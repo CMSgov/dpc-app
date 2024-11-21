@@ -33,9 +33,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.Mockito.doReturn;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Job batch aggregation engine operations")
 class BatchAggregationEngineTest {
     private static final UUID aggregatorID = UUID.randomUUID();
     private static final String TEST_ORG_NPI = NPIUtil.generateNPI();
@@ -96,6 +98,7 @@ class BatchAggregationEngineTest {
      * Test if a engine can handle a simple job with one resource type, one test provider, and one patient.
      */
     @Test
+    @DisplayName("Queue and process a large job 🥳")
     void largeJobTestSingleResource() {
         // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
@@ -132,9 +135,9 @@ class BatchAggregationEngineTest {
      * Test if a engine can handle a simple job with one resource type, one test provider, and one patient.
      */
     @Test
+    @DisplayName("Queue and process a large job with mixes resource types 🥳")
     void largeJobTest() {
 
-        // Make a simple job with one resource type
         final var orgID = UUID.randomUUID();
         final var jobID = queue.createJob(
                 orgID,
@@ -172,6 +175,7 @@ class BatchAggregationEngineTest {
      * Test if a engine can handle a simple job with one resource type, one test provider, and one patient.
      */
     @Test
+    @DisplayName("Queue and process a job containing a patient with bad IDs 🤮")
     void largeJobWithBadPatientTest() {
         final var orgID = UUID.randomUUID();
 
@@ -204,7 +208,9 @@ class BatchAggregationEngineTest {
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
     }
+    
     @Test
+    @DisplayName("Queue and process a job containing look back date mismatch 🤮")
     void lookBackDateCriteriaMismatch() throws IOException {
         final var orgID = UUID.randomUUID();
         final var npi = NPIUtil.generateNPI();
@@ -248,6 +254,7 @@ class BatchAggregationEngineTest {
     }
 
     @Test
+    @DisplayName("Queue and process a job containing multiple look back mismatches 🤮")
     void lookBackAllCriteriaMismatch() throws IOException {
         final var orgID = UUID.randomUUID();
         final var npi = NPIUtil.generateNPI();
@@ -291,6 +298,7 @@ class BatchAggregationEngineTest {
     }
 
     @Test
+    @DisplayName("Queue and process a job containing look back NPI mismatches 🤮")
     void lookBackNpiCriteriaMismatch() throws IOException {
         final var orgID = UUID.randomUUID();
         final var npi = NPIUtil.generateNPI();
@@ -334,6 +342,7 @@ class BatchAggregationEngineTest {
     }
 
     @Test
+    @DisplayName("Queue and process job with look back match 🥳")
     void lookBackNpiCriteriaMatch() {
         final var orgID = UUID.randomUUID();
         final var npi = NPIUtil.generateNPI();
@@ -364,12 +373,12 @@ class BatchAggregationEngineTest {
         assertAll(
                 () -> assertEquals(4, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
                 () -> assertTrue(completeJob.getJobQueueFile(DPCResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
-                () -> assertFalse(completeJob.getJobQueueFile(DPCResourceType.OperationOutcome).isPresent(), "Expect an error"));
+                () -> assertFalse(completeJob.getJobQueueFile(DPCResourceType.OperationOutcome).isPresent(), "Expect no error"));
 
         // Look at the output files
         final var outputFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.ExplanationOfBenefit, 0);
         assertTrue(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
-        assertFalse(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
+        assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file for failed patient");
     }
 }

@@ -22,9 +22,9 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 
 import java.util.Arrays;
 import java.util.List;
@@ -128,7 +128,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     public Organization getOrganization(
             @PathParam("organizationID") UUID organizationID) {
         final Optional<OrganizationEntity> orgOptional = this.dao.fetchOrganization(organizationID);
-        final OrganizationEntity organizationEntity = orgOptional.orElseThrow(() -> new WebApplicationException(String.format("Cannot find organization '%s'", organizationID), Response.Status.NOT_FOUND));
+        final OrganizationEntity organizationEntity = orgOptional.orElseThrow(() -> new NotFoundException(String.format("Cannot find organization '%s'", organizationID)));
         return this.converter.toFHIR(Organization.class, organizationEntity);
     }
 
@@ -163,7 +163,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Override
     public Response deleteOrganization(@PathParam("organizationID") UUID organizationID) {
         final OrganizationEntity organizationEntity = this.dao.fetchOrganization(organizationID)
-                .orElseThrow(() -> new WebApplicationException("Cannot find organization.", Response.Status.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("Cannot find organization."));
 
         this.dao.deleteOrganization(organizationEntity);
         return Response.ok().build();

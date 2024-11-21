@@ -10,8 +10,8 @@ import org.jooq.conf.RenderQuotedNames;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.util.List;
@@ -40,8 +40,8 @@ public class TruncateDatabase extends Task {
         final PooledDataSourceFactory dataSourceFactory = configuration.getDatabase();
         final ManagedDataSource dataSource = dataSourceFactory.build(null, "attribution-seeder");
 
-        try (final Connection connection = dataSource.getConnection();
-             DSLContext context = DSL.using(connection, new Settings().withRenderQuotedNames(RenderQuotedNames.EXPLICIT_DEFAULT_UNQUOTED))) {
+        try (final Connection connection = dataSource.getConnection()) {
+            DSLContext context = DSL.using(connection, new Settings().withRenderQuotedNames(RenderQuotedNames.EXPLICIT_DEFAULT_UNQUOTED));
 
             DBUtils.truncateAllTables(context, "public");
         }

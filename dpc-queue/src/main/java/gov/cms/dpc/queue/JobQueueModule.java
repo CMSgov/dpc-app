@@ -8,7 +8,7 @@ import com.google.inject.Binder;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
-import com.google.inject.name.Named;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.queue.annotations.AggregatorID;
 import gov.cms.dpc.queue.annotations.QueueBatchSize;
 import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
@@ -17,7 +17,7 @@ import gov.cms.dpc.queue.health.JobQueueHealthCheck;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.core.Configuration;
 import io.github.azagniotov.metrics.reporter.cloudwatch.CloudWatchReporter;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
+import jakarta.inject.Named;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
 
@@ -82,6 +82,7 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
     @Provides
     @Named("QueueSize")
     @Inject
+    @SuppressWarnings("CloseableProvides")
     ScheduledReporter provideSizeScheduledReporter(MetricRegistry metricRegistry) {
         DPCAwsQueueConfiguration awsConfig = configuration().getDpcAwsQueueConfiguration();
         String metricName = awsConfig.getQueueSizeMetricName();
@@ -97,6 +98,7 @@ public class JobQueueModule<T extends Configuration & DPCQueueConfig> extends Dr
     @Provides
     @Named("QueueAge")
     @Inject
+    @SuppressWarnings("CloseableProvides")
     ScheduledReporter provideAgeScheduledReporter(MetricRegistry metricRegistry) {
         return provideSlf4jReporter(metricRegistry, configuration().getDpcAwsQueueConfiguration().getQueueAgeMetricName());
     }

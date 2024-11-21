@@ -9,8 +9,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.WebApplicationException;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -19,6 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static gov.cms.dpc.common.consent.entities.ConsentEntity.*;
+import jakarta.ws.rs.BadRequestException;
 
 /**
  * A utility class for converting a ConsentEntity into a FHIR Consent Resource.
@@ -84,7 +84,7 @@ public class ConsentEntityConverter {
         } else if (OPT_OUT_MAGIC.equals(uri)) {
             return OPT_OUT;
         }
-        throw new WebApplicationException(String.format("Policy rule must be %s or %s.", OPT_IN_MAGIC, OPT_OUT_MAGIC), Response.Status.BAD_REQUEST);
+        throw new BadRequestException(String.format("Policy rule must be %s or %s.", OPT_IN_MAGIC, OPT_OUT_MAGIC));
     }
 
     private static List<CodeableConcept> category(String loincCode) {
@@ -126,7 +126,7 @@ public class ConsentEntityConverter {
     @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Consent model
     public static ConsentEntity fromFhir(Consent consent) {
         if (consent == null) {
-            throw new WebApplicationException("No consent resource provided", Response.Status.BAD_REQUEST);
+            throw new BadRequestException("No consent resource provided");
         }
 
         ConsentEntity entity = new ConsentEntity();
@@ -144,11 +144,11 @@ public class ConsentEntityConverter {
 
         Reference patientRef = consent.getPatient();
         if (patientRef == null || StringUtils.isBlank(patientRef.getReference())) {
-            throw new WebApplicationException("Consent resource must contain patient reference", Response.Status.BAD_REQUEST);
+            throw new BadRequestException("Consent resource must contain patient reference");
         }
         String mbi = mbiFromPatientReference(patientRef.getReference());
         if (StringUtils.isBlank(mbi)) {
-            throw new WebApplicationException("Could not find MBI in patient reference", Response.Status.BAD_REQUEST);
+            throw new BadRequestException("Could not find MBI in patient reference");
         }
         entity.setMbi(mbi);
 

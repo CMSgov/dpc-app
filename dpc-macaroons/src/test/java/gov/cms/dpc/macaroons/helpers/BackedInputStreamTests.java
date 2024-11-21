@@ -7,10 +7,13 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Backed input stream handling")
 class BackedInputStreamTests {
 
     @Test
+    @DisplayName("Read backed input stream 🥳")
     void testSimpleRead() throws IOException {
         final String testString = "Test String";
         final ByteBuffer bb = ByteBuffer.wrap(testString.getBytes(StandardCharsets.UTF_8));
@@ -24,12 +27,14 @@ class BackedInputStreamTests {
     }
 
     @Test
+    @DisplayName("Read empty buffer 🥳")
     void testEmptyBuffer() throws IOException {
         final ByteBufferBackedInputStream bis = new ByteBufferBackedInputStream(ByteBuffer.allocate(0));
         assertEquals(-1, bis.read(), "Should return empty size value");
     }
 
     @Test
+    @DisplayName("Read complete buffer 🥳")
     void testFullyReadBuffer() throws IOException {
         final ByteBufferBackedInputStream bis = new ByteBufferBackedInputStream(ByteBuffer.allocate(0));
         final byte[] outputArray = ByteBuffer.allocate(1).array();
@@ -37,6 +42,7 @@ class BackedInputStreamTests {
     }
 
     @Test
+    @DisplayName("Overflow buffer 🤮")
     void testBufferOverflow() {
         final String testString = "Test String";
         final ByteBuffer bb = ByteBuffer.wrap(testString.getBytes(StandardCharsets.UTF_8));

@@ -14,10 +14,10 @@ import io.dropwizard.hibernate.UnitOfWork;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Endpoint;
 
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -76,13 +76,13 @@ public class EndpointResource extends AbstractEndpointResource {
     @Override
     public Endpoint fetchEndpoint(@NotNull @PathParam("endpointID") UUID endpointID) {
         final EndpointEntity endpoint = this.endpointDAO.fetchEndpoint(endpointID)
-                .orElseThrow(() -> new WebApplicationException("Unable to find Endpoint", Response.Status.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("Unable to find Endpoint"));
 
         return converter.toFHIR(Endpoint.class, endpoint);
     }
 
     @FHIR
-    @PUT
+    @PUT    
     @Path("/{endpointID}")
     @Timed
     @ExceptionMetered
@@ -102,7 +102,7 @@ public class EndpointResource extends AbstractEndpointResource {
     @Override
     public Response deleteEndpoint(@NotNull @PathParam("endpointID") UUID endpointID) {
         final EndpointEntity endpoint = this.endpointDAO.fetchEndpoint(endpointID)
-                .orElseThrow(() -> new WebApplicationException("Unable to find Endpoint", Response.Status.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("Unable to find Endpoint"));
         OrganizationEntity organization = endpoint.getOrganization();
         List<EndpointEntity> endpoints = organization.getEndpoints();
         if (endpoints.size() == 1) {

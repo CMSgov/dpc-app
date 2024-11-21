@@ -30,9 +30,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 
+@DisplayName("Public key submission")
 class KeyUploadUnitTest {
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
@@ -68,7 +70,8 @@ class KeyUploadUnitTest {
     }
 
     @Test
-    public void testDeleteKeys_happyPath() throws IOException {
+    @DisplayName("Upload public key to key store 🥳")
+    public void testUploadKeys_happyPath() throws IOException {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()
@@ -99,7 +102,8 @@ class KeyUploadUnitTest {
     }
 
     @Test
-    public void testDeleteKeys_badResponse() throws IOException {
+    @DisplayName("Invalid request fails to upload public key to key store 🤮")
+    public void testUploadKeys_badResponse() throws IOException {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
                 .when(
                         HttpRequest.request()

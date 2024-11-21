@@ -9,6 +9,7 @@ import gov.cms.dpc.api.tasks.keys.DeletePublicKey;
 import gov.cms.dpc.api.tasks.keys.ListPublicKeys;
 import gov.cms.dpc.api.tasks.keys.UploadPublicKey;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import jakarta.ws.rs.BadRequestException;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -16,13 +17,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import javax.ws.rs.WebApplicationException;
 import java.io.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Public key operations")
 public class PublicKeyTaskTests {
 
     private KeyResource keyResource = Mockito.mock(KeyResource.class);
@@ -45,15 +47,17 @@ public class PublicKeyTaskTests {
     }
 
     @Test
+    @DisplayName("Upload public key without specifying an org 🤮")
     void testKeyUploadNoOrg() throws Exception {
         final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> upk.execute(map, "", new PrintWriter(new OutputStreamWriter(bos))));
+            final BadRequestException ex = assertThrows(BadRequestException.class, () -> upk.execute(map, "", new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
         }
     }
 
     @Test
+    @DisplayName("Upload public key 🥳")
     void testKeyUpload() throws Exception {
         final UUID id = UUID.randomUUID();
         final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()));
@@ -69,6 +73,7 @@ public class PublicKeyTaskTests {
     }
 
     @Test
+    @DisplayName("Upload public key with custom label 🥳")
     void testKeyUploadLabel() throws Exception {
         final UUID id = UUID.randomUUID();
         final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()), "label", List.of("this is a label"));
@@ -85,6 +90,7 @@ public class PublicKeyTaskTests {
     }
 
     @Test
+    @DisplayName("Get list of public keys for org 🥳")
     void testKeyList() throws Exception {
         final UUID id = UUID.randomUUID();
         final Organization org = new Organization();
@@ -104,34 +110,38 @@ public class PublicKeyTaskTests {
     }
 
     @Test
+    @DisplayName("Get public key list without specifying an org 🤮")
     void testKeyListNoOrg() throws IOException {
         final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> lpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            final BadRequestException ex = assertThrows(BadRequestException.class, () -> lpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
         }
     }
 
     @Test
+    @DisplayName("Delete public key without specifying an org 🤮")
     void testKeyDeletionNoOrg() throws IOException {
         final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            final BadRequestException ex = assertThrows(BadRequestException.class, () -> dpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
         }
     }
 
     @Test
+    @DisplayName("Delete unrecognized public key 🤮")
     void testKeyDeletionNoKey() throws IOException {
         final UUID id = UUID.randomUUID();
         final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            final BadRequestException ex = assertThrows(BadRequestException.class, () -> dpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have key", ex.getMessage(), "Should have correct message");
         }
     }
 
     @Test
+    @DisplayName("Delete public key 🥳")
     void testKeyDeletion() throws IOException {
         final UUID id = UUID.randomUUID();
         final UUID keyID = UUID.randomUUID();

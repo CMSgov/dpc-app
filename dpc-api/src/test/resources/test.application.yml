@@ -9,7 +9,7 @@ database:
   maxSize: 10
   properties:
     charSet: UTF-8
-    hibernate.dialect: org.hibernate.dialect.PostgreSQL10Dialect
+#    hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
 
 queuedb:
   driverClass: org.postgresql.Driver
@@ -49,6 +49,7 @@ logging:
     "liquibase": ERROR
     "gov.cms.dpc.queue.DistributedBatchQueue": DEBUG
     "org.hibernate": ERROR
+    "org.glassfish.jersey.internal": ERROR
     "org.hibernate.SQL": ERROR
     "gov.cms.dpc.api.auth": INFO
     "gov.cms.dpc.common.logging.filters": INFO

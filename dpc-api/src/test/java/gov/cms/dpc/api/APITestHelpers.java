@@ -11,8 +11,20 @@ import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.exceptions.BadRequestExceptionMapper;
+import gov.cms.dpc.api.exceptions.ConstraintViolationExceptionMapper;
+import gov.cms.dpc.api.exceptions.ForbiddenExceptionMapper;
+import gov.cms.dpc.api.exceptions.InternalServerErrorExceptionMapper;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotAcceptableExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotAuthorizedExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotDeSerializableExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotFoundExceptionMapper;
+import gov.cms.dpc.api.exceptions.UnprocessableEntityExceptionMapper;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
@@ -24,7 +36,6 @@ import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandl
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
-import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
@@ -44,10 +55,9 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
@@ -57,6 +67,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.junit.jupiter.api.Assertions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -67,6 +78,8 @@ public class APITestHelpers {
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
     public static String BASE_URL = "https://dpc.cms.gov/api";
     public static String ORGANIZATION_NPI = "1111111112";
+    public static final int HEALTH_RETRIES = 10;
+    public static final int HEALTH_RETRY_MS = 1000;
 
     private static final String configPath = "src/test/resources/test.application.yml";
 
@@ -146,7 +159,7 @@ public class APITestHelpers {
      */
     public static ResourceExtension buildResourceExtension(FhirContext
                                                                    ctx, List<Object> resources, List<Object> providers, boolean validation) {
-
+        
         final FHIRHandler fhirHandler = new FHIRHandler(ctx);
         final var builder = ResourceExtension
                 .builder()
@@ -159,6 +172,15 @@ public class APITestHelpers {
                 .addProvider(HAPIExceptionHandler.class)
                 .addProvider(DefaultFHIRExceptionHandler.class)
                 .addProvider(JsonParseExceptionMapper.class)
+                .addProvider(BadRequestExceptionMapper.class)
+                .addProvider(NotDeSerializableExceptionMapper.class)
+                .addProvider(ConstraintViolationExceptionMapper.class)
+                .addProvider(ForbiddenExceptionMapper.class)
+                .addProvider(InternalServerErrorExceptionMapper.class)
+                .addProvider(NotAcceptableExceptionMapper.class)
+                .addProvider(NotAuthorizedExceptionMapper.class)
+                .addProvider(NotFoundExceptionMapper.class)
+                .addProvider(UnprocessableEntityExceptionMapper.class)
                 .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
 
         // Optionally enable validation
@@ -174,7 +196,8 @@ public class APITestHelpers {
                     new DefaultProfileValidationSupport(ctx),
                     new InMemoryTerminologyServerValidationSupport(ctx));
             final InjectingConstraintValidatorFactory constraintFactory = new InjectingConstraintValidatorFactory(
-                    Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, config, support).get())));
+                    Set.of(new ProfileValidator(ctx.newValidator())));
+//                    Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, config, support).get())));
 
             builder.setValidator(provideValidator(constraintFactory));
         }
@@ -192,9 +215,9 @@ public class APITestHelpers {
         application.before();
         // Truncate the Auth DB
         // dropwizard-guicey will raise a SharedStateError unless we clear the configuration state before each run
-        SharedConfigurationState.clear();
+//        SharedConfigurationState.clear();
         application.getApplication().run("db", "drop-all", "--confirm-delete-everything", configPath);
-        SharedConfigurationState.clear();
+//        SharedConfigurationState.clear();
         application.getApplication().run("db", "migrate", configPath);
 
     }
@@ -214,12 +237,27 @@ public class APITestHelpers {
             IOException {
         // URI of the API Service Healthcheck
         final String healthURI = String.format("http://localhost:%s/healthcheck", application.getAdminPort());
+        System.out.println("Testing " + healthURI);
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpGet healthCheck = new HttpGet(healthURI);
 
-            try (CloseableHttpResponse execute = client.execute(healthCheck)) {
-                assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should be healthy");
+            boolean isHealthy = false;
+            for(int i = 0; i < HEALTH_RETRIES; i++) {
+                try (CloseableHttpResponse execute = client.execute(healthCheck)) {
+
+                    if(execute.getStatusLine().getStatusCode() == HttpStatus.OK_200) {
+                        isHealthy = true;
+                        break;
+                    }
+
+                    try {
+                        Thread.sleep(HEALTH_RETRY_MS);
+                    } catch(InterruptedException e) {
+                        break;
+                    }
+                }
             }
+            Assertions.assertTrue(isHealthy, "Should be healthy");
         }
     }
 
@@ -284,7 +322,7 @@ public class APITestHelpers {
         return createResource(client,resource, Maps.newHashMap());
     }
 
-    public  static <T extends IBaseResource> T getResourceById(IGenericClient client, Class<T> clazz, String resourceId){
+    public static <T extends IBaseResource> T getResourceById(IGenericClient client, Class<T> clazz, String resourceId){
        return client.read()
                 .resource(clazz)
                 .withId(resourceId).encodedJson().execute();

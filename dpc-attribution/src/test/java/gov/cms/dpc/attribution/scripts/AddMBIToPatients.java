@@ -14,12 +14,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import org.junit.jupiter.api.DisplayName;
 
 /**
  * Helper script for adding MBI identifiers to patient rosters.
  * This is marked as {@link Disabled} because it's not actually a test, we put it here to prevent it from being pulled into the runtime JAR.
  */
 @Disabled
+@DisplayName("Patient attribute management")
 public class AddMBIToPatients {
 
     static final String MBI_CSV = "prod_sbx_bene_ids.csv";
@@ -41,6 +43,7 @@ public class AddMBIToPatients {
     }
 
     @Test
+    @DisplayName("Update patients via script 🥳")
     void updatePatients() throws IOException {
         final String bundleName = "patient_bundle.json";
         try (InputStream stream = AddMBIToPatients.class.getClassLoader().getResourceAsStream(bundleName)) {
@@ -54,6 +57,7 @@ public class AddMBIToPatients {
     }
 
     @Test
+    @DisplayName("Update DPR matients via script 🥳")
     void updateDPRPatients() throws IOException {
         final String bundleName = "patient_bundle-dpr.json";
         try (InputStream stream = AddMBIToPatients.class.getClassLoader().getResourceAsStream(bundleName)) {

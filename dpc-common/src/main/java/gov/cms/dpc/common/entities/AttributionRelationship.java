@@ -1,10 +1,16 @@
 package gov.cms.dpc.common.entities;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
@@ -18,24 +24,12 @@ public class AttributionRelationship implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "attributions_generator")
-    @GenericGenerator(
+    @SequenceGenerator(
         name="attributions_generator",
-        strategy = "sequence",
-        parameters = {
-            @Parameter(
-                name = "sequence_name",
-                value = "attributions_id_seq"
-            ),
-            @Parameter(
-                name = "increment_size",
-                value = "100"   // Tied to attributions_id_seq in dpc_attribution DB
-            ),
-            @Parameter(
-                name = "optimizer",
-                value = "pooled-lo"
-            )
-        }
+        sequenceName="attributions_id_seq",
+        allocationSize=100
     )
+    
     @Column(name = "id", updatable = false, nullable = false)
     @Access(AccessType.PROPERTY)
     private Long attributionID;

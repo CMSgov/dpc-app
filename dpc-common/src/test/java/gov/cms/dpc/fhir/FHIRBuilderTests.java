@@ -11,8 +11,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("FHIR data object construction")
 public class FHIRBuilderTests {
 
     private FHIRBuilderTests() {
@@ -20,6 +22,7 @@ public class FHIRBuilderTests {
     }
 
     @Test
+    @DisplayName("Build patient 🥳")
     void testPatientBuilder() {
         final Patient patient = FHIRBuilders.buildPatientFromMBI("12345");
         assertAll(() -> assertEquals("12345", patient.getIdentifierFirstRep().getValue(), "Should have the correct value"),
@@ -27,6 +30,7 @@ public class FHIRBuilderTests {
     }
 
     @Test
+    @DisplayName("Look back log JSON parsing 🥳")
     void testProviderBuilder() {
         final Practitioner practitioner = FHIRBuilders.buildPractitionerFromNPI("12345");
         assertAll(() -> assertEquals("12345", practitioner.getIdentifierFirstRep().getValue(), "Should have the correct value"),
@@ -34,6 +38,7 @@ public class FHIRBuilderTests {
     }
 
     @Test
+    @DisplayName("Verify no additional metadata 🥳")
     void testTagAdditionNoMeta() {
         final UUID uuid = UUID.randomUUID();
         final Patient patient = new Patient();
@@ -47,6 +52,7 @@ public class FHIRBuilderTests {
     }
 
     @Test
+    @DisplayName("Distinguish existing from new metadata 🥳")
     void testTagAdditionExistingMeta() {
         final Meta meta = new Meta();
         meta.addTag().setSystem("http://not.real").setCode("nothing");

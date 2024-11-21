@@ -12,13 +12,13 @@ import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import java.util.List;
 
 import static gov.cms.dpc.api.auth.MacaroonHelpers.BEARER_PREFIX;
+import jakarta.ws.rs.NotAuthorizedException;
 
 /**
  * Implementation of {@link AuthFilter} to use when an {@link gov.cms.dpc.api.auth.annotations.AdminOperation} annotated method (or class) is called.
@@ -45,14 +45,14 @@ public class AdminAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
             m1 = MacaroonBakery.deserializeMacaroon(macaroon);
         } catch (BakeryException e) {
             logger.error("Cannot deserialize Macaroon", e);
-            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+            throw new NotAuthorizedException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
 
         try {
             this.bakery.verifyMacaroon(m1);
         } catch (BakeryException e) {
             logger.error("Macaroon verification failed", e);
-            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+            throw new NotAuthorizedException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
 
         // At this point, we should have exactly one Macaroon, anything else is a failure
@@ -67,7 +67,7 @@ public class AdminAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
 
         if (isGoldenMacaroon) {
             logger.error("Attempted to call Admin endpoint with Organization token");
-            throw new WebApplicationException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
+            throw new NotAuthorizedException(unauthorizedHandler.buildResponse(BEARER_PREFIX, realm));
         }
         this.authenticate(requestContext, new DPCAuthCredentials(macaroon, new Organization(), null, null), null);
     }

@@ -16,6 +16,7 @@
         <module>dpc-macaroons</module>
         <module>dpc-smoketest</module>
         <module>dpc-testing</module>
+        <module>dropwizard-guiciest</module>
     </modules>
 
     <groupId>gov.cms.dpc</groupId>
@@ -34,23 +35,38 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <dropwizard.version>3.0.7</dropwizard.version>
-        <junit.jupiter.version>5.10.2</junit.jupiter.version>
-        <slf4j.version>2.0.12</slf4j.version>
-        <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
-        <hapi.fhir.version>7.2.1</hapi.fhir.version>
-        <pgsql.version>42.7.3</pgsql.version>
         <java.version>11</java.version>
+
+        <h2.version>2.3.232</h2.version>
+        <dropwizard.version>4.0.9</dropwizard.version>
+        <pgsql.version>42.7.4</pgsql.version>
+
+        <junit.jupiter.version>5.11.2</junit.jupiter.version>
+        <testcontainers.version>1.20.2</testcontainers.version>
+        <pitest.version>1.17.0</pitest.version>
+        <jooq.version>3.16.23</jooq.version>
+        <jacoco.version>0.8.12</jacoco.version>
+
+        <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
+        <hapi.fhir.version>7.4.5</hapi.fhir.version>
+
+        <gson.version>2.11.0</gson.version>
+        <jaxb.version>2.3.1</jaxb.version>
+
+        <slf4j.version>2.0.16</slf4j.version>
+        <newrelic.agent.version>7.11.1</newrelic.agent.version>
+        <newrelic.agent.type>zip</newrelic.agent.type>
+
+        <bouncey.version>1.78.1</bouncey.version>
+
         <jib.container.appRoot>/app</jib.container.appRoot>
         <jib.ecr.root>755619740999.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
         <timestamp>${maven.build.timestamp}</timestamp>
-        <jacoco.version>0.8.5</jacoco.version>
-        <jooq.version>3.13.4</jooq.version>
-        <bouncey.version>1.70</bouncey.version>
-        <pitest.version>1.5.1</pitest.version>
-        <newrelic.agent.version>7.11.1</newrelic.agent.version>
-        <newrelic.agent.type>zip</newrelic.agent.type>
-        <h2.version>2.2.220</h2.version>
+        
+        <test.verbosity>false</test.verbosity>
+        <disable.console>true</disable.console>
+
+        <base.image>docker://dpc-base:latest</base.image>
     </properties>
 
     <developers>
@@ -137,6 +153,73 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>com.flipkart.utils</groupId>
+                <artifactId>dropwizard-guicier</artifactId>
+                <version>7.0.0-DPC</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.inject.extensions</groupId>
+                <artifactId>guice-servlet</artifactId>
+                <version>7.0.0</version>
+            </dependency>            
+            <dependency>
+                <groupId>org.glassfish.jersey.core</groupId>
+                <artifactId>jersey-server</artifactId>
+                <version>3.1.8</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>6.1.0-DPC</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>3.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+                <version>3.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
+                <version>4.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.persistence</groupId>
+                <artifactId>jakarta.persistence-api</artifactId>
+                <version>3.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.ws.rs</groupId>
+                <artifactId>jakarta.ws.rs-api</artifactId>
+                <version>3.1.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.nickrobison-usds</groupId>
+                <artifactId>jmacaroons</artifactId>
+                <version>1024efc25df40c63bbfbaedc6d75556d829d84c7</version>
+            </dependency>
+            <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
+            <dependency>
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>6.6.1.Final</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate.validator</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>8.0.1.Final</version>
+            </dependency>
+            <dependency>
                 <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-bom</artifactId>
                 <version>${dropwizard.version}</version>
@@ -151,60 +234,31 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>ru.vyarus.guicey</groupId>
-                <artifactId>guicey-bom</artifactId>
-                <version>6.2.1</version>
-                <type>pom</type>
-                <scope>import</scope>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-jersey31</artifactId>
+                <version>4.2.28</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-hibernate6</artifactId>
+                <version>2.18.0</version>
             </dependency>
             <!--No longer shipped with Java 11, so we need to include it manually-->
-            <dependency>
-                <groupId>javax.xml.bind</groupId>
-                <artifactId>jaxb-api</artifactId>
-                <version>2.3.1</version>
-            </dependency>
             <!--This is required for Java 11 support. The version shipped with Hibernate is too old-->
             <dependency>
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
-                <version>3.27.0-GA</version>
+                <version>3.30.2-GA</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-io</artifactId>
-                <version>10.0.20</version>
-            </dependency>
-            <dependency>
-                <groupId>ru.vyarus</groupId>
-                <artifactId>dropwizard-guicey</artifactId>
-                <version>6.2.2</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-io</artifactId>
-                    </exclusion>
-                </exclusions>
+                <version>11.0.19</version>
             </dependency>
             <dependency>
                 <groupId>com.typesafe</groupId>
                 <artifactId>config</artifactId>
-                <version>1.4.2</version>
-            </dependency>
-            <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
-            <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-core</artifactId>
-                <version>5.6.15.Final</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate.validator</groupId>
-                <artifactId>hibernate-validator</artifactId>
-                <version>6.2.5.Final</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.persistence</groupId>
-                <artifactId>javax.persistence-api</artifactId>
-                <version>2.2</version>
+                <version>1.4.3</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
@@ -212,14 +266,9 @@
                 <version>${pgsql.version}</version>
             </dependency>
             <dependency>
-                <groupId>javax.ws.rs</groupId>
-                <artifactId>javax.ws.rs-api</artifactId>
-                <version>2.1.1</version>
-            </dependency>
-            <dependency>
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
-                <version>5.1.0</version>
+                <version>7.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -267,6 +316,11 @@
                 <version>5.1.4</version>
             </dependency>
             <dependency>
+                <groupId>com.github.nitram509</groupId>
+                <artifactId>jmacaroons</artifactId>
+                <version>0.5.0</version>
+            </dependency>
+            <dependency>
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz</artifactId>
                 <version>2.3.2</version>
@@ -274,7 +328,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>32.0.0-jre</version>
+                <version>33.3.1-jre</version>
             </dependency>
             <dependency>
                 <groupId>com.newrelic.agent.java</groupId>
@@ -299,7 +353,7 @@
             <dependency>
                 <groupId>uk.org.webcompere</groupId>
                 <artifactId>system-stubs-jupiter</artifactId>
-                <version>2.1.6</version>
+                <version>2.1.7</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -317,7 +371,7 @@
             <dependency>
                 <groupId>com.helger</groupId>
                 <artifactId>ph-schematron</artifactId>
-                <version>5.3.0</version>
+                <version>5.6.5</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -328,19 +382,19 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.4.0</version>
+                <version>5.14.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-junit-jupiter</artifactId>
-                <version>5.4.0</version>
+                <version>5.14.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>4.5.14</version>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>5.4</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -352,26 +406,26 @@
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers-bom</artifactId>
-                <version>1.19.3</version>
+                <version>${testcontainers.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>junit-jupiter</artifactId>
-                <version>1.19.3</version>
+                <version>${testcontainers.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>1.19.3</version>
+                <version>${testcontainers.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>io.hypersistence</groupId>
-                <artifactId>hypersistence-utils-hibernate-55</artifactId>
-                <version>3.7.0</version>
+                <artifactId>hypersistence-utils-hibernate-63</artifactId>
+                <version>3.8.3</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -392,7 +446,6 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -411,7 +464,7 @@
         <dependency>
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity-engine-core</artifactId>
-            <version>2.3</version>
+            <version>2.4</version>
         </dependency>
     </dependencies>
 
@@ -423,10 +476,50 @@
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>integration-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>   
+                                </goals>
+                                <phase>integration-test</phase>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                                <phase>verify</phase>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                          <dependency>
+                             <groupId>me.fabriciorby</groupId>
+                             <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                             <version>1.3.0</version>
+                          </dependency>
+                        </dependencies>                        
+                        <configuration>
+                            <testFailureIgnore>false</testFailureIgnore>
+                            <skip>false</skip>
+                            <reportFormat>plain</reportFormat>
+                            <consoleOutputReporter>
+                               <disable>${disable.console}</disable>
+                            </consoleOutputReporter>
+                            <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                                <theme>UNICODE</theme>
+                                <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                                <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                                <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                            </statelessTestsetInfoReporter>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration combine.self="override">
-                            <groups>Integration</groups>
-                            <forkedProcessExitTimeoutInSeconds>600</forkedProcessExitTimeoutInSeconds>
+                        <configuration>
+                            <skip>true</skip>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -439,11 +532,38 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
+                        <dependencies>
+                          <dependency>
+                             <groupId>me.fabriciorby</groupId>
+                             <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                             <version>1.3.0</version>
+                          </dependency>
+                        </dependencies>                        
                         <configuration>
+                            <skip>false</skip>
                             <excludedGroups>Integration</excludedGroups>
                             <parallel>all</parallel>
                             <threadCount>10</threadCount>
+                            <reportFormat>plain</reportFormat>
+                            <consoleOutputReporter>
+                               <disable>${disable.console}</disable>
+                            </consoleOutputReporter>
+                            <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                                <theme>UNICODE</theme>
+                                <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                                <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                                <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                            </statelessTestsetInfoReporter>
                         </configuration>
+                        <executions>
+                            <execution>
+                                <id>unit-test</id>
+                                <goals>
+                                    <goal>test</goal> <!-- Bind it to the integration-test phase -->
+                                </goals>
+                                <phase>test</phase>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
@@ -453,6 +573,21 @@
             <id>ci</id>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-maven-plugin</artifactId>
+                        <configuration>
+                            <to>
+                                <image>${jib.ecr.root}/${project.artifactId}</image>
+                                <tags>
+                                    <tag>latest</tag>
+                                </tags>
+                            </to>
+                            <from>
+                                <image>${base.image}</image>
+                            </from>
+                        </configuration>
+                    </plugin>
                     <plugin>
                         <artifactId>maven-dependency-plugin</artifactId>
                         <executions>
@@ -487,6 +622,32 @@
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <dependencies>
+                          <dependency>
+                             <groupId>me.fabriciorby</groupId>
+                             <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                             <version>1.3.0</version>
+                          </dependency>
+                        </dependencies>                        
+                        <configuration>
+                            <excludedGroups>Integration</excludedGroups>
+                            <parallel>all</parallel>
+                            <threadCount>10</threadCount>
+                            <reportFormat>plain</reportFormat>
+                            <consoleOutputReporter>
+                               <disable>true</disable>
+                            </consoleOutputReporter>
+                            <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                                <theme>UNICODE</theme>
+                                <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                                <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                                <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                            </statelessTestsetInfoReporter>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -523,7 +684,8 @@
                                         <path>
                                             <groupId>com.google.errorprone</groupId>
                                             <artifactId>error_prone_core</artifactId>
-                                            <version>2.4.0</version>
+                                            <!-- NOTE: can't move to newer version until fixes made to code -->
+                                            <version>2.6.0</version>
                                         </path>
                                     </annotationProcessorPaths>
                                     <!-- Erroneously inverted logic... for details, see
@@ -532,6 +694,32 @@
                                 </configuration>
                             </execution>
                         </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <dependencies>
+                          <dependency>
+                             <groupId>me.fabriciorby</groupId>
+                             <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                             <version>1.3.0</version>
+                          </dependency>
+                        </dependencies>                        
+                        <configuration>
+                            <excludedGroups>Integration</excludedGroups>
+                            <parallel>all</parallel>
+                            <threadCount>10</threadCount>
+                            <reportFormat>plain</reportFormat>
+                            <consoleOutputReporter>
+                               <disable>true</disable>
+                            </consoleOutputReporter>
+                            <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                                <theme>UNICODE</theme>
+                                <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                                <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                                <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                            </statelessTestsetInfoReporter>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -545,10 +733,14 @@
                         <artifactId>jib-maven-plugin</artifactId>
                         <configuration>
                             <to>
+                                <image>${jib.ecr.root}/${project.artifactId}</image>
                                 <tags combine.children="override">
                                     <tag>${project.version}</tag>
                                 </tags>
                             </to>
+                            <from>
+                                <image>${base.image}</image>
+                            </from>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -580,36 +772,82 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>use-amd-image</id>
+            <activation>
+                <property>
+                    <name>useAMD</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <base.image>docker://dpc-base-amd:latest</base.image>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-maven-plugin</artifactId>
+                        <configuration>
+                            <from>
+                                <image>${base.image}</image>
+                            </from>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <build>
         <pluginManagement>
             <plugins>
-
+                <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-clean-plugin</artifactId>
+                  <version>3.4.0</version>
+                  <executions>
+                    <execution>
+                      <phase>clean</phase>
+                      <goals>
+                        <goal>clean</goal>
+                      </goals>
+                      <configuration>
+                          <retryOnError>true</retryOnError>
+                          <failOnError>false</failOnError>
+                      </configuration>
+                    </execution>
+                  </executions>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.2.2</version>
+                    <version>3.6.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M3</version>
+                    <version>3.5.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.5.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.4.2</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.13.0</version>
                 </plugin>
                 <!-- Base configuration for Docker images -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>3.8.0</version>
                     <executions>
                         <execution>
                             <id>unpack-newrelic</id>
@@ -631,18 +869,7 @@
                 <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
-                    <version>3.4.1</version>
-                    <configuration>
-                        <to>
-                            <image>${jib.ecr.root}/${project.artifactId}</image>
-                            <tags>
-                                <tag>latest</tag>
-                            </tags>
-                        </to>
-                        <from>
-                            <image>docker://dpc-base:latest</image>
-                        </from>
-                    </configuration>
+                    <version>3.4.4</version>
                     <executions>
                         <execution>
                             <phase>package</phase>
@@ -655,27 +882,47 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.5</version>
+                    <version>0.8.12</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.9.0</version>
+                    <version>4.0.0-M16</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-project-info-reports-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.7.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.0.0-M1</version>
+                    <version>3.1.3</version>
                 </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.4.1</version>
+                <executions>
+                    <execution>
+                        <id>build-custom-jakarta-server</id>
+                        <phase>initialize</phase>  
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>bash</executable>
+                            <arguments>
+                                <argument>scripts/build-custom-jakarta-server.sh</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -692,7 +939,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -704,7 +951,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.10.1</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -725,7 +972,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0-M3</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -781,7 +1028,7 @@
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <version>4.0.0</version>
+                <version>4.9.10</version>
                 <executions>
                     <execution>
                         <id>git-commit</id>
@@ -802,7 +1049,7 @@
                     <dependency>
                         <groupId>org.pitest</groupId>
                         <artifactId>pitest-junit5-plugin</artifactId>
-                        <version>0.12</version>
+                        <version>1.2.1</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -814,11 +1061,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.9.0</version>
+                <version>4.0.0-M16</version>
             </plugin>
             <plugin>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.7.0</version>
                 <configuration>
                     <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
                 </configuration>
@@ -826,4 +1073,11 @@
         </plugins>
     </reporting>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+    
 </project>

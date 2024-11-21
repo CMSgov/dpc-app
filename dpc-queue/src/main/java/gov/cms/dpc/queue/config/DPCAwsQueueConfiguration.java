@@ -1,6 +1,6 @@
 package gov.cms.dpc.queue.config;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public class DPCAwsQueueConfiguration {
 

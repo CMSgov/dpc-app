@@ -5,10 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Provider Entity tests")
 public class ProviderEntityTest {
 
 	@Test
+        @DisplayName("Test getters and setters 🥳")
 	public void testGettersAndSetters() {
 		ProviderEntity provider = new ProviderEntity();
 		String providerNPI = "1234567890";
@@ -24,6 +27,7 @@ public class ProviderEntityTest {
 	}
 
 	@Test
+        @DisplayName("Attributed patients 🥳")
 	public void testAttributedPatients() {
 		ProviderEntity provider = new ProviderEntity();
 		PatientEntity p1 = new PatientEntity();
@@ -36,6 +40,7 @@ public class ProviderEntityTest {
 	}
 
 	@Test
+        @DisplayName("Attribution roster 🥳")
 	public void testAttributionRosters() {
 		ProviderEntity provider = new ProviderEntity();
 		RosterEntity r1 = new RosterEntity();
@@ -48,6 +53,7 @@ public class ProviderEntityTest {
 	}
 
 	@Test
+        @DisplayName("Update provider 🥳")
 	public void testUpdate() {
 		ProviderEntity provider = new ProviderEntity();
 		String firstName = "Sydney";
@@ -64,6 +70,7 @@ public class ProviderEntityTest {
 	}
 
 	@Test
+        @DisplayName("Overriden hashcode and equals 🥳")
 	public void testEqualsAndHashCode() {
 		ProviderEntity p1 = new ProviderEntity();
 		UUID id = UUID.randomUUID();

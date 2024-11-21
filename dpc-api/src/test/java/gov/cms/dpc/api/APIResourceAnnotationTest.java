@@ -14,21 +14,23 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.reflections.Reflections;
-import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 
-import javax.ws.rs.*;
+import jakarta.ws.rs.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+import org.reflections.scanners.Scanners;
 
 // Ensure that all resources have the appropriate handlers and annotations
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Resource annotation and handling")
 class APIResourceAnnotationTest {
 
     private static Set<Method> methods;
@@ -37,7 +39,7 @@ class APIResourceAnnotationTest {
     static void filterMethods() {
         final ConfigurationBuilder config = new ConfigurationBuilder()
                 .setUrls(ClasspathHelper.forPackage("gov.cms.dpc.api.resources"))
-                .setScanners(new MethodAnnotationsScanner())
+                .setScanners(Scanners.MethodsAnnotated)
                 .filterInputsBy(new FilterBuilder().includePackage("gov.cms.dpc.api.resources"));
 
         final Reflections reflections = new Reflections(config);
@@ -60,6 +62,7 @@ class APIResourceAnnotationTest {
     }
 
     @Test
+    @DisplayName("All resources have monitoring annotations 🥳")
     void allResourcesHaveMonitoringAnnotations() {
         methods.forEach(method -> assertAll(
                 () -> assertTrue(method.isAnnotationPresent(Timed.class), String.format("Method: %s in Class: %s must have @Timed annotation", method.getName(), method.getDeclaringClass())),
@@ -68,6 +71,7 @@ class APIResourceAnnotationTest {
     }
 
     @Test
+    @DisplayName("All resources have Swagger annotations 🥳")
     void allResourcesHaveSwaggerAnnotations() {
         methods
                 .forEach(method ->
@@ -75,6 +79,7 @@ class APIResourceAnnotationTest {
     }// iterate over parameters (at least one should have Auth)
 
     @Test
+    @DisplayName("All resources have security annotations 🥳")
     void allResourcesHaveSecurityAnnotations() {
         methods.forEach(APIResourceAnnotationTest::assertMethodHasValidAuthAnnotations);
     }
