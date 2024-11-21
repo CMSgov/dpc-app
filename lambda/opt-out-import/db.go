@@ -194,7 +194,11 @@ func createConnection(dbUser string, dbPassword string) (*sql.DB, error) {
 	var dbName string = "dpc_consent"
 	var dbHost string = os.Getenv("DB_HOST")
 	var dbPort int = 5432
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
+	var sslmode string = "require"
+	if isTesting {
+		sslmode = "disable"
+	}
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", dbHost, dbPort, dbUser, dbPassword, dbName, sslmode)
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
