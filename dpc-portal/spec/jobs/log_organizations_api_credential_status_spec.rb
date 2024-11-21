@@ -86,5 +86,29 @@ RSpec.describe LogOrganizationsApiCredentialStatusJob, type: :job do
 
       described_class.perform_now
     end
+    it 'processes next organization successfully when an exception is raised' do
+      second_organization = create(
+        :provider_organization,
+        name: 'Test2',
+        dpc_api_organization_id: 'bar',
+        terms_of_service_accepted_by: user,
+        terms_of_service_accepted_at: 1.day.ago
+      )
+      second_organization.save!
+      provider_organization.save!
+
+      allow_any_instance_of(described_class).to receive(:fetch_credential_status).with('foo').and_return(
+        num_tokens: 1, num_keys: 2, num_ips: 3
+      )
+      allow_any_instance_of(described_class).to receive(:fetch_credential_status).with('bar').and_raise(
+        StandardError.new('something failed inside fetch_credential_status!')
+      )
+
+      allow(Rails.logger).to receive(:info)
+      expect(Rails.logger).to receive(:info).with(['Organizations API credential status',
+                                                   { have_active_credentials: 1,
+                                                     have_incomplete_or_no_credentials: 0 }])
+      described_class.perform_now
+    end
   end
 end
