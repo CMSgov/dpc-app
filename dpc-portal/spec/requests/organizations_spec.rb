@@ -220,7 +220,7 @@ RSpec.describe 'Organizations', type: :request do
         it 'does not assign invitations even if exist' do
           create(:invitation, :cd, provider_organization: org, invited_by: user)
           get "/organizations/#{org.id}"
-          expect(assigns(:invitations)).to be_nil
+          expect(assigns(:pending_invitations)).to be_nil
         end
       end
     end
@@ -260,24 +260,50 @@ RSpec.describe 'Organizations', type: :request do
           expect(response.body).to include('<h2>Credential delegates</h2>')
           expect(response.body).to include('<h2>Pending invitations</h2>')
           expect(response.body).to include('<h2>Active</h2>')
+          expect(response.body).to include('<h2>Expired invitations</h2>')
         end
 
-        context :invitations do
+        context :pending_invitations do
           it 'assigns if exist' do
             create(:invitation, :cd, provider_organization: org, invited_by: user)
             get "/organizations/#{org.id}"
-            expect(assigns(:invitations).size).to eq 1
+            expect(assigns(:pending_invitations).size).to eq 1
           end
 
           it 'does not assign if not exist' do
             get "/organizations/#{org.id}"
-            expect(assigns(:invitations).size).to eq 0
+            expect(assigns(:pending_invitations).size).to eq 0
           end
 
           it 'does not assign if only accepted exists' do
             create(:invitation, :cd, provider_organization: org, invited_by: user, status: :accepted)
             get "/organizations/#{org.id}"
-            expect(assigns(:invitations).size).to eq 0
+            expect(assigns(:pending_invitations).size).to eq 0
+          end
+
+          it 'does not assign if expired' do
+            create(:invitation, :cd, provider_organization: org, invited_by: user, created_at: 3.days.ago)
+            get "/organizations/#{org.id}"
+            expect(assigns(:pending_invitations).size).to eq 0
+          end
+        end
+
+        context :expired_invitations do
+          it 'assigns if exist' do
+            create(:invitation, :cd, provider_organization: org, invited_by: user, created_at: 3.days.ago)
+            get "/organizations/#{org.id}"
+            expect(assigns(:expired_invitations).size).to eq 1
+          end
+
+          it 'does not assign if not exist' do
+            get "/organizations/#{org.id}"
+            expect(assigns(:pending_invitations).size).to eq 0
+          end
+
+          it 'does not assign if invitation is not expired' do
+            create(:invitation, :cd, provider_organization: org, invited_by: user)
+            get "/organizations/#{org.id}"
+            expect(assigns(:expired_invitations).size).to eq 0
           end
         end
 
