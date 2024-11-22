@@ -14,14 +14,24 @@ class LogOrganizationsApiCredentialStatusJob < ApplicationJob
       have_incomplete_or_no_credentials: 0
     }
     ProviderOrganization.where.not(terms_of_service_accepted_by: nil).find_each do |organization|
-      credential_status = fetch_credential_status(organization.dpc_api_organization_id)
-      Rails.logger.info(['Credential status for organization',
-                         { name: organization.name,
-                           dpc_api_org_id: organization.dpc_api_organization_id,
-                           credential_status: }])
-      update_organization_aggregate_hash(organizations_credential_aggregate_status, credential_status)
+      process_organization_credentials(organizations_credential_aggregate_status, organization.name,
+                                       organization.dpc_api_organization_id)
     end
     Rails.logger.info(['Organizations API credential status', organizations_credential_aggregate_status])
+  end
+
+  def process_organization_credentials(organizations_credential_aggregate_status, organization_name,
+                                       organization_id)
+    credential_status = fetch_credential_status(organization_id)
+    Rails.logger.info(['Credential status for organization',
+                       { name: organization_name,
+                         dpc_api_org_id: organization_id,
+                         credential_status: }])
+    update_organization_aggregate_hash(organizations_credential_aggregate_status, credential_status)
+  rescue StandardError
+    Rails.logger.error(['Failed to fetch api credential status for organization',
+                        {  name: organization_name,
+                           dpc_api_org_id: organization_id }])
   end
 
   def update_organization_aggregate_hash(aggregate_stats, credential_status)
