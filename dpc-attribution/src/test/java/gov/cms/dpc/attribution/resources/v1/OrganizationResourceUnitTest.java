@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +28,9 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import org.junit.jupiter.api.DisplayName;
+import static org.mockito.ArgumentMatchers.any;
+
 
 @DisplayName("Organization resource operations")
 public class OrganizationResourceUnitTest {
@@ -59,8 +60,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-@DisplayName("Get organizations by ID 🥳")
-
+    @DisplayName("Get organizations by ID 🥳")
     void testGetOrganizationsByIds() {
         OrganizationEntity orgEnt1 = createOrganizationEntity("123", "org1");
         OrganizationEntity orgEnt2 = createOrganizationEntity("456", "org2");
@@ -75,8 +75,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-@DisplayName("Create organization with no look back exemptions 🥳")
-
+    @DisplayName("Create organization with no look back exemptions 🥳")
     void submitTestOrganizationAndNoLookbackExemptions() {
         Mockito.when(mockOrganizationDao.registerOrganization(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
         configuration.setLookBackExemptOrgs(null);
@@ -84,13 +83,12 @@ public class OrganizationResourceUnitTest {
 
         Response response = resource.submitOrganization(bundle);
         Organization orgCreated = (Organization) response.getEntity();
-        assertEquals(201, response.getStatus(), "Should have returned a 200 status");
+        assertEquals(201, response.getStatus(), "Should have returned a 201 status");
         assertEquals(lookbackExcemptOrgId, orgCreated.getId(), "UUID passed in should have been used");
     }
 
     @Test
-@DisplayName("Create organization with look back exemptions 🥳")
-
+    @DisplayName("Create organization with look back exemptions 🥳")
     void submitTestOrganizationWithLookbackExemptions() {
         Mockito.when(mockOrganizationDao.registerOrganization(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
         configuration.setLookBackExemptOrgs(List.of(lookbackExcemptOrgId));
@@ -98,13 +96,12 @@ public class OrganizationResourceUnitTest {
 
         Response response = resource.submitOrganization(bundle);
         Organization orgCreated = (Organization) response.getEntity();
-        assertEquals(201, response.getStatus(), "Should have returned a 200 status");
+        assertEquals(201, response.getStatus(), "Should have returned a 201 status");
         assertEquals(lookbackExcemptOrgId, orgCreated.getId(), "UUID passed in should have been used");
     }
 
     @Test
-@DisplayName("Create organization with ID specified 🥳")
-
+    @DisplayName("Create organization with ID specified 🥳")
     void submitOrganizationWithIdSpecified() {
         Mockito.when(mockOrganizationDao.registerOrganization(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
         configuration.setLookBackExemptOrgs(List.of(lookbackExcemptOrgId));
@@ -114,13 +111,12 @@ public class OrganizationResourceUnitTest {
         Response response = resource.submitOrganization(bundle);
 
         Organization orgCreated = (Organization) response.getEntity();
-        assertEquals(201, response.getStatus(), "Should have returned a 200 status");
+        assertEquals(201, response.getStatus(), "Should have returned a 201 status");
         assertEquals(uuid.toString(), orgCreated.getId(), "UUID passed in should have been used");
     }
 
     @Test
-@DisplayName("Create organization with no ID specified 🥳")
-
+    @DisplayName("Create organization with no ID specified 🥳")
     void submitOrganizationWithNoIdSpecified() throws IllegalAccessException, NoSuchFieldException {
         Mockito.when(mockOrganizationDao.registerOrganization(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
         configuration.setLookBackExemptOrgs(List.of(lookbackExcemptOrgId));
@@ -134,7 +130,7 @@ public class OrganizationResourceUnitTest {
 
         Response response = resource.submitOrganization(bundle);
         Organization orgCreated = (Organization) response.getEntity();
-        assertEquals(201, response.getStatus(), "Should have returned a 200 status");
+        assertEquals(201, response.getStatus(), "Should have returned a 201 status");
         assertEquals(validUUID, orgCreated.getId(), "Should have use the UUID that was generated second, first one was prohibited.");
     }
 

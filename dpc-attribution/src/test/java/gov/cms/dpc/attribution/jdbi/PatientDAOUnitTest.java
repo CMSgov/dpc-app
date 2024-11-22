@@ -12,9 +12,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
+
 @DisplayName("Patient data operations")
-
-
 class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 	private PatientDAO patientDAO;
 	private OrganizationDAO organizationDAO;
@@ -27,8 +26,8 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 	}
 
 	@Test
-	@DisplayName("Search for patients in DB 🥳")
-public void test_batch_patientSearch_happy_path() {
+        @DisplayName("Search for patients in DB 🥳")
+	public void test_batch_patientSearch_happy_path() {
 		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
 		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(org);
 		PatientEntity pat2 = AttributionTestHelpers.createPatientEntity(org);
@@ -50,8 +49,8 @@ public void test_batch_patientSearch_happy_path() {
 	}
 
 	@Test
-	@DisplayName("Search for patients in DB with org filters 🥳")
-public void test_batch_patientSearch_only_finds_correct_org() {
+        @DisplayName("Search for patients in DB with org filters 🥳")
+	public void test_batch_patientSearch_only_finds_correct_org() {
 		OrganizationEntity goodOrg = AttributionTestHelpers.createOrganizationEntity();
 		OrganizationEntity badOrg = AttributionTestHelpers.createOrganizationEntity();
 		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(goodOrg);

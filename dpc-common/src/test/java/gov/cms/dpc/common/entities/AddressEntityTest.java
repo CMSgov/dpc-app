@@ -17,8 +17,8 @@ public class AddressEntityTest {
 	private String addressLine2 = "N/A";
 
 	@Test
-	@DisplayName("Address getters and setters 🥳")
-public void testGettersAndSetters() {
+        @DisplayName("Address getters and setters 🥳")
+	public void testGettersAndSetters() {
 		// Create an object, and set / get the objects in the Entity.
 		AddressEntity address = new AddressEntity();
 		address.setCity(addressCity);
@@ -42,8 +42,8 @@ public void testGettersAndSetters() {
 	}
 
 	@Test
-	@DisplayName("Convert address to FHIR 🥳")
-public void testToFHIR() {
+        @DisplayName("Convert address to FHIR 🥳")
+	public void testToFHIR() {
 		AddressEntity address = new AddressEntity();
 
 		address.setCity(addressCity);

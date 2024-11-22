@@ -26,7 +26,6 @@ import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @DisplayName("Organization validation")
-
 class OrganizationValidationTest {
 
     private static FhirValidator fhirValidator;
@@ -54,8 +53,7 @@ class OrganizationValidationTest {
     }
 
     @Test
-@DisplayName("Validate organization with identifiers 🤮")
-
+    @DisplayName("Validate organization with identifiers 🤮")
     void testIdentifier() {
         final Organization organization = generateFakeOrganization();
         organization.addAddress(generateFakeAddress());
@@ -69,7 +67,14 @@ class OrganizationValidationTest {
         final ValidationResult r2 = fhirValidator.validateWithResult(organization, new ValidationOptions().addProfile(OrganizationProfile.PROFILE_URI));
         assertAll(() -> assertFalse(r2.isSuccessful(), "Should have failed validation"),
                 () -> assertEquals(2, r2.getMessages().size(), "Should have two failures for ID"));
+    }
 
+    @Test
+    @DisplayName("Validate organization with identifiers 🥳")
+    void testValidIdentifier() {
+        final Organization organization = generateFakeOrganization();
+        organization.addAddress(generateFakeAddress());
+        organization.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi-value");
         // Add correct NPI
         organization.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("test-value");
 
@@ -78,8 +83,7 @@ class OrganizationValidationTest {
     }
 
     @Test
-@DisplayName("Validate organization with address 🤮")
-
+    @DisplayName("Validate organization with address 🤮")
     void testAddress() {
         final Organization organization = generateFakeOrganization();
         organization.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("test-value");
@@ -94,7 +98,15 @@ class OrganizationValidationTest {
         final ValidationResult r2 = fhirValidator.validateWithResult(organization, new ValidationOptions().addProfile(OrganizationProfile.PROFILE_URI));
         assertAll(() -> assertFalse(r2.isSuccessful(), "Should have failed validation"),
                 () -> assertEquals(7, r2.getMessages().size(), "Should have multiple address failures"));
+    }
 
+    @Test
+    @DisplayName("Validate organization with address 🥳")
+    void testValidAddress() {
+        final Organization organization = generateFakeOrganization();
+        organization.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("test-value");
+        // Add a text based Address
+        organization.addAddress().setText("7500 Security Blvd").setType(Address.AddressType.PHYSICAL).setUse(Address.AddressUse.HOME);
         // Add valid address
         organization.setAddress(Collections.singletonList(generateFakeAddress()));
 

@@ -17,7 +17,6 @@ import java.io.PrintStream;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.DisplayName;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @IntegrationTest
@@ -109,7 +108,7 @@ class ConsentCommandsIT {
     }
 
     @Test
-    @DisplayName("Create opt-in record 🥳")
+    @DisplayName("Run consent command for opt in 🥳")
     final void createDefaultOptInRecord() throws Exception {
         final Optional<Throwable> t2 = cli.run("consent", "create", configPath, "-p", "t2-mbi", "-d", "2019-11-22", "-i", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertFalse(t2.isPresent(), "Should have succeeded"),
@@ -117,7 +116,7 @@ class ConsentCommandsIT {
     }
 
     @Test
-    @DisplayName("Create opt-out record 🥳")
+    @DisplayName("Run consent command for opt out 🥳")
     final void createDefaultOptOutRecord() throws Exception {
         final Optional<Throwable> t3 = cli.run("consent", "create", configPath, "-p", "t3-mbi", "-d", "2019-11-23", "-o", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertFalse(t3.isPresent(), "Should have succeeded"),

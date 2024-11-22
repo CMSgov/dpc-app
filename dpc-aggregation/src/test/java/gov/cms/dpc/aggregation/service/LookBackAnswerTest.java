@@ -16,7 +16,7 @@ public class LookBackAnswerTest {
 
     @Test
     @DisplayName("Look back date matches 🥳")
-public void testDateCriteria() {
+    public void testDateCriteria() {
         LookBackAnswer lookBackAnswer = new LookBackAnswer(null, null, 0, null)
                 .addEobBillingPeriod(YearMonth.now());
 
@@ -48,7 +48,7 @@ public void testDateCriteria() {
 
     @Test
     @DisplayName("Match on different look back data 🤮")
-public void testDifferentNPIValues() {
+    public void testDifferentNPIValues() {
         LookBackAnswer lookBackAnswer = new LookBackAnswer(null, null, 0, null);
         Assertions.assertFalse(lookBackAnswer.matchDateCriteria());
         Assertions.assertFalse(lookBackAnswer.orgMatchEob());

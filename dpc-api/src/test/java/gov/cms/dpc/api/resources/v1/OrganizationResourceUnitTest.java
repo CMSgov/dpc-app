@@ -9,6 +9,8 @@ import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.testing.factories.OrganizationFactory;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -18,17 +20,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
-import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("Organization resource operations")
 public class OrganizationResourceUnitTest {
@@ -48,7 +49,7 @@ public class OrganizationResourceUnitTest {
 
     @Test
     @DisplayName("Add organization")
-public void testSubmitOrganization() {
+    public void testSubmitOrganization() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());
@@ -75,13 +76,13 @@ public void testSubmitOrganization() {
 
     @Test
     @DisplayName("Add organization with missing parameters 🤮")
-public void testSubmitOrganizationNoOrganization() {
+    public void testSubmitOrganizationNoOrganization() {
         Bundle bundle = new Bundle();
 
         try {
             orgResource.submitOrganization(bundle);
             fail("This call is supposed to fail.");
-        } catch (WebApplicationException exc) {
+        } catch (BadRequestException exc) {
             String excMsg = "Bundle must include Organization";
             assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), exc.getResponse().getStatus());
             assertEquals(excMsg, exc.getMessage());
@@ -90,7 +91,7 @@ public void testSubmitOrganizationNoOrganization() {
 
     @Test
     @DisplayName("Add organization with no endpoints 🤮")
-public void testSubmitOrganizationNoEndpoints() {
+    public void testSubmitOrganizationNoEndpoints() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());
@@ -100,7 +101,7 @@ public void testSubmitOrganizationNoEndpoints() {
         try {
             orgResource.submitOrganization(bundle);
             fail("This call is supposed to fail");
-        } catch (WebApplicationException exc) {
+        } catch (BadRequestException exc) {
             String excMsg = "Organization must have at least 1 endpoint";
             assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), exc.getResponse().getStatus());
             assertEquals(excMsg, exc.getMessage());
@@ -109,7 +110,7 @@ public void testSubmitOrganizationNoEndpoints() {
 
     @Test
     @DisplayName("Get organization 🥳")
-public void testGetOrganization() {
+    public void testGetOrganization() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());
@@ -130,7 +131,7 @@ public void testGetOrganization() {
 
     @Test
     @DisplayName("Delete organization 🥳")
-public void testDeleteOrganization() {
+    public void testDeleteOrganization() {
         UUID orgID = UUID.randomUUID();
 
         IDeleteTyped delRet = mock(IDeleteTyped.class);
@@ -146,7 +147,7 @@ public void testDeleteOrganization() {
 
     @Test
     @DisplayName("Update organization 🥳")
-public void testUpdateOrganization() {
+    public void testUpdateOrganization() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());
@@ -169,7 +170,7 @@ public void testUpdateOrganization() {
 
     @Test
     @DisplayName("Update unrecognized organization 🤮")
-public void testUpdateOrganizationNoResource() {
+    public void testUpdateOrganizationNoResource() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());
@@ -186,7 +187,7 @@ public void testUpdateOrganizationNoResource() {
         try {
             orgResource.updateOrganization(orgID, organization);
             fail("This call is supposed to fail.");
-        } catch (WebApplicationException exc) {
+        } catch (InternalServerErrorException exc) {
             String excMsg = "Unable to update Organization";
             assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), exc.getResponse().getStatus());
             assertEquals(excMsg, exc.getMessage());

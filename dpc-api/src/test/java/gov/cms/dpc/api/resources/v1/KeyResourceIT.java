@@ -20,19 +20,17 @@ import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
+
 @DisplayName("Public key resource operations")
-
-
 class KeyResourceIT extends AbstractSecureApplicationIT {
 
     private final ObjectMapper mapper;
@@ -49,9 +47,8 @@ class KeyResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Submit public key to key store with long label 🤮")
-
-    void testInvalidKeySubmission() throws GeneralSecurityException, IOException, URISyntaxException {
+    @DisplayName("Submit duplicate public key to key store 🤮")
+    void testDuplicateKeySubmission() throws GeneralSecurityException, IOException, URISyntaxException {
         KeyResource.KeySignature keySig = generateKeyAndSignature();
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
@@ -70,7 +67,7 @@ class KeyResourceIT extends AbstractSecureApplicationIT {
             // Try the same key again
             try (CloseableHttpResponse response = client.execute(post)) {
                 assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Cannot submit duplicated keys"),
-                        () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("duplicate key value violates unique constraint"), "Should have nice error message"));
+                        () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("Key cannot be re-used"), "Should have nice error message"));
             }
 
             KeyResource.KeySignature keySig2 = generateKeyAndSignature();
@@ -79,7 +76,7 @@ class KeyResourceIT extends AbstractSecureApplicationIT {
             post.setEntity(new StringEntity(json2));
             try (CloseableHttpResponse response = client.execute(post)) {
                 assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Cannot submit duplicated keys"),
-                        () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("duplicate key value violates unique constraint"), "Should have nice error message"));
+                        () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("Key cannot be re-used"), "Should have nice error message"));
             }
 
             // Try with too long label
@@ -91,15 +88,43 @@ class KeyResourceIT extends AbstractSecureApplicationIT {
             labelViolationPost.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
             labelViolationPost.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
             try (CloseableHttpResponse response = client.execute(labelViolationPost)) {
-                assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Key label cannot be too long");
-                assertEquals("{\"code\":400,\"message\":\"Key label cannot be more than 25 characters\"}", EntityUtils.toString(response.getEntity()), "Key label should have correct error message");
+                assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Key label cannot be too long"),
+                        () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("Key label cannot be more than 25 characters"), "Should have nice error message"));
             }
         }
     }
 
     @Test
-@DisplayName("Submit public key with incorrect signature 🤮")
+    @DisplayName("Submit public key to key store with long label 🤮")
+    void testInvalidKeySubmission() throws GeneralSecurityException, IOException, URISyntaxException {
+        KeyResource.KeySignature keySig = generateKeyAndSignature();
 
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final URIBuilder builder = new URIBuilder(String.format("%s/Key", getBaseURL()));
+            builder.addParameter("label", "this is a test");
+            final HttpPost post = new HttpPost(builder.build());
+            String json = new ObjectMapper().writeValueAsString(keySig);
+            post.setEntity(new StringEntity(json));
+            post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+            post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
+
+            // Try with too long label
+            final URIBuilder b2 = new URIBuilder(String.format("%s/Key", getBaseURL()));
+            b2.addParameter("label", "This is way too long to be used for a key id field. Never should pass");
+            final HttpPost labelViolationPost = new HttpPost(b2.build());
+            labelViolationPost.setEntity(new StringEntity(json));
+            labelViolationPost.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+            labelViolationPost.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
+            labelViolationPost.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+            try (CloseableHttpResponse response = client.execute(labelViolationPost)) {
+                assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Key label cannot be too long"),
+                        () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("Key label cannot be more than 25 characters"), "Should have nice error message"));
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("Submit public key with incorrect signature 🤮")
     void testMismatchedKeyAndSignature() throws GeneralSecurityException, IOException, URISyntaxException {
         KeyResource.KeySignature keySig1 = generateKeyAndSignature();
         KeyResource.KeySignature keySig2 = generateKeyAndSignature();
@@ -114,14 +139,13 @@ class KeyResourceIT extends AbstractSecureApplicationIT {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             try (CloseableHttpResponse response = client.execute(post)) {
                 assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Should not accept mismatched public key and signature"),
-                        () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("Public key could not be verified"), "Should have informative error message"));
+                        () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("Cannot verify signature with public key"), "Should have informative error message"));
             }
         }
     }
 
     @Test
-@DisplayName("Validate public key round trip process 🥳")
-
+    @DisplayName("Validate public key round trip process 🥳")
     void testRoundTrip() throws GeneralSecurityException, IOException {
         KeyResource.KeySignature keySig = generateKeyAndSignature();
 
@@ -178,9 +202,9 @@ class KeyResourceIT extends AbstractSecureApplicationIT {
 
     // TODO: Remove this test when ECC support is re-enabled.
     @Test
-    @SuppressWarnings("unchecked")
     @DisplayName("Process ECC key type 🤮")
-public void testRejectEccKey() throws NoSuchAlgorithmException, IOException {
+    @SuppressWarnings("unchecked")
+    public void testRejectEccKey() throws NoSuchAlgorithmException, IOException {
         KeyPair eccKeyPair = APIAuthHelpers.generateKeyPair(KeyType.ECC);
         String publicKeyStr = APIAuthHelpers.generatePublicKey(eccKeyPair.getPublic());
         KeyResource.KeySignature keySig = new KeyResource.KeySignature(publicKeyStr, "");
@@ -192,9 +216,8 @@ public void testRejectEccKey() throws NoSuchAlgorithmException, IOException {
             post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
 
             try (CloseableHttpResponse response = client.execute(post)) {
-                assertEquals(HttpStatus.UNPROCESSABLE_ENTITY_422, response.getStatusLine().getStatusCode(), "ECC key should be rejected");
-                Map<String, String> respBody = new ObjectMapper().readValue(response.getEntity().getContent(), Map.class);
-                assertEquals(respBody.get("message"), "ECC keys are not currently supported", "Should return helpful error message");
+                assertAll(() -> assertEquals(HttpStatus.UNPROCESSABLE_ENTITY_422, response.getStatusLine().getStatusCode(), "ECC key should be rejected"),
+                        () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("ECC keys are not currently supported"), "Should return helpful error message"));
             }
         }
     }

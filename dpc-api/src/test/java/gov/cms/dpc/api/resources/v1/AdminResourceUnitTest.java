@@ -5,10 +5,8 @@ import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -40,7 +38,7 @@ public class AdminResourceUnitTest {
 
     @Test
     @DisplayName("Get organization 🥳")
-public void testGetOrganizations() {
+    public void testGetOrganizations() {
         UUID orgID1 = UUID.randomUUID();
         Organization organization1 = new Organization();
         organization1.setId(orgID1.toString());

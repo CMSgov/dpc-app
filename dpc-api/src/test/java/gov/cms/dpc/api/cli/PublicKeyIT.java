@@ -76,8 +76,7 @@ public class PublicKeyIT extends AbstractApplicationIT {
     }
 
     @Test
-@DisplayName("Complete public key lifecycle 🥳")
-
+    @DisplayName("Complete public key lifecycle 🥳")
     void testPublicKeyLifecycle() throws Exception {
         // Create the organization
         final Optional<Throwable> success = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token", "--host", "http://localhost:3500/v1");

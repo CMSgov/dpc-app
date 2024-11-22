@@ -15,6 +15,9 @@
     <properties>
         <aws.java.sdk.version>2.26.7</aws.java.sdk.version>
         <exec.skip>true</exec.skip>
+        <test.verbosity>false</test.verbosity>
+        <disable.console>true</disable.console>
+        <jib.skip>true</jib.skip>
     </properties>
 
     <dependencyManagement>
@@ -31,15 +34,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ru.vyarus</groupId>
-            <artifactId>dropwizard-guicey</artifactId>
-            <version>6.2.2</version>
-        </dependency>
-        <dependency>
             <groupId>gov.cms.dpc</groupId>
             <artifactId>dpc-common</artifactId>
             <version>0.4.0-SNAPSHOT</version>
@@ -51,38 +45,21 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>32.1.3-jre</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.reactivex.rxjava2</groupId>
             <artifactId>rxjava</artifactId>
             <version>2.2.21</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
-            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>5.6.15.Final</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>javax.persistence</groupId>
-            <artifactId>javax.persistence-api</artifactId>
-            <version>2.2</version>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -95,11 +72,6 @@
         </dependency>
         <!-- required by HAPI FHIR; specifying non-vulnerable version -->
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.9</version>
-        </dependency>
-        <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>cloudwatch</artifactId>
         </dependency>
@@ -107,6 +79,15 @@
             <groupId>io.github.azagniotov</groupId>
             <artifactId>dropwizard-metrics-cloudwatch</artifactId>
             <version>2.0.8</version>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-base</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>org.hl7.fhir.dstu3</artifactId>
+            <version>6.4.0</version>
         </dependency>
     </dependencies>
 
@@ -118,23 +99,143 @@
                     <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
                     <annotationProcessorPaths>
                         <annotationProcessorPath>
-                            <groupId>org.hibernate</groupId>
+                            <groupId>org.hibernate.orm</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
-                            <version>5.6.15.Final</version>
+                            <version>6.6.1.Final</version>
                         </annotationProcessorPath>
                         <path>
-                            <groupId>javax.xml.bind</groupId>
-                            <artifactId>jaxb-api</artifactId>
-                            <version>2.3.0</version>
+                            <groupId>jakarta.xml.bind</groupId>
+                            <artifactId>jakarta.xml.bind-api</artifactId>
+                            <version>4.0.2</version>
                         </path>
                         <path>
-                            <groupId>javax.annotation</groupId>
-                            <artifactId>javax.annotation-api</artifactId>
-                            <version>1.3.1</version>
+                            <groupId>jakarta.annotation</groupId>
+                            <artifactId>jakarta.annotation-api</artifactId>
+                            <version>3.0.0</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <dependencies>
+                  <dependency>
+                     <groupId>me.fabriciorby</groupId>
+                     <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                     <version>1.3.0</version>
+                  </dependency>
+                </dependencies>                        
+                <configuration>
+                    <reportFormat>plain</reportFormat>
+                    <consoleOutputReporter>
+                       <disable>${disable.console}</disable>
+                    </consoleOutputReporter>
+                    <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                        <theme>UNICODE</theme>
+                        <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                        <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                        <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                    </statelessTestsetInfoReporter>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <dependencies>
+                  <dependency>
+                     <groupId>me.fabriciorby</groupId>
+                     <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                     <version>1.3.0</version>
+                  </dependency>
+                </dependencies>                        
+                <configuration>
+                    <testFailureIgnore>false</testFailureIgnore>
+                    <skip>false</skip>
+                    <reportFormat>plain</reportFormat>
+                    <consoleOutputReporter>
+                       <disable>${disable.console}</disable>
+                    </consoleOutputReporter>
+                    <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                        <theme>UNICODE</theme>
+                        <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                        <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                        <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                    </statelessTestsetInfoReporter>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>integration-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>integration-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                                <phase>verify</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+           <id>unit-tests</id>
+           <build>
+               <plugins>
+                   <plugin>
+                       <groupId>org.apache.maven.plugins</groupId>
+                       <artifactId>maven-surefire-plugin</artifactId>
+                       <executions>
+                           <execution>
+                               <id>unit-test</id>
+                               <goals>
+                                   <goal>test</goal>
+                               </goals>
+                               <phase>test</phase>
+                           </execution>
+                       </executions>
+                       <configuration>
+                           <skip>false</skip>
+                       </configuration>
+                   </plugin>
+               </plugins>
+           </build>
+       </profile>
+    </profiles>
+    
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>project.local</id>
+            <name>project</name>
+            <url>file://${project.basedir}/../repo</url>
+        </repository>
+    </repositories>
 </project>

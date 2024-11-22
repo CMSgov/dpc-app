@@ -53,14 +53,14 @@ public class FHIRGroupBuilderUnitTest {
 
     @Test
     @DisplayName("Build new FHIR group 🥳")
-public void testNewBuild() {
+    public void testNewBuild() {
         FHIRGroupBuilder result = FHIRGroupBuilder.newBuild();
         assertNotNull(result);
     }
 
     @Test
     @DisplayName("Set attributions in group 🥳")
-public void testAttributedTo() {
+    public void testAttributedTo() {
         FHIRGroupBuilder builder = FHIRGroupBuilder.newBuild();
         builder.attributedTo("12345");
         Group group = builder.build();
@@ -82,7 +82,7 @@ public void testAttributedTo() {
 
     @Test
     @DisplayName("Build group with multiple patients 🥳")
-public void testWithPatient() {
+    public void testWithPatient() {
         UUID patientUUID = UUID.randomUUID();
 
         //With id as string
@@ -108,9 +108,10 @@ public void testWithPatient() {
         assertEquals("Patient/"+id1,group.getMember().get(0).getEntity().getReference());
         assertEquals("Patient/"+id2,group.getMember().get(1).getEntity().getReference());
     }
+    
     @Test
     @DisplayName("Build group with org tag 🥳")
-public void withOrgTag() {
+    public void withOrgTag() {
         UUID orgId = UUID.randomUUID();
 
         //With id as UUID

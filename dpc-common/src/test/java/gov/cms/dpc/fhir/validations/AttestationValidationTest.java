@@ -27,7 +27,6 @@ import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @DisplayName("Attestation validation")
-
 class AttestationValidationTest {
 
     private static FhirValidator fhirValidator;
@@ -55,8 +54,7 @@ class AttestationValidationTest {
     }
 
     @Test
-@DisplayName("Validate attestation definition 🤮")
-
+    @DisplayName("Validate attestation definition 🤮")
     void definitionIsValid() {
         final StructureDefinition provenanceDefinition = dpcModule.fetchStructureDefinition(AttestationProfile.PROFILE_URI);
         final ValidationResult result = fhirValidator.validateWithResult(provenanceDefinition);
@@ -80,8 +78,7 @@ class AttestationValidationTest {
     }
 
     @Test
-@DisplayName("Validate provenance with reason 🤮")
-
+    @DisplayName("Validate provenance with reason 🤮")
     void testHasReason() {
         final Provenance provenance = new Provenance();
         provenance.setRecorded(Date.valueOf("1990-01-01"));
@@ -111,6 +108,25 @@ class AttestationValidationTest {
 
         assertAll(() -> assertFalse(r3.isSuccessful(), "Should not have passed"),
                 () -> assertEquals(3 , r3.getMessages().size(), "Should errors for both reasons"));
+    }
+
+    @Test
+    @DisplayName("Validate provenance with reason 🥳")
+    void testValidHasReason() {
+        final Provenance provenance = new Provenance();
+        provenance.setRecorded(Date.valueOf("1990-01-01"));
+
+        final Meta meta = new Meta();
+        meta.addProfile(AttestationProfile.PROFILE_URI);
+        provenance.setMeta(meta);
+        addAgent(provenance);
+
+        // Add a reason, but the wrong system
+        Coding c1 = new Coding().setSystem("http://test.local").setCode("TREAT");
+        provenance.setReason(List.of(c1));
+        // Add a reason, but the wrong value
+        Coding c2 = new Coding().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("wrongz");
+        provenance.setReason(List.of(c2));
 
         // Add a correct reason (which should cause everything to pass)
         Coding c3 = new Coding().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
@@ -120,8 +136,7 @@ class AttestationValidationTest {
     }
 
     @Test
-@DisplayName("Validate provenance with role agent 🥳")
-
+    @DisplayName("Validate provenance with role agent 🥳")
     void testRoleAgent() {
         final Provenance provenance = new Provenance();
         provenance.setRecorded(Date.valueOf("1990-01-01"));
@@ -152,8 +167,7 @@ class AttestationValidationTest {
     }
 
     @Test
-@DisplayName("Validate provenance with no role agent 🤮")
-
+    @DisplayName("Validate provenance with no role agent 🤮")
     void testRoleNoAgent() {
         final Provenance provenance = new Provenance();
         provenance.setRecorded(Date.valueOf("1990-01-01"));
@@ -179,12 +193,11 @@ class AttestationValidationTest {
         final ValidationResult r2 = fhirValidator.validateWithResult(provenance);
 
         assertAll(() -> assertFalse(r2.isSuccessful(), "Should not have passed"),
-                () -> assertEquals(2, r2.getMessages().size(), "Should messages for missing agent and missing slice"));
+                () -> assertEquals(2, r2.getMessages().size(), "Should have two messages for missing agent and missing slice"));
     }
 
     @Test
-@DisplayName("Validate provenance with missing behalf of 🤮")
-
+    @DisplayName("Validate provenance with missing behalf of 🤮")
     void testRoleAgentNoBehalf() {
         final Provenance provenance = new Provenance();
         provenance.setRecorded(Date.valueOf("1990-01-01"));
@@ -215,8 +228,7 @@ class AttestationValidationTest {
     }
 
     @Test
-@DisplayName("Validate provenance with multiple agents 🥳")
-
+    @DisplayName("Validate provenance with multiple agents 🥳")
     void testMultipleAgent() {
         final Provenance provenance = new Provenance();
         provenance.setRecorded(Date.valueOf("1990-01-01"));
@@ -261,8 +273,7 @@ class AttestationValidationTest {
     }
 
     @Test
-@DisplayName("Validate provenance with duplicate agents 🤮")
-
+    @DisplayName("Validate provenance with duplicate agents 🤮")
     void testDuplicateAgent() {
         final Provenance provenance = new Provenance();
         provenance.setRecorded(Date.valueOf("1990-01-01"));
@@ -293,7 +304,6 @@ class AttestationValidationTest {
         a2.setOnBehalfOf(new Reference("Practitioner/test2"));
         a2.setRole(Collections.singletonList(roleConcept));
         provenance.addAgent(a2);
-
 
         final ValidationResult result = fhirValidator.validateWithResult(provenance);
 

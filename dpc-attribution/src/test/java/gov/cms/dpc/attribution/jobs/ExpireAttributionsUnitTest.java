@@ -27,8 +27,8 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import org.junit.jupiter.api.DisplayName;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit test for verifying that the expiration job correctly expires and deletes attributions.
@@ -36,7 +36,6 @@ import org.junit.jupiter.api.DisplayName;
 @ExtendWith(BufferedLoggerHandler.class)
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Attribution lifecycle management")
-
 class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
 
     private OrganizationDAO organizationDAO;
@@ -75,8 +74,7 @@ class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
     }
 
     @Test
-@DisplayName("Expire attributions 🥳")
-
+    @DisplayName("Expire attributions 🥳")
     void testExpireAttribution() {
         OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
         ProviderEntity provider = AttributionTestHelpers.createProviderEntity(org);
@@ -102,8 +100,7 @@ class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
     }
 
     @Test
-@DisplayName("Delete inactive attribution 🥳")
-
+    @DisplayName("Delete inactive attribution 🥳")
     void testDeleteInactiveAttribution() {
         OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
         ProviderEntity provider = AttributionTestHelpers.createProviderEntity(org);
@@ -130,8 +127,7 @@ class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
     }
 
     @Test
-@DisplayName("Lookup multiple attributions 🥳")
-
+    @DisplayName("Lookup multiple attributions 🥳")
     void testMultipleAttributions() {
         OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
         ProviderEntity provider = AttributionTestHelpers.createProviderEntity(org);
@@ -182,8 +178,7 @@ class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
     }
 
     @Test
-@DisplayName("Handle general database error 🤮")
-
+    @DisplayName("Handle general database error 🤮")
     void testDatabaseException() throws SQLException {
         when(this.dataSource.getConnection()).thenThrow(new SQLException());
         AttributionException exception = assertThrows(AttributionException.class,

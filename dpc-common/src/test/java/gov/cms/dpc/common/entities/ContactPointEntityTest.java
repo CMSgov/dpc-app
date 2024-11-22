@@ -13,7 +13,7 @@ public class ContactPointEntityTest {
 
     @Test
     @DisplayName("Test contact point getters and setters 🥳")
-public void testGettersAndSetters() {
+    public void testGettersAndSetters() {
         ContactPointEntity contactPoint = new ContactPointEntity();
         UUID id = UUID.randomUUID();
         ContactEntity contact = new ContactEntity();
@@ -40,7 +40,7 @@ public void testGettersAndSetters() {
 
     @Test
     @DisplayName("Convert contact point to FHIR 🥳")
-public void testToFHIR() {
+    public void testToFHIR() {
         ContactPointEntity contactPoint = new ContactPointEntity();
         ContactPoint.ContactPointSystem system = ContactPoint.ContactPointSystem.EMAIL;
         ContactPoint.ContactPointUse use = ContactPoint.ContactPointUse.WORK;

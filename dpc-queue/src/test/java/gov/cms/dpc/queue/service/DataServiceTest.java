@@ -59,7 +59,7 @@ public class DataServiceTest {
 
     @Test
     @DisplayName("Handle data retrieval exceptions during job 🤮")
-public void whenGetJobBatchesThrowsException() {
+    public void whenGetJobBatchesThrowsException() {
         DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
 
         Mockito.doThrow(new RuntimeException("error")).when(queue).getJobBatches(Mockito.any(UUID.class));
@@ -69,7 +69,7 @@ public void whenGetJobBatchesThrowsException() {
 
     @Test
     @DisplayName("Handle failed jobs 🤮")
-public void whenGetJobBatchesReturnsFailedJob() {
+    public void whenGetJobBatchesReturnsFailedJob() {
         DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
 
         workJob(true, resourceType);
@@ -78,7 +78,7 @@ public void whenGetJobBatchesReturnsFailedJob() {
 
     @Test
     @DisplayName("Get job batch with completed job as resource bundle 🥳")
-public void whenGetJobBatchesReturnsCompletedJobWithResourceType() {
+    public void whenGetJobBatchesReturnsCompletedJobWithResourceType() {
         DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
 
         workJob(false, resourceType);
@@ -88,18 +88,18 @@ public void whenGetJobBatchesReturnsCompletedJobWithResourceType() {
 
     @Test
     @DisplayName("Get job batch with completed job as outcome 🥳")
-public void whenGetJobBatchesReturnsCompletedJobWithOperationOutcome() {
-        UUID patientID = UUID.randomUUID();
+    public void whenGetJobBatchesReturnsCompletedJobWithOperationOutcome() {
+        UUID randomPatientID = UUID.randomUUID();
         DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
 
         workJob(false, DPCResourceType.OperationOutcome);
-        Resource resource = dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType);
+        Resource resource = dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(randomPatientID.toString()), resourceType);
         Assertions.assertTrue(resource instanceof OperationOutcome);
     }
 
     @Test
     @DisplayName("Handle exception when providing no resource type to retrieve data 🥳")
-public void whenPassingInNoResourceTypes() {
+    public void whenPassingInNoResourceTypes() {
         workJob(false, DPCResourceType.ExplanationOfBenefit);
         Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString())));
     }

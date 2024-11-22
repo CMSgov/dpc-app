@@ -47,8 +47,7 @@ public class PractitionerValidationTest {
     }
 
     @Test
-@DisplayName("Validate practitioner with name 🥳")
-
+    @DisplayName("Validate practitioner with name 🥳")
     void testHasName() {
         final Practitioner practitioner = generateFakePractitioner();
         practitioner.addName().setFamily("Patient").addGiven("Test");
@@ -67,8 +66,7 @@ public class PractitionerValidationTest {
     }
 
     @Test
-@DisplayName("Validate with practitioner with identifier 🥳")
-
+    @DisplayName("Validate with practitioner with identifier 🥳")
     void testHasIdentifier() {
         final Practitioner practitioner = generateFakePractitioner();
         practitioner.addName().setFamily("Patient").addGiven("Test");

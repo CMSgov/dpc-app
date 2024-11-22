@@ -22,15 +22,15 @@ import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
 
-class PatientResourceIT extends AbstractAttributionIT {
+@DisplayName("Patient resource handling")
+class PatientResourceTest extends AbstractAttributionIT {
 
-    private PatientResourceIT() {
+    private PatientResourceTest() {
         // Not used
     }
 
     @Test
-@DisplayName("Create and access patient resource 🥳")
-
+    @DisplayName("Create and access patient resource 🥳")
     void testPatientReadWrite() {
         final Patient patient = createPatientResource("0O00O00OO00", DEFAULT_ORG_ID);
 
@@ -74,8 +74,34 @@ class PatientResourceIT extends AbstractAttributionIT {
     }
 
     @Test
-@DisplayName("Correct casing of MBI 🥳")
+    @DisplayName("Duplicate patient not allowed 🤮")
+    void testDuplicatePatient() {
+        final Patient patient = createPatientResource("0O00O00OO00", DEFAULT_ORG_ID);
 
+        final Reference orgReference = new Reference(new IdType("Organization", DEFAULT_ORG_ID));
+        patient.setManagingOrganization(orgReference);
+
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        final MethodOutcome outcome = client
+                .create()
+                .resource(patient)
+                .encodedJson()
+                .execute();
+
+        // Try to create them again
+
+        final ICreateTyped secondCreation = client
+                .create()
+                .resource(patient)
+                .encodedJson();
+
+        final MethodOutcome execute = secondCreation.execute();
+        assertNull(execute.getCreated(), "Should not be able to create again");
+    }
+
+    @Test
+    @DisplayName("Correct casing of MBI 🥳")
     void testPatientMBIPersistedAsUppercase() {
         final Reference orgReference = new Reference(new IdType("Organization", DEFAULT_ORG_ID));
         final String patientMbi = "3aa0C00aA00";
@@ -106,8 +132,7 @@ class PatientResourceIT extends AbstractAttributionIT {
     }
 
     @Test
-@DisplayName("Create patient with invalid MBI 🤮")
-
+    @DisplayName("Create patient with invalid MBI 🤮")
     void testCreatePatientWithInvalidMbi() {
         final Patient patient = createPatientResource("not-an-mbi", DEFAULT_ORG_ID);
 
@@ -124,8 +149,7 @@ class PatientResourceIT extends AbstractAttributionIT {
     }
 
     @Test
-@DisplayName("Search patient with org and MBI 🥳")
-
+    @DisplayName("Search patient with org and MBI 🥳")
     void testPatientSearchWithValidOrgAndMbi() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
@@ -142,8 +166,7 @@ class PatientResourceIT extends AbstractAttributionIT {
     }
 
     @Test
-@DisplayName("Search patietn with invalid org 🤮")
-
+    @DisplayName("Search patietn with invalid org 🤮")
     void testPatientSearchWithInvalidOrg() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
@@ -160,8 +183,7 @@ class PatientResourceIT extends AbstractAttributionIT {
     }
 
     @Test
-@DisplayName("Search patient with lowercase MBI 🤮")
-
+    @DisplayName("Search patient with lowercase MBI 🤮")
     void testPatientSearchWithLowerCaseMbi() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
@@ -178,8 +200,7 @@ class PatientResourceIT extends AbstractAttributionIT {
     }
 
     @Test
-@DisplayName("Delete patient 🥳")
-
+    @DisplayName("Delete patient 🥳")
     void testPatientDeletion() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
@@ -244,8 +265,7 @@ class PatientResourceIT extends AbstractAttributionIT {
     }
 
     @Test
-@DisplayName("Update patient 🥳")
-
+    @DisplayName("Update patient 🥳")
     void testPatientUpdate() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
@@ -307,8 +327,7 @@ class PatientResourceIT extends AbstractAttributionIT {
     }
 
     @Test
-@DisplayName("Update patient to invalid MBI 🤮")
-
+    @DisplayName("Update patient to invalid MBI 🤮")
     void testPatientUpdateWithInvalidMbi() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
         final String mbi = "4S41C00AA00";

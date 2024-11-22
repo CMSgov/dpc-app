@@ -1,7 +1,8 @@
 package gov.cms.dpc.attribution;
 
-import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListener;
+import com.google.inject.servlet.GuiceFilter;
+import com.hubspot.dropwizard.guicier.GuiceBundle;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.attribution.jobs.ExpireAttributions;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
@@ -23,9 +24,9 @@ import io.dropwizard.jobs.JobsBundle;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 public class DPCAttributionService extends Application<DPCAttributionConfiguration> {
 
@@ -33,9 +34,11 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     private final DPCHibernateBundle<DPCAttributionConfiguration> hibernateBundle = new DPCHibernateBundle<>();
 
+    @SuppressWarnings("rawtypes")
     private GuiceBundle guiceBundle;
 
     public static void main(final String[] args) throws Exception {
+        logger.info("Running the attribution service with args: " + Arrays.toString(args));
         new DPCAttributionService().run(args);
     }
 
@@ -46,9 +49,6 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     @Override
     public void initialize(Bootstrap<DPCAttributionConfiguration> bootstrap) {
-        // This is required for Guice to load correctly. Not entirely sure why
-        // https://github.com/dropwizard/dropwizard/issues/1772
-        JerseyGuiceUtils.reset();
 
         // Enable variable substitution with environment variables
         EnvironmentVariableSubstitutor substitutor = new EnvironmentVariableSubstitutor(false);
@@ -63,10 +63,14 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     @Override
     public void run(DPCAttributionConfiguration configuration, Environment environment) {
+        logger.info("Starting DPCAttributionService run!");
+        EnvironmentParser.getEnvironment("Attribution");
+
         GuiceJobManager jobManager = new GuiceJobManager(configuration, guiceBundle.getInjector());
         environment.lifecycle().manage(jobManager);
 
-        EnvironmentParser.getEnvironment("Attribution");
+        environment.servlets().addFilter("GuiceFilter", GuiceFilter.class).addMappingForUrlPatterns(null, false, "/*");
+
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
         environment.jersey().register(new GenerateRequestIdFilter(true));
@@ -79,8 +83,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     }
 
     private void registerBundles(Bootstrap<DPCAttributionConfiguration> bootstrap) {
-        guiceBundle = GuiceBundle.builder()
-                .enableAutoConfig("gov.cms.dpc.attribution")
+        guiceBundle = GuiceBundle.defaultBuilder(DPCAttributionConfiguration.class)
                 .modules(
                         new DPCHibernateModule<>(hibernateBundle),
                         new AttributionAppModule(),
@@ -96,7 +99,6 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCAttributionConfiguration configuration) {
-                logger.debug("Connecting to database {} at {}", configuration.getDatabase().getDriverClass(), configuration.getDatabase().getUrl());
                 return configuration.getDatabase();
             }
         });

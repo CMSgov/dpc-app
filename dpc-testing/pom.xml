@@ -16,9 +16,25 @@
         <jjwt.version>0.12.6</jjwt.version>
         <sonar.skip>true</sonar.skip>
         <exec.skip>true</exec.skip>
+        <test.verbosity>false</test.verbosity>
+        <disable.console>true</disable.console>
+        <jib.skip>true</jib.skip>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.eclipse.sisu</groupId>
+            <artifactId>org.eclipse.sisu.inject</artifactId>
+            <version>0.9.0.M3</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-io</artifactId>
@@ -26,7 +42,6 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.3</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -35,7 +50,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>4.4</version>
+            <version>4.5.0-M2</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -65,9 +80,7 @@
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-common</artifactId>
-            <version>2.41</version>
-            <scope>compile</scope>
+            <artifactId>jersey-server</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.dropwizard-jobs</groupId>
@@ -82,7 +95,6 @@
         <dependency>
             <groupId>com.github.nickrobison-usds</groupId>
             <artifactId>jmacaroons</artifactId>
-            <version>1024efc25df40c63bbfbaedc6d75556d829d84c7</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -102,26 +114,18 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.14</version>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
-            <version>2.1.1</version>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.25.3</version>
         </dependency>
         <!-- required by HAPI FHIR; specifying non-vulnerable version -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.10.1</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -133,7 +137,6 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>compile</scope>
         </dependency>
-        <!-- needed for testcontainers -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -142,14 +145,12 @@
         </dependency>
         <dependency>
             <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-55</artifactId>
-            <version>3.7.0</version>
+            <artifactId>hypersistence-utils-hibernate-63</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>5.6.15.Final</version>
         </dependency>
     </dependencies>
 
@@ -160,4 +161,118 @@
             <url>file://${project.basedir}/../repo</url>
         </repository>
     </repositories>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <dependencies>
+                  <dependency>
+                     <groupId>me.fabriciorby</groupId>
+                     <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                     <version>1.3.0</version>
+                  </dependency>
+                </dependencies>                        
+                <configuration>
+                    <reportFormat>plain</reportFormat>
+                    <consoleOutputReporter>
+                       <disable>${disable.console}</disable>
+                    </consoleOutputReporter>
+                    <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                        <theme>UNICODE</theme>
+                        <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                        <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                        <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                    </statelessTestsetInfoReporter>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <dependencies>
+                  <dependency>
+                     <groupId>me.fabriciorby</groupId>
+                     <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                     <version>1.3.0</version>
+                  </dependency>
+                </dependencies>                        
+                <configuration>
+                    <testFailureIgnore>false</testFailureIgnore>
+                    <reportFormat>plain</reportFormat>
+                    <consoleOutputReporter>
+                       <disable>${disable.console}</disable>
+                    </consoleOutputReporter>
+                    <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                        <theme>UNICODE</theme>
+                        <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                        <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                        <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                    </statelessTestsetInfoReporter>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+
+    <profiles>
+        <profile>
+            <id>integration-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>integration-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                                <phase>verify</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+           <id>unit-tests</id>
+           <build>
+               <plugins>
+                   <plugin>
+                       <groupId>org.apache.maven.plugins</groupId>
+                       <artifactId>maven-surefire-plugin</artifactId>
+                       <executions>
+                           <execution>
+                               <id>unit-test</id>
+                               <goals>
+                                   <goal>test</goal>
+                               </goals>
+                               <phase>test</phase>
+                           </execution>
+                       </executions>
+                       <configuration>
+                           <skip>false</skip>
+                       </configuration>
+                   </plugin>
+               </plugins>
+           </build>
+       </profile>
+    </profiles>
+    
 </project>

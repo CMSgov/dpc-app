@@ -9,10 +9,8 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 
 import java.security.SecureRandom;
-import org.junit.jupiter.api.DisplayName;
 
 @IntegrationTest
-@DisplayName("Hibernate keystore")
 class HibernateStoreIT extends AbstractStoreTest {
 
     HibernateStoreIT() {
@@ -29,7 +27,7 @@ class HibernateStoreIT extends AbstractStoreTest {
         try (SessionFactory sessionFactory = buildSessionFactory()) {
             try (Session session = sessionFactory.openSession()) {
                 final Transaction tx = session.beginTransaction();
-                session.createNativeQuery("DROP TABLE root_keys CASCADE").executeUpdate();
+                session.createNativeQuery("DROP TABLE root_keys CASCADE", Object.class).executeUpdate();
                 tx.commit();
             }
         }

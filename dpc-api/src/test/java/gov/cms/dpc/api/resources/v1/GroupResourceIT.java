@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
@@ -26,7 +27,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -45,6 +46,7 @@ import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.createProvenance;
+import jakarta.ws.rs.ForbiddenException;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
 
@@ -53,8 +55,7 @@ import org.junit.jupiter.api.DisplayName;
 public class GroupResourceIT extends AbstractSecureApplicationIT {
 
     @Test
-@DisplayName("Missing provenance 🤮")
-
+    @DisplayName("Missing provenance 🤮")
     void testMissingProvenance() throws IOException {
         final IParser parser = ctx.newJsonParser();
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
@@ -103,9 +104,10 @@ public class GroupResourceIT extends AbstractSecureApplicationIT {
 
         final InvalidRequestException invalidRequestException = assertThrows(InvalidRequestException.class, creation::execute, "Should throw a 400");
         final OperationOutcome operationOutcome = (OperationOutcome) invalidRequestException.getOperationOutcome();
-        assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, invalidRequestException.getStatusCode(), "Should have 400 status"),
-                () -> assertEquals("Must have X-Provenance header", operationOutcome.getIssueFirstRep().getDetails().getText(), "Should have correct message"));
-
+        
+        assertEquals(HttpStatus.BAD_REQUEST_400, invalidRequestException.getStatusCode(), "Should have 400 status");
+        assertEquals("Must have X-Provenance header", operationOutcome.getIssueFirstRep().getDetails().getText(), "Should have correct message");
+        
         // Try again with provenance
         final Provenance provenance = new Provenance();
         provenance.setRecorded(Date.valueOf(Instant.now().atZone(ZoneOffset.UTC).toLocalDate()));
@@ -137,7 +139,7 @@ public class GroupResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @DisplayName("Invalid inputs fail to create group 🤮")
-public void testInvalidInputsWhenCreatingGroup() throws IOException {
+    public void testInvalidInputsWhenCreatingGroup() throws IOException {
         final IParser parser = ctx.newJsonParser();
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
@@ -221,8 +223,7 @@ public void testInvalidInputsWhenCreatingGroup() throws IOException {
     }
 
     @Test
-@DisplayName("Create invalid group 🤮")
-
+    @DisplayName("Create invalid group 🤮")
     void testCreateInvalidGroup() throws IOException, URISyntaxException {
         Provenance provenance = new Provenance();
         provenance.setRecorded(Date.valueOf(LocalDate.now()));
@@ -260,7 +261,7 @@ public void testInvalidInputsWhenCreatingGroup() throws IOException {
 
     @Test
     @DisplayName("Group creation returns headers 🥳")
-public void testCreateGroupReturnsAppropriateHeaders() throws IOException {
+    public void testCreateGroupReturnsAppropriateHeaders() throws IOException {
         final IParser parser = ctx.newJsonParser();
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
@@ -348,7 +349,7 @@ public void testCreateGroupReturnsAppropriateHeaders() throws IOException {
 
     @Test
     @DisplayName("Create group with provenance header and group provider mismatch 🤮")
-public void testProvenanceHeaderAndGroupProviderMatch() {
+    public void testProvenanceHeaderAndGroupProviderMatch() {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), ORGANIZATION_ID);
 
@@ -410,7 +411,7 @@ public void testProvenanceHeaderAndGroupProviderMatch() {
 
     @Test
     @DisplayName("Unauthorized group retrieval 🤮")
-public void testGroupCanOnlyBeRetrievedByOwner() throws GeneralSecurityException, IOException, URISyntaxException {
+    public void testGroupCanOnlyBeRetrievedByOwner() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -451,27 +452,15 @@ public void testGroupCanOnlyBeRetrievedByOwner() throws GeneralSecurityException
     }
 
     @Test
-    public void testOrgCanOnlyDeleteTheirOwnGroup() throws GeneralSecurityException, IOException, URISyntaxException {
-        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
+    @DisplayName("Delete group 🥳")
+    public void testOrgCanDeleteTheirOwnGroup() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
-        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
         final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
-
-        Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(), orgAClient);
-        Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Collections.emptyList());
 
         Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
         Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
         Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
-        assertThrows(AuthenticationException.class, () -> {
-            orgBClient.delete()
-                    .resource(orgAGroup)
-                    .encodedJson()
-                    .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
-                    .execute();
-        }, "Organization should not be able to delete another organization's group.");
-
         MethodOutcome result = orgBClient
                 .delete()
                 .resource(orgBGroup)
@@ -481,7 +470,8 @@ public void testGroupCanOnlyBeRetrievedByOwner() throws GeneralSecurityException
     }
 
     @Test
-    public void testOrgCanOnlyUpdateTheirOwnGroup() throws GeneralSecurityException, IOException, URISyntaxException {
+    @DisplayName("Delete group of other org 🤮")
+    public void testOrgCannotDeleteOtherOrgGroup() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -491,16 +481,27 @@ public void testGroupCanOnlyBeRetrievedByOwner() throws GeneralSecurityException
         Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Collections.emptyList());
 
         Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
-        Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
         Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
         assertThrows(AuthenticationException.class, () -> {
-            orgBClient.update().resource(orgAGroup)
+            orgBClient.delete()
+                    .resource(orgAGroup)
                     .encodedJson()
                     .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
                     .execute();
-        }, "Org should receive auth error when updating another org's group.");
+        }, "Organization should not be able to delete another organization's group.");
+    }
 
+    @Test
+    @DisplayName("Update group")
+    public void testOrgCanUpdateTheirOwnGroup() throws GeneralSecurityException, IOException, URISyntaxException {
+        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
+        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
+
+        Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
+        Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
+
+        Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
         MethodOutcome response = orgBClient.update().resource(orgBGroup)
                 .encodedJson()
                 .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
@@ -510,8 +511,30 @@ public void testGroupCanOnlyBeRetrievedByOwner() throws GeneralSecurityException
     }
 
     @Test
+    @DisplayName("Update group of other org 🤮")
+    public void testOrgCannotUpdateOtherOrgGroup() throws GeneralSecurityException, IOException, URISyntaxException {
+        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
+        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
+        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
+        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
+
+        Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(), orgAClient);
+        Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Collections.emptyList());
+
+        Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
+
+        Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
+        assertThrows(AuthenticationException.class, () -> {
+            orgBClient.update().resource(orgAGroup)
+                    .encodedJson()
+                    .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
+                    .execute();
+        }, "Org should receive auth error when updating another org's group.");
+    }
+
+    @Test
     @DisplayName("List groups 🥳")
-public void testOrgCanOnlyListTheirOwnGroups() throws GeneralSecurityException, IOException, URISyntaxException {
+    public void testOrgCanOnlyListTheirOwnGroups() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -535,45 +558,66 @@ public void testOrgCanOnlyListTheirOwnGroups() throws GeneralSecurityException, 
 
 
     @Test
-    public void testOrgCanOnlyCreateGroupWithPatientsTheyManage() throws GeneralSecurityException, IOException, URISyntaxException {
+    @DisplayName("Create group with patients 🥳")
+    public void testOrgCanCreateGroupWithPatientsTheyManage() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
-        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
-        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
         //Setup Org A with a practitioner and patient.
         final Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(), orgAClient);
         final Patient orgAPatient = (Patient) APITestHelpers.createResource(orgAClient, APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId())).getResource();
         assertNotNull(orgAPatient, "Patient should have been created");
 
-        //Setup OrgB with a practitioner
-        final Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
-
         //Assert org A can add their own patient to roster successfully.
         final String orgAPatientId = orgAPatient.getId();
         final Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Collections.singletonList(orgAPatientId));
         assertNotNull(orgAGroup, "Roster for Org A should have been created with patient they manage.");
+    }
+
+    @Test
+    @DisplayName("Create group with other orgs patient 🤮")
+    public void testOrgCannotCreateGroupWithPatientsTheyDontManage() throws GeneralSecurityException, IOException, URISyntaxException {
+        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
+        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
+        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
+        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
+
+        //Setup Org A with a practitioner and patient.
+        final Patient orgAPatient = (Patient) APITestHelpers.createResource(orgAClient, APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId())).getResource();
+        //Setup OrgB with a practitioner and Org A patient
+        final Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
+        final String orgAPatientId = orgAPatient.getId();
 
         //Assert Org B can NOT add OrgA's patient
         InvalidRequestException e = assertThrows(InvalidRequestException.class, () -> {
             createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.singletonList(orgAPatientId));
         }, "Org should not be able to add patients they do not managed to their group.");
-
         assertTrue(e.getResponseBody().contains("All patients in group must exist."));
     }
 
     @Test
-    public void testOrgCanOnlyUpdateGroupWithPatientsTheyManage() throws GeneralSecurityException, IOException, URISyntaxException {
+    @DisplayName("Update group with patients 🥳")
+    public void testOrgCanUpdateGroupWithPatientsTheyManage() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
-        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
-        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
         //Setup Org A with a practitioner, patient, and group.
         final Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(), orgAClient);
         final Patient orgAPatient = (Patient) APITestHelpers.createResource(orgAClient, APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId())).getResource();
         final Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Collections.singletonList(orgAPatient.getId()));
         assertNotNull(orgAGroup, "Org should have been able to create group with patient they manage.");
+    }
+
+    @Test
+    @DisplayName("Update group with other orgs patient 🤮")
+    public void testOrgCannotUpdateGroupWithPatientsTheyDontManage() throws GeneralSecurityException, IOException, URISyntaxException {
+        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
+        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
+        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
+        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
+
+        //Setup Org A with a practitioner, patient, and group.
+        final Patient orgAPatient = (Patient) APITestHelpers.createResource(orgAClient, APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId())).getResource();
 
         //Setup Org B with a practitioner, and empty group.
         final Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
@@ -590,10 +634,9 @@ public void testOrgCanOnlyListTheirOwnGroups() throws GeneralSecurityException, 
         assertTrue(e.getResponseBody().contains("All patients in group must exist."));
     }
 
-
     @Test
     @DisplayName("Add other org's patients to group 🤮")
-public void testOrgCanOnlyAddPatientsTheyManageToGroup() throws IOException, URISyntaxException, GeneralSecurityException {
+    public void testOrgCanOnlyAddPatientsTheyManageToGroup() throws IOException, URISyntaxException, GeneralSecurityException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -608,7 +651,6 @@ public void testOrgCanOnlyAddPatientsTheyManageToGroup() throws IOException, URI
 
         //Ensure Org B can not add Org A's patient to group using add operation:  /Group/{id}/$add
         orgBGroup.addMember(new Group.GroupMemberComponent().setEntity(new Reference(orgAPatient.getId())));
-
 
         URL url = new URL(getBaseURL() + "/" + orgBGroup.getId() + "/$add");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -632,6 +674,28 @@ public void testOrgCanOnlyAddPatientsTheyManageToGroup() throws IOException, URI
 
         conn.disconnect();
     }
+
+    @Test
+    @DisplayName("API overrides incorrect group in meta tag 🥳")
+    public void testApiDoesNotUseOrgTagSpecifiedByClient() throws GeneralSecurityException, IOException, URISyntaxException {
+        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
+        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
+        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
+
+        //Setup OrgB with a practitioner.
+        final Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
+        final Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
+
+        Group groupWithOrgATag = FHIRGroupBuilder.newBuild()
+                .attributedTo(orgBPractitioner.getIdentifierFirstRep().getValue())
+                .withOrgTag(UUID.fromString(orgAContext.getOrgId()))
+                .build();
+
+        Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
+        assertThrows(ForbiddenOperationException.class, () -> 
+                APITestHelpers.createResource(orgBClient, groupWithOrgATag, Map.of("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))).getResource());
+    }
+
 
     private Practitioner createAndSubmitPractitioner(String orgId, IGenericClient client) {
         Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), orgId);

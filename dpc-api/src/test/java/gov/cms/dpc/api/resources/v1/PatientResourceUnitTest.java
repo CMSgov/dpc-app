@@ -22,21 +22,22 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.createProvenance;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotAuthorizedException;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
-import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("Patient resource operations")
 public class PatientResourceUnitTest {
@@ -63,7 +64,7 @@ public class PatientResourceUnitTest {
 
     @Test
     @DisplayName("Search patient by MBI 🥳")
-public void testPatientSearch() {
+    public void testPatientSearch() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -94,7 +95,7 @@ public void testPatientSearch() {
 
     @Test
     @DisplayName("Search patient with no identifier specified 🥳")
-public void testPatientSearchNoIdentifier() {
+    public void testPatientSearchNoIdentifier() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -122,7 +123,7 @@ public void testPatientSearchNoIdentifier() {
 
     @Test
     @DisplayName("Add patient 🥳")
-public void testSubmitPatient() {
+    public void testSubmitPatient() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -145,7 +146,7 @@ public void testSubmitPatient() {
 
     @Test
     @DisplayName("Bulk add patient 🥳")
-public void testBulkSubmitPatients() {
+    public void testBulkSubmitPatients() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -170,9 +171,9 @@ public void testBulkSubmitPatients() {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     @DisplayName("Get patient by UUID 🥳")
-public void testGetPatient() {
+    @SuppressWarnings("unchecked")
+    public void testGetPatient() {
         IReadExecutable<Patient> readExec = mock(IReadExecutable.class);
 
         UUID patientId = UUID.randomUUID();
@@ -190,7 +191,7 @@ public void testGetPatient() {
 
     @Test
     @DisplayName("Get Patient$Everything 🥳")
-public void testEverything() {
+    public void testEverything() {
         UUID practitionerId = UUID.randomUUID();
         Practitioner practitioner = new Practitioner();
         practitioner.setId(practitionerId.toString());
@@ -259,7 +260,7 @@ public void testEverything() {
 
     @Test
     @DisplayName("Get Patient$Everything without attribution 🤮")
-public void testEverythingNoPractitioner() {
+    public void testEverythingNoPractitioner() {
         UUID practitionerId = UUID.randomUUID();
         UUID patientId = UUID.randomUUID();
         UUID orgId = UUID.randomUUID();
@@ -282,14 +283,14 @@ public void testEverythingNoPractitioner() {
         try {
             patientResource.everything(organizationPrincipal, provenance, patientId, since, request);
             fail("This call is supposed to fail.");
-        } catch (WebApplicationException exc) {
+        } catch (NotAuthorizedException exc) {
             assertEquals(HttpStatus.UNAUTHORIZED_401, exc.getResponse().getStatus());
         }
     }
 
     @Test
     @DisplayName("Delete Patient 🥳")
-public void testDeletePatient() {
+    public void testDeletePatient() {
         UUID patientId = UUID.randomUUID();
 
         IDeleteTyped delResp = mock(IDeleteTyped.class);
@@ -305,7 +306,7 @@ public void testDeletePatient() {
 
     @Test
     @DisplayName("Update Patient 🥳")
-public void testUpdatePatient() {
+    public void testUpdatePatient() {
         UUID patientId = UUID.randomUUID();
         Patient patient = new Patient();
         patient.setId(patientId.toString());
@@ -328,7 +329,7 @@ public void testUpdatePatient() {
 
     @Test
     @DisplayName("Update unrecognized patient 🤮")
-public void testUpdatePatientNoResource() {
+    public void testUpdatePatientNoResource() {
         UUID patientId = UUID.randomUUID();
         Patient patient = new Patient();
         patient.setId(patientId.toString());
@@ -345,7 +346,7 @@ public void testUpdatePatientNoResource() {
         try {
             patientResource.updatePatient(patientId, patient);
             fail("This call is supposed to fail.");
-        } catch (WebApplicationException exc) {
+        } catch (InternalServerErrorException exc) {
             String excMsg = "Unable to update Patient";
             assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), exc.getResponse().getStatus());
             assertEquals(excMsg, exc.getMessage());
@@ -354,7 +355,7 @@ public void testUpdatePatientNoResource() {
 
     @Test
     @DisplayName("Validate Patient profile 🥳")
-public void testValidatePatient() {
+    public void testValidatePatient() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());

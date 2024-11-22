@@ -9,8 +9,11 @@ import io.dropwizard.logging.common.filter.FilterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.constraints.NotEmpty;
-import java.util.*;
+import jakarta.validation.constraints.NotEmpty;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 @JsonTypeName("secret-filter-factory")
 public class SecretLoggingFilter implements FilterFactory<ILoggingEvent> {
@@ -19,15 +22,11 @@ public class SecretLoggingFilter implements FilterFactory<ILoggingEvent> {
 	private final Map<String, String> envVars = System.getenv();
 
 	@NotEmpty
-	private List<String> secrets = new LinkedList<>();
+	private List<String> secrets = new ArrayList<>();
 
 	@JsonProperty("secrets") // Required for Jackson to build this correctly
 	public void setSecrets(List<String> secrets) {
 		this.secrets = secrets;
-	}
-
-	public SecretLoggingFilter() {
-		Map<String, String> envVars = System.getenv();
 	}
 
 	@Override

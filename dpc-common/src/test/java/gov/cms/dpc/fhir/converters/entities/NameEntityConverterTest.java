@@ -44,8 +44,7 @@ public class NameEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert name with attributes from FHIR 🥳")
-
+    @DisplayName("Convert name with attributes from FHIR 🥳")
     void fromFHIR() {
         NameEntity convertedEntity = converter.fromFHIR(fhirEntityConverter, name);
         assertEquals(nameEntity.getUse(), convertedEntity.getUse());
@@ -56,8 +55,7 @@ public class NameEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert name with attributes to FHIR 🥳")
-
+    @DisplayName("Convert name with attributes to FHIR 🥳")
     void toFHIR() {
         HumanName convertedResource = converter.toFHIR(fhirEntityConverter, nameEntity);
         assertEquals(name.getUse(), convertedResource.getUse());
@@ -68,15 +66,13 @@ public class NameEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert Human Name class to FHIR resource 🥳")
-
+    @DisplayName("Convert Human Name class to FHIR resource 🥳")
     void getFHIRResource() {
         assertEquals(HumanName.class, converter.getFHIRResource());
     }
 
     @Test
-@DisplayName("Convert Name Entity to Java class 🥳")
-
+    @DisplayName("Convert Name Entity to Java class 🥳")
     void getJavaClass() {
         assertEquals(NameEntity.class, converter.getJavaClass());
     }

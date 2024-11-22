@@ -11,13 +11,13 @@ public class FHIRPractitionerBuilderUnitTest {
 
     @Test
     @DisplayName("Set up new FHIR Practitioner builder 🥳")
-public void newBuilder() {
+    public void newBuilder() {
         assertNotNull(FHIRPractitionerBuilder.newBuilder());
     }
 
     @Test
     @DisplayName("Build new practitioner 🥳")
-public void build() {
+    public void build() {
         Practitioner practitioner = FHIRPractitionerBuilder.newBuilder()
                 .withNpi("7127445550")
                 .withName("Test", "Practitioner")

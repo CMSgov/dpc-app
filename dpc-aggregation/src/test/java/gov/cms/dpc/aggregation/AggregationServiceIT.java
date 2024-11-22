@@ -38,15 +38,13 @@ public class AggregationServiceIT {
     }
 
     @Test
-@DisplayName("Verify health of blue button client, aggregation engine, and consent service 🥳")
-
+    @DisplayName("Verify health of blue button client, aggregation engine, and consent service 🥳")
     void testHealthChecks() {
         final HealthCheckRegistry checks = APPLICATION.getEnvironment().healthChecks();
         final SortedSet<String> names = checks.getNames();
-
         // Ensure that the various healthchecks are propagated from the modules
-        assertAll(() -> assertTrue(names.contains("blue-button-client"), "Should have BB health check"));
-        assertAll(() -> assertTrue(names.contains("aggregation-engine"), "Should have Aggregation Engine health check"));
+        assertAll(() -> assertTrue(names.contains("BlueButtonHealthCheck"), "Should have BB health check"));
+        assertAll(() -> assertTrue(names.contains("AggregationEngineHealthCheck"), "Should have Aggregation Engine health check"));
         assertAll(() -> assertTrue(names.contains("dpc-consent"), "Should have dpc-consent health check"));
 
         // Everything should be true

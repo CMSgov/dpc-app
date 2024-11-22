@@ -4,7 +4,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
+import com.fasterxml.jackson.datatype.hibernate6.Hibernate6Module;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationIT;
 import gov.cms.dpc.api.entities.TokenEntity;
@@ -51,9 +51,9 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     static
     {
-        final Hibernate5Module h5M = new Hibernate5Module();
-        h5M.disable(Hibernate5Module.Feature.USE_TRANSIENT_ANNOTATION);
-        MAPPER.registerModule(h5M);
+        final Hibernate6Module h6M = new Hibernate6Module();
+        h6M.disable(Hibernate6Module.Feature.USE_TRANSIENT_ANNOTATION);
+        MAPPER.registerModule(h6M);
     }
     private String fullyAuthedToken;
 
@@ -118,7 +118,6 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
             httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             try (CloseableHttpResponse response = client.execute(httpPost)) {
                 String entityStr = EntityUtils.toString(response.getEntity());
-                System.out.println("Here is the response I received!\n" + entityStr);
                 
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
                 final TokenEntity tokenEntity = MAPPER.readValue(entityStr, TokenEntity.class);

@@ -31,8 +31,7 @@ public class ContactPointConverterTest {
     }
 
     @Test
-@DisplayName("Convert contact point with attributes from FHIR 🥳")
-
+    @DisplayName("Convert contact point with attributes from FHIR 🥳")
     void fromFHIR() {
         ContactPointEntity convertedEntity = converter.fromFHIR(fhirEntityConverter, contactPoint);
         assertEquals(contactPoint.getSystem(), convertedEntity.getSystem());
@@ -42,8 +41,7 @@ public class ContactPointConverterTest {
     }
 
     @Test
-@DisplayName("Convert contact point with rank from FHIR 🥳")
-
+    @DisplayName("Convert contact point with rank from FHIR 🥳")
     void fromFHIR_WithRank() {
         contactPoint.setRank(4);
         ContactPointEntity convertedEntity = converter.fromFHIR(fhirEntityConverter, contactPoint);
@@ -52,8 +50,7 @@ public class ContactPointConverterTest {
 
 
     @Test
-@DisplayName("Convert contact point with attributes to FHIR 🥳")
-
+    @DisplayName("Convert contact point with attributes to FHIR 🥳")
     void toFHIR() {
         ContactPoint convertedEntity = converter.toFHIR(fhirEntityConverter, contactPointEntity);
         assertEquals(contactPointEntity.getSystem(), convertedEntity.getSystem());
@@ -63,8 +60,7 @@ public class ContactPointConverterTest {
     }
 
     @Test
-@DisplayName("Convert contact point with rank to FHIR 🥳")
-
+    @DisplayName("Convert contact point with rank to FHIR 🥳")
     void toFHIR_WithRank() {
         contactPointEntity.setRank(4);
         ContactPoint convertedEntity = converter.toFHIR(fhirEntityConverter, contactPointEntity);
@@ -73,15 +69,13 @@ public class ContactPointConverterTest {
 
 
     @Test
-@DisplayName("Convert Contact Point Java class to FHIR 🥳")
-
+    @DisplayName("Convert Contact Point Java class to FHIR 🥳")
     void getFHIRResource() {
         assertEquals(ContactPoint.class, converter.getFHIRResource());
     }
 
     @Test
-@DisplayName("Convert Contact Point Entity to Java class 🥳")
-
+    @DisplayName("Convert Contact Point Entity to Java class 🥳")
     void getJavaClass() {
         assertEquals(ContactPointEntity.class, converter.getJavaClass());
     }

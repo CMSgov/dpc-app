@@ -7,15 +7,14 @@ import io.hypersistence.utils.hibernate.type.basic.Inet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.persistence.PersistenceException;
+import jakarta.persistence.PersistenceException;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
+
 @DisplayName("Inet address handling")
-
-
 class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
     IpAddressDAO ipAddressDAO;
 
@@ -26,7 +25,7 @@ class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
 
     @Test
     @DisplayName("IP address written to allow list 🥳")
-public void writesIpAddress() {
+    public void writesIpAddress() {
         IpAddressEntity ipAddressEntity = createIpAddressEntity(UUID.randomUUID(), "192.168.1.1", "test label");
 
         IpAddressEntity returnedIp = db.inTransaction(() -> ipAddressDAO.persistIpAddress(ipAddressEntity));
@@ -40,7 +39,7 @@ public void writesIpAddress() {
 
     @Test
     @DisplayName("Malformed IP address fails to write to allow list 🤮")
-public void failsWritingBadIpAddress() {
+    public void failsWritingBadIpAddress() {
         IpAddressEntity ipAddressEntity = createIpAddressEntity(UUID.randomUUID(), "bad_ip", "test label");
         assertThrows(PersistenceException.class, () ->
             db.inTransaction(() -> ipAddressDAO.persistIpAddress(ipAddressEntity)));
@@ -48,7 +47,7 @@ public void failsWritingBadIpAddress() {
 
     @Test
     @DisplayName("Fetch IP addresses from allow list 🥳")
-public void fetchesIpAddress() {
+    public void fetchesIpAddress() {
         UUID orgId1 = UUID.randomUUID();
         UUID orgId2 = UUID.randomUUID();
 
@@ -75,7 +74,7 @@ public void fetchesIpAddress() {
 
     @Test
     @DisplayName("Delete IP address from allow list 🥳")
-public void deletesIpAddress() {
+    public void deletesIpAddress() {
         UUID orgId = UUID.randomUUID();
 
         IpAddressEntity persistedIpAddress = db.inTransaction(() ->

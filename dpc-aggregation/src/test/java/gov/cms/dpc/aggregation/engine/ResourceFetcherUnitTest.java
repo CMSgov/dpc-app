@@ -19,12 +19,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import org.junit.jupiter.api.DisplayName;
+
 @DisplayName("Blue Button resource fetching")
-
-
 class ResourceFetcherUnitTest {
     private static Patient testPatient;
     private static String testPatientMbi;
@@ -43,7 +42,7 @@ class ResourceFetcherUnitTest {
 
     @Test
     @DisplayName("Fetch patient resource from BFD 🥳")
-public void testHappyPath_Patient() {
+    public void testHappyPath_Patient() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Patient,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minus(1, ChronoUnit.DAYS),
@@ -59,7 +58,7 @@ public void testHappyPath_Patient() {
 
     @Test
     @DisplayName("Fetch EOB resource from BFD 🥳")
-public void testHappyPath_Eob() {
+    public void testHappyPath_Eob() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.ExplanationOfBenefit,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minus(1, ChronoUnit.DAYS),
@@ -75,7 +74,7 @@ public void testHappyPath_Eob() {
 
     @Test
     @DisplayName("Fetch coverage resource from BFD 🥳")
-public void testHappyPath_coverage() {
+    public void testHappyPath_coverage() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Coverage,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minus(1, ChronoUnit.DAYS),
@@ -91,7 +90,7 @@ public void testHappyPath_coverage() {
 
     @Test
     @DisplayName("Fetch patient with since parameter 🥳")
-public void testHappyPath_NoSince() {
+    public void testHappyPath_NoSince() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Patient,
                 null,
@@ -107,7 +106,7 @@ public void testHappyPath_NoSince() {
 
     @Test
     @DisplayName("Bad transaction time specified in request 🤮")
-public void testBadTransactionTime() {
+    public void testBadTransactionTime() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Patient,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minus(1, ChronoUnit.DAYS),
@@ -122,7 +121,7 @@ public void testBadTransactionTime() {
 
     @Test
     @DisplayName("Requested unrecognized patient from BFD 🤮")
-public void testResourceNotFound() {
+    public void testResourceNotFound() {
         ResourceFetcher fetcher = Mockito.spy(
                 getResourceFetcher(
                     DPCResourceType.Patient,
@@ -144,7 +143,7 @@ public void testResourceNotFound() {
 
     @Test
     @DisplayName("Base server error requesting resource 🤮")
-public void testBaseServerErrorFetchingResources() {
+    public void testBaseServerErrorFetchingResources() {
         ResourceFetcher fetcher = Mockito.spy(
                 getResourceFetcher(
                     DPCResourceType.Patient,
@@ -166,7 +165,7 @@ public void testBaseServerErrorFetchingResources() {
 
     @Test
     @DisplayName("Unknown error requesting resource 🤮")
-public void testUnknownErrorFetchingResources() {
+    public void testUnknownErrorFetchingResources() {
         ResourceFetcher fetcher = Mockito.spy(
                 getResourceFetcher(
                     DPCResourceType.Patient,
@@ -189,7 +188,7 @@ public void testUnknownErrorFetchingResources() {
 
     @Test
     @DisplayName("Incorrect resource type requested 🤮")
-public void testWrongResourceTypeReturned() {
+    public void testWrongResourceTypeReturned() {
         // Build EoB bundle
         ExplanationOfBenefit eob = new ExplanationOfBenefit();
         Bundle.BundleEntryComponent component = new Bundle.BundleEntryComponent();
@@ -217,7 +216,7 @@ public void testWrongResourceTypeReturned() {
 
     @Test
     @DisplayName("Unsupported resource type requested 🤮")
-public void testSearchForUnsupportedResourceType() {
+    public void testSearchForUnsupportedResourceType() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Practitioner,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minus(1, ChronoUnit.DAYS),

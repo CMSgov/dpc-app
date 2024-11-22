@@ -4,6 +4,8 @@ import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,14 +14,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import org.junit.jupiter.api.DisplayName;
+import static org.mockito.Mockito.*;
 
 @DisplayName("Public key resource operations")
 public class KeyResourceUnitTest {
@@ -37,7 +38,7 @@ public class KeyResourceUnitTest {
 
     @Test
     @DisplayName("Get public keys from key store 🥳")
-public void testGetPublicKeys() {
+    public void testGetPublicKeys() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
 
         PublicKeyEntity publicKeyEntity = mock(PublicKeyEntity.class);
@@ -51,8 +52,8 @@ public void testGetPublicKeys() {
     }
 
     @Test
-    @DisplayName("Get public key by ID 🥳")
-    public void testGetPublicKey() {
+    @DisplayName("Get specified public key from key store 🥳")
+    public void testFetchPublicKey() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
 
@@ -66,12 +67,12 @@ public void testGetPublicKeys() {
 
     @Test
     @DisplayName("Return unrecognized public key 🤮")
-public void testGetPublicKeyNotFound() {
+    public void testGetPublicKeyNotFound() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
 
         when(publicKeyDao.publicKeySearch(publicKeyUUID, organizationPrincipal.getID())).thenReturn(List.of());
-        WebApplicationException exception = assertThrows(WebApplicationException.class,
+        NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> resource.getPublicKey(organizationPrincipal, publicKeyUUID));
         assertEquals(HttpStatus.SC_NOT_FOUND, exception.getResponse().getStatus());
         assertEquals("Cannot find public key", exception.getMessage());
@@ -79,7 +80,7 @@ public void testGetPublicKeyNotFound() {
 
     @Test
     @DisplayName("Delete public key from key store 🥳")
-public void testDeletePublicKey() {
+    public void testDeletePublicKey() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
 
@@ -94,13 +95,13 @@ public void testDeletePublicKey() {
 
     @Test
     @DisplayName("Delete unrecognized public key 🤮")
-public void testDeletePublicKeyNotFound() {
+    public void testDeletePublicKeyNotFound() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
 
         when(publicKeyDao.publicKeySearch(publicKeyUUID, organizationPrincipal.getID())).thenReturn(List.of());
 
-        WebApplicationException exception = assertThrows(WebApplicationException.class,
+        NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> resource.deletePublicKey(organizationPrincipal, publicKeyUUID));
         assertEquals(HttpStatus.SC_NOT_FOUND, exception.getResponse().getStatus());
         assertEquals("Cannot find certificate", exception.getMessage());
@@ -108,7 +109,7 @@ public void testDeletePublicKeyNotFound() {
 
     @Test
     @DisplayName("Add public key to key store 🥳")
-public void testSubmitKey() throws GeneralSecurityException, IOException {
+    public void testSubmitKey() throws GeneralSecurityException, IOException {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         KeyResource.KeySignature keySignature = KeyResourceIT.generateKeyAndSignature();
 
@@ -130,12 +131,12 @@ public void testSubmitKey() throws GeneralSecurityException, IOException {
 
     @Test
     @DisplayName("Add public key to key store with long label 🤮")
-public void testSubmitKeyTooLong() throws GeneralSecurityException {
+    public void testSubmitKeyTooLong() throws GeneralSecurityException {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         KeyResource.KeySignature keySignature = KeyResourceIT.generateKeyAndSignature();
         String label = "A really, really, really long, test key label";
 
-        WebApplicationException exception = assertThrows(WebApplicationException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> resource.submitKey(organizationPrincipal, keySignature, Optional.of(label)));
         assertEquals(HttpStatus.SC_BAD_REQUEST, exception.getResponse().getStatus());
         assertEquals("Key label cannot be more than 25 characters", exception.getMessage());
@@ -143,11 +144,11 @@ public void testSubmitKeyTooLong() throws GeneralSecurityException {
 
     @Test
     @DisplayName("Add unreadable public key to key store 🤮")
-public void testSubmitKeyBadPEMString() {
+    public void testSubmitKeyBadPEMString() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         KeyResource.KeySignature keySignature = new KeyResource.KeySignature("badPEMString", "badSignature");
 
-        WebApplicationException exception =  assertThrows(WebApplicationException.class,
+        BadRequestException exception =  assertThrows(BadRequestException.class,
                 () -> resource.submitKey(organizationPrincipal, keySignature, Optional.of("label")));
         assertEquals(HttpStatus.SC_BAD_REQUEST, exception.getResponse().getStatus());
         assertEquals("Public key could not be parsed", exception.getMessage());

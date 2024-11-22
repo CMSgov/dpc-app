@@ -32,8 +32,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 import org.junit.jupiter.api.DisplayName;
+import static org.mockito.Mockito.mock;
 
 @DisplayName("Token creation")
 public class TokenCreateUnitTest {
@@ -72,7 +72,7 @@ public class TokenCreateUnitTest {
 
     @Test
     @DisplayName("Create client token 🥳")
-public void testCreateToken_happyPath() throws IOException {
+    public void testCreateToken_happyPath() throws IOException {
         UUID org_id = UUID.randomUUID();
         TokenEntity tokenEntity = new TokenEntity("tokenID", org_id, TokenType.OAUTH);
         tokenEntity.setLabel("test create token");
@@ -109,7 +109,7 @@ public void testCreateToken_happyPath() throws IOException {
 
     @Test
     @DisplayName("Invalid request fails to create client token 🤮")
-public void testCreateToken_badResponse() throws IOException {
+    public void testCreateToken_badResponse() throws IOException {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()

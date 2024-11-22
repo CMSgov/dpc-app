@@ -6,7 +6,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
-import com.google.inject.name.Named;
+import com.google.inject.Scopes;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
 import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
@@ -36,14 +36,16 @@ import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
-import io.jsonwebtoken.LocatorAdapter;
-import java.security.Key;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
-import javax.inject.Singleton;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
+import gov.cms.dpc.fhir.parameters.ProvenanceResourceValueFactory;
+import io.jsonwebtoken.LocatorAdapter;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
+import java.security.Key;
 
 public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
@@ -60,6 +62,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         Binder binder = binder();
         // V1 Resources
         binder.bind(BaseResource.class);
+        binder.bind(AdminResource.class);
         binder.bind(DataResource.class);
         binder.bind(DefinitionResource.class);
         binder.bind(EndpointResource.class);
@@ -88,6 +91,8 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
         binder.bind(DataService.class);
 
+        bind(ProvenanceResourceValueFactory.class).in(Scopes.SINGLETON);
+
         // Healthchecks
         // Additional health-checks can be added here.
         // By default, Dropwizard adds a check for Hibernate and each additional database (e.g. auth, queue, etc).
@@ -98,14 +103,23 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     // Since the KeyResource requires access to the Auth DB, we have to manually do the creation and resource injection,
     // in order to ensure that the @UnitOfWork annotations are tied to the correct SessionFactory
     @Provides
+    @Singleton
     public KeyResource provideKeyResource(PublicKeyDAO dao) {
-        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+        
+        KeyResource resource = new UnitOfWorkAwareProxyFactory("hibernate.auth", authHibernateBundle.getSessionFactory())
                 .create(KeyResource.class, new Class<?>[]{PublicKeyDAO.class}, new Object[]{dao});
+
+        logger.info("Created the key resource with UOW-Aware Proxy Factory!!");
+        
+        return resource;
     }
 
     @Provides
-    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, LocatorAdapter<Key> locator, IJTICache cache, @APIV1 String publicURL) {
-        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+    @Singleton
+    @SuppressWarnings("rawtypes")
+    public TokenResource provideTokenResource(TokenDAO tokenDao, MacaroonBakery bakery, LocatorAdapter<Key> locator, IJTICache cache, @APIV1 String publicURL) {
+
+        TokenResource resource = new UnitOfWorkAwareProxyFactory("hibernate.auth", authHibernateBundle.getSessionFactory())
                 .create(TokenResource.class,
                         new Class<?>[]{TokenDAO.class,
                                 MacaroonBakery.class,
@@ -113,27 +127,41 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
                                 LocatorAdapter.class,
                                 IJTICache.class,
                                 String.class},
-                        new Object[]{dao,
+                        new Object[]{tokenDao,
                                 bakery,
                                 this.configuration().getTokenPolicy(),
                                 locator,
                                 cache, publicURL});
+
+        logger.info("Created the token resource with UOW-Aware Proxy Factory!!");
+
+        return resource;   
     }
 
     @Provides
+    @Singleton
     public IpAddressResource provideIpAddressResource(IpAddressDAO dao) {
-        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+        IpAddressResource resource = new UnitOfWorkAwareProxyFactory("hibernate.auth", authHibernateBundle.getSessionFactory())
             .create(IpAddressResource.class, new Class<?>[]{IpAddressDAO.class}, new Object[]{dao});
+
+        logger.info("Created the IP address resource with UOW-Aware Proxy Factory!!");
+
+        return resource;
     }
 
     @Provides
+    @Singleton
     public OrganizationResource provideOrganizationResource(@Named("attribution") IGenericClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
-        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+        OrganizationResource resource = new UnitOfWorkAwareProxyFactory("hibernate.auth", authHibernateBundle.getSessionFactory())
                 .create(OrganizationResource.class,
                         new Class<?>[]{IGenericClient.class,
                         TokenDAO.class,
                         PublicKeyDAO.class},
                         new Object[]{client, tokenDAO, keyDAO});
+        
+        logger.info("Created the organization resource with UOW-Aware Proxy Factory!!");
+
+        return resource;
     }
 
     @Provides
@@ -144,24 +172,28 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Provides
     @ExportPath
+    @Singleton
     public String provideExportPath() {
         return configuration().getExportPath();
     }
 
     @Provides
     @ServiceBaseURL
+    @Singleton
     public String provideBaseURL() {
         return configuration().getPublicURL();
     }
 
     @Provides
     @APIV1
+    @Singleton
     public String provideV1URL() {
         return configuration().getPublicURL() + "/v1";
     }
 
     @Provides
     @PublicURL
+    @Singleton
     public String providePublicURL(@ServiceBaseURL String baseURL) {
         return baseURL;
     }
@@ -173,6 +205,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
+    @Singleton
     TokenPolicy providePolicy() {
         return configuration().getTokenPolicy();
     }
@@ -211,6 +244,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Provides
     @JobTimeout
+    @Singleton
     public int provideJobTimeoutInSeconds() {
         return configuration().getJobTimeoutInSeconds();
     }

@@ -7,10 +7,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
@@ -27,9 +27,9 @@ public class NoHtmlValidatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("stringSource")
     @DisplayName("Valid HTML 🥳")
-public void noHtmlValidatorTest(String value, boolean isValid) {
+    @MethodSource("stringSource")
+    public void noHtmlValidatorTest(String value, boolean isValid) {
 
         TestObject testObject = new TestObject();
         testObject.setA(value);

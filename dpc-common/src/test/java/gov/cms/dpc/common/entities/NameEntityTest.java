@@ -11,8 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 public class NameEntityTest {
 
 	@Test
-	@DisplayName("Test name getters and setters 🥳")
-public void testGettersAndSetters() {
+        @DisplayName("Test name getters and setters 🥳")
+	public void testGettersAndSetters() {
 		NameEntity name = new NameEntity();
 		HumanName.NameUse use = HumanName.NameUse.OFFICIAL;
 		String given = "Australian";
@@ -34,8 +34,8 @@ public void testGettersAndSetters() {
 	}
 
 	@Test
-	@DisplayName("Convert name to FHIR 🥳")
-public void testToFHIR() {
+        @DisplayName("Convert name to FHIR 🥳")
+	public void testToFHIR() {
 		NameEntity name = new NameEntity();
 		HumanName.NameUse use = HumanName.NameUse.OFFICIAL;
 		String given = "Australian";

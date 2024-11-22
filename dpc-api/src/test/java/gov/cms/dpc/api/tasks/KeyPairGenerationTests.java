@@ -3,11 +3,11 @@ package gov.cms.dpc.api.tasks;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.models.KeyPairResponse;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import jakarta.ws.rs.BadRequestException;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.ws.rs.WebApplicationException;
 import java.io.*;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +43,7 @@ class KeyPairGenerationTests {
     @DisplayName("Generate key pair without username 🤮")
     void checkRequiresUsername() throws IOException {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> task.execute(Map.of(), new PrintWriter(new OutputStreamWriter(bos))));
+            final BadRequestException exception = assertThrows(BadRequestException.class, () -> task.execute(Map.of(), new PrintWriter(new OutputStreamWriter(bos))));
             assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should have bad response"),
                     () -> assertEquals("Must have ID of user generating keypair", exception.getMessage(), "Should show missing user"));
         }

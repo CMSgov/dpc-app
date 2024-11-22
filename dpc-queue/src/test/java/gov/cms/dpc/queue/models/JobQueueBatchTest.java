@@ -36,7 +36,7 @@ public class JobQueueBatchTest {
 
 
     @Test
-@DisplayName("Validate batch job resource type 🥳")
+    @DisplayName("Validate batch job resource type 🥳")
     void testIsValidResourceType() {
         assertTrue(JobQueueBatch.isValidResourceType(DPCResourceType.Patient));
         assertFalse(JobQueueBatch.isValidResourceType(DPCResourceType.Practitioner));
@@ -69,8 +69,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Verify batch job is v2 🥳")
-
+    @DisplayName("Verify batch job is v2 🥳")
     void testIsV2() {
         final var job = createJobQueueBatch();
         assertFalse(job.isV2());
@@ -80,8 +79,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Create a job queue batch 🥳")
-
+    @DisplayName("Create a job queue batch 🥳")
     void testCreateJobQueueBatch() {
         final var job = createJobQueueBatch();
         job.setAggregatorIDForTesting(aggregatorID);
@@ -119,8 +117,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Create a Job Queue Batch with two equal files 🥳")
-
+    @DisplayName("Create a Job Queue Batch with two equal files 🥳")
     void testGetJobQueueBatchFile() {
         final var job = createJobQueueBatch();
         var file1 = job.addJobQueueFile(DPCResourceType.Patient, 0, 1);
@@ -133,8 +130,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Set a batch job to running status 🥳")
-
+    @DisplayName("Set a batch job to running status 🥳")
     void testSetRunningStatus() {
         final var job = Mockito.spy(createJobQueueBatch());
         job.setRunningStatus(aggregatorID);
@@ -147,8 +143,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Set unqueued job to running status 🤮")
-
+    @DisplayName("Set unqueued job to running status 🤮")
     void testSetRunningStatus_NotInQueuedState() {
         final var job = createJobQueueBatch();
         job.status = JobStatus.RUNNING;
@@ -162,8 +157,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Get next batch from queue until empty 🥳")
-
+    @DisplayName("Get next batch from queue until empty 🥳")
     void testFetchNextBatch() {
         final var job = Mockito.spy(createJobQueueBatch());
         job.setRunningStatus(aggregatorID);
@@ -190,8 +184,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Get next patient from non-running job 🤮")
-
+    @DisplayName("Get next patient from non-running job 🤮")
     void testFetchNextBatch_NotRunning() {
         final var job = Mockito.spy(createJobQueueBatch());
 
@@ -204,8 +197,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Pause a running job 🥳")
-
+    @DisplayName("Pause a running job 🥳")
     void testSetPausedStatus() {
         final var job = Mockito.spy(createJobQueueBatch());
         job.setRunningStatus(aggregatorID);
@@ -219,8 +211,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Pause a non-running job 🤮")
-
+    @DisplayName("Pause a non-running job 🤮")
     void testSetPausedStatus_NotRunning() {
         final var job = Mockito.spy(createJobQueueBatch());
 
@@ -233,8 +224,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Mark a running job with patients as complete 🥳")
-
+    @DisplayName("Mark a running job with patients as complete 🥳")
     void testSetCompletedStatus() {
         final var job = Mockito.spy(createJobQueueBatch());
         job.status = JobStatus.RUNNING;
@@ -252,8 +242,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Mark a running job with empty patient list as complete 🥳")
-
+    @DisplayName("Mark a running job with empty patient list as complete 🥳")
     void testSetCompletedStatus_EmptyPatientList() {
         final var job = Mockito.spy(createJobQueueBatch());
         job.status = JobStatus.RUNNING;
@@ -272,8 +261,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Set a non-running job as complete 🤮")
-
+    @DisplayName("Set a non-running job as complete 🤮")
     void testSetFinishedStatus_InvalidRunningStatus() {
         final var job = Mockito.spy(createJobQueueBatch());
         job.status = JobStatus.QUEUED;
@@ -287,8 +275,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Set a running incomplete job as complete 🤮")
-
+    @DisplayName("Set a running incomplete job as complete 🤮")
     void testSetFinishedStatus_NotDoneProcessing() {
         final var job = Mockito.spy(createJobQueueBatch());
         job.status = JobStatus.RUNNING;
@@ -302,8 +289,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Mark a running job as failed and verify partial results 🥳")
-
+    @DisplayName("Mark a running job as failed and verify partial results 🥳")
     void testSetFailedStatus() {
         final var job = Mockito.spy(createJobQueueBatch());
         job.status = JobStatus.RUNNING;
@@ -323,8 +309,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Set a non-running job as failed 🤮")
-
+    @DisplayName("Set a non-running job as failed 🤮")
     void testSetFailedStatus_InvalidRunningStatus() {
         // We should always allow a job to fail regardless of state, or this can cause other issues
 
@@ -342,8 +327,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Restart a failed job 🥳")
-
+    @DisplayName("Restart a failed job 🥳")
     void testRestartBatch() {
         final var job = createJobQueueBatch();
         job.setRunningStatus(aggregatorID);
@@ -361,8 +345,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Restart a stuck job 🥳")
-
+    @DisplayName("Restart a stuck job 🥳")
     void testRestartBatch_Stuck() {
         final var job = createJobQueueBatch();
         job.setRunningStatus(aggregatorID);
@@ -381,16 +364,14 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Verify an unqueued job has no aggregator ID 🥳")
-
+    @DisplayName("Verify an unqueued job has no aggregator ID 🥳")
     void testVerifyAggregatorID_NoneSet() {
         final var job = createJobQueueBatch();
         job.verifyAggregatorID(aggregatorID);
     }
 
     @Test
-@DisplayName("Verify a queued job has an aggregator ID 🥳")
-
+    @DisplayName("Verify a queued job has an aggregator ID 🥳")
     void testVerifyAggregatorID_Match() {
         final var job = createJobQueueBatch();
         job.aggregatorID = aggregatorID;
@@ -398,8 +379,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Verify a claimed job can't be claimed by another aggregator 🤮")
-
+    @DisplayName("Verify a claimed job can't be claimed by another aggregator 🤮")
     void testVerifyAggregatorID_InvalidMatch() {
         final var job = createJobQueueBatch();
         job.aggregatorID = UUID.randomUUID();
@@ -413,8 +393,7 @@ public class JobQueueBatchTest {
     }
 
     @Test
-@DisplayName("Verify complete job queue batch lifecycle 🥳")
-
+    @DisplayName("Verify complete job queue batch lifecycle 🥳")
     void testStatus_OverallFlow() {
         final var job = createJobQueueBatch();
 
@@ -449,8 +428,7 @@ public class JobQueueBatchTest {
 
 
     @Test
-@DisplayName("Verify overriden equals on Job Queue Batch with dates 🥳")
-
+    @DisplayName("Verify overriden equals on Job Queue Batch with dates 🥳")
     void testEquals() {
         OffsetDateTime timestamp = OffsetDateTime.now(ZoneOffset.UTC);
 

@@ -20,8 +20,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import org.junit.jupiter.api.DisplayName;
+import static org.mockito.ArgumentMatchers.any;
 
 @DisplayName("Consent service usage")
 public class ConsentServiceImplUnitTest {
@@ -59,7 +59,7 @@ public class ConsentServiceImplUnitTest {
 
     @Test
     @DisplayName("Obtain multiple consent records 🥳")
-public void getMultipleConsent() {
+    public void getMultipleConsent() {
         String mbi1 = "0OO0OO0OO00";
         String mbi2 = "0OO0OO0OO01";
 
@@ -85,7 +85,7 @@ public void getMultipleConsent() {
 
     @Test
     @DisplayName("Obtain empty consent record 🥳")
-public void testNoConsent() {
+    public void testNoConsent() {
         final String testMbi = "0OO0OO0OO00";
 
         Bundle bundle = new Bundle();

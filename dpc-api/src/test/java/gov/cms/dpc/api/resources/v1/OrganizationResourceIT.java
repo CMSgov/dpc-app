@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,7 +38,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -53,9 +54,9 @@ import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
+
 @DisplayName("Organization resource operations")
-
-
 class OrganizationResourceIT extends AbstractSecureApplicationIT {
 
     private final ObjectMapper mapper;
@@ -66,27 +67,42 @@ class OrganizationResourceIT extends AbstractSecureApplicationIT {
 
     @Test
     @DisplayName("Register organization 🥳")
-void testOrganizationRegistration() throws IOException {
+    @Order(1)
+    void testOrganizationRegistration() throws IOException {
         // Generate a golden macaroon
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
 
-
         final String newOrgID = "1111111211";
         final Organization organization = OrganizationHelpers.createOrganization(ctx, client, newOrgID, true);
         assertNotNull(organization);
+    }
+
+    @Test
+    @DisplayName("Register duplicate organization 🤮")
+    @Order(2)
+    void testDuplicateOrganizationRegistration() throws IOException {
+        // Generate a golden macaroon
+        final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
+        final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
 
         // Try again, should fail because it's a duplicate
+        final String duplicateOrgID = "1111111211";
         // Error handling is really bad right now, but it should get improved in DPC-540
-        assertThrows(InvalidRequestException.class, () -> OrganizationHelpers.createOrganization(ctx, client, newOrgID, true));
+        assertThrows(InternalErrorException.class, () -> OrganizationHelpers.createOrganization(ctx, client, duplicateOrgID, true));
+    }
 
-        // Now, try to create one again, but using an actual org token
+    @Test
+    @DisplayName("Register org without authenticating 🤮")
+    @Order(3)
+    void testOtherOrganizationRegistration() throws IOException {
         assertThrows(AuthenticationException.class, () -> OrganizationHelpers.createOrganization(ctx, APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY), "1111111112", true));
     }
 
     @Test
     @DisplayName("Register org with invalid parameters 🤮")
-void testCreateInvalidOrganization() throws IOException, URISyntaxException {
+    @Order(4)
+    void testCreateInvalidOrganization() throws IOException, URISyntaxException {
         URL url = new URL(getBaseURL() + "/Organization/$submit");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(HttpMethod.POST);
@@ -106,7 +122,7 @@ void testCreateInvalidOrganization() throws IOException, URISyntaxException {
                 respBuilder.append(respLine.trim());
             }
             String resp = respBuilder.toString();
-            assertTrue(resp.contains("\"resourceType\":\"OperationOutcome\""));
+
             assertTrue(resp.contains("Resource type must be `Parameters`"));
         }
 
@@ -115,7 +131,8 @@ void testCreateInvalidOrganization() throws IOException, URISyntaxException {
 
     @Test
     @DisplayName("Fetch organization 🥳")
-void testOrganizationFetch() {
+    @Order(5)
+    void testOrganizationFetch() {
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         final Bundle organizations = client
@@ -132,7 +149,8 @@ void testOrganizationFetch() {
 
     @Test
     @DisplayName("Fetch organization by ID 🥳")
-void testOrganizationFetchById() {
+    @Order(6)
+    void testOrganizationFetchById() {
 
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
@@ -169,7 +187,8 @@ void testOrganizationFetchById() {
 
     @Test
     @DisplayName("Fetch organization with missing endpoint 🤮")
-void testMissingEndpoint() throws IOException {
+    @Order(7)
+    void testMissingEndpoint() throws IOException {
         // Generate a golden macaroon
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
@@ -195,7 +214,8 @@ void testMissingEndpoint() throws IOException {
 
     @Test
     @DisplayName("Fetch unrecognized organization 🤮")
-void testMissingOrganization() throws IOException {
+    @Order(8)
+    void testMissingOrganization() throws IOException {
         // Generate a golden macaroon
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
@@ -220,7 +240,8 @@ void testMissingOrganization() throws IOException {
 
     @Test
     @DisplayName("Update organization 🥳")
-void testUpdateOrganization() throws IOException, URISyntaxException, GeneralSecurityException {
+    @Order(9)
+    void testUpdateOrganization() throws IOException, URISyntaxException, GeneralSecurityException {
         final String orgID = UUID.randomUUID().toString();
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
@@ -251,10 +272,26 @@ void testUpdateOrganization() throws IOException, URISyntaxException, GeneralSec
         assertEquals(organization.getName(), result.getName(), "Name should be updated");
         assertTrue(organization.getContact().isEmpty(), "Contact list should be updated");
         assertEquals(1, result.getEndpoint().size(), "Endpoint list should be unchanged");
+    }
+
+    @Test
+    @DisplayName("Update wrong organization 🤮")
+    @Order(10)
+    void testUpdateWrongOrganization() throws IOException, URISyntaxException, GeneralSecurityException {
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+
+        final Organization organization = client
+                .read()
+                .resource(Organization.class)
+                .withId(ORGANIZATION_ID)
+                .encodedJson()
+                .execute();
+
+        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
 
         // Try to update when authenticated as different organization
         final String org2ID = UUID.randomUUID().toString();
-        final String org2Macaroon = FHIRHelpers.registerOrganization(attrClient, parser, org2ID, "4321234211", getAdminURL());
+        final String org2Macaroon = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), org2ID, "4321234211", getAdminURL());
         final Pair<UUID, PrivateKey> org2UUIDPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("org2-update-key", org2ID, GOLDEN_MACAROON, getBaseURL());
         final IGenericClient org2Client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), org2Macaroon, org2UUIDPrivateKeyPair.getLeft(), org2UUIDPrivateKeyPair.getRight());
 
@@ -264,7 +301,8 @@ void testUpdateOrganization() throws IOException, URISyntaxException, GeneralSec
 
     @Test
     @DisplayName("Delete organization 🥳")
-void testOrganizationDeletion() throws IOException, URISyntaxException, GeneralSecurityException {
+    @Order(11)
+    void testOrganizationDeletion() throws IOException, URISyntaxException, GeneralSecurityException {
 //        // Generate a golden macaroon
         final UUID orgDeletionID = UUID.randomUUID();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);

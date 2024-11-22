@@ -1,7 +1,8 @@
 package gov.cms.dpc.consent;
 
-import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListener;
+import com.google.inject.servlet.GuiceFilter;
+import com.hubspot.dropwizard.guicier.GuiceBundle;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
@@ -22,7 +23,6 @@ import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import liquibase.exception.DatabaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 import java.sql.SQLException;
 
@@ -42,20 +42,19 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public void initialize(Bootstrap<DPCConsentConfiguration> bootstrap) {
-        JerseyGuiceUtils.reset();
-
         // Enable variable substitution with environment variables
         EnvironmentVariableSubstitutor substitutor = new EnvironmentVariableSubstitutor(false);
         SubstitutingSourceProvider provider =
                 new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), substitutor);
         bootstrap.setConfigurationSourceProvider(provider);
 
-        GuiceBundle guiceBundle = GuiceBundle.builder()
-                .modules(
-                        new DPCConsentHibernateModule<>(hibernateBundle),
+        GuiceBundle guiceBundle = GuiceBundle.defaultBuilder(DPCConsentConfiguration.class)
+                .modules(new DPCConsentHibernateModule<>(hibernateBundle),
                         new FHIRModule<DPCConsentConfiguration>(),
-                        new ConsentAppModule())
+                        new ConsentAppModule()
+                )
                 .build();
 
         bootstrap.addBundle(hibernateBundle);
@@ -63,7 +62,6 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCConsentConfiguration configuration) {
-                logger.debug("Connecting to database {} at {}", configuration.getConsentDatabase().getDriverClass(), configuration.getConsentDatabase().getUrl());
                 return configuration.getConsentDatabase();
             }
 
@@ -85,7 +83,11 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
 
     @Override
     public void run(DPCConsentConfiguration configuration, Environment environment) throws DatabaseException, SQLException {
+        logger.info("Starting DPCConsentService run!");
         EnvironmentParser.getEnvironment("Consent");
+        
+        environment.servlets().addFilter("GuiceFilter", GuiceFilter.class).addMappingForUrlPatterns(null, false, "/*");
+
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
 
@@ -93,5 +95,7 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
         environment.healthChecks().register("consent-self-check",
             new HttpHealthCheck(UrlGenerator.generateVersionUrl(configuration.getServicePort()))
         );
+        
+        logger.info("The run method is done!");
     }
 }

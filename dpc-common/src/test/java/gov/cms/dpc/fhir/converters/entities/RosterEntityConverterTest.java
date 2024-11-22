@@ -53,8 +53,7 @@ public class RosterEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert null with from FHIR 🤮")
-
+    @DisplayName("Convert null with from FHIR 🤮")
     void fromFHIR() {
         String expected = "Entity cannot be converted from FHIR, using this class";
         Exception exception = assertThrows(UnsupportedOperationException.class, () -> {
@@ -64,8 +63,7 @@ public class RosterEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert group with attributes to FHIR 🥳")
-
+    @DisplayName("Convert group with attributes to FHIR 🥳")
     void toFHIR() {
         Group convertedResource = rosterEntityConverter.toFHIR(fhirEntityConverter, rosterEntity);
         assertEquals(Group.GroupType.PERSON, convertedResource.getType());
@@ -84,15 +82,13 @@ public class RosterEntityConverterTest {
     }
 
     @Test
-@DisplayName("Get Group FHIR resource from Java class 🥳")
-
+    @DisplayName("Get Group FHIR resource from Java class 🥳")
     void getFHIRResource() {
         assertEquals(Group.class, rosterEntityConverter.getFHIRResource());
     }
 
     @Test
-@DisplayName("Convert Roster Entity Java class from Roster Entity FHIR resource 🥳🤮")
-
+    @DisplayName("Convert Roster Entity Java class from Roster Entity FHIR resource 🥳🤮")
     void getJavaClass() {
         assertEquals(RosterEntity.class, rosterEntityConverter.getJavaClass());
     }}

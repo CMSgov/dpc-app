@@ -9,16 +9,15 @@ import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
+import jakarta.ws.rs.NotAuthorizedException;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MultivaluedMap;
-import java.io.IOException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MultivaluedMap;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Collections;
@@ -66,7 +65,7 @@ class AdminAuthFilterTests {
     }
 
     @Test
-    @DisplayName("Wrong organization token 🤮")
+    @DisplayName("Reject organization token 🤮")
     void ensureOrganizationTokenRejected() {
         // Create Golden Macaroon
         final Macaroon m1 = bakery.createMacaroon(Collections.singletonList(new MacaroonCaveat(new MacaroonCondition("organization_id", MacaroonCondition.Operator.EQ, "1234"))));
@@ -78,7 +77,7 @@ class AdminAuthFilterTests {
         Mockito.when(request.getHeaders()).thenReturn(headers);
         Mockito.when(headers.getFirst(HttpHeaders.AUTHORIZATION)).thenReturn(String.format("Bearer %s", macaroonValue));
 
-        final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> this.filter.filter(request), "Should have thrown exception");
+        final NotAuthorizedException ex = assertThrows(NotAuthorizedException.class, () -> this.filter.filter(request), "Should have thrown exception");
         assertEquals(HttpStatus.UNAUTHORIZED_401, ex.getResponse().getStatus(), "Should be unauthorized");
         Mockito.verifyNoInteractions(authenticator);
     }

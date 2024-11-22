@@ -12,11 +12,9 @@ import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @DisplayName("Batch job queuing with files")
-
 class JobQueueBatchFileTest {
     @Test
-@DisplayName("Verify overriden equals on Job Queue Batch File 🥳")
-
+    @DisplayName("Verify overriden equals on Job Queue Batch File 🥳")
     void testEqual() {
         final var jobID = UUID.randomUUID();
         final var batchID = UUID.randomUUID();
@@ -29,8 +27,7 @@ class JobQueueBatchFileTest {
     }
 
     @Test
-@DisplayName("Verify overriden hashcode on Job Queue Batch File 🥳")
-
+    @DisplayName("Verify overriden hashcode on Job Queue Batch File 🥳")
     void testHash() {
         final var jobID = UUID.randomUUID();
         final var batchID = UUID.randomUUID();
@@ -42,8 +39,7 @@ class JobQueueBatchFileTest {
     }
 
     @Test
-@DisplayName("Get a Job Queue Batch File 🥳")
-
+    @DisplayName("Get a Job Queue Batch File 🥳")
     void testGet() {
         final var jobID = UUID.randomUUID();
         final var batchID = UUID.randomUUID();

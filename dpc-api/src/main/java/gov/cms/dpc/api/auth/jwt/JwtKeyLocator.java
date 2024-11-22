@@ -12,15 +12,15 @@ import java.security.Key;
 import java.util.UUID;
 
 import io.jsonwebtoken.LocatorAdapter;
-import javax.inject.Singleton;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.core.Response;
 
 public class JwtKeyLocator extends LocatorAdapter<Key> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(JwtKeyLocator.class);
+    private static final Logger logger = LoggerFactory.getLogger(JwtKeyLocator.class);
 
     private final PublicKeyDAO dao;
 
@@ -34,7 +34,7 @@ public class JwtKeyLocator extends LocatorAdapter<Key> {
     protected Key locate(JwsHeader header) {
         final String keyId = header.getKeyId();
         if (keyId == null) {
-            LOG.error("JWT KID field is missing");
+            logger.error("JWT KID field is missing");
             throw new NotAuthorizedException("JWT header must have `kid` value", Response.status(Response.Status.UNAUTHORIZED));
         }
 
@@ -43,14 +43,14 @@ public class JwtKeyLocator extends LocatorAdapter<Key> {
             keyEntity = this.dao.fetchPublicKey(UUID.fromString(keyId))
                     .orElseThrow(() -> new NotAuthorizedException(String.format("Cannot find public key with id: %s", keyId), Response.status(Response.Status.UNAUTHORIZED)));
         } catch (IllegalArgumentException e) {
-            LOG.error("Cannot convert '{}' to UUID", keyId, e);
+            logger.error("Cannot convert '{}' to UUID", keyId, e);
             throw new BadRequestException("`kid` value must be a UUID");
         }
 
         try {
             return PublicKeyHandler.publicKeyFromEntity(keyEntity);
         } catch (PublicKeyException e) {
-            LOG.error("Cannot convert public key", e);
+            logger.error("Cannot convert public key", e);
             throw new InternalServerErrorException("Internal server error");
         }
     }

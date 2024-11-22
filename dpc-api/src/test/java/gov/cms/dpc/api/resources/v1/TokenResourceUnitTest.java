@@ -14,13 +14,13 @@ import gov.cms.dpc.macaroons.config.TokenPolicy.ExpirationPolicy;
 import gov.cms.dpc.macaroons.config.TokenPolicy.VersionPolicy;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.jsonwebtoken.LocatorAdapter;
-import javax.ws.rs.NotFoundException;
+import jakarta.ws.rs.NotFoundException;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.security.Key;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import javax.ws.rs.WebApplicationException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -110,7 +109,7 @@ public class TokenResourceUnitTest {
 
         Mockito.when(mockTokenDao.findTokenByOrgAndID(orgId, tokenId)).thenAnswer(answer -> new ArrayList<TokenEntity>());
 
-        assertThrows(WebApplicationException.class, () -> tokenResource.getOrganizationToken(organizationPrincipal, tokenId));
+        assertThrows(NotFoundException.class, () -> tokenResource.getOrganizationToken(organizationPrincipal, tokenId));
     }
 
     @Test

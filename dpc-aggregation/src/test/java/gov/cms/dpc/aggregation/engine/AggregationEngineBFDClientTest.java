@@ -82,9 +82,9 @@ public class AggregationEngineBFDClientTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     @DisplayName("Complete a bulk job using BFD data 🥳")
-void testHeadersPassedToBFDForBulkJob() {
+    @SuppressWarnings("unchecked")
+    void testHeadersPassedToBFDForBulkJob() {
         //Mock out the interactions of using IGenericClient to capture things
         IUntypedQuery<IBaseBundle> iUntypedQuery = Mockito.mock(IUntypedQuery.class);
         Mockito.when(bbClient.search()).thenReturn(iUntypedQuery);
@@ -96,7 +96,6 @@ void testHeadersPassedToBFDForBulkJob() {
         ArgumentCaptor<String> headerValue = ArgumentCaptor.forClass(String.class);
         Mockito.when(iQuery.withAdditionalHeader(headerKey.capture(), headerValue.capture())).thenReturn(iQuery);
 
-        UUID providerID = UUID.randomUUID();
         UUID jobID = queue.createJob(
                 orgID,
                 TEST_ORG_NPI,
@@ -114,8 +113,8 @@ void testHeadersPassedToBFDForBulkJob() {
 
         // Look at the result
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
-        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
 
+        assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         Assertions.assertThat(completeJob.getJobID()).isNotNull();
         Assertions.assertThat(completeJob.getProviderNPI()).isNotNull();
         Assertions.assertThat(completeJob.getTransactionTime()).isNotNull();
@@ -126,9 +125,9 @@ void testHeadersPassedToBFDForBulkJob() {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     @DisplayName("Complete a non-bulk job using BFD data 🥳")
-void testHeadersPassedToBFDForNonBulkJob() {
+    @SuppressWarnings("unchecked")
+    void testHeadersPassedToBFDForNonBulkJob() {
         //Mock out the interactions of using IGenericClient to capture things
         IUntypedQuery<IBaseBundle> iUntypedQuery = Mockito.mock(IUntypedQuery.class);
         Mockito.when(bbClient.search()).thenReturn(iUntypedQuery);

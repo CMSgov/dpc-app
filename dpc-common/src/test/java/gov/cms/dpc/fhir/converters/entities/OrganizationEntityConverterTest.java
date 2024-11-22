@@ -64,8 +64,7 @@ public class OrganizationEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert organization with attributes from FHIR 🥳")
-
+    @DisplayName("Convert organization with attributes from FHIR 🥳")
     void fromFHIR() {
         OrganizationEntity convertedEntity = organizationEntityConverter.fromFHIR(fhirEntityConverter, organization);
         assertEquals(uuid, convertedEntity.getId());
@@ -77,8 +76,7 @@ public class OrganizationEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert organization with no ID from FHIR 🥳")
-
+    @DisplayName("Convert organization with no ID from FHIR 🥳")
     void fromFHIR_noID() {
         organization.setId("");
         OrganizationEntity convertedEntity = organizationEntityConverter.fromFHIR(fhirEntityConverter, organization);
@@ -87,8 +85,7 @@ public class OrganizationEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert organization with different identifier system from FHIR 🥳")
-
+    @DisplayName("Convert organization with different identifier system from FHIR 🥳")
     void fromFHIR_DifferentIdentifierSystem() {
         OrganizationEntity.OrganizationID orgId = new OrganizationEntity.OrganizationID(DPCIdentifierSystem.MBI, orgIdValue);
 
@@ -100,8 +97,7 @@ public class OrganizationEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert organization with bad identifier system from FHIR 🤮")
-
+    @DisplayName("Convert organization with bad identifier system from FHIR 🤮")
     void fromFHIR_BadIdentifierSystem() {
         Identifier identifier = new Identifier().setSystem("bad system");
         organization.setIdentifier(List.of(identifier));
@@ -113,8 +109,7 @@ public class OrganizationEntityConverterTest {
 
 
     @Test
-@DisplayName("Convert organization with attributes to FHIR 🥳")
-
+    @DisplayName("Convert organization with attributes to FHIR 🥳")
     void toFHIR() {
         Organization convertedResource = organizationEntityConverter.toFHIR(fhirEntityConverter, organizationEntity);
         assertEquals(uuid.toString(), convertedResource.getId());
@@ -127,15 +122,13 @@ public class OrganizationEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert Organization java class to FHIR resource 🥳")
-
+    @DisplayName("Convert Organization java class to FHIR resource 🥳")
     void getFHIRResource() {
         assertEquals(Organization.class, organizationEntityConverter.getFHIRResource());
     }
 
     @Test
-@DisplayName("Convert Organization Entity FHIR resource to Java class 🥳")
-
+    @DisplayName("Convert Organization Entity FHIR resource to Java class 🥳")
     void getJavaClass() {
         assertEquals(OrganizationEntity.class, organizationEntityConverter.getJavaClass());
     }}

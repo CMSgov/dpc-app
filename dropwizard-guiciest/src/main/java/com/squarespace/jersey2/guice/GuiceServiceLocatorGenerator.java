@@ -22,8 +22,7 @@ import org.slf4j.LoggerFactory;
 class GuiceServiceLocatorGenerator implements ServiceLocatorGenerator {
     
     private static final Logger LOG = LoggerFactory.getLogger(GuiceServiceLocatorGenerator.class);
-    private static final boolean TRACE = LOG.isTraceEnabled();
-    
+
     private final ServiceLocatorGenerator generator = new ServiceLocatorGeneratorImpl();
 
     private final ConcurrentMap<String, ServiceLocator> locators = new ConcurrentHashMap<>();
@@ -31,7 +30,7 @@ class GuiceServiceLocatorGenerator implements ServiceLocatorGenerator {
     private final AtomicReference<ServiceLocatorGenerator> delegateRef = new AtomicReference<>();
 
     public void delegate(ServiceLocatorGenerator delegate) {
-        if(TRACE) LOG.trace("I am setting a delegate: " + delegate.hashCode());
+        LOG.info("I am setting a delegate: " + delegate.hashCode());
         delegateRef.set(delegate);
     }
 
@@ -59,7 +58,7 @@ class GuiceServiceLocatorGenerator implements ServiceLocatorGenerator {
         // uses the same name again!
         ServiceLocator locator = locators.remove(name);
         if (locator != null) {
-            if(TRACE) LOG.trace("Someone wants to create a locator, I'll just return " + locator.getName());
+            LOG.info("Someone wants to create a locator, I'll just return " + locator.getName());
             return locator;
         }
 
@@ -68,7 +67,7 @@ class GuiceServiceLocatorGenerator implements ServiceLocatorGenerator {
         if (delegate != null) {
             locator = delegate.create(name, parent);
             if (locator != null) {
-                if(TRACE) LOG.trace("Created a locator from delegate: " + locator.getName());
+                LOG.info("Created a locator from delegate: " + locator.getName());
                 return locator;
             }
         }

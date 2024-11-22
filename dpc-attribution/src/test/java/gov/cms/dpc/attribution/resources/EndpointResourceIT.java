@@ -25,8 +25,7 @@ public class EndpointResourceIT extends AbstractAttributionIT {
     final IGenericClient client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
 
     @Test
-@DisplayName("Create endpoint 🥳")
-
+    @DisplayName("Create endpoint 🥳")
     void testCreateEndpoint() {
         Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1111111112", false);
         Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint(organization.getId());
@@ -41,8 +40,7 @@ public class EndpointResourceIT extends AbstractAttributionIT {
     }
 
     @Test
-@DisplayName("Search endpoints 🥳")
-
+    @DisplayName("Search endpoints 🥳")
     void testSearchEndpoints() {
         Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1111111211", false);
         String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();
@@ -59,8 +57,7 @@ public class EndpointResourceIT extends AbstractAttributionIT {
     }
 
     @Test
-@DisplayName("Fetch endpoint 🥳")
-
+    @DisplayName("Fetch endpoint 🥳")
     void testFetchEndpoint() {
         Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1111111310", false);
         String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();
@@ -75,8 +72,7 @@ public class EndpointResourceIT extends AbstractAttributionIT {
     }
 
     @Test
-@DisplayName("Update endpoint 🥳")
-
+    @DisplayName("Update endpoint 🥳")
     void testUpdateEndpoint() {
         Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1211111111", false);
         String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();
@@ -100,8 +96,7 @@ public class EndpointResourceIT extends AbstractAttributionIT {
     }
 
     @Test
-@DisplayName("Delete endpoint 🥳")
-
+    @DisplayName("Delete endpoint 🥳")
     void testDeleteEndpoint() {
         Organization organization = OrganizationHelpers.createOrganization(ctx, client, "1112111111", false);
         String endpointId = FHIRExtractors.getEntityUUID(organization.getEndpointFirstRep().getReference()).toString();

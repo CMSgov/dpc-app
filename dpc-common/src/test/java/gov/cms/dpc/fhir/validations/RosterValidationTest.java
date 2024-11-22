@@ -46,8 +46,7 @@ public class RosterValidationTest {
     }
 
     @Test
-@DisplayName("Validate roster 🥳")
-
+    @DisplayName("Validate roster 🥳")
     void testAttributed() {
         final Group group = generateFakeGroup();
         final CodeableConcept concept = new CodeableConcept();

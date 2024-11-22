@@ -32,7 +32,7 @@ import java.util.Base64;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
-@DisplayName("Public Key Handler Tests")
+@DisplayName("Public Key handling")
 @SuppressWarnings("InnerClassMayBeStatic")
 class PublicKeyHandlerTest {
 
@@ -42,41 +42,39 @@ class PublicKeyHandlerTest {
 
 
         @ParameterizedTest
-        @EnumSource(KeyType.class)
         @DisplayName("Valid public key 🥳")
-void testValidKey(KeyType keyType) throws NoSuchAlgorithmException {
+        @EnumSource(KeyType.class)
+        void testValidKey(KeyType keyType) throws NoSuchAlgorithmException {
             final String encoded = generatePublicKey(keyType);
             final String key = String.format("-----BEGIN PUBLIC KEY-----\n%s\n-----END PUBLIC KEY-----\n", encoded);
             PublicKeyHandler.parsePEMString(key);
         }
 
         @ParameterizedTest
-        @EnumSource(KeyType.class)
         @DisplayName("Invalid public key header 🤮")
-void testInvalidKeyHeader(KeyType keyType) throws NoSuchAlgorithmException {
+        @EnumSource(KeyType.class)
+        void testInvalidKeyHeader(KeyType keyType) throws NoSuchAlgorithmException {
             final String encoded = generatePublicKey(keyType);
             final String key = String.format("-----BEGIN RSA PUBLIC KEY-----\n%s\n-----END RSA PUBLIC KEY-----\n", encoded);
             assertThrows(PublicKeyException.class, () -> PublicKeyHandler.parsePEMString(key));
         }
 
         @Test
-@DisplayName("Empty public key 🤮")
-
+        @DisplayName("Empty public key 🤮")
         void testEmptyKey() {
             assertThrows(PublicKeyException.class, () -> PublicKeyHandler.parsePEMString(""));
         }
 
         @Test
-@DisplayName("Malformed public key 🤮")
-
+        @DisplayName("Malformed public key 🤮")
         void testGarbageKey() {
             assertThrows(PublicKeyException.class, () -> PublicKeyHandler.parsePEMString("This is NOT a real key"));
         }
 
         @ParameterizedTest
-        @EnumSource(KeyType.class)
         @DisplayName("Private key incorrectly submitted 🤮")
-void testPrivateKey(KeyType keyType) throws NoSuchAlgorithmException {
+        @EnumSource(KeyType.class)
+        void testPrivateKey(KeyType keyType) throws NoSuchAlgorithmException {
             final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
             final String encoded = Base64.getMimeEncoder().encodeToString(keyPair.getPrivate().getEncoded());
 
@@ -91,8 +89,7 @@ void testPrivateKey(KeyType keyType) throws NoSuchAlgorithmException {
     class PublicKeyEncodingTests {
 
         @Test
-@DisplayName("Base64-encode public key 🥳")
-
+        @DisplayName("Base64-encode public key 🥳")
         void testEncodeKey() throws IOException {
             final SubjectPublicKeyInfo keyInfo = Mockito.mock(SubjectPublicKeyInfo.class);
             final byte[] keyValue = "Not a real key".getBytes(StandardCharsets.UTF_8);
@@ -102,8 +99,7 @@ void testPrivateKey(KeyType keyType) throws NoSuchAlgorithmException {
         }
 
         @Test
-@DisplayName("Base64 encoding of public key 🤮")
-
+        @DisplayName("Base64 encoding of public key 🤮")
         void testPEMEncodeIOException() throws IOException {
             final SubjectPublicKeyInfo keyInfo = Mockito.mock(SubjectPublicKeyInfo.class);
             Mockito.when(keyInfo.getEncoded()).thenThrow(IOException.class);
@@ -118,8 +114,7 @@ void testPrivateKey(KeyType keyType) throws NoSuchAlgorithmException {
     class PublicKeyValidationTests {
 
         @Test
-@DisplayName("RSA key size too small 🤮")
-
+        @DisplayName("RSA key size too small 🤮")
         void testRSAKeyTooShort() throws NoSuchAlgorithmException {
 
             final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
@@ -132,8 +127,7 @@ void testPrivateKey(KeyType keyType) throws NoSuchAlgorithmException {
         }
 
         @Test
-@DisplayName("ECC key size too small 🤮")
-
+        @DisplayName("ECC key size too small 🤮")
         void testECCKeyTooSmall() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
             final KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
             ECGenParameterSpec spec = new ECGenParameterSpec("secp160r1");
@@ -147,8 +141,7 @@ void testPrivateKey(KeyType keyType) throws NoSuchAlgorithmException {
         }
 
         @Test
-@DisplayName("Unsupported ECC key type 🤮")
-
+        @DisplayName("Unsupported ECC key type 🤮")
         void testECCWrongAlgorithm() {
             final SubjectPublicKeyInfo publicKeyInfo = Mockito.mock(SubjectPublicKeyInfo.class);
             Mockito.when(publicKeyInfo.getAlgorithm()).thenAnswer((answer) -> new AlgorithmIdentifier(new ASN1ObjectIdentifier("1.2.840.10045.5")));
@@ -157,8 +150,7 @@ void testPrivateKey(KeyType keyType) throws NoSuchAlgorithmException {
         }
 
         @Test
-@DisplayName("Signature verification 🥳")
-
+        @DisplayName("Signature verification 🥳")
         void testVerifySignature() throws Exception {
             KeyPair keyPair = APIAuthHelpers.generateKeyPair(KeyType.RSA);
             String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair.getPublic());
@@ -169,8 +161,7 @@ void testPrivateKey(KeyType keyType) throws NoSuchAlgorithmException {
         }
 
         @Test
-@DisplayName("Wrong snippet signed 🤮")
-
+        @DisplayName("Wrong snippet signed 🤮")
         void testVerifySignatureWrongSnippet() throws Exception {
             KeyPair keyPair = APIAuthHelpers.generateKeyPair(KeyType.RSA);
             String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair.getPublic());
@@ -182,8 +173,7 @@ void testPrivateKey(KeyType keyType) throws NoSuchAlgorithmException {
         }
 
         @Test
-@DisplayName("Incorrect key used for signature verification 🤮")
-
+        @DisplayName("Incorrect key used for signature verification 🤮")
         void testVerifySignatureMismatch() throws Exception {
             KeyPair keyPair1 = APIAuthHelpers.generateKeyPair(KeyType.RSA);
             KeyPair keyPair2 = APIAuthHelpers.generateKeyPair(KeyType.RSA);
@@ -205,8 +195,7 @@ void testPrivateKey(KeyType keyType) throws NoSuchAlgorithmException {
     }
 
     @Test
-@DisplayName("Complete signature and verification round-trip 🥳")
-
+    @DisplayName("Complete signature and verification round-trip 🥳")
     void testEncryptionRoundTrip() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, IOException, InvalidKeySpecException {
         final String plainText = "This should be encrypted";
         final Cipher cipher = Cipher.getInstance("RSA");

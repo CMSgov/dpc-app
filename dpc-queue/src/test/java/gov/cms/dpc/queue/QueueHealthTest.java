@@ -16,8 +16,8 @@ import org.mockito.Mockito;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import org.junit.jupiter.api.DisplayName;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("rawtypes")
 @ExtendWith(BufferedLoggerHandler.class)
@@ -36,8 +36,8 @@ public class QueueHealthTest {
 
         when(factory.openSession())
                 .thenReturn(session);
-
-        when(session.createQuery(Mockito.anyString()))
+        
+        when(session.createQuery(Mockito.anyString(), Mockito.any()))
                 .thenReturn(query);
 
         when(query.setParameter(Mockito.anyString(), Mockito.any()))
@@ -45,8 +45,7 @@ public class QueueHealthTest {
     }
 
     @Test
-@DisplayName("Verify queue health when queue is healthy 🥳")
-
+    @DisplayName("Verify queue health when queue is healthy 🥳")
     void testHealthyQueue() {
         when(query.uniqueResult())
                 .thenReturn(0L);
@@ -60,8 +59,7 @@ public class QueueHealthTest {
     }
 
     @Test
-@DisplayName("Verify queue health when queue is unhealthy 🥳")
-
+    @DisplayName("Verify queue health when queue is unhealthy 🥳")
     void testUnhealthyQueue() {
         when(query.uniqueResult())
                 .thenReturn(2L);

@@ -29,14 +29,17 @@ server:
             application: ${APPLICATION:-"dpc-consent"}
 
 logging:
-  level: ERROR
+  level: INFO
   loggers:
     "liquibase": INFO
     "gov.cms.dpc.queue.DistributedBatchQueue": DEBUG
     "org.hibernate": ERROR
     "org.hibernate.SQL": ERROR
+    "org.glassfish.hk2": DEBUG
+    "org.jvnet.hk2": TRACE
   appenders:
     - type: console
+      logFormat: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
       filterFactories:
         - type: secret-filter-factory
           # List any env vars that contain secrets that should be filtered out of the logs

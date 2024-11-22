@@ -9,6 +9,7 @@ import gov.cms.dpc.api.tasks.keys.DeletePublicKey;
 import gov.cms.dpc.api.tasks.keys.ListPublicKeys;
 import gov.cms.dpc.api.tasks.keys.UploadPublicKey;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import jakarta.ws.rs.BadRequestException;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import javax.ws.rs.WebApplicationException;
 import java.io.*;
 import java.util.*;
 
@@ -51,7 +51,7 @@ public class PublicKeyTaskTests {
     void testKeyUploadNoOrg() throws Exception {
         final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> upk.execute(map, "", new PrintWriter(new OutputStreamWriter(bos))));
+            final BadRequestException ex = assertThrows(BadRequestException.class, () -> upk.execute(map, "", new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
         }
     }
@@ -114,7 +114,7 @@ public class PublicKeyTaskTests {
     void testKeyListNoOrg() throws IOException {
         final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> lpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            final BadRequestException ex = assertThrows(BadRequestException.class, () -> lpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
         }
     }
@@ -124,7 +124,7 @@ public class PublicKeyTaskTests {
     void testKeyDeletionNoOrg() throws IOException {
         final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            final BadRequestException ex = assertThrows(BadRequestException.class, () -> dpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
         }
     }
@@ -135,7 +135,7 @@ public class PublicKeyTaskTests {
         final UUID id = UUID.randomUUID();
         final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            final BadRequestException ex = assertThrows(BadRequestException.class, () -> dpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
             assertEquals("Must have key", ex.getMessage(), "Should have correct message");
         }
     }

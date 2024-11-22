@@ -9,7 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import javax.validation.*;
+import jakarta.validation.*;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -27,9 +27,9 @@ public class OrganizationIdValidatorTest {
     }
 
     @ParameterizedTest
-    @MethodSource("stringSource")
     @DisplayName("Validate organization ID 🥳")
-public void organizationIdValidatorTest(DPCIdentifierSystem dpcIdentifierSystem, String value, boolean isValid) {
+    @MethodSource("stringSource")
+    public void organizationIdValidatorTest(DPCIdentifierSystem dpcIdentifierSystem, String value, boolean isValid) {
 
         TestObject testObject = new TestObject();
         testObject.setA(new OrganizationEntity.OrganizationID(dpcIdentifierSystem, value));

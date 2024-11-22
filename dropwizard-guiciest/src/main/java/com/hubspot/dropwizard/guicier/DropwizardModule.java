@@ -25,7 +25,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 public class DropwizardModule extends AbstractModule {
     private static final Logger LOG = LoggerFactory.getLogger(DropwizardModule.class);
-    private static final boolean TRACE = LOG.isTraceEnabled();
 
     private final Environment environment;
 
@@ -65,22 +64,22 @@ public class DropwizardModule extends AbstractModule {
 
     private void handle(Managed managed) {
         environment.lifecycle().manage(managed);
-        if(TRACE) LOG.trace("Added guice injected managed Object: {}", managed.getClass().getName());
+        LOG.info("Added guice injected managed Object: {}", managed.getClass().getName());
     }
 
     private void handle(Task task) {
         environment.admin().addTask(task);
-        if(TRACE) LOG.trace("Added guice injected Task: {}", task.getClass().getName());
+        LOG.info("Added guice injected Task: {}", task.getClass().getName());
     }
 
     private void handle(HealthCheck healthcheck) {
         environment.healthChecks().register(healthcheck.getClass().getSimpleName(), healthcheck);
-        if(TRACE) LOG.trace("Added guice injected health check: {}", healthcheck.getClass().getName());
+        LOG.info("Added guice injected health check: {}", healthcheck.getClass().getName());
     }
 
     private void handle(ServerLifecycleListener serverLifecycleListener) {
         environment.lifecycle().addServerLifecycleListener(serverLifecycleListener);
-        if(TRACE) LOG.trace("Added guice injected server lifecycle listener: {}", serverLifecycleListener.getClass().getName());
+        LOG.info("Added guice injected server lifecycle listener: {}", serverLifecycleListener.getClass().getName());
     }
 
     private void registerResourcesAndProviders(ResourceConfig config, Injector injector) {
@@ -91,16 +90,16 @@ public class DropwizardModule extends AbstractModule {
                     Class<?> c = (Class<?>) type;
                     if (isProviderClass(c)) {
 
-                        if(TRACE) LOG.trace("Registering {} as a provider class", c.getName());
+                        LOG.info("Registering {} as a provider class", c.getName());
                         config.register(c);
                     } else if (isResourceClass(c)) {
                         // Jersey rejects resources that it doesn't think are acceptable
                         // Including abstract classes and interfaces, even if there is a valid Guice binding.
                         if (Resource.isAcceptable(c)) {
-                            if(TRACE) LOG.trace("Registering {} as a root resource class", c.getName());
+                            LOG.info("Registering {} as a root resource class", c.getName());
                             config.register(c);
                         } else {
-                            if(TRACE) LOG.trace("Class {} was not registered as a resource; bind a concrete implementation instead", c.getName());
+                            LOG.warn("Class {} was not registered as a resource; bind a concrete implementation instead", c.getName());
                         }
                     }
 

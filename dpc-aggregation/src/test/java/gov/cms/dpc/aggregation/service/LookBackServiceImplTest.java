@@ -54,7 +54,7 @@ public class LookBackServiceImplTest {
 
     @Test
     @DisplayName("Match look back within time frame 🥳")
-public void testClaimWithinTimeFrame() {
+    public void testClaimWithinTimeFrame() {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
@@ -76,7 +76,7 @@ public void testClaimWithinTimeFrame() {
 
     @Test
     @DisplayName("Match look back with random org 🤮")
-public void testJobOrgMatchAnyEobNPIs() {
+    public void testJobOrgMatchAnyEobNPIs() {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
@@ -89,7 +89,7 @@ public void testJobOrgMatchAnyEobNPIs() {
 
     @Test
     @DisplayName("Match look back with random NPI 🤮")
-public void testJobProviderMatchAnyEobNPIs() {
+    public void testJobProviderMatchAnyEobNPIs() {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 

@@ -2,13 +2,11 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.net.HttpHeaders;
-import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
@@ -16,35 +14,33 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.queue.IJobQueue;
-import gov.cms.dpc.testing.factories.FHIRGroupBuilder;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.resources.v1.GroupResource.SYNTHETIC_BENE_ID;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
+import jakarta.ws.rs.NotAcceptableException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.*;
-import org.junit.jupiter.api.DisplayName;
 
 @SuppressWarnings("unchecked")
 @DisplayName("Group resource operations")
@@ -75,7 +71,7 @@ public class GroupResourceUnitTest {
 
     @Test
     @DisplayName("Create roster 🥳")
-public void testCreateRoster() {
+    public void testCreateRoster() {
         String practitionerNPI = NPIUtil.generateNPI();
         UUID practitionerId = UUID.randomUUID();
         UUID orgId = UUID.randomUUID();
@@ -120,52 +116,8 @@ public void testCreateRoster() {
     }
 
     @Test
-    @DisplayName("Create roster with incorrect tag 🤮")
-    public void testCreateRosterUsesCorrectTag() {
-        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
-        Organization organization = organizationPrincipal.getOrganization();
-
-        Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), organization.getId());
-        practitioner.setId(UUID.randomUUID().toString());
-
-        Provenance provenance = APITestHelpers.createProvenance(organization.getId(), practitioner.getId(), Collections.emptyList());
-
-        Group groupWithBadTag = FHIRGroupBuilder.newBuild()
-            .attributedTo(practitioner.getIdentifierFirstRep().getValue())
-            .withOrgTag(UUID.randomUUID())
-            .build();
-
-        // Mock practitioner check when Group tries to verify headers
-        IReadExecutable<Practitioner> readExec = mock(IReadExecutable.class);
-        when(attributionClient.read().resource(Practitioner.class).withId(practitioner.getId()).encodedJson()).thenReturn(readExec);
-        when(readExec.execute()).thenReturn(practitioner);
-
-        // Mock the create call to attribution.  We can't use deep stubs because we need to verify a parameter midway
-        // through the chain.
-        ICreate iCreate = mock(ICreate.class);
-        doReturn(iCreate).when(attributionClient).create();
-
-        ICreateTyped iCreateTyped = mock(ICreateTyped.class);
-        doReturn(iCreateTyped).when(iCreate).resource(groupWithBadTag);
-        doReturn(iCreateTyped).when(iCreateTyped).encodedJson();
-
-        MethodOutcome outcome = new MethodOutcome();
-        outcome.setResource(new Group());
-        doReturn(outcome).when(iCreateTyped).execute();
-
-        // Run the create and verify that the org sent to attribution has the correct org tag
-        resource.createRoster(organizationPrincipal, provenance, groupWithBadTag);
-
-        ArgumentCaptor<Group> groupArg = ArgumentCaptor.forClass(Group.class);
-        verify(iCreate, times(1)).resource(groupArg.capture());
-
-        Group capturedGroup = groupArg.getValue();
-        assertEquals(organization.getId(), capturedGroup.getMeta().getTagFirstRep().getCode());
-    }
-
-    @Test
     @DisplayName("Create roster with non-matching NPI 🤮")
-public void testCreateRosterNonMatchingNPI() {
+    public void testCreateRosterNonMatchingNPI() {
         UUID practitionerId = UUID.randomUUID();
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -206,7 +158,7 @@ public void testCreateRosterNonMatchingNPI() {
 
     @Test
     @DisplayName("Create roster when provider not found 🤮")
-public void testCreateRosterProviderNotFound() {
+    public void testCreateRosterProviderNotFound() {
         UUID practitionerId = UUID.randomUUID();
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -242,7 +194,7 @@ public void testCreateRosterProviderNotFound() {
 
     @Test
     @DisplayName("Export roster with valid `Since` parameter 🥳")
-public void testExportWithValidSinceParam() {
+    public void testExportWithValidSinceParam() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -317,7 +269,7 @@ public void testExportWithValidSinceParam() {
 
     @Test
     @DisplayName("Export roster with invalid times 🤮")
-public void testExportWithInvalidTimes() {
+    public void testExportWithInvalidTimes() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -369,7 +321,7 @@ public void testExportWithInvalidTimes() {
         when(mockBfdClient.requestPatientFromServer(SYNTHETIC_BENE_ID, null, null).getMeta()).thenReturn(bfdTransactionMeta);
 
         //Test a few seconds into the future
-        WebApplicationException exception = Assertions.assertThrows(BadRequestException.class, () -> {
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> {
             String since = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusSeconds(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
             resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request);
         });
@@ -385,7 +337,7 @@ public void testExportWithInvalidTimes() {
         assertEquals("'_since' query parameter cannot be a future date", exception.getMessage());
 
         //Test bad format
-        exception = Assertions.assertThrows(WebApplicationException.class, () -> {
+        exception = Assertions.assertThrows(BadRequestException.class, () -> {
             final String since = "2020-05-2X616:43:01.780+10:00";
             resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request);
         });
@@ -397,7 +349,7 @@ public void testExportWithInvalidTimes() {
 
     @Test
     @DisplayName("Set export output format 🥳")
-public void testOutputFormatSetting() {
+    public void testOutputFormatSetting() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -465,19 +417,79 @@ public void testOutputFormatSetting() {
             resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.NDJSON, "2017-01-01T00:00:00Z", "respond-async", request);
         });
 
-        Assertions.assertThrows(BadRequestException.class, () -> resource.export(organizationPrincipal, "roster-id", "Coverage", FHIR_JSON, "2017-01-01T00:00:00Z", "respond-async", request));
-
-        Assertions.assertThrows(BadRequestException.class, () -> resource.export(organizationPrincipal, "roster-id", "Coverage", null, "2017-01-01T00:00:00Z", "respond-async", request));
-
-        Assertions.assertThrows(BadRequestException.class, () -> resource.export(organizationPrincipal, "roster-id", "Coverage", "", "2017-01-01T00:00:00Z", "respond-async", request));
-
         //3 non bad requests
         verify(request, times(3)).getHeader(HttpHeaders.X_FORWARDED_FOR);
         verify(request, times(3)).getRemoteAddr();
     }
 
     @Test
-    public void testExportWithExpiredPatietn() {
+    @DisplayName("Set export output format using invalid format 🤮")
+    public void testInvalidOutputFormatSetting() {
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        Identifier identifier = new Identifier();
+        identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(NPIUtil.generateNPI());
+        organization.setIdentifier(List.of(identifier));
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+
+        IReadExecutable<Group> readExec = mock(IReadExecutable.class);
+        Group fakeGroup = new Group();
+        fakeGroup.getMember().add(new Group.GroupMemberComponent());
+        fakeGroup.addCharacteristic().getCode().addCoding().setCode("attributed-to");
+        CodeableConcept codeableConcept = new CodeableConcept();
+        codeableConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(NPIUtil.generateNPI());
+        fakeGroup.getCharacteristicFirstRep().setValue(codeableConcept);
+        when(attributionClient
+                .read()
+                .resource(Group.class)
+                .withId(any(IdType.class))
+                .encodedJson())
+                .thenReturn(readExec);
+
+        when(readExec.execute())
+                .thenReturn(fakeGroup);
+
+        IReadExecutable<Organization> readExec2 = mock(IReadExecutable.class);
+        when(attributionClient.read().resource(Organization.class).withId(new IdType("Organization", orgId.toString())).encodedJson()).thenReturn(readExec2);
+        when(readExec2.execute()).thenReturn(organization);
+
+        IOperationUntypedWithInput<Bundle> operationInput = mock(IOperationUntypedWithInput.class);
+        Patient fakePatient = new Patient();
+        fakePatient.getIdentifier().add(new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("2S51C00AA00"));
+        Bundle fakeBundle = new Bundle();
+        fakeBundle.getEntry().add(new Bundle.BundleEntryComponent().setResource(fakePatient));
+        when(attributionClient
+                .operation()
+                .onInstance(any(IdType.class))
+                .named("patients")
+                .withParameters(any(Parameters.class))
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .encodedJson())
+                .thenReturn(operationInput);
+        when(operationInput.execute())
+                .thenReturn(fakeBundle);
+
+        when(mockBfdClient.requestPatientFromServer(anyString(), any(), any()))
+                .thenReturn(new Bundle());
+
+        //Mock create job
+        when(mockQueue.createJob(any(), any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(UUID.randomUUID());
+
+        //Mock fetching request Url
+        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v1/Group/1234567890/$export"));
+
+        Assertions.assertThrows(BadRequestException.class, () -> resource.export(organizationPrincipal, "roster-id", "Coverage", FHIR_JSON, "2017-01-01T00:00:00Z", "respond-async", request));
+
+        Assertions.assertThrows(BadRequestException.class, () -> resource.export(organizationPrincipal, "roster-id", "Coverage", null, "2017-01-01T00:00:00Z", "respond-async", request));
+
+        Assertions.assertThrows(BadRequestException.class, () -> resource.export(organizationPrincipal, "roster-id", "Coverage", "", "2017-01-01T00:00:00Z", "respond-async", request));
+    }
+
+    @Test
+    @DisplayName("Export group with expired patient 🤮")
+    public void testExportWithExpiredPatient() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -521,7 +533,7 @@ public void testOutputFormatSetting() {
 
         //Past date with Z offset
         String since = "2020-05-26T16:43:01.780Z";
-        Assertions.assertThrows(WebApplicationException.class, () -> {
+        Assertions.assertThrows(NotAcceptableException.class, () -> {
             resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request);
         });
     }

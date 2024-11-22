@@ -14,13 +14,13 @@ import org.junit.jupiter.api.DisplayName;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(BufferedLoggerHandler.class)
-@DisplayName("Blue Button health checks")
+@DisplayName("Blue Button health checking")
 class TestBlueButtonHealth {
 
     private static final String EXCEPTION_MESSAGE = "Timeout, not good";
 
     @Test
-    @DisplayName("Blue Button healthy 🥳")
+    @DisplayName("BlueButton health check  🥳")
     void testHealthy() {
 
         final BlueButtonClient bbc = Mockito.mock(BlueButtonClient.class);
@@ -32,7 +32,7 @@ class TestBlueButtonHealth {
     }
 
     @Test
-    @DisplayName("Blue Button unhealthy 🤮")
+    @DisplayName("Blue Button health check 🤮")
     void testException() {
 
         final BlueButtonClient bbc = Mockito.mock(BlueButtonClient.class);
@@ -49,7 +49,7 @@ class TestBlueButtonHealth {
     }
 
     @Test
-    @DisplayName("Blue Button health check failure 🤮")
+    @DisplayName("Invalid health check response 🤮")
     void testInvalidResponse() {
 
         final BlueButtonClient bbc = Mockito.mock(BlueButtonClient.class);

@@ -23,18 +23,17 @@ import org.slf4j.LoggerFactory;
 public class GuiceServiceLocatorGeneratorStub implements ServiceLocatorGenerator {
     
     private static final Logger LOG = LoggerFactory.getLogger(GuiceServiceLocatorGeneratorStub.class);
-    private static final boolean TRACE = LOG.isTraceEnabled();
     
     private static final AtomicReference<ServiceLocatorGenerator> GENERATOR_REF = new AtomicReference<>();
 
     static ServiceLocatorGenerator install(ServiceLocatorGenerator generator) {
-        if(TRACE) LOG.trace("I got a generator to install!  Its a " + generator.getClass().getCanonicalName());
+        LOG.info("I got a generator to install!  Its a " + generator.getClass().getCanonicalName());
         if (generator instanceof GuiceServiceLocatorGeneratorStub) {
             throw new IllegalArgumentException();
         }
 
         ServiceLocatorGenerator g = GENERATOR_REF.getAndSet(generator);
-        if(TRACE) LOG.trace("OK! I got and set a generator and am returning a " + generator.getClass().getCanonicalName());
+        LOG.info("OK! I got and set a generator and am returning a " + generator.getClass().getCanonicalName());
         return g;
     }
 
@@ -51,7 +50,7 @@ public class GuiceServiceLocatorGeneratorStub implements ServiceLocatorGenerator
         }
 
         ServiceLocator l = generator.create(name, parent);
-        if(TRACE) LOG.trace("I just created a new service locator: " + l.getName());
+        LOG.info("I just created a new service locator: " + l.getName());
         return l;
     }
 }

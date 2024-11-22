@@ -18,7 +18,6 @@ import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @DisplayName("Capabilities statement verification")
-
 class CapabilitiesTest {
 
     private FhirValidator validator;
@@ -34,8 +33,7 @@ class CapabilitiesTest {
     }
 
     @Test
-@DisplayName("Validate capabilities statement 🥳")
-
+    @DisplayName("Validate capabilities statement 🥳")
     void capabilitiesIsValid() {
         final CapabilityStatement capabilities = Capabilities.getCapabilities("https://sandbox.dpc.cms.gov/api/v1");
         final ValidationResult validationResult = validator.validateWithResult(capabilities);

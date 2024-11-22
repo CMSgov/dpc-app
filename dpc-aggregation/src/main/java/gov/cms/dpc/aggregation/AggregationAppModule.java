@@ -6,7 +6,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
-import com.google.inject.name.Named;
+import com.google.inject.Scopes;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
@@ -20,9 +20,11 @@ import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
+import gov.cms.dpc.fhir.parameters.ProvenanceResourceValueFactory;
+import jakarta.inject.Named;
 
 public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
 
@@ -40,6 +42,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         binder.bind(AggregationManager.class).asEagerSingleton();
         binder.bind(JobBatchProcessor.class);
         binder.bind(AggregationEngineHealthCheck.class);
+        bind(ProvenanceResourceValueFactory.class).in(Scopes.SINGLETON);
 
         // Healthchecks
         // Additional health-checks can be added here

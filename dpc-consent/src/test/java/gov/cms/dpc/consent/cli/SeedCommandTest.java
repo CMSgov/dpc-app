@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
 
 @Disabled
-@DisplayName("Seed commands")
 class SeedCommandTest {
 
     private final PrintStream originalOut = System.out;

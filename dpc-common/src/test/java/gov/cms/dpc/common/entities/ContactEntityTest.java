@@ -15,8 +15,8 @@ import org.junit.jupiter.api.DisplayName;
 public class ContactEntityTest {
 
 	@Test
-	@DisplayName("Test contact getters and setters 🥳")
-public void testGettersAndSetters() {
+        @DisplayName("Test contact getters and setters 🥳")
+	public void testGettersAndSetters() {
 		ContactEntity contact = new ContactEntity();
 		UUID id = UUID.randomUUID();
 		OrganizationEntity org = new OrganizationEntity();
@@ -39,8 +39,8 @@ public void testGettersAndSetters() {
 	}
 
 	@Test
-	@DisplayName("Convert contact to FHIR 🥳")
-public void testToFHIR() {
+        @DisplayName("Convert contact to FHIR 🥳")
+	public void testToFHIR() {
 		ContactEntity contact = new ContactEntity();
 		NameEntity name = new NameEntity();
 		name.setFamily("Dog");

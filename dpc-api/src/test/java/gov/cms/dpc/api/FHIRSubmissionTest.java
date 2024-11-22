@@ -33,9 +33,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
@@ -46,8 +46,8 @@ import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import org.junit.jupiter.api.DisplayName;
+import static org.mockito.Mockito.*;
 
 /**
  * Verifies that a user can successfully submit a data export job
@@ -56,7 +56,6 @@ import org.junit.jupiter.api.DisplayName;
 @ExtendWith(BufferedLoggerHandler.class)
 @SuppressWarnings("rawtypes")
 @DisplayName("FHIR resource submission ")
-
 class FHIRSubmissionTest {
     private static final String TEST_BASE_URL = "http://localhost:3002/v1";
     private static final UUID AGGREGATOR_ID = UUID.randomUUID();
@@ -92,8 +91,7 @@ class FHIRSubmissionTest {
     }
 
     @Test
-@DisplayName("Data request 🥳")
-
+    @DisplayName("Data request 🥳")
     void testDataRequest() {
         final WebTarget target = groupResource.target("/v1/Group/1/$export");
         final Response response = target.request()
@@ -125,8 +123,7 @@ class FHIRSubmissionTest {
      * Test with a resource type in the '_type' query parameter
      *///fails
     @Test
-@DisplayName("Single resource submission 🥳")
-
+    @DisplayName("Single resource submission 🥳")
     void testOneResourceSubmission() {
         // A request with parameters ...
         final WebTarget target = groupResource
@@ -150,8 +147,7 @@ class FHIRSubmissionTest {
      * Test with a list of resource types in the '_type' query parameter
      */
     @Test
-@DisplayName("Resource list submission 🥳")
-
+    @DisplayName("Resource list submission 🥳")
     void testTwoResourceSubmission() {
         // A request with parameters ...
         final WebTarget target = groupResource
@@ -173,8 +169,7 @@ class FHIRSubmissionTest {
     }
 
     @Test
-@DisplayName("Parameterized resource list submission 🥳")
-
+    @DisplayName("Parameterized resource list submission 🥳")
     void testThreeResourceSubmission() {
         // A request with parameters ...
         final WebTarget target = groupResource
@@ -200,8 +195,7 @@ class FHIRSubmissionTest {
      * Negative test with a bad type of resource types in the '_type' query parameter
      */
     @Test
-@DisplayName("Bad resource type submission 🤮")
-
+    @DisplayName("Bad resource type submission 🤮")
     void testBadResourceSubmission() {
         // A request with a bad resource type parameter...
         final WebTarget target = groupResource
@@ -218,8 +212,7 @@ class FHIRSubmissionTest {
      * Test with no _type parameter
      */
     @Test
-@DisplayName("No resource submission 🥳")
-
+    @DisplayName("No resource submission 🥳")
     void testNoResourceSubmission() {
         // A request with no resource type parameters...
         final WebTarget target = groupResource.target("/v1/Group/1/$export");

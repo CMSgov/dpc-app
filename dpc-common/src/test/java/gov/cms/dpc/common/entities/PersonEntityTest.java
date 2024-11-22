@@ -2,7 +2,6 @@ package gov.cms.dpc.common.entities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -11,8 +10,8 @@ import org.junit.jupiter.api.DisplayName;
 @DisplayName("Person Entity tests")
 public class PersonEntityTest {
 	@Test
-	@DisplayName("Test getters and setters 🥳")
-public void testGettersAndSetters() {
+        @DisplayName("Test getters and setters 🥳")
+	public void testGettersAndSetters() {
 		PersonEntityImpl personEntity = new PersonEntityImpl();
 		String firstName = "Sydney";
 		String lastName = "Danger";
@@ -33,8 +32,8 @@ public void testGettersAndSetters() {
 	}
 
 	@Test
-	@DisplayName("Person creation 🥳")
-public void testSetCreation() {
+        @DisplayName("Person creation 🥳")
+	public void testSetCreation() {
 		PersonEntityImpl personEntity = new PersonEntityImpl();
 		personEntity.setCreation();
 		assertNotNull(personEntity.getCreatedAt());
@@ -42,8 +41,8 @@ public void testSetCreation() {
 	}
 
 	@Test
-	@DisplayName("Person update 🥳")
-public void testSetUpdateTime() {
+        @DisplayName("Person update 🥳")
+	public void testSetUpdateTime() {
 		PersonEntityImpl personEntity = new PersonEntityImpl();
 		personEntity.setUpdateTime();
 		assertNotNull(personEntity.getUpdatedAt());

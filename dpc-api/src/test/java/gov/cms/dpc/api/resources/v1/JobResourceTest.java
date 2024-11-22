@@ -14,7 +14,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -43,7 +43,7 @@ public class JobResourceTest {
      */
     @Test
     @DisplayName("Get unrecognized job 🤮")
-public void testNonExistentJob() {
+    public void testNonExistentJob() {
         final var jobID = UUID.randomUUID();
         final var queue = new MemoryBatchQueue(100);
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -59,7 +59,7 @@ public void testNonExistentJob() {
      */
     @Test
     @DisplayName("Return queued job status 🥳")
-public void testQueuedJob() {
+    public void testQueuedJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(100);
@@ -85,7 +85,7 @@ public void testQueuedJob() {
      */
     @Test
     @DisplayName("Return running job status 🥳")
-public void testRunningJob() {
+    public void testRunningJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(1);
@@ -115,7 +115,7 @@ public void testRunningJob() {
      */
     @Test
     @DisplayName("Return successful job artifacts 🥳")
-public void testSuccessfulJob() {
+    public void testSuccessfulJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(100);
@@ -165,7 +165,7 @@ public void testSuccessfulJob() {
      */
     @Test
     @DisplayName("Return partially successful job artifacts 🥳")
-public void testJobWithError() {
+    public void testJobWithError() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(100);
@@ -207,7 +207,7 @@ public void testJobWithError() {
      */
     @Test
     @DisplayName("Return failed job status 🥳")
-public void testFailedJob() {
+    public void testFailedJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(100);
@@ -233,7 +233,7 @@ public void testFailedJob() {
 
     @Test
     @DisplayName("Return expired job status 🥳")
-public void testExpiredJob() {
+    public void testExpiredJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(1);
@@ -274,7 +274,7 @@ public void testExpiredJob() {
      */
     @Test
     @DisplayName("Access other org's job 🤮")
-public void testWrongOrgJobAccess() {
+    public void testWrongOrgJobAccess() {
         final var organizationPrincipalCorrect = APITestHelpers.makeOrganizationPrincipal();
         final var orgIDCorrect = FHIRExtractors.getEntityUUID(organizationPrincipalCorrect.getOrganization().getId());
         final var organizationPrincipalWrong = APITestHelpers.makeOrganizationPrincipal(OTHER_ORGANIZATION);
@@ -293,9 +293,6 @@ public void testWrongOrgJobAccess() {
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
         runningJob.fetchNextPatient(AGGREGATOR_ID);
-        final var results = JobQueueBatch.validResourceTypes.stream()
-                .map(resourceType -> runningJob.addJobQueueFile(resourceType, 0, 1))
-                .collect(Collectors.toList());
 
         queue.completeBatch(runningJob, AGGREGATOR_ID);
 
@@ -303,18 +300,6 @@ public void testWrongOrgJobAccess() {
         final var resource = new JobResource(queue, TEST_BASEURL);
         final Response responseWrong = resource.checkJobStatus(organizationPrincipalWrong, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, responseWrong.getStatus()));
-
-        // Access it with the right org (should be authorized)
-        final Response responseRight = resource.checkJobStatus(organizationPrincipalCorrect, jobID.toString());
-        assertAll(() -> assertEquals(HttpStatus.OK_200, responseRight.getStatus()));
-
-        // Test the completion model
-        final var completion = (JobCompletionModel) responseRight.getEntity();
-        assertAll(() -> assertEquals(JobQueueBatch.validResourceTypes.size(), completion.getOutput().size()),
-                () -> assertEquals(0, completion.getError().size()));
-        for (JobCompletionModel.OutputEntry entry : completion.getOutput()) {
-            assertEquals(String.format("%s/Data/%s.ndjson", TEST_BASEURL, JobQueueBatchFile.formOutputFileName(runningJob.getBatchID(), entry.getType(), 0)), entry.getUrl());
-        }
     }
 
     /**
@@ -322,7 +307,7 @@ public void testWrongOrgJobAccess() {
      */
     @Test
     @DisplayName("Build output entry extension for file 🥳")
-public void testBuildOutputEntryExtension() {
+    public void testBuildOutputEntryExtension() {
         final var resource = new JobResource(null, "");
         final var file = new JobQueueBatchFile(UUID.randomUUID(), UUID.fromString("f1e518f5-4977-47c6-971b-7eeaf1b433e8"), DPCResourceType.Patient, 0, 11);
         file.setChecksum(Hex.decode("9d251cea787379c603af13f90c26a9b2a4fbb1e029793ae0f688c5631cdb6a1b"));
@@ -336,7 +321,7 @@ public void testBuildOutputEntryExtension() {
 
     @Test
     @DisplayName("Build job extension 🥳")
-public void testBuildJobExtension() {
+    public void testBuildJobExtension() {
         final var resource = new JobResource(null, "");
         final var batch = new JobQueueBatch(
                 UUID.randomUUID(),

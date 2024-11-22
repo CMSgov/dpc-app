@@ -13,15 +13,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.DisplayName;
 
-@DisplayName("Numeric encoding and decoding")
+@DisplayName("Numeric handling")
 class VarIntTests {
 
     private VarIntTests() {
     }
 
     @ParameterizedTest
-    @MethodSource("longStream")
     @DisplayName("Read signed long 🥳")
+    @MethodSource("longStream")
     void testSignedLong(long value) throws IOException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream(Long.BYTES);
         final DataOutputStream os = new DataOutputStream(bos);
@@ -32,8 +32,8 @@ class VarIntTests {
     }
 
     @ParameterizedTest
-    @MethodSource("longStream")
     @DisplayName("Read unsigned long 🥳")
+    @MethodSource("longStream")
     void testUnsignedLong(long value) throws IOException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream(Long.BYTES);
         final DataOutputStream os = new DataOutputStream(bos);
@@ -44,8 +44,8 @@ class VarIntTests {
     }
 
     @ParameterizedTest
-    @MethodSource("intStream")
     @DisplayName("Read signed int 🥳")
+    @MethodSource("intStream")
     void testSignedInt(int value) throws IOException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream(Integer.BYTES);
         final DataOutputStream os = new DataOutputStream(bos);
@@ -58,8 +58,8 @@ class VarIntTests {
     }
 
     @ParameterizedTest
-    @MethodSource("intStream")
     @DisplayName("Read unsigned int 🥳")
+    @MethodSource("intStream")
     void testUnsignedInt(int value) throws IOException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream(Integer.BYTES);
         final DataOutputStream os = new DataOutputStream(bos);

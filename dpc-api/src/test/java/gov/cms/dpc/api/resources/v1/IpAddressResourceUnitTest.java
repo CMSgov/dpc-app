@@ -6,6 +6,8 @@ import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotFoundException;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,20 +15,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Inet resource operations")
-
 class IpAddressResourceUnitTest {
     IpAddressResource ipAddressResource;
     OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
@@ -41,7 +42,7 @@ class IpAddressResourceUnitTest {
 
     @Test
     @DisplayName("Get IP address 🥳")
-public void testGet() {
+    public void testGet() {
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of(ipAddressEntity));
@@ -53,7 +54,7 @@ public void testGet() {
 
     @Test
     @DisplayName("Get empty list when no IP addresses are defined 🥳")
-public void testGet_nothingReturned() {
+    public void testGet_nothingReturned() {
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of());
 
         CollectionResponse response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
@@ -62,7 +63,7 @@ public void testGet_nothingReturned() {
 
     @Test
     @DisplayName("Add an IP address 🥳")
-public void testPost_happyPath() {
+    public void testPost_happyPath() {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("192.168.1.1");
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
@@ -75,18 +76,18 @@ public void testPost_happyPath() {
 
     @Test
     @DisplayName("Add an invalid IP address 🤮")
-public void testPost_badIp() {
+    public void testPost_badIp() {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("1.bad.ip.addr");
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
-        assertThrows(WebApplicationException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest);
         });
     }
 
     @Test
     @DisplayName("Add too many IP addresses 🤮")
-public void testPost_tooManyIps() {
+    public void testPost_tooManyIps() {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("192.168.1.1");
 
         List<IpAddressEntity> existingIps = new ArrayList<>();
@@ -103,7 +104,7 @@ public void testPost_tooManyIps() {
 
     @Test
     @DisplayName("Delete IP address 🥳")
-public void testDelete_happyPath() {
+    public void testDelete_happyPath() {
         UUID ipId = UUID.randomUUID();
         IpAddressEntity existingIp = new IpAddressEntity().setId(ipId);
 
@@ -115,12 +116,12 @@ public void testDelete_happyPath() {
 
     @Test
     @DisplayName("Unrecognized IP address 🤮")
-public void testDelete_notFound() {
+    public void testDelete_notFound() {
         IpAddressEntity existingIp = new IpAddressEntity().setId(UUID.randomUUID());
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of(existingIp));
 
-        assertThrows(WebApplicationException.class, () -> {
+        assertThrows(NotFoundException.class, () -> {
             ipAddressResource.deleteIpAddress(organizationPrincipal, UUID.randomUUID());
         });
     }

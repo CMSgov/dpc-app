@@ -6,9 +6,8 @@ import java.security.SecureRandom;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.api.DisplayName;
+
 @DisplayName("Key/value store memory management")
-
-
 class MemoryStoreTest extends AbstractStoreTest {
 
     MemoryStoreTest() {
@@ -16,8 +15,7 @@ class MemoryStoreTest extends AbstractStoreTest {
     }
 
     @Test
-@DisplayName("Generate key 🥳")
-
+    @DisplayName("Generate key 🥳")
     void testKeyGeneratedCorrectly() {
         assertNotEquals(0, this.store.get("0").hashCode(), "Should have random root key");
     }

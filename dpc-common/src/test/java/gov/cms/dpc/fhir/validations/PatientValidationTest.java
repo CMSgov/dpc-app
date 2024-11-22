@@ -22,7 +22,6 @@ import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @DisplayName("Patient validation")
-
 class PatientValidationTest {
 
     private static FhirValidator fhirValidator;
@@ -50,8 +49,7 @@ class PatientValidationTest {
     }
 
     @Test
-@DisplayName("Validate patient definition 🥳")
-
+    @DisplayName("Validate patient definition 🥳")
     void definitionIsValid() {
         final StructureDefinition patientDefinition = dpcModule.fetchStructureDefinition(PatientProfile.PROFILE_URI);
         final ValidationResult result = fhirValidator.validateWithResult(patientDefinition);
@@ -60,8 +58,7 @@ class PatientValidationTest {
     }
 
     @Test
-@DisplayName("Validate patient with missing name 🥳")
-
+    @DisplayName("Validate patient with missing name 🥳")
     void testHasName() {
 
         final Patient patient = generateFakePatient();
@@ -85,8 +82,7 @@ class PatientValidationTest {
     }
 
     @Test
-@DisplayName("Validate patient with missing DOB 🤮")
-
+    @DisplayName("Validate patient with missing DOB 🤮")
     void testHasBirthday() {
 
         final Patient patient = generateFakePatient();
@@ -104,8 +100,7 @@ class PatientValidationTest {
     }
 
     @Test
-@DisplayName("Validate patient with missing ID 🤮")
-
+    @DisplayName("Validate patient with missing ID 🤮")
     void testIdentifier() {
         final Patient patient = generateFakePatient();
         patient.addName().setFamily("Patient").addGiven("Test");
@@ -126,6 +121,23 @@ class PatientValidationTest {
                 () -> assertEquals(2, r2.getMessages().size(), "Should have two failures for ID slice"));
 
         patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mpi");
+        final ValidationResult r3 = fhirValidator.validateWithResult(patient);
+        assertTrue(r3.isSuccessful(), "Should have passed");
+    }
+
+    @Test
+    @DisplayName("Validate patient 🥳")
+    void testPatientIdentifier() {
+        final Patient patient = generateFakePatient();
+        patient.addName().setFamily("Patient").addGiven("Test");
+        patient.setBirthDate(Date.valueOf("1990-01-01"));
+        patient.setMultipleBirth(new BooleanType(false));
+        patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("555-555-5501").setUse(ContactPoint.ContactPointUse.MOBILE);
+        patient.addAddress(generateFakeAddress());
+
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("test-npi");
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mpi");
+
         final ValidationResult r3 = fhirValidator.validateWithResult(patient);
         assertTrue(r3.isSuccessful(), "Should have passed");
     }

@@ -18,8 +18,8 @@ import org.junit.jupiter.api.DisplayName;
 public class RosterEntityTest {
 
 	@Test
-	@DisplayName("Test getters and setters 🥳")
-public void testGettersAndSetters() {
+        @DisplayName("Test getters and setters 🥳")
+	public void testGettersAndSetters() {
 		RosterEntity roster = new RosterEntity();
 		UUID id = UUID.randomUUID();
 		ProviderEntity provider = new ProviderEntity();
@@ -44,8 +44,8 @@ public void testGettersAndSetters() {
 	}
 
 	@Test
-	@DisplayName("Roster entity returned from FHIR 🥳")
-public void testFromFHIR() {
+        @DisplayName("Roster entity returned from FHIR 🥳")
+	public void testFromFHIR() {
 		Group attributionRoster = new Group();
 
 		Coding coding = new Coding();
@@ -70,8 +70,8 @@ public void testFromFHIR() {
 	}
 
 	@Test
-	@DisplayName("Overrides for hashcode and equals 🥳")
-public void testEqualsAndHashCode() {
+        @DisplayName("Overrides for hashcode and equals 🥳")
+	public void testEqualsAndHashCode() {
 		UUID id = UUID.randomUUID();
 		RosterEntity r1 = new RosterEntity();
 		r1.setId(id);

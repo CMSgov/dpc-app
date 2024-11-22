@@ -11,8 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 public class EndpointEntityTest {
 
 	@Test
-	@DisplayName("Test endpoint getters and setters 🥳")
-public void testGettersAndSetters() {
+        @DisplayName("Test endpoint getters and setters 🥳")
+	public void testGettersAndSetters() {
 		EndpointEntity endpoint = new EndpointEntity();
 		UUID id = UUID.randomUUID();
 		OrganizationEntity org = new OrganizationEntity();
@@ -44,8 +44,8 @@ public void testGettersAndSetters() {
 	}
 
 	@Test
-	@DisplayName("Update endpoint 🥳")
-public void testUpdate() {
+        @DisplayName("Update endpoint 🥳")
+	public void testUpdate() {
 		EndpointEntity e1 = new EndpointEntity();
 		EndpointEntity e2 = new EndpointEntity();
 
@@ -56,8 +56,8 @@ public void testUpdate() {
 	}
 
 	@Test
-	@DisplayName("Test connection getters and setters 🥳")
-public void testConnectionGettersAndSetters() {
+        @DisplayName("Test connection getters and setters 🥳")
+	public void testConnectionGettersAndSetters() {
 		EndpointEntity.ConnectionType connectionType = new EndpointEntity.ConnectionType();
 		String system = "example-system";
 		String code = "example-code";

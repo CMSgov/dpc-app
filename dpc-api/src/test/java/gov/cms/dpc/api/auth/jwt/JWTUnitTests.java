@@ -3,7 +3,11 @@ package gov.cms.dpc.api.auth.jwt;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.UnitTestModule;
 import gov.cms.dpc.api.auth.DPCAuthDynamicFeature;
 import gov.cms.dpc.api.auth.DPCAuthFactory;
 import gov.cms.dpc.api.auth.DPCUnauthorizedHandler;
@@ -38,11 +42,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mockito;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -77,9 +81,16 @@ class JWTUnitTests {
     private JWTUnitTests() {
     }
     
+    @BeforeEach
+    void setup() {
+        Injector injector = Guice.createInjector(new UnitTestModule(null));
+        JerseyGuiceUtils.install(injector);    
+    }
+
     @AfterEach
     void cleanup() {
         JWTKeys.clear();
+        JerseyGuiceUtils.reset();
     }
 
     @Nested
@@ -704,7 +715,7 @@ class JWTUnitTests {
                     .accept(MediaType.APPLICATION_JSON)
                     .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
 
-            assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus(), "Should not be authorized");
+            assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus(), "Should not be authorized");
             assertTrue(response.readEntity(String.class).contains("Claim issuer must be present"), "Should have correct exception");
         }
 

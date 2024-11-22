@@ -39,7 +39,6 @@ import static com.squarespace.jersey2.guice.BindingUtils.newThreeThirtyInjection
 public class JerseyGuiceUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(JerseyGuiceUtils.class);
-    private static final boolean TRACE = LOG.isTraceEnabled();
 
     private static final String MODIFIERS_FIELD = "modifiers";
 
@@ -63,13 +62,13 @@ public class JerseyGuiceUtils {
     public static void install(Injector injector) {
         // This binding is provided by JerseyGuiceModule
         ServiceLocator locator = injector.getInstance(ServiceLocator.class);
-        if(TRACE) LOG.trace("OK I am installing the injector. Got a locator: " + locator.getName());
+        LOG.info("OK I am installing the injector. Got a locator: " + locator.getName());
 
         GuiceServiceLocatorGenerator generator = getOrCreateGuiceServiceLocatorGenerator();
-        if(TRACE) LOG.trace("Got a generator with " + generator.locators().size() + " locators!");
+        LOG.info("Got a generator with " + generator.locators().size() + " locators!");
 
         generator.add(locator);
-        if(TRACE) LOG.trace("Now its a generator with " + generator.locators().size() + " locators!");
+        LOG.info("Now its a generator with " + generator.locators().size() + " locators!");
     }
 
     /**
@@ -94,20 +93,20 @@ public class JerseyGuiceUtils {
 
     private static synchronized GuiceServiceLocatorGenerator getOrCreateGuiceServiceLocatorGenerator() {
         // Use SPI
-        if(TRACE) LOG.trace("Getting or creating GSLG...");
+        LOG.info("Getting or creating GSLG...");
         if (isProviderPresent()) {
-            if(TRACE) LOG.trace("Provider is present!!!");
+            LOG.info("Provider is present!!!");
             GuiceServiceLocatorGenerator generator = (GuiceServiceLocatorGenerator) GuiceServiceLocatorGeneratorStub.get();
-            if(TRACE) LOG.trace("Got a generator from the stub!");
+            LOG.info("Got a generator from the stub!");
             if (generator == null) {
-                if(TRACE) LOG.trace("Generator was null though!!");
+                LOG.info("Generator was null though!!");
                 generator = new GuiceServiceLocatorGenerator();
-                if(TRACE) LOG.trace("Created a new one!");
+                LOG.info("Created a new one!");
                 GuiceServiceLocatorGeneratorStub.install(generator);
-                if(TRACE) LOG.trace("Installed in the stub ref!");
+                LOG.info("Installed in the stub ref!");
             }
             
-            if(TRACE) LOG.trace("OK I am returning generator " + generator.getClass().getCanonicalName());
+            LOG.info("OK I am returning generator " + generator.getClass().getCanonicalName());
             return generator;
         }
 
@@ -115,7 +114,7 @@ public class JerseyGuiceUtils {
         GuiceServiceLocatorFactory factory = getOrCreateFactory();
         
         if (factory != null) {
-            if(TRACE) LOG.trace("I have to find a factory! Its " + factory.getClass().getCanonicalName());
+            LOG.info("I have to find a factory! Its " + factory.getClass().getCanonicalName());
             GuiceServiceLocatorGenerator generator = (GuiceServiceLocatorGenerator) factory.get();
             if (generator == null) {
                 generator = new GuiceServiceLocatorGenerator();
@@ -125,7 +124,7 @@ public class JerseyGuiceUtils {
             return generator;
         }
 
-        LOG.error("Could not get or create a Guice Service Locator Factory.");
+        LOG.info("Oh no! Null factory!!!");
         throw new IllegalStateException();
     }
 
@@ -135,19 +134,19 @@ public class JerseyGuiceUtils {
     private static synchronized boolean isProviderPresent() {
 
         if (!SPI_CHECKED) {
-            if(TRACE) LOG.trace("Haven't checked on service provider for j2g!");
+            LOG.info("Haven't checked on service provider for j2g!");
             SPI_CHECKED = true;
 
             ServiceLocatorGenerator generator = lookupSPI();
             if(generator != null)
-                if(TRACE) LOG.trace("Generator I got from looking up SPI is " + generator.getClass().getCanonicalName());
+                LOG.info("Generator I got from looking up SPI is " + generator.getClass().getCanonicalName());
             if (generator instanceof GuiceServiceLocatorGeneratorStub) {
                 SPI_PRESENT = true;
-                if(TRACE) LOG.trace("OK SPI is present!");
+                LOG.info("OK SPI is present!");
             }
 
             if (!SPI_PRESENT) {
-                if(TRACE) LOG.trace("It appears jersey2-guice-spi is either not present or in conflict with some other Jar: {}", generator);
+                LOG.warn("It appears jersey2-guice-spi is either not present or in conflict with some other Jar: {}", generator);
             }
         }
 
@@ -155,7 +154,7 @@ public class JerseyGuiceUtils {
     }
 
     private static ServiceLocatorGenerator lookupSPI() {
-        if(TRACE) LOG.trace("Looking up SPI!");
+        LOG.info("Looking up SPI!");
         return AccessController.doPrivileged(new PrivilegedAction<ServiceLocatorGenerator>() {
             @Override
             public ServiceLocatorGenerator run() {
@@ -183,32 +182,34 @@ public class JerseyGuiceUtils {
      * @see ServiceLocatorFactory
      */
     private static synchronized GuiceServiceLocatorFactory getOrCreateFactory() {
-        if(TRACE) LOG.trace("Getting or creating factory!");
+        LOG.info("Getting or creating factory!");
         
         ServiceLocatorFactory factory = ServiceLocatorFactory.getInstance();
         if (factory instanceof GuiceServiceLocatorFactory) {
-            if(TRACE) LOG.trace("The factory is a GSLF!");
+            LOG.info("The factory is a GSLF!");
             return (GuiceServiceLocatorFactory) factory;
         }
 
-        if(TRACE) LOG.trace("Attempting to install (using relfection) a Guice-aware ServiceLocatorFactory...");
+        LOG.info("Attempting to install (using relfection) a Guice-aware ServiceLocatorFactory...");
 
         try {
             GuiceServiceLocatorFactory guiceServiceLocatorFactory
                     = new GuiceServiceLocatorFactory(factory);
 
-            if(TRACE) LOG.trace("Created a new GSLF!");
+            LOG.info("Created a new GSLF!");
             
             Class<?> clazz = ServiceLocatorFactory.class;
             Field field = clazz.getDeclaredField("INSTANCE");
 
             set(field, null, guiceServiceLocatorFactory);
 
-            if(TRACE) LOG.trace("Built a faked-up factory!");
+            LOG.info("Built a faked up factory!");
             
             return guiceServiceLocatorFactory;
         } catch (Exception err) {
-            LOG.error("Exception trying to get or create a Guice Service Locator Factory.", err);
+            LOG.info("Big mess here!");
+            err.printStackTrace();
+            LOG.error("Exception", err);
         }
 
         return null;
@@ -258,7 +259,7 @@ public class JerseyGuiceUtils {
 
         GuiceServiceLocator locator = new GuiceServiceLocator(name, parent);
 
-        if(TRACE) LOG.trace("I made a new GSL with name " + name);
+        LOG.info("I made a new GSL with name " + name);
         
         DynamicConfigurationImpl config = new DynamicConfigurationImpl(locator);
 
@@ -368,7 +369,9 @@ public class JerseyGuiceUtils {
             if (!(source instanceof ElementSource)) {
 
                 // Things like the Injector itself don't have an ElementSource.
-                if(TRACE) LOG.trace("Adding binding: key={}, source={}", key, source);
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Adding binding: key={}, source={}", key, source);
+                }
 
                 binders.add(new GuiceBinder(key, binding));
                 continue;
@@ -392,7 +395,9 @@ public class JerseyGuiceUtils {
                     module = Class.forName(name);
                 }
                 if (JerseyModule.class.isAssignableFrom(module)) {
-                    if(TRACE) LOG.trace("Ignoring binding {} in {}", key, module);
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Ignoring binding {} in {}", key, module);
+                    }
 
                     continue;
                 }
@@ -401,7 +406,9 @@ public class JerseyGuiceUtils {
                 // in a container that enforcer tighter class loader constraints (such as the
                 // org.ops4j.peaberry.osgi.OSGiModule Guice module when running in an OSGi container),
                 // so we're only logging a warning here instead of throwing a hard exception
-                LOG.warn("Unavailable to load class in order to validate module: name={}", name);
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Unavailable to load class in order to validate module: name={}", name);
+                }
             }
 
             binders.add(new GuiceBinder(key, binding));

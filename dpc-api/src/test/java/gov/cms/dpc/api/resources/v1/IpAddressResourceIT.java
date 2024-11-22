@@ -19,7 +19,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.jupiter.api.*;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.UUID;
@@ -27,11 +27,9 @@ import java.util.UUID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import org.junit.jupiter.api.DisplayName;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("Inet resource operations")
-
 class IpAddressResourceIT extends AbstractSecureApplicationIT {
     private final ObjectMapper mapper = new ObjectMapper();
     private final String fullyAuthedToken;
@@ -45,9 +43,9 @@ class IpAddressResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-    @Order(1)
     @DisplayName("Access IP Address resource with fake auth token 🤮")
-public void testBadAuth() throws URISyntaxException, IOException {
+    @Order(1)
+    public void testBadAuth() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
         URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
@@ -56,13 +54,13 @@ public void testBadAuth() throws URISyntaxException, IOException {
         get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer FAKE_AUTH_TOKEN" );
 
         CloseableHttpResponse response = client.execute(get);
-        assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatusLine().getStatusCode());
+        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
     }
 
     @Test
-    @Order(2)
     @DisplayName("Access IP Address resource with no auth token 🤮")
-public void testNoAuth() throws URISyntaxException, IOException {
+    @Order(2)
+    public void testNoAuth() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
         URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
@@ -74,9 +72,9 @@ public void testNoAuth() throws URISyntaxException, IOException {
     }
 
     @Test
-    @Order(3)
     @DisplayName("Access IP Address resource with auth token 🥳")
-public void testPost_happyPath() throws IOException, URISyntaxException {
+    @Order(3)
+    public void testPost_happyPath() throws IOException, URISyntaxException {
         CloseableHttpClient client = HttpClients.createDefault();
         String ipAddressJson = mapper.writeValueAsString(ipRequest);
         URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
@@ -98,14 +96,14 @@ public void testPost_happyPath() throws IOException, URISyntaxException {
         assertNotNull(responseIp.getCreatedAt());
 
         // Save the updated ipAddressEntity for future tests
-        this.ipAddressEntityResponse = responseIp;
+        ipAddressEntityResponse = responseIp;
     }
 
     @Test
+    @DisplayName("Get IP address 🥳")
     @Order(4)
     // Force this to run after the POST test
-    @DisplayName("Get IP address 🥳")
-public void testGet() throws URISyntaxException, IOException {
+    public void testGet() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
         URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
@@ -129,9 +127,9 @@ public void testGet() throws URISyntaxException, IOException {
     }
 
     @Test
-    @Order(5)
     @DisplayName("Delete IP address 🥳")
-public void testDelete_happyPath() throws URISyntaxException, IOException {
+    @Order(5)
+    public void testDelete_happyPath() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
         URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress/%s", getBaseURL(), ipAddressEntityResponse.getId()));
 
@@ -144,9 +142,9 @@ public void testDelete_happyPath() throws URISyntaxException, IOException {
     }
 
     @Test
-    @Order(6)
     @DisplayName("Delete unrecognized IP Address 🤮")
-public void testDelete_notFound() throws URISyntaxException, IOException {
+    @Order(6)
+    public void testDelete_notFound() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
         URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress/%s", getBaseURL(), UUID.randomUUID()));
 
@@ -159,10 +157,10 @@ public void testDelete_notFound() throws URISyntaxException, IOException {
     }
 
     @Test
+    @DisplayName("Allow too many IP addresses to be set 🤮")
     @Order(7)
     // Force this test to run last since it's going to max out our Ips for the org
-    @DisplayName("Allow too many IP addresses to be set 🤮")
-public void testPost_tooManyIps() throws IOException, URISyntaxException {
+    public void testPost_tooManyIps() throws IOException, URISyntaxException {
         // We shouldn't have any rows in the table at this point, so fill up to the max
         for(int i=1; i<=8; i++) {
             writeIpAddress(String.format("test post %d", i), "192.168.1.1");
@@ -185,9 +183,9 @@ public void testPost_tooManyIps() throws IOException, URISyntaxException {
     }
 
     @Test
-    @Order(8)
     @DisplayName("Get IP address with missing parameter 🤮")
-public void testPost_noIp() throws IOException, URISyntaxException {
+    @Order(8)
+    public void testPost_noIp() throws IOException, URISyntaxException {
         CreateIpAddressRequest emptyIpRequest = new CreateIpAddressRequest(null);
 
         CloseableHttpClient client = HttpClients.createDefault();

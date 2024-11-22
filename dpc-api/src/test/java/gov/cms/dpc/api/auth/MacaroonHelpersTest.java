@@ -5,12 +5,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 import static gov.cms.dpc.api.auth.MacaroonHelpers.TOKEN_URI_PARAM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,8 +29,7 @@ class MacaroonHelpersTest {
     class MacaroonTests {
 
         @Test
-@DisplayName("Macaroon extraction from header 🥳")
-
+        @DisplayName("Macaroon extraction from header 🥳")
         void getMacaroonFromHeader() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);
@@ -44,8 +42,7 @@ class MacaroonHelpersTest {
         }
 
         @Test
-@DisplayName("Macaroon extraction from query parameter 🥳")
-
+        @DisplayName("Macaroon extraction from query parameter 🥳")
         void getMacaroonFromQueryParam() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);
@@ -63,8 +60,7 @@ class MacaroonHelpersTest {
         }
 
         @Test
-@DisplayName("Request without macaroon 🤮")
-
+        @DisplayName("Request without macaroon 🤮")
         void getNoMacaroon() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);
@@ -77,12 +73,11 @@ class MacaroonHelpersTest {
             Mockito.when(request.getUriInfo()).thenReturn(uriMock);
 
             final Response response = Response.ok().build();
-            assertThrows(WebApplicationException.class, () -> MacaroonHelpers.extractMacaroonFromRequest(request, response), "Should not have Macaroon");
+            assertThrows(IllegalArgumentException.class, () -> MacaroonHelpers.extractMacaroonFromRequest(request, response), "Should not have Macaroon");
         }
 
         @Test
-@DisplayName("Macaroon from header is prioritized 🥳")
-
+        @DisplayName("Macaroon from header is prioritized 🥳")
         void ensureHeaderPriority() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);
@@ -100,8 +95,7 @@ class MacaroonHelpersTest {
         }
 
         @Test
-@DisplayName("Blank macaroon in header 🤮")
-
+        @DisplayName("Blank macaroon in header 🤮")
         void testBlankMacaroonHeader() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);
@@ -119,8 +113,7 @@ class MacaroonHelpersTest {
         }
 
         @Test
-@DisplayName("Blank macaroon in query parameter 🤮")
-
+        @DisplayName("Blank macaroon in query parameter 🤮")
         void testBlankMacaroonQueryParam() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);
@@ -138,8 +131,7 @@ class MacaroonHelpersTest {
         }
 
         @Test
-@DisplayName("Macaroon with whitespace 🤮")
-
+        @DisplayName("Macaroon with whitespace 🤮")
         void testHeaderNoSpace() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);
@@ -153,12 +145,11 @@ class MacaroonHelpersTest {
             Mockito.when(request.getUriInfo()).thenReturn(uriMock);
 
             final Response response = Response.ok().build();
-            assertThrows(WebApplicationException.class, () -> MacaroonHelpers.extractMacaroonFromRequest(request, response), "Should not have Macaroon");
+            assertThrows(IllegalArgumentException.class, () -> MacaroonHelpers.extractMacaroonFromRequest(request, response), "Should not have Macaroon");
         }
 
         @Test
-@DisplayName("Bearer token missing from header 🤮")
-
+        @DisplayName("Bearer token missing from header 🤮")
         void testHeaderNoBearer() {
             final ContainerRequestContext request = mock(ContainerRequestContext.class);
             final MultivaluedMap headers = mock(MultivaluedMap.class);
@@ -172,7 +163,7 @@ class MacaroonHelpersTest {
             Mockito.when(request.getUriInfo()).thenReturn(uriMock);
 
             final Response response = Response.ok().build();
-            assertThrows(WebApplicationException.class, () -> MacaroonHelpers.extractMacaroonFromRequest(request, response), "Should not have Macaroon");
+            assertThrows(IllegalArgumentException.class, () -> MacaroonHelpers.extractMacaroonFromRequest(request, response), "Should not have Macaroon");
         }
     }
 }

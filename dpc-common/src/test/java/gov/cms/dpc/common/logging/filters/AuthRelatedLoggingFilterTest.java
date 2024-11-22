@@ -28,9 +28,9 @@ public class AuthRelatedLoggingFilterTest {
     }
 
     @ParameterizedTest
-    @MethodSource("stringSource")
     @DisplayName("Test URL query strings 🥳?")
-public void testQueryString(String queryString, FilterReply expectedReply) {
+    @MethodSource("stringSource")
+    public void testQueryString(String queryString, FilterReply expectedReply) {
         Mockito.when(event.getQueryString()).thenReturn(queryString);
         FilterReply reply = filter.decide(event);
         Assertions.assertEquals(expectedReply, reply);

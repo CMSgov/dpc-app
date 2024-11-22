@@ -14,12 +14,10 @@ import org.apache.http.impl.client.HttpClients;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
-import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
@@ -39,9 +37,9 @@ public abstract class AbstractAttributionIT {
     @BeforeAll
     public static void initDB() throws Exception {
         APPLICATION.before();
-        SharedConfigurationState.clear();
+//        SharedConfigurationState.clear();
         APPLICATION.getApplication().run("db", "migrate" , configPath);
-        SharedConfigurationState.clear();
+//        SharedConfigurationState.clear();
         APPLICATION.getApplication().run("seed", configPath);
     }
 

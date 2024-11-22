@@ -13,7 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(BufferedLoggerHandler.class)
-@DisplayName("Macaroon store tests")
+@DisplayName("Key/value storage")
 public abstract class AbstractStoreTest {
 
     protected final IRootKeyStore store;
@@ -28,7 +28,6 @@ public abstract class AbstractStoreTest {
     }
 
     @Test
-
     @DisplayName("Create key pair 🥳")
     void simpleCreateTest() {
         final IDKeyPair idKeyPair = store.create();

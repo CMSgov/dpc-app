@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MultivaluedHashMap;
 import java.util.List;
 
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
@@ -37,8 +37,7 @@ public class FHIRAsyncRequestFilterTest {
     class AcceptsHeader {
 
         @Test
-@DisplayName("Filter FHIR request with missing header 🤮")
-
+        @DisplayName("Filter FHIR request with missing header 🤮")
         void testMissingAcceptsHeader() {
             final MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
             Mockito.when(context.getHeaders()).thenReturn(map);
@@ -47,8 +46,7 @@ public class FHIRAsyncRequestFilterTest {
         }
 
         @Test
-@DisplayName("Accept FHIR request with correct header 🥳")
-
+        @DisplayName("Accept FHIR request with correct header 🥳")
         void testCorrectAcceptsHeader() {
             final MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
             map.put(HttpHeaders.ACCEPT, List.of(FHIR_JSON));
@@ -58,8 +56,7 @@ public class FHIRAsyncRequestFilterTest {
         }
 
         @Test
-@DisplayName("Accept FHIR request with multi-value header 🥳")
-
+        @DisplayName("Accept FHIR request with multi-value header 🥳")
         void testMultipleAcceptsHeader() {
             final MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
             map.put(HttpHeaders.ACCEPT, List.of("wrong", FHIR_JSON));
@@ -69,8 +66,7 @@ public class FHIRAsyncRequestFilterTest {
         }
 
         @Test
-@DisplayName("Filter FHIR request with incorrect header value 🤮")
-
+        @DisplayName("Filter FHIR request with incorrect header value 🤮")
         void testIncorrectAcceptsHeader() {
             final MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
             map.put(HttpHeaders.ACCEPT, List.of("This is not right"));
@@ -84,6 +80,7 @@ public class FHIRAsyncRequestFilterTest {
     @DisplayName("Test `Prefer` header")
     class PreferHeader {
         @Test
+        @DisplayName("Filter FHIR request with missing header 🤮")
         void testMissingPreferHeader() {
             final MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
             map.put(HttpHeaders.ACCEPT, List.of(FHIR_JSON));
@@ -93,6 +90,7 @@ public class FHIRAsyncRequestFilterTest {
         }
 
         @Test
+        @DisplayName("Accept FHIR request with correct header 🥳")
         void testCorrectPreferHeader() {
             final MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
             map.put(HttpHeaders.ACCEPT, List.of(FHIR_JSON));
@@ -102,8 +100,7 @@ public class FHIRAsyncRequestFilterTest {
         }
 
         @Test
-@DisplayName("Filter FHIR request with invalid multi-value header 🤮")
-
+        @DisplayName("Filter FHIR request with invalid multi-value header 🤮")
         void testMultiplePreferHeader() {
             final MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
             map.put(HttpHeaders.ACCEPT, List.of(FHIR_JSON));
@@ -114,8 +111,7 @@ public class FHIRAsyncRequestFilterTest {
         }
 
         @Test
-@DisplayName("Filter FHIR request with incorrect header 🤮")
-
+        @DisplayName("Filter FHIR request with incorrect header 🤮")
         void testIncorrectPreferHeader() {
             final MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
             map.put(HttpHeaders.ACCEPT, List.of(FHIR_JSON));

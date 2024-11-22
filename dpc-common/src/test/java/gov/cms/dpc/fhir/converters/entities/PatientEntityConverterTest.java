@@ -58,8 +58,7 @@ public class PatientEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert patient from FHIR 🥳")
-
+    @DisplayName("Convert patient from FHIR 🥳")
     void fromFHIR() {
         PatientEntity convertedEntity = converter.fromFHIR(fhirEntityConverter, patient);
         assertEquals(uuid, convertedEntity.getID());
@@ -71,8 +70,7 @@ public class PatientEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert patient with no org from FHIR 🥳")
-
+    @DisplayName("Convert patient with no org from FHIR 🥳")
     void fromFHIR_NoOrg() {
         patient.setManagingOrganization(null);
         PatientEntity convertedEntity = converter.fromFHIR(fhirEntityConverter, patient);
@@ -80,8 +78,7 @@ public class PatientEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert patient with no ID from FHIR 🥳")
-
+    @DisplayName("Convert patient with no ID from FHIR 🥳")
     void fromFHIR_NoId() {
         patient.setId("");
         PatientEntity convertedEntity = converter.fromFHIR(fhirEntityConverter, patient);
@@ -89,8 +86,7 @@ public class PatientEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert patient with attributes to FHIR 🥳")
-
+    @DisplayName("Convert patient with attributes to FHIR 🥳")
     void toFHIR() {
         Patient convertedResource = converter.toFHIR(fhirEntityConverter, patientEntity);
         assertEquals(PatientProfile.PROFILE_URI, convertedResource.getMeta().getProfile().get(0).getValueAsString());
@@ -105,8 +101,7 @@ public class PatientEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert patient entity updated date to FHIR 🥳")
-
+    @DisplayName("Convert patient entity updated date to FHIR 🥳")
     void toFHIR_Updated() {
         OffsetDateTime ost = OffsetDateTime.now();
         patientEntity.setUpdatedAt(ost);
@@ -115,15 +110,13 @@ public class PatientEntityConverterTest {
     }
 
     @Test
-@DisplayName("Convert Patient class to FHIR resource 🥳")
-
+    @DisplayName("Convert Patient class to FHIR resource 🥳")
     void getFHIRResource() {
         assertEquals(Patient.class, converter.getFHIRResource());
     }
 
     @Test
-@DisplayName("Convert Patient Entity to Java class 🥳")
-
+    @DisplayName("Convert Patient Entity to Java class 🥳")
     void getJavaClass() {
         assertEquals(PatientEntity.class, converter.getJavaClass());
     }

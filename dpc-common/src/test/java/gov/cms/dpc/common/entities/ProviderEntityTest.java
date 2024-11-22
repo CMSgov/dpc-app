@@ -11,8 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 public class ProviderEntityTest {
 
 	@Test
-	@DisplayName("Test getters and setters 🥳")
-public void testGettersAndSetters() {
+        @DisplayName("Test getters and setters 🥳")
+	public void testGettersAndSetters() {
 		ProviderEntity provider = new ProviderEntity();
 		String providerNPI = "1234567890";
 		UUID id = UUID.randomUUID();
@@ -27,8 +27,8 @@ public void testGettersAndSetters() {
 	}
 
 	@Test
-	@DisplayName("Attributed patients 🥳")
-public void testAttributedPatients() {
+        @DisplayName("Attributed patients 🥳")
+	public void testAttributedPatients() {
 		ProviderEntity provider = new ProviderEntity();
 		PatientEntity p1 = new PatientEntity();
 		PatientEntity p2 = new PatientEntity();
@@ -40,8 +40,8 @@ public void testAttributedPatients() {
 	}
 
 	@Test
-	@DisplayName("Attribution roster 🥳")
-public void testAttributionRosters() {
+        @DisplayName("Attribution roster 🥳")
+	public void testAttributionRosters() {
 		ProviderEntity provider = new ProviderEntity();
 		RosterEntity r1 = new RosterEntity();
 		RosterEntity r2 = new RosterEntity();
@@ -53,8 +53,8 @@ public void testAttributionRosters() {
 	}
 
 	@Test
-	@DisplayName("Update provider 🥳")
-public void testUpdate() {
+        @DisplayName("Update provider 🥳")
+	public void testUpdate() {
 		ProviderEntity provider = new ProviderEntity();
 		String firstName = "Sydney";
 		String lastName = "Danger";
@@ -70,8 +70,8 @@ public void testUpdate() {
 	}
 
 	@Test
-	@DisplayName("Overriden hashcode and equals 🥳")
-public void testEqualsAndHashCode() {
+        @DisplayName("Overriden hashcode and equals 🥳")
+	public void testEqualsAndHashCode() {
 		ProviderEntity p1 = new ProviderEntity();
 		UUID id = UUID.randomUUID();
 		p1.setID(id);

@@ -3,7 +3,6 @@ package gov.cms.dpc.consent.resources;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Splitter;
-import com.google.inject.name.Named;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -15,14 +14,14 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 import org.hl7.fhir.dstu3.model.Identifier;
 
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -87,7 +86,7 @@ public class ConsentResource {
             }
 
         } else {
-            throw new WebApplicationException("Must have some form of Consent Resource ID or Patient ID", Response.Status.BAD_REQUEST);
+            throw new BadRequestException("Must have some form of Consent Resource ID or Patient ID");
         }
 
         return entities
@@ -107,7 +106,7 @@ public class ConsentResource {
     public Consent getConsent(@ApiParam(value = "Consent resource ID", required = true) @PathParam("consentId") UUID consentId) {
 
         final ConsentEntity consentEntity = this.dao.getConsent(consentId).orElseThrow(() ->
-                new WebApplicationException("invalid consent resource id value", HttpStatus.NOT_FOUND_404)
+                new NotFoundException("invalid consent resource id value")
         );
 
         return ConsentEntityConverter.toFhir(consentEntity, fhirReferenceURL);
@@ -141,7 +140,7 @@ public class ConsentResource {
                 field = "hicn";
                 break;
             default:
-                throw new WebApplicationException("Unknown Patient ID code system", Response.Status.BAD_REQUEST);
+                throw new BadRequestException("Unknown Patient ID code system");
         }
 
         return this.dao.findBy(field, patientIdentifier.getValue());

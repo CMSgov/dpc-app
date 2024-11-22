@@ -22,7 +22,6 @@ import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @DisplayName("Macaroon Bakery")
-
 class BakeryTest {
 
     private static final MemoryThirdPartyKeyStore thirdParty = new MemoryThirdPartyKeyStore();
@@ -40,22 +39,19 @@ class BakeryTest {
     }
 
     @Test
-@DisplayName("Serialize macaroon 🥳")
-
+    @DisplayName("Serialize macaroon 🥳")
     void testSerializationDeserialization() {
         macaroonSerializationTest(false);
     }
 
     @Test
-@DisplayName("Base64 encode and decode 🥳")
-
+    @DisplayName("Base64 encode and decode 🥳")
     void testBase64EncodeDecode() {
         macaroonSerializationTest(true);
     }
 
     @Test
-@DisplayName("Parse caveats 🥳")
-
+    @DisplayName("Parse caveats 🥳")
     void testCaveatParsing() {
         final List<MacaroonCaveat> caveatList = Collections.singletonList(
                 new MacaroonCaveat("", new MacaroonCondition("test_id",
@@ -67,8 +63,7 @@ class BakeryTest {
     }
 
     @Test
-@DisplayName("Deserialize macaroon with local third party caveat 🥳")
-
+    @DisplayName("Deserialize macaroon with local third party caveat 🥳")
     void testLocalThirdPartyCaveat() {
         List<MacaroonCaveat> caveats = new ArrayList<>();
         caveats.add(new MacaroonCaveat("", new MacaroonCondition("account", MacaroonCondition.Operator.EQ, "3735928559")));
@@ -102,8 +97,7 @@ class BakeryTest {
     }
 
     @Test
-@DisplayName("Verify local caveats 🤮")
-
+    @DisplayName("Verify local caveats 🤮")
     void testDefaultCaveatChecking() {
 
         final CaveatVerifier verifier = caveat -> {
@@ -136,8 +130,7 @@ class BakeryTest {
     }
 
     @Test
-@DisplayName("Verify default caveats 🥳")
-
+    @DisplayName("Verify default caveats 🥳")
     void testDefaultCaveatSuppliers() {
 
         final MacaroonCaveat test_caveat = new MacaroonCaveat("", new MacaroonCondition("test_caveat", MacaroonCondition.Operator.EQ, "1"));

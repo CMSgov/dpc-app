@@ -10,7 +10,7 @@ public class ConsentIT extends AbstractConsentIT {
 
     @Test
     @DisplayName("Placeholder test 🥳")
-public void testTrue() {
+    public void testTrue() {
         assertTrue(true);
     }
 }

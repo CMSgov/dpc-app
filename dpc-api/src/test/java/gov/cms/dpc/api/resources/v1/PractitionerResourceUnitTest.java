@@ -19,11 +19,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("Practitioner resource operations")
@@ -45,7 +46,7 @@ public class PractitionerResourceUnitTest {
 
     @Test
     @DisplayName("Search for practitioner by NPI 🥳")
-public void testPractitionerSearch() {
+    public void testPractitionerSearch() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -72,7 +73,7 @@ public void testPractitionerSearch() {
 
     @Test
     @DisplayName("Get provider by provider ID 🥳")
-public void testGetProvider() {
+    public void testGetProvider() {
         UUID providerId = UUID.randomUUID();
         Practitioner practitioner = new Practitioner();
         practitioner.setId(providerId.toString());
@@ -89,7 +90,7 @@ public void testGetProvider() {
 
     @Test
     @DisplayName("Submit provider 🥳")
-public void testSubmitProvider() {
+    public void testSubmitProvider() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -112,7 +113,7 @@ public void testSubmitProvider() {
 
     @Test
     @DisplayName("Bulk submit providers 🥳")
-public void testBulkSubmitProviders() {
+    public void testBulkSubmitProviders() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -141,7 +142,7 @@ public void testBulkSubmitProviders() {
 
     @Test
     @DisplayName("Delete a provider 🥳")
-public void testDeleteProvider() {
+    public void testDeleteProvider() {
         UUID providerId = UUID.randomUUID();
 
         IDeleteTyped delResp = Mockito.mock(IDeleteTyped.class);
@@ -152,15 +153,16 @@ public void testDeleteProvider() {
         assertEquals(200, actualResponse.getStatus());
     }
 
+    @Disabled
     @Test
     @DisplayName("Update a provider - not yet implemented")
-public void testUpdateProvider() {
+    public void testUpdateProvider() {
         // Not yet implemented
     }
 
     @Test
     @DisplayName("Validate a provider profile 🥳")
-public void testValidateProvider() {
+    public void testValidateProvider() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());

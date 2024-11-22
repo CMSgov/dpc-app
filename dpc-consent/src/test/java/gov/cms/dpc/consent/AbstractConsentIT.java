@@ -4,13 +4,15 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import gov.cms.dpc.consent.resources.UnitTestModule;
 import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
-import org.junit.jupiter.api.DisplayName;
 
 @IntegrationTest
 public abstract class AbstractConsentIT {
@@ -26,15 +28,19 @@ public abstract class AbstractConsentIT {
     @BeforeAll
     public static void initDB() throws Exception {
         APPLICATION.before();
-        SharedConfigurationState.clear();
+//        SharedConfigurationState.clear();
         APPLICATION.getApplication().run("db", "migrate", configPath);
-        SharedConfigurationState.clear();
+//        SharedConfigurationState.clear();
         APPLICATION.getApplication().run("seed", configPath);
+
+        Injector injector = Guice.createInjector(new UnitTestModule(null));
+        JerseyGuiceUtils.install(injector);
     }
 
     @AfterAll
     public static void shutdown() {
         APPLICATION.after();
+        JerseyGuiceUtils.reset();
     }
 
     // supporting a v1 path might require inserting something like attribution.resources.AbstractAttributionResource

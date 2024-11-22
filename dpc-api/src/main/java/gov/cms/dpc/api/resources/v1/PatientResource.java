@@ -8,7 +8,6 @@ import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import com.google.inject.name.Named;
 import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
@@ -31,12 +30,12 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
+import com.google.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -44,6 +43,7 @@ import java.util.regex.Pattern;
 
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
+import jakarta.inject.Named;
 
 @Api(value = "Patient", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Patient")
@@ -86,7 +86,7 @@ public class PatientResource extends AbstractPatientResource {
                 .where(Patient.ORGANIZATION.hasId(organization.getOrganization().getId()))
                 .returnBundle(Bundle.class);
 
-        if (patientMBI != null && !patientMBI.equals("")) {
+        if (patientMBI != null && !patientMBI.isBlank()) {
 
             // Handle MBI parsing
             // This should come out as part of DPC-432
@@ -194,8 +194,7 @@ public class PatientResource extends AbstractPatientResource {
                 .execute();
 
         if (practitioner == null) {
-            // Is this the best code to be throwing here?
-            throw new WebApplicationException(HttpStatus.UNAUTHORIZED_401);
+            throw new NotAuthorizedException(HttpStatus.UNAUTHORIZED_401);
         }
 
         final Patient patient = getPatient(patientId);
@@ -271,7 +270,7 @@ public class PatientResource extends AbstractPatientResource {
 
         final Patient resource = (Patient) outcome.getResource();
         if (resource == null) {
-            throw new WebApplicationException("Unable to update Patient", Response.Status.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Unable to update Patient");
         }
         return resource;
     }

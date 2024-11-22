@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.auth.macaroonauth;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -12,7 +11,8 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
+import jakarta.inject.Named;
 import java.util.*;
 
 /**

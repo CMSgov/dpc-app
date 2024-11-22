@@ -22,7 +22,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -44,8 +44,7 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
     @Test
-@DisplayName("Create endpoint 🥳")
-
+    @DisplayName("Create endpoint 🥳")
     void testCreateEndpoint() {
         Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
 
@@ -59,8 +58,7 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Create invalid endpoint 🤮")
-
+    @DisplayName("Create invalid endpoint 🤮")
     void testCreateInvalidEndpoint() throws IOException, URISyntaxException {
         URL url = new URL(getBaseURL() + "/Endpoint");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -91,8 +89,7 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Create fake endpoint 🤮")
-
+    @DisplayName("Create fake endpoint 🤮")
     void testCreateEndpointNullStatus() {
         Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
         endpoint.setStatus(null);
@@ -102,8 +99,7 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Create endpoint with wrong org 🤮")
-
+    @DisplayName("Create endpoint with wrong org 🤮")
     void testCreateEndpointDifferentOrg() throws IOException {
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient adminClient = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
@@ -116,8 +112,7 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Create endpoint without address 🤮")
-
+    @DisplayName("Create endpoint without address 🤮")
     void testCreateEndpointWithoutAddress() {
         Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
         endpoint.setAddress((String)null);
@@ -126,8 +121,7 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Get multiple endpoints 🥳")
-
+    @DisplayName("Get multiple endpoints 🥳")
     void testGetEndpoints() {
         Bundle result = client.search().forResource(Endpoint.class).returnBundle(Bundle.class).execute();
         assertTrue(result.getTotal() > 0);
@@ -140,9 +134,23 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Get single endpoint 🥳")
-
+    @DisplayName("Get single endpoint 🥳")
     void testFetchEndpoint() throws GeneralSecurityException, IOException, URISyntaxException {
+        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
+        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
+
+        //Setup Org A with one single endpoint
+        MethodOutcome outcome = orgAClient.create().resource(OrganizationFactory.createValidFakeEndpoint(orgAContext.getOrgId())).execute();
+        final Endpoint orgAEndpoint = (Endpoint) outcome.getResource();
+
+        //Assert Org A can get their endpoint
+        Endpoint readEndpoint = orgAClient.read().resource(Endpoint.class).withId(orgAEndpoint.getId()).execute();
+        assertTrue(readEndpoint.equalsDeep(orgAEndpoint), "Organization should have been able to retrieve their own endpoint");
+    }
+
+    @Test
+    @DisplayName("Get endpoint from different org 🤮")
+    void testFetchUnauthorizedEndpoint() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -153,16 +161,7 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
         final Endpoint orgAEndpoint = (Endpoint) outcome.getResource();
 
         //Setup Org B with one single endpoint
-        outcome = orgBClient.create().resource(OrganizationFactory.createValidFakeEndpoint(orgBContext.getOrgId())).execute();
-        final Endpoint orgBEndpoint = (Endpoint) outcome.getResource();
-
-        //Assert Org A can get their endpoint
-        Endpoint readEndpoint = orgAClient.read().resource(Endpoint.class).withId(orgAEndpoint.getId()).execute();
-        assertTrue(readEndpoint.equalsDeep(orgAEndpoint), "Organization should have been able to retrieve their own endpoint");
-
-        //Assert Org B can get their endpoint
-        readEndpoint = orgBClient.read().resource(Endpoint.class).withId(orgBEndpoint.getId()).execute();
-        assertTrue(readEndpoint.equalsDeep(orgBEndpoint), "Organization should have been able to retrieve their own endpoint");
+        orgBClient.create().resource(OrganizationFactory.createValidFakeEndpoint(orgBContext.getOrgId())).execute();
 
         //Assert Org B can NOT get org A's endpoint
         IReadExecutable<Endpoint> readExecutable = orgBClient.read().resource(Endpoint.class).withId(orgAEndpoint.getId());
@@ -170,9 +169,26 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Update endpoints 🥳")
-
+    @DisplayName("Update endpoints 🥳")
     void testUpdateEndpoint() throws GeneralSecurityException, IOException, URISyntaxException {
+        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
+        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
+
+        //Setup Org A with one single endpoint
+        MethodOutcome outcome = orgAClient.create().resource(OrganizationFactory.createValidFakeEndpoint(orgAContext.getOrgId())).execute();
+        final Endpoint orgAEndpoint = (Endpoint) outcome.getResource();
+
+        //Assert Org A can update their own endpoint
+        orgAEndpoint.setName("Name updated by Org A");
+        orgAEndpoint.setPayloadType(List.of(createCodeableConcept()));
+        MethodOutcome updateOutcome = orgAClient.update().resource(orgAEndpoint).withId(orgAEndpoint.getId()).execute();
+        final Endpoint orgAUpdatedEndpoint = (Endpoint) updateOutcome.getResource();
+        assertEquals("Name updated by Org A", orgAUpdatedEndpoint.getName(), "Org should have been able to update their own endpoint's name");
+    }
+
+    @Test
+    @DisplayName("Update endpoint of different org 🤮")
+    void testUpdateUnauthorizedEndpoint() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -185,20 +201,6 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
         //Setup Org B with one single endpoint
         outcome = orgBClient.create().resource(OrganizationFactory.createValidFakeEndpoint(orgBContext.getOrgId())).execute();
         final Endpoint orgBEndpoint = (Endpoint) outcome.getResource();
-
-        //Assert Org A can update their own endpoint
-        orgAEndpoint.setName("Name updated by Org A");
-        orgAEndpoint.setPayloadType(List.of(createCodeableConcept()));
-        MethodOutcome updateOutcome = orgAClient.update().resource(orgAEndpoint).withId(orgAEndpoint.getId()).execute();
-        final Endpoint orgAUpdatedEndpoint = (Endpoint) updateOutcome.getResource();
-        assertEquals("Name updated by Org A", orgAEndpoint.getName(), "Org should have been able to update their own endpoint's name");
-
-        //Assert Org B can update their own endpoint
-        orgBEndpoint.setName("Name updated by Org B");
-        orgBEndpoint.setPayloadType(List.of(createCodeableConcept()));
-        updateOutcome = orgBClient.update().resource(orgBEndpoint).withId(orgBEndpoint.getId()).execute();
-        final Endpoint orgBUpdatedEndpoint = (Endpoint) updateOutcome.getResource();
-        assertEquals("Name updated by Org B", orgBUpdatedEndpoint.getName(), "Org should have been able to update their own endpoint's name");
 
         //Assert Org B can NOT update org A's endpoint.
         orgAEndpoint.setName("Name updated by Org A");
@@ -218,16 +220,14 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
         return payloadType;
     }
 
-
     @Test
-@DisplayName("Delete last remaining endpoint 🤮")
-
-    void testDeleteOrgsOnlyEndpoint() throws IOException, GeneralSecurityException, URISyntaxException {
+    @DisplayName("Delete endpoint 🥳")
+    void testDeleteOrgEndpoint() throws IOException, GeneralSecurityException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
 
         //Setup Org A with 2 endpoints.
-        MethodOutcome outcome = orgAClient.create().resource(OrganizationFactory.createValidFakeEndpoint(orgAContext.getOrgId())).execute();
+        orgAClient.create().resource(OrganizationFactory.createValidFakeEndpoint(orgAContext.getOrgId())).execute();
 
         //Assert we have 2 resources.
         String[] endpointIds =  getAvailableResources(orgAClient, Endpoint.class).toArray(String[]::new);
@@ -236,6 +236,18 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
         //Assert Org A CAN delete 1 of 2 endpoints.
         orgAClient.delete().resourceById("Endpoint",new IdType(endpointIds[0]).getIdPart()).execute();
         assertEquals(1, getAvailableResources(orgAClient, Endpoint.class).size(), "Only 1 of 2 Endpoints should exist");
+    }
+
+    @Test
+    @DisplayName("Delete last remaining endpoint 🤮")
+    void testDeleteOrgsOnlyEndpoint() throws IOException, GeneralSecurityException, URISyntaxException {
+        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
+        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
+
+        //Setup Org A with 2 endpoints and remove one.
+        orgAClient.create().resource(OrganizationFactory.createValidFakeEndpoint(orgAContext.getOrgId())).execute();
+        String[] endpointIds =  getAvailableResources(orgAClient, Endpoint.class).toArray(String[]::new);
+        orgAClient.delete().resourceById("Endpoint",new IdType(endpointIds[0]).getIdPart()).execute();
 
         //Assert Org A CAN NOT delete their last endpoint.
         IDeleteTyped deleteExecutable = orgAClient.delete().resourceById("Endpoint",new IdType(endpointIds[1]).getIdPart());
@@ -243,8 +255,7 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Delete other org's endpoint 🤮")
-
+    @DisplayName("Delete other org's endpoint 🤮")
     void testDeleteEndpoint() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
@@ -256,19 +267,11 @@ public class EndpointResourceIT extends AbstractSecureApplicationIT {
         final Endpoint orgAEndpoint = (Endpoint) outcome.getResource();
 
         //Setup Org B with one single endpoint
-        outcome = orgBClient.create().resource(OrganizationFactory.createValidFakeEndpoint(orgBContext.getOrgId())).execute();
-        final Endpoint orgBEndpoint = (Endpoint) outcome.getResource();
+        orgBClient.create().resource(OrganizationFactory.createValidFakeEndpoint(orgBContext.getOrgId())).execute();
 
         //Assert Org B can NOT delete org A's endpoint.
         IDeleteTyped executableDelete = orgBClient.delete().resourceById("Endpoint",new IdType(orgAEndpoint.getId()).getIdPart());
         assertThrows(AuthenticationException.class, executableDelete::execute, "Expected auth error when deleting another org's endpoint.");
-
-        //Assert Org B CAN delete their own endpoint
-        Set<String> availableEndpoints = getAvailableResources(orgBClient, Endpoint.class);
-        assertTrue(availableEndpoints.contains(orgBEndpoint.getId()), "Endpoint should be found in Org");
-        orgBClient.delete().resourceById("Endpoint",new IdType(orgBEndpoint.getId()).getIdPart()).execute();
-        availableEndpoints = getAvailableResources(orgBClient, Endpoint.class);
-        assertFalse(availableEndpoints.contains(orgBEndpoint.getId()), "Endpoint should not be found in Org.");
     }
 
     private <T extends IBaseResource> Set<String> getAvailableResources(IGenericClient client, Class<T> tClass){

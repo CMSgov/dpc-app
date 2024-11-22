@@ -76,7 +76,7 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @Test
-    @DisplayName("Create Consent with Invalid MBI 🤮")
+    @DisplayName("Create Consent with Invalid MBI")
     final void createConsent_fails_withInvalidMbi() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
         Consent consent = new Consent();
@@ -105,7 +105,7 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @Test
-    @DisplayName("Get Consent with Non-Existant ID 🤮")
+    @DisplayName("Get Consent with Non-Existant ID")
     final void getConsentResource_fails_withNonExtantId() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
@@ -119,7 +119,7 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @Test
-    @DisplayName("Find Consent Resource using Valid ID 🥳")
+    @DisplayName("Find Consent Resource using Valid ID")
     final void getConsentResource_finds_validId() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
@@ -135,7 +135,7 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @Test
-    @DisplayName("Consent Search Fails with No Parameters 🤮")
+    @DisplayName("Consent Search Fails with No Parameters")
     final void searchConsentResource_fails_withNoParams() {
         // an attempt to the resource with an empty value is routed to the search endpoint
 
@@ -150,7 +150,7 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @Test
-    @DisplayName("Consent Search Succeeeds using Valid ID 🥳")
+    @DisplayName("Consent Search Succeeeds using Valid ID")
     final void searchConsentResource_finds_validIdParam() {
 
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
@@ -170,7 +170,7 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @Test
-    @DisplayName("Consent Search Succeeds using Valid Identifier 🥳")
+    @DisplayName("Consent Search Succeeds using Valid Identifier")
     final void searchConsentResource_finds_validIdentifierParam() {
 
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
@@ -190,8 +190,8 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @ParameterizedTest
+    @DisplayName("Consent Search Succeeds using Patient ID")
     @CsvSource({"MBI,mbi_1", "HICN,hicn_1"})
-    @DisplayName("Consent Search Returns a Single Matching Record from Multiple Hits 🥳")
     final void searchConsentResource_finds_validPatientParam(String system, String patientId) {
 
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
@@ -212,7 +212,7 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @Test
-    @DisplayName("Consent Search Returns Patient record on multi-ID hit 🥳")
+    @DisplayName("Consent Search Returns a Single Matching Record from Multiple Hits")
     final void searchConsentResource_multiple_ids_for_one_patient() {
         String patientIds = String.format("%s|%s,%s|%s", MBI.getSystem(), "mbi_1", MBI.getSystem(), "mbi_no_record");
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
@@ -235,7 +235,6 @@ class ConsentResourceIT extends AbstractConsentIT {
     }
 
     @Test
-    @DisplayName("Consent record update 🥳")
     final void updateConsent() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
         Consent consent = new Consent();

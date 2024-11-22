@@ -2,6 +2,7 @@ package gov.cms.dpc.api.auth;
 
 import com.google.inject.Binder;
 import com.google.inject.TypeLiteral;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.filters.PathAuthorizationFilter;
 import gov.cms.dpc.api.auth.jwt.CaffeineJTICache;
@@ -15,11 +16,10 @@ import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.UnauthorizedHandler;
 import io.jsonwebtoken.LocatorAdapter;
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.security.Key;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 /**
  * {@link DropwizardAwareModule} for determining which authentication system to use.

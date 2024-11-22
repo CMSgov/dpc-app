@@ -37,7 +37,6 @@ import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
  */
 public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T> {
     private static final Logger LOG = LoggerFactory.getLogger(GuiceBundle.class);
-    private static final boolean TRACE = LOG.isTraceEnabled();
 
     public static <U extends Configuration> Builder<U> defaultBuilder(final Class<U> configClass) {
         return new Builder<>(configClass);
@@ -73,7 +72,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
     @Override
     public void initialize(final Bootstrap<?> bootstrap) {
-        if(TRACE) LOG.trace("Initializing GuiceBundle...");
+        LOG.info("Initializing GuiceBundle...");
 
         this.bootstrap = (Bootstrap<T>) bootstrap;
         if (allowUnknownFields) {
@@ -83,7 +82,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
     @Override
     public void run(final T configuration, final Environment environment) throws Exception {
-        if(TRACE) LOG.trace("Running GuiceBundle...");
+        LOG.info("Running GuiceBundle...");
 
 
         for (DropwizardAwareModule<T> dropwizardAwareModule : dropwizardAwareModules) {
@@ -91,14 +90,14 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
             dropwizardAwareModule.setConfiguration(configuration);
             dropwizardAwareModule.setEnvironment(environment);
 
-            if(TRACE) LOG.trace("Prepped DropwizardAwareModule " + dropwizardAwareModule);
+            LOG.info("Prepped DropwizardAwareModule " + dropwizardAwareModule);
         }
 
         final DropwizardModule dropwizardModule = new DropwizardModule(environment);
 
         // We assume that the next service locator will be the main application one
         final String serviceLocatorName = getNextServiceLocatorName();
-        if(TRACE) LOG.trace("Here is the service locator name: " + serviceLocatorName);
+        LOG.info("Here is the service locator name: " + serviceLocatorName);
 
         JerseyGuiceModule jgm = new JerseyGuiceModule(serviceLocatorName);
         
@@ -106,6 +105,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
                 ImmutableSet.<com.google.inject.Module>builder()
                         .addAll(guiceModules)
                         .addAll(dropwizardAwareModules)
+//                        .add(new SingletonModule())
                         .add(new ServletModule())
                         .add(dropwizardModule)
                         .add(jgm)
@@ -114,22 +114,22 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
                             binder.bind(Environment.class).toInstance(environment);
                             binder.bind(configClass).toInstance(configuration);
                         });
-        if(TRACE) LOG.trace("I set up the modules builder!");
+        LOG.info("I set up the modules builder!");
         
         if (enableGuiceEnforcer) {
             modulesBuilder.add(new GuiceEnforcerModule());
-            if(TRACE) LOG.trace("Guice enforcer added!");
+            LOG.info("Guice enforcer added!");
         }
 
         this.injector = injectorFactory.create(guiceStage, modulesBuilder.build());
 
         JerseyGuiceUtils.install(injector);
-        if(TRACE) LOG.trace("Installed the injector!");
+        LOG.info("Installed the injector!");
 
         GuiceBridge.getGuiceBridge().initializeGuiceBridge(jgm.getLocator());
         GuiceIntoHK2Bridge guiceBridge = jgm.getLocator().getService(GuiceIntoHK2Bridge.class);
         guiceBridge.bridgeGuiceInjector(injector);
-        if(TRACE) LOG.trace("Setup Guice-HK2 Bridges!");
+        LOG.info("Setup Guice-HK2 Bridges!");
         
         dropwizardModule.register(injector);
 

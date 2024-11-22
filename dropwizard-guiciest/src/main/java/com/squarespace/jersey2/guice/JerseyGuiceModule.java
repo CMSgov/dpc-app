@@ -40,26 +40,25 @@ import org.slf4j.LoggerFactory;
 public class JerseyGuiceModule extends JerseyModule {
 
     private static final Logger LOG = LoggerFactory.getLogger(JerseyGuiceModule.class);
-    private static final boolean TRACE = LOG.isTraceEnabled();
     
     private final ServiceLocator locator;
 
     public JerseyGuiceModule(String name) {
         this(JerseyGuiceUtils.newServiceLocator(name));
-        if(TRACE) LOG.trace("Creating JGM with service locator name: " + name);
+        LOG.info("Creating JGM with service locator name: " + name);
     }
 
     public JerseyGuiceModule(ServiceLocator locator) {
-        if(TRACE) LOG.trace("Creating JGM with service locator: " + locator.getName());
+        LOG.info("Creating JGM with service locator: " + locator.getName());
         this.locator = locator;
     }
 
     @Override
     protected void configure() {
-        if(TRACE) LOG.trace("I am configuring the JerseyGuiceModule!");
+        LOG.info("I am configuring the JerseyGuiceModule!");
        
         bind(ServiceLocator.class).toInstance(locator);
-        if(TRACE) LOG.trace("Bound Service locator.");
+        LOG.info("Bound Service locator.");
 
         Hk2RequestScope requestScope = new Hk2RequestScope();
         
@@ -84,46 +83,46 @@ public class JerseyGuiceModule extends JerseyModule {
 
         bind(new TypeLiteral<InjectionResolver<com.google.inject.Inject>>() {}).to(GuiceInjectionResolver.class).in(Scopes.SINGLETON);
         bind(InjectionResolver.class).to(GuiceInjectionResolver.class).in(Scopes.SINGLETON);
-        if(TRACE) LOG.trace("Bound InjectionResolver");
+        LOG.info("Bound InjectionResolver");
 
         bind(ClassAnalyzer.class).to(ConcreteJerseyClassAnalyzer.class).in(Scopes.SINGLETON);
-        if(TRACE) LOG.trace("Bound ClassAnalyzer");
+        LOG.info("Bound ClassAnalyzer");
         
         bind(Hk2RequestScope.class).toInstance(requestScope);
         bind(RequestScope.class).toInstance(requestScope);
-        if(TRACE) LOG.trace("Bound RequestScope");
+        LOG.info("Bound RequestScope");
 
         Provider<ServiceLocator> provider = getProvider(ServiceLocator.class);
 
         bind(Application.class)
                 .toProvider(new JerseyProvider<>(provider, Application.class));
-        if(TRACE) LOG.trace("Bound Application to JerseyProvider.");
+        LOG.info("Bound Application to JerseyProvider.");
 
         bind(Providers.class)
                 .toProvider(new JerseyProvider<>(provider, Providers.class));
-        if(TRACE) LOG.trace("Bound Providers to JerseyProvider.");
+        LOG.info("Bound Providers to JerseyProvider.");
 
         bind(UriInfo.class)
                 .toProvider(new JerseyProvider<>(provider, UriInfo.class))
                 .in(RequestScoped.class);
-        if(TRACE) LOG.trace("Bound UriInfo to JerseyProvider with RequestScope.");
+        LOG.info("Bound UriInfo to JerseyProvider with RequestScope.");
 
         bind(HttpHeaders.class)
                 .toProvider(new JerseyProvider<>(provider, HttpHeaders.class))
                 .in(RequestScoped.class);
-        if(TRACE) LOG.trace("Bound HttpHeaders to JerseyProvider with RequestScope.");
+        LOG.info("Bound HttpHeaders to JerseyProvider with RequestScope.");
 
         bind(SecurityContext.class)
                 .toProvider(new JerseyProvider<>(provider, SecurityContext.class))
                 .in(RequestScoped.class);
-        if(TRACE) LOG.trace("Bound SecurityContext to JerseyProvider with RequestScope.");
+        LOG.info("Bound SecurityContext to JerseyProvider with RequestScope.");
 
         bind(Request.class)
                 .toProvider(new JerseyProvider<>(provider, Request.class))
                 .in(RequestScoped.class);
-        if(TRACE) LOG.trace("Bound Request to JerseyProvider with RequestScope.");
+        LOG.info("Bound Request to JerseyProvider with RequestScope.");
 
-        if(TRACE) LOG.trace("JerseyGuiceModule configuration complete!");
+        LOG.info("I am DONE configuring the JerseyGuiceModule!");
     }
     
    // Explicitly provide an ActiveDescriptor<GuiceInjectionResolver> binding
@@ -171,4 +170,25 @@ public class JerseyGuiceModule extends JerseyModule {
             return locator.getService(type);
         }
     }
+
+//    private static class ServiceLocatorProvider implements Provider<ServiceLocator> {
+//
+//        private final Provider<Injector> provider;
+//
+//        private final ServiceLocator locator;
+//
+//        @Inject
+//        public ServiceLocatorProvider(Provider<Injector> provider, ServiceLocator locator) {
+//            this.provider = provider;
+//            this.locator = locator;
+//        }
+//
+//        @Override
+//        public ServiceLocator get() {
+//            Injector injector = provider.get();
+//            JerseyGuiceUtils.link(locator, injector);
+//
+//            return locator;
+//        }
+//    }
 }

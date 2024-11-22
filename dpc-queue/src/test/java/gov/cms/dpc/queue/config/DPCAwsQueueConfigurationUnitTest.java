@@ -4,13 +4,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
+
 @DisplayName("AWS Queue access")
-
-
 class DPCAwsQueueConfigurationUnitTest {
 	@Test
-@DisplayName("Verify AWS queue setters and getters 🥳")
-
+        @DisplayName("Verify AWS queue setters and getters 🥳")
 	void testSettersAndGetters() {
 		DPCAwsQueueConfiguration config = new DPCAwsQueueConfiguration();
 

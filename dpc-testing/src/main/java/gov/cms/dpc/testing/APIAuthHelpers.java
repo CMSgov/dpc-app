@@ -14,7 +14,7 @@ import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.testing.models.KeyView;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.SignatureAlgorithm;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
@@ -35,7 +35,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -113,13 +113,13 @@ public class APIAuthHelpers {
             audience = "https://prod.dpc.cms.gov/api/v1";
         }
         final String jwt = Jwts.builder()
-                .setHeaderParam("kid", keyID.toString())
-                .setAudience(String.format("%s/Token/auth", audience))
-                .setIssuer(macaroon)
-                .setSubject(macaroon)
-                .setId(UUID.randomUUID().toString())
-                .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
-                .signWith(privateKey, getSigningAlgorithm(KeyType.RSA))
+                .header().add("kid", keyID.toString()).and()
+                .audience().add(String.format("%s/Token/auth", audience)).and()
+                .issuer(macaroon)
+                .subject(macaroon)
+                .id(UUID.randomUUID().toString())
+                .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
+                .signWith(privateKey)
                 .compact();
 
         // Verify JWT with /validate endpoint
@@ -213,10 +213,12 @@ public class APIAuthHelpers {
      * @throws NoSuchAlgorithmException - throws if security breaks
      */
     public static Pair<UUID, PrivateKey> generateAndUploadKey(String keyLabel, String organizationID, String goldenMacaroon, String baseURL) throws IOException, URISyntaxException, GeneralSecurityException {
+        System.err.println("Generate and upload key...");
+                
         final KeyPair keyPair = generateKeyPair();
         final String key = generatePublicKey(keyPair.getPublic());
         final String signature = signString(keyPair.getPrivate(), KEY_VERIFICATION_SNIPPET);
-
+        
         // Create org specific macaroon from Golden Macaroon
         final String macaroon = MacaroonsBuilder
                 .modify(MacaroonsBuilder.deserialize(goldenMacaroon).get(0))
@@ -234,7 +236,8 @@ public class APIAuthHelpers {
         post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
         try (CloseableHttpClient client = createCustomHttpClient().trusting().build()) {
             try (CloseableHttpResponse response = client.execute(post)) {
-                keyEntity = mapper.readValue(response.getEntity().getContent(), KeyView.class);
+                String r = new String(response.getEntity().getContent().readAllBytes(), StandardCharsets.UTF_8);
+                keyEntity = mapper.readValue(r, KeyView.class);
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Key should be valid");
             }
         }
@@ -326,9 +329,8 @@ public class APIAuthHelpers {
      * @return - {@link SignatureAlgorithm} to use for signing JWT
      */
     public static SignatureAlgorithm getSigningAlgorithm(KeyType keyType) {
-        return keyType == KeyType.ECC ? SignatureAlgorithm.ES256 : SignatureAlgorithm.RS384;
+        return keyType == KeyType.ECC ? Jwts.SIG.ES256 : Jwts.SIG.RS384;   
     }
-
 
     public static class MacaroonsInterceptor implements IClientInterceptor {
 
@@ -415,7 +417,6 @@ public class APIAuthHelpers {
         }
 
         private void refreshAuthToken() {
-            System.out.println("Refreshing access token");
             try {
                 final AuthResponse authResponse = jwtAuthFlow(this.baseURL, this.clientToken, this.keyID, this.privateKey);
                 // Set the refresh time to be 30 seconds before expiration
@@ -458,7 +459,6 @@ public class APIAuthHelpers {
         }
 
         private void refreshAuthToken() {
-            System.out.println("Refreshing access token");
             try {
                 final AuthResponse authResponse = jwtAuthFlow(this.baseURL, this.clientToken, this.keyID, this.privateKey);
                 // Set the refresh time to be 30 seconds before expiration

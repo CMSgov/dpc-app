@@ -62,8 +62,7 @@ public class OrganizationIT extends AbstractApplicationIT {
     }
 
     @Test
-@DisplayName("Organization commands 🥳")
-
+    @DisplayName("Organization commands 🥳")
     void testOrganizationCommands() {
         // Create the organization
         final Optional<Throwable> register = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token", "--host", "http://localhost:3500/v1");

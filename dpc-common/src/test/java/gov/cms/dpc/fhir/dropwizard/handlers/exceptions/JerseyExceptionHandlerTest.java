@@ -7,9 +7,9 @@ import org.glassfish.jersey.server.model.Invocable;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import javax.validation.ConstraintViolation;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Response;
+import jakarta.validation.ConstraintViolation;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Response;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,8 +21,7 @@ public class JerseyExceptionHandlerTest {
     // TODO: add constraint violations
 
     @Test
-@DisplayName("Cause FHIR exception 🤮")
-
+    @DisplayName("Cause FHIR exception 🤮")
     void testToResponse_fhirException() {
         ResourceInfo info = Mockito.mock(ResourceInfo.class);
         Mockito.when(info.getResourceClass()).thenAnswer(answer -> FHIRResourceClass.class);
@@ -35,8 +34,7 @@ public class JerseyExceptionHandlerTest {
     }
 
     @Test
-@DisplayName("Cause non-FHIR exception 🤮")
-
+    @DisplayName("Cause non-FHIR exception 🤮")
     void testToResponse_nonFhirException() {
         final JerseyExceptionHandler handler = new JerseyExceptionHandler(Mockito.mock(ResourceInfo.class));
 

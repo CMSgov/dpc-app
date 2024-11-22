@@ -31,8 +31,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyMap;
 import org.junit.jupiter.api.DisplayName;
+import static org.mockito.ArgumentMatchers.anyMap;
 
 /**
  * These tests are here to make sure the engine is still running/polling in situations where errors are recoverable.
@@ -76,7 +76,7 @@ public class AggregationEngineHealthCheckTest {
 
     @Test
     @DisplayName("Verify queue engine health 🥳")
-public void testHealthyEngine() throws InterruptedException {
+    public void testHealthyEngine() throws InterruptedException {
 
         final var orgID = UUID.randomUUID();
 
@@ -103,7 +103,7 @@ public void testHealthyEngine() throws InterruptedException {
 
     @Test
     @DisplayName("Verify queue engine health with job errors present 🥳")
-public void testHealthyEngineWhenJobBatchErrors() throws InterruptedException {
+    public void testHealthyEngineWhenJobBatchErrors() throws InterruptedException {
 
         Mockito.doThrow(new RuntimeException("Error")).when(bbclient).requestPatientFromServer(Mockito.anyString(), Mockito.any(DateRangeParam.class), anyMap());
 
@@ -132,7 +132,7 @@ public void testHealthyEngineWhenJobBatchErrors() throws InterruptedException {
 
     @Test
     @DisplayName("Verify queue engine health with batch errors 🥳")
-public void testHealthyEngineWhenClaimBatchErrors() throws InterruptedException {
+    public void testHealthyEngineWhenClaimBatchErrors() throws InterruptedException {
 
         final var orgID = UUID.randomUUID();
 
@@ -161,7 +161,7 @@ public void testHealthyEngineWhenClaimBatchErrors() throws InterruptedException 
 
     @Test
     @DisplayName("Verify queue engine health with operation errors 🥳")
-public void testHealthyEngineWhenQueueOperationsError() throws InterruptedException {
+    public void testHealthyEngineWhenQueueOperationsError() throws InterruptedException {
         Mockito.doThrow(new RuntimeException("Error")).when(queue).completePartialBatch(Mockito.any(JobQueueBatch.class), Mockito.any(UUID.class));
 
         final var orgID = UUID.randomUUID();

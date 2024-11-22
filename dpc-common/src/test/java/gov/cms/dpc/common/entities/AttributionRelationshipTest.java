@@ -14,8 +14,8 @@ import org.junit.jupiter.api.DisplayName;
 public class AttributionRelationshipTest {
 
 	@Test
-	@DisplayName("Attribution relationship overriden hashcode and equals 🥳")
-public void testEqualsAndHashCode() {
+        @DisplayName("Attribution relationship overriden hashcode and equals 🥳")
+	public void testEqualsAndHashCode() {
 		AttributionRelationship r1 = new AttributionRelationship();
 		AttributionRelationship r2 = new AttributionRelationship();
 
@@ -47,8 +47,8 @@ public void testEqualsAndHashCode() {
 	}
 
 	@Test
-	@DisplayName("Attribution relationship overriden toString() 🥳")
-public void testToString() {
+        @DisplayName("Attribution relationship overriden toString() 🥳")
+	public void testToString() {
 		AttributionRelationship relationship = new AttributionRelationship();
 		relationship.setAttributionID(1L);
 		RosterEntity roster = new RosterEntity();
@@ -69,8 +69,8 @@ public void testToString() {
 	}
 
 	@Test
-	@DisplayName("Attribution relationship constructors 🥳")
-public void testConstructors() {
+        @DisplayName("Attribution relationship constructors 🥳")
+	public void testConstructors() {
 		RosterEntity roster = new RosterEntity();
 		PatientEntity patient = new PatientEntity();
 		Timestamp created = Timestamp.from(Instant.now());
