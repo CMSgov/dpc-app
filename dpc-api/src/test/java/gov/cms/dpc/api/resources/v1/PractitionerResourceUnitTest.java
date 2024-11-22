@@ -19,12 +19,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Practitioner resource operations")
 public class PractitionerResourceUnitTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -42,6 +45,7 @@ public class PractitionerResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Search for practitioner by NPI 🥳")
     public void testPractitionerSearch() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -68,6 +72,7 @@ public class PractitionerResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get provider by provider ID 🥳")
     public void testGetProvider() {
         UUID providerId = UUID.randomUUID();
         Practitioner practitioner = new Practitioner();
@@ -84,6 +89,7 @@ public class PractitionerResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Submit provider 🥳")
     public void testSubmitProvider() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -106,6 +112,7 @@ public class PractitionerResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Bulk submit providers 🥳")
     public void testBulkSubmitProviders() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -134,6 +141,7 @@ public class PractitionerResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Delete a provider 🥳")
     public void testDeleteProvider() {
         UUID providerId = UUID.randomUUID();
 
@@ -145,12 +153,15 @@ public class PractitionerResourceUnitTest {
         assertEquals(200, actualResponse.getStatus());
     }
 
+    @Disabled
     @Test
+    @DisplayName("Update a provider - not yet implemented")
     public void testUpdateProvider() {
         // Not yet implemented
     }
 
     @Test
+    @DisplayName("Validate a provider profile 🥳")
     public void testValidateProvider() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();

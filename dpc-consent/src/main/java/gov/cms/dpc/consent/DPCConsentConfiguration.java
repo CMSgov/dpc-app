@@ -10,9 +10,9 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.jetty.HttpConnectorFactory;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 public class DPCConsentConfiguration extends Configuration implements IDPCConsentDatabase, IDPCFHIRConfiguration {
 

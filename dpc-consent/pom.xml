@@ -14,18 +14,79 @@
 
     <properties>
         <mainClass>gov.cms.dpc.consent.DPCConsentService</mainClass>
+        <exec.skip>true</exec.skip>
+        <test.verbosity>false</test.verbosity>
+        <disable.console>true</disable.console>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.eclipse.sisu</groupId>
+            <artifactId>org.eclipse.sisu.inject</artifactId>
+            <version>0.9.0.M3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>gov.cms.dpc</groupId>
             <artifactId>dpc-common</artifactId>
             <version>0.4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-core</artifactId>
+            <groupId>gov.cms.dpc</groupId>
+            <artifactId>dpc-testing</artifactId>
+            <version>0.4.0-SNAPSHOT</version>
+            <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-migrations</artifactId>
@@ -34,52 +95,14 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-hibernate</artifactId>
         </dependency>
-        <!--No longer shipped with Java 11, so we need to include it manually-->
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ru.vyarus</groupId>
-            <artifactId>dropwizard-guicey</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jooq</groupId>
-            <artifactId>jooq</artifactId>
-            <version>${jooq.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.smoketurner</groupId>
-            <artifactId>dropwizard-swagger</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-json-logging</artifactId>
         </dependency>
         <dependency>
-            <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-client</artifactId>
-        </dependency>
-        <!--Testing dependencies-->
-        <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-testing</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
@@ -87,15 +110,39 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>gov.cms.dpc</groupId>
-            <artifactId>dpc-testing</artifactId>
-            <version>0.4.0-SNAPSHOT</version>
-            <scope>test</scope>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-jersey31</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.smoketurner</groupId>
+            <artifactId>dropwizard-swagger</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+            <version>${jooq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -106,12 +153,11 @@
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
             <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
             <!-- Ideally, this should track the version used in Dropwizard-->
-            <version>2.41</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
-                    <groupId>javax.servlet</groupId>
-                    <artifactId>javax.servlet-api</artifactId>
+                    <groupId>jakarta.servlet</groupId>
+                    <artifactId>jakarta.servlet-api</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>junit</groupId>
@@ -122,15 +168,9 @@
         <dependency>
             <groupId>com.newrelic.agent.java</groupId>
             <artifactId>newrelic-java</artifactId>
-            <version>${newrelic.agent.version}</version>
             <type>${newrelic.agent.type}</type>
         </dependency>
         <!-- required by HAPI FHIR; specifying non-vulnerable version -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.9</version>
-        </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
@@ -159,6 +199,29 @@
         </testResources>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <dependencies>
+                  <dependency>
+                     <groupId>me.fabriciorby</groupId>
+                     <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                     <version>1.3.0</version>
+                  </dependency>
+                </dependencies>                        
+                <configuration>
+                    <reportFormat>plain</reportFormat>
+                    <consoleOutputReporter>
+                       <disable>${disable.console}</disable>
+                    </consoleOutputReporter>
+                    <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                        <theme>UNICODE</theme>
+                        <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                        <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                        <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                    </statelessTestsetInfoReporter>
+                </configuration>
+            </plugin>
+            <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
                 <configuration>
                     <createDependencyReducedPom>true</createDependencyReducedPom>
@@ -173,6 +236,7 @@
                         <filter>
                             <artifact>*:*</artifact>
                             <excludes>
+                                <exclude>module-info.class</exclude>
                                 <exclude>META-INF/*.SF</exclude>
                                 <exclude>META-INF/*.DSA</exclude>
                                 <exclude>META-INF/*.RSA</exclude>
@@ -244,19 +308,19 @@
                     <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
                     <annotationProcessorPaths>
                         <annotationProcessorPath>
-                            <groupId>org.hibernate</groupId>
+                            <groupId>org.hibernate.orm</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
-                            <version>5.6.15.Final</version>
+                            <version>6.6.1.Final</version>
                         </annotationProcessorPath>
                         <path>
-                            <groupId>javax.xml.bind</groupId>
-                            <artifactId>jaxb-api</artifactId>
-                            <version>2.3.0</version>
+                            <groupId>jakarta.xml.bind</groupId>
+                            <artifactId>jakarta.xml.bind-api</artifactId>
+                            <version>4.0.2</version>
                         </path>
                         <path>
-                            <groupId>javax.annotation</groupId>
-                            <artifactId>javax.annotation-api</artifactId>
-                            <version>1.3.1</version>
+                            <groupId>jakarta.annotation</groupId>
+                            <artifactId>jakarta.annotation-api</artifactId>
+                            <version>3.0.0</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -285,7 +349,7 @@
                                         </property>
                                         <property>
                                             <key>dialect</key>
-                                            <value>org.hibernate.dialect.PostgreSQL10Dialect</value>
+                                            <value>org.hibernate.dialect.PostgreSQLDialect</value>
                                         </property>
                                     </properties>
                                     <includes>.*</includes>
@@ -308,12 +372,113 @@
                         <version>${jooq.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>javax.persistence</groupId>
-                        <artifactId>javax.persistence-api</artifactId>
-                        <version>2.2</version>
+                        <groupId>org.jooq</groupId>
+                        <artifactId>jooq-meta-extensions-hibernate</artifactId>
+                        <version>${jooq.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>jakarta.persistence</groupId>
+                        <artifactId>jakarta.persistence-api</artifactId>
+                        <version>3.1.0</version>
                     </dependency>
                 </dependencies>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <dependencies>
+                  <dependency>
+                     <groupId>me.fabriciorby</groupId>
+                     <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                     <version>1.3.0</version>
+                  </dependency>
+                </dependencies>                        
+                <configuration>
+                    <testFailureIgnore>false</testFailureIgnore>
+                    <reportFormat>plain</reportFormat>
+                    <consoleOutputReporter>
+                       <disable>${disable.console}</disable>
+                    </consoleOutputReporter>
+                    <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporterUnicode">
+                        <theme>UNICODE</theme>
+                        <printStacktraceOnFailure>${test.verbosity}</printStacktraceOnFailure>
+                        <printStdoutOnFailure>${test.verbosity}</printStdoutOnFailure>
+                        <printStderrOnFailure>${test.verbosity}</printStderrOnFailure>
+                    </statelessTestsetInfoReporter>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>integration-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>integration-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                                <phase>verify</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+           <id>unit-tests</id>
+           <build>
+               <plugins>
+                   <plugin>
+                       <groupId>org.apache.maven.plugins</groupId>
+                       <artifactId>maven-surefire-plugin</artifactId>
+                       <executions>
+                           <execution>
+                               <id>unit-test</id>
+                               <goals>
+                                   <goal>test</goal>
+                               </goals>
+                               <phase>test</phase>
+                           </execution>
+                       </executions>
+                       <configuration>
+                           <skip>false</skip>
+                       </configuration>
+                   </plugin>
+               </plugins>
+           </build>
+       </profile>
+    </profiles>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>project.local</id>
+            <name>project</name>
+            <url>file://${project.basedir}/../repo</url>
+        </repository>
+    </repositories>
 </project>

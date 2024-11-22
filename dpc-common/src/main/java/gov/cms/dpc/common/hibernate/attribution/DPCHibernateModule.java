@@ -2,12 +2,12 @@ package gov.cms.dpc.common.hibernate.attribution;
 
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
+import com.google.inject.Singleton;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import io.dropwizard.core.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.db.ManagedDataSource;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
-import javax.inject.Singleton;
 
 
 public class DPCHibernateModule<T extends Configuration & IDPCDatabase> extends DropwizardAwareModule<T> {

@@ -4,6 +4,7 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.macaroons.MacaroonBakery;
@@ -12,14 +13,15 @@ import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.config.TokenPolicy.ExpirationPolicy;
 import gov.cms.dpc.macaroons.config.TokenPolicy.VersionPolicy;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
-import io.jsonwebtoken.SigningKeyResolverAdapter;
+import io.jsonwebtoken.LocatorAdapter;
+import jakarta.ws.rs.NotFoundException;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
+import java.security.Key;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -31,10 +33,15 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Token resource operations")
 public class TokenResourceUnitTest {
     @Mock
     TokenDAO mockTokenDao;
+    
+    @Mock
+    PublicKeyDAO mockPublicKeyDao;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private static MacaroonBakery bakery;
@@ -42,7 +49,7 @@ public class TokenResourceUnitTest {
     private static TokenPolicy policy;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private static Macaroon macaroon;
-    private static SigningKeyResolverAdapter resolver = Mockito.mock(SigningKeyResolverAdapter.class);
+    private static LocatorAdapter<Key> resolver = Mockito.mock(LocatorAdapter.class);
     private static IJTICache cache = Mockito.mock(IJTICache.class);
     private static String authURL = "auth_url";
     private TokenResource tokenResource;
@@ -54,24 +61,26 @@ public class TokenResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get client tokens 🥳")
     public void testGetOrganizationTokens() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
         TokenEntity tokenEntity = new TokenEntity("46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0", orgId, TokenEntity.TokenType.MACAROON);
-        List<TokenEntity> tokenEntityList = new ArrayList<TokenEntity>();
+        List<TokenEntity> tokenEntityList = new ArrayList<>();
         tokenEntityList.add(tokenEntity);
         CollectionResponse<TokenEntity> expected = new CollectionResponse<>(tokenEntityList);
 
         Mockito.when(mockTokenDao.fetchTokens(orgId)).thenAnswer(answer -> tokenEntityList);
-
+        
         CollectionResponse<TokenEntity> actualResponse = tokenResource.getOrganizationTokens(organizationPrincipal);
 
         assertEquals(expected.getEntities(), actualResponse.getEntities());
     }
 
     @Test
+    @DisplayName("Get client token 🥳")
     public void testGetOrganizationToken() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -79,7 +88,7 @@ public class TokenResourceUnitTest {
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
         UUID tokenId = UUID.randomUUID();
         TokenEntity tokenEntity = new TokenEntity(tokenId.toString(), orgId, TokenEntity.TokenType.MACAROON);
-        List<TokenEntity> tokenEntityList = new ArrayList<TokenEntity>();
+        List<TokenEntity> tokenEntityList = new ArrayList<>();
         tokenEntityList.add(tokenEntity);
 
         Mockito.when(mockTokenDao.findTokenByOrgAndID(orgId, tokenId)).thenAnswer(answer -> tokenEntityList);
@@ -90,6 +99,7 @@ public class TokenResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Get unrecognized client token 🤮")
     public void testGetOrganizationTokenNoMatch() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -99,10 +109,11 @@ public class TokenResourceUnitTest {
 
         Mockito.when(mockTokenDao.findTokenByOrgAndID(orgId, tokenId)).thenAnswer(answer -> new ArrayList<TokenEntity>());
 
-        assertThrows(WebApplicationException.class, () -> tokenResource.getOrganizationToken(organizationPrincipal, tokenId));
+        assertThrows(NotFoundException.class, () -> tokenResource.getOrganizationToken(organizationPrincipal, tokenId));
     }
 
     @Test
+    @DisplayName("Create client token 🥳")
     public void testCreateOrganizationToken() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -113,7 +124,7 @@ public class TokenResourceUnitTest {
         expirationPolicy.setExpirationOffset(0);
         VersionPolicy versionPolicy = new VersionPolicy();
         versionPolicy.setCurrentVersion(1);
-        List<MacaroonCaveat> macaroonCaveats = new ArrayList<MacaroonCaveat>();
+        List<MacaroonCaveat> macaroonCaveats = new ArrayList<>();
         MacaroonCaveat macaroonCaveat = new MacaroonCaveat();
         macaroonCaveat.setRawCaveat("organization_id = org".getBytes());
         macaroonCaveats.add(macaroonCaveat);
@@ -142,6 +153,7 @@ public class TokenResourceUnitTest {
     }
 
     @Test
+    @DisplayName("Delete client token 🥳")
     public void testDeleteOrganizationToken() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -149,7 +161,7 @@ public class TokenResourceUnitTest {
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
         UUID tokenId = UUID.randomUUID();
         TokenEntity tokenEntity = new TokenEntity(tokenId.toString(), orgId, TokenEntity.TokenType.MACAROON);
-        List<TokenEntity> tokenEntityList = new ArrayList<TokenEntity>();
+        List<TokenEntity> tokenEntityList = new ArrayList<>();
         tokenEntityList.add(tokenEntity);
 
         Mockito.when(mockTokenDao.findTokenByOrgAndID(orgId, tokenId)).thenAnswer(answer -> tokenEntityList);

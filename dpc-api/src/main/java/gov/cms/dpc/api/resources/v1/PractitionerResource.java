@@ -6,7 +6,6 @@ import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import com.google.inject.name.Named;
 import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
@@ -26,15 +25,16 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import com.google.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import java.util.*;
 import java.util.function.Consumer;
 
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
+import jakarta.inject.Named;
 
 @Api(value = "Practitioner", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Practitioner")

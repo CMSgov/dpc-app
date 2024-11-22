@@ -23,15 +23,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBI;
 import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBIs;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 public class JobBatchProcessor {
     private static final Logger logger = LoggerFactory.getLogger(JobBatchProcessor.class);
@@ -130,7 +138,7 @@ public class JobBatchProcessor {
         final String resourcesRequested = job.getResourceTypes().stream().map(DPCResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
         final String failReasonLabel = failReason.map(Enum::name).orElse("NA");
         stopWatch.stop();
-        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason.isEmpty(), failReasonLabel, resourcesRequested, stopWatch.getTime());
+        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason.isEmpty(), failReasonLabel, resourcesRequested, stopWatch.getDuration().getSeconds() * 1000);
         return results;
     }
 

@@ -14,7 +14,7 @@ import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.IdType;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;

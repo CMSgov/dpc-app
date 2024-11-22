@@ -2,11 +2,12 @@ package gov.cms.dpc.api.auth;
 
 import com.google.inject.Binder;
 import com.google.inject.TypeLiteral;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.filters.PathAuthorizationFilter;
 import gov.cms.dpc.api.auth.jwt.CaffeineJTICache;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
-import gov.cms.dpc.api.auth.jwt.JwtKeyResolver;
+import gov.cms.dpc.api.auth.jwt.JwtKeyLocator;
 import gov.cms.dpc.api.auth.macaroonauth.MacaroonsAuthenticator;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthFactory;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
@@ -14,10 +15,10 @@ import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
 import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.UnauthorizedHandler;
-import io.jsonwebtoken.SigningKeyResolverAdapter;
+import io.jsonwebtoken.LocatorAdapter;
+import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 /**
  * {@link DropwizardAwareModule} for determining which authentication system to use.
@@ -49,7 +50,7 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
             binder.bind(authenticatorTypeLiteral).to(MacaroonsAuthenticator.class);
         }
         binder.bind(DPCAuthDynamicFeature.class);
-        binder.bind(SigningKeyResolverAdapter.class).to(JwtKeyResolver.class);
+        binder.bind(LocatorAdapter.class).to(JwtKeyLocator.class).in(Singleton.class);
         binder.bind(IJTICache.class).to(CaffeineJTICache.class);
         binder.bind(BakeryKeyPair.class).toProvider(new BakeryKeyPairProvider(this.configuration()));
     }

@@ -4,8 +4,8 @@ import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 
-import javax.inject.Inject;
-import javax.persistence.criteria.*;
+import jakarta.inject.Inject;
+import jakarta.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -48,13 +48,14 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
             throw new IllegalStateException("Must have at least one search predicate!");
         }
 
-        query.where(predicates.toArray(new Predicate[0]));
+        query.where(predicates.toArray(Predicate[]::new));
         return this.list(query);
     }
 
     /**
      * Returns a list of all {@link PatientEntity}s whose id is in resourceIds.
-     * @param resourceIDs
+     * @param organizationId UUID of the organization to search in
+     * @param resourceIDs List of UUIDs for each patient ID to search
      * @return List of {@link PatientEntity}s
      */
     public List<PatientEntity> patientSearch(UUID organizationId, List<UUID> resourceIDs) {
@@ -80,7 +81,7 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         // Delete all the attribution relationships
         removeAttributionRelationships(patientEntity);
 
-        this.currentSession().delete(patientEntity);
+        this.currentSession().remove(patientEntity);
 
         return true;
     }
@@ -96,19 +97,16 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         return fullyUpdated;
     }
 
-    // We have to suppress this because the list returned is actually Strings, but we can't prove it to the compiler
-    @SuppressWarnings("rawtypes")
-    public List fetchPatientMBIByRosterID(UUID rosterID, boolean activeOnly) {
+    public List<PatientEntity> fetchPatientMBIByRosterID(UUID rosterID, boolean activeOnly) {
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
         final Root<PatientEntity> root = query.from(PatientEntity.class);
-        query.select(root);
-
+        
         // Join across the AttributionRelationships
         final ListJoin<PatientEntity, AttributionRelationship> attrJoins = root.join(PatientEntity_.attributions);
         final Join<AttributionRelationship, RosterEntity> rosterJoin = attrJoins.join(AttributionRelationship_.roster);
 
-        query.select(root.get(PatientEntity_.BENEFICIARY_ID));
+        query.select(root);
 
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(builder.equal(rosterJoin.get(RosterEntity_.id), rosterID));
@@ -116,8 +114,18 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         if (activeOnly) {
             predicates.add(builder.equal(attrJoins.get(AttributionRelationship_.inactive), false));
         }
-        query.where(predicates.toArray(new Predicate[0]));
-        return this.list(query);
+        query.where(predicates.toArray(Predicate[]::new));
+        
+        List<PatientEntity> patients = this.list(query);
+        List<PatientEntity> fakePatients = new ArrayList<>();
+        for(PatientEntity patient : patients)
+        {
+            PatientEntity p = new PatientEntity();
+            p.setBeneficiaryID(patient.getBeneficiaryID());
+            fakePatients.add(p);
+        }
+        
+        return fakePatients;
     }
 
     private int removeAttributionRelationships(PatientEntity patientEntity) {
@@ -130,6 +138,6 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
                         .get(AttributionRelationship_.patient)
                         .get(PatientEntity_.id),
                 patientEntity.getID()));
-        return this.currentSession().createQuery(criteriaDelete).executeUpdate();
+        return this.currentSession().createMutationQuery(criteriaDelete).executeUpdate();
     }
 }

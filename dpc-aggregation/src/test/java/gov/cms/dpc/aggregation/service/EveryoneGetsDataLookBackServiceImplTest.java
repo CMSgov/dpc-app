@@ -2,13 +2,16 @@ package gov.cms.dpc.aggregation.service;
 
 import gov.cms.dpc.common.utils.NPIUtil;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+@DisplayName("Look Back common data set")
 public class EveryoneGetsDataLookBackServiceImplTest {
 
     private final LookBackService lookBackService = new EveryoneGetsDataLookBackServiceImpl();
 
     @Test
+    @DisplayName("Look back data matches 🥳")
     public void alwaysReturnTrueFromHasClaimWithin() {
         LookBackAnswer result = lookBackService.getLookBackAnswer(null, NPIUtil.generateNPI(), NPIUtil.generateNPI(), 0L);
         Assertions.assertTrue(result.orgNPIMatchAnyEobNPIs());

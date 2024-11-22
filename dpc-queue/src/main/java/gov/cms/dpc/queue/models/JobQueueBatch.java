@@ -8,7 +8,7 @@ import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -497,6 +497,7 @@ public class JobQueueBatch implements Serializable {
 
     /**
      * Retrieve the number of patients that have been processed.
+     * @return number of patients processed
      */
     public int getPatientsProcessed() {
         if (JobStatus.COMPLETED.equals(status)) {

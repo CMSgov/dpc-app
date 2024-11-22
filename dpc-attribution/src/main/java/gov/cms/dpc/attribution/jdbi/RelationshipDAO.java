@@ -9,11 +9,11 @@ import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.inject.Inject;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaDelete;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -77,12 +77,12 @@ public class RelationshipDAO extends DPCAbstractDAO<AttributionRelationship> {
      */
     public void removeRosterAttributions(UUID rosterID) {
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaDelete<AttributionRelationship> query = builder.createCriteriaDelete(AttributionRelationship.class);
-        final Root<AttributionRelationship> root = query.from(AttributionRelationship.class);
+        final CriteriaDelete<AttributionRelationship> deleteQuery = builder.createCriteriaDelete(AttributionRelationship.class);
+        final Root<AttributionRelationship> root = deleteQuery.from(AttributionRelationship.class);
 
-        query.where(builder.equal(root.get(AttributionRelationship_.roster).get(RosterEntity_.id), rosterID));
+        deleteQuery.where(builder.equal(root.get(AttributionRelationship_.roster).get(RosterEntity_.id), rosterID));
 
-        this.currentSession().createQuery(query).executeUpdate();
+        this.currentSession().createMutationQuery(deleteQuery).executeUpdate();
     }
 
     /**
@@ -91,7 +91,7 @@ public class RelationshipDAO extends DPCAbstractDAO<AttributionRelationship> {
      * @param relationship - {@link AttributionRelationship} to update
      */
     public void updateAttributionRelationship(AttributionRelationship relationship) {
-        this.currentSession().update(relationship);
+        this.currentSession().merge(relationship);
     }
 
     /**

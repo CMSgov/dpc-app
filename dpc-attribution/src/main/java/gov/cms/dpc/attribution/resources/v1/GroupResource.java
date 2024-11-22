@@ -26,11 +26,11 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -41,8 +41,8 @@ import java.util.stream.Stream;
 public class GroupResource extends AbstractGroupResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
-    private static final WebApplicationException NOT_FOUND_EXCEPTION = new WebApplicationException("Cannot find Roster resource", Response.Status.NOT_FOUND);
-    private static final WebApplicationException TOO_MANY_MEMBERS_EXCEPTION = new WebApplicationException("Roster limit reached", Response.Status.BAD_REQUEST);
+    private static final NotFoundException NOT_FOUND_EXCEPTION = new NotFoundException("Cannot find Roster resource");
+    private static final BadRequestException TOO_MANY_MEMBERS_EXCEPTION = new BadRequestException("Roster limit reached");
 
     private final ProviderDAO providerDAO;
     private final PatientDAO patientDAO;
@@ -76,14 +76,13 @@ public class GroupResource extends AbstractGroupResource {
         final String providerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
         final List<ProviderEntity> providers = this.providerDAO.getProviders(null, providerNPI, organizationID);
         if (providers.isEmpty()) {
-            throw new WebApplicationException("Unable to find attributable provider", Response.Status.NOT_FOUND);
+            throw new NotFoundException("Unable to find attributable provider");
         }
-
+        
         // Check and see if a roster already exists for the provider
         final List<RosterEntity> entities = this.rosterDAO.findEntities(null, organizationID, providerNPI, null);
         if (!entities.isEmpty()) {
-            throw new WebApplicationException("Could not create a roster for this provider as they already have one.  Try updating it instead, or first deleting it.",
-                Response.Status.FORBIDDEN);
+            throw new ForbiddenException("Could not create a roster for this provider as they already have one.  Try updating it instead, or first deleting it.");
         }
 
         // Verify that all patients in the roster exist
@@ -127,18 +126,17 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     public List<Patient> getAttributedPatients(@NotNull @PathParam("rosterID") UUID rosterID, @QueryParam(value = "active") boolean activeOnly) {
         if (!this.rosterDAO.rosterExists(rosterID)) {
-            throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
+            throw new NotFoundException(NOT_FOUND_EXCEPTION);
         }
 
-        // We have to do this because Hibernate/Dropwizard gets confused when returning a single type (like String)
-        @SuppressWarnings("unchecked") final List<String> patientMBIs = this.patientDAO.fetchPatientMBIByRosterID(rosterID, activeOnly);
+        final List<PatientEntity> patientMBIs = this.patientDAO.fetchPatientMBIByRosterID(rosterID, activeOnly);
 
         return patientMBIs
                 .stream()
-                .map(mbi -> {
+                .map(patient -> {
                     // Generate a fake patient, with only the ID set
                     final Patient p = new Patient();
-                    p.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(mbi);
+                    p.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(patient.getBeneficiaryID());
                     return p;
                 })
                 .collect(Collectors.toList());
@@ -153,16 +151,17 @@ public class GroupResource extends AbstractGroupResource {
     public Group replaceRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
         // Check that the roster exists, that the new roster isn't too big, and that all patients exist
         if (!this.rosterDAO.rosterExists(rosterID)) {
-            throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
+            throw new NotFoundException(NOT_FOUND_EXCEPTION);
         }
         if (rosterSizeTooBig(config.getPatientLimit(), groupUpdate)) {
             throw TOO_MANY_MEMBERS_EXCEPTION;
         }
+        
         List<PatientEntity> patientEntities = verifyAndGetMembers(groupUpdate);
-
+        
         final RosterEntity rosterEntity = new RosterEntity();
         rosterEntity.setId(rosterID);
-
+        
         // Remove all roster relationships
         this.relationshipDAO.removeRosterAttributions(rosterID);
 
@@ -178,7 +177,7 @@ public class GroupResource extends AbstractGroupResource {
         final RosterEntity rosterEntity1 = rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
         this.rosterDAO.refresh(rosterEntity1);
-
+        
         return converter.toFHIR(Group.class, rosterEntity1);
     }
 
@@ -190,7 +189,7 @@ public class GroupResource extends AbstractGroupResource {
     public Group addRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
         // Get the roster if it exists, if not return NOT_FOUND
         final RosterEntity rosterEntity = this.rosterDAO.getEntity(rosterID)
-                .orElseThrow(() -> new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_EXCEPTION));
 
         if (rosterSizeTooBig(config.getPatientLimit(), converter.toFHIR(Group.class, rosterEntity), groupUpdate)) {
             throw TOO_MANY_MEMBERS_EXCEPTION;
@@ -249,7 +248,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     public Group removeRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
         if (!this.rosterDAO.rosterExists(rosterID)) {
-            throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
+            throw new NotFoundException(NOT_FOUND_EXCEPTION);
         }
 
         groupUpdate
@@ -262,7 +261,7 @@ public class GroupResource extends AbstractGroupResource {
                     patientEntity.setID(patientID);
                     return this.relationshipDAO.lookupAttributionRelationship(rosterID, patientID);
                 })
-                .map(rOptional -> rOptional.orElseThrow(() -> new WebApplicationException("Cannot find attribution relationship.", Response.Status.BAD_REQUEST)))
+                .map(rOptional -> rOptional.orElseThrow(() -> new BadRequestException("Cannot find attribution relationship.")))
                 .peek(relationship -> {
                     relationship.setInactive(true);
                     relationship.setPeriodEnd(OffsetDateTime.now(ZoneOffset.UTC));
@@ -327,7 +326,7 @@ public class GroupResource extends AbstractGroupResource {
 
     /**
      * Verifies that all patients referenced in the {@link Group} exist, then returns their {@link PatientEntity}s.
-     * If any of the patients don't exist it throws a {@link WebApplicationException}.
+     * If any of the patients don't exist it throws a {@link BadRequestException}.
      * @param group A {@link Group} whose patient references need to be verified.
      * @return List of {@link PatientEntity}s
      */
@@ -342,12 +341,12 @@ public class GroupResource extends AbstractGroupResource {
             .map(ref -> UUID.fromString(new IdType(ref.getReference()).getIdPart()))
             .distinct()
             .collect(Collectors.toList());
-
+        
         // Get corresponding PatientEntities
         // As of 7/30/24, we're currently capped at 1350 patients per group.  If we ever raise that it might be worth
         // considering breaking this up into multiple queries.
         List<PatientEntity> patientEntities = patientDAO.patientSearch(orgId, patientIds);
-
+        
         // Make sure we have the same number of Ids and entities
         if(patientIds.size() != patientEntities.size()) {
             throw new WebApplicationException(

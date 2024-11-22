@@ -16,9 +16,9 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,7 +27,7 @@ import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 
 public class PatientResource extends AbstractPatientResource {
 
-    private static final WebApplicationException NOT_FOUND_EXCEPTION = new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND);
+    private static final NotFoundException NOT_FOUND_EXCEPTION = new NotFoundException("Cannot find patient with given ID");
     private final FHIREntityConverter converter;
     private final PatientDAO dao;
 
@@ -46,16 +46,16 @@ public class PatientResource extends AbstractPatientResource {
             @QueryParam("identifier") String patientMBI,
             @QueryParam("organization") String organizationReference) {
         if (patientMBI == null && organizationReference == null && resourceID == null) {
-            throw new WebApplicationException("Must have one of Patient Identifier, Organization Resource ID, or Patient Resource ID", Response.Status.BAD_REQUEST);
+            throw new BadRequestException("Must have one of Patient Identifier, Organization Resource ID, or Patient Resource ID");
         }
 
         final String idValue;
-
+        
         // Extract the Patient MBI from the query param
         if (patientMBI != null) {
             final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(patientMBI);
             if (!patientIdentifier.getSystem().equals(DPCIdentifierSystem.MBI.getSystem())) {
-                throw new WebApplicationException("Must have MBI identifier", Response.Status.BAD_REQUEST);
+                throw new BadRequestException("Must have MBI identifier");
             }
             idValue = patientIdentifier.getValue();
         } else {
@@ -77,8 +77,8 @@ public class PatientResource extends AbstractPatientResource {
     public Patient getPatient(@PathParam("patientID") UUID patientID) {
         final PatientEntity patientEntity = this.dao.getPatient(patientID)
                 .orElseThrow(() ->
-                        new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND));
-
+                        new NotFoundException("Cannot find patient with given ID"));
+        
         return this.converter.toFHIR(Patient.class, patientEntity);
     }
 

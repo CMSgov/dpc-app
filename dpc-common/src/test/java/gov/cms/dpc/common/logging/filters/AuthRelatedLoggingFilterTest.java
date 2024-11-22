@@ -13,7 +13,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 import java.util.stream.Stream;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Authentication log filtering")
 public class AuthRelatedLoggingFilterTest {
 
     private Filter<IAccessEvent> filter;
@@ -26,6 +28,7 @@ public class AuthRelatedLoggingFilterTest {
     }
 
     @ParameterizedTest
+    @DisplayName("Test URL query strings 🥳?")
     @MethodSource("stringSource")
     public void testQueryString(String queryString, FilterReply expectedReply) {
         Mockito.when(event.getQueryString()).thenReturn(queryString);

@@ -3,8 +3,8 @@ package gov.cms.dpc.common.hibernate.validator;
 import gov.cms.dpc.common.annotations.NPI;
 import gov.cms.dpc.common.utils.NPIUtil;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class NPIValidator implements ConstraintValidator<NPI, String> {
 

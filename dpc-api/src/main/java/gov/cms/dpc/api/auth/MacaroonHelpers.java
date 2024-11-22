@@ -9,11 +9,11 @@ import gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier;
 import gov.cms.dpc.macaroons.caveats.VersionCaveatSupplier;
 import org.apache.http.HttpHeaders;
 
-import javax.annotation.Nullable;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import jakarta.annotation.Nullable;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +49,7 @@ public class MacaroonHelpers {
         }
 
         if (macaroon == null) {
-            throw new WebApplicationException(unauthorizedResponse);
+            throw new NotAuthorizedException(unauthorizedResponse);
         }
 
         return macaroon;

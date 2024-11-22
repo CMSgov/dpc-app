@@ -8,7 +8,7 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -72,6 +72,7 @@ public class APIHelpers {
     /**
      * Fetch the BFD database last update time. Use it as the transactionTime for a job.
      *
+     * @param bfdClient  BFD client to use for transaction
      * @return transactionTime from the BFD service
      */
     @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model

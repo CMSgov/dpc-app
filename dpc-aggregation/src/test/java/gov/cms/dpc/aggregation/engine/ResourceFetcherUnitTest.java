@@ -19,9 +19,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
+@DisplayName("Blue Button resource fetching")
 class ResourceFetcherUnitTest {
     private static Patient testPatient;
     private static String testPatientMbi;
@@ -39,6 +41,7 @@ class ResourceFetcherUnitTest {
     }
 
     @Test
+    @DisplayName("Fetch patient resource from BFD 🥳")
     public void testHappyPath_Patient() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Patient,
@@ -54,6 +57,7 @@ class ResourceFetcherUnitTest {
     }
 
     @Test
+    @DisplayName("Fetch EOB resource from BFD 🥳")
     public void testHappyPath_Eob() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.ExplanationOfBenefit,
@@ -69,6 +73,7 @@ class ResourceFetcherUnitTest {
     }
 
     @Test
+    @DisplayName("Fetch coverage resource from BFD 🥳")
     public void testHappyPath_coverage() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Coverage,
@@ -84,6 +89,7 @@ class ResourceFetcherUnitTest {
     }
 
     @Test
+    @DisplayName("Fetch patient with since parameter 🥳")
     public void testHappyPath_NoSince() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Patient,
@@ -99,6 +105,7 @@ class ResourceFetcherUnitTest {
     }
 
     @Test
+    @DisplayName("Bad transaction time specified in request 🤮")
     public void testBadTransactionTime() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Patient,
@@ -113,6 +120,7 @@ class ResourceFetcherUnitTest {
     }
 
     @Test
+    @DisplayName("Requested unrecognized patient from BFD 🤮")
     public void testResourceNotFound() {
         ResourceFetcher fetcher = Mockito.spy(
                 getResourceFetcher(
@@ -134,6 +142,7 @@ class ResourceFetcherUnitTest {
     }
 
     @Test
+    @DisplayName("Base server error requesting resource 🤮")
     public void testBaseServerErrorFetchingResources() {
         ResourceFetcher fetcher = Mockito.spy(
                 getResourceFetcher(
@@ -155,6 +164,7 @@ class ResourceFetcherUnitTest {
     }
 
     @Test
+    @DisplayName("Unknown error requesting resource 🤮")
     public void testUnknownErrorFetchingResources() {
         ResourceFetcher fetcher = Mockito.spy(
                 getResourceFetcher(
@@ -177,6 +187,7 @@ class ResourceFetcherUnitTest {
     }
 
     @Test
+    @DisplayName("Incorrect resource type requested 🤮")
     public void testWrongResourceTypeReturned() {
         // Build EoB bundle
         ExplanationOfBenefit eob = new ExplanationOfBenefit();
@@ -204,6 +215,7 @@ class ResourceFetcherUnitTest {
     }
 
     @Test
+    @DisplayName("Unsupported resource type requested 🤮")
     public void testSearchForUnsupportedResourceType() {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Practitioner,

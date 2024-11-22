@@ -1,10 +1,9 @@
 package gov.cms.dpc.api.converters;
 
 import gov.cms.dpc.api.models.RangeHeader;
+import jakarta.ws.rs.BadRequestException;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ParamConverter;
+import jakarta.ws.rs.ext.ParamConverter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +42,7 @@ class HttpRangeHeaderParamConverter implements ParamConverter<RangeHeader> {
             }
             return rangeHeader;
         }
-        throw new WebApplicationException(String.format(RANGE_MSG_FORMATTER, value), Response.Status.BAD_REQUEST);
+        throw new BadRequestException(String.format(RANGE_MSG_FORMATTER, value));
     }
 
     @Override

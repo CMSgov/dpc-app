@@ -14,11 +14,10 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.UUID;
 
 
@@ -43,7 +42,7 @@ public class PathAuthorizationFilter extends DPCAuthFilter {
         final String pathValue = uriInfo.getPathParameters().getFirst(pathParam);
         if (pathValue == null) {
             logger.error("Cannot find path param {} on request. Has: {}", XSSSanitizerUtil.sanitize(pathParam), uriInfo.getPathParameters().keySet());
-            throw new WebApplicationException("Unable to get path parameter from request", Response.Status.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Unable to get path parameter from request");
         }
 
         final Organization organization = new Organization();

@@ -7,10 +7,13 @@ import org.junit.jupiter.api.Test;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("FHIR-based Group Factory tests")
 public class FHIRGroupBuilderUnitTest {
 
     @Test
+    @DisplayName("Build fully-loaded FHIR group 🥳")
     public void testFullBuild() {
         UUID patient1Id = UUID.randomUUID();
         UUID patient2Id = UUID.randomUUID();
@@ -49,12 +52,14 @@ public class FHIRGroupBuilderUnitTest {
     }
 
     @Test
+    @DisplayName("Build new FHIR group 🥳")
     public void testNewBuild() {
         FHIRGroupBuilder result = FHIRGroupBuilder.newBuild();
         assertNotNull(result);
     }
 
     @Test
+    @DisplayName("Set attributions in group 🥳")
     public void testAttributedTo() {
         FHIRGroupBuilder builder = FHIRGroupBuilder.newBuild();
         builder.attributedTo("12345");
@@ -76,6 +81,7 @@ public class FHIRGroupBuilderUnitTest {
 
 
     @Test
+    @DisplayName("Build group with multiple patients 🥳")
     public void testWithPatient() {
         UUID patientUUID = UUID.randomUUID();
 
@@ -102,7 +108,9 @@ public class FHIRGroupBuilderUnitTest {
         assertEquals("Patient/"+id1,group.getMember().get(0).getEntity().getReference());
         assertEquals("Patient/"+id2,group.getMember().get(1).getEntity().getReference());
     }
+    
     @Test
+    @DisplayName("Build group with org tag 🥳")
     public void withOrgTag() {
         UUID orgId = UUID.randomUUID();
 

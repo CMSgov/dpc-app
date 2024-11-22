@@ -1,8 +1,6 @@
-version: '3'
-
 services:
-
   bfd-test:
+    image: dpc-test:latest
     build:
       context: .
       dockerfile: docker/Dockerfiles/Dockerfile.test

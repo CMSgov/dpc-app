@@ -3,6 +3,8 @@ package gov.cms.dpc.fhir.validations.dropwizard;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -12,8 +14,8 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
+//import jakarta.inject.Inject;
+//import jakarta.inject.Provider;
 import java.sql.Date;
 
 import static gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration.FHIRValidationConfiguration;
@@ -36,11 +38,18 @@ public class FHIRValidatorProvider implements Provider<FhirValidator> {
         this.validationConfiguration = config;
         this.supportChain = supportChain;
 
+        logger.info("Injected FhirContext: {}", ctx);
+        logger.info("Injected FHIRValidationConfiguration: {}", config);
+        logger.info("Injected ValidationSupportChain: {}", supportChain);
+
         // Double lock check to eagerly init the validator
         // Since we can't inject the provider as a singleton, we need a way to prime the validator on first use, but only once.
+        logger.info("Something wants to initiialize the a FhirValidator!");
         if (!initialized) {
             synchronized (lock) {
+                logger.info("Something made it into the synchronized block!");
                 if (!initialized) {
+                    logger.info("Initializing the FHIR Validator. Thread: {}", Thread.currentThread().getId());
                     // Initialize
                     final FhirValidator fhirValidator = get();
                     initialize(fhirValidator);

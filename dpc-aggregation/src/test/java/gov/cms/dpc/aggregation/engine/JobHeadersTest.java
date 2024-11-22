@@ -11,7 +11,9 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Job header setting")
 class JobHeadersTest {
 
     private  String requestingIP;
@@ -39,6 +41,7 @@ class JobHeadersTest {
     }
 
     @Test
+    @DisplayName("Create job headers 🥳")
     void buildHeaders() {
         this.isBulk=true;
         this.jobHeaders = new JobHeaders(this.requestingIP,this.randomUUID , this.randomUUID, this.transactionTime,this.isBulk);

@@ -6,8 +6,8 @@ import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import org.hibernate.query.Query;
 
-import javax.inject.Inject;
-import javax.persistence.criteria.*;
+import jakarta.inject.Inject;
+import jakarta.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -59,7 +59,7 @@ public class RosterDAO extends DPCAbstractDAO<RosterEntity> {
             predicates.add(builder.equal(patientJoin.get(PatientEntity_.id), patientID));
         }
 
-        query.where(predicates.toArray(new Predicate[0]));
+        query.where(predicates.toArray(Predicate[]::new));
         return this.list(query);
     }
 
@@ -77,6 +77,6 @@ public class RosterDAO extends DPCAbstractDAO<RosterEntity> {
     }
 
     public void delete(RosterEntity rosterEntity) {
-        currentSession().delete(rosterEntity);
+        currentSession().remove(rosterEntity);
     }
 }

@@ -9,9 +9,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.DisplayName;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Key/value storage")
 public abstract class AbstractStoreTest {
 
     protected final IRootKeyStore store;
@@ -26,6 +28,7 @@ public abstract class AbstractStoreTest {
     }
 
     @Test
+    @DisplayName("Create key pair 🥳")
     void simpleCreateTest() {
         final IDKeyPair idKeyPair = store.create();
         final String key2 = store.get(idKeyPair.getId());
@@ -33,6 +36,7 @@ public abstract class AbstractStoreTest {
     }
 
     @Test
+    @DisplayName("Get key for unknown ID 🤮")
     void testInvalidID() {
         assertThrows(BakeryException.class, () -> store.get("1"), "Should throw an exception on unknown ID");
     }
