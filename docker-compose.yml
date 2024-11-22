@@ -27,6 +27,7 @@ services:
       - EMIT_AWS_METRICS=${EMIT_AWS_METRICS:-false}
       - JACOCO=${REPORT_COVERAGE}
       - DEBUG_MODE=${DEBUG_MODE:-false}
+      - HEALTH_CHECK_COUNT=7
     depends_on:
       - db
       - consent
@@ -61,6 +62,7 @@ services:
       - EXPORT_PATH=/app/data
       - AUTH_DISABLED=${AUTH_DISABLED:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
+      - HEALTH_CHECK_COUNT=8
     depends_on:
       - attribution
     volumes:
