@@ -51,7 +51,6 @@ public class PractitionerResourceUnitTest {
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
         String providerNPI = NPIUtil.generateNPI();
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("_tag", Collections.singletonList(organizationPrincipal.getOrganization().getId()));
         searchParams.put("identifier", Collections.singletonList(providerNPI));
         Bundle bundle = new Bundle();
 
@@ -61,6 +60,7 @@ public class PractitionerResourceUnitTest {
         IQuery<Bundle> mockQuery = Mockito.mock(IQuery.class);
         Mockito.when(attributionClient.search().forResource(Practitioner.class).encodedJson()).thenReturn(queryExec);
         Mockito.when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
+        Mockito.when(mockQuery.withTag(DPCIdentifierSystem.DPC.getSystem(), organizationPrincipal.getID().toString())).thenReturn(mockQuery);
         Mockito.when(mockQuery.whereMap(searchParams)).thenReturn(mockQuery);
         Mockito.when(mockQuery.execute()).thenReturn(bundle);
 

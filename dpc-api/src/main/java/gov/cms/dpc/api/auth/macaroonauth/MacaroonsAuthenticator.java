@@ -51,30 +51,22 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
         Map<String, List<String>> searchParams = new HashMap<>();
         searchParams.put("_id", Collections.singletonList(credentials.getPathValue()));
 
-        // Practitioner resources don't support an organization search parameter, use _tag instead
-        if (credentials.getPathAuthorizer().type() == DPCResourceType.Practitioner) {
-            searchParams.put("_tag", Collections.singletonList(credentials.getOrganization().getIdElement().getIdPart()));
+        var query = this.client
+            .search()
+            .forResource(credentials.getPathAuthorizer().type().toString())
+            .returnBundle(Bundle.class)
+            .encodedJson();
+
+        if ( List.of(DPCResourceType.Group, DPCResourceType.Practitioner).contains(credentials.getPathAuthorizer().type()) ) {
+            query.withTag(DPCIdentifierSystem.DPC.getSystem(), credentials.getOrganization().getIdElement().getIdPart());
         } else {
             searchParams.put("organization", Collections.singletonList(credentials.getOrganization().getId()));
         }
-
-        // Special handling of Group resources, which use tags instead of resource properties.
-        // TODO: Remove with DPC-552
-        if (credentials.getPathAuthorizer().type() == DPCResourceType.Group) {
-            searchParams.put("_tag", Collections.singletonList(String.format("%s|%s", DPCIdentifierSystem.DPC.getSystem(), credentials.getOrganization().getId())));
-        }
-        final Bundle bundle = this.client
-                .search()
-                .forResource(credentials.getPathAuthorizer().type().toString())
-                .whereMap(searchParams)
-                .returnBundle(Bundle.class)
-                .encodedJson()
-                .execute();
+        final Bundle bundle = query.whereMap(searchParams).execute();
 
         if (bundle.getTotal() == 0) {
             return Optional.empty();
         }
-
         return Optional.of(principal);
     }
 

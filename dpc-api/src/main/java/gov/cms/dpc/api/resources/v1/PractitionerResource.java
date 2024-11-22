@@ -13,6 +13,7 @@ import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPractitionerResource;
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
@@ -67,7 +68,6 @@ public class PractitionerResource extends AbstractPractitionerResource {
 
         // Create search params
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("_tag", Collections.singletonList(organizationPrincipal.getID().toString()));
 
         if (providerNPI != null && !providerNPI.equals("")) {
             searchParams.put("identifier", Collections.singletonList(providerNPI));
@@ -78,6 +78,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
             .forResource(Practitioner.class)
             .encodedJson()
             .returnBundle(Bundle.class)
+            .withTag(DPCIdentifierSystem.DPC.getSystem(), organizationPrincipal.getID().toString())
             .whereMap(searchParams)
             .execute();
     }
