@@ -10,7 +10,16 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.cli.keys.KeyCommand;
 import gov.cms.dpc.api.cli.organizations.OrganizationCommand;
 import gov.cms.dpc.api.cli.tokens.TokenCommand;
+import gov.cms.dpc.api.exceptions.BadRequestExceptionMapper;
+import gov.cms.dpc.api.exceptions.ConstraintViolationExceptionMapper;
+import gov.cms.dpc.api.exceptions.ForbiddenExceptionMapper;
+import gov.cms.dpc.api.exceptions.InternalServerErrorExceptionMapper;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotAcceptableExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotAuthorizedExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotDeSerializableExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotFoundExceptionMapper;
+import gov.cms.dpc.api.exceptions.UnprocessableEntityExceptionMapper;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
@@ -91,8 +100,18 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         EnvironmentParser.getEnvironment("API");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
+
         environment.jersey().register(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
         environment.jersey().register(new JsonParseExceptionMapper());
+        environment.jersey().register(new UnprocessableEntityExceptionMapper());
+        environment.jersey().register(new BadRequestExceptionMapper());
+        environment.jersey().register(new NotDeSerializableExceptionMapper());
+        environment.jersey().register(new ConstraintViolationExceptionMapper());
+        environment.jersey().register(new ForbiddenExceptionMapper());
+        environment.jersey().register(new InternalServerErrorExceptionMapper());
+        environment.jersey().register(new NotAcceptableExceptionMapper());
+        environment.jersey().register(new NotAuthorizedExceptionMapper());
+        environment.jersey().register(new NotFoundExceptionMapper());
         environment.jersey().register(new GenerateRequestIdFilter(false));
         environment.jersey().register(new LogResponseFilter());
 

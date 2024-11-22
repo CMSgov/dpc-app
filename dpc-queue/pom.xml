@@ -37,6 +37,7 @@
         <dependency>
             <groupId>ru.vyarus</groupId>
             <artifactId>dropwizard-guicey</artifactId>
+            <version>6.2.2</version>
         </dependency>
         <dependency>
             <groupId>gov.cms.dpc</groupId>
@@ -75,11 +76,13 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
+            <version>5.6.15.Final</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.persistence</groupId>
             <artifactId>javax.persistence-api</artifactId>
+            <version>2.2</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>

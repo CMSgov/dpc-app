@@ -3,12 +3,12 @@ package gov.cms.dpc.api.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
+import com.github.nitram509.jmacaroons.NotDeSerializableException;
 import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
-import gov.cms.dpc.api.auth.jwt.ValidatingKeyResolver;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
@@ -53,6 +53,9 @@ import java.util.stream.Collectors;
 import static gov.cms.dpc.api.auth.MacaroonHelpers.ORGANIZATION_CAVEAT_KEY;
 import static gov.cms.dpc.api.auth.MacaroonHelpers.generateCaveatsForToken;
 import static gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier.EXPIRATION_KEY;
+import gov.cms.dpc.macaroons.exceptions.BakeryException;
+import java.security.Key;
+import java.time.Instant;
 
 @Api(tags = {"Auth", "Token"}, authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Token")
@@ -67,23 +70,27 @@ public class TokenResource extends AbstractTokenResource {
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
-    private final SigningKeyResolverAdapter resolver;
     private final IJTICache cache;
     private final String authURL;
+    private final JwtParser authParser;
 
     @Inject
     public TokenResource(TokenDAO dao,
                          MacaroonBakery bakery,
                          TokenPolicy policy,
-                         SigningKeyResolverAdapter resolver,
+                         LocatorAdapter<Key> locator,
                          IJTICache cache,
                          @APIV1 String publicURL) {
         this.dao = dao;
         this.bakery = bakery;
         this.policy = policy;
-        this.resolver = resolver;
         this.cache = cache;
         this.authURL = String.format("%s/Token/auth", publicURL);
+
+        authParser = Jwts.parser()
+            .keyLocator(locator)
+            .requireAudience(this.authURL)
+            .build();
     }
 
     @Override
@@ -241,17 +248,78 @@ public class TokenResource extends AbstractTokenResource {
     @Public
     @Override
     public Response validateJWT(@NoHtml @NotEmpty(message = "Must submit JWT") String jwt) {
-
+        if(jwt == null || jwt.isBlank())
+            throw new NotAuthorizedException("JWT is required for authentication.", Response.status(Response.Status.UNAUTHORIZED));
         try {
-            Jwts.parserBuilder()
-                    .requireAudience(this.authURL)
-                    .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, this.authURL))
-                    .build()
-                    .parseClaimsJws(jwt);
-        } catch (IllegalArgumentException e) {
-            // This is fine, we just want the body
-        } catch (MalformedJwtException e) {
-            throw new WebApplicationException("JWT is not formatted correctly", Response.Status.BAD_REQUEST);
+            Jws<Claims> signedJwt = authParser.parseSignedClaims(jwt);
+            Claims claims = signedJwt.getPayload();
+
+            // Verify not expired and not more than 5 minutes in the future
+            final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+            final OffsetDateTime expiration;
+            try {
+                final Integer epochSeconds = getClaimIfPresent("expiration", claims.get("exp", Integer.class));
+                expiration = Instant.ofEpochSecond(epochSeconds).atOffset(ZoneOffset.UTC);
+            } catch (BadRequestException | RequiredTypeException e) {
+                throw new NotAuthorizedException("Expiration time must be seconds since unix epoch", Response.status(Response.Status.UNAUTHORIZED));
+            }
+
+            // ensure Not expired
+            if (now.isAfter(expiration)) {
+                throw new NotAuthorizedException("JWT is expired", Response.status(Response.Status.UNAUTHORIZED));
+            }
+
+            // Not more than 5 minutes in the future
+            if (now.plus(5, ChronoUnit.MINUTES).isBefore(expiration.toInstant().atOffset(ZoneOffset.UTC))) {
+                throw new NotAuthorizedException("Token expiration cannot be more than 5 minutes in the future", Response.status(Response.Status.UNAUTHORIZED));
+            }
+
+            // JTI must be present and have not been used in the past 5 minutes.
+            if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getId()), false)) {
+                throw new NotAuthorizedException("Token ID cannot be re-used", Response.status(Response.Status.UNAUTHORIZED));
+            }
+ 
+            final String issuer = getClaimIfPresent("issuer", claims.getIssuer());
+
+            // Issuer and Sub match
+            final String subject = getClaimIfPresent("subject", claims.getSubject());
+
+            if (!issuer.equals(subject)) {
+                throw new NotAuthorizedException("Issuer and Subject must be identical", Response.status(Response.Status.UNAUTHORIZED));
+            }
+
+            // Make sure the client token is actually a macaroon and not something else, like a a UUID
+            try {
+                UUID.fromString(issuer);
+                throw new NotAuthorizedException("Cannot use Token ID as `client_token`, must use actual token value", Response.status(Response.Status.UNAUTHORIZED));
+            } catch (IllegalArgumentException e) {
+                // If the parsing fails, then we know it's not a UUID, which it shouldn't be, so continue
+            }
+
+            try {
+                MacaroonBakery.deserializeMacaroon(issuer);
+            } catch (BakeryException e) {
+                throw new NotAuthorizedException("Client token is not formatted correctly", Response.status(Response.Status.UNAUTHORIZED));
+            }
+        } catch(ExpiredJwtException e) {
+            NotAuthorizedException n = new NotAuthorizedException("JWT is expired", Response.status(Response.Status.UNAUTHORIZED));
+            throw n;
+        } catch(MalformedJwtException e) {
+            if(e.getMessage().contains("Expiration Time") && e.getMessage().contains("All heuristics exhausted"))
+                throw new NotAuthorizedException("Expiration is not a JWT NumericDate, nor is it ISO-8601-formatted.", Response.status(Response.Status.UNAUTHORIZED));
+            else
+                throw new BadRequestException("JWT is not formatted, signed, or populated correctly");
+        } catch (NotDeSerializableException | UnsupportedJwtException e) {
+            throw new BadRequestException("JWT is not formatted, signed, or populated correctly");
+        } catch(IncorrectClaimException e) {
+            throw new NotAuthorizedException(String.format("%s claim value is incorrect", e.getClaimName()), Response.status(Response.Status.UNAUTHORIZED).build());
+        } catch(NotAuthorizedException e) {
+            throw e;
+        } catch(Exception e) {
+            if(e.getMessage().contains("Claim expiration must be present"))
+                throw new NotAuthorizedException(e.getMessage(), Response.status(Response.Status.UNAUTHORIZED).build());
+            else
+                throw new BadRequestException(e.getMessage());
         }
 
         return Response.ok().build();
@@ -276,20 +344,36 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
-        final Jws<Claims> claims = Jwts.parserBuilder()
-                .setSigningKeyResolver(this.resolver)
-                .requireAudience(this.authURL)
-                .build()
-                .parseClaimsJws(jwtBody);
+        try {
+            authParser.parse(jwtBody);
+        } catch(NotAuthorizedException e) {
+                throw e;
+        } catch(ExpiredJwtException e) {
+            throw new NotAuthorizedException("JWT is expired", Response.status(Response.Status.UNAUTHORIZED));
+        } catch (io.jsonwebtoken.security.SignatureException e) {
+            throw new NotAuthorizedException("JWT signature does not match locally-computed signature", Response.status(Response.Status.UNAUTHORIZED));
+        } catch (SecurityException e) {
+            logger.error("JWT has invalid signature", e);
+            throw new NotAuthorizedException(INVALID_JWT_MSG, Response.status(Response.Status.UNAUTHORIZED));
+        } catch (JwtException e) {
+            logger.error("Malformed JWT", e);
+            throw new BadRequestException(INVALID_JWT_MSG);
+        } catch(IllegalArgumentException e) {
+                throw new BadRequestException("Expiration time must be seconds since unix epoch");
+        } catch(Exception e) {
+                throw new BadRequestException("Wow!");
+        }
+
+        Jws<Claims> claims = authParser.parseSignedClaims(jwtBody);
 
         // Extract the Client Macaroon from the subject field (which is the same as the issuer)
-        final String clientMacaroon = claims.getBody().getSubject();
+        final String clientMacaroon = claims.getPayload().getSubject();
         final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(clientMacaroon);
 
         // Get org id from macaroon caveats
         UUID orgId = MacaroonHelpers.extractOrgIDFromCaveats(macaroons).orElseThrow(() -> {
             logger.error("No organization found on macaroon");
-            throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
+            throw new NotAuthorizedException(INVALID_JWT_MSG, Response.status(Response.Status.UNAUTHORIZED));
         });
 
         // Determine if claims are present and valid

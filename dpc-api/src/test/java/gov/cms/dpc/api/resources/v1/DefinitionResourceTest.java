@@ -25,15 +25,13 @@ import org.junit.jupiter.api.DisplayName;
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(BufferedLoggerHandler.class)
 @DisplayName("Resource definition operations")
-
 class DefinitionResourceTest {
 
     private static final FhirContext ctx = FhirContext.forDstu3();
     private static final ResourceExtension RESOURCES = buildResources();
 
     @Test
-@DisplayName("Fetch all resource definitions 🥳")
-
+    @DisplayName("Fetch all resource definitions 🥳")
     void testFetchAllResources() {
         final Response response = RESOURCES.target("/v1/StructureDefinition")
                 .request(FHIRMediaTypes.FHIR_JSON)
@@ -47,8 +45,7 @@ class DefinitionResourceTest {
     }
 
     @Test
-@DisplayName("Fetch specific resource definition 🥳")
-
+    @DisplayName("Fetch specific resource definition 🥳")
     void testFetchSpecificResource() {
         // Fetch the patient resource
         final Response response = RESOURCES.target("/v1/StructureDefinition/dpc-profile-patient")
@@ -63,8 +60,7 @@ class DefinitionResourceTest {
     }
 
     @Test
-@DisplayName("Missing resource definition 🤮")
-
+    @DisplayName("Missing resource definition 🤮")
     void testMissingResource() {
         // Fetch the patient resource
         final Response response = RESOURCES.target("/v1/StructureDefinition/dpc-patient-gone")

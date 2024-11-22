@@ -51,6 +51,23 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
         return Optional.of(resultList.get(0));
     }
 
+    public Optional<PublicKeyEntity> fetchPublicKey(UUID keyID) {
+
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
+        final Root<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
+
+        query.where(builder.equal(root.get(PublicKeyEntity_.id), keyID));
+
+        final List<PublicKeyEntity> resultList = list(query);
+
+        if (resultList.size() != 1) {
+            return Optional.empty();
+        }
+
+        return Optional.of(resultList.get(0));
+    }
+
     public void deletePublicKey(PublicKeyEntity keyEntity) {
         currentSession().delete(keyEntity);
     }

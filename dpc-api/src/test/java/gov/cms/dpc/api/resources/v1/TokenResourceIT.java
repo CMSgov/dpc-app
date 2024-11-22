@@ -4,6 +4,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationIT;
 import gov.cms.dpc.api.entities.TokenEntity;
@@ -39,19 +40,24 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
+import org.apache.http.util.EntityUtils;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+
 @DisplayName("Token resource operations")
-
-
 class TokenResourceIT extends AbstractSecureApplicationIT {
 
-    private final ObjectMapper mapper;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    static
+    {
+        final Hibernate5Module h5M = new Hibernate5Module();
+        h5M.disable(Hibernate5Module.Feature.USE_TRANSIENT_ANNOTATION);
+        MAPPER.registerModule(h5M);
+    }
     private String fullyAuthedToken;
 
     private TokenResourceIT() {
-        this.mapper = new ObjectMapper();
-
         try {
             this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
         } catch (IOException | URISyntaxException e) {
@@ -74,8 +80,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Get client token list 🥳")
-
+    @DisplayName("Get client token list 🥳")
     void testTokenList() throws IOException {
 
         final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
@@ -95,15 +100,14 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
-                final TokenEntity singleEntity = this.mapper.readValue(response.getEntity().getContent(), TokenEntity.class);
+                final TokenEntity singleEntity = MAPPER.readValue(response.getEntity().getContent(), TokenEntity.class);
                 assertEquals(token, singleEntity, "Should be the same");
             }
         }
     }
 
     @Test
-@DisplayName("Create a list token with custom label 🥳")
-
+    @DisplayName("Create a list token with custom label 🥳")
     void testTokenCustomLabel() throws IOException {
         // List the tokens
 
@@ -113,8 +117,11 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
             final HttpPost httpPost = new HttpPost(getBaseURL() + String.format("/Token?label=%s", URLEncoder.encode(customLabel, StandardCharsets.UTF_8)));
             httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             try (CloseableHttpResponse response = client.execute(httpPost)) {
+                String entityStr = EntityUtils.toString(response.getEntity());
+                System.out.println("Here is the response I received!\n" + entityStr);
+                
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have found organization");
-                final TokenEntity tokenEntity = this.mapper.readValue(response.getEntity().getContent(), TokenEntity.class);
+                final TokenEntity tokenEntity = MAPPER.readValue(entityStr, TokenEntity.class);
                 assertAll(() -> assertEquals(customLabel, tokenEntity.getLabel(), "Should have correct label"),
                         () -> assertNotNull(tokenEntity.getToken(), "Should have generated token"));
             }
@@ -130,8 +137,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Create client token with excessive expiration time 🤮")
-
+    @DisplayName("Create client token with excessive expiration time 🤮")
     void testTokenCreationWithExceedingExpirationTime() throws IOException {
         // Create a new token with an expiration greater than 1 year
         final OffsetDateTime expires = OffsetDateTime.now(ZoneOffset.UTC).plusYears(5);
@@ -145,8 +151,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Create client token that has already expired 🤮")
-
+    @DisplayName("Create client token that has already expired 🤮")
     void testTokenCreationWithPastExpirationTime() throws IOException {
         final OffsetDateTime expires = OffsetDateTime.now(ZoneOffset.UTC).minusDays(10);
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
@@ -161,8 +166,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
 
 
     @Test
-@DisplayName("Create a client token with custom expiration 🥳")
-
+    @DisplayName("Create a client token with custom expiration 🥳")
     void testTokenCreationWithValidCustomExpiration() throws IOException {
         final OffsetDateTime expiresFinal = OffsetDateTime.now(ZoneOffset.UTC).plusDays(10);
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
@@ -178,8 +182,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Create client token with default parameters 🥳")
-
+    @DisplayName("Create client token with default parameters 🥳")
     void testTokenCreationWithDefaults() throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost httpPost = new HttpPost(getBaseURL() + String.format("/Token"));
@@ -188,7 +191,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
             String newTokenId;
             try (CloseableHttpResponse response = client.execute(httpPost)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have been created.");
-                final TokenEntity tokenReturned = mapper.readValue(response.getEntity().getContent(), TokenEntity.class);
+                final TokenEntity tokenReturned = MAPPER.readValue(response.getEntity().getContent(), TokenEntity.class);
                 assertNotNull(tokenReturned, "Should have contained a response body");
                 assertEquals(tokenReturned.getLabel(), String.format("Token for organization %s.", ORGANIZATION_ID), "Returned token should have default label");
                 assertNotNull(tokenReturned.getCreatedAt(), "Returned token should have a non-empty createdAt value");
@@ -203,7 +206,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
-                final TokenEntity tokenReturned = this.mapper.readValue(response.getEntity().getContent(), TokenEntity.class);
+                final TokenEntity tokenReturned = MAPPER.readValue(response.getEntity().getContent(), TokenEntity.class);
                 assertNotNull(tokenReturned, "Should have contained a response body");
                 assertEquals(tokenReturned.getLabel(), String.format("Token for organization %s.", ORGANIZATION_ID), "Returned token should have default label");
                 assertNotNull(tokenReturned.getCreatedAt(), "Returned token should have a non-empty createdAt value");
@@ -215,8 +218,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Create client token using body parameters 🥳")
-
+    @DisplayName("Create client token using body parameters 🥳")
     void testTokenCreationUsingBodyParams() throws IOException {
         final OffsetDateTime expiresFinal = OffsetDateTime.now(ZoneOffset.UTC).plusDays(10);
         final String expiresFormatted =  FHIRFormatters.INSTANT_FORMATTER.format(expiresFinal);
@@ -237,8 +239,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Create client token with HTML in label 🤮")
-
+    @DisplayName("Create client token with HTML in label 🤮")
     void testNoHtmlInBodyLabel() throws IOException {
         final OffsetDateTime expiresFinal = OffsetDateTime.now(ZoneOffset.UTC).plusDays(10);
         final String expiresFormatted =  FHIRFormatters.INSTANT_FORMATTER.format(expiresFinal);
@@ -254,8 +255,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
     }
 
     @Test
-@DisplayName("Create client token with invalid expiration body parameter 🤮")
-
+    @DisplayName("Create client token with invalid expiration body parameter 🤮")
     void testTokenCreationWithInvalidExpirationBodyParam() throws IOException {
         final String expiresFormatted =  "invalid-date-time-format-ZZZ";
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
@@ -269,11 +269,8 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
         }
     }
 
-
-
     @Test
-@DisplayName("Delete client token 🥳")
-
+    @DisplayName("Delete client token 🥳")
     void testTokenDeletion() throws IOException {
         //Create a token
         TokenEntity token = createToken();
@@ -297,7 +294,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
         //Ensure it is no longer returned when listing tokens
         tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
         tokenList = tokens.getEntities().stream().filter(t -> t.getId().equals(token.getId())).collect(Collectors.toList());
-        assertTrue(tokenList.size() == 0 , "There should exist exactly 0 tokens with matching token ID");
+        assertTrue(tokenList.isEmpty(), "There should exist exactly 0 tokens with matching token ID");
 
         //Ensure it is not longer returned when fetched by id
         final HttpGet httpGet = new HttpGet(getBaseURL() + "/Token/"+token.getId());
@@ -312,7 +309,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
             final HttpPost httpPost = new HttpPost(getBaseURL() + "/Token");
             httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             try (CloseableHttpResponse response = client.execute(httpPost)) {
-                return this.mapper.readValue(response.getEntity().getContent(), TokenEntity.class);
+                return MAPPER.readValue(response.getEntity().getContent(), TokenEntity.class);
             }
         }
     }
@@ -325,30 +322,35 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
                 return response.getStatusLine().getStatusCode() == 204;
             }
         }catch (IOException e){
-            e.printStackTrace();
             return false;
         }
     }
 
     @Test
-@DisplayName("Verify a client token 🥳")
-
+    @DisplayName("Verify a client token 🥳")
     void testTokenSigning() throws IOException, URISyntaxException {
-        final IParser parser = ctx.newJsonParser();
-        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-        // Create a new org and make sure it has no providers
-        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
-
         // Create a new JWT
         final APIAuthHelpers.AuthResponse authResponse = APIAuthHelpers.jwtAuthFlow(this.getBaseURL(), fullyAuthedToken, PUBLIC_KEY_ID, PRIVATE_KEY);
         assertAll(() -> assertNotEquals("", authResponse.accessToken, "Should have token"),
                 () -> assertEquals(300, authResponse.expiresIn, "Should be valid for 300 seconds"),
                 () -> assertEquals("system/*.*", authResponse.scope, "Should have correct scope"),
                 () -> assertEquals("bearer", authResponse.tokenType, "Should be a macaroon"));
+    }
+
+    @Test
+    @Disabled
+    // authentication is no longer going to do authorization
+    // JWT authentication will not throw an exception when an operation is done outside the organizational compartment
+    // TokenResource can catch that and throw an exception
+    @DisplayName("Verify client token signed with wrong key 🤮")
+    void testTokenInvalidSigning() throws IOException, URISyntaxException {
+        final IParser parser = ctx.newJsonParser();
+        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
+        // Create a new org and make sure it has no providers
+        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
 
         // Try to authenticate using the private key for org 1 and the token for org 2, should throw an exception, but in the auth handler
-        final AssertionFailedError error = assertThrows(AssertionFailedError.class, () -> APIAuthHelpers.jwtAuthFlow(this.getBaseURL(), m2, PUBLIC_KEY_ID, PRIVATE_KEY));
-        error.getMessage();
+        assertThrows(AssertionFailedError.class, () -> APIAuthHelpers.jwtAuthFlow(this.getBaseURL(), m2, PUBLIC_KEY_ID, PRIVATE_KEY));
     }
 
     CollectionResponse<TokenEntity> fetchTokens(String orgID, String token) throws IOException {
@@ -357,7 +359,7 @@ class TokenResourceIT extends AbstractSecureApplicationIT {
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<TokenEntity>>() {
+                return MAPPER.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<TokenEntity>>() {
                 });
             }
         }

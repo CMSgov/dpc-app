@@ -12,7 +12,16 @@ import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.exceptions.BadRequestExceptionMapper;
+import gov.cms.dpc.api.exceptions.ConstraintViolationExceptionMapper;
+import gov.cms.dpc.api.exceptions.ForbiddenExceptionMapper;
+import gov.cms.dpc.api.exceptions.InternalServerErrorExceptionMapper;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotAcceptableExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotAuthorizedExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotDeSerializableExceptionMapper;
+import gov.cms.dpc.api.exceptions.NotFoundExceptionMapper;
+import gov.cms.dpc.api.exceptions.UnprocessableEntityExceptionMapper;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
@@ -162,6 +171,15 @@ public class APITestHelpers {
                 .addProvider(HAPIExceptionHandler.class)
                 .addProvider(DefaultFHIRExceptionHandler.class)
                 .addProvider(JsonParseExceptionMapper.class)
+                .addProvider(BadRequestExceptionMapper.class)
+                .addProvider(NotDeSerializableExceptionMapper.class)
+                .addProvider(ConstraintViolationExceptionMapper.class)
+                .addProvider(ForbiddenExceptionMapper.class)
+                .addProvider(InternalServerErrorExceptionMapper.class)
+                .addProvider(NotAcceptableExceptionMapper.class)
+                .addProvider(NotAuthorizedExceptionMapper.class)
+                .addProvider(NotFoundExceptionMapper.class)
+                .addProvider(UnprocessableEntityExceptionMapper.class)
                 .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
 
         // Optionally enable validation
