@@ -50,7 +50,13 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
         logger.debug("Looking up resource {} in path authorizer. With value: {}", credentials.getPathAuthorizer().type(), credentials.getPathAuthorizer().pathParam());
         Map<String, List<String>> searchParams = new HashMap<>();
         searchParams.put("_id", Collections.singletonList(credentials.getPathValue()));
-        searchParams.put("organization", Collections.singletonList(credentials.getOrganization().getId()));
+
+        // Practitioner resources don't support an organization search parameter, use _tag instead
+        if (credentials.getPathAuthorizer().type() == DPCResourceType.Practitioner) {
+            searchParams.put("_tag", Collections.singletonList(credentials.getOrganization().getIdElement().getIdPart()));
+        } else {
+            searchParams.put("organization", Collections.singletonList(credentials.getOrganization().getId()));
+        }
 
         // Special handling of Group resources, which use tags instead of resource properties.
         // TODO: Remove with DPC-552

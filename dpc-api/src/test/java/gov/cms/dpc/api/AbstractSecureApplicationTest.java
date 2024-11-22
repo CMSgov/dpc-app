@@ -78,9 +78,10 @@ public class AbstractSecureApplicationTest {
 
     @BeforeAll
     public static void setup() throws Exception {
-        APITestHelpers.setupApplication(APPLICATION);
         ctx = FhirContext.forDstu3();
         ctx.getParserOptions().setOverrideResourceIdWithBundleEntryFullUrl(false);
+
+        APITestHelpers.setupApplication(APPLICATION, ctx);
 
         // Register a test organization for us
         // First, create a Golden macaroon for admin uses

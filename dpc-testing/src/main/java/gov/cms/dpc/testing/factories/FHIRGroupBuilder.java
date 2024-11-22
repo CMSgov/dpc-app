@@ -14,7 +14,7 @@ public class FHIRGroupBuilder {
     //This constant is found in DPCIdentifierSystem; but I did not want to introduce a circular dependency.
     //TODO revisit during test refactoring
     static final String NPPES_SYSTEM =  "http://hl7.org/fhir/sid/us-npi";
-    static final String DPC_SYSTEM = "https://dpc.cms.gov/organization_id#";
+    static final String DPC_SYSTEM = "https://dpc.cms.gov/organization_id";
 
     private Group theGroup;
 

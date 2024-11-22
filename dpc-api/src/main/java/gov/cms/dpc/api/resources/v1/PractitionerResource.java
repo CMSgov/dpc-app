@@ -61,13 +61,13 @@ public class PractitionerResource extends AbstractPractitionerResource {
             "Otherwise, the method returns all Practitioners associated to the given Organization")
     @Override
     public Bundle practitionerSearch(@ApiParam(hidden = true)
-                                     @Auth OrganizationPrincipal organization,
+                                     @Auth OrganizationPrincipal organizationPrincipal,
                                      @ApiParam(value = "Provider NPI")
                                      @QueryParam(value = Practitioner.SP_IDENTIFIER) @NoHtml String providerNPI) {
 
         // Create search params
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("_tag", Collections.singletonList(organization.getOrganization().getId()));
+        searchParams.put("_tag", Collections.singletonList(organizationPrincipal.getID().toString()));
 
         if (providerNPI != null && !providerNPI.equals("")) {
             searchParams.put("identifier", Collections.singletonList(providerNPI));
@@ -140,7 +140,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
                                       @ApiParam Parameters params) {
         final Bundle providerBundle = (Bundle) params.getParameterFirstRep().getResource();
         final Consumer<Practitioner> entryHandler = (resource) -> validateProvider(resource,
-                organization.getOrganization().getId(),
+                organization.getID().toString(),
                 validator,
                 PRACTITIONER_PROFILE);
 

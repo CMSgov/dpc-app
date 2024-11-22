@@ -41,7 +41,7 @@ public class AbstractApplicationTest {
     private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION =
             new DropwizardTestSupport<>(DPCAPIService.class, configPath,
                     ConfigOverride.config("authenticationDisabled", "true"));
-    protected FhirContext ctx;
+    protected static FhirContext ctx;
 
     protected AbstractApplicationTest() {
         // Not used
@@ -53,13 +53,13 @@ public class AbstractApplicationTest {
 
     @BeforeAll
     public static void setup() throws Exception {
-        APITestHelpers.setupApplication(APPLICATION);
+        ctx = FhirContext.forDstu3();
+        ctx.getParserOptions().setOverrideResourceIdWithBundleEntryFullUrl(false);
+        APITestHelpers.setupApplication(APPLICATION, ctx);
     }
 
     @BeforeEach
     public void eachSetup() throws IOException {
-        ctx = FhirContext.forDstu3();
-        ctx.getParserOptions().setOverrideResourceIdWithBundleEntryFullUrl(false);
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         FHIRHelpers.registerOrganization(attrClient,
                 ctx.newJsonParser(),

@@ -180,10 +180,10 @@ public class APITestHelpers {
         return builder.build();
     }
 
-    static <C extends io.dropwizard.core.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
+    static <C extends io.dropwizard.core.Configuration> void setupApplication(DropwizardTestSupport<C> application, FhirContext ctx) throws
             Exception {
         // Truncate attribution database
-        truncateDatabase();
+        truncateDatabase(ctx);
         application.before();
         // Truncate the Auth DB
         // dropwizard-guicey will raise a SharedStateError unless we clear the configuration state before each run
@@ -194,11 +194,11 @@ public class APITestHelpers {
 
     }
 
-    private static void truncateDatabase() throws IOException, InterruptedException {
+    private static void truncateDatabase(FhirContext ctx) throws IOException, InterruptedException {
         // TODO: Rewrite this as an operation on the FHIR server
         // This is replacing a call to the DropWizard admin end point on dpc-attribution.  For now, we'll just grab
         // a list of resources and delete them.  This is definitely not ideal, but it works for a PoC.
-        IGenericClient client = buildAttributionClient(FhirContext.forDstu3());
+        IGenericClient client = buildAttributionClient(ctx);
 
         // Order matters to prevent referential integrity problems
         List<Class<? extends DomainResource>> resourceClasses = Arrays.asList(

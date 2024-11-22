@@ -7,6 +7,8 @@ import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.util.UrlUtil;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.TestOrganizationContext;
@@ -22,6 +24,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.HttpMethod;
@@ -69,11 +72,12 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
         // Fetch the provider directly
         final Practitioner foundProvider = (Practitioner) specificSearch.getEntryFirstRep().getResource();
+        IIdType foundProviderId = foundProvider.getIdElement().toUnqualifiedVersionless();
 
         final IReadExecutable<Practitioner> clientQuery = client
                 .read()
                 .resource(Practitioner.class)
-                .withId(foundProvider.getIdElement())
+                .withId(foundProviderId)
                 .encodedJson();
 
         final Practitioner queriedProvider = clientQuery
@@ -85,13 +89,13 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
         client
                 .delete()
-                .resourceById(queriedProvider.getIdElement())
+                .resourceById(queriedProvider.getIdElement().toUnqualifiedVersionless())
                 .encodedJson()
                 .execute();
 
 
         // Try again, should be not found
-        assertThrows(AuthenticationException.class, clientQuery::execute, "Should not have practitioner");
+        assertThrows(ResourceGoneException.class, clientQuery::execute, "Should not have practitioner");
 
         // Create a new org and make sure it has no providers
         final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
@@ -170,9 +174,11 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         assertNotNull(location);
         assertNotNull(date);
 
+        UrlUtil.UrlParts urlParts = UrlUtil.parseUrl(location);
+
         Practitioner foundPractitioner = client.read()
                 .resource(Practitioner.class)
-                .withUrl(location)
+                .withUrl(urlParts.getResourceType() + "/" + urlParts.getResourceId())
                 .encodedJson()
                 .execute();
 
@@ -296,7 +302,6 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
                 .build();
 
         //Test forgery during practitioner creation (Specify another org's id in the metadata tag)
-        practitioner.getMeta().addTag(DPCIdentifierSystem.DPC.getSystem(), orgBContext.getOrgId(), "Organization ID");
         APITestHelpers.createResource(orgAClient, practitioner).getResource();
 
         Bundle bundle = APITestHelpers.resourceSearch(orgBClient, DPCResourceType.Practitioner);
