@@ -43,8 +43,6 @@ ops/config/decrypted/*
 !ops/config/decrypted/README.md
 .mvn/
 
-tmp/
-!tmp/.keep
 
 # Ignore Go unit test results
 dpc-go/dpc-api/results.json
