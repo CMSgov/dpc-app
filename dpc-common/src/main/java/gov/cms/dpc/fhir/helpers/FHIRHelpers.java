@@ -16,8 +16,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +61,11 @@ public class FHIRHelpers {
 
             // To create a resource with a specific id, we need to update/create it.
             client.update().resource(origOrg).withId(organizationID).execute();
+
+            // Register the org's end point, which is the second resource in organization.tmpl.json
+            final Endpoint endpoint = (Endpoint) orgBundle.getEntry().get(1).getResource();
+            endpoint.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
+            client.create().resource(endpoint).execute();
 
             try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
                 final URIBuilder uriBuilder = new URIBuilder(String.format("%s/generate-token", adminURL));

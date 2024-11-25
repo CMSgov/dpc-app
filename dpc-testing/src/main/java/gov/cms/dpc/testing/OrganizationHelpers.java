@@ -39,7 +39,7 @@ public class OrganizationHelpers {
      */
     public static Organization createOrganization(FhirContext ctx, IGenericClient client, String organizationNPI, boolean skipExists) {
 
-//         Check to see if the organization already exists, otherwise, create it
+        // Check to see if the organization already exists, otherwise, create it
         if (!skipExists) {
             final Bundle searchBundle = client
                     .search()

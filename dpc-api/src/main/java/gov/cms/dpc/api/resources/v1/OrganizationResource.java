@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.util.BundleBuilder;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
@@ -19,6 +20,7 @@ import gov.cms.dpc.fhir.annotations.Profiled;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
@@ -56,18 +58,25 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Override
     public Organization submitOrganization(@FHIRParameter(name = "resource") @NotNull Bundle organizationBundle) {
         // Validate bundle
-        validateOrganizationBundle(organizationBundle);
+        Pair<Organization, List<Endpoint>> validated = validateOrganizationBundle(organizationBundle);
+        Organization org = validated.getLeft();
 
-        final Parameters parameters = new Parameters();
-        parameters.addParameter().setName("resource").setResource(organizationBundle);
-        return this.client
-                .operation()
-                .onType(Organization.class)
-                .named("submit")
-                .withParameters(parameters)
-                .returnResourceType(Organization.class)
-                .encodedJson()
-                .execute();
+        // Get the org and create it.
+        MethodOutcome outcome = this.client.create().resource(org).execute();
+        Organization createdOrg = (Organization) outcome.getResource();
+
+        // Add managing org to end points and create
+        List<Endpoint> endpoints = validated.getRight();
+
+        BundleBuilder bundleBuilder = new BundleBuilder(client.getFhirContext());
+        endpoints.stream()
+            .map(ep ->
+                ep.setManagingOrganization(new Reference(new IdType("Organization", createdOrg.getIdPart())))
+            )
+            .forEach(bundleBuilder::addTransactionCreateEntry);
+        client.transaction().withBundle(bundleBuilder.getBundle()).execute();
+
+        return createdOrg;
     }
 
     @GET
@@ -183,29 +192,33 @@ public class OrganizationResource extends AbstractOrganizationResource {
         return resource;
     }
 
-    private void validateOrganizationBundle(Bundle organizationBundle) {
+    private Pair<Organization, List<Endpoint>> validateOrganizationBundle(Bundle organizationBundle) {
         // Ensure we have an organization
-        organizationBundle
+        Organization org = organizationBundle
                 .getEntry()
                 .stream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter(resource -> resource.getResourceType().getPath().equals(DPCResourceType.Organization.getPath()))
+                .map(resource -> (Organization) resource)
                 .findAny()
                 .orElseThrow(() -> new WebApplicationException("Bundle must include Organization", Response.Status.BAD_REQUEST));
 
 
         // Make sure we have some endpoints
-        final List<Resource> endpoints = organizationBundle
+        final List<Endpoint> endpoints = organizationBundle
                 .getEntry()
                 .stream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter(resource -> resource.getResourceType().getPath().equals(DPCResourceType.Endpoint.getPath()))
+                .map(resource -> (Endpoint) resource)
                 .collect(Collectors.toList());
 
         if (endpoints.isEmpty()) {
             throw new WebApplicationException("Organization must have at least 1 endpoint", Response.Status.BAD_REQUEST);
         }
+
+        return Pair.of(org, endpoints);
     }
 }

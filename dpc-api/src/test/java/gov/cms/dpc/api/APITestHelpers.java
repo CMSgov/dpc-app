@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
+import ca.uhn.fhir.util.BundleBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
@@ -197,24 +198,27 @@ public class APITestHelpers {
     private static void truncateDatabase(FhirContext ctx) throws IOException, InterruptedException {
         // TODO: Rewrite this as an operation on the FHIR server
         // This is replacing a call to the DropWizard admin end point on dpc-attribution.  For now, we'll just grab
-        // a list of resources and delete them.  This is definitely not ideal, but it works for a PoC.
+        // a list of resources and delete them.  This is probably not ideal, but it works for a PoC.
         IGenericClient client = buildAttributionClient(ctx);
 
         // Order matters to prevent referential integrity problems
         List<Class<? extends DomainResource>> resourceClasses = Arrays.asList(
-            Group.class, Patient.class, Practitioner.class, Endpoint.class, Organization.class
+            Group.class, Endpoint.class, Patient.class, Practitioner.class, Organization.class
         );
 
         for (Class<? extends DomainResource> resourceClass : resourceClasses ) {
             Bundle bundle = client.search().forResource(resourceClass).encodedJson().returnBundle(Bundle.class).execute();
             bundle = FHIRHelpers.getPages(client, bundle);
+
+            BundleBuilder bundleBuilder = new BundleBuilder(ctx);
             for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
-                client.delete().resource(component.getResource()).execute();
+                bundleBuilder.addTransactionDeleteEntry(component.getResource());
             }
+            client.transaction().withBundle(bundleBuilder.getBundle()).execute();
 
             // Sometimes the deletes take a second to complete, and prevents the next delete from working due to
             // referential integrity checks.
-            Thread.sleep(350);
+            Thread.sleep(500);
         }
     }
 
