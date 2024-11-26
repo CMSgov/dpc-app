@@ -28,8 +28,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Api(value = "Organization", authorizations = @Authorization(value = "access_token"))
@@ -141,12 +140,25 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @ApiResponse(code = 401, message = "Cannot find organization to remove")})
     @Override
     public Response deleteOrganization(@NotNull @PathParam("organizationID") UUID organizationID) {
-        // Delete from the attribution service
-        this.client
-                .delete()
-                .resourceById(new IdType("Organization", organizationID.toString()))
-                .encodedJson()
-                .execute();
+        // The org and its endpoints must be deleted together since they reference each other
+        Map<String, List<String>> searchParams = new HashMap<>();
+        searchParams.put("organization", Collections.singletonList(organizationID.toString()));
+
+        Bundle endpointBundle = this.client
+            .search()
+            .forResource(Endpoint.class)
+            .returnBundle(Bundle.class)
+            .whereMap(searchParams)
+            .encodedJson()
+            .execute();
+
+        // Build a transaction for all of our deletes
+        BundleBuilder bundleBuilder = new BundleBuilder(this.client.getFhirContext());
+        bundleBuilder.addTransactionDeleteEntry(new IdType("Organization", organizationID.toString()));
+        endpointBundle.getEntry().stream()
+            .map(entry -> (Endpoint) entry.getResource())
+            .forEach(bundleBuilder::addTransactionDeleteEntry);
+        this.client.transaction().withBundle(bundleBuilder.getBundle()).execute();
 
         // Delete tokens
         this.tokenDAO

@@ -3,6 +3,7 @@ package gov.cms.dpc.api;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
@@ -203,23 +204,26 @@ public class APITestHelpers {
 
         // Order matters to prevent referential integrity problems
         List<Class<? extends DomainResource>> resourceClasses = Arrays.asList(
-            Group.class, Endpoint.class, Patient.class, Practitioner.class, Organization.class
+            Endpoint.class, Patient.class, Group.class, Practitioner.class, Organization.class
         );
 
+        BundleBuilder bundleBuilder = new BundleBuilder(ctx);
         for (Class<? extends DomainResource> resourceClass : resourceClasses ) {
-            Bundle bundle = client.search().forResource(resourceClass).encodedJson().returnBundle(Bundle.class).execute();
+            Bundle bundle = client.search()
+                .forResource(resourceClass)
+                .encodedJson()
+                .returnBundle(Bundle.class)
+                .cacheControl(CacheControlDirective.noCache())
+                .execute();
             bundle = FHIRHelpers.getPages(client, bundle);
 
-            BundleBuilder bundleBuilder = new BundleBuilder(ctx);
             for (Bundle.BundleEntryComponent component : bundle.getEntry()) {
                 bundleBuilder.addTransactionDeleteEntry(component.getResource());
             }
-            client.transaction().withBundle(bundleBuilder.getBundle()).execute();
-
-            // Sometimes the deletes take a second to complete, and prevents the next delete from working due to
-            // referential integrity checks.
-            Thread.sleep(500);
         }
+
+        // Send all the deletes in one transaction
+        client.transaction().withBundle(bundleBuilder.getBundle()).execute();
     }
 
     static <C extends io.dropwizard.core.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws

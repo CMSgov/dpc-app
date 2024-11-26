@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 
 public class FHIRHelpers {
@@ -65,7 +66,12 @@ public class FHIRHelpers {
             // Register the org's end point, which is the second resource in organization.tmpl.json
             final Endpoint endpoint = (Endpoint) orgBundle.getEntry().get(1).getResource();
             endpoint.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
-            client.create().resource(endpoint).execute();
+            MethodOutcome endPointOutcome = client.create().resource(endpoint).execute();
+            String endPointId = endPointOutcome.getResource().getIdElement().getIdPart();
+
+            // Update the org's end point reference now that we have the endpoint's id
+            origOrg.setEndpoint(List.of(new Reference(new IdType("Endpoint", endPointId))));
+            client.update().resource(origOrg).withId(organizationID).execute();
 
             try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
                 final URIBuilder uriBuilder = new URIBuilder(String.format("%s/generate-token", adminURL));
