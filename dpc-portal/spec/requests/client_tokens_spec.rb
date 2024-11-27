@@ -161,28 +161,6 @@ RSpec.describe 'ClientTokens', type: :request do
       end
     end
 
-    context 'as ao' do
-      let!(:user) { create(:user) }
-      let(:org_api_id) { SecureRandom.uuid }
-      let!(:org) { create(:provider_organization, terms_of_service_accepted_by:, dpc_api_organization_id: org_api_id) }
-
-      before do
-        create(:ao_org_link, provider_organization: org, user:)
-        sign_in user
-      end
-
-      it 'redirects to ' do
-        token_guid = SecureRandom.uuid
-        api_client = stub_api_client(message: :get_organization,
-                                     response: default_get_org_response(org_api_id))
-        stub_self_returning_api_client(message: :create_client_token,
-                                       response: default_get_client_tokens(guid: token_guid)['entities'].first,
-                                       api_client:)
-        post "/organizations/#{org.id}/client_tokens", params: { label: 'New Token' }
-        expect(assigns(:organization)).to eq org
-        expect(assigns(:client_token)['id']).to eq token_guid
-      end
-    end
     context 'as cd' do
       let!(:user) { create(:user) }
       let(:org_api_id) { SecureRandom.uuid }

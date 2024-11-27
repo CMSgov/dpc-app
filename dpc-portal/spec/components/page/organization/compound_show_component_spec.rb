@@ -10,7 +10,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       normalize_space(rendered_content)
     end
     let(:org) { build(:provider_organization, name: 'Health Hut', npi: '11111111', id: 2) }
-    let(:component) { described_class.new(org, delegate_info) }
+    let(:component) { described_class.new(org, delegate_info, credential_start) }
 
     before do
       render_inline(component)
@@ -18,28 +18,43 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
 
     context 'has delegate information' do
       let(:delegate_info) { { active: [], pending: [], expired: [] } }
-      it 'Should have org name' do
-        is_expected.to include("<h1>#{org.name}</h1>")
+      context 'credential delegate start' do
+        let(:credential_start) { false }
+        it 'Should have org name' do
+          is_expected.to include("<h1>#{org.name}</h1>")
+        end
+        it 'Should have npi' do
+          is_expected.to include(%(<div class="margin-bottom-5">NPI: #{org.npi}</div>))
+        end
+        it 'Should have script tag' do
+          is_expected.to include('<script')
+        end
+        it 'Should have header tag' do
+          is_expected.to include('<header')
+        end
+        it 'Should have credential delegates' do
+          is_expected.to include('<div id="credential_delegates">')
+        end
+        it 'Should have credentials' do
+          is_expected.to include('<div id="credentials">')
+        end
+        it 'Should start on credential delegate page' do
+          is_expected.to include('}make_current(0);')
+          is_expected.to_not include('}make_current(1);')
+        end
       end
-      it 'Should have npi' do
-        is_expected.to include(%(<div class="margin-bottom-5">NPI: #{org.npi}</div>))
-      end
-      it 'Should have script tag' do
-        is_expected.to include('<script')
-      end
-      it 'Should have header tag' do
-        is_expected.to include('<header')
-      end
-      it 'Should have credential delegates' do
-        is_expected.to include('<div id="credential_delegates">')
-      end
-      it 'Should have credentials' do
-        is_expected.to include('<div id="credentials">')
+      context 'credential start' do
+        let(:credential_start) { true }
+        it 'Should start on credential page' do
+          is_expected.to_not include('}make_current(0);')
+          is_expected.to include('}make_current(1);')
+        end
       end
     end
 
     context 'not show cds' do
       let(:delegate_info) { {} }
+      let(:credential_start) { true }
       it 'Should have org name' do
         is_expected.to include("<h1>#{org.name}</h1>")
       end

@@ -28,7 +28,8 @@ class OrganizationsController < ApplicationController
                                                          invited_by: current_user).select(&:expired?)
       @delegate_information[:active] = CdOrgLink.where(provider_organization: @organization, disabled_at: nil)
     end
-    render(Page::Organization::CompoundShowComponent.new(@organization, @delegate_information))
+    render(Page::Organization::CompoundShowComponent.new(@organization, @delegate_information,
+                                                         params[:credential_start]))
   end
 
   def new
