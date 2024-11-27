@@ -10,14 +10,14 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       normalize_space(rendered_content)
     end
     let(:org) { build(:provider_organization, name: 'Health Hut', npi: '11111111', id: 2) }
-    let(:component) { described_class.new(org, [], [], [], show_cds) }
+    let(:component) { described_class.new(org, delegate_info) }
 
     before do
       render_inline(component)
     end
 
-    context 'show cds' do
-      let(:show_cds) { true }
+    context 'has delegate information' do
+      let(:delegate_info) { { active: [], pending: [], expired: [] } }
       it 'Should have org name' do
         is_expected.to include("<h1>#{org.name}</h1>")
       end
@@ -39,7 +39,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
     end
 
     context 'not show cds' do
-      let(:show_cds) { false }
+      let(:delegate_info) { {} }
       it 'Should have org name' do
         is_expected.to include("<h1>#{org.name}</h1>")
       end
