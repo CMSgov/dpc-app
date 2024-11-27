@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static gov.cms.dpc.fhir.helpers.FHIRHelpers.getPages;
+
 
 @Api(value = "Admin", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Admin")
@@ -53,6 +55,6 @@ public class AdminResource extends AbstractAdminResource{
                     .encodedJson()
                     .returnBundle(Bundle.class)
                     .execute();
-        return bundle;
+        return getPages(client, bundle);
     }
 }

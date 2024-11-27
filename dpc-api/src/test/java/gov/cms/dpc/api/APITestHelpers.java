@@ -184,6 +184,12 @@ public class APITestHelpers {
 
     static <C extends io.dropwizard.core.Configuration> void setupApplication(DropwizardTestSupport<C> application, FhirContext ctx) throws
             Exception {
+        // Set large timeouts on any created clients.  Some of the tests require processing large transactions.
+        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        ctx.getRestfulClientFactory().setSocketTimeout(15000);
+        ctx.getRestfulClientFactory().setConnectTimeout(15000);
+        ctx.getRestfulClientFactory().setConnectionRequestTimeout(15000);
+
         // Truncate attribution database
         truncateDatabase(ctx);
         application.before();

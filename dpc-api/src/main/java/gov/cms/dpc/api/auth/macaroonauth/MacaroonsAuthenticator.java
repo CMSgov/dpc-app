@@ -58,7 +58,7 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
             .encodedJson();
 
         if ( List.of(DPCResourceType.Group, DPCResourceType.Practitioner).contains(credentials.getPathAuthorizer().type()) ) {
-            query.withTag(DPCIdentifierSystem.DPC.getSystem(), credentials.getOrganization().getIdElement().getIdPart());
+            query.withTag(DPCIdentifierSystem.DPC.getSystem(), credentials.getOrganization().getIdPart());
         } else {
             searchParams.put("organization", Collections.singletonList(credentials.getOrganization().getId()));
         }

@@ -36,6 +36,7 @@ public class APIHelpers {
                 .filter(resource -> resource.getClass().equals(clazz))
                 .map(clazz::cast)
                 .forEach(entryConsumer);
+        resourceBundle.setType(Bundle.BundleType.TRANSACTION);
 
         return client.transaction().withBundle(resourceBundle).execute();
     }

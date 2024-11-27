@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
+import static gov.cms.dpc.fhir.helpers.FHIRHelpers.getPages;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
 
@@ -93,7 +94,8 @@ public class GroupResource extends AbstractGroupResource {
                                  Group attributionRoster) {
         // Log attestation
         logAndVerifyAttestation(rosterAttestation, null, attributionRoster);
-        addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
+        verifyPatients(organizationPrincipal.getOrganization().getId(), attributionRoster);
+        addOrganizationTag(attributionRoster, organizationPrincipal.getID().toString());
 
         final MethodOutcome outcome = this
                 .client
@@ -133,14 +135,15 @@ public class GroupResource extends AbstractGroupResource {
             queryParams.put("member", Collections.singletonList(patientID));
         }
 
-        return this.client
+        Bundle bundle = this.client
                 .search()
                 .forResource(Group.class)
                 .whereMap(queryParams)
-                .withTag(DPCIdentifierSystem.DPC.getSystem(), organizationPrincipal.getOrganization().getIdElement().getIdPart())
+                .withTag(DPCIdentifierSystem.DPC.getSystem(), organizationPrincipal.getID().toString())
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
+        return getPages(client, bundle);
     }
 
     @GET
@@ -184,6 +187,7 @@ public class GroupResource extends AbstractGroupResource {
                               Group rosterUpdate) {
 
         logAndVerifyAttestation(rosterAttestation, rosterID, rosterUpdate);
+        verifyPatients(organizationPrincipal.getID().toString(), rosterUpdate);
         addOrganizationTag(rosterUpdate, organizationPrincipal.getID().toString());
         final MethodOutcome outcome = this.client
                 .update()
@@ -212,6 +216,7 @@ public class GroupResource extends AbstractGroupResource {
                                   Group groupUpdate) {
         logAndVerifyAttestation(rosterAttestation, rosterID, groupUpdate);
         addOrganizationTag(groupUpdate, organizationPrincipal.getID().toString());
+        verifyPatients(organizationPrincipal.getID().toString(), groupUpdate);
         return this.executeGroupOperation(rosterID, groupUpdate, "add");
     }
 
@@ -494,5 +499,32 @@ public class GroupResource extends AbstractGroupResource {
         return JobQueueBatch.validResourceTypes.stream()
                 .filter(validResource -> validResource.toString().equalsIgnoreCase(canonical))
                 .findFirst();
+    }
+
+    // Was previously done in dpc-attribution, for the purposes of this PoC
+    // TODO: Implement as custom op on fhir server
+    private void verifyPatients(String orgId, Group group) {
+        // Build list of patient ids
+        List<String> patientIds = group.getMember().stream()
+            .map(Group.GroupMemberComponent::getEntity)
+            .map(Reference::getReference)
+            .collect(Collectors.toList());
+
+        // Load all patients
+        Bundle patients = client.search()
+            .forResource(Patient.class)
+            .where(Patient.RES_ID.exactly().codes(patientIds))
+            .and(Patient.ORGANIZATION.hasId(orgId))
+            .returnBundle(Bundle.class)
+            .encodedJson()
+            .execute();
+        getPages(client, patients);
+
+        if(patientIds.size() != patients.getTotal()) {
+            throw new WebApplicationException(
+                String.format("All patients in group must exist. Cannot find %d patient(s).", patientIds.size() - patients.getTotal()),
+                Response.Status.BAD_REQUEST
+            );
+        }
     }
 }

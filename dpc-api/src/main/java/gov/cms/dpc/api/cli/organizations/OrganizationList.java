@@ -3,6 +3,7 @@ package gov.cms.dpc.api.cli.organizations;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.jakewharton.fliptables.FlipTable;
 import gov.cms.dpc.api.cli.AbstractAttributionCommand;
+import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import io.dropwizard.core.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
@@ -37,6 +38,7 @@ public class OrganizationList extends AbstractAttributionCommand {
                 .encodedJson()
                 .returnBundle(Bundle.class)
                 .execute();
+        FHIRHelpers.getPages(client, organizations);
 
         // Generate the table
         final String[] headers = {"ID", "NPI", "NAME"};

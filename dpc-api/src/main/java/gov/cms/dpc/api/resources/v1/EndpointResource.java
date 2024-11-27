@@ -28,6 +28,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
+import static gov.cms.dpc.fhir.helpers.FHIRHelpers.getPages;
+
 @Api(value = "Endpoint", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Endpoint")
 public class EndpointResource extends AbstractEndpointResource {
@@ -76,13 +78,14 @@ public class EndpointResource extends AbstractEndpointResource {
     @ApiOperation(value = "Search for Endpoints", notes = "Search for public Endpoint resources associated to the given Organization.")
     @Override
     public Bundle getEndpoints(@ApiParam(hidden=true) @Auth OrganizationPrincipal organization) {
-        return this.client
+        Bundle bundle = this.client
                 .search()
                 .forResource(Endpoint.class)
                 .where(Endpoint.ORGANIZATION.hasId(organization.getOrganization().getId()))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
+        return getPages(client, bundle);
     }
 
     @GET

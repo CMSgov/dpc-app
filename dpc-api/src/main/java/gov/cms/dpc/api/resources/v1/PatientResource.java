@@ -1,7 +1,9 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationOptions;
@@ -44,6 +46,8 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
+import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBI;
+import static gov.cms.dpc.fhir.helpers.FHIRHelpers.getPages;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
 @Api(value = "Patient", authorizations = @Authorization(value = "access_token"))
@@ -85,7 +89,8 @@ public class PatientResource extends AbstractPatientResource {
                 .forResource(Patient.class)
                 .encodedJson()
                 .where(Patient.ORGANIZATION.hasId(organization.getOrganization().getId()))
-                .returnBundle(Bundle.class);
+                .returnBundle(Bundle.class)
+                .cacheControl(CacheControlDirective.noCache());
 
         if (patientMBI != null && !patientMBI.equals("")) {
             // Handle MBI parsing
@@ -101,12 +106,10 @@ public class PatientResource extends AbstractPatientResource {
                 mbiSystem = mbiPair.getLeft();
             }
 
-            return request
-                    .where(Patient.IDENTIFIER.exactly().systemAndIdentifier(mbiSystem, mbiValue))
-                    .execute();
+            request.where(Patient.IDENTIFIER.exactly().systemAndIdentifier(mbiSystem, mbiValue));
         }
 
-        return request.execute();
+        return getPages(client, request.execute());
     }
 
     @FHIR
@@ -118,15 +121,24 @@ public class PatientResource extends AbstractPatientResource {
     @ApiResponses(@ApiResponse(code = 422, message = "Patient does not satisfy the required FHIR profile"))
     @Override
     public Response submitPatient(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization, @Valid @Profiled @ApiParam Patient patient) {
-
         // Set the Managing Organization on the Patient
-        final Reference orgReference = new Reference(new IdType("Organization", organization.getOrganization().getIdPart()));
+        final String orgId = organization.getOrganization().getIdPart();
+        final Reference orgReference = new Reference(new IdType("Organization", orgId));
         patient.setManagingOrganization(orgReference);
-        final MethodOutcome outcome = this.client
+
+        MethodOutcome outcome;
+        if(patientExists(organization, patient)) {
+            // Patient already exists, don't bother sending to fhir server for creation
+            outcome = new MethodOutcome();
+            outcome.setResource(patient);
+            outcome.setResponseStatusCode(HttpStatus.OK_200);
+        } else {
+            outcome = this.client
                 .create()
                 .resource(patient)
                 .encodedJson()
                 .execute();
+        }
 
         return handleMethodOutcome(outcome);
     }
@@ -144,9 +156,10 @@ public class PatientResource extends AbstractPatientResource {
     public Bundle bulkSubmitPatients(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
                                      @ApiParam Parameters params) {
         final Bundle patientBundle = (Bundle) params.getParameterFirstRep().getResource();
+        final Bundle filteredBundle = removeExistingPatients(organization, patientBundle);
         final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getIdPart(), validator);
 
-        return bulkResourceClient(Patient.class, client, entryHandler, patientBundle);
+        return bulkResourceClient(Patient.class, client, entryHandler, filteredBundle);
     }
 
 
@@ -205,7 +218,7 @@ public class PatientResource extends AbstractPatientResource {
 
         final Patient patient = getPatient(patientId);
         final var since = handleSinceQueryParam(sinceParam);
-        final String patientMbi = FHIRExtractors.getPatientMBI(patient);
+        final String patientMbi = getPatientMBI(patient);
         final UUID orgId = organization.getID();
         final Organization org = this.client
                 .read()
@@ -304,5 +317,28 @@ public class PatientResource extends AbstractPatientResource {
                 throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
             }
         }
+    }
+
+    private boolean patientExists(OrganizationPrincipal organization, Patient patient) {
+        Bundle bundle = patientSearch(organization, getPatientMBI(patient));
+        return bundle.getTotal() > 0;
+    }
+
+    // TODO: Aggregate this into one transaction, not one for each patient.  Spin off into a library.
+    private Bundle removeExistingPatients(OrganizationPrincipal organization, Bundle patients) {
+        BundleBuilder bundleBuilder = new BundleBuilder(client.getFhirContext());
+        patients
+            .getEntry()
+            .stream()
+            .filter(Bundle.BundleEntryComponent::hasResource)
+            .filter(entry -> entry.getResource().getResourceType().getPath().equals(DPCResourceType.Patient.getPath()))
+            .map(entry -> (Patient)(entry.getResource()))
+            .filter(patient -> !patientExists(organization, patient))
+            .forEach(bundleBuilder::addCollectionEntry);
+
+        Bundle filteredPatients = bundleBuilder.getBundleTyped();
+        filteredPatients.setTotal(filteredPatients.getEntry().size());
+
+        return filteredPatients;
     }
 }

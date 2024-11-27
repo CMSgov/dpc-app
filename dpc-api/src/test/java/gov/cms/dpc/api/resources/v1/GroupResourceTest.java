@@ -324,9 +324,12 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         String location = methodOutcome.getResponseHeaders().get("location").get(0);
         assertNotNull(location);
 
+        // Remove version from location
+        IdType locationId = new IdType(location);
+
         Group foundGroup = client.read()
                 .resource(Group.class)
-                .withUrl(location)
+                .withUrl(locationId.toVersionless())
                 .encodedJson()
                 .execute();
 
@@ -414,7 +417,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
 
         Group foundGroup = orgAClient.read()
                 .resource(Group.class)
-                .withId(orgAGroup.getId())
+                .withId(orgAGroup.getIdPart())
                 .encodedJson()
                 .execute();
 
@@ -423,7 +426,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
 
         foundGroup = orgBClient.read()
                 .resource(Group.class)
-                .withId(orgBGroup.getId())
+                .withId(orgBGroup.getIdPart())
                 .encodedJson()
                 .execute();
 
@@ -434,7 +437,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         assertThrows(AuthenticationException.class, () -> {
             orgBClient.read()
                     .resource(Group.class)
-                    .withId(orgAGroup.getId())
+                    .withId(orgAGroup.getIdPart())
                     .encodedJson()
                     .execute();
         },"Organization B should not be able to retrieve group from another organization (Org A)");
@@ -595,10 +598,10 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         final Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
         //Ensure Org B can not add Org A's patient to group using add operation:  /Group/{id}/$add
-        orgBGroup.addMember(new Group.GroupMemberComponent().setEntity(new Reference(orgAPatient.getId())));
+        orgBGroup.addMember(new Group.GroupMemberComponent().setEntity(new Reference(orgAPatient.getIdPart())));
 
 
-        URL url = new URL(getBaseURL() + "/" + orgBGroup.getId() + "/$add");
+        URL url = new URL(getBaseURL() + "/" + orgBGroup.getIdElement().toUnqualifiedVersionless() + "/$add");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(HttpMethod.POST);
         conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
@@ -607,7 +610,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
         conn.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + auth.accessToken);
 
-        Provenance provenance = createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
+        Provenance provenance = createProvenance(orgBContext.getOrgId(), orgBPractitioner.getIdPart(), Collections.emptyList());
         String provString = ctx.newJsonParser().encodeResourceToString(provenance);
         conn.setRequestProperty("X-Provenance", provString);
 

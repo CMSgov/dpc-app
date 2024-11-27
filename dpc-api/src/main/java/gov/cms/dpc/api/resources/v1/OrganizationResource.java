@@ -31,6 +31,8 @@ import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static gov.cms.dpc.fhir.helpers.FHIRHelpers.getPages;
+
 @Api(value = "Organization", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Organization")
 public class OrganizationResource extends AbstractOrganizationResource {
@@ -151,6 +153,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             .whereMap(searchParams)
             .encodedJson()
             .execute();
+        endpointBundle = getPages(client, endpointBundle);
 
         // Build a transaction for all of our deletes
         BundleBuilder bundleBuilder = new BundleBuilder(this.client.getFhirContext());
