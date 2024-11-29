@@ -4,7 +4,7 @@ services:
     image: postgres:14
     command: postgres -c 'max_connections=250'
     environment:
-      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth,dpc_consent,dpc-website_development,bcda,dpc-portal_development
+      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth,dpc_consent,dpc-website_development,bcda,dpc-portal_development,hapi
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=dpc-safe
     volumes:
@@ -33,20 +33,6 @@ services:
       - export-volume:/app/data
       - ./jacocoReport/dpc-aggregation:/jacoco-report
 
-  attribution:
-    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-attribution}:latest
-    depends_on:
-      - db
-    environment:
-      - ENV=local
-      - JACOCO=${REPORT_COVERAGE}
-      - DEBUG_MODE=${DEBUG_MODE:-false}
-    ports:
-      - "3500:8080"
-      - "9902:9902"
-    volumes:
-      - ./jacocoReport/dpc-attribution:/jacoco-report
-
   api:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-api}:latest
     ports:
@@ -62,7 +48,6 @@ services:
       - AUTH_DISABLED=true
       - DEBUG_MODE=${DEBUG_MODE:-false}
     depends_on:
-      - attribution
       - fhir
     volumes:
       - export-volume:/app/data
@@ -127,24 +112,13 @@ services:
       - source: hapi
         target: /app/config/application.yaml
     depends_on:
-      - hapi_db
-
-  hapi_db:
-    image: postgres
-    restart: always
-    environment:
-      POSTGRES_PASSWORD: admin
-      POSTGRES_USER: admin
-      POSTGRES_DB: hapi
-    volumes:
-      - hapi_pg_data:/data:delegated
+      - db
 
 configs:
   hapi:
     file: ./hapi.application.yaml
 
 volumes:
-  hapi_pg_data:
   pgdata14:
   export-volume:
     driver: local

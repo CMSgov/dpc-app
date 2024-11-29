@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: 'jdbc:postgresql://hapi_db:5432/hapi'
-    username: admin
-    password: admin
+    url: 'jdbc:postgresql://db:5432/hapi'
+    username: postgres
+    password: dpc-safe
     driverClassName: org.postgresql.Driver
   jpa:
     properties:
