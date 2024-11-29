@@ -62,7 +62,7 @@ public class OrganizationTests extends AbstractApplicationTest {
     @Test
     void testOrganizationCommands() {
         // Create the organization
-        final Optional<Throwable> register = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token", "--host", "http://localhost:3500/v1");
+        final Optional<Throwable> register = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token", "--host", "http://localhost:8080/fhir");
         assertAll(() -> assertTrue(register.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
                 () -> assertTrue(stdOut.toString().contains("Registered organization:")));
@@ -76,7 +76,7 @@ public class OrganizationTests extends AbstractApplicationTest {
         stdErr.reset();
 
         // List organizations
-        final Optional<Throwable> listOrgs = cli.run("list", "--host", "http://localhost:3500/v1");
+        final Optional<Throwable> listOrgs = cli.run("list", "--host", "http://localhost:8080/fhir");
         assertAll(() -> assertTrue(listOrgs.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
                 () -> assertTrue(stdOut.toString().contains(orgId)));
@@ -86,7 +86,7 @@ public class OrganizationTests extends AbstractApplicationTest {
 
         // Delete the organization
         final String orgReference = "Organization/" + orgId;
-        final Optional<Throwable> delete = cli.run("delete", orgReference, "--host", "http://localhost:3500/v1");
+        final Optional<Throwable> delete = cli.run("delete", orgReference, "--host", "http://localhost:8080/fhir");
         assertAll(() -> assertTrue(delete.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
                 () -> assertTrue(stdOut.toString().contains("Successfully deleted Organization")));
@@ -95,7 +95,7 @@ public class OrganizationTests extends AbstractApplicationTest {
         stdErr.reset();
 
         // Confirm the organization has been deleted
-        final Optional<Throwable> listEmpty = cli.run("list", "--host", "http://localhost:3500/v1");
+        final Optional<Throwable> listEmpty = cli.run("list", "--host", "http://localhost:8080/fhir");
         assertAll(() -> assertTrue(listEmpty.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
                 () -> assertFalse(stdOut.toString().contains(orgId), "Should not list organization"));

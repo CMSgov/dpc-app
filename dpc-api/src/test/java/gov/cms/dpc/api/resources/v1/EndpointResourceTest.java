@@ -20,6 +20,7 @@ import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.HttpMethod;
@@ -204,6 +205,9 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
     }
 
 
+    // No longer possible to delete an org or an end point unless you delete them together in a single transaction.
+    // This is enforced by ref integrity on the FHIR server.
+    @Disabled
     @Test
     void testDeleteOrgsOnlyEndpoint() throws IOException, GeneralSecurityException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
@@ -222,9 +226,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
 
         //Assert Org A CAN NOT delete their last endpoint.
         IDeleteTyped deleteExecutable = orgAClient.delete().resourceById("Endpoint",new IdType(endpointIds[1]).getIdPart());
-
-        // TODO: This was enforced at the attribution level.  We need to intercept it in the FHIR server or catch it in dpc-api.
-        //assertThrows(UnprocessableEntityException.class, deleteExecutable::execute, "Expected 422 when deleting the last endpoint");
+        assertThrows(UnprocessableEntityException.class, deleteExecutable::execute, "Expected 422 when deleting the last endpoint");
     }
 
     @Test

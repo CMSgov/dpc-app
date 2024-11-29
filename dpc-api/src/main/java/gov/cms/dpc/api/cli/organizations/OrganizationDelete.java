@@ -1,11 +1,22 @@
 package gov.cms.dpc.api.cli.organizations;
 
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.util.BundleBuilder;
 import gov.cms.dpc.api.cli.AbstractAttributionCommand;
 import io.dropwizard.core.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static gov.cms.dpc.fhir.helpers.FHIRHelpers.getPages;
 
 public class OrganizationDelete extends AbstractAttributionCommand {
 
@@ -33,11 +44,27 @@ public class OrganizationDelete extends AbstractAttributionCommand {
 
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
 
-        client
-                .delete()
-                .resourceById(new IdType(orgReference))
-                .encodedJson()
-                .execute();
+        // The org and its endpoints must be deleted together since they reference each other
+        Map<String, List<String>> searchParams = new HashMap<>();
+        searchParams.put("organization", Collections.singletonList(orgReference));
+
+        Bundle endpointBundle = client
+            .search()
+            .forResource(Endpoint.class)
+            .encodedJson()
+            .returnBundle(Bundle.class)
+            .whereMap(searchParams)
+            .cacheControl(CacheControlDirective.noCache())
+            .execute();
+        endpointBundle = getPages(client, endpointBundle);
+
+        // Build a transaction for all of our deletes
+        BundleBuilder bundleBuilder = new BundleBuilder(client.getFhirContext());
+        bundleBuilder.addTransactionDeleteEntry(new IdType("Organization", orgReference));
+        endpointBundle.getEntry().stream()
+            .map(entry -> (Endpoint) entry.getResource())
+            .forEach(bundleBuilder::addTransactionDeleteEntry);
+        client.transaction().withBundle(bundleBuilder.getBundle()).execute();
 
         System.out.println("Successfully deleted Organization");
     }

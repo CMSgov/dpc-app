@@ -515,8 +515,8 @@ public class GroupResource extends AbstractGroupResource {
             .forResource(Patient.class)
             .where(Patient.RES_ID.exactly().codes(patientIds))
             .and(Patient.ORGANIZATION.hasId(orgId))
-            .returnBundle(Bundle.class)
             .encodedJson()
+            .returnBundle(Bundle.class)
             .execute();
         getPages(client, patients);
 

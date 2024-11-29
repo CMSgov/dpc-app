@@ -1,11 +1,9 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.IDeleteTyped;
-import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
-import ca.uhn.fhir.rest.gclient.IReadExecutable;
-import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
+import ca.uhn.fhir.rest.gclient.*;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.testing.factories.OrganizationFactory;
@@ -13,10 +11,12 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -42,6 +42,7 @@ public class OrganizationResourceUnitTest {
     public void setUp() {
         openMocks(this);
         orgResource = new OrganizationResource(attributionClient, tokenDAO, publicKeyDAO);
+        when(attributionClient.getFhirContext()).thenReturn(FhirContext.forDstu3());
     }
 
     @Test
@@ -53,6 +54,10 @@ public class OrganizationResourceUnitTest {
         bundle.addEntry().setResource(organization);
         Endpoint endpoint = OrganizationFactory.createFakeEndpoint();
         bundle.addEntry().setResource(endpoint);
+
+        MethodOutcome methodOutcome = new MethodOutcome();
+        methodOutcome.setResource(organization);
+        when(attributionClient.create().resource(organization).execute()).thenReturn(methodOutcome);
 
         @SuppressWarnings("unchecked")
         IOperationUntypedWithInput<Organization> submitExec = mock(IOperationUntypedWithInput.class);
@@ -125,6 +130,14 @@ public class OrganizationResourceUnitTest {
     @Test
     public void testDeleteOrganization() {
         UUID orgID = UUID.randomUUID();
+
+        Bundle bundle = new Bundle();
+        IQuery<IBaseBundle> queryExec = Mockito.mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        Mockito.when(attributionClient.search().forResource(any(Class.class)).encodedJson()).thenReturn(queryExec);
+        IQuery<Bundle> mockQuery = Mockito.mock(IQuery.class);
+        Mockito.when(queryExec.returnBundle(any(Class.class))).thenReturn(mockQuery);
+        Mockito.when(mockQuery.whereMap(any())).thenReturn(mockQuery);
+        Mockito.when(mockQuery.execute()).thenReturn(bundle);
 
         IDeleteTyped delRet = mock(IDeleteTyped.class);
         when(attributionClient

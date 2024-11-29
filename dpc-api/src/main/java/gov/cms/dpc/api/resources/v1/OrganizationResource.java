@@ -149,9 +149,9 @@ public class OrganizationResource extends AbstractOrganizationResource {
         Bundle endpointBundle = this.client
             .search()
             .forResource(Endpoint.class)
+            .encodedJson()
             .returnBundle(Bundle.class)
             .whereMap(searchParams)
-            .encodedJson()
             .execute();
         endpointBundle = getPages(client, endpointBundle);
 

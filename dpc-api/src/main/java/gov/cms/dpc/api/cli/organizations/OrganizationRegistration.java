@@ -1,8 +1,11 @@
 package gov.cms.dpc.api.cli.organizations;
 
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.util.BundleBuilder;
 import gov.cms.dpc.api.cli.AbstractAttributionCommand;
+import gov.cms.dpc.fhir.DPCResourceType;
 import io.dropwizard.core.setup.Bootstrap;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -13,9 +16,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,7 +24,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class OrganizationRegistration extends AbstractAttributionCommand {
 
@@ -80,21 +83,40 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
         System.out.println(String.format("Connecting to Attribution service at: %s", attributionService));
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
 
-        final Parameters parameters = new Parameters();
-
-        parameters
-                .addParameter().setResource(organization);
-
         UUID organizationID = null;
         try {
-            final Organization createdOrg = client
-                    .operation()
-                    .onType(Organization.class)
-                    .named("submit")
-                    .withParameters(parameters)
-                    .returnResourceType(Organization.class)
-                    .encodedJson()
-                    .execute();
+            // Get org from bundle
+            Organization org = organization
+                .getEntry()
+                .stream()
+                .filter(Bundle.BundleEntryComponent::hasResource)
+                .map(Bundle.BundleEntryComponent::getResource)
+                .filter(resource -> resource.getResourceType().getPath().equals(DPCResourceType.Organization.getPath()))
+                .map(resource -> (Organization) resource)
+                .findFirst().get();
+
+            // Get endpoints from bundle
+            List<Endpoint> endpoints = organization
+                .getEntry()
+                .stream()
+                .filter(Bundle.BundleEntryComponent::hasResource)
+                .map(Bundle.BundleEntryComponent::getResource)
+                .filter(resource -> resource.getResourceType().getPath().equals(DPCResourceType.Endpoint.getPath()))
+                .map(resource -> (Endpoint) resource)
+                .collect(Collectors.toList());
+
+            // Create the org
+            MethodOutcome outcome = client.create().resource(org).execute();
+            Organization createdOrg = (Organization) outcome.getResource();
+
+            // Update the end points with the new org's id and create them
+            BundleBuilder bundleBuilder = new BundleBuilder(client.getFhirContext());
+            endpoints.stream()
+                .map(ep ->
+                    ep.setManagingOrganization(new Reference(new IdType("Organization", createdOrg.getIdPart())))
+                )
+                .forEach(bundleBuilder::addTransactionCreateEntry);
+            client.transaction().withBundle(bundleBuilder.getBundle()).execute();
 
             organizationID = UUID.fromString(createdOrg.getIdElement().getIdPart());
             System.out.println(String.format("Registered organization: %s", organizationID));

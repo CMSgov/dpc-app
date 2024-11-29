@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.*;
@@ -7,12 +8,14 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.net.HttpHeaders;
+import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.service.DataService;
+import gov.cms.dpc.testing.MBIUtil;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -57,6 +60,7 @@ public class PatientResourceUnitTest {
     public void setUp() {
         openMocks(this);
         patientResource = new PatientResource(attributionClient, fhirValidator, dataService, bfdClient);
+        when(attributionClient.getFhirContext()).thenReturn(FhirContext.forDstu3());
     }
 
     @Test
@@ -81,7 +85,7 @@ public class PatientResourceUnitTest {
                 .forResource(Patient.class)
                 .encodedJson()
         ).thenReturn(queryExec);
-        when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class).cacheControl(any())).thenReturn(mockQuery);
         when(mockQuery.where(any(ICriterion.class))).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(bundle);
 
@@ -109,7 +113,11 @@ public class PatientResourceUnitTest {
                 .forResource(Patient.class)
                 .encodedJson()
         ).thenReturn(queryExec);
-        when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(queryExec
+            .where(any(ICriterion.class))
+            .returnBundle(Bundle.class)
+            .cacheControl(any())
+        ).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(bundle);
 
         Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null);
@@ -122,10 +130,23 @@ public class PatientResourceUnitTest {
         Organization organization = new Organization();
         organization.setId(orgId.toString());
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
-        Patient patient = new Patient();
+        Patient patient = APITestHelpers.createPatientResource(MBIUtil.generateMBI(), orgId.toString());
 
         ICreateTyped createExec = mock(ICreateTyped.class);
         when(attributionClient.create().resource(patient).encodedJson()).thenReturn(createExec);
+
+        Bundle emptyBundle = new Bundle();
+        IQuery<IBaseBundle> queryExec = mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        @SuppressWarnings("unchecked")
+        IQuery<Bundle> mockQuery = mock(IQuery.class);
+        when(attributionClient
+            .search()
+            .forResource(Patient.class)
+            .encodedJson()
+        ).thenReturn(queryExec);
+        when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class).cacheControl(any())).thenReturn(mockQuery);
+        when(mockQuery.where(any(ICriterion.class))).thenReturn(mockQuery);
+        when(mockQuery.execute()).thenReturn(emptyBundle);
 
         MethodOutcome outcome = new MethodOutcome();
         outcome.setResource(patient);

@@ -120,7 +120,6 @@ services:
     network_mode: host
 
   fhir:
-    container_name: fhir
     image: "hapiproject/hapi:latest"
     ports:
       - "8080:8080"

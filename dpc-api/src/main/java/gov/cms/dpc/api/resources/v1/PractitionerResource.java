@@ -212,7 +212,13 @@ public class PractitionerResource extends AbstractPractitionerResource {
     }
 
     private boolean practitionerExists(OrganizationPrincipal organization, Practitioner practitioner) {
-        Bundle bundle = practitionerSearch(organization, getProviderNPI(practitioner));
+        Bundle bundle;
+        try {
+            bundle = practitionerSearch(organization, getProviderNPI(practitioner));
+        } catch (IllegalArgumentException e) {
+            // Practitioner has no npi
+            throw new WebApplicationException("Invalid practitioner", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
         return bundle.getTotal() > 0;
     }
 

@@ -126,6 +126,7 @@ public class PatientResource extends AbstractPatientResource {
         final Reference orgReference = new Reference(new IdType("Organization", orgId));
         patient.setManagingOrganization(orgReference);
 
+        // TODO: Replace patientExists with a conditional create header
         MethodOutcome outcome;
         if(patientExists(organization, patient)) {
             // Patient already exists, don't bother sending to fhir server for creation
@@ -320,7 +321,13 @@ public class PatientResource extends AbstractPatientResource {
     }
 
     private boolean patientExists(OrganizationPrincipal organization, Patient patient) {
-        Bundle bundle = patientSearch(organization, getPatientMBI(patient));
+        Bundle bundle;
+        try {
+            bundle = patientSearch(organization, getPatientMBI(patient));
+        } catch (IllegalArgumentException e) {
+            // Patient doesn't have an MBI
+            throw new WebApplicationException("Invalid patient", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
         return bundle.getTotal() > 0;
     }
 

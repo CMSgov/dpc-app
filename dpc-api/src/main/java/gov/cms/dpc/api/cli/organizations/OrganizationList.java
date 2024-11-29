@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.cli.organizations;
 
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.jakewharton.fliptables.FlipTable;
 import gov.cms.dpc.api.cli.AbstractAttributionCommand;
@@ -37,6 +38,7 @@ public class OrganizationList extends AbstractAttributionCommand {
                 .forResource(Organization.class)
                 .encodedJson()
                 .returnBundle(Bundle.class)
+                .cacheControl(CacheControlDirective.noCache())
                 .execute();
         FHIRHelpers.getPages(client, organizations);
 

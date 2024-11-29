@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.*;
@@ -41,6 +42,7 @@ public class PractitionerResourceUnitTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         practitionerResource = new PractitionerResource(attributionClient, fhirValidator);
+        when(attributionClient.getFhirContext()).thenReturn(FhirContext.forDstu3());
     }
 
     @Test
@@ -62,6 +64,7 @@ public class PractitionerResourceUnitTest {
         Mockito.when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
         Mockito.when(mockQuery.withTag(DPCIdentifierSystem.DPC.getSystem(), organizationPrincipal.getID().toString())).thenReturn(mockQuery);
         Mockito.when(mockQuery.whereMap(searchParams)).thenReturn(mockQuery);
+        Mockito.when(mockQuery.cacheControl(any())).thenReturn(mockQuery);
         Mockito.when(mockQuery.execute()).thenReturn(bundle);
 
         Bundle actualResponse = practitionerResource.practitionerSearch(organizationPrincipal, providerNPI);
