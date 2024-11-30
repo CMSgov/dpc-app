@@ -19,12 +19,17 @@ class OrganizationsController < ApplicationController
   def show
     show_cds = current_user.ao?(@organization)
     if show_cds
-      @invitations = Invitation.where(provider_organization: @organization,
-                                      invited_by: current_user,
-                                      status: :pending)
+      # Invitation expiration is determined in relation to the `created_at` field; the `status` field will
+      # never be `'expired'`. Therefore, we need to further filter out expired invitations from this query.
+      @pending_invitations = Invitation.where(provider_organization: @organization,
+                                              invited_by: current_user,
+                                              status: :pending).reject(&:expired?)
+      @expired_invitations = Invitation.where(provider_organization: @organization,
+                                              invited_by: current_user).select(&:expired?)
       @cds = CdOrgLink.where(provider_organization: @organization, disabled_at: nil)
     end
-    render(Page::Organization::CompoundShowComponent.new(@organization, @cds, @invitations, show_cds))
+    render(Page::Organization::CompoundShowComponent.new(@organization, @pending_invitations, @expired_invitations,
+                                                         @cds, show_cds))
   end
 
   def new

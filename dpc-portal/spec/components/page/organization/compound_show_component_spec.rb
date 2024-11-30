@@ -10,7 +10,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       normalize_space(rendered_content)
     end
     let(:org) { build(:provider_organization, name: 'Health Hut', npi: '11111111', id: 2) }
-    let(:component) { described_class.new(org, [], [], show_cds) }
+    let(:component) { described_class.new(org, [], [], [], show_cds) }
 
     before do
       render_inline(component)
