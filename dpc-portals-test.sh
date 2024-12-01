@@ -1,11 +1,14 @@
 #!/bin/bash
+
+NEW_RELIC_AGENT_ENABLED="false";
+
 IS_AWS_EC2=$(./ops/scripts/is_aws_ec2.sh);
-NEW_RELIC_AGENT_ENABLED=true;
 if [ "$IS_AWS_EC2" == "no" ]; then
   LOCAL_DOCKER_OVERRIDE="-f docker-compose.override.yml";
-  NEW_RELIC_AGENT_ENABLED="false";
 fi
+
 PROJECT_NAME=${PORTAL_PROJ_NAME:-start-v1-portals}
+
 set -e
 
 function _finally {
