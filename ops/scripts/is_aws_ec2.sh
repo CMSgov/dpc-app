@@ -4,6 +4,9 @@
 #
 # Josh Kupershmidt (https://serverfault.com/users/223639/josh-kupershmidt) 3/20/2018
 
+# Default curl options to speed up requests
+CURL_OPTS="--connect-timeout 1 --max-time 2 --retry 0"
+
 # Check for ECS environment variable
 if [ -n "$ECS_CONTAINER_METADATA_URI" ]; then 
   echo "yes"
@@ -11,12 +14,12 @@ if [ -n "$ECS_CONTAINER_METADATA_URI" ]; then
 fi
 
 # Attempt to obtain a token from the Instance Metadata Service (IMDS)
-TOKEN=$(curl -s -X PUT -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" http://169.254.169.254/latest/api/token)
+TOKEN=$(curl -s $CURL_OPTS -X PUT -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" http://169.254.169.254/latest/api/token)
 
 # Check if the token was successfully obtained
 if [ -n "$TOKEN" ]; then
   # Use the token to access metadata and check if the request is successful
-  METADATA=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/)
+  METADATA=$(curl -s $CURL_OPTS -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/)
   
   # Check if the metadata request returned a result
   if [ -n "$METADATA" ]; then
