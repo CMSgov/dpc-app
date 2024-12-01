@@ -193,6 +193,13 @@ down-dpc: ## Shut down all services
 down-dpc:
 	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml down
 
+down-portals: ## Shut down all services
+down-portals: down-dpc
+
+down-start-v1-portals: ## Shut down test services
+down-start-v1-portals:
+	@docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml down
+
 # Utility targets
 # These targets provider CLI support
 # =================

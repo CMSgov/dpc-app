@@ -22,6 +22,11 @@ trap _finally EXIT
 echo "┌───────────────────────┐"
 echo "│                       │"
 echo "│   Running Web Tests   |"
+if [ "$IS_AWS_EC2" = "yes" ]; then
+    echo "│       (AWS EC2)       │"
+else
+    echo "│                       │"
+fi
 echo "│                       │"
 echo "└───────────────────────┘"
 
