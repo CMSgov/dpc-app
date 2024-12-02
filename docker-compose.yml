@@ -1,27 +1,18 @@
 services:
 
   db:
-    image: postgres:16
+    image: postgres:14
     command: postgres -c 'max_connections=250'
     environment:
-      - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth,dpc_consent,dpc-website_development,bcda,dpc-portal_development
+      - POSTGRES_MULTIPLE_DATABASES=dpc_queue,dpc_auth,dpc_consent,dpc-website_development,bcda,dpc-portal_development,hapi
       - POSTGRES_USER=postgres
-      - POSTGRES_DB=postgres
       - POSTGRES_PASSWORD=dpc-safe
     volumes:
       # Mount database startup script, which automatically creates new databases
       # based on the POSTGRES_MULTIPLE_DATABASES variable above.
       - ./docker/postgres:/docker-entrypoint-initdb.d
       # Mount persistent volume to ensure data is not erased across containers.
-      - pgdata16:/var/lib/postgresql/data
-      - ./tmp:/var/tmp
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 10s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
-    restart: unless-stopped
+      - pgdata14:/var/lib/postgresql/data
 
   aggregation:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
@@ -33,52 +24,14 @@ services:
       - ENV=local
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
       - EMIT_AWS_METRICS=${EMIT_AWS_METRICS:-false}
-      - JACOCO=${REPORT_COVERAGE:-false}
+      - JACOCO=${REPORT_COVERAGE}
       - DEBUG_MODE=${DEBUG_MODE:-false}
-      - AGGREGATION_SVC_PORT=9901
-      - HEALTH_CHECK_COUNT=6
-    healthcheck:
-      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${AGGREGATION_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $((HEALTH_CHECK_COUNT - $( [ \"$$USE_BFD_MOCK\" = 'true' ] && echo 1 || echo 0 )))"]
-      interval: 10s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
-    restart: unless-stopped
     depends_on:
-      db:
-        condition: service_healthy
-        restart: true
-      consent:
-        condition: service_healthy
-        restart: true
+      - db
+      - consent
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-aggregation:/jacoco-report
-
-  attribution:
-    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-attribution}:latest
-    depends_on:
-      db:
-        condition: service_healthy
-        restart: true
-    environment:
-      - ENV=local
-      - JACOCO=${REPORT_COVERAGE:-false}
-      - DEBUG_MODE=${DEBUG_MODE:-false}
-      - ATTRIBUTION_SVC_PORT=9902
-      - HEALTH_CHECK_COUNT=3
-    ports:
-      - "3500:8080"
-      - "9902:9902"
-    healthcheck:
-      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${ATTRIBUTION_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $${HEALTH_CHECK_COUNT}"]
-      interval: 10s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
-    restart: unless-stopped
-    volumes:
-      - ./jacocoReport/dpc-attribution:/jacoco-report
 
   api:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-api}:latest
@@ -89,25 +42,13 @@ services:
       - ./ops/config/decrypted/local.env
     environment:
       - ENV=local
-      - JACOCO=${REPORT_COVERAGE:-false}
+      - JACOCO=${REPORT_COVERAGE}
       - EXPORT_PATH=/app/data
-      - AUTH_DISABLED=${AUTH_DISABLED:-false}
+      #- AUTH_DISABLED=${AUTH_DISABLED:-false}
+      - AUTH_DISABLED=true
       - DEBUG_MODE=${DEBUG_MODE:-false}
-      - API_SVC_PORT=9900
-      - HEALTH_CHECK_COUNT=7
-    healthcheck:
-      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${API_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $${HEALTH_CHECK_COUNT}"]
-      interval: 10s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
     depends_on:
-      attribution:
-        condition: service_healthy
-        restart: true
-      aggregation:
-        condition: service_healthy
-        restart: true
+      - fhir
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-api:/jacoco-report
@@ -115,50 +56,70 @@ services:
   consent:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-consent}:latest
     depends_on:
-      db:
-        condition: service_healthy
-        restart: true
+      - db
     environment:
       - ENV=local
-      - JACOCO=${REPORT_COVERAGE:-false}
+      - JACOCO=${REPORT_COVERAGE}
       - DEBUG_MODE=${DEBUG_MODE:-false}
-      - CONSENT_SVC_PORT=9904
-      - HEALTH_CHECK_COUNT=3
     ports:
       - "3600:3600"
       - "9904:9904"
     volumes:
       - ./jacocoReport/dpc-consent:/jacoco-report
-    healthcheck:
-      test: ["CMD-SHELL", "test $(curl -s 'http://localhost:'$${CONSENT_SVC_PORT}'/healthcheck?pretty=true' | grep -c '\"healthy\" : true') -eq $${HEALTH_CHECK_COUNT}"]
-      interval: 10s
-      retries: 5
-      start_period: 60s
-      timeout: 10s
-    restart: unless-stopped
+
+  start_core_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - db
+    command: db:5432
+
+  start_api_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      #- attribution
+      - fhir
+      - aggregation
+    command: fhir:8080 aggregation:9901
+
+  start_api:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - api
+    command: api:3002
+
+  start_consent:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - consent
+    command: consent:3600
 
   tests:
     image: maven:3.6-jdk-11
     env_file:
       - ./ops/config/decrypted/local.env
-    environment:
-      - TEST_VERBOSITY=${TEST_VERBOSITY:-false}
     volumes:
       - export-volume:/tmp
       - ./:/usr/src/mymaven
-    depends_on:
-      attribution:
-        condition: service_healthy
-        restart: true
-      aggregation:
-        condition: service_healthy
-        restart: true
     working_dir: /usr/src/mymaven
-    command: sh -c "mvn verify -Pintegration-tests -am -ntp -Djib.skip=true $${TEST_VERBOSITY+$( [ \"$$TEST_VERBOSITY\" = \"true\" ] && echo '-Dtest.verbosity=true' )}"
+    command: sh -c "mvn test -Pintegration-tests -am -ntp"
     network_mode: host
 
+  fhir:
+    image: "hapiproject/hapi:latest"
+    ports:
+      - "8080:8080"
+    configs:
+      - source: hapi
+        target: /app/config/application.yaml
+    depends_on:
+      - db
+
+configs:
+  hapi:
+    file: ./hapi.application.yaml
+
 volumes:
-  pgdata16:
+  pgdata14:
   export-volume:
     driver: local
     driver_opts:
