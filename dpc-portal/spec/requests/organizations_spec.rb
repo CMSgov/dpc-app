@@ -255,14 +255,14 @@ RSpec.describe 'Organizations', type: :request do
           expect(assigns(:organization)).to eq org
         end
 
-        it 'should show cd list by default' do
+        it 'should start on cd tab by default' do
           get "/organizations/#{org.id}"
           expect(response).to be_ok
           expect(response.body).to include(' make_current(0);')
           expect(response.body).to_not include(' make_current(1);')
         end
 
-        it 'should show creds if credential_start param' do
+        it 'should start on credentials tab if credential_start param' do
           get "/organizations/#{org.id}", params: { credential_start: true }
           expect(response).to be_ok
           expect(response.body).to_not include(' make_current(0);')

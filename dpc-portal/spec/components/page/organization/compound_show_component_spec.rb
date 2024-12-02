@@ -16,7 +16,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       render_inline(component)
     end
 
-    context 'has delegate information' do
+    context 'cd tab' do
       let(:delegate_info) { { active: [], pending: [], expired: [] } }
       context 'credential delegate start' do
         let(:credential_start) { false }
@@ -52,7 +52,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       end
     end
 
-    context 'not show cds' do
+    context 'credentials tab' do
       let(:delegate_info) { {} }
       let(:credential_start) { true }
       it 'Should have org name' do
