@@ -258,7 +258,8 @@ class InvitationsController < ApplicationController
       msg = 'Credential Delegate Invitation expired'
       action_type = LoggingConstants::ActionType::CdInvitationExpired
     else
-      msg, action_type = ''
+      msg = "Invitation unacceptable: #{reason}"
+      action_type = LoggingConstants::ActionType::Unacceptable
     end
 
     [msg, action_type]
