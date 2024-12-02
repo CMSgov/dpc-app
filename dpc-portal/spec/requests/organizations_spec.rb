@@ -255,6 +255,20 @@ RSpec.describe 'Organizations', type: :request do
           expect(assigns(:organization)).to eq org
         end
 
+        it 'should start on cd tab by default' do
+          get "/organizations/#{org.id}"
+          expect(response).to be_ok
+          expect(response.body).to include(' make_current(0);')
+          expect(response.body).to_not include(' make_current(1);')
+        end
+
+        it 'should start on credentials tab if credential_start param' do
+          get "/organizations/#{org.id}", params: { credential_start: true }
+          expect(response).to be_ok
+          expect(response.body).to_not include(' make_current(0);')
+          expect(response.body).to include(' make_current(1);')
+        end
+
         it 'shows CD list page' do
           get "/organizations/#{org.id}"
           expect(response.body).to include('<h2>Credential delegates</h2>')
@@ -267,24 +281,24 @@ RSpec.describe 'Organizations', type: :request do
           it 'assigns if exist' do
             create(:invitation, :cd, provider_organization: org, invited_by: user)
             get "/organizations/#{org.id}"
-            expect(assigns(:pending_invitations).size).to eq 1
+            expect(assigns(:delegate_information)[:pending].size).to eq 1
           end
 
           it 'does not assign if not exist' do
             get "/organizations/#{org.id}"
-            expect(assigns(:pending_invitations).size).to eq 0
+            expect(assigns(:delegate_information)[:pending].size).to eq 0
           end
 
           it 'does not assign if only accepted exists' do
             create(:invitation, :cd, provider_organization: org, invited_by: user, status: :accepted)
             get "/organizations/#{org.id}"
-            expect(assigns(:pending_invitations).size).to eq 0
+            expect(assigns(:delegate_information)[:pending].size).to eq 0
           end
 
           it 'does not assign if expired' do
             create(:invitation, :cd, provider_organization: org, invited_by: user, created_at: 3.days.ago)
             get "/organizations/#{org.id}"
-            expect(assigns(:pending_invitations).size).to eq 0
+            expect(assigns(:delegate_information)[:pending].size).to eq 0
           end
         end
 
@@ -292,18 +306,18 @@ RSpec.describe 'Organizations', type: :request do
           it 'assigns if exist' do
             create(:invitation, :cd, provider_organization: org, invited_by: user, created_at: 3.days.ago)
             get "/organizations/#{org.id}"
-            expect(assigns(:expired_invitations).size).to eq 1
+            expect(assigns(:delegate_information)[:expired].size).to eq 1
           end
 
           it 'does not assign if not exist' do
             get "/organizations/#{org.id}"
-            expect(assigns(:pending_invitations).size).to eq 0
+            expect(assigns(:delegate_information)[:pending].size).to eq 0
           end
 
           it 'does not assign if invitation is not expired' do
             create(:invitation, :cd, provider_organization: org, invited_by: user)
             get "/organizations/#{org.id}"
-            expect(assigns(:expired_invitations).size).to eq 0
+            expect(assigns(:delegate_information)[:expired].size).to eq 0
           end
         end
 
@@ -311,18 +325,18 @@ RSpec.describe 'Organizations', type: :request do
           it 'assigns if exist' do
             create(:cd_org_link, provider_organization: org)
             get "/organizations/#{org.id}"
-            expect(assigns(:cds).size).to eq 1
+            expect(assigns(:delegate_information)[:active].size).to eq 1
           end
 
           it 'does not assign if not exist' do
             get "/organizations/#{org.id}"
-            expect(assigns(:cds).size).to eq 0
+            expect(assigns(:delegate_information)[:active].size).to eq 0
           end
 
           it 'does not assign if link disabled' do
             create(:cd_org_link, provider_organization: org, disabled_at: 1.day.ago)
             get "/organizations/#{org.id}"
-            expect(assigns(:cds).size).to eq 0
+            expect(assigns(:delegate_information)[:active].size).to eq 0
           end
         end
       end
