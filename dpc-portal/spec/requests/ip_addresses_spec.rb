@@ -178,6 +178,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                        response: default_get_ip_addresses['entities'].first,
                                        api_client:)
         post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
+        expect(response).to redirect_to(organization_path(org, credential_start: true))
         expect(assigns(:organization)).to eq org
       end
 
@@ -258,7 +259,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                        api_client:)
         delete "/organizations/#{org.id}/ip_addresses/#{addr_guid}"
         expect(flash[:notice]).to eq('IP address successfully deleted.')
-        expect(response).to redirect_to(organization_path(org))
+        expect(response).to redirect_to(organization_path(org, credential_start: true))
       end
 
       it 'renders error if error' do
@@ -272,7 +273,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                        api_client:)
         delete "/organizations/#{org.id}/ip_addresses/#{addr_guid}"
         expect(flash[:alert]).to eq('IP address could not be deleted.')
-        expect(response).to redirect_to(organization_path(org))
+        expect(response).to redirect_to(organization_path(org, credential_start: true))
       end
     end
   end
