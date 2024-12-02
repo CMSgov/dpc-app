@@ -23,6 +23,8 @@ module LoggingConstants
     CdCreated = 'CdCreated'
     AoLinkedToOrg = 'AoLinkedToOrg'
     CdLinkedToOrg = 'CdLinkedToOrg'
+    AoAlreadyRegistered = 'AoAlreadyRegistered'
+    CdAlreadyRegistered = 'CdAlreadyRegistered'
 
     BeginLogin = 'BeginLogin'
     UserLoggedIn = 'UserLoggedIn'

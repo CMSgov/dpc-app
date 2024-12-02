@@ -234,19 +234,34 @@ class InvitationsController < ApplicationController
   def validate_invitation
     return unless @invitation.unacceptable_reason
 
-    if @invitation.credential_delegate?
-      Rails.logger.info(['Credential Delegate Invitation expired',
-                         { actionContext: LoggingConstants::ActionContext::Registration,
-                           actionType: LoggingConstants::ActionType::CdInvitationExpired,
-                           invitation: @invitation.id }])
-    elsif @invitation.authorized_official?
-      Rails.logger.info(['Authorized Official Invitation expired',
-                         { actionContext: LoggingConstants::ActionContext::Registration,
-                           actionType: LoggingConstants::ActionType::AoInvitationExpired,
-                           invitation: @invitation.id }])
-    end
+    err_msg, action_type = get_invitation_error(@invitation.unacceptable_reason)
+    Rails.logger.info([err_msg, { actionContext: LoggingConstants::ActionContext::Registration,
+                                  actionType: action_type,
+                                  invitation: @invitation.id }])
+
     render(Page::Invitations::BadInvitationComponent.new(@invitation, @invitation.unacceptable_reason),
            status: :forbidden)
+  end
+
+  def get_invitation_error(reason)
+    case reason
+    when 'ao_accepted'
+      msg = 'Authorized Official Invitation already accepted'
+      action_type = LoggingConstants::ActionType::AoAlreadyRegistered
+    when 'cd_accepted'
+      msg = 'Credential Delegate Invitation already accepted'
+      action_type = LoggingConstants::ActionType::CdAlreadyRegistered
+    when 'ao_expired'
+      msg = 'Authorized Official Invitation expired'
+      action_type = LoggingConstants::ActionType::AoInvitationExpired
+    when 'cd_expired'
+      msg = 'Credential Delegate Invitation expired'
+      action_type = LoggingConstants::ActionType::CdInvitationExpired
+    else
+      msg, action_type = ''
+    end
+
+    [msg, action_type]
   end
 
   def verify_ao_invitation

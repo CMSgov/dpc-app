@@ -72,6 +72,24 @@ RSpec.describe 'Invitations', type: :request do
     end
     it 'should show warning page if accepted' do
       invitation.accept!
+      if invitation.authorized_official?
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(
+          ['Authorized Official Invitation already accepted',
+           { actionContext: LoggingConstants::ActionContext::Registration,
+             actionType: LoggingConstants::ActionType::AoAlreadyRegistered,
+             invitation: invitation.id }]
+        )
+      elsif invitation.credential_delegate?
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(
+          ['Credential Delegate Invitation already accepted',
+           { actionContext: LoggingConstants::ActionContext::Registration,
+             actionType: LoggingConstants::ActionType::CdAlreadyRegistered,
+             invitation: invitation.id }]
+        )
+      end
+
       send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
       expect(response).to be_forbidden
       if invitation.authorized_official?
