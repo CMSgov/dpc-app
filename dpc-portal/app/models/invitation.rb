@@ -31,7 +31,7 @@ class Invitation < ApplicationRecord
   end
 
   def expired?
-    Time.now > expiration_date
+    pending? && Time.now > expiration_date
   end
 
   def expired_at
