@@ -45,6 +45,6 @@ module LoggingConstants
     HealthCheckPassed = 'HealthCheckPassed'
     HealthCheckFailed = 'HealthCheckFailed'
 
-    Unacceptable = 'Unacceptable'
+    UnacceptableInvitation = 'UnacceptableInvitation'
   end
 end

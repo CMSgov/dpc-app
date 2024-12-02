@@ -259,7 +259,7 @@ class InvitationsController < ApplicationController
       action_type = LoggingConstants::ActionType::CdInvitationExpired
     else
       msg = "Invitation unacceptable: #{reason}"
-      action_type = LoggingConstants::ActionType::Unacceptable
+      action_type = LoggingConstants::ActionType::UnacceptableInvitation
     end
 
     [msg, action_type]
