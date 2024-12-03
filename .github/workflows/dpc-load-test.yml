@@ -1,0 +1,20 @@
+name: DPC Load Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-test:
+    runs-on: ubuntu-latest
+    container:
+      image: grafana/k6:latest
+      options: --user root
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run k6 test
+        uses: grafana/run-k6-action@v1
+        with:
+          path: ./dpc-load-testing/script.js
