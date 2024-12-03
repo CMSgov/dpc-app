@@ -234,7 +234,7 @@ class InvitationsController < ApplicationController
   def validate_invitation
     return unless @invitation.unacceptable_reason
 
-    err_msg, action_type = get_invitation_error(@invitation.unacceptable_reason)
+    err_msg, action_type = get_invitation_log_data(@invitation.unacceptable_reason)
     Rails.logger.info([err_msg, { actionContext: LoggingConstants::ActionContext::Registration,
                                   actionType: action_type,
                                   invitation: @invitation.id }])
@@ -243,26 +243,21 @@ class InvitationsController < ApplicationController
            status: :forbidden)
   end
 
-  def get_invitation_error(reason)
-    case reason
-    when 'ao_accepted'
-      msg = 'Authorized Official Invitation already accepted'
-      action_type = LoggingConstants::ActionType::AoAlreadyRegistered
-    when 'cd_accepted'
-      msg = 'Credential Delegate Invitation already accepted'
-      action_type = LoggingConstants::ActionType::CdAlreadyRegistered
-    when 'ao_expired'
-      msg = 'Authorized Official Invitation expired'
-      action_type = LoggingConstants::ActionType::AoInvitationExpired
-    when 'cd_expired'
-      msg = 'Credential Delegate Invitation expired'
-      action_type = LoggingConstants::ActionType::CdInvitationExpired
-    else
-      msg = "Invitation unacceptable: #{reason}"
-      action_type = LoggingConstants::ActionType::UnacceptableInvitation
-    end
+  def get_invitation_log_data(reason)
+    unacceptable_reason_map = {
+      invalid: ['Invalid Invitation', LoggingConstants::ActionType::InvalidInvitation],
+      ao_renewed: ['Ao Renewed Expired Invitation', LoggingConstants::ActionType::AoRenewedExpiredInvitation],
+      ao_accepted: ['Authorized Official Invitation already accepted',
+                    LoggingConstants::ActionType::AoAlreadyRegistered],
+      cd_accepted: ['Credential Delegate Invitation already accepted',
+                    LoggingConstants::ActionType::CdAlreadyRegistered],
+      ao_expired: ['Authorized Official Invitation expired', LoggingConstants::ActionType::AoInvitationExpired],
+      cd_expired: ['Credential Delegate Invitation expired', LoggingConstants::ActionType::CdInvitationExpired],
+    }
+    unacceptable_reason_map.default = ["Invitation unacceptable: #{reason}",
+                                       LoggingConstants::ActionType::UnacceptableInvitation]
 
-    [msg, action_type]
+    unacceptable_reason_map[reason.to_sym]
   end
 
   def verify_ao_invitation
