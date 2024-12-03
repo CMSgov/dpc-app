@@ -27,12 +27,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("Organization resource handling")
-class OrganizationResourceTest extends AbstractAttributionIT {
+class OrganizationResourceIT extends AbstractAttributionIT {
 
         final IGenericClient client;
         final List<Organization> organizationsToCleanUp;
 
-    private OrganizationResourceTest() {
+    private OrganizationResourceIT() {
         client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
         organizationsToCleanUp = new ArrayList<>();
     }

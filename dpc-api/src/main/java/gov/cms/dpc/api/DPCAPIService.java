@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     private static final Logger LOG = LoggerFactory.getLogger(DPCAPIService.class);
+    private static final boolean TRACE = LOG.isTraceEnabled();
     
     private final DPCHibernateBundle<DPCAPIConfiguration> hibernateBundle = new DPCHibernateBundle<>();
     private final DPCQueueHibernateBundle<DPCAPIConfiguration> hibernateQueueBundle = new DPCQueueHibernateBundle<>();
@@ -92,19 +93,23 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         bootstrap.addBundle(hibernateQueueBundle);
         bootstrap.addBundle(hibernateAuthBundle);
 
+        com.google.inject.Module[] modules = new com.google.inject.Module[TRACE ? 10 : 9];
+        int pos = -1;
+        if(TRACE) {
+            modules[++pos] = new DebugLoggingModule();
+        }
+        modules[++pos] = new DPCHibernateModule<>(hibernateBundle);
+        modules[++pos] = new DPCQueueHibernateModule<>(hibernateQueueBundle);
+        modules[++pos] = new DPCAuthHibernateModule<>(hibernateAuthBundle);
+        modules[++pos] = new DPCAPIModule(hibernateAuthBundle);
+        modules[++pos] = new AuthModule();
+        modules[++pos] = new BakeryModule();
+        modules[++pos] = new JobQueueModule<>();
+        modules[++pos] = new FHIRModule<DPCAPIConfiguration>();
+        modules[++pos] = new BlueButtonClientModule<DPCAPIConfiguration>();
+        
         guiceBundle = GuiceBundle.defaultBuilder(DPCAPIConfiguration.class)
-                .modules(                
-                        new DebugLoggingModule(),
-                        new DPCHibernateModule<>(hibernateBundle),
-                        new DPCQueueHibernateModule<>(hibernateQueueBundle),
-                        new DPCAuthHibernateModule<>(hibernateAuthBundle),
-                        new DPCAPIModule(hibernateAuthBundle),
-                        new AuthModule(),
-                        new BakeryModule(),
-                        new JobQueueModule<>(),
-                        new FHIRModule<DPCAPIConfiguration>(),
-                        new BlueButtonClientModule<DPCAPIConfiguration>()
-                )
+                .modules(modules)
                 .build();
        
         bootstrap.addBundle(guiceBundle);

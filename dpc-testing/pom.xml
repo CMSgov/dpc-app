@@ -95,6 +95,7 @@
         <dependency>
             <groupId>com.github.nickrobison-usds</groupId>
             <artifactId>jmacaroons</artifactId>
+            <version>1024efc25df40c63bbfbaedc6d75556d829d84c7</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -126,6 +127,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -146,11 +148,13 @@
         <dependency>
             <groupId>io.hypersistence</groupId>
             <artifactId>hypersistence-utils-hibernate-63</artifactId>
+            <version>3.8.3</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
+            <version>6.6.1.Final</version>
         </dependency>
     </dependencies>
 
