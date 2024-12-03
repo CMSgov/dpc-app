@@ -13,7 +13,7 @@
     <name>DPC Java Job Queue</name>
 
     <properties>
-        <aws.java.sdk.version>2.26.7</aws.java.sdk.version>
+        <aws.java.sdk.version>2.29.20</aws.java.sdk.version>
         <exec.skip>true</exec.skip>
         <test.verbosity>false</test.verbosity>
         <disable.console>true</disable.console>

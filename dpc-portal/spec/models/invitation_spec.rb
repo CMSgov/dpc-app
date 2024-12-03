@@ -155,6 +155,10 @@ RSpec.describe Invitation, type: :model do
         invitation = create(:invitation, :cd, created_at: 2.days.ago)
         expect(invitation.expired?).to eq true
       end
+      it 'should not be expired if acccepted and more than 2 days old' do
+        invitation = create(:invitation, :cd, created_at: 49.hours.ago, status: :accepted)
+        expect(invitation.expired?).to eq false
+      end
     end
 
     describe :accept! do
