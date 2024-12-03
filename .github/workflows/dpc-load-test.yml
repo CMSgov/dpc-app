@@ -2,6 +2,11 @@ name: DPC Load Test
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - cr/dpc-4400
+    paths:
+      - .github/workflows/dpc-load-test.yml
 
 jobs:
   run-test:
