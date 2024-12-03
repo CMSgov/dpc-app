@@ -40,7 +40,7 @@ var getAuthData = func(dbUser string, dbPassword string) ([]string, error) {
 	}
 	defer db.Close()
 
-	rows, queryErr := db.Query(`SELECT ip_address FROM ip_addresses`)
+	rows, queryErr := db.Query(`SELECT DISTINCT ip_address FROM ip_addresses`)
 	if queryErr != nil {
 		log.Warningf("Error running query: %v", queryErr)
 		return nil, queryErr
