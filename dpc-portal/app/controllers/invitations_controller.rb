@@ -252,7 +252,7 @@ class InvitationsController < ApplicationController
       cd_accepted: ['Credential Delegate Invitation already accepted',
                     LoggingConstants::ActionType::CdAlreadyRegistered],
       ao_expired: ['Authorized Official Invitation expired', LoggingConstants::ActionType::AoInvitationExpired],
-      cd_expired: ['Credential Delegate Invitation expired', LoggingConstants::ActionType::CdInvitationExpired],
+      cd_expired: ['Credential Delegate Invitation expired', LoggingConstants::ActionType::CdInvitationExpired]
     }
     unacceptable_reason_map.default = ["Invitation unacceptable: #{reason}",
                                        LoggingConstants::ActionType::UnacceptableInvitation]
