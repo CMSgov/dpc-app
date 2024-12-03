@@ -63,7 +63,7 @@ var getAuthData = func(dbUser string, dbPassword string) ([]string, error) {
 			}
 		}
 
-		ipAddresses = append(ipAddresses, ip)
+		ipAddresses = append(ipAddresses, fmt.Sprintf("%s/32", ip))
 	}
 	log.WithField("num_rows_scanned", count).Info("Successfully retrieved ip address data")
 	return ipAddresses, nil
