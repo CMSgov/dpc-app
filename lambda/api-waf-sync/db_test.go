@@ -10,7 +10,7 @@ import (
 
 func TestGetAuthData(t *testing.T) {
 	ipAddressColumns := []string{"ip_address"}
-	ipAddressQuery := "SELECT ip_address FROM ip_addresses"
+	ipAddressQuery := "SELECT DISTINCT ip_address FROM ip_addresses"
 	oricreateConnection := createConnection
 	db, mock, err := sqlmock.New()
 	mockCreateConnection(db)
