@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("Patient resource handling")
-class PatientResourceTest extends AbstractAttributionIT {
+class PatientResourceIT extends AbstractAttributionIT {
 
-    private PatientResourceTest() {
+    private PatientResourceIT() {
         // Not used
     }
 
