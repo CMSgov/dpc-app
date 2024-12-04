@@ -27,5 +27,18 @@
         <p>There are no pending credential delegates.</p>
       <% end %>
     </div>
+    <div>
+      <h2>Expired invitations</h2>
+      <p>These invites expired. You can resend the invite to give them more time to accept.</p>
+      <% if @expired_invitations.present? %>
+        <%= render(Core::Table::TableComponent.new(id: 'expired-invitation-table', additional_classes: ['width-full'], sortable: false)) do %>
+          <%= render(Core::Table::HeaderComponent.new(caption: 'Expired Invitation Table',
+                                                      columns: ['Name', 'Email', 'Expired on'])) %>
+          <%= render(Core::Table::RowComponent.with_collection(@expired_invitations, keys: ['full_name', 'email', 'expired_at'], obj_name: 'expired invitation')) %>
+        <% end %>
+      <% else %>
+        <p>You have no expired invitations.</p>
+      <% end %>
+    </div>
   <% end %>
 </div>

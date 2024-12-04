@@ -34,11 +34,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <dropwizard.version>3.0.7</dropwizard.version>
+        <dropwizard.version>3.0.10</dropwizard.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version>
         <slf4j.version>2.0.12</slf4j.version>
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
-        <hapi.fhir.version>7.2.1</hapi.fhir.version>
+        <hapi.fhir.version>7.6.0</hapi.fhir.version>
         <pgsql.version>42.7.3</pgsql.version>
         <java.version>11</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>

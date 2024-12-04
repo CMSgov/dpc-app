@@ -188,7 +188,7 @@ RSpec.describe 'PublicKeys', type: :request do
         }
         expect(flash[:notice]).to eq('Public key successfully created.')
         expect(assigns(:organization)).to eq org
-        expect(response).to redirect_to(organization_path(org))
+        expect(response).to redirect_to(organization_path(org, credential_start: true))
       end
 
       it 'fails if missing params' do
@@ -257,7 +257,7 @@ RSpec.describe 'PublicKeys', type: :request do
                                        api_client:)
         delete "/organizations/#{org.id}/public_keys/#{key_guid}"
         expect(flash[:notice]).to eq('Public key successfully deleted.')
-        expect(response).to redirect_to(organization_path(org))
+        expect(response).to redirect_to(organization_path(org, credential_start: true))
       end
 
       it 'renders error if error' do
