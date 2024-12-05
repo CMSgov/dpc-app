@@ -14,7 +14,7 @@ describe DpcMiddleware::IgFix do
     it 'appends / if a trailing / is not present and redirects' do
       response = request.get(path)
       expect(response.status).to eq(301)
-      expect(response.header['Location']).to eq(host + path + '/')
+      expect(response.headers['Location']).to eq(host + path + '/')
       expect(response.body).to be_empty
     end
 
@@ -29,7 +29,7 @@ describe DpcMiddleware::IgFix do
     it 'appends / if a trailing / is not present and redirects' do
       response = request.get(path + '?a=b')
       expect(response.status).to eq(301)
-      expect(response.header['Location']).to eq(host + path + '/?a=b')
+      expect(response.headers['Location']).to eq(host + path + '/?a=b')
       expect(response.body).to be_empty
     end
 

@@ -25,9 +25,6 @@ Bundler.require(*Rails.groups)
 module DpcWebsite
   class Application < Rails::Application
 
-    #Dump and read as sql
-    config.active_record.schema_format = :sql
-
     # Check for STATIC_SITE_URL environment variable
     ENV['STATIC_SITE_URL'].present? ? ENV['STATIC_SITE_URL'] : ENV['STATIC_SITE_URL'] = 'https://dpc.cms.gov'
     config.autoload_paths << Rails.root.join('lib')
