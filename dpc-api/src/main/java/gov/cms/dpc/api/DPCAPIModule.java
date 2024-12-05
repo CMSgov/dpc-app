@@ -187,7 +187,9 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Singleton
     @Named("fhirContextAttributionSTU3")
     public FhirContext provideAttributionSTU3Context() {
-        return FhirContext.forDstu3();
+        FhirContext ctx = FhirContext.forDstu3();
+        ctx.getParserOptions().setOverrideResourceIdWithBundleEntryFullUrl(false);
+        return ctx;
     }
 
     @Provides

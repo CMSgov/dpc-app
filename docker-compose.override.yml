@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   db:
     ports:
@@ -12,9 +10,6 @@ services:
   aggregation:
     ports:
       - "5006:5005"
-  attribution:
-    ports:
-      - "5007:5005"
   consent:
     ports:
       - "5008:5005"

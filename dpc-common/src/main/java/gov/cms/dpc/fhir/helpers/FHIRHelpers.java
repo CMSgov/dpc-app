@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -15,9 +16,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 
 public class FHIRHelpers {
@@ -52,8 +52,6 @@ public class FHIRHelpers {
         // Read in the test file
         String macaroon;
         try (InputStream inputStream = FHIRHelpers.class.getClassLoader().getResourceAsStream("organization.tmpl.json")) {
-
-
             final Bundle orgBundle = (Bundle) parser.parseResource(inputStream);
 
             // Update the Organization resource and set a random NPI
@@ -62,17 +60,18 @@ public class FHIRHelpers {
             origOrg.getIdentifierFirstRep().setValue(organizationNPI);
             origOrg.setId(organizationID);
 
-            final Parameters parameters = new Parameters();
-            parameters.addParameter().setResource(orgBundle).setName("resource");
+            // To create a resource with a specific id, we need to update/create it.
+            client.update().resource(origOrg).withId(organizationID).execute();
 
-            client
-                    .operation()
-                    .onType(Organization.class)
-                    .named("submit")
-                    .withParameters(parameters)
-                    .returnResourceType(Organization.class)
-                    .encodedJson()
-                    .execute();
+            // Register the org's end point, which is the second resource in organization.tmpl.json
+            final Endpoint endpoint = (Endpoint) orgBundle.getEntry().get(1).getResource();
+            endpoint.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
+            MethodOutcome endPointOutcome = client.create().resource(endpoint).execute();
+            String endPointId = endPointOutcome.getResource().getIdElement().getIdPart();
+
+            // Update the org's end point reference now that we have the endpoint's id
+            origOrg.setEndpoint(List.of(new Reference(new IdType("Endpoint", endPointId))));
+            client.update().resource(origOrg).withId(organizationID).execute();
 
             try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
                 final URIBuilder uriBuilder = new URIBuilder(String.format("%s/generate-token", adminURL));
@@ -139,6 +138,45 @@ public class FHIRHelpers {
                 return EntityUtils.toString(execute.getEntity());
             }
         }
+    }
+
+    /**
+     * Given a bundle, it follows its next link and loads all of it's associated pages.  It then combines the
+     * results into a single bundle.
+     *
+     * @param client Client used to load the bundle's pages from.
+     * @param bundle A bundle that should be loaded.
+     * @return An aggregate bundle that contains the resources from all of the submitted bundle's pages.
+     */
+    // TODO: Add tests!
+    public static Bundle getPages(IGenericClient client, Bundle bundle) {
+        Bundle results = bundle;
+
+        while (bundle.getLink(Bundle.LINK_NEXT) != null) {
+            bundle = client.loadPage().next(bundle).execute();
+            results = combineBundles(client.getFhirContext(), results, bundle);
+        }
+        return results;
+    }
+
+    /**
+     * Combines bundle 2 and 2 and returns the results.
+     * @param ctx The FHIR context of the bundles
+     * @param bundle1
+     * @param bundle2
+     * @return A new bundle combining the entries from bundle1 and bundle2.
+     */
+    // TODO: Add tests
+    public static Bundle combineBundles(FhirContext ctx,  Bundle bundle1, Bundle bundle2) {
+        BundleBuilder bundleBuilder = new BundleBuilder(ctx);
+        bundle1.getEntry().stream().map(component -> component.getResource()).forEach(bundleBuilder::addCollectionEntry);
+        bundle2.getEntry().stream().map(component -> component.getResource()).forEach(bundleBuilder::addCollectionEntry);
+
+        Bundle results = (Bundle) bundleBuilder.getBundle();
+        results.setTotal(results.getEntry().size());
+        results.setType(Bundle.BundleType.SEARCHSET);
+
+        return (Bundle) bundleBuilder.getBundle();
     }
 
     public static class MacaroonsInterceptor implements IClientInterceptor {

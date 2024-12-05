@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.util.BundleBuilder;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.name.Named;
@@ -19,6 +20,7 @@ import gov.cms.dpc.fhir.annotations.Profiled;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
 
 import javax.inject.Inject;
@@ -26,9 +28,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static gov.cms.dpc.fhir.helpers.FHIRHelpers.getPages;
 
 @Api(value = "Organization", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Organization")
@@ -56,18 +59,25 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Override
     public Organization submitOrganization(@FHIRParameter(name = "resource") @NotNull Bundle organizationBundle) {
         // Validate bundle
-        validateOrganizationBundle(organizationBundle);
+        Pair<Organization, List<Endpoint>> validated = validateOrganizationBundle(organizationBundle);
+        Organization org = validated.getLeft();
 
-        final Parameters parameters = new Parameters();
-        parameters.addParameter().setName("resource").setResource(organizationBundle);
-        return this.client
-                .operation()
-                .onType(Organization.class)
-                .named("submit")
-                .withParameters(parameters)
-                .returnResourceType(Organization.class)
-                .encodedJson()
-                .execute();
+        // Get the org and create it.
+        MethodOutcome outcome = this.client.create().resource(org).execute();
+        Organization createdOrg = (Organization) outcome.getResource();
+
+        // Add managing org to end points and create
+        List<Endpoint> endpoints = validated.getRight();
+
+        BundleBuilder bundleBuilder = new BundleBuilder(client.getFhirContext());
+        endpoints.stream()
+            .map(ep ->
+                ep.setManagingOrganization(new Reference(new IdType("Organization", createdOrg.getIdPart())))
+            )
+            .forEach(bundleBuilder::addTransactionCreateEntry);
+        client.transaction().withBundle(bundleBuilder.getBundle()).execute();
+
+        return createdOrg;
     }
 
     @GET
@@ -132,12 +142,26 @@ public class OrganizationResource extends AbstractOrganizationResource {
             @ApiResponse(code = 401, message = "Cannot find organization to remove")})
     @Override
     public Response deleteOrganization(@NotNull @PathParam("organizationID") UUID organizationID) {
-        // Delete from the attribution service
-        this.client
-                .delete()
-                .resourceById(new IdType("Organization", organizationID.toString()))
-                .encodedJson()
-                .execute();
+        // The org and its endpoints must be deleted together since they reference each other
+        Map<String, List<String>> searchParams = new HashMap<>();
+        searchParams.put("organization", Collections.singletonList(organizationID.toString()));
+
+        Bundle endpointBundle = this.client
+            .search()
+            .forResource(Endpoint.class)
+            .encodedJson()
+            .returnBundle(Bundle.class)
+            .whereMap(searchParams)
+            .execute();
+        endpointBundle = getPages(client, endpointBundle);
+
+        // Build a transaction for all of our deletes
+        BundleBuilder bundleBuilder = new BundleBuilder(this.client.getFhirContext());
+        bundleBuilder.addTransactionDeleteEntry(new IdType("Organization", organizationID.toString()));
+        endpointBundle.getEntry().stream()
+            .map(entry -> (Endpoint) entry.getResource())
+            .forEach(bundleBuilder::addTransactionDeleteEntry);
+        this.client.transaction().withBundle(bundleBuilder.getBundle()).execute();
 
         // Delete tokens
         this.tokenDAO
@@ -183,29 +207,33 @@ public class OrganizationResource extends AbstractOrganizationResource {
         return resource;
     }
 
-    private void validateOrganizationBundle(Bundle organizationBundle) {
+    private Pair<Organization, List<Endpoint>> validateOrganizationBundle(Bundle organizationBundle) {
         // Ensure we have an organization
-        organizationBundle
+        Organization org = organizationBundle
                 .getEntry()
                 .stream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter(resource -> resource.getResourceType().getPath().equals(DPCResourceType.Organization.getPath()))
+                .map(resource -> (Organization) resource)
                 .findAny()
                 .orElseThrow(() -> new WebApplicationException("Bundle must include Organization", Response.Status.BAD_REQUEST));
 
 
         // Make sure we have some endpoints
-        final List<Resource> endpoints = organizationBundle
+        final List<Endpoint> endpoints = organizationBundle
                 .getEntry()
                 .stream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter(resource -> resource.getResourceType().getPath().equals(DPCResourceType.Endpoint.getPath()))
+                .map(resource -> (Endpoint) resource)
                 .collect(Collectors.toList());
 
         if (endpoints.isEmpty()) {
             throw new WebApplicationException("Organization must have at least 1 endpoint", Response.Status.BAD_REQUEST);
         }
+
+        return Pair.of(org, endpoints);
     }
 }
