@@ -9,7 +9,8 @@ on:
       - .github/workflows/dpc-load-test.yml
 
 jobs:
-  run-test:
+  run-load-test:
+    name: "Run DPC API Load Test"
     runs-on: ubuntu-latest
     container:
       image: grafana/k6:latest
