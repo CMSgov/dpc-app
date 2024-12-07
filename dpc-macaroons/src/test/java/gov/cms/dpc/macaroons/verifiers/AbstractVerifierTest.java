@@ -12,9 +12,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @SuppressWarnings("OptionalGetWithoutIsPresent")
+@DisplayName("Caveat matching")
 abstract class AbstractVerifierTest<V extends CaveatVerifier> {
 
     private final V verifier;
@@ -24,6 +26,7 @@ abstract class AbstractVerifierTest<V extends CaveatVerifier> {
     }
 
     @Test
+    @DisplayName("Verify non-matching macaroon caveat 🥳")
     final void testNonMatchingCaveat() {
         final MacaroonCaveat caveat = getNonMatchingCaveat();
         final Optional<String> response = this.verifier.check(caveat.getCondition());
@@ -32,6 +35,7 @@ abstract class AbstractVerifierTest<V extends CaveatVerifier> {
     }
 
     @Test
+    @DisplayName("Verify wrong macaroon caveat 🥳")
     final void testWrongCaveat() {
         final MacaroonCaveat caveat = getWrongCaveat();
         final Optional<String> response = this.verifier.check(caveat.getCondition());
@@ -39,6 +43,7 @@ abstract class AbstractVerifierTest<V extends CaveatVerifier> {
     }
 
     @Test
+    @DisplayName("Get correct macaroon caveat 🥳")
     final void testCorrectCaveat() {
         final MacaroonCaveat caveat = getCorrectCaveat();
         final Optional<String> response = this.verifier.check(caveat.getCondition());

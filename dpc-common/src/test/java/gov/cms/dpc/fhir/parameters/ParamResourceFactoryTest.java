@@ -4,6 +4,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import jakarta.ws.rs.BadRequestException;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
@@ -14,11 +15,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import javax.ws.rs.WebApplicationException;
-
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Parameter resource factory")
 class ParamResourceFactoryTest {
 
     private ParamResourceFactoryTest() {
@@ -32,7 +33,7 @@ class ParamResourceFactoryTest {
         Mockito.when(parser.parseResource(Parameters.class, mockRequest.getEntityStream())).thenThrow(DataFormatException.class);
 
         final ParamResourceFactory factory = new ParamResourceFactory(mockRequest, null, parser);
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw exception");
+        final BadRequestException exception = assertThrows(BadRequestException.class, factory::provide, "Should throw exception");
         assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
                 () -> assertEquals("Resource type must be `Parameters`", exception.getMessage(), "Should have wrong resource message"));
     }
@@ -98,7 +99,7 @@ class ParamResourceFactoryTest {
         Mockito.when(parser.parseResource(Parameters.class, mockRequest.getEntityStream())).thenReturn(parameters);
         final ParamResourceFactory factory = new ParamResourceFactory(mockRequest, parameter, parser);
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
+        final BadRequestException exception = assertThrows(BadRequestException.class, factory::provide, "Should throw an exception");
 
         assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
                 () -> assertEquals("Provided resource must be: `Practitioner`, not `Patient`", exception.getMessage(), "Should have useful message"));
@@ -121,7 +122,7 @@ class ParamResourceFactoryTest {
         Mockito.when(parser.parseResource(Parameters.class, mockRequest.getEntityStream())).thenReturn(parameters);
         final ParamResourceFactory factory = new ParamResourceFactory(mockRequest, parameter, parser);
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, factory::provide, "Should throw an exception");
+        final BadRequestException exception = assertThrows(BadRequestException.class, factory::provide, "Should throw an exception");
         assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should be a bad request"),
                 () -> assertEquals("Cannot find matching parameter named `missing`", exception.getMessage(), "Should output which parameter is missing"));
     }

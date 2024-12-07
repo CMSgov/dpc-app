@@ -1,9 +1,9 @@
 package gov.cms.dpc.macaroons.store.hibernate.entities;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.validation.constraints.NotEmpty;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 

@@ -1,13 +1,13 @@
 package gov.cms.dpc.fhir.dropwizard.filters;
 
 import gov.cms.dpc.fhir.FHIRMediaTypes;
-import org.eclipse.jetty.server.Response;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotSupportedException;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
@@ -28,11 +28,11 @@ public class FHIRRequestFilter implements ContainerRequestFilter {
         final boolean isExportRequest = requestContext.getUriInfo().getRequestUri().toString().contains("$export");
 
         if (isExportRequest && acceptHeaders == null) {
-            throw new WebApplicationException("`Accept:` header is required.", Response.SC_BAD_REQUEST);
+            throw new BadRequestException("`Accept:` header is required.");
         }
 
         if (!shortCircuitBooleanCheck(acceptHeaders, FHIRMediaTypes::isFHIRContent) || (isExportRequest && acceptHeaders.contains(MediaType.WILDCARD_TYPE))) {
-            throw new WebApplicationException("`Accept:` header must specify valid FHIR content type", Response.SC_UNSUPPORTED_MEDIA_TYPE);
+            throw new NotSupportedException("`Accept:` header must specify valid FHIR content type");
         }
     }
 
@@ -40,7 +40,7 @@ public class FHIRRequestFilter implements ContainerRequestFilter {
         final List<String> typeHeaders = requestContext.getHeaders().get(HttpHeaders.CONTENT_TYPE);
 
         if (typeHeaders != null && !shortCircuitBooleanCheck(typeHeaders, (typeHeader) -> FHIRMediaTypes.isFHIRContent(MediaType.valueOf(typeHeader)))) {
-            throw new WebApplicationException("`Content-Type:` header must specify valid FHIR content type", Response.SC_UNSUPPORTED_MEDIA_TYPE);
+            throw new NotSupportedException("`Content-Type:` header must specify valid FHIR content type");
         }
     }
 

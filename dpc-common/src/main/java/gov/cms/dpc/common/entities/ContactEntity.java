@@ -3,8 +3,8 @@ package gov.cms.dpc.common.entities;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import javax.persistence.*;
-import javax.validation.Valid;
+import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;

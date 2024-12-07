@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 import static gov.cms.dpc.consent.dao.tables.Consent.CONSENT;
 
 public class SeedCommand extends EnvironmentCommand<DPCConsentConfiguration> {
-    private static Logger logger = LoggerFactory.getLogger(SeedCommand.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SeedCommand.class);
     private static final String CSV = "test_consent.csv";
 
     private final Settings settings;
@@ -52,11 +52,11 @@ public class SeedCommand extends EnvironmentCommand<DPCConsentConfiguration> {
         final ManagedDataSource dataSource = dataSourceFactory.build(environment.metrics(), "attribution-seeder");
 
         // Read in the seeds file and write things
-        logger.info("Seeding consent entries.");
+        LOGGER.info("Seeding consent entries.");
 
-        try (final Connection connection = dataSource.getConnection();
-             DSLContext context = DSL.using(connection, this.settings)) {
-
+        try (final Connection connection = dataSource.getConnection()) {            
+            final DSLContext context = DSL.using(connection, this.settings);
+             
             // Like other seed commands, we truncate our one table first
             // since we only have the one table, this seems reasonable. See also DBUtils.truncateAllTables()
             context.truncateTable("consent").execute();
@@ -64,7 +64,7 @@ public class SeedCommand extends EnvironmentCommand<DPCConsentConfiguration> {
             readLines(Path.of(resource.getPath()), context);
         }
 
-        logger.info("Consent entries seeded.");
+        LOGGER.info("Consent entries seeded.");
     }
 
     private void readLines(Path filePath, DSLContext context) throws IOException {

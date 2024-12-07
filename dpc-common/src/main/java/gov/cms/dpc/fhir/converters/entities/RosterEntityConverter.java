@@ -25,9 +25,13 @@ public class RosterEntityConverter implements FHIRConverter<Group, RosterEntity>
     @Override
     public Group toFHIR(FHIREntityConverter converter, RosterEntity entity) {
         final Group group = new Group();
+
         group.setType(Group.GroupType.PERSON);
         group.setActual(true);
         group.setId(entity.getId().toString());
+        if(entity.getManagingOrganization() != null
+                && entity.getManagingOrganization().getOrganizationID() != null)
+            group.getMeta().addTag(DPCIdentifierSystem.DPC.getSystem(), entity.getManagingOrganization().getOrganizationID().getValue(), "Organization ID");
 
         final CodeableConcept attributedConcept = new CodeableConcept();
         attributedConcept.addCoding().setCode("attributed-to");

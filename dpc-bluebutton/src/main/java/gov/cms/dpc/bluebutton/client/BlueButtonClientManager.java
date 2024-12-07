@@ -2,8 +2,8 @@ package gov.cms.dpc.bluebutton.client;
 
 import io.dropwizard.lifecycle.Managed;
 
-import javax.inject.Inject;
-import javax.ws.rs.ext.Provider;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ext.Provider;
 
 @Provider
 public class BlueButtonClientManager implements Managed {

@@ -1,5 +1,6 @@
 package gov.cms.dpc.common.hibernate.attribution;
 
+import com.google.inject.Inject;
 import io.dropwizard.lifecycle.Managed;
 import org.hibernate.SessionFactory;
 
@@ -11,6 +12,7 @@ public class DPCManagedSessionFactory implements Managed {
 
     private final SessionFactory sessionFactory;
 
+    @Inject
     public DPCManagedSessionFactory(SessionFactory factory) {
         this.sessionFactory = factory;
     }

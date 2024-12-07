@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import org.hl7.fhir.dstu3.model.Address;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Address Entity tests")
 public class AddressEntityTest {
 	private String addressCity = "Galveston";
 	private String addressCountry = "US";
@@ -15,6 +17,7 @@ public class AddressEntityTest {
 	private String addressLine2 = "N/A";
 
 	@Test
+        @DisplayName("Address getters and setters 🥳")
 	public void testGettersAndSetters() {
 		// Create an object, and set / get the objects in the Entity.
 		AddressEntity address = new AddressEntity();
@@ -39,6 +42,7 @@ public class AddressEntityTest {
 	}
 
 	@Test
+        @DisplayName("Convert address to FHIR 🥳")
 	public void testToFHIR() {
 		AddressEntity address = new AddressEntity();
 

@@ -9,13 +9,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Profile validation")
 class ProfileValidatorTests {
 
     private final FhirContext ctx = FhirContext.forDstu3();
 
     @Test
+    @DisplayName("Load DPC profile 🥳")
     void testBasicLoading() {
         final DPCProfileSupport support = new DPCProfileSupport(ctx);
 

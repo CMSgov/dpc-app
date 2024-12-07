@@ -9,10 +9,13 @@ import java.sql.Date;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("FHIR-based Patient Factory tests")
 class FHIRPatientBuilderUnitTest {
 
     @Test
+    @DisplayName("Build patient with multiple attributes 🥳")
     public void testBuildWithMultiple() {
         String gender =  "other";
         UUID orgId =  UUID.randomUUID();
@@ -26,6 +29,7 @@ class FHIRPatientBuilderUnitTest {
     }
 
     @Test
+    @DisplayName("Build patient with ID 🥳")
     public void withId() {
         UUID id = UUID.randomUUID();
         Patient patient = FHIRPatientBuilder.newBuild().withId(id).build();
@@ -37,6 +41,7 @@ class FHIRPatientBuilderUnitTest {
     }
 
     @Test
+    @DisplayName("Build patient with MBI 🥳")
     public void withMbi() {
         String mbi =  "4S41C00AA00";
         Patient patient = FHIRPatientBuilder.newBuild().withMbi(mbi).build();
@@ -46,6 +51,7 @@ class FHIRPatientBuilderUnitTest {
     }
 
     @Test
+    @DisplayName("Build patient with full name 🥳")
     public void testWithName() {
         String first =  "Salvadoritito";
         String last = "Burger";
@@ -56,6 +62,7 @@ class FHIRPatientBuilderUnitTest {
     }
 
     @Test
+    @DisplayName("Build patient with DOB 🥳")
     public void testWithBirthDate() {
         String dob =  "1990-10-10";
         Patient patient = FHIRPatientBuilder.newBuild().withBirthDate(dob).build();
@@ -67,6 +74,7 @@ class FHIRPatientBuilderUnitTest {
 
 
     @Test
+    @DisplayName("Build patient with gender 🥳")
     public void testWithGender() {
         String gender =  "other";
         Patient patient = FHIRPatientBuilder.newBuild().withGender(gender).build();
@@ -77,6 +85,7 @@ class FHIRPatientBuilderUnitTest {
     }
 
     @Test
+    @DisplayName("Build patient with managed-by attribute 🥳")
     public void testManagedBy() {
         UUID orgId =  UUID.randomUUID();
         Patient patient = FHIRPatientBuilder.newBuild().managedBy(orgId).build();

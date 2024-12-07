@@ -3,9 +3,9 @@ package gov.cms.dpc.bluebutton;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.MetricRegistry;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
-import com.google.inject.name.Named;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
@@ -15,6 +15,8 @@ import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
 import gov.cms.dpc.bluebutton.health.BlueButtonHealthCheck;
 import gov.cms.dpc.fhir.configuration.TimeoutConfiguration;
 import io.dropwizard.core.Configuration;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
@@ -22,7 +24,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
@@ -71,6 +72,7 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
     }
 
     @Provides
+    @Singleton
     public BlueButtonClient provideBlueButtonClient(@Named("bbclient") IGenericClient fhirRestClient, MetricRegistry registry) {
         return bbClientConfiguration.isUseBfdMock() ? new MockBlueButtonClient(fhirRestClient.getFhirContext()) : new BlueButtonClientImpl(fhirRestClient, this.bbClientConfiguration, registry);
     }

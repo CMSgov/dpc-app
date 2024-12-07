@@ -2,7 +2,7 @@ package gov.cms.dpc.common.consent.entities;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -12,6 +12,8 @@ import java.util.UUID;
 
 @Entity(name = "opt_out_file")
 public class OptOutFileEntity implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     public static final String IMPORT_STATUS_IN_PROGRESS = "In-Progress";
     public static final String IMPORT_STATUS_COMPLETED = "Completed";
     public static final String IMPORT_STATUS_FAILED = "Failed";

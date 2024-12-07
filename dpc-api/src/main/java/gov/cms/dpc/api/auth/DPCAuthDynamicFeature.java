@@ -9,11 +9,11 @@ import org.glassfish.jersey.server.model.AnnotatedMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.ws.rs.container.DynamicFeature;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.ext.Provider;
+import com.google.inject.Inject;
+import jakarta.ws.rs.container.DynamicFeature;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.FeatureContext;
+import jakarta.ws.rs.ext.Provider;
 import java.lang.annotation.Annotation;
 
 /**
@@ -35,7 +35,6 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
     @Override
     public void configure(ResourceInfo resourceInfo, FeatureContext context) {
 
-
         final AnnotatedMethod am = new AnnotatedMethod(resourceInfo.getResourceMethod());
 
         // Check for Admin annotated params
@@ -55,7 +54,7 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
 
         // Check for @Authorized annotated param
         if (isMethodClassAnnotated(Authorizer.class, resourceInfo, am)) {
-            logger.trace("Registering Auth param on method {}", am.toString());
+            logger.info("Registering Auth param on method {}", am.toString());
             context.register(this.factory.createStandardAuthorizer());
             return;
         }

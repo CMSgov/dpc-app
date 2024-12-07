@@ -10,11 +10,14 @@ import org.whispersystems.curve25519.Curve25519;
 import java.security.SecureRandom;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Caveat condition parsing")
 class ConditionParsingTests {
 
     @Test
+    @DisplayName("Parse simple caveat 🥳")
     void testSimpleCaveatParsing() {
         final MacaroonCondition macaroonCondition = MacaroonCondition.parseFromString("test = valid");
         assertAll(() -> assertEquals("test", macaroonCondition.getKey(), "Key should match"),
@@ -23,6 +26,7 @@ class ConditionParsingTests {
     }
 
     @Test
+    @DisplayName("Parse poorly-formatted caveat 🤮")
     void testPoorlyFormattedCaveatParsing() {
         // Test spaces
         assertAll(() -> assertThrows(IllegalArgumentException.class, () -> MacaroonCondition.parseFromString("test =valid"), "Caveats need spaces between entities"),
@@ -31,17 +35,20 @@ class ConditionParsingTests {
     }
 
     @Test
+    @DisplayName("Parse invalid operation value 🤮")
     void testInvalidOperationValueParsing() {
         assertAll(() -> assertThrows(IllegalArgumentException.class, () -> MacaroonCondition.parseFromString("test ~ valid"), "Should throw for invalid operation type"));
     }
 
     @Test
+    @DisplayName("Parse malformed caveat 🤮")
     void testMalformedCaveatParsing() {
         assertThrows(IllegalArgumentException.class, () -> MacaroonCondition.parseFromString("test ="), "Should not parse malformed caveat");
         assertThrows(IllegalArgumentException.class, () -> MacaroonCondition.parseFromString("test id = hello"), "Should not parse caveat with strings in key");
     }
 
     @Test
+    @DisplayName("Secret encoding round trip 🥳")
     void testSecretEncodingRoundTrip() {
         // Create a test key pairs for first party and third party
         final Curve25519 instance = Curve25519.getInstance(Curve25519.BEST);
@@ -64,6 +71,7 @@ class ConditionParsingTests {
     }
 
     @Test
+    @DisplayName("Secret encoding with custom keys 🥳")
     void testSecretEncodingCustomKeys() {
         final BakeryKeyPair firstParty = BakeryKeyPair.generate();
         final BakeryKeyPair thirdParty = BakeryKeyPair.generate();

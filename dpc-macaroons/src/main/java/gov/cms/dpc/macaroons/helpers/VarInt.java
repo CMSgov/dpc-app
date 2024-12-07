@@ -76,10 +76,11 @@ public final class VarInt {
     }
 
     /**
+     * Encodes a value using the variable-length encoding 
      * @param value -   {@link Integer} integer to write
      * @param out   - {@link DataOutput} to write varint
      * @throws IOException - throws if cannot write
-     * @see #writeSignedVarLong(long, DataOutput)
+     * @see VarInt#writeSignedVarLong(long, DataOutput)
      */
     public static void writeSignedVarInt(int value, DataOutput out) throws IOException {
         // Great trick from http://code.google.com/apis/protocolbuffers/docs/encoding.html#types
@@ -87,10 +88,11 @@ public final class VarInt {
     }
 
     /**
+     * Encodes a value using the variable-length encoding 
      * @param value -   {@link Integer} integer to write
      * @param out   - {@link DataOutput} to write varint
      * @throws IOException - throws if cannot write
-     * @see #writeUnsignedVarLong(long, DataOutput)
+     * @see VarInt#writeUnsignedVarLong(long, DataOutput)
      */
     public static void writeUnsignedVarInt(int value, DataOutput out) throws IOException {
         while ((value & 0xFFFFFF80) != 0L) {
@@ -106,9 +108,10 @@ public final class VarInt {
     }
 
     /**
+     * Encodes a value using the variable-length encoding 
      * @param value - {@link Integer} value to write
      * @return {@link Byte} array of varint
-     * @see #writeUnsignedVarLong(long, DataOutput)
+     * @see VarInt#writeUnsignedVarLong(long, DataOutput)
      * <p>
      * This one does not use streams and is much faster.
      * Makes a single object each time, and that object is a primitive array.
@@ -129,6 +132,7 @@ public final class VarInt {
     }
 
     /**
+     * Decodes a value using the variable-length encoding 
      * @param in to read bytes from
      * @return decode value
      * @throws IOException              if {@link DataInput} throws {@link IOException}
@@ -147,12 +151,13 @@ public final class VarInt {
     }
 
     /**
+     * Decodes a value using the variable-length encoding 
      * @param in to read bytes from
      * @return decode value
      * @throws IOException              if {@link DataInput} throws {@link IOException}
      * @throws IllegalArgumentException if variable-length value does not terminate
      *                                  after 9 bytes have been read
-     * @see #writeUnsignedVarLong(long, DataOutput)
+     * @see VarInt#writeUnsignedVarLong(long, DataOutput)
      */
     public static long readUnsignedVarLong(DataInput in) throws IOException {
         long value = 0L;
@@ -169,12 +174,13 @@ public final class VarInt {
     }
 
     /**
+     * Decodes a value using the variable-length encoding 
      * @param in - {@link DataInput} to read from
      * @return - {@link Integer}
      * @throws IllegalArgumentException if variable-length value does not terminate
      *                                  after 5 bytes have been read
      * @throws IOException              if {@link DataInput} throws {@link IOException}
-     * @see #readSignedVarLong(DataInput)
+     * @see VarInt#readSignedVarLong(DataInput)
      */
     public static int readSignedVarInt(DataInput in) throws IOException {
         int raw = readUnsignedVarInt(in);
@@ -187,12 +193,13 @@ public final class VarInt {
     }
 
     /**
+     * Decodes a value using the variable-length encoding 
      * @param in - {@link DataInput} to read from
      * @return - {@link Integer}
      * @throws IllegalArgumentException if variable-length value does not terminate
      *                                  after 5 bytes have been read
      * @throws IOException              if {@link DataInput} throws {@link IOException}
-     * @see #readUnsignedVarLong(DataInput)
+     * @see VarInt#readUnsignedVarLong(DataInput)
      */
     public static int readUnsignedVarInt(DataInput in) throws IOException {
         int value = 0;

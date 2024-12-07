@@ -5,6 +5,7 @@ import com.codahale.metrics.Slf4jReporter;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
@@ -18,15 +19,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.support.ReflectionSupport;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 import software.amazon.awssdk.regions.Region;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.Mockito.*;
 
+@DisplayName("Queue configuration and instrumentation ")
 class JobQueueModuleUnitTest {
 	JobQueueModule queueModule = spy(JobQueueModule.class);
 	DPCAwsQueueConfiguration awsConfig = mock(DPCAwsQueueConfiguration.class);
@@ -37,7 +39,7 @@ class JobQueueModuleUnitTest {
 	@BeforeEach
 	void setup() throws NoSuchMethodException {
 		ReflectionSupport.invokeMethod(
-			DropwizardAwareModule.class.getDeclaredMethod("configuration"),
+                        DropwizardAwareModule.class.getDeclaredMethod("configuration"),
 			doReturn(mockConfig).when(queueModule)
 		);
 
@@ -52,12 +54,14 @@ class JobQueueModuleUnitTest {
 	}
 
 	@Test
+        @DisplayName("Get batch size from queue 🥳")
 	void test_provideBatchSize() {
 		JobQueueModule queueModule = new JobQueueModule();
 		assertEquals(100, queueModule.provideBatchSize());
 	}
 
 	@Test
+        @DisplayName("Get aggregator ID from queue 🥳")
 	void test_provideAggregatorId() {
 		UUID testUUID = UUID.randomUUID();
 
@@ -70,28 +74,33 @@ class JobQueueModuleUnitTest {
 	}
 
 	@Test
+        @DisplayName("Get AWS queue configuration 🥳")
 	void test_provideDpcAwsQueueConfiguration() throws NoSuchMethodException {
 		assertSame(awsConfig, queueModule.provideDpcAwsQueueConfiguration());
 	}
 
 	@Test
+        @DisplayName("Verify queue age reporter 🥳")
 	void test_provideAgeReporter() throws NoSuchMethodException {
 		assertInstanceOf(Slf4jReporter.class, queueModule.provideAgeScheduledReporter(metricRegistry));
 	}
 
 	@Test
+        @DisplayName("Verify queue size reporter emitting to AWS 🥳")
 	void test_provideSizeReporter_emitting_to_aws() throws NoSuchMethodException {
 		when(awsConfig.getEmitAwsMetrics()).thenReturn(true);
 		assertInstanceOf(CloudWatchReporter.class, queueModule.provideSizeScheduledReporter(metricRegistry));
 	}
 
 	@Test
+        @DisplayName("Emit queue age reports to AWS when local reporter used 🤮")
 	void test_provideSizeReporter_not_emitting_to_aws() throws NoSuchMethodException {
 		when(awsConfig.getEmitAwsMetrics()).thenReturn(false);
 		assertInstanceOf(Slf4jReporter.class, queueModule.provideSizeScheduledReporter(metricRegistry));
 	}
 
 	@Test
+        @DisplayName("Configure AWS queue 🥳")
 	void test_Can_Configure_AWS_Queue() {
 		when(awsConfig.getEmitAwsMetrics()).thenReturn(true);
 		final Injector injector = Guice.createInjector(queueModule, new MockModule<MockConfig>());
@@ -99,6 +108,7 @@ class JobQueueModuleUnitTest {
 	}
 
 	@Test
+        @DisplayName("Configure distributed queue 🥳")
 	void test_Can_Configure_Distributed_Queue() {
 		when(mockConfig.getDpcAwsQueueConfiguration()).thenReturn(null);
 		final Injector injector = Guice.createInjector(queueModule, new MockModule<MockConfig>());

@@ -5,10 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
 import org.hl7.fhir.dstu3.model.HumanName;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Name Entity tests")
 public class NameEntityTest {
 
 	@Test
+        @DisplayName("Test name getters and setters 🥳")
 	public void testGettersAndSetters() {
 		NameEntity name = new NameEntity();
 		HumanName.NameUse use = HumanName.NameUse.OFFICIAL;
@@ -31,6 +34,7 @@ public class NameEntityTest {
 	}
 
 	@Test
+        @DisplayName("Convert name to FHIR 🥳")
 	public void testToFHIR() {
 		NameEntity name = new NameEntity();
 		HumanName.NameUse use = HumanName.NameUse.OFFICIAL;
