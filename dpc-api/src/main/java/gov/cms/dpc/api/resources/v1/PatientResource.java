@@ -52,7 +52,8 @@ public class PatientResource extends AbstractPatientResource {
     // TODO: This should be moved into a helper class, in DPC-432.
     // This checks to see if the Identifier is fully specified or not.
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9]+://.*$");
-
+    private static final ValidationOptions VALIDATION_OPTIONS = new ValidationOptions().addProfile(PatientProfile.PROFILE_URI);
+    
     private final IGenericClient client;
     private final FhirValidator validator;
     private final DataService dataService;
@@ -139,7 +140,9 @@ public class PatientResource extends AbstractPatientResource {
     public Bundle bulkSubmitPatients(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
                                      @ApiParam Parameters params) {
         final Bundle patientBundle = (Bundle) params.getParameterFirstRep().getResource();
-        final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator);
+        
+        Reference managingOrgReference = new Reference(new IdType("Organization", organization.getOrganization().getId()));
+        final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, managingOrgReference, validator);
 
         return bulkResourceClient(Patient.class, client, entryHandler, patientBundle);
     }
@@ -288,10 +291,10 @@ public class PatientResource extends AbstractPatientResource {
         return ValidationHelpers.validateAgainstProfile(this.validator, parameters, PatientProfile.PROFILE_URI);
     }
 
-    private static void validateAndAddOrg(Patient patient, String organizationID, FhirValidator validator) {
+    private static void validateAndAddOrg(Patient patient, Reference orgReference, FhirValidator validator) {
         // Set the Managing Org, since we need it for the validation
-        patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
-        final ValidationResult result = validator.validateWithResult(patient, new ValidationOptions().addProfile(PatientProfile.PROFILE_URI));
+        patient.setManagingOrganization(orgReference);
+        final ValidationResult result = validator.validateWithResult(patient, VALIDATION_OPTIONS);
         if (!result.isSuccessful()) {
             // Temporary until DPC-536 is merged in
             if (result.getMessages().get(0).getSeverity() != ResultSeverityEnum.INFORMATION) {

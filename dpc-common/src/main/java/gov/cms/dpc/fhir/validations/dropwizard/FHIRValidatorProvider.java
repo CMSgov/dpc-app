@@ -67,6 +67,7 @@ public class FHIRValidatorProvider implements Provider<FhirValidator> {
         final FhirValidator fhirValidator = ctx.newValidator();
         fhirValidator.setValidateAgainstStandardSchema(validationConfiguration.isSchemaValidation());
         fhirValidator.registerValidatorModule(instanceValidator);
+        fhirValidator.setConcurrentBundleValidation(true);
 
         instanceValidator.setValidationSupport(this.supportChain);
         return fhirValidator;
