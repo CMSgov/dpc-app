@@ -10,7 +10,7 @@ import (
 
 func TestGetAuthData(t *testing.T) {
 	ipAddressColumns := []string{"ip_address"}
-	ipAddressQuery := "SELECT ip_address FROM ip_addresses"
+	ipAddressQuery := "SELECT DISTINCT ip_address FROM ip_addresses"
 	oricreateConnection := createConnection
 	db, mock, err := sqlmock.New()
 	mockCreateConnection(db)
@@ -20,7 +20,7 @@ func TestGetAuthData(t *testing.T) {
 	defer db.Close()
 
 	expectedIpAddresses := []string{"127.0.0.1/32", "127.0.0.2/32"}
-	ipAddressResult := sqlmock.NewRows(ipAddressColumns).AddRow("127.0.0.1/32").AddRow("127.0.0.2/32")
+	ipAddressResult := sqlmock.NewRows(ipAddressColumns).AddRow("127.0.0.1").AddRow("127.0.0.2")
 
 	mock.ExpectQuery(ipAddressQuery).WillReturnRows(ipAddressResult)
 	ipAddresses, err := getAuthData("user", "pass")
