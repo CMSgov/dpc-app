@@ -154,6 +154,10 @@ start-portals-no-auth:
 start-system-smoke: ## Start the system for local smoke tests
 start-system-smoke: start-api start-portals-no-auth
 
+start-load-tests: ## Run DPC performance tests locally in a Docker image provided by Grafana/K6
+start-load-tests:
+	@docker run --rm -i grafana/k6 run - <./dpc-load-testing/script.js
+
 
 # Debug commands
 # These targets compile the DPC software with debugging info 

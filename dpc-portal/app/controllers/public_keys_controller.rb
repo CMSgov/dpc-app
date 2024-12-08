@@ -25,7 +25,7 @@ class PublicKeysController < ApplicationController
     if new_public_key[:response]
       log_credential_action(:public_key, new_public_key.dig(:message, 'id'), :add)
       flash[:notice] = 'Public key successfully created.'
-      redirect_to organization_path(@organization)
+      redirect_to organization_path(@organization, credential_start: true)
     else
       @errors = new_public_key[:errors]
       render_error @errors[:root] || 'Invalid encoding'
@@ -38,7 +38,7 @@ class PublicKeysController < ApplicationController
     if manager.delete_public_key(params)
       log_credential_action(:public_key, params[:id], :remove)
       flash[:notice] = 'Public key successfully deleted.'
-      redirect_to organization_path(@organization)
+      redirect_to organization_path(@organization, credential_start: true)
     else
       flash[:alert] = 'Public key could not be deleted.'
     end

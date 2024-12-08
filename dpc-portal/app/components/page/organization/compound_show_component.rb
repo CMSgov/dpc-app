@@ -4,15 +4,15 @@ module Page
   module Organization
     # Shows tabbed credential delegates and credentials
     class CompoundShowComponent < ViewComponent::Base
-      def initialize(organization, cd_invitations, expired_cd_invitations, credential_delegates, show_cds)
+      def initialize(organization, delegate_information, credential_start)
         super
-        @links = [['User Access', '#credential_delegates', true],
-                  ['Credentials', '#credentials', false]]
+        @links = [['User Access', '#credential_delegates', !credential_start],
+                  ['Credentials', '#credentials', credential_start]]
         @organization = organization
-        @active_credential_delegates = credential_delegates
-        @pending_credential_delegates = cd_invitations
-        @expired_cd_invitations = expired_cd_invitations
-        @show_cds = show_cds
+        @active_credential_delegates = delegate_information[:active]
+        @pending_credential_delegates = delegate_information[:pending]
+        @expired_cd_invitations = delegate_information[:expired]
+        @show_cds = !delegate_information.empty?
       end
     end
   end

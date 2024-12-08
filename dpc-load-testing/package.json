@@ -1,0 +1,11 @@
+{
+  "name": "dpc-load-testing",
+  "version": "1.0.0",
+  "description": "Load tests for the DPC API, using K6 as an engine",
+  "main": "script.js",
+  "repository": "https://github.com/cmsgov/dpc-app",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/k6": "^0.54.2"
+  }
+}
