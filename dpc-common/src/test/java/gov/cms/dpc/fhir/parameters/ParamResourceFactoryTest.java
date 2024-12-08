@@ -17,8 +17,10 @@ import org.mockito.Mockito;
 import javax.ws.rs.WebApplicationException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Parameter resource factory")
 class ParamResourceFactoryTest {
 
     private ParamResourceFactoryTest() {
@@ -26,6 +28,7 @@ class ParamResourceFactoryTest {
     }
 
     @Test
+    @DisplayName("Request non-parameter 🤮")
     void testNonParameter() {
         final IParser parser = Mockito.mock(IParser.class);
         final ContainerRequest mockRequest = Mockito.mock(ContainerRequest.class);
@@ -38,6 +41,7 @@ class ParamResourceFactoryTest {
     }
 
     @Test
+    @DisplayName("Request patient 🥳")
     void testUnnamedResource() {
         final Parameters parameters = new Parameters();
         final Patient dummyPatient = new Patient();
@@ -58,6 +62,7 @@ class ParamResourceFactoryTest {
     }
 
     @Test
+    @DisplayName("Get patient by name 🥳")
     void testNamedResource() {
         final Parameters parameters = new Parameters();
         final Patient unnamedPatient = new Patient();
@@ -82,6 +87,7 @@ class ParamResourceFactoryTest {
     }
 
     @Test
+    @DisplayName("Request patient iwth incorrect parameter type 🤮")
     void testMismatchedParameterType() {
         final Parameters parameters = new Parameters();
         final Patient dummyPatient = new Patient();
@@ -105,6 +111,7 @@ class ParamResourceFactoryTest {
     }
 
     @Test
+    @DisplayName("Request patient with unrecognized parameter value ?🤮")
     void testMissingResource() {
         final Parameters parameters = new Parameters();
         final Patient dummyPatient = new Patient();

@@ -32,9 +32,11 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Attestation resource operations")
 public class AttestationUnitTests {
 
     private static final ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
@@ -65,6 +67,7 @@ public class AttestationUnitTests {
     }
 
     @Test
+    @DisplayName("Create attestation logging for organization 🥳")
     void testCreateLogging() {
 
 
@@ -96,6 +99,7 @@ public class AttestationUnitTests {
     }
 
     @Test
+    @DisplayName("Update attestation logging for organization 🥳")
     void testUpdateLogging() {
         final Organization org = new Organization();
         org.setId(new IdType("Organization", APITestHelpers.ORGANIZATION_ID));
@@ -126,6 +130,7 @@ public class AttestationUnitTests {
     }
 
     @Test
+    @DisplayName("Update attestation logging for multiple patients 🥳")
     void testUpdateLoggingMultiplePatients() {
         final Organization org = new Organization();
         org.setId(new IdType("Organization", APITestHelpers.ORGANIZATION_ID));
@@ -158,6 +163,7 @@ public class AttestationUnitTests {
     }
 
     @Test
+    @DisplayName("Add attestation log for roster 🥳")
     void testRosterAddLogging() {
         final Organization org = new Organization();
         org.setId(new IdType("Organization", APITestHelpers.ORGANIZATION_ID));

@@ -39,8 +39,11 @@ import java.util.MissingResourceException;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Blue Button client")
+
 class BlueButtonClientTest {
     // A random example patient (Jane Doe)
     private static final String TEST_PATIENT_ID = "-20140000008325";
@@ -149,6 +152,8 @@ class BlueButtonClientTest {
     }
 
     @Test
+@DisplayName("Get FHIR from patient ID with last updated date 🥳")
+
     void shouldGetFHIRFromPatientID() {
         Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
         // Verify that the bundle has one
@@ -167,6 +172,8 @@ class BlueButtonClientTest {
     }
 
     @Test
+@DisplayName("Get FHIR from patient ID without last updated date 🥳")
+
     void shouldGetFHIRFromPatientIDWithoutLastUpdated() {
         Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, null, null);
         // Verify that the bundle has one
@@ -177,6 +184,7 @@ class BlueButtonClientTest {
     }
 
     @Test
+    @DisplayName("Get FHIR from patient ID with last updated date 🥳")
     void shouldGetFHIRFromPatientIDWithLastUpdated() {
         Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
         // Verify that the bundle has one
@@ -187,6 +195,8 @@ class BlueButtonClientTest {
     }
 
     @Test
+@DisplayName("Get EOB from patient ID with last updated date 🥳")
+
     void shouldGetEOBFromPatientID() {
         Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
@@ -195,6 +205,8 @@ class BlueButtonClientTest {
     }
 
     @Test
+@DisplayName("Get single EOB from patient ID with no next link 🥳")
+
     void shouldNotHaveNextBundle() {
         Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID, TEST_LAST_UPDATED, null);
 
@@ -204,6 +216,8 @@ class BlueButtonClientTest {
     }
 
     @Test
+@DisplayName("Get next link for paitent ID with multiple EOBs 🥳")
+
     void shouldHaveNextBundle() {
         Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
@@ -215,6 +229,8 @@ class BlueButtonClientTest {
     }
 
     @Test
+@DisplayName("EOB bundle ocntains only EOBs 🥳")
+
     void shouldReturnBundleContainingOnlyEOBs() {
         Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
@@ -226,6 +242,8 @@ class BlueButtonClientTest {
     }
 
     @Test
+@DisplayName("Get patient coverage 🥳")
+
     void shouldGetCoverageFromPatientID() {
         final Bundle response = bbc.requestCoverageFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
@@ -234,6 +252,8 @@ class BlueButtonClientTest {
     }
 
     @Test
+@DisplayName("Get capabilities statement 🥳")
+
     void shouldReturnCapabilitiesStatement() {
         final CapabilityStatement statement = bbc.requestCapabilityStatement();
 
@@ -243,12 +263,16 @@ class BlueButtonClientTest {
     }
 
     @Test
+@DisplayName("Get patient's single EOB 🥳")
+
     void shouldHandlePatientsWithOnlyOneEOB() {
         final Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID, TEST_LAST_UPDATED, null);
         assertEquals(1, response.getTotal(), "This demo patient should have exactly 1 EOB");
     }
 
     @Test
+@DisplayName("Get unrecognized patient record and EOB 🤮")
+
     void shouldThrowExceptionWhenResourceNotFound() {
         assertThrows(
                 ResourceNotFoundException.class,

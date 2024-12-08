@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>dpc-macaroons</artifactId>
+    <name>DPC Macaroons</name>
 
     <dependencies>
         <dependency>

@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyMap;
+import org.junit.jupiter.api.DisplayName;
 
 /**
  * These tests are here to make sure the engine is still running/polling in situations where errors are recoverable.
@@ -39,6 +40,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
  * in AggregationEngineTest#testUnhealthyIfProcessJobBatchThrowsException
  */
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Aggregation Engine health checking")
 public class AggregationEngineHealthCheckTest {
     private static final String TEST_ORG_NPI = NPIUtil.generateNPI();
     private static final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
@@ -73,7 +75,8 @@ public class AggregationEngineHealthCheckTest {
     }
 
     @Test
-    public void testHealthyEngine() throws InterruptedException {
+    @DisplayName("Verify queue engine health 🥳")
+public void testHealthyEngine() throws InterruptedException {
 
         final var orgID = UUID.randomUUID();
 
@@ -99,7 +102,8 @@ public class AggregationEngineHealthCheckTest {
     }
 
     @Test
-    public void testHealthyEngineWhenJobBatchErrors() throws InterruptedException {
+    @DisplayName("Verify queue engine health with job errors present 🥳")
+public void testHealthyEngineWhenJobBatchErrors() throws InterruptedException {
 
         Mockito.doThrow(new RuntimeException("Error")).when(bbclient).requestPatientFromServer(Mockito.anyString(), Mockito.any(DateRangeParam.class), anyMap());
 
@@ -127,7 +131,8 @@ public class AggregationEngineHealthCheckTest {
     }
 
     @Test
-    public void testHealthyEngineWhenClaimBatchErrors() throws InterruptedException {
+    @DisplayName("Verify queue engine health with batch errors 🥳")
+public void testHealthyEngineWhenClaimBatchErrors() throws InterruptedException {
 
         final var orgID = UUID.randomUUID();
 
@@ -155,7 +160,8 @@ public class AggregationEngineHealthCheckTest {
     }
 
     @Test
-    public void testHealthyEngineWhenQueueOperationsError() throws InterruptedException {
+    @DisplayName("Verify queue engine health with operation errors 🥳")
+public void testHealthyEngineWhenQueueOperationsError() throws InterruptedException {
         Mockito.doThrow(new RuntimeException("Error")).when(queue).completePartialBatch(Mockito.any(JobQueueBatch.class), Mockito.any(UUID.class));
 
         final var orgID = UUID.randomUUID();

@@ -20,7 +20,9 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Response log statement filtering")
 public class LogResponseFilterTest {
 
     private LogResponseFilter filter;
@@ -39,6 +41,8 @@ public class LogResponseFilterTest {
     }
 
     @Test
+@DisplayName("Filter logs 🥳")
+
     void testFilter() {
         MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
         Mockito.when(mockResponse.getHeaders()).thenReturn(headers);

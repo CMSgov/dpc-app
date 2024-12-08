@@ -24,7 +24,9 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Practitioner resource operations")
 public class PractitionerResourceUnitTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -42,7 +44,8 @@ public class PractitionerResourceUnitTest {
     }
 
     @Test
-    public void testPractitionerSearch() {
+    @DisplayName("Search for practitioner by NPI 🥳")
+public void testPractitionerSearch() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -68,7 +71,8 @@ public class PractitionerResourceUnitTest {
     }
 
     @Test
-    public void testGetProvider() {
+    @DisplayName("Get provider by provider ID 🥳")
+public void testGetProvider() {
         UUID providerId = UUID.randomUUID();
         Practitioner practitioner = new Practitioner();
         practitioner.setId(providerId.toString());
@@ -84,7 +88,8 @@ public class PractitionerResourceUnitTest {
     }
 
     @Test
-    public void testSubmitProvider() {
+    @DisplayName("Submit provider 🥳")
+public void testSubmitProvider() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -106,7 +111,8 @@ public class PractitionerResourceUnitTest {
     }
 
     @Test
-    public void testBulkSubmitProviders() {
+    @DisplayName("Bulk submit providers 🥳")
+public void testBulkSubmitProviders() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -134,7 +140,8 @@ public class PractitionerResourceUnitTest {
     }
 
     @Test
-    public void testDeleteProvider() {
+    @DisplayName("Delete a provider 🥳")
+public void testDeleteProvider() {
         UUID providerId = UUID.randomUUID();
 
         IDeleteTyped delResp = Mockito.mock(IDeleteTyped.class);
@@ -146,12 +153,14 @@ public class PractitionerResourceUnitTest {
     }
 
     @Test
-    public void testUpdateProvider() {
+    @DisplayName("Update a provider - not yet implemented")
+public void testUpdateProvider() {
         // Not yet implemented
     }
 
     @Test
-    public void testValidateProvider() {
+    @DisplayName("Validate a provider profile 🥳")
+public void testValidateProvider() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());

@@ -17,8 +17,10 @@ import java.util.Date;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Entity conversion")
 public class EntityConverterTest {
 
     private FHIREntityConverter converter;
@@ -33,6 +35,8 @@ public class EntityConverterTest {
     }
 
     @Test
+@DisplayName("Convert patient gender 🥳")
+
     void testSimpleConversion() {
         converter.addConverter(new PatientGenderConverter());
 
@@ -47,6 +51,8 @@ public class EntityConverterTest {
 
 
     @Test
+@DisplayName("Asymmetric patient conversion 🤮")
+
     void testMissingConverter() {
         final MissingConverterException exception = assertThrows(MissingConverterException.class, () -> converter.toFHIR(Patient.class, new PatientEntity()));
         assertAll(() -> assertEquals(PatientEntity.class, exception.getSourceClass(), "Should have patient entity source"),
@@ -54,6 +60,8 @@ public class EntityConverterTest {
     }
 
     @Test
+@DisplayName("Convert multiple patient attributes 🥳")
+
     void testMultipleConverters() throws ParseException {
         converter.addConverter(new PatientGenderConverter());
         converter.addConverter(new PatientBirthDateConverter());
@@ -82,6 +90,8 @@ public class EntityConverterTest {
     }
 
     @Test
+@DisplayName("Convert invalid attributes 🤮")
+
     void testConversionException() {
         // Throws NPE
         converter.addConverter(new PatientGenderConverter());
@@ -102,6 +112,8 @@ public class EntityConverterTest {
     }
 
     @Test
+@DisplayName("Duplicate convertors loaded 🤮")
+
     void testDuplicateConverters() {
         converter.addConverter(new PatientGenderConverter());
         final FHIRConverterException exception = assertThrows(FHIRConverterException.class, () -> converter.addConverter(new PatientGenderConverter()));

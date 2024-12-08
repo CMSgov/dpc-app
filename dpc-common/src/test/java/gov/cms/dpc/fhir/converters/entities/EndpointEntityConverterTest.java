@@ -13,7 +13,9 @@ import org.junit.jupiter.api.Test;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Endpoint entity conversion")
 public class EndpointEntityConverterTest {
     EndpointEntityConverter entityConverter = new EndpointEntityConverter();
     FHIREntityConverter fhirEntityConverter = FHIREntityConverter.initialize();
@@ -52,6 +54,8 @@ public class EndpointEntityConverterTest {
     }
 
     @Test
+@DisplayName("Convert Endpoint with attributes from FHIR 🥳")
+
     void fromFHIR() {
         EndpointEntity convertedEntity = entityConverter.fromFHIR(fhirEntityConverter, endpoint);
         assertEquals(uuid, convertedEntity.getId());
@@ -64,6 +68,8 @@ public class EndpointEntityConverterTest {
     }
 
     @Test
+@DisplayName("Convert endpoint with ID from FHIR 🥳")
+
     void fromFHIR_noId() {
         endpoint.setId("");
         EndpointEntity convertedEntity = entityConverter.fromFHIR(fhirEntityConverter, endpoint);
@@ -72,6 +78,8 @@ public class EndpointEntityConverterTest {
     }
 
     @Test
+@DisplayName("Convert endpoint with no org from FHIR 🥳")
+
     void fromFHIR_noOrg() {
         endpoint.setManagingOrganization(null);
         EndpointEntity convertedEntity = entityConverter.fromFHIR(fhirEntityConverter, endpoint);
@@ -80,6 +88,8 @@ public class EndpointEntityConverterTest {
     }
 
     @Test
+@DisplayName("Convert endpoint with attributes to FHIR 🥳")
+
     void toFHIR() {
         Endpoint convertedResource = entityConverter.toFHIR(fhirEntityConverter, endpointEntity);
         assertEquals("Endpoint/" + endpointEntity.getId(), convertedResource.getId());
@@ -92,11 +102,15 @@ public class EndpointEntityConverterTest {
     }
 
     @Test
+@DisplayName("Convert endpoint class to FHIR resource 🥳")
+
     void getFHIRResource() {
         assertEquals(Endpoint.class, entityConverter.getFHIRResource());
     }
 
     @Test
+@DisplayName("Convert Endpoint Entity to Java class 🥳")
+
     void getJavaClass() {
         assertEquals(EndpointEntity.class, entityConverter.getJavaClass());
     }

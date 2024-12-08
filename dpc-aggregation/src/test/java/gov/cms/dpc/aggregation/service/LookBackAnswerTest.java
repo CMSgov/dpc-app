@@ -6,14 +6,17 @@ import org.junit.jupiter.api.Test;
 
 import java.time.YearMonth;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Look Back answer evaluation")
 public class LookBackAnswerTest {
 
     private final String providerNPI = NPIUtil.generateNPI();
     private final String organizationNPI = NPIUtil.generateNPI();
 
     @Test
-    public void testDateCriteria() {
+    @DisplayName("Look back date matches 🥳")
+public void testDateCriteria() {
         LookBackAnswer lookBackAnswer = new LookBackAnswer(null, null, 0, null)
                 .addEobBillingPeriod(YearMonth.now());
 
@@ -44,7 +47,8 @@ public class LookBackAnswerTest {
     }
 
     @Test
-    public void testDifferentNPIValues() {
+    @DisplayName("Match on different look back data 🤮")
+public void testDifferentNPIValues() {
         LookBackAnswer lookBackAnswer = new LookBackAnswer(null, null, 0, null);
         Assertions.assertFalse(lookBackAnswer.matchDateCriteria());
         Assertions.assertFalse(lookBackAnswer.orgMatchEob());
