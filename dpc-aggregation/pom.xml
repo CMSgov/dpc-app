@@ -14,7 +14,7 @@
 
     <properties>
         <mainClass>gov.cms.dpc.aggregation.DPCAggregationService</mainClass>
-        <resilience4j.version>1.7.1</resilience4j.version>
+        <resilience4j.version>2.2.0</resilience4j.version>          <!-- latest prod release 12/8/24 -->
         <exec.skip>true</exec.skip>
         <test.verbosity>false</test.verbosity>
         <disable.console>true</disable.console>
@@ -23,8 +23,8 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.sisu</groupId>
-            <artifactId>org.eclipse.sisu.inject</artifactId>
-            <version>0.9.0.M3</version>
+            <artifactId>org.eclipse.sisu.inject</artifactId>        
+            <version>0.9.0.M3</version>                             <!-- latest release 12/8/24 - this is a milestone release, but only available recent one -->
         </dependency>
         <dependency>
             <groupId>gov.cms.dpc</groupId>
@@ -44,7 +44,7 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
-        <!--No longer shipped with Java 11, so we need to include it manually-->
+
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
@@ -75,9 +75,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>io.reactivex.rxjava2</groupId>
+            <groupId>io.reactivex.rxjava3</groupId>
             <artifactId>rxjava</artifactId>
-            <version>2.2.21</version>
+            <version>3.1.10</version>                               <!-- latest prod release 12/8/24-->
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>
@@ -86,7 +86,7 @@
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>
-            <artifactId>resilience4j-rxjava2</artifactId>
+            <artifactId>resilience4j-rxjava3</artifactId>
             <version>${resilience4j.version}</version>
         </dependency>
         <dependency>
@@ -231,7 +231,7 @@
                   <dependency>
                      <groupId>me.fabriciorby</groupId>
                      <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
-                     <version>1.3.0</version>
+                     <version>1.4.0</version>                           <!-- latest prod release 12/8/24-->
                   </dependency>
                 </dependencies>                        
                 <configuration>
@@ -254,7 +254,7 @@
                   <dependency>
                      <groupId>me.fabriciorby</groupId>
                      <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
-                     <version>1.3.0</version>
+                     <version>1.4.0</version>                       <!-- latest prod release 12/8/24-->
                   </dependency>
                 </dependencies>                        
                 <configuration>

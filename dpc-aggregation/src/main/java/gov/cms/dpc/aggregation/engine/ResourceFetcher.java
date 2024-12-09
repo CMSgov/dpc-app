@@ -9,7 +9,6 @@ import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
-import io.reactivex.Flowable;
 import org.hl7.fhir.dstu3.model.*;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
@@ -21,6 +20,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBI;
+import io.reactivex.rxjava3.core.Flowable;
 
 /**
  * A resource fetcher will fetch resources of particular type from passed {@link BlueButtonClient}

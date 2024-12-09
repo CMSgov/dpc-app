@@ -37,32 +37,31 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
 
-        <h2.version>2.3.232</h2.version>
-        <dropwizard.version>4.0.9</dropwizard.version>
-        <pgsql.version>42.7.4</pgsql.version>
-        <jersey.version>3.1.9</jersey.version>
+        <h2.version>2.3.232</h2.version>                                <!-- latest prod release 12/8/24-->
+        <dropwizard.version>4.0.11</dropwizard.version>                 <!-- latest prod release 12/8/24-->
+        <pgsql.version>42.7.4</pgsql.version>                           <!-- latest prod release 12/8/24-->
+        <jersey.version>3.1.9</jersey.version>                          <!-- latest prod release 12/8/24-->
 
-        <hk2-api.version>3.1.1</hk2-api.version>
-        <guice.version>7.0.0</guice.version>
+        <hk2-api.version>3.1.1</hk2-api.version>                        <!-- latest prod release 12/8/24-->
+        <guice.version>7.0.0</guice.version>                            <!-- latest prod release 12/8/24-->
 
-        <junit.jupiter.version>5.11.2</junit.jupiter.version>
-        <testcontainers.version>1.20.2</testcontainers.version>
-        <pitest.version>1.17.0</pitest.version>
-        <jooq.version>3.16.23</jooq.version>
-        <jacoco.version>0.8.12</jacoco.version>
+        <junit.jupiter.version>5.11.3</junit.jupiter.version>           <!-- latest prod release 12/8/24-->
+        <testcontainers.version>1.20.4</testcontainers.version>         <!-- latest prod release 12/8/24-->
+        <pitest.version>1.17.2</pitest.version>                         <!-- latest prod release 12/8/24-->
+        <jooq.version>3.16.23</jooq.version>                            <!-- latest known-good release 12/8/24 - releases after v3.16 don't support jdk 11 -->
+        <jacoco.version>0.8.12</jacoco.version>                         <!-- latest prod release 12/8/24-->
 
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
         <hapi.fhir.version>7.4.5</hapi.fhir.version>
 
-        <gson.version>2.11.0</gson.version>
-        <guava.version>33.3.1-jre</guava.version>
-        <jaxb.version>2.3.1</jaxb.version>
+        <gson.version>2.11.0</gson.version>                             <!-- latest prod release 12/8/24-->
+        <guava.version>33.3.1-jre</guava.version>                       <!-- latest prod release 12/8/24-->
 
-        <slf4j.version>2.0.16</slf4j.version>
-        <newrelic.agent.version>7.11.1</newrelic.agent.version>
+        <slf4j.version>2.0.16</slf4j.version>                           <!-- latest prod release 12/8/24-->
+        <newrelic.agent.version>8.16.0</newrelic.agent.version>         
         <newrelic.agent.type>zip</newrelic.agent.type>
 
-        <bouncey.version>1.78.1</bouncey.version>
+        <bouncey.version>1.79</bouncey.version>                         <!-- latest prod release 12/8/24-->
 
         <jib.container.appRoot>/app</jib.container.appRoot>
         <jib.ecr.root>755619740999.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
@@ -231,27 +230,27 @@
             <dependency>
                 <groupId>jakarta.validation</groupId>
                 <artifactId>jakarta.validation-api</artifactId>
-                <version>3.1.0</version>
+                <version>3.1.0</version>                                <!-- latest prod release 12/8/24-->
             </dependency>
             <dependency>
                 <groupId>jakarta.annotation</groupId>
                 <artifactId>jakarta.annotation-api</artifactId>
-                <version>3.0.0</version>
+                <version>3.0.0</version>                                <!-- latest prod release 12/8/24-->
             </dependency>
             <dependency>
                 <groupId>jakarta.xml.bind</groupId>
                 <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>4.0.2</version>
+                <version>4.0.2</version>                                <!-- latest prod release 12/8/24-->
             </dependency>
             <dependency>
                 <groupId>jakarta.persistence</groupId>
                 <artifactId>jakarta.persistence-api</artifactId>
-                <version>3.1.0</version>
+                <version>3.1.0</version>                                <!-- latest known-good release 12/8/24 - releases after v3.1 don't support jdk 11 -->
             </dependency>
             <dependency>
                 <groupId>jakarta.ws.rs</groupId>
                 <artifactId>jakarta.ws.rs-api</artifactId>
-                <version>3.1.0</version>
+                <version>3.1.0</version>                                <!-- latest known-good release 12/8/24 - releases after v3 don't support jdk 11 -->
             </dependency>
 
             <dependency>
@@ -264,16 +263,15 @@
                 <artifactId>jmacaroons</artifactId>
                 <version>1024efc25df40c63bbfbaedc6d75556d829d84c7</version>
             </dependency>
-            <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
             <dependency>
                 <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>6.6.1.Final</version>
+                <version>6.6.3.Final</version>                          <!-- latest prod release 12/8/24-->
             </dependency>
             <dependency>
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
-                <version>8.0.1.Final</version>
+                <version>8.0.1.Final</version>                          <!-- latest prod release 12/8/24-->
             </dependency>
             <dependency>
                 <groupId>io.dropwizard</groupId>
@@ -292,29 +290,27 @@
             <dependency>
                 <groupId>io.dropwizard.metrics</groupId>
                 <artifactId>metrics-jersey31</artifactId>
-                <version>4.2.28</version>
+                <version>4.2.29</version>                       <!-- latest prod release 12/8/24-->
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-hibernate6</artifactId>
-                <version>2.18.0</version>
+                <version>2.18.1</version>                       <!-- latest known-good release 12/8/24 - v2.18.2 crashes smoke test -->
             </dependency>
-            <!--No longer shipped with Java 11, so we need to include it manually-->
-            <!--This is required for Java 11 support. The version shipped with Hibernate is too old-->
             <dependency>
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
-                <version>3.30.2-GA</version>
+                <version>3.30.2-GA</version>                    <!-- latest prod release 12/8/24-->
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-io</artifactId>
-                <version>11.0.19</version>
+                <version>11.0.24</version>                      <!-- latest prod release 12/8/24-->
             </dependency>
             <dependency>
                 <groupId>com.typesafe</groupId>
                 <artifactId>config</artifactId>
-                <version>1.4.3</version>
+                <version>1.4.3</version>                        <!-- latest prod release 12/8/24-->
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
@@ -349,27 +345,27 @@
             <dependency>
                 <groupId>com.smoketurner</groupId>
                 <artifactId>dropwizard-swagger</artifactId>
-                <version>3.0.0-1</version>
-            </dependency>
+                <version>4.0.5-1</version>                          <!-- latest prod release 12/8/24-->
+            </dependency>   
             <dependency>
                 <groupId>io.github.dropwizard-jobs</groupId>
                 <artifactId>dropwizard-jobs-core</artifactId>
-                <version>5.1.4</version>
+                <version>5.1.4</version>                            <!-- latest known-good release 12/8/24 - releases after v5 don't support jdk 11 -->
             </dependency>
             <dependency>
                 <groupId>io.github.dropwizard-jobs</groupId>
                 <artifactId>dropwizard-jobs-guice</artifactId>
-                <version>5.1.4</version>
+                <version>5.1.4</version>                            <!-- latest known-good release 12/8/24 - releases after v5 don't support jdk 11 -->
             </dependency>
             <dependency>
                 <groupId>com.github.nitram509</groupId>
                 <artifactId>jmacaroons</artifactId>
-                <version>0.5.0</version>
+                <version>0.5.0</version>                            <!-- latest prod release 12/8/24-->
             </dependency>
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz</artifactId>
-                <version>2.3.2</version>
+                <version>2.5.0</version>
             </dependency>
             <dependency>
                 <groupId>com.newrelic.agent.java</groupId>
@@ -394,7 +390,7 @@
             <dependency>
                 <groupId>uk.org.webcompere</groupId>
                 <artifactId>system-stubs-jupiter</artifactId>
-                <version>2.1.7</version>
+                <version>2.1.7</version>                            <!-- latest prod release 12/8/24-->
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -412,7 +408,7 @@
             <dependency>
                 <groupId>com.helger</groupId>
                 <artifactId>ph-schematron</artifactId>
-                <version>5.6.5</version>
+                <version>5.6.5</version>                            <!-- latest prod release 12/8/24-->
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -423,19 +419,19 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.14.1</version>
+                <version>5.14.2</version>                           <!-- latest prod release 12/8/24-->
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-junit-jupiter</artifactId>
-                <version>5.14.1</version>
+                <version>5.14.2</version>                           <!-- latest prod release 12/8/24-->
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents.client5</groupId>
                 <artifactId>httpclient5</artifactId>
-                <version>5.4</version>
+                <version>5.4.1</version>                            <!-- latest prod release 12/8/24-->
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -466,7 +462,7 @@
             <dependency>
                 <groupId>io.hypersistence</groupId>
                 <artifactId>hypersistence-utils-hibernate-63</artifactId>
-                <version>3.8.3</version>
+                <version>3.9.0</version>                            <!-- latest prod release 12/8/24-->
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -505,7 +501,7 @@
         <dependency>
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity-engine-core</artifactId>
-            <version>2.4</version>
+            <version>2.4.1</version>                                <!-- latest prod release 12/8/24-->
         </dependency>
     </dependencies>
 
@@ -701,17 +697,17 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.6.0</version>
+                    <version>3.6.0</version>                            <!-- latest prod release 12/8/24-->
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.5.2</version>
+                    <version>3.5.2</version>                            <!-- latest prod release 12/8/24-->
                     <dependencies>
                       <dependency>
                          <groupId>me.fabriciorby</groupId>
                          <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
-                         <version>1.3.0</version>
+                         <version>1.4.0</version>                       <!-- latest prod release 12/8/24-->
                       </dependency>
                     </dependencies>
                     <configuration>
@@ -730,12 +726,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.2</version>
+                    <version>3.5.2</version>                            <!-- latest prod release 12/8/24-->
                     <dependencies>
                       <dependency>
                          <groupId>me.fabriciorby</groupId>
                          <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
-                         <version>1.3.0</version>
+                         <version>1.4.0</version>                       <!-- latest prod release 12/8/24-->
                       </dependency>
                     </dependencies>
                     <configuration>
@@ -757,17 +753,17 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.4.2</version>
+                    <version>3.4.2</version>                            <!-- latest prod release 12/8/24-->
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.13.0</version>
+                    <version>3.13.0</version>                           <!-- latest prod release 12/8/24-->
                 </plugin>
                 <!-- Base configuration for Docker images -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.8.1</version>                            <!-- latest prod release 12/8/24-->
                     <executions>
                         <execution>
                             <id>unpack-newrelic</id>
@@ -789,7 +785,7 @@
                 <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
-                    <version>3.4.4</version>
+                    <version>3.4.4</version>                            <!-- latest prod release 12/8/24-->
                     <configuration>
                         <to>
                             <image>${jib.ecr.root}/${project.artifactId}</image>
@@ -813,22 +809,22 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.12</version>
+                    <version>0.8.12</version>                           <!-- latest prod release 12/8/24-->
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-site-plugin</artifactId>
-                    <version>4.0.0-M16</version>
+                    <artifactId>maven-site-plugin</artifactId>          
+                    <version>4.0.0-M16</version>                        <!-- latest release 12/8/24, this is a milestone release but 16th so sufficiently mature-->
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-project-info-reports-plugin</artifactId>
-                    <version>3.8.0</version>
+                    <version>3.8.0</version>                            <!-- latest prod release 12/8/24-->
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.1.3</version>
+                    <version>3.1.3</version>                            <!-- latest prod release 12/8/24-->
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -843,7 +839,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.3.1</version>                                <!-- latest prod release 12/8/24-->
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -855,7 +851,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.11.1</version>
+                <version>3.11.1</version>                               <!-- latest prod release 12/8/24-->
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -876,7 +872,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.5.0</version>                                <!-- latest prod release 12/8/24-->
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -932,7 +928,7 @@
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <version>4.9.10</version>
+                <version>4.9.10</version>                               <!-- latest prod release 12/8/24-->
                 <executions>
                     <execution>
                         <id>git-commit</id>
@@ -953,14 +949,14 @@
                     <dependency>
                         <groupId>org.pitest</groupId>
                         <artifactId>pitest-junit5-plugin</artifactId>
-                        <version>1.2.1</version>
+                        <version>1.2.1</version>                        <!-- latest prod release 12/8/24-->
                     </dependency>
                 </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.4.0</version>                                <!-- latest prod release 12/8/24-->
                 <configuration>
                     <failOnError>false</failOnError>
                     <retryOnError>true</retryOnError>
@@ -969,7 +965,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.5.0</version>                                <!-- latest prod release 12/8/24-->
                 <executions>
                     <execution>
                         <id>build-custom-jakarta-server</id>
@@ -994,11 +990,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>4.0.0-M16</version>
+                <version>4.0.0-M16</version>                            <!-- latest release 12/8/24, this is a milestone release but 16th so sufficiently mature-->
             </plugin>
             <plugin>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>3.8.0</version>                                <!-- latest prod release 12/8/24-->
                 <configuration>
                     <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
                 </configuration>

@@ -49,7 +49,7 @@ public class RosterDAO extends DPCAbstractDAO<RosterEntity> {
         }
 
         if (providerNPI != null) {
-            predicates.add(builder.equal(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.PROVIDER_NP_I), providerNPI));
+            predicates.add(builder.equal(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.PROVIDER_N_P_I), providerNPI));
         }
 
         if (patientReference != null) {

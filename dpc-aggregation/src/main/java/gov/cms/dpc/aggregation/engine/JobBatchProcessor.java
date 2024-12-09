@@ -14,7 +14,6 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
-import io.reactivex.Flowable;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
@@ -31,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBI;
 import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBIs;
+import io.reactivex.rxjava3.core.Flowable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;

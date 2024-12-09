@@ -13,7 +13,7 @@
     <name>DPC Common Testing Code</name>
 
     <properties>
-        <jjwt.version>0.12.6</jjwt.version>
+        <jjwt.version>0.12.6</jjwt.version>                         <!-- latest prod release 12/8/24-->
         <sonar.skip>true</sonar.skip>
         <exec.skip>true</exec.skip>
         <test.verbosity>false</test.verbosity>
@@ -25,7 +25,7 @@
         <dependency>
             <groupId>org.eclipse.sisu</groupId>
             <artifactId>org.eclipse.sisu.inject</artifactId>
-            <version>0.9.0.M3</version>
+            <version>0.9.0.M3</version>                             <!-- latest prod release 12/8/24-->
         </dependency>
         <dependency>
             <groupId>jakarta.servlet</groupId>
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>4.5.0-M2</version>
+            <version>4.5.0-M2</version>                     <!-- latest release 12/8/24 - this is a milestone release, but the only recent one available -->
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -95,7 +95,7 @@
         <dependency>
             <groupId>com.github.nickrobison-usds</groupId>
             <artifactId>jmacaroons</artifactId>
-            <version>1024efc25df40c63bbfbaedc6d75556d829d84c7</version>
+            <version>1024efc25df40c63bbfbaedc6d75556d829d84c7</version> <!-- latest prod release 12/8/24-->
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -148,13 +148,13 @@
         <dependency>
             <groupId>io.hypersistence</groupId>
             <artifactId>hypersistence-utils-hibernate-63</artifactId>
-            <version>3.8.3</version>
+            <version>3.9.0</version>                                    <!-- latest prod release 12/8/24-->
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>6.6.1.Final</version>
+            <version>6.6.3.Final</version>                              <!-- latest prod release 12/8/24-->
         </dependency>
     </dependencies>
 
@@ -175,7 +175,7 @@
                   <dependency>
                      <groupId>me.fabriciorby</groupId>
                      <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
-                     <version>1.3.0</version>
+                     <version>1.4.0</version>                           <!-- latest prod release 12/8/24-->
                   </dependency>
                 </dependencies>                        
                 <configuration>
@@ -198,7 +198,7 @@
                   <dependency>
                      <groupId>me.fabriciorby</groupId>
                      <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
-                     <version>1.3.0</version>
+                     <version>1.4.0</version>                           <!-- latest prod release 12/8/24-->
                   </dependency>
                 </dependencies>                        
                 <configuration>
