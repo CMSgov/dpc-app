@@ -1,4 +1,8 @@
 bzt
-wheel>=0.38.0 # not directly required, pinned by Snyk to avoid a vulnerability
-numpy>=1.22.2 # not directly required, pinned by Snyk to avoid a vulnerability
+aiohttp>=3.10.11 # not directly required, pinned for Snyk to avoid a vulnerability
+numpy>=1.22.2 # not directly required, pinned for Snyk to avoid a vulnerability
+requests>=2.32.2 # not directly required, pinned for Snyk to avoid a vulnerability
 setuptools>=74.1.2 # Pip will try to downgrade to 65.5.0 and break things
+urllib3>=1.26.19 # not directly required, pinned for Snyk to avoid a vulnerability
+wheel>=0.38.0 # not directly required, pinned for Snyk to avoid a vulnerability
+zipp>=3.19.1 # not directly required, pinned for Snyk to avoid a vulnerability
