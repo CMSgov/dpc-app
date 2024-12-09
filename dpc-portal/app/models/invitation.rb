@@ -22,6 +22,7 @@ class Invitation < ApplicationRecord
   def show_attributes
     { full_name: "#{invited_given_name} #{invited_family_name}",
       email: invited_email,
+      expired_at: expired_at.to_s,
       id: }.with_indifferent_access
   end
 
@@ -30,7 +31,17 @@ class Invitation < ApplicationRecord
   end
 
   def expired?
-    created_at < 2.days.ago
+    pending? && Time.now > expiration_date
+  end
+
+  def expired_at
+    return unless expired?
+
+    expiration_date
+  end
+
+  def expiration_date
+    created_at + 2.days
   end
 
   def accept!
