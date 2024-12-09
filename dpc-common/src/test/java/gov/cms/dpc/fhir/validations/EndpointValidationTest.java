@@ -18,9 +18,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import static gov.cms.dpc.testing.factories.OrganizationFactory.createFakeEndpoint;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
-    class EndpointValidationTest {
+@DisplayName("Endpoint validation")
+class EndpointValidationTest {
 
     private static FhirValidator fhirValidator;
     private static DPCProfileSupport dpcModule;
@@ -47,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.*;
     }
 
     @Test
+    @DisplayName("Validate endpoint with managing org 🤮")
     void testManagingOrg() {
         final Endpoint endpoint = createFakeEndpoint();
         endpoint.setName("Test Name");
@@ -55,7 +58,14 @@ import static org.junit.jupiter.api.Assertions.*;
         final ValidationResult result = fhirValidator.validateWithResult(endpoint, new ValidationOptions().addProfile(EndpointProfile.PROFILE_URI));
         assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
                 () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
+    }
 
+    @Test
+    @DisplayName("Validate endpoint with managing org 🥳")
+    void testValidManagingOrg() {
+        final Endpoint endpoint = createFakeEndpoint();
+        endpoint.setName("Test Name");
+        endpoint.setAddress("http://test.local");
         // Add a managing org
         endpoint.setManagingOrganization(new Reference("Organization/fake-org"));
 
@@ -64,6 +74,7 @@ import static org.junit.jupiter.api.Assertions.*;
     }
 
     @Test
+    @DisplayName("Validate endpoint with name 🤮")
     void testName() {
         final Endpoint endpoint = createFakeEndpoint();
         endpoint.setManagingOrganization(new Reference("Organization/fake-org"));
@@ -80,6 +91,19 @@ import static org.junit.jupiter.api.Assertions.*;
     }
 
     @Test
+    @DisplayName("Validate endpoint with name 🥳")
+    void testValidName() {
+        final Endpoint endpoint = createFakeEndpoint();
+        endpoint.setManagingOrganization(new Reference("Organization/fake-org"));
+        endpoint.setAddress("http://test.local");
+        endpoint.setName("Test Name");
+
+        final ValidationResult r2 = fhirValidator.validateWithResult(endpoint);
+        assertTrue(r2.isSuccessful());
+    }
+
+    @Test
+    @DisplayName("Validate endpoint with address 🤮")
     void testAddress() {
         final Endpoint endpoint = createFakeEndpoint();
         endpoint.setName("Test Name");
@@ -88,10 +112,17 @@ import static org.junit.jupiter.api.Assertions.*;
         final ValidationResult result = fhirValidator.validateWithResult(endpoint, new ValidationOptions().addProfile(EndpointProfile.PROFILE_URI));
         assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
                 () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
+    }
 
+    @Test
+    @DisplayName("Validate endpoint with address 🥳")
+    void testValidAddress() {
+        final Endpoint endpoint = createFakeEndpoint();
+        endpoint.setName("Test Name");
+        endpoint.setManagingOrganization(new Reference("Organization/fake-org"));
         endpoint.setAddress("http://test.local");
+
         final ValidationResult r2 = fhirValidator.validateWithResult(endpoint, new ValidationOptions().addProfile(EndpointProfile.PROFILE_URI));
         assertTrue(r2.isSuccessful());
     }
-
 }

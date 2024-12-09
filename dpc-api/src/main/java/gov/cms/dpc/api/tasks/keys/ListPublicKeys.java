@@ -8,13 +8,13 @@ import gov.cms.dpc.api.resources.v1.KeyResource;
 import io.dropwizard.servlets.tasks.Task;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import com.google.inject.Inject;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
 import static gov.cms.dpc.api.tasks.TasksCommon.extractOrganization;
+import jakarta.inject.Singleton;
 
 /**
  * Admin task to list {@link PublicKeyEntity} for a given {@link Organization}

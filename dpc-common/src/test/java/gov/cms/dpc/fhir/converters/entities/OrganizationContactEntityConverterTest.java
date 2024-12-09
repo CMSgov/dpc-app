@@ -12,7 +12,9 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Organization Contact entity conversion")
 public class OrganizationContactEntityConverterTest {
     OrganizationContactEntityConverter entityConverter = new OrganizationContactEntityConverter();
     FHIREntityConverter fhirEntityConverter = FHIREntityConverter.initialize();
@@ -51,6 +53,7 @@ public class OrganizationContactEntityConverterTest {
     }
 
     @Test
+    @DisplayName("Convert contact with attributes from FHIR 🥳")
     void fromFHIR() {
         ContactEntity convertedEntity = entityConverter.fromFHIR(fhirEntityConverter, organizationContact);
         assertEquals(family, convertedEntity.getName().getFamily());
@@ -59,6 +62,7 @@ public class OrganizationContactEntityConverterTest {
     }
 
     @Test
+    @DisplayName("Convert contact with attributes to FHIR 🥳")
     void toFHIR() {
         Organization.OrganizationContactComponent convertedResource = entityConverter.toFHIR(fhirEntityConverter, organizationContactEntity);
         assertEquals(family, convertedResource.getName().getFamily());
@@ -67,11 +71,13 @@ public class OrganizationContactEntityConverterTest {
     }
 
     @Test
+    @DisplayName("Convert Organization Contact Component to FHIR 🥳")
     void getFHIRResource() {
         assertEquals(Organization.OrganizationContactComponent.class, entityConverter.getFHIRResource());
     }
 
     @Test
+    @DisplayName("Convert Contact Entity to Java class 🥳")
     void getJavaClass() {
         assertEquals(ContactEntity.class, entityConverter.getJavaClass());
     }}

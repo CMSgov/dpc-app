@@ -1,6 +1,6 @@
 package gov.cms.dpc.queue.annotations;
 
-import com.google.inject.BindingAnnotation;
+import jakarta.inject.Qualifier;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,6 +12,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.METHOD, ElementType.FIELD})
-@BindingAnnotation
+@Qualifier
 public @interface AggregatorID {
 }

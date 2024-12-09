@@ -5,9 +5,9 @@ import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
 
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Response;
 import java.util.UUID;
 
 @Path("/IpAddress")

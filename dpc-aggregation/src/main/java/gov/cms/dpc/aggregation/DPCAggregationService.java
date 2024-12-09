@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation;
 
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import com.google.inject.servlet.GuiceFilter;
+import com.hubspot.dropwizard.guicier.GuiceBundle;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
@@ -16,10 +17,13 @@ import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
-import ru.vyarus.dropwizard.guice.GuiceBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DPCAggregationService extends Application<DPCAggregationConfiguration> {
 
+    private static final Logger logger = LoggerFactory.getLogger(DPCAggregationService.class);
+    
     private final DPCQueueHibernateBundle<DPCAggregationConfiguration> queueHibernateBundle = new DPCQueueHibernateBundle<>();
     private final DPCHibernateBundle<DPCAggregationConfiguration> hibernateBundle = new DPCHibernateBundle<>();
 
@@ -33,8 +37,8 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public void initialize(Bootstrap<DPCAggregationConfiguration> bootstrap) {
-        JerseyGuiceUtils.reset();
 
         // Enable variable substitution with environment variables
         EnvironmentVariableSubstitutor substitutor = new EnvironmentVariableSubstitutor(false);
@@ -42,7 +46,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
                 new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), substitutor);
         bootstrap.setConfigurationSourceProvider(provider);
 
-        GuiceBundle guiceBundle = GuiceBundle.builder()
+        GuiceBundle guiceBundle = GuiceBundle.defaultBuilder(DPCAggregationConfiguration.class)
                 .modules(new AggregationAppModule(),
                         new DPCQueueHibernateModule<>(queueHibernateBundle),
                         new DPCHibernateModule<>(hibernateBundle),
@@ -72,7 +76,10 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
 
     @Override
     public void run(DPCAggregationConfiguration configuration, Environment environment) {
+        logger.info("Starting DPCAggregationService run!");
         EnvironmentParser.getEnvironment("Aggregation");
+
+        environment.servlets().addFilter("GuiceFilter", GuiceFilter.class).addMappingForUrlPatterns(null, false, "/*");
 
         // Http healthchecks on dependent services
         environment.healthChecks().register("dpc-consent", new HttpHealthCheck(configuration.getConsentHealthCheckURL()));

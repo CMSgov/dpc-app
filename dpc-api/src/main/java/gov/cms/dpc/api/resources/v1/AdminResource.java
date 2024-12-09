@@ -3,7 +3,6 @@ package gov.cms.dpc.api.resources.v1;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
 import gov.cms.dpc.api.resources.AbstractAdminResource;
 import gov.cms.dpc.fhir.annotations.FHIR;
@@ -11,11 +10,12 @@ import io.swagger.annotations.*;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
+import com.google.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +43,7 @@ public class AdminResource extends AbstractAdminResource{
             authorizations = @Authorization(value = "access_token"))
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "Only administrators can use this endpoint")})
+    @Override
     public Bundle getOrganizations(@NotNull @QueryParam(value="npis") String npis) {
         Map<String, List<String>> searchParams = new HashMap<>();
         searchParams.put("identifier", Collections.singletonList(npis));

@@ -2,8 +2,6 @@ package gov.cms.dpc.testing;
 
 import io.dropwizard.testing.junit5.DAOTestExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
-import org.hibernate.cfg.AvailableSettings;
-import org.hibernate.dialect.PostgreSQL10Dialect;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -25,7 +23,7 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 public abstract class AbstractMultipleDAOTest {
     @Container
-    private final PostgreSQLContainer postgreSql = new PostgreSQLContainer(DockerImageName.parse("postgres:14.7"));
+    private final PostgreSQLContainer<?> postgreSql = new PostgreSQLContainer<>(DockerImageName.parse("postgres:14.7"));
 
     protected DAOTestExtension db;
 
@@ -34,13 +32,12 @@ public abstract class AbstractMultipleDAOTest {
         postgreSql.start();
 
         DAOTestExtension.Builder builder = DAOTestExtension.newBuilder()
-            .customizeConfiguration(c -> c.setProperty(AvailableSettings.DIALECT, PostgreSQL10Dialect.class.getName()))
             .setDriver(postgreSql.getDriverClassName())
             .setUrl(postgreSql.getJdbcUrl())
             .setUsername(postgreSql.getUsername())
             .setPassword(postgreSql.getPassword());
 
-        for (Class clazz : clazzes ) {
+        for (Class<?> clazz : clazzes ) {
             builder.addEntityClass(clazz);
         }
 

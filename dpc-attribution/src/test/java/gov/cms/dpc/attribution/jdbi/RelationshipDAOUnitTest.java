@@ -4,6 +4,7 @@ import gov.cms.dpc.attribution.AbstractAttributionDAOTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import jakarta.persistence.SequenceGenerator;
 import org.hibernate.Session;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
@@ -16,7 +17,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Relationship data operations")
 class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 	private RelationshipDAO relationshipDAO;
 	private PatientDAO patientDAO;
@@ -35,6 +38,7 @@ class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 	}
 
 	@Test
+        @DisplayName("Batch search for attributions 🥳")
 	public void test_AttributionRelationship_batch_search_happy_path() {
 		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
 
@@ -74,6 +78,7 @@ class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 	}
 
 	@Test
+        @DisplayName("Search attributions with roster filtering 🥳")
 	public void test_AttributionRelationship_batch_search_only_finds_correct_roster() {
 		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
 
@@ -120,22 +125,20 @@ class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 	// failed inserts for duplicate keys.  Check that here to prevent someone from accidentally changing one and not the
 	// other.
 	@Test
+        @DisplayName("Verify internal database key integrity 🥳")
 	public void test_SequenceIncrementSizeMatches() throws ClassNotFoundException, NoSuchFieldException {
 		Field attributionID = ClassLoader.getSystemClassLoader()
 			.loadClass("gov.cms.dpc.common.entities.AttributionRelationship")
 			.getDeclaredField("attributionID");
 
-		GenericGenerator annotation = attributionID.getAnnotation(GenericGenerator.class);
-		Parameter[] parms = annotation.parameters();
+                SequenceGenerator annotation = attributionID.getAnnotation(SequenceGenerator.class);
 
-		Integer hibernateIncrement = Arrays.stream(parms)
-			.filter(parameter -> parameter.name().equals("increment_size"))
-			.map(parameter -> Integer.valueOf(parameter.value()))
-			.findAny().get();
+                 // Directly access the allocationSize property
+                int hibernateIncrement = annotation.allocationSize();
 
 		Session session = db.getSessionFactory().getCurrentSession();
 		String sql = "select increment_by from pg_sequences where sequencename = 'attributions_id_seq'";
-		int dbIncrement = ((BigInteger) session.createNativeQuery(sql).getSingleResult()).intValue();
+		int dbIncrement = (session.createNativeQuery(sql, BigInteger.class).getSingleResult()).intValue();
 
 		assertEquals(hibernateIncrement, dbIncrement);
 	}

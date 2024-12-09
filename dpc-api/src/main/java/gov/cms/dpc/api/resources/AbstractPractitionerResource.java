@@ -9,9 +9,9 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
-import javax.validation.Valid;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import java.util.UUID;
 
 @Path("/Practitioner")

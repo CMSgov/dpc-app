@@ -1,9 +1,8 @@
 package gov.cms.dpc.api.tasks;
 
+import jakarta.ws.rs.BadRequestException;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
 
@@ -20,13 +19,12 @@ public class TasksCommon {
      *
      * @param parameters - {@link Map} of parameters
      * @return - {@link Organization} extracted from query params
-     * @throws WebApplicationException if the organization ID is missing
      */
     public static Organization extractOrganization(Map<String, List<String>> parameters) {
         final List<String> organizationCollection = parameters.get(ORG_PARAM);
 
         if (organizationCollection == null || organizationCollection.isEmpty()) {
-            throw new WebApplicationException("Must have organization", Response.Status.BAD_REQUEST);
+            throw new BadRequestException("Must have organization");
         }
 
         final String organizationID = organizationCollection.get(0);

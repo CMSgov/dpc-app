@@ -11,11 +11,10 @@ import gov.cms.dpc.queue.exceptions.DataRetrievalException;
 import gov.cms.dpc.queue.exceptions.DataRetrievalRetryException;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
-import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,6 +28,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Coverage;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Resource;
 
 public class DataService {
 

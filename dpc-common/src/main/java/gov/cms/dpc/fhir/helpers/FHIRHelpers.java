@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import jakarta.ws.rs.InternalServerErrorException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -22,8 +23,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -99,12 +99,12 @@ public class FHIRHelpers {
      *
      * @param outcome - {@link MethodOutcome} to handle
      * @return - {@link Response} with {@link IBaseResource} and appropriate HTTP status
-     * @throws WebApplicationException with status {@link Response.Status#INTERNAL_SERVER_ERROR} if {@link MethodOutcome#getResource()} is null
+     * @throws InternalServerErrorException with status {@link Response.Status#INTERNAL_SERVER_ERROR} if {@link MethodOutcome#getResource()} is null
      */
     public static Response handleMethodOutcome(MethodOutcome outcome) {
         final IBaseResource resource = outcome.getResource();
         if (resource == null) {
-            throw new WebApplicationException("Unable to get resource.", Response.Status.INTERNAL_SERVER_ERROR);
+            throw new InternalServerErrorException("Unable to get resource.");
         }
         final Response.Status status = outcome.getCreated() != null ? Response.Status.CREATED : Response.Status.OK;
         Response.ResponseBuilder builder = Response.status(status).entity(resource);

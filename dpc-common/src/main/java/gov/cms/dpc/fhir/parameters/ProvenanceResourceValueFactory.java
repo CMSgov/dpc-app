@@ -1,15 +1,15 @@
 package gov.cms.dpc.fhir.parameters;
 
 import ca.uhn.fhir.context.FhirContext;
-import com.google.inject.Injector;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import org.glassfish.hk2.api.Factory;
 import org.hl7.fhir.dstu3.model.Provenance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * {@link Factory} for extracting a {@link org.hl7.fhir.dstu3.model.Provenance} resource from a request header.
@@ -19,30 +19,31 @@ public class ProvenanceResourceValueFactory implements Factory<Provenance> {
     static final String PROVENANCE_HEADER = "X-Provenance";
     private static final Logger logger = LoggerFactory.getLogger(ProvenanceResourceValueFactory.class);
 
-    private final Injector injector;
+    private final Provider<HttpServletRequest> requestProvider;
     private final FhirContext ctx;
 
-    ProvenanceResourceValueFactory(Injector injector, FhirContext ctx) {
-        this.injector = injector;
+    @Inject
+    public ProvenanceResourceValueFactory(Provider<HttpServletRequest> requestProvider, FhirContext ctx) {
+        this.requestProvider = requestProvider;
         this.ctx = ctx;
     }
 
     @Override
     public Provenance provide() {
-        final HttpServletRequest request = injector.getInstance(HttpServletRequest.class);
+        final HttpServletRequest request = requestProvider.get();
         final String headerValue = request.getHeader(PROVENANCE_HEADER);
+        
         if (headerValue == null) {
-            throw new WebApplicationException(String.format("Must have %s header", PROVENANCE_HEADER), Response.Status.BAD_REQUEST);
-        }
-        final Provenance provenance;
-        try {
-            provenance = ctx.newJsonParser().parseResource(Provenance.class, headerValue);
-        } catch (Exception e) {
-            logger.error("Cannot parse Provenance", e);
-            throw new WebApplicationException("Cannot parse FHIR `Provenance` resource", Response.Status.BAD_REQUEST);
+            String message = String.format("Must have %s header", PROVENANCE_HEADER);
+            throw new InvalidRequestException(message);
         }
 
-        return provenance;
+        try {
+            return ctx.newJsonParser().parseResource(Provenance.class, headerValue);
+        } catch (Exception e) {
+            logger.error("Cannot parse Provenance", e);
+            throw new InvalidRequestException("Cannot parse FHIR `Provenance` resource");
+        }
     }
 
     @Override
