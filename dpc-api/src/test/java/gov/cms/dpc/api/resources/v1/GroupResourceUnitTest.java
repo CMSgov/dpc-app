@@ -2,10 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.ICreate;
-import ca.uhn.fhir.rest.gclient.ICreateTyped;
-import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
-import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.api.APITestHelpers;
@@ -18,13 +15,11 @@ import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.testing.factories.FHIRGroupBuilder;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Answers;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.BadRequestException;
@@ -109,6 +104,13 @@ public class GroupResourceUnitTest {
         when(attributionClient.read().resource(Practitioner.class).withId(practitionerId.toString()).encodedJson()).thenReturn(readExec);
         when(readExec.execute()).thenReturn(practitioner);
 
+        Bundle bundle = new Bundle();
+        IQuery<IBaseBundle> queryExec = Mockito.mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        Mockito.when(attributionClient.search().forResource(any(Class.class)).where((ICriterion<?>) any()).and(any()).encodedJson()).thenReturn(queryExec);
+        IQuery<Bundle> mockQuery = Mockito.mock(IQuery.class);
+        Mockito.when(queryExec.returnBundle(any(Class.class))).thenReturn(mockQuery);
+        Mockito.when(mockQuery.execute()).thenReturn(bundle);
+
         Response response = resource.createRoster(organizationPrincipal, provenance, group);
         Group result = (Group) response.getEntity();
 
@@ -148,6 +150,13 @@ public class GroupResourceUnitTest {
         MethodOutcome outcome = new MethodOutcome();
         outcome.setResource(new Group());
         doReturn(outcome).when(iCreateTyped).execute();
+
+        Bundle bundle = new Bundle();
+        IQuery<IBaseBundle> queryExec = Mockito.mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        Mockito.when(attributionClient.search().forResource(any(Class.class)).where((ICriterion<?>) any()).and(any()).encodedJson()).thenReturn(queryExec);
+        IQuery<Bundle> mockQuery = Mockito.mock(IQuery.class);
+        Mockito.when(queryExec.returnBundle(any(Class.class))).thenReturn(mockQuery);
+        Mockito.when(mockQuery.execute()).thenReturn(bundle);
 
         // Run the create and verify that the org sent to attribution has the correct org tag
         resource.createRoster(organizationPrincipal, provenance, groupWithBadTag);

@@ -1,6 +1,8 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -13,6 +15,7 @@ import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPractitionerResource;
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
@@ -34,6 +37,8 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
+import static gov.cms.dpc.fhir.FHIRExtractors.getProviderNPI;
+import static gov.cms.dpc.fhir.helpers.FHIRHelpers.getPages;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
 @Api(value = "Practitioner", authorizations = @Authorization(value = "access_token"))
@@ -61,31 +66,27 @@ public class PractitionerResource extends AbstractPractitionerResource {
             "Otherwise, the method returns all Practitioners associated to the given Organization")
     @Override
     public Bundle practitionerSearch(@ApiParam(hidden = true)
-                                     @Auth OrganizationPrincipal organization,
+                                     @Auth OrganizationPrincipal organizationPrincipal,
                                      @ApiParam(value = "Provider NPI")
                                      @QueryParam(value = Practitioner.SP_IDENTIFIER) @NoHtml String providerNPI) {
 
         // Create search params
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("organization", Collections
-                .singletonList(organization
-                        .getOrganization()
-                        .getIdElement()
-                        .getIdPart()));
-
-        final var request = this.client
-                .search()
-                .forResource(Practitioner.class)
-                .encodedJson()
-                .returnBundle(Bundle.class);
 
         if (providerNPI != null && !providerNPI.equals("")) {
             searchParams.put("identifier", Collections.singletonList(providerNPI));
         }
 
-        return request
-                .whereMap(searchParams)
-                .execute();
+        Bundle bundle = this.client
+            .search()
+            .forResource(Practitioner.class)
+            .encodedJson()
+            .returnBundle(Bundle.class)
+            .withTag(DPCIdentifierSystem.DPC.getSystem(), organizationPrincipal.getID().toString())
+            .whereMap(searchParams)
+            .cacheControl(CacheControlDirective.noCache())
+            .execute();
+        return getPages(client, bundle);
     }
 
     @GET
@@ -145,12 +146,13 @@ public class PractitionerResource extends AbstractPractitionerResource {
     public Bundle bulkSubmitProviders(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
                                       @ApiParam Parameters params) {
         final Bundle providerBundle = (Bundle) params.getParameterFirstRep().getResource();
+        final Bundle filteredBundle = removeExistingPractitioners(organization, providerBundle);
         final Consumer<Practitioner> entryHandler = (resource) -> validateProvider(resource,
-                organization.getOrganization().getId(),
+                organization.getID().toString(),
                 validator,
                 PRACTITIONER_PROFILE);
 
-        return bulkResourceClient(Practitioner.class, client, entryHandler, providerBundle);
+        return bulkResourceClient(Practitioner.class, client, entryHandler, filteredBundle);
     }
 
     @DELETE
@@ -209,4 +211,32 @@ public class PractitionerResource extends AbstractPractitionerResource {
         APIHelpers.addOrganizationTag(provider, organizationID);
     }
 
+    private boolean practitionerExists(OrganizationPrincipal organization, Practitioner practitioner) {
+        Bundle bundle;
+        try {
+            bundle = practitionerSearch(organization, getProviderNPI(practitioner));
+        } catch (IllegalArgumentException e) {
+            // Practitioner has no npi
+            throw new WebApplicationException("Invalid practitioner", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
+        return bundle.getTotal() > 0;
+    }
+
+    // TODO: Aggregate this into one transaction, not one for each patient.  Spin off into a library.
+    private Bundle removeExistingPractitioners(OrganizationPrincipal organization, Bundle practitioners) {
+        BundleBuilder bundleBuilder = new BundleBuilder(client.getFhirContext());
+        practitioners
+            .getEntry()
+            .stream()
+            .filter(Bundle.BundleEntryComponent::hasResource)
+            .filter(entry -> entry.getResource().getResourceType().getPath().equals(DPCResourceType.Practitioner.getPath()))
+            .map(entry -> (Practitioner)(entry.getResource()))
+            .filter(practitioner -> !practitionerExists(organization, practitioner))
+            .forEach(bundleBuilder::addCollectionEntry);
+
+        Bundle filteredPractitioners = bundleBuilder.getBundleTyped();
+        filteredPractitioners.setTotal(filteredPractitioners.getEntry().size());
+
+        return filteredPractitioners;
+    }
 }
