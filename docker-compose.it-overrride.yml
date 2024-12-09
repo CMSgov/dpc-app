@@ -1,0 +1,8 @@
+services:
+
+  tests:
+    command: [ "/bin/bash", "-c", "trap : TERM INT; sleep infinity & wait" ]
+    environment:
+      - IT_CMD=mvn verify -Pintegration-tests -am -ntp -Djib.skip=true > /tmp/it.out 2> /tmp/it.err &
+      - IT_CMD_V=mvn verify -Pintegration-tests -am -ntp -Dtest.verbosity=true -Djib.skip=true > /tmp/it.out 2> /tmp/it.err &
+      - IT_CMD_F=mvn verify -Pintegration-tests -am -ntp -Dtest.verbosity=true -Ddisable.console=false -Djib.skip=true > /tmp/it.out 2> /tmp/it.err &
