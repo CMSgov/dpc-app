@@ -12,13 +12,15 @@ class AoInvitationService
                                    provider_organization: organization,
                                    invitation_type: :authorized_official)
 
+    InvitationMailer.with(invitation:, given_name:, family_name:).invite_ao.deliver_now
+
+    organization.reload
+    dpc_api_organization_id = organization.dpc_api_organization_id
     AsyncLoggerJob.perform_later(:info, ['Authorized Official invited',
                                          { actionContext: LoggingConstants::ActionContext::Registration,
                                            actionType: LoggingConstants::ActionType::AoInvited,
-                                           organization: { id: invitation.provider_organization_id },
+                                           organization: { id: organization.id, dpc_api_organization_id: },
                                            invitation: invitation.id }])
-
-    InvitationMailer.with(invitation:, given_name:, family_name:).invite_ao.deliver_now
 
     invitation
   end
