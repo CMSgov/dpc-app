@@ -11,8 +11,7 @@ RSpec.describe AsyncLoggerJob, type: :job do
                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
                   actionType: LoggingConstants::ActionType::AoHasWaiver }]
       allow(Rails.logger).to receive(:info)
-      expect(Rails.logger).to receive(:info)
-        .with(params)
+      expect(Rails.logger).to receive(:info).with(params)
       AsyncLoggerJob.perform_now(:info, params)
     end
     it 'should log at :unknown if level not available' do
@@ -20,8 +19,7 @@ RSpec.describe AsyncLoggerJob, type: :job do
                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
                   actionType: LoggingConstants::ActionType::AoHasWaiver }]
       allow(Rails.logger).to receive(:unknown)
-      expect(Rails.logger).to receive(:unknown)
-        .with(params)
+      expect(Rails.logger).to receive(:unknown).with(params)
       AsyncLoggerJob.perform_now(:foo, params)
     end
   end
