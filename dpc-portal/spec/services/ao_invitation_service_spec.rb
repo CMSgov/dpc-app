@@ -80,8 +80,10 @@ describe AoInvitationService do
       expect(ProviderOrganization).to receive(:find_or_create_by).with(npi: organization_npi).and_return(organization)
 
       invitation_id = 123
+      organization_id = 345
       invitation = instance_double(Invitation)
       expect(invitation).to receive(:id).and_return(invitation_id)
+      expect(invitation).to receive(:provider_organization_id).and_return(organization_id)
       expect(Invitation).to receive(:create).and_return(invitation)
 
       mailer = double(InvitationMailer)
@@ -92,6 +94,7 @@ describe AoInvitationService do
       log_params = ['Authorized Official invited',
                     { actionContext: LoggingConstants::ActionContext::Registration,
                       actionType: LoggingConstants::ActionType::AoInvited,
+                      organization: { id: organization_id },
                       invitation: invitation_id }]
       expect(AsyncLoggerJob).to receive(:perform_later).with(:info, log_params)
 
