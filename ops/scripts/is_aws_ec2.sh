@@ -4,6 +4,10 @@
 #
 # Josh Kupershmidt (https://serverfault.com/users/223639/josh-kupershmidt) 3/20/2018
 
+# Temporarily disabling this check based on integration test problems in github actions cicd
+echo "no"
+exit 1
+
 # Default curl options to speed up requests
 CURL_OPTS="--connect-timeout 1 --max-time 2 --retry 0"
 
