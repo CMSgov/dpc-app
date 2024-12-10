@@ -61,7 +61,7 @@ docker compose -p start-v1-app up start_api_dependencies
 AUTH_DISABLED=true docker compose -p start-v1-app up start_api start_consent
 
 # Run the Postman tests
-npm install
+# npm install
 npm run test
 
 # Wait for Jacoco to finish writing the output files

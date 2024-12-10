@@ -18,13 +18,17 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.DisplayName;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
+@DisplayName("FHIR request filtering")
 public class FHIRRequestFilterTest {
 
     private static final FHIRRequestFilter filter = new FHIRRequestFilter();
 
     @Test
+@DisplayName("Accept FHIR request 🥳")
+
     void testSuccess() throws URISyntaxException {
         final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
         Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.singletonList(FHIRMediaTypes.FHIR_JSON));
@@ -36,6 +40,8 @@ public class FHIRRequestFilterTest {
     }
 
     @Test
+@DisplayName("Filter FHIR request with missing header 🤮")
+
     void testMissingAcceptsHeaderForExport() throws URISyntaxException {
         final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
         Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.singletonList(FHIRMediaTypes.FHIR_JSON));
@@ -48,6 +54,8 @@ public class FHIRRequestFilterTest {
     }
 
     @Test
+@DisplayName("Filter FHIR request with invalid header 🤮")
+
     void testIncorrectAcceptsHeaderForExport() throws URISyntaxException {
         final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
         Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.singletonList(FHIRMediaTypes.FHIR_JSON));
@@ -60,6 +68,8 @@ public class FHIRRequestFilterTest {
     }
 
     @Test
+@DisplayName("Filter FHIR request with unsupported header 🤮")
+
     void testWildcardAcceptsHeaderForExport() throws URISyntaxException {
         final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
         Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.singletonList(FHIRMediaTypes.FHIR_JSON));
@@ -72,6 +82,8 @@ public class FHIRRequestFilterTest {
     }
 
     @Test
+@DisplayName("Accept FHIR request with nested header value 🥳")
+
     void testNestedAcceptsHeader() throws URISyntaxException {
         final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
         Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.singletonList(FHIRMediaTypes.FHIR_JSON));
@@ -84,6 +96,8 @@ public class FHIRRequestFilterTest {
     }
 
     @Test
+@DisplayName("Filter FHIR request with null header value 🤮")
+
     void testNullAcceptsHeader() throws URISyntaxException {
         final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
         Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.singletonList(FHIRMediaTypes.FHIR_JSON));
@@ -97,6 +111,8 @@ public class FHIRRequestFilterTest {
     }
 
     @Test
+@DisplayName("Filter FHIR request with incorrect header 🤮")
+
     void testIncorrectContentHeader() throws URISyntaxException {
         final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
         Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.singletonList("application/fire+json"));
@@ -109,6 +125,8 @@ public class FHIRRequestFilterTest {
     }
 
     @Test
+@DisplayName("Accept FHIR request with null header value 🥳")
+
     void testNullContentHeader() throws URISyntaxException {
         final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
         Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(null);
@@ -120,6 +138,8 @@ public class FHIRRequestFilterTest {
     }
 
     @Test
+@DisplayName("Accept FHIR request with multi-value header 🥳")
+
     void testTestedContentHeader() throws URISyntaxException {
         final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
         Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(List.of("application/fire+json", FHIRMediaTypes.FHIR_JSON));

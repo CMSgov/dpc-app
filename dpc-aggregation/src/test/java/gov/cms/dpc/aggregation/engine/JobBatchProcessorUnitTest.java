@@ -32,8 +32,11 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Job batch processing")
+
 class JobBatchProcessorUnitTest {
     private static final String exportPath = "/tmp";
     private static final String TEST_ORG_NPI = NPIUtil.generateNPI();
@@ -64,7 +67,8 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
-    public void testHappyPath() {
+    @DisplayName("Queue and process job 🥳")
+public void testHappyPath() {
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
 
         OperationsConfig operationsConfig = getOperationsConfig();
@@ -99,7 +103,8 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
-    public void testHappyPath_lookBackExempt() {
+    @DisplayName("Queue and process look back exempt job 🥳")
+public void testHappyPath_lookBackExempt() {
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
 
         IJobQueue queue = new MemoryBatchQueue();
@@ -144,7 +149,8 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
-    public void testHappyPath_MoreThanOnePatientInJob() {
+    @DisplayName("Queue and process multi-patient job 🥳")
+public void testHappyPath_MoreThanOnePatientInJob() {
         List<String> mbis = List.of(
                 MockBlueButtonClient.TEST_PATIENT_MBIS.get(0),
                 MockBlueButtonClient.TEST_PATIENT_MBIS.get(1)
@@ -204,7 +210,8 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
-    public void testHappyPath_NoConsent() {
+    @DisplayName("Queue and process no-consent/opt-in job 🥳")
+public void testHappyPath_NoConsent() {
         // No consent records gets treated like an opt in by the JobBatchProcessor
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
@@ -241,7 +248,8 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
-    public void testHappyPath_AllResources() {
+    @DisplayName("Queue and process job with multiple resource types 🥳")
+public void testHappyPath_AllResources() {
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
 
         OperationsConfig operationsConfig = getOperationsConfig();
@@ -276,7 +284,8 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
-    public void testError_LoadingPatientByMbi() throws GeneralSecurityException {
+    @DisplayName("Queue and process job using patient MBI 🥳")
+public void testError_LoadingPatientByMbi() throws GeneralSecurityException {
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
 
         OperationsConfig operationsConfig = getOperationsConfig();
@@ -311,7 +320,8 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
-    public void testError_MultiplePatientsForMbi() throws GeneralSecurityException {
+    @DisplayName("Queue and process job with partial success 🤮")
+public void testError_MultiplePatientsForMbi() throws GeneralSecurityException {
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
 
         OperationsConfig operationsConfig = getOperationsConfig();
@@ -350,7 +360,8 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
-    public void testError_ConsentServiceException() {
+    @DisplayName("Queue and process job with consent service exception 🤮")
+public void testError_ConsentServiceException() {
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
 
         OperationsConfig operationsConfig = getOperationsConfig();
@@ -385,7 +396,8 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
-    public void testPatientOptOut() {
+    @DisplayName("Queue and process job with opted-out patient 🤮")
+public void testPatientOptOut() {
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
 
         OperationsConfig operationsConfig = getOperationsConfig();
@@ -420,7 +432,8 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
-    public void testFailsLookBackCheck() {
+    @DisplayName("Queue and process job with failed look-back 🤮")
+public void testFailsLookBackCheck() {
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
         String id = MockBlueButtonClient.MBI_BENE_ID_MAP.get(mbi);
 
@@ -459,7 +472,8 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
-    public void testError_NoPractitionerAndOrgLookBack() {
+    @DisplayName("Queue and process job with missing org and provider 🤮")
+public void testError_NoPractitionerAndOrgLookBack() {
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
 
         OperationsConfig operationsConfig = getOperationsConfig();

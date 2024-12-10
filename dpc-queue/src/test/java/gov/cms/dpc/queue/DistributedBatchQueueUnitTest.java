@@ -17,6 +17,9 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("Distributed job queue")
+
 
 class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 	DistributedBatchQueueUnitTest() {
@@ -35,6 +38,8 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 	}
 
 	@Test
+@DisplayName("Verify empty queue has no age 🥳")
+
 	void test_queueAge_returns_0_on_empty() {
 		Transaction transaction = session.beginTransaction();
 		Query query = session.createQuery("DELETE from job_queue_batch");
@@ -45,6 +50,8 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 	}
 
 	@Test
+@DisplayName("Verify populated queue has an age 🥳")
+
 	void test_queueAge_works() {
 		Transaction transaction = session.beginTransaction();
 

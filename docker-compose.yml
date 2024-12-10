@@ -110,11 +110,14 @@ services:
     image: maven:3.6-jdk-11
     env_file:
       - ./ops/config/decrypted/local.env
+    environment:
+      - TEST_VERBOSITY=${TEST_VERBOSITY:-false}
     volumes:
       - export-volume:/tmp
       - ./:/usr/src/mymaven
+      - "${HOME}/.m2:/root/.m2"
     working_dir: /usr/src/mymaven
-    command: sh -c "mvn test -Pintegration-tests -am -ntp"
+    command: sh -c "mvn verify -Pintegration-tests -am -ntp -Djib.skip=true $${TEST_VERBOSITY+$( [ \"$$TEST_VERBOSITY\" = \"true\" ] && echo '-Dtest.verbosity=true' )}"
     network_mode: host
 
 volumes:

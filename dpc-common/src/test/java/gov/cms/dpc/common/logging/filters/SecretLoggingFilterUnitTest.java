@@ -14,13 +14,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(SystemStubsExtension.class)
+@DisplayName("Secret logging filter")
+
 class SecretLoggingFilterUnitTest {
 
 	@SystemStub
 	private EnvironmentVariables envVars;
 	@Test
+@DisplayName("Deny log entry 🥳")
+
 	void test_canDenyLogs() {
 		envVars.set("TEST_SECRET", "test_secret");
 
@@ -35,6 +40,8 @@ class SecretLoggingFilterUnitTest {
 	}
 
 	@Test
+@DisplayName("Accept log entry 🥳")
+
 	void test_canAcceptLogs() {
 		envVars.set("TEST_SECRET", "test_secret");
 
@@ -49,6 +56,8 @@ class SecretLoggingFilterUnitTest {
 	}
 
 	@Test
+@DisplayName("Accept logging with missing secret 🥳")
+
 	void test_canHandleMissingSecrets() {
 		envVars.remove("NON_EXISTENT_SECRET");
 

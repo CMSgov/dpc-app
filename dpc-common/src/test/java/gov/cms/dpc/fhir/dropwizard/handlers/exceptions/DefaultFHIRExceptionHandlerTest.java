@@ -11,8 +11,10 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 
 
+@DisplayName("FHIR exception handling")
 public class DefaultFHIRExceptionHandlerTest {
 
     @Test
@@ -31,6 +33,8 @@ public class DefaultFHIRExceptionHandlerTest {
     }
 
     @Test
+@DisplayName("Cause FHIR exception for other error 🤮")
+
     void testToResponse_fhirException_otherException() {
         ResourceInfo info = Mockito.mock(ResourceInfo.class);
         Mockito.when(info.getResourceClass()).thenAnswer(answer -> FHIRResourceClass.class);
@@ -46,6 +50,8 @@ public class DefaultFHIRExceptionHandlerTest {
     }
 
     @Test
+@DisplayName("Cause non-FHIR exception 🤮")
+
     void testToResponse_nonFhirException() {
         final DefaultFHIRExceptionHandler handler = new DefaultFHIRExceptionHandler(Mockito.mock(ResourceInfo.class));
 

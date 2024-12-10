@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Test;
 import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("AWS-based distributed batch queue")
+
 
 class AwsDistributedBatchQueueUnitTest {
 	private AwsDistributedBatchQueue queue;
@@ -22,6 +25,8 @@ class AwsDistributedBatchQueueUnitTest {
 	private final Slf4jReporter sizeReporter = mock(Slf4jReporter.class);
 
 	@Test
+@DisplayName("Started a queue reporter 🥳")
+
 	void testReporterStarted() {
 		metricRegistry = new MetricRegistry();
 		config = new DPCAwsQueueConfiguration()

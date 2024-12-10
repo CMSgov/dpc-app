@@ -6,8 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Checksum calculation")
+
 class ChecksumParamConverterTest {
 
     private final ChecksumParamConverter converter = new ChecksumParamConverter();
@@ -17,6 +20,8 @@ class ChecksumParamConverterTest {
     }
 
     @Test
+@DisplayName("GZIP checksum 🥳")
+
     void testGzipChecksum() {
         final String checksum = "checksum--gzip";
 
@@ -24,6 +29,8 @@ class ChecksumParamConverterTest {
     }
 
     @Test
+@DisplayName("Simple checksum 🥳")
+
     void testSimpleChecksum() {
         final String checksum = "checksum";
 
@@ -31,6 +38,8 @@ class ChecksumParamConverterTest {
     }
 
     @Test
+@DisplayName("Malformed checksum 🤮")
+
     void testMalformedChecksum() {
         final String checksum = "checksum-deflate";
 
@@ -38,6 +47,8 @@ class ChecksumParamConverterTest {
     }
 
     @Test
+@DisplayName("Null checksum 🥳")
+
     void testNullChecksum() {
         assertNull(converter.fromString(null), "Should have null value");
     }

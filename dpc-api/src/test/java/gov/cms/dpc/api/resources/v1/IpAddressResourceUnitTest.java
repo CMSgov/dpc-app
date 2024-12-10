@@ -22,8 +22,11 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Inet resource operations")
+
 class IpAddressResourceUnitTest {
     IpAddressResource ipAddressResource;
     OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
@@ -37,7 +40,8 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
-    public void testGet() {
+    @DisplayName("Get IP address 🥳")
+public void testGet() {
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of(ipAddressEntity));
@@ -48,7 +52,8 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
-    public void testGet_nothingReturned() {
+    @DisplayName("Get empty list when no IP addresses are defined 🥳")
+public void testGet_nothingReturned() {
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of());
 
         CollectionResponse response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
@@ -56,7 +61,8 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
-    public void testPost_happyPath() {
+    @DisplayName("Add an IP address 🥳")
+public void testPost_happyPath() {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("192.168.1.1");
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
@@ -68,7 +74,8 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
-    public void testPost_badIp() {
+    @DisplayName("Add an invalid IP address 🤮")
+public void testPost_badIp() {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("1.bad.ip.addr");
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
@@ -78,7 +85,8 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
-    public void testPost_tooManyIps() {
+    @DisplayName("Add too many IP addresses 🤮")
+public void testPost_tooManyIps() {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("192.168.1.1");
 
         List<IpAddressEntity> existingIps = new ArrayList<>();
@@ -94,7 +102,8 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
-    public void testDelete_happyPath() {
+    @DisplayName("Delete IP address 🥳")
+public void testDelete_happyPath() {
         UUID ipId = UUID.randomUUID();
         IpAddressEntity existingIp = new IpAddressEntity().setId(ipId);
 
@@ -105,7 +114,8 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
-    public void testDelete_notFound() {
+    @DisplayName("Unrecognized IP address 🤮")
+public void testDelete_notFound() {
         IpAddressEntity existingIp = new IpAddressEntity().setId(UUID.randomUUID());
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of(existingIp));

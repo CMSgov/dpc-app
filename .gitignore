@@ -64,3 +64,4 @@ dpc-go/dpc-attribution/src/attribution
 #BFD Certs
 dpc-go/dpc-attribution/shared_files/decrypted/*
 !dpc-go/dpc-attribution/shared_files/decrypted/README.md
+!/tmp/
