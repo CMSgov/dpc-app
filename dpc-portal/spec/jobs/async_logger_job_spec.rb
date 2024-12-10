@@ -8,20 +8,20 @@ RSpec.describe AsyncLoggerJob, type: :job do
   describe :perform do
     it 'should log what receives' do
       params = ['Authorized official has a waiver',
-                                       { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                                         actionType: LoggingConstants::ActionType::AoHasWaiver }]
+                { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                  actionType: LoggingConstants::ActionType::AoHasWaiver }]
       allow(Rails.logger).to receive(:info)
       expect(Rails.logger).to receive(:info)
-                                .with(params)
+        .with(params)
       AsyncLoggerJob.perform_now(:info, params)
     end
     it 'should log at :unknown if level not available' do
       params = ['Authorized official has a waiver',
-                                       { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                                         actionType: LoggingConstants::ActionType::AoHasWaiver }]
+                { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                  actionType: LoggingConstants::ActionType::AoHasWaiver }]
       allow(Rails.logger).to receive(:unknown)
       expect(Rails.logger).to receive(:unknown)
-                                .with(params)
+        .with(params)
       AsyncLoggerJob.perform_now(:foo, params)
     end
   end
