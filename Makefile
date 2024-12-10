@@ -1,5 +1,6 @@
-IS_AWS_EC2=$(shell [ "$$(./ops/scripts/is_aws_ec2.sh)" = "no" ] && echo "-f docker-compose.override.yml" )
 REPORT_COVERAGE ?= false
+THIS_IS_GITHUB ?= false
+IS_AWS_EC2=$(shell [ "$(THIS_IS_GITHUB)" = "true" ] && echo "no" || ([ "$$(./ops/scripts/is_aws_ec2.sh)" = "no" ] && echo "-f docker-compose.override.yml"))
 
 ifdef DOCKER_PROJECT_NAME
         DOCKER_PROJ:="-p${DOCKER_PROJECT_NAME}"
@@ -247,7 +248,7 @@ api: secure-envs
 
 .PHONY: ci-app
 ci-app: docker-base secure-envs
-	@./dpc-test.sh
+	@THIS_IS_GITHUB=$(THIS_IS_GITHUB) ./dpc-test.sh
 
 .PHONY: ci-portals
 ci-portals: secure-envs
