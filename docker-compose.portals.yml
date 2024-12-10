@@ -24,6 +24,7 @@ services:
       - ./tmp/letter_opener/web:/dpc-web/tmp/letter_opener
       - "./dpc-web/Gemfile.lock:/dpc-web/Gemfile.lock"
       - "./dpc-web/app:/dpc-web/app"
+      - "./dpc-web/db:/dpc-web/db"
       - "./dpc-web/spec:/dpc-web/spec"
     environment:
       - REDIS_URL=redis://redis
