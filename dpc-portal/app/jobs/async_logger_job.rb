@@ -4,7 +4,7 @@
 # Actions activated by rake tasks on AWS servers are not logging to CloudWatch, so we need
 # to have sidekiq do the logging, since its logs seem to go through
 class AsyncLoggerJob < ApplicationJob
-  queue_as :default
+  queue_as :portal
   LOGGER_LEVELS = %i[debug info warn error fatal].freeze
 
   def perform(level, args)
