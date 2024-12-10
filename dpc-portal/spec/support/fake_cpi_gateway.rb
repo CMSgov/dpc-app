@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'sinatra/base'
+require 'webrick'
 
 # This class simulates the CPI API Gateway and the IDM identity service
 #
@@ -25,7 +26,7 @@ require 'sinatra/base'
 #     Valid for testing in Login.gov
 #     AO SSNS: 900111111
 class FakeCpiGateway < Sinatra::Base
-  set :server, 'thin'
+  set :server, 'webrick'
 
   set(:method) do |method|
     method = method.to_s.upcase
@@ -33,10 +34,7 @@ class FakeCpiGateway < Sinatra::Base
   end
 
   before method: :post do
-    if request.env['CONTENT_TYPE'] == 'application/json'
-      request.body.rewind
-      @request_payload = JSON.parse request.body.read
-    end
+    @request_payload = JSON.parse(request.body.read) if request.env['CONTENT_TYPE'] == 'application/json'
   end
 
   # IDM identity service
