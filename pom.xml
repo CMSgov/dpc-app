@@ -512,7 +512,7 @@
                                         <arg>-XDcompilePolicy=simple</arg>
                                         <!--All ErrorProne configuration options need to be included in a single arg line-->
                                         <arg>-Xplugin:ErrorProne -XepExcludedPaths:.*/target/generated-sources/.*
-                                            -Xep:MissingSummary:OFF -Xep:EmptyBlockTag:OFF -Xep:UnusedVariable:OFF
+                                            -Xep:EmptyBlockTag:OFF -Xep:MissingSummary:OFF -Xep:UnusedVariable:OFF
                                             -Xep:RemoveUnusedImports:ERROR
                                         </arg>
                                         <!-- Tell ErrorProne to ignore checking for processed annotations-->

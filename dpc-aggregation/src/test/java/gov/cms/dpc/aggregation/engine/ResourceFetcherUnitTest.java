@@ -116,7 +116,7 @@ class ResourceFetcherUnitTest {
         ResourceFetcher fetcher = Mockito.spy(
                 getResourceFetcher(
                     DPCResourceType.Patient,
-                        MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
+                    MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
                     MockBlueButtonClient.BFD_TRANSACTION_TIME,
                     bbClient
                 )
@@ -137,7 +137,7 @@ class ResourceFetcherUnitTest {
         ResourceFetcher fetcher = Mockito.spy(
                 getResourceFetcher(
                     DPCResourceType.Patient,
-                        MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
+                    MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
                     MockBlueButtonClient.BFD_TRANSACTION_TIME,
                     bbClient
             )
