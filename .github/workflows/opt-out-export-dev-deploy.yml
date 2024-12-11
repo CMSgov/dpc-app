@@ -1,12 +1,12 @@
 name: opt-out-export dev deploy
 
-inputs:
-  octocats:
-    description: environment
-    required: false
-    default: 'dev'
 on:
   workflow_dispatch:
+    inputs:
+      octocats:
+        description: environment
+        required: false
+        default: 'dev'
   push:
     branches:
       - main
@@ -20,7 +20,9 @@ jobs:
       contents: read
       id-token: write
     runs-on: ubuntu-latest
-    environment: foo
+    env:
+      INPUT_ENVIRONMENT: ${{ github.event.inputs.octocats }}
+    environment: ${{ github.event.inputs.octocats }}
     steps:
-      - name: Upload and reload
+      - name: Write out env
         run: env
