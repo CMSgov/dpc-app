@@ -98,18 +98,6 @@ echo "│                                      │"
 echo "└──────────────────────────────────────┘"
 TEST_VERBOSITY="$TEST_VERBOSITY" DOCKER_PROJECT_NAME="$PROJECT_NAME" make int-tests-cicd
 
-# Check for unhealthy containers
-echo "Checking for unhealthy containers..."
-UNHEALTHY_CONTAINERS=$(docker ps | grep unhealthy | wc -l | xargs)
-echo "There were $UNHEALTHY_CONTAINERS"
-if [ "$UNHEALTHY_CONTAINERS" != 0 ]; then
-    echo "${UNHEALTHY_CONTAINERS} unhealthy container$( [ "$UNHEALTHY_CONTAINERS" != 1 ] && echo 's' ). You can debug or stop $( [ "$UNHEALTHY_CONTAINERS" != 1 ] && echo 'them' || echo 'it' )."
-    docker ps -f json > /tmp/chuck-ps.log
-    CONTAINER_ID=$(docker ps | grep consent | awk '{print $1;}')
-    docker logs "$CONTAINER_ID" > /tmp/container-log.log
-    sleep 15000
-fi
-
 docker compose -p "$PROJECT_NAME" down
 docker volume rm "${PROJECT_NAME}_pgdata16"
 echo "^^^^^^^^^^^^^^^"
@@ -124,18 +112,6 @@ echo "└───────────────────────�
 
 # Start the API server
 AUTH_DISABLED=true DOCKER_PROJECT_NAME="$PROJECT_NAME" make start-mock-app
-
-# Check for unhealthy containers
-echo "Checking for unhealthy containers..."
-UNHEALTHY_CONTAINERS=$(docker ps | grep unhealthy | wc -l | xargs)
-echo "There were $UNHEALTHY_CONTAINERS"
-if [ "$UNHEALTHY_CONTAINERS" != 0 ]; then
-    echo "${UNHEALTHY_CONTAINERS} unhealthy container$( [ "$UNHEALTHY_CONTAINERS" != 1 ] && echo 's' ). You can debug or stop $( [ "$UNHEALTHY_CONTAINERS" != 1 ] && echo 'them' || echo 'it' )."
-    docker ps -f json > /tmp/chuck-ps.log
-    CONTAINER_ID=$(docker ps | grep consent | awk '{print $1;}')
-    docker logs "$CONTAINER_ID" > /tmp/container-log.log
-    sleep 15000
-fi
 
 # Run the Postman tests
 npm run test

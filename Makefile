@@ -296,13 +296,13 @@ unit-tests:
 
 .PHONY: int-tests
 int-tests: 
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up tests
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) down
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) up tests
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) down
 
 .PHONY: int-tests-cicd
 int-tests-cicd: 
-	@TEST_VERBOSITY=true docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --exit-code-from tests tests
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) down
+	@TEST_VERBOSITY=true docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) up --exit-code-from tests tests
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) down
 
 .PHONY: sys-tests
 sys-tests:
