@@ -1,7 +1,17 @@
-name: opt-out-export dev deploy
+name: opt-out-export deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      dispatch_environment:
+        description: environment
+        required: false
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - test
+          - prod
   push:
     branches:
       - main
