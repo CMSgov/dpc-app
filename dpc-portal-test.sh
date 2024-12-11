@@ -1,9 +1,13 @@
 #!/bin/bash
 
-IS_AWS_EC2="no" #future --> $(./ops/scripts/is_aws_ec2.sh);
+if [ -z "${IS_AWS_EC2+x}" ]; then
+  IS_AWS_EC2=$(./ops/scripts/is_aws_ec2.sh)
+fi
+
 if [ "$IS_AWS_EC2" == "no" ]; then
   LOCAL_DOCKER_OVERRIDE="-f docker-compose.override.yml";
 fi
+
 PROJECT_NAME="${PORTAL_PROJ_NAME:-start-v1-portals}";
 
 set -e

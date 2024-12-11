@@ -248,39 +248,39 @@ api: secure-envs
 
 .PHONY: ci-app
 ci-app: docker-base secure-envs
-	@./dpc-test.sh
+	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-test.sh
 
 .PHONY: ci-portals
 ci-portals: secure-envs
-	@./dpc-portals-test.sh
+	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-portals-test.sh
 
 .PHONY: ci-portals-v1
 ci-portals-v1: secure-envs
-	@./dpc-portals-test.sh
+	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-portals-test.sh
 
 .PHONY: ci-admin-portal
 ci-admin-portal: secure-envs
-	@./dpc-admin-portal-test.sh
+	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-admin-portal-test.sh
 
 .PHONY: ci-portal
 ci-portal: secure-envs
-	@./dpc-portal-test.sh
+	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-portal-test.sh
 
 .PHONY: ci-portal-accessibility
 ci-portal-accessibility: secure-envs
-	@./dpc-portal-accessibility-test.sh
+	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-portal-accessibility-test.sh
 
 .PHONY: ci-web-portal
 ci-web-portal: secure-envs
-	@./dpc-web-portal-test.sh
+	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-web-portal-test.sh
 
 .PHONY: ci-api-client
 ci-api-client:
-	@./dpc-api-client-test.sh
+	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-api-client-test.sh
 
 .PHONY: unit-tests
 unit-tests:
-	@bash ./dpc-unit-test.sh
+	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-unit-test.sh
 
 .PHONY: int-tests
 int-tests: 

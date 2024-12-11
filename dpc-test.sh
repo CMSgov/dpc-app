@@ -12,7 +12,9 @@ if [ -z "$TEST_VERBOSITY" ]; then
 fi
 
 # Check if running on AWS EC2
-IS_AWS_EC2=$(./ops/scripts/is_aws_ec2.sh)
+if [ -z "${IS_AWS_EC2+x}" ]; then
+  IS_AWS_EC2=$(./ops/scripts/is_aws_ec2.sh)
+fi
 echo "I got an AWS response as $IS_AWS_EC2"
 
 # Set script options for error handling
