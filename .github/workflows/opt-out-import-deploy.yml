@@ -1,4 +1,4 @@
-name: opt-out-import dev deploy
+name: opt-out-import deploy
 
 on:
   workflow_dispatch:
@@ -17,10 +17,10 @@ on:
       - main
     paths:
       - lambda/opt-out-import/**
-      - .github/workflows/opt-out-import-dev-deploy.yml
+      - .github/workflows/opt-out-import-deploy.yml
 
 jobs:
-  test:
+  deploy import lambda:
     permissions:
       contents: read
       id-token: write

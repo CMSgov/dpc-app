@@ -17,10 +17,10 @@ on:
       - main
     paths:
       - lambda/opt-out-export/**
-      - .github/workflows/opt-out-export-dev-deploy.yml
+      - .github/workflows/opt-out-export-deploy.yml
 
 jobs:
-  test:
+  deploy export lambda:
     permissions:
       contents: read
       id-token: write
