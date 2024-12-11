@@ -77,7 +77,6 @@ describe AoInvitationService do
 
     it 'logs on success' do
       organization = instance_double(ProviderOrganization)
-
       expect(ProviderOrganization).to receive(:find_or_create_by).with(npi: organization_npi).and_return(organization)
 
       invitation_id = 123
