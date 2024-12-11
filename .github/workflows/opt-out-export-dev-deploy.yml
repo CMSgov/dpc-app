@@ -25,4 +25,5 @@ jobs:
         working-directory: ./lambda/opt-out-export
     environment: foo
     steps:
-      run: env
+      - name: Upload and reload
+        run: env
