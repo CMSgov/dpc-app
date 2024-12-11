@@ -3,7 +3,7 @@
 class FhirEndpoint < ApplicationRecord
   belongs_to :registered_organization
 
-  enum status: {
+  enum :status, {
     'test' => 0,
     'active' => 1,
     'suspended' => 2,

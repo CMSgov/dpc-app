@@ -23,7 +23,7 @@ class User < ApplicationRecord
          :timeoutable, :recoverable, :confirmable,
          :password_expirable, :password_archivable
 
-  enum requested_organization_type: ORGANIZATION_TYPES
+  enum :requested_organization_type, ORGANIZATION_TYPES
 
   validate :password_complexity
   validates :requested_organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }

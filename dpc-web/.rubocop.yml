@@ -4,6 +4,7 @@ require:
   rubocop-performance
 
 AllCops:
+  SuggestExtensions: false
   NewCops: enable
   TargetRubyVersion: 3.3
   Exclude:
