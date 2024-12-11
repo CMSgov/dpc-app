@@ -25,7 +25,7 @@ HealthCheck.setup do |config|
     #config.buckets = {}
   
     # You can customize which checks happen on a standard health check, eg to set an explicit list use:
-    config.standard_checks = [ 'database', 'migrations', 'site' ]
+    config.standard_checks = [ 'database', 'site' ]
   
     # Or to exclude one check:
     #config.standard_checks -= [ 'emailconf' ]
