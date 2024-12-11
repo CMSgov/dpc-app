@@ -1,12 +1,12 @@
 name: opt-out-export dev deploy
 
+inputs:
+  octocats:
+    description: environment
+    required: false
+    default: 'dev'
 on:
   workflow_dispatch:
-    inputs:
-      octocats:
-        description: environment
-        required: false
-        default: 'dev'
   push:
     branches:
       - main
