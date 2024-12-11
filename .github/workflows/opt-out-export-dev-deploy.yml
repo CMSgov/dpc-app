@@ -7,6 +7,11 @@ on:
         description: environment
         required: false
         default: 'dev'
+        type: choice
+        options:
+          - dev
+          - test
+          - prod
   push:
     branches:
       - main
