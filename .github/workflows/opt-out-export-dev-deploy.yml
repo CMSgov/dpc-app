@@ -25,6 +25,10 @@ jobs:
         working-directory: ./lambda/opt-out-export
     environment: $INPUT_ENVIRONMENT
     steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ $INPUT_ENVIRONMENT }}-github-actions
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
       - name: Build opt-out-export zip file
@@ -33,10 +37,6 @@ jobs:
         run: |
           go build -o bootstrap main.go db.go
           zip function.zip bootstrap
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-$INPUT_ENVIRONMENT-github-actions
       - name: Upload and reload
         run: |
           aws s3 cp --no-progress function.zip \
