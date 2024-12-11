@@ -11,23 +11,22 @@ import java.security.Key;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
+import java.util.Set;
 import java.util.UUID;
 
 /**
- * Implementation of {@link SigningKeyResolverAdapter} that simply verifies whether or not the required claims and values are present.
+ * Implementation of {@link SigningKeyResolverAdapter} that simply verifies whether the required claims and values are present.
  * As far as I can tell, this is the only way to get access to the JWS claims without actually verifying the signature.
  * See: https://github.com/jwtk/jjwt/issues/205
  * <p>
  * The downside is that this method will always return a null {@link Key}, which means the {@link Jwts#parser()} method will always throw an {@link IllegalArgumentException}, which we need to catch.
  */
-@SuppressWarnings("rawtypes") // The JwsHeader comes as a generic, which bothers ErrorProne
 public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
 
     private final IJTICache cache;
-    private final String audClaim;
+    private final Set<String> audClaim;
 
-    public ValidatingKeyResolver(IJTICache cache, String audClaim) {
+    public ValidatingKeyResolver(IJTICache cache, Set<String> audClaim) {
         this.cache = cache;
         this.audClaim = audClaim;
     }
@@ -50,7 +49,6 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
 
         // Make sure it's a UUID
         try {
-            //noinspection ResultOfMethodCallIgnored
             UUID.fromString(keyId);
         } catch (IllegalArgumentException e) {
             throw new WebApplicationException("`kid` value must be a UUID", Response.Status.BAD_REQUEST);
@@ -58,9 +56,8 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
     }
 
     void validateTokenFormat(String issuer) {
-        // Make sure the client token is actually a macaroon and not something else, like a a UUID
+        // Make sure the client token is actually a macaroon and not something else, like a UUID
         try {
-            //noinspection ResultOfMethodCallIgnored
             UUID.fromString(issuer);
             throw new WebApplicationException("Cannot use Token ID as `client_token`, must use actual token value", Response.Status.BAD_REQUEST);
         } catch (IllegalArgumentException e) {
@@ -91,7 +88,7 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
         }
 
         // Not more than 5 minutes in the future
-        if (now.plus(5, ChronoUnit.MINUTES).isBefore(expiration.toInstant().atOffset(ZoneOffset.UTC))) {
+        if (now.plusMinutes(5).isBefore(expiration.toInstant().atOffset(ZoneOffset.UTC))) {
             throw new WebApplicationException("Token expiration cannot be more than 5 minutes in the future", Response.Status.BAD_REQUEST);
         }
     }
@@ -110,7 +107,7 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
         }
 
         // Test correct aud claim
-        final String audience = getClaimIfPresent("audience", claims.getAudience());
+        final Set<String> audience = getClaimIfPresent("audience", claims.getAudience());
         if (!audience.equals(this.audClaim)) {
             throw new WebApplicationException("Audience claim value is incorrect", Response.Status.BAD_REQUEST);
         }

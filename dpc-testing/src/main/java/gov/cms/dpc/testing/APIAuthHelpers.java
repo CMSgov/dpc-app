@@ -14,7 +14,7 @@ import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.testing.models.KeyView;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.SignatureAlgorithm;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
@@ -326,7 +326,7 @@ public class APIAuthHelpers {
      * @return - {@link SignatureAlgorithm} to use for signing JWT
      */
     public static SignatureAlgorithm getSigningAlgorithm(KeyType keyType) {
-        return keyType == KeyType.ECC ? SignatureAlgorithm.ES256 : SignatureAlgorithm.RS384;
+        return keyType == KeyType.ECC ? Jwts.SIG.ES256 : Jwts.SIG.RS384;
     }
 
 
@@ -419,9 +419,7 @@ public class APIAuthHelpers {
             try {
                 final AuthResponse authResponse = jwtAuthFlow(this.baseURL, this.clientToken, this.keyID, this.privateKey);
                 // Set the refresh time to be 30 seconds before expiration
-                this.shouldRefreshToken = OffsetDateTime.now(ZoneOffset.UTC)
-                        .plus(authResponse.expiresIn, ChronoUnit.SECONDS)
-                        .minus(30, ChronoUnit.SECONDS);
+                this.shouldRefreshToken = OffsetDateTime.now(ZoneOffset.UTC).plusSeconds(authResponse.expiresIn - 30);
                 this.response = authResponse;
             } catch (IOException | URISyntaxException e) {
                 throw new IllegalStateException("Cannot perform auth flow", e);
@@ -462,9 +460,7 @@ public class APIAuthHelpers {
             try {
                 final AuthResponse authResponse = jwtAuthFlow(this.baseURL, this.clientToken, this.keyID, this.privateKey);
                 // Set the refresh time to be 30 seconds before expiration
-                this.shouldRefreshToken = OffsetDateTime.now(ZoneOffset.UTC)
-                        .plus(authResponse.expiresIn, ChronoUnit.SECONDS)
-                        .minus(30, ChronoUnit.SECONDS);
+                this.shouldRefreshToken = OffsetDateTime.now(ZoneOffset.UTC).plusSeconds(authResponse.expiresIn - 30);
                 this.response = authResponse;
             } catch (IOException | URISyntaxException e) {
                 throw new IllegalStateException("Cannot perform auth flow", e);
