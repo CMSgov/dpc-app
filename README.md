@@ -134,7 +134,7 @@ Other installation options can be found in the [pre-commit documentation](https:
 
 #### Step 2: Install the hooks
 
-Run the following command to install the gitleaks hook:
+Run the following command from the project root directory to install the gitleaks hook:
 
 ```sh
 pre-commit install
@@ -179,10 +179,10 @@ Note that this will always generate a unique hash, even if you didn't change the
 DPC requires an external Postgres database to be running. While a separate Postgres server can be used, the `docker-compose` file includes everything needed, and can be started like so: 
 
 ```bash
-docker compose up start_core_dependencies
+make start-db
 ```
 
-**Warning**: If you do have an existing Postgres database running on port 5342, docker-compose **will not** alert you to the port conflict. Ensure any local Postgres databases are stopped before starting docker-compose.
+**Warning**: If you do have an existing Postgres database running on port 5342, docker-compose **will not** alert you to the port conflict. Ensure any local Postgres databases are stopped before starting a new database container.
 
 ## Building the DPC API
 ###### [`^`](#table-of-contents)
@@ -236,28 +236,11 @@ Once the JARs are built, they can be run in two ways, either via [`docker-compos
 
 Click on [Install Docker](https://www.docker.com/products/docker-desktop) to set up Docker.
 The application (along with all required dependencies) can be automatically started with the following command: `make start-app`. 
-The individual services can be started (along with their dependencies) by passing the service name to the `up` command.
-
-```bash
-docker compose up {db,aggregation,attribution,api}
-``` 
+The individual services can be started with individual make targets. Review the project Makefile to see available targets and the associated docker commnds and docker compose files that facilitate this.
 
 By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always returns the same value.
 This can be overridden during startup by setting the `AUTH_DISABLED=false` environment variable. 
 
-When running locally, you'll need to update the docker-compse.yml file by adding:
-```yaml
-ports: 
-  - "5432:5432"
-```
-
-in the `db` node e.g.
-```yaml
-db: 
-  image: postgres:11 
-  ports: 
-    - "5432:5432"
-```
 ### Generating a golden macaroon
 
 Golden macaroons are automatically generated and configured upon startup for the frontend applications. To generate your own for use, run the command below:
@@ -430,15 +413,10 @@ Once the development environment is up and running, you should now be able to ru
 ###### [`^`](#table-of-contents)
 
 If you're running locally through Docker and you want to use your debugger there are two steps.
-- Open up port 5005 on whichever service you want to debug
-  - Add the following to docker-compose.yml under api, aggregation, attribution or consent.
-    ```    
-    ports:
-        - "5005:5005"
-    ```
+- Apply the docker-compose.debug-override.yml file to your docker compose commands. See Makefile for examples and review the override file to set desired port numbers for each service's debug listener.
 - Instead of using `make start-dpc` or `make start-app` to start the application, use `make start-dpc-debug` or `make start-app-debug`.
   - They'll both do a clean compile of the app with debug information and start each service with the debug agent.
-- Now you can attach your debugger to the running app on port 5005.
+- Now you can attach your debugger to the running app on the specified TCP port.
   - If you're using IntelliJ, there are instructions [here](https://www.jetbrains.com/help/idea/attaching-to-local-process.html#attach-to-remote).
 
 
