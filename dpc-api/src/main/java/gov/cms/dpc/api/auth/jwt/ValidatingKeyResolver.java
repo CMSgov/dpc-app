@@ -17,7 +17,7 @@ import java.util.UUID;
 /**
  * Implementation of {@link LocatorAdapter} that simply verifies whether the required claims and values are present.
  * As far as I can tell, this is the only way to get access to the JWS claims without actually verifying the signature.
- * See: <a href="https://github.com/jwtk/jjwt/issues/205">...</a>
+ * See: <a href="https://github.com/jwtk/jjwt/issues/205">
  * <p>
  * The downside is that this method will always return a null {@link Key}, which means the {@link Jwts#parser()} method will always throw an {@link IllegalArgumentException}, which we need to catch.
  */
