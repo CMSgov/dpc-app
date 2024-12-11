@@ -15,13 +15,13 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Implementation of {@link SigningKeyResolverAdapter} that simply verifies whether the required claims and values are present.
+ * Implementation of {@link LocatorAdapter} that simply verifies whether the required claims and values are present.
  * As far as I can tell, this is the only way to get access to the JWS claims without actually verifying the signature.
- * See: https://github.com/jwtk/jjwt/issues/205
+ * See: <a href="https://github.com/jwtk/jjwt/issues/205">...</a>
  * <p>
  * The downside is that this method will always return a null {@link Key}, which means the {@link Jwts#parser()} method will always throw an {@link IllegalArgumentException}, which we need to catch.
  */
-public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
+public class ValidatingKeyResolver extends KeyResolverAdapter {
 
     private final IJTICache cache;
     private final Set<String> audClaim;

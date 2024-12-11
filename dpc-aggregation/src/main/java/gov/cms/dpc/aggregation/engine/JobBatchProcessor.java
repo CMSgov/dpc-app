@@ -356,7 +356,7 @@ public class JobBatchProcessor {
             if (consentResults.isEmpty()) {
                 return false;
             }
-            final ConsentResult latestConsent = Collections.max(consentResults, Comparator.comparing(consent -> consent.getConsentDate()));
+            final ConsentResult latestConsent = Collections.max(consentResults, Comparator.comparing(ConsentResult::getConsentDate));
             final boolean isActive = latestConsent.isActive();
             final boolean isOptOut = ConsentResult.PolicyType.OPT_OUT.equals(latestConsent.getPolicyType());
             final boolean isFutureConsent = latestConsent.getConsentDate().after(new Date());

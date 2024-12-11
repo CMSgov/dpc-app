@@ -6,17 +6,18 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
-import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
+import gov.cms.dpc.api.auth.jwt.KeyResolverAdapter;
 import gov.cms.dpc.api.auth.jwt.ValidatingKeyResolver;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
-import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.api.models.CreateTokenRequest;
+import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.macaroons.CaveatSupplier;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
@@ -67,7 +68,7 @@ public class TokenResource extends AbstractTokenResource {
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
-    private final SigningKeyResolverAdapter resolver;
+    private final KeyResolverAdapter resolver;
     private final IJTICache cache;
     private final String authURL;
 
@@ -75,7 +76,7 @@ public class TokenResource extends AbstractTokenResource {
     public TokenResource(TokenDAO dao,
                          MacaroonBakery bakery,
                          TokenPolicy policy,
-                         SigningKeyResolverAdapter resolver,
+                         KeyResolverAdapter resolver,
                          IJTICache cache,
                          @APIV1 String publicURL) {
         this.dao = dao;
@@ -245,7 +246,7 @@ public class TokenResource extends AbstractTokenResource {
         try {
             Jwts.parser()
                     .requireAudience(this.authURL)
-                    .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
+                    .keyLocator(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
                     .build()
                     .parseSignedClaims(jwt);
         } catch (IllegalArgumentException e) {
@@ -277,7 +278,7 @@ public class TokenResource extends AbstractTokenResource {
 
     private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
         final Jws<Claims> claims = Jwts.parser()
-                .setSigningKeyResolver(this.resolver)
+                .keyLocator(this.resolver)
                 .requireAudience(this.authURL)
                 .build()
                 .parseSignedClaims(jwtBody);
@@ -302,7 +303,7 @@ public class TokenResource extends AbstractTokenResource {
         final OffsetDateTime expiryTime = OffsetDateTime.now(ZoneOffset.UTC)
                 .plus(tokenLifetime);
 
-        // Add an additional restriction to the root Macaroons
+        // Add a restriction to the root Macaroons
         final Macaroon restrictedMacaroon = this.bakery.addCaveats(macaroons.get(0), new MacaroonCaveat(new MacaroonCondition(EXPIRATION_KEY, MacaroonCondition.Operator.EQ, expiryTime.toString())));
 
         final List<Macaroon> discharged = this.bakery.dischargeAll(Collections.singletonList(restrictedMacaroon), this.bakery::discharge);
