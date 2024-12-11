@@ -2,6 +2,11 @@ name: opt-out-export dev deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: environment
+        required: false
+        default: 'dev'
   push:
     branches:
       - main
@@ -18,7 +23,7 @@ jobs:
     defaults:
       run:
         working-directory: ./lambda/opt-out-export
-    environment: dev
+    environment: $INPUT_ENVIRONMENT
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -31,10 +36,10 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ INPUT_ENVIRONMENT }}-github-actions
       - name: Upload and reload
         run: |
           aws s3 cp --no-progress function.zip \
-            s3://dpc-dev-opt-out-export-function/function-${{ github.sha }}.zip
-          aws lambda update-function-code --function-name dpc-dev-opt-out-export \
-            --s3-bucket dpc-dev-opt-out-export-function --s3-key function-${{ github.sha }}.zip
+            s3://dpc-$INPUT_ENVIRONMENT-opt-out-export-function/function-${{ github.sha }}.zip
+          aws lambda update-function-code --function-name dpc-$INPUT_ENVIRONMENT-opt-out-export \
+            --s3-bucket dpc-$INPUT_ENVIRONMENT-opt-out-export-function --s3-key function-${{ github.sha }}.zip
