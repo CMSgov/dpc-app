@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.*;
@@ -24,6 +25,8 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 public class PractitionerResourceUnitTest {
 
@@ -39,6 +42,7 @@ public class PractitionerResourceUnitTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         practitionerResource = new PractitionerResource(attributionClient, fhirValidator);
+        when(attributionClient.getFhirContext()).thenReturn(FhirContext.forDstu3());
     }
 
     @Test
@@ -49,7 +53,6 @@ public class PractitionerResourceUnitTest {
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
         String providerNPI = NPIUtil.generateNPI();
         Map<String, List<String>> searchParams = new HashMap<>();
-        searchParams.put("organization", Collections.singletonList(organizationPrincipal.getOrganization().getIdElement().getIdPart()));
         searchParams.put("identifier", Collections.singletonList(providerNPI));
         Bundle bundle = new Bundle();
 
@@ -59,8 +62,10 @@ public class PractitionerResourceUnitTest {
         IQuery<Bundle> mockQuery = Mockito.mock(IQuery.class);
         Mockito.when(attributionClient.search().forResource(Practitioner.class).encodedJson()).thenReturn(queryExec);
         Mockito.when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
-        Mockito.when(mockQuery.execute()).thenReturn(bundle);
+        Mockito.when(mockQuery.withTag(DPCIdentifierSystem.DPC.getSystem(), organizationPrincipal.getID().toString())).thenReturn(mockQuery);
         Mockito.when(mockQuery.whereMap(searchParams)).thenReturn(mockQuery);
+        Mockito.when(mockQuery.cacheControl(any())).thenReturn(mockQuery);
+        Mockito.when(mockQuery.execute()).thenReturn(bundle);
 
         Bundle actualResponse = practitionerResource.practitionerSearch(organizationPrincipal, providerNPI);
 
@@ -116,17 +121,11 @@ public class PractitionerResourceUnitTest {
         Parameters params = new Parameters();
         params.addParameter().setResource(bundle);
 
-        @SuppressWarnings("unchecked")
-        IOperationUntypedWithInput<Bundle> practitionerBundle = Mockito.mock(IOperationUntypedWithInput.class);
-        Mockito.when(attributionClient
-            .operation()
-            .onType(Practitioner.class)
-            .named("submit")
-            .withParameters(Mockito.any())
-            .returnResourceType(Bundle.class)
-            .encodedJson()
-        ).thenReturn(practitionerBundle);
-        Mockito.when(practitionerBundle.execute()).thenReturn(bundle);
+        when(attributionClient
+            .transaction()
+            .withBundle(any(Bundle.class))
+            .execute()
+        ).thenReturn(bundle);
 
         Bundle actualResponse = practitionerResource.bulkSubmitProviders(organizationPrincipal, params);
 

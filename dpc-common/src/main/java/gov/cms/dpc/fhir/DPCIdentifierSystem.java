@@ -12,7 +12,7 @@ public enum DPCIdentifierSystem {
     BENE_ID("https://bluebutton.cms.gov/resources/variables/bene_id"),
     MBI("http://hl7.org/fhir/sid/us-mbi"),
     MBI_HASH("https://bluebutton.cms.gov/resources/identifier/mbi-hash"),
-    DPC("https://dpc.cms.gov/organization_id#"),
+    DPC("https://dpc.cms.gov/organization_id"),
     HICN("https://bluebutton.cms.gov/resources/identifier/hicn-hash"),
     UNKNOWN ("");
 

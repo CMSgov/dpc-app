@@ -107,7 +107,8 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         environment.healthChecks().register("api-self-check",
             new HttpHealthCheck(UrlGenerator.generateVersionUrl(configuration.getServicePort(), configuration.getAppContextPath()))
         );
-        environment.healthChecks().register("dpc-attribution", new HttpHealthCheck(configuration.getAttributionHealthCheckURL()));
+        // TODO: Turned off for PoC since I don't want to create a healthcheck for the new FHIR server
+        //environment.healthChecks().register("dpc-attribution", new HttpHealthCheck(configuration.getAttributionHealthCheckURL()));
     }
 
     private GuiceBundle setupGuiceBundle() {
