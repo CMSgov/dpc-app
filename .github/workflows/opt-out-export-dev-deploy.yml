@@ -3,7 +3,7 @@ name: opt-out-export dev deploy
 on:
   workflow_dispatch:
     inputs:
-      environment:
+      octocats:
         description: environment
         required: false
         default: 'dev'
