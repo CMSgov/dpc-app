@@ -2,16 +2,6 @@ name: opt-out-export dev deploy
 
 on:
   workflow_dispatch:
-    inputs:
-      dispatch_environment:
-        description: environment
-        required: false
-        default: 'dev'
-        type: choice
-        options:
-          - dev
-          - test
-          - prod
   push:
     branches:
       - main
@@ -29,8 +19,8 @@ jobs:
       run:
         working-directory: ./lambda/opt-out-export
     env:
-      INPUT_ENVIRONMENT: ${{ github.event.inputs.dispatch_environment }}
-    environment: ${{ github.event.inputs.dispatch_environment }}
+      INPUT_ENVIRONMENT: ${{ github.event.inputs.dispatch_environment || 'dev' }}
+    environment: ${{ github.event.inputs.dispatch_environment || 'dev' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
