@@ -1,6 +1,17 @@
 REPORT_COVERAGE ?= false
+
 THIS_IS_GITHUB ?= false
-IS_AWS_EC2=$(shell [ "$(THIS_IS_GITHUB)" = "true" ] && echo "-f docker-compose.override.yml" || ([ "$$(./ops/scripts/is_aws_ec2.sh)" = "no" ] && echo "-f docker-compose.override.yml"))
+ifeq ($(THIS_IS_GITHUB),true)
+  IS_AWS_EC2 = no
+else
+  IS_AWS_EC2 = $(shell ./ops/scripts/is_aws_ec2.sh)
+endif
+
+ifeq ($(IS_AWS_EC2),no)
+  DB_PORT_MAPPING = -f docker-compose.override.yml
+else
+  DB_PORT_MAPPING =
+endif
 
 ifdef DOCKER_PROJECT_NAME
         DOCKER_PROJ:="-p${DOCKER_PROJECT_NAME}"
@@ -91,7 +102,7 @@ start-dpc: start-app start-portals
 
 start-db: ## Start the postgres database supporting the api
 start-db:
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d db
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) up --wait -d db
 
 start-redis: ## Start the redis database supporting the portal
 start-redis:
@@ -103,17 +114,17 @@ start-portal-dbs: start-db start-redis
 start-consent: ## Start the consent service supporting the api
 start-consent:
 	$(eval DEBUG_ARG := $(if $(filter true,$(DEBUG_MODE)),-f docker-compose.debug-override.yml,))
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) $(DEBUG_ARG) up --wait -d consent
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) $(DEBUG_ARG) up --wait -d consent
 
 start-attribution: ## Start the attribution service supporting the api
 start-attribution:
 	$(eval DEBUG_ARG := $(if $(filter true,$(DEBUG_MODE)),-f docker-compose.debug-override.yml,))
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) $(DEBUG_ARG) up --wait -d attribution
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) $(DEBUG_ARG) up --wait -d attribution
 
 start-aggregation: ## Start the aggregation service supporting the api
 start-aggregation:
 	$(eval DEBUG_ARG := $(if $(filter true,$(DEBUG_MODE)),-f docker-compose.debug-override.yml,))
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) $(DEBUG_ARG) up --wait -d aggregation
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) $(DEBUG_ARG) up --wait -d aggregation
 
 start-api-dependencies: # Start internal Java service dependencies, e.g. attribution and aggregation services.
 start-api-dependencies: start-attribution 
@@ -124,26 +135,26 @@ start-mock-api-dependencies: start-attribution start-aggregation
 
 start-mock-app: ## Start the API with mock BFD
 start-mock-app: secure-envs
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d api
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) up --wait -d api
 
 start-app: ## Start the API
 start-app: secure-envs 
-	@USE_BFD_MOCK=false docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) up --wait -d api
+	@USE_BFD_MOCK=false docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) up --wait -d api
 
 start-api: ## Start the API
 start-api: start-app
 
 start-web: ## Start the sandbox portal
 start-web: 
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d dpc_web
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) -f docker-compose.portals.yml up --wait -d dpc_web
 
 start-admin: ## Start the sandbox admin portal
 start-admin:
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d dpc_admin
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) -f docker-compose.portals.yml up --wait -d dpc_admin
 
 start-portal: ## Start the DPC portal
 start-portal: secure-envs
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml up --wait -d dpc_portal
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) -f docker-compose.portals.yml up --wait -d dpc_portal
 
 start-portals: ## Start all frontend services
 start-portals: start-web start-admin start-portal
@@ -196,7 +207,7 @@ start-it-debug: secure-envs
 
 down-dpc: ## Shut down all services
 down-dpc:
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml down
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) -f docker-compose.portals.yml down
 
 down-portals: ## Shut down all services
 down-portals: down-dpc
@@ -228,13 +239,13 @@ maven-config:
 	@while read line;do echo "-D$${line} " >> ./.mvn/maven.config;done < ./ops/config/decrypted/local.env
 
 psql: ## Run a psql shell
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) exec -it db psql -U postgres
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) exec -it db psql -U postgres
 
 portal-sh: ## Run a portal shell
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml exec -it dpc_portal bin/sh
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) -f docker-compose.portals.yml exec -it dpc_portal bin/sh
 
 portal-console: ## Run a rails console shell
-	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) -f docker-compose.portals.yml exec -it dpc_portal bin/console
+	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(DB_PORT_MAPPING) -f docker-compose.portals.yml exec -it dpc_portal bin/console
 
 
 # Software Build & Test targets
@@ -248,39 +259,40 @@ api: secure-envs
 
 .PHONY: ci-app
 ci-app: docker-base secure-envs
-	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-test.sh
+	@echo "IS_AWS_EC2 is $(IS_AWS_EC2)"
+	@IS_AWS_EC2=$(IS_AWS_EC2) ./dpc-test.sh
 
 .PHONY: ci-portals
 ci-portals: secure-envs
-	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-portals-test.sh
+	@IS_AWS_EC2=$(IS_AWS_EC2) ./dpc-portals-test.sh
 
 .PHONY: ci-portals-v1
 ci-portals-v1: secure-envs
-	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-portals-test.sh
+	@IS_AWS_EC2=$(IS_AWS_EC2) ./dpc-portals-test.sh
 
 .PHONY: ci-admin-portal
 ci-admin-portal: secure-envs
-	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-admin-portal-test.sh
+	@IS_AWS_EC2=$(IS_AWS_EC2) ./dpc-admin-portal-test.sh
 
 .PHONY: ci-portal
 ci-portal: secure-envs
-	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-portal-test.sh
+	@IS_AWS_EC2=$(IS_AWS_EC2) ./dpc-portal-test.sh
 
 .PHONY: ci-portal-accessibility
 ci-portal-accessibility: secure-envs
-	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-portal-accessibility-test.sh
+	@IS_AWS_EC2=$(IS_AWS_EC2) ./dpc-portal-accessibility-test.sh
 
 .PHONY: ci-web-portal
 ci-web-portal: secure-envs
-	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-web-portal-test.sh
+	@IS_AWS_EC2=$(IS_AWS_EC2) ./dpc-web-portal-test.sh
 
 .PHONY: ci-api-client
 ci-api-client:
-	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-api-client-test.sh
+	@IS_AWS_EC2=$(IS_AWS_EC2) ./dpc-api-client-test.sh
 
 .PHONY: unit-tests
 unit-tests:
-	@IS_AWS_EC2=$IS_AWS_EC2 ./dpc-unit-test.sh
+	@IS_AWS_EC2=$(IS_AWS_EC2) ./dpc-unit-test.sh
 
 .PHONY: int-tests
 int-tests: 
