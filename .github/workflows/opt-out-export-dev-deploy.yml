@@ -3,7 +3,7 @@ name: opt-out-export dev deploy
 on:
   workflow_dispatch:
     inputs:
-      octocats:
+      dispatch_environment:
         description: environment
         required: false
         default: 'dev'
@@ -20,9 +20,28 @@ jobs:
       contents: read
       id-token: write
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./lambda/opt-out-export
     env:
-      INPUT_ENVIRONMENT: ${{ github.event.inputs.octocats }}
-    environment: ${{ github.event.inputs.octocats }}
+      INPUT_ENVIRONMENT: ${{ github.event.inputs.dispatch_environment }}
+    environment: ${{ github.event.inputs.dispatch_environment }}
     steps:
-      - name: Write out env
-        run: env
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+      - name: Build opt-out-export zip file
+        env:
+          CGO_ENABLED: 0
+        run: |
+          go build -o bootstrap main.go db.go
+          zip function.zip bootstrap
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ env.INPUT_ENVIRONMENT }}-github-actions
+      - name: Upload and reload
+        run: |
+          aws s3 cp --no-progress function.zip \
+            s3://dpc-$INPUT_ENVIRONMENT-opt-out-export-function/function-${{ github.sha }}.zip
+          aws lambda update-function-code --function-name dpc-$INPUT_ENVIRONMENT-opt-out-export \
+            --s3-bucket dpc-$INPUT_ENVIRONMENT-opt-out-export-function --s3-key function-${{ github.sha }}.zip
