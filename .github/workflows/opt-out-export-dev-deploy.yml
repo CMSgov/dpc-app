@@ -20,9 +20,6 @@ jobs:
       contents: read
       id-token: write
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./lambda/opt-out-export
     environment: foo
     steps:
       - name: Upload and reload
