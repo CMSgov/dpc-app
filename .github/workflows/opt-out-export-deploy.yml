@@ -12,6 +12,11 @@ on:
           - dev
           - test
           - prod
+  workflow_call:
+    inputs:
+      dispatch_environment:
+        description: environment
+        required: true
   push:
     branches:
       - main
@@ -20,7 +25,7 @@ on:
       - .github/workflows/opt-out-export-deploy.yml
 
 jobs:
-  deploy export lambda:
+  deploy_export_lambda:
     permissions:
       contents: read
       id-token: write
@@ -29,8 +34,8 @@ jobs:
       run:
         working-directory: ./lambda/opt-out-export
     env:
-      INPUT_ENVIRONMENT: ${{ github.event.inputs.dispatch_environment || 'dev' }}
-    environment: ${{ github.event.inputs.dispatch_environment || 'dev' }}
+      INPUT_ENVIRONMENT: ${{ github.event.inputs.dispatch_environment }}
+    environment: ${{ github.event.inputs.dispatch_environment }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

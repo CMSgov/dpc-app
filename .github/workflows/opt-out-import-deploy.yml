@@ -12,22 +12,9 @@ on:
           - dev
           - test
           - prod
-  push:
-    paths:
-      - .github/workflows/opt-out-import-deploy.yml
-    with:
-      dispatch_environment: 'dev'
 
 jobs:
-  deploy_import_lambda:
-    permissions:
-      contents: read
-      id-token: write
-    runs-on: ubuntu-latest
-    env:
-      INPUT_ENVIRONMENT: ${{ github.event.inputs.dispatch_environment }}
-    environment: ${{ github.event.inputs.dispatch_environment }}
-    steps:
-      - name: 
-        run: |
-          echo $INPUT_ENVIRONMENT
+  deploy_export:
+    uses: ./.github/workflows/opt-out-export-deploy.yml@jd/mess-with-workflows
+    with:
+      dispatch_environment: 'dev'
