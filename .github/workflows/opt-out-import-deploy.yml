@@ -12,6 +12,9 @@ on:
           - dev
           - test
           - prod
+  push:
+    paths:
+      - .github/workflows/opt-out-import-deploy.yml
 
 jobs:
   deploy_export:
