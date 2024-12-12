@@ -24,7 +24,10 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
           is_expected.to include("<h1>#{org.name}</h1>")
         end
         it 'Should have npi' do
-          is_expected.to include(%(<div class="margin-bottom-5">NPI: #{org.npi}</div>))
+          is_expected.to include("NPI: #{org.npi}")
+        end
+        it 'Should have org id' do
+          is_expected.to include("Organization ID: #{org.id}")
         end
         it 'Should have script tag' do
           is_expected.to include('<script')
@@ -59,7 +62,10 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
         is_expected.to include("<h1>#{org.name}</h1>")
       end
       it 'Should have npi' do
-        is_expected.to include(%(<div class="margin-bottom-5">NPI: #{org.npi}</div>))
+        is_expected.to include("NPI: #{org.npi}")
+      end
+      it 'Should have org id' do
+        is_expected.to include("Organization ID: #{org.id}")
       end
       it 'Should not have script tag' do
         is_expected.to_not include('<script')
