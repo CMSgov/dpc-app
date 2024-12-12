@@ -5,9 +5,10 @@ import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.jersey.errors.LoggingExceptionMapper;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.Provider;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.Provider;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
 
 
 /**
@@ -27,12 +28,14 @@ public class HAPIExceptionHandler extends LoggingExceptionMapper<BaseServerRespo
 
         // If the exception contains a FHIR OperationOutcome, use it.  If not, create one.
         OperationOutcome operationOutcome = (OperationOutcome) exception.getOperationOutcome();
+        
         if (operationOutcome == null) {
             operationOutcome = new OperationOutcome();
             operationOutcome.addIssue()
                     .setCode(OperationOutcome.IssueType.EXCEPTION)
                     .setSeverity(OperationOutcome.IssueSeverity.ERROR)
-                    .setDiagnostics(exception.getMessage());
+                    .setDiagnostics(exception.getMessage())
+                    .setDetails(new CodeableConcept().setText(exception.getMessage()));
         }
         operationOutcome.setId(String.format("%016x", exceptionID));
 

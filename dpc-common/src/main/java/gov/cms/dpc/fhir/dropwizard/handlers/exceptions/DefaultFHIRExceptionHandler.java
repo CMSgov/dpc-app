@@ -5,12 +5,14 @@ import io.dropwizard.jersey.errors.LoggingExceptionMapper;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.Provider;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.Provider;
 
 /**
  * Core error handler for differentiating between FHIR and standard HTTP errors.
@@ -38,7 +40,10 @@ public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Th
         final int statusCode;
         // Duplicating some of the logic from the parent LoggingExceptionMapper, because we need to get the logged ID
         // We just pass along redirects
-        if (exception instanceof WebApplicationException) {
+        
+        if (exception instanceof WebApplicationException
+                || ClientErrorException.class.isAssignableFrom(exception.getClass())
+                || exception instanceof InternalServerErrorException) {
             final Response response = ((WebApplicationException) exception).getResponse();
             Response.Status.Family family = response.getStatusInfo().getFamily();
             if (family.equals(Response.Status.Family.REDIRECTION)) {
@@ -46,10 +51,13 @@ public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Th
             }
             // If it's any other type of web application exception, use the status as the response code.
             statusCode = ((WebApplicationException) exception).getResponse().getStatus();
+        } else if(exception.getMessage().startsWith("Couldn't deserialize macaroon.")) {
+            statusCode = Response.Status.BAD_REQUEST.getStatusCode();
         } else {
             // For any other types of errors, just set a 500 and move along
             statusCode = Response.Status.INTERNAL_SERVER_ERROR.getStatusCode();
         }
+
         // Log the exception and generate the OperationOutcome
         final long exceptionID = super.logException(exception);
         final OperationOutcome outcome = new OperationOutcome();

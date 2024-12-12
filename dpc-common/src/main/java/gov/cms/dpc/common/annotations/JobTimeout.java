@@ -1,6 +1,6 @@
 package gov.cms.dpc.common.annotations;
 
-import com.google.inject.BindingAnnotation;
+import jakarta.inject.Qualifier;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,6 +12,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
-@BindingAnnotation
+@Qualifier
 public @interface JobTimeout {
 }

@@ -6,10 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.junit.jupiter.api.Test;
 import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Contact Point Entity tests")
 public class ContactPointEntityTest {
 
     @Test
+    @DisplayName("Test contact point getters and setters 🥳")
     public void testGettersAndSetters() {
         ContactPointEntity contactPoint = new ContactPointEntity();
         UUID id = UUID.randomUUID();
@@ -36,6 +39,7 @@ public class ContactPointEntityTest {
     }
 
     @Test
+    @DisplayName("Convert contact point to FHIR 🥳")
     public void testToFHIR() {
         ContactPointEntity contactPoint = new ContactPointEntity();
         ContactPoint.ContactPointSystem system = ContactPoint.ContactPointSystem.EMAIL;

@@ -9,9 +9,12 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Job completion data marshaling")
 class JobCompletionModelUnitTest {
     @Test
+    @DisplayName("Deserialize job completion model 🥳")
     public void testDeserialize() throws IOException {
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 

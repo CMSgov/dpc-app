@@ -1,7 +1,10 @@
 package gov.cms.dpc.common.hibernate.auth;
 
+import com.google.inject.Inject;
 import io.dropwizard.lifecycle.Managed;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link Managed} interface that wraps a Hibernate {@link SessionFactory} and ensures that it is shutdown correctly when the service exits.
@@ -9,9 +12,12 @@ import org.hibernate.SessionFactory;
  */
 public class DPCAuthManagedSessionFactory implements Managed {
 
+    private static final Logger LOG = LoggerFactory.getLogger(DPCAuthManagedSessionFactory.class);
     private final SessionFactory sessionFactory;
 
+    @Inject
     public DPCAuthManagedSessionFactory(SessionFactory factory) {
+        LOG.info("DPCAuthManagedSessionFactory here with SessionFactory " + factory);
         this.sessionFactory = factory;
     }
 

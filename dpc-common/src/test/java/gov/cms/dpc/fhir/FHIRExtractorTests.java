@@ -11,8 +11,10 @@ import java.util.UUID;
 
 import static gov.cms.dpc.fhir.FHIRExtractors.*;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("FHIR data element extraction")
 public class FHIRExtractorTests {
 
     private static final String MISSING_ID_FMT = "Cannot find identifier for system: %s";
@@ -20,6 +22,7 @@ public class FHIRExtractorTests {
     private static final String PERFORMER = "Cannot find Provenance performer";
 
     @Test
+    @DisplayName("Search for patient using multiple identifiers 🥳")
     void testGetMBI_MultipleIDs() {
         final Patient patient = new Patient();
         // This double nesting verifies that the fromString method works correctly. Makes PiTest happy.
@@ -30,6 +33,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Search patient with no MBI 🤮")
     void testGetMBI_NoID() {
         final Patient patient = new Patient();
         patient.setId("id");
@@ -39,6 +43,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Search patient with multiple MBIs 🥳")
     void testGetMBI_MultipleMBIs() {
         final Patient patient = new Patient();
         patient
@@ -61,6 +66,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Search patient using current MBI 🤮")
     void testGetMBI_MultipleMBIs_NoneCurrent() {
         final Patient patient = new Patient();
         patient.setId("id");
@@ -85,6 +91,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Search patient with no current MBI 🤮")
     void testGetMBI_MultipleMBIs_NoneWithCurrency() {
         final Patient patient = new Patient();
         patient.setId("id");
@@ -103,6 +110,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Search patient using invalid MBI 🤮")
     void testGetMBI_BadFormat() {
         final Patient patient = new Patient();
         patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("bad_mbi");
@@ -111,6 +119,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Sarch patient using one matching MBI and two invalid IDs 🥳")
     void testGetMBIs_OneFound() {
         final Patient patient = new Patient();
         Identifier validMBI = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA01");
@@ -124,6 +133,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Search patient using multiple matching MBIs and one invalid ID 🥳")
     void testGetMBIs_MultipleFound_SomeWithBadFormat() {
         final Patient patient = new Patient();
         Identifier validMBI1 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA01");
@@ -137,6 +147,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Search patient using invalid MBI with no results 🤮")
     void testGetMBIs_NoneFound() {
         final Patient patient = new Patient();
         Identifier invalidMBI = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("mbi");
@@ -146,6 +157,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Search practitioner using multiple IDs 🥳")
     void testPractitionerMultipleIDs() {
         final Practitioner practitioner = new Practitioner();
         practitioner.addIdentifier().setSystem(DPCIdentifierSystem.DPC.getSystem()).setValue("test-dpc-one");
@@ -155,6 +167,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Search practitioner using no ID 🤮")
     void testPractitionerNoID() {
         final Practitioner practitioner = new Practitioner();
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> getProviderNPI(practitioner), "Should not have NPI");
@@ -162,15 +175,19 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Extract IDs from 🥳")
     void testEntityIDExtraction() {
         final UUID uuid1 = UUID.randomUUID();
         final IdType id1 = new IdType("Organization", uuid1.toString());
         assertEquals(uuid1, getEntityUUID(id1.toString()), "Should have Org ID");
         assertEquals(uuid1, getEntityUUID(uuid1.toString()), "Should parse UUID correctly");
         assertEquals(uuid1, getEntityUUID(String.format("/%s", uuid1.toString())), "Should ignore leading slash");
-
-
         assertEquals(uuid1, getEntityUUID(uuid1.toString()), "Should have org id");
+    }
+
+    @Test
+    @DisplayName("Extract invalid IDs 🤮")
+    void testInvalidEntityIDExtraction() {
         final IdType idType = new IdType("Organization/not-a-uuid");
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> getEntityUUID(idType.toString()), "Should not parse non-UUID");
         assertEquals(String.format(ENTITY_ID_ERROR, idType.toString()), exception.getMessage(), "Should have correct error message");
@@ -180,6 +197,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Require provenance performer 🤮")
     void testProvenanceMissingPerformer() {
         final Provenance noAgent = new Provenance();
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> getProvenancePerformer(noAgent), "Should fail with missing agent");
@@ -193,6 +211,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Extract provenance 🥳")
     void testProvenanceExtraction() {
         final Provenance provenance = new Provenance();
         provenance.addAgent().addRole().addCoding().setCode("AGNT");
@@ -201,6 +220,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Parse tags 🥳")
     void testTagParsing() {
         final Pair<String, String> codeTag = parseTag("a tag");
         assertAll(() -> assertEquals("", codeTag.getLeft()),
@@ -220,6 +240,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Extract ID from query parameter 🥳")
     void testIDExtraction() {
         final Identifier identifier = parseIDFromQueryParam(String.format("%s|%s", DPCIdentifierSystem.DPC.getSystem(), "hello"));
         assertAll(() -> assertEquals(DPCIdentifierSystem.DPC.getSystem(), identifier.getSystem(), "Should have correct system"),
@@ -239,13 +260,15 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Build group with no metadata 🤮")
     void testResourceNoMeta() {
         final Group group = new Group();
         assertThrows(IllegalArgumentException.class, () -> getOrganizationID(group), "Should fail with missing meta");
     }
 
     @Test
-    void testResourceWithMeta() {
+    @DisplayName("Set empty metadata on group 🤮")
+    void testResourceWithNoMeta() {
         final Group group = new Group();
         final Meta meta = new Meta();
         group.setMeta(meta);
@@ -259,7 +282,29 @@ public class FHIRExtractorTests {
     }
 
     @Test
-    void testGroupAttributedExtraction() {
+    @DisplayName("Set invalid metadata on group 🤮")
+    void testResourceWithInvalidMeta() {
+        final Group group = new Group();
+        final Meta meta = new Meta();
+
+        meta.addTag().setSystem(DPCIdentifierSystem.MBI_HASH.getSystem()).setCode("not-an-org");
+        assertThrows(IllegalArgumentException.class, () -> getOrganizationID(group), "Should fail with incorrect identifier");
+    }
+
+    @Test
+    @DisplayName("Set metadata on group 🥳")
+    void testResourceWithMeta() {
+        final Group group = new Group();
+        final Meta meta = new Meta();
+        group.setMeta(meta);
+        meta.addTag().setSystem(DPCIdentifierSystem.MBI_HASH.getSystem()).setCode("not-an-org");
+        meta.addTag().setSystem(DPCIdentifierSystem.DPC.getSystem()).setCode("test-org");
+
+        assertEquals("test-org", getOrganizationID(group), "Should have correct org ID");    }
+
+    @Test
+    @DisplayName("Extract group attributes 🤮")
+    void testInvalidGroupAttributesExtraction() {
         final Group group = new Group();
         final IllegalArgumentException e1 = assertThrows(IllegalArgumentException.class, () -> getAttributedNPI(group), "Should throw with no concepts");
         assertEquals("Must have 'attributed-to' concept", e1.getMessage(), "Should have correct error message");
@@ -284,6 +329,23 @@ public class FHIRExtractorTests {
         gc.setValue(c);
         final IllegalArgumentException e4 = assertThrows(IllegalArgumentException.class, () -> getAttributedNPI(group), "Should throw with missing value");
         assertEquals("Roster MUST have attributed Provider", e4.getMessage(), "Should have correct error message");
+    }
+
+    @Test
+    @DisplayName("Extract group attributes 🥳")
+    void testGroupAttributesExtraction() {
+        final Group group = new Group();
+        final CodeableConcept linkedTo = new CodeableConcept();
+        linkedTo.addCoding().setCode("linked-to").setSystem("http://local.test");
+        group.addCharacteristic().setCode(linkedTo);
+        final CodeableConcept attributedTo = new CodeableConcept();
+        attributedTo.addCoding().setCode("attributed-to").setSystem("http://local.test");
+        final Group.GroupCharacteristicComponent gc = new Group.GroupCharacteristicComponent();
+        gc.setCode(attributedTo);
+        group.addCharacteristic(gc);
+        final CodeableConcept c = new CodeableConcept();
+        c.addCoding().setSystem(DPCIdentifierSystem.PECOS.getSystem()).setCode("1");
+        gc.setValue(c);
 
         final CodeableConcept cc = new CodeableConcept();
         cc.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode("123345");
@@ -292,6 +354,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Find matching identifiers using multiple identifiers 🥳")
     void testFindMatchingIdentifiersMultipleFound() {
         Identifier idMbi1 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("mbi1");
         Identifier idMbi2 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("mbi1");
@@ -301,6 +364,7 @@ public class FHIRExtractorTests {
     }
 
     @Test
+    @DisplayName("Test empty search results 🥳")
     void testFindMatchingIdentifiersNoneFound() {
         Identifier idMbi1 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("mbi1");
         Identifier idMbi2 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("mbi1");

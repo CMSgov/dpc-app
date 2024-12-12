@@ -2,9 +2,8 @@ package gov.cms.dpc.common.converters.jackson;
 
 import com.fasterxml.jackson.databind.util.StdConverter;
 import gov.cms.dpc.fhir.FHIRFormatters;
+import jakarta.ws.rs.BadRequestException;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -26,6 +25,6 @@ public class MultiFormatOffsetDateTimeDeserializer extends StdConverter<String, 
                 //Ignore exception and try next format
             }
         }
-        throw new WebApplicationException(String.format("Could not parse date: %s",s), Response.Status.BAD_REQUEST);
+        throw new BadRequestException(String.format("Could not parse date: %s",s));
     }
 }

@@ -4,8 +4,8 @@ import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.utils.XSSSanitizerUtil;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class NoHtmlValidator implements ConstraintValidator<NoHtml, String> {
 

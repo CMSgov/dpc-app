@@ -26,8 +26,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.Mockito.mock;
 
+@DisplayName("Public key deletion")
 class KeyDeleteUnitTest {
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
@@ -63,6 +65,7 @@ class KeyDeleteUnitTest {
     }
 
     @Test
+    @DisplayName("Public key deleted from key store 🥳")
     public void testDeleteKeys_happyPath() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
@@ -87,6 +90,7 @@ class KeyDeleteUnitTest {
     }
 
     @Test
+    @DisplayName("Key not found in key store for deletion 🤮")
     public void testDeleteKeys_badResponse() throws IOException {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(

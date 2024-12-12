@@ -10,10 +10,12 @@ import gov.cms.dpc.api.auth.DPCUnauthorizedHandler;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.core.UriInfo;
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of {@link DPCAuthFilter} that is use when an {@link io.dropwizard.auth.Auth} annotated method is called.
@@ -22,12 +24,16 @@ import java.util.UUID;
 @Priority(Priorities.AUTHENTICATION)
 public class PrincipalInjectionAuthFilter extends DPCAuthFilter {
 
+    private static final Logger LOG = LoggerFactory.getLogger(PrincipalInjectionAuthFilter.class);
+    
     public PrincipalInjectionAuthFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao, DPCUnauthorizedHandler dpc401handler) {
         super(bakery, auth, dao, dpc401handler);
     }
 
     @Override
     protected DPCAuthCredentials buildCredentials(String macaroon, UUID organizationID, UriInfo uriInfo) {
+        LOG.info("I have been asked to build credentials for " + organizationID);
+        
         final Organization resource = new Organization();
         resource.setId(new IdType("Organization", organizationID.toString()));
         return new DPCAuthCredentials(macaroon, resource, null, null);

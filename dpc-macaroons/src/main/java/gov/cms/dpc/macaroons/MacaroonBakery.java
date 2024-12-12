@@ -239,7 +239,7 @@ public class MacaroonBakery {
         }
         try {
             return MacaroonsBuilder.deserialize(new String(decodedString, StandardCharsets.UTF_8));
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             throw new BakeryException("Cannot deserialize Macaroon", e);
         }
     }

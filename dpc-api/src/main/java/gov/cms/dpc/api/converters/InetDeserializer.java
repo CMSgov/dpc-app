@@ -13,6 +13,7 @@ import java.io.IOException;
  * help in the other direction.
  */
 public class InetDeserializer extends StdDeserializer<Inet> {
+    public static final long serialVersionUID = 42L;
     public InetDeserializer() {this(null);}
     private InetDeserializer(Class<?> vc) {super(vc);}
 

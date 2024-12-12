@@ -2,14 +2,16 @@ package gov.cms.dpc.attribution;
 
 import com.google.inject.Binder;
 import com.google.inject.Provides;
+import com.google.inject.Scopes;
+import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import gov.cms.dpc.attribution.jdbi.*;
 import gov.cms.dpc.attribution.resources.v1.*;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import gov.cms.dpc.fhir.parameters.ProvenanceResourceValueFactory;
 import org.hibernate.SessionFactory;
 import org.jooq.conf.RenderQuotedNames;
 import org.jooq.conf.Settings;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import java.time.Duration;
 
@@ -38,6 +40,8 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
 
         // Tasks
         binder.bind(TruncateDatabase.class);
+
+        bind(ProvenanceResourceValueFactory.class).in(Scopes.SINGLETON);
 
         // Services
 

@@ -1,0 +1,20 @@
+NOTICE
+======
+
+This project is based on dropwizard-guicier by Flipkart (https://flipkart-incubator.github.io/dropwizard-guicier/)
+which itself is based on works by SquareSpace (https://github.com/Squarespace/jersey2-guice) and HubSpot (https://github.com/HubSpot/dropwizard-guicier)
+ 
+* Copyright 2014-2016 Squarespace, Inc.
+Licensed under the Apache License, Version 2.0
+
+ * Copyright 2019 HubSpot Inc.
+Licensed under the Apache License, Version 2.0
+
+ * Copyright 2020 Flipkart Internet Private Limited
+
+Modifications 2024 
+- Updated dependency versions and revised code to support jersey3 - guice 7 environment
+
+This modified version is also licensed under the Apache License, Version 2.0
+
+You can find the original project at: https://github.com/flipkart-incubator/dropwizard-guicier

@@ -9,7 +9,6 @@ import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
-import io.reactivex.Flowable;
 import org.hl7.fhir.dstu3.model.*;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
@@ -21,6 +20,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBI;
+import io.reactivex.rxjava3.core.Flowable;
 
 /**
  * A resource fetcher will fetch resources of particular type from passed {@link BlueButtonClient}
@@ -153,7 +153,7 @@ class ResourceFetcher {
     private void addResources(ArrayList<Resource> resources, Bundle bundle) {
         bundle.getEntry().forEach((entry) -> {
             final var resource = entry.getResource();
-            if (resource.getResourceType().getPath() != resourceType.getPath()) {
+            if (!resource.getResourceType().getPath().equals(resourceType.getPath())) {
                 throw new DataFormatException(String.format("Unexpected resource type: got %s expected: %s", resource.getResourceType().toString(), resourceType.toString()));
             }
             resources.add(resource);

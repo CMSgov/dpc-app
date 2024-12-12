@@ -25,7 +25,6 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.hl7.fhir.dstu3.model.*;
 import org.jooq.DSLContext;
-import org.jooq.conf.RenderQuotedNames;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -37,21 +36,19 @@ import java.sql.Connection;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import org.jooq.conf.RenderNameCase;
 
 public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration> {
 
-    private static Logger logger = LoggerFactory.getLogger(SeedCommand.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SeedCommand.class);
     private static final String CSV = "test_associations.csv";
     private static final String ORGANIZATION_BUNDLE = "organization_bundle.json";
     private static final String PROVIDER_BUNDLE = "provider_bundle.json";
     private static final String PATIENT_BUNDLE = "patient_bundle.json";
     private static final UUID ORGANIZATION_ID = UUID.fromString("46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
-    private final Settings settings;
-
     public SeedCommand(Application<DPCAttributionConfiguration> application) {
         super(application, "seed", "Seed the attribution roster");
-        this.settings = new Settings().withRenderQuotedNames(RenderQuotedNames.EXPLICIT_DEFAULT_UNQUOTED);
     }
 
     @Override
@@ -76,10 +73,10 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         final OffsetDateTime creationTimestamp = generateTimestamp(namespace);
 
         // Read in the seeds file and write things
-        logger.info("Seeding attributions at time {}", creationTimestamp.toLocalDateTime());
-
-        try (final Connection connection = dataSource.getConnection();
-             DSLContext context = DSL.using(connection, this.settings)) {
+        LOGGER.info("Seeding attributions at time {}", creationTimestamp.toLocalDateTime());
+        
+        try (final Connection connection = dataSource.getConnection()) {
+            DSLContext context = DSL.using(connection, new Settings().withRenderNameCase(RenderNameCase.LOWER));
 
             // Truncate everything
             DBUtils.truncateAllTables(context, "public");
@@ -99,7 +96,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             // Get the test attribution seeds
             seedAttributions(context, ORGANIZATION_ID, creationTimestamp, patientReferences);
 
-            logger.info("Finished loading seeds");
+            LOGGER.info("Finished loading seeds");
         }
     }
 

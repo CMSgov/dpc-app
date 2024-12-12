@@ -15,10 +15,10 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
-import javax.inject.Inject;
-import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -90,8 +90,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
         final ProviderEntity providerEntity = this.dao
                 .getProvider(providerID)
                 .orElseThrow(() ->
-                        new WebApplicationException(String.format("Provider %s is not registered",
-                                providerID), Response.Status.NOT_FOUND));
+                        new NotFoundException(String.format("Provider %s is not registered", providerID)));
 
         return this.converter.toFHIR(Practitioner.class, providerEntity);
     }
@@ -117,11 +116,11 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @ExceptionMetered
     public Response deleteProvider(@PathParam("providerID") UUID providerID) {
         try {
-            final ProviderEntity provider = this.dao.getProvider(providerID).orElseThrow(() -> new WebApplicationException(String.format("Provider '%s' is not registered", providerID), Response.Status.NOT_FOUND));
+            final ProviderEntity provider = this.dao.getProvider(providerID).orElseThrow(() -> new NotFoundException(String.format("Provider '%s' is not registered", providerID)));
             this.dao.deleteProvider(provider);
             return Response.ok().build();
         } catch (IllegalArgumentException e) {
-            throw new WebApplicationException(String.format("Provider '%s' is not registered", providerID), Response.Status.NOT_FOUND);
+            throw new NotFoundException(String.format("Provider '%s' is not registered", providerID));
         }
     }
 
