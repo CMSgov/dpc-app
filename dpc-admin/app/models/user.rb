@@ -18,7 +18,7 @@ class User < ApplicationRecord
   #        :validatable, :trackable, :registerable,
   #        :timeoutable, :recoverable, :confirmable,
   #        :password_expirable, :password_archivable
-  enum requested_organization_type: ORGANIZATION_TYPES
+  enum :requested_organization_type, ORGANIZATION_TYPES
 
   validates :requested_organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
   validates :email, presence: true, domain_exists: true
