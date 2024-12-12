@@ -222,9 +222,7 @@ seed-db:
 
 maven-config: ## Translate local environment variables into maven.config for manual API installation
 maven-config:
-	@mkdir -p ./.mvn
-	@: > ./.mvn/maven.config
-	@while read line;do echo "-D$${line} " >> ./.mvn/maven.config;done < ./ops/config/decrypted/local.env
+	@./maven-config.sh
 
 psql: ## Run a psql shell
 	@docker compose $(DOCKER_PROJ) -f docker-compose.yml $(IS_AWS_EC2) exec -it db psql -U postgres

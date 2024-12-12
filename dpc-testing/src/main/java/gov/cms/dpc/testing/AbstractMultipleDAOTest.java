@@ -25,7 +25,7 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 public abstract class AbstractMultipleDAOTest {
     @Container
-    private final PostgreSQLContainer postgreSql = new PostgreSQLContainer(DockerImageName.parse("postgres:14.7"));
+    private final PostgreSQLContainer<?> postgreSql = new PostgreSQLContainer<>(DockerImageName.parse("postgres:14.7"));
 
     protected DAOTestExtension db;
 
@@ -40,7 +40,7 @@ public abstract class AbstractMultipleDAOTest {
             .setUsername(postgreSql.getUsername())
             .setPassword(postgreSql.getPassword());
 
-        for (Class clazz : clazzes ) {
+        for (Class<?> clazz : clazzes ) {
             builder.addEntityClass(clazz);
         }
 
