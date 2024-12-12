@@ -8,6 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
+@DisplayName("Organization data operations")
+
 
 class OrganizationDAOUnitTest extends AbstractAttributionDAOTest {
 	private RelationshipDAO relationshipDAO;
@@ -28,6 +31,8 @@ class OrganizationDAOUnitTest extends AbstractAttributionDAOTest {
 	}
 
 	@Test
+@DisplayName("Verify cascading deletes in DB 🥳")
+
 	void test_delete_cascades() {
 		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
 		PatientEntity pat = AttributionTestHelpers.createPatientEntity(org);

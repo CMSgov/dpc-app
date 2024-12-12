@@ -9,11 +9,14 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.UUID;
 import java.util.ArrayList;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Contact Entity tests")
 public class ContactEntityTest {
 
 	@Test
-	public void testGettersAndSetters() {
+	@DisplayName("Test contact getters and setters 🥳")
+public void testGettersAndSetters() {
 		ContactEntity contact = new ContactEntity();
 		UUID id = UUID.randomUUID();
 		OrganizationEntity org = new OrganizationEntity();
@@ -36,7 +39,8 @@ public class ContactEntityTest {
 	}
 
 	@Test
-	public void testToFHIR() {
+	@DisplayName("Convert contact to FHIR 🥳")
+public void testToFHIR() {
 		ContactEntity contact = new ContactEntity();
 		NameEntity name = new NameEntity();
 		name.setFamily("Dog");

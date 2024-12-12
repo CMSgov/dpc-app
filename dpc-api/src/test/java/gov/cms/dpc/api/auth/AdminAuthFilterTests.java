@@ -25,10 +25,12 @@ import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.DisplayName;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 
 @SuppressWarnings("unchecked")
+@DisplayName("Admin authentication filtering")
 class AdminAuthFilterTests {
 
     private final MacaroonBakery bakery;
@@ -47,6 +49,7 @@ class AdminAuthFilterTests {
     }
 
     @Test
+    @DisplayName("Golden macaroon passes 🥳")
     void ensureGoldenMacaroonPasses() throws AuthenticationException {
         // Create Golden Macaroon
         final Macaroon m1 = bakery.createMacaroon(Collections.emptyList());
@@ -63,6 +66,7 @@ class AdminAuthFilterTests {
     }
 
     @Test
+    @DisplayName("Wrong organization token 🤮")
     void ensureOrganizationTokenRejected() {
         // Create Golden Macaroon
         final Macaroon m1 = bakery.createMacaroon(Collections.singletonList(new MacaroonCaveat(new MacaroonCondition("organization_id", MacaroonCondition.Operator.EQ, "1234"))));

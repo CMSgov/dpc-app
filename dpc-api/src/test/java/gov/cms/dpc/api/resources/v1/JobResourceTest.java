@@ -24,9 +24,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Job resource operations")
 public class JobResourceTest {
     static final UUID AGGREGATOR_ID = UUID.randomUUID();
     static final String TEST_ORG_NPI = NPIUtil.generateNPI();
@@ -40,7 +42,8 @@ public class JobResourceTest {
      * Test that a non-existent job is handled correctly
      */
     @Test
-    public void testNonExistentJob() {
+    @DisplayName("Get unrecognized job 🤮")
+public void testNonExistentJob() {
         final var jobID = UUID.randomUUID();
         final var queue = new MemoryBatchQueue(100);
         final var resource = new JobResource(queue, TEST_BASEURL);
@@ -55,7 +58,8 @@ public class JobResourceTest {
      * Test with a queued job
      */
     @Test
-    public void testQueuedJob() {
+    @DisplayName("Return queued job status 🥳")
+public void testQueuedJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(100);
@@ -80,7 +84,8 @@ public class JobResourceTest {
      * Test with a running job
      */
     @Test
-    public void testRunningJob() {
+    @DisplayName("Return running job status 🥳")
+public void testRunningJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(1);
@@ -109,7 +114,8 @@ public class JobResourceTest {
      * Test with a successful job
      */
     @Test
-    public void testSuccessfulJob() {
+    @DisplayName("Return successful job artifacts 🥳")
+public void testSuccessfulJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(100);
@@ -158,7 +164,8 @@ public class JobResourceTest {
      * Test with a successful job with one patient error
      */
     @Test
-    public void testJobWithError() {
+    @DisplayName("Return partially successful job artifacts 🥳")
+public void testJobWithError() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(100);
@@ -199,7 +206,8 @@ public class JobResourceTest {
      * Test with a failed job
      */
     @Test
-    public void testFailedJob() {
+    @DisplayName("Return failed job status 🥳")
+public void testFailedJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(100);
@@ -224,7 +232,8 @@ public class JobResourceTest {
     }
 
     @Test
-    public void testExpiredJob() {
+    @DisplayName("Return expired job status 🥳")
+public void testExpiredJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(1);
@@ -264,7 +273,8 @@ public class JobResourceTest {
      * Test accessing a job with the wrong organization
      */
     @Test
-    public void testWrongOrgJobAccess() {
+    @DisplayName("Access other org's job 🤮")
+public void testWrongOrgJobAccess() {
         final var organizationPrincipalCorrect = APITestHelpers.makeOrganizationPrincipal();
         final var orgIDCorrect = FHIRExtractors.getEntityUUID(organizationPrincipalCorrect.getOrganization().getId());
         final var organizationPrincipalWrong = APITestHelpers.makeOrganizationPrincipal(OTHER_ORGANIZATION);
@@ -311,7 +321,8 @@ public class JobResourceTest {
      * Test building extension for a file.
      */
     @Test
-    public void testBuildOutputEntryExtension() {
+    @DisplayName("Build output entry extension for file 🥳")
+public void testBuildOutputEntryExtension() {
         final var resource = new JobResource(null, "");
         final var file = new JobQueueBatchFile(UUID.randomUUID(), UUID.fromString("f1e518f5-4977-47c6-971b-7eeaf1b433e8"), DPCResourceType.Patient, 0, 11);
         file.setChecksum(Hex.decode("9d251cea787379c603af13f90c26a9b2a4fbb1e029793ae0f688c5631cdb6a1b"));
@@ -324,7 +335,8 @@ public class JobResourceTest {
     }
 
     @Test
-    public void testBuildJobExtension() {
+    @DisplayName("Build job extension 🥳")
+public void testBuildJobExtension() {
         final var resource = new JobResource(null, "");
         final var batch = new JobQueueBatch(
                 UUID.randomUUID(),

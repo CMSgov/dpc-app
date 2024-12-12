@@ -4,16 +4,20 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("FHIR-based Practitioner Factory tests")
 public class FHIRPractitionerBuilderUnitTest {
 
     @Test
-    public void newBuilder() {
+    @DisplayName("Set up new FHIR Practitioner builder 🥳")
+public void newBuilder() {
         assertNotNull(FHIRPractitionerBuilder.newBuilder());
     }
 
     @Test
-    public void build() {
+    @DisplayName("Build new practitioner 🥳")
+public void build() {
         Practitioner practitioner = FHIRPractitionerBuilder.newBuilder()
                 .withNpi("7127445550")
                 .withName("Test", "Practitioner")

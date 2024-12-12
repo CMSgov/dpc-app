@@ -17,8 +17,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Practitioner validation")
 public class PractitionerValidationTest {
 
     private static FhirValidator fhirValidator;
@@ -45,6 +47,8 @@ public class PractitionerValidationTest {
     }
 
     @Test
+@DisplayName("Validate practitioner with name 🥳")
+
     void testHasName() {
         final Practitioner practitioner = generateFakePractitioner();
         practitioner.addName().setFamily("Patient").addGiven("Test");
@@ -63,6 +67,8 @@ public class PractitionerValidationTest {
     }
 
     @Test
+@DisplayName("Validate with practitioner with identifier 🥳")
+
     void testHasIdentifier() {
         final Practitioner practitioner = generateFakePractitioner();
         practitioner.addName().setFamily("Patient").addGiven("Test");

@@ -41,9 +41,12 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.DisplayName;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Aggregation Engine operations")
+
 class AggregationEngineTest {
     private static final UUID aggregatorID = UUID.randomUUID();
     private static final String TEST_ORG_NPI = NPIUtil.generateNPI();
@@ -93,6 +96,8 @@ class AggregationEngineTest {
      * Test if the BB Mock Client will return a patient.
      */
     @Test
+@DisplayName("Get patient via BlueButton mock client 🥳")
+
     void mockBlueButtonClientTest() {
         var patientMBI = MockBlueButtonClient.MBI_BENE_ID_MAP.get(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0));
         Bundle patient = bbclient.requestPatientFromServer(patientMBI, null, null);
@@ -103,6 +108,8 @@ class AggregationEngineTest {
      * Verify that an exception in the claimBatch method doesn't kill polling the queue
      */
     @Test
+@DisplayName("Verify that a failure to claim a batch doesn't block the queue 🥳")
+
     void claimBatchException() throws InterruptedException {
         final var orgID = UUID.randomUUID();
 
@@ -160,6 +167,8 @@ class AggregationEngineTest {
      * Verify that an exception in the processJobBatch method doesn't kill polling the queue
      */
     @Test
+@DisplayName("Verify that a failure to process a batch doesn't block the queue 🥳")
+
     void processJobBatchException() throws InterruptedException {
         doReturn(Optional.empty())
                 .doReturn(Optional.empty())
@@ -196,6 +205,8 @@ class AggregationEngineTest {
      * Test if a engine can handle a simple job with one resource type, one test provider, and one patient.
      */
     @Test
+@DisplayName("Complete a simple job 🥳")
+
     void simpleJobTest() {
         final var orgID = UUID.randomUUID();
 
@@ -228,6 +239,8 @@ class AggregationEngineTest {
      * Test if a engine can handle a simple job with one resource type, one test provider, one patient and since.
      */
     @Test
+@DisplayName("Complete a simple job with a since parameter 🥳")
+
     void sinceJobTest() {
         final var orgID = UUID.randomUUID();
 
@@ -259,6 +272,8 @@ class AggregationEngineTest {
      * Test if the engine can handle a job with multiple output files and patients
      */
     @Test
+@DisplayName("Complete a job with multiple output files and patients 🥳")
+
     void multipleFileJobTest() {
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
@@ -291,6 +306,8 @@ class AggregationEngineTest {
      * Test if the engine can split a job into multiple batches
      */
     @Test
+@DisplayName("Split a queued job into multiple batches 🥳")
+
     void multipleBatchJobTest() {
         final var orgID = UUID.randomUUID();
 
@@ -314,6 +331,8 @@ class AggregationEngineTest {
      * Test if the engine can handle a pausing a job on shutdown
      */
     @Test
+@DisplayName("Pause a queued job during queue shutdown 🥳")
+
     void pauseJobTest() {
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
@@ -354,6 +373,8 @@ class AggregationEngineTest {
      * Test if the engine can handle appending to a batch file with multiple patients
      */
     @Test
+@DisplayName("Queue and process a batch job with multiple patients 🥳")
+
     void appendBatchFileTest() {
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
@@ -392,6 +413,8 @@ class AggregationEngineTest {
      * Test if the engine can handle a job with no attributions
      */
     @Test
+@DisplayName("Queue and process empty job 🥳")
+
     void emptyJobTest() {
         final var orgID = UUID.randomUUID();
 
@@ -425,6 +448,8 @@ class AggregationEngineTest {
      * Test if the engine can handle a job with bad parameters
      */
     @Test
+@DisplayName("Handle job with invalid resource type 🤮")
+
     void badJobTest() {
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
@@ -453,6 +478,8 @@ class AggregationEngineTest {
      * Test if the engine can handle a job with bad parameters, and then fail marking the batch as failed
      */
     @Test
+@DisplayName("Handle job with bad parameters and force it into a stuck job state 🤮")
+
     void badJobTestWithFailBatchException() {
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
@@ -486,6 +513,8 @@ class AggregationEngineTest {
      * Test that the engine can handle a bad patient ID
      */
     @Test
+@DisplayName("Complete a job batch with partial success 🥳")
+
     void badPatientIDTest() throws GeneralSecurityException {
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1), "-1");
@@ -532,6 +561,8 @@ class AggregationEngineTest {
     }
 
     @Test
+@DisplayName("Complete a job batch with patient with mulitple MBIs 🥳")
+
     void multiplePatientsMatchTest() {
         final List<String> mbis = Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MULTIPLE_MBIS.get(0));
 
@@ -563,6 +594,8 @@ class AggregationEngineTest {
     }
 
     @Test
+@DisplayName("Blue Button client runtime exception 🤮")
+
     void testBlueButtonException() throws GeneralSecurityException {
         // Test generic runtime exception
         testWithThrowable(new RuntimeException("Error!!!!"));
@@ -573,7 +606,8 @@ class AggregationEngineTest {
     }
 
     @Test
-    public void testUnhealthyIfProcessJobBatchThrowsException() throws InterruptedException {
+    @DisplayName("Verify queue engine termination affects health check 🤮")
+public void testUnhealthyIfProcessJobBatchThrowsException() throws InterruptedException {
         // This should never happen but if it does then this test is checking to make sure the look gets broken out
         // and goes into the #onError callback to set the queue to not running
         Mockito.doThrow(new RuntimeException("Error")).when(engine).processJobBatch(Mockito.any(JobQueueBatch.class));

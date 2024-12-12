@@ -26,9 +26,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 // Ensure that all resources have the appropriate handlers and annotations
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Resource annotation and handling")
+
 class APIResourceAnnotationTest {
 
     private static Set<Method> methods;
@@ -60,6 +63,8 @@ class APIResourceAnnotationTest {
     }
 
     @Test
+@DisplayName("All resources have monitoring annotations 🥳")
+
     void allResourcesHaveMonitoringAnnotations() {
         methods.forEach(method -> assertAll(
                 () -> assertTrue(method.isAnnotationPresent(Timed.class), String.format("Method: %s in Class: %s must have @Timed annotation", method.getName(), method.getDeclaringClass())),
@@ -68,6 +73,8 @@ class APIResourceAnnotationTest {
     }
 
     @Test
+@DisplayName("All resources have Swagger annotations 🥳")
+
     void allResourcesHaveSwaggerAnnotations() {
         methods
                 .forEach(method ->
@@ -75,6 +82,8 @@ class APIResourceAnnotationTest {
     }// iterate over parameters (at least one should have Auth)
 
     @Test
+@DisplayName("All resources have security annotations 🥳")
+
     void allResourcesHaveSecurityAnnotations() {
         methods.forEach(APIResourceAnnotationTest::assertMethodHasValidAuthAnnotations);
     }

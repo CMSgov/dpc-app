@@ -22,7 +22,9 @@ import org.mockito.Mockito;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Admin resource operations")
 public class AdminResourceUnitTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -37,7 +39,8 @@ public class AdminResourceUnitTest {
     }
 
     @Test
-    public void testGetOrganizations() {
+    @DisplayName("Get organization 🥳")
+public void testGetOrganizations() {
         UUID orgID1 = UUID.randomUUID();
         Organization organization1 = new Organization();
         organization1.setId(orgID1.toString());

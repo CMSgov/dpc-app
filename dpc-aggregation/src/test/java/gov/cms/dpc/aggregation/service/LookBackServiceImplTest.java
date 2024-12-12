@@ -18,8 +18,10 @@ import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Look Back service operations")
 public class LookBackServiceImplTest {
 
     private final String providerNPI = NPIUtil.generateNPI();
@@ -51,7 +53,8 @@ public class LookBackServiceImplTest {
     }
 
     @Test
-    public void testClaimWithinTimeFrame() {
+    @DisplayName("Match look back within time frame 🥳")
+public void testClaimWithinTimeFrame() {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
@@ -72,7 +75,8 @@ public class LookBackServiceImplTest {
     }
 
     @Test
-    public void testJobOrgMatchAnyEobNPIs() {
+    @DisplayName("Match look back with random org 🤮")
+public void testJobOrgMatchAnyEobNPIs() {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
@@ -84,7 +88,8 @@ public class LookBackServiceImplTest {
     }
 
     @Test
-    public void testJobProviderMatchAnyEobNPIs() {
+    @DisplayName("Match look back with random NPI 🤮")
+public void testJobProviderMatchAnyEobNPIs() {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 

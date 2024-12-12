@@ -22,8 +22,11 @@ import java.util.Collections;
 import static gov.cms.dpc.testing.factories.OrganizationFactory.generateFakeAddress;
 import static gov.cms.dpc.testing.factories.OrganizationFactory.generateFakeOrganization;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.DisplayName;
 
 @ExtendWith(BufferedLoggerHandler.class)
+@DisplayName("Organization validation")
+
 class OrganizationValidationTest {
 
     private static FhirValidator fhirValidator;
@@ -51,6 +54,8 @@ class OrganizationValidationTest {
     }
 
     @Test
+@DisplayName("Validate organization with identifiers 🤮")
+
     void testIdentifier() {
         final Organization organization = generateFakeOrganization();
         organization.addAddress(generateFakeAddress());
@@ -73,6 +78,8 @@ class OrganizationValidationTest {
     }
 
     @Test
+@DisplayName("Validate organization with address 🤮")
+
     void testAddress() {
         final Organization organization = generateFakeOrganization();
         organization.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("test-value");

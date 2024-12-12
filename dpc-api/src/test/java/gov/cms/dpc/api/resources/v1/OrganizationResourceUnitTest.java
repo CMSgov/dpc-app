@@ -28,7 +28,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Organization resource operations")
 public class OrganizationResourceUnitTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -45,7 +47,8 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-    public void testSubmitOrganization() {
+    @DisplayName("Add organization")
+public void testSubmitOrganization() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());
@@ -71,7 +74,8 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-    public void testSubmitOrganizationNoOrganization() {
+    @DisplayName("Add organization with missing parameters 🤮")
+public void testSubmitOrganizationNoOrganization() {
         Bundle bundle = new Bundle();
 
         try {
@@ -85,7 +89,8 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-    public void testSubmitOrganizationNoEndpoints() {
+    @DisplayName("Add organization with no endpoints 🤮")
+public void testSubmitOrganizationNoEndpoints() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());
@@ -103,7 +108,8 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-    public void testGetOrganization() {
+    @DisplayName("Get organization 🥳")
+public void testGetOrganization() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());
@@ -123,7 +129,8 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-    public void testDeleteOrganization() {
+    @DisplayName("Delete organization 🥳")
+public void testDeleteOrganization() {
         UUID orgID = UUID.randomUUID();
 
         IDeleteTyped delRet = mock(IDeleteTyped.class);
@@ -138,7 +145,8 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-    public void testUpdateOrganization() {
+    @DisplayName("Update organization 🥳")
+public void testUpdateOrganization() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());
@@ -160,7 +168,8 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-    public void testUpdateOrganizationNoResource() {
+    @DisplayName("Update unrecognized organization 🤮")
+public void testUpdateOrganizationNoResource() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());

@@ -8,11 +8,14 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Attribution Entity tests")
 public class AttributionRelationshipTest {
 
 	@Test
-	public void testEqualsAndHashCode() {
+	@DisplayName("Attribution relationship overriden hashcode and equals 🥳")
+public void testEqualsAndHashCode() {
 		AttributionRelationship r1 = new AttributionRelationship();
 		AttributionRelationship r2 = new AttributionRelationship();
 
@@ -44,7 +47,8 @@ public class AttributionRelationshipTest {
 	}
 
 	@Test
-	public void testToString() {
+	@DisplayName("Attribution relationship overriden toString() 🥳")
+public void testToString() {
 		AttributionRelationship relationship = new AttributionRelationship();
 		relationship.setAttributionID(1L);
 		RosterEntity roster = new RosterEntity();
@@ -65,7 +69,8 @@ public class AttributionRelationshipTest {
 	}
 
 	@Test
-	public void testConstructors() {
+	@DisplayName("Attribution relationship constructors 🥳")
+public void testConstructors() {
 		RosterEntity roster = new RosterEntity();
 		PatientEntity patient = new PatientEntity();
 		Timestamp created = Timestamp.from(Instant.now());
