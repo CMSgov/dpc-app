@@ -18,6 +18,6 @@ on:
 
 jobs:
   deploy_export:
-    uses: ./.github/workflows/opt-out-export-deploy.yml@jd/mess-with-workflows
+    uses: ./.github/workflows/opt-out-export-deploy.yml
     with:
       dispatch_environment: 'dev'
