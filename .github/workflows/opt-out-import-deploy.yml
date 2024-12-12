@@ -19,7 +19,7 @@ on:
       dispatch_environment: 'dev'
 
 jobs:
-  deploy import lambda:
+  deploy_import_lambda:
     permissions:
       contents: read
       id-token: write
