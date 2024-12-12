@@ -13,11 +13,10 @@ on:
           - test
           - prod
   push:
-    branches:
-      - main
     paths:
-      - lambda/opt-out-import/**
       - .github/workflows/opt-out-import-deploy.yml
+    with:
+      dispatch_environment: 'dev'
 
 jobs:
   deploy import lambda:
@@ -25,28 +24,10 @@ jobs:
       contents: read
       id-token: write
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./lambda/opt-out-import
     env:
-      INPUT_ENVIRONMENT: ${{ github.event.inputs.dispatch_environment || 'dev' }}
-    environment: ${{ github.event.inputs.dispatch_environment || 'dev' }}
+      INPUT_ENVIRONMENT: ${{ github.event.inputs.dispatch_environment }}
+    environment: ${{ github.event.inputs.dispatch_environment }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-      - name: Build opt-out-import zip file
-        env:
-          CGO_ENABLED: 0
+      - name: 
         run: |
-          go build -o bootstrap main.go parsers.go utils.go models.go db.go
-          zip function.zip bootstrap
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ env.INPUT_ENVIRONMENT }}-github-actions
-      - name: Upload and reload
-        run: |
-          aws s3 cp --no-progress function.zip \
-            s3://dpc-$INPUT_ENVIRONMENT-opt-out-import-function/function-${{ github.sha }}.zip
-          aws lambda update-function-code --function-name dpc-$INPUT_ENVIRONMENT-opt-out-import \
-            --s3-bucket dpc-$INPUT_ENVIRONMENT-opt-out-import-function --s3-key function-${{ github.sha }}.zip
+          echo $INPUT_ENVIRONMENT
