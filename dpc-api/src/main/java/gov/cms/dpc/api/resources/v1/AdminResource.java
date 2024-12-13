@@ -32,6 +32,7 @@ public class AdminResource extends AbstractAdminResource{
         this.client = client;
     }
 
+    @Override
     @GET
     @Path("Organization")
     @FHIR
@@ -46,13 +47,12 @@ public class AdminResource extends AbstractAdminResource{
     public Bundle getOrganizations(@NotNull @QueryParam(value="npis") String npis) {
         Map<String, List<String>> searchParams = new HashMap<>();
         searchParams.put("identifier", Collections.singletonList(npis));
-        Bundle bundle = this.client
+        return this.client
                     .search()
                     .forResource(Organization.class)
                     .whereMap(searchParams)
                     .encodedJson()
                     .returnBundle(Bundle.class)
                     .execute();
-        return bundle;
     }
 }

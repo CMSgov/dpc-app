@@ -33,7 +33,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TokenResourceTest extends AbstractSecureApplicationTest {
 
     private final ObjectMapper mapper;
-    private String fullyAuthedToken;
+    private final String fullyAuthedToken;
 
     private TokenResourceTest() {
         this.mapper = new ObjectMapper();
@@ -67,7 +66,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
                 .filter(token -> !token.getId().equals(orgTokenId))
                 .collect(Collectors.toList());
 
-        tokensToBeDeleted.stream().forEach(token -> deleteToken(token.getId()));
+        tokensToBeDeleted.forEach(token -> deleteToken(token.getId()));
     }
 
     @Test
@@ -79,7 +78,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         final TokenEntity token = ((List<TokenEntity>) tokens.getEntities()).get(0);
 
         assertAll(() -> assertEquals(String.format("Token for organization %s.", ORGANIZATION_ID), token.getLabel(), "Should have auto-generated label"),
-                () -> assertEquals(LocalDate.now().plus(1, ChronoUnit.YEARS), token.getExpiresAt().toLocalDate(), "Should expire in 1 year"),
+                () -> assertEquals(LocalDate.now().plusYears(1), token.getExpiresAt().toLocalDate(), "Should expire in 1 year"),
                 () -> assertEquals(LocalDate.now(), token.getCreatedAt().toLocalDate(), "Should be created today"),
                 () -> assertNull(token.getToken(), "Should not have token field"));
 
@@ -167,7 +166,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
     @Test
     void testTokenCreationWithDefaults() throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(getBaseURL() + String.format("/Token"));
+            final HttpPost httpPost = new HttpPost(getBaseURL() + "/Token");
             httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
 
             String newTokenId;
@@ -259,7 +258,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
         assertFalse(tokens.getEntities().isEmpty(), "Should have a token");
         List<TokenEntity> tokenList = tokens.getEntities().stream().filter(t -> t.getId().equals(token.getId())).collect(Collectors.toList());
-        assertTrue(tokenList.size() == 1 , "There should exist exactly 1 token with matching token ID");
+        assertEquals(1, tokenList.size(), "There should exist exactly 1 token with matching token ID");
 
         //Delete it
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
@@ -274,9 +273,9 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         //Ensure it is no longer returned when listing tokens
         tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
         tokenList = tokens.getEntities().stream().filter(t -> t.getId().equals(token.getId())).collect(Collectors.toList());
-        assertTrue(tokenList.size() == 0 , "There should exist exactly 0 tokens with matching token ID");
+        assertEquals(0, tokenList.size(), "There should exist exactly 0 tokens with matching token ID");
 
-        //Ensure it is not longer returned when fetched by id
+        //Ensure it is no longer returned when fetched by id
         final HttpGet httpGet = new HttpGet(getBaseURL() + "/Token/"+token.getId());
         httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
         try (final CloseableHttpClient client = HttpClients.createDefault();CloseableHttpResponse response = client.execute(httpGet)) {
@@ -332,7 +331,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<TokenEntity>>() {
+                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {
                 });
             }
         }

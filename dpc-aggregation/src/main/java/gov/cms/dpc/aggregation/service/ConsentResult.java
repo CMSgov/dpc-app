@@ -45,7 +45,7 @@ public class ConsentResult {
         OPT_OUT("http://hl7.org/fhir/ConsentPolicy/opt-out");
 
 
-        private String policyUrl;
+        private final String policyUrl;
 
         PolicyType(String policyUrl) {
             this.policyUrl = policyUrl;
