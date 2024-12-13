@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - .github/workflows/deploy.yml
+      - .github/workflows/deploy_static.yml
 
 jobs:
   deploy_static_site:
