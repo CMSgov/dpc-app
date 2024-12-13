@@ -113,12 +113,12 @@ public class APIAuthHelpers {
             audience = "https://prod.dpc.cms.gov/api/v1";
         }
         final String jwt = Jwts.builder()
-                .setHeaderParam("kid", keyID.toString())
-                .setAudience(String.format("%s/Token/auth", audience))
-                .setIssuer(macaroon)
-                .setSubject(macaroon)
-                .setId(UUID.randomUUID().toString())
-                .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
+                .header().add("kid", keyID.toString()).and()
+                .audience().add(String.format("%s/Token/auth", audience)).and()
+                .issuer(macaroon)
+                .subject(macaroon)
+                .id(UUID.randomUUID().toString())
+                .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
                 .signWith(privateKey, getSigningAlgorithm(KeyType.RSA))
                 .compact();
 
@@ -419,9 +419,7 @@ public class APIAuthHelpers {
             try {
                 final AuthResponse authResponse = jwtAuthFlow(this.baseURL, this.clientToken, this.keyID, this.privateKey);
                 // Set the refresh time to be 30 seconds before expiration
-                this.shouldRefreshToken = OffsetDateTime.now(ZoneOffset.UTC)
-                        .plus(authResponse.expiresIn, ChronoUnit.SECONDS)
-                        .minus(30, ChronoUnit.SECONDS);
+                this.shouldRefreshToken = OffsetDateTime.now(ZoneOffset.UTC).plusSeconds(authResponse.expiresIn - 30);
                 this.response = authResponse;
             } catch (IOException | URISyntaxException e) {
                 throw new IllegalStateException("Cannot perform auth flow", e);
@@ -462,9 +460,7 @@ public class APIAuthHelpers {
             try {
                 final AuthResponse authResponse = jwtAuthFlow(this.baseURL, this.clientToken, this.keyID, this.privateKey);
                 // Set the refresh time to be 30 seconds before expiration
-                this.shouldRefreshToken = OffsetDateTime.now(ZoneOffset.UTC)
-                        .plus(authResponse.expiresIn, ChronoUnit.SECONDS)
-                        .minus(30, ChronoUnit.SECONDS);
+                this.shouldRefreshToken = OffsetDateTime.now(ZoneOffset.UTC).plusSeconds(authResponse.expiresIn - 30);
                 this.response = authResponse;
             } catch (IOException | URISyntaxException e) {
                 throw new IllegalStateException("Cannot perform auth flow", e);
