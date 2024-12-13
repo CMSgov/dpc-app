@@ -256,7 +256,7 @@ class JWTUnitTests {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
             final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID()).and()
+                    .header().add("kid", UUID.randomUUID().toString()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
                     .issuer("macaroon")
                     .subject("macaroon")
@@ -387,7 +387,7 @@ class JWTUnitTests {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
             final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID()).and()
+                    .header().add("kid", UUID.randomUUID().toString()).and()
                     .audience().add("localhost:3002/v1/Token/auth").and()
                     .issuer("macaroon")
                     .subject("macaroon")
@@ -414,7 +414,7 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID()).and()
+                    .header().add("kid", UUID.randomUUID().toString()).and()
                     .audience().add("localhost:3002/v1/Token/auth").and()
                     .issuer(id)
                     .subject(id)
@@ -441,7 +441,7 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID()).and()
+                    .header().add("kid", UUID.randomUUID().toString()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
                     .issuer(id)
                     .subject(id)
@@ -471,7 +471,7 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID()).and()
+                    .header().add("kid", UUID.randomUUID().toString()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
                     .issuer(id)
                     .subject(id)
@@ -501,7 +501,7 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID()).and()
+                    .header().add("kid", UUID.randomUUID().toString()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
                     .issuer(id)
                     .subject(id)
@@ -517,6 +517,7 @@ class JWTUnitTests {
                     .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
 
             assertEquals(400, response.getStatus(), "Should not be valid");
+            System.out.println(response.readEntity(String.class));
             assertTrue(response.readEntity(String.class).contains("Expiration time must be seconds since unix epoch"), "Should have correct exception");
         }
 
@@ -528,7 +529,7 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID()).and()
+                    .header().add("kid", UUID.randomUUID().toString()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
                     .issuer(id)
                     .subject(id)
@@ -555,7 +556,7 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID()).and()
+                    .header().add("kid", UUID.randomUUID().toString()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
                     .issuer(m)
                     .subject(m)
@@ -582,7 +583,7 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID()).and()
+                    .header().add("kid", UUID.randomUUID().toString()).and()
                     .audience().add("localhost:3002/v1/Token/auth").and()
                     .issuer(m)
                     .subject(m)
@@ -607,7 +608,7 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID()).and()
+                    .header().add("kid", UUID.randomUUID().toString()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
                     .issuer("this is")
                     .subject("not matching")
@@ -633,7 +634,7 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID()).and()
+                    .header().add("kid", UUID.randomUUID().toString()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
                     .subject("not matching")
                     .id(id)
@@ -725,7 +726,7 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID()).and()
+                    .header().add("kid", UUID.randomUUID().toString()).and()
                     .audience().add("localhost:3002/v1/Token/auth").and()
                     .issuer(m)
                     .subject(m)

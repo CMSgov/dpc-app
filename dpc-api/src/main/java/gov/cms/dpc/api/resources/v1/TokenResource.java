@@ -6,18 +6,17 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
+import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
-import gov.cms.dpc.api.auth.jwt.KeyResolverAdapter;
 import gov.cms.dpc.api.auth.jwt.ValidatingKeyResolver;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
-import gov.cms.dpc.api.models.CreateTokenRequest;
 import gov.cms.dpc.api.models.JWTAuthResponse;
+import gov.cms.dpc.api.models.CreateTokenRequest;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
-import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.macaroons.CaveatSupplier;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
@@ -68,7 +67,7 @@ public class TokenResource extends AbstractTokenResource {
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
-    private final KeyResolverAdapter resolver;
+    private final SigningKeyResolverAdapter resolver;
     private final IJTICache cache;
     private final String authURL;
 
@@ -76,7 +75,7 @@ public class TokenResource extends AbstractTokenResource {
     public TokenResource(TokenDAO dao,
                          MacaroonBakery bakery,
                          TokenPolicy policy,
-                         KeyResolverAdapter resolver,
+                         SigningKeyResolverAdapter resolver,
                          IJTICache cache,
                          @APIV1 String publicURL) {
         this.dao = dao;
@@ -246,9 +245,9 @@ public class TokenResource extends AbstractTokenResource {
         try {
             Jwts.parser()
                     .requireAudience(this.authURL)
-                    .keyLocator(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
+                    .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
                     .build()
-                    .parseSignedClaims(jwt);
+                    .parseClaimsJws(jwt);
         } catch (IllegalArgumentException e) {
             // This is fine, we just want the body
         } catch (MalformedJwtException e) {
@@ -278,10 +277,10 @@ public class TokenResource extends AbstractTokenResource {
 
     private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
         final Jws<Claims> claims = Jwts.parser()
-                .keyLocator(this.resolver)
+                .setSigningKeyResolver(this.resolver)
                 .requireAudience(this.authURL)
                 .build()
-                .parseSignedClaims(jwtBody);
+                .parseClaimsJws(jwtBody);
 
         // Extract the Client Macaroon from the subject field (which is the same as the issuer)
         final String clientMacaroon = claims.getPayload().getSubject();
