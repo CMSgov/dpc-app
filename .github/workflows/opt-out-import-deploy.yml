@@ -20,5 +20,4 @@ jobs:
   deploy_export:
     uses: ./.github/workflows/opt-out-export-deploy.yml
     with:
-      type: string
       dispatch_environment: dev
