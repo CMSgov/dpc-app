@@ -48,8 +48,6 @@ jobs:
             -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
             -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
             -Dsonar.qualitygate.wait=true
-      - name: List Bucket before sync
-        run: aws s3 ls s3://stage.dpc.cms.gov/
       - name: "Sync _site"
         run: aws s3 sync _site/ s3://stage.dpc.cms.gov/ --delete
       - name: Upload html files without suffix with content-language set
@@ -58,5 +56,7 @@ jobs:
             suffixless=`basename ${file/.html}`
             aws s3 cp $file s3://stage.dpc.cms.gov/$suffixless --content-language text/html
           done
-      - name: List Bucket after sync
-        run: aws s3 ls s3://stage.dpc.cms.gov/
+      - name: Invalidate Cloudfront cache
+        run: |
+          DISTRIBUTION_ID=`aws cloudfront list-distributions --query "DistributionList.Items[].{Id:Id, OriginDomainName: Origins.Items[0].DomainName}[?starts_with(OriginDomainName, 'stage.dpc.cms.gov')].Id" --output text`
+          aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths '/*'
