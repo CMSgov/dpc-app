@@ -55,7 +55,8 @@ jobs:
       - name: Upload html files without suffix with content-language set
         run: |
           for file in _site/*.html; do
-            aws s3 cp ${file} s3://stage.dpc.cms.gov/${file/.html} --content-language text/html
+            suffixless=`basename ${file/.html}`
+            aws s3 cp $file s3://stage.dpc.cms.gov/$suffixless --content-language text/html
           done
       - name: List Bucket after sync
         run: aws s3 ls s3://stage.dpc.cms.gov/
