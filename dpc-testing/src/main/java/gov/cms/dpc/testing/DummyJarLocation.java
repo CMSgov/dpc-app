@@ -9,7 +9,6 @@ public class DummyJarLocation extends JarLocation {
         super(DummyJarLocation.class);
     }
 
-    @Override
     public Optional<String> getVersion() {
         return Optional.of("1.0.0");
     }

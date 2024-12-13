@@ -7,6 +7,7 @@ import gov.cms.dpc.macaroons.caveats.ExpirationCaveatVerifier;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 
 class ExpirationVerifierTest extends AbstractVerifierTest<ExpirationCaveatVerifier> {
 
@@ -26,7 +27,7 @@ class ExpirationVerifierTest extends AbstractVerifierTest<ExpirationCaveatVerifi
 
     @Override
     MacaroonCaveat getCorrectCaveat() {
-        return new MacaroonCaveat(new MacaroonCondition("expires", MacaroonCondition.Operator.EQ, OffsetDateTime.now(ZoneOffset.UTC).plusYears(2).toString()));
+        return new MacaroonCaveat(new MacaroonCondition("expires", MacaroonCondition.Operator.EQ, OffsetDateTime.now(ZoneOffset.UTC).plus(2, ChronoUnit.YEARS).toString()));
     }
 
     @Override

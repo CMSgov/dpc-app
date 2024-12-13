@@ -147,6 +147,5 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
         this.lookBackExemptOrgs = lookBackExemptOrgs;
     }
 
-    @Override
     public DPCAwsQueueConfiguration getDpcAwsQueueConfiguration() { return this.dpcAwsQueueConfiguration; }
 }

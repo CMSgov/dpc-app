@@ -130,7 +130,7 @@ public class JobBatchProcessor {
         final String resourcesRequested = job.getResourceTypes().stream().map(DPCResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
         final String failReasonLabel = failReason.map(Enum::name).orElse("NA");
         stopWatch.stop();
-        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason.isEmpty(), failReasonLabel, resourcesRequested, stopWatch.getDuration());
+        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason.isEmpty(), failReasonLabel, resourcesRequested, stopWatch.getTime());
         return results;
     }
 
@@ -356,7 +356,7 @@ public class JobBatchProcessor {
             if (consentResults.isEmpty()) {
                 return false;
             }
-            final ConsentResult latestConsent = Collections.max(consentResults, Comparator.comparing(ConsentResult::getConsentDate));
+            final ConsentResult latestConsent = Collections.max(consentResults, Comparator.comparing(consent -> consent.getConsentDate()));
             final boolean isActive = latestConsent.isActive();
             final boolean isOptOut = ConsentResult.PolicyType.OPT_OUT.equals(latestConsent.getPolicyType());
             final boolean isFutureConsent = latestConsent.getConsentDate().after(new Date());

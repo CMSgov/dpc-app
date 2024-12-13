@@ -153,7 +153,7 @@ class ResourceFetcher {
     private void addResources(ArrayList<Resource> resources, Bundle bundle) {
         bundle.getEntry().forEach((entry) -> {
             final var resource = entry.getResource();
-            if (!resource.getResourceType().getPath().equals(resourceType.getPath())) {
+            if (resource.getResourceType().getPath() != resourceType.getPath()) {
                 throw new DataFormatException(String.format("Unexpected resource type: got %s expected: %s", resource.getResourceType().toString(), resourceType.toString()));
             }
             resources.add(resource);

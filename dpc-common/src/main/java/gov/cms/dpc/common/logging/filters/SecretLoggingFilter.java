@@ -19,7 +19,7 @@ public class SecretLoggingFilter implements FilterFactory<ILoggingEvent> {
 	private final Map<String, String> envVars = System.getenv();
 
 	@NotEmpty
-	private List<String> secrets = new ArrayList<>();
+	private List<String> secrets = new LinkedList<>();
 
 	@JsonProperty("secrets") // Required for Jackson to build this correctly
 	public void setSecrets(List<String> secrets) {
@@ -33,14 +33,19 @@ public class SecretLoggingFilter implements FilterFactory<ILoggingEvent> {
 	@Override
 	public Filter<ILoggingEvent> build() {
 		// Clean the secrets list
-        secrets.removeIf(secret -> !envVars.containsKey(secret));
+		for (Iterator<String> i = secrets.listIterator(); i.hasNext();) {
+			String secret = i.next();
+			if (!envVars.containsKey(secret)) {
+				i.remove();
+			}
+		}
 
 		return new Filter<>() {
 			@Override
 			public FilterReply decide(ILoggingEvent event) {
 				for (String secretName : secrets) {
 					if (event.getFormattedMessage().contains(envVars.get(secretName))) {
-                        logger.warn("Suppressing log, attempted to write {} in {}", secretName, event.getLoggerName());
+						logger.warn("Suppressing log, attempted to write " + secretName + " in " + event.getLoggerName());
 						return FilterReply.DENY;
 					}
 				}

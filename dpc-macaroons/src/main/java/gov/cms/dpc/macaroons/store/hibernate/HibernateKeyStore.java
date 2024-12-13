@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import java.security.SecureRandom;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 /**
@@ -45,7 +46,7 @@ public class HibernateKeyStore implements IRootKeyStore {
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         entity.setCreated(now);
         // TODO: Make this configurable. DPC-284
-        entity.setExpires(now.plusYears(1));
+        entity.setExpires(now.plus(1, ChronoUnit.YEARS));
 
         try (final Session session = this.factory.openSession()) {
             final Transaction tx = session.beginTransaction();
