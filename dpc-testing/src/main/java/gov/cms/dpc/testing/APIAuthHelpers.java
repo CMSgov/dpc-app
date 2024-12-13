@@ -113,12 +113,12 @@ public class APIAuthHelpers {
             audience = "https://prod.dpc.cms.gov/api/v1";
         }
         final String jwt = Jwts.builder()
-                .header().add("kid", keyID.toString()).and()
-                .audience().add(String.format("%s/Token/auth", audience)).and()
-                .issuer(macaroon)
-                .subject(macaroon)
-                .id(UUID.randomUUID().toString())
-                .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
+                .setHeaderParam("kid", keyID.toString())
+                .setAudience(String.format("%s/Token/auth", audience))
+                .setIssuer(macaroon)
+                .setSubject(macaroon)
+                .setId(UUID.randomUUID().toString())
+                .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
                 .signWith(privateKey, getSigningAlgorithm(KeyType.RSA))
                 .compact();
 
