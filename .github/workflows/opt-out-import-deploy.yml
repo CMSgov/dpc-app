@@ -20,4 +20,4 @@ jobs:
     uses: ./.github/workflows/opt-out-export-dev-deploy.yml
     with:
       dispatch_environment: dev
-      secrets: inherit
+    secrets: inherit
