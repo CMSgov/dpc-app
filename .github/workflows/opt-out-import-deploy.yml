@@ -17,6 +17,6 @@ on:
 
 jobs:
   deploy_export:
-    uses: ./.github/workflows/opt-out-export-deploy.yml
+    uses: ./.github/workflows/opt-out-export-dev-deploy.yml
     with:
       dispatch_environment: dev
