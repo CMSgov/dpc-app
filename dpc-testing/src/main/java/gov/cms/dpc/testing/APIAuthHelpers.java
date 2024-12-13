@@ -14,7 +14,7 @@ import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.testing.models.KeyView;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
@@ -326,7 +326,7 @@ public class APIAuthHelpers {
      * @return - {@link SignatureAlgorithm} to use for signing JWT
      */
     public static SignatureAlgorithm getSigningAlgorithm(KeyType keyType) {
-        return keyType == KeyType.ECC ? Jwts.SIG.ES256 : Jwts.SIG.RS384;
+        return keyType == KeyType.ECC ? SignatureAlgorithm.ES256 : SignatureAlgorithm.RS384;
     }
 
 
