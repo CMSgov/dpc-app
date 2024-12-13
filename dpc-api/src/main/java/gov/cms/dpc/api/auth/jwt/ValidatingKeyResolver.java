@@ -20,7 +20,6 @@ import java.util.UUID;
  * <p>
  * The downside is that this method will always return a null {@link Key}, which means the {@link Jwts#parser()} method will always throw an {@link IllegalArgumentException}, which we need to catch.
  */
-// The JwsHeader comes as a generic, which bothers ErrorProne
 public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
 
     private final IJTICache cache;
