@@ -35,8 +35,8 @@ jobs:
       run:
         working-directory: ./lambda/opt-out-export
     env:
-      INPUT_ENVIRONMENT: ${{ github.event.inputs.dispatch_environment }}
-    environment: ${{ github.event.inputs.dispatch_environment }}
+      INPUT_ENVIRONMENT: ${{ inputs.dispatch_environment }}
+    environment: ${{ inputs.dispatch_environment }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
