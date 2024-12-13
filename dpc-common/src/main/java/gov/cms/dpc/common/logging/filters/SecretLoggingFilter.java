@@ -33,7 +33,12 @@ public class SecretLoggingFilter implements FilterFactory<ILoggingEvent> {
 	@Override
 	public Filter<ILoggingEvent> build() {
 		// Clean the secrets list
-        secrets.removeIf(secret -> !envVars.containsKey(secret));
+        for (Iterator<String> i = secrets.listIterator(); i.hasNext();) {
+            String secret = i.next();
+            if (!envVars.containsKey(secret)) {
+                i.remove();
+            }
+        }
 
 		return new Filter<>() {
 			@Override
