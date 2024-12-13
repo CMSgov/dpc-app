@@ -27,4 +27,6 @@ jobs:
           repository: 'CMSgov/dpc-static-site'
           ref: ${{ inputs.static_repo_ref }}
       - name: "Git tag info"
-        run: which git
+        run: |
+          ls
+          git tag
