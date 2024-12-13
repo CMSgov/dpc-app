@@ -1,0 +1,57 @@
+name: 'deploy static site'
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/deploy.yml
+
+jobs:
+  deploy_static_site:
+    name: Deploy Static Site
+    runs-on: self-hosted
+    env:
+      # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+        with:
+          repository: 'CMSgov/dpc-static-site'
+          ref: 'jd/dpc-4433-gha-deploy-static'
+      - name: "Add dirs"
+        run: mkdir -p _site && mkdir -p .jekyll-cache
+      - name: 'Build Image'
+        run: docker build . -f Dockerfiles/Dockerfile.static_site -t static_site
+      - name: 'Build Site'
+        run: docker run -v ./_site:/dpc-site-static/_site -v ./.jekyll-cache:/dpc-site-static/.jekyll-cache --rm static_site
+      - name: Set env vars from AWS params
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: us-east-1
+        with:
+          params: |
+            SONAR_HOST_URL=/sonarqube/url
+            SONAR_TOKEN=/sonarqube/token
+      - name: Run quality gate scan
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        uses: sonarsource/sonarqube-scan-action@master
+        with:
+          args:
+            -Dsonar.projectKey=bcda-dpc-static-site
+            -Dsonar.sources=.
+            -Dsonar.working.directory=./sonar_workspace
+            -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+            -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
+            -Dsonar.qualitygate.wait=true
+      - name: List Bucket before sync
+        run: aws s3 ls s3://stage.dpc.cms.gov/
+      - name: "Sync _site"
+        run: aws s3 sync _site/ s3://stage.dpc.cms.gov/ --delete
+      - name: Upload html files without suffix with content-language set
+        run: |
+          for file in _site/*.html; do
+            aws s3 cp ${file} s3://stage.dpc.cms.gov/${file/.html} --content-language text/html
+          done
+      - name: List Bucket after sync
+        run: aws s3 ls s3://stage.dpc.cms.gov/
