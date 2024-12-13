@@ -1,4 +1,4 @@
-name: 'Deploy Static Site'
+name: 'Tag Static Site'
 
 on:
   workflow_dispatch:
@@ -6,66 +6,25 @@ on:
       target_environment:
         description: Deploy where?
         required: false
-        default: 'staging'
+        default: 'do not deploy'
         type: choice
         options:
+          - 'do not deploy'
           - staging
-          - prod
       static_repo_ref:
         description: Which branch or tag
         required: true
         default: 'main'
         type: 'string'
 jobs:
-  deploy_static_site:
-    name: Deploy Static Site
-    runs-on: self-hosted
-    env:
-      TARGET_BUCKET: ${{ inputs.target_environment == 'prod' && 'dpc.cms.gov' || 'stage.dpc.cms.gov' }}
+  tag_static_site:
+    name: Tag Static Site
+    runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
         with:
           repository: 'CMSgov/dpc-static-site'
           ref: ${{ inputs.static_repo_ref }}
-      - name: "Add dirs"
-        run: mkdir -p _site && mkdir -p .jekyll-cache
-      - name: 'Build Image'
-        run: docker build . -f Dockerfiles/Dockerfile.static_site -t static_site
-      - name: 'Build Site'
-        run: docker run -v ./_site:/dpc-site-static/_site -v ./.jekyll-cache:/dpc-site-static/.jekyll-cache --rm static_site
-      - name: Set env vars from AWS params
-        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
-        env:
-          AWS_REGION: ${{ vars.AWS_REGION }}
-        with:
-          params: |
-            SONAR_HOST_URL=/sonarqube/url
-            SONAR_TOKEN=/sonarqube/token
-      - name: Run quality gate scan
-        if: ${{ inputs.target_environment == 'staging' }}
-        uses: sonarsource/sonarqube-scan-action@master
-        with:
-          args:
-            -Dsonar.projectKey=bcda-dpc-static-site
-            -Dsonar.sources=.
-            -Dsonar.working.directory=./sonar_workspace
-            -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
-            -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
-            -Dsonar.qualitygate.wait=true
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.target_environment == 'prod' && 'prod' || 'dev' }}-github-actions
-      - name: "Sync _site"
-        run: aws s3 sync _site/ s3://$TARGET_BUCKET/ --delete
-      - name: Upload html files without suffix with content-language set
-        run: |
-          for file in _site/*.html; do
-            suffixless=`basename ${file/.html}`
-            aws s3 cp $file s3://$TARGET_BUCKET/$suffixless --content-language text/html
-          done
-      - name: Invalidate Cloudfront cache
-        run: |
-          DISTRIBUTION_ID=`aws cloudfront list-distributions --query "DistributionList.Items[].{Id:Id, OriginDomainName: Origins.Items[0].DomainName}[?starts_with(OriginDomainName, '$TARGET_BUCKET')].Id" --output text`
-          aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths '/*'
+      - name: "Git tag info"
+        run: git tag | sort -n | tail -1

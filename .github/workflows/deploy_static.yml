@@ -1,21 +1,33 @@
-name: 'deploy static site'
+name: 'Deploy Static Site'
 
 on:
   workflow_dispatch:
-
+    inputs:
+      target_environment:
+        description: Deploy where?
+        required: false
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - prod
+      static_repo_ref:
+        description: Which branch or tag?
+        required: true
+        default: 'main'
+        type: 'string'
 jobs:
   deploy_static_site:
     name: Deploy Static Site
     runs-on: self-hosted
     env:
-      # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
+      TARGET_BUCKET: ${{ inputs.target_environment == 'prod' && 'dpc.cms.gov' || 'stage.dpc.cms.gov' }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
         with:
           repository: 'CMSgov/dpc-static-site'
-          ref: 'jd/dpc-4433-gha-deploy-static'
+          ref: ${{ inputs.static_repo_ref }}
       - name: "Add dirs"
         run: mkdir -p _site && mkdir -p .jekyll-cache
       - name: 'Build Image'
@@ -31,7 +43,7 @@ jobs:
             SONAR_HOST_URL=/sonarqube/url
             SONAR_TOKEN=/sonarqube/token
       - name: Run quality gate scan
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ inputs.target_environment == 'staging' }}
         uses: sonarsource/sonarqube-scan-action@master
         with:
           args:
@@ -44,16 +56,16 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.target_environment == 'prod' && 'prod' || 'dev' }}-github-actions
       - name: "Sync _site"
-        run: aws s3 sync _site/ s3://stage.dpc.cms.gov/ --delete
+        run: aws s3 sync _site/ s3://$TARGET_BUCKET/ --delete
       - name: Upload html files without suffix with content-language set
         run: |
           for file in _site/*.html; do
             suffixless=`basename ${file/.html}`
-            aws s3 cp $file s3://stage.dpc.cms.gov/$suffixless --content-language text/html
+            aws s3 cp $file s3://$TARGET_BUCKET/$suffixless --content-language text/html
           done
       - name: Invalidate Cloudfront cache
         run: |
-          DISTRIBUTION_ID=`aws cloudfront list-distributions --query "DistributionList.Items[].{Id:Id, OriginDomainName: Origins.Items[0].DomainName}[?starts_with(OriginDomainName, 'stage.dpc.cms.gov')].Id" --output text`
+          DISTRIBUTION_ID=`aws cloudfront list-distributions --query "DistributionList.Items[].{Id:Id, OriginDomainName: Origins.Items[0].DomainName}[?starts_with(OriginDomainName, '$TARGET_BUCKET')].Id" --output text`
           aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths '/*'
