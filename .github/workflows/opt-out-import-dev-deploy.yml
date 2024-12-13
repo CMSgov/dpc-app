@@ -32,4 +32,9 @@ jobs:
           echo fetching
           git fetch --quiet
           echo describing
-          git describe --tags --abbrev=0 
+          last_rev=`git describe --tags --abbrev=0 --match 'r*'`
+          git log --pretty=format:"- %s" $last_rev..HEAD
+          last_rev_num=${last_rev/r}
+          next_rev_num=$((last_rev_num + 1))
+          next_rev=r$next_rev_num
+          echo $next_rev
