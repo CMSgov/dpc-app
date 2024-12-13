@@ -29,11 +29,7 @@ jobs:
       - name: git
         run: |
           # setup the username and email. I tend to use 'GitHub Actions Bot' with no email by default
-          git --version
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
-          git status
           echo fetching
-          git fetch
+          git fetch --quiet
           echo describing
           git describe --tags --abbrev=0 
