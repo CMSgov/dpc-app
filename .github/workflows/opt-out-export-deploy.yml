@@ -16,6 +16,7 @@ on:
     inputs:
       dispatch_environment:
         description: environment
+        type: string
         required: true
   push:
     branches:
