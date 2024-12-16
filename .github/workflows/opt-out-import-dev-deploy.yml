@@ -45,6 +45,7 @@ jobs:
           echo $BODY
   test_output:
     name: Test Output
+    runs-on: ubuntu-latest
     needs: tag_static_site
     steps:
       - env:
