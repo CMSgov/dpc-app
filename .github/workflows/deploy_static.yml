@@ -30,6 +30,8 @@ jobs:
           ref: ${{ inputs.static_repo_ref }}
       - name: "Add dirs"
         run: mkdir -p _site && mkdir -p .jekyll-cache
+      - name: "Set Version"
+        run: echo "version: ${{ inputs.static_repo_ref }}" >> _version_config.yml
       - name: 'Build Image'
         run: docker build . -f Dockerfiles/Dockerfile.static_site -t static_site
       - name: 'Build Site'
