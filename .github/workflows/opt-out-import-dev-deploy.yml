@@ -18,7 +18,7 @@ on:
         default: 'main'
         type: 'string'
 jobs:
-  tag_static_site:
+  tag-static-site:
     name: Tag Static Site
     runs-on: ubuntu-latest
     outputs:
@@ -49,9 +49,9 @@ jobs:
           body: ${{ BODY }}
           tag_name: ${{ NEXT_REV }}
           repository: CMSgov/dpc-static-site/${{ inputs.static_repo_ref }}
-  test_outputs:
+  test-outputs:
     name: Test Outputs
-    needs: tag_static_site
+    needs: tag-static-site
     steps:
       - name: output output
         run: |
