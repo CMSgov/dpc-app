@@ -1,7 +1,7 @@
 name: 'Tag Repo'
 
 on:
-  workflow_on:
+  workflow_call:
     inputs:
       repo_ref:
         description: Which branch or tag
