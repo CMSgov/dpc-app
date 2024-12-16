@@ -38,5 +38,5 @@ jobs:
           echo $NEXT_REV
       - name: "Set Body"
         run: |
-          BODY=`git log --pretty=format:"- %s" $PREV_REV..HEAD`
+          BODY=`git log --pretty=format:"- %s" r46..HEAD`
           echo $BODY
