@@ -49,5 +49,5 @@ jobs:
     needs: tag_static_site
     steps:
       - env:
-          OUTPUT1: ${{needs.test_static_site.outputs.next_rev}}
+          OUTPUT1: ${{needs.tag_static_site.outputs.next_rev}}
         run: echo "$OUTPUT1"
