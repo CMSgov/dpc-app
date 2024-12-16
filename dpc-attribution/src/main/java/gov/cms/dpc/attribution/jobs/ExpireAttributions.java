@@ -42,7 +42,8 @@ public class ExpireAttributions extends Job {
         // Find all the jobs and expire them
         logger.debug("Expiring active attribution relationships before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
 
-        try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
+        try (final Connection connection = this.dataSource.getConnection()) {
+            final DSLContext context = DSL.using(connection, this.settings);
             connection.setAutoCommit(false);
 
             final int updated = context

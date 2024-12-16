@@ -40,9 +40,8 @@ public class TruncateDatabase extends Task {
         final PooledDataSourceFactory dataSourceFactory = configuration.getDatabase();
         final ManagedDataSource dataSource = dataSourceFactory.build(null, "attribution-seeder");
 
-        try (final Connection connection = dataSource.getConnection();
-             DSLContext context = DSL.using(connection, new Settings().withRenderQuotedNames(RenderQuotedNames.EXPLICIT_DEFAULT_UNQUOTED))) {
-
+        try (final Connection connection = dataSource.getConnection()) {
+            DSLContext context = DSL.using(connection, new Settings().withRenderQuotedNames(RenderQuotedNames.EXPLICIT_DEFAULT_UNQUOTED));
             DBUtils.truncateAllTables(context, "public");
         }
     }

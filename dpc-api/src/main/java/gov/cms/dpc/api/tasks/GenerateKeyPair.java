@@ -12,8 +12,8 @@ import org.whispersystems.curve25519.Curve25519KeyPair;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import java.io.PrintWriter;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;

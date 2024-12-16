@@ -9,8 +9,8 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Date;

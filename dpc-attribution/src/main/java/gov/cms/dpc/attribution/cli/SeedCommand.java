@@ -78,8 +78,8 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         // Read in the seeds file and write things
         logger.info("Seeding attributions at time {}", creationTimestamp.toLocalDateTime());
 
-        try (final Connection connection = dataSource.getConnection();
-             DSLContext context = DSL.using(connection, this.settings)) {
+        try (final Connection connection = dataSource.getConnection()) {
+            DSLContext context = DSL.using(connection, this.settings);
 
             // Truncate everything
             DBUtils.truncateAllTables(context, "public");

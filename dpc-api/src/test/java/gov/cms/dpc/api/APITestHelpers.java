@@ -46,8 +46,8 @@ import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;

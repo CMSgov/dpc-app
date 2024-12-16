@@ -106,12 +106,12 @@
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
             <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
             <!-- Ideally, this should track the version used in Dropwizard-->
-            <version>2.41</version>
+            <version>3.0.16</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
-                    <groupId>javax.servlet</groupId>
-                    <artifactId>javax.servlet-api</artifactId>
+                    <groupId>jakarta.servlet</groupId>
+                    <artifactId>jakarta.servlet-api</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>junit</groupId>
@@ -246,7 +246,7 @@
                         <annotationProcessorPath>
                             <groupId>org.hibernate</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
-                            <version>5.6.15.Final</version>
+                            <version>6.6.3.Final</version>
                         </annotationProcessorPath>
                         <path>
                             <groupId>javax.xml.bind</groupId>
@@ -304,13 +304,13 @@
                 <dependencies>
                     <dependency>
                         <groupId>org.jooq</groupId>
-                        <artifactId>jooq-meta-extensions</artifactId>
+                        <artifactId>jooq-meta-extensions-hibernate</artifactId>
                         <version>${jooq.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>javax.persistence</groupId>
-                        <artifactId>javax.persistence-api</artifactId>
-                        <version>2.2</version>
+                        <groupId>jakarta.persistence</groupId>
+                        <artifactId>jakarta.persistence-api</artifactId>
+                        <version>3.1.0</version>
                     </dependency>
                 </dependencies>
             </plugin>

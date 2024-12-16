@@ -14,9 +14,9 @@ import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.util.UUID;
 

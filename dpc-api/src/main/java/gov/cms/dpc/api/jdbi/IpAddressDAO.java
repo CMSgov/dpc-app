@@ -4,10 +4,11 @@ import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.entities.IpAddressEntity_;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
+import org.hibernate.query.criteria.HibernateCriteriaBuilder;
+import org.hibernate.query.criteria.JpaCriteriaQuery;
+import org.hibernate.query.criteria.JpaRoot;
+
 import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,11 +19,11 @@ public class IpAddressDAO extends AbstractDAO<IpAddressEntity> {
     }
 
    public List<IpAddressEntity> fetchIpAddresses(UUID organizationID) {
-       CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+       HibernateCriteriaBuilder builder = currentSession().getCriteriaBuilder();
 
-       CriteriaQuery<IpAddressEntity> query = builder.createQuery(IpAddressEntity.class);
-       Root<IpAddressEntity> root = query.from(IpAddressEntity.class);
-       query.where(builder.equal(root.get(IpAddressEntity_.organizationId), organizationID));
+       JpaCriteriaQuery<IpAddressEntity> query = builder.createQuery(IpAddressEntity.class);
+       JpaRoot<IpAddressEntity> root = query.from(IpAddressEntity.class);
+       query.where(builder.equal(root.get(IpAddressEntity_.organizationId.toString()), organizationID));
 
        return list(query);
    }

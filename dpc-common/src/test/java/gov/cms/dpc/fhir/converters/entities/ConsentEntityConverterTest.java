@@ -8,7 +8,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

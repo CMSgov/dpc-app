@@ -4,11 +4,11 @@ import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.entities.PublicKeyEntity_;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
+import org.hibernate.query.criteria.HibernateCriteriaBuilder;
+import org.hibernate.query.criteria.JpaCriteriaQuery;
+import org.hibernate.query.criteria.JpaRoot;
 
 import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,22 +25,22 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
     }
 
     public List<PublicKeyEntity> fetchPublicKeys(UUID organizationID) {
-        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
-        final Root<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
+        final HibernateCriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final JpaCriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
+        final JpaRoot<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
 
-        query.where(builder.equal(root.get(PublicKeyEntity_.organization_id), organizationID));
+        query.where(builder.equal(root.get(PublicKeyEntity_.organization_id.toString()), organizationID));
         return list(query);
     }
 
     public Optional<PublicKeyEntity> fetchPublicKey(UUID organizationID, UUID keyID) {
 
-        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
-        final Root<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
+        final HibernateCriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final JpaCriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
+        final JpaRoot<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
 
-        query.where(builder.and(builder.equal(root.get(PublicKeyEntity_.organization_id), organizationID),
-                builder.equal(root.get(PublicKeyEntity_.id), keyID)));
+        query.where(builder.and(builder.equal(root.get(PublicKeyEntity_.organization_id.toString()), organizationID),
+                builder.equal(root.get(PublicKeyEntity_.id.toString()), keyID)));
 
         final List<PublicKeyEntity> resultList = list(query);
 
@@ -56,22 +56,22 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
     }
 
     public PublicKeyEntity findKeyByLabel(String keyLabel) {
-        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
-        final Root<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
+        final HibernateCriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final JpaCriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
+        final JpaRoot<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
 
-        query.where(builder.equal(root.get(PublicKeyEntity_.label), keyLabel));
+        query.where(builder.equal(root.get(PublicKeyEntity_.label.toString()), keyLabel));
         return currentSession().createQuery(query).getSingleResult();
     }
 
     public List<PublicKeyEntity> publicKeySearch(UUID keyID, UUID organizationID) {
-        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
-        final Root<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
+        final HibernateCriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final JpaCriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
+        final JpaRoot<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
 
         query.where(builder.and(
-                builder.equal(root.get(PublicKeyEntity_.id), keyID),
-                builder.equal(root.get(PublicKeyEntity_.organization_id), organizationID)));
+                builder.equal(root.get(PublicKeyEntity_.id.toString()), keyID),
+                builder.equal(root.get(PublicKeyEntity_.organization_id.toString()), organizationID)));
         return list(query);
     }
 }

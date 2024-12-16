@@ -7,9 +7,9 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import javax.persistence.PersistenceException;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Response;
+import jakarta.persistence.PersistenceException;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Response;
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

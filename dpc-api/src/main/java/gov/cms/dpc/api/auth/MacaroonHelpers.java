@@ -10,10 +10,10 @@ import gov.cms.dpc.macaroons.caveats.VersionCaveatSupplier;
 import org.apache.http.HttpHeaders;
 
 import javax.annotation.Nullable;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;

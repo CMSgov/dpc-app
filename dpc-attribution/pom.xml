@@ -249,7 +249,7 @@
                                         </property>
                                         <property>
                                             <key>dialect</key>
-                                            <value>org.hibernate.dialect.PostgreSQL10Dialect</value>
+                                            <value>org.hibernate.dialect.PostgreSQLDialect</value>
                                         </property>
                                     </properties>
                                     <includes>.*</includes>
@@ -268,13 +268,13 @@
                 <dependencies>
                     <dependency>
                         <groupId>org.jooq</groupId>
-                        <artifactId>jooq-meta-extensions</artifactId>
+                        <artifactId>jooq-meta-extensions-hibernate</artifactId>
                         <version>${jooq.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>javax.persistence</groupId>
-                        <artifactId>javax.persistence-api</artifactId>
-                        <version>2.2</version>
+                        <groupId>jakarta.persistence</groupId>
+                        <artifactId>jakarta.persistence-api</artifactId>
+                        <version>3.1.0</version>
                     </dependency>
                 </dependencies>
             </plugin>

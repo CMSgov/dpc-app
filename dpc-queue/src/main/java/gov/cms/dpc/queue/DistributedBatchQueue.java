@@ -10,6 +10,9 @@ import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -18,9 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
@@ -131,7 +131,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
                         builder.equal(root.get("jobID"), jobID)
                 );
 
-                return session.createQuery(query).getResultList();
+                return session.createQuery(query.toString()).getResultList();
             } finally {
                 tx.commit();
             }
@@ -203,7 +203,6 @@ public class DistributedBatchQueue extends JobQueueCommon {
      * @param aggregatorID - The ID of the aggregator processing the job
      * @return the claimed job batch
      */
-    @SuppressWarnings("unchecked")
     private Optional<JobQueueBatch> claimBatchFromDatabase(Session session, UUID aggregatorID) {
         // Claim a new batch
         Optional<String> batchID = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED")

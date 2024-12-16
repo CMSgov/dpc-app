@@ -7,9 +7,9 @@ import org.glassfish.jersey.server.model.Invocable;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import javax.validation.ConstraintViolation;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Response;
+import jakarta.validation.ConstraintViolation;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Response;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

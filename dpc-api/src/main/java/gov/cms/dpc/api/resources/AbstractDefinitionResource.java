@@ -4,8 +4,8 @@ import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
 import java.util.List;
 
 @Path("/StructureDefinition")

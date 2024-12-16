@@ -34,9 +34,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <dropwizard.version>3.0.10</dropwizard.version>
+        <dropwizard.version>4.0.11</dropwizard.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version>
-        <slf4j.version>2.0.12</slf4j.version>
+        <slf4j.version>2.0.16</slf4j.version>
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
         <hapi.fhir.version>7.6.0</hapi.fhir.version>
         <pgsql.version>42.7.3</pgsql.version>
@@ -45,7 +45,7 @@
         <jib.ecr.root>755619740999.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
         <timestamp>${maven.build.timestamp}</timestamp>
         <jacoco.version>0.8.5</jacoco.version>
-        <jooq.version>3.13.4</jooq.version>
+        <jooq.version>3.16.23</jooq.version>
         <bouncey.version>1.70</bouncey.version>
         <pitest.version>1.5.1</pitest.version>
         <newrelic.agent.version>7.11.1</newrelic.agent.version>
@@ -172,12 +172,12 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-io</artifactId>
-                <version>10.0.20</version>
+                <version>11.0.24</version>
             </dependency>
             <dependency>
                 <groupId>ru.vyarus</groupId>
                 <artifactId>dropwizard-guicey</artifactId>
-                <version>6.2.2</version>
+                <version>7.1.4</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.eclipse.jetty</groupId>
@@ -192,19 +192,19 @@
             </dependency>
             <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
             <dependency>
-                <groupId>org.hibernate</groupId>
+                <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>5.6.15.Final</version>
+                <version>6.6.3.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
-                <version>6.2.5.Final</version>
+                <version>7.0.5.Final</version>
             </dependency>
             <dependency>
-                <groupId>javax.persistence</groupId>
-                <artifactId>javax.persistence-api</artifactId>
-                <version>2.2</version>
+                <groupId>jakarta.persistence</groupId>
+                <artifactId>jakarta.persistence-api</artifactId>
+                <version>3.1.0</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
@@ -212,9 +212,9 @@
                 <version>${pgsql.version}</version>
             </dependency>
             <dependency>
-                <groupId>javax.ws.rs</groupId>
-                <artifactId>javax.ws.rs-api</artifactId>
-                <version>2.1.1</version>
+                <groupId>jakarta.ws.rs</groupId>
+                <artifactId>jakarta.ws.rs-api</artifactId>
+                <version>3.0.0</version>
             </dependency>
             <dependency>
                 <groupId>com.google.inject</groupId>
@@ -275,6 +275,11 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>32.0.0-jre</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-hibernate6</artifactId>
+                <version>2.18.1</version>
             </dependency>
             <dependency>
                 <groupId>com.newrelic.agent.java</groupId>
@@ -604,7 +609,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.13.0</version>
                 </plugin>
                 <!-- Base configuration for Docker images -->
                 <plugin>

@@ -2,7 +2,7 @@ package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.common.annotations.NoHtml;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;

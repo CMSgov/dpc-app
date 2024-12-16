@@ -7,11 +7,11 @@ import io.dropwizard.hibernate.AbstractDAO;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
+import org.hibernate.query.criteria.HibernateCriteriaBuilder;
+import org.hibernate.query.criteria.JpaCriteriaQuery;
+import org.hibernate.query.criteria.JpaRoot;
 
 import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,22 +30,22 @@ public class TokenDAO extends AbstractDAO<TokenEntity> {
     }
 
     public List<TokenEntity> fetchTokens(UUID organizationID) {
-        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaQuery<TokenEntity> query = builder.createQuery(TokenEntity.class);
-        final Root<TokenEntity> root = query.from(TokenEntity.class);
+        final HibernateCriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final JpaCriteriaQuery<TokenEntity> query = builder.createQuery(TokenEntity.class);
+        final JpaRoot<TokenEntity> root = query.from(TokenEntity.class);
 
-        query.where(builder.equal(root.get(TokenEntity_.organizationID), organizationID));
+        query.where(builder.equal(root.get(TokenEntity_.organizationID.toString()), organizationID));
         return this.list(query);
     }
 
     public List<TokenEntity> findTokenByOrgAndID(UUID organizationID, UUID tokenID) {
-        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaQuery<TokenEntity> query = builder.createQuery(TokenEntity.class);
-        final Root<TokenEntity> root = query.from(TokenEntity.class);
+        final HibernateCriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final JpaCriteriaQuery<TokenEntity> query = builder.createQuery(TokenEntity.class);
+        final JpaRoot<TokenEntity> root = query.from(TokenEntity.class);
 
         query.where(builder.and(
-                builder.equal(root.get(TokenEntity_.id), tokenID.toString()),
-                builder.equal(root.get(TokenEntity_.organizationID), organizationID)));
+                builder.equal(root.get(TokenEntity_.id.toString()), tokenID.toString()),
+                builder.equal(root.get(TokenEntity_.organizationID.toString()), organizationID)));
 
         return this.list(query);
     }
@@ -60,11 +60,11 @@ public class TokenDAO extends AbstractDAO<TokenEntity> {
     public UUID findOrgByToken(UUID tokenID) {
         try (Session session = this.factory.openSession()) {
 
-            final CriteriaBuilder builder = session.getCriteriaBuilder();
-            final CriteriaQuery<TokenEntity> query = builder.createQuery(TokenEntity.class);
-            final Root<TokenEntity> root = query.from(TokenEntity.class);
+            final HibernateCriteriaBuilder builder = session.getCriteriaBuilder();
+            final JpaCriteriaQuery<TokenEntity> query = builder.createQuery(TokenEntity.class);
+            final JpaRoot<TokenEntity> root = query.from(TokenEntity.class);
 
-            query.where(builder.equal(root.get(TokenEntity_.id), tokenID.toString()));
+            query.where(builder.equal(root.get(TokenEntity_.id.toString()), tokenID.toString()));
 
             final Query<TokenEntity> matchQuery = session.createQuery(query);
 
