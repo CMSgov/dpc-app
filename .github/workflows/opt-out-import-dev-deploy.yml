@@ -21,22 +21,24 @@ jobs:
         with:
           ref: 'main'
       - name: "Fetch git info"
-        id: set_revs
         run: |
           git fetch --quiet
-          PREV_REV=`git tag -l 'r*' --sort=v:refname | tail -n 1`
-          echo $PREV_REV
-          PREV_REV_NUM=${PREV_REV/r}
-          NEXT_REV_NUM=$((PREV_REV_NUM + 1))
-          NEXT_REV=r$NEXT_REV_NUM
-          echo "next_rev=$NEXT_REV" >> "$GITHUB_OUTPUT"
+      - name: "Set Revisions"
+        id: set_revs
+        run: |
+          prev_rev=`git tag -l 'r*' --sort=v:refname | tail -n 1`
+          prev_rev_num=${prev_rev/r}
+          next_rev_num=$((prev_rev_num + 1))
+          next_rev=r$next_rev_num
+          echo "next_rev=$next_rev" >> "$GITHUB_OUTPUT"
       - name: "Set Body"
+        id: set_body
         run: |
           BODY=`git log --pretty=format:"- %s" r46..HEAD`
-          echo $BODY
+          echo "body=$BODY" >> "$GITHUB_OUTPUT"
       - name: Test Envs
         env:
-          nr: ${{ env.NEXT_REV }}
+          nr: ${{ steps.set_body.outputs.body }}
         run: echo $nr
       - name: Release
         if: ${{ env.NEXT_REV == 'dont run' }}
