@@ -38,7 +38,7 @@ jobs:
           PREV_REV_NUM=${PREV_REV/r}
           NEXT_REV_NUM=$((PREV_REV_NUM + 1))
           NEXT_REV=r$NEXT_REV_NUM
-          echo 'some pig' >> "$GITHUB_OUTPUT"
+          echo "next_rev=$NEXT_REV" >> "$GITHUB_OUTPUT"
       - name: "Set Body"
         run: |
           BODY=`git log --pretty=format:"- %s" r46..HEAD`
