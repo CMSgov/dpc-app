@@ -15,32 +15,35 @@ if (__ENV.ENVIRONMENT == 'local') {
   privateKey = __ENV.PRIVATE_KEY;
 }
 
-let dt = new Date().getTime();
-const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-  const r = (dt + Math.random()*16)%16 | 0;
-  dt = Math.floor(dt/16);
-  return (c=='x' ? r :(r&0x3|0x8)).toString(16);
-});
+function generateJWT() {
+  let dt = new Date().getTime();
+  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = (dt + Math.random()*16)%16 | 0;
+    dt = Math.floor(dt/16);
+    return (c=='x' ? r :(r&0x3|0x8)).toString(16);
+  });
 
-const payload = {
-    "iss": clientToken,
-    "sub": clientToken, 
-    "aud": 'https://test.dpc.cms.gov/api/v1/Token/auth',
-    "exp": Math.round(new Date().getTime() / 1000) + 300,
-    "iat": Math.round(Date.now()),
-    "jti": uuid,
+  const payload = {
+      "iss": clientToken,
+      "sub": clientToken, 
+      "aud": 'https://test.dpc.cms.gov/api/v1/Token/auth',
+      "exp": Math.round(new Date().getTime() / 1000) + 300,
+      "iat": Math.round(Date.now()),
+      "jti": uuid,
+    };
+
+  const header = {
+    'alg': 'RS384',
+    'kid': publicKeyId, 
   };
 
-const header = {
-  'alg': 'RS384',
-  'kid': publicKeyId, 
-};
-
-const signedJWT = KJUR.jws.JWS.sign('RS384', header, JSON.stringify(payload), privateKey);
+  return KJUR.jws.JWS.sign('RS384', header, JSON.stringify(payload), privateKey);
+}
 
 export default function generateDPCToken() {
   // console.log('client token', clientToken);
   // console.log('public key id', publicKeyId);
+  const signedJWT = generateJWT();
   const headers = { 
     'Accept': 'application/json',
     'Content-Type': 'application/x-www-form-urlencoded'
