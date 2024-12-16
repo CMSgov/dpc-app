@@ -25,7 +25,8 @@ export default function() {
       console.log('bearer token fetched successfully!');
     } else {
       console.error('failed to fetch bearer token')
-      console.log(tokenResponse.json())
+      console.log(tokenResponse.status)
+      console.log(tokenResponse.html())
     }
   }
 
