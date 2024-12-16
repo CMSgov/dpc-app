@@ -18,7 +18,7 @@ on:
         default: 'main'
         type: 'string'
 jobs:
-  tag-static-site:
+  tag_static_site:
     name: Tag Static Site
     runs-on: ubuntu-latest
     outputs:
@@ -42,17 +42,3 @@ jobs:
      - name: build body
        run: |
          BODY=`git log --pretty=format:"- %s" $PREV_REV..HEAD`
-      - name: Release
-        if: ${{ NEXT_REV == 'dont run' }}
-        uses: softprops/action-gh-release@v2
-        with:
-          body: ${{ BODY }}
-          tag_name: ${{ NEXT_REV }}
-          repository: CMSgov/dpc-static-site/${{ inputs.static_repo_ref }}
-  test-outputs:
-    name: Test Outputs
-    needs: tag-static-site
-    steps:
-      - name: output output
-        run: |
-          echo ${{ needs.tag_static_site.outputs.next_tag }}
