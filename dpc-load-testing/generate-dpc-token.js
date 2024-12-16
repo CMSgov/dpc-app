@@ -7,7 +7,7 @@ const clientToken = __ENV.CLIENT_TOKEN;
 const publicKeyId = __ENV.PUBLIC_KEY_ID;
 let privateKey;
 
-console.log(KJUR);
+console.log('KJUR', KJUR);
 if (__ENV.ENVIRONMENT == 'local') {
   const privateKeyBase64 = __ENV.PRIVATE_KEY_BASE64.trim();
   privateKey = encoding.b64decode(privateKeyBase64, 'std', 's');
