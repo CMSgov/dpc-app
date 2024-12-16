@@ -23,8 +23,8 @@ jobs:
       - name: "Fetch git info"
         id: set_revs
         run: |
-          git fetch --tags
-          PREV_REV=`git describe --tags --abbrev=0 --match 'r*'`
+          git fetch --quiet
+          PREV_REV=`git tag -l 'r*' --sort=v:refname | tail -n 1`
           echo $PREV_REV
           PREV_REV_NUM=${PREV_REV/r}
           NEXT_REV_NUM=$((PREV_REV_NUM + 1))
