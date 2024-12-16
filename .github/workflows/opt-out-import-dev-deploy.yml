@@ -36,7 +36,7 @@ jobs:
       - name: Test Envs
         env:
           nr: ${{ env.NEXT_REV }}
-          run: echo $nr
+        run: echo $nr
       - name: Release
         if: ${{ env.NEXT_REV == 'dont run' }}
         uses: softprops/action-gh-release@v2
