@@ -62,6 +62,8 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     final java.util.Date dateYesterday = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
     final java.util.Date dateToday = Date.from(Instant.now());
 
+    final RandomStringUtils randomStringUtils = RandomStringUtils.secure();
+
     public static final String PROVENANCE_FMT = "{ \"resourceType\": \"Provenance\", \"recorded\": \"" + DateTimeType.now().getValueAsString() + "\"," +
             " \"reason\": [ { \"system\": \"http://hl7.org/fhir/v3/ActReason\", \"code\": \"TREAT\"  } ], \"agent\": [ { \"role\": " +
             "[ { \"coding\": [ { \"system\":" + "\"http://hl7.org/fhir/v3/RoleClass\", \"code\": \"AGNT\" } ] } ], \"whoReference\": " +
@@ -273,7 +275,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     @Test
     @Order(6)
     void testPatientEverythingWithoutGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
-        IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
+        IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
         APITestHelpers.setupPractitionerTest(client, parser);
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
@@ -348,7 +350,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     @Test
     @Order(7)
     void testPatientEverythingWithGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
-        IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
+        IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
         Patient patient = fetchPatient(client, mbi);
@@ -435,7 +437,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     @Test
     @Order(8)
     void testPatientEverything_CanHandlePatientWithMultipleMBIs() throws IOException, URISyntaxException, GeneralSecurityException {
-        IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
+        IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(6);
         Patient patient = fetchPatient(client, mbi);
@@ -453,7 +455,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .execute();
 
         Patient patientResource = (Patient) everythingBundle.getEntry().stream()
-                .filter(entry -> entry.getResource().getResourceType().getPath() == "patient")
+                .filter(entry -> entry.getResource().getResourceType().getPath().equals("patient"))
                 .findFirst().get().getResource();
 
         // Patient should have multiple MBIs
@@ -469,7 +471,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     @Test
     @Order(9)
     void testPatientEverythingForOptedOutPatient() throws IOException, URISyntaxException, GeneralSecurityException {
-        IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
+        IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
         Patient patient = fetchPatient(client, mbi);
@@ -494,7 +496,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     @Test
     @Order(10)
     void testPatientEverythingForOptedOutPatientOnMultipleMbis() throws IOException, URISyntaxException, GeneralSecurityException {
-        IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
+        IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(6);
         String historicMbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(7);
@@ -520,7 +522,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     public void testOptInPatient() throws GeneralSecurityException, IOException, URISyntaxException {
-        IGenericClient client = generateClient(ORGANIZATION_NPI, RandomStringUtils.randomAlphabetic(25));
+        IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
         Patient patient = fetchPatient(client, mbi);
@@ -540,7 +542,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .execute();
 
         Patient patientResource = (Patient) bundle.getEntry().stream()
-                .filter(entry -> entry.getResource().getResourceType().getPath() == "patient")
+                .filter(entry -> entry.getResource().getResourceType().getPath().equals("patient"))
                 .findFirst().get().getResource();
 
         // Patient should have multiple MBIs
@@ -684,7 +686,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         consent.setDateTime(date);
 
-        Reference orgRef = new Reference("Organization/" + UUID.randomUUID().toString());
+        Reference orgRef = new Reference("Organization/" + UUID.randomUUID());
         consent.setOrganization(List.of(orgRef));
 
         consent.setPolicyRule(policyUrl);

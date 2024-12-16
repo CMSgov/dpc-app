@@ -9,7 +9,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.jooq.DSLContext;
 
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static gov.cms.dpc.attribution.dao.tables.Providers.PROVIDERS;
@@ -46,7 +45,7 @@ public class RosterUtils {
                 .map(id -> {
                     final AttributionsRecord ar = new AttributionsRecord();
                     ar.setPeriodBegin(creationTimestamp);
-                    ar.setPeriodEnd(creationTimestamp.plus(90, ChronoUnit.DAYS));
+                    ar.setPeriodEnd(creationTimestamp.plusDays(90));
                     ar.setRosterId(roster.getId());
                     ar.setPatientId(UUID.fromString(id.getIdPart()));
                     return ar;

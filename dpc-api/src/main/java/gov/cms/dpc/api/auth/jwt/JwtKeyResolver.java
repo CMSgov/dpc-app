@@ -9,7 +9,6 @@ import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.SigningKeyResolverAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -23,7 +22,7 @@ import java.util.UUID;
 
 import static gov.cms.dpc.api.auth.MacaroonHelpers.ORGANIZATION_CAVEAT_KEY;
 
-public class JwtKeyResolver extends SigningKeyResolverAdapter {
+public class JwtKeyResolver extends KeyResolverAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtKeyResolver.class);
 
@@ -35,7 +34,6 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
     }
 
     @Override
-    @SuppressWarnings("rawtypes") // We need to suppress this because the Raw type is part of the signature we inherit
     public Key resolveSigningKey(JwsHeader header, Claims claims) {
         final String keyId = header.getKeyId();
         if (keyId == null) {
@@ -65,7 +63,7 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
     }
 
     protected UUID getOrganizationID(String macaroon) {
-        if (macaroon == null || macaroon.equals("")) {
+        if (macaroon == null || macaroon.isEmpty()) {
             throw new WebApplicationException("JWT must have client_id", Response.Status.UNAUTHORIZED);
         }
         final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(macaroon);

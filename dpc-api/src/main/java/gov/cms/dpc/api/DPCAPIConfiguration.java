@@ -22,7 +22,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig, IDPCAuthDatabase, IDPCFHIRConfiguration, BlueButtonBundleConfiguration {
@@ -181,7 +181,7 @@ public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, 
 
     public List<String> getLookBackExemptOrgs() {
         if(lookBackExemptOrgs == null){
-            return new LinkedList<>();
+            return new ArrayList<>();
         }
         return lookBackExemptOrgs; }
 

@@ -256,12 +256,12 @@ class JWTUnitTests {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", UUID.randomUUID())
-                    .setAudience(String.format("%sToken/auth", "here"))
-                    .setIssuer("macaroon")
-                    .setSubject("macaroon")
-                    .setId(UUID.randomUUID().toString())
-                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .header().add("kid", UUID.randomUUID()).and()
+                    .audience().add(String.format("%sToken/auth", "here")).and()
+                    .issuer("macaroon")
+                    .subject("macaroon")
+                    .id(UUID.randomUUID().toString())
+                    .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -284,12 +284,12 @@ class JWTUnitTests {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", keyPair.getLeft())
-                    .setAudience(String.format("%sToken/auth", "here"))
-                    .setIssuer("macaroon")
-                    .setSubject("macaroon")
-                    .setId(UUID.randomUUID().toString())
-                    .setExpiration(Date.from(Instant.now().minus(5, ChronoUnit.MINUTES)))
+                    .header().add("kid", keyPair.getLeft()).and()
+                    .audience().add(String.format("%sToken/auth", "here")).and()
+                    .issuer("macaroon")
+                    .subject("macaroon")
+                    .id(UUID.randomUUID().toString())
+                    .expiration(Date.from(Instant.now().minus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -312,12 +312,12 @@ class JWTUnitTests {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", keyPair.getLeft())
-                    .setAudience(String.format("%sToken/auth", "here"))
-                    .setIssuer("macaroon")
-                    .setSubject("macaroon")
-                    .setId(UUID.randomUUID().toString())
-                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .header().add("kid", keyPair.getLeft()).and()
+                    .audience().add(String.format("%sToken/auth", "here")).and()
+                    .issuer("macaroon")
+                    .subject("macaroon")
+                    .id(UUID.randomUUID().toString())
+                    .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -342,12 +342,12 @@ class JWTUnitTests {
             String macaroon = buildMacaroon();
 
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", keyPair.getLeft())
-                    .setAudience(String.format("%sToken/auth", "localhost:3002/v1/"))
-                    .setIssuer(macaroon)
-                    .setSubject(macaroon)
-                    .setId(UUID.randomUUID().toString())
-                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .header().add("kid", keyPair.getLeft()).and()
+                    .audience().add(String.format("%sToken/auth", "localhost:3002/v1/")).and()
+                    .issuer(macaroon)
+                    .subject(macaroon)
+                    .id(UUID.randomUUID().toString())
+                    .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -387,12 +387,12 @@ class JWTUnitTests {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", UUID.randomUUID())
-                    .setAudience("localhost:3002/v1/Token/auth")
-                    .setIssuer("macaroon")
-                    .setSubject("macaroon")
-                    .setId(UUID.randomUUID().toString())
-                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .header().add("kid", UUID.randomUUID()).and()
+                    .audience().add("localhost:3002/v1/Token/auth").and()
+                    .issuer("macaroon")
+                    .subject("macaroon")
+                    .id(UUID.randomUUID().toString())
+                    .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -414,12 +414,12 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", UUID.randomUUID())
-                    .setAudience("localhost:3002/v1/Token/auth")
-                    .setIssuer(id)
-                    .setSubject(id)
-                    .setId(id)
-                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .header().add("kid", UUID.randomUUID()).and()
+                    .audience().add("localhost:3002/v1/Token/auth").and()
+                    .issuer(id)
+                    .subject(id)
+                    .id(id)
+                    .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -441,12 +441,12 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", UUID.randomUUID())
-                    .setAudience(String.format("%sToken/auth", "here"))
-                    .setIssuer(id)
-                    .setSubject(id)
-                    .setId(id)
-                    .setExpiration(Date.from(Instant.now().minus(5, ChronoUnit.MINUTES)))
+                    .header().add("kid", UUID.randomUUID()).and()
+                    .audience().add(String.format("%sToken/auth", "here")).and()
+                    .issuer(id)
+                    .subject(id)
+                    .id(id)
+                    .expiration(Date.from(Instant.now().minus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -471,12 +471,12 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", UUID.randomUUID())
-                    .setAudience(String.format("%sToken/auth", "here"))
-                    .setIssuer(id)
-                    .setSubject(id)
-                    .setId(id)
-                    .addClaims(claims)
+                    .header().add("kid", UUID.randomUUID()).and()
+                    .audience().add(String.format("%sToken/auth", "here")).and()
+                    .issuer(id)
+                    .subject(id)
+                    .id(id)
+                    .claims().add(claims).and()
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -501,12 +501,12 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", UUID.randomUUID())
-                    .setAudience(String.format("%sToken/auth", "here"))
-                    .setIssuer(id)
-                    .setSubject(id)
-                    .setId(id)
-                    .addClaims(claims)
+                    .header().add("kid", UUID.randomUUID()).and()
+                    .audience().add(String.format("%sToken/auth", "here")).and()
+                    .issuer(id)
+                    .subject(id)
+                    .id(id)
+                    .claims().add(claims).and()
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -528,12 +528,12 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", UUID.randomUUID())
-                    .setAudience(String.format("%sToken/auth", "here"))
-                    .setIssuer(id)
-                    .setSubject(id)
-                    .setId(id)
-                    .setExpiration(Date.from(Instant.now().plus(12, ChronoUnit.MINUTES)))
+                    .header().add("kid", UUID.randomUUID()).and()
+                    .audience().add(String.format("%sToken/auth", "here")).and()
+                    .issuer(id)
+                    .subject(id)
+                    .id(id)
+                    .expiration(Date.from(Instant.now().plus(12, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -555,12 +555,12 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", UUID.randomUUID())
-                    .setAudience(String.format("%sToken/auth", "here"))
-                    .setIssuer(m)
-                    .setSubject(m)
-                    .setId(id)
-                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .header().add("kid", UUID.randomUUID()).and()
+                    .audience().add(String.format("%sToken/auth", "here")).and()
+                    .issuer(m)
+                    .subject(m)
+                    .id(id)
+                    .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -582,12 +582,12 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", UUID.randomUUID())
-                    .setAudience("localhost:3002/v1/Token/auth")
-                    .setIssuer(m)
-                    .setSubject(m)
-                    .setId(id)
-                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .header().add("kid", UUID.randomUUID()).and()
+                    .audience().add("localhost:3002/v1/Token/auth").and()
+                    .issuer(m)
+                    .subject(m)
+                    .id(id)
+                    .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -607,12 +607,12 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", UUID.randomUUID())
-                    .setAudience(String.format("%sToken/auth", "here"))
-                    .setIssuer("this is")
-                    .setSubject("not matching")
-                    .setId(id)
-                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .header().add("kid", UUID.randomUUID()).and()
+                    .audience().add(String.format("%sToken/auth", "here")).and()
+                    .issuer("this is")
+                    .subject("not matching")
+                    .id(id)
+                    .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -633,11 +633,11 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", UUID.randomUUID())
-                    .setAudience(String.format("%sToken/auth", "here"))
-                    .setSubject("not matching")
-                    .setId(id)
-                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .header().add("kid", UUID.randomUUID()).and()
+                    .audience().add(String.format("%sToken/auth", "here")).and()
+                    .subject("not matching")
+                    .id(id)
+                    .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -671,11 +671,11 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .setAudience("localhost:3002/v1/Token/auth")
-                    .setIssuer(m)
-                    .setSubject(m)
-                    .setId(id)
-                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .audience().add("localhost:3002/v1/Token/auth").and()
+                    .issuer(m)
+                    .subject(m)
+                    .id(id)
+                    .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -697,12 +697,12 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .setAudience("localhost:3002/v1/Token/auth")
-                    .setHeaderParam("kid", "this is not a kid")
-                    .setIssuer(m)
-                    .setSubject(m)
-                    .setId(id)
-                    .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .audience().add("localhost:3002/v1/Token/auth").and()
+                    .header().add("kid", "this is not a kid").and()
+                    .issuer(m)
+                    .subject(m)
+                    .id(id)
+                    .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -725,11 +725,11 @@ class JWTUnitTests {
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
-                    .setHeaderParam("kid", UUID.randomUUID())
-                    .setAudience("localhost:3002/v1/Token/auth")
-                    .setIssuer(m)
-                    .setSubject(m)
-                    .setId(id)
+                    .header().add("kid", UUID.randomUUID()).and()
+                    .audience().add("localhost:3002/v1/Token/auth").and()
+                    .issuer(m)
+                    .subject(m)
+                    .id(id)
                     .claim("exp", Instant.now().plus(1, ChronoUnit.MINUTES).atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
@@ -788,7 +788,7 @@ class JWTUnitTests {
         final PublicKeyDAO mock = mock(PublicKeyDAO.class);
 
         Mockito.when(mock.fetchPublicKey(Mockito.any(), Mockito.any())).then(answer -> {
-            @SuppressWarnings("RedundantCast") final KeyPair keyPair = JWTKeys.get((UUID) answer.getArgument(1));
+            final KeyPair keyPair = JWTKeys.get((UUID) answer.getArgument(1));
             if (keyPair == null) {
                 return Optional.empty();
             }

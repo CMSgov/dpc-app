@@ -9,16 +9,17 @@ public final class MBIUtil {
 	 */
 	public static String generateMBI() {
 		String mbi;
+        RandomStringUtils randomStringUtils = RandomStringUtils.secure();
 
-		mbi = RandomStringUtils.randomNumeric(1);
-		mbi += RandomStringUtils.randomAlphabetic(1);
-		mbi += RandomStringUtils.randomAlphanumeric(1);
-		mbi += RandomStringUtils.randomNumeric(1);
-		mbi += RandomStringUtils.randomAlphabetic(1);
-		mbi += RandomStringUtils.randomAlphanumeric(1);
-		mbi += RandomStringUtils.randomNumeric(1);
-		mbi += RandomStringUtils.randomAlphabetic(2);
-		mbi += RandomStringUtils.randomNumeric(2);
+		mbi = randomStringUtils.nextNumeric(1);
+		mbi += randomStringUtils.nextAlphabetic(1);
+		mbi += randomStringUtils.nextAlphanumeric(1);
+		mbi += randomStringUtils.nextNumeric(1);
+		mbi += randomStringUtils.nextAlphabetic(1);
+		mbi += randomStringUtils.nextAlphanumeric(1);
+		mbi += randomStringUtils.nextNumeric(1);
+		mbi += randomStringUtils.nextAlphabetic(2);
+		mbi += randomStringUtils.nextNumeric(2);
 
 		return mbi;
 	}
