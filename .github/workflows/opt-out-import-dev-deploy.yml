@@ -21,6 +21,8 @@ jobs:
   tag_static_site:
     name: Tag Static Site
     runs-on: ubuntu-latest
+    outputs:
+      next_rev: ${{ steps.set_revs.outputs.test }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
@@ -30,13 +32,21 @@ jobs:
         run: |
           git fetch --quiet
       - name: "Set Revisions"
+        id: set_revs
         run: |
           PREV_REV=`git describe --tags --abbrev=0 --match 'r*'`
           PREV_REV_NUM=${PREV_REV/r}
           NEXT_REV_NUM=$((PREV_REV_NUM + 1))
           NEXT_REV=r$NEXT_REV_NUM
-          echo $NEXT_REV
+          echo $NEXT_REV >> "$GITHUB_OUTPUT"
       - name: "Set Body"
         run: |
           BODY=`git log --pretty=format:"- %s" r46..HEAD`
           echo $BODY
+  test_output:
+    name: Test Output
+    needs: tag_static_site
+    steps:
+      - env:
+          OUTPUT1: ${{needs.test_static_site.outputs.next_rev}}
+        run: echo "$OUTPUT1"
