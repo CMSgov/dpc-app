@@ -3,11 +3,14 @@ import { URLSearchParams } from 'https://jslib.k6.io/url/1.0.0/index.js';
 import http from 'k6/http';
 import encoding from 'k6/encoding';
 
+console.log('CLIENT_TOKEN', __ENV.CLIENT_TOKEN);
+console.log('PUBLIC_KEY_ID', __ENV.PUBLIC_KEY_ID);
+console.log('PRIVATE_KEY', __ENV.PRIVATE_KEY);
+
 const clientToken = __ENV.CLIENT_TOKEN;
 const publicKeyId = __ENV.PUBLIC_KEY_ID;
 let privateKey;
 
-console.log('KJUR', KJUR);
 if (__ENV.ENVIRONMENT == 'local') {
   const privateKeyBase64 = __ENV.PRIVATE_KEY_BASE64.trim();
   privateKey = encoding.b64decode(privateKeyBase64, 'std', 's');
