@@ -21,8 +21,6 @@ jobs:
   tag_static_site:
     name: Tag Static Site
     runs-on: ubuntu-latest
-    outputs:
-      next_tag: ${{ steps.set_revisions.outputs.NEXT_REV }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
