@@ -1,0 +1,46 @@
+name: 'Tag Repo'
+
+on:
+  workflow_on:
+    inputs:
+      repo_ref:
+        description: Which branch or tag
+        required: true
+        default: 'main'
+        type: 'string'
+jobs:
+  tag_repo:
+    name: Tag Repository
+    runs-on: ubuntu-latest
+    outputs:
+      next_rev: ${{ steps.set_revs.outputs.next_rev }}
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.static_repo_ref || 'main' }}
+      - name: "Fetch git info"
+        run: |
+          git fetch --quiet
+      - name: "Set Revisions"
+        id: set_revs
+        run: |
+          prev_rev=`git tag -l 'r*' --sort=v:refname | tail -n 1`
+          echo "prev_rev=$prev_rev" >> "$GITHUB_OUTPUT"
+          prev_rev_num=${prev_rev/r}
+          next_rev_num=$((prev_rev_num + 1))
+          next_rev=r$next_rev_num
+          echo "next_rev=$next_rev" >> "$GITHUB_OUTPUT"
+      - name: "Set Body"
+        id: set_body
+        env:
+          PREV_REV: ${{ steps.set_revs.outputs.prev_rev }}
+        run: |
+          BODY=`git log --pretty=format:"- %s" $PREV_REV..HEAD`
+          echo "body=$BODY" >> "$GITHUB_OUTPUT"
+      - name: Release
+        if: ${{ env.NEXT_REV == 'dont run' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ steps.set_body.outputs.body }}
+          tag_name: ${{ steps.set_revs.outputs.next_rev }}
