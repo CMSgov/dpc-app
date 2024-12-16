@@ -21,20 +21,38 @@ jobs:
   tag_static_site:
     name: Tag Static Site
     runs-on: ubuntu-latest
+    outputs:
+      next_tag: ${{ steps.set_revisions.outputs.NEXT_REV }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
         with:
           repository: 'CMSgov/dpc-static-site'
-      - name: git
+      - name: fetch git info
         run: |
-          # setup the username and email. I tend to use 'GitHub Actions Bot' with no email by default
-          echo fetching
           git fetch --quiet
-          echo describing
-          last_rev=`git describe --tags --abbrev=0 --match 'r*'`
-          git log --pretty=format:"- %s" $last_rev..HEAD
-          last_rev_num=${last_rev/r}
-          next_rev_num=$((last_rev_num + 1))
-          next_rev=r$next_rev_num
-          echo $next_rev
+      - name: set PREV and NEXT Revisions
+        id: set_revisions
+        run: |
+          PREV_REV=`git describe --tags --abbrev=0 --match 'r*'`
+          PREV_REV_NUM=${PREV_REV/r}
+          NEXT_REV_NUM=$((PREV_REV_NUM + 1))
+          NEXT_REV=r$NEXT_REV_NUM
+          echo $NEXT_REV
+     - name: build body
+       run: |
+         BODY=`git log --pretty=format:"- %s" $PREV_REV..HEAD`
+      - name: Release
+        if: ${{ NEXT_REV == 'dont run' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ BODY }}
+          tag_name: ${{ NEXT_REV }}
+          repository: CMSgov/dpc-static-site/${{ inputs.static_repo_ref }}
+  test_outputs:
+    name: Test Outputs
+    needs: tag_static_site
+    steps:
+      - name: output output
+        run: |
+          echo ${{ needs.tag_static_site.outputs.next_tag }}
