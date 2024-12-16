@@ -17,6 +17,7 @@ export const options = {
 let bearerToken;
 
 export default function() {
+  console.log('starting run')
   if (!bearerToken) {
     const tokenResponse = generateDPCToken();
     if (tokenResponse.status.toString() == '200') {
