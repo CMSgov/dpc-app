@@ -26,15 +26,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: 'CMSgov/dpc-static-site'
-      - name: git
+      - name: "Fetch git info"
         run: |
-          # setup the username and email. I tend to use 'GitHub Actions Bot' with no email by default
-          echo fetching
           git fetch --quiet
-          echo describing
-          last_rev=`git describe --tags --abbrev=0 --match 'r*'`
-          git log --pretty=format:"- %s" $last_rev..HEAD
-          last_rev_num=${last_rev/r}
-          next_rev_num=$((last_rev_num + 1))
-          next_rev=r$next_rev_num
-          echo $next_rev
+      - name: "Set Revisions"
+        run: |
+          PREV_REV=`git describe --tags --abbrev=0 --match 'r*'`
+          PREV_REV_NUM=${PREV_REV/r}
+          NEXT_REV_NUM=$((PREV_REV_NUM + 1))
+          NEXT_REV=r$NEXT_REV_NUM
+          echo $NEXT_REV
+      - name: "Set Body"
+        run: |
+          BODY=`git log --pretty=format:"- %s" $PREV_REV..HEAD`
+          echo $BODY
