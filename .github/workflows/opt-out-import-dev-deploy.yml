@@ -21,12 +21,10 @@ jobs:
         with:
           ref: 'main'
       - name: "Fetch git info"
-        run: |
-          git fetch
-      - name: "Set Revisions"
         id: set_revs
         run: |
-          PREV_REV=`git describe --all --abbrev=0 --match 'r*'`
+          git fetch
+          PREV_REV=`git describe --tags --abbrev=0 --match 'r*'`
           echo $PREV_REV
           PREV_REV_NUM=${PREV_REV/r}
           NEXT_REV_NUM=$((PREV_REV_NUM + 1))
