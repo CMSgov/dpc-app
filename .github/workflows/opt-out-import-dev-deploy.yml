@@ -26,11 +26,11 @@ jobs:
       - name: "Set Revisions"
         id: set_revs
         run: |
-          PREV_REV=`git describe --tags --always --abbrev=0 --match 'r*'`
+          PREV_REV=`git describe --all --abbrev=0 --match 'r*'`
+          echo $PREV_REV
           PREV_REV_NUM=${PREV_REV/r}
           NEXT_REV_NUM=$((PREV_REV_NUM + 1))
           NEXT_REV=r$NEXT_REV_NUM
-          echo $NEXT_REV
           echo "next_rev=$NEXT_REV" >> "$GITHUB_OUTPUT"
       - name: "Set Body"
         run: |
