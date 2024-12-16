@@ -6,18 +6,17 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
+import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
-import gov.cms.dpc.api.auth.jwt.KeyResolverAdapter;
 import gov.cms.dpc.api.auth.jwt.ValidatingKeyResolver;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
-import gov.cms.dpc.api.models.CreateTokenRequest;
 import gov.cms.dpc.api.models.JWTAuthResponse;
+import gov.cms.dpc.api.models.CreateTokenRequest;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
-import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.macaroons.CaveatSupplier;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
@@ -68,7 +67,7 @@ public class TokenResource extends AbstractTokenResource {
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
-    private final KeyResolverAdapter resolver;
+    private final SigningKeyResolverAdapter resolver;
     private final IJTICache cache;
     private final String authURL;
 
@@ -76,7 +75,7 @@ public class TokenResource extends AbstractTokenResource {
     public TokenResource(TokenDAO dao,
                          MacaroonBakery bakery,
                          TokenPolicy policy,
-                         KeyResolverAdapter resolver,
+                         SigningKeyResolverAdapter resolver,
                          IJTICache cache,
                          @APIV1 String publicURL) {
         this.dao = dao;
@@ -244,11 +243,11 @@ public class TokenResource extends AbstractTokenResource {
     public Response validateJWT(@NoHtml @NotEmpty(message = "Must submit JWT") String jwt) {
 
         try {
-            Jwts.parser()
+            Jwts.parserBuilder()
                     .requireAudience(this.authURL)
-                    .keyLocator(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
+                    .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, this.authURL))
                     .build()
-                    .parseSignedClaims(jwt);
+                    .parseClaimsJws(jwt);
         } catch (IllegalArgumentException e) {
             // This is fine, we just want the body
         } catch (MalformedJwtException e) {
@@ -277,14 +276,14 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
-        final Jws<Claims> claims = Jwts.parser()
-                .keyLocator(this.resolver)
+        final Jws<Claims> claims = Jwts.parserBuilder()
+                .setSigningKeyResolver(this.resolver)
                 .requireAudience(this.authURL)
                 .build()
-                .parseSignedClaims(jwtBody);
+                .parseClaimsJws(jwtBody);
 
         // Extract the Client Macaroon from the subject field (which is the same as the issuer)
-        final String clientMacaroon = claims.getPayload().getSubject();
+        final String clientMacaroon = claims.getBody().getSubject();
         final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(clientMacaroon);
 
         // Get org id from macaroon caveats
@@ -355,20 +354,20 @@ public class TokenResource extends AbstractTokenResource {
     @SuppressWarnings("JdkObsolete") // Date class is used by Jwt
     private void handleJWTClaims(UUID organizationID, Jws<Claims> claims) {
         // Issuer and Sub must be present and identical
-        final String issuer = getClaimIfPresent("issuer", claims.getPayload().getIssuer());
-        final String subject = getClaimIfPresent("subject", claims.getPayload().getSubject());
+        final String issuer = getClaimIfPresent("issuer", claims.getBody().getIssuer());
+        final String subject = getClaimIfPresent("subject", claims.getBody().getSubject());
         if (!issuer.equals(subject)) {
             throw new WebApplicationException("Issuer and Subject must be identical", Response.Status.BAD_REQUEST);
         }
 
         // JTI must be present and have not been used in the past 5 minutes.
-        if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getPayload().getId()), true)) {
+        if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getBody().getId()), true)) {
             logger.warn("JWT being replayed for organization {}", organizationID);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
         }
 
         // Ensure the expiration time for the token is not more than 5 minutes in the future
-        final Date expiration = getClaimIfPresent("expiration", claims.getPayload().getExpiration());
+        final Date expiration = getClaimIfPresent("expiration", claims.getBody().getExpiration());
         if (OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(5).isBefore(expiration.toInstant().atOffset(ZoneOffset.UTC))) {
             throw new WebApplicationException("Not authorized", Response.Status.UNAUTHORIZED);
         }
