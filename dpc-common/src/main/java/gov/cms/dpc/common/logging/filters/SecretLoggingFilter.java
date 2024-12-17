@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.validation.constraints.NotEmpty;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @JsonTypeName("secret-filter-factory")
 public class SecretLoggingFilter implements FilterFactory<ILoggingEvent> {
@@ -33,12 +34,12 @@ public class SecretLoggingFilter implements FilterFactory<ILoggingEvent> {
 	@Override
 	public Filter<ILoggingEvent> build() {
 		// Clean the secrets list
-        secrets.removeIf(secret -> !envVars.containsKey(secret));
+        List<String> containsSecrets = secrets.stream().filter(envVars::containsKey).collect(Collectors.toList());
 
 		return new Filter<>() {
 			@Override
 			public FilterReply decide(ILoggingEvent event) {
-				for (String secretName : secrets) {
+				for (String secretName : containsSecrets) {
 					if (event.getFormattedMessage().contains(envVars.get(secretName))) {
                         logger.warn("Suppressing log, attempted to write {} in {}", secretName, event.getLoggerName());
 						return FilterReply.DENY;

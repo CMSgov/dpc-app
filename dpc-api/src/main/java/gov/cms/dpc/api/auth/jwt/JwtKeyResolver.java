@@ -10,6 +10,7 @@ import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwsHeader;
+import io.jsonwebtoken.SigningKeyResolverAdapter;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
@@ -22,7 +23,7 @@ import java.util.UUID;
 
 import static gov.cms.dpc.api.auth.MacaroonHelpers.ORGANIZATION_CAVEAT_KEY;
 
-public class JwtKeyResolver extends KeyResolverAdapter {
+public class JwtKeyResolver extends SigningKeyResolverAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtKeyResolver.class);
 

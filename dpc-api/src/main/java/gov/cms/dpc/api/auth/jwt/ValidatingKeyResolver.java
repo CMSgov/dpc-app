@@ -11,22 +11,21 @@ import java.security.Key;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Set;
 import java.util.UUID;
 
 /**
- * Implementation of {@link LocatorAdapter} that simply verifies whether the required claims and values are present.
+ * Implementation of {@link SigningKeyResolverAdapter} that simply verifies whether the required claims and values are present.
  * As far as I can tell, this is the only way to get access to the JWS claims without actually verifying the signature.
- * See: <a href="https://github.com/jwtk/jjwt/issues/205"></a>
+ * See: https://github.com/jwtk/jjwt/issues/205
  * <p>
  * The downside is that this method will always return a null {@link Key}, which means the {@link Jwts#parser()} method will always throw an {@link IllegalArgumentException}, which we need to catch.
  */
-public class ValidatingKeyResolver extends KeyResolverAdapter {
+public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
 
     private final IJTICache cache;
-    private final Set<String> audClaim;
+    private final String audClaim;
 
-    public ValidatingKeyResolver(IJTICache cache, Set<String> audClaim) {
+    public ValidatingKeyResolver(IJTICache cache, String audClaim) {
         this.cache = cache;
         this.audClaim = audClaim;
     }
@@ -107,7 +106,7 @@ public class ValidatingKeyResolver extends KeyResolverAdapter {
         }
 
         // Test correct aud claim
-        final Set<String> audience = getClaimIfPresent("audience", claims.getAudience());
+        final String audience = getClaimIfPresent("audience", claims.getAudience());
         if (!audience.equals(this.audClaim)) {
             throw new WebApplicationException("Audience claim value is incorrect", Response.Status.BAD_REQUEST);
         }

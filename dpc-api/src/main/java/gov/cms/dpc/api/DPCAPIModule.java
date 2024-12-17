@@ -9,7 +9,6 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
-import gov.cms.dpc.api.auth.jwt.KeyResolverAdapter;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
 import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
 import gov.cms.dpc.api.core.FileManager;
@@ -38,6 +37,7 @@ import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
+import io.jsonwebtoken.SigningKeyResolverAdapter;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,13 +103,13 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
-    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, KeyResolverAdapter resolver, IJTICache cache, @APIV1 String publicURL) {
+    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, SigningKeyResolverAdapter resolver, IJTICache cache, @APIV1 String publicURL) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(TokenResource.class,
                         new Class<?>[]{TokenDAO.class,
                                 MacaroonBakery.class,
                                 TokenPolicy.class,
-                                KeyResolverAdapter.class,
+                                SigningKeyResolverAdapter.class,
                                 IJTICache.class,
                                 String.class},
                         new Object[]{dao,

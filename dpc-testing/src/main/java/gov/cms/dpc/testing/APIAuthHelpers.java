@@ -14,7 +14,7 @@ import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.testing.models.KeyView;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
@@ -113,12 +113,12 @@ public class APIAuthHelpers {
             audience = "https://prod.dpc.cms.gov/api/v1";
         }
         final String jwt = Jwts.builder()
-                .header().add("kid", keyID.toString()).and()
-                .audience().add(String.format("%s/Token/auth", audience)).and()
-                .issuer(macaroon)
-                .subject(macaroon)
-                .id(UUID.randomUUID().toString())
-                .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
+                .setHeaderParam("kid", keyID.toString())
+                .setAudience(String.format("%s/Token/auth", audience))
+                .setIssuer(macaroon)
+                .setSubject(macaroon)
+                .setId(UUID.randomUUID().toString())
+                .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
                 .signWith(privateKey, getSigningAlgorithm(KeyType.RSA))
                 .compact();
 
@@ -326,7 +326,7 @@ public class APIAuthHelpers {
      * @return - {@link SignatureAlgorithm} to use for signing JWT
      */
     public static SignatureAlgorithm getSigningAlgorithm(KeyType keyType) {
-        return keyType == KeyType.ECC ? Jwts.SIG.ES256 : Jwts.SIG.RS384;
+        return keyType == KeyType.ECC ? SignatureAlgorithm.ES256 : SignatureAlgorithm.RS384;
     }
 
 
