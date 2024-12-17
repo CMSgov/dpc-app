@@ -17,7 +17,7 @@ import java.util.UUID;
 
 /**
  * Implementation of {@link DPCAuthFilter} that is use when an {@link io.dropwizard.auth.Auth} annotated method is called.
- * This simply passes the {@link Organization} to the method and assumes that it handles all of the necessary security controls and such.
+ * This simply passes the {@link Organization} to the method and assumes that it handles all the necessary security controls and such.
  */
 @Priority(Priorities.AUTHENTICATION)
 public class PrincipalInjectionAuthFilter extends DPCAuthFilter {

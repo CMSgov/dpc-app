@@ -1,10 +1,10 @@
 package gov.cms.dpc.fhir.validations.dropwizard;
 
-import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintValidatorFactoryImpl;
-
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorFactory;
+import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintValidatorFactoryImpl;
+
 import java.util.Set;
 
 /**

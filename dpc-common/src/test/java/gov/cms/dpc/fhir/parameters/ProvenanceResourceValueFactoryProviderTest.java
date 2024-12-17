@@ -21,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(BufferedLoggerHandler.class)
 class ProvenanceResourceValueFactoryProviderTest {
 
-    private static Injector injector = Mockito.mock(Injector.class);
-    private static FhirContext ctx = FhirContext.forDstu3();
+    private static final Injector injector = Mockito.mock(Injector.class);
+    private static final FhirContext ctx = FhirContext.forDstu3();
     private static ProvenanceResourceFactoryProvider factory;
 
     @BeforeAll

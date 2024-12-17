@@ -1,6 +1,7 @@
 package gov.cms.dpc.queue.service;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.inject.Inject;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.logging.SplunkTimestamp;
@@ -15,7 +16,6 @@ import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -100,7 +100,7 @@ public class DataService {
         // No data for the batch was returned AND No OperationOutcome was created
         LOGGER.error("No data returned from queue for job, jobID: {}; jobTimeout: {}", jobID, jobTimeoutInSeconds);
         // These Exceptions are not just thrown in the application - the message is also sent in the Response payload
-        throw new DataRetrievalException("Failed to retrieve data"); 
+        throw new DataRetrievalException("Failed to retrieve data");
     }
 
     private Optional<List<JobQueueBatch>> waitForJobToComplete(UUID jobID, UUID organizationID, IJobQueue queue) {

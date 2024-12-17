@@ -13,7 +13,7 @@ import java.util.List;
 
 @Embeddable
 public class NameEntity implements Serializable {
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @NotNull
     @Column(name = "name_use")

@@ -3,13 +3,13 @@ package gov.cms.dpc.fhir.validations;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
+import com.google.inject.Inject;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.*;
-import org.hl7.fhir.dstu3.model.*;
-
-import javax.inject.Inject;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import org.hl7.fhir.dstu3.model.*;
+
 import java.util.Map;
 
 /**

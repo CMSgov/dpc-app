@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.jobs;
 
+import com.google.inject.Inject;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.dao.tables.Attributions;
 import gov.cms.dpc.attribution.exceptions.AttributionException;
@@ -13,7 +14,6 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;

@@ -1,16 +1,15 @@
 package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
+import com.google.inject.Inject;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.jersey.errors.LoggingExceptionMapper;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-
-import javax.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 
 /**
  * Core error handler for differentiating between FHIR and standard HTTP errors.

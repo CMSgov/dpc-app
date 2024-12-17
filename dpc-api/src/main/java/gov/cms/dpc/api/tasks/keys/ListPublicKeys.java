@@ -1,6 +1,8 @@
 package gov.cms.dpc.api.tasks.keys;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
@@ -8,8 +10,6 @@ import gov.cms.dpc.api.resources.v1.KeyResource;
 import io.dropwizard.servlets.tasks.Task;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;

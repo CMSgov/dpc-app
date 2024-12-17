@@ -1,5 +1,7 @@
 package gov.cms.dpc.attribution.tasks;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.utils.DBUtils;
 import io.dropwizard.db.ManagedDataSource;
@@ -10,8 +12,6 @@ import org.jooq.conf.RenderQuotedNames;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.util.List;

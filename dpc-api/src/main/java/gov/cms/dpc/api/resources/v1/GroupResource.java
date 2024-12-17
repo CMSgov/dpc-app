@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.DPCAPIConfiguration;
@@ -27,6 +28,11 @@ import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -34,12 +40,6 @@ import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -257,7 +257,7 @@ public class GroupResource extends AbstractGroupResource {
      * @param resourceTypes - {@link String} of comma separated values corresponding to FHIR {@link DPCResourceType}
      * @param outputFormat  - Optional outputFormats parameter
      * @param sinceParam    - Optional since parameter
-     * @return - {@link OperationOutcome} specifying whether or not the request was successful.
+     * @return - {@link OperationOutcome} specifying whether the request was successful.
      */
     @Override
     @GET // Need this here, since we're using a path param
@@ -315,7 +315,7 @@ public class GroupResource extends AbstractGroupResource {
 
         final boolean isSmoke = config.getLookBackExemptOrgs().contains(orgID.toString());
         final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true, isSmoke);
-        final int totalPatients = attributedPatients == null ? 0 : attributedPatients.size();
+        final int totalPatients = attributedPatients.size();
         final String resourcesRequested = resources.stream().map(DPCResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
         logger.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},orgId={},totalPatients={},resourcesRequested={},queueSubmitTime={}", "/Group/$export",jobID, orgID, totalPatients, resourcesRequested, eventTime);
         return Response.status(Response.Status.ACCEPTED)

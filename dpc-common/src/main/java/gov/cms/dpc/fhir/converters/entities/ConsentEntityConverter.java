@@ -42,16 +42,15 @@ public class ConsentEntityConverter {
         boolean noHicn = hicn == null || hicn.isEmpty();
         boolean noMbi = mbi == null || mbi.isEmpty();
 
-        StringBuilder sb = new StringBuilder("Consent status of ");
-        sb.append(inOrOut);
-        sb.append(" for the patient with identifiers [");
-        sb.append(noHicn ? "" : patientIdentifier(DPCIdentifierSystem.HICN, hicn));
-        sb.append((!noHicn && !noMbi) ? "], [" : "");
-        sb.append(noMbi ? "" : patientIdentifier(DPCIdentifierSystem.MBI, mbi));
-        sb.append("]");
+        String sb = "Consent status of " + inOrOut +
+                " for the patient with identifiers [" +
+                (noHicn ? "" : patientIdentifier(DPCIdentifierSystem.HICN, hicn)) +
+                ((!noHicn && !noMbi) ? "], [" : "") +
+                (noMbi ? "" : patientIdentifier(DPCIdentifierSystem.MBI, mbi)) +
+                "]";
 
         Narrative text = new Narrative();
-        text.setDiv(new XhtmlNode(NodeType.Text).setValue(sb.toString()));
+        text.setDiv(new XhtmlNode(NodeType.Text).setValue(sb));
         text.setStatus(Narrative.NarrativeStatus.GENERATED);
         return text;
     }

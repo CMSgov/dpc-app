@@ -15,7 +15,7 @@ public class FHIRMediaTypes {
     private static final MediaType FHIR_JSON_MT = MediaType.valueOf(FHIR_JSON);
     private static final MediaType FHIR_NDJSON_MT = MediaType.valueOf(FHIR_NDJSON);
     /**
-     * Validates whether or not the given content type is of type FHIR
+     * Validates whether the given content type is of type FHIR
      * String can be null or empty
      *
      * @param mediaType - {@link String} value from {@link jakarta.ws.rs.core.HttpHeaders#CONTENT_TYPE} header.

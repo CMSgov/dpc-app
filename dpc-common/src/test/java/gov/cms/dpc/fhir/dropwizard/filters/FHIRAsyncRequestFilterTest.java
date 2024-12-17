@@ -23,8 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(BufferedLoggerHandler.class)
 public class FHIRAsyncRequestFilterTest {
 
-    private static FHIRAsyncRequestFilter filter = new FHIRAsyncRequestFilter();
-    private static ContainerRequestContext context = Mockito.mock(ContainerRequestContext.class);
+    private static final FHIRAsyncRequestFilter filter = new FHIRAsyncRequestFilter();
+    private static final ContainerRequestContext context = Mockito.mock(ContainerRequestContext.class);
 
     @BeforeAll
     static void setup() {

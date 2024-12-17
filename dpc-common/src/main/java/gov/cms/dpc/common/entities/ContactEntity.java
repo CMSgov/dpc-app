@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Entity(name = "organization_contacts")
 public class ContactEntity implements Serializable {
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

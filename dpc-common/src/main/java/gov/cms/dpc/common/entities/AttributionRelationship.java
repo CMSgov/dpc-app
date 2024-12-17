@@ -14,7 +14,7 @@ import java.util.Objects;
 @Entity(name = "attributions")
 public class AttributionRelationship implements Serializable {
 
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "attributions_generator")

@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Entity(name = "contact_telecoms")
 public class ContactPointEntity implements Serializable {
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

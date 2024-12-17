@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(BufferedLoggerHandler.class)
 class FHIRParamValueFactoryTest {
 
-    private static FhirContext ctx = FhirContext.forDstu3();
+    private static final FhirContext ctx = FhirContext.forDstu3();
 
     private static FHIRParamValueFactory factory;
 
@@ -50,9 +50,7 @@ class FHIRParamValueFactoryTest {
         final Function<ContainerRequest, Object> valueFunc = factory.getValueProvider(parameter);
 
         try (MockedConstruction<ParamResourceFactory> mocked = Mockito.mockConstruction(ParamResourceFactory.class,
-            (mock, context) -> {
-                Mockito.when(mock.provide()).thenReturn(provenance);
-            })) {
+            (mock, context) -> Mockito.when(mock.provide()).thenReturn(provenance))) {
             assertAll(() -> assertNotNull(valueFunc, "Should have factory function"),
                     () -> assertEquals(Provenance.class, valueFunc.apply(request).getClass(), "Should have provenance"));
         }

@@ -12,7 +12,7 @@ import java.time.Duration;
 
 public class JWTAuthResponse implements Serializable {
 
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @NotNull
     @JsonProperty(value = "access_token")

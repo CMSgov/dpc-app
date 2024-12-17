@@ -37,11 +37,11 @@ import static org.mockito.Mockito.times;
 @ExtendWith(BufferedLoggerHandler.class)
 public class GenerateClientTokenTests {
 
-    private TokenResource tokenResource = Mockito.mock(TokenResource.class);
-    private static MacaroonBakery bakery = Mockito.mock(MacaroonBakery.class);
-    private ArgumentCaptor<OrganizationPrincipal> principalCaptor = ArgumentCaptor.forClass(OrganizationPrincipal.class);
-    private ArgumentCaptor<String> tokenLabelCaptor = ArgumentCaptor.forClass(String.class);
-    private ArgumentCaptor<Optional<OffsetDateTimeParam>> expirationCaptor = ArgumentCaptor.forClass(Optional.class);
+    private final TokenResource tokenResource = Mockito.mock(TokenResource.class);
+    private static final MacaroonBakery bakery = Mockito.mock(MacaroonBakery.class);
+    private final ArgumentCaptor<OrganizationPrincipal> principalCaptor = ArgumentCaptor.forClass(OrganizationPrincipal.class);
+    private final ArgumentCaptor<String> tokenLabelCaptor = ArgumentCaptor.forClass(String.class);
+    private final ArgumentCaptor<Optional<OffsetDateTimeParam>> expirationCaptor = ArgumentCaptor.forClass(Optional.class);
     private final GenerateClientTokens gct;
     private final ListClientTokens lct;
     private final DeleteToken dct;

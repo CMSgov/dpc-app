@@ -11,7 +11,7 @@ import java.util.Objects;
 @Entity(name = "providers")
 public class ProviderEntity extends PersonEntity {
 
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @NoHtml
     @NPI

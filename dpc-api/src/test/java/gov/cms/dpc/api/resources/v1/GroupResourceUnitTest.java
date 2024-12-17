@@ -512,9 +512,7 @@ public class GroupResourceUnitTest {
 
         //Past date with Z offset
         String since = "2020-05-26T16:43:01.780Z";
-        Assertions.assertThrows(WebApplicationException.class, () -> {
-            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request);
-        });
+        Assertions.assertThrows(WebApplicationException.class, () -> resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request));
     }
 
 }

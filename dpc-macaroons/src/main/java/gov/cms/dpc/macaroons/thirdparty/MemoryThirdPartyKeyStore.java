@@ -1,6 +1,7 @@
 package gov.cms.dpc.macaroons.thirdparty;
 
-import javax.inject.Singleton;
+import com.google.inject.Singleton;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;

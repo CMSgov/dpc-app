@@ -19,7 +19,7 @@ import java.util.Objects;
 @Entity(name = "patients")
 public class PatientEntity extends PersonEntity {
 
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
     /* For details of the MBI format, see: https://www.cms.gov/Medicare/New-Medicare-Card/Understanding-the-MBI.pdf
     This pattern is similar to that format, but is less restrictive to accommodate testing. Synthetic MBIs should
     include letters and numbers not permitted in real MBIs. */

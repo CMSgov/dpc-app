@@ -2,13 +2,13 @@ package gov.cms.dpc.fhir.parameters;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ext.Provider;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
 import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.inject.Inject;
-import jakarta.ws.rs.ext.Provider;
 import java.util.function.Function;
 
 /**

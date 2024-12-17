@@ -1,10 +1,10 @@
 package gov.cms.dpc.macaroons.store;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import gov.cms.dpc.macaroons.helpers.SecretHelpers;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 

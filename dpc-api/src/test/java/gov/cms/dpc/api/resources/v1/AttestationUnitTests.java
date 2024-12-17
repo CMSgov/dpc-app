@@ -22,9 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Request;
-import jakarta.ws.rs.core.SecurityContext;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;

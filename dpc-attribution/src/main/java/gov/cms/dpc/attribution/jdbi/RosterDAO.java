@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.jdbi;
 
+import com.google.inject.Inject;
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
@@ -7,7 +8,6 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import jakarta.persistence.criteria.*;
 import org.hibernate.query.Query;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -77,6 +77,6 @@ public class RosterDAO extends DPCAbstractDAO<RosterEntity> {
     }
 
     public void delete(RosterEntity rosterEntity) {
-        currentSession().delete(rosterEntity);
+        currentSession().remove(rosterEntity);
     }
 }

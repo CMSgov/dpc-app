@@ -1,12 +1,11 @@
 package gov.cms.dpc.fhir.validations.dropwizard;
 
-import org.glassfish.jersey.server.validation.ValidationConfig;
-
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import jakarta.validation.ConstraintValidatorFactory;
 import jakarta.validation.ValidatorFactory;
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
+import org.glassfish.jersey.server.validation.ValidationConfig;
 
 /**
  * Custom {@link ContextResolver} that allows us to override the default Hibernate/Dropwizard settings in order to support injection for our custom {@link jakarta.validation.ConstraintValidator}

@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @Entity(name = "organizations")
 public class OrganizationEntity implements Serializable {
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @Id
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
@@ -152,7 +152,7 @@ public class OrganizationEntity implements Serializable {
 
     @Embeddable
     public static class OrganizationID implements Serializable {
-        public static final long serialVersionUID = 42L;
+        private static final long serialVersionUID = 42L;
 
         @Column(name = "id_system")
         private DPCIdentifierSystem system;

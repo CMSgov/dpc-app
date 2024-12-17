@@ -1,19 +1,18 @@
 package gov.cms.dpc.api.resources.v1;
 
-import gov.cms.dpc.common.annotations.Public;
+import com.google.inject.Inject;
 import gov.cms.dpc.api.core.Capabilities;
 import gov.cms.dpc.api.resources.*;
 import gov.cms.dpc.common.annotations.APIV1;
+import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.common.utils.PropertiesProvider;
 import io.swagger.annotations.*;
-import org.hl7.fhir.dstu3.model.CapabilityStatement;
-
-import javax.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 
 
 @Api(value = "Metadata")

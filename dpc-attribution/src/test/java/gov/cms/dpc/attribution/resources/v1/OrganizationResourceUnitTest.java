@@ -43,11 +43,11 @@ public class OrganizationResourceUnitTest {
 
     private DPCAttributionConfiguration configuration;
 
-    private FHIREntityConverter converter = FHIREntityConverter.initialize();
+    private final FHIREntityConverter converter = FHIREntityConverter.initialize();
 
     private OrganizationResource resource;
 
-    private String lookbackExcemptOrgId = "0ab352f1-2bf1-44c4-aa7a-3004a1ffef12";
+    private final String lookbackExcemptOrgId = "0ab352f1-2bf1-44c4-aa7a-3004a1ffef12";
 
     @BeforeEach
     public void setUp() {

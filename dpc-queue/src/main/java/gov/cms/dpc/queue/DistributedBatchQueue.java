@@ -2,6 +2,7 @@ package gov.cms.dpc.queue;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.inject.Inject;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.annotations.QueueBatchSize;
@@ -20,7 +21,6 @@ import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;

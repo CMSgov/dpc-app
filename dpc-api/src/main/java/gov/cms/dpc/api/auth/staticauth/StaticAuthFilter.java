@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.auth.staticauth;
 
+import com.google.inject.Inject;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.DPCAuthFilter;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
@@ -13,7 +14,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.MDC;
 
-import javax.inject.Inject;
 
 /**
  * WARNING: DO NOT USE IN PRODUCTION

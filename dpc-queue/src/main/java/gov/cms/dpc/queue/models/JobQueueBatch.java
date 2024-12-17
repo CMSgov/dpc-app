@@ -114,13 +114,13 @@ public class JobQueueBatch implements Serializable {
     /**
      * The since parameter from the export request
      */
-    @Column(name = "since", nullable = true)
+    @Column(name = "since")
     private OffsetDateTime since;
 
     /**
      * The transaction time parameter from the job creation
      */
-    @Column(name = "transaction_time", nullable = true)
+    @Column(name = "transaction_time")
     private OffsetDateTime transactionTime;
 
     /**
@@ -132,31 +132,31 @@ public class JobQueueBatch implements Serializable {
     /**
      * The time the job was last processed
      */
-    @Column(name = "update_time", nullable = true)
+    @Column(name = "update_time")
     protected OffsetDateTime updateTime;
 
     /**
      * The time the job was submitted
      */
-    @Column(name = "submit_time", nullable = true)
+    @Column(name = "submit_time")
     protected OffsetDateTime submitTime;
 
     /**
      * The time the job started to work
      */
-    @Column(name = "start_time", nullable = true)
+    @Column(name = "start_time")
     protected OffsetDateTime startTime;
 
     /**
      * The time the job was completed
      */
-    @Column(name = "complete_time", nullable = true)
+    @Column(name = "complete_time")
     protected OffsetDateTime completeTime;
 
     /**
      * The url used when the job was started
      */
-    @Column(name = "request_url", nullable = true)
+    @Column(name = "request_url")
     protected String requestUrl;
 
     /**

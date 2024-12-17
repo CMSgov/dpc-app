@@ -1,6 +1,12 @@
 package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
+import com.google.inject.Inject;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
+import jakarta.persistence.PersistenceException;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.Provider;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -8,12 +14,6 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import jakarta.persistence.PersistenceException;
-import jakarta.ws.rs.container.ResourceInfo;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.Provider;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

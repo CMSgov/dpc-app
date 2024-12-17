@@ -72,7 +72,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
             StringBuilder respBuilder = new StringBuilder();
-            String respLine = null;
+            String respLine;
             while ((respLine = reader.readLine()) != null) {
                 respBuilder.append(respLine.trim());
             }
@@ -108,7 +108,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
     @Test
     void testCreateEndpointWithoutAddress() {
         Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
-        endpoint.setAddress((String)null);
+        endpoint.setAddress(null);
         ICreateTyped createExec = client.create().resource(endpoint);
         assertThrows(UnprocessableEntityException.class, createExec::execute);
     }

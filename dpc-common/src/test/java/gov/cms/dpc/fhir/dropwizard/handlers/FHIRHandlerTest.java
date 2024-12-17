@@ -25,8 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class FHIRHandlerTest {
 
-    private static FhirContext ctx = FhirContext.forDstu3();
-    private static FHIRHandler handler = new FHIRHandler(ctx);
+    private static final FhirContext ctx = FhirContext.forDstu3();
+    private static final FHIRHandler handler = new FHIRHandler(ctx);
 
     @Nested
     @DisplayName("FHIR reader tests")

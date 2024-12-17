@@ -115,7 +115,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a completed job
-        final var requestUrl = String.format(TEST_JOB_URL, UUID.randomUUID().toString());
+        final var requestUrl = String.format(TEST_JOB_URL, UUID.randomUUID());
         final var jobID = queue.createJob(orgID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
@@ -164,7 +164,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a completed job with one error
-        final var requestUrl = String.format(TEST_JOB_URL, UUID.randomUUID().toString()) + "?since=2020-02-20T12:00:00.000-05:00";
+        final var requestUrl = String.format(TEST_JOB_URL, UUID.randomUUID()) + "?since=2020-02-20T12:00:00.000-05:00";
         final var jobID = queue.createJob(orgID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,

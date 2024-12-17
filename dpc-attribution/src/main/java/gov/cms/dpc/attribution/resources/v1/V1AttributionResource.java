@@ -1,8 +1,7 @@
 package gov.cms.dpc.attribution.resources.v1;
 
+import com.google.inject.Inject;
 import gov.cms.dpc.attribution.resources.*;
-
-import javax.inject.Inject;
 import jakarta.ws.rs.Path;
 
 @Path("/v1")

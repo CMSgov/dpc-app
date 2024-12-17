@@ -90,9 +90,12 @@ public class FHIRRequestFeatureTest {
 
     }
 
+    @Test
     @FHIR
     public void testFhirAnnotationMethod() {}
+    @Test
     @FHIRAsync
     public void testFhirAsyncAnnotatedMethod() {}
+    @Test
     public void testNoAnnotationMethod() {}
 }

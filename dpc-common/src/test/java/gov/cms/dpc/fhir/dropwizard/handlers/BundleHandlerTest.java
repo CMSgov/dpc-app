@@ -30,7 +30,7 @@ public class BundleHandlerTest {
         JerseyGuiceUtils.reset();
     }
 
-    private static ResourceExtension resource = buildResource();
+    private static final ResourceExtension resource = buildResource();
     private static FhirContext ctx;
 
     private static ResourceExtension buildResource() {

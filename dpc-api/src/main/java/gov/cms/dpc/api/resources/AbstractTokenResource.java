@@ -30,7 +30,7 @@ public abstract class AbstractTokenResource {
 
     /**
      * Get authentication token for {@link org.hl7.fhir.dstu3.model.Organization}.
-     * If no tokens exists, returns an empty {@link List}
+     * If no tokens exist, returns an empty {@link List}
      *
      * @param organizationPrincipal - {@link OrganizationPrincipal} supplied by auth handler
      * @return - {@link List} {@link String} base64 (URL) encoded token

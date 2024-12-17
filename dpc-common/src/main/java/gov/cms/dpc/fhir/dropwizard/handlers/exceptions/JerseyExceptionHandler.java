@@ -2,19 +2,19 @@ package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Inject;
 import io.dropwizard.jersey.validation.ConstraintMessage;
 import io.dropwizard.jersey.validation.JerseyViolationException;
-import org.apache.commons.lang3.tuple.Pair;
-import org.glassfish.jersey.server.model.Invocable;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-
-import javax.inject.Inject;
 import jakarta.validation.ConstraintViolation;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
+import org.apache.commons.lang3.tuple.Pair;
+import org.glassfish.jersey.server.model.Invocable;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+
 import java.util.Set;
 
 /**

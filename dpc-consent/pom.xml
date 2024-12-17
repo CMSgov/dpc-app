@@ -285,7 +285,7 @@
                                         </property>
                                         <property>
                                             <key>dialect</key>
-                                            <value>org.hibernate.dialect.PostgreSQL10Dialect</value>
+                                            <value>org.hibernate.dialect.PostgreSQLDialect</value>
                                         </property>
                                     </properties>
                                     <includes>.*</includes>

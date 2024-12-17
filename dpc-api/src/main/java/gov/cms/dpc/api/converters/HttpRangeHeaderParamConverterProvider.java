@@ -1,11 +1,11 @@
 package gov.cms.dpc.api.converters;
 
+import com.google.inject.Inject;
 import gov.cms.dpc.api.models.RangeHeader;
-
-import javax.inject.Inject;
 import jakarta.ws.rs.ext.ParamConverter;
 import jakarta.ws.rs.ext.ParamConverterProvider;
 import jakarta.ws.rs.ext.Provider;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 

@@ -1,11 +1,11 @@
 package gov.cms.dpc.attribution.jdbi;
 
+import com.google.inject.Inject;
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
 import jakarta.persistence.criteria.*;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +54,7 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
 
     /**
      * Returns a list of all {@link PatientEntity}s whose id is in resourceIds.
-     * @param resourceIDs
+     * @param resourceIDs List of resource UUIDs
      * @return List of {@link PatientEntity}s
      */
     public List<PatientEntity> patientSearch(UUID organizationId, List<UUID> resourceIDs) {
@@ -80,7 +80,7 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         // Delete all the attribution relationships
         removeAttributionRelationships(patientEntity);
 
-        this.currentSession().delete(patientEntity);
+        this.currentSession().remove(patientEntity);
 
         return true;
     }
@@ -130,6 +130,6 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
                         .get(AttributionRelationship_.patient)
                         .get(PatientEntity_.id),
                 patientEntity.getID()));
-        return this.currentSession().createQuery(criteriaDelete).executeUpdate();
+        return this.currentSession().createMutationQuery(criteriaDelete).executeUpdate();
     }
 }

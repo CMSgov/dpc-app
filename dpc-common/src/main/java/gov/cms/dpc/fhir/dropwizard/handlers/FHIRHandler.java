@@ -3,12 +3,9 @@ package gov.cms.dpc.fhir.dropwizard.handlers;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import com.google.inject.Inject;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.BaseResource;
-
-import javax.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
@@ -17,6 +14,9 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 import jakarta.ws.rs.ext.Provider;
+import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.BaseResource;
+
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;

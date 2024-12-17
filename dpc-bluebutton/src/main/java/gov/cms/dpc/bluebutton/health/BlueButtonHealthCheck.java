@@ -1,15 +1,15 @@
 package gov.cms.dpc.bluebutton.health;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import ru.vyarus.dropwizard.guice.module.installer.feature.health.NamedHealthCheck;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
- * {@link NamedHealthCheck} class that verifies whether or not the Blue Button endpoint is accessible.
+ * {@link NamedHealthCheck} class that verifies whether the Blue Button endpoint is accessible.
  * This simply makes a request to the /metadata endpoint and verifies that the returned {@link CapabilityStatement} has an {@link org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus#ACTIVE} status.
  */
 @Singleton

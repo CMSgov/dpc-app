@@ -105,27 +105,21 @@ public class ConsentEntityConverterTest {
 
     @Test
     void fromFHIR_nullThrowsError() {
-        Exception exception = assertThrows(WebApplicationException.class, () -> {
-            ConsentEntityConverter.fromFhir(null);
-        });
+        Exception exception = assertThrows(WebApplicationException.class, () -> ConsentEntityConverter.fromFhir(null));
         assertEquals("No consent resource provided", exception.getMessage());
     }
 
     @Test
     void fromFHIR_InactiveThrowsError() {
         consent.setStatus(Consent.ConsentState.INACTIVE);
-        Exception exception = assertThrows(WebApplicationException.class, () -> {
-            ConsentEntityConverter.fromFhir(consent);
-        });
+        Exception exception = assertThrows(WebApplicationException.class, () -> ConsentEntityConverter.fromFhir(consent));
         assertEquals("Only active consent records are accepted", exception.getMessage());
     }
 
     @Test
     void fromFHIR_NoPatientThrowsError() {
         consent.setPatient(null);
-        Exception exception = assertThrows(WebApplicationException.class, () -> {
-            ConsentEntityConverter.fromFhir(consent);
-        });
+        Exception exception = assertThrows(WebApplicationException.class, () -> ConsentEntityConverter.fromFhir(consent));
         assertEquals("Consent resource must contain patient reference", exception.getMessage());
     }
 
@@ -133,9 +127,7 @@ public class ConsentEntityConverterTest {
     void fromFHIR_BadMBIThrowsError() {
         Reference patient = new Reference().setReference(String.format("http://fhir.org/Patient?identity=|%s", TEST_MBI));
         consent.setPatient(patient);
-        Exception exception = assertThrows(WebApplicationException.class, () -> {
-            ConsentEntityConverter.fromFhir(consent);
-        });
+        Exception exception = assertThrows(WebApplicationException.class, () -> ConsentEntityConverter.fromFhir(consent));
         assertEquals("Could not find MBI in patient reference", exception.getMessage());
     }
 
@@ -143,18 +135,14 @@ public class ConsentEntityConverterTest {
     void fromFHIR_BadPolicyUriThrowsError() {
         consent.setPolicyRule("https://www.google.com");
 
-        Exception exception = assertThrows(WebApplicationException.class, () -> {
-            ConsentEntityConverter.fromFhir(consent);
-        });
+        Exception exception = assertThrows(WebApplicationException.class, () -> ConsentEntityConverter.fromFhir(consent));
         assertEquals("Policy rule must be http://hl7.org/fhir/ConsentPolicy/opt-in or http://hl7.org/fhir/ConsentPolicy/opt-out.", exception.getMessage());
     }
 
     @Test
     void fromFHIR_NoCategoryThrowsError() {
         consent.setCategory(new ArrayList<>());
-        Exception exception = assertThrows(WebApplicationException.class, () -> {
-            ConsentEntityConverter.fromFhir(consent);
-        });
+        Exception exception = assertThrows(WebApplicationException.class, () -> ConsentEntityConverter.fromFhir(consent));
         assertEquals("Must include one category", exception.getMessage());
     }
 
@@ -162,9 +150,7 @@ public class ConsentEntityConverterTest {
     void fromFHIR_NoCodingThrowsError() {
         CodeableConcept category = new CodeableConcept();
         consent.setCategory(List.of(category));
-        Exception exception = assertThrows(WebApplicationException.class, () -> {
-            ConsentEntityConverter.fromFhir(consent);
-        });
+        Exception exception = assertThrows(WebApplicationException.class, () -> ConsentEntityConverter.fromFhir(consent));
         assertEquals("Category must have one coding", exception.getMessage());
     }
 
@@ -173,9 +159,7 @@ public class ConsentEntityConverterTest {
         CodeableConcept category = new CodeableConcept();
         category.addCoding().setSystem("https://www.google.com").setCode(loinCode).setDisplay(ConsentEntity.CATEGORY_DISPLAY);
         consent.setCategory(List.of(category));
-        Exception exception = assertThrows(WebApplicationException.class, () -> {
-            ConsentEntityConverter.fromFhir(consent);
-        });
+        Exception exception = assertThrows(WebApplicationException.class, () -> ConsentEntityConverter.fromFhir(consent));
         assertEquals("Category coding must have system http://loinc.org and code 64292-6", exception.getMessage());
     }
 
@@ -184,9 +168,7 @@ public class ConsentEntityConverterTest {
         CodeableConcept category = new CodeableConcept();
         category.addCoding().setSystem("https://www.google.com").setCode("bad code").setDisplay(ConsentEntity.CATEGORY_DISPLAY);
         consent.setCategory(List.of(category));
-        Exception exception = assertThrows(WebApplicationException.class, () -> {
-            ConsentEntityConverter.fromFhir(consent);
-        });
+        Exception exception = assertThrows(WebApplicationException.class, () -> ConsentEntityConverter.fromFhir(consent));
         assertEquals("Category coding must have system http://loinc.org and code 64292-6", exception.getMessage());
     }
 }

@@ -92,7 +92,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         assertNotNull(responseIp.getCreatedAt());
 
         // Save the updated ipAddressEntity for future tests
-        this.ipAddressEntityResponse = responseIp;
+        ipAddressEntityResponse = responseIp;
     }
 
     @Test
@@ -109,7 +109,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         CloseableHttpResponse response = client.execute(get);
         assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
 
-        TypeReference<CollectionResponse<IpAddressEntity>> typeRef = new TypeReference<CollectionResponse<IpAddressEntity>>() {};
+        TypeReference<CollectionResponse<IpAddressEntity>> typeRef = new TypeReference<>() {};
         CollectionResponse<IpAddressEntity> responseCollection = mapper.readValue(response.getEntity().getContent(), typeRef);
         assertEquals(1, responseCollection.getCount());
 
@@ -209,8 +209,6 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
             CloseableHttpResponse response = client.execute(post);
 
             return mapper.readValue(response.getEntity().getContent(), IpAddressEntity.class);
-        } catch (Exception e) {
-            throw e;
         }
     }
 }

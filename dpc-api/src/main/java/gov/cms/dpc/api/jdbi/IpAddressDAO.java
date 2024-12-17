@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.jdbi;
 
+import com.google.inject.Inject;
 import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.entities.IpAddressEntity_;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
@@ -8,7 +9,6 @@ import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 import org.hibernate.query.criteria.JpaCriteriaQuery;
 import org.hibernate.query.criteria.JpaRoot;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,6 +33,6 @@ public class IpAddressDAO extends AbstractDAO<IpAddressEntity> {
     }
 
     public void deleteIpAddress(IpAddressEntity ipAddress) {
-        currentSession().delete(ipAddress);
+        currentSession().remove(ipAddress);
     }
 }

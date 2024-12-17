@@ -19,7 +19,7 @@ import java.util.UUID;
 
 @Entity(name = "organization_tokens")
 public class TokenEntity implements Serializable {
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     public enum TokenType {
         MACAROON,

@@ -13,7 +13,7 @@ import java.time.OffsetDateTime;
 @Entity(name = "root_keys")
 public class RootKeyEntity implements Serializable {
 
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @Id
     private String id;

@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Entity(name = "rosters")
 public class RosterEntity implements Serializable {
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @Id
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")

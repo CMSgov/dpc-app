@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.jdbi;
 
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
@@ -9,7 +10,6 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,6 +50,6 @@ public class EndpointDAO extends AbstractDAO<EndpointEntity> {
     }
 
     public void deleteEndpoint(EndpointEntity endpointEntity) {
-        currentSession().delete(endpointEntity);
+        currentSession().remove(endpointEntity);
     }
 }

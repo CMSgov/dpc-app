@@ -42,7 +42,7 @@ class IpAddressResourceUnitTest {
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of(ipAddressEntity));
 
-        CollectionResponse response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
+        CollectionResponse<IpAddressEntity> response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
         assertEquals(1, response.getCount());
         assertTrue(response.getEntities().contains(ipAddressEntity));
     }
@@ -51,7 +51,7 @@ class IpAddressResourceUnitTest {
     public void testGet_nothingReturned() {
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of());
 
-        CollectionResponse response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
+        CollectionResponse<IpAddressEntity> response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
         assertEquals(0, response.getCount());
     }
 
@@ -72,9 +72,7 @@ class IpAddressResourceUnitTest {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("1.bad.ip.addr");
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
-        assertThrows(WebApplicationException.class, () -> {
-            ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest);
-        });
+        assertThrows(WebApplicationException.class, () -> ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest));
     }
 
     @Test
@@ -88,9 +86,7 @@ class IpAddressResourceUnitTest {
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(existingIps);
 
-        assertThrows(WebApplicationException.class, () -> {
-            ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest);
-        });
+        assertThrows(WebApplicationException.class, () -> ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest));
     }
 
     @Test
@@ -110,8 +106,6 @@ class IpAddressResourceUnitTest {
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of(existingIp));
 
-        assertThrows(WebApplicationException.class, () -> {
-            ipAddressResource.deleteIpAddress(organizationPrincipal, UUID.randomUUID());
-        });
+        assertThrows(WebApplicationException.class, () -> ipAddressResource.deleteIpAddress(organizationPrincipal, UUID.randomUUID()));
     }
 }

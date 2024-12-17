@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.auth.jwt;
 
 import com.github.nitram509.jmacaroons.Macaroon;
+import com.google.inject.Inject;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
@@ -9,13 +10,12 @@ import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwsHeader;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import javax.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 import java.security.Key;
 import java.util.List;
 import java.util.UUID;

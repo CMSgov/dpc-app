@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import com.google.inject.Inject;
 import gov.cms.dpc.fhir.helpers.ServiceLoaderHelpers;
 import gov.cms.dpc.fhir.validations.profiles.IProfileLoader;
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
@@ -15,7 +16,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;

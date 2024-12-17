@@ -16,11 +16,11 @@ import java.util.UUID;
  */
 @Entity(name = "job_queue_batch_file")
 public class JobQueueBatchFile implements Serializable {
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @Embeddable
     public static class JobQueueBatchFileID implements Serializable {
-        public static final long serialVersionUID = 3L;
+        private static final long serialVersionUID = 3L;
 
         @Column(name = "batch_id")
         private UUID batchID;

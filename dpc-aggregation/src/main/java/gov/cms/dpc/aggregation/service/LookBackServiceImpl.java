@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation.service;
 
 import com.google.common.base.Joiner;
+import com.google.inject.Inject;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import io.dropwizard.hibernate.UnitOfWork;
@@ -14,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import javax.inject.Inject;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.HashSet;

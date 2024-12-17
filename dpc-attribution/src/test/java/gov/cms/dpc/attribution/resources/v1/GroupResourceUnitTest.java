@@ -52,7 +52,7 @@ public class GroupResourceUnitTest {
 
     private DPCAttributionConfiguration configuration;
 
-    private FHIREntityConverter converter = FHIREntityConverter.initialize();
+    private final FHIREntityConverter converter = FHIREntityConverter.initialize();
 
 
     @BeforeEach
@@ -118,7 +118,7 @@ public class GroupResourceUnitTest {
         configuration.setExpirationThreshold(10);
         Mockito.when(rosterDAO.findEntities(isNull(),eq(orgId), eq(providerNpi), isNull())).thenReturn(List.of());
         Mockito.when(providerDAO.getProviders(isNull(),eq(providerNpi), eq(orgId))).thenReturn(List.of(new ProviderEntity()));
-        patientBank.keySet().stream().forEach(patientId ->
+        patientBank.keySet().forEach(patientId ->
                 Mockito.when(patientDAO.patientSearch(eq(patientId), isNull(),eq(orgId))).thenReturn(List.of(new PatientEntity())));
 
         Mockito.when(patientDAO.patientSearch(eq(badPatientUUID), isNull(),eq(orgId))).thenReturn(List.of());

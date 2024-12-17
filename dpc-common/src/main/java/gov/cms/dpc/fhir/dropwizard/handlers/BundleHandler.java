@@ -1,13 +1,10 @@
 package gov.cms.dpc.fhir.dropwizard.handlers;
 
 import com.google.common.reflect.TypeToken;
+import com.google.inject.Inject;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Resource;
-
-import javax.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
@@ -15,6 +12,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 import jakarta.ws.rs.ext.Provider;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Resource;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 @FHIR
 @Consumes({FHIRMediaTypes.FHIR_JSON})
 @Produces({FHIRMediaTypes.FHIR_JSON})
-@SuppressWarnings("UnstableApiUsage")
 public class BundleHandler implements MessageBodyWriter<Collection<Resource>> {
 
     final FHIRHandler handler;

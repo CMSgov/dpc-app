@@ -6,6 +6,7 @@ import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
@@ -20,16 +21,15 @@ import gov.cms.dpc.fhir.validations.ValidationHelpers;
 import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import jakarta.validation.Valid;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Response;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -79,7 +79,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
                 .encodedJson()
                 .returnBundle(Bundle.class);
 
-        if (providerNPI != null && !providerNPI.equals("")) {
+        if (providerNPI != null && !providerNPI.isEmpty()) {
             searchParams.put("identifier", Collections.singletonList(providerNPI));
         }
 

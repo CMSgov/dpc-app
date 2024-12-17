@@ -40,7 +40,7 @@ import java.util.*;
 
 public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration> {
 
-    private static Logger logger = LoggerFactory.getLogger(SeedCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(SeedCommand.class);
     private static final String CSV = "test_associations.csv";
     private static final String ORGANIZATION_BUNDLE = "organization_bundle.json";
     private static final String PROVIDER_BUNDLE = "provider_bundle.json";

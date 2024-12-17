@@ -1,5 +1,6 @@
 package gov.cms.dpc.macaroons.store.hibernate;
 
+import com.google.inject.Inject;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import gov.cms.dpc.macaroons.helpers.SecretHelpers;
 import gov.cms.dpc.macaroons.store.IDKeyPair;
@@ -9,7 +10,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
-import javax.inject.Inject;
 import java.security.SecureRandom;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;

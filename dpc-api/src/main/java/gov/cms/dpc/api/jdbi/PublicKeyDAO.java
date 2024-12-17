@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.jdbi;
 
+import com.google.inject.Inject;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.entities.PublicKeyEntity_;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
@@ -8,7 +9,6 @@ import org.hibernate.query.criteria.HibernateCriteriaBuilder;
 import org.hibernate.query.criteria.JpaCriteriaQuery;
 import org.hibernate.query.criteria.JpaRoot;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -52,7 +52,7 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
     }
 
     public void deletePublicKey(PublicKeyEntity keyEntity) {
-        currentSession().delete(keyEntity);
+        currentSession().remove(keyEntity);
     }
 
     public PublicKeyEntity findKeyByLabel(String keyLabel) {

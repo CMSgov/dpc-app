@@ -1,16 +1,16 @@
 package gov.cms.dpc.api.core;
 
+import com.google.inject.Inject;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 import java.io.File;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
@@ -38,7 +38,7 @@ public class FileManager {
                 .orElseThrow(() -> new WebApplicationException("Cannot export job for file", Response.Status.NOT_FOUND));
 
         final java.nio.file.Path path = Paths.get(String.format("%s/%s.ndjson", fileLocation, batchFile.getFileName()));
-        logger.debug("Streaming file {}", path.toString());
+        logger.debug("Streaming file {}", path);
         return new FilePointer(Hex.toHexString(batchFile.getChecksum()),
                 batchFile.getFileLength(),
                 batchFile.getJobID(),

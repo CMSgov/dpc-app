@@ -20,7 +20,7 @@ public class EndpointEntity implements Serializable {
         FAILED
     }
 
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @Id
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
@@ -130,7 +130,7 @@ public class EndpointEntity implements Serializable {
     @Embeddable
     public static class ConnectionType implements Serializable {
 
-        public static final long serialVersionUID = 42L;
+        private static final long serialVersionUID = 42L;
 
         @NotEmpty
         private String system;

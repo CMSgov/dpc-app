@@ -1,11 +1,11 @@
 package gov.cms.dpc.queue.health;
 
 import com.codahale.metrics.health.HealthCheck;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.annotations.AggregatorID;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.UUID;
 
 /**

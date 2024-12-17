@@ -1,11 +1,11 @@
 package gov.cms.dpc.aggregation;
 
+import com.google.inject.Inject;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import io.dropwizard.lifecycle.Managed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 
 public class AggregationManager implements Managed {
 

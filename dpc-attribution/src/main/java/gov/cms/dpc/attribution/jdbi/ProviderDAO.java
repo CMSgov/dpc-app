@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.jdbi;
 
+import com.google.inject.Inject;
 import gov.cms.dpc.common.entities.OrganizationEntity_;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.entities.ProviderEntity_;
@@ -10,7 +11,6 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

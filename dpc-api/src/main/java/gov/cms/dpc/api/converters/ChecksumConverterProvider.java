@@ -1,14 +1,14 @@
 package gov.cms.dpc.api.converters;
 
-import org.glassfish.jersey.internal.util.ReflectionHelper;
-import org.glassfish.jersey.internal.util.collection.ClassTypePair;
-
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.ext.ParamConverter;
 import jakarta.ws.rs.ext.ParamConverterProvider;
 import jakarta.ws.rs.ext.Provider;
+import org.glassfish.jersey.internal.util.ReflectionHelper;
+import org.glassfish.jersey.internal.util.collection.ClassTypePair;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Arrays;
