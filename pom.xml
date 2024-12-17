@@ -157,11 +157,10 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!--No longer shipped with Java 11, so we need to include it manually-->
             <dependency>
-                <groupId>javax.xml.bind</groupId>
-                <artifactId>jaxb-api</artifactId>
-                <version>2.3.1</version>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
+                <version>4.0.2</version>
             </dependency>
             <!--This is required for Java 11 support. The version shipped with Hibernate is too old-->
             <dependency>

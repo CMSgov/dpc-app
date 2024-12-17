@@ -52,10 +52,9 @@
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
         </dependency>
-        <!--No longer shipped with Java 11, so we need to include it manually-->
         <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
         </dependency>
         <dependency>
             <groupId>ru.vyarus</groupId>
@@ -246,10 +245,6 @@
                                         <property>
                                             <key>packages</key>
                                             <value>gov.cms.dpc.common.entities</value>
-                                        </property>
-                                        <property>
-                                            <key>dialect</key>
-                                            <value>org.hibernate.dialect.PostgreSQLDialect</value>
                                         </property>
                                     </properties>
                                     <includes>.*</includes>

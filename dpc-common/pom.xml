@@ -172,9 +172,9 @@
                             <version>6.6.3.Final</version>
                         </annotationProcessorPath>
                         <path>
-                            <groupId>javax.xml.bind</groupId>
-                            <artifactId>jaxb-api</artifactId>
-                            <version>2.3.0</version>
+                            <groupId>jakarta.xml.bind</groupId>
+                            <artifactId>jakarta.xml.bind-api</artifactId>
+                            <version>3.0.1</version>
                         </path>
                         <path>
                             <groupId>javax.annotation</groupId>
