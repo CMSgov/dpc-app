@@ -12,11 +12,9 @@ In GitHub Actions, the load tests must be manually triggered. Developers can run
 
 #### Local Development
 
-To test locally, follow these steps:
-1. `cp ./.env.sample ./.env`
-2. Ask a DPC developer for the client token, public key ID, and base64 encoded private key. Fill those values in your .env file.
-3. Run `yarn` in order to get IDE integration for K6 libraries. 
-4. Run `make start-load-tests`.
+Environment variables are stored in Ansible Vault. These will all populate automatically when you run the make command. To test locally, follow these steps:
+1. Run `yarn` in order to get IDE integration for K6 libraries. 
+2. Run `make start-load-tests`.
 
 ### A note on modules
 
