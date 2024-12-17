@@ -8,6 +8,10 @@ on:
         required: true
         default: 'main'
         type: 'string'
+    outputs:
+      tag:
+        description: the release tag
+        value: ${{ jobs.tag_repo.outputs.next_rev }}
 jobs:
   tag_repo:
     name: Tag Repository
@@ -18,7 +22,7 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.static_repo_ref || 'main' }}
+          ref: ${{ inputs.repo_ref || 'main' }}
       - name: "Fetch git info"
         run: |
           git fetch --quiet
@@ -37,9 +41,11 @@ jobs:
           PREV_REV: ${{ steps.set_revs.outputs.prev_rev }}
         run: |
           BODY=`git log --pretty=format:"- %s" $PREV_REV..HEAD`
+          if [ -z "$BODY" ]; then
+            BODY='No changes'
+          fi
           echo "body=$BODY" >> "$GITHUB_OUTPUT"
       - name: Release
-        if: ${{ env.NEXT_REV == 'dont run' }}
         uses: softprops/action-gh-release@v2
         with:
           body: ${{ steps.set_body.outputs.body }}
