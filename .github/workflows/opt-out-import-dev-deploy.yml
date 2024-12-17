@@ -1,24 +1,40 @@
-name: "Test Boolean"
+name: opt-out-import dev deploy
 
 on:
   workflow_dispatch:
-    inputs:
-      deploy:
-        description: 'Deploy or just tag?'
-        type: boolean
-        default: true
-        required: true
-        
+  push:
+    branches:
+      - main
+    paths:
+      - lambda/opt-out-import/**
+      - .github/workflows/opt-out-import-dev-deploy.yml
+
 jobs:
-  build:
-    name: "Build and Test"
+  test:
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./lambda/opt-out-import
+    environment: dev
     steps:
-      - name: Run if true
-        if:  ${{ inputs.deploy }}
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+      - name: Build opt-out-import zip file
+        env:
+          CGO_ENABLED: 0
         run: |
-          echo 'Told to deploy'
-      - name: Run if false
-        if:  ${{ !inputs.deploy }}
+          go build -o bootstrap main.go parsers.go utils.go models.go db.go
+          zip function.zip bootstrap
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Upload and reload
         run: |
-          echo 'Told not to deploy'
+          aws s3 cp --no-progress function.zip \
+            s3://dpc-dev-opt-out-import-function/function-${{ github.sha }}.zip
+          aws lambda update-function-code --function-name dpc-dev-opt-out-import \
+            --s3-bucket dpc-dev-opt-out-import-function --s3-key function-${{ github.sha }}.zip
