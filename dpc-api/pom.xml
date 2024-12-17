@@ -206,7 +206,7 @@
         </dependency>
         <dependency>
             <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-55</artifactId>
+            <artifactId>hypersistence-utils-hibernate-63</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
