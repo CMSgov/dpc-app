@@ -79,7 +79,6 @@ class BlueButtonClientTest {
                     getRawXML(SAMPLE_PATIENT_PATH_PREFIX + patientId + ".xml"),
                     List.of(
                             Parameter.param("_id", patientId),
-                            Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING),
                             Parameter.param("_count", "100"))
             );
 

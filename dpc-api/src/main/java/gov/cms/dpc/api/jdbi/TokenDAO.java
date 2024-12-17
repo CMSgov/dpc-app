@@ -34,7 +34,7 @@ public class TokenDAO extends AbstractDAO<TokenEntity> {
         final JpaCriteriaQuery<TokenEntity> query = builder.createQuery(TokenEntity.class);
         final JpaRoot<TokenEntity> root = query.from(TokenEntity.class);
 
-        query.where(builder.equal(root.get(TokenEntity_.organizationID.toString()), organizationID));
+        query.where(builder.equal(root.get(TokenEntity_.organizationID), organizationID));
         return this.list(query);
     }
 
@@ -44,8 +44,8 @@ public class TokenDAO extends AbstractDAO<TokenEntity> {
         final JpaRoot<TokenEntity> root = query.from(TokenEntity.class);
 
         query.where(builder.and(
-                builder.equal(root.get(TokenEntity_.id.toString()), tokenID.toString()),
-                builder.equal(root.get(TokenEntity_.organizationID.toString()), organizationID)));
+                builder.equal(root.get(TokenEntity_.id), tokenID.toString()),
+                builder.equal(root.get(TokenEntity_.organizationID), organizationID)));
 
         return this.list(query);
     }

@@ -130,6 +130,6 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
                         .get(AttributionRelationship_.patient)
                         .get(PatientEntity_.id),
                 patientEntity.getID()));
-        return this.currentSession().createMutationQuery(criteriaDelete).executeUpdate();
+        return this.currentSession().createQuery(criteriaDelete).executeUpdate();
     }
 }

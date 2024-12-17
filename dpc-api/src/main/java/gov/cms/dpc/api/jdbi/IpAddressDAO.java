@@ -23,7 +23,7 @@ public class IpAddressDAO extends AbstractDAO<IpAddressEntity> {
 
        JpaCriteriaQuery<IpAddressEntity> query = builder.createQuery(IpAddressEntity.class);
        JpaRoot<IpAddressEntity> root = query.from(IpAddressEntity.class);
-       query.where(builder.equal(root.get(IpAddressEntity_.organizationId.toString()), organizationID));
+       query.where(builder.equal(root.get(IpAddressEntity_.organizationId), organizationID));
 
        return list(query);
    }

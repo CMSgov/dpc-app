@@ -29,7 +29,7 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
         final JpaCriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
         final JpaRoot<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
 
-        query.where(builder.equal(root.get(PublicKeyEntity_.organization_id.toString()), organizationID));
+        query.where(builder.equal(root.get(PublicKeyEntity_.organization_id), organizationID));
         return list(query);
     }
 
@@ -39,7 +39,7 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
         final JpaCriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
         final JpaRoot<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
 
-        query.where(builder.and(builder.equal(root.get(PublicKeyEntity_.organization_id.toString()), organizationID),
+        query.where(builder.and(builder.equal(root.get(PublicKeyEntity_.organization_id), organizationID),
                 builder.equal(root.get(PublicKeyEntity_.id.toString()), keyID)));
 
         final List<PublicKeyEntity> resultList = list(query);
@@ -60,7 +60,7 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
         final JpaCriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
         final JpaRoot<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
 
-        query.where(builder.equal(root.get(PublicKeyEntity_.label.toString()), keyLabel));
+        query.where(builder.equal(root.get(PublicKeyEntity_.label), keyLabel));
         return currentSession().createQuery(query).getSingleResult();
     }
 
@@ -70,8 +70,8 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
         final JpaRoot<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
 
         query.where(builder.and(
-                builder.equal(root.get(PublicKeyEntity_.id.toString()), keyID),
-                builder.equal(root.get(PublicKeyEntity_.organization_id.toString()), organizationID)));
+                builder.equal(root.get(PublicKeyEntity_.id), keyID),
+                builder.equal(root.get(PublicKeyEntity_.organization_id), organizationID)));
         return list(query);
     }
 }
