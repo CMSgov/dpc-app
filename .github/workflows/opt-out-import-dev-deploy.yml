@@ -1,48 +1,24 @@
-name: 'Tag Repo'
+name: "Test Boolean"
 
 on:
   workflow_dispatch:
     inputs:
-      repo_ref:
-        description: Which branch or tag
+      deploy:
+        description: 'Deploy or just tag?'
+        type: boolean
+        default: true
         required: true
-        default: 'main'
-        type: 'string'
+        
 jobs:
-  tag_repo:
-    name: Tag Repository
+  build:
+    name: "Build and Test"
     runs-on: ubuntu-latest
-    outputs:
-      next_rev: ${{ steps.set_revs.outputs.next_rev }}
     steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
-        with:
-          ref: 'main'
-      - name: "Fetch git info"
+      - name: Run if true
+        if:  ${{ inputs.deploy }}
         run: |
-          git fetch --quiet
-      - name: "Set Revisions"
-        id: set_revs
+          echo 'Told to deploy'
+      - name: Run if false
+        if:  ${{ !inputs.deploy }}
         run: |
-          prev_rev=`git tag -l 'r*' --sort=v:refname | tail -n 1`
-          prev_rev_num=${prev_rev/r}
-          next_rev_num=$((prev_rev_num + 1))
-          next_rev=r$next_rev_num
-          echo "next_rev=$next_rev" >> "$GITHUB_OUTPUT"
-      - name: "Set Body"
-        id: set_body
-        run: |
-          BODY=`git log --pretty=format:"- %s" r46..HEAD`
-          echo "body=$BODY" >> "$GITHUB_OUTPUT"
-      - name: Test Envs
-        env:
-          nr: ${{ steps.set_body.outputs.body }}
-        run: echo $nr
-      - name: Release
-        if: ${{ env.NEXT_REV == 'dont run' }}
-        uses: softprops/action-gh-release@v2
-        with:
-          body: ${{ env.BODY }}
-          tag_name: ${{ env.NEXT_REV }}
-          repository: ./${{ inputs.static_repo_ref }}
+          echo 'Told not to deploy'
