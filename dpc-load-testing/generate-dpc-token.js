@@ -5,18 +5,18 @@ import encoding from 'k6/encoding';
 
 const fetchTokenURL = 'https://test.dpc.cms.gov/api/v1/Token/auth';
 
-const clientToken = __ENV.CLIENT_TOKEN;
-const publicKeyId = __ENV.PUBLIC_KEY_ID;
+const clientToken = __ENV.LOAD_TEST_CLIENT_TOKEN;
+const publicKeyId = __ENV.LOAD_TEST_PUBLIC_KEY_ID;
 let privateKey;
 
 if (__ENV.ENVIRONMENT == 'local') {
   // RSA private keys are multi-line strings, and .env files aren't able to handle newline characters
   // for environment variables. As a workaround for local dev, we convert the private key into a base64 
   // encoded string, and set that to PRIVATE_KEY_BASE64 in .env
-  const privateKeyBase64 = __ENV.PRIVATE_KEY_BASE64.trim();
+  const privateKeyBase64 = __ENV.LOAD_TEST_PRIVATE_KEY_BASE64.trim();
   privateKey = encoding.b64decode(privateKeyBase64, 'std', 's');
 }  else {
-  privateKey = __ENV.PRIVATE_KEY;
+  privateKey = __ENV.LOAD_TEST_PRIVATE_KEY;
 }
 
 function generateJWT() {

@@ -2,6 +2,9 @@ name: DPC Load Test
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - cr/dpc-4427
 
 jobs:
   run-load-test:
@@ -17,9 +20,9 @@ jobs:
 
       - name: Run k6 test
         env:
-          CLIENT_TOKEN: ${{ secrets.LOAD_TEST_CLIENT_TOKEN }}
-          PRIVATE_KEY: ${{ secrets.LOAD_TEST_PRIVATE_KEY }}
-          PUBLIC_KEY_ID: ${{ secrets.LOAD_TEST_PUBLIC_KEY_ID }}
+          LOAD_TEST_CLIENT_TOKEN: ${{ secrets.LOAD_TEST_CLIENT_TOKEN }}
+          LOAD_TEST_PRIVATE_KEY: ${{ secrets.LOAD_TEST_PRIVATE_KEY }}
+          LOAD_TEST_PUBLIC_KEY_ID: ${{ secrets.LOAD_TEST_PUBLIC_KEY_ID }}
         uses: grafana/run-k6-action@v1
         with:
           path: ./dpc-load-testing/script.js
