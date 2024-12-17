@@ -3,15 +3,16 @@ import { URLSearchParams } from 'https://jslib.k6.io/url/1.0.0/index.js';
 import http from 'k6/http';
 import encoding from 'k6/encoding';
 
-// console.log('CLIENT_TOKEN', !!__ENV.CLIENT_TOKEN);
-// console.log('PUBLIC_KEY_ID', !!__ENV.PUBLIC_KEY_ID);
-// console.log('PRIVATE_KEY', !!__ENV.PRIVATE_KEY);
+const fetchTokenURL = 'https://test.dpc.cms.gov/api/v1/Token/auth';
 
 const clientToken = __ENV.CLIENT_TOKEN;
 const publicKeyId = __ENV.PUBLIC_KEY_ID;
 let privateKey;
 
 if (__ENV.ENVIRONMENT == 'local') {
+  // RSA private keys are multi-line strings, and .env files aren't able to handle newline characters
+  // for environment variables. As a workaround for local dev, we convert the private key into a base64 
+  // encoded string, and set that to PRIVATE_KEY_BASE64 in .env
   const privateKeyBase64 = __ENV.PRIVATE_KEY_BASE64.trim();
   privateKey = encoding.b64decode(privateKeyBase64, 'std', 's');
 }  else {
@@ -29,7 +30,7 @@ function generateJWT() {
   const payload = {
       "iss": clientToken,
       "sub": clientToken, 
-      "aud": 'https://test.dpc.cms.gov/api/v1/Token/auth',
+      "aud": fetchTokenURL,
       "exp": Math.round(new Date().getTime() / 1000) + 300,
       "iat": Math.round(Date.now()),
       "jti": uuid,
@@ -44,11 +45,6 @@ function generateJWT() {
 }
 
 export default function generateDPCToken() {
-  console.log('CLIENT_TOKEN', !!clientToken);
-  console.log('PUBLIC_KEY_ID', !!publicKeyId);
-  console.log('PRIVATE_KEY', !!privateKey);
-  // console.log('client token', clientToken);
-  // console.log('public key id', publicKeyId);
   const signedJWT = generateJWT();
   const headers = { 
     'Accept': 'application/json',
@@ -60,5 +56,5 @@ export default function generateDPCToken() {
     client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
     client_assertion: signedJWT
   }).toString();
-  return http.post('https://test.dpc.cms.gov/api/v1/Token/auth', body, { headers: headers })
+  return http.post(fetchTokenURL, body, { headers: headers })
 }

@@ -17,16 +17,13 @@ export const options = {
 let bearerToken;
 
 export default function() {
-  console.log('starting run')
   if (!bearerToken) {
     const tokenResponse = generateDPCToken();
     if (tokenResponse.status.toString() == '200') {
       bearerToken = tokenResponse.json()['access_token'];
       console.log('bearer token fetched successfully!');
     } else {
-      console.error('failed to fetch bearer token')
-      console.log(tokenResponse.status)
-      console.log(tokenResponse.html())
+      console.error('failed to fetch bearer token');
     }
   }
 
