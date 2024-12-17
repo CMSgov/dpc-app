@@ -3,9 +3,9 @@ import { URLSearchParams } from 'https://jslib.k6.io/url/1.0.0/index.js';
 import http from 'k6/http';
 import encoding from 'k6/encoding';
 
-console.log('CLIENT_TOKEN', !!__ENV.CLIENT_TOKEN);
-console.log('PUBLIC_KEY_ID', !!__ENV.PUBLIC_KEY_ID);
-console.log('PRIVATE_KEY', !!__ENV.PRIVATE_KEY);
+// console.log('CLIENT_TOKEN', !!__ENV.CLIENT_TOKEN);
+// console.log('PUBLIC_KEY_ID', !!__ENV.PUBLIC_KEY_ID);
+// console.log('PRIVATE_KEY', !!__ENV.PRIVATE_KEY);
 
 const clientToken = __ENV.CLIENT_TOKEN;
 const publicKeyId = __ENV.PUBLIC_KEY_ID;
@@ -44,6 +44,9 @@ function generateJWT() {
 }
 
 export default function generateDPCToken() {
+  console.log('CLIENT_TOKEN', !!clientToken);
+  console.log('PUBLIC_KEY_ID', !!publicKeyId);
+  console.log('PRIVATE_KEY', !!privateKey);
   // console.log('client token', clientToken);
   // console.log('public key id', publicKeyId);
   const signedJWT = generateJWT();
