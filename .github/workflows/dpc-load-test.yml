@@ -2,9 +2,6 @@ name: DPC Load Test
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - cr/dpc-4427
 
 jobs:
   run-load-test:
