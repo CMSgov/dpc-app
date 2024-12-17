@@ -86,7 +86,9 @@ class BlueButtonClientTest {
                     "/v1/fhir/Patient",
                     HttpStatus.OK_200,
                     getRawXML(SAMPLE_PATIENT_PATH_PREFIX + patientId + ".xml"),
-                    Collections.singletonList(Parameter.param("_id", patientId))
+                    List.of(
+                            Parameter.param("_id", patientId),
+                            Parameter.param("_count", "100"))
             );
 
             createMockServerExpectation(
