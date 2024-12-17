@@ -8,7 +8,7 @@ export const options = {
   // A number specifying the number of VUs to run concurrently.
   vus: 1,
   // A string specifying the total duration of the test run.
-  duration: '40s',
+  duration: '1m',
   thresholds: {
     http_req_failed: ['rate<0.01']
   }
