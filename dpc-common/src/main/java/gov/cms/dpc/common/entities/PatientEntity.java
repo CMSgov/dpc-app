@@ -8,9 +8,7 @@ import jakarta.validation.constraints.Pattern;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Patient;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;

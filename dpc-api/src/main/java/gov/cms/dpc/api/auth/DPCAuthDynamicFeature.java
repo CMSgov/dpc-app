@@ -1,11 +1,11 @@
 package gov.cms.dpc.api.auth;
 
-import com.google.inject.Inject;
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.common.annotations.Public;
 import io.dropwizard.auth.AuthDynamicFeature;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.container.DynamicFeature;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.FeatureContext;

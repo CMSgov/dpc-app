@@ -1,6 +1,5 @@
 package gov.cms.dpc.api.auth.staticauth;
 
-import com.google.inject.Inject;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.DPCAuthFilter;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
@@ -8,6 +7,7 @@ import gov.cms.dpc.common.MDCConstants;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import jakarta.annotation.Priority;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import org.hl7.fhir.dstu3.model.IdType;

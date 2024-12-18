@@ -2,9 +2,9 @@ package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Inject;
 import io.dropwizard.jersey.validation.ConstraintMessage;
 import io.dropwizard.jersey.validation.JerseyViolationException;
+import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolation;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
@@ -19,7 +19,7 @@ import java.util.Set;
 
 /**
  * Custom exception handler for {@link JerseyViolationException}.
- * It provides human readable error messages which can help pinpoint which violates the user needs to address.
+ * It provides human-readable error messages which can help pinpoint which violates the user needs to address.
  */
 @Provider
 public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyViolationException> {

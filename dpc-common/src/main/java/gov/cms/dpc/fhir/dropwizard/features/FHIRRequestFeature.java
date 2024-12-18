@@ -1,10 +1,10 @@
 package gov.cms.dpc.fhir.dropwizard.features;
 
-import com.google.inject.Inject;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
 import gov.cms.dpc.fhir.dropwizard.filters.FHIRAsyncRequestFilter;
 import gov.cms.dpc.fhir.dropwizard.filters.FHIRRequestFilter;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.container.DynamicFeature;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.FeatureContext;

@@ -1,10 +1,10 @@
 package gov.cms.dpc.api.core;
 
-import com.google.inject.Inject;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.bouncycastle.util.encoders.Hex;

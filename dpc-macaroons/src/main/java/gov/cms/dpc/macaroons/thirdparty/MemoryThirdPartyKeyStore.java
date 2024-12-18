@@ -1,6 +1,6 @@
 package gov.cms.dpc.macaroons.thirdparty;
 
-import com.google.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import java.util.Map;
 import java.util.Optional;

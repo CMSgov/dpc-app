@@ -1,6 +1,6 @@
 package gov.cms.dpc.fhir.dropwizard.filters;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;

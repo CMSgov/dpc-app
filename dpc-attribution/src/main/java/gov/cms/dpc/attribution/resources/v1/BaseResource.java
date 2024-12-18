@@ -1,9 +1,9 @@
 package gov.cms.dpc.attribution.resources.v1;
 
-import com.google.inject.Inject;
 import gov.cms.dpc.attribution.resources.AbstractBaseResource;
 import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.common.utils.PropertiesProvider;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;

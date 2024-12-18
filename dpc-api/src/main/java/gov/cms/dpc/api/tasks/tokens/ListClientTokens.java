@@ -1,13 +1,13 @@
 package gov.cms.dpc.api.tasks.tokens;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.resources.v1.TokenResource;
 import io.dropwizard.servlets.tasks.Task;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import java.io.PrintWriter;

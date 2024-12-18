@@ -3,7 +3,6 @@ package gov.cms.dpc.api.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import com.google.inject.Inject;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.jwt.PublicKeyHandler;
@@ -17,6 +16,7 @@ import gov.cms.dpc.common.entities.OrganizationEntity;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
+import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;

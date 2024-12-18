@@ -1,6 +1,5 @@
 package gov.cms.dpc.aggregation.engine;
 
-import com.google.inject.Inject;
 import com.newrelic.api.agent.Trace;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.common.MDCConstants;
@@ -12,6 +11,7 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;

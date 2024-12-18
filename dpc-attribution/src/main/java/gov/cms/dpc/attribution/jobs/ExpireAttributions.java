@@ -1,12 +1,12 @@
 package gov.cms.dpc.attribution.jobs;
 
-import com.google.inject.Inject;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.dao.tables.Attributions;
 import gov.cms.dpc.attribution.exceptions.AttributionException;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.jobs.Job;
 import io.dropwizard.jobs.annotations.On;
+import jakarta.inject.Inject;
 import org.jooq.DSLContext;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;

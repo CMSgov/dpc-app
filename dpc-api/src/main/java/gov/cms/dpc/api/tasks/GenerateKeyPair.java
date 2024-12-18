@@ -1,12 +1,12 @@
 package gov.cms.dpc.api.tasks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import gov.cms.dpc.api.models.KeyPairResponse;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import io.dropwizard.servlets.tasks.Task;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;

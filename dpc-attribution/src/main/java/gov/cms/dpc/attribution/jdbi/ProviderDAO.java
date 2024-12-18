@@ -1,11 +1,11 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import com.google.inject.Inject;
 import gov.cms.dpc.common.entities.OrganizationEntity_;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.entities.ProviderEntity_;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
+import jakarta.inject.Inject;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;

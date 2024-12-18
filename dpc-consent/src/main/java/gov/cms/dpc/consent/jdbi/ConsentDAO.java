@@ -1,9 +1,9 @@
 package gov.cms.dpc.consent.jdbi;
 
-import com.google.inject.Inject;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
+import jakarta.inject.Inject;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;

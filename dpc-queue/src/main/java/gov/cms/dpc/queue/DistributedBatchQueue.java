@@ -2,7 +2,6 @@ package gov.cms.dpc.queue;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.google.inject.Inject;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.queue.annotations.QueueBatchSize;
@@ -11,6 +10,7 @@ import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
+import jakarta.inject.Inject;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;

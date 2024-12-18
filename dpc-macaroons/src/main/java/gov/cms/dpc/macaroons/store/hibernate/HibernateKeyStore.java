@@ -1,11 +1,11 @@
 package gov.cms.dpc.macaroons.store.hibernate;
 
-import com.google.inject.Inject;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import gov.cms.dpc.macaroons.helpers.SecretHelpers;
 import gov.cms.dpc.macaroons.store.IDKeyPair;
 import gov.cms.dpc.macaroons.store.IRootKeyStore;
 import gov.cms.dpc.macaroons.store.hibernate.entities.RootKeyEntity;
+import jakarta.inject.Inject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;

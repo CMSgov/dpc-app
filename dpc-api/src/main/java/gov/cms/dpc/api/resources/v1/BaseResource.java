@@ -1,12 +1,12 @@
 package gov.cms.dpc.api.resources.v1;
 
-import com.google.inject.Inject;
 import gov.cms.dpc.api.core.Capabilities;
 import gov.cms.dpc.api.resources.*;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.common.utils.PropertiesProvider;
 import io.swagger.annotations.*;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;

@@ -2,7 +2,6 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import com.google.inject.Inject;
 import gov.cms.dpc.attribution.jdbi.EndpointDAO;
 import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
 import gov.cms.dpc.attribution.resources.AbstractEndpointResource;
@@ -12,6 +11,7 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
+import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;

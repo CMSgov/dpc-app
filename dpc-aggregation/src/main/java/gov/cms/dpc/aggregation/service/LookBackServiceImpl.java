@@ -1,10 +1,10 @@
 package gov.cms.dpc.aggregation.service;
 
 import com.google.common.base.Joiner;
-import com.google.inject.Inject;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import io.dropwizard.hibernate.UnitOfWork;
+import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;

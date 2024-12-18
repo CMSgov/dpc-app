@@ -1,9 +1,9 @@
 package gov.cms.dpc.fhir.parameters;
 
 import ca.uhn.fhir.context.FhirContext;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.ext.Provider;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;

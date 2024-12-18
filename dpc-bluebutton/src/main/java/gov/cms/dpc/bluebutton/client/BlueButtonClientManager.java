@@ -1,7 +1,7 @@
 package gov.cms.dpc.bluebutton.client;
 
-import com.google.inject.Inject;
 import io.dropwizard.lifecycle.Managed;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.ext.Provider;
 
 @Provider

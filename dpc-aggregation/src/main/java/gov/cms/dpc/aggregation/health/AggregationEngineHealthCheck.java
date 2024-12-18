@@ -1,8 +1,8 @@
 package gov.cms.dpc.aggregation.health;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import ru.vyarus.dropwizard.guice.module.installer.feature.health.NamedHealthCheck;
 
 

@@ -1,8 +1,8 @@
 package gov.cms.dpc.bluebutton.health;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import ru.vyarus.dropwizard.guice.module.installer.feature.health.NamedHealthCheck;

@@ -1,7 +1,6 @@
 package gov.cms.dpc.queue.service;
 
 import ca.uhn.fhir.context.FhirContext;
-import com.google.inject.Inject;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.logging.SplunkTimestamp;
@@ -12,6 +11,7 @@ import gov.cms.dpc.queue.exceptions.DataRetrievalException;
 import gov.cms.dpc.queue.exceptions.DataRetrievalRetryException;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
+import jakarta.inject.Inject;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

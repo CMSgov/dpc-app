@@ -1,7 +1,7 @@
 package gov.cms.dpc.api.auth;
 
-import com.google.inject.Inject;
 import io.dropwizard.auth.UnauthorizedHandler;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import org.hl7.fhir.dstu3.model.CodeableConcept;

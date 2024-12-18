@@ -1,10 +1,10 @@
 package gov.cms.dpc.fhir.dropwizard.handlers;
 
 import com.google.common.reflect.TypeToken;
-import com.google.inject.Inject;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
@@ -36,8 +36,7 @@ import java.util.stream.Collectors;
 public class BundleHandler implements MessageBodyWriter<Collection<Resource>> {
 
     final FHIRHandler handler;
-    private static final TypeToken<Collection<? extends Resource>> COLLECTION_TYPE_TOKEN = new TypeToken<>() {
-    };
+    private static final TypeToken<Collection<? extends Resource>> COLLECTION_TYPE_TOKEN = new TypeToken<>() {};
 
     @Inject
     public BundleHandler(FHIRHandler handler) {

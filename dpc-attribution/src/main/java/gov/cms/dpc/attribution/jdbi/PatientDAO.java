@@ -1,9 +1,9 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import com.google.inject.Inject;
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
+import jakarta.inject.Inject;
 import jakarta.persistence.criteria.*;
 
 import java.util.ArrayList;

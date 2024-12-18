@@ -1,12 +1,12 @@
 package gov.cms.dpc.api.auth.staticauth;
 
-import com.google.inject.Inject;
 import gov.cms.dpc.api.auth.AuthFactory;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
+import jakarta.inject.Inject;
 
 
 /**

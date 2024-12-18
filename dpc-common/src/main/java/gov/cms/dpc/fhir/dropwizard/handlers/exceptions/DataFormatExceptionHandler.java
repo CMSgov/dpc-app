@@ -1,8 +1,8 @@
 package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
 import ca.uhn.fhir.parser.DataFormatException;
-import com.google.inject.Inject;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;

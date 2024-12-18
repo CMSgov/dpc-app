@@ -2,14 +2,14 @@ package gov.cms.dpc.api.tasks.tokens;
 
 import com.github.nitram509.jmacaroons.Macaroon;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.resources.v1.TokenResource;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.dropwizard.servlets.tasks.Task;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;

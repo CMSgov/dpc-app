@@ -2,10 +2,10 @@ package gov.cms.dpc.common.hibernate.attribution;
 
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
-import com.google.inject.Singleton;
 import io.dropwizard.core.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.db.ManagedDataSource;
+import jakarta.inject.Singleton;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 

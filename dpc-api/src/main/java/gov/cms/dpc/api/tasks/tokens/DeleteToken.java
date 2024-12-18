@@ -1,10 +1,10 @@
 package gov.cms.dpc.api.tasks.tokens;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.resources.v1.TokenResource;
 import io.dropwizard.servlets.tasks.Task;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Organization;

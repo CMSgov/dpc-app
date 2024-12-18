@@ -1,7 +1,7 @@
 package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
-import com.google.inject.Inject;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
+import jakarta.inject.Inject;
 import jakarta.persistence.PersistenceException;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;

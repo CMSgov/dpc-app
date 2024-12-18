@@ -1,10 +1,10 @@
 package gov.cms.dpc.api.jdbi;
 
-import com.google.inject.Inject;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.entities.TokenEntity_;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
+import jakarta.inject.Inject;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;

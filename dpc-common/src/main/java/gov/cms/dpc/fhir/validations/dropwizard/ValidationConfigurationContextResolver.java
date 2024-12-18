@@ -1,6 +1,6 @@
 package gov.cms.dpc.fhir.validations.dropwizard;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.validation.ConstraintValidatorFactory;
 import jakarta.validation.ValidatorFactory;
 import jakarta.ws.rs.ext.ContextResolver;
