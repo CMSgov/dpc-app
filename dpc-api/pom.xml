@@ -14,7 +14,7 @@
 
     <properties>
         <mainClass>gov.cms.dpc.api.DPCAPIService</mainClass>
-        <jjwt.version>0.11.4</jjwt.version>
+        <jjwt.version>0.12.5</jjwt.version>
         <mockserverVersion>5.15.0</mockserverVersion>
     </properties>
 
@@ -232,6 +232,11 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

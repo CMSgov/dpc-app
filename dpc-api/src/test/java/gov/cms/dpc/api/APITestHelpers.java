@@ -32,6 +32,8 @@ import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -46,8 +48,6 @@ import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
