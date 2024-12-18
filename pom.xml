@@ -423,10 +423,29 @@
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>integration-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                                <phase>verify</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration combine.self="override">
-                            <groups>Integration</groups>
-                            <forkedProcessExitTimeoutInSeconds>600</forkedProcessExitTimeoutInSeconds>
+                        <configuration>
+                            <skip>true</skip>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -593,6 +612,41 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.5.2</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>me.fabriciorby</groupId>
+                            <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                            <version>1.3.0</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <reportFormat>plain</reportFormat>
+                        <consoleOutputReporter>
+                            <disable>true</disable>
+                        </consoleOutputReporter>
+                        <statelessTestsetInfoReporter
+                                implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+                            <theme>UNICODE</theme>
+                            <printStacktraceOnError>true</printStacktraceOnError>
+                            <printStacktraceOnFailure>true</printStacktraceOnFailure>
+                            <printStdoutOnError>false</printStdoutOnError>
+                            <printStdoutOnFailure>false</printStdoutOnFailure>
+                            <printStdoutOnSuccess>false</printStdoutOnSuccess>
+                            <printStderrOnError>true</printStderrOnError>
+                            <printStderrOnFailure>true</printStderrOnFailure>
+                            <printStderrOnSuccess>false</printStderrOnSuccess>
+                        </statelessTestsetInfoReporter>
+                        <includes>
+                            <include>**/*Test.java</include>
+                            <include>**/*Tests.java</include>
+                        </includes>
+                        <groups>Integration</groups>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.5.2</version>
                     <dependencies>
@@ -612,13 +666,14 @@
                             <theme>UNICODE</theme>
                             <printStacktraceOnError>true</printStacktraceOnError>
                             <printStacktraceOnFailure>true</printStacktraceOnFailure>
-                            <printStdoutOnError>true</printStdoutOnError>
-                            <printStdoutOnFailure>true</printStdoutOnFailure>
+                            <printStdoutOnError>false</printStdoutOnError>
+                            <printStdoutOnFailure>false</printStdoutOnFailure>
                             <printStdoutOnSuccess>false</printStdoutOnSuccess>
                             <printStderrOnError>true</printStderrOnError>
                             <printStderrOnFailure>true</printStderrOnFailure>
                             <printStderrOnSuccess>false</printStderrOnSuccess>
                         </statelessTestsetInfoReporter>
+                        <excludedGroups>Integration</excludedGroups>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -701,13 +756,6 @@
         </pluginManagement>
 
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludedGroups>Integration</excludedGroups>
-                </configuration>
-            </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
