@@ -138,7 +138,7 @@ class BlueButtonClientTest {
                 HttpStatus.OK_200,
                 getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_PATIENT_ID + "_" + startIndex + ".xml"),
                 List.of(Parameter.param("patient", TEST_PATIENT_ID),
-                        Parameter.param("_count", "100"),
+                        Parameter.param("count", "10"),
                         Parameter.param("startIndex", startIndex),
                         Parameter.param("excludeSAMHSA", "true"))
             );
