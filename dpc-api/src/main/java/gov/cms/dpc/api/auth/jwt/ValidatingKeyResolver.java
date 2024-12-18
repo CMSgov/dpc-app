@@ -18,7 +18,7 @@ import java.util.UUID;
  * As far as I can tell, this is the only way to get access to the JWS claims without actually verifying the signature.
  * See: https://github.com/jwtk/jjwt/issues/205
  * <p>
- * The downside is that this method will always return a null {@link Key}, which means the {@link Jwts#parser()} method will always throw an {@link IllegalArgumentException}, which we need to catch.
+ * The downside is that this method will always return a null {@link Key}, which means the {@link Jwts#parserBuilder()} method will always throw an {@link IllegalArgumentException}, which we need to catch.
  */
 public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
 

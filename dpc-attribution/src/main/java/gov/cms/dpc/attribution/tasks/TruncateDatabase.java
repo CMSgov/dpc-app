@@ -1,6 +1,5 @@
 package gov.cms.dpc.attribution.tasks;
 
-
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.utils.DBUtils;
 import io.dropwizard.db.ManagedDataSource;

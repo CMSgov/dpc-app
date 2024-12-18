@@ -116,7 +116,7 @@ public class DataService {
         }, 0, 250, TimeUnit.MILLISECONDS);
 
         // this timeout value should probably be adjusted according to the number of types being requested
-        // In the case of the /Patient/*/$everything endpoint - we're getting all types back which may take longer than nother requests
+        // In the case of the /Patient/*/$everything endpoint - we're getting all types back which may take longer than other requests
         // Experimenting with increasing this threshold from 30 to 60
         dataFuture.completeOnTimeout(Optional.empty(), jobTimeoutInSeconds, TimeUnit.SECONDS);
 

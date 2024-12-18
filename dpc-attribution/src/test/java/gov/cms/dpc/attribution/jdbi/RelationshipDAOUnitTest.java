@@ -125,9 +125,9 @@ class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 			.getDeclaredField("attributionID");
 
 		GenericGenerator annotation = attributionID.getAnnotation(GenericGenerator.class);
-		Parameter[] parms = annotation.parameters();
+		Parameter[] params = annotation.parameters();
 
-		Integer hibernateIncrement = Arrays.stream(parms)
+		Integer hibernateIncrement = Arrays.stream(params)
 			.filter(parameter -> parameter.name().equals("increment_size"))
 			.map(parameter -> Integer.valueOf(parameter.value()))
 			.findAny().get();
