@@ -5,6 +5,7 @@
   "main": "script.js",
   "repository": "https://github.com/cmsgov/dpc-app",
   "license": "MIT",
+  "type": "module",
   "devDependencies": {
     "@types/k6": "^0.54.2"
   }
