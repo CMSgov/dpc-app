@@ -70,7 +70,6 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 		// Check that our submitted job is between 0 and 0.001 hours old (about 3.6 seconds).
 		// We could probably mock the system time and the results coming back from Hibernate, but this is enough to
 		// prove it works.
-        System.out.println("age: " + age);
 		assertTrue(age > 0 && age < .001);
 	}
 }
