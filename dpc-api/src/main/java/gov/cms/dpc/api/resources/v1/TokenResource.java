@@ -245,7 +245,7 @@ public class TokenResource extends AbstractTokenResource {
         try {
             Jwts.parser()
                     .requireAudience(this.authURL)
-                    .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, this.authURL))
+                    .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
                     .build()
                     .parseClaimsJws(jwt);
         } catch (IllegalArgumentException e) {
