@@ -131,7 +131,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
                         builder.equal(root.get("jobID"), jobID)
                 );
 
-                return session.createQuery(query.toString()).getResultList();
+                return session.createQuery(query).getResultList();
             } finally {
                 tx.commit();
             }
