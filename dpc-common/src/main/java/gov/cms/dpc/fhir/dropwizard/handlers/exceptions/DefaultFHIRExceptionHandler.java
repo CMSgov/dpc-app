@@ -46,6 +46,7 @@ public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Th
             // If it's any other type of web application exception, use the status as the response code.
             statusCode = ((WebApplicationException) exception).getResponse().getStatus();
         } else {
+            System.out.println("ERROR TYPE: " + exception.getCause());
             // For any other types of errors, just set a 500 and move along
             statusCode = Response.Status.INTERNAL_SERVER_ERROR.getStatusCode();
         }
