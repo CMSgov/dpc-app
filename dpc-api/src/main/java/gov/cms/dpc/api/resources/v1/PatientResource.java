@@ -215,11 +215,12 @@ public class PatientResource extends AbstractPatientResource {
         final String requestUrl = APIHelpers.fetchRequestUrl(request);
         Resource result = dataService.retrieveData(orgId, orgNPI, practitionerNPI, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
                 requestingIP, requestUrl, DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Coverage);
-        if (DPCResourceType.Bundle.getPath().equals(result.getResourceType().getPath())) {
+        String resourcePath = result.getResourceType().getPath();
+        if (resourcePath.equals(DPCResourceType.Bundle.getPath())) {
             // A Bundle containing patient data was returned
             return (Bundle) result;
         }
-        if (DPCResourceType.OperationOutcome.getPath().equals(result.getResourceType().getPath())) {
+        if (resourcePath.equals(DPCResourceType.OperationOutcome.getPath())) {
             // An OperationOutcome (ERROR) was returned
             OperationOutcome resultOp = (OperationOutcome) result;
             // getIssueFirstRep() grabs the first issue only - there may be others
