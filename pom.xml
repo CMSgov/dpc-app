@@ -886,7 +886,6 @@
                 <configuration>
                     <failOnError>false</failOnError>
                     <retryOnError>true</retryOnError>
-                    <verbose>true</verbose>
                 </configuration>
             </plugin>
         </plugins>
