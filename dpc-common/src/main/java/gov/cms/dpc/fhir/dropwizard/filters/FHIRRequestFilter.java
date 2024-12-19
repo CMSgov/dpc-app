@@ -3,11 +3,11 @@ package gov.cms.dpc.fhir.dropwizard.filters;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import org.eclipse.jetty.server.Response;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;

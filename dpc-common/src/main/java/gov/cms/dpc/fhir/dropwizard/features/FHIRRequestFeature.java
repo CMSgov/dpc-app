@@ -4,12 +4,11 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
 import gov.cms.dpc.fhir.dropwizard.filters.FHIRAsyncRequestFilter;
 import gov.cms.dpc.fhir.dropwizard.filters.FHIRRequestFilter;
-
-import javax.inject.Inject;
-import javax.ws.rs.container.DynamicFeature;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.ext.Provider;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.container.DynamicFeature;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.FeatureContext;
+import jakarta.ws.rs.ext.Provider;
 
 @Provider
 public class FHIRRequestFeature implements DynamicFeature {

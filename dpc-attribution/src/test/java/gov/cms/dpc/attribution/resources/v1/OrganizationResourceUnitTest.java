@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +43,11 @@ public class OrganizationResourceUnitTest {
 
     private DPCAttributionConfiguration configuration;
 
-    private FHIREntityConverter converter = FHIREntityConverter.initialize();
+    private final FHIREntityConverter converter = FHIREntityConverter.initialize();
 
     private OrganizationResource resource;
 
-    private String lookbackExcemptOrgId = "0ab352f1-2bf1-44c4-aa7a-3004a1ffef12";
+    private final String lookbackExemptOrgId = "0ab352f1-2bf1-44c4-aa7a-3004a1ffef12";
 
     @BeforeEach
     public void setUp() {
@@ -74,30 +74,30 @@ public class OrganizationResourceUnitTest {
     void submitTestOrganizationAndNoLookbackExemptions() {
         Mockito.when(mockOrganizationDao.registerOrganization(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
         configuration.setLookBackExemptOrgs(null);
-        final Bundle bundle = buildBundleWithTestOrg(lookbackExcemptOrgId);
+        final Bundle bundle = buildBundleWithTestOrg(lookbackExemptOrgId);
 
         Response response = resource.submitOrganization(bundle);
         Organization orgCreated = (Organization) response.getEntity();
         assertEquals(201, response.getStatus(), "Should have returned a 200 status");
-        assertEquals(lookbackExcemptOrgId, orgCreated.getId(), "UUID passed in should have been used");
+        assertEquals(lookbackExemptOrgId, orgCreated.getId(), "UUID passed in should have been used");
     }
 
     @Test
     void submitTestOrganizationWithLookbackExemptions() {
         Mockito.when(mockOrganizationDao.registerOrganization(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
-        configuration.setLookBackExemptOrgs(List.of(lookbackExcemptOrgId));
-        final Bundle bundle = buildBundleWithTestOrg(lookbackExcemptOrgId);
+        configuration.setLookBackExemptOrgs(List.of(lookbackExemptOrgId));
+        final Bundle bundle = buildBundleWithTestOrg(lookbackExemptOrgId);
 
         Response response = resource.submitOrganization(bundle);
         Organization orgCreated = (Organization) response.getEntity();
         assertEquals(201, response.getStatus(), "Should have returned a 200 status");
-        assertEquals(lookbackExcemptOrgId, orgCreated.getId(), "UUID passed in should have been used");
+        assertEquals(lookbackExemptOrgId, orgCreated.getId(), "UUID passed in should have been used");
     }
 
     @Test
     void submitOrganizationWithIdSpecified() {
         Mockito.when(mockOrganizationDao.registerOrganization(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
-        configuration.setLookBackExemptOrgs(List.of(lookbackExcemptOrgId));
+        configuration.setLookBackExemptOrgs(List.of(lookbackExemptOrgId));
         UUID uuid = UUID.randomUUID();
         final Bundle bundle = buildBundleWithTestOrg(uuid.toString());
 
@@ -111,12 +111,12 @@ public class OrganizationResourceUnitTest {
     @Test
     void submitOrganizationWithNoIdSpecified() throws IllegalAccessException, NoSuchFieldException {
         Mockito.when(mockOrganizationDao.registerOrganization(any())).thenAnswer(invocation -> invocation.getArguments()[0]);
-        configuration.setLookBackExemptOrgs(List.of(lookbackExcemptOrgId));
+        configuration.setLookBackExemptOrgs(List.of(lookbackExemptOrgId));
         Field supplierField = OrganizationResource.class.getDeclaredField("uuidSupplier");
         supplierField.setAccessible(true);
         supplierField.set(resource, uuidSupplier);
         String validUUID = "df62c0c9-44df-476d-85fc-555c075fbb61"; //simulate valid random UUID that is not exempt;
-        Mockito.when(uuidSupplier.get()).thenReturn(UUID.fromString(lookbackExcemptOrgId), UUID.fromString(validUUID)); //Simulate generating a prohibited org id the first time, but not the second.
+        Mockito.when(uuidSupplier.get()).thenReturn(UUID.fromString(lookbackExemptOrgId), UUID.fromString(validUUID)); //Simulate generating a prohibited org id the first time, but not the second.
 
         final Bundle bundle = buildBundleWithTestOrg(null);
 

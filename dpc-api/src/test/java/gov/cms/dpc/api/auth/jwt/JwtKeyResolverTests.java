@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.security.Key;
 import java.security.KeyPair;
@@ -32,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings("rawtypes")
 @ExtendWith(BufferedLoggerHandler.class)
 class JwtKeyResolverTests {
 
@@ -197,7 +196,7 @@ class JwtKeyResolverTests {
         final Macaroon m = MacaroonsBuilder.create("test.local", "fake key", "make id");
         if (orgID != null) {
             return MacaroonsBuilder.modify(m)
-                    .add_first_party_caveat(String.format("organization_id = %s", orgID.toString()))
+                    .add_first_party_caveat(String.format("organization_id = %s", orgID))
                     .getMacaroon()
                     .serialize(MacaroonVersion.SerializationVersion.V1_BINARY);
         }

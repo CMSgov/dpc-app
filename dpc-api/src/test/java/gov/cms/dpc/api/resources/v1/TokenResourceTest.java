@@ -275,7 +275,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         tokenList = tokens.getEntities().stream().filter(t -> t.getId().equals(token.getId())).collect(Collectors.toList());
         assertEquals(0, tokenList.size(), "There should exist exactly 0 tokens with matching token ID");
 
-        //Ensure it is not longer returned when fetched by id
+        //Ensure it is no longer returned when fetched by id
         final HttpGet httpGet = new HttpGet(getBaseURL() + "/Token/"+token.getId());
         httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
         try (final CloseableHttpClient client = HttpClients.createDefault();CloseableHttpResponse response = client.execute(httpGet)) {
@@ -331,7 +331,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<TokenEntity>>() {
+                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {
                 });
             }
         }

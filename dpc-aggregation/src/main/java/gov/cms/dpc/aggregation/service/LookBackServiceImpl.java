@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import io.dropwizard.hibernate.UnitOfWork;
+import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -14,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import javax.inject.Inject;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.HashSet;

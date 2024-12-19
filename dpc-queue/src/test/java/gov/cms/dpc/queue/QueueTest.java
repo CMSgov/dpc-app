@@ -52,46 +52,49 @@ class QueueTest {
         return queues
                 .stream()
                 .map(queueName -> {
-                    if (queueName.equals("memory")) {
-                        return new MemoryBatchQueue(100);
-                    } else if (queueName.equals("distributed")) {
-                        // Create the session factory
-                        final Configuration conf = new Configuration();
-                        sessionFactory = conf.configure().buildSessionFactory();
-                        return new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
-                    } else if(queueName.equals("aws")) {
-                        MetricRegistry metricRegistry = new MetricRegistry();
+                    switch (queueName) {
+                        case "memory":
+                            return new MemoryBatchQueue(100);
+                        case "distributed": {
+                            // Create the session factory
+                            final Configuration conf = new Configuration();
+                            sessionFactory = conf.configure().buildSessionFactory();
+                            return new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
+                        }
+                        case "aws": {
+                            MetricRegistry metricRegistry = new MetricRegistry();
 
-                        ScheduledReporter reporter1 = Slf4jReporter.forRegistry(metricRegistry)
-                            .filter(MetricFilter.contains("metricName"))
-                            .withLoggingLevel(Slf4jReporter.LoggingLevel.DEBUG)
-                            .build();
-                        ScheduledReporter reporter2 = Slf4jReporter.forRegistry(metricRegistry)
-                            .filter(MetricFilter.contains("metricName"))
-                            .withLoggingLevel(Slf4jReporter.LoggingLevel.DEBUG)
-                            .build();
+                            ScheduledReporter reporter1 = Slf4jReporter.forRegistry(metricRegistry)
+                                    .filter(MetricFilter.contains("metricName"))
+                                    .withLoggingLevel(Slf4jReporter.LoggingLevel.DEBUG)
+                                    .build();
+                            ScheduledReporter reporter2 = Slf4jReporter.forRegistry(metricRegistry)
+                                    .filter(MetricFilter.contains("metricName"))
+                                    .withLoggingLevel(Slf4jReporter.LoggingLevel.DEBUG)
+                                    .build();
 
-                        DPCAwsQueueConfiguration awsConfig = new DPCAwsQueueConfiguration();
-                        awsConfig
-                            .setQueueSizeMetricName("sizeMetricName")
-                            .setQueueAgeMetricName("ageMetricName")
-                            .setEnvironment("test")
-                            .setAwsAgeReportingInterval(10)
-                            .setAwsSizeReportingInterval(10);
-
-                        final Configuration conf = new Configuration();
-                        sessionFactory = conf.configure().buildSessionFactory();
-
-                        return new AwsDistributedBatchQueue(
-                            new DPCQueueManagedSessionFactory(sessionFactory),
-                            100,
-                            metricRegistry,
-                            reporter1,
-                            reporter2,
+                            DPCAwsQueueConfiguration awsConfig = new DPCAwsQueueConfiguration();
                             awsConfig
-                        );
-                    } else {
-                        throw new IllegalArgumentException("I'm not that kind of queue");
+                                    .setQueueSizeMetricName("sizeMetricName")
+                                    .setQueueAgeMetricName("ageMetricName")
+                                    .setEnvironment("test")
+                                    .setAwsAgeReportingInterval(10)
+                                    .setAwsSizeReportingInterval(10);
+
+                            final Configuration conf = new Configuration();
+                            sessionFactory = conf.configure().buildSessionFactory();
+
+                            return new AwsDistributedBatchQueue(
+                                    new DPCQueueManagedSessionFactory(sessionFactory),
+                                    100,
+                                    metricRegistry,
+                                    reporter1,
+                                    reporter2,
+                                    awsConfig
+                            );
+                        }
+                        default:
+                            throw new IllegalArgumentException("I'm not that kind of queue");
                     }
                 })
                 .map(queue -> {

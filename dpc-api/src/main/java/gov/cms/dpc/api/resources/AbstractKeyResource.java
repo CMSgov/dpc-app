@@ -5,12 +5,12 @@ import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.resources.v1.KeyResource;
 
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Response;
 import java.util.Optional;
 import java.util.UUID;
 

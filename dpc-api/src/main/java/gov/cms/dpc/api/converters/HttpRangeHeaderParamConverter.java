@@ -2,9 +2,9 @@ package gov.cms.dpc.api.converters;
 
 import gov.cms.dpc.api.models.RangeHeader;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ParamConverter;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ParamConverter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

@@ -24,7 +24,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -143,7 +143,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
             StringBuilder respBuilder = new StringBuilder();
-            String respLine = null;
+            String respLine;
             while ((respLine = reader.readLine()) != null) {
                 respBuilder.append(respLine.trim());
             }
@@ -345,7 +345,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         bundle.addEntry(new Bundle.BundleEntryComponent().setResource(practitioner3));
         bundle.addEntry(new Bundle.BundleEntryComponent().setResource(practitioner4));
 
-        Parameters execute = orgAClient.operation()
+        orgAClient.operation()
                 .onType(Practitioner.class)
                 .named("submit")
                 .withParameter(Parameters.class, "name", bundle)

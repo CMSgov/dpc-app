@@ -16,7 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 import java.io.*;
 import java.util.*;
 
@@ -25,8 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(BufferedLoggerHandler.class)
 public class PublicKeyTaskTests {
 
-    private KeyResource keyResource = Mockito.mock(KeyResource.class);
-    private ArgumentCaptor<OrganizationPrincipal> principalCaptor = ArgumentCaptor.forClass(OrganizationPrincipal.class);
+    private final KeyResource keyResource = Mockito.mock(KeyResource.class);
+    private final ArgumentCaptor<OrganizationPrincipal> principalCaptor = ArgumentCaptor.forClass(OrganizationPrincipal.class);
     private final UploadPublicKey upk;
     private final ListPublicKeys lpk;
     private final DeletePublicKey dpk;

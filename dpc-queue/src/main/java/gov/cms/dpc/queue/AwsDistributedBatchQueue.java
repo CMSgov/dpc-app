@@ -8,8 +8,8 @@ import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.queue.annotations.QueueBatchSize;
 import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import io.github.azagniotov.metrics.reporter.cloudwatch.DimensionedName;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
 import java.util.concurrent.TimeUnit;
 
 /**

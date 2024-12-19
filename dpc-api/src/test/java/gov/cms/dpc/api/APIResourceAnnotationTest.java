@@ -19,7 +19,7 @@ import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 
-import javax.ws.rs.*;
+import jakarta.ws.rs.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Set;

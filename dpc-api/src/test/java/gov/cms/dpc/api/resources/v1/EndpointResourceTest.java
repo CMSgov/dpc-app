@@ -22,7 +22,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -72,7 +72,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
             StringBuilder respBuilder = new StringBuilder();
-            String respLine = null;
+            String respLine;
             while ((respLine = reader.readLine()) != null) {
                 respBuilder.append(respLine.trim());
             }
@@ -108,7 +108,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
     @Test
     void testCreateEndpointWithoutAddress() {
         Endpoint endpoint = OrganizationFactory.createValidFakeEndpoint();
-        endpoint.setAddress((String)null);
+        endpoint.setAddress(null);
         ICreateTyped createExec = client.create().resource(endpoint);
         assertThrows(UnprocessableEntityException.class, createExec::execute);
     }

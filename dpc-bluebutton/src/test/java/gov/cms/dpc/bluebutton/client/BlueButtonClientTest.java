@@ -79,14 +79,16 @@ class BlueButtonClientTest {
                     getRawXML(SAMPLE_PATIENT_PATH_PREFIX + patientId + ".xml"),
                     List.of(
                             Parameter.param("_id", patientId),
-                            Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
+                            Parameter.param("_count", "100"))
             );
 
             createMockServerExpectation(
                     "/v1/fhir/Patient",
                     HttpStatus.OK_200,
                     getRawXML(SAMPLE_PATIENT_PATH_PREFIX + patientId + ".xml"),
-                    Collections.singletonList(Parameter.param("_id", patientId))
+                    List.of(
+                            Parameter.param("_id", patientId),
+                            Parameter.param("_count", "100"))
             );
 
             createMockServerExpectation(
@@ -96,7 +98,7 @@ class BlueButtonClientTest {
                     List.of(
                             Parameter.param("patient", patientId),
                             Parameter.param("excludeSAMHSA", "true"),
-                            Parameter.param("_count", "10"),
+                            Parameter.param("_count", "100"),
                             Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
             );
 
@@ -106,7 +108,7 @@ class BlueButtonClientTest {
                     getRawXML(SAMPLE_COVERAGE_PATH_PREFIX + patientId + ".xml"),
                     List.of(
                             Parameter.param("beneficiary", "Patient/" + patientId),
-                            Parameter.param("_count", "10"),
+                            Parameter.param("_count", "100"),
                             Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
             );
         }
@@ -119,13 +121,13 @@ class BlueButtonClientTest {
         );
 
         createMockServerExpectation(
-            "/v1/fhir/ExplainationOfBenefit",
+            "/v1/fhir/ExplanationOfBenefit",
             HttpStatus.OK_200,
             getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_SINGLE_EOB_PATIENT_ID + ".xml"),
             List.of(
                     Parameter.param("patient", TEST_SINGLE_EOB_PATIENT_ID),
                     Parameter.param("excludeSAMHSA", "true"),
-                    Parameter.param("_count", "10"),
+                    Parameter.param("_count", "100"),
                     Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
         );
 

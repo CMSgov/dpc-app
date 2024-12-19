@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
@@ -126,16 +125,16 @@ class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 			.getDeclaredField("attributionID");
 
 		GenericGenerator annotation = attributionID.getAnnotation(GenericGenerator.class);
-		Parameter[] parms = annotation.parameters();
+		Parameter[] params = annotation.parameters();
 
-		Integer hibernateIncrement = Arrays.stream(parms)
+		Integer hibernateIncrement = Arrays.stream(params)
 			.filter(parameter -> parameter.name().equals("increment_size"))
 			.map(parameter -> Integer.valueOf(parameter.value()))
 			.findAny().get();
 
 		Session session = db.getSessionFactory().getCurrentSession();
 		String sql = "select increment_by from pg_sequences where sequencename = 'attributions_id_seq'";
-		int dbIncrement = ((BigInteger) session.createNativeQuery(sql).getSingleResult()).intValue();
+		int dbIncrement = ((Long) session.createNativeQuery(sql).getSingleResult()).intValue();
 
 		assertEquals(hibernateIncrement, dbIncrement);
 	}
