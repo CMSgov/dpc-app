@@ -2,10 +2,10 @@ package gov.cms.dpc.queue.models;
 
 import gov.cms.dpc.fhir.DPCResourceType;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
@@ -16,11 +16,11 @@ import java.util.UUID;
  */
 @Entity(name = "job_queue_batch_file")
 public class JobQueueBatchFile implements Serializable {
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @Embeddable
     public static class JobQueueBatchFileID implements Serializable {
-        public static final long serialVersionUID = 3L;
+        private static final long serialVersionUID = 3L;
 
         @Column(name = "batch_id")
         private UUID batchID;

@@ -6,8 +6,8 @@ import io.dropwizard.core.ConfiguredBundle;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.SessionFactoryFactory;
+import jakarta.inject.Singleton;
 
-import javax.inject.Singleton;
 import java.util.Collections;
 
 import static gov.cms.dpc.common.hibernate.EntityScanner.applicationEntities;

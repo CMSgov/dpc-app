@@ -3,11 +3,11 @@ package gov.cms.dpc.attribution.jdbi;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import jakarta.inject.Inject;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
-import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -41,7 +41,7 @@ public class OrganizationDAO extends DPCAbstractDAO<OrganizationEntity> {
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<OrganizationEntity> query = builder.createQuery(OrganizationEntity.class);
         final Root<OrganizationEntity> root = query.from(OrganizationEntity.class);
-        
+
         query.select(root).where(root.get("organizationID").get("value").in(ids));
 
         return list(query);
@@ -56,7 +56,7 @@ public class OrganizationDAO extends DPCAbstractDAO<OrganizationEntity> {
     }
 
     public void deleteOrganization(OrganizationEntity entity) {
-        currentSession().delete(entity);
+        currentSession().remove(entity);
     }
 
     public List<OrganizationEntity> searchByToken(String tokenID) {

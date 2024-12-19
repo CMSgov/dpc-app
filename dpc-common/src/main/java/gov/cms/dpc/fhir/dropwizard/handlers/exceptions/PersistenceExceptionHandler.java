@@ -1,19 +1,20 @@
 package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
 import gov.cms.dpc.fhir.FHIRMediaTypes;
+import jakarta.inject.Inject;
+import jakarta.persistence.PersistenceException;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.Provider;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.persistence.PersistenceException;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.Provider;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -75,6 +76,9 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
         final String message;
         if (exception.getCause() instanceof ConstraintViolationException) {
             message = generateErrorMessage((ConstraintViolationException) exception.getCause());
+            status = Response.Status.BAD_REQUEST;
+        } else if (exception.getCause() instanceof PSQLException) {
+            message = exception.getMessage();
             status = Response.Status.BAD_REQUEST;
         } else {
             logger.error("Cannot persist to DB", exception);

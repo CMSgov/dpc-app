@@ -1,8 +1,9 @@
 package gov.cms.dpc.aggregation.engine;
-import gov.cms.dpc.common.logging.SplunkTimestamp;
+
 import com.newrelic.api.agent.Trace;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.common.MDCConstants;
+import gov.cms.dpc.common.logging.SplunkTimestamp;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.annotations.AggregatorID;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -10,11 +11,11 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
 import io.reactivex.plugins.RxJavaPlugins;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
@@ -101,7 +102,7 @@ public class AggregationEngine implements Runnable {
                     logger.debug(String.format("Configuring queue to poll every %d milliseconds", operationsConfig.getPollingFrequency()));
                     return completed.delay(operationsConfig.getPollingFrequency(), TimeUnit.MILLISECONDS);
                 })
-                .doOnEach(item -> logger.trace("Processing item: " + item.toString()))
+                .doOnEach(item -> logger.trace("Processing item: {}", item.toString()))
                 .doOnError(error -> logger.error("Unable to complete job.", error))
                 .retry()
                 .filter(Optional::isPresent)

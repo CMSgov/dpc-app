@@ -10,6 +10,10 @@ import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
+import jakarta.inject.Inject;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -17,16 +21,12 @@ import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
-import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -203,7 +203,6 @@ public class DistributedBatchQueue extends JobQueueCommon {
      * @param aggregatorID - The ID of the aggregator processing the job
      * @return the claimed job batch
      */
-    @SuppressWarnings("unchecked")
     private Optional<JobQueueBatch> claimBatchFromDatabase(Session session, UUID aggregatorID) {
         // Claim a new batch
         Optional<String> batchID = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED")
@@ -326,14 +325,14 @@ public class DistributedBatchQueue extends JobQueueCommon {
     public double queueAge() {
         try (final Session session = this.factory.openSession()) {
             try {
-                Optional<Timestamp> submitTime =
+                Optional<Instant> submitTime =
                     session.createNativeQuery("SELECT MIN( submit_time ) FROM job_queue_batch WHERE status = " + JobStatus.QUEUED.ordinal())
                     .uniqueResultOptional();
 
                 if(submitTime.isPresent()) {
-                    Long now = Timestamp.from(Instant.now()).getTime(); // Now in milliseconds from Unix epoch
-                    Long then = submitTime.get().getTime();             // Submit time in milliseconds from Unix epoch
-                    return ((double) (now - then)) / (1000 * 60 * 60);  // msec difference / msec in an hour
+                    Long now = Instant.now().getLong(ChronoField.MILLI_OF_SECOND);      // Now in milliseconds from Unix epoch
+                    Long then = submitTime.get().getLong(ChronoField.MILLI_OF_SECOND);  // Submit time in milliseconds from Unix epoch
+                    return ((double) (now - then)) / (1000 * 60 * 60);                  // msec difference / msec in an hour
                 } else {
                     return 0;
                 }

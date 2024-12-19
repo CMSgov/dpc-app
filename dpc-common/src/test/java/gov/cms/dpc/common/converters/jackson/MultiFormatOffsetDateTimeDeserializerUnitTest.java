@@ -3,7 +3,7 @@ package gov.cms.dpc.common.converters.jackson;
 import gov.cms.dpc.fhir.FHIRFormatters;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 

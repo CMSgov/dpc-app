@@ -3,8 +3,8 @@ package gov.cms.dpc.common.entities;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
@@ -14,7 +14,7 @@ import java.util.Objects;
 @Entity(name = "attributions")
 public class AttributionRelationship implements Serializable {
 
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "attributions_generator")

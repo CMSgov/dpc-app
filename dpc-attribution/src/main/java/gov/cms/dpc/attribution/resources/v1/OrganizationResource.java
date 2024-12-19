@@ -14,6 +14,9 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -22,15 +25,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -68,7 +63,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                     .collect(Collectors.toList());
         }
         String parsedToken = parseTokenTag((tag) -> tag, identifier);
-        Set<String> idSet = Arrays.asList(parsedToken.split(",")).stream().collect(Collectors.toSet());
+        Set<String> idSet = new HashSet<>(Arrays.asList(parsedToken.split(",")));
         if (idSet.size() > 1) {
             return this.dao.getOrganizationsByIds(idSet)
                 .stream()

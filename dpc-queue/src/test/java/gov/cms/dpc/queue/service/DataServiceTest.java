@@ -78,7 +78,7 @@ public class DataServiceTest {
 
         workJob(false, resourceType);
         Resource resource = dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType);
-        Assertions.assertTrue(resource instanceof Bundle);
+        Assertions.assertInstanceOf(Bundle.class, resource);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class DataServiceTest {
 
         workJob(false, DPCResourceType.OperationOutcome);
         Resource resource = dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType);
-        Assertions.assertTrue(resource instanceof OperationOutcome);
+        Assertions.assertInstanceOf(OperationOutcome.class, resource);
     }
 
     @Test

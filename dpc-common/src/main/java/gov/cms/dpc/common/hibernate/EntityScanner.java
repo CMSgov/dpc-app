@@ -5,7 +5,7 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -38,7 +38,7 @@ public class EntityScanner {
     }
 
     /**
-     * Scan the given {@link List} of package prefixes for any {@link Entity} annoted classes
+     * Scan the given {@link List} of package prefixes for any {@link Entity} annotated classes
      *
      * @param paths - {@link String} class package to class
      * @return - {@link ImmutableList} of annotated {@link Class}es
