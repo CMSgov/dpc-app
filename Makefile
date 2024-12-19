@@ -111,8 +111,8 @@ start-portals: ## Start all frontend services
 start-portals: start-db start-web start-admin start-portal
 
 start-load-tests: ## Run DPC performance tests locally in a Docker image provided by Grafana/K6
-start-load-tests:
-	@docker run --rm -i grafana/k6 run - <./dpc-load-testing/script.js
+start-load-tests: secure-envs
+	@docker run --rm -v $(shell pwd)/dpc-load-testing:/src --env-file $(shell pwd)/ops/config/decrypted/local.env -e ENVIRONMENT=local -i grafana/k6 run /src/script.js
 
 
 # Debug commands
