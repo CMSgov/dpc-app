@@ -224,6 +224,7 @@ public class PatientResource extends AbstractPatientResource {
             // An OperationOutcome (ERROR) was returned
             OperationOutcome resultOp = (OperationOutcome) result;
             // getIssueFirstRep() grabs the first issue only - there may be others
+            System.out.println("OUTCOME TEXT: " + resultOp.getIssueFirstRep().getDetails().getText());
             throw new WebApplicationException(resultOp.getIssueFirstRep().getDetails().getText());
         }
 
