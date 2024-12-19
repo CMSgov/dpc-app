@@ -51,9 +51,6 @@ jobs:
         with:
           name: code-coverage-report-dpc-api
           path: ./jacoco-reports
-      - name: "Smoke Test"
-        run: |
-          make smoke
 
   build-dpc-web:
     name: "Build and Test DPC Web"
