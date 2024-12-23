@@ -1,0 +1,46 @@
+name: 'Docker Build'
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_call:
+    inputs:
+      branch:
+        description: "Branch name for build"
+        required: true
+        type: string
+
+env:
+  VAULT_PW: ${{ secrets.VAULT_PW }}
+  REPORT_COVERAGE: true
+
+jobs:
+  docker_build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.inputs.branch }}
+      - name: "Set up JDK 11"
+        uses: actions/setup-java@v1
+        with:
+          java-version: "11"
+      - name: "Set up Python 3.8.1"
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8.1"
+
+      - name: Build app
+        run: make ci-app
+
+      - name: Build portal # this is run in parallel with the app build on jenkins, might break out to separate job
+        run: make ci-portals-v1
+
+      - name: Save artifacts
+        run: "echo 'Saving artifacts'"
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: app
