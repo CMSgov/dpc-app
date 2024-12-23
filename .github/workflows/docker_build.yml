@@ -1,4 +1,4 @@
-name: 'Docker Build'
+name: Docker Build
 
 on:
   push:
@@ -18,7 +18,8 @@ env:
 
 jobs:
   docker_build:
-    runs-on: self-hosted
+#    runs-on: self-hosted
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
