@@ -15,6 +15,6 @@ public class LogHeaderFilter implements ContainerRequestFilter {
 
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
-		logger.info("{}={}", headerKey, requestContext.getHeaderString(headerKey));
+		logger.info("{}=\"{}\"", headerKey, requestContext.getHeaderString(headerKey));
 	}
 }

@@ -19,7 +19,10 @@ public class DPCJsonLayout extends EventJsonLayout {
     private static final String MESSAGE = "message";
     private static final String EXCEPTION = "exception";
     private static final String KEY_VALUE_SEPARATOR = "=";
-    private static final String ENTRY_SEPARATOR = ",";
+
+    // This says search for commas only when there is 0, or an even number of double quotes after it.
+    // Essentially, find commas that aren't in quotes.
+    private static final String ENTRY_SEPARATOR_REGEX = ",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)";
     private static final Pattern MBI_PATTERN = Pattern.compile("\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2}");
     private static final String MBI_MASK = "***MBI?***";
     private static final String DATABASE_INFO_MASK = "**********";
@@ -57,11 +60,12 @@ public class DPCJsonLayout extends EventJsonLayout {
     }
 
     private Map<String, String> splitToMap(String in) {
-        return Arrays.stream(in.split(ENTRY_SEPARATOR))
+        return Arrays.stream(in.split(ENTRY_SEPARATOR_REGEX))
                 .map(s -> s.split(KEY_VALUE_SEPARATOR))
                 .collect(Collectors.toMap(
-                        a -> StringUtils.strip(a[0]),  //key
-                        a -> StringUtils.strip(a[1])   //value
+                        a -> StringUtils.strip(a[0]),   // key
+                        a -> StringUtils.strip(a[1])    // value
+                            .replaceAll("^\"|\"$", "") // Remove start and end quotes
                 ));
     }
 

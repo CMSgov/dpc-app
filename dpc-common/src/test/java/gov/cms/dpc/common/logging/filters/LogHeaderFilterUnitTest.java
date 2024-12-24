@@ -15,7 +15,7 @@ class LogHeaderFilterUnitTest {
 	@Test
 	public void testLogsHeader() throws IOException {
 		final String headerKey = "fakeHeader";
-		final String headerValue = "fakeValue";
+		final String headerValue = "fakeValue,fakervalue";
 
 		Logger logger = mock(Logger.class);
 
