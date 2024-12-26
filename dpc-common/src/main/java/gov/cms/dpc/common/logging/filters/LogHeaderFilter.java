@@ -15,6 +15,13 @@ public class LogHeaderFilter implements ContainerRequestFilter {
 
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
-		logger.info("{}=\"{}\"", headerKey, requestContext.getHeaderString(headerKey));
+		// If we have a value, wrap it in quotes.  Some headers can have commas in them, and if we don't add quotes
+		// it breaks our logging layout.
+		String headerValue = requestContext.getHeaderString(headerKey);
+		if (headerValue != null) {
+			headerValue = "\"" + headerValue + "\"";
+		}
+
+		logger.info("{}={}", headerKey, headerValue);
 	}
 }
