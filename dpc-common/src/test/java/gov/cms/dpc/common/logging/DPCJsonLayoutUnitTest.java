@@ -188,8 +188,8 @@ public class DPCJsonLayoutUnitTest {
     }
 
     @Test
-    public void testQuotedValues() {
-        String message = "key1=value1, key2=\"value2a,value2b\"";
+    void testEscapedValues() {
+        String message = "key1=value1, key2=value2a\\,value2b";
 
         when(loggingEvent.getFormattedMessage()).thenReturn(message);
         Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);

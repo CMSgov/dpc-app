@@ -15,11 +15,11 @@ public class LogHeaderFilter implements ContainerRequestFilter {
 
 	@Override
 	public void filter(ContainerRequestContext requestContext) throws IOException {
-		// If we have a value, wrap it in quotes.  Some headers can have commas in them, and if we don't add quotes
-		// it breaks our logging layout.
 		String headerValue = requestContext.getHeaderString(headerKey);
-		if (headerValue != null) {
-			headerValue = "\"" + headerValue + "\"";
+
+		// Escape commas so they don't get confused with field separators
+		if(headerValue != null) {
+			headerValue = headerValue.replace(",", "\\,");
 		}
 
 		logger.info("{}={}", headerKey, headerValue);

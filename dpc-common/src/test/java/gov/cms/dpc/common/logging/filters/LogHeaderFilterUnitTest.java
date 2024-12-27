@@ -39,9 +39,9 @@ class LogHeaderFilterUnitTest {
 	}
 
 	@Test
-	public void testLogsHeader() throws IOException {
+	void testLogsHeader() throws IOException {
 		final String headerValue = "fakeValue,fakervalue";
-		final String headerValueLogged = "\"fakeValue,fakervalue\"";
+		final String headerValueLogged = "fakeValue\\,fakervalue";
 
 		ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
 		when(requestContext.getHeaderString(headerKey)).thenReturn(headerValue);
@@ -53,7 +53,7 @@ class LogHeaderFilterUnitTest {
 	}
 
 	@Test
-	public void testLogsNull() throws IOException {
+	void testLogsNull() throws IOException {
 		ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
 		when(requestContext.getHeaderString(headerKey)).thenReturn(null);
 
