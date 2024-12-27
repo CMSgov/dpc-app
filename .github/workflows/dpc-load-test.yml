@@ -11,7 +11,7 @@ jobs:
     name: "Run DPC API Load Test"
     runs-on: self-hosted
     container:
-      image: grafana/k6:latest
+      image: ubuntu-latest
       options: --user root
 
     steps:
