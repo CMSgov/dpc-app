@@ -10,8 +10,6 @@ jobs:
   run-load-test:
     name: "Run DPC API Load Test"
     runs-on: self-hosted
-    container:
-      options: --user root
 
     steps:
       - name: Checkout
