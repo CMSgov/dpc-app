@@ -75,7 +75,6 @@ public class DPCJsonLayout extends EventJsonLayout {
             .collect(Collectors.toMap(
                 array -> StringUtils.strip(array[0]),                 // Key
                 array -> StringUtils.strip(array[1])                  // Value
-                    .replaceAll("(^\")|(\"$)", "")   // Remove start and end quotes
             ));
     }
 
