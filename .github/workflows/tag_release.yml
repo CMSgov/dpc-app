@@ -15,7 +15,7 @@ on:
 jobs:
   tag_repo:
     name: Tag Repository
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       next_rev: ${{ steps.set_revs.outputs.next_rev }}
     steps:
