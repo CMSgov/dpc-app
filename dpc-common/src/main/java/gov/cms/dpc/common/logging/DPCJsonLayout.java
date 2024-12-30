@@ -6,20 +6,24 @@ import io.dropwizard.logging.json.EventAttribute;
 import io.dropwizard.logging.json.layout.EventJsonLayout;
 import io.dropwizard.logging.json.layout.JsonFormatter;
 import io.dropwizard.logging.json.layout.TimestampFormatter;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class DPCJsonLayout extends EventJsonLayout {
 
     private static final String MESSAGE = "message";
     private static final String EXCEPTION = "exception";
     private static final String KEY_VALUE_SEPARATOR = "=";
-    private static final String ENTRY_SEPARATOR = ",";
+
+    private static final Character ENTRY_SEPARATOR = ',';
     private static final Pattern MBI_PATTERN = Pattern.compile("\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2}");
     private static final String MBI_MASK = "***MBI?***";
     private static final String DATABASE_INFO_MASK = "**********";
@@ -56,13 +60,22 @@ public class DPCJsonLayout extends EventJsonLayout {
         }
     }
 
-    private Map<String, String> splitToMap(String in) {
-        return Arrays.stream(in.split(ENTRY_SEPARATOR))
-                .map(s -> s.split(KEY_VALUE_SEPARATOR))
-                .collect(Collectors.toMap(
-                        a -> StringUtils.strip(a[0]),  //key
-                        a -> StringUtils.strip(a[1])   //value
-                ));
+    private Map<String, String> splitToMap(String in) throws IOException {
+        // Allow the usage of '\' as an escape character so we can log values with a comma.
+        CSVFormat csvFormat = CSVFormat.newFormat(ENTRY_SEPARATOR).builder()
+            .setSkipHeaderRecord(true)
+            .setEscape('\\')
+            .build();
+
+        // Load the message string as a record, with each comma separated value as a column
+        CSVRecord rec = csvFormat.parse(new StringReader(in)).getRecords().get(0);
+
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(rec.iterator(), 0), false)
+            .map(field -> field.split(KEY_VALUE_SEPARATOR))
+            .collect(Collectors.toMap(
+                array -> StringUtils.strip(array[0]),   // Key
+                array -> StringUtils.strip(array[1])    // Value
+            ));
     }
 
     private String maskMBI(String unMaskedMessage) {
