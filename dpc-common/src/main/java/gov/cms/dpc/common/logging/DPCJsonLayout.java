@@ -73,8 +73,8 @@ public class DPCJsonLayout extends EventJsonLayout {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(rec.iterator(), 0), false)
             .map(field -> field.split(KEY_VALUE_SEPARATOR))
             .collect(Collectors.toMap(
-                array -> StringUtils.strip(array[0]),                 // Key
-                array -> StringUtils.strip(array[1])                  // Value
+                array -> StringUtils.strip(array[0]),   // Key
+                array -> StringUtils.strip(array[1])    // Value
             ));
     }
 
