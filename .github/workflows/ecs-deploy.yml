@@ -38,35 +38,35 @@ jobs:
           cd terraform/dev/persistent
           terraform init
           terraform plan -out dpc-release-dev.tfplan -lock=false 2>&1
-      - name: Apply persistent plan
-        run: |
-          echo 'TBD'
-      - name: Verify main environment plan
-        run: |
-          echo 'TBD'
-      - name: Apply main environment plan
-        run: |
-          echo 'TBD'
-  wait-for-deployment:
-    name: Wait for deployment
-    runs-on: self-hosted
-    if: ${{ false }}
-    steps:
-      - name: First check
-        run: |
-          echo 'TBD'
-  notify-new-relic:
-    name: Notify New Relic
-    runs-on: self-hosted
-    if: ${{ false }}
-    steps:
-        run: |
-          echo 'TBD'
-  notify-slack:
-    name: Notify Slack
-    runs-on: self-hosted
-    if: ${{ false }}
-    steps:
-      - name: 'notify slack'
-        run: |
-          echo 'TBD'
+  #     - name: Apply persistent plan
+  #       run: |
+  #         echo 'TBD'
+  #     - name: Verify main environment plan
+  #       run: |
+  #         echo 'TBD'
+  #     - name: Apply main environment plan
+  #       run: |
+  #         echo 'TBD'
+  # wait-for-deployment:
+  #   name: Wait for deployment
+  #   runs-on: self-hosted
+  #   if: ${{ false }}
+  #   steps:
+  #     - name: First check
+  #       run: |
+  #         echo 'TBD'
+  # notify-new-relic:
+  #   name: Notify New Relic
+  #   runs-on: self-hosted
+  #   if: ${{ false }}
+  #   steps:
+  #       run: |
+  #         echo 'TBD'
+  # notify-slack:
+  #   name: Notify Slack
+  #   runs-on: self-hosted
+  #   if: ${{ false }}
+  #   steps:
+  #     - name: 'notify slack'
+  #       run: |
+  #         echo 'TBD'
