@@ -18,6 +18,6 @@ jobs:
     runs-on: self-hosted
     needs: tag-dpc-app
     steps:
-      - name: "Tag Release"
+      - name: "Release Tag"
         run: |
           echo ${{ needs.tag-dpc-app.outputs.tag }}

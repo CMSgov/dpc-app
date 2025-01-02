@@ -27,6 +27,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.repo_ref || 'main' }}
+          repository: ${{ inputs.repository }}
       - name: "Fetch git info"
         run: |
           git fetch --quiet
