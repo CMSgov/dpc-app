@@ -30,4 +30,4 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: 'CMSgov/dpc-ops'
-          
+          ref: 'main'          
