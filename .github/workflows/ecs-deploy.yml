@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     name: Deploy
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Verify build parameters
         run: |
@@ -20,15 +20,24 @@ jobs:
         run: |
           echo 'TBD'
       - name: "Checkout code"
-        if: ${{ false }}
         uses: actions/checkout@v4
         with:
           repository: 'CMSgov/dpc-ops'
           ref: 'main'
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
+      - name: install terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.0.0"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Verify persistent plan
         run: |
-          echo 'TBD'
+          cd terraform/dev/persistent
+          terraform init
+          terraform plan -out dpc-release-dev.tfplan -lock=false 2>&1
       - name: Apply persistent plan
         run: |
           echo 'TBD'
@@ -38,12 +47,26 @@ jobs:
       - name: Apply main environment plan
         run: |
           echo 'TBD'
-      - name: Wait for deployment
+  wait-for-deployment:
+    name: Wait for deployment
+    runs-on: self-hosted
+    if: ${{ false }}
+    steps:
+      - name: First check
         run: |
           echo 'TBD'
-      - name: Notify New Relic
+  notify-new-relic:
+    name: Notify New Relic
+    runs-on: self-hosted
+    if: ${{ false }}
+    steps:
         run: |
           echo 'TBD'
-      - name: Notify Slack
+  notify-slack:
+    name: Notify Slack
+    runs-on: self-hosted
+    if: ${{ false }}
+    steps:
+      - name: 'notify slack'
         run: |
           echo 'TBD'
