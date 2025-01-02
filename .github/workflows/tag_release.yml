@@ -13,10 +13,6 @@ on:
         required: true
         default: 'main'
         type: 'string'
-      repository:
-        description: Which repository (defaults to current)
-        required: false
-        type: 'string'
     outputs:
       tag:
         description: the release tag
@@ -32,9 +28,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.repo_ref || 'main' }}
-          repository: ${{ inputs.repository }}
           fetch-tags: true
-      - name: "Set Revisions"
+      - name: "Calculate Next Revision"
         id: set_revs
         run: |
           prev_rev=`git tag -l 'r*' --sort=v:refname | tail -n 1`
@@ -43,6 +38,7 @@ jobs:
           next_rev_num=$((prev_rev_num + 1))
           next_rev=r$next_rev_num
           echo "next_rev=$next_rev" >> "$GITHUB_OUTPUT"
+          echo "Next Revision: $next_rev"
       - name: "Set Body"
         id: set_body
         env:
@@ -53,9 +49,8 @@ jobs:
             BODY='No changes'
           fi
           echo "body=$BODY" >> "$GITHUB_OUTPUT"
-          echo $BODY
-      # - name: Release
-      #   uses: softprops/action-gh-release@v2
-      #   with:
-      #     body: ${{ steps.set_body.outputs.body }}
-      #     tag_name: ${{ steps.set_revs.outputs.next_rev }}
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ steps.set_body.outputs.body }}
+          tag_name: ${{ steps.set_revs.outputs.next_rev }}
