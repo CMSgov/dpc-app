@@ -1,0 +1,21 @@
+name: 'DPC - ECS Deploy'
+
+on:
+  push:
+    paths:
+      - ./.github/workflows/ecs-deploy.yml
+
+jobs:
+  deploy_static_site:
+    name: Deploy Static Site
+    runs-on: self-hosted
+    steps:
+      - name: "Add ssh key"
+        run: |
+          ssh-agent -s
+          ssh-add - <<< '${{ secrets.DPC_OPS_SSH_KEY }}'
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+        with:
+          repository: 'CMSgov/dpc-ops'
+          ref: 'main'
