@@ -10,9 +10,20 @@ jobs:
     name: Deploy
     runs-on: self-hosted
     steps:
+      - name: Verify build parameters
+      - name: Verify image tags
+      - name: Check for maintenance mode
       - name: "Checkout code"
-        uses: actions/checkout@v2
+        if: ${{ false }}
+        uses: actions/checkout@v4
         with:
           repository: 'CMSgov/dpc-ops'
           ref: 'main'
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
+      - name: Verify persistent plan
+      - name: Apply persistent plan
+      - name: Verify main environment plan
+      - name: Apply main environment plan
+      - name: Wait for deployment
+      - name: Notify New Relic
+      - name: Notify Slack
