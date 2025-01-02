@@ -5,12 +5,9 @@ on:
     paths:
       - .github/workflows/ecs-deploy.yml
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   deploy:
+    if: ${{ false }}
     name: Deploy
     runs-on: self-hosted
     steps:
@@ -55,14 +52,13 @@ jobs:
       - name: Apply main environment plan
         run: |
           echo 'TBD'
-  # wait-for-deployment:
-  #   name: Wait for deployment
-  #   runs-on: self-hosted
-  #   if: ${{ false }}
-  #   steps:
-  #     - name: First check
-  #       run: |
-  #         echo 'TBD'
+  wait-for-deployment:
+    name: Wait for deployment
+    runs-on: self-hosted
+    steps:
+      - name: First check
+        run: |
+          echo 'TBD'
   # notify-new-relic:
   #   name: Notify New Relic
   #   runs-on: self-hosted
