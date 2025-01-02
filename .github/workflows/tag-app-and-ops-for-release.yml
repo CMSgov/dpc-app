@@ -24,8 +24,10 @@ jobs:
   tag-dpc-ops:
     name: "Tag dpc-ops"
     runs-on: self-hosted
+    permissions: read-all
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
         with:
           repository: 'CMSgov/dpc-ops'
+          
