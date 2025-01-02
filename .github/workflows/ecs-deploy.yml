@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: "Add ssh key"
         run: |
-          ssh-agent -s
+          eval `ssh-agent -s`
           ssh-add - <<< '${{ secrets.DPC_OPS_SSH_KEY }}'
       - name: "Checkout code"
         uses: actions/checkout@v4
