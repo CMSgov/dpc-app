@@ -23,6 +23,7 @@ jobs:
   #         echo ${{ needs.tag-dpc-app.outputs.tag }}
   tag-dpc-ops:
     name: "Tag dpc-ops"
+    runs-on: self-hosted
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
