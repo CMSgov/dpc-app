@@ -16,3 +16,4 @@ jobs:
           repository: 'CMSgov/dpc-ops'
           ref: 'main'
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
+          ssh-user: 'CMSgov/dpc-ops'
