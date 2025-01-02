@@ -3,7 +3,7 @@ name: 'DPC - ECS Deploy'
 on:
   push:
     paths:
-      - ./.github/workflows/ecs-deploy.yml
+      - .github/workflows/ecs-deploy.yml
 
 jobs:
   deploy_static_site:
