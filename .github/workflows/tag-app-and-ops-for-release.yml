@@ -10,9 +10,9 @@ jobs:
   tag-dpc-app:
     name: "Tag dpc-app"
     uses: CMSgov/dpc-app/.github/workflows/tag_release.yml@jd/dpc-4453-tag-release
-    runs-on: self-hosted
     with:
       repo_ref: 'main'
+      runner: 'self-hosted'
     secrets: inherit
   echo-relelase-tag:
     name: "Release Tag"

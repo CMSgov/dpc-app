@@ -3,6 +3,11 @@ name: 'Tag Repo Utility'
 on:
   workflow_call:
     inputs:
+      runner:
+        description: Which runner to use
+        required: false
+        default: 'self-hosted'
+        type: 'string'
       repo_ref:
         description: Which branch or tag
         required: true
@@ -19,6 +24,7 @@ on:
 jobs:
   tag_repo:
     name: Tag Repository
+    runs-on: ${{ inputs.runner }}
     outputs:
       next_rev: ${{ steps.set_revs.outputs.next_rev }}
     steps:
