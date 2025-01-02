@@ -1,0 +1,24 @@
+name: "DPC - Tag Release Version"
+
+on:
+  push:
+    paths:
+      - .github/workflows/tag-app-and-ops-for-release.yml
+
+
+jobs:
+  tag-dpc-app:
+    name: "tag dpc-app"
+    runs-on: self-hosted
+    uses: CMSgov/dpc-app/.github/workflows/tag_release.yml@jd/dpc-4453-tag-release
+    with:
+      repo_ref: 'main'
+    secrets: inherit
+  echo-relelase-tag:
+    name: "Release Tag"
+    runs-on: self-hosted
+    needs: tag-dpc-app
+    steps:
+      - name: "Tag Release"
+        run: |
+          echo ${{ needs.tag-dpc-app.outputs.tag }}
