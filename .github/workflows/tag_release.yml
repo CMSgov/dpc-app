@@ -33,9 +33,7 @@ jobs:
         with:
           ref: ${{ inputs.repo_ref || 'main' }}
           repository: ${{ inputs.repository }}
-      - name: "Fetch git info"
-        run: |
-          git fetch --quiet
+          fetch-tags: true
       - name: "Set Revisions"
         id: set_revs
         run: |
