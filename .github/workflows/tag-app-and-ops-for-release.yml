@@ -7,18 +7,24 @@ on:
 
 
 jobs:
-  tag-dpc-app:
-    name: "tag dpc-app"
-    uses: CMSgov/dpc-app/.github/workflows/tag_release.yml@jd/dpc-4453-tag-release
-    with:
-      repo_ref: 'main'
-      repository: 'CMSgov/dpc-ops'
-    secrets: inherit
-  echo-relelase-tag:
-    name: "Release Tag"
-    runs-on: self-hosted
-    needs: tag-dpc-app
+  # tag-dpc-app:
+  #   name: "Tag dpc-app"
+  #   uses: CMSgov/dpc-app/.github/workflows/tag_release.yml@jd/dpc-4453-tag-release
+  #   with:
+  #     repo_ref: 'main'
+  #   secrets: inherit
+  # echo-relelase-tag:
+  #   name: "Release Tag"
+  #   runs-on: self-hosted
+  #   needs: tag-dpc-app
+  #   steps:
+  #     - name: "Release Tag"
+  #       run: |
+  #         echo ${{ needs.tag-dpc-app.outputs.tag }}
+  tag-dpc-ops:
+    name: "Tag dpc-ops"
     steps:
-      - name: "Release Tag"
-        run: |
-          echo ${{ needs.tag-dpc-app.outputs.tag }}
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+        with:
+          repository: 'CMSgov/dpc-ops'
