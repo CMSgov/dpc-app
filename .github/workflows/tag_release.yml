@@ -1,4 +1,4 @@
-name: 'Tag Repo'
+name: 'Tag Repo Utility'
 
 on:
   workflow_call:
@@ -7,6 +7,10 @@ on:
         description: Which branch or tag
         required: true
         default: 'main'
+        type: 'string'
+      repository:
+        description: Which repository (defaults to current)
+        required: false
         type: 'string'
     outputs:
       tag:
@@ -45,8 +49,9 @@ jobs:
             BODY='No changes'
           fi
           echo "body=$BODY" >> "$GITHUB_OUTPUT"
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        with:
-          body: ${{ steps.set_body.outputs.body }}
-          tag_name: ${{ steps.set_revs.outputs.next_rev }}
+          echo $BODY
+      # - name: Release
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     body: ${{ steps.set_body.outputs.body }}
+      #     tag_name: ${{ steps.set_revs.outputs.next_rev }}
