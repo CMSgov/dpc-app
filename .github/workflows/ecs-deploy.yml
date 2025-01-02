@@ -56,21 +56,29 @@ jobs:
     name: Wait for deployment
     runs-on: self-hosted
     steps:
-      - name: First check
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Check API
+        run: |
+          ./scripts/check-deployment-status.sh dev api-1 api api frontend v9
+  notify-new-relic:
+    name: Notify New Relic
+    runs-on: self-hosted
+    if: ${{ false }}
+    steps:
+      - name: 'Notify New Relic'
         run: |
           echo 'TBD'
-  # notify-new-relic:
-  #   name: Notify New Relic
-  #   runs-on: self-hosted
-  #   if: ${{ false }}
-  #   steps:
-  #       run: |
-  #         echo 'TBD'
-  # notify-slack:
-  #   name: Notify Slack
-  #   runs-on: self-hosted
-  #   if: ${{ false }}
-  #   steps:
-  #     - name: 'notify slack'
-  #       run: |
-  #         echo 'TBD'
+  notify-slack:
+    name: Notify Slack
+    runs-on: self-hosted
+    if: ${{ false }}
+    steps:
+      - name: 'Notify Slack'
+        run: |
+          echo 'TBD'
