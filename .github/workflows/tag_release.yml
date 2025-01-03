@@ -29,6 +29,9 @@ jobs:
         with:
           ref: ${{ inputs.repo_ref || 'main' }}
           fetch-tags: true
+      - name: "Fetch git info"
+        run: |
+          git fetch --quiet
       - name: "Calculate Next Revision"
         id: set_revs
         run: |
