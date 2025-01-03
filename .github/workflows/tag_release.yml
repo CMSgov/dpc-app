@@ -26,7 +26,7 @@ jobs:
     steps:
       - name: Assert Ownership
         run: |
-          sudo chmod -R u+rwX .
+          sudo chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
         with:
