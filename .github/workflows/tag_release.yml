@@ -1,8 +1,13 @@
-name: 'Tag Repo'
+name: 'Tag Repo Utility'
 
 on:
   workflow_call:
     inputs:
+      runner:
+        description: Which runner to use
+        required: false
+        default: 'self-hosted'
+        type: 'string'
       repo_ref:
         description: Which branch or tag
         required: true
@@ -15,7 +20,7 @@ on:
 jobs:
   tag_repo:
     name: Tag Repository
-    runs-on: self-hosted
+    runs-on: ${{ inputs.runner }}
     outputs:
       next_rev: ${{ steps.set_revs.outputs.next_rev }}
     steps:
@@ -23,10 +28,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.repo_ref || 'main' }}
-      - name: "Fetch git info"
-        run: |
-          git fetch --quiet
-      - name: "Set Revisions"
+          fetch-tags: true
+      - name: "Calculate Next Revision"
         id: set_revs
         run: |
           prev_rev=`git tag -l 'r*' --sort=v:refname | tail -n 1`
@@ -35,6 +38,7 @@ jobs:
           next_rev_num=$((prev_rev_num + 1))
           next_rev=r$next_rev_num
           echo "next_rev=$next_rev" >> "$GITHUB_OUTPUT"
+          echo "Next Revision: $next_rev"
       - name: "Set Body"
         id: set_body
         env:
