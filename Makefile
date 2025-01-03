@@ -110,6 +110,10 @@ start-portal: secure-envs
 start-portals: ## Start all frontend services
 start-portals: start-db start-web start-admin start-portal
 
+start-load-tests: ## Run DPC performance tests locally in a Docker image provided by Grafana/K6
+start-load-tests: secure-envs
+	@docker run --rm -v $(shell pwd)/dpc-load-testing:/src --env-file $(shell pwd)/ops/config/decrypted/local.env -e ENVIRONMENT=local -i grafana/k6 run /src/script.js
+
 
 # Debug commands
 # ==============
@@ -174,9 +178,7 @@ seed-db:
 
 maven-config: ## Translate local environment variables into maven.config for manual API installation
 maven-config:
-	@mkdir -p ./.mvn
-	@: > ./.mvn/maven.config
-	@while read line;do echo "-D$${line} " >> ./.mvn/maven.config;done < ./ops/config/decrypted/local.env
+	@./maven-config.sh
 
 psql: ## Run a psql shell
 	@docker compose -f docker-compose.yml exec -it db psql -U postgres

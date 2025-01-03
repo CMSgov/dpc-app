@@ -89,12 +89,8 @@ describe AoInvitationService do
                                                 .and_return(mailer)
       expect(mailer).to receive(:invite_ao).and_return(mailer)
       expect(mailer).to receive(:deliver_now)
+      expect(LogAoInviteJob).to receive(:perform_later).with(invitation_id)
 
-      allow(Rails.logger).to receive(:info)
-      expect(Rails.logger).to receive(:info).with(['Authorized Official invited',
-                                                   { actionContext: LoggingConstants::ActionContext::Registration,
-                                                     actionType: LoggingConstants::ActionType::AoInvited,
-                                                     invitation: invitation_id }])
       service.create_invitation(*params, organization_npi)
     end
   end

@@ -9,7 +9,7 @@ class Invitation < ApplicationRecord
   validate :cannot_cancel_accepted
   validate :check_if_duplicate, if: :new_record?
 
-  enum invitation_type: %i[credential_delegate authorized_official]
+  enum :invitation_type, %i[credential_delegate authorized_official]
   enum :status, %i[pending accepted expired cancelled renewed], default: :pending
 
   belongs_to :provider_organization, required: true

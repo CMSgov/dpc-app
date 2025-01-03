@@ -186,4 +186,15 @@ public class DPCJsonLayoutUnitTest {
         Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
         assertEquals(expectedLogMessage, map.get("exception"));
     }
+
+    @Test
+    void testEscapedValues() {
+        String message = "key1=value1, key2=value2a\\,value2b";
+
+        when(loggingEvent.getFormattedMessage()).thenReturn(message);
+        Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
+        assertFalse(map.containsKey("message"));
+        assertEquals("value1", map.get("key1"));
+        assertEquals("value2a,value2b", map.get("key2"));
+    }
 }

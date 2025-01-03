@@ -3,6 +3,8 @@ package gov.cms.dpc.fhir.validations;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
@@ -16,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.sql.Date;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -50,7 +53,9 @@ class PatientValidationTest {
     void definitionIsValid() {
         final StructureDefinition patientDefinition = dpcModule.fetchStructureDefinition(PatientProfile.PROFILE_URI);
         final ValidationResult result = fhirValidator.validateWithResult(patientDefinition);
-        assertEquals(1, result.getMessages().size(), "Should have a single message");
+        Stream<SingleValidationMessage> errorMessages = result.getMessages().stream()
+                .filter(error -> error.getSeverity().equals(ResultSeverityEnum.ERROR));
+        assertEquals(1, errorMessages.toArray().length, "Should have a single error message");
         assertTrue(result.getMessages().get(0).getMessage().contains("Found # expecting a token name"));
     }
 
