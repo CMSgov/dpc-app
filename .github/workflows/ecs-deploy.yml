@@ -49,9 +49,9 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Verify persistent plan
         run: |
-          cd terraform/dev/persistent
+          cd terraform/dev
           terraform init
-          terraform plan -out dpc-release-dev.tfplan -lock=false 2>&1
+          terraform plan -var 'maintenance_mode=false' -var 'release_version=commit_f413bc3a' -var 'aggregation_image_tag=rls-202501031222-4373' -var 'api_image_tag=rls-202501031222-4373' -var 'attribution_image_tag=rls-202501031222-4373' -var 'consent_image_tag=rls-202501031222-4373' -var 'web_admin_image_tag=rls-202501031222-4373' -var 'web_portal_image_tag=rls-202501031222-4373' -var 'web_image_tag=rls-202501031222-4373' -out dpc-release-dev.tfplan
       - name: Apply persistent plan
         run: |
           echo 'TBD'
