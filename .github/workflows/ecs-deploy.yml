@@ -1,9 +1,18 @@
 name: 'DPC - ECS Deploy'
 
 on:
-  push:
-    paths:
-      - .github/workflows/ecs-deploy.yml
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to check
+        required: true
+        type: 'string'
+        default: 'dev'
+      tag:
+        description: Image tag to deploy
+        required: false
+        type: 'string'
+        default: 'latest'
 
 permissions:
   id-token: write
@@ -34,11 +43,19 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: set image tag to latest
         id: rel-tag
+        env:
+        env:
+          EXPLICIT_TAG: ${{ inputs.tag }}
         run: |
-          rel_tag=`aws --region us-east-1 ecr describe-images --repository-name dpc-api --image-ids 'imageTag=latest' '--query=imageDetails[0].imageTags[?contains(@, \`rls-\`)] | [0]' --output text`
-          echo "rel_tag=$rel_tag" >> "$GITHUB_OUTPUT"
+          if [ -z $EXPLICIT_TAG ] || [ $EXPLICIT_TAG = 'latest' ]; then
+            rel_tag=`aws --region us-east-1 ecr describe-images --repository-name dpc-api --image-ids 'imageTag=latest' '--query=imageDetails[].imageTags[] | [?contains(@, \`rls-\`)] | [0]' --output text`
+            echo "rel_tag=$rel_tag" >> "$GITHUB_OUTPUT"
+          else
+            echo "rel_tag=$EXPLICIT_TAG >> "$GITHUB_OUTPUT"
+          fi
           echo $rel_tag
       - name: Check for maintenance mode
+        if: ${{ false }}
         id: maintenance-mode
         run: |
           maintenance=`aws ecs list-tags-for-resource --resource-arn arn:aws:ecs:us-east-1:755619740999:cluster/dpc-dev-backend '--query=tags[?key==\`Maintenance\`].value' --output text`
@@ -48,9 +65,6 @@ jobs:
         run: |
           echo 'Release'
           echo ${{ steps.rel-tag.outputs.rel_tag }}
-          echo 'Maintenance'
-          echo ${{ steps.maintenance-mode.outputs.maintenance }}
-          
       - name: "Checkout code"
         if: ${{ false }}
         uses: actions/checkout@v4
