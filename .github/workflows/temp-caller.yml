@@ -1,4 +1,4 @@
-name 'Temp Caller'
+name: 'Temp Caller'
 
 on:
   push:
