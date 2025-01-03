@@ -33,7 +33,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Verify image tags
         run: |
-          aws --region us-east-1 ecr describe-images --repository-name ${obj.repo} --image-ids imageTag=latest --query='imageDetails[0].imageTags[?contains(@, `rls-`)] | [0]' --output text
+          aws --region us-east-1 ecr describe-images --repository-name dpc-aggregation --image-ids 'imageTag=latest' '--query=imageDetails[0].imageTags[?contains(@, `rls-`)] | [0]' --output text
       - name: Check for maintenance mode
         run: |
           echo 'TBD'
