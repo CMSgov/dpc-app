@@ -24,9 +24,6 @@ jobs:
     outputs:
       next_rev: ${{ steps.set_revs.outputs.next_rev }}
     steps:
-      - name: Assert Ownership
-        run: |
-          sudo chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
         with:
@@ -35,12 +32,14 @@ jobs:
       - name: "Calculate Next Revision"
         id: set_revs
         run: |
+          git tag -l 'r*' --sort=v:refname
           prev_rev=`git tag -l 'r*' --sort=v:refname | tail -n 1`
           echo "prev_rev=$prev_rev" >> "$GITHUB_OUTPUT"
           prev_rev_num=${prev_rev/r}
           next_rev_num=$((prev_rev_num + 1))
           next_rev=r$next_rev_num
           echo "next_rev=$next_rev" >> "$GITHUB_OUTPUT"
+          echo "Prev Revision: $prev_rev"
           echo "Next Revision: $next_rev"
       - name: "Set Body"
         id: set_body
@@ -53,6 +52,7 @@ jobs:
           fi
           echo "body=$BODY" >> "$GITHUB_OUTPUT"
       - name: Release
+        if: ${{ false }}
         uses: softprops/action-gh-release@v2
         with:
           body: ${{ steps.set_body.outputs.body }}
