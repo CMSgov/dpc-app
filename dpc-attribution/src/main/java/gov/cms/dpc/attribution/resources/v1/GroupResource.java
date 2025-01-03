@@ -79,12 +79,11 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException("Unable to find attributable provider", Response.Status.NOT_FOUND);
         }
 
-        // TODO: Force commit before making this call (DPC-4196)
-        // Check and see if a roster already exists for the provider, if so, we just return that and ignore what they sent in
+        // Check and see if a roster already exists for the provider
         final List<RosterEntity> entities = this.rosterDAO.findEntities(null, organizationID, providerNPI, null);
         if (!entities.isEmpty()) {
-            final RosterEntity rosterEntity = entities.get(0);
-            return Response.status(Response.Status.OK).entity(this.converter.toFHIR(Group.class, rosterEntity)).build();
+            throw new WebApplicationException("Could not create a roster for this provider as they already have one.  Try updating it instead, or first deleting it.",
+                Response.Status.FORBIDDEN);
         }
 
         // Verify that all patients in the roster exist

@@ -4,7 +4,7 @@
 class ApplicationController < ActionController::Base
   IDP_HOST = ENV.fetch('IDP_HOST')
   IDP_CLIENT_ID = "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV.fetch('ENV')}".freeze
-  before_action :block_prod_sbx
+
   before_action :check_session_length
   before_action :set_current_request_attributes
 
@@ -38,10 +38,6 @@ class ApplicationController < ActionController::Base
                      query: { client_id: IDP_CLIENT_ID,
                               post_logout_redirect_uri: "#{root_url}users/auth/logged_out",
                               state: }.to_query)
-  end
-
-  def block_prod_sbx
-    redirect_to root_url if ENV.fetch('ENV', nil) == 'prod-sbx'
   end
 
   # rubocop:disable Metrics/AbcSize

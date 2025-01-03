@@ -11,7 +11,7 @@ RUN apk update && \
 
 # Set the working directory
 RUN mkdir -p /dpc-admin/vendor/api_client
-Workdir /dpc-admin
+WORKDIR /dpc-admin
 
 # Copy over the files needed to fetch dependencies
 COPY /engines/api_client/ /dpc-admin/vendor/api_client/
@@ -26,7 +26,7 @@ RUN gem install bundler --no-document && \
     npm install
 
 # Run bundler audit
-RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2015-9284
+RUN bundle exec bundle audit update && bundle exec bundle audit check
 
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-admin /dpc-admin

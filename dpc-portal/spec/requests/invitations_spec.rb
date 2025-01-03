@@ -49,14 +49,16 @@ RSpec.describe 'Invitations', type: :request do
           expect(Rails.logger).to receive(:info).with(
             ['Credential Delegate Invitation expired',
              { actionContext: LoggingConstants::ActionContext::Registration,
-               actionType: LoggingConstants::ActionType::CdInvitationExpired }]
+               actionType: LoggingConstants::ActionType::CdInvitationExpired,
+               invitation: invitation.id }]
           )
         elsif invitation.authorized_official?
           allow(Rails.logger).to receive(:info)
           expect(Rails.logger).to receive(:info).with(
             ['Authorized Official Invitation expired',
              { actionContext: LoggingConstants::ActionContext::Registration,
-               actionType: LoggingConstants::ActionType::AoInvitationExpired }]
+               actionType: LoggingConstants::ActionType::AoInvitationExpired,
+               invitation: invitation.id }]
           )
         end
         send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
@@ -70,6 +72,24 @@ RSpec.describe 'Invitations', type: :request do
     end
     it 'should show warning page if accepted' do
       invitation.accept!
+      if invitation.authorized_official?
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(
+          ['Authorized Official Invitation already accepted',
+           { actionContext: LoggingConstants::ActionContext::Registration,
+             actionType: LoggingConstants::ActionType::AoAlreadyRegistered,
+             invitation: invitation.id }]
+        )
+      elsif invitation.credential_delegate?
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(
+          ['Credential Delegate Invitation already accepted',
+           { actionContext: LoggingConstants::ActionContext::Registration,
+             actionType: LoggingConstants::ActionType::CdAlreadyRegistered,
+             invitation: invitation.id }]
+        )
+      end
+
       send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
       expect(response).to be_forbidden
       if invitation.authorized_official?
@@ -126,7 +146,8 @@ RSpec.describe 'Invitations', type: :request do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(['User began login flow',
                                                      { actionContext: LoggingConstants::ActionContext::Registration,
-                                                       actionType: LoggingConstants::ActionType::BeginLogin }])
+                                                       actionType: LoggingConstants::ActionType::BeginLogin,
+                                                       invitation: invitation.id }])
         org_id = invitation.provider_organization.id
         post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
       end
@@ -225,8 +246,16 @@ RSpec.describe 'Invitations', type: :request do
           expect(response).to redirect_to(organization_invitation_path(org, cd_invite))
         end
         it 'should show error page if email not match' do
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(
+            ['AO PII Check Fail',
+             { actionContext: LoggingConstants::ActionContext::Registration,
+               actionType: LoggingConstants::ActionType::FailAoPiiCheck,
+               invitation: invitation.id }]
+          )
           stub_user_info(overrides: { 'email' => 'another@example.com' })
           get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          expect(assigns(:given_name)).to be_nil
           expect(response).to be_forbidden
           expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.email_mismatch_status')))
         end
@@ -454,7 +483,8 @@ RSpec.describe 'Invitations', type: :request do
             approved_access_log_message = [
               'Approved access authorization occurred for the Credential Delegate',
               { actionContext: LoggingConstants::ActionContext::Registration,
-                actionType: LoggingConstants::ActionType::CdConfirmed }
+                actionType: LoggingConstants::ActionType::CdConfirmed,
+                invitation: cd_invite.id }
             ]
             expect(Rails.logger).to receive(:info).with(approved_access_log_message)
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
@@ -468,13 +498,28 @@ RSpec.describe 'Invitations', type: :request do
         end
         context :failure do
           it 'should render error page if email not match' do
+            allow(Rails.logger).to receive(:info)
+            expect(Rails.logger).to receive(:info).with(
+              ['CD PII Check Fail',
+               { actionContext: LoggingConstants::ActionContext::Registration,
+                 actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                 invitation: cd_invite.id }]
+            )
             stub_user_info(overrides: { 'email' => 'another@example.com' })
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+            expect(assigns(:given_name)).to be_nil
             expect(response).to be_forbidden
             expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.email_mismatch_status')))
             expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
           end
           it 'should render error page if family_name not match' do
+            allow(Rails.logger).to receive(:info)
+            expect(Rails.logger).to receive(:info).with(
+              ['CD PII Check Fail',
+               { actionContext: LoggingConstants::ActionContext::Registration,
+                 actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                 invitation: cd_invite.id }]
+            )
             stub_user_info(overrides: { 'family_name' => 'Something Else' })
             get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
             expect(response).to be_forbidden
@@ -539,11 +584,13 @@ RSpec.describe 'Invitations', type: :request do
           if invitation.authorized_official?
             expect(Rails.logger).to receive(:info).with(['Authorized Official linked to organization',
                                                          { actionContext: LoggingConstants::ActionContext::Registration,
-                                                           actionType: LoggingConstants::ActionType::AoLinkedToOrg }])
+                                                           actionType: LoggingConstants::ActionType::AoLinkedToOrg,
+                                                           invitation: invitation.id }])
           else
             expect(Rails.logger).to receive(:info).with(['Credential Delegate linked to organization',
                                                          { actionContext: LoggingConstants::ActionContext::Registration,
-                                                           actionType: LoggingConstants::ActionType::CdLinkedToOrg }])
+                                                           actionType: LoggingConstants::ActionType::CdLinkedToOrg,
+                                                           invitation: invitation.id }])
           end
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
         end
@@ -552,7 +599,8 @@ RSpec.describe 'Invitations', type: :request do
           allow(Rails.logger).to receive(:info)
           expect(Rails.logger).to receive(:info).with(['User logged in',
                                                        { actionContext: LoggingConstants::ActionContext::Registration,
-                                                         actionType: LoggingConstants::ActionType::UserLoggedIn }])
+                                                         actionType: LoggingConstants::ActionType::UserLoggedIn,
+                                                         invitation: invitation.id }])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
         end
 
@@ -570,11 +618,13 @@ RSpec.describe 'Invitations', type: :request do
           if invitation.authorized_official?
             expect(Rails.logger).to receive(:info).with(['Authorized Official user created,',
                                                          { actionContext: LoggingConstants::ActionContext::Registration,
-                                                           actionType: LoggingConstants::ActionType::AoCreated }])
+                                                           actionType: LoggingConstants::ActionType::AoCreated,
+                                                           invitation: invitation.id }])
           else
             expect(Rails.logger).to receive(:info).with(['Credential Delegate user created,',
                                                          { actionContext: LoggingConstants::ActionContext::Registration,
-                                                           actionType: LoggingConstants::ActionType::CdCreated }])
+                                                           actionType: LoggingConstants::ActionType::CdCreated,
+                                                           invitation: invitation.id }])
           end
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
         end
@@ -733,6 +783,26 @@ RSpec.describe 'Invitations', type: :request do
         expect(flash[:alert]).to eq fail_message
         expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
       end
+    end
+  end
+
+  describe 'GET /set_idp_token' do
+    let(:invitation) { create(:invitation, :ao) }
+    let(:org_id) { invitation.provider_organization.id }
+
+    it_behaves_like 'an invitation endpoint', :get, 'set_idp_token' do
+      let(:invitation) { create(:invitation, :ao) }
+    end
+
+    it 'should succeed in Rails.test' do
+      get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token"
+      expect(response).to be_ok
+      expect(response.body).to be_blank
+    end
+    it 'should fail outside Rails.test' do
+      allow(Rails.env).to receive(:test?).and_return false
+      get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token"
+      expect(response).to be_forbidden
     end
   end
 end

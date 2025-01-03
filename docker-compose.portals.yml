@@ -18,6 +18,7 @@ services:
       - ./tmp/letter_opener/web:/dpc-web/tmp/letter_opener
       - "./dpc-web/Gemfile.lock:/dpc-web/Gemfile.lock"
       - "./dpc-web/app:/dpc-web/app"
+      - "./dpc-web/db:/dpc-web/db"
       - "./dpc-web/spec:/dpc-web/spec"
 
     environment:
@@ -142,7 +143,7 @@ services:
 
       # Mount coverage and utility files
       - "./dpc-portal/coverage:/dpc-portal/coverage"
-      - ./tmp/letter_opener/portal:/dpc-portal/tmp/letter_opener
+      - ./tmp:/dpc-portal/tmp
     env_file:
       - ./ops/config/decrypted/local.env
     environment:

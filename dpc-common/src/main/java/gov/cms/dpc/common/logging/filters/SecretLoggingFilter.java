@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @JsonTypeName("secret-filter-factory")
 public class SecretLoggingFilter implements FilterFactory<ILoggingEvent> {
@@ -19,7 +20,7 @@ public class SecretLoggingFilter implements FilterFactory<ILoggingEvent> {
 	private final Map<String, String> envVars = System.getenv();
 
 	@NotEmpty
-	private List<String> secrets = new LinkedList<>();
+	private List<String> secrets = new ArrayList<>();
 
 	@JsonProperty("secrets") // Required for Jackson to build this correctly
 	public void setSecrets(List<String> secrets) {
@@ -33,19 +34,14 @@ public class SecretLoggingFilter implements FilterFactory<ILoggingEvent> {
 	@Override
 	public Filter<ILoggingEvent> build() {
 		// Clean the secrets list
-		for (Iterator<String> i = secrets.listIterator(); i.hasNext();) {
-			String secret = i.next();
-			if (!envVars.containsKey(secret)) {
-				i.remove();
-			}
-		}
+        List<String> containsSecrets = secrets.stream().filter(envVars::containsKey).collect(Collectors.toList());
 
 		return new Filter<>() {
 			@Override
 			public FilterReply decide(ILoggingEvent event) {
-				for (String secretName : secrets) {
+				for (String secretName : containsSecrets) {
 					if (event.getFormattedMessage().contains(envVars.get(secretName))) {
-						logger.warn("Suppressing log, attempted to write " + secretName + " in " + event.getLoggerName());
+                        logger.warn("Suppressing log, attempted to write {} in {}", secretName, event.getLoggerName());
 						return FilterReply.DENY;
 					}
 				}

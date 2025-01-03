@@ -1,0 +1,25 @@
+name: DPC Load Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-load-test:
+    name: "Run DPC API Load Test"
+    runs-on: self-hosted
+    container:
+      image: grafana/k6:latest
+      options: --user root
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run k6 test
+        env:
+          LOAD_TEST_CLIENT_TOKEN: ${{ secrets.LOAD_TEST_CLIENT_TOKEN }}
+          LOAD_TEST_PRIVATE_KEY: ${{ secrets.LOAD_TEST_PRIVATE_KEY }}
+          LOAD_TEST_PUBLIC_KEY_ID: ${{ secrets.LOAD_TEST_PUBLIC_KEY_ID }}
+        uses: grafana/run-k6-action@v1
+        with:
+          path: ./dpc-load-testing/script.js

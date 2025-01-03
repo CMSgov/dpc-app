@@ -7,7 +7,7 @@ RSpec.describe Invitation, type: :model do
   let(:organization) { build(:provider_organization) }
 
   describe :cd do
-    let(:valid_new_cd_invite) { build(:invitation, :cd) }
+    let(:valid_new_cd_invite) { build(:invitation, :cd, provider_organization: organization) }
     describe :create do
       it 'passes validations' do
         expect(valid_new_cd_invite.valid?).to eq true
@@ -81,6 +81,31 @@ RSpec.describe Invitation, type: :model do
           valid_new_cd_invite.status = :fake_status
         end.to raise_error(ArgumentError)
       end
+
+      context 'duplicate information' do
+        let(:ao_user) { build(:user) }
+        before { valid_new_cd_invite.save! }
+        it 'fails on existing invitation with same email and full name' do
+          new_cd_invite = build(:invitation, :cd, provider_organization: organization, invited_by: ao_user)
+          expect(new_cd_invite.valid?).to eq false
+          expect(new_cd_invite.errors[:base].size).to eq 1
+          expect(new_cd_invite.errors[:base].first[:status]).to eq I18n.t('errors.attributes.base.duplicate_cd.status')
+          expect(new_cd_invite.errors[:base].first[:text]).to eq I18n.t('errors.attributes.base.duplicate_cd.text')
+        end
+
+        it 'fails on existing cd with same email' do
+          user = create(:user)
+          new_cd_invite = build(:invitation, :cd, provider_organization: organization, invited_by: ao_user,
+                                                  invited_email: user.email, invited_email_confirmation: user.email)
+          expect(new_cd_invite.valid?).to eq true
+
+          create(:cd_org_link, user:, provider_organization: organization, invitation: valid_new_cd_invite)
+          expect(new_cd_invite.valid?).to eq false
+          expect(new_cd_invite.errors[:base].size).to eq 1
+          expect(new_cd_invite.errors[:base].first[:status]).to eq I18n.t('errors.attributes.base.duplicate_cd.status')
+          expect(new_cd_invite.errors[:base].first[:text]).to eq I18n.t('errors.attributes.base.duplicate_cd.text')
+        end
+      end
     end
 
     describe :update do
@@ -130,6 +155,10 @@ RSpec.describe Invitation, type: :model do
         invitation = create(:invitation, :cd, created_at: 2.days.ago)
         expect(invitation.expired?).to eq true
       end
+      it 'should not be expired if acccepted and more than 2 days old' do
+        invitation = create(:invitation, :cd, created_at: 49.hours.ago, status: :accepted)
+        expect(invitation.expired?).to eq false
+      end
     end
 
     describe :accept! do
@@ -141,6 +170,18 @@ RSpec.describe Invitation, type: :model do
         expect(invitation.invited_family_name).to be_nil
         expect(invitation.invited_email).to be_nil
         expect(invitation).to be_accepted
+      end
+      it 'sends a confirmation email' do
+        invitation = create(:invitation, :cd)
+        mailer = double(InvitationMailer)
+        expect(InvitationMailer).to receive(:with)
+          .with(invitation:,
+                invited_given_name: invitation.invited_given_name,
+                invited_family_name: invitation.invited_family_name)
+          .and_return(mailer)
+        expect(mailer).to receive(:cd_accepted).and_return(mailer)
+        expect(mailer).to receive(:deliver_later)
+        invitation.accept!
       end
     end
 
@@ -334,6 +375,11 @@ RSpec.describe Invitation, type: :model do
         expect(invitation.invited_family_name).to be_nil
         expect(invitation.invited_email).to be_nil
         expect(invitation).to be_accepted
+      end
+      it 'does not send a confirmation email' do
+        invitation = create(:invitation, :ao)
+        expect(InvitationMailer).not_to receive(:with)
+        invitation.accept!
       end
     end
 

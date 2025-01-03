@@ -7,17 +7,18 @@ ruby '~>3.3'
 
 # Anchored versions, do not bump without testing
 # Specifying rails components to be able to omit unused actioncable
-gem 'actionmailbox', '~> 7.1.4.1'
-gem 'actionmailer', '~> 7.1.4.1'
-gem 'actionpack', '~> 7.1.4.1'
-gem 'actiontext', '~> 7.1.4.1'
-gem 'actionview', '~> 7.1.4.1'
-gem 'activejob', '~> 7.1.4.1'
-gem 'activemodel', '~> 7.1.4.1'
-gem 'activerecord', '~> 7.1.4.1'
-gem 'activestorage', '~> 7.1.4.1'
-gem 'activesupport', '~> 7.1.4.1'
-gem 'railties', '~> 7.1.4.1'
+gem 'actionmailbox', '~> 7.2.2.1'
+gem 'actionmailer', '~> 7.2.2.1'
+gem 'actionpack', '~> 7.2.2.1'
+gem 'actiontext', '~> 7.2.2.1'
+gem 'actionview', '~> 7.2.2.1'
+gem 'activejob', '~> 7.2.2.1'
+gem 'activemodel', '~> 7.2.2.1'
+gem 'activerecord', '~> 7.2.2.1'
+gem 'activestorage', '~> 7.2.2.1'
+gem 'activesupport', '~> 7.2.2.1'
+gem 'railties', '~> 7.2.2.1'
+gem 'csv'
 gem 'bundler', '>= 1.15.0'
 gem 'sprockets-rails', '>= 3.4.2'
 gem 'puma', '~> 6.4.3'
@@ -27,7 +28,7 @@ gem 'kramdown', '~> 2.3', '>= 2.3.1'
 gem 'luhnacy', '~> 0.2.1'
 gem 'sidekiq', '~> 7.2.4'
 gem 'newrelic_rpm', '~> 8.10'
-gem 'rexml', '>= 3.3.6'
+gem 'rexml', '>= 3.3.9'
 gem 'bootsnap', '>= 1.1.0', require: false
 gem 'sassc-rails', '>= 2.1.2'
 gem 'uglifier', '>= 1.3.0'
@@ -38,13 +39,13 @@ gem 'devise-security', '>= 0.17.0'
 gem 'truemail'
 gem 'health_check', '>= 3.1.0'
 gem 'fhir_models'
-gem 'sidekiq_alive', '~> 2.1.5'
+gem 'sidekiq_alive', '~> 2.4'
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 gem 'kaminari', '>= 1.2.2'
 gem 'active_model_serializers', '>= 0.10.13'
 gem 'macaroons'
 gem 'lograge', '>= 0.12.0'
-gem 'rack', '~> 2.2.8.1'
+gem 'rack', '~> 3'
 gem 'redis-namespace'
 gem 'bootstrap-table-rails'
 
@@ -58,7 +59,7 @@ group :development, :test do
   gem 'pry'
   gem 'pry-nav'
   gem 'rspec-rails', '>= 5.1.2'
-  gem 'database_cleaner'
+  gem 'database_cleaner-active_record', '~> 2.2'
   gem 'capybara', '>= 3.37.1'
   gem 'factory_bot_rails', '>= 6.2.0'
   gem 'faker'
@@ -83,8 +84,8 @@ group :development do
   gem 'web-console', '>= 4.2.0'
   gem 'listen', '~> 3.5'
 
-  gem 'rubocop', '>= 1.12.0', require: false
-  gem 'rubocop-performance', '>= 1.10.2', require: false
+  gem 'rubocop', require: false
+  gem 'rubocop-performance', require: false
 
   gem 'letter_opener', '>= 1.7.0'
 

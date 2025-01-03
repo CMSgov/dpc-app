@@ -7,8 +7,9 @@ class Invitation < ApplicationRecord
   validates :invited_email, format: Devise.email_regexp, confirmation: true, if: :new_record?
   validates :invitation_type, presence: true
   validate :cannot_cancel_accepted
+  validate :check_if_duplicate, if: :new_record?
 
-  enum invitation_type: %i[credential_delegate authorized_official]
+  enum :invitation_type, %i[credential_delegate authorized_official]
   enum :status, %i[pending accepted expired cancelled renewed], default: :pending
 
   belongs_to :provider_organization, required: true
@@ -21,6 +22,7 @@ class Invitation < ApplicationRecord
   def show_attributes
     { full_name: "#{invited_given_name} #{invited_family_name}",
       email: invited_email,
+      expired_at: expired_at.to_s,
       id: }.with_indifferent_access
   end
 
@@ -29,10 +31,23 @@ class Invitation < ApplicationRecord
   end
 
   def expired?
-    created_at < 2.days.ago
+    pending? && Time.now > expiration_date
+  end
+
+  def expired_at
+    return unless expired?
+
+    expiration_date
+  end
+
+  def expiration_date
+    created_at + 2.days
   end
 
   def accept!
+    if credential_delegate?
+      InvitationMailer.with(invitation: self, invited_given_name:, invited_family_name:).cd_accepted.deliver_later
+    end
     update!(invited_given_name: nil, invited_family_name: nil, invited_email: nil,
             status: :accepted)
   end
@@ -91,6 +106,23 @@ class Invitation < ApplicationRecord
     check_missing_user_info(user_info, 'email')
 
     user_info['email'].downcase == invited_email.downcase
+  end
+
+  def check_if_duplicate
+    return unless credential_delegate? && (existing_invite? || existing_credential_delegate?)
+
+    errors.add(:base, :duplicate_cd)
+  end
+
+  def existing_invite?
+    Invitation.where(provider_organization:, invited_email:, invited_given_name:, invited_family_name:,
+                     status: :pending).any?
+  end
+
+  def existing_credential_delegate?
+    return false unless provider_organization&.cd_org_links&.any?
+
+    provider_organization.cd_org_links.any? { |link| link.disabled_at.nil? && link.user.email == invited_email }
   end
 
   private

@@ -11,7 +11,11 @@ import (
 var createConnection = func(dbName string, dbUser string, dbPassword string) (*sql.DB, error) {
 	var dbHost string = os.Getenv("DB_HOST")
 	var dbPort int = 5432
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPassword, dbName)
+	var sslmode string = "require"
+	if isTesting {
+		sslmode = "disable"
+	}
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", dbHost, dbPort, dbUser, dbPassword, dbName, sslmode)
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
@@ -36,7 +40,7 @@ var getAuthData = func(dbUser string, dbPassword string) ([]string, error) {
 	}
 	defer db.Close()
 
-	rows, queryErr := db.Query(`SELECT ip_address FROM ip_addresses`)
+	rows, queryErr := db.Query(`SELECT DISTINCT ip_address FROM ip_addresses`)
 	if queryErr != nil {
 		log.Warningf("Error running query: %v", queryErr)
 		return nil, queryErr
@@ -59,7 +63,7 @@ var getAuthData = func(dbUser string, dbPassword string) ([]string, error) {
 			}
 		}
 
-		ipAddresses = append(ipAddresses, ip)
+		ipAddresses = append(ipAddresses, fmt.Sprintf("%s/32", ip))
 	}
 	log.WithField("num_rows_scanned", count).Info("Successfully retrieved ip address data")
 	return ipAddresses, nil

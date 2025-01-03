@@ -2,6 +2,9 @@
 
 require 'simplecov'
 
+require 'axe-rspec'
+require 'capybara/rspec'
+
 SimpleCov.start 'rails' do
   add_group 'Serializers', 'app/serializers'
   add_group 'Services', 'app/services'
@@ -27,7 +30,7 @@ SimpleCov.start 'rails' do
 end
 
 require 'webmock/rspec'
-WebMock.disable_net_connect!(allow_localhost: true)
+WebMock.disable_net_connect!(allow_localhost: true, allow: ['github.com', 'objects.githubusercontent.com'])
 
 require 'support/fake_cpi_gateway'
 
@@ -47,6 +50,7 @@ require 'support/fake_cpi_gateway'
 #
 # See https://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
+  config.filter_run_excluding type: :system
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
   # assertions if you prefer.
