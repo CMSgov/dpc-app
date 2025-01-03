@@ -35,8 +35,9 @@ jobs:
       - name: set image tag to latest
         id: img-tag
         run: |
-          rls_tag=`aws --region us-east-1 ecr describe-images --repository-name dpc-api --image-ids 'imageTag=latest' '--query=imageDetails[0].imageTags[?contains(@, \`rls-\`)] | [0]' --output text`
-          echo "rls_tag=$rel_tag" >> "$GITHUB_OUTPUT"
+          rel_tag=`aws --region us-east-1 ecr describe-images --repository-name dpc-api --image-ids 'imageTag=latest' '--query=imageDetails[0].imageTags[?contains(@, \`rls-\`)] | [0]' --output text`
+          echo "rel_tag=$rel_tag" >> "$GITHUB_OUTPUT"
+          echo $rel_tag
       - name: Verify release tag set
         run: |
           echo ${{ steps.img-tag.outputs.rel_tag }}
