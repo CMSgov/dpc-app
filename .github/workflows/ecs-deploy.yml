@@ -17,6 +17,7 @@ jobs:
         run: |
           apk update
           apk add git
+          apk add ssh
       - name: Verify build parameters
         run: |
           echo 'TBD'
