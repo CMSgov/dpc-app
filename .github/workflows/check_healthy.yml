@@ -1,0 +1,35 @@
+name: Validate Service is up
+
+inputs:
+  env:
+    description: AWS environment to check
+    required: true
+  target:
+    description: target group suffix
+    required: true
+  task:
+    description: task suffix
+    required: true
+  service:
+    description: service name suffix
+    required: true
+  cluster:
+    description: cluster name suffix
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v4
+      with:
+        path: dpc-app
+    - name: AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: ${{ vars.AWS_REGION }}
+        role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+    - name: Check
+        run: |
+          ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} ${{ inputs.target }} ${{ inputs.task }} ${{ inputs.service }} ${{ inputs.cluster }} v9
+
