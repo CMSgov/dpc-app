@@ -31,7 +31,7 @@ jobs:
       image: alpine:latest
       options: --user root
     steps:
-      - name: Verify Build Parameters
+      - name: Run If Inputs Invalid
         if: ${{ inputs.env != inputs.confirm_env }}
         run: |
           echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
