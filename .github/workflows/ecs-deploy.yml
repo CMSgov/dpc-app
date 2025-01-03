@@ -23,7 +23,7 @@ jobs:
           apk add git --no-cache
           apk add openssh --no-cache
           apk add npm --no-cache
-          apk add --no-cache aws-cli
+          apk add aws-cli --no-cache
       - name: Verify build parameters
         run: |
           echo 'TBD'
@@ -32,9 +32,14 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Verify image tags
+      - name: set image tag to latest
+        id: img-tag
         run: |
-          aws --region us-east-1 ecr describe-images --repository-name dpc-aggregation --image-ids 'imageTag=latest' '--query=imageDetails[0].imageTags[?contains(@, `rls-`)] | [0]' --output text
+          rls_tag=`aws --region us-east-1 ecr describe-images --repository-name dpc-api --image-ids 'imageTag=latest' '--query=imageDetails[0].imageTags[?contains(@, \`rls-\`)] | [0]' --output text`
+          echo "rls_tag=$rel_tag" >> "$GITHUB_OUTPUT"
+      - name: Verify release tag set
+        run: |
+          echo ${{ steps.img-tag.outputs.rel_tag }}
       - name: Check for maintenance mode
         run: |
           echo 'TBD'
