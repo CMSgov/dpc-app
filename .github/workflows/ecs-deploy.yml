@@ -44,7 +44,6 @@ jobs:
       - name: set image tag to latest
         id: rel-tag
         env:
-        env:
           EXPLICIT_TAG: ${{ inputs.tag }}
         run: |
           if [ -z $EXPLICIT_TAG ] || [ $EXPLICIT_TAG = 'latest' ]; then
