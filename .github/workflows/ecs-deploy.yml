@@ -16,7 +16,6 @@ jobs:
     container:
       image: alpine:latest
       options: --user root
-    if: ${{ false }}
     steps:
       - name: Install Dependencies
         run: |
@@ -27,13 +26,19 @@ jobs:
       - name: Verify build parameters
         run: |
           echo 'TBD'
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Verify image tags
         run: |
-          echo 'TBD'
+          aws --region us-east-1 ecr describe-images --repository-name ${obj.repo} --image-ids imageTag=latest --query='imageDetails[0].imageTags[?contains(@, `rls-`)] | [0]' --output text
       - name: Check for maintenance mode
         run: |
           echo 'TBD'
       - name: "Checkout code"
+        if: ${{ false }}
         uses: actions/checkout@v4
         with:
           repository: 'CMSgov/dpc-ops'
@@ -41,48 +46,49 @@ jobs:
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
           path: dpc-ops
       - name: install terraform
+        if: ${{ false }}
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.0.0"
-      - name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Verify persistent plan
+        if: ${{ false }}
         run: |
           cd dpc-ops/terraform/dev/persistent
           terraform init
           terraform plan -out dpc-release-dev.tfplan -lock=false 2>&1
       - name: Apply persistent plan
+        if: ${{ false }}
         run: |
           echo 'TBD'
       - name: Verify main environment plan
+        if: ${{ false }}
         run: |
           cd dpc-ops/terraform/dev
           terraform init
           terraform plan -var 'maintenance_mode=false' -var 'release_version=commit_f413bc3a' -var 'aggregation_image_tag=rls-202501031222-4373' -var 'api_image_tag=rls-202501031222-4373' -var 'attribution_image_tag=rls-202501031222-4373' -var 'consent_image_tag=rls-202501031222-4373' -var 'web_admin_image_tag=rls-202501031222-4373' -var 'web_portal_image_tag=rls-202501031222-4373' -var 'web_image_tag=rls-202501031222-4373' -out dpc-release-dev.tfplan
       - name: Apply main environment plan
+        if: ${{ false }}
         run: |
           echo 'TBD'
   services-up:
     name: All Services Healthy
+    if: ${{ false }}
     uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
     with:
       env: dev
     secrets: inherit
   notify-new-relic:
     name: Notify New Relic
-    runs-on: self-hosted
     if: ${{ false }}
+    runs-on: self-hosted
     steps:
       - name: 'Notify New Relic'
         run: |
           echo 'TBD'
   notify-slack:
     name: Notify Slack
-    runs-on: self-hosted
     if: ${{ false }}
+    runs-on: self-hosted
     steps:
       - name: 'Notify Slack'
         run: |
