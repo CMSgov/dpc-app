@@ -13,6 +13,7 @@ jobs:
     uses: CMSgov/dpc-app/.github/workflows/ecs-deploy.yml@jd/dpc-4454-ecs-deploy
     with:
       env: dev
+      confirm_env: stage
       tag: latest
     secrets: inherit
     

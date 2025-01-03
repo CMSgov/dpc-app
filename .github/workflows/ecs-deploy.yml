@@ -8,6 +8,11 @@ on:
         required: true
         type: 'string'
         default: 'dev'
+      confirm_env:
+        description: Double check for environment
+        required: true
+        type: 'string'
+        default: ''
       tag:
         description: Image tag to deploy
         required: false
@@ -34,8 +39,10 @@ jobs:
           apk add npm --no-cache
           apk add aws-cli --no-cache
       - name: Verify build parameters
+        if: ${{ inputs.env != inputs.confirm_env }}
         run: |
-          echo 'TBD'
+          echo "${{ inputs.env }} != ${{ inputs.confirm_env }}"
+          exit 1
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
