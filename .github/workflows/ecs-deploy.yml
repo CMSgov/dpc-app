@@ -34,7 +34,7 @@ jobs:
       - name: Verify build parameters
         if: ${{ inputs.env != inputs.confirm_env }}
         run: |
-          echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env}\".")
+          echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\".")
           exit 1
       - name: Install Dependencies
         run: |
