@@ -7,6 +7,7 @@ on:
         description: AWS environment to check
         required: true
         type: 'string'
+        default: 'dev'
       target:
         description: target group suffix
         required: true
