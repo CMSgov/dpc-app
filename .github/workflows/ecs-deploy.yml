@@ -31,7 +31,7 @@ jobs:
       image: alpine:latest
       options: --user root
     steps:
-      - name: Verify build parameters
+      - name: Verify Build Parameters
         if: ${{ inputs.env != inputs.confirm_env }}
         run: |
           echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
@@ -48,7 +48,7 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
-      - name: set image tag to latest
+      - name: Set Release Image Tag
         id: rel-tag
         env:
           EXPLICIT_TAG: ${{ inputs.tag }}
@@ -74,7 +74,6 @@ jobs:
           echo 'Release'
           echo ${{ steps.rel-tag.outputs.rel_tag }}
       - name: "Checkout code"
-        if: ${{ false }}
         uses: actions/checkout@v4
         with:
           repository: 'CMSgov/dpc-ops'
@@ -82,7 +81,6 @@ jobs:
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
           path: dpc-ops
       - name: install terraform
-        if: ${{ false }}
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.0.0"
@@ -97,11 +95,10 @@ jobs:
         run: |
           echo 'TBD'
       - name: Verify main environment plan
-        if: ${{ false }}
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
           terraform init
-          terraform plan -var 'maintenance_mode=false' -var 'release_version=commit_f413bc3a' -var 'aggregation_image_tag=rls-202501031222-4373' -var 'api_image_tag=rls-202501031222-4373' -var 'attribution_image_tag=rls-202501031222-4373' -var 'consent_image_tag=rls-202501031222-4373' -var 'web_admin_image_tag=rls-202501031222-4373' -var 'web_portal_image_tag=rls-202501031222-4373' -var 'web_image_tag=rls-202501031222-4373' -out dpc-release-${{ inputs.env }}.tfplan
+          terraform plan -var 'maintenance_mode=false' -var 'release_version=commit_f413bc3a' -var 'aggregation_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'api_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'attribution_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'consent_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'web_admin_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'web_portal_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'web_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -out dpc-release-${{ inputs.env }}.tfplan
       - name: Apply main environment plan
         if: ${{ false }}
         run: |
