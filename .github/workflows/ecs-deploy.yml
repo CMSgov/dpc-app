@@ -16,6 +16,7 @@ jobs:
     container:
       image: alpine:latest
       options: --user root
+    if: ${{ false }}
     steps:
       - name: Install Dependencies
         run: |
@@ -38,6 +39,7 @@ jobs:
           repository: 'CMSgov/dpc-ops'
           ref: 'main'
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
+          path: dpc-ops
       - name: install terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -49,21 +51,22 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Verify persistent plan
         run: |
-          cd terraform/dev
+          cd dpc-ops/terraform/dev/persistent
           terraform init
-          terraform plan -var 'maintenance_mode=false' -var 'release_version=commit_f413bc3a' -var 'aggregation_image_tag=rls-202501031222-4373' -var 'api_image_tag=rls-202501031222-4373' -var 'attribution_image_tag=rls-202501031222-4373' -var 'consent_image_tag=rls-202501031222-4373' -var 'web_admin_image_tag=rls-202501031222-4373' -var 'web_portal_image_tag=rls-202501031222-4373' -var 'web_image_tag=rls-202501031222-4373' -out dpc-release-dev.tfplan
+          terraform plan -out dpc-release-dev.tfplan -lock=false 2>&1
       - name: Apply persistent plan
         run: |
           echo 'TBD'
       - name: Verify main environment plan
         run: |
-          echo 'TBD'
+          cd dpc-ops/terraform/dev
+          terraform init
+          terraform plan -var 'maintenance_mode=false' -var 'release_version=commit_f413bc3a' -var 'aggregation_image_tag=rls-202501031222-4373' -var 'api_image_tag=rls-202501031222-4373' -var 'attribution_image_tag=rls-202501031222-4373' -var 'consent_image_tag=rls-202501031222-4373' -var 'web_admin_image_tag=rls-202501031222-4373' -var 'web_portal_image_tag=rls-202501031222-4373' -var 'web_image_tag=rls-202501031222-4373' -out dpc-release-dev.tfplan
       - name: Apply main environment plan
         run: |
           echo 'TBD'
-  wait-for-deployment:
-    if: ${{ false }}
-    name: Wait for deployment
+  wait-for-api:
+    name: Wait for dpc-api to be healthy
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
@@ -76,6 +79,132 @@ jobs:
       - name: Check API
         run: |
           ./scripts/check-deployment-status.sh dev api-1 api api frontend v9
+  wait-for-attribution:
+    name: Wait for dpc-attribution to be healthy
+    runs-on: self-hosted
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Check Web
+        run: |
+          ./scripts/check-deployment-status.sh dev attribution attribution attribution backend v9
+  wait-for-aggregation:
+    name: Wait for dpc-aggregation to be healthy
+    runs-on: self-hosted
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Check Web
+        run: |
+          ./scripts/check-deployment-status.sh dev aggregation aggregation aggregation backend v9
+  wait-for-consent:
+    name: Wait for dpc-consent to be healthy
+    runs-on: self-hosted
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Check Web
+        run: |
+          ./scripts/check-deployment-status.sh dev consent consent consent backend v9
+  wait-for-web:
+    name: Wait for dpc-web to be healthy
+    runs-on: self-hosted
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Check Web
+        run: |
+          ./scripts/check-deployment-status.sh dev web-v2-1 web web frontend v9
+  wait-for-web-sidekiq:
+    name: Wait for dpc-web sidekiq to be healthy
+    runs-on: self-hosted
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Check Web Sidekiq
+        run: |
+          ./scripts/check-deployment-status.sh dev sidekiq sidekiq sidekiq frontend v9
+  wait-for-web-admin:
+    name: Wait for dpc-admin to be healthy
+    runs-on: self-hosted
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Check Web
+        run: |
+          ./scripts/check-deployment-status.sh dev web-admin-1 web-admin web-admin frontend v9
+  wait-for-admin-sidekiq:
+    name: Wait for dpc-admin sidekiq to be healthy
+    runs-on: self-hosted
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Check Admin Sidekiq
+        run: |
+          ./scripts/check-deployment-status.sh dev sidekiq-admin sidekiq-admin sidekiq-admin frontend v9
+  wait-for-portal:
+    name: Wait for dpc-portal to be healthy
+    runs-on: self-hosted
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Check Web
+        run: |
+          ./scripts/check-deployment-status.sh dev web-portal-1 dpc-portal web-portal frontend v9
+  wait-for-portal-sidekiq:
+    name: Wait for dpc-portal sidekiq to be healthy
+    runs-on: self-hosted
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Check Portal Sidekiq
+        run: |
+          ./scripts/check-deployment-status.sh dev sidekiq-portal sidekiq-portal sidekiq-portal frontend v9
   notify-new-relic:
     name: Notify New Relic
     runs-on: self-hosted
