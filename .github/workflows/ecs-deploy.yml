@@ -67,7 +67,6 @@ jobs:
           echo 'TBD'
   wait-for-api:
     name: Wait for dpc-api to be healthy
-    runs-on: self-hosted
     uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
     with:
       env: dev
