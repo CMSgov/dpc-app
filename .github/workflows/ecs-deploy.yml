@@ -17,7 +17,7 @@ jobs:
       image: alpine:latest
       options: --user root
     steps:
-      - name: Install git
+      - name: Install Dependencies
         run: |
           apk update
           apk add git --no-cache
@@ -38,7 +38,6 @@ jobs:
           ref: 'main'
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
       - name: install terraform
-        if: ${{ false }}
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.0.0"
@@ -48,7 +47,6 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Verify persistent plan
-        if: ${{ false }}
         run: |
           cd terraform/dev/persistent
           terraform init
