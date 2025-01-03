@@ -74,6 +74,7 @@ jobs:
       task: api
       service: api
       cluster: frontend
+    secrets: inherit
   wait-for-attribution:
     name: Wait for dpc-attribution to be healthy
     runs-on: self-hosted
