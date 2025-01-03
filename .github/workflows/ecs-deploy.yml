@@ -65,105 +65,11 @@ jobs:
       - name: Apply main environment plan
         run: |
           echo 'TBD'
-  api-healthy:
-    name: API Healthy
+  services-up:
+    name: All Services Healthy
     uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
     with:
       env: dev
-      target: api-1
-      task: api
-      service: api
-      cluster: frontend
-    secrets: inherit
-  attribution-healthy:
-    name: Attribution Healthy
-    uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
-    with:
-      env: dev
-      target: attribution
-      task: attribution
-      service: attribution
-      cluster: backend
-    secrets: inherit
-  aggregation-healthy:
-    name: Aggregation Healthy
-    uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
-    with:
-      env: dev
-      target: aggregation
-      task: aggregation
-      service: aggregation
-      cluster: backend
-    secrets: inherit
-  consent-healthy:
-    name: Consent Healthy
-    uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
-    with:
-      env: dev
-      target: consent
-      task: consent
-      service: consent
-      cluster: backend
-    secrets: inherit
-  web-healthy:
-    name: Web Healthy
-    uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
-    with:
-      env: dev
-      target: web-v2-1
-      task: web
-      service: web
-      cluster: frontend
-    secrets: inherit
-  web-sidekiq-healthy:
-    name: Web Sidekiq Healthy
-    uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
-    with:
-      env: dev
-      target: sidekiq
-      task: sidekiq
-      service: sidekiq
-      cluster: frontend
-    secrets: inherit
-  web-admin-healthy:
-    name: Web Admin Healthy
-    uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
-    with:
-      env: dev
-      target: web-admin-1
-      task: web-admin
-      service: web-admin
-      cluster: frontend
-    secrets: inherit
-  admin-sidekiq-healthy:
-    name: Admin Sidekiq Healthy
-    uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
-    with:
-      env: dev
-      target: sidekiq-admin
-      task: sidekiq-admin
-      service: sidekiq-admin
-      cluster: frontend
-    secrets: inherit
-  portal-healthy:
-    name: Portal Healthy
-    uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
-    with:
-      env: dev
-      target: web-portal-1
-      task: dpc-portal
-      service: web-portal
-      cluster: frontend
-    secrets: inherit
-  portal-sidekiq-healthy:
-    name: Portal Sidekiq Healthy
-    uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
-    with:
-      env: dev
-      target: sidekiq-portal
-      task: sidekiq-portal
-      service: sidekiq-portal
-      cluster: frontend
     secrets: inherit
   notify-new-relic:
     name: Notify New Relic
