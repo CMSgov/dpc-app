@@ -24,6 +24,9 @@ jobs:
     outputs:
       next_rev: ${{ steps.set_revs.outputs.next_rev }}
     steps:
+      - name: Assert Ownership
+        run: |
+          chmod -R u+rwX .
       - name: "Checkout code"
         uses: actions/checkout@v4
         with:
