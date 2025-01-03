@@ -6,18 +6,23 @@ on:
       env:
         description: AWS environment to check
         required: true
+        type: 'string'
       target:
         description: target group suffix
         required: true
+        type: 'string'
       task:
         description: task suffix
         required: true
+        type: 'string'
       service:
         description: service name suffix
         required: true
+        type: 'string'
       cluster:
         description: cluster name suffix
         required: true
+        type: 'string'
 
 jobs:
   verify-healthy:
