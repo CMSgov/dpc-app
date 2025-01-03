@@ -69,11 +69,12 @@ jobs:
     name: Wait for dpc-api to be healthy
     runs-on: self-hosted
     uses: CMSgov/dpc-app/scripts/composite_actions/ensure_healthy@jd/dpc-4454-ecs-deploy
-          env: dev
-          target: api-1
-          task: api
-          service: api
-          cluster: frontend
+    with:
+      env: dev
+      target: api-1
+      task: api
+      service: api
+      cluster: frontend
   wait-for-attribution:
     name: Wait for dpc-attribution to be healthy
     runs-on: self-hosted
