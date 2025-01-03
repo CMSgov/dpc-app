@@ -31,6 +31,11 @@ jobs:
       image: alpine:latest
       options: --user root
     steps:
+      - name: Verify build parameters
+        if: ${{ inputs.env != inputs.confirm_env }}
+        run: |
+          echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env}\".")
+          exit 1
       - name: Install Dependencies
         run: |
           apk update
@@ -38,11 +43,6 @@ jobs:
           apk add openssh --no-cache
           apk add npm --no-cache
           apk add aws-cli --no-cache
-      - name: Verify build parameters
-        if: ${{ inputs.env != inputs.confirm_env }}
-        run: |
-          echo "${{ inputs.env }} != ${{ inputs.confirm_env }}"
-          exit 1
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
