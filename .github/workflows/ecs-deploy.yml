@@ -7,9 +7,11 @@ on:
 
 jobs:
   deploy:
-    if: ${{ false }}
     name: Deploy
     runs-on: self-hosted
+    container:
+      image: alpine:latest
+      options: --user root
     steps:
       - name: Verify build parameters
         run: |
@@ -53,6 +55,7 @@ jobs:
         run: |
           echo 'TBD'
   wait-for-deployment:
+    if: ${{ false }}
     name: Wait for deployment
     runs-on: self-hosted
     steps:
