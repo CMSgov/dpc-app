@@ -71,6 +71,8 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+        with:
+          path: dpc-app
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -78,13 +80,15 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check API
         run: |
-          ./scripts/check-deployment-status.sh dev api-1 api api frontend v9
+          ./dpc-app/scripts/check-deployment-status.sh dev api-1 api api frontend v9
   wait-for-attribution:
     name: Wait for dpc-attribution to be healthy
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+        with:
+          path: dpc-app
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -92,13 +96,15 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Web
         run: |
-          ./scripts/check-deployment-status.sh dev attribution attribution attribution backend v9
+          ./dpc-app/scripts/check-deployment-status.sh dev attribution attribution attribution backend v9
   wait-for-aggregation:
     name: Wait for dpc-aggregation to be healthy
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+        with:
+          path: dpc-app
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -106,13 +112,15 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Web
         run: |
-          ./scripts/check-deployment-status.sh dev aggregation aggregation aggregation backend v9
+          ./dpc-app/scripts/check-deployment-status.sh dev aggregation aggregation aggregation backend v9
   wait-for-consent:
     name: Wait for dpc-consent to be healthy
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+        with:
+          path: dpc-app
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -120,13 +128,15 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Web
         run: |
-          ./scripts/check-deployment-status.sh dev consent consent consent backend v9
+          ./dpc-app/scripts/check-deployment-status.sh dev consent consent consent backend v9
   wait-for-web:
     name: Wait for dpc-web to be healthy
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+        with:
+          path: dpc-app
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -134,13 +144,15 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Web
         run: |
-          ./scripts/check-deployment-status.sh dev web-v2-1 web web frontend v9
+          ./dpc-app/scripts/check-deployment-status.sh dev web-v2-1 web web frontend v9
   wait-for-web-sidekiq:
     name: Wait for dpc-web sidekiq to be healthy
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+        with:
+          path: dpc-app
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -148,13 +160,15 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Web Sidekiq
         run: |
-          ./scripts/check-deployment-status.sh dev sidekiq sidekiq sidekiq frontend v9
+          ./dpc-app/scripts/check-deployment-status.sh dev sidekiq sidekiq sidekiq frontend v9
   wait-for-web-admin:
     name: Wait for dpc-admin to be healthy
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+        with:
+          path: dpc-app
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -162,13 +176,15 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Web
         run: |
-          ./scripts/check-deployment-status.sh dev web-admin-1 web-admin web-admin frontend v9
+          ./dpc-app/scripts/check-deployment-status.sh dev web-admin-1 web-admin web-admin frontend v9
   wait-for-admin-sidekiq:
     name: Wait for dpc-admin sidekiq to be healthy
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+        with:
+          path: dpc-app
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -176,13 +192,15 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Admin Sidekiq
         run: |
-          ./scripts/check-deployment-status.sh dev sidekiq-admin sidekiq-admin sidekiq-admin frontend v9
+          ./dpc-app/scripts/check-deployment-status.sh dev sidekiq-admin sidekiq-admin sidekiq-admin frontend v9
   wait-for-portal:
     name: Wait for dpc-portal to be healthy
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+        with:
+          path: dpc-app
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -190,13 +208,15 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Web
         run: |
-          ./scripts/check-deployment-status.sh dev web-portal-1 dpc-portal web-portal frontend v9
+          ./dpc-app/scripts/check-deployment-status.sh dev web-portal-1 dpc-portal web-portal frontend v9
   wait-for-portal-sidekiq:
     name: Wait for dpc-portal sidekiq to be healthy
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+        with:
+          path: dpc-app
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -204,7 +224,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Portal Sidekiq
         run: |
-          ./scripts/check-deployment-status.sh dev sidekiq-portal sidekiq-portal sidekiq-portal frontend v9
+          ./dpc-app/scripts/check-deployment-status.sh dev sidekiq-portal sidekiq-portal sidekiq-portal frontend v9
   notify-new-relic:
     name: Notify New Relic
     runs-on: self-hosted
