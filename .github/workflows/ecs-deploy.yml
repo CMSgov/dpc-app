@@ -16,8 +16,8 @@ jobs:
       - name: Install git
         run: |
           apk update
-          apk add git
-          apk add ssh
+          apk add git --no-cache
+          apk add openssh --no-cache
       - name: Verify build parameters
         run: |
           echo 'TBD'
