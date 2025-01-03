@@ -50,7 +50,7 @@ jobs:
             rel_tag=`aws --region us-east-1 ecr describe-images --repository-name dpc-api --image-ids 'imageTag=latest' '--query=imageDetails[].imageTags[] | [?contains(@, \`rls-\`)] | [0]' --output text`
             echo "rel_tag=$rel_tag" >> "$GITHUB_OUTPUT"
           else
-            echo "rel_tag=$EXPLICIT_TAG >> "$GITHUB_OUTPUT"
+            echo "rel_tag=$EXPLICIT_TAG" >> "$GITHUB_OUTPUT"
           fi
           echo $rel_tag
       - name: Check for maintenance mode
