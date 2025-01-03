@@ -9,10 +9,10 @@ on:
 
 jobs:
   deploy:
-    name: All Services Healthy
+    name: ECS Deploy
     uses: CMSgov/dpc-app/.github/workflows/ecs-deploy.yml@jd/dpc-4454-ecs-deploy
     with:
       env: dev
-      tag: rls-202412031547-4294
+      tag: latest
     secrets: inherit
     
