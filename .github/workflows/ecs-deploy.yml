@@ -47,7 +47,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: set image tag to latest
         id: rel-tag
         env:
@@ -57,7 +57,8 @@ jobs:
             rel_tag=`aws --region us-east-1 ecr describe-images --repository-name dpc-api --image-ids 'imageTag=latest' '--query=imageDetails[].imageTags[] | [?contains(@, \`rls-\`)] | [0]' --output text`
             echo "rel_tag=$rel_tag" >> "$GITHUB_OUTPUT"
           else
-            aws --region us-east-1 ecr describe-images --repository-name dpc-api --image-ids 'imageTag=${{ inputs.tag }}'
+          # Note: this will fail if the image doesn't exist
+            aws --region us-east-1 ecr describe-images --repository-name dpc-api --image-ids 'imageTag=${{ inputs.tag }}' > /dev/null
             echo "rel_tag=$EXPLICIT_TAG" >> "$GITHUB_OUTPUT"
           fi
           echo $rel_tag
@@ -65,7 +66,7 @@ jobs:
         if: ${{ false }}
         id: maintenance-mode
         run: |
-          maintenance=`aws ecs list-tags-for-resource --resource-arn arn:aws:ecs:us-east-1:755619740999:cluster/dpc-dev-backend '--query=tags[?key==\`Maintenance\`].value' --output text`
+          maintenance=`aws ecs list-tags-for-resource --resource-arn arn:aws:ecs:us-east-1:755619740999:cluster/dpc-${{ inputs.env }}-backend '--query=tags[?key==\`Maintenance\`].value' --output text`
           echo "maintenance=$maintenance" >> "$GITHUB_OUTPUT"
           echo $maintenance
       - name: Verify output set
@@ -88,9 +89,9 @@ jobs:
       - name: Verify persistent plan
         if: ${{ false }}
         run: |
-          cd dpc-ops/terraform/dev/persistent
+          cd dpc-ops/terraform/${{ inputs.env }}/persistent
           terraform init
-          terraform plan -out dpc-release-dev.tfplan -lock=false 2>&1
+          terraform plan -out dpc-release-${{ inputs.env }}.tfplan -lock=false 2>&1
       - name: Apply persistent plan
         if: ${{ false }}
         run: |
@@ -98,9 +99,9 @@ jobs:
       - name: Verify main environment plan
         if: ${{ false }}
         run: |
-          cd dpc-ops/terraform/dev
+          cd dpc-ops/terraform/${{ inputs.env }}
           terraform init
-          terraform plan -var 'maintenance_mode=false' -var 'release_version=commit_f413bc3a' -var 'aggregation_image_tag=rls-202501031222-4373' -var 'api_image_tag=rls-202501031222-4373' -var 'attribution_image_tag=rls-202501031222-4373' -var 'consent_image_tag=rls-202501031222-4373' -var 'web_admin_image_tag=rls-202501031222-4373' -var 'web_portal_image_tag=rls-202501031222-4373' -var 'web_image_tag=rls-202501031222-4373' -out dpc-release-dev.tfplan
+          terraform plan -var 'maintenance_mode=false' -var 'release_version=commit_f413bc3a' -var 'aggregation_image_tag=rls-202501031222-4373' -var 'api_image_tag=rls-202501031222-4373' -var 'attribution_image_tag=rls-202501031222-4373' -var 'consent_image_tag=rls-202501031222-4373' -var 'web_admin_image_tag=rls-202501031222-4373' -var 'web_portal_image_tag=rls-202501031222-4373' -var 'web_image_tag=rls-202501031222-4373' -out dpc-release-${{ inputs.env }}.tfplan
       - name: Apply main environment plan
         if: ${{ false }}
         run: |
@@ -110,7 +111,7 @@ jobs:
     if: ${{ false }}
     uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
     with:
-      env: dev
+      env: ${{ inputs.env }}
     secrets: inherit
   notify-new-relic:
     name: Notify New Relic
