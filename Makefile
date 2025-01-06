@@ -82,7 +82,7 @@ start-dpc: start-app start-portals
 
 start-db: ## Start the database
 start-db:
-	@docker compose up start_core_dependencies
+	@docker compose up db --wait
 
 start-api-dependencies: # Start internal Java service dependencies, e.g. attribution and aggregation services.
 start-api-dependencies:
@@ -97,15 +97,15 @@ start-api: start-app
 
 start-web: ## Start the sandbox portal
 start-web:
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up dpc_web --wait
 
 start-admin: ## Start the sandbox admin portal
 start-admin:
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up dpc_admin --wait
 
 start-portal: ## Start the DPC portal
 start-portal: secure-envs
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_portal
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up dpc_portal --wait
 
 start-portals: ## Start all frontend services
 start-portals: start-db start-web start-admin start-portal

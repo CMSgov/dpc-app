@@ -45,7 +45,8 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
 FROM ruby:3.3-alpine
 
 # Install app dependencies
-RUN apk add --no-cache postgresql-client nodejs tzdata libsodium-dev
+RUN apk add --no-cache postgresql-client nodejs tzdata libsodium-dev && \
+    apk add --no-cache curl
 
 # Set the working directory
 RUN mkdir /dpc-admin
