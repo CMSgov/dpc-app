@@ -6,10 +6,12 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 
 import java.io.IOException;
+import java.io.Serial;
 
 public class BakeryKeyPairSerializer extends StdSerializer<BakeryKeyPair> {
 
-    public static final long serialVersionUID = 42L;
+    @Serial
+    private static final long serialVersionUID = 42L;
 
     BakeryKeyPairSerializer() {
         this(null);

@@ -13,6 +13,11 @@ import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.CacheControl;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
@@ -20,11 +25,6 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -212,7 +212,7 @@ public class DataResource extends AbstractDataResource {
             throw new WebApplicationException("Range end cannot be before begin", Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
         }
 
-        RandomAccessFile randomAccessFile = null;
+        RandomAccessFile randomAccessFile;
         try {
             randomAccessFile = new RandomAccessFile(file, "r");
         } catch (IOException e) {
@@ -267,7 +267,7 @@ public class DataResource extends AbstractDataResource {
     private static class PartialFileStreamer implements StreamingOutput {
 
         private int length;
-        private RandomAccessFile raf;
+        private final RandomAccessFile raf;
         final byte[] buf = new byte[4096];
 
         PartialFileStreamer(int length, RandomAccessFile raf) {

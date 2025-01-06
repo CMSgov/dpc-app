@@ -3,11 +3,13 @@ package gov.cms.dpc.macaroons.thirdparty;
 import org.whispersystems.curve25519.Curve25519;
 import org.whispersystems.curve25519.Curve25519KeyPair;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class BakeryKeyPair implements Serializable {
 
-    public static final long serialVersionUID = 42L;
+    @Serial
+    private static final long serialVersionUID = 42L;
 
     private byte[] publicKey;
 

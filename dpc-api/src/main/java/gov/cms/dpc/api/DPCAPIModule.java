@@ -37,12 +37,11 @@ import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
+import jakarta.inject.Singleton;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
-
-import javax.inject.Singleton;
 
 public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 

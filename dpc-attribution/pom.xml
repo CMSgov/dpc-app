@@ -52,10 +52,9 @@
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
         </dependency>
-        <!--No longer shipped with Java 11, so we need to include it manually-->
         <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
         </dependency>
         <dependency>
             <groupId>ru.vyarus</groupId>
@@ -248,10 +247,6 @@
                                             <key>packages</key>
                                             <value>gov.cms.dpc.common.entities</value>
                                         </property>
-                                        <property>
-                                            <key>dialect</key>
-                                            <value>org.hibernate.dialect.PostgreSQL10Dialect</value>
-                                        </property>
                                     </properties>
                                     <includes>.*</includes>
                                 </database>
@@ -269,13 +264,13 @@
                 <dependencies>
                     <dependency>
                         <groupId>org.jooq</groupId>
-                        <artifactId>jooq-meta-extensions</artifactId>
+                        <artifactId>jooq-meta-extensions-hibernate</artifactId>
                         <version>${jooq.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>javax.persistence</groupId>
-                        <artifactId>javax.persistence-api</artifactId>
-                        <version>2.2</version>
+                        <groupId>jakarta.persistence</groupId>
+                        <artifactId>jakarta.persistence-api</artifactId>
+                        <version>3.2.0</version>
                     </dependency>
                 </dependencies>
             </plugin>

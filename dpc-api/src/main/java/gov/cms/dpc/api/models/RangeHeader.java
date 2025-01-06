@@ -1,12 +1,14 @@
 package gov.cms.dpc.api.models;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 
 public class RangeHeader implements Serializable {
 
-    public static final long serialVersionUID = 42L;
+    @Serial
+    private static final long serialVersionUID = 42L;
 
     private String unit;
     private Long start;

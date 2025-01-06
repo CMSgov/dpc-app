@@ -1,18 +1,19 @@
 package gov.cms.dpc.api.auth;
 
 import io.dropwizard.auth.UnauthorizedHandler;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 
 public class DPCUnauthorizedHandler implements UnauthorizedHandler {
 
     @Inject
     public DPCUnauthorizedHandler() {
+        // not used
     }
 
     @Override
@@ -26,7 +27,7 @@ public class DPCUnauthorizedHandler implements UnauthorizedHandler {
                 .setCode(OperationOutcome.IssueType.EXCEPTION)
                 .setDetails(new CodeableConcept().addCoding(coding));
 
-        return Response.status(Status.UNAUTHORIZED)
+        return Response.status(Response.Status.UNAUTHORIZED)
                 .type(FHIR_JSON)
                 .entity(outcome)
                 .build();

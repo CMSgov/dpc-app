@@ -7,12 +7,12 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import io.dropwizard.auth.Authenticator;
+import jakarta.inject.Inject;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import java.util.*;
 
 /**

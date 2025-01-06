@@ -12,6 +12,7 @@ import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import gov.cms.dpc.queue.config.DPCQueueConfig;
 import io.dropwizard.core.Configuration;
 import io.github.azagniotov.metrics.reporter.cloudwatch.CloudWatchReporter;
+import jakarta.inject.Singleton;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,6 @@ import org.mockito.Mockito;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 import software.amazon.awssdk.regions.Region;
 
-import javax.inject.Singleton;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;

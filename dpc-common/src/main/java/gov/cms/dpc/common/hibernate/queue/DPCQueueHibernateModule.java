@@ -5,7 +5,7 @@ import com.google.inject.Scopes;
 import io.dropwizard.core.Configuration;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 public class DPCQueueHibernateModule<T extends Configuration & IDPCQueueDatabase> extends DropwizardAwareModule<T> {
 

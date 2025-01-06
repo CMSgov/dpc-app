@@ -17,11 +17,11 @@ import io.dropwizard.core.Configuration;
 import io.dropwizard.core.server.DefaultServerFactory;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.jetty.HttpConnectorFactory;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -2,9 +2,9 @@ package gov.cms.dpc.api.auth.macaroonauth;
 
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import io.dropwizard.auth.Authorizer;
+import jakarta.ws.rs.container.ContainerRequestContext;
 
 import javax.annotation.Nullable;
-import javax.ws.rs.container.ContainerRequestContext;
 
 /**
  * Barebones authorizer for handling role-based access requests.

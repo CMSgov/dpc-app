@@ -2,17 +2,17 @@ package gov.cms.dpc.api.auth.filters;
 
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.DPCAuthFilter;
+import gov.cms.dpc.api.auth.DPCUnauthorizedHandler;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.auth.Authenticator;
-import gov.cms.dpc.api.auth.DPCUnauthorizedHandler;
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.core.UriInfo;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.core.UriInfo;
 import java.util.UUID;
 
 /**

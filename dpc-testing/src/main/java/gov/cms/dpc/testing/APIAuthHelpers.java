@@ -15,6 +15,7 @@ import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.testing.models.KeyView;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
@@ -35,7 +36,6 @@ import org.eclipse.jetty.http.HttpStatus;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -43,13 +43,13 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
-import java.sql.Date;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import static java.util.Date.from;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -118,7 +118,7 @@ public class APIAuthHelpers {
                 .setIssuer(macaroon)
                 .setSubject(macaroon)
                 .setId(UUID.randomUUID().toString())
-                .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
+                .setExpiration(from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
                 .signWith(privateKey, getSigningAlgorithm(KeyType.RSA))
                 .compact();
 
@@ -197,7 +197,7 @@ public class APIAuthHelpers {
 
     public static String generatePublicKey(PublicKey key) {
         final String encoded = Base64.getMimeEncoder().encodeToString(key.getEncoded());
-        return String.format("-----BEGIN PUBLIC KEY-----\n%s\n-----END PUBLIC KEY-----\n", encoded);
+        return String.format("-----BEGIN PUBLIC KEY-----%n%s%n-----END PUBLIC KEY-----%n", encoded);
     }
 
     /**

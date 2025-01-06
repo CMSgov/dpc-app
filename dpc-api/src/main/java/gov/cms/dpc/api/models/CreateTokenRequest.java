@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.converters.jackson.MultiFormatOffsetDateTimeDeserializer;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Objects;
@@ -12,6 +14,7 @@ import java.util.Objects;
 
 public class CreateTokenRequest implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 4464861101748469238L;
 
     @NoHtml

@@ -11,11 +11,11 @@ import gov.cms.dpc.queue.exceptions.DataRetrievalException;
 import gov.cms.dpc.queue.exceptions.DataRetrievalRetryException;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
+import jakarta.inject.Inject;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -73,7 +73,7 @@ public class DataService {
                                  OffsetDateTime transactionTime,
                                  String requestingIP, String requestUrl, DPCResourceType... resourceTypes) {
         UUID jobID = this.queue.createJob(organizationID, orgNPI, providerNPI, patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP, requestUrl, false, false);
-        LOGGER.info("Patient everything export job created with job_id={} _since={} from requestUrl={}", jobID.toString(), since, requestUrl);
+        LOGGER.info("Patient everything export job created with job_id={} _since={} from requestUrl={}", jobID, since, requestUrl);
         final String eventTime = SplunkTimestamp.getSplunkTimestamp();
         LOGGER.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},queueSubmitTime={}", "/Patient/$everything", jobID ,eventTime);
 
@@ -81,7 +81,7 @@ public class DataService {
 
         if (optionalBatches.isPresent()) {
             List<JobQueueBatch> batches = optionalBatches.get();
-            List<JobQueueBatchFile> files = batches.stream().map(JobQueueBatch::getJobQueueBatchFiles).flatMap(List::stream).collect(Collectors.toList());
+            List<JobQueueBatchFile> files = batches.stream().map(JobQueueBatch::getJobQueueBatchFiles).flatMap(List::stream).toList();
             if (files.size() == 1 && files.get(0).getResourceType() == DPCResourceType.OperationOutcome) {
                 // An OperationOutcome (ERROR) was returned
                 final String jobTime = SplunkTimestamp.getSplunkTimestamp();
@@ -100,7 +100,7 @@ public class DataService {
         // No data for the batch was returned AND No OperationOutcome was created
         LOGGER.error("No data returned from queue for job, jobID: {}; jobTimeout: {}", jobID, jobTimeoutInSeconds);
         // These Exceptions are not just thrown in the application - the message is also sent in the Response payload
-        throw new DataRetrievalException("Failed to retrieve data"); 
+        throw new DataRetrievalException("Failed to retrieve data");
     }
 
     private Optional<List<JobQueueBatch>> waitForJobToComplete(UUID jobID, UUID organizationID, IJobQueue queue) {
@@ -176,16 +176,12 @@ public class DataService {
     }
 
     private Class<? extends Resource> getClassForResourceType(DPCResourceType resourceType) {
-        switch (resourceType) {
-            case Coverage:
-                return Coverage.class;
-            case ExplanationOfBenefit:
-                return ExplanationOfBenefit.class;
-            case Patient:
-                return Patient.class;
-            default:
-                throw new DataRetrievalException("Unexpected resource type: " + resourceType);
-        }
+        return switch (resourceType) {
+            case Coverage -> Coverage.class;
+            case ExplanationOfBenefit -> ExplanationOfBenefit.class;
+            case Patient -> Patient.class;
+            default -> throw new DataRetrievalException("Unexpected resource type: " + resourceType);
+        };
     }
 
     private void addResourceEntries(Class<? extends Resource> clazz, Path path, Bundle bundle) {

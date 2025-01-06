@@ -1,12 +1,13 @@
 package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.common.annotations.NoHtml;
+import jakarta.persistence.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.hl7.fhir.dstu3.model.Endpoint;
 
-import javax.persistence.*;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -20,7 +21,8 @@ public class EndpointEntity implements Serializable {
         FAILED
     }
 
-    public static final long serialVersionUID = 42L;
+    @Serial
+    private static final long serialVersionUID = 42L;
 
     @Id
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
@@ -130,7 +132,8 @@ public class EndpointEntity implements Serializable {
     @Embeddable
     public static class ConnectionType implements Serializable {
 
-        public static final long serialVersionUID = 42L;
+        @Serial
+        private static final long serialVersionUID = 42L;
 
         @NotEmpty
         private String system;

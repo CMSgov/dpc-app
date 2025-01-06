@@ -4,10 +4,11 @@ import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.entities.IpAddressEntity_;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
-import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.inject.Inject;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+
 import java.util.List;
 import java.util.UUID;
 

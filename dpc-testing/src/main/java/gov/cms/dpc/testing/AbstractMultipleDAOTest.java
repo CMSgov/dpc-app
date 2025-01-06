@@ -2,8 +2,6 @@ package gov.cms.dpc.testing;
 
 import io.dropwizard.testing.junit5.DAOTestExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
-import org.hibernate.cfg.AvailableSettings;
-import org.hibernate.dialect.PostgreSQL10Dialect;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -34,7 +32,6 @@ public abstract class AbstractMultipleDAOTest {
         postgreSql.start();
 
         DAOTestExtension.Builder builder = DAOTestExtension.newBuilder()
-            .customizeConfiguration(c -> c.setProperty(AvailableSettings.DIALECT, PostgreSQL10Dialect.class.getName()))
             .setDriver(postgreSql.getDriverClassName())
             .setUrl(postgreSql.getJdbcUrl())
             .setUsername(postgreSql.getUsername())

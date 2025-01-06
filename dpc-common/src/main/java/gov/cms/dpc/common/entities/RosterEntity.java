@@ -1,14 +1,15 @@
 package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.fhir.FHIRExtractors;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Reference;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -19,7 +20,8 @@ import java.util.stream.Collectors;
 
 @Entity(name = "rosters")
 public class RosterEntity implements Serializable {
-    public static final long serialVersionUID = 42L;
+    @Serial
+    private static final long serialVersionUID = 42L;
 
     @Id
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")

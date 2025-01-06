@@ -15,6 +15,7 @@ import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
+import jakarta.inject.Inject;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
@@ -23,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import javax.inject.Inject;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;

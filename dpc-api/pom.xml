@@ -14,7 +14,7 @@
 
     <properties>
         <mainClass>gov.cms.dpc.api.DPCAPIService</mainClass>
-        <jjwt.version>0.11.4</jjwt.version>
+        <jjwt.version>0.12.6</jjwt.version>
         <mockserverVersion>5.15.0</mockserverVersion>
     </properties>
 
@@ -46,14 +46,17 @@
             <artifactId>dropwizard-auth</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-hibernate6</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <scope>compile</scope>
         </dependency>
-        <!--No longer shipped with Java 11, so we need to include it manually-->
         <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
         </dependency>
         <dependency>
             <groupId>ru.vyarus</groupId>
@@ -184,13 +187,9 @@
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
             <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
             <!-- Ideally, this should track the version used in Dropwizard-->
-            <version>2.41</version>
+            <version>3.0.16</version>
             <scope>test</scope>
             <exclusions>
-                <exclusion>
-                    <groupId>javax.servlet</groupId>
-                    <artifactId>javax.servlet-api</artifactId>
-                </exclusion>
                 <exclusion>
                     <groupId>junit</groupId>
                     <artifactId>junit</artifactId>
@@ -205,7 +204,7 @@
         </dependency>
         <dependency>
             <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-55</artifactId>
+            <artifactId>hypersistence-utils-hibernate-63</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -335,19 +334,19 @@
                     <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
                     <annotationProcessorPaths>
                         <annotationProcessorPath>
-                            <groupId>org.hibernate</groupId>
+                            <groupId>org.hibernate.orm</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
-                            <version>5.6.15.Final</version>
+                            <version>6.6.3.Final</version>
                         </annotationProcessorPath>
                         <path>
-                            <groupId>javax.xml.bind</groupId>
-                            <artifactId>jaxb-api</artifactId>
-                            <version>2.3.0</version>
+                            <groupId>jakarta.xml.bind</groupId>
+                            <artifactId>jakarta.xml.bind-api</artifactId>
+                            <version>4.0.2</version>
                         </path>
                         <path>
-                            <groupId>javax.annotation</groupId>
-                            <artifactId>javax.annotation-api</artifactId>
-                            <version>1.3.1</version>
+                            <groupId>jakarta.annotation</groupId>
+                            <artifactId>jakarta.annotation-api</artifactId>
+                            <version>3.0.0</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

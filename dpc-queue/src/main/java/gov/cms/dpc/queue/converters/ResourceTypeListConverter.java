@@ -1,10 +1,10 @@
 package gov.cms.dpc.queue.converters;
 
 import gov.cms.dpc.fhir.DPCResourceType;
+import jakarta.persistence.AttributeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.AttributeConverter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;

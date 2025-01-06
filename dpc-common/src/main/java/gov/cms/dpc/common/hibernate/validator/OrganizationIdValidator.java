@@ -4,9 +4,9 @@ import gov.cms.dpc.common.annotations.OrganizationId;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 
 public class OrganizationIdValidator implements ConstraintValidator<OrganizationId, OrganizationEntity.OrganizationID> {
 

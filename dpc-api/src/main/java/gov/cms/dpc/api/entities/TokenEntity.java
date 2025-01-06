@@ -6,12 +6,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 import org.hibernate.annotations.CreationTimestamp;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Transient;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Objects;
@@ -19,7 +20,8 @@ import java.util.UUID;
 
 @Entity(name = "organization_tokens")
 public class TokenEntity implements Serializable {
-    public static final long serialVersionUID = 42L;
+    @Serial
+    private static final long serialVersionUID = 42L;
 
     public enum TokenType {
         MACAROON,
@@ -126,8 +128,7 @@ public class TokenEntity implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TokenEntity)) return false;
-        TokenEntity that = (TokenEntity) o;
+        if (!(o instanceof TokenEntity that)) return false;
         return Objects.equals(id, that.id) &&
                 Objects.equals(organizationID, that.organizationID) &&
                 tokenType == that.tokenType &&

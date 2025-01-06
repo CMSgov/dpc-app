@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.cli.AbstractAdminCommand;
 import gov.cms.dpc.api.resources.v1.KeyResource;
 import io.dropwizard.core.setup.Bootstrap;
+import jakarta.ws.rs.core.MediaType;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.apache.http.HttpHeaders;
@@ -17,7 +18,6 @@ import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.IdType;
 
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystems;

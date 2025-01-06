@@ -6,22 +6,22 @@ import gov.cms.dpc.api.converters.InetDeserializer;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
 import io.hypersistence.utils.hibernate.type.basic.Inet;
-import io.hypersistence.utils.hibernate.type.basic.PostgreSQLInetType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.TypeDef;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.validation.constraints.NotNull;
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity(name = "ip_addresses")
-@TypeDef(typeClass = PostgreSQLInetType.class, defaultForType = Inet.class)
 public class IpAddressEntity implements Serializable {
-    public static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue

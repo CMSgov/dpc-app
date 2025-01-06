@@ -9,23 +9,25 @@ import gov.cms.dpc.api.converters.PublicKeySerializer;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
 import io.swagger.annotations.ApiModelProperty;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity(name = "organization_keys")
 public class PublicKeyEntity implements Serializable {
-    public static final long serialVersionUID = 42L;
+    @Serial
+    private static final long serialVersionUID = 42L;
 
     @Id
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")

@@ -1,10 +1,9 @@
 package gov.cms.dpc.aggregation.health;
 
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import ru.vyarus.dropwizard.guice.module.installer.feature.health.NamedHealthCheck;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 @Singleton
 public class AggregationEngineHealthCheck extends NamedHealthCheck {

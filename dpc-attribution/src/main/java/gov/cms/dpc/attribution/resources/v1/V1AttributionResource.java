@@ -2,7 +2,7 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import gov.cms.dpc.attribution.resources.*;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.ws.rs.Path;
 
 @Path("/v1")

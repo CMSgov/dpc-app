@@ -4,7 +4,7 @@ import gov.cms.dpc.attribution.resources.AbstractBaseResource;
 import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.common.utils.PropertiesProvider;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

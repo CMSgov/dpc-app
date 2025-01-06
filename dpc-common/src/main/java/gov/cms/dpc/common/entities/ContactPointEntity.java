@@ -1,17 +1,19 @@
 package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.common.annotations.NoHtml;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
 
 @Entity(name = "contact_telecoms")
 public class ContactPointEntity implements Serializable {
-    public static final long serialVersionUID = 42L;
+    @Serial
+    private static final long serialVersionUID = 42L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

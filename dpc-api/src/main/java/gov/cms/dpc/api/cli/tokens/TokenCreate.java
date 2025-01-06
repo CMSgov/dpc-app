@@ -2,6 +2,7 @@ package gov.cms.dpc.api.cli.tokens;
 
 import gov.cms.dpc.api.cli.AbstractAdminCommand;
 import io.dropwizard.core.setup.Bootstrap;
+import jakarta.ws.rs.core.MediaType;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.apache.http.HttpHeaders;
@@ -14,7 +15,6 @@ import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.IdType;
 
-import javax.ws.rs.core.MediaType;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;

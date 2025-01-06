@@ -1,13 +1,15 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import gov.cms.dpc.common.entities.*;
+import gov.cms.dpc.common.entities.AttributionRelationship;
+import gov.cms.dpc.common.entities.PatientEntity;
+import gov.cms.dpc.common.entities.RosterEntity;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import jakarta.inject.Inject;
+import jakarta.persistence.criteria.*;
 import org.hibernate.query.Query;
 
-import javax.inject.Inject;
-import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

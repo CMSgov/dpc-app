@@ -15,19 +15,21 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 import org.hl7.fhir.dstu3.model.Identifier;
 
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
 
 @Path("v1/Consent")
 public class ConsentResource {
@@ -64,7 +66,7 @@ public class ConsentResource {
             "<p>Must provide ONE OF Consent ID as an _id or identifier, or a patient MBI or HICN to search for.", response = Bundle.class)
     @ApiResponses(@ApiResponse(code = 400, message = "Must provide Consent or Patient id"))
     public List<Consent> search(
-            @ApiParam(value = "Consent resource _id") @QueryParam(Consent.SP_RES_ID) Optional<UUID> id,
+            @ApiParam(value = "Consent resource _id") @QueryParam(SP_RES_ID) Optional<UUID> id,
             @ApiParam(value = "Consent resource identifier") @QueryParam(Consent.SP_IDENTIFIER) Optional<UUID> identifier,
             @ApiParam(value = "Patient Identifier") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId) {
 
@@ -129,20 +131,14 @@ public class ConsentResource {
     }
 
     private List<ConsentEntity> getEntitiesByPatient(Identifier patientIdentifier) {
-        String field;
+        String field = switch (DPCIdentifierSystem.fromString(patientIdentifier.getSystem())) {
+            case MBI -> "mbi";
+            case HICN -> "hicn";
+            default -> throw new WebApplicationException("Unknown Patient ID code system", Response.Status.BAD_REQUEST);
+        };
 
         // we have been asked to search for a patient id defined by one among two (soon three!) coding systems
         // we need to determine which database field that system's value is stored in
-        switch (DPCIdentifierSystem.fromString(patientIdentifier.getSystem())) {
-            case MBI:
-                field = "mbi";
-                break;
-            case HICN:
-                field = "hicn";
-                break;
-            default:
-                throw new WebApplicationException("Unknown Patient ID code system", Response.Status.BAD_REQUEST);
-        }
 
         return this.dao.findBy(field, patientIdentifier.getValue());
     }

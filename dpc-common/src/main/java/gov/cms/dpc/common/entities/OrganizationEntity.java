@@ -3,19 +3,21 @@ package gov.cms.dpc.common.entities;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.annotations.OrganizationId;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import jakarta.persistence.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import javax.persistence.*;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
 @Entity(name = "organizations")
 public class OrganizationEntity implements Serializable {
-    public static final long serialVersionUID = 42L;
+    @Serial
+    private static final long serialVersionUID = 42L;
 
     @Id
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
@@ -152,7 +154,8 @@ public class OrganizationEntity implements Serializable {
 
     @Embeddable
     public static class OrganizationID implements Serializable {
-        public static final long serialVersionUID = 42L;
+        @Serial
+        private static final long serialVersionUID = 42L;
 
         @Column(name = "id_system")
         private DPCIdentifierSystem system;

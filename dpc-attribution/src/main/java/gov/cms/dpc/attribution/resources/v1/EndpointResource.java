@@ -14,7 +14,7 @@ import io.dropwizard.hibernate.UnitOfWork;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Endpoint;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;

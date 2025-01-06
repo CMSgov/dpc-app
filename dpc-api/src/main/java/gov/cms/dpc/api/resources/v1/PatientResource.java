@@ -27,16 +27,16 @@ import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -86,7 +86,7 @@ public class PatientResource extends AbstractPatientResource {
                 .where(Patient.ORGANIZATION.hasId(organization.getOrganization().getId()))
                 .returnBundle(Bundle.class);
 
-        if (patientMBI != null && !patientMBI.equals("")) {
+        if (patientMBI != null && !patientMBI.isEmpty()) {
 
             // Handle MBI parsing
             // This should come out as part of DPC-432
@@ -139,7 +139,7 @@ public class PatientResource extends AbstractPatientResource {
     public Bundle bulkSubmitPatients(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
                                      @ApiParam Parameters params) {
         final Bundle patientBundle = (Bundle) params.getParameterFirstRep().getResource();
-        final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator);
+        final Consumer<Patient> entryHandler = patient -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator);
 
         return bulkResourceClient(Patient.class, client, entryHandler, patientBundle);
     }
@@ -293,11 +293,8 @@ public class PatientResource extends AbstractPatientResource {
         // Set the Managing Org, since we need it for the validation
         patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
         final ValidationResult result = validator.validateWithResult(patient, new ValidationOptions().addProfile(PatientProfile.PROFILE_URI));
-        if (!result.isSuccessful()) {
-            // Temporary until DPC-536 is merged in
-            if (result.getMessages().get(0).getSeverity() != ResultSeverityEnum.INFORMATION) {
+        if (!result.isSuccessful() && result.getMessages().get(0).getSeverity() != ResultSeverityEnum.INFORMATION) {
                 throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
-            }
         }
     }
 }

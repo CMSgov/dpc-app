@@ -18,11 +18,10 @@ import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
+import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
-
-import javax.inject.Singleton;
 
 public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
 
