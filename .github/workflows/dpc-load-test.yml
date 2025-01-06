@@ -19,7 +19,6 @@ jobs:
         run: |
           docker run -d \
             --name newrelic-statsd \
-            --network host \
             -e NR_ACCOUNT_ID=${{ secrets.NEW_RELIC_ACCOUNT_ID }} \
             -e NR_API_KEY=${{ secrets.NEW_RELIC_API_KEY }} \
             -p 8125:8125/udp \
