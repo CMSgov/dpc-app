@@ -37,7 +37,7 @@ jobs:
         uses: grafana/run-k6-action@v1
         with:
           path: ./dpc-app/dpc-load-testing/script.js
-          arguments: --out statsd
+          flags: --out statsd
 
       - name: Cleanup StatsD Container
         if: always()
