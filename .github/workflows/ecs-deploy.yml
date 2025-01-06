@@ -18,6 +18,11 @@ on:
         required: false
         type: 'string'
         default: 'latest'
+      terraform:
+        description: 'Also run terraform?'
+        type: boolean
+        default: false
+        required: false
 
 permissions:
   id-token: write
@@ -81,25 +86,28 @@ jobs:
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
           path: dpc-ops
       - name: install terraform
+        if: ${{ inputs.terraform }}
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.0.0"
       - name: Verify persistent plan
+        if: ${{ inputs.terraform }}
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}/persistent
           terraform init
           terraform plan -out dpc-release-${{ inputs.env }}.tfplan -lock=false 2>&1
       - name: Apply persistent plan
-        if: ${{ false }}
+        if: ${{ inputs.terraform }}
         run: |
           echo 'TBD'
       - name: Verify main environment plan
+        if: ${{ inputs.terraform }}
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
           terraform init
           terraform plan -var 'maintenance_mode=false' -var 'release_version=commit_f413bc3a' -var 'aggregation_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'api_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'attribution_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'consent_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'web_admin_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'web_portal_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'web_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -out dpc-release-${{ inputs.env }}.tfplan
       - name: Apply main environment plan
-        if: ${{ false }}
+        if: ${{ inputs.terraform }}
         run: |
           echo 'TBD'
   services-up:
