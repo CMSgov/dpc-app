@@ -117,31 +117,6 @@ services:
       start_period: 10s
       retries: 5
 
-  start_core_dependencies:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - db
-    command: db:5432
-
-  start_api_dependencies:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - attribution
-      - aggregation
-    command: attribution:8080 aggregation:9901
-
-  start_api:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - api
-    command: api:3002
-
-  start_consent:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - consent
-    command: consent:3600
-
   tests:
     image: maven:3.6-jdk-11
     env_file:
