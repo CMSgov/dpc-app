@@ -33,6 +33,6 @@ public class IpAddressDAO extends AbstractDAO<IpAddressEntity> {
     }
 
     public void deleteIpAddress(IpAddressEntity ipAddress) {
-        currentSession().delete(ipAddress);
+        currentSession().remove(ipAddress);
     }
 }

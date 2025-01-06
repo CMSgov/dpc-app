@@ -73,6 +73,6 @@ public class TokenDAO extends AbstractDAO<TokenEntity> {
     }
 
     public void deleteToken(TokenEntity entity) {
-        this.currentSession().delete(entity);
+        this.currentSession().remove(entity);
     }
 }

@@ -44,13 +44,13 @@
         <jib.container.appRoot>/app</jib.container.appRoot>
         <jib.ecr.root>755619740999.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
         <timestamp>${maven.build.timestamp}</timestamp>
-        <jacoco.version>0.8.5</jacoco.version>
+        <jacoco.version>0.8.12</jacoco.version>
         <jooq.version>3.19.16</jooq.version>
-        <bouncey.version>1.70</bouncey.version>
+        <bouncey.version>1.79</bouncey.version>
         <pitest.version>1.5.1</pitest.version>
-        <newrelic.agent.version>7.11.1</newrelic.agent.version>
+        <newrelic.agent.version>8.16.0</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
-        <h2.version>2.2.220</h2.version>
+        <h2.version>2.3.232</h2.version>
     </properties>
 
     <developers>
@@ -170,7 +170,7 @@
             <dependency>
                 <groupId>ru.vyarus</groupId>
                 <artifactId>dropwizard-guicey</artifactId>
-                <version>6.2.2</version>
+                <version>7.1.4</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.eclipse.jetty</groupId>
@@ -748,7 +748,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.5</version>
+                    <version>0.8.12</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

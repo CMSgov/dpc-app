@@ -7,7 +7,7 @@ import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.testing.AbstractMultipleDAOTest;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.query.Query;
+import org.hibernate.query.MutationQuery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +37,7 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 	@Test
 	void test_queueAge_returns_0_on_empty() {
 		Transaction transaction = session.beginTransaction();
-		Query query = session.createQuery("DELETE from job_queue_batch");
+		MutationQuery query = session.createMutationQuery("DELETE from job_queue_batch");
 		query.executeUpdate();
 		transaction.commit();
 

@@ -82,7 +82,7 @@ public class RelationshipDAO extends DPCAbstractDAO<AttributionRelationship> {
 
         query.where(builder.equal(root.get(AttributionRelationship_.roster).get(RosterEntity_.id), rosterID));
 
-        this.currentSession().createQuery(query).executeUpdate();
+        this.currentSession().createMutationQuery(query).executeUpdate();
     }
 
     /**
@@ -91,7 +91,7 @@ public class RelationshipDAO extends DPCAbstractDAO<AttributionRelationship> {
      * @param relationship - {@link AttributionRelationship} to update
      */
     public void updateAttributionRelationship(AttributionRelationship relationship) {
-        this.currentSession().update(relationship);
+        this.currentSession().merge(relationship);
     }
 
     /**

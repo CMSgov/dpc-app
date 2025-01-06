@@ -52,7 +52,7 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
     }
 
     public void deletePublicKey(PublicKeyEntity keyEntity) {
-        currentSession().delete(keyEntity);
+        currentSession().remove(keyEntity);
     }
 
     public PublicKeyEntity findKeyByLabel(String keyLabel) {

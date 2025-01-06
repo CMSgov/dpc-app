@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * Implements a distributed {@link gov.cms.dpc.queue.models.JobQueueBatch} using a Postgres database
@@ -145,7 +144,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
             final String queryString =
                     "SELECT f FROM gov.cms.dpc.queue.models.JobQueueBatchFile f LEFT JOIN gov.cms.dpc.queue.models.JobQueueBatch b on b.jobID = f.jobID WHERE f.fileName = :fileName AND b.orgID = :org";
 
-            final Query query = session.createQuery(queryString);
+            final Query query = session.createQuery(queryString, JobQueueBatchFile.class);
             query.setParameter("fileName", fileID);
             query.setParameter("org", organizationID);
             return query.uniqueResultOptional();
@@ -171,10 +170,10 @@ public class DistributedBatchQueue extends JobQueueCommon {
      *
      * @param session - The active database session
      */
-    @SuppressWarnings("unchecked")
     private void restartStuckBatches(Session session) {
         // Find stuck batches
-        List<String> stuckBatchIDs = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 1 AND update_time < current_timestamp - interval '5 minutes' FOR UPDATE SKIP LOCKED")
+        List<String> stuckBatchIDs = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 1 AND update_time < current_timestamp - interval '5 minutes' FOR UPDATE SKIP LOCKED",
+                        String.class)
                 .getResultList();
 
         // Unstick stuck batches
@@ -184,7 +183,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
             final Root<JobQueueBatch> root = query.from(JobQueueBatch.class);
 
             query.select(root);
-            query.where(root.get("batchID").in(stuckBatchIDs.stream().map(UUID::fromString).collect(Collectors.toList())));
+            query.where(root.get("batchID").in(stuckBatchIDs.stream().map(UUID::fromString).toList()));
             final List<JobQueueBatch> stuckJobList = session.createQuery(query).getResultList();
 
             for ( JobQueueBatch stuckJob : stuckJobList ) {
@@ -203,10 +202,10 @@ public class DistributedBatchQueue extends JobQueueCommon {
      * @param aggregatorID - The ID of the aggregator processing the job
      * @return the claimed job batch
      */
-    @SuppressWarnings("unchecked")
     private Optional<JobQueueBatch> claimBatchFromDatabase(Session session, UUID aggregatorID) {
         // Claim a new batch
-        Optional<String> batchID = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED")
+        Optional<String> batchID = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED",
+                        String.class)
                 .uniqueResultOptional();
 
         if ( batchID.isPresent() ) {
@@ -327,7 +326,8 @@ public class DistributedBatchQueue extends JobQueueCommon {
         try (final Session session = this.factory.openSession()) {
             try {
                 Optional<Timestamp> submitTime =
-                    session.createNativeQuery("SELECT MIN( submit_time ) FROM job_queue_batch WHERE status = " + JobStatus.QUEUED.ordinal())
+                    session.createNativeQuery("SELECT MIN( submit_time ) FROM job_queue_batch WHERE status = " + JobStatus.QUEUED.ordinal(),
+                                    Timestamp.class)
                     .uniqueResultOptional();
 
                 if(submitTime.isPresent()) {

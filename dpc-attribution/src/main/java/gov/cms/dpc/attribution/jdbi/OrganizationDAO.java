@@ -56,7 +56,7 @@ public class OrganizationDAO extends DPCAbstractDAO<OrganizationEntity> {
     }
 
     public void deleteOrganization(OrganizationEntity entity) {
-        currentSession().delete(entity);
+        currentSession().remove(entity);
     }
 
     public List<OrganizationEntity> searchByToken(String tokenID) {
