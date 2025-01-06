@@ -27,6 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 
+import java.util.List;
+
 public class DPCAttributionService extends Application<DPCAttributionConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(DPCAttributionService.class);
@@ -108,6 +110,6 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
             }
         });
 
-        bootstrap.addBundle(new JobsBundle(new ExpireAttributions()));
+        bootstrap.addBundle(new JobsBundle(List.of(new ExpireAttributions())));
     }
 }
