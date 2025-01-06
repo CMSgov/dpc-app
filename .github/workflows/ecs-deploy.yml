@@ -122,14 +122,14 @@ jobs:
     steps:
       - name: 'Notify New Relic'
         run: |
-          for service in dpc-api-${{ inputs.env }} dpc-attribution-${{ inputs.env }} dpc-aggregation-${{ inputs.env }} dpc-consent-${{ inputs.env }} dpc-web-${{ inputs.env }} dpc-web-admin-${{ inputs.env }} dpc-web-portal-${{ inputs.env }} bad
+          for service in dpc-api-${{ inputs.env }} dpc-attribution-${{ inputs.env }} dpc-aggregation-${{ inputs.env }} dpc-consent-${{ inputs.env }} dpc-web-${{ inputs.env }} dpc-web-admin-${{ inputs.env }} dpc-web-portal-${{ inputs.env }}
           do
             application_stanza=`docker run --rm -e NEW_RELIC_API_KEY="${{ secrets.NEW_RELIC_API_KEY }}" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18 apm application search --name $service`
             if [ -z "$application_stanza" ] || [ "$application_stanza" = "null" ]; then
-              echo "No such service: $service"
+              echo "Service $service not found in New Relic, skipping gracefully."
             else
               application_id=`echo $application_stanza | jq -r ".[] | select(.name == \"$service\") | .applicationId"`
-              echo "Notify new relic about $service $application_id"
+              docker run --rm -e NEW_RELIC_API_KEY="${{ secrets.NEW_RELIC_API_KEY }}" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18 apm deployment create --applicationId "$application_id" --revision "${ jobs.deploy.outputs.rel_tag }" --user jenkins
             fi
           done
   notify-slack:
