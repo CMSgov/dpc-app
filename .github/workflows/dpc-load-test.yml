@@ -32,6 +32,7 @@ jobs:
           LOAD_TEST_CLIENT_TOKEN: ${{ secrets.LOAD_TEST_CLIENT_TOKEN }}
           LOAD_TEST_PRIVATE_KEY: ${{ secrets.LOAD_TEST_PRIVATE_KEY }}
           LOAD_TEST_PUBLIC_KEY_ID: ${{ secrets.LOAD_TEST_PUBLIC_KEY_ID }}
+          K6_STATSD_ENABLE_TAGS: true
         uses: grafana/run-k6-action@v1
         with:
           path: ./dpc-app/dpc-load-testing/script.js
