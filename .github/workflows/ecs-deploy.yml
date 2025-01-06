@@ -31,6 +31,7 @@ permissions:
 jobs:
   deploy:
     name: Deploy
+    if ${{ false }}
     runs-on: self-hosted
     container:
       image: alpine:latest
@@ -111,26 +112,41 @@ jobs:
           terraform apply dpc-release-${{ inputs.env }}.tfplan
       - uses: slackapi/slack-github-action@v2.0.0
         name: Slack failure
+        if: ${{ false }}
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: CMC1E4AEQ
+            text: "Deploy failed"
+
+  services-up:
+    name: All Services Healthy
+    if: ${{ false }}
+    needs: deploy
+    steps:
+      - name: check services
+        uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
+        with:
+          env: ${{ inputs.env }}
+        secrets: inherit
+      - uses: slackapi/slack-github-action@v2.0.0
+        name: Slack failure
         if: ${{ failure() }}
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             channel: CMC1E4AEQ
-            text: "ECS Deploy can message slack"
-
-  services-up:
-    name: All Services Healthy
-    if: ${{ false }}
-    uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
-    with:
-      env: ${{ inputs.env }}
-    secrets: inherit
+            text: "Deployed services did not come up"
+      
   notify-new-relic:
     name: Notify New Relic
     if: ${{ false }}
     runs-on: self-hosted
-    needs: deploy
+    needs:
+      - deploy
+      - services-up
     steps:
       - name: 'Notify New Relic'
         run: |
@@ -148,8 +164,17 @@ jobs:
   notify-slack:
     name: Notify Slack
     if: ${{ false }}
+    needs:
+      - deploy
+      - services-up
     runs-on: self-hosted
     steps:
-      - name: 'Notify Slack'
-        run: |
-          echo 'TBD'
+      - uses: slackapi/slack-github-action@v2.0.0
+        name: Slack Success
+        if: ${{ false }}
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: CMC1E4AEQ
+            text: "Services deployed to #{{ inputs.env }}"
