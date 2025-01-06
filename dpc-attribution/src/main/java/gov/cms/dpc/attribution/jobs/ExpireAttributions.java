@@ -34,7 +34,9 @@ public class ExpireAttributions extends Job {
     @Inject
     private Settings settings;
 
-    public ExpireAttributions() {}
+    public ExpireAttributions() {
+        // not used
+    }
 
     @Override
     public void doJob(JobExecutionContext jobContext) {
@@ -42,9 +44,10 @@ public class ExpireAttributions extends Job {
         // Find all the jobs and expire them
         logger.debug("Expiring active attribution relationships before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
 
-        try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
+        try (final Connection connection = this.dataSource.getConnection()) {
             connection.setAutoCommit(false);
 
+            final DSLContext context = DSL.using(connection, this.settings);
             final int updated = context
                     .update(Attributions.ATTRIBUTIONS)
                     .set(Attributions.ATTRIBUTIONS.INACTIVE, true)

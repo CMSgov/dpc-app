@@ -16,6 +16,7 @@ import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
+import jakarta.ws.rs.HttpMethod;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
@@ -24,7 +25,6 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -143,7 +143,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
             StringBuilder respBuilder = new StringBuilder();
-            String respLine = null;
+            String respLine;
             while ((respLine = reader.readLine()) != null) {
                 respBuilder.append(respLine.trim());
             }

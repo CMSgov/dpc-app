@@ -118,7 +118,7 @@ public class JobQueueBatchTest {
 
         var file2 = job.addJobQueueFile(DPCResourceType.Patient, 0, 1);
         assertEquals(file1, file2);
-        assertEquals(file1.getCount(), 2);
+        assertEquals(2, file1.getCount());
         assertEquals(file1, job.getJobQueueFileLatest(DPCResourceType.Patient).get());
     }
 

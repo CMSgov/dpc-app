@@ -22,11 +22,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(BufferedLoggerHandler.class)
 public class QueueHealthTest {
 
-    private Session session = mock(Session.class);
+    private final Session session = mock(Session.class);
     private final SessionFactory factory = mock(SessionFactory.class);
-    private DPCQueueManagedSessionFactory managedSessionFactory = new DPCQueueManagedSessionFactory(factory);
-    private NativeQuery query = mock(NativeQuery.class);
-    private MetricRegistry metrics = new MetricRegistry();
+    private final DPCQueueManagedSessionFactory managedSessionFactory = new DPCQueueManagedSessionFactory(factory);
+    private final NativeQuery query = mock(NativeQuery.class);
+    private final MetricRegistry metrics = new MetricRegistry();
 
     @BeforeEach
     void setupQueueDependencies() {

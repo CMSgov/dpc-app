@@ -11,17 +11,16 @@ import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
-import jakarta.inject.Inject;
-import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 
@@ -52,7 +51,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
                 .getProviders(resourceID, providerNPI, FHIRExtractors.getEntityUUID(organizationID))
                 .stream()
                 .map(p -> this.converter.toFHIR(Practitioner.class, p))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @POST

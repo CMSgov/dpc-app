@@ -70,23 +70,23 @@ class JobQueueModuleUnitTest {
 	}
 
 	@Test
-	void test_provideDpcAwsQueueConfiguration() throws NoSuchMethodException {
+	void test_provideDpcAwsQueueConfiguration() {
 		assertSame(awsConfig, queueModule.provideDpcAwsQueueConfiguration());
 	}
 
 	@Test
-	void test_provideAgeReporter() throws NoSuchMethodException {
+	void test_provideAgeReporter() {
 		assertInstanceOf(Slf4jReporter.class, queueModule.provideAgeScheduledReporter(metricRegistry));
 	}
 
 	@Test
-	void test_provideSizeReporter_emitting_to_aws() throws NoSuchMethodException {
+	void test_provideSizeReporter_emitting_to_aws() {
 		when(awsConfig.getEmitAwsMetrics()).thenReturn(true);
 		assertInstanceOf(CloudWatchReporter.class, queueModule.provideSizeScheduledReporter(metricRegistry));
 	}
 
 	@Test
-	void test_provideSizeReporter_not_emitting_to_aws() throws NoSuchMethodException {
+	void test_provideSizeReporter_not_emitting_to_aws() {
 		when(awsConfig.getEmitAwsMetrics()).thenReturn(false);
 		assertInstanceOf(Slf4jReporter.class, queueModule.provideSizeScheduledReporter(metricRegistry));
 	}
@@ -122,7 +122,7 @@ class JobQueueModuleUnitTest {
 	}
 
 	// Dummy Module that implements the providers we need to build our queues.
-	private class MockModule <T extends Configuration & DPCQueueConfig> extends DropwizardAwareModule<T> {
+	private static class MockModule <T extends Configuration & DPCQueueConfig> extends DropwizardAwareModule<T> {
 		@Provides
 		@JobTimeout
 		public int provideJobTimeoutInSeconds() {

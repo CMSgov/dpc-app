@@ -17,6 +17,10 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.testing.factories.FHIRGroupBuilder;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,10 +30,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -512,9 +512,9 @@ public class GroupResourceUnitTest {
 
         //Past date with Z offset
         String since = "2020-05-26T16:43:01.780Z";
-        Assertions.assertThrows(WebApplicationException.class, () -> {
-            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request);
-        });
+        Assertions.assertThrows(WebApplicationException.class, () ->
+                resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request)
+        );
     }
 
 }

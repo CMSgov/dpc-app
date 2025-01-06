@@ -11,16 +11,15 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Endpoint;
 
-import jakarta.inject.Inject;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class EndpointResource extends AbstractEndpointResource {
 
@@ -64,7 +63,7 @@ public class EndpointResource extends AbstractEndpointResource {
         return endpointList
                 .stream()
                 .map(e -> converter.toFHIR(Endpoint.class, e))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @FHIR

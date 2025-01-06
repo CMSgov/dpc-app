@@ -2,12 +2,12 @@ package gov.cms.dpc.attribution.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,7 +54,7 @@ public abstract class AbstractOrganizationResource {
      *
      * @param organizationID {@link UUID} of organization
      * @param organization   {@link Organization}
-     * @return - {@link Response} whether or not the {@link Organization} was updated
+     * @return - {@link Response} whether the {@link Organization} was updated
      */
     @PUT
     @FHIR
@@ -67,7 +67,7 @@ public abstract class AbstractOrganizationResource {
      * Note: This drop ALL resources associated to the given Organization
      *
      * @param organizationID - {@link UUID} of organization
-     * @return - {@link Response} whether or not the drop was successful
+     * @return - {@link Response} whether the drop was successful
      */
     @DELETE
     @FHIR

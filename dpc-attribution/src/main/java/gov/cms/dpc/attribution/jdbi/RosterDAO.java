@@ -1,8 +1,6 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import gov.cms.dpc.common.entities.AttributionRelationship;
-import gov.cms.dpc.common.entities.PatientEntity;
-import gov.cms.dpc.common.entities.RosterEntity;
+import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -51,7 +49,7 @@ public class RosterDAO extends DPCAbstractDAO<RosterEntity> {
         }
 
         if (providerNPI != null) {
-            predicates.add(builder.equal(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.PROVIDER_NP_I), providerNPI));
+            predicates.add(builder.equal(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.PROVIDER_N_P_I), providerNPI));
         }
 
         if (patientReference != null) {
@@ -79,6 +77,6 @@ public class RosterDAO extends DPCAbstractDAO<RosterEntity> {
     }
 
     public void delete(RosterEntity rosterEntity) {
-        currentSession().delete(rosterEntity);
+        currentSession().remove(rosterEntity);
     }
 }

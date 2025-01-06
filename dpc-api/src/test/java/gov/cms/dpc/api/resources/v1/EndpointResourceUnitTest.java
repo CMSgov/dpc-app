@@ -5,15 +5,19 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.*;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.apache.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.Answers;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -155,7 +159,7 @@ public class EndpointResourceUnitTest {
 
         WebApplicationException exception =  assertThrows(WebApplicationException.class,
                 () -> spiedResource.updateEndpoint(endPointUUID, newEndPoint));
-        assertEquals(exception.getResponse().getStatus(), HttpStatus.SC_UNPROCESSABLE_ENTITY);
+        assertEquals(HttpStatus.SC_UNPROCESSABLE_ENTITY, exception.getResponse().getStatus());
     }
 
     @Test

@@ -18,6 +18,7 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.factories.FHIRGroupBuilder;
+import jakarta.ws.rs.HttpMethod;
 import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
@@ -26,7 +27,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -239,7 +239,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
             StringBuilder respBuilder = new StringBuilder();
-            String respLine = null;
+            String respLine;
             while ((respLine = reader.readLine()) != null) {
                 respBuilder.append(respLine.trim());
             }
@@ -431,13 +431,11 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         assertEquals(orgBGroup.getId(), foundGroup.getId(), "Returned group ID should have been the same as requested ID");
 
 
-        assertThrows(AuthenticationException.class, () -> {
-            orgBClient.read()
-                    .resource(Group.class)
-                    .withId(orgAGroup.getId())
-                    .encodedJson()
-                    .execute();
-        },"Organization B should not be able to retrieve group from another organization (Org A)");
+        assertThrows(AuthenticationException.class, () -> orgBClient.read()
+                .resource(Group.class)
+                .withId(orgAGroup.getId())
+                .encodedJson()
+                .execute(),"Organization B should not be able to retrieve group from another organization (Org A)");
     }
 
     @Test
@@ -454,13 +452,11 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
         Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
-        assertThrows(AuthenticationException.class, () -> {
-            orgBClient.delete()
-                    .resource(orgAGroup)
-                    .encodedJson()
-                    .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
-                    .execute();
-        }, "Organization should not be able to delete another organization's group.");
+        assertThrows(AuthenticationException.class, () -> orgBClient.delete()
+                .resource(orgAGroup)
+                .encodedJson()
+                .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
+                .execute(), "Organization should not be able to delete another organization's group.");
 
         MethodOutcome result = orgBClient
                 .delete()
@@ -484,12 +480,10 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
         Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
-        assertThrows(AuthenticationException.class, () -> {
-            orgBClient.update().resource(orgAGroup)
-                    .encodedJson()
-                    .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
-                    .execute();
-        }, "Org should receive auth error when updating another org's group.");
+        assertThrows(AuthenticationException.class, () -> orgBClient.update().resource(orgAGroup)
+                .encodedJson()
+                .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
+                .execute(), "Org should receive auth error when updating another org's group.");
 
         MethodOutcome response = orgBClient.update().resource(orgBGroup)
                 .encodedJson()
@@ -544,9 +538,9 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         assertNotNull(orgAGroup, "Roster for Org A should have been created with patient they manage.");
 
         //Assert Org B can NOT add OrgA's patient
-        InvalidRequestException e = assertThrows(InvalidRequestException.class, () -> {
-            createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.singletonList(orgAPatientId));
-        }, "Org should not be able to add patients they do not managed to their group.");
+        InvalidRequestException e = assertThrows(InvalidRequestException.class, () ->
+                createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.singletonList(orgAPatientId)),
+                "Org should not be able to add patients they do not managed to their group.");
 
         assertTrue(e.getResponseBody().contains("All patients in group must exist."));
     }

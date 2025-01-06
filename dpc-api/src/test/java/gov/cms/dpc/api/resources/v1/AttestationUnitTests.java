@@ -22,13 +22,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.SecurityContext;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -90,7 +86,7 @@ public class AttestationUnitTests {
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
                 .map(Reference::getReference)
-                .collect(Collectors.toList());
+                .toList();
         final String expectedMessage = String.format("Organization %s is attesting a %s purpose between provider %s and patient(s) %s", performer.getWhoReference().getReference(), reason.getCode(), performer.getOnBehalfOfReference().getReference(), attributedPatients);
         assertEquals(expectedMessage, listAppender.list.get(0).getFormattedMessage(), "Should have correct message");
     }
@@ -120,7 +116,7 @@ public class AttestationUnitTests {
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
                 .map(Reference::getReference)
-                .collect(Collectors.toList());
+                .toList();
         final String expectedMessage = String.format("Organization %s is attesting a %s purpose between provider %s and patient(s) %s for roster %s", performer.getWhoReference().getReference(), reason.getCode(), performer.getOnBehalfOfReference().getReference(), attributedPatients, new IdType("Group", rosterID.toString()));
         assertEquals(expectedMessage, listAppender.list.get(0).getFormattedMessage(), "Should have correct message");
     }
@@ -152,7 +148,7 @@ public class AttestationUnitTests {
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
                 .map(Reference::getReference)
-                .collect(Collectors.toList());
+                .toList();
         final String expectedMessage = String.format("Organization %s is attesting a %s purpose between provider %s and patient(s) %s for roster %s", performer.getWhoReference().getReference(), reason.getCode(), performer.getOnBehalfOfReference().getReference(), attributedPatients, new IdType("Group", rosterID.toString()));
         assertEquals(expectedMessage, listAppender.list.get(0).getFormattedMessage(), "Should have correct message");
     }
@@ -184,7 +180,7 @@ public class AttestationUnitTests {
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
                 .map(Reference::getReference)
-                .collect(Collectors.toList());
+                .toList();
         final String expectedMessage = String.format("Organization %s is attesting a %s purpose between provider %s and patient(s) %s for roster %s", performer.getWhoReference().getReference(), reason.getCode(), performer.getOnBehalfOfReference().getReference(), attributedPatients, new IdType("Group", rosterID.toString()));
         assertEquals(expectedMessage, listAppender.list.get(0).getFormattedMessage(), "Should have correct message");
     }

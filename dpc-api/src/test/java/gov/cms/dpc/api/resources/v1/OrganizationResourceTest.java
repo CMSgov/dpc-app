@@ -24,6 +24,7 @@ import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.OrganizationHelpers;
 import gov.cms.dpc.testing.factories.OrganizationFactory;
+import jakarta.ws.rs.HttpMethod;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -37,7 +38,6 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -96,7 +96,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
             StringBuilder respBuilder = new StringBuilder();
-            String respLine = null;
+            String respLine;
             while ((respLine = reader.readLine()) != null) {
                 respBuilder.append(respLine.trim());
             }
@@ -266,7 +266,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         // Delegate the Macaroon
         final Macaroon macaroon = MacaroonBakery.deserializeMacaroon(GOLDEN_MACAROON).get(0);
         final String delegatedMacaroon = MacaroonsBuilder.modify(macaroon)
-                .add_first_party_caveat(String.format("organization_id = %s", orgDeletionID.toString()))
+                .add_first_party_caveat(String.format("organization_id = %s", orgDeletionID))
                 .getMacaroon()
                 .serialize(MacaroonVersion.SerializationVersion.V2_JSON);
 
@@ -309,8 +309,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<TokenEntity>>() {
-                });
+                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
             }
         }
     }
@@ -321,8 +320,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<PublicKeyEntity>>() {
-                });
+                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
             }
         }
     }

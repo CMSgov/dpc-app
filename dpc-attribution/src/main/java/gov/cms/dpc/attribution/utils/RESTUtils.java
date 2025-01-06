@@ -1,14 +1,13 @@
 package gov.cms.dpc.attribution.utils;
 
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class RESTUtils {
 
@@ -49,7 +48,7 @@ public class RESTUtils {
                     throw new WebApplicationException(response);
                 })
                 .map(r -> (T) r)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -71,7 +70,7 @@ public class RESTUtils {
     }
 
     public static UUID tokenTagToUUID(String tokenTag) {
-        final Function<String, UUID> builder = (tag) -> {
+        final Function<String, UUID> builder = tag -> {
             final IdType idType = new IdType(tag);
             return UUID.fromString(idType.getIdPart());
         };

@@ -14,6 +14,9 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -22,17 +25,8 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
 
@@ -65,15 +59,15 @@ public class OrganizationResource extends AbstractOrganizationResource {
             return this.dao.listOrganizations()
                     .stream()
                     .map(o -> this.converter.toFHIR(Organization.class, o))
-                    .collect(Collectors.toList());
+                    .toList();
         }
-        String parsedToken = parseTokenTag((tag) -> tag, identifier);
-        Set<String> idSet = Arrays.asList(parsedToken.split(",")).stream().collect(Collectors.toSet());
+        String parsedToken = parseTokenTag(tag -> tag, identifier);
+        Set<String> idSet = new HashSet<>(Arrays.asList(parsedToken.split(",")));
         if (idSet.size() > 1) {
             return this.dao.getOrganizationsByIds(idSet)
                 .stream()
                 .map(o -> this.converter.toFHIR(Organization.class, o))
-                .collect(Collectors.toList());
+                .toList();
         }
         // Pull out the NPI, keeping it as a string.
         final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(parsedToken);
@@ -81,7 +75,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
         return queryList
                 .stream()
                 .map(o -> this.converter.toFHIR(Organization.class, o))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -146,7 +140,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                         UUID endpointID = FHIRExtractors.getEntityUUID(r.getReference());
                         return endpointDAO.fetchEndpoint(endpointID);
                     }
-            ).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+            ).filter(Optional::isPresent).map(Optional::get).toList();
             orgEntity.setEndpoints(endpointEntities);
             orgEntity = this.dao.updateOrganization(organizationID, orgEntity);
             return Response.status(Response.Status.OK).entity(this.converter.toFHIR(Organization.class, orgEntity)).build();
@@ -176,7 +170,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .filter(entry -> entry.hasResource() && entry.getResource().getResourceType().getPath().equals(DPCResourceType.Endpoint.getPath()))
                 .map(entry -> (Endpoint) entry.getResource())
                 .map(e -> this.converter.fromFHIR(EndpointEntity.class, e))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private String generateNewOrgId() {

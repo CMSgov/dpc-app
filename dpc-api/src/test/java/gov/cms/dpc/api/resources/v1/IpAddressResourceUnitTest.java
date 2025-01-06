@@ -6,6 +6,8 @@ import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,8 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -72,9 +72,7 @@ class IpAddressResourceUnitTest {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("1.bad.ip.addr");
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
-        assertThrows(WebApplicationException.class, () -> {
-            ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest);
-        });
+        assertThrows(WebApplicationException.class, () -> ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest));
     }
 
     @Test
@@ -88,9 +86,7 @@ class IpAddressResourceUnitTest {
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(existingIps);
 
-        assertThrows(WebApplicationException.class, () -> {
-            ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest);
-        });
+        assertThrows(WebApplicationException.class, () -> ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest));
     }
 
     @Test
@@ -110,8 +106,6 @@ class IpAddressResourceUnitTest {
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of(existingIp));
 
-        assertThrows(WebApplicationException.class, () -> {
-            ipAddressResource.deleteIpAddress(organizationPrincipal, UUID.randomUUID());
-        });
+        assertThrows(WebApplicationException.class, () -> ipAddressResource.deleteIpAddress(organizationPrincipal, UUID.randomUUID()));
     }
 }

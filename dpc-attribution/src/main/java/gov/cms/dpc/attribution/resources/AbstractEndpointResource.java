@@ -1,10 +1,10 @@
 package gov.cms.dpc.attribution.resources;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Endpoint;
 
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 

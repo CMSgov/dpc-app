@@ -7,6 +7,7 @@ import io.dropwizard.hibernate.AbstractDAO;
 import jakarta.inject.Inject;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
 import java.util.List;
@@ -49,6 +50,6 @@ public class EndpointDAO extends AbstractDAO<EndpointEntity> {
     }
 
     public void deleteEndpoint(EndpointEntity endpointEntity) {
-        currentSession().delete(endpointEntity);
+        currentSession().remove(endpointEntity);
     }
 }
