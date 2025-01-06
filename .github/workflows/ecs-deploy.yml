@@ -30,16 +30,17 @@ permissions:
 
 jobs:
   deploy:
+    if: ${{ false }}
     name: Deploy
     runs-on: self-hosted
     container:
       image: alpine:latest
       options: --user root
     steps:
-      - name: Run If Inputs Invalid
+      - name: Run and Fail if Inputs Invalid
         if: ${{ inputs.env != inputs.confirm_env }}
         run: |
-          echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
+          echo 'Target deployment environment "${{ inputs.env }}" must be specified and match confirmed deployment environment "${{ inputs.confirm_env }}".'
           exit 1
       - name: Install Dependencies
         run: |
@@ -68,16 +69,10 @@ jobs:
           fi
           echo $rel_tag
       - name: Check for maintenance mode
-        if: ${{ false }}
         id: maintenance-mode
         run: |
           maintenance=`aws ecs list-tags-for-resource --resource-arn arn:aws:ecs:us-east-1:755619740999:cluster/dpc-${{ inputs.env }}-backend '--query=tags[?key==\`Maintenance\`].value' --output text`
           echo "maintenance=$maintenance" >> "$GITHUB_OUTPUT"
-          echo $maintenance
-      - name: Verify output set
-        run: |
-          echo 'Release'
-          echo ${{ steps.rel-tag.outputs.rel_tag }}
       - name: "Checkout code"
         uses: actions/checkout@v4
         with:
@@ -97,22 +92,23 @@ jobs:
           terraform init
           terraform plan -out dpc-release-${{ inputs.env }}.tfplan -lock=false 2>&1
       - name: Apply persistent plan
-        if: ${{ inputs.terraform }}
+        if: ${{ inputs.terraform && false }}
         run: |
-          echo 'TBD'
+          cd dpc-ops/terraform/${{ inputs.env }}/persistent
+          terraform apply dpc-release-${{ inputs.env }}.tfplan
       - name: Verify main environment plan
         if: ${{ inputs.terraform }}
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
           terraform init
-          terraform plan -var 'maintenance_mode=false' -var 'release_version=commit_f413bc3a' -var 'aggregation_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'api_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'attribution_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'consent_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'web_admin_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'web_portal_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'web_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -out dpc-release-${{ inputs.env }}.tfplan
+          terraform plan -var 'maintenance_mode=${{ steps.maintenance-mode.outputs.maintenance }} -var 'release_version=commit_f413bc3a' -var 'aggregation_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'api_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'attribution_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'consent_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'web_admin_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'web_portal_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'web_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -out dpc-release-${{ inputs.env }}.tfplan
       - name: Apply main environment plan
-        if: ${{ inputs.terraform }}
+        if: ${{ inputs.terraform && false}}
         run: |
-          echo 'TBD'
+          cd dpc-ops/terraform/${{ inputs.env }}
+          terraform apply dpc-release-${{ inputs.env }}.tfplan
   services-up:
     name: All Services Healthy
-    if: ${{ false }}
     uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
     with:
       env: ${{ inputs.env }}

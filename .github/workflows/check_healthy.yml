@@ -1,4 +1,4 @@
-name: Validate Service is up
+name: Utility for validating that services are up
 
 on:
   workflow_call:
@@ -76,6 +76,7 @@ jobs:
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} consent consent consent backend v9
   wait-for-web:
     name: Wait for dpc-web to be healthy
+    if: inputs.env != 'prod'
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
@@ -92,6 +93,7 @@ jobs:
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} web-v2-1 web web frontend v9
   wait-for-web-sidekiq:
     name: Wait for dpc-web sidekiq to be healthy
+    if: inputs.env != 'prod'
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
@@ -108,6 +110,7 @@ jobs:
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} sidekiq sidekiq sidekiq frontend v9
   wait-for-web-admin:
     name: Wait for dpc-admin to be healthy
+    if: inputs.env != 'prod'
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
@@ -124,6 +127,7 @@ jobs:
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} web-admin-1 web-admin web-admin frontend v9
   wait-for-admin-sidekiq:
     name: Wait for dpc-admin sidekiq to be healthy
+    if: inputs.env != 'prod'
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
@@ -140,6 +144,7 @@ jobs:
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} sidekiq-admin sidekiq-admin sidekiq-admin frontend v9
   wait-for-portal:
     name: Wait for dpc-portal to be healthy
+    if: inputs.env != 'prod'
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
@@ -156,6 +161,7 @@ jobs:
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} web-portal-1 dpc-portal web-portal frontend v9
   wait-for-portal-sidekiq:
     name: Wait for dpc-portal sidekiq to be healthy
+    if: inputs.env != 'dev'
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
