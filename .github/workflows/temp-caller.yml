@@ -3,6 +3,7 @@ name: 'Temp Caller'
 on:
   push:
     paths:
+      - .github/workflows/ecs-deploy.yml
       - .github/workflows/temp-caller.yml
 
   workflow_dispatch:
