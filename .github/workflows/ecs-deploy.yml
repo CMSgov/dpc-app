@@ -125,8 +125,8 @@ jobs:
           for service in dpc-api-${{ inputs.env }} dpc-attribution-${{ inputs.env }} dpc-aggregation-${{ inputs.env }} dpc-consent-${{ inputs.env }} dpc-web-${{ inputs.env }} dpc-web-admin-${{ inputs.env }} dpc-web-portal-${{ inputs.env }} bad
           do
             application_id=`docker run --rm -e NEW_RELIC_API_KEY="${{ secrets.NEW_RELIC_API_KEY }}" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18 apm application search --name $service || '{}' | jq -r ".[] | select(.name == \"$service\") | .applicationId"`
-            if [ ! -z "$application_id" ]; then
-             echo "Notify new relic about $service"
+            if [ ! -z "$application_id" ] && [ ! $application_id = 'null' ]; then
+             echo "Notify new relic about $service $application_id"
              else
              echo "No such service: $service"
             fi
