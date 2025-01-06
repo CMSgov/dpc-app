@@ -39,7 +39,7 @@ jobs:
       rel_tag: ${{ steps.rel-tag.outputs.rel_tag }}
     steps:
       - name: Run and Fail if Inputs Invalid
-        if: ${{ inputs.env != inputs.confirm_env }}
+        if: ${{ inputs.env = inputs.confirm_env }}
         run: |
           echo 'Target deployment environment "${{ inputs.env }}" must be specified and match confirmed deployment environment "${{ inputs.confirm_env }}".'
           exit 1
