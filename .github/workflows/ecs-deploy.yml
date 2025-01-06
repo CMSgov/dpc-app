@@ -109,13 +109,15 @@ jobs:
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
           terraform apply dpc-release-${{ inputs.env }}.tfplan
-      - uses: slackapi/slack-github-action@v1.26.0
+      - uses: slackapi/slack-github-action@v2.0.0
+        name: Slack failure
         if: ${{ failure() }}
         with:
-          channel-id: 'CMC1E4AEQ'
-          slack-message: "Slack Test"
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: 'CMC1E4AEQ'
+            text: "ECS Deploy can message slack"
 
   services-up:
     name: All Services Healthy
