@@ -125,7 +125,7 @@ jobs:
           for service in dpc-api-${{ inputs.env }} dpc-attribution-${{ inputs.env }} dpc-aggregation-${{ inputs.env }} dpc-consent-${{ inputs.env }} dpc-web-${{ inputs.env }} dpc-web-admin-${{ inputs.env }} dpc-web-portal-${{ inputs.env }}
           do
             echo $service
-            docker run --rm -e NEW_RELIC_API_KEY="${{ secrets.NEW_RELIC_API_KEY }}" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18@sha256:77caa9e445b26b70c8ae53e818f7dee6acc3f6a22012737ecf901d4a031b3ff5 apm application search --name $service | jq -r ".[] | select(.name == \"$service\") | .applicationId"
+            docker run --rm -e NEW_RELIC_API_KEY="${{ secrets.NEW_RELIC_API_KEY }}" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18 apm application search --name $service | jq -r ".[] | select(.name == \"$service\") | .applicationId"
           done
   notify-slack:
     name: Notify Slack
