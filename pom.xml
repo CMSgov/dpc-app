@@ -162,12 +162,6 @@
                 <artifactId>jakarta.xml.bind-api</artifactId>
                 <version>4.0.2</version>
             </dependency>
-            <!--This is required for Java 11 support. The version shipped with Hibernate is too old-->
-            <dependency>
-                <groupId>org.javassist</groupId>
-                <artifactId>javassist</artifactId>
-                <version>3.27.0-GA</version>
-            </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-io</artifactId>
