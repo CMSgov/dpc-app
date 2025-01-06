@@ -21,6 +21,7 @@ jobs:
         run: |
           docker run -d \
             --name newrelic-statsd \
+            --network host \
             -e NR_ACCOUNT_ID=${{ secrets.NEW_RELIC_ACCOUNT_ID }} \
             -e NR_API_KEY=${{ secrets.NEW_RELIC_API_KEY }} \
             -p 8125:8125/udp \
@@ -33,6 +34,7 @@ jobs:
           LOAD_TEST_PRIVATE_KEY: ${{ secrets.LOAD_TEST_PRIVATE_KEY }}
           LOAD_TEST_PUBLIC_KEY_ID: ${{ secrets.LOAD_TEST_PUBLIC_KEY_ID }}
           K6_STATSD_ENABLE_TAGS: true
+          K6_STATSD_ADDR: localhost:8125
         uses: grafana/run-k6-action@v1
         with:
           path: ./dpc-app/dpc-load-testing/script.js
