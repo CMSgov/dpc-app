@@ -121,7 +121,6 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: 'Notify New Relic'
-        if: ${{ false }}
         run: |
           for service in dpc-api-${{ inputs.env }} dpc-attribution-${{ inputs.env }} dpc-aggregation-${{ inputs.env }} dpc-consent-${{ inputs.env }} dpc-web-${{ inputs.env }} dpc-web-admin-${{ inputs.env }} dpc-web-portal-${{ inputs.env }}
           do
