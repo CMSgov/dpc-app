@@ -110,7 +110,8 @@ jobs:
           cd dpc-ops/terraform/${{ inputs.env }}
           terraform apply dpc-release-${{ inputs.env }}.tfplan
       - uses: slackapi/slack-github-action@2.0.0
-      - name: Slack failure
+        name: Slack failure
+        if: ${{ failure() }}
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
