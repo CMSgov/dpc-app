@@ -161,7 +161,7 @@ jobs:
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} web-portal-1 dpc-portal web-portal frontend v9
   wait-for-portal-sidekiq:
     name: Wait for dpc-portal sidekiq to be healthy
-    if: inputs.env != 'dev'
+    if: inputs.env != 'prod'
     runs-on: self-hosted
     steps:
       - name: "Checkout code"
