@@ -85,7 +85,6 @@ jobs:
         with:
           terraform_version: "1.0.0"
       - name: Verify persistent plan
-        if: ${{ false }}
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}/persistent
           terraform init
