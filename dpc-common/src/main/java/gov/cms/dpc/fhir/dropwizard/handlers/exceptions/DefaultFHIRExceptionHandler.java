@@ -37,8 +37,8 @@ public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Th
         final int statusCode;
         // Duplicating some of the logic from the parent LoggingExceptionMapper, because we need to get the logged ID
         // We just pass along redirects
-        if (exception instanceof WebApplicationException) {
-            final Response response = ((WebApplicationException) exception).getResponse();
+        if (exception instanceof WebApplicationException webAppException) {
+            final Response response = webAppException.getResponse();
             Response.Status.Family family = response.getStatusInfo().getFamily();
             if (family.equals(Response.Status.Family.REDIRECTION)) {
                 return response;

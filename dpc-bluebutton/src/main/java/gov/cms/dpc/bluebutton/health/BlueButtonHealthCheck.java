@@ -9,7 +9,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 /**
- * {@link NamedHealthCheck} class that verifies whether or not the Blue Button endpoint is accessible.
+ * {@link NamedHealthCheck} class that verifies whether the Blue Button endpoint is accessible.
  * This simply makes a request to the /metadata endpoint and verifies that the returned {@link CapabilityStatement} has an {@link org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus#ACTIVE} status.
  */
 @Singleton

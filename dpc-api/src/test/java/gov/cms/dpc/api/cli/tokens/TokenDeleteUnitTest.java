@@ -18,7 +18,6 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.Parameter;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -63,7 +62,7 @@ public class TokenDeleteUnitTest {
     }
 
     @Test
-    public void testDeleteToken_happyPath() throws IOException {
+    public void testDeleteToken_happyPath() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()
@@ -87,7 +86,7 @@ public class TokenDeleteUnitTest {
     }
 
     @Test
-    public void testDeleteToken_badResponse() throws IOException {
+    public void testDeleteToken_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()

@@ -85,9 +85,7 @@ public class OrganizationEntityConverterTest {
         OrganizationEntity.OrganizationID orgId = new OrganizationEntity.OrganizationID(DPCIdentifierSystem.MBI, orgIdValue);
 
         organization.setIdentifier(List.of(orgId.toFHIR()));
-        Exception exception = assertThrows(DataFormatException.class, () -> {
-            organizationEntityConverter.fromFHIR(fhirEntityConverter, organization);
-        });
+        Exception exception = assertThrows(DataFormatException.class, () -> organizationEntityConverter.fromFHIR(fhirEntityConverter, organization));
         assertEquals("Identifier must be NPPES or PECOS", exception.getMessage());
     }
 
@@ -95,9 +93,7 @@ public class OrganizationEntityConverterTest {
     void fromFHIR_BadIdentifierSystem() {
         Identifier identifier = new Identifier().setSystem("bad system");
         organization.setIdentifier(List.of(identifier));
-        Exception exception = assertThrows(DataFormatException.class, () -> {
-            organizationEntityConverter.fromFHIR(fhirEntityConverter, organization);
-        });
+        Exception exception = assertThrows(DataFormatException.class, () -> organizationEntityConverter.fromFHIR(fhirEntityConverter, organization));
         assertEquals("Identifier must be NPPES or PECOS", exception.getMessage());
     }
 

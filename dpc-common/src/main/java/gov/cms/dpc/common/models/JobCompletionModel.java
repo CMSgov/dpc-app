@@ -133,7 +133,7 @@ public class JobCompletionModel {
     /**
      * Do requests to NDJSON files require an access token. Part of the FHIR spec.
      */
-    private final boolean requiresAccessToken = true;
+    private static final boolean requiresAccessToken = true;
 
     /**
      * The output entries

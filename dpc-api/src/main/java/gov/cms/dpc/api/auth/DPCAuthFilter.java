@@ -122,7 +122,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
             orgID = MacaroonHelpers.extractOrgIDFromCaveats(Collections.singletonList(rootMacaroon))
                     .orElseThrow(() -> {
                         logger.error("Cannot find organization_id on Macaroon");
-                        throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
+                        return new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
                     });
         }
 

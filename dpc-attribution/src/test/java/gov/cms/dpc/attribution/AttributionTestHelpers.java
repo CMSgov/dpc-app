@@ -36,7 +36,7 @@ public class AttributionTestHelpers {
         practitioner.addName()
                 .setFamily("Practitioner").addGiven("Test");
 
-        // Meta data which includes the Org we're using
+        // Metadata which includes the Org we're using
         final Meta meta = new Meta();
         meta.addTag(DPCIdentifierSystem.DPC.getSystem(), DEFAULT_ORG_ID, "OrganizationID");
         practitioner.setMeta(meta);

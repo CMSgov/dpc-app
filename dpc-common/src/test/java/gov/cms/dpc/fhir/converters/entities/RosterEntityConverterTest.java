@@ -53,9 +53,8 @@ public class RosterEntityConverterTest {
     @Test
     void fromFHIR() {
         String expected = "Entity cannot be converted from FHIR, using this class";
-        Exception exception = assertThrows(UnsupportedOperationException.class, () -> {
-            rosterEntityConverter.fromFHIR(fhirEntityConverter, null);
-        });
+        Exception exception = assertThrows(UnsupportedOperationException.class, () ->
+                rosterEntityConverter.fromFHIR(fhirEntityConverter, null));
         assertEquals(expected, exception.getMessage());
     }
 

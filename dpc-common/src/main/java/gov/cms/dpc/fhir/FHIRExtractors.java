@@ -14,7 +14,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Helper class for extracting various features from FHIR resources
@@ -99,12 +98,12 @@ public class FHIRExtractors {
                 if(mbiPattern.matcher(identifier.getValue()).matches()) {
                     return identifier.getValue();
                 } else {
-                    logger.warn("MBI: " + identifier.getValue() + " for patient: " + patient.getId() + " does not match MBI format");
+                    logger.warn("MBI: {} for patient: {} does not match MBI format", identifier.getValue(), patient.getId());
                     return null;
                 }
             })
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     /**
@@ -136,7 +135,7 @@ public class FHIRExtractors {
         }
 
         final Matcher matcher = idExtractor.matcher(idString);
-        if (!matcher.find() || !(matcher.groupCount() == 1)) {
+        if (!matcher.find() || matcher.groupCount() != 1) {
             throw new IllegalArgumentException(String.format(ENTITY_ID_ERROR, idString));
         }
 
@@ -231,7 +230,7 @@ public class FHIRExtractors {
         return identifiers
                 .stream()
                 .filter(id -> id.getSystem().equals(system.getSystem()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

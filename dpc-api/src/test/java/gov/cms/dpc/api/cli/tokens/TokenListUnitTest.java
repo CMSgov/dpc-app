@@ -102,7 +102,7 @@ public class TokenListUnitTest {
     }
 
     @Test
-    public void testListTokens_badResponse() throws IOException {
+    public void testListTokens_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()

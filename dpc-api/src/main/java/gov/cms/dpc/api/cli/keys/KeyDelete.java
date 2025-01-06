@@ -40,10 +40,10 @@ public class KeyDelete extends AbstractAdminCommand {
         // Get the reference
         final String orgReference = namespace.getString(ORG_REFERENCE);
         final String keyID = namespace.getString(KEY_ID);
-        System.out.println(String.format("Deleting public key %s for organization %s", keyID, orgReference));
+        System.out.printf("Deleting public key %s for organization %s%n", keyID, orgReference);
 
         final String apiService = namespace.getString(API_HOSTNAME);
-        System.out.println(String.format("Connecting to API service at: %s", apiService));
+        System.out.printf("Connecting to API service at: %s%n", apiService);
 
         // Delete the token
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {

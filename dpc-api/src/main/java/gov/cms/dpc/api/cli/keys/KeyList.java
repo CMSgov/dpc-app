@@ -41,10 +41,10 @@ public class KeyList extends AbstractAdminCommand {
     public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
         // Get the reference
         final String orgReference = namespace.getString("org-reference");
-        System.out.println(String.format("Listing keys for organization: %s.", orgReference));
+        System.out.printf("Listing keys for organization: %s.%n", orgReference);
 
         final String apiService = namespace.getString(API_HOSTNAME);
-        System.out.println(String.format("Connecting to API service at: %s", apiService));
+        System.out.printf("Connecting to API service at: %s%n", apiService);
         listKeys(apiService, orgReference);
     }
 
@@ -60,8 +60,7 @@ public class KeyList extends AbstractAdminCommand {
                     System.exit(1);
                 }
 
-                CollectionResponse<PublicKeyEntity> keys = mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<PublicKeyEntity>>() {
-                });
+                CollectionResponse<PublicKeyEntity> keys = mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
                 generateTable(new ArrayList<>(keys.getEntities()));
             }
         }

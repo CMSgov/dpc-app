@@ -77,12 +77,12 @@ class AddressEntityConverterTest {
         StringType line3 = new StringType("Red Door");
         fhirAddress.setLine(List.of(line1ST,line2ST,line3));
         AddressEntity convertedAddress = converter.fromFHIR(fhirEntityConverter, fhirAddress);
-        assertEquals(convertedAddress.getLine2(), "APT 3 Red Door");
+        assertEquals("APT 3 Red Door", convertedAddress.getLine2());
     }
 
     @Test
     void fromFhirEmptyLines() {
-        fhirAddress.setLine(new java.util.ArrayList<StringType>());
+        fhirAddress.setLine(new java.util.ArrayList<>());
         assertThrows(DataTranslationException.class, () -> converter.fromFHIR(null, fhirAddress));
     }
     @Test

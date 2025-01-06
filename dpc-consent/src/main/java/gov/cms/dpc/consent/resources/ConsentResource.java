@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
 
@@ -95,7 +94,7 @@ public class ConsentResource {
         return entities
                 .stream()
                 .map(e -> ConsentEntityConverter.toFhir(e, fhirReferenceURL))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @GET

@@ -140,7 +140,7 @@ class PatientResourceTest extends AbstractAttributionTest {
                 .search()
                 .forResource(Patient.class)
                 .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI))
-                .and(Patient.ORGANIZATION.hasId("Organization/" + UUID.randomUUID().toString()))
+                .and(Patient.ORGANIZATION.hasId("Organization/" + UUID.randomUUID()))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
@@ -156,7 +156,7 @@ class PatientResourceTest extends AbstractAttributionTest {
                 .search()
                 .forResource(Patient.class)
                 .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI.toLowerCase()))
-                .and(Patient.ORGANIZATION.hasId("Organization/" + UUID.randomUUID().toString()))
+                .and(Patient.ORGANIZATION.hasId("Organization/" + UUID.randomUUID()))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();

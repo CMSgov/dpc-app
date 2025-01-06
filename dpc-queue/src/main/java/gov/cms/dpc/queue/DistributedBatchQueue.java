@@ -361,7 +361,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
                         .setParameter("updateTime", stuckSince)
                         .uniqueResult();
 
-                logger.debug(String.format("Found (%d) stuck jobs on aggregatorID(%s).", stuckBatchCount, aggregatorID));
+                logger.debug("Found ({}) stuck jobs on aggregatorID({}).", stuckBatchCount, aggregatorID);
 
                 if (stuckBatchCount > 0) {
                     throw new JobQueueUnhealthy(JOB_UNHEALTHY);

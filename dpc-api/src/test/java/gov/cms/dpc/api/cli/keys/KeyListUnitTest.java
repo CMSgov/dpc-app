@@ -99,7 +99,7 @@ class KeyListUnitTest {
     }
 
     @Test
-    public void testListKeys_badResponse() throws IOException {
+    public void testListKeys_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()

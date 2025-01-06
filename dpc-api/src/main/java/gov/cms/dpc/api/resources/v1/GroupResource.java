@@ -257,7 +257,7 @@ public class GroupResource extends AbstractGroupResource {
      * @param resourceTypes - {@link String} of comma separated values corresponding to FHIR {@link DPCResourceType}
      * @param outputFormat  - Optional outputFormats parameter
      * @param sinceParam    - Optional since parameter
-     * @return - {@link OperationOutcome} specifying whether or not the request was successful.
+     * @return - {@link OperationOutcome} specifying whether the request was successful.
      */
     @Override
     @GET // Need this here, since we're using a path param
@@ -403,7 +403,7 @@ public class GroupResource extends AbstractGroupResource {
                 .stream()
                 .map(entry -> (Patient) entry.getResource())
                 .map(FHIRExtractors::getPatientMBI)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private String fetchOrganizationNPI(IdType orgID) {
@@ -453,7 +453,7 @@ public class GroupResource extends AbstractGroupResource {
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
                 .map(Reference::getReference)
-                .collect(Collectors.toList());
+                .toList();
 
         logger.info("Organization {} is attesting a {} purpose between provider {} and patient(s) {}{}", performer.getWhoReference().getReference(),
                 reason.getCode(),

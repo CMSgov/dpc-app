@@ -16,7 +16,6 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Entity(name = "rosters")
 public class RosterEntity implements Serializable {
@@ -104,8 +103,7 @@ public class RosterEntity implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof RosterEntity)) return false;
-        RosterEntity that = (RosterEntity) o;
+        if (!(o instanceof RosterEntity that)) return false;
         return Objects.equals(id, that.id) &&
                 Objects.equals(attributedProvider, that.attributedProvider) &&
                 Objects.equals(managingOrganization, that.managingOrganization) &&
@@ -162,6 +160,6 @@ public class RosterEntity implements Serializable {
                     relationship.setPeriodEnd(expires);
                     return relationship;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 }

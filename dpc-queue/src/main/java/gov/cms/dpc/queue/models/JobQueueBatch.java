@@ -217,17 +217,13 @@ public class JobQueueBatch implements Serializable {
      * @return True if the fields are consistent with each other
      */
     public Boolean isValid() {
-        switch (status) {
-            case QUEUED:
-                return submitTime != null && aggregatorID == null;
-            case RUNNING:
-                return submitTime != null && startTime != null && updateTime != null && aggregatorID != null;
-            case COMPLETED:
-            case FAILED:
-                return submitTime != null && startTime != null && updateTime != null && completeTime != null && aggregatorID == null;
-            default:
-                return false;
-        }
+        return switch (status) {
+            case QUEUED -> submitTime != null && aggregatorID == null;
+            case RUNNING -> submitTime != null && startTime != null && updateTime != null && aggregatorID != null;
+            case COMPLETED, FAILED ->
+                    submitTime != null && startTime != null && updateTime != null && completeTime != null && aggregatorID == null;
+            default -> false;
+        };
     }
 
 
@@ -511,9 +507,7 @@ public class JobQueueBatch implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
 
-        if (!(o instanceof JobQueueBatch)) return false;
-
-        JobQueueBatch that = (JobQueueBatch) o;
+        if (!(o instanceof JobQueueBatch that)) return false;
 
         return new EqualsBuilder()
                 .append(batchID, that.batchID)

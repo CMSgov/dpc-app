@@ -26,10 +26,10 @@ public class OrganizationDelete extends AbstractAttributionCommand {
     public void run(Bootstrap<?> bootstrap, Namespace namespace) {
         // Get the reference
         final String orgReference = namespace.getString("org-reference");
-        System.out.println(String.format("Removing organization %s", orgReference));
+        System.out.printf("Removing organization %s%n", orgReference);
 
         final String attributionService = namespace.getString(ATTR_HOSTNAME);
-        System.out.println(String.format("Connecting to Attribution service at: %s", attributionService));
+        System.out.printf("Connecting to Attribution service at: %s%n", attributionService);
 
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
 

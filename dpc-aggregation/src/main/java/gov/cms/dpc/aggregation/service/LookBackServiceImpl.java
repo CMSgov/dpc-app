@@ -25,7 +25,7 @@ import static gov.cms.dpc.common.MDCConstants.EOB_ID;
 
 public class LookBackServiceImpl implements LookBackService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LookBackService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LookBackServiceImpl.class);
 
     private final OperationsConfig operationsConfig;
 

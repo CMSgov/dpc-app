@@ -19,7 +19,7 @@ import static gov.cms.dpc.api.tasks.TasksCommon.extractOrganization;
 /**
  * Admin task to delete a {@link gov.cms.dpc.api.entities.TokenEntity} registered for a given {@link Organization}
  * <p>
- * This requires `organization` and `token` query parms.
+ * This requires `organization` and `token` query params.
  */
 @Singleton
 public class DeleteToken extends Task {

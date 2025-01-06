@@ -48,7 +48,7 @@ public class TokenCreate extends AbstractAdminCommand {
     public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
         final IdType orgID = new IdType(namespace.getString("org-reference"));
         final String apiService = namespace.getString(API_HOSTNAME);
-        System.out.println(String.format("Connecting to API service at: %s", apiService));
+        System.out.printf("Connecting to API service at: %s%n", apiService);
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/generate-token", apiService));
 
@@ -75,7 +75,7 @@ public class TokenCreate extends AbstractAdminCommand {
                     System.exit(1);
                 }
                 final String token = EntityUtils.toString(response.getEntity());
-                System.out.println(String.format("Organization token: %s", token));
+                System.out.printf("Organization token: %s%n", token);
             }
         }
     }

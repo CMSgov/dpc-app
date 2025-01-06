@@ -108,9 +108,7 @@ public class DPCJsonLayoutUnitTest {
         inputOutputMap.put("", "");
         inputOutputMap.put(" ", " ");
 
-        inputOutputMap.entrySet().stream().forEach(entry -> {
-            final String unMaskedMessage = entry.getKey();
-            final String expectedMaskedMessage = entry.getValue();
+        inputOutputMap.forEach((unMaskedMessage, expectedMaskedMessage) -> {
             when(loggingEvent.getFormattedMessage()).thenReturn(unMaskedMessage);
             Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
             assertEquals(expectedMaskedMessage, map.get("message"));
@@ -131,14 +129,18 @@ public class DPCJsonLayoutUnitTest {
 
     @Test
     public void testPostgresMasking() {
-        String badLogMessage = "[ERROR] org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint \"organization_idx\"\n" +
-                "  Detail: Key (id_system, id_value)=(1, 1111111112) already exists.\n" +
-                "\tat org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2725)\n" +
-                "\tat org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2412)\n";
-        String expectedLogMessage = "[ERROR] org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint \"organization_idx\"\n" +
-                "  **********\n" +
-                "\tat org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2725)\n" +
-                "\tat org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2412)\n";
+        String badLogMessage = """
+        [ERROR] org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint "organization_idx"
+          Detail: Key (id_system, id_value)=(1, 1111111112) already exists.
+        \tat org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2725)
+        \tat org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2412)
+        """;
+        String expectedLogMessage = """
+        [ERROR] org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint "organization_idx"
+          **********
+        \tat org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2725)
+        \tat org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2412)
+        """;
         when(loggingEvent.getFormattedMessage()).thenReturn(badLogMessage);
         Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
         assertEquals(expectedLogMessage, map.get("message"));

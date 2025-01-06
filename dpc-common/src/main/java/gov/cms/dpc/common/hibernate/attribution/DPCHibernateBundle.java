@@ -20,7 +20,7 @@ import static gov.cms.dpc.common.hibernate.EntityScanner.applicationEntities;
  */
 public class DPCHibernateBundle<T extends Configuration & IDPCDatabase> extends HibernateBundle<T> implements ConfiguredBundle<T> {
 
-    public static String PREFIX_STRING = "gov.cms.dpc.common.entities";
+    public static final String PREFIX_STRING = "gov.cms.dpc.common.entities";
 
     @Inject
     public DPCHibernateBundle() {

@@ -58,8 +58,7 @@ public class JobQueueBatchFile implements Serializable {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof JobQueueBatchFileID)) return false;
-            JobQueueBatchFileID that = (JobQueueBatchFileID) o;
+            if (!(o instanceof JobQueueBatchFileID that)) return false;
             return sequence == that.sequence &&
                     batchID.equals(that.batchID) &&
                     resourceType == that.resourceType;
@@ -172,8 +171,7 @@ public class JobQueueBatchFile implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof JobQueueBatchFile)) return false;
-        JobQueueBatchFile that = (JobQueueBatchFile) o;
+        if (!(o instanceof JobQueueBatchFile that)) return false;
         return jobQueueBatchFileID.equals(that.jobQueueBatchFileID) &&
                 jobID.equals(that.jobID);
     }

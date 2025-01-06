@@ -19,14 +19,14 @@ public class BBClientConfiguration extends FHIRClientConfiguration {
 
     @Min(10)
     @Max(1000)
-    private int resourcesCount = 100;
+    private static final int resourcesCount = 100;
 
     @Valid
     @NotNull
     @JsonProperty("keyStore")
     private KeystoreConfiguration keystore = new KeystoreConfiguration();
 
-    private boolean useBfdMock = false;
+    private static final boolean useBfdMock = false;
 
     public int getResourcesCount() { return resourcesCount; }
 

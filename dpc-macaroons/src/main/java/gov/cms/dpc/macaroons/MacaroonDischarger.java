@@ -8,7 +8,7 @@ import com.github.nitram509.jmacaroons.Macaroon;
 @FunctionalInterface
 public interface MacaroonDischarger {
     /**
-     * Peform discharge operation
+     * Perform discharge operation
      *
      * @param caveat          - {@link MacaroonCaveat} to discharge
      * @param encryptedCaveat - {@link Byte} encrypted caveat body

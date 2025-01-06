@@ -24,8 +24,8 @@ public class AddMBIToPatients {
 
     static final String MBI_CSV = "prod_sbx_bene_ids.csv";
 
-    private static Map<String, PatientMBI> patientMap = new HashMap<>();
-    private static FhirContext ctx = FhirContext.forDstu3();
+    private static final Map<String, PatientMBI> patientMap = new HashMap<>();
+    private static final FhirContext ctx = FhirContext.forDstu3();
 
     @BeforeAll
     static void setup() throws IOException {
@@ -45,7 +45,7 @@ public class AddMBIToPatients {
         final String bundleName = "patient_bundle.json";
         try (InputStream stream = AddMBIToPatients.class.getClassLoader().getResourceAsStream(bundleName)) {
             final Bundle bundle = (Bundle) ctx.newJsonParser().parseResource(stream);
-            final Bundle updatedBundle = updateBundle(bundle, (id) -> "-" + id);
+            final Bundle updatedBundle = updateBundle(bundle, id -> "-" + id);
 
             try (FileWriter fileWriter = new FileWriter(String.format("../src/main/resources/%s", bundleName), StandardCharsets.UTF_8)) {
                 ctx.newJsonParser().encodeResourceToWriter(updatedBundle, fileWriter);
@@ -58,7 +58,7 @@ public class AddMBIToPatients {
         final String bundleName = "patient_bundle-dpr.json";
         try (InputStream stream = AddMBIToPatients.class.getClassLoader().getResourceAsStream(bundleName)) {
             final Parameters parameters = (Parameters) ctx.newJsonParser().parseResource(stream);
-            final Bundle updatedBundle = updateBundle((Bundle) parameters.getParameterFirstRep().getResource(), (id) -> id);
+            final Bundle updatedBundle = updateBundle((Bundle) parameters.getParameterFirstRep().getResource(), id -> id);
 
             try (FileWriter fileWriter = new FileWriter(String.format("../src/main/resources/%s", bundleName), StandardCharsets.UTF_8)) {
                 ctx.newJsonParser().encodeResourceToWriter(updatedBundle, fileWriter);
@@ -71,11 +71,11 @@ public class AddMBIToPatients {
                 .getEntry()
                 .stream()
                 .map(Bundle.BundleEntryComponent::getResource)
-                .map(resource -> (Patient) resource)
+                .map(Patient.class::cast)
                 .forEach(patient -> {
                     final String beneID = FHIRExtractors.getPatientMBI(patient);
                     final PatientMBI mbi = patientMap.get(beneIDConverter.apply(beneID));
-                    assert !(mbi == null);
+                    assert mbi != null;
                     patient.addIdentifier().setSystem("http://hl7.org/fhir/sid/us-mbi").setValue(mbi.mbi);
                     patient.addIdentifier().setSystem("https://bluebutton.cms.gov/resources/identifier/mbi-hash").setValue(mbi.mbiHash);
                 });

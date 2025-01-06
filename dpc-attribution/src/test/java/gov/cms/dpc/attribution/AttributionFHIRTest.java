@@ -28,7 +28,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static gov.cms.dpc.attribution.SharedMethods.submitAttributionBundle;
@@ -88,7 +87,7 @@ class AttributionFHIRTest {
                 .entrySet()
                 .stream()
                 .map((Map.Entry<String, List<Pair<String, String>>> entry) -> SeedProcessor.generateAttributionBundle(entry, orgID))
-                .flatMap((bundle) -> Stream.of(
+                .flatMap(bundle -> Stream.of(
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Submit"), () -> submitRoster(bundle)),
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update"), () -> updateRoster(bundle)),
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Remove"), () -> removeRoster(bundle))));
@@ -123,7 +122,7 @@ class AttributionFHIRTest {
         fetchedGroup.setMeta(null);
 
         assertAll(() -> assertTrue(createdGroup.equalsDeep(fetchedGroup), "Groups should be equal"),
-                () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of beneies"));
+                () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of benes"));
 
         final String patientID = bundle.getEntry().get(1).getResource().getId();
 
@@ -149,7 +148,7 @@ class AttributionFHIRTest {
 
         final Group group2 = groupSizeQuery.execute();
         assertAll(() -> assertTrue(fetchedGroup.equalsDeep(group2), "Groups should be equal"),
-                () -> assertEquals(bundle.getEntry().size() - 1, group2.getMember().size(), "Should have the same number of beneies"));
+                () -> assertEquals(bundle.getEntry().size() - 1, group2.getMember().size(), "Should have the same number of benes"));
 
         // Try to get attributed patients
         final Bundle attributed = client
@@ -285,12 +284,12 @@ class AttributionFHIRTest {
         final List<Group.GroupMemberComponent> inactiveMembers = members
                 .stream()
                 .filter(Group.GroupMemberComponent::getInactive)
-                .collect(Collectors.toList());
+                .toList();
 
         final List<Group.GroupMemberComponent> activeMembers = members
                 .stream()
                 .filter(member -> !member.getInactive())
-                .collect(Collectors.toList());
+                .toList();
 
         // Add 10 minutes to avoid comparison differences with milliseconds on the Date values
         // Since we're only comparing Date values, adding a minute offset ensure the test passes, but is still valid

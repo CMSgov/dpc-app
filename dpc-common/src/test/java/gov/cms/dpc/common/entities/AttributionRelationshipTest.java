@@ -1,13 +1,14 @@
 package gov.cms.dpc.common.entities;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class AttributionRelationshipTest {
 
@@ -59,8 +60,8 @@ public class AttributionRelationshipTest {
 		relationship.setPeriodBegin(periodBegin);
 		relationship.setPeriodEnd(periodEnd);
 
-		String expected = "AttributionRelationship{attributionID=1, roster=" + roster.toString() + ", patient="
-				+ patient.toString() + ", inactive=true, begin=" + periodBegin + ", end=" + periodEnd + "}";
+		String expected = "AttributionRelationship{attributionID=1, roster=" + roster + ", patient="
+				+ patient + ", inactive=true, begin=" + periodBegin + ", end=" + periodEnd + "}";
 		assertEquals(expected, relationship.toString());
 	}
 

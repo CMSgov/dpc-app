@@ -178,7 +178,7 @@ public class JobBatchProcessor {
         Flowable<Resource> eobs = lookBackPair.getRight();
 
         if (isLookBackExempt(job.getOrgID())) {
-            logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
+            logger.info("Skipping lookBack for org: {}", job.getOrgID());
             MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
         } else {
             if (!passesLookBack(answers)) {
@@ -287,7 +287,7 @@ public class JobBatchProcessor {
                         sequenceCount.set(file.getSequence());
                     });
                     final var writer = new ResourceWriter(fhirContext, job, dpcResourceType, operationsConfig);
-                    return groupedByResourceFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount));
+                    return groupedByResourceFlow.compose(upstream -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount));
                 });
     }
 

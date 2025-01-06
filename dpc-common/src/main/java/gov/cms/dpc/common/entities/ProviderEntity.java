@@ -82,8 +82,7 @@ public class ProviderEntity extends PersonEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ProviderEntity)) return false;
-        ProviderEntity that = (ProviderEntity) o;
+        if (!(o instanceof ProviderEntity that)) return false;
         return Objects.equals(id, that.id) &&
                 Objects.equals(providerNPI, that.providerNPI) &&
                 Objects.equals(organization, that.organization) &&

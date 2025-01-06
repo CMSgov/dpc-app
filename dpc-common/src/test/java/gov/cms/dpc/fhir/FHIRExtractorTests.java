@@ -167,13 +167,13 @@ public class FHIRExtractorTests {
         final IdType id1 = new IdType("Organization", uuid1.toString());
         assertEquals(uuid1, getEntityUUID(id1.toString()), "Should have Org ID");
         assertEquals(uuid1, getEntityUUID(uuid1.toString()), "Should parse UUID correctly");
-        assertEquals(uuid1, getEntityUUID(String.format("/%s", uuid1.toString())), "Should ignore leading slash");
+        assertEquals(uuid1, getEntityUUID(String.format("/%s", uuid1)), "Should ignore leading slash");
 
 
         assertEquals(uuid1, getEntityUUID(uuid1.toString()), "Should have org id");
         final IdType idType = new IdType("Organization/not-a-uuid");
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> getEntityUUID(idType.toString()), "Should not parse non-UUID");
-        assertEquals(String.format(ENTITY_ID_ERROR, idType.toString()), exception.getMessage(), "Should have correct error message");
+        assertEquals(String.format(ENTITY_ID_ERROR, idType), exception.getMessage(), "Should have correct error message");
 
         final IllegalArgumentException exception1 = assertThrows(IllegalArgumentException.class, () -> getEntityUUID("not-a-uuid"), "Should throw with non-uuid");
         assertEquals("Invalid UUID string: not-a-uuid", exception1.getMessage(), "Should have correct exception message");

@@ -468,7 +468,7 @@ public class GroupResourceUnitTest {
     }
 
     @Test
-    public void testExportWithExpiredPatietn() {
+    public void testExportWithExpiredPatient() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());

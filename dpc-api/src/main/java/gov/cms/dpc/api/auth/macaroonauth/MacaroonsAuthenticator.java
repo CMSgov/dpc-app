@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 /**
- * Implementation of {@link Authenticator} which matches an {@link Organization} to the given Macaroon (base64 encoded string
+ * Implementation of {@link Authenticator} which matches an {@link Organization} to the given Macaroon (base64 encoded string)
  * If no {@link Organization} is found, this returns an empty optional, which signifies and authorization failure.
  */
 public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials, OrganizationPrincipal> {

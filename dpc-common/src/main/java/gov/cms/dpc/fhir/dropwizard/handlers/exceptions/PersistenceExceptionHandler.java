@@ -73,8 +73,8 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
     private Pair<Response.Status, String> handleResponseGeneration(PersistenceException exception) {
         final Response.Status status;
         final String message;
-        if (exception.getCause() instanceof ConstraintViolationException) {
-            message = generateErrorMessage((ConstraintViolationException) exception.getCause());
+        if (exception.getCause() instanceof ConstraintViolationException constraintViolationException) {
+            message = generateErrorMessage(constraintViolationException);
             status = Response.Status.BAD_REQUEST;
         } else {
             logger.error("Cannot persist to DB", exception);

@@ -48,14 +48,14 @@ public class KeyUpload extends AbstractAdminCommand {
                 .help("Label for public key");
 
         subparser
-                .addArgument("key-file")
+                .addArgument(KEY_FILE)
                 .dest(KEY_FILE)
                 .type(String.class)
                 .required(true)
                 .help("PEM encoded public key to upload");
 
         subparser
-                .addArgument("signature-file")
+                .addArgument(SIGNATURE_FILE)
                 .dest(SIGNATURE_FILE)
                 .type(String.class)
                 .required(true)
@@ -67,7 +67,7 @@ public class KeyUpload extends AbstractAdminCommand {
     public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
         final IdType orgID = new IdType(namespace.getString("org-reference"));
         final String apiService = namespace.getString(API_HOSTNAME);
-        System.out.println(String.format("Connecting to API service at: %s", apiService));
+        System.out.printf("Connecting to API service at: %s%n", apiService);
 
         // Read the file and parse it
         final Path keyFilePath = FileSystems.getDefault().getPath(namespace.getString(KEY_FILE));
@@ -103,7 +103,7 @@ public class KeyUpload extends AbstractAdminCommand {
                     System.exit(1);
                 }
                 final String token = EntityUtils.toString(response.getEntity());
-                System.out.println(String.format("Organization token: %s", token));
+                System.out.printf("Organization token: %s%n", token);
             }
         }
     }

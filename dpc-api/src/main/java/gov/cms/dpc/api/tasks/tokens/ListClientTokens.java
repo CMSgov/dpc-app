@@ -19,7 +19,7 @@ import static gov.cms.dpc.api.tasks.TasksCommon.extractOrganization;
 /**
  * Admin task for listing {@link TokenEntity}s registered with the given {@link Organization}
  * <p>
- * This requries an `organization` query param.
+ * This requires an `organization` query param.
  */
 @Singleton
 public class ListClientTokens extends Task {

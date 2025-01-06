@@ -24,7 +24,6 @@ import java.util.UUID;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -70,7 +69,7 @@ class TokenTests extends AbstractApplicationTest {
     }
 
     @Test
-    void testTokenLifecycle() throws Exception {
+    void testTokenLifecycle() {
         // Create the organization
         final Optional<Throwable> success = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token", "--host", "http://localhost:3500/v1");
 
@@ -109,20 +108,20 @@ class TokenTests extends AbstractApplicationTest {
         assertTrue(tokenIDs.isEmpty(), "Should not have any tokens");
     }
 
-    List<UUID> getTokenIDs(String organizationID) throws Exception {
+    List<UUID> getTokenIDs(String organizationID) {
         stdOut.reset();
         stdErr.reset();
 
         final Optional<Throwable> s2 = cli.run("list", organizationID);
 
-        // Find all of the token IDs
+        // Find all the token IDs
         final List<UUID> matchedTokenIDs = Pattern.compile("║\\s([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})")
                 .matcher(stdOut.toString())
                 .results()
                 .map(MatchResult::group)
                 .map(match -> match.replace("║ ", ""))
                 .map(UUID::fromString)
-                .collect(Collectors.toList());
+                .toList();
 
         assertAll(() -> assertTrue(s2.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should be empty"));

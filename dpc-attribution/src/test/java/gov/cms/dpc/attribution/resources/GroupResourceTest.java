@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static org.junit.jupiter.api.Assertions.*;
@@ -102,7 +101,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
 
         assertTrue(methodOutcome.getCreated());
 
-        //Add an additional patient
+        //Add a patient
         final Patient patient2 = createPatient("0O00O00OO00", DEFAULT_ORG_ID);
         group.addMember().setEntity(new Reference(patient2.getIdElement()));
 
@@ -389,6 +388,6 @@ public class GroupResourceTest extends AbstractAttributionTest {
 
         return patientsReturned.getEntry().stream()
             .map(component -> (Patient) component.getResource())
-            .collect(Collectors.toList());
+            .toList();
     }
 }

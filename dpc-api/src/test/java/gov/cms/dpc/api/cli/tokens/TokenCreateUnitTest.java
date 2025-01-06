@@ -105,7 +105,7 @@ public class TokenCreateUnitTest {
     }
 
     @Test
-    public void testCreateToken_badResponse() throws IOException {
+    public void testCreateToken_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()

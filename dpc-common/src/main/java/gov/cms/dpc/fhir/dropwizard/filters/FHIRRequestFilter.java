@@ -39,7 +39,7 @@ public class FHIRRequestFilter implements ContainerRequestFilter {
     private void checkContentType(ContainerRequestContext requestContext) {
         final List<String> typeHeaders = requestContext.getHeaders().get(HttpHeaders.CONTENT_TYPE);
 
-        if (typeHeaders != null && !shortCircuitBooleanCheck(typeHeaders, (typeHeader) -> FHIRMediaTypes.isFHIRContent(MediaType.valueOf(typeHeader)))) {
+        if (typeHeaders != null && !shortCircuitBooleanCheck(typeHeaders, typeHeader -> FHIRMediaTypes.isFHIRContent(MediaType.valueOf(typeHeader)))) {
             throw new WebApplicationException("`Content-Type:` header must specify valid FHIR content type", HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
         }
     }

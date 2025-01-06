@@ -20,14 +20,12 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.nio.file.Path;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static gov.cms.dpc.testing.APIAuthHelpers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -121,20 +119,20 @@ public class PublicKeyTests extends AbstractApplicationTest {
 
     }
 
-    private List<UUID> getKeyIDs(String organizationID) throws Exception {
+    private List<UUID> getKeyIDs(String organizationID) {
         stdOut.reset();
         stdErr.reset();
 
         final Optional<Throwable> s2 = cli.run("list", organizationID);
 
-        // Find all of the key IDs
+        // Find all the key IDs
         final List<UUID> matchedKeyIDs = Pattern.compile("║\\s([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})")
                 .matcher(stdOut.toString())
                 .results()
                 .map(MatchResult::group)
                 .map(match -> match.replace("║ ", ""))
                 .map(UUID::fromString)
-                .collect(Collectors.toList());
+                .toList();
 
         assertAll(() -> assertTrue(s2.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should be empty"));
@@ -142,7 +140,7 @@ public class PublicKeyTests extends AbstractApplicationTest {
         return matchedKeyIDs;
     }
 
-    private Path writeToTempFile(String str) throws NoSuchAlgorithmException, IOException {
+    private Path writeToTempFile(String str) throws IOException {
         final File file = Files.newTemporaryFile();
 
         // Write the public key to the file

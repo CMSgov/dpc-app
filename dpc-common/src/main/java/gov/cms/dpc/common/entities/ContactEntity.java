@@ -9,7 +9,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Entity(name = "organization_contacts")
 public class ContactEntity implements Serializable {
@@ -84,7 +83,7 @@ public class ContactEntity implements Serializable {
         final List<ContactPoint> cps = this.telecom
                 .stream()
                 .map(ContactPointEntity::toFHIR)
-                .collect(Collectors.toList());
+                .toList();
 
         contactComponent.setTelecom(cps);
         contactComponent.setAddress(this.address.toFHIR());

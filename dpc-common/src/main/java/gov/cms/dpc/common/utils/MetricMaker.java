@@ -12,8 +12,8 @@ import java.util.function.Supplier;
  * Utility class used to register a metric only once
  */
 public class MetricMaker {
-    private Class<?> klass;
-    private MetricRegistry metricRegistry;
+    private final Class<?> klass;
+    private final MetricRegistry metricRegistry;
 
     /**
      * Construct for specific class and metric registry
@@ -110,7 +110,7 @@ public class MetricMaker {
      * @param <T> unit of the gauge
      */
     private static class CachedGaugeFromSupplier<T> extends CachedGauge<T> {
-        private Supplier<T> loadSupplier;
+        private final Supplier<T> loadSupplier;
 
         CachedGaugeFromSupplier(long timeout, TimeUnit timeUnit, Supplier<T> loadSupplier) {
             super(timeout, timeUnit);

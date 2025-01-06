@@ -9,9 +9,6 @@ public class FHIRMediaTypes {
     public static final String APPLICATION_NDJSON = "application/ndjson";
     public static final String NDJSON = "ndjson";
 
-
-
-
     private static final MediaType FHIR_JSON_MT = MediaType.valueOf(FHIR_JSON);
     private static final MediaType FHIR_NDJSON_MT = MediaType.valueOf(FHIR_NDJSON);
     /**

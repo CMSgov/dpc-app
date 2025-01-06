@@ -8,7 +8,7 @@ import ru.vyarus.dropwizard.guice.module.installer.feature.health.NamedHealthChe
 @Singleton
 public class AggregationEngineHealthCheck extends NamedHealthCheck {
 
-    private AggregationEngine aggregationEngine;
+    private final AggregationEngine aggregationEngine;
 
     @Inject
     public AggregationEngineHealthCheck(AggregationEngine aggregationEngine) {

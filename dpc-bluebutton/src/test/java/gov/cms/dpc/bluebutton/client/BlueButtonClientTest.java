@@ -119,7 +119,7 @@ class BlueButtonClientTest {
         );
 
         createMockServerExpectation(
-            "/v1/fhir/ExplainationOfBenefit",
+            "/v1/fhir/ExplanationOfBenefit",
             HttpStatus.OK_200,
             getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_SINGLE_EOB_PATIENT_ID + ".xml"),
             List.of(
@@ -160,10 +160,10 @@ class BlueButtonClientTest {
 
         String patientDataCorrupted = "The demo Patient object data differs from what is expected";
         assertEquals(patient.getBirthDate(), java.sql.Date.valueOf("2014-06-01"), patientDataCorrupted);
-        assertEquals(patient.getGender().getDisplay(), "Unknown", patientDataCorrupted);
-        assertEquals(patient.getName().size(), 1, patientDataCorrupted);
-        assertEquals(patient.getName().get(0).getFamily(), "Doe", patientDataCorrupted);
-        assertEquals(patient.getName().get(0).getGiven().get(0).toString(), "Jane", patientDataCorrupted);
+        assertEquals("Unknown", patient.getGender().getDisplay(), patientDataCorrupted);
+        assertEquals(1, patient.getName().size(), patientDataCorrupted);
+        assertEquals("Doe", patient.getName().get(0).getFamily(), patientDataCorrupted);
+        assertEquals("Jane", patient.getName().get(0).getGiven().get(0).toString(), patientDataCorrupted);
     }
 
     @Test
@@ -218,7 +218,7 @@ class BlueButtonClientTest {
     void shouldReturnBundleContainingOnlyEOBs() {
         Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
-        response.getEntry().forEach((entry) -> assertEquals(
+        response.getEntry().forEach(entry -> assertEquals(
                 entry.getResource().getResourceType().getPath(),
                 DPCResourceType.ExplanationOfBenefit.getPath(),
                 "EOB bundles returned by the BlueButton client should only contain EOB objects"

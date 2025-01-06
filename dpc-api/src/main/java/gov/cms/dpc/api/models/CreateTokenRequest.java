@@ -47,8 +47,7 @@ public class CreateTokenRequest implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof CreateTokenRequest)) return false;
-        CreateTokenRequest that = (CreateTokenRequest) o;
+        if (!(o instanceof CreateTokenRequest that)) return false;
         return Objects.equals(label, that.label) &&
                 Objects.equals(expiresAt, that.expiresAt);
     }

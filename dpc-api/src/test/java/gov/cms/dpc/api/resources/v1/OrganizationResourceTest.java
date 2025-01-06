@@ -81,7 +81,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testCreateInvalidOrganization() throws IOException, URISyntaxException {
+    void testCreateInvalidOrganization() throws IOException {
         URL url = new URL(getBaseURL() + "/Organization/$submit");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(HttpMethod.POST);

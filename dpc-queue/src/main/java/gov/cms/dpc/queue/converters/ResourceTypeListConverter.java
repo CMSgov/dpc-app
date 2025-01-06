@@ -16,7 +16,7 @@ import java.util.StringJoiner;
 public class ResourceTypeListConverter implements AttributeConverter<List<DPCResourceType>, String>  {
     private static final String LIST_DELIM = ",";
 
-    private static Logger logger = LoggerFactory.getLogger(ResourceTypeListConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(ResourceTypeListConverter.class);
 
     @Override
     public String convertToDatabaseColumn(List<DPCResourceType> attribute) {
