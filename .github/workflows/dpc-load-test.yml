@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          clean: true
+          path: ./dpc-app
 
       - name: Start StatsD Integration
         run: |
@@ -34,4 +34,4 @@ jobs:
           LOAD_TEST_PUBLIC_KEY_ID: ${{ secrets.LOAD_TEST_PUBLIC_KEY_ID }}
         uses: grafana/run-k6-action@v1
         with:
-          path: ./dpc-load-testing/script.js
+          path: ./dpc-app/dpc-load-testing/script.js
