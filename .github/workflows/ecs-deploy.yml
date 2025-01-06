@@ -30,7 +30,6 @@ permissions:
 
 jobs:
   deploy:
-    if: ${{ false }}
     name: Deploy
     runs-on: self-hosted
     container:
