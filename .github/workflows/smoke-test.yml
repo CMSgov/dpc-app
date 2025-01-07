@@ -30,7 +30,11 @@ jobs:
         uses: actions/checkout@v4
       - name: "Install python"
         run: |
-          apk add --no-cache python3 py3-pip aws-cli curl
+          apk add --no-cache python3 py3-pip aws-cli curl gcc
+          test -d venv || python -m venv venv
+          . venv/bin/activate
+          touch venv/bin/activate
+          pip install -r requirements.txt
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -75,12 +79,6 @@ jobs:
           curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
           rm -rf /opt/maven
           mv "$tmpdir/apache-maven-3.6.3" /opt/maven
-      - name: Install bzt
-        run: |
-          test -d venv || python -m venv venv
-          . venv/bin/activate
-          touch venv/bin/activate
-          pip install -r requirements.txt
       - name: Run Smoke Test
         env:
           ELB_URL: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
