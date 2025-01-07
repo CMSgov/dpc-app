@@ -60,10 +60,9 @@ jobs:
           WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
           WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
         run: |
-          env
-          if [ "${{ inputs.env }}" = 'prod']; then
+          if [ "${{ inputs.env }}" = 'prod' ]; then
             make smoke/prod
-          elif [ "${{ inputs.env }} = 'prod-sbx' ]; then
+          elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
             make smoke/sandbox
           else
             make smoke/remote
