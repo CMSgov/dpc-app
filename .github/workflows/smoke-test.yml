@@ -22,21 +22,15 @@ permissions:
 jobs:
   smoke-test:
     name: Smoke Test
-    runs-on: self-hosted
-    container:
-      image: ubuntu:latest
-      options: --user root
+    runs-on: ubuntu-latest
     steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
       - name: "Install python"
         uses: actions/setup-python@v5
         with:
           python-version: '3.12.7'
           cache: 'pip'
-      - name: fail
-        run: |
-          exit 1
-      - name: "Checkout code"
-        uses: actions/checkout@v4
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -82,6 +76,9 @@ jobs:
           curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
           sudo rm -rf /opt/maven
           sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
+      - name: Install bzt
+        run: |
+          pip install -r requirements.txt
       - name: Run Smoke Test
         env:
           ELB_URL: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
@@ -90,12 +87,13 @@ jobs:
           WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
           WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
         run: |
+          mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
           if [ "${{ inputs.env }}" = 'prod' ]; then
             make smoke/prod
           elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
             make smoke/sandbox
           else
-            make smoke/remote
+            bzt src/test/remote.smoke_test.yml
           fi
       # - uses: slackapi/slack-github-action@v2.0.0
       #   name: Slack Starting
