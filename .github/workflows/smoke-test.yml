@@ -34,7 +34,7 @@ jobs:
           test -d venv || python -m venv venv
           . venv/bin/activate
           touch venv/bin/activate
-          pip install -r requirements.txt
+          pip install bzt
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
