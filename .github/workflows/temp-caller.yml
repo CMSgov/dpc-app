@@ -17,11 +17,16 @@ on:
 jobs:
   deploy:
     name: ECS Deploy
-    uses: CMSgov/dpc-app/.github/workflows/ecs-deploy.yml@jd/dpc-4454-ecs-deploy
-    with:
-      env: dev
-      confirm_env: devx
-      tag: latest
-      terraform: ${{ inputs.terraform || false }}
-    secrets: inherit
+    steps:
+      - name: Write out run id
+        run: |
+          echo ${{ github.run_id }}
+      - name: Call ecs-deploy
+        uses: CMSgov/dpc-app/.github/workflows/ecs-deploy.yml@jd/dpc-4454-ecs-deploy
+        with:
+          env: dev
+          confirm_env: devx
+          tag: latest
+          terraform: ${{ inputs.terraform || false }}
+        secrets: inherit
 
