@@ -19,16 +19,13 @@ jobs:
   smoke-test:
     name: Smoke Test
     runs-on: self-hosted
-    container:
-      image: ubuntu:latest
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
-      - name: install bzt
-        run: |
-         apt update
-         apt install --assume-yes python3 default-jre-headless python3-tk python3-pip python3-dev libxml2-dev libxslt-dev zlib1g-dev net-tools
-         python3 -m pip install bzt
+      - name: "Install python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
