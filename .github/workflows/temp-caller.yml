@@ -24,3 +24,4 @@ jobs:
       tag: latest
       terraform: ${{ inputs.terraform || false }}
     secrets: inherit
+
