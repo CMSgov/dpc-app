@@ -17,16 +17,6 @@ jobs:
         with:
           path: ./dpc-app
 
-      - name: Install Go
-        run: |
-          if ! command -v go &> /dev/null; then
-            sudo dnf install -y golang
-            export GOPATH=$HOME/go
-            mkdir -p $GOPATH/bin
-            export PATH=$PATH:$GOPATH:$GOPATH/bin
-            go version
-          fi
-
       - name: Start StatsD Integration
         run: |
           docker run -d \
@@ -40,10 +30,9 @@ jobs:
       # see https://grafana.com/docs/k6/latest/results-output/real-time/statsd/
       - name: Build K6 with xk6-output-statsd
         run: |
-          go install go.k6.io/xk6/cmd/xk6@latest
-          xk6 build --with github.com/LeonAdato/xk6-output-statsd
-          chmod +x k6
-          
+          docker run --rm -it -u "$(id -u):$(id -g)" -v "${PWD}:/xk6" grafana/xk6 build \
+            --with github.com/LeonAdato/xk6-output-statsd
+
       - name: Run K6 with StatsD output
         env:
           LOAD_TEST_CLIENT_TOKEN: ${{ secrets.LOAD_TEST_CLIENT_TOKEN }}
