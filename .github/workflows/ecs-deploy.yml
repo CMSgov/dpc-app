@@ -33,7 +33,10 @@ permissions:
 jobs:
   deploy:
     name: Deploy
+    if: ${{ false }} # temp
     runs-on: self-hosted
+    container:
+      image: alpine:latest
     outputs:
       image_tag: ${{ steps.image-tag.outputs.image_tag }}
     steps:
