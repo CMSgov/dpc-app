@@ -144,7 +144,6 @@ class JWTUnitTests {
             formData.add("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE);
             formData.add("client_assertion", "dummyJWT");
 
-            final String payload = "not a real payload";
             Response response = RESOURCE.target("/v1/Token/auth")
                     .request()
                     .post(Entity.form(formData));
@@ -214,7 +213,6 @@ class JWTUnitTests {
             formData.add("client_assertion_type", TokenResource.CLIENT_ASSERTION_TYPE);
             formData.add("client_assertion", "dummyJWT");
 
-            final String payload = "not a real payload";
             Response response = RESOURCE.target("/v1/Token/auth")
                     .request()
                     .post(Entity.form(formData));

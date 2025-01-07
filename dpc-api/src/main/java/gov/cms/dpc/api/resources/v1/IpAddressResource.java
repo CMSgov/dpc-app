@@ -78,7 +78,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
         CollectionResponse<IpAddressEntity> currentIps = getOrganizationIpAddresses(organizationPrincipal);
 
         if(currentIps.getCount() >= MAX_IPS) {
-            logger.debug(String.format("Cannot add Ip for org: %s.  They are already at the max of %d.", organizationPrincipal.getID(), MAX_IPS));
+            logger.debug("Cannot add Ip for org: {}.  They are already at the max of {}.", organizationPrincipal.getID(), MAX_IPS);
             throw new WebApplicationException(String.format("Max Ips for organization reached: %d", MAX_IPS), Response.Status.BAD_REQUEST);
         } else {
             IpAddressEntity ipAddressEntity = new IpAddressEntity()

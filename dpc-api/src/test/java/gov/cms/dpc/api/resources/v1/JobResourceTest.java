@@ -127,9 +127,6 @@ public class JobResourceTest {
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
         runningJob.fetchNextPatient(AGGREGATOR_ID);
-        final var results = JobQueueBatch.validResourceTypes.stream()
-                .map(resourceType -> runningJob.addJobQueueFile(resourceType, 0, 1))
-                .toList();
 
         queue.completeBatch(runningJob, AGGREGATOR_ID);
 
@@ -282,9 +279,6 @@ public class JobResourceTest {
 
         final var runningJob = queue.getJobBatches(jobID).get(0);
         runningJob.fetchNextPatient(AGGREGATOR_ID);
-        final var results = JobQueueBatch.validResourceTypes.stream()
-                .map(resourceType -> runningJob.addJobQueueFile(resourceType, 0, 1))
-                .toList();
 
         queue.completeBatch(runningJob, AGGREGATOR_ID);
 

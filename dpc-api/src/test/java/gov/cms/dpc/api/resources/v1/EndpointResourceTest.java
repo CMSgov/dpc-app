@@ -173,7 +173,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
         orgAEndpoint.setPayloadType(List.of(createCodeableConcept()));
         MethodOutcome updateOutcome = orgAClient.update().resource(orgAEndpoint).withId(orgAEndpoint.getId()).execute();
         final Endpoint orgAUpdatedEndpoint = (Endpoint) updateOutcome.getResource();
-        assertEquals("Name updated by Org A", orgAEndpoint.getName(), "Org should have been able to update their own endpoint's name");
+        assertEquals("Name updated by Org A", orgAUpdatedEndpoint.getName(), "Org should have been able to update their own endpoint's name");
 
         //Assert Org B can update their own endpoint
         orgBEndpoint.setName("Name updated by Org B");
@@ -207,7 +207,7 @@ public class EndpointResourceTest extends AbstractSecureApplicationTest {
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
 
         //Setup Org A with 2 endpoints.
-        MethodOutcome outcome = orgAClient.create().resource(OrganizationFactory.createValidFakeEndpoint(orgAContext.getOrgId())).execute();
+        orgAClient.create().resource(OrganizationFactory.createValidFakeEndpoint(orgAContext.getOrgId())).execute();
 
         //Assert we have 2 resources.
         String[] endpointIds =  getAvailableResources(orgAClient, Endpoint.class).toArray(String[]::new);

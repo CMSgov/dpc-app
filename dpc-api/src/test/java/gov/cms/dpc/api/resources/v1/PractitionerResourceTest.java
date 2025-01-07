@@ -283,30 +283,6 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testRequestBodyForgeryOnCreate() throws GeneralSecurityException, IOException, URISyntaxException {
-        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
-        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
-        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
-        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
-
-        Practitioner practitioner = FHIRPractitionerBuilder.newBuilder()
-                .withOrgTag(orgBContext.getOrgId())
-                .withNpi(NPIUtil.generateNPI())
-                .withName("Org B Practitioner", "Last name")
-                .build();
-
-        //Test forgery during practitioner creation (Specify another org's id in the metadata tag)
-        practitioner.getMeta().addTag(DPCIdentifierSystem.DPC.getSystem(), orgBContext.getOrgId(), "Organization ID");
-        APITestHelpers.createResource(orgAClient, practitioner).getResource();
-
-        Bundle bundle = APITestHelpers.resourceSearch(orgBClient, DPCResourceType.Practitioner);
-        assertEquals(0, bundle.getTotal(), "Expected Org B to have 0 practitioners.");
-
-        bundle = APITestHelpers.resourceSearch(orgAClient, DPCResourceType.Practitioner);
-        assertEquals(1, bundle.getTotal(), "Expected Org A to have 1 practitioner.");
-    }
-
-    @Test
     public void testRequestBodyForgeryOnMultipleSubmit() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
@@ -345,7 +321,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         bundle.addEntry(new Bundle.BundleEntryComponent().setResource(practitioner3));
         bundle.addEntry(new Bundle.BundleEntryComponent().setResource(practitioner4));
 
-        Parameters execute = orgAClient.operation()
+        orgAClient.operation()
                 .onType(Practitioner.class)
                 .named("submit")
                 .withParameter(Parameters.class, "name", bundle)

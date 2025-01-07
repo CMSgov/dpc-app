@@ -315,8 +315,8 @@ public class GroupResource extends AbstractGroupResource {
 
         final boolean isSmoke = config.getLookBackExemptOrgs().contains(orgID.toString());
         final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true, isSmoke);
-        final int totalPatients = attributedPatients == null ? 0 : attributedPatients.size();
-        final String resourcesRequested = resources.stream().map(DPCResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
+        final int totalPatients = attributedPatients.size();
+        final String resourcesRequested = resources.stream().map(DPCResourceType::getPath).collect(Collectors.joining(";"));
         logger.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},orgId={},totalPatients={},resourcesRequested={},queueSubmitTime={}", "/Group/$export",jobID, orgID, totalPatients, resourcesRequested, eventTime);
         return Response.status(Response.Status.ACCEPTED)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
