@@ -22,6 +22,6 @@ jobs:
       env: dev
       confirm_env: dev
       tag: latest
-      terraform: ${{ true }}
+      terraform: ${{ inputs.terraform || false }}
     secrets: inherit
 

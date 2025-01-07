@@ -44,7 +44,7 @@ jobs:
       - name: Run and Fail if Inputs Invalid
         if: ${{ inputs.env != inputs.confirm_env }}
         run: |
-          echo 'Target deployment environment "${{ inputs.env }}" must be specified and match confirmed deployment environment "${{ inputs.confirm_env }}".'
+          echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
           exit 1
       - name: Install Dependencies
         run: |
@@ -150,18 +150,26 @@ jobs:
           done
   notify-slack:
     name: Notify Slack
-    if: ${{ false }}
     needs:
       - deploy
-      - services-up
     runs-on: self-hosted
     steps:
       - uses: slackapi/slack-github-action@v2.0.0
         name: Slack Success
-        if: ${{ false }}
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            channel: CMC1E4AEQ
-            text: "Services deployed to #{{ inputs.env }}"
+            channel: "CMC1E4AEQ"
+            text:  "FAKE -- Deployment to `${{ inputs.env }}` has succeeded"
+            attachments:
+              - color: good
+                fallback: "FAKE FALLBACK -Deployment to ${{ inputs.env }} has succeeded"
+                pretext:  "FAKE - Deployment to `${{ inputs.env }}` has succeeded"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|ECS Deploy - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - pretext
+                  - footer
+                fields:
+                  - title: Image Tag
+                    value: ${{ needs.deploy.outputs.rel_tag }}
