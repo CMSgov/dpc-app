@@ -151,8 +151,13 @@ jobs:
               echo "Service $service not found in New Relic, skipping gracefully."
             else
               echo "Notifying New Relic about deployment of $service to ${{ inputs.env }}"
+              echo "$application_stanza"
               application_id=`echo $application_stanza | jq -r ".[] | select(.name == \"$service\") | .applicationId"`
+              echo "APP ID: $application_id"
+              counter=$((counter+1))
+              echo "Counter 1 $counter"
               let counter++
+              echo "Counter 2 $counter"
             fi
           done
           echo "counter=$counter" >> "$GITHUB_OUTPUT"
