@@ -22,15 +22,16 @@ permissions:
 jobs:
   smoke-test:
     name: Smoke Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    container:
+      image: alpine:latest
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: "Install python"
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12.7'
-          cache: 'pip'
+        run: |
+          apk add python3 --no-cache
+          python -m ensure-pip
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
