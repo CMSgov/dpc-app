@@ -15,14 +15,17 @@ on:
         required: true
         type: 'string'
         default: 'dev'
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   smoke-test:
     name: Smoke Test
     runs-on: self-hosted
+    container:
+      image: alpine:latest
     steps:
-      - name: Cleanup
-        run: |
-          chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: "Install python"
