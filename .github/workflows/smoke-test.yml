@@ -27,7 +27,7 @@ jobs:
       - name: install bzt
         run: |
          apt update
-         apt install python3 default-jre-headless python3-tk python3-pip python3-dev libxml2-dev libxslt-dev zlib1g-dev net-tools
+         apt install --assume-yes python3 default-jre-headless python3-tk python3-pip python3-dev libxml2-dev libxslt-dev zlib1g-dev net-tools
          python3 -m pip install bzt
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
