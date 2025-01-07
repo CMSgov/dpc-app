@@ -6,6 +6,7 @@ import gov.cms.dpc.attribution.exceptions.AttributionException;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.jobs.Job;
 import io.dropwizard.jobs.annotations.On;
+import jakarta.inject.Inject;
 import org.jooq.DSLContext;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
@@ -13,7 +14,6 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.inject.Inject;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;

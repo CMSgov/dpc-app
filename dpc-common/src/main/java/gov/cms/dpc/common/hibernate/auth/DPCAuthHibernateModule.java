@@ -3,9 +3,8 @@ package gov.cms.dpc.common.hibernate.auth;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import io.dropwizard.core.Configuration;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
-
 import jakarta.inject.Singleton;
+import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 public class DPCAuthHibernateModule<T extends Configuration & IDPCAuthDatabase> extends DropwizardAwareModule<T> {
 

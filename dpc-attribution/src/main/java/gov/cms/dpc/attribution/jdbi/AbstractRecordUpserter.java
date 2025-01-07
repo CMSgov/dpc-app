@@ -13,7 +13,7 @@ import java.util.Map;
  * Abstract class for adding custom handling of {@link org.jooq.Record} insertion or updating.
  * This allows the user to specify how conflicts in the database should be handled.
  * <p>
- * When overriding, the user specifies which columns should be included when determining whether a conflict occurs.
+ * When overriding, the user specifies which columns should be included when determining whether or not a conflict occurs.
  * The user then specifies which fields to EXCLUDE from updating with the new record.
  * Finally, any specific return fields are listed. If no fields are given, the entire record is returned.
  * <p>
@@ -99,7 +99,7 @@ public abstract class AbstractRecordUpserter<R extends UpdatableRecordImpl<R>> {
 
     /**
      * Upsert the record, using the {@link Map} returned by {@link AbstractRecordUpserter#getUpdateMap(boolean)}.
-     * Allows the user to specify whether to exclude conflict fields from the update.
+     * Allows the user to specify whether or not to exclude conflict fields from the update.
      *
      * @param returnFields          - {@link Collection} of {@link TableField} which specifies which values to return from the database
      * @param excludeConflictFields - {@code true} exclude conflicting fields from the update. {@code false} update conflicting fields.

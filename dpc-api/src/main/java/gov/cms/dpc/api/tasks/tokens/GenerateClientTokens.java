@@ -8,13 +8,13 @@ import gov.cms.dpc.api.resources.v1.TokenResource;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.dropwizard.servlets.tasks.Task;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;

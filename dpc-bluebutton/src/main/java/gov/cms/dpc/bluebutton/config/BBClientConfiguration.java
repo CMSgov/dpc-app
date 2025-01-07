@@ -32,6 +32,8 @@ public class BBClientConfiguration extends FHIRClientConfiguration {
         return keystore;
     }
 
+    public int getResourcesCount() { return resourcesCount; }
+
     public BBClientConfiguration() {
         // Not used
     }
@@ -52,18 +54,8 @@ public class BBClientConfiguration extends FHIRClientConfiguration {
         this.registerHealthCheck = registerHealthCheck;
     }
 
-    public int getResourcesCount() { return resourcesCount; }
-
-    public void setResourcesCount(int resourcesCount) {
-        this.resourcesCount = resourcesCount;
-    }
-
     public boolean isUseBfdMock() {
         return useBfdMock;
-    }
-
-    public void setUseBfdMock(boolean useBfdMock) {
-        this.useBfdMock = useBfdMock;
     }
 
     public static class KeystoreConfiguration {

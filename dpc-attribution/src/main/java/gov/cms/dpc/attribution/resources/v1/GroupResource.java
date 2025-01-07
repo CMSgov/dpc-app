@@ -37,8 +37,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
-
 public class GroupResource extends AbstractGroupResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
@@ -102,7 +100,7 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @UnitOfWork
     @Override
-    public List<Group> rosterSearch(@QueryParam(SP_RES_ID) UUID rosterID,
+    public List<Group> rosterSearch(@QueryParam(Group.SP_RES_ID) UUID rosterID,
                                     @NotEmpty @QueryParam("_tag") String organizationToken,
                                     @QueryParam(Group.SP_CHARACTERISTIC_VALUE) String providerNPI,
                                     @QueryParam(Group.SP_MEMBER) String patientID) {

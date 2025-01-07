@@ -32,8 +32,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Date.from;
-
 /**
  * Shared methods for testing export jobs
  */
@@ -347,7 +345,7 @@ public class ClientUtils {
 
     private static Provenance createAttestation(UUID organizationID, String practitioner) {
         final Provenance provenance = new Provenance();
-        provenance.setRecorded(from(Instant.now()));
+        provenance.setRecorded(Date.from(Instant.now()));
 
         provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
 

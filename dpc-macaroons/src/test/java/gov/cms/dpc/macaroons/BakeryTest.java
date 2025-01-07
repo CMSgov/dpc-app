@@ -110,7 +110,7 @@ class BakeryTest {
 
         caveatBakery.verifyMacaroon(Collections.singletonList(macaroon));
 
-        // Add a caveat and try to validate again, which should fail
+        // Add an additional caveat and try to validate again, which should fail
         final Macaroon macaroon1 = caveatBakery.addCaveats(macaroon, new MacaroonCaveat("", new MacaroonCondition("expires", MacaroonCondition.Operator.LT, "now")));
 
         assertThrows(BakeryException.class, () -> caveatBakery.verifyMacaroon(Collections.singletonList(macaroon1)));

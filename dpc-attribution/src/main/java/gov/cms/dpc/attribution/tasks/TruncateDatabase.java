@@ -5,13 +5,13 @@ import gov.cms.dpc.attribution.utils.DBUtils;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.servlets.tasks.Task;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.jooq.DSLContext;
 import org.jooq.conf.RenderQuotedNames;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.util.List;

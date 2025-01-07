@@ -122,11 +122,11 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
             }
         } else {
             final String keyStorePath = this.bbClientConfiguration.getKeystore().getLocation();
-            logger.debug("Opening keystream from location: {}", keyStorePath);
+            logger.debug("Opening keystream from location: " + keyStorePath);
             try {
                 keyStoreStream = new FileInputStream(keyStorePath);
             } catch (FileNotFoundException e) {
-                logger.error("Could not find keystore at location: {}", Paths.get(keyStorePath).toAbsolutePath());
+                logger.error("Could not find keystore at location: " + Paths.get(keyStorePath).toAbsolutePath());
                 throw new BlueButtonClientSetupException("Unable to find keystore", e);
             }
         }

@@ -26,9 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
-import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
-
 
 public class BlueButtonClientImpl implements BlueButtonClient {
 
@@ -70,7 +67,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     @Override
     public Bundle requestPatientFromServer(String patientId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
         logger.debug("Attempting to fetch patient ID {} from baseURL: {}", patientId, client.getServerBase());
-        ICriterion<ReferenceClientParam> criterion = new ReferenceClientParam(SP_RES_ID).hasId(patientId);
+        ICriterion<ReferenceClientParam> criterion = new ReferenceClientParam(Patient.SP_RES_ID).hasId(patientId);
         return instrumentCall(REQUEST_PATIENT_METRIC, () ->
                 fetchBundle(Patient.class, Collections.singletonList(criterion), patientId, lastUpdated, headers));
     }
@@ -163,7 +160,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     @Override
     public Bundle requestNextBundleFromServer(Bundle bundle, Map<String, String> headers) throws ResourceNotFoundException {
         return instrumentCall(REQUEST_NEXT_METRIC, () -> {
-            var nextURL = bundle.getLink(LINK_NEXT).getUrl();
+            var nextURL = bundle.getLink(Bundle.LINK_NEXT).getUrl();
             logger.debug("Attempting to fetch next bundle from url: {}", nextURL);
             return client
                     .loadPage()
@@ -203,6 +200,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
         }
 
         IQuery<Bundle> iQuery = query
+                .count(config.getResourcesCount())
                 .lastUpdated(lastUpdated)
                 .returnBundle(Bundle.class);
         addBFDHeaders(query, headers);

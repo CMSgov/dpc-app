@@ -6,7 +6,6 @@ import io.dropwizard.core.ConfiguredBundle;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.SessionFactoryFactory;
-
 import jakarta.inject.Singleton;
 
 import java.util.Collections;
@@ -23,7 +22,7 @@ import static gov.cms.dpc.common.hibernate.EntityScanner.applicationEntities;
 @Singleton
 public class DPCAuthHibernateBundle<T extends Configuration & IDPCAuthDatabase> extends HibernateBundle<T> implements ConfiguredBundle<T> {
 
-    public static String PREFIX_STRING = "gov.cms.dpc.api.entities";
+    public static final String PREFIX_STRING = "gov.cms.dpc.api.entities";
 
     @Inject
     public DPCAuthHibernateBundle() {

@@ -95,7 +95,7 @@ public interface IJobQueue {
     /**
      * Completes the current batch.
      *
-     * @param job          - the job batch to complete
+     * @param job          - the job batch to compelte
      * @param aggregatorID - the current aggregator working the job
      */
     void completeBatch(JobQueueBatch job, UUID aggregatorID);

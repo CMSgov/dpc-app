@@ -3,9 +3,8 @@ package gov.cms.dpc.common.hibernate.consent;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import io.dropwizard.core.Configuration;
-import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
-
 import jakarta.inject.Singleton;
+import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 public class DPCConsentHibernateModule<T extends Configuration & IDPCConsentDatabase> extends DropwizardAwareModule<T> {
 

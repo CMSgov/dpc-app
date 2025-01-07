@@ -22,8 +22,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
-
 public class MockBlueButtonClient implements BlueButtonClient {
 
     private static final String SAMPLE_EOB_PATH_PREFIX = "bb-test-data/eob/";
@@ -94,7 +92,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
     @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
     public Bundle requestNextBundleFromServer(Bundle bundle, Map<String, String> headers) throws ResourceNotFoundException {
         // This is code is very specific to the bb-test-data directory and its contents
-        final var nextLink = bundle.getLink(LINK_NEXT).getUrl();
+        final var nextLink = bundle.getLink(Bundle.LINK_NEXT).getUrl();
         final var nextUrl = URI.create(nextLink);
         final var params = URLEncodedUtils.parse(nextUrl.getQuery(), StandardCharsets.UTF_8);
         final var patient = params.stream().filter(pair -> pair.getName().equals("patient")).findFirst().orElseThrow().getValue();

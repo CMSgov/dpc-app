@@ -21,7 +21,6 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBI;
-import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
 
 /**
  * A resource fetcher will fetch resources of particular type from passed {@link BlueButtonClient}
@@ -90,7 +89,7 @@ class ResourceFetcher {
 
         // Loop until no more next bundles
         var bundle = firstBundle;
-        while (bundle.getLink(LINK_NEXT) != null) {
+        while (bundle.getLink(Bundle.LINK_NEXT) != null) {
             logger.debug("Fetching next bundle {} from BlueButton for {}", resourceType, fetchId);
             bundle = blueButtonClient.requestNextBundleFromServer(bundle, headers);
             checkBundleTransactionTime(bundle);

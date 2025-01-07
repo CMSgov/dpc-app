@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
-
 @Path("v1/Consent")
 public class ConsentResource {
 
@@ -65,7 +63,7 @@ public class ConsentResource {
             "<p>Must provide ONE OF Consent ID as an _id or identifier, or a patient MBI or HICN to search for.", response = Bundle.class)
     @ApiResponses(@ApiResponse(code = 400, message = "Must provide Consent or Patient id"))
     public List<Consent> search(
-            @ApiParam(value = "Consent resource _id") @QueryParam(SP_RES_ID) Optional<UUID> id,
+            @ApiParam(value = "Consent resource _id") @QueryParam(Consent.SP_RES_ID) Optional<UUID> id,
             @ApiParam(value = "Consent resource identifier") @QueryParam(Consent.SP_IDENTIFIER) Optional<UUID> identifier,
             @ApiParam(value = "Patient Identifier") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId) {
 

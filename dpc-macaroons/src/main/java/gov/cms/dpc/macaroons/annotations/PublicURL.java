@@ -8,7 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for providing the base URL to use for the {@link gov.cms.dpc.macaroons.MacaroonBakery}
+ * Annotation for for providing the base URL to use for the {@link gov.cms.dpc.macaroons.MacaroonBakery}
  */
 @BindingAnnotation
 @Retention(RetentionPolicy.RUNTIME)

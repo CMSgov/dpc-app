@@ -2,7 +2,6 @@ package gov.cms.dpc.common.models;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import gov.cms.dpc.fhir.DPCResourceType;
@@ -134,7 +133,6 @@ public class JobCompletionModel {
     /**
      * Do requests to NDJSON files require an access token. Part of the FHIR spec.
      */
-    @JsonProperty("requiresAccessToken")
     private final boolean requiresAccessToken = true;
 
     /**
