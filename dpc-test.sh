@@ -53,10 +53,10 @@ docker compose -p start-v1-app up --exit-code-from tests tests
 
 docker compose -p start-v1-app down
 docker volume rm start-v1-app_pgdata16
-docker compose -p start-v1-app up db attribution aggregation --wait
 
 # Start the API server
-AUTH_DISABLED=true docker compose -p start-v1-app up api consent --wait
+USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
+USE_BFD_MOCK=false AUTH_DISABLED=true docker compose -p start-v1-app up api consent --wait
 
 # Run the Postman tests
 npm install
