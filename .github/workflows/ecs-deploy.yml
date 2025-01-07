@@ -1,5 +1,7 @@
 name: 'DPC - ECS Deploy'
 
+# TODO: remove if: ${{ false }}, remove FAKE from Slack messages; remove inputs.terraform, temp-deploy, remove lock=false
+
 on:
   workflow_call:
     inputs:
@@ -18,7 +20,7 @@ on:
         required: false
         type: 'string'
         default: 'latest'
-      terraform:
+      terraform: # temp
         description: 'Also run terraform?'
         type: boolean
         default: false
@@ -30,14 +32,12 @@ permissions:
 
 jobs:
   deploy:
-    if: false
     name: Deploy
     runs-on: self-hosted
     container:
       image: alpine:latest
-      options: --user root
     outputs:
-      rel_tag: ${{ steps.rel-tag.outputs.rel_tag }}
+      image_tag: ${{ steps.image-tag.outputs.image_tag }}
     steps:
       - name: Run and Fail if Inputs Invalid
         if: ${{ inputs.env != inputs.confirm_env }}
@@ -56,20 +56,20 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
-      - name: Set Release Image Tag
-        id: rel-tag
+      - name: Set Deployed Image Tag
+        id: image-tag
         env:
           EXPLICIT_TAG: ${{ inputs.tag }}
         run: |
           if [ -z $EXPLICIT_TAG ] || [ $EXPLICIT_TAG = 'latest' ]; then
-            rel_tag=`aws --region us-east-1 ecr describe-images --repository-name dpc-api --image-ids 'imageTag=latest' '--query=imageDetails[].imageTags[] | [?contains(@, \`rls-\`)] | [0]' --output text`
-            echo "rel_tag=$rel_tag" >> "$GITHUB_OUTPUT"
+            image_tag=`aws --region us-east-1 ecr describe-images --repository-name dpc-api --image-ids 'imageTag=latest' '--query=imageDetails[].imageTags[] | [?contains(@, \`rls-\`)] | [0]' --output text`
+            echo "image_tag=$image_tag" >> "$GITHUB_OUTPUT"
           else
           # Note: this will fail if the image doesn't exist
             aws --region us-east-1 ecr describe-images --repository-name dpc-api --image-ids 'imageTag=${{ inputs.tag }}' > /dev/null
-            echo "rel_tag=$EXPLICIT_TAG" >> "$GITHUB_OUTPUT"
+            echo "image_tag=$EXPLICIT_TAG" >> "$GITHUB_OUTPUT"
           fi
-          echo $rel_tag
+          echo $image_tag
       - uses: slackapi/slack-github-action@v2.0.0
         name: Slack Starting
         with:
@@ -86,14 +86,8 @@ jobs:
                   - footer
                 fields:
                   - title: Image Tag
-                    value: ${{ steps.rel-tag.outputs.rel_tag }}
-      - name: Check for maintenance mode
-        id: maintenance-mode
-        run: |
-          maintenance=`aws ecs list-tags-for-resource --resource-arn arn:aws:ecs:us-east-1:755619740999:cluster/dpc-${{ inputs.env }}-backend '--query=tags[?key==\`Maintenance\`].value' --output text`
-          echo "maintenance=$maintenance" >> "$GITHUB_OUTPUT"
+                    value: ${{ steps.image-tag.outputs.image_tag }}
       - name: "Checkout code"
-        if: ${{ inputs.terraform }}
         uses: actions/checkout@v4
         with:
           repository: 'CMSgov/dpc-ops'
@@ -121,7 +115,7 @@ jobs:
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
           terraform init
-          terraform plan -var 'maintenance_mode=${{ steps.maintenance-mode.outputs.maintenance }} -var 'release_version=commit_f413bc3a' -var 'aggregation_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'api_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'attribution_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'consent_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'web_admin_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'web_portal_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -var 'web_image_tag=${{ steps.rel-tag.outputs.rel_tag }}' -out dpc-release-${{ inputs.env }}.tfplan
+          terraform plan -var 'release_version=commit_f413bc3a' -var 'aggregation_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'api_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'attribution_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'consent_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'web_admin_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'web_portal_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'web_image_tag=${{ steps.image-tag.outputs.image_tag }}' -out dpc-release-${{ inputs.env }}.tfplan
       - name: Apply main environment plan
         if: ${{ inputs.terraform && false}}
         run: |
@@ -139,13 +133,15 @@ jobs:
 
   notify-new-relic:
     name: Notify New Relic
+    if: ${{ false }}
     runs-on: self-hosted
+    needs: deploy
     steps:
       - name: 'Notify New Relic'
         id: notify-new-relic
         run: |
           counter=0
-          for service in bad worse
+          for service in dpc-api-${{ inputs.env }} dpc-attribution-${{ inputs.env }} dpc-aggregation-${{ inputs.env }} dpc-consent-${{ inputs.env }} dpc-web-${{ inputs.env }} dpc-web-admin-${{ inputs.env }} dpc-web-portal-${{ inputs.env }}
           do
             application_stanza=`docker run --rm -e NEW_RELIC_API_KEY="${{ secrets.NEW_RELIC_API_KEY }}" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18 apm application search --name $service`
             if [ -z "$application_stanza" ] || [ "$application_stanza" = "null" ]; then
@@ -153,7 +149,7 @@ jobs:
             else
               echo "Notifying New Relic about deployment of $service to ${{ inputs.env }}"
               application_id=`echo $application_stanza | jq -r ".[] | select(.name == \"$service\") | .applicationId"`
-              docker run --rm -e NEW_RELIC_API_KEY="${{ secrets.NEW_RELIC_API_KEY }}" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18 apm deployment create --applicationId "$application_id" --revision "${{ needs.deploy.outputs.rel_tag }}" --user jenkins
+              docker run --rm -e NEW_RELIC_API_KEY="${{ secrets.NEW_RELIC_API_KEY }}" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18 apm deployment create --applicationId "$application_id" --revision "${{ needs.deploy.outputs.image_tag }}" --user jenkins
               counter=$((counter+1))
             fi
           done
@@ -170,7 +166,7 @@ jobs:
             text:  "FAKE Notification to New Relic of deployment to `${{ inputs.env }}` has failed"
             attachments:
               - color: danger
-                text: Although the deployment succeeded, we were unable to notify New Relic of the success
+                text: Although the deployment succeeded, we were unable to notify New Relic
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|ECS Deploy - Build ${{ github.run_id }}>"
                 mrkdown_in:
                   - footer
@@ -200,7 +196,7 @@ jobs:
                   - footer
                 fields:
                   - title: Image Tag
-                    value: ${{ needs.deploy.outputs.rel_tag }}
+                    value: ${{ needs.deploy.outputs.image_tag }}
       - uses: slackapi/slack-github-action@v2.0.0
         name: Slack failure
         if: ${{ contains(needs.*.result, 'failure') }}
@@ -218,4 +214,4 @@ jobs:
                   - footer
                 fields:
                   - title: Image Tag
-                    value: ${{ needs.deploy.outputs.rel_tag }}
+                    value: ${{ needs.deploy.outputs.image_tag }}
