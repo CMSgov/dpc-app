@@ -157,8 +157,8 @@ jobs:
     needs:
       - deploy
       - services-up
-     runs-on: self-hosted
-     steps:
+    runs-on: self-hosted
+    steps:
       - uses: slackapi/slack-github-action@v2.0.0
         name: Slack Success
         if: ${{ false }}
