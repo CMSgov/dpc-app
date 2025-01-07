@@ -15,14 +15,6 @@ on:
         required: true
 
 jobs:
-  run_id:
-    name: Check run id
-    runs-on: self-hosted
-    steps:
-      - name: Write out run id
-        run: |
-          echo ${{ github.run_id }}
-        
   deploy:
     name: ECS Deploy
     uses: CMSgov/dpc-app/.github/workflows/ecs-deploy.yml@jd/dpc-4454-ecs-deploy
@@ -33,3 +25,14 @@ jobs:
       terraform: ${{ inputs.terraform || false }}
     secrets: inherit
 
+  git-stuff:
+    name: Git stuff
+    runs-on: self-hosted
+    steps:
+      - name: run_id
+        run: |
+          echo ${{ github.run_id }}
+      - name: run_number
+        run: |
+          echo ${{ github.run_number }}
+        

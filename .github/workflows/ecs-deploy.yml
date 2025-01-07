@@ -38,13 +38,16 @@ jobs:
     outputs:
       rel_tag: ${{ steps.rel-tag.outputs.rel_tag }}
     steps:
-      - name: Write out run id
+      - name: run_id
         run: |
           echo ${{ github.run_id }}
+      - name: run_number
+        run: |
+          echo ${{ github.run_number }}
       - name: Run and Fail if Inputs Invalid
         if: ${{ inputs.env != inputs.confirm_env }}
         run: |
-          echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
+          echo 'Target deployment environment "${{ inputs.env }}" must be specified and match confirmed deployment environment "${{ inputs.confirm_env }}".'
           exit 1
       - name: Install Dependencies
         run: |
@@ -151,7 +154,6 @@ jobs:
       - services-up
     steps:
       - name: 'Notify New Relic'
-        # TODO: fail if no services
         run: |
           for service in dpc-api-${{ inputs.env }} dpc-attribution-${{ inputs.env }} dpc-aggregation-${{ inputs.env }} dpc-consent-${{ inputs.env }} dpc-web-${{ inputs.env }} dpc-web-admin-${{ inputs.env }} dpc-web-portal-${{ inputs.env }}
           do
