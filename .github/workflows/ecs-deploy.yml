@@ -112,23 +112,24 @@ jobs:
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
           terraform apply dpc-release-${{ inputs.env }}.tfplan
-      - uses: slackapi/slack-github-action@v2.0.0
-        name: Slack failure
-        if: ${{ failure() }}
-        with:
-          method: chat.postMessage
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
-          payload: |
-            channel: CMC1E4AEQ
-            text: "ECS Deploy can message slack"
 
   services-up:
+    name: Fake services up
+    runs-on: self-hosted
+    needs: deploy
+    steps:
+      - name: Fake services up
+        run: |
+          echo "Pretend worked"
+  services-up-hold:
     name: All Services Healthy
     if: ${{ false }}
+    needs: deploy
     uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
     with:
       env: ${{ inputs.env }}
     secrets: inherit
+
   notify-new-relic:
     name: Notify New Relic
     if: ${{ false }}
@@ -148,27 +149,45 @@ jobs:
               docker run --rm -e NEW_RELIC_API_KEY="${{ secrets.NEW_RELIC_API_KEY }}" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18 apm deployment create --applicationId "$application_id" --revision "${{ needs.deploy.outputs.rel_tag }}" --user jenkins
             fi
           done
+
   notify-slack:
     name: Notify Slack
+    if: ${{ always() }}
     needs:
       - deploy
+      - services-up
     runs-on: self-hosted
     steps:
       - uses: slackapi/slack-github-action@v2.0.0
         name: Slack Success
+        if: ${{ needs.services-up.result == 'success' }}
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             channel: "CMC1E4AEQ"
-            text:  "FAKE -- Deployment to `${{ inputs.env }}` has succeeded"
+            text:  "FAKE Deployment to `${{ inputs.env }}` has succeeded"
             attachments:
               - color: good
-                fallback: "FAKE FALLBACK -Deployment to ${{ inputs.env }} has succeeded"
-                pretext:  "FAKE - Deployment to `${{ inputs.env }}` has succeeded"
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|ECS Deploy - Build ${{ github.run_id }}>"
                 mrkdown_in:
-                  - pretext
+                  - footer
+                fields:
+                  - title: Image Tag
+                    value: ${{ needs.deploy.outputs.rel_tag }}
+      - uses: slackapi/slack-github-action@v2.0.0
+        name: Slack failure
+        if: ${{ contains(needs.*.result, 'failure') }}
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: "CMC1E4AEQ"
+            text:  "FAKE Deployment to `${{ inputs.env }}` has failed"
+            attachments:
+              - color: danger
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|ECS Deploy - Build ${{ github.run_id }}>"
+                mrkdown_in:
                   - footer
                 fields:
                   - title: Image Tag
