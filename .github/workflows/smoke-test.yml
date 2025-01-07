@@ -22,9 +22,7 @@ permissions:
 jobs:
   smoke-test:
     name: Smoke Test
-    runs-on: self-hosted
-    container:
-      image: ubuntu:latest
+    runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
@@ -33,6 +31,9 @@ jobs:
         with:
           python-version: '3.12.7'
           cache: 'pip'
+      - name: fail
+        run: |
+          exit 0
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
