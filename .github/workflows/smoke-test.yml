@@ -73,8 +73,8 @@ jobs:
           echo "PATH=$PATH" >> $GITHUB_ENV
           tmpdir="$(mktemp -d)"
           curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
-          sudo rm -rf /opt/maven
-          sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
+          rm -rf /opt/maven
+          mv "$tmpdir/apache-maven-3.6.3" /opt/maven
       - name: Install bzt
         run: |
           pip install -r requirements.txt
