@@ -152,7 +152,7 @@ jobs:
             else
               echo "Notifying New Relic about deployment of $service to ${{ inputs.env }}"
               application_id=`echo $application_stanza | jq -r ".[] | select(.name == \"$service\") | .applicationId"`
-              let counter++
+              counter=$((counter+1))
               echo "Counter $counter"
             fi
           done
