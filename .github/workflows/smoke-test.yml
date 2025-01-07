@@ -1,0 +1,120 @@
+name: 'Smoke Test'
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: AWS environment to check
+        required: true
+        type: 'string'
+        default: 'dev'
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to check
+        required: true
+        type: 'string'
+        default: 'dev'
+jobs:
+  smoke-test:
+    name: Smoke Test
+    runs-on: self-hosted
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+      - name: Fetch admin host
+        id: fetch-admin-host
+        run: |
+          admin-host=`aws elbv2 describe-load-balancers --names dpc-${{ inputs.env }}-frontend-internal --query="LoadBalancers[0].DNSName" --output text`
+          echo "admin-host=$admin-host" >> "$GITHUB_OUTPUT"
+          echo "ELB_URL=http://$admin-host:9900/tasks" >> "$GITHUB_OUTPUT"
+      - name: Set BFD_URL from AWS params
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            BFD_URL=/dpc/${{ inputs.env }}/bluebutton/bfd_url
+      - name: Determine host
+        id: determine-host
+        run: |
+          if [ "${{ inputs.env }}" = 'prod']; then
+            HOST="http://${{ steps.fetch-admin-host }}"
+          elif [ "${{ inputs.env }} = 'prod-sbx' ]; then
+            HOST="https://sandbox.dpc.cms.gov"
+          else
+            HOST="https://${{ inputs.env }}.dpc.cms.gov"
+          fi
+          echo "HOST=$HOST" >> "$GITHUB_OUTPUT"
+          echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
+          echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
+      - name: Run Smoke Test
+        env:
+          ELB_URL=${{ steps.fetch-admin-host.outputs.ELB_URL }}
+          HOST_URL=${{ steps.determine-host.outputs.HOST_URL }}
+          PORTAL_HOST=${{ steps.determine-host.outputs.HOST }}
+          WEB_HOST=${{ steps.determine-host.outputs.HOST }}
+          WEB_ADMIN_HOST=${{ steps.determine-host.outputs.HOST }}
+        run: |
+          env
+          if [ "${{ inputs.env }}" = 'prod']; then
+            make smoke/prod
+          elif [ "${{ inputs.env }} = 'prod-sbx' ]; then
+            make smoke/sandbox
+          else
+            make smoke/remote
+          fi
+      # - uses: slackapi/slack-github-action@v2.0.0
+      #   name: Slack Starting
+      #   with:
+      #     method: chat.postMessage
+      #     token: ${{ secrets.SLACK_BOT_TOKEN }}
+      #     # Sends to dpc-deploys
+      #     payload: |
+      #       channel: "CMC1E4AEQ"
+      #       text: "Smoke test of `${{ inputs.env }}` has started"
+      #       attachments:
+      #         - color: warning
+      #           footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
+      #           mrkdown_in:
+      #             - footer
+      # - uses: slackapi/slack-github-action@v2.0.0
+      #   name: Slack Success
+      #   with:
+      #     method: chat.postMessage
+      #     token: ${{ secrets.SLACK_BOT_TOKEN }}
+      #     # Sends to dpc-deploys
+      #     payload: |
+      #       channel: "CMC1E4AEQ"
+      #       text: "Smoke test of `${{ inputs.env }}` has succeeded"
+      #       attachments:
+      #         - color: good
+      #           footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
+      #           mrkdown_in:
+      #             - footer
+      #           fields:
+      #             - title: Image Tag
+      #               value: ${{ needs.deploy.outputs.image_tag }}
+      # - uses: slackapi/slack-github-action@v2.0.0
+      #   name: Slack failure
+      #   if: ${{ contains(needs.*.result, 'failure') }}
+      #   with:
+      #     method: chat.postMessage
+      #     token: ${{ secrets.SLACK_BOT_TOKEN }}
+      #     # Sends to dpc-deploys
+      #     payload: |
+      #       channel: "CMC1E4AEQ"
+      #       text: "Smoke test of `${{ inputs.env }}` has failed"
+      #       attachments:
+      #         - color: danger
+      #           footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
+      #           mrkdown_in:
+      #             - footer
+      #           fields:
+      #             - title: Image Tag
+      #               value: ${{ needs.deploy.outputs.image_tag }}

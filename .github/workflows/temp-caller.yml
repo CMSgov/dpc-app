@@ -1,0 +1,16 @@
+name: 'Temp Caller'
+
+on:
+  push:
+    paths:
+      - .github/workflows/smoke-test.yml
+      - .github/workflows/temp-caller.yml
+
+jobs:
+  deploy:
+    name: ECS Deploy
+    uses: CMSgov/dpc-app/.github/workflows/smoke-test.yml@jd/dpc-4455-gha-smoke-test
+    with:
+      env: dev
+    secrets: inherit
+
