@@ -33,9 +33,6 @@ jobs:
           docker run --rm -i -u "$(id -u):$(id -g)" -v "${PWD}:/xk6" grafana/xk6 build \
             --with github.com/LeonAdato/xk6-output-statsd
 
-      - name: Verify K6 Extensions
-        run: ./k6 version
-
       - name: Run K6 with StatsD output
         env:
           LOAD_TEST_CLIENT_TOKEN: ${{ secrets.LOAD_TEST_CLIENT_TOKEN }}
@@ -45,9 +42,6 @@ jobs:
           ./k6 run \
             --out statsd=localhost:8125,enableTags=true \
             ./dpc-app/dpc-load-testing/script.js
-
-      - name: Check StatsD Logs
-        run: docker logs newrelic-statsd
 
       - name: Cleanup StatsD Container
         if: always()
