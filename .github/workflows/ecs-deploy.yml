@@ -38,12 +38,9 @@ jobs:
     outputs:
       rel_tag: ${{ steps.rel-tag.outputs.rel_tag }}
     steps:
-      - name: run_id
+      - name: Run URL
         run: |
-          echo ${{ github.run_id }}
-      - name: run_number
-        run: |
-          echo ${{ github.run_number }}
+          echo "${{ github.server_url}}/${{ github.replistory}}/actions/runs/${{ github.run_id }}"
       - name: Run and Fail if Inputs Invalid
         if: ${{ inputs.env != inputs.confirm_env }}
         run: |
