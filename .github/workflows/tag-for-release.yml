@@ -1,0 +1,19 @@
+name: "DPC - Tag Release Version"
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo_ref:
+        description: 'Which branch or tag?'
+        required: true
+        default: 'main'
+        type: 'string'
+
+
+jobs:
+  tag-dpc-app:
+    name: "Tag dpc-app"
+    uses: CMSgov/dpc-app/.github/workflows/tag_release.yml@main
+    with:
+      repo_ref: ${{ inputs.repo_ref }}
+    secrets: inherit
