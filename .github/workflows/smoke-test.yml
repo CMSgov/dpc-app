@@ -24,7 +24,7 @@ jobs:
     name: Smoke Test
     runs-on: self-hosted
     container:
-      image: alpine:latest
+      image: ubuntu:latest
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
