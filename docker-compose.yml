@@ -107,7 +107,7 @@ services:
     command: consent:3600
 
   tests:
-    image: maven:3.6-jdk-17
+    image: maven:3.8.5-openjdk-17
     env_file:
       - ./ops/config/decrypted/local.env
     volumes:
