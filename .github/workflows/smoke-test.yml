@@ -20,6 +20,9 @@ jobs:
     name: Smoke Test
     runs-on: self-hosted
     steps:
+      - name: Cleanup
+        run: |
+          chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: "Install python"
