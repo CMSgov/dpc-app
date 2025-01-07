@@ -84,12 +84,13 @@ jobs:
                   - footer
                 fields:
                   - title: Image Tag
-                    value: ${{ steps.rel_tag.outputs.rel_tag }}
+                    value: ${{ steps.rel-tag.outputs.rel_tag }}
       - name: Check for maintenance mode
         id: maintenance-mode
         run: |
           maintenance=`aws ecs list-tags-for-resource --resource-arn arn:aws:ecs:us-east-1:755619740999:cluster/dpc-${{ inputs.env }}-backend '--query=tags[?key==\`Maintenance\`].value' --output text`
           echo "maintenance=$maintenance" >> "$GITHUB_OUTPUT"
+          exit 1
       - name: "Checkout code"
         if: ${{ inputs.terraform }}
         uses: actions/checkout@v4
