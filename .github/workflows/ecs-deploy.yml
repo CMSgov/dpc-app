@@ -90,7 +90,7 @@ jobs:
         run: |
           maintenance=`aws ecs list-tags-for-resource --resource-arn arn:aws:ecs:us-east-1:755619740999:cluster/dpc-${{ inputs.env }}-backend '--query=tags[?key==\`Maintenance\`].value' --output text`
           echo "maintenance=$maintenance" >> "$GITHUB_OUTPUT"
-       - name: "Checkout code"
+      - name: "Checkout code"
         if: ${{ inputs.terraform }}
         uses: actions/checkout@v4
         with:
