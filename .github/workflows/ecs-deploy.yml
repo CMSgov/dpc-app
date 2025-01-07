@@ -40,7 +40,7 @@ jobs:
     steps:
       - name: Run URL
         run: |
-          echo "${{ github.server_url}}/${{ github.replistory}}/actions/runs/${{ github.run_id }}"
+          echo "${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}"
       - name: Run and Fail if Inputs Invalid
         if: ${{ inputs.env != inputs.confirm_env }}
         run: |
