@@ -24,15 +24,3 @@ jobs:
       tag: latest
       terraform: ${{ inputs.terraform || false }}
     secrets: inherit
-
-  git-stuff:
-    name: Git stuff
-    runs-on: self-hosted
-    steps:
-      - name: run_id
-        run: |
-          echo ${{ github.run_id }}
-      - name: run_number
-        run: |
-          echo ${{ github.run_number }}
-        
