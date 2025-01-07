@@ -15,23 +15,18 @@ on:
         required: true
         type: 'string'
         default: 'dev'
-permissions:
-  id-token: write
-  contents: read
 
 jobs:
   smoke-test:
     name: Smoke Test
     runs-on: self-hosted
-    container:
-      image: alpine:latest
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: "Install python"
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13.1'
+          python-version: '3.12.7'
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
