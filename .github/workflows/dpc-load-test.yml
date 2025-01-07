@@ -21,7 +21,8 @@ jobs:
         run: |
           if ! command -v go &> /dev/null; then
             sudo dnf install -y golang
-            go --version
+            export PATH=$PATH:/usr/local/go/bin
+            go version
           fi
 
       - name: Start StatsD Integration
