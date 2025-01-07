@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v4
       - name: "Install python"
         run: |
-          apk add --no-cache python3 py3-pip aws-cli
+          apk add --no-cache python3 py3-pip aws-cli curl
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -71,7 +71,6 @@ jobs:
         run: |
           export PATH="$PATH:/opt/maven/bin"
           echo "PATH=$PATH" >> $GITHUB_ENV
-          if mvn -v; then echo "Maven already installed" && exit 0; else echo "Installing Maven"; fi
           tmpdir="$(mktemp -d)"
           curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
           sudo rm -rf /opt/maven
