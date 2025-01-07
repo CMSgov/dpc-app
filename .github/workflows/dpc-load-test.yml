@@ -21,7 +21,9 @@ jobs:
         run: |
           if ! command -v go &> /dev/null; then
             sudo dnf install -y golang
-            export PATH=$PATH:/usr/local/go/bin
+            export GOPATH=$HOME/go
+            mkdir -p $GOPATH/bin
+            export PATH=$PATH:$GOPATH:$GOPATH/bin
             go version
           fi
 
