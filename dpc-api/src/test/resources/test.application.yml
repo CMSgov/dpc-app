@@ -93,7 +93,6 @@ bbclient:
     socketTimeout: 5000 # ms
     requestTimeout: 5000 # ms
   serverBaseUrl: ${BFD_URL}
-  resourcesCount: 100 # Max number of resource that a request to BB will return before using another request
 
 attributionClient:
   serverBaseUrl: ${ATTRIBUTION_URL:-"http://localhost:3500/v1/"}

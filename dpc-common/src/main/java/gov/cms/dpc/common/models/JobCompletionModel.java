@@ -131,11 +131,6 @@ public class JobCompletionModel {
     private String request;
 
     /**
-     * Do requests to NDJSON files require an access token. Part of the FHIR spec.
-     */
-    private static final boolean requiresAccessToken = true;
-
-    /**
      * The output entries
      */
     private List<OutputEntry> output;
@@ -176,10 +171,6 @@ public class JobCompletionModel {
 
     public void setRequest(String request) {
         this.request = request;
-    }
-
-    public boolean isRequiresAccessToken() {
-        return requiresAccessToken;
     }
 
     public List<OutputEntry> getOutput() {

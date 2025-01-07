@@ -96,7 +96,6 @@ class BlueButtonClientTest {
                     List.of(
                             Parameter.param("patient", patientId),
                             Parameter.param("excludeSAMHSA", "true"),
-                            Parameter.param("_count", "10"),
                             Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
             );
 
@@ -106,7 +105,6 @@ class BlueButtonClientTest {
                     getRawXML(SAMPLE_COVERAGE_PATH_PREFIX + patientId + ".xml"),
                     List.of(
                             Parameter.param("beneficiary", "Patient/" + patientId),
-                            Parameter.param("_count", "10"),
                             Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
             );
         }
@@ -125,7 +123,6 @@ class BlueButtonClientTest {
             List.of(
                     Parameter.param("patient", TEST_SINGLE_EOB_PATIENT_ID),
                     Parameter.param("excludeSAMHSA", "true"),
-                    Parameter.param("_count", "10"),
                     Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
         );
 
@@ -136,7 +133,6 @@ class BlueButtonClientTest {
                 HttpStatus.OK_200,
                 getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_PATIENT_ID + "_" + startIndex + ".xml"),
                 List.of(Parameter.param("patient", TEST_PATIENT_ID),
-                        Parameter.param("count", "10"),
                         Parameter.param("startIndex", startIndex),
                         Parameter.param("excludeSAMHSA", "true"))
             );

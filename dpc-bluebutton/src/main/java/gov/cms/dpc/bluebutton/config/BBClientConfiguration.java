@@ -3,8 +3,6 @@ package gov.cms.dpc.bluebutton.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
@@ -17,18 +15,12 @@ public class BBClientConfiguration extends FHIRClientConfiguration {
     @JsonProperty("registerHealthCheck")
     private boolean registerHealthCheck = false;
 
-    @Min(10)
-    @Max(1000)
-    private static final int resourcesCount = 100;
-
     @Valid
     @NotNull
     @JsonProperty("keyStore")
     private KeystoreConfiguration keystore = new KeystoreConfiguration();
 
     private static final boolean useBfdMock = false;
-
-    public int getResourcesCount() { return resourcesCount; }
 
     public KeystoreConfiguration getKeystore() {
         return keystore;

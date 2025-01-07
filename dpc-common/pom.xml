@@ -64,6 +64,11 @@
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <!-- update with dropwizard upgrade -->
         <dependency>
             <groupId>org.reflections</groupId>
@@ -157,12 +162,6 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-        </dependency>
-        <!--needed by dropwizard-guicey-->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 

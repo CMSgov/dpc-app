@@ -203,7 +203,6 @@ public class BlueButtonClientImpl implements BlueButtonClient {
         }
 
         IQuery<Bundle> iQuery = query
-                .count(config.getResourcesCount())
                 .lastUpdated(lastUpdated)
                 .returnBundle(Bundle.class);
         addBFDHeaders(query, headers);

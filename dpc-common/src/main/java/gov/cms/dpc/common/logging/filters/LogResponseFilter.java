@@ -4,6 +4,7 @@ import com.google.inject.Provider;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.utils.XSSSanitizerUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
@@ -11,8 +12,6 @@ import jakarta.ws.rs.core.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-
-import javax.servlet.http.HttpServletRequest;
 
 public class LogResponseFilter implements ContainerResponseFilter {
     private static final Logger logger = LoggerFactory.getLogger(LogResponseFilter.class);
