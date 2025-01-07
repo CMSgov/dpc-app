@@ -38,6 +38,12 @@ jobs:
     outputs:
       rel_tag: ${{ steps.rel-tag.outputs.rel_tag }}
     steps:
+      - name: run_id
+        run: |
+          echo ${{ github.run_id }}
+      - name: run_number
+        run: |
+          echo ${{ github.run_number }}
       - name: Run and Fail if Inputs Invalid
         if: ${{ inputs.env != inputs.confirm_env }}
         run: |
@@ -148,8 +154,17 @@ jobs:
   notify-slack:
     name: Notify Slack
     if: ${{ false }}
-    runs-on: self-hosted
-    steps:
-      - name: 'Notify Slack'
-        run: |
-          echo 'TBD'
+    needs:
+      - deploy
+      - services-up
+     runs-on: self-hosted
+     steps:
+      - uses: slackapi/slack-github-action@v2.0.0
+        name: Slack Success
+        if: ${{ false }}
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: CMC1E4AEQ
+            text: "Services deployed to #{{ inputs.env }}"
