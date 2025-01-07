@@ -1,6 +1,7 @@
 {
   "transactionTime": "2024-04-10T12:02:49.492+00:00",
   "request": "http://dev.dpc.cms.gov/api/v1/Group/82771a76-f010-44bd-9f7a-7fb02b130f11/$export_format=json",
+  "requiresAccessToken": true,
   "output": [
     {
       "type": "Patient",

@@ -3,6 +3,8 @@ package gov.cms.dpc.bluebutton.config;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
@@ -15,12 +17,16 @@ public class BBClientConfiguration extends FHIRClientConfiguration {
     @JsonProperty("registerHealthCheck")
     private boolean registerHealthCheck = false;
 
+    @Min(10)
+    @Max(1000)
+    private int resourcesCount = 100;
+
     @Valid
     @NotNull
     @JsonProperty("keyStore")
     private KeystoreConfiguration keystore = new KeystoreConfiguration();
 
-    private static final boolean useBfdMock = false;
+    private boolean useBfdMock = false;
 
     public KeystoreConfiguration getKeystore() {
         return keystore;
@@ -38,7 +44,6 @@ public class BBClientConfiguration extends FHIRClientConfiguration {
         this.healthcheckName = healthcheckName;
     }
 
-
     public boolean isRegisterHealthCheck() {
         return registerHealthCheck;
     }
@@ -47,8 +52,18 @@ public class BBClientConfiguration extends FHIRClientConfiguration {
         this.registerHealthCheck = registerHealthCheck;
     }
 
+    public int getResourcesCount() { return resourcesCount; }
+
+    public void setResourcesCount(int resourcesCount) {
+        this.resourcesCount = resourcesCount;
+    }
+
     public boolean isUseBfdMock() {
         return useBfdMock;
+    }
+
+    public void setUseBfdMock(boolean useBfdMock) {
+        this.useBfdMock = useBfdMock;
     }
 
     public static class KeystoreConfiguration {

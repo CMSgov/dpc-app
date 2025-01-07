@@ -76,6 +76,7 @@ bbclient:
     requestTimeout: 5000 # ms
 
   serverBaseUrl: ${BFD_URL}
+  resourcesCount: 100 # Max number of resource that a request to BB will return before using another request
 
   useBfdMock: ${USE_BFD_MOCK:-true}
 

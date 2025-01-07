@@ -357,6 +357,7 @@ You will need to set the Accept header to `application/fhir+json` (per the FHIR 
     {
         "transactionTime": 1550868647.776162,
         "request": "http://localhost:3002/v1/Job/de00da66-86cf-4be1-a2a8-0415b21a6a9b",
+        "requiresAccessToken": false,
         "output": [
             "http://localhost:3002/v1/Data/de00da66-86cf-4be1-a2a8-0415b21a6a9b.ndjson"
         ],

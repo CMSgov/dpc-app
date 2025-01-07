@@ -224,10 +224,12 @@
                 <artifactId>jakarta.validation-api</artifactId>
                 <version>3.0.2</version>
             </dependency>
+            <!--v6+ removes class needed by dropwizard-guicey-->
+            <!--see https://github.com/jakartaee/servlet/issues/418-->
             <dependency>
                 <groupId>jakarta.servlet</groupId>
                 <artifactId>jakarta.servlet-api</artifactId>
-                <version>6.1.0</version>
+                <version>5.0.0</version>
             </dependency>
             <dependency>
                 <groupId>com.google.inject</groupId>
@@ -267,7 +269,7 @@
             <dependency>
                 <groupId>com.smoketurner</groupId>
                 <artifactId>dropwizard-swagger</artifactId>
-                <version>3.0.0-1</version>
+                <version>4.0.5-1</version>
             </dependency>
             <dependency>
                 <groupId>io.github.dropwizard-jobs</groupId>

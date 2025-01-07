@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Injector;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import jakarta.servlet.http.HttpServletRequest;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
