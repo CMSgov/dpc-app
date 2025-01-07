@@ -34,8 +34,6 @@ jobs:
   deploy:
     name: Deploy
     runs-on: self-hosted
-    container:
-      image: alpine:latest
     outputs:
       image_tag: ${{ steps.image-tag.outputs.image_tag }}
     steps:
