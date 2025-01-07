@@ -52,6 +52,21 @@ jobs:
           fi
           echo "HOST=$HOST" >> "$GITHUB_OUTPUT"
           echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: temurin
+          cache: maven
+      - name: Install Maven 3.6.3
+        run: |
+          export PATH="$PATH:/opt/maven/bin"
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          if mvn -v; then echo "Maven already installed" && exit 0; else echo "Installing Maven"; fi
+          tmpdir="$(mktemp -d)"
+          curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
+          sudo rm -rf /opt/maven
+          sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
       - name: Run Smoke Test
         env:
           ELB_URL: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
