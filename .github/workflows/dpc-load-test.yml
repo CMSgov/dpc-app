@@ -39,11 +39,11 @@ jobs:
           path: ./dpc-app/dpc-load-testing/script.js
           flags: --out statsd
 
-      - name: Cleanup StatsD Container
-        if: always()
-        run: |
-          if [ $(docker ps -aq -f name=newrelic-statsd) ]; then
-            echo "Stopping and removing StatsD container"
-            docker stop newrelic-statsd
-            docker rm newrelic-statsd
-          fi
+#      - name: Cleanup StatsD Container
+#        if: always()
+#        run: |
+#          if [ $(docker ps -aq -f name=newrelic-statsd) ]; then
+#            echo "Stopping and removing StatsD container"
+#            docker stop newrelic-statsd
+#            docker rm newrelic-statsd
+#          fi
