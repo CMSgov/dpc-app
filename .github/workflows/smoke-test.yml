@@ -30,8 +30,7 @@ jobs:
         uses: actions/checkout@v4
       - name: "Install python"
         run: |
-          apk add python3 --no-cache
-          python -m ensure-pip
+          apk add --no-cache python3 py3-pip
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
