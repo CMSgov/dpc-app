@@ -22,10 +22,11 @@ permissions:
 jobs:
   smoke-test:
     name: Smoke Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    container:
+      image: ubuntu:latest
+      options: --user root
     steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
       - name: "Install python"
         uses: actions/setup-python@v5
         with:
@@ -33,7 +34,9 @@ jobs:
           cache: 'pip'
       - name: fail
         run: |
-          exit 0
+          exit 1
+      - name: "Checkout code"
+        uses: actions/checkout@v4
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
