@@ -30,6 +30,7 @@ permissions:
 
 jobs:
   deploy:
+    if: false
     name: Deploy
     runs-on: self-hosted
     container:
@@ -74,6 +75,7 @@ jobs:
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
           payload: |
             channel: "CMC1E4AEQ"
             text:  "FAKE Deployment to `${{ inputs.env }}` has started"
@@ -138,13 +140,12 @@ jobs:
   notify-new-relic:
     name: Notify New Relic
     runs-on: self-hosted
-    needs: deploy
     steps:
       - name: 'Notify New Relic'
         id: notify-new-relic
         run: |
           counter=0
-          for service in bad dpc-api-dev
+          for service in bad worse
           do
             application_stanza=`docker run --rm -e NEW_RELIC_API_KEY="${{ secrets.NEW_RELIC_API_KEY }}" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18 apm application search --name $service`
             if [ -z "$application_stanza" ] || [ "$application_stanza" = "null" ]; then
@@ -152,15 +153,27 @@ jobs:
             else
               echo "Notifying New Relic about deployment of $service to ${{ inputs.env }}"
               application_id=`echo $application_stanza | jq -r ".[] | select(.name == \"$service\") | .applicationId"`
+              docker run --rm -e NEW_RELIC_API_KEY="${{ secrets.NEW_RELIC_API_KEY }}" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18 apm deployment create --applicationId "$application_id" --revision "${{ needs.deploy.outputs.rel_tag }}" --user jenkins
               counter=$((counter+1))
-              echo "Counter $counter"
             fi
           done
           echo "counter=$counter" >> "$GITHUB_OUTPUT"
       - name: Slack if nothing to New Relic
         if: ${{ steps.notify-new-relic.outputs.counter == 0 }}
-        run: |
-          echo "Nothing to new relic"
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-alerts
+          payload: |
+            channel: "CUY7H43DY"
+            text:  "FAKE Notification to New Relic of deployment to `${{ inputs.env }}` has failed"
+            attachments:
+              - color: danger
+                text: Although the deployment succeeded, we were unable to notify New Relic of the success
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|ECS Deploy - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer
 
   notify-slack:
     name: Notify Slack
@@ -176,6 +189,7 @@ jobs:
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
           payload: |
             channel: "CMC1E4AEQ"
             text:  "FAKE Deployment to `${{ inputs.env }}` has succeeded"
@@ -193,6 +207,7 @@ jobs:
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
           payload: |
             channel: "CMC1E4AEQ"
             text:  "FAKE Deployment to `${{ inputs.env }}` has failed"
