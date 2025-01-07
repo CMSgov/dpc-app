@@ -127,15 +127,6 @@ jobs:
           terraform apply dpc-release-${{ inputs.env }}.tfplan
 
   services-up:
-    name: Fake services up
-    runs-on: self-hosted
-    needs: deploy
-    steps:
-      - name: Fake services up
-        run: |
-          echo "Pretend failed"
-          exit 1
-  services-up-hold:
     name: All Services Healthy
     if: ${{ false }}
     needs: deploy
@@ -146,13 +137,14 @@ jobs:
 
   notify-new-relic:
     name: Notify New Relic
-    if: ${{ false }}
     runs-on: self-hosted
     needs: deploy
     steps:
       - name: 'Notify New Relic'
+        id: notify-new-relic
         run: |
-          for service in dpc-api-${{ inputs.env }} dpc-attribution-${{ inputs.env }} dpc-aggregation-${{ inputs.env }} dpc-consent-${{ inputs.env }} dpc-web-${{ inputs.env }} dpc-web-admin-${{ inputs.env }} dpc-web-portal-${{ inputs.env }}
+          counter=0
+          for service in bad worse
           do
             application_stanza=`docker run --rm -e NEW_RELIC_API_KEY="${{ secrets.NEW_RELIC_API_KEY }}" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18 apm application search --name $service`
             if [ -z "$application_stanza" ] || [ "$application_stanza" = "null" ]; then
@@ -160,13 +152,18 @@ jobs:
             else
               echo "Notifying New Relic about deployment of $service to ${{ inputs.env }}"
               application_id=`echo $application_stanza | jq -r ".[] | select(.name == \"$service\") | .applicationId"`
-              docker run --rm -e NEW_RELIC_API_KEY="${{ secrets.NEW_RELIC_API_KEY }}" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18 apm deployment create --applicationId "$application_id" --revision "${{ needs.deploy.outputs.rel_tag }}" --user jenkins
+              let counter++
             fi
           done
+          echo "counter=$counter" >> "$GITHUB_OUTPUT"
+      - name: Slack if nothing to New Relic
+        if: ${{ steps.notify-new-relic.outputs.counter == 0 }}
+        run: |
+          echo "Nothing to new relic"
 
   notify-slack:
     name: Notify Slack
-    if: ${{ always() }}
+    if: ${{ always() && false }}
     needs:
       - deploy
       - services-up
