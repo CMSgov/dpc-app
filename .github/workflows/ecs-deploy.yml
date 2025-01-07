@@ -144,7 +144,7 @@ jobs:
         id: notify-new-relic
         run: |
           counter=0
-          for service in bad worse
+          for service in bad dpc-api-dev
           do
             application_stanza=`docker run --rm -e NEW_RELIC_API_KEY="${{ secrets.NEW_RELIC_API_KEY }}" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18 apm application search --name $service`
             if [ -z "$application_stanza" ] || [ "$application_stanza" = "null" ]; then
