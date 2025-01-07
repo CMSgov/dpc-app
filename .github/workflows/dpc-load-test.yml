@@ -22,6 +22,7 @@ jobs:
           if ! command -v go &> /dev/null; then
             sudo apt-get update
             sudo apt-get install -y golang-go
+          fi
 
       - name: Start StatsD Integration
         run: |
