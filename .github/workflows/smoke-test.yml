@@ -31,18 +31,16 @@ jobs:
       - name: "Install dependencies"
         run: |
           apk add --no-cache python3 python3-dev py3-pip aws-cli curl gcc libc-dev linux-headers openjdk11 maven
-          which java
-      - name: Build smoke test
-        run: |
-          export JAVA_HOME=/usr/lib/jvm/default-jvm
-          mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
       - name: Install bzt
         run: |
           test -d venv || python -m venv venv
           . venv/bin/activate
           touch venv/bin/activate
-          pip install bzt
-
+          pip install -r requirements.txt
+      - name: Build smoke test
+        run: |
+          export JAVA_HOME=/usr/lib/jvm/default-jvm
+          mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
