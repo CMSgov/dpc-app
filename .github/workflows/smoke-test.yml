@@ -34,7 +34,7 @@ jobs:
           which java
       - name: Build smoke test
         run: |
-          export JAVA_HOME=/usr/bin/java
+          export JAVA_HOME=/usr/lib/jvm/default-jvm
           mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
       - name: Install bzt
         run: |
