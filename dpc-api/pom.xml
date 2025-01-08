@@ -187,7 +187,7 @@
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
             <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
             <!-- Ideally, this should track the version used in Dropwizard-->
-            <version>3.0.16</version>
+            <version>4.0.0-M1</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
