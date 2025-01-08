@@ -37,7 +37,7 @@ jobs:
             attachments:
               - color: warning
                 text: "Smoke test of `${{ inputs.env }}` has started"
-                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}|Smoke Test - Build ${{ github.run_id }}>"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
                 mrkdown_in:
                   - footer
       - name: "Checkout code"
@@ -136,7 +136,7 @@ jobs:
             attachments:
               - color: danger
                 text: "Smoke test of `${{ inputs.env }}` has failed"
-                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}|Smoke Test - Build ${{ github.run_id }}>"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
                 mrkdown_in:
                   - footer
                 fields:
