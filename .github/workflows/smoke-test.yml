@@ -87,6 +87,12 @@ jobs:
           else
             bzt src/test/remote.smoke_test.yml
           fi
+      - name: Upload bzt logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: bzt-logs
+          path: ./bzt-out
       # - uses: slackapi/slack-github-action@v2.0.0
       #   name: Slack Starting
       #   with:
