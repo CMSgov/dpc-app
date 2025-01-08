@@ -126,8 +126,6 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
-        with:
-          path: ./dpc-app
       - name: Download web code coverage
         uses: actions/download-artifact@v4
         with:
@@ -201,8 +199,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          path: ./dpc-app
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
