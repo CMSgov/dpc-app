@@ -36,7 +36,7 @@ jobs:
         run: |
           export JAVA_HOME=/usr/bin/java
           mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
-      = name: Install bzt
+      - name: Install bzt
         run: |
           test -d venv || python -m venv venv
           . venv/bin/activate
