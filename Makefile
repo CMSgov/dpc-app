@@ -121,7 +121,7 @@ start-load-tests: secure-envs
 .PHONY: start-dpc-debug
 start-dpc-debug: secure-envs
 	@mvn clean install -Pci -Pdebug -DskipTests -ntp
-	@DEBUG_MODE=true docker compose -f docker-compose.yml -f docker-compose.portals.yml up aggregation api --wait
+	@DEBUG_MODE=true docker compose -f docker-compose.yml up aggregation api --wait
 	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up dpc_web dpc_admin dpc_portal --wait
 	@docker ps
 
@@ -129,7 +129,7 @@ start-dpc-debug: secure-envs
 start-app-debug: secure-envs
 	@docker compose down
 	@mvn clean install -Pci -Pdebug -DskipTests -ntp
-	@DEBUG_MODE=true docker compose -f docker-compose.yml -f docker-compose.portals.yml up api aggregation --wait
+	@DEBUG_MODE=true docker compose -f docker-compose.yml up api aggregation --wait
 
 .PHONY: start-it-debug
 start-it-debug: secure-envs
