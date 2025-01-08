@@ -17,7 +17,7 @@ echo "└───────────────────────�
 make portal
 
 # Prepare the environment 
-docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
+docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml up db --wait
 docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails db:create db:migrate RAILS_ENV=test" dpc_portal
 
 # Run the tests
