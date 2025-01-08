@@ -16,8 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JerseyExceptionHandlerTest {
 
-    // TODO: add constraint violations
-
     @Test
     void testToResponse_fhirException() {
         ResourceInfo info = Mockito.mock(ResourceInfo.class);
