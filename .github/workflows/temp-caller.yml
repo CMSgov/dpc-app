@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    name: ECS Deploy
+    name: Smoke Test
     uses: CMSgov/dpc-app/.github/workflows/smoke-test.yml@jd/dpc-4455-gha-smoke-test
     with:
       env: dev

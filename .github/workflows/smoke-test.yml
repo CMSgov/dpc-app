@@ -1,4 +1,4 @@
-name: 'Smoke Test (not ecs deploy)'
+name: 'Smoke Test'
 
 on:
   workflow_dispatch:
@@ -35,6 +35,11 @@ jobs:
           . venv/bin/activate
           touch venv/bin/activate
           pip install bzt
+          which java
+      - name: Build smoke test
+        -run: |
+          JAVA_HOME=/opt/openjdk-11 mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
+
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -73,7 +78,6 @@ jobs:
           WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
           WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
         run: |
-          mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
           if [ "${{ inputs.env }}" = 'prod' ]; then
             make smoke/prod
           elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
