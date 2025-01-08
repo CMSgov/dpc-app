@@ -17,6 +17,7 @@ modules:
     disable: true
 
 included-configs:
+  - smoke_test.yml
   - src/test/portal_test.yml
   - src/test/web_admin_test.yml
   - src/test/web_test.yml

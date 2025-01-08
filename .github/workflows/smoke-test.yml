@@ -114,9 +114,6 @@ jobs:
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}|Smoke Test - Build ${{ github.run_id }}>"
                 mrkdown_in:
                   - footer
-                fields:
-                  - title: Image Tag
-                    value: ${{ needs.deploy.outputs.image_tag }}
       - uses: slackapi/slack-github-action@v2.0.0
         name: Slack failure
         if: ${{ failure() }}
@@ -132,6 +129,3 @@ jobs:
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
                 mrkdown_in:
                   - footer
-                fields:
-                  - title: Image Tag
-                    value: ${{ needs.deploy.outputs.image_tag }}
