@@ -26,6 +26,20 @@ jobs:
     container:
       image: alpine:latest
     steps:
+      - uses: slackapi/slack-github-action@v2.0.0
+        name: Slack Starting
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            attachments:
+              - color: warning
+                text: "Smoke test of `${{ inputs.env }}` has started"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}|Smoke Test - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: "Install dependencies"
@@ -93,52 +107,38 @@ jobs:
         with:
           name: bzt-logs
           path: ./bzt-out
-      # - uses: slackapi/slack-github-action@v2.0.0
-      #   name: Slack Starting
-      #   with:
-      #     method: chat.postMessage
-      #     token: ${{ secrets.SLACK_BOT_TOKEN }}
-      #     # Sends to dpc-deploys
-      #     payload: |
-      #       channel: "CMC1E4AEQ"
-      #       text: "Smoke test of `${{ inputs.env }}` has started"
-      #       attachments:
-      #         - color: warning
-      #           footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
-      #           mrkdown_in:
-      #             - footer
-      # - uses: slackapi/slack-github-action@v2.0.0
-      #   name: Slack Success
-      #   with:
-      #     method: chat.postMessage
-      #     token: ${{ secrets.SLACK_BOT_TOKEN }}
-      #     # Sends to dpc-deploys
-      #     payload: |
-      #       channel: "CMC1E4AEQ"
-      #       text: "Smoke test of `${{ inputs.env }}` has succeeded"
-      #       attachments:
-      #         - color: good
-      #           footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
-      #           mrkdown_in:
-      #             - footer
-      #           fields:
-      #             - title: Image Tag
-      #               value: ${{ needs.deploy.outputs.image_tag }}
-      # - uses: slackapi/slack-github-action@v2.0.0
-      #   name: Slack failure
-      #   if: ${{ contains(needs.*.result, 'failure') }}
-      #   with:
-      #     method: chat.postMessage
-      #     token: ${{ secrets.SLACK_BOT_TOKEN }}
-      #     # Sends to dpc-deploys
-      #     payload: |
-      #       channel: "CMC1E4AEQ"
-      #       text: "Smoke test of `${{ inputs.env }}` has failed"
-      #       attachments:
-      #         - color: danger
-      #           footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
-      #           mrkdown_in:
-      #             - footer
-      #           fields:
-      #             - title: Image Tag
-      #               value: ${{ needs.deploy.outputs.image_tag }}
+      - uses: slackapi/slack-github-action@v2.0.0
+        name: Slack Success
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            attachments:
+              - color: good
+                text: "Smoke test of `${{ inputs.env }}` has succeeded"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}|Smoke Test - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer
+                fields:
+                  - title: Image Tag
+                    value: ${{ needs.deploy.outputs.image_tag }}
+      - uses: slackapi/slack-github-action@v2.0.0
+        name: Slack failure
+        if: ${{ failure() }}
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            attachments:
+              - color: danger
+                text: "Smoke test of `${{ inputs.env }}` has failed"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}|Smoke Test - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer
+                fields:
+                  - title: Image Tag
+                    value: ${{ needs.deploy.outputs.image_tag }}
