@@ -66,13 +66,6 @@ jobs:
           admin_host=`aws elbv2 describe-load-balancers --names dpc-${{ inputs.env }}-frontend-internal --query="LoadBalancers[0].DNSName" --output text`
           echo "admin_host=$admin_host" >> "$GITHUB_OUTPUT"
           echo "ELB_URL=http://$admin_host:9900/tasks" >> "$GITHUB_OUTPUT"
-      - name: Set BFD_URL from AWS params
-        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
-        env:
-          AWS_REGION: ${{ vars.AWS_REGION }}
-        with:
-          params: |
-            BFD_URL=/dpc/${{ inputs.env }}/bluebutton/bfd_url
       - name: Determine host
         id: determine-host
         run: |
