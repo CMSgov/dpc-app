@@ -31,7 +31,7 @@ services:
       - ENV=local
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
       - EMIT_AWS_METRICS=${EMIT_AWS_METRICS:-false}
-      - JACOCO=${REPORT_COVERAGE}
+      - JACOCO=${REPORT_COVERAGE:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     depends_on:
       db:
@@ -55,7 +55,7 @@ services:
         condition: service_healthy
     environment:
       - ENV=local
-      - JACOCO=${REPORT_COVERAGE}
+      - JACOCO=${REPORT_COVERAGE:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     ports:
       - "3500:8080"
@@ -78,7 +78,7 @@ services:
       - ./ops/config/decrypted/local.env
     environment:
       - ENV=local
-      - JACOCO=${REPORT_COVERAGE}
+      - JACOCO=${REPORT_COVERAGE:-false}
       - EXPORT_PATH=/app/data
       - AUTH_DISABLED=${AUTH_DISABLED:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
@@ -103,7 +103,7 @@ services:
         condition: service_healthy
     environment:
       - ENV=local
-      - JACOCO=${REPORT_COVERAGE}
+      - JACOCO=${REPORT_COVERAGE:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     ports:
       - "3600:3600"

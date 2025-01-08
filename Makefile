@@ -1,5 +1,3 @@
-REPORT_COVERAGE ?= false
-
 # Smoke Testing
 # ==============
 
