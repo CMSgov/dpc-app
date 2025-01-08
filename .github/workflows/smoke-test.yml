@@ -81,6 +81,7 @@ jobs:
           WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
           WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
         run: |
+          . venv/bin/activate
           if [ "${{ inputs.env }}" = 'prod' ]; then
             make smoke/prod
           elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
