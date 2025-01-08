@@ -37,7 +37,7 @@ jobs:
           pip install bzt
           which java
       - name: Build smoke test
-        -run: |
+        run: |
           JAVA_HOME=/opt/openjdk-11 mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
 
       - name: AWS Credentials
