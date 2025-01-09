@@ -1,3 +1,5 @@
+REPORT_COVERAGE ?= false
+
 # Smoke Testing
 # ==============
 
@@ -80,30 +82,30 @@ start-dpc: start-app start-portals
 
 start-db: ## Start the database
 start-db:
-	@docker compose up db --wait
+	@docker compose up start_core_dependencies
 
 start-api-dependencies: # Start internal Java service dependencies, e.g. attribution and aggregation services.
 start-api-dependencies:
-	@docker compose up attribution aggregation --wait
+	@USE_BFD_MOCK=false docker compose up start_api_dependencies
 
 start-app: ## Start the API
 start-app: secure-envs start-db start-api-dependencies
-	@docker compose up api --wait
+	@docker compose up start_api
 
 start-api: ## Start the API
 start-api: start-app
 
 start-web: ## Start the sandbox portal
 start-web:
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up dpc_web --wait
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
 
 start-admin: ## Start the sandbox admin portal
 start-admin:
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up dpc_admin --wait
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
 
 start-portal: ## Start the DPC portal
 start-portal: secure-envs
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up dpc_portal --wait
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_portal
 
 start-portals: ## Start all frontend services
 start-portals: start-db start-web start-admin start-portal
@@ -118,22 +120,31 @@ start-load-tests: secure-envs
 
 .PHONY: start-dpc-debug
 start-dpc-debug: secure-envs
-	@mvn clean install -Pci -Pdebug -DskipTests -ntp
-	@DEBUG_MODE=true docker compose -f docker-compose.yml up aggregation api --wait
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up dpc_web dpc_admin dpc_portal --wait
+	@mvn clean install -Pdebug -DskipTests -ntp
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
+	@DEBUG_MODE=true USE_BFD_MOCK=false docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
+	@DEBUG_MODE=true docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_web
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_admin
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_portal
 	@docker ps
 
 .PHONY: start-app-debug
 start-app-debug: secure-envs
 	@docker compose down
-	@mvn clean install -Pci -Pdebug -DskipTests -ntp
-	@DEBUG_MODE=true docker compose -f docker-compose.yml up api aggregation --wait
+	@mvn clean compile -Pdebug -DskipTests -ntp
+	@mvn package -Pci -ntp -DskipTests
+	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_core_dependencies
+	@DEBUG_MODE=true USE_BFD_MOCK=false docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api_dependencies
+	@DEBUG_MODE=true docker compose -f docker-compose.yml -f docker-compose.portals.yml up start_api
 
 .PHONY: start-it-debug
 start-it-debug: secure-envs
 	@docker compose down
-	@mvn clean install -Pci -Pdebug -DskipTests -ntp
-	@DEBUG_MODE=true docker compose up attribution aggregation --wait
+	@mvn clean compile -Pdebug -B -V -ntp -DskipTests
+	@mvn package -Pci -ntp -DskipTests
+	@docker compose up start_core_dependencies
+	@DEBUG_MODE=true docker compose up start_api_dependencies
 
 
 # Down commands

@@ -6,12 +6,6 @@ services:
 
   redis:
     image: redis:latest
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      start_period: 10s
-      retries: 5
 
   dpc_web:
     build:
@@ -43,18 +37,9 @@ services:
     ports:
       - "3900:3500"
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      web_sidekiq:
-        condition: service_healthy
-    healthcheck:
-      test: curl --fail http://localhost:3500/health_check || exit 1
-      interval: 5s
-      timeout: 5s
-      start_period: 10s
-      retries: 5
+      - db
+      - redis
+      - web_sidekiq
 
   web_sidekiq:
     volumes:
@@ -78,16 +63,8 @@ services:
       - RUBY_YJIT_ENABLE=1
       - DISABLE_JSON_LOGGER=true
     depends_on:
-      redis:
-        condition: service_healthy
-      db:
-        condition: service_healthy
-    healthcheck:
-      test: curl --fail http://localhost:7433 || exit 1
-      interval: 5s
-      timeout: 5s
-      start_period: 10s
-      retries: 5
+      - redis
+      - db
 
   dpc_admin:
     build:
@@ -113,18 +90,9 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      admin_sidekiq:
-        condition: service_healthy
-    healthcheck:
-      test: curl --fail http://localhost:3000/admin/health_check || exit 1
-      interval: 5s
-      timeout: 5s
-      start_period: 10s
-      retries: 5
+      - db
+      - redis
+      - admin_sidekiq
 
   admin_sidekiq:
     volumes:
@@ -147,16 +115,8 @@ services:
       - RUBY_YJIT_ENABLE=1
       - DISABLE_JSON_LOGGER=true
     depends_on:
-      redis:
-        condition: service_healthy
-      db:
-        condition: service_healthy
-    healthcheck:
-      test: curl --fail http://localhost:7434 || exit 1
-      interval: 5s
-      timeout: 5s
-      start_period: 10s
-      retries: 5
+      - redis
+      - db
 
   dpc_portal:
     build:
@@ -211,16 +171,8 @@ services:
     ports:
       - "3100:3100"
     depends_on:
-      db:
-        condition: service_healthy
-      portal_sidekiq:
-        condition: service_healthy
-    healthcheck:
-      test: curl --fail http://localhost:3100/portal/health_check || exit 1
-      interval: 5s
-      timeout: 5s
-      start_period: 10s
-      retries: 5
+      - db
+      - portal_sidekiq
 
   portal_sidekiq:
     volumes:
@@ -246,13 +198,31 @@ services:
       - ENV=local
       - DISABLE_JSON_LOGGER=true
     depends_on:
-      redis:
-        condition: service_healthy
-      db:
-        condition: service_healthy
-    healthcheck:
-      test: curl --fail http://localhost:7435 || exit 1
-      interval: 5s
-      timeout: 5s
-      start_period: 10s
-      retries: 5
+      - redis
+      - db
+
+  # Starts up each service in the background
+  start_core_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - db
+      - redis
+    command: db:5432
+
+  start_web:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - dpc_web
+    command: dpc_web:3500
+
+  start_admin:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - dpc_admin
+    command: dpc_admin:3000
+
+  start_portal:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - dpc_portal
+    command: dpc_portal:3100

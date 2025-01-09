@@ -35,7 +35,7 @@ else
 fi
 
 # Build the application
-docker compose -p start-v1-app up db --wait
+docker compose -p start-v1-app up start_core_dependencies
 mvn clean compile -Perror-prone -B -V -ntp
 mvn package -Pci -ntp
 
@@ -46,17 +46,19 @@ fi
 
 docker compose -p start-v1-app down
 docker volume rm start-v1-app_pgdata16
-docker compose -p start-v1-app up db attribution aggregation --wait
+docker compose -p start-v1-app up start_core_dependencies
+docker compose -p start-v1-app up start_api_dependencies
 
 # Run the integration tests
 docker compose -p start-v1-app up --exit-code-from tests tests
 
 docker compose -p start-v1-app down
 docker volume rm start-v1-app_pgdata16
+docker compose -p start-v1-app up start_core_dependencies
+docker compose -p start-v1-app up start_api_dependencies
 
 # Start the API server
-USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
-USE_BFD_MOCK=false AUTH_DISABLED=true docker compose -p start-v1-app up api consent --wait
+AUTH_DISABLED=true docker compose -p start-v1-app up start_api start_consent
 
 # Run the Postman tests
 npm install
