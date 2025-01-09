@@ -165,7 +165,7 @@
             <column name="use" type="TINYINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="contact_value" type="VARCHAR">
+            <column name="value" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
             <column name="rank" type="TINYINT"/>
@@ -437,5 +437,11 @@
 
     <changeSet id="increment-attributions_id_seq" author="MEsposito">
         <alterSequence sequenceName="attributions_id_seq" incrementBy="100"></alterSequence>
+    </changeSet>
+
+    <changeSet id="update-value-column" author="ashley-weaver">
+        <update tableName="CONTACT_TELECOMS">
+            <column name="value" value="contact_value"/>
+        </update>
     </changeSet>
 </databaseChangeLog>
