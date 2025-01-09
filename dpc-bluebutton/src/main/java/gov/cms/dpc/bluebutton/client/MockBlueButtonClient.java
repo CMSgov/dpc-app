@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.IOException;
@@ -31,8 +32,18 @@ public class MockBlueButtonClient implements BlueButtonClient {
     private static final String SAMPLE_EMPTY_BUNDLE = "bb-test-data/empty";
 
     public static final List<String> TEST_PATIENT_MULTIPLE_MBIS = List.of("9V99EU8XY91", "1S00EU8FE91");
+
+    // Synthetic patient only used by dpc-api to load transaction time from BFD
+    public static final String TEST_PATIENT_FOR_API_TRANSACTION_TIME = "9S99EU8XY92";
     public static final List<String> TEST_PATIENT_MBIS = List.of(
-        "2SW4N00AA00", "4SP0P00AA00", "3S58A00AA00", "4S58A00AA00", "5S58A00AA00", "1SQ3F00AA00", TEST_PATIENT_MULTIPLE_MBIS.get(0), TEST_PATIENT_MULTIPLE_MBIS.get(1)
+        "2SW4N00AA00",
+        "4SP0P00AA00",
+        "3S58A00AA00",
+        "4S58A00AA00",
+        "5S58A00AA00",
+        "1SQ3F00AA00",
+        TEST_PATIENT_MULTIPLE_MBIS.get(0),
+        TEST_PATIENT_MULTIPLE_MBIS.get(1)
     );
 
     public static final Map<String, String> MBI_BENE_ID_MAP = Map.of(
@@ -43,7 +54,8 @@ public class MockBlueButtonClient implements BlueButtonClient {
             TEST_PATIENT_MBIS.get(4), "-19990000002210",
             TEST_PATIENT_MBIS.get(5), "-20000000001809",
             TEST_PATIENT_MBIS.get(6), "-10000010288391",
-            TEST_PATIENT_MBIS.get(7), "-10000010288391"
+            TEST_PATIENT_MBIS.get(7), "-10000010288391",
+            TEST_PATIENT_FOR_API_TRANSACTION_TIME, "-19990000000001"
             );
 
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
@@ -92,7 +104,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
     @SuppressWarnings("JdkObsolete") // Date class is used by FHIR stu3 Meta model
     public Bundle requestNextBundleFromServer(Bundle bundle, Map<String, String> headers) throws ResourceNotFoundException {
         // This is code is very specific to the bb-test-data directory and its contents
-        final var nextLink = bundle.getLink(Bundle.LINK_NEXT).getUrl();
+        final var nextLink = bundle.getLink(IBaseBundle.LINK_NEXT).getUrl();
         final var nextUrl = URI.create(nextLink);
         final var params = URLEncodedUtils.parse(nextUrl.getQuery(), StandardCharsets.UTF_8);
         final var patient = params.stream().filter(pair -> pair.getName().equals("patient")).findFirst().orElseThrow().getValue();
@@ -142,7 +154,14 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
         try( InputStream sampleData = loadResource(pathPrefix + beneId + fileExt) ) {
             final var bundle = parseResource(Bundle.class, sampleData, fileExt);
-            bundle.getMeta().setLastUpdated(Date.from(BFD_TRANSACTION_TIME.toInstant()));
+
+            // If this is the synthetic bene dpc-api uses to get the BFD transaction time, make sure the time returned
+            // is in the past.  If not, dpc-aggregation will fail tests when it checks transaction times.
+            Date lastUpdated = beneId.equals(MBI_BENE_ID_MAP.get(TEST_PATIENT_FOR_API_TRANSACTION_TIME)) ?
+                Date.from(BFD_TRANSACTION_TIME.toInstant().minusSeconds(300)) :
+                Date.from(BFD_TRANSACTION_TIME.toInstant());
+
+            bundle.getMeta().setLastUpdated(lastUpdated);
             return bundle;
         } catch(IOException ex) {
             throw formNoPatientException(beneId);
@@ -155,7 +174,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
      * @param resourceName - Fully qualified name of the resource to load, including path and file name
      * @return the stream associated with the resource
      */
-    private InputStream loadResource(String resourceName) throws ResourceNotFoundException, IOException {
+    private InputStream loadResource(String resourceName) throws ResourceNotFoundException {
         return MockBlueButtonClient.class.getClassLoader().getResourceAsStream(resourceName);
     }
 
