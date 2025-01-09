@@ -1,11 +1,11 @@
 package gov.cms.dpc.common.hibernate.consent;
 
-import com.google.inject.Inject;
 import io.dropwizard.core.Configuration;
 import io.dropwizard.core.ConfiguredBundle;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.SessionFactoryFactory;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 import java.util.Collections;

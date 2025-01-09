@@ -1,13 +1,13 @@
 package gov.cms.dpc.api.auth.macaroonauth;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import io.dropwizard.auth.Authenticator;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;

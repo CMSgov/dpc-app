@@ -62,7 +62,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                     .toList();
         }
         String parsedToken = parseTokenTag(tag -> tag, identifier);
-        Set<String> idSet = new HashSet<>(Arrays.asList(parsedToken.split(",")));
+        Set<String> idSet = Set.of(parsedToken.split(","));
         if (idSet.size() > 1) {
             return this.dao.getOrganizationsByIds(idSet)
                 .stream()

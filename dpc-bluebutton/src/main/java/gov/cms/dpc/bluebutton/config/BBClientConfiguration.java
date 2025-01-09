@@ -28,11 +28,13 @@ public class BBClientConfiguration extends FHIRClientConfiguration {
 
     private boolean useBfdMock = false;
 
+    public int getResourcesCount() {
+        return resourcesCount;
+    }
+
     public KeystoreConfiguration getKeystore() {
         return keystore;
     }
-
-    public int getResourcesCount() { return resourcesCount; }
 
     public BBClientConfiguration() {
         // Not used

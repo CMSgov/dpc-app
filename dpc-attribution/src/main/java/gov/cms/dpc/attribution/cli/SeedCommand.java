@@ -170,9 +170,9 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                     })
                     .map(entity -> patientEntityToRecord(context, entity))
                     .peek(context::executeInsert)
-                    .forEach(patientRecord -> {
-                        final Reference ref = new Reference(new IdType("Patient", patientRecord.getId().toString()));
-                        patientReferences.put(patientRecord.getBeneficiaryId(), ref);
+                    .forEach(record -> {
+                        final Reference ref = new Reference(new IdType("Patient", record.getId().toString()));
+                        patientReferences.put(record.getBeneficiaryId(), ref);
                     });
 
             return patientReferences;
@@ -189,62 +189,62 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
 
     private static OrganizationsRecord organizationEntityToRecord(DSLContext context, OrganizationEntity entity) {
         // We have to manually map the embedded fields
-        final OrganizationsRecord orgsRecord = context.newRecord(Organizations.ORGANIZATIONS, entity);
-        orgsRecord.setIdSystem(entity.getOrganizationID().getSystem().ordinal());
-        orgsRecord.setIdValue(entity.getOrganizationID().getValue());
+        final OrganizationsRecord record = context.newRecord(Organizations.ORGANIZATIONS, entity);
+        record.setIdSystem(entity.getOrganizationID().getSystem().ordinal());
+        record.setIdValue(entity.getOrganizationID().getValue());
 
         final AddressEntity address = entity.getOrganizationAddress();
-        orgsRecord.setAddressType(address.getType().ordinal());
-        orgsRecord.setAddressUse(address.getUse().ordinal());
-        orgsRecord.setLine1(address.getLine1());
-        orgsRecord.setLine2(address.getLine2());
-        orgsRecord.setCity(address.getCity());
-        orgsRecord.setDistrict(address.getDistrict());
-        orgsRecord.setState(address.getState());
-        orgsRecord.setPostalCode(address.getPostalCode());
-        orgsRecord.setCountry(address.getCountry());
-        return orgsRecord;
+        record.setAddressType(address.getType().ordinal());
+        record.setAddressUse(address.getUse().ordinal());
+        record.setLine1(address.getLine1());
+        record.setLine2(address.getLine2());
+        record.setCity(address.getCity());
+        record.setDistrict(address.getDistrict());
+        record.setState(address.getState());
+        record.setPostalCode(address.getPostalCode());
+        record.setCountry(address.getCountry());
+        return record;
     }
 
     private static OrganizationEndpointsRecord endpointsEntityToRecord(DSLContext context, EndpointEntity entity) {
-        final OrganizationEndpointsRecord orgEndpointsRecord = context.newRecord(OrganizationEndpoints.ORGANIZATION_ENDPOINTS, entity);
+        final OrganizationEndpointsRecord record = context.newRecord(OrganizationEndpoints.ORGANIZATION_ENDPOINTS, entity);
 
         final EndpointEntity.ConnectionType connectionType = entity.getConnectionType();
-        orgEndpointsRecord.setOrganizationId(entity.getOrganization().getId());
-        orgEndpointsRecord.setSystem(connectionType.getSystem());
-        orgEndpointsRecord.setCode(connectionType.getCode());
+        record.setOrganizationId(entity.getOrganization().getId());
+        record.setSystem(connectionType.getSystem());
+        record.setCode(connectionType.getCode());
 
         // Not sure why we have to manually set these values
-        orgEndpointsRecord.setStatus(entity.getStatus().ordinal());
-        orgEndpointsRecord.setName(entity.getName());
-        orgEndpointsRecord.setAddress(entity.getAddress());
-        orgEndpointsRecord.setValidationStatus(entity.getValidationStatus().ordinal());
-        orgEndpointsRecord.setValidationMessage(entity.getValidationMessage());
+        record.setStatus(entity.getStatus().ordinal());
+        record.setName(entity.getName());
+        record.setAddress(entity.getAddress());
+        record.setValidationStatus(entity.getValidationStatus().ordinal());
+        record.setValidationMessage(entity.getValidationMessage());
 
-        return orgEndpointsRecord;
+        return record;
     }
 
     private static ProvidersRecord providersEntityToRecord(DSLContext context, ProviderEntity entity) {
-        final ProvidersRecord providersRecord = context.newRecord(Providers.PROVIDERS, entity);
-        providersRecord.setOrganizationId(entity.getOrganization().getId());
+        final ProvidersRecord record = context.newRecord(Providers.PROVIDERS, entity);
+        record.setOrganizationId(entity.getOrganization().getId());
         final OffsetDateTime created = OffsetDateTime.now(ZoneOffset.UTC);
-        providersRecord.setCreatedAt(created);
-        providersRecord.setUpdatedAt(created);
-        providersRecord.setId(UUID.randomUUID());
+        record.setCreatedAt(created);
+        record.setUpdatedAt(created);
+        record.setId(UUID.randomUUID());
 
-        return providersRecord;
+        return record;
     }
 
     private static PatientsRecord patientEntityToRecord(DSLContext context, PatientEntity entity) {
         // Generate a temporary ID
-        final PatientsRecord patientsRecord = context.newRecord(Patients.PATIENTS, entity);
-        patientsRecord.setOrganizationId(entity.getOrganization().getId());
+        final PatientsRecord record = context.newRecord(Patients.PATIENTS, entity);
+        record.setOrganizationId(entity.getOrganization().getId());
         final OffsetDateTime created = OffsetDateTime.now(ZoneOffset.UTC);
-        patientsRecord.setCreatedAt(created);
-        patientsRecord.setUpdatedAt(created);
-        patientsRecord.setGender(entity.getGender().ordinal());
-        patientsRecord.setId(UUID.randomUUID());
+        record.setCreatedAt(created);
+        record.setUpdatedAt(created);
+        record.setGender(entity.getGender().ordinal());
+        record.setId(UUID.randomUUID());
 
-        return patientsRecord;
+        return record;
     }
 }

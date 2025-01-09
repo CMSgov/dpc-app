@@ -12,6 +12,9 @@
         <property name="hibernate.connection.username">postgres</property>
         <property name="hibernate.connection.password">dpc-safe</property>
 
+        <!-- SQL dialect -->
+        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+
         <!-- Print executed SQL to stdout -->
         <property name="show_sql">false</property>
 
