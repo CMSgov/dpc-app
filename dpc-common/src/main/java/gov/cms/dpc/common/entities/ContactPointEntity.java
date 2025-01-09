@@ -30,7 +30,7 @@ public class ContactPointEntity implements Serializable {
     private ContactPoint.ContactPointUse use;
     @NoHtml
     @NotEmpty
-    @Column(name = "contact_value")  // TODO: does anything else need to be updated?
+    @Column(name = "contact_value", nullable = false)
     private String value;
     private Integer rank;
 

@@ -165,7 +165,7 @@
             <column name="use" type="TINYINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="value" type="VARCHAR">
+            <column name="contact_value" type="VARCHAR">
                 <constraints nullable="false"/>
             </column>
             <column name="rank" type="TINYINT"/>
