@@ -439,9 +439,9 @@
         <alterSequence sequenceName="attributions_id_seq" incrementBy="100"></alterSequence>
     </changeSet>
 
-    <changeSet id="update-value-column" author="ashley-weaver">
-        <update tableName="CONTACT_TELECOMS">
-            <column name="value" value="contact_value"/>
-        </update>
+    <changeSet id="update-value-column-name" author="ashley-weaver">
+        <renameColumn tableName="CONTACT_TELECOMS"
+                      oldColumnName="value"
+                      newColumnName="contact_value"/>
     </changeSet>
 </databaseChangeLog>
