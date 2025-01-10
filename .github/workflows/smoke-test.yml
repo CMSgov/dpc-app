@@ -88,9 +88,9 @@ jobs:
         run: |
           . venv/bin/activate
           if [ "${{ inputs.env }}" = 'prod' ]; then
-            make smoke/prod
+            bzt src/test/prod.smoke_test.yml
           elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
-            make smoke/sandbox
+            bzt src/test/sandbox.smoke_test.yml
           else
             bzt src/test/remote.smoke_test.yml
           fi
