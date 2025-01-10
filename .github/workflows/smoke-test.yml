@@ -36,7 +36,7 @@ jobs:
             channel: "CMC1E4AEQ"
             attachments:
               - color: warning
-                text: "Smoke test of `${{ inputs.env }}` has started"
+                text: "GHA Smoke test of `${{ inputs.env }}` has started"
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
                 mrkdown_in:
                   - footer
@@ -55,7 +55,6 @@ jobs:
           echo "admin_host=$admin_host" >> "$GITHUB_OUTPUT"
           echo "ELB_URL=http://$admin_host:9900/tasks" >> "$GITHUB_OUTPUT"
       - name: Verify can hit admin host
-        if: ${{ false }}
         run: |
           curl ${{ steps.fetch-admin-host.outputs.ELB_URL }} --connect-timeout 10
       - name: Determine host
@@ -115,7 +114,7 @@ jobs:
             channel: "CMC1E4AEQ"
             attachments:
               - color: good
-                text: "Smoke test of `${{ inputs.env }}` has succeeded"
+                text: "GHA Smoke test of `${{ inputs.env }}` has succeeded"
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}|Smoke Test - Build ${{ github.run_id }}>"
                 mrkdown_in:
                   - footer
@@ -130,7 +129,7 @@ jobs:
             channel: "CMC1E4AEQ"
             attachments:
               - color: danger
-                text: "Smoke test of `${{ inputs.env }}` has failed"
+                text: "GHA Smoke test of `${{ inputs.env }}` has failed"
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
                 mrkdown_in:
                   - footer
