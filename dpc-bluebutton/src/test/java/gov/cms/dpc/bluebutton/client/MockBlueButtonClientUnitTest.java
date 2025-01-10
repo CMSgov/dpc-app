@@ -17,10 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * tests.  SonarQube is flagging it for code coverage, though, so I'm adding some anyway.
  */
 class MockBlueButtonClientUnitTest {
-	private MockBlueButtonClient client = new MockBlueButtonClient(FhirContext.forDstu3());
+	private final MockBlueButtonClient client = new MockBlueButtonClient(FhirContext.forDstu3());
 
-	private String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
-	private String id = MockBlueButtonClient.MBI_BENE_ID_MAP.get(mbi);
+	private final String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
+	private final String id = MockBlueButtonClient.MBI_BENE_ID_MAP.get(mbi);
 
 	@Test
 	void testRequestPatientFromServerByMbi() {
