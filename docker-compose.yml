@@ -16,9 +16,9 @@ services:
       - ./tmp:/var/tmp
     healthcheck:
       test: "pg_isready -U $${POSTGRES_USER}"
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      start_period: 10s
+      start_period: 30s
       retries: 5
 
   aggregation:
@@ -43,9 +43,9 @@ services:
       - ./jacocoReport/dpc-aggregation:/jacoco-report
     healthcheck:
       test: curl --fail http://localhost:9901/healthcheck || exit 1
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      start_period: 10s
+      start_period: 30s
       retries: 5
 
   attribution:
@@ -64,9 +64,9 @@ services:
       - ./jacocoReport/dpc-attribution:/jacoco-report
     healthcheck:
       test: curl --fail http://localhost:9902/healthcheck || exit 1
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      start_period: 10s
+      start_period: 30s
       retries: 5
 
   api:
@@ -91,9 +91,9 @@ services:
       - ./jacocoReport/dpc-api:/jacoco-report
     healthcheck:
       test: curl --fail http://localhost:9900/healthcheck || exit 1
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      start_period: 10s
+      start_period: 30s
       retries: 5
 
   consent:
@@ -112,9 +112,9 @@ services:
       - ./jacocoReport/dpc-consent:/jacoco-report
     healthcheck:
       test: curl --fail http://localhost:9904/healthcheck || exit 1
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      start_period: 10s
+      start_period: 30s
       retries: 5
 
   tests:
