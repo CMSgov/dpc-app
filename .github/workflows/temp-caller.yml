@@ -14,6 +14,6 @@ jobs:
       env: dev
       confirm_env: dev
       tag: latest
-      ops-ref: jd/not-building-debug
+      ops-ref: main
     secrets: inherit
 
