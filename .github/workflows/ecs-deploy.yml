@@ -20,6 +20,15 @@ on:
         required: false
         type: 'string'
         default: 'latest'
+      ops-ref:
+        description: Branch of dpc-ops to use
+        required: false
+        type: 'string'
+        default: 'main'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.env }}
+  cancel-in-progress: false
 
 permissions:
   id-token: write
@@ -86,7 +95,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: 'CMSgov/dpc-ops'
-          ref: 'main'
+          ref: ${{ inputs.ops-ref }}
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
           path: dpc-ops
       - name: install terraform
@@ -143,7 +152,7 @@ jobs:
           done
           echo "counter=$counter" >> "$GITHUB_OUTPUT"
       - name: Slack if nothing to New Relic
-        if: ${{ steps.notify-new-relic.outputs.counter == 0 }}
+        if: ${{ failure() || steps.notify-new-relic.outputs.counter == 0 }}
         uses: slackapi/slack-github-action@v2.0.0
         with:
           method: chat.postMessage
