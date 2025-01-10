@@ -134,7 +134,7 @@ jobs:
           # Sends to dpc-deploys
           payload: |
             channel: "CMC1E4AEQ"
-            text:  "GHA Deployment to `${{ inputs.env }}` has failed"
+            text:  "GHA Deployment to `${{ inputs.env }}` has failed in Deploy Job"
             attachments:
               - color: danger
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|ECS Deploy - Build ${{ github.run_id }}>"
