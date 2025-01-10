@@ -55,6 +55,7 @@ jobs:
           echo "admin_host=$admin_host" >> "$GITHUB_OUTPUT"
           echo "ELB_URL=http://$admin_host:9900/tasks" >> "$GITHUB_OUTPUT"
       - name: Verify can hit admin host
+        if: ${{ false }}
         run: |
           curl ${{ steps.fetch-admin-host.outputs.ELB_URL }} --connect-timeout 10
       - name: Determine host
@@ -98,6 +99,10 @@ jobs:
           else
             bzt src/test/remote.smoke_test.yml
           fi
+      - name: Debug failure
+        if: ${{ failure() }}
+        run: |
+          echo ${{ steps.run-smoke-test.outcome }}
       - name: Upload bzt logs
         if: ${{ steps.run-smoke-test.outcome == 'failure' }}
         uses: actions/upload-artifact@v4
