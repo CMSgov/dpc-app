@@ -20,6 +20,11 @@ on:
         required: false
         type: 'string'
         default: 'latest'
+      app-version:
+        description: 'The version of dpc-app being deployed (ex: r###, xx_test_branch).  This will appear in logs under the "version" property".'
+        required: false
+        type: 'string'
+        default: 'unknown'
       ops-ref:
         description: Branch of dpc-ops to use
         required: false
@@ -115,11 +120,29 @@ jobs:
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
           terraform init
-          terraform plan -var 'release_version=commit_f413bc3a' -var 'aggregation_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'api_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'attribution_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'consent_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'web_admin_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'web_portal_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'web_image_tag=${{ steps.image-tag.outputs.image_tag }}' -out dpc-release-${{ inputs.env }}.tfplan
+          terraform plan -var 'release_version=${{ inputs.app-version}}' -var 'aggregation_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'api_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'attribution_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'consent_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'web_admin_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'web_portal_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'web_image_tag=${{ steps.image-tag.outputs.image_tag }}' -out dpc-release-${{ inputs.env }}.tfplan
       - name: Apply main environment plan
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
           terraform apply dpc-release-${{ inputs.env }}.tfplan
+      - uses: slackapi/slack-github-action@v2.0.0
+        name: Slack failure
+        if: ${{ failure() }}
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            text:  "GHA Deployment to `${{ inputs.env }}` has failed"
+            attachments:
+              - color: danger
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|ECS Deploy - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer
+                fields:
+                  - title: Image Tag
+                    value: ${{ needs.deploy.outputs.image_tag }}
 
   services-up:
     name: All Services Healthy
