@@ -1,6 +1,6 @@
 name: 'DPC - ECS Deploy'
 
-# TODO: remove if: ${{ false }}, remove FAKE from Slack messages; remove inputs.terraform, temp-deploy, remove lock=false
+# TODO: remove if: ${{ false }}, remove GHA from Slack messages; remove inputs.terraform, temp-deploy, remove lock=false
 
 on:
   workflow_call:
@@ -78,7 +78,7 @@ jobs:
           # Sends to dpc-deploys
           payload: |
             channel: "CMC1E4AEQ"
-            text:  "FAKE Deployment to `${{ inputs.env }}` has started"
+            text:  "GHA Deployment to `${{ inputs.env }}` has started"
             attachments:
               - color: warning
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|ECS Deploy - Build ${{ github.run_id }}>"
@@ -104,9 +104,8 @@ jobs:
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}/persistent
           terraform init
-          terraform plan -out dpc-release-${{ inputs.env }}.tfplan -lock=false 2>&1
+          terraform plan -out dpc-release-${{ inputs.env }}.tfplan 2>&1
       - name: Apply persistent plan
-        if: ${{ inputs.terraform && false }}
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}/persistent
           terraform apply dpc-release-${{ inputs.env }}.tfplan
@@ -117,14 +116,12 @@ jobs:
           terraform init
           terraform plan -var 'release_version=commit_f413bc3a' -var 'aggregation_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'api_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'attribution_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'consent_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'web_admin_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'web_portal_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'web_image_tag=${{ steps.image-tag.outputs.image_tag }}' -out dpc-release-${{ inputs.env }}.tfplan
       - name: Apply main environment plan
-        if: ${{ inputs.terraform && false}}
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
           terraform apply dpc-release-${{ inputs.env }}.tfplan
 
   services-up:
     name: All Services Healthy
-    if: ${{ false }}
     needs: deploy
     uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
     with:
@@ -133,7 +130,6 @@ jobs:
 
   notify-new-relic:
     name: Notify New Relic
-    if: ${{ false }}
     runs-on: self-hosted
     needs: deploy
     steps:
@@ -163,7 +159,7 @@ jobs:
           # Sends to dpc-alerts
           payload: |
             channel: "CUY7H43DY"
-            text:  "FAKE Notification to New Relic of deployment to `${{ inputs.env }}` has failed"
+            text:  "GHA Notification to New Relic of deployment to `${{ inputs.env }}` has failed"
             attachments:
               - color: danger
                 text: Although the deployment succeeded, we were unable to notify New Relic
@@ -173,7 +169,6 @@ jobs:
 
   notify-slack:
     name: Notify Slack
-    if: ${{ always() && false }}
     needs:
       - deploy
       - services-up
@@ -188,7 +183,7 @@ jobs:
           # Sends to dpc-deploys
           payload: |
             channel: "CMC1E4AEQ"
-            text:  "FAKE Deployment to `${{ inputs.env }}` has succeeded"
+            text:  "GHA Deployment to `${{ inputs.env }}` has succeeded"
             attachments:
               - color: good
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|ECS Deploy - Build ${{ github.run_id }}>"
@@ -206,7 +201,7 @@ jobs:
           # Sends to dpc-deploys
           payload: |
             channel: "CMC1E4AEQ"
-            text:  "FAKE Deployment to `${{ inputs.env }}` has failed"
+            text:  "GHA Deployment to `${{ inputs.env }}` has failed"
             attachments:
               - color: danger
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|ECS Deploy - Build ${{ github.run_id }}>"
