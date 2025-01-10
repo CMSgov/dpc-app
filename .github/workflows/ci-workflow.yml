@@ -124,6 +124,9 @@ jobs:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
     steps:
+      - name: chmod working directory
+        run: |
+          chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: Download web code coverage
@@ -162,6 +165,9 @@ jobs:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
     steps:
+      - name: chmod working directory
+        run: |
+          chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: Download code coverage
@@ -197,6 +203,9 @@ jobs:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
+      - name: chmod working directory
+        run: |
+          chmod -R 777 .
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Setup Java
