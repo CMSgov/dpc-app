@@ -56,7 +56,7 @@ jobs:
           echo "ELB_URL=http://$admin_host:9900/tasks" >> "$GITHUB_OUTPUT"
       - name: Verify can hit admin host
         run: |
-          curl ${{ steps.fetch-admin-host.outputs.ELB_URL }}
+          curl ${{ steps.fetch-admin-host.outputs.ELB_URL }} --connect-timeout 10
       - name: Determine host
         id: determine-host
         run: |
