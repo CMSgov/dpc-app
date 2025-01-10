@@ -126,7 +126,7 @@ jobs:
     steps:
       - name: chmod working directory
         run: |
-          chmod -R 777 .
+          sudo chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: Download web code coverage
@@ -167,7 +167,7 @@ jobs:
     steps:
       - name: chmod working directory
         run: |
-          chmod -R 777 .
+          sudo chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: Download code coverage
@@ -205,7 +205,7 @@ jobs:
     steps:
       - name: chmod working directory
         run: |
-          chmod -R 777 .
+          sudo chmod -R 777 .
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Setup Java
