@@ -82,6 +82,7 @@ jobs:
           export JAVA_HOME=/usr/lib/jvm/default-jvm
           mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
       - name: Run Smoke Test
+        id: run-smoke-test
         env:
           ELB_URL: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
           HOST_URL: ${{ steps.determine-host.outputs.HOST_URL }}
@@ -98,7 +99,7 @@ jobs:
             bzt src/test/remote.smoke_test.yml
           fi
       - name: Upload bzt logs
-        if: ${{ failure() }}
+        if: ${{ steps.run-smoke-test.outcome == 'failure' }}
         uses: actions/upload-artifact@v4
         with:
           name: bzt-logs
