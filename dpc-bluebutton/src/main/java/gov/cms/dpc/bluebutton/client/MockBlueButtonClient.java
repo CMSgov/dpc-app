@@ -157,6 +157,11 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
             // If this is the synthetic bene dpc-api uses to get the BFD transaction time, make sure the time returned
             // is in the past.  If not, dpc-aggregation will fail tests when it checks transaction times.
+            //
+            // Dpc-api loads this particular synthetic patient to get its meta.lastUpdated time to figure out when BFD
+            // data was last loaded.  Dpc-aggregation then compares this date to the meta.lastUpdated of any resource
+            // bundles to make sure the bundle was created after the last data load.  At some point in the past, BFD had
+            // an issue with transaction time regression, and this was how it was dealt with.
             Date lastUpdated = beneId.equals(MBI_BENE_ID_MAP.get(TEST_PATIENT_FOR_API_TRANSACTION_TIME)) ?
                 Date.from(BFD_TRANSACTION_TIME.toInstant().minusSeconds(300)) :
                 Date.from(BFD_TRANSACTION_TIME.toInstant());
