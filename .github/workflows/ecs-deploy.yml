@@ -1,6 +1,6 @@
 name: 'DPC - ECS Deploy'
 
-# TODO: remove if: ${{ false }}, remove GHA from Slack messages; remove inputs.terraform, temp-deploy, remove lock=false
+# TODO: remove if: ${{ false }}, remove GHA from Slack messages, temp-deploy, remove lock=false
 
 on:
   workflow_call:
@@ -20,11 +20,6 @@ on:
         required: false
         type: 'string'
         default: 'latest'
-      terraform: # temp
-        description: 'Also run terraform?'
-        type: boolean
-        default: false
-        required: false
 
 permissions:
   id-token: write
@@ -95,12 +90,10 @@ jobs:
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
           path: dpc-ops
       - name: install terraform
-        if: ${{ inputs.terraform }}
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.0.0"
       - name: Verify persistent plan
-        if: ${{ inputs.terraform }}
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}/persistent
           terraform init
@@ -110,7 +103,6 @@ jobs:
           cd dpc-ops/terraform/${{ inputs.env }}/persistent
           terraform apply dpc-release-${{ inputs.env }}.tfplan
       - name: Verify main environment plan
-        if: ${{ inputs.terraform }}
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
           terraform init

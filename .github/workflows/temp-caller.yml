@@ -6,14 +6,6 @@ on:
       - .github/workflows/ecs-deploy.yml
       - .github/workflows/temp-caller.yml
 
-  workflow_dispatch:
-    inputs:
-      terraform:
-        description: 'Also run terraform?'
-        type: boolean
-        default: false
-        required: true
-
 jobs:
   deploy:
     name: ECS Deploy
@@ -21,7 +13,6 @@ jobs:
     with:
       env: dev
       confirm_env: dev
-      tag: latest
-      terraform: ${{ inputs.terraform || true }}
+      tag: rls-202501071112-4379
     secrets: inherit
 
