@@ -11,9 +11,9 @@ jobs:
     name: ECS Deploy
     uses: CMSgov/dpc-app/.github/workflows/ecs-deploy.yml@jd/dpc-4454-ecs-deploy
     with:
-      env: dev
-      confirm_env: dev
-      tag: latest
+      env: test
+      confirm_env: test
+      tag: rls-202501020600-4370
       ops-ref: main
     secrets: inherit
 
