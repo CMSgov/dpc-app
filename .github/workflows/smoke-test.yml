@@ -99,12 +99,8 @@ jobs:
           else
             bzt src/test/remote.smoke_test.yml
           fi
-      - name: Debug failure
-        if: ${{ failure() }}
-        run: |
-          echo ${{ steps.run-smoke-test.outcome }}
       - name: Upload bzt logs
-        if: ${{ steps.run-smoke-test.outcome == 'failure' }}
+        if: ${{ failure() && steps.run-smoke-test.outcome == 'failure' }}
         uses: actions/upload-artifact@v4
         with:
           name: bzt-logs
