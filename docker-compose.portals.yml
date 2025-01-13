@@ -8,9 +8,9 @@ services:
     image: redis:latest
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      start_period: 10s
+      start_period: 30s
       retries: 5
 
   dpc_web:
@@ -51,9 +51,9 @@ services:
         condition: service_healthy
     healthcheck:
       test: curl --fail http://localhost:3500/health_check || exit 1
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      start_period: 10s
+      start_period: 30s
       retries: 5
 
   web_sidekiq:
@@ -84,9 +84,9 @@ services:
         condition: service_healthy
     healthcheck:
       test: curl --fail http://localhost:7433 || exit 1
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      start_period: 10s
+      start_period: 30s
       retries: 5
 
   dpc_admin:
@@ -121,9 +121,9 @@ services:
         condition: service_healthy
     healthcheck:
       test: curl --fail http://localhost:3000/admin/health_check || exit 1
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      start_period: 10s
+      start_period: 30s
       retries: 5
 
   admin_sidekiq:
@@ -153,9 +153,9 @@ services:
         condition: service_healthy
     healthcheck:
       test: curl --fail http://localhost:7434 || exit 1
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      start_period: 10s
+      start_period: 30s
       retries: 5
 
   dpc_portal:
@@ -217,9 +217,9 @@ services:
         condition: service_healthy
     healthcheck:
       test: curl --fail http://localhost:3100/portal/health_check || exit 1
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      start_period: 10s
+      start_period: 30s
       retries: 5
 
   portal_sidekiq:
@@ -252,7 +252,7 @@ services:
         condition: service_healthy
     healthcheck:
       test: curl --fail http://localhost:7435 || exit 1
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      start_period: 10s
+      start_period: 30s
       retries: 5
