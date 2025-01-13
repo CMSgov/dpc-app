@@ -8,6 +8,7 @@ settings:
     SEED_FILE: src/main/resources/test_associations-dpr.csv
     PROVIDER_BUNDLE: provider_bundle.json
     PATIENT_BUNDLE: patient_bundle-dpr.json
+    GOLDEN_MACAROON: ${GOLDEN_MACAROON}
   artifacts-dir: bzt-out/%Y-%m-%d_%H-%M-%S.%f
 
 modules:
