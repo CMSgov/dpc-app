@@ -1,8 +1,33 @@
 name: 'DPC - ECS Deploy'
 
-# TODO: remove if: ${{ false }}, remove GHA from Slack messages, temp-deploy, remove lock=false
-
 on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: AWS environment to check
+        required: true
+        type: 'string'
+        default: 'dev'
+      confirm_env:
+        description: Double check for environment
+        required: true
+        type: 'string'
+        default: ''
+      tag:
+        description: Image tag to deploy
+        required: false
+        type: 'string'
+        default: 'latest'
+      app-version:
+        description: 'The version of dpc-app being deployed (ex: r###, xx_test_branch).  This will appear in logs under the "version" property".'
+        required: false
+        type: 'string'
+        default: 'unknown'
+      ops-ref:
+        description: Branch of dpc-ops to use
+        required: false
+        type: 'string'
+        default: 'main'
   workflow_call:
     inputs:
       env:
@@ -147,7 +172,7 @@ jobs:
   services-up:
     name: All Services Healthy
     needs: deploy
-    uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@jd/dpc-4454-ecs-deploy
+    uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@main
     with:
       env: ${{ inputs.env }}
     secrets: inherit
