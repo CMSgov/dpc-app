@@ -1,0 +1,15 @@
+name: 'Temp Caller - Docker Build'
+
+on:
+  push:
+    paths:
+      - .github/workflows/docker_build.yml
+      - .github/workflows/docker-build-temp-caller.yml
+
+jobs:
+  run_build_test:
+    name: Run Docker Build
+    uses: CMSgov/dpc-app/.github/workflows/docker_build.yml@ls/dpc-4446-build-docker
+    with:
+      env: dev
+    secrets: inherit
