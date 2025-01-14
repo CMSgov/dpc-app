@@ -58,11 +58,6 @@
                 <stringProp name="Argument.value">${__P(admin-url,)}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
-              <elementProp name="golden-macaroon" elementType="Argument">
-                <stringProp name="Argument.name">golden-macaroon</stringProp>
-                <stringProp name="Argument.value">${__P(golden-macaroon,)}</stringProp>
-                <stringProp name="Argument.metadata">=</stringProp>
-              </elementProp>
               <elementProp name="organization-ids" elementType="Argument">
                 <stringProp name="Argument.name">organization-ids</stringProp>
                 <stringProp name="Argument.value">${__P(organization-ids,)}</stringProp>

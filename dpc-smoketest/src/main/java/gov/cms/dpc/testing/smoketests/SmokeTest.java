@@ -57,7 +57,6 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         final Arguments arguments = new Arguments();
         arguments.addArgument("host", "http://localhost:3002/v1");
         arguments.addArgument("admin-url", "http://localhost:3002/tasks");
-        arguments.addArgument("golden-macaroon", "");
         arguments.addArgument("attribution-url", "http://localhost:3500/v1");
         arguments.addArgument("seed-file", "src/main/resources/test_associations-dpr.csv");
         arguments.addArgument("provider-bundle", "provider_bundle.json");
@@ -74,7 +73,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         apiHost = context.getParameter("host");
         apiAdminUrl = context.getParameter("admin-url");
         fhirContext = FhirContext.forDstu3();
-        goldenMacaroon = context.getParameter("golden-macaroon");
+        goldenMacaroon = createGoldenMacaroon();
         organizationID = getTestOrganizationId(context);
         providerBundleFileLoc = context.getParameter("provider-bundle");
         patientBundleFileLoc = context.getParameter("patient-bundle");
@@ -310,5 +309,13 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                     .resourceById(new IdType("Organization", orgId))
                     .encodedJson()
                     .execute();
+    }
+
+    private String createGoldenMacaroon(){
+        try {
+            return APIAuthHelpers.createGoldenMacaroon(apiAdminUrl);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed creating Macaroon", e);
+        }
     }
 }
