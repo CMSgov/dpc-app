@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       env:
-        description: AWS environment to check
+        description: AWS environment to deploy to
         required: true
         type: 'string'
         default: 'dev'
@@ -31,7 +31,7 @@ on:
   workflow_call:
     inputs:
       env:
-        description: AWS environment to check
+        description: AWS environment to deploy to
         required: true
         type: 'string'
         default: 'dev'
