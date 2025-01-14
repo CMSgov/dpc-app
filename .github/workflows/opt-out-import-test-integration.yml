@@ -20,6 +20,7 @@ jobs:
     secrets: inherit
 
   trigger:
+    if: ${{ always() }}
     needs: deploy
     permissions:
       contents: read
@@ -126,13 +127,9 @@ jobs:
             echo "input file id query returned zero results or command failed"
             exit 1
           else
-            echo "input file id $RESPONSE_FILE_ID"
             CONSENTS=`docker exec dpc-app-db-1 psql --csv -t -U $DB_USER -h $HOST -d dpc_consent -c "SELECT COUNT(mbi) FROM consent WHERE opt_out_file_id = '$RESPONSE_FILE_ID'" 2>&1`
             if [[ $? -ne 0 || -z $CONSENTS ]]; then
               echo "consents query returned zero results or command failed"
               exit 1
-            else
-              echo "consents: $CONSENTS"
             fi
           fi
-          
