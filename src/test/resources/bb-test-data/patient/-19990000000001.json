@@ -7,7 +7,7 @@
     {
       "resource": {
         "resourceType": "Patient",
-        "id": "-10000010288391",
+        "id": "-19990000000001",
         "meta": {
           "lastUpdated": "2023-04-26T15:19:31.964-04:00"
         },
@@ -68,7 +68,7 @@
         "identifier": [
           {
             "system": "https://bluebutton.cms.gov/resources/variables/bene_id",
-            "value": "-10000010288391"
+            "value": "-19990000000001"
           },
           {
             "system": "https://bluebutton.cms.gov/resources/identifier/mbi-hash",
@@ -86,7 +86,7 @@
               }
             ],
             "system": "http://hl7.org/fhir/sid/us-mbi",
-            "value": "9V99EU8XY91"
+            "value": "9S99EU8XY92"
           },
           {
             "extension": [
