@@ -153,7 +153,7 @@ public class TokenResource extends AbstractTokenResource {
         //Set the label, if provided, otherwise, generate a default one
         if(optionalBody.isPresent() && StringUtils.isNotEmpty(optionalBody.get().getLabel())){
             tokenEntity.setLabel(optionalBody.get().getLabel());
-        }else{
+        } else {
             tokenEntity.setLabel(Optional.ofNullable(tokenLabel).orElse(String.format("Token for organization %s.", organizationID)));
         }
         logger.info("Generating access token: {}", tokenEntity);
@@ -240,14 +240,13 @@ public class TokenResource extends AbstractTokenResource {
     @Public
     @Override
     public Response validateJWT(@NoHtml @NotEmpty(message = "Must submit JWT") String jwt) {
-
         try {
             Jwts.parser()
                     .requireAudience(this.authURL)
                     .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
                     .build()
                     .parseSignedClaims(jwt);
-        } catch (IllegalArgumentException e) {
+        } catch (UnsupportedJwtException e) {
             // This is fine, we just want the body
         } catch (MalformedJwtException e) {
             throw new WebApplicationException("JWT is not formatted correctly", Response.Status.BAD_REQUEST);

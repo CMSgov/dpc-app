@@ -432,7 +432,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(0, resultValidSince.getTotal(), "Should have 0 entries in Bundle");
     }
 
-    @Disabled
     @Test
     @Order(8)
     void testPatientEverything_CanHandlePatientWithMultipleMBIs() throws IOException, URISyntaxException, GeneralSecurityException {
@@ -466,7 +465,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals("9V99EU8XY91", FHIRExtractors.getPatientMBI(patientResource));
     }
 
-    @Disabled
     @Test
     @Order(9)
     void testPatientEverythingForOptedOutPatient() throws IOException, URISyntaxException, GeneralSecurityException {

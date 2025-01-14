@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +77,12 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
         if (exception.getCause() instanceof ConstraintViolationException constraintViolationException) {
             message = generateErrorMessage(constraintViolationException);
             status = Response.Status.BAD_REQUEST;
+        } else if (exception.getCause() instanceof PSQLException) {
+            message = exception.getMessage();
+            status = Response.Status.BAD_REQUEST;
         } else {
+            System.out.println("EXCEPTION CAUSE");
+            System.out.println(exception.getCause());
             logger.error("Cannot persist to DB", exception);
             message = "Internal server error";
             status = Response.Status.INTERNAL_SERVER_ERROR;
