@@ -3,6 +3,8 @@ FROM ruby:3.3-alpine AS ruby_builder
 # Install build dependencies
 RUN apk update && \
     apk add --no-cache postgresql-dev && \
+    apk add --no-cache libffi-dev && \
+    apk add --no-cache yaml-dev && \
     apk add --no-cache shared-mime-info && \
     apk add --no-cache --virtual build-deps alpine-sdk npm tzdata && \
     apk add xz && \
@@ -42,7 +44,8 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
 FROM ruby:3.3-alpine
 
 # Install app dependencies
-RUN apk add --no-cache postgresql-client nodejs tzdata
+RUN apk add --no-cache postgresql-client nodejs tzdata && \
+    apk add --no-cache curl
 
 # Set the working directory
 RUN mkdir /dpc-web
