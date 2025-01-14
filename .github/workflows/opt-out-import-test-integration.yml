@@ -119,7 +119,18 @@ jobs:
           docker run --rm --name dpc-app-db-1 -e POSTGRES_PASSWORD="$DB_PASSWORD" -e PGPASSWORD="$DB_PASSWORD" -d postgres:16.4
       - name: Verify suppression file was ingested
         env:
-          FILENAME: ${{needs.trigger.outputs.filename}}
+          FILENAME: 'T.NGD.DPC.RSP.D241121.T2128511.IN' #${{needs.trigger.outputs.filename}}
         # CAUTION: if changing the script below, validate that sensitive information is not printed in the workflow
         run: |
-          docker exec dpc-app-db-1 psql --csv -t -U $DB_USER -h $HOST -d dpc_consent -c 'SELECT count(*) from opt_out_file'
+          RESPONSE_FILE_ID=`docker exec dpc-app-db-1 psql --csv -t -U $DB_USER -h $HOST -d dpc_consent -c "SELECT id FROM opt_out_file WHERE name = '$FILENAME' LIMIT 1" 2>&1`
+          if [[ $? -ne 0 || -z $RESPONSE_FILE_ID ]]; then
+            echo "input file id query returned zero results or command failed"
+            exit 1
+          else
+            CONSENTS=`docker exec dpc-app-db-1 psql --csv -t -U $DB_USER -h $HOST -d dpc_consent -c "SELECT COUNT(mbi) FROM consent WHERE opt_out_file_id = '$RESPONSE_FILE_ID'" 2>&1`
+            if [[ $? -ne 0 || -z $CONSENTS ]]; then
+              echo "consents query returned zero results or command failed"
+              exit 1
+            fi
+          fi
+          
