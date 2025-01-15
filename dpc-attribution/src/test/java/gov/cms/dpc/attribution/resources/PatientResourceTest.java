@@ -15,6 +15,9 @@ import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static gov.cms.dpc.attribution.AttributionTestHelpers.*;
@@ -311,4 +314,34 @@ class PatientResourceTest extends AbstractAttributionTest {
 
         assertThrows(UnprocessableEntityException.class, update::execute);
     }
+
+    @Test
+    void testBulkInsert() {
+        // dpc-api currently has a 20sec timeout when calling attribution, so we'll match that for this test
+        final IGenericClient client = createFHIRClient(ctx, getServerURL(), 20000);
+
+        List<Patient> patients = AttributionTestHelpers.createPatientResources(DEFAULT_ORG_ID, 50000);
+        Bundle patientBundle = AttributionTestHelpers.createBundle(
+            patients.stream().map(Resource.class::cast).toArray(Resource[] ::new)
+        );
+        Parameters params = new Parameters();
+        params.addParameter().setResource(patientBundle);
+
+        Instant startInstant = Instant.now();
+        Bundle resultPatientBundle = client
+            .operation()
+            .onType(Patient.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+        Instant endInstant = Instant.now();
+
+        Duration duration = Duration.between(startInstant, endInstant);
+
+        System.out.println("Runtime: " + duration.getSeconds());
+    }
+
+
 }

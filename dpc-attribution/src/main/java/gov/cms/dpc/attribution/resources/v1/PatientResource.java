@@ -22,8 +22,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
+import java.util.stream.Stream;
 
 public class PatientResource extends AbstractPatientResource {
 
@@ -91,21 +90,15 @@ public class PatientResource extends AbstractPatientResource {
             final UUID organizationID = FHIRExtractors.getEntityUUID(patient.getManagingOrganization().getReference());
             final String patientMBI = FHIRExtractors.getPatientMBI(patient);
 
-            final Response.Status status;
-            final PatientEntity entity;
-            // Check to see if Patient already exists, if so, ignore it.
+            // Check to see if Patient already exists, if so just return it.
             final List<PatientEntity> patientEntities = this.dao.patientSearch(null, patientMBI, organizationID);
             if (!patientEntities.isEmpty()) {
-                status = Response.Status.OK;
-                entity = patientEntities.get(0);
-            } else {
-                status = Response.Status.CREATED;
-                entity = this.dao.persistPatient(this.converter.fromFHIR(PatientEntity.class, patient));
-            }
-
-            return Response.status(status)
-                    .entity(this.converter.toFHIR(Patient.class, entity))
+                return Response.status(Response.Status.OK)
+                    .entity(this.converter.toFHIR(Patient.class, patientEntities.get(0)))
                     .build();
+            } else {
+                return insertPatient(patient);
+            }
         } catch (IllegalArgumentException e) {
             throw new WebApplicationException("Invalid Patient resource", HttpStatus.UNPROCESSABLE_ENTITY_422);
         }
@@ -118,7 +111,43 @@ public class PatientResource extends AbstractPatientResource {
     @BundleReturnProperties(bundleType = Bundle.BundleType.COLLECTION)
     @Override
     public List<Patient> bulkSubmitPatients(Parameters params) {
-        return bulkResourceHandler(Patient.class, params, this::createPatient);
+        // Get our list of patients
+        final Bundle bundle = (Bundle) params.getParameterFirstRep().getResource();
+
+        final List<Patient> patients = bundle.getEntry().stream()
+            .filter(Bundle.BundleEntryComponent::hasResource)
+            .map(Bundle.BundleEntryComponent::getResource)
+            .filter(resource -> resource.getClass().equals(Patient.class))
+            .map(Patient.class::cast)
+            .collect(Collectors.toList());
+
+        if(patients.isEmpty()) {
+            throw new WebApplicationException("No valid patients submitted", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
+
+        // Pull out the list of patient entities that already exist in the DB
+        final UUID organizationID = FHIRExtractors.getEntityUUID(patients.get(0).getManagingOrganization().getReference());
+        final List<String> mbis = patients.stream().map(FHIRExtractors::getPatientMBI).collect(Collectors.toList());
+        final List<PatientEntity> existingPatientEntities = dao.bulkPatientSearchByMbi(organizationID, mbis);
+
+        // Insert the rest of the patients
+        List<String> existingMbis = existingPatientEntities.stream().map(PatientEntity::getBeneficiaryID).collect(Collectors.toList());
+
+        List<Patient> insertedPatients = patients.stream()
+            .filter(patient -> ! existingMbis.contains(FHIRExtractors.getPatientMBI(patient)))
+            .map(patient -> {
+                Response response = insertPatient(patient);
+                if(! HttpStatus.isSuccess(response.getStatus())) {
+                    throw new WebApplicationException(response);
+                }
+                return (Patient) response.getEntity();
+            })
+            .collect(Collectors.toList());
+
+        return Stream.concat(
+            insertedPatients.stream(),
+            existingPatientEntities.stream().map(entity -> this.converter.toFHIR(Patient.class, entity))
+        ).collect(Collectors.toList());
     }
 
     @DELETE
@@ -151,5 +180,19 @@ public class PatientResource extends AbstractPatientResource {
         } catch (FHIRConverterException e) {
             throw new WebApplicationException("Invalid Patient resource", HttpStatus.UNPROCESSABLE_ENTITY_422);
         }
+    }
+
+
+    /**
+     * Inserts a {@link Patient} into the DB and creates an {@link Response} to send back to the caller.
+     * @param patient {@link Patient} to be inserted
+     * @return {@link Response} to send back to the user
+     */
+    private Response insertPatient(Patient patient) {
+        PatientEntity patientEntity = this.dao.persistPatient(this.converter.fromFHIR(PatientEntity.class, patient));
+
+        return Response.status(Response.Status.CREATED)
+            .entity(this.converter.toFHIR(Patient.class, patientEntity))
+            .build();
     }
 }

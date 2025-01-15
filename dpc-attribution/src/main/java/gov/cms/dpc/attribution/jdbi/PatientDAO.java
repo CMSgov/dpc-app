@@ -57,14 +57,32 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
      * @param resourceIDs
      * @return List of {@link PatientEntity}s
      */
-    public List<PatientEntity> patientSearch(UUID organizationId, List<UUID> resourceIDs) {
+    public List<PatientEntity> bulkPatientSearchById(UUID organizationId, List<UUID> resourceIDs) {
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
         final Root<PatientEntity> root = query.from(PatientEntity.class);
 
         query.select(root)
             .where(builder.and(
-                root.get(PatientEntity_.id).in(resourceIDs),
+                root.get(PersonEntity_.id).in(resourceIDs),
+                builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), organizationId))
+            );
+        return list(query);
+    }
+
+    /**
+     * Returns a list of all {@link PatientEntity}s whose id is in resourceIds.
+     * @param mbis
+     * @return List of {@link PatientEntity}s
+     */
+    public List<PatientEntity> bulkPatientSearchByMbi(UUID organizationId, List<String> mbis) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
+        final Root<PatientEntity> root = query.from(PatientEntity.class);
+
+        query.select(root)
+            .where(builder.and(
+                root.get(PatientEntity_.beneficiaryID).in(mbis),
                 builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), organizationId))
             );
         return list(query);

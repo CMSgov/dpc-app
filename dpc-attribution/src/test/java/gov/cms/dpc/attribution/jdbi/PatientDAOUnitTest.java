@@ -24,7 +24,7 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 	}
 
 	@Test
-	public void test_batch_patientSearch_happy_path() {
+	void test_batch_patientSearchById_happy_path() {
 		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
 		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(org);
 		PatientEntity pat2 = AttributionTestHelpers.createPatientEntity(org);
@@ -37,7 +37,7 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 			patientDAO.persistPatient(pat3);
 		});
 
-		List<PatientEntity> patients = patientDAO.patientSearch(org.getId(), List.of(pat1.getID(), pat2.getID()));
+		List<PatientEntity> patients = patientDAO.bulkPatientSearchById(org.getId(), List.of(pat1.getID(), pat2.getID()));
 
 		assertEquals(2, patients.size());
 		assertTrue(patients.contains(pat1));
@@ -46,7 +46,7 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 	}
 
 	@Test
-	public void test_batch_patientSearch_only_finds_correct_org() {
+	void test_batch_patientSearchById_only_finds_correct_org() {
 		OrganizationEntity goodOrg = AttributionTestHelpers.createOrganizationEntity();
 		OrganizationEntity badOrg = AttributionTestHelpers.createOrganizationEntity();
 		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(goodOrg);
@@ -61,7 +61,55 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 			patientDAO.persistPatient(pat3);
 		});
 
-		List<PatientEntity> patients = patientDAO.patientSearch(goodOrg.getId(), List.of(pat1.getID(), pat2.getID(), pat3.getID()));
+		List<PatientEntity> patients = patientDAO.bulkPatientSearchById(goodOrg.getId(), List.of(pat1.getID(), pat2.getID(), pat3.getID()));
+
+		assertEquals(2, patients.size());
+		assertTrue(patients.contains(pat1));
+		assertTrue(patients.contains(pat2));
+		assertFalse(patients.contains(pat3));
+	}
+
+	@Test
+	void test_batch_patientSearchByMbi_happy_path() {
+		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(org);
+		PatientEntity pat2 = AttributionTestHelpers.createPatientEntity(org);
+		PatientEntity pat3 = AttributionTestHelpers.createPatientEntity(org);
+
+		db.inTransaction(() -> {
+			organizationDAO.registerOrganization(org);
+			patientDAO.persistPatient(pat1);
+			patientDAO.persistPatient(pat2);
+			patientDAO.persistPatient(pat3);
+		});
+
+		List<PatientEntity> patients = patientDAO.bulkPatientSearchByMbi(org.getId(), List.of(pat1.getBeneficiaryID(), pat2.getBeneficiaryID()));
+
+		assertEquals(2, patients.size());
+		assertTrue(patients.contains(pat1));
+		assertTrue(patients.contains(pat2));
+		assertFalse(patients.contains(pat3));
+	}
+
+	@Test
+	void test_batch_patientSearchByMbi_only_finds_correct_org() {
+		OrganizationEntity goodOrg = AttributionTestHelpers.createOrganizationEntity();
+		OrganizationEntity badOrg = AttributionTestHelpers.createOrganizationEntity();
+		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(goodOrg);
+		PatientEntity pat2 = AttributionTestHelpers.createPatientEntity(goodOrg);
+		PatientEntity pat3 = AttributionTestHelpers.createPatientEntity(badOrg);
+
+		db.inTransaction(() -> {
+			organizationDAO.registerOrganization(goodOrg);
+			organizationDAO.registerOrganization(badOrg);
+			patientDAO.persistPatient(pat1);
+			patientDAO.persistPatient(pat2);
+			patientDAO.persistPatient(pat3);
+		});
+
+		List<PatientEntity> patients = patientDAO.bulkPatientSearchByMbi(goodOrg.getId(), List.of(
+			pat1.getBeneficiaryID(), pat2.getBeneficiaryID(), pat3.getBeneficiaryID())
+		);
 
 		assertEquals(2, patients.size());
 		assertTrue(patients.contains(pat1));
