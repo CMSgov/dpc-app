@@ -4,16 +4,13 @@ import jakarta.validation.constraints.NotNull;
 
 public class DPCAwsQueueConfiguration {
 
-	@NotNull
 	private boolean emitAwsMetrics;
 
 	@NotNull
 	private String awsRegion;
 
-	@NotNull
 	private int awsSizeReportingInterval;
 
-	@NotNull
 	private int awsAgeReportingInterval;
 
 	@NotNull

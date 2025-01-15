@@ -146,7 +146,7 @@ class ResourceFetcher {
      * @param resources - the list to add resources to
      * @param bundle - the bundle to extract resources from
      */
-    private void addResources(ArrayList<Resource> resources, Bundle bundle) {
+    private void addResources(List<Resource> resources, Bundle bundle) {
         bundle.getEntry().forEach(entry -> {
             final var resource = entry.getResource();
             if (!resource.getResourceType().getPath().equals(resourceType.getPath())) {
