@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class OrganizationEntityConverter implements FHIRConverter<Organization, OrganizationEntity> {
     @Override
@@ -69,7 +70,7 @@ public class OrganizationEntityConverter implements FHIRConverter<Organization, 
                 .getContact()
                 .stream()
                 .map(r -> converter.fromFHIR(ContactEntity.class, r))
-                .toList();
+                .collect(Collectors.toList());
         // Add the entity reference
         contactEntities.forEach(contact -> contact.setOrganization(entity));
         entity.setContacts(contactEntities);
@@ -90,14 +91,14 @@ public class OrganizationEntityConverter implements FHIRConverter<Organization, 
         final List<Organization.OrganizationContactComponent> contactComponents = entity.getContacts()
                 .stream()
                 .map(ContactEntity::toFHIR)
-                .toList();
+                .collect(Collectors.toList());
         org.setContact(contactComponents);
 
         final List<Reference> endpointReferences = entity
                 .getEndpoints()
                 .stream()
                 .map(ep -> new Reference(new IdType("Endpoint", ep.getId().toString())))
-                .toList();
+                .collect(Collectors.toList());
 
         org.setEndpoint(endpointReferences);
 

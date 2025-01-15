@@ -12,7 +12,7 @@ import java.lang.reflect.Modifier;
 
 import static org.mockito.Mockito.*;
 
-@Disabled // TODO: open java.lang.reflect for access
+@Disabled // TODO: open java.lang.reflect for access -acw
 class LogHeaderFilterUnitTest {
 
 	private final Logger logger = mock(Logger.class);

@@ -12,6 +12,7 @@ import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class OrganizationContactEntityConverter implements FHIRConverter<Organization.OrganizationContactComponent, ContactEntity> {
     @Override
@@ -23,7 +24,7 @@ public class OrganizationContactEntityConverter implements FHIRConverter<Organiz
                 .getTelecom()
                 .stream()
                 .map(c -> converter.fromFHIR(ContactPointEntity.class, c))
-                .toList();
+                .collect(Collectors.toList());
 
         // Set the entity reference
         collect.forEach(contact -> contact.setContactEntity(entity));
@@ -41,7 +42,7 @@ public class OrganizationContactEntityConverter implements FHIRConverter<Organiz
         final List<ContactPoint> cps = entity.getTelecom()
                 .stream()
                 .map(ContactPointEntity::toFHIR)
-                .toList();
+                .collect(Collectors.toList());
 
         contactComponent.setTelecom(cps);
         contactComponent.setAddress(converter.toFHIR(Address.class, entity.getAddress()));

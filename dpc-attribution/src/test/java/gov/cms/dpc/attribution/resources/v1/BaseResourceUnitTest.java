@@ -23,7 +23,7 @@ class BaseResourceUnitTest {
 		MockitoAnnotations.openMocks(this);
 	}
 
-    @Disabled // TODO: still valid? mocking not working as expected
+    @Disabled // TODO: still valid? mocking not working as expected -acw
 	@Test
 	public void testGetVersion() {
 		doReturn("version").when(pp).getBuildVersion();

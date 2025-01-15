@@ -28,6 +28,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static gov.cms.dpc.attribution.SharedMethods.submitAttributionBundle;
@@ -284,12 +285,12 @@ class AttributionFHIRTest {
         final List<Group.GroupMemberComponent> inactiveMembers = members
                 .stream()
                 .filter(Group.GroupMemberComponent::getInactive)
-                .toList();
+                .collect(Collectors.toList());
 
         final List<Group.GroupMemberComponent> activeMembers = members
                 .stream()
                 .filter(member -> !member.getInactive())
-                .toList();
+                .collect(Collectors.toList());
 
         // Add 10 minutes to avoid comparison differences with milliseconds on the Date values
         // Since we're only comparing Date values, adding a minute offset ensure the test passes, but is still valid

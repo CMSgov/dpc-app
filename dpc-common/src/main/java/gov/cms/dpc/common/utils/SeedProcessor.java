@@ -77,7 +77,7 @@ public class SeedProcessor {
                             .setEntity(ref);
                     return member;
                 })
-                .toList();
+                .collect(Collectors.toList());
 
         return group.setMember(members);
     }

@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class OrganizationList extends AbstractAttributionCommand {
 
@@ -49,7 +50,7 @@ public class OrganizationList extends AbstractAttributionCommand {
                 .map(resource ->
                         List.of(resource.getId(), resource.getIdentifierFirstRep().getValue(), resource.getName()))
                 .map(values -> values.toArray(new String[0]))
-                .toList();
+                .collect(Collectors.toList());
 
         System.out.println(FlipTable.of(headers, collect.toArray(new String[0][])));
     }

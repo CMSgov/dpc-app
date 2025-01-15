@@ -20,6 +20,7 @@ import org.hl7.fhir.dstu3.model.Endpoint;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class EndpointResource extends AbstractEndpointResource {
 
@@ -63,7 +64,7 @@ public class EndpointResource extends AbstractEndpointResource {
         return endpointList
                 .stream()
                 .map(e -> converter.toFHIR(Endpoint.class, e))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @FHIR

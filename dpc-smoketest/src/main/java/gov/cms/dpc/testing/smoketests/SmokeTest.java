@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class SmokeTest extends AbstractJavaSamplerClient {
 
@@ -156,7 +157,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                     .map(Bundle.BundleEntryComponent::getResource)
                     .map(Practitioner.class::cast)
                     .map(FHIRExtractors::getProviderNPI)
-                    .toList();
+                    .collect(Collectors.toList());
 
             ClientUtils.handleExportJob(exportClient, providerNPIs, httpClient, apiHost);
             exportSample.setSuccessful(true);

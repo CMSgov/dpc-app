@@ -119,7 +119,7 @@ class PublicKeyHandlerTest {
             assertEquals("Public key must be at least 4096 bits.", exception.getMessage(), "Should have correct error message");
         }
 
-        @Disabled  // TODO: refactor because given curve is deprecated
+        @Disabled  // TODO: refactor because given curve is deprecated -acw
         @Test
         void testECCKeyTooSmall() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
             final KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");

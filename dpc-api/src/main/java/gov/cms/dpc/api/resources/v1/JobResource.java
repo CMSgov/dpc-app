@@ -181,7 +181,7 @@ public class JobResource extends AbstractJobResource {
                         result.getCount(), buildOutputEntryExtension(result)))
                 .filter(entry -> (entry.getType() == DPCResourceType.OperationOutcome ^ !forOperationalOutcomes)
                         && entry.getCount() > 0)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     List<JobCompletionModel.FhirExtension> buildOutputEntryExtension(JobQueueBatchFile batchFile) {

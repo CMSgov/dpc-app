@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
 
@@ -59,15 +60,15 @@ public class OrganizationResource extends AbstractOrganizationResource {
             return this.dao.listOrganizations()
                     .stream()
                     .map(o -> this.converter.toFHIR(Organization.class, o))
-                    .toList();
+                    .collect(Collectors.toList());
         }
         String parsedToken = parseTokenTag(tag -> tag, identifier);
-        Set<String> idSet = Set.of(parsedToken.split(","));
+        Set<String> idSet = Arrays.asList(parsedToken.split(",")).stream().collect(Collectors.toSet());
         if (idSet.size() > 1) {
             return this.dao.getOrganizationsByIds(idSet)
                 .stream()
                 .map(o -> this.converter.toFHIR(Organization.class, o))
-                .toList();
+                .collect(Collectors.toList());
         }
         // Pull out the NPI, keeping it as a string.
         final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(parsedToken);
@@ -75,7 +76,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
         return queryList
                 .stream()
                 .map(o -> this.converter.toFHIR(Organization.class, o))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -140,7 +141,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                         UUID endpointID = FHIRExtractors.getEntityUUID(r.getReference());
                         return endpointDAO.fetchEndpoint(endpointID);
                     }
-            ).filter(Optional::isPresent).map(Optional::get).toList();
+            ).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
             orgEntity.setEndpoints(endpointEntities);
             orgEntity = this.dao.updateOrganization(organizationID, orgEntity);
             return Response.status(Response.Status.OK).entity(this.converter.toFHIR(Organization.class, orgEntity)).build();
@@ -170,7 +171,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .filter(entry -> entry.hasResource() && entry.getResource().getResourceType().getPath().equals(DPCResourceType.Endpoint.getPath()))
                 .map(entry -> (Endpoint) entry.getResource())
                 .map(e -> this.converter.fromFHIR(EndpointEntity.class, e))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private String generateNewOrgId() {

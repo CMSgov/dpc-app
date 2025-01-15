@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Path("v1/Consent")
 public class ConsentResource {
@@ -92,7 +93,7 @@ public class ConsentResource {
         return entities
                 .stream()
                 .map(e -> ConsentEntityConverter.toFhir(e, fhirReferenceURL))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @GET
@@ -128,14 +129,13 @@ public class ConsentResource {
     }
 
     private List<ConsentEntity> getEntitiesByPatient(Identifier patientIdentifier) {
+        // we have been asked to search for a patient id defined by one among two (soon three!) coding systems
+        // we need to determine which database field that system's value is stored in
         String field = switch (DPCIdentifierSystem.fromString(patientIdentifier.getSystem())) {
             case MBI -> "mbi";
             case HICN -> "hicn";
             default -> throw new WebApplicationException("Unknown Patient ID code system", Response.Status.BAD_REQUEST);
         };
-
-        // we have been asked to search for a patient id defined by one among two (soon three!) coding systems
-        // we need to determine which database field that system's value is stored in
 
         return this.dao.findBy(field, patientIdentifier.getValue());
     }

@@ -8,6 +8,7 @@ import org.hl7.fhir.dstu3.model.*;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class RESTUtils {
 
@@ -48,7 +49,7 @@ public class RESTUtils {
                     throw new WebApplicationException(response);
                 })
                 .map(r -> (T) r)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**

@@ -35,6 +35,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class GroupResource extends AbstractGroupResource {
@@ -116,7 +117,7 @@ public class GroupResource extends AbstractGroupResource {
         return this.rosterDAO.findEntities(rosterID, organizationID, providerIDPart, patientID)
                 .stream()
                 .map(r -> this.converter.toFHIR(Group.class, r))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @GET
@@ -140,7 +141,7 @@ public class GroupResource extends AbstractGroupResource {
                     p.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(mbi);
                     return p;
                 })
-                .toList();
+                .collect(Collectors.toList());
     }
 
 
@@ -200,7 +201,7 @@ public class GroupResource extends AbstractGroupResource {
         List<PatientEntity> patientEntities = verifyAndGetMembers(groupUpdate);
         List<UUID> patientIds = patientEntities.stream()
             .map(PatientEntity::getID)
-            .toList();
+            .collect(Collectors.toList());
 
         // Check which patients are already part of the roster and mark them active as of today
         OffsetDateTime periodBegin = OffsetDateTime.now(ZoneOffset.UTC);
@@ -219,7 +220,7 @@ public class GroupResource extends AbstractGroupResource {
         List<UUID> existingPatientIds = existingAttributions.stream()
             .map(AttributionRelationship::getPatient)
             .map(PatientEntity::getID)
-            .toList();
+            .collect(Collectors.toList());
 
         List<AttributionRelationship> newAttributions = patientEntities.stream()
             .filter( patient -> !existingPatientIds.contains(patient.getID()))
@@ -228,7 +229,7 @@ public class GroupResource extends AbstractGroupResource {
                 attribution.setPeriodEnd(periodEnd);
                 return attribution;
             })
-            .toList();
+            .collect(Collectors.toList());
 
         // Last but not least, save our changes
         Stream.concat(existingAttributions.stream(), newAttributions.stream())
@@ -340,7 +341,7 @@ public class GroupResource extends AbstractGroupResource {
             .map(Group.GroupMemberComponent::getEntity)
             .map(ref -> UUID.fromString(new IdType(ref.getReference()).getIdPart()))
             .distinct()
-            .toList();
+            .collect(Collectors.toList());
 
         // Get corresponding PatientEntities
         // As of 7/30/24, we're currently capped at 1350 patients per group.  If we ever raise that it might be worth

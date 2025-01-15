@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.testing.APIAuthHelpers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -132,7 +133,7 @@ public class PublicKeyTests extends AbstractApplicationTest {
                 .map(MatchResult::group)
                 .map(match -> match.replace("║ ", ""))
                 .map(UUID::fromString)
-                .toList();
+                .collect(Collectors.toList());
 
         assertAll(() -> assertTrue(s2.isEmpty(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should be empty"));

@@ -9,6 +9,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class BundleParser {
 
@@ -30,6 +31,6 @@ public class BundleParser {
                     resource.setMeta(meta);
                 })
                 .map(converter::convert)
-                .toList();
+                .collect(Collectors.toList());
     }
 }

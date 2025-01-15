@@ -403,7 +403,7 @@ public class GroupResource extends AbstractGroupResource {
                 .stream()
                 .map(entry -> (Patient) entry.getResource())
                 .map(FHIRExtractors::getPatientMBI)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private String fetchOrganizationNPI(IdType orgID) {
@@ -453,7 +453,7 @@ public class GroupResource extends AbstractGroupResource {
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
                 .map(Reference::getReference)
-                .toList();
+                .collect(Collectors.toList());
 
         logger.info("Organization {} is attesting a {} purpose between provider {} and patient(s) {}{}", performer.getWhoReference().getReference(),
                 reason.getCode(),

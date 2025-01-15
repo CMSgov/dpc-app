@@ -21,6 +21,7 @@ import org.hl7.fhir.dstu3.model.Patient;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 
@@ -65,7 +66,7 @@ public class PatientResource extends AbstractPatientResource {
         return this.dao.patientSearch(resourceID, idValue, organizationID)
                 .stream()
                 .map(p -> this.converter.toFHIR(Patient.class, p))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @GET

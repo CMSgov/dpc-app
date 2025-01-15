@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Implements a distributed {@link gov.cms.dpc.queue.models.JobQueueBatch} using a Postgres database
@@ -183,11 +184,11 @@ public class DistributedBatchQueue extends JobQueueCommon {
             final Root<JobQueueBatch> root = query.from(JobQueueBatch.class);
 
             query.select(root);
-            query.where(root.get("batchID").in(stuckBatchIDs.stream().map(UUID::fromString).toList()));
+            query.where(root.get("batchID").in(stuckBatchIDs.stream().map(UUID::fromString).collect(Collectors.toList())));
             final List<JobQueueBatch> stuckJobList = session.createQuery(query).getResultList();
 
             for ( JobQueueBatch stuckJob : stuckJobList ) {
-                logger.warn(String.format("Restarting stuck batch... batchID=%s", stuckJob.getBatchID()));
+                logger.warn("Restarting stuck batch... batchID={}", stuckJob.getBatchID());
                 stuckJob.restartBatch();
                 session.merge(stuckJob);
             }
@@ -354,7 +355,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
             try {
                 OffsetDateTime stuckSince = OffsetDateTime.now(ZoneId.systemDefault()).minusMinutes(3);
 
-                logger.debug(String.format("Checking aggregatorID(%s) for stuck jobs since (%s)...", aggregatorID, stuckSince));
+                logger.debug("Checking aggregatorID({}) for stuck jobs since ({})...", aggregatorID, stuckSince);
                 Long stuckBatchCount = (Long) session
                         .createQuery("select count(*) from job_queue_batch where aggregatorID = :aggregatorID and status = 1 and updateTime < :updateTime")
                         .setParameter("aggregatorID", aggregatorID)

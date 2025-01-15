@@ -28,6 +28,7 @@ import org.hl7.fhir.dstu3.model.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Api(value = "Organization", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Organization")
@@ -201,7 +202,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .filter(Bundle.BundleEntryComponent::hasResource)
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter(resource -> resource.getResourceType().getPath().equals(DPCResourceType.Endpoint.getPath()))
-                .toList();
+                .collect(Collectors.toList());
 
         if (endpoints.isEmpty()) {
             throw new WebApplicationException("Organization must have at least 1 endpoint", Response.Status.BAD_REQUEST);

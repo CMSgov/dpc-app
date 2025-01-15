@@ -485,7 +485,7 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("JWT is expired"), "Should have correct exception");
         }
 
-        @Disabled  // TODO: is this exception valid anymore?
+        @Disabled  // TODO: is this exception valid anymore? -acw
         @ParameterizedTest
         @EnumSource(KeyType.class)
         void testDateExpiration(KeyType keyType) throws NoSuchAlgorithmException {
@@ -570,7 +570,7 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("Audience claim value is incorrect"), "Should have correct exception");
         }
 
-        @Disabled  // TODO: yeah, i dunno
+        @Disabled  // TODO: yeah, i dunno -acw
         @ParameterizedTest
         @EnumSource(KeyType.class)
         void testSuccess(KeyType keyType) throws NoSuchAlgorithmException {
@@ -713,7 +713,7 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("`kid` value must be a UUID"), "Should have correct exception");
         }
 
-        @Disabled  // TODO: is this exception valid anymore?
+        @Disabled  // TODO: is this exception valid anymore? -acw
         @ParameterizedTest
         @EnumSource(KeyType.class)
         void testIncorrectExpFormat(KeyType keyType) throws NoSuchAlgorithmException {

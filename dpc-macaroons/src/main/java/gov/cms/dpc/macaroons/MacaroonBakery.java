@@ -51,7 +51,7 @@ public class MacaroonBakery {
         this.defaultVerifiers = defaultVerifiers
                 .stream()
                 .map(CaveatWrapper::new)
-                .toList();
+                .collect(Collectors.toList());
         this.defaultSuppliers = defaultSuppliers;
         this.thirdPartyKeyStore = thirdPartyKeyStore;
         this.keyPair = keyPair;
@@ -165,7 +165,7 @@ public class MacaroonBakery {
                     }
                     return Optional.of("Caveat is not satisfied");
                 }))
-                .toList();
+                .collect(Collectors.toList());
 
         verifyMacaroonImpl(macaroons, verifiers);
     }
@@ -179,7 +179,7 @@ public class MacaroonBakery {
     public void verifyMacaroon(List<Macaroon> macaroons, CaveatVerifier... caveatVerifiers) {
         final List<CaveatWrapper> verifiers = Arrays.stream(caveatVerifiers)
                 .map(CaveatWrapper::new)
-                .toList();
+                .collect(Collectors.toList());
         verifyMacaroonImpl(macaroons, verifiers);
     }
 

@@ -21,6 +21,7 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
 
@@ -51,7 +52,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
                 .getProviders(resourceID, providerNPI, FHIRExtractors.getEntityUUID(organizationID))
                 .stream()
                 .map(p -> this.converter.toFHIR(Practitioner.class, p))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @POST

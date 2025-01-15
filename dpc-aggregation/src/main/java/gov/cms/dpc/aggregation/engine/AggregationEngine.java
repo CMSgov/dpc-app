@@ -98,10 +98,10 @@ public class AggregationEngine implements Runnable {
     protected void pollQueue() {
         this.subscribe = this.createQueueObserver()
                 .repeatWhen(completed -> {
-                    logger.debug(String.format("Configuring queue to poll every %d milliseconds", operationsConfig.getPollingFrequency()));
+                    logger.debug("Configuring queue to poll every {} milliseconds", operationsConfig.getPollingFrequency());
                     return completed.delay(operationsConfig.getPollingFrequency(), TimeUnit.MILLISECONDS);
                 })
-                .doOnEach(item -> logger.trace("Processing item: " + item.toString()))
+                .doOnEach(item -> logger.trace("Processing item: {}", item))
                 .doOnError(error -> logger.error("Unable to complete job.", error))
                 .retry()
                 .filter(Optional::isPresent)

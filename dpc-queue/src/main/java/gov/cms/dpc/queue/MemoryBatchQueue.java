@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Simple in-memory queue for tracking job statuses
@@ -46,7 +47,7 @@ public class MemoryBatchQueue extends JobQueueCommon {
     public synchronized List<JobQueueBatch> getJobBatches(UUID jobID) {
         return this.queue.values().stream()
                 .filter(batch -> batch.getJobID().equals(jobID))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override

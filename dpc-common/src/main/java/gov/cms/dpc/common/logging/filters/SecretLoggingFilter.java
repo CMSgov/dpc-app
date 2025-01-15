@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @JsonTypeName("secret-filter-factory")
 public class SecretLoggingFilter implements FilterFactory<ILoggingEvent> {
@@ -35,7 +36,7 @@ public class SecretLoggingFilter implements FilterFactory<ILoggingEvent> {
 	@Override
 	public Filter<ILoggingEvent> build() {
 		// Clean the secrets list
-        List<String> containsSecrets = secrets.stream().filter(envVars::containsKey).toList();
+        List<String> containsSecrets = secrets.stream().filter(envVars::containsKey).collect(Collectors.toList());
 
 		return new Filter<>() {
 			@Override
