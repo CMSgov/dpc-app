@@ -157,7 +157,7 @@ public class AttributionTestHelpers {
 
     public static ProviderEntity createProviderEntity(OrganizationEntity org) {
         ProviderEntity providerEntity = new ProviderEntity();
-        providerEntity.setID(UUID.randomUUID());
+
         providerEntity.setProviderNPI(NPIUtil.generateNPI());
         providerEntity.setOrganization(org);
 

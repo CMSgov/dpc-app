@@ -16,6 +16,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 public class DPCAttributionConfiguration extends JobConfiguration implements IDPCDatabase, IDPCFHIRConfiguration {
 
@@ -121,5 +122,10 @@ public class DPCAttributionConfiguration extends JobConfiguration implements IDP
         DefaultServerFactory serverFactory = (DefaultServerFactory) this.getServerFactory();
         HttpConnectorFactory connection = (HttpConnectorFactory) serverFactory.getApplicationConnectors().get(0);
         return connection.getPort();
+    }
+
+    public int getQueryChunkSize() {
+        Map<String,String> properties = database.getProperties();
+        return Integer.parseInt(properties.get("queryChunkSize"));
     }
 }

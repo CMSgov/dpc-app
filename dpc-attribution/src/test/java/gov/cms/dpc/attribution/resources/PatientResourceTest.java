@@ -320,7 +320,9 @@ class PatientResourceTest extends AbstractAttributionTest {
         // dpc-api currently has a 20sec timeout when calling attribution, so we'll match that for this test
         final IGenericClient client = createFHIRClient(ctx, getServerURL(), 20000);
 
-        List<Patient> patients = AttributionTestHelpers.createPatientResources(DEFAULT_ORG_ID, 50000);
+        final int COUNT_TEST_PATIENTS = 100000;
+
+        List<Patient> patients = AttributionTestHelpers.createPatientResources(DEFAULT_ORG_ID, COUNT_TEST_PATIENTS);
         Bundle patientBundle = AttributionTestHelpers.createBundle(
             patients.stream().map(Resource.class::cast).toArray(Resource[] ::new)
         );
@@ -338,9 +340,10 @@ class PatientResourceTest extends AbstractAttributionTest {
             .execute();
         Instant endInstant = Instant.now();
 
-        Duration duration = Duration.between(startInstant, endInstant);
+        assertEquals(COUNT_TEST_PATIENTS, resultPatientBundle.getEntry().size());
 
-        System.out.println("Runtime: " + duration.getSeconds());
+        Duration duration = Duration.between(startInstant, endInstant);
+        System.out.println("Insert time: " + duration.getSeconds());
     }
 
 

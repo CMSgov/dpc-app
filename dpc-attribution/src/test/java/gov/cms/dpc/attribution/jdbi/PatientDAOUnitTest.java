@@ -8,6 +8,7 @@ import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,7 +20,9 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 	@BeforeEach
 	public void setup() {
 		DPCManagedSessionFactory dpcManagedSessionFactory = new DPCManagedSessionFactory(db.getSessionFactory());
-		patientDAO = new PatientDAO(dpcManagedSessionFactory);
+
+		// Chunk size is set to 10000 in the current config
+		patientDAO = new PatientDAO(dpcManagedSessionFactory, 1000);
 		organizationDAO = new OrganizationDAO(dpcManagedSessionFactory);
 	}
 
@@ -115,5 +118,29 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 		assertTrue(patients.contains(pat1));
 		assertTrue(patients.contains(pat2));
 		assertFalse(patients.contains(pat3));
+	}
+
+	@Test
+	void test_bulkPatientSearchByMbi_handles_large_requests() {
+		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+		PatientEntity patientEntity = AttributionTestHelpers.createPatientEntity(org);
+
+		db.inTransaction(() -> {
+			organizationDAO.registerOrganization(org);
+			patientDAO.persistPatient(patientEntity);
+		});
+
+		List<String> mbis = new ArrayList<>();
+		mbis.add(patientEntity.getBeneficiaryID());
+
+		// Add enough fake MBIs to make sure we have to chunk the query
+		for(int i=0; i< 50000; i++){
+			mbis.add("fake_mbi");
+		}
+
+		List<PatientEntity> patients = patientDAO.bulkPatientSearchByMbi(org.getId(), mbis);
+
+		assertEquals(1, patients.size());
+		assertTrue(patients.contains(patientEntity));
 	}
 }

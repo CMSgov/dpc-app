@@ -2,6 +2,8 @@ package gov.cms.dpc.attribution;
 
 import com.google.inject.Binder;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import gov.cms.dpc.attribution.jdbi.*;
 import gov.cms.dpc.attribution.resources.v1.*;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
@@ -62,4 +64,9 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     SessionFactory provideSessionFactory(DPCManagedSessionFactory factory) {
         return factory.getSessionFactory();
     }
+
+    @Provides
+    @Singleton
+    @Named("queryChunkSize")
+    int provideQueryChunkSize() { return configuration().getQueryChunkSize(); }
 }

@@ -1,8 +1,10 @@
 package gov.cms.dpc.attribution.jdbi;
 
+import com.google.inject.name.Named;
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.hibernate.AbstractDAO;
+import org.apache.commons.collections4.ListUtils;
 
 import javax.inject.Inject;
 import javax.persistence.criteria.*;
@@ -12,10 +14,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class PatientDAO extends AbstractDAO<PatientEntity> {
+    private final int queryChunkSize;
 
     @Inject
-    public PatientDAO(DPCManagedSessionFactory factory) {
+    public PatientDAO(DPCManagedSessionFactory factory, @Named("queryChunkSize") int queryChunkSize) {
         super(factory.getSessionFactory());
+        this.queryChunkSize = queryChunkSize;
     }
 
     public PatientEntity persistPatient(PatientEntity patient) {
@@ -76,16 +80,26 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
      * @return List of {@link PatientEntity}s
      */
     public List<PatientEntity> bulkPatientSearchByMbi(UUID organizationId, List<String> mbis) {
-        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
-        final Root<PatientEntity> root = query.from(PatientEntity.class);
+        List<PatientEntity> results = new ArrayList<>(mbis.size());
 
-        query.select(root)
-            .where(builder.and(
-                root.get(PatientEntity_.beneficiaryID).in(mbis),
-                builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), organizationId))
-            );
-        return list(query);
+        // With large patient inserts, this can theoretically be called with 10s of thousands of patients, so break
+        // it up into queries that we can handle without causing a stack overflow.
+        List<List<String>> mbiChunks = ListUtils.partition(mbis, queryChunkSize);
+        mbiChunks.stream().forEach(mbiList -> {
+            final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+            final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
+            final Root<PatientEntity> root = query.from(PatientEntity.class);
+
+            query.select(root)
+                .where(builder.and(
+                    root.get(PatientEntity_.beneficiaryID).in(mbiList),
+                    builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), organizationId))
+                );
+
+            results.addAll(list(query));
+        });
+
+        return results;
     }
 
     public boolean deletePatient(UUID patientID) {

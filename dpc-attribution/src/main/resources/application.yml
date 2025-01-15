@@ -14,6 +14,7 @@ database:
     hibernate.batch_versioned_data: true
     hibernate.order_inserts: true
     hibernate.show_sql: false
+    queryChunkSize: 1000
 
 server:
   enableThreadNameFilter: false
