@@ -152,7 +152,7 @@ public class TokenResource extends AbstractTokenResource {
         tokenEntity.setExpiresAt(handleExpirationTime(expiration, optionalBody));
 
         //Set the label, if provided, otherwise, generate a default one
-        if(optionalBody.isPresent() && StringUtils.isNotEmpty(optionalBody.get().getLabel())){
+        if (optionalBody.isPresent() && StringUtils.isNotEmpty(optionalBody.get().getLabel())) {
             tokenEntity.setLabel(optionalBody.get().getLabel());
         } else {
             tokenEntity.setLabel(Optional.ofNullable(tokenLabel).orElse(String.format("Token for organization %s.", organizationID)));
