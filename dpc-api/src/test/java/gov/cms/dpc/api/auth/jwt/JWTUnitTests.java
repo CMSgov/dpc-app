@@ -711,6 +711,7 @@ class JWTUnitTests {
             assertEquals(400, response.getStatus(), "Should not be valid");
             assertTrue(response.readEntity(String.class).contains("`kid` value must be a UUID"), "Should have correct exception");
         }
+    }
 
     private static Pair<String, PrivateKey> generateKeypair(KeyType keyType) throws NoSuchAlgorithmException {
         final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
