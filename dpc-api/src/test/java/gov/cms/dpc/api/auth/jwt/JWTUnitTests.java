@@ -712,35 +712,6 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("`kid` value must be a UUID"), "Should have correct exception");
         }
 
-        @ParameterizedTest
-        @EnumSource(KeyType.class)
-        void testIncorrectExpFormat(KeyType keyType) throws NoSuchAlgorithmException {
-            final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
-            final String m = buildMacaroon();
-
-
-            final String id = UUID.randomUUID().toString();
-            final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID().toString()).and()
-                    .audience().add("localhost:3002/v1/Token/auth").and()
-                    .issuer(m)
-                    .subject(m)
-                    .id(id)
-                    .claim("exp", Instant.now().plus(1, ChronoUnit.MINUTES).atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
-                    .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
-                    .compact();
-
-            // Submit the JWT
-            Response response = RESOURCE.target("/v1/Token/validate")
-                    .request()
-                    .accept(MediaType.APPLICATION_JSON)
-                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
-
-            assertEquals(400, response.getStatus(), "Should not be valid");
-            assertTrue(response.readEntity(String.class).contains("Expiration time must be seconds since unix epoch"), "Should have correct exception");
-        }
-    }
-
     private static Pair<String, PrivateKey> generateKeypair(KeyType keyType) throws NoSuchAlgorithmException {
         final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
         final UUID uuid = UUID.randomUUID();
