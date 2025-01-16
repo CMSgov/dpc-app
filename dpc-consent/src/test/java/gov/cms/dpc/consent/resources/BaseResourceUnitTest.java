@@ -2,31 +2,29 @@ package gov.cms.dpc.consent.resources;
 
 import gov.cms.dpc.common.utils.PropertiesProvider;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.doReturn;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class BaseResourceUnitTest {
-	@InjectMocks
-	BaseResource baseResource;
-
-	@Mock
-	PropertiesProvider pp;
 
 	@BeforeEach
 	public void setup() {
 		MockitoAnnotations.openMocks(this);
 	}
 
-    @Disabled // TODO: still valid? mocking not working as expected -acw
     @Test
 	public void testGetVersion() {
-		doReturn("version").when(pp).getBuildVersion();
-		assertEquals("version", baseResource.version());
+        try(MockedConstruction<PropertiesProvider> mock = Mockito.mockConstruction(PropertiesProvider.class)) {
+            BaseResource baseResource = new BaseResource();
+
+            PropertiesProvider mockedPropertiesProvider = mock.constructed().get(0);
+            Mockito.when(mockedPropertiesProvider.getBuildVersion()).thenReturn("version");
+
+            assertEquals("version", baseResource.version());
+        }
 	}
 }

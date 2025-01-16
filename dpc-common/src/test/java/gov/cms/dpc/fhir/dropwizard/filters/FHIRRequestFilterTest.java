@@ -25,7 +25,7 @@ public class FHIRRequestFilterTest {
     private static final FHIRRequestFilter filter = new FHIRRequestFilter();
 
     @Test
-    void testSuccess() throws URISyntaxException { // TODO: add assertions to these tests -acw
+    void testSuccess() throws URISyntaxException {
         final MultivaluedMap headerMap = Mockito.mock(MultivaluedMap.class);
         Mockito.when(headerMap.get(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.singletonList(FHIRMediaTypes.FHIR_JSON));
         final ContainerRequestContext request = mockRequest();
