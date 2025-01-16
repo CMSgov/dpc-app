@@ -82,12 +82,6 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
         } else if (exception.getCause() instanceof PSQLException) {
             message = exception.getMessage();
         } else {
-            System.out.println("EXCEPTION MSG");
-            System.out.println(exception.getMessage());
-            System.out.println("EXCEPTION CLASS");
-            System.out.println(exception.getClass());
-            System.out.println("EXCEPTION CAUSE");
-            System.out.println(exception.getCause());
             logger.error("Cannot persist to DB", exception);
             message = "Internal server error";
             status = Response.Status.INTERNAL_SERVER_ERROR;
