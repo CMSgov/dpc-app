@@ -25,7 +25,7 @@ smoke:
 	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
 
 .PHONY: smoke/local
-smoke/local: export USE_BFD_MOCK = false
+smoke/local: export USE_BFD_MOCK=false
 smoke/local: venv smoke start-portals start-api-dependencies start-api
 	@echo "Running Smoke Tests against Local env"
 	@read -p "`echo '\n=====\nThe Smoke Tests require an authenticated environment!\nVerify your local API environment has \"authenticationDisabled = false\" or these tests will fail.\n=====\n\nPress ENTER to run the tests...'`"
