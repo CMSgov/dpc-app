@@ -7,7 +7,7 @@ on:
       - .github/workflows/docker-build-temp-caller.yml
 
 jobs:
-  run_build_test:
+  run_build_test: # temporary job for invoking the docker build job w/o access to the GUI before PR merged to main
     name: Run Docker Build
     uses: CMSgov/dpc-app/.github/workflows/docker_build.yml@ls/dpc-4446-build-docker
     with:
