@@ -2,6 +2,7 @@ package gov.cms.dpc.api.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
@@ -117,6 +118,7 @@ public class TokenEntity implements Serializable {
         this.expiresAt = expiresAt;
     }
 
+    @JsonProperty("token")
     public String getToken() {
         return token;
     }
