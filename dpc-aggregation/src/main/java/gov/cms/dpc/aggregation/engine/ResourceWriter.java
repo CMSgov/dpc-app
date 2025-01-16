@@ -25,10 +25,10 @@ class ResourceWriter {
     private static final Logger logger = LoggerFactory.getLogger(ResourceWriter.class);
     private static final char DELIM = '\n';
 
-    private final FhirContext fhirContext;
-    private final OperationsConfig config;
-    private final JobQueueBatch job;
-    private final DPCResourceType resourceType;
+    private FhirContext fhirContext;
+    private OperationsConfig config;
+    private JobQueueBatch job;
+    private DPCResourceType resourceType;
 
     /**
      * Form the full file name of an output file
@@ -106,7 +106,7 @@ class ResourceWriter {
     }
 
     /**
-     * Write an array of bytes to a file. Name the file according to the supplied name
+     * Write a array of bytes to a file. Name the file according to the supplied name
      *
      * @param bytes - Bytes to write
      * @param fileName - The fileName to write too
