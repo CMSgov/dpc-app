@@ -9,7 +9,6 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -119,18 +118,13 @@ class PublicKeyHandlerTest {
             assertEquals("Public key must be at least 4096 bits.", exception.getMessage(), "Should have correct error message");
         }
 
-        @Disabled  // TODO: refactor because given curve is deprecated -acw
         @Test
         void testECCKeyTooSmall() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
             final KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
             ECGenParameterSpec spec = new ECGenParameterSpec("secp160r1");
-            kpg.initialize(spec);
-            final KeyPair keyPair = kpg.generateKeyPair();
-            final byte[] encoded = keyPair.getPublic().getEncoded();
-            final SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(encoded));
 
-            final PublicKeyException exception = assertThrows(PublicKeyException.class, () -> PublicKeyHandler.validatePublicKey(publicKeyInfo));
-            assertEquals("ECC curve `1.3.132.0.8` is not supported.", exception.getMessage(), "Should have correct error message");
+            final InvalidAlgorithmParameterException exception = assertThrows(InvalidAlgorithmParameterException.class, () -> kpg.initialize(spec));
+            assertEquals("Curve not supported: secp160r1 (1.3.132.0.8)", exception.getMessage(), "Should have correct error message");
         }
 
         @Test

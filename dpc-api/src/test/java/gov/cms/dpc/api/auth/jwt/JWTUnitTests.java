@@ -485,22 +485,22 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("JWT is expired"), "Should have correct exception");
         }
 
-        @Disabled  // TODO: is this exception valid anymore? -acw
         @ParameterizedTest
         @EnumSource(KeyType.class)
-        void testDateExpiration(KeyType keyType) throws NoSuchAlgorithmException {
+        void testFutureExpiration(KeyType keyType) throws NoSuchAlgorithmException {
             // Submit JWT with non-client token
             final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
 
             final Map<String, Object> claims = new HashMap<>();
-            claims.put("exp", DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(Instant.now().atOffset(ZoneOffset.UTC)));
+            claims.put("exp", DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(Instant.now().atOffset(ZoneOffset.UTC).plusMinutes(5)));
 
+            final String macaroon = buildMacaroon();
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
                     .header().add("kid", UUID.randomUUID().toString()).and()
-                    .audience().add(String.format("%sToken/auth", "here")).and()
-                    .issuer(id)
-                    .subject(id)
+                    .audience().add("localhost:3002/v1/Token/auth").and()
+                    .issuer(macaroon)
+                    .subject(macaroon)
                     .id(id)
                     .claims().add(claims).and()
                     .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
@@ -513,7 +513,7 @@ class JWTUnitTests {
                     .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
 
             assertEquals(400, response.getStatus(), "Should not be valid");
-            assertTrue(response.readEntity(String.class).contains("Expiration time must be seconds since unix epoch"), "Should have correct exception");
+            assertTrue(response.readEntity(String.class).contains("Token expiration cannot be more than 5 minutes in the future"), "Should have correct exception");
         }
 
         @ParameterizedTest
@@ -570,7 +570,6 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("Audience claim value is incorrect"), "Should have correct exception");
         }
 
-        @Disabled  // TODO: yeah, i dunno -acw
         @ParameterizedTest
         @EnumSource(KeyType.class)
         void testSuccess(KeyType keyType) throws NoSuchAlgorithmException {
@@ -713,7 +712,6 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("`kid` value must be a UUID"), "Should have correct exception");
         }
 
-        @Disabled  // TODO: is this exception valid anymore? -acw
         @ParameterizedTest
         @EnumSource(KeyType.class)
         void testIncorrectExpFormat(KeyType keyType) throws NoSuchAlgorithmException {
