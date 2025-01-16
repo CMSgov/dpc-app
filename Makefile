@@ -26,9 +26,9 @@ smoke:
 
 .PHONY: smoke/local
 smoke/local: export USE_BFD_MOCK=false
-smoke/local: venv smoke start-portals start-api-dependencies start-api
+smoke/local: export AUTH_DISABLED=false
+smoke/local: venv smoke start-dpc
 	@echo "Running Smoke Tests against Local env"
-	@read -p "`echo '\n=====\nThe Smoke Tests require an authenticated environment!\nVerify your local API environment has \"authenticationDisabled = false\" or these tests will fail.\n=====\n\nPress ENTER to run the tests...'`"
 	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/local.smoke_test.yml
 
 .PHONY: smoke/remote
