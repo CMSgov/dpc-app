@@ -55,7 +55,6 @@ public class TokenEntity implements Serializable {
     @JsonDeserialize(converter = StringToOffsetDateTimeConverter.class)
     private OffsetDateTime expiresAt;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     @Transient
     private String token;
 
@@ -119,6 +118,7 @@ public class TokenEntity implements Serializable {
     }
 
     @JsonProperty("token")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public String getToken() {
         return token;
     }
