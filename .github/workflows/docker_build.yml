@@ -35,6 +35,10 @@ jobs:
 #        uses: actions/setup-python@v2
 #        with:
 #          python-version: "3.8.1"
+      - name: Set up make
+        run: |
+          apk update
+          apk add make --no-cache
 
       - name: Build app
         run: make ci-app
