@@ -7,13 +7,13 @@ import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
 import gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier;
 import gov.cms.dpc.macaroons.caveats.VersionCaveatSupplier;
+import jakarta.annotation.Nullable;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import org.apache.http.HttpHeaders;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;

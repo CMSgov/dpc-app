@@ -3,10 +3,10 @@ package gov.cms.dpc.api.auth.jwt;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.jsonwebtoken.*;
+import jakarta.annotation.Nullable;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
-import javax.annotation.Nullable;
 import java.security.Key;
 import java.time.Instant;
 import java.time.OffsetDateTime;
