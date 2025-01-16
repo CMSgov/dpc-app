@@ -44,7 +44,7 @@ jobs:
           apk add make --no-cache
 
       - name: Build app
-        run: ls && make ci-app
+        run: cat Makefile | grep ci-app -B 2 -A 3 && make ci-app
 
       - name: Build portal # this is run in parallel with the app build on jenkins, might break out to separate job
         run: make ci-portals-v1
