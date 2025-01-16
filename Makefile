@@ -26,8 +26,10 @@ smoke:
 
 .PHONY: smoke/local
 smoke/local: venv smoke
+smoke/local: start-portals
 	@echo "Running Smoke Tests against Local env"
 	@read -p "`echo '\n=====\nThe Smoke Tests require an authenticated environment!\nVerify your local API environment has \"authenticationDisabled = false\" or these tests will fail.\n=====\n\nPress ENTER to run the tests...'`"
+	@USE_BFD_MOCK=false docker compose up aggregation api --wait
 	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/local.smoke_test.yml
 
 .PHONY: smoke/remote
