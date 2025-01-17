@@ -5,12 +5,14 @@ import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.resources.AbstractPractitionerResource;
+import gov.cms.dpc.attribution.utils.RESTUtils;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import io.dropwizard.hibernate.UnitOfWork;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -20,10 +22,10 @@ import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static gov.cms.dpc.attribution.utils.RESTUtils.bulkResourceHandler;
+import java.util.stream.Stream;
 
 @FHIR
 public class PractitionerResource extends AbstractPractitionerResource {
@@ -31,12 +33,14 @@ public class PractitionerResource extends AbstractPractitionerResource {
     private final ProviderDAO dao;
     private final FHIREntityConverter converter;
     private final Integer providerLimit;
+    private final int dbBatchSize;
 
     @Inject
     PractitionerResource(FHIREntityConverter converter, ProviderDAO dao, DPCAttributionConfiguration dpcAttributionConfiguration) {
         this.dao = dao;
         this.converter = converter;
         this.providerLimit = dpcAttributionConfiguration.getProviderLimit();
+        this.dbBatchSize = dpcAttributionConfiguration.getDbBatchSize();
     }
 
     @GET
@@ -62,7 +66,6 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @Timed
     @ExceptionMetered
     public Response submitProvider(Practitioner provider) {
-
         final ProviderEntity entity = this.converter.fromFHIR(ProviderEntity.class, provider);
         final Long totalExistingProviders = this.dao.getProvidersCount(null, null, entity.getOrganization().getId());
         final List<ProviderEntity> existingProvidersByNPI = this.dao.getProviders(null, entity.getProviderNPI(), entity.getOrganization().getId());
@@ -72,8 +75,8 @@ public class PractitionerResource extends AbstractPractitionerResource {
         }
 
         if (existingProvidersByNPI.isEmpty()) {
-            final ProviderEntity persisted = this.dao.persistProvider(entity);
-            return Response.status(Response.Status.CREATED).entity(this.converter.toFHIR(Practitioner.class, persisted)).build();
+            final Practitioner persisted = insertPractitioner(provider);
+            return Response.status(Response.Status.CREATED).entity(persisted).build();
         }
 
         return Response.ok().entity(this.converter.toFHIR(Practitioner.class, existingProvidersByNPI.get(0))).build();
@@ -105,7 +108,30 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @BundleReturnProperties(bundleType = Bundle.BundleType.COLLECTION)
     @Override
     public List<Practitioner> bulkSubmitProviders(Parameters params) {
-        return bulkResourceHandler(Practitioner.class, params, this::submitProvider);
+        // Get the org from one of the practitioners
+        Optional<Practitioner> firstPractitioner = FHIRExtractors.getResourceStream(params, Practitioner.class).findAny();
+        if (firstPractitioner.isEmpty()) {
+            throw new WebApplicationException("No practitioners submitted", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        }
+        final UUID orgId = FHIRExtractors.getEntityUUID(FHIRExtractors.getOrganizationID(firstPractitioner.get()));
+
+        // Get NPIs of practitioners that already exist in the DB
+        final List<String> npis = FHIRExtractors.getResourceStream(params, Practitioner.class)
+            .map(FHIRExtractors::getProviderNPI)
+            .collect(Collectors.toList());
+
+        // Get practitioners that already exist in the DB
+        final List<ProviderEntity> existingProviderEntities = dao.bulkProviderSearch(orgId, npis);
+
+        // Insert the practitioners that don't already exist
+        List<Practitioner> insertedPractitioners = RESTUtils.bulkResourceHandler(
+            FHIRExtractors.getResourceStream(params, Practitioner.class), this::insertPractitioner, dao, dbBatchSize
+        );
+
+        return Stream.concat(
+            insertedPractitioners.stream(),
+            existingProviderEntities.stream().map(entity -> this.converter.toFHIR(Practitioner.class, entity))
+        ).collect(Collectors.toList());
     }
 
     @DELETE
@@ -136,5 +162,11 @@ public class PractitionerResource extends AbstractPractitionerResource {
         final ProviderEntity providerEntity = this.converter.fromFHIR(ProviderEntity.class, provider);
         providerEntity.setID(providerID);
         return this.converter.toFHIR(Practitioner.class, this.dao.updateProvider(providerID, providerEntity));
+    }
+
+    private Practitioner insertPractitioner(Practitioner practitioner) {
+        ProviderEntity providerEntity = this.converter.fromFHIR(ProviderEntity.class, practitioner);
+        providerEntity.setID(null);
+        return this.converter.toFHIR(Practitioner.class, this.dao.persistProvider(providerEntity));
     }
 }

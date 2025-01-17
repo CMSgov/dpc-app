@@ -33,8 +33,6 @@ public class FHIRExtractors {
 
     /**
      * Extract the National Provider ID (NPI) from the given {@link Practitioner} resource
-     * This currently assumes that the NPI is the first ID associated to the resource,
-     * but eventually we'll need to do a more thorough check
      *
      * @param provider - {@link Practitioner} provider to get NPI from
      * @return - {@link String} provider NPI

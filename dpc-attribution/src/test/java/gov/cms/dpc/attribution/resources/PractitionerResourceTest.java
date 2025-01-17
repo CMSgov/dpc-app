@@ -314,4 +314,87 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
         assertNotNull(result2, "Should be created");
     }
+
+    @Test
+    void testBulkInsert() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+
+        Bundle practitionerBundle = AttributionTestHelpers.createBundle(practitioner);
+        Parameters params = new Parameters();
+        params.addParameter().setResource(practitionerBundle);
+
+        Bundle resultPractitionerBundle = client
+            .operation()
+            .onType(Practitioner.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        assertEquals(1, resultPractitionerBundle.getEntry().size());
+        Practitioner resultPractitioner = (Practitioner) resultPractitionerBundle.getEntry().get(0).getResource();
+        assertEquals(FHIRExtractors.getProviderNPI(practitioner), FHIRExtractors.getProviderNPI(resultPractitioner));
+
+        practitionersToCleanUp.add(resultPractitioner);
+    }
+
+    @Test
+    void testBulkInsertMultiplePractioners() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        Practitioner prac1 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        Practitioner prac2 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        Practitioner prac3 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+
+        Bundle practitionerBundle = AttributionTestHelpers.createBundle(prac1, prac2, prac3);
+        Parameters params = new Parameters();
+        params.addParameter().setResource(practitionerBundle);
+
+        Bundle resultPractitionerBundle = client
+            .operation()
+            .onType(Practitioner.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        assertEquals(3, resultPractitionerBundle.getEntry().size());
+
+        resultPractitionerBundle.getEntry().forEach(entry -> {
+            practitionersToCleanUp.add((Practitioner) entry.getResource());
+        });
+    }
+
+    @Test
+    void testBulkInsertWithExistingId() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        practitioner.setId(UUID.randomUUID().toString());
+
+        Bundle practitionerBundle = AttributionTestHelpers.createBundle(practitioner);
+        Parameters params = new Parameters();
+        params.addParameter().setResource(practitionerBundle);
+
+        Bundle resultPractitionerBundle = client
+            .operation()
+            .onType(Practitioner.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        assertEquals(1, resultPractitionerBundle.getEntry().size());
+
+        // We should ignore an id sent by the customer and create our own
+        Practitioner resultPractitioner = (Practitioner) resultPractitionerBundle.getEntry().get(0).getResource();
+        assertNotEquals(practitioner.getId(), resultPractitioner.getId());
+
+        practitionersToCleanUp.add(resultPractitioner);
+    }
 }
