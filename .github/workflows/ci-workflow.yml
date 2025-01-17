@@ -29,8 +29,15 @@ jobs:
         with:
           python-version: "3.8.1"
       - name: "API Build"
+        id: api-build
         run: |
           make ci-app
+      - name: "Upload Docker logs"
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
+        uses: actions/upload-artifact
+        with:
+          name: docker-logs
+          path: ./docker-logs.txt
       - name: "Move jacoco reports"
         run: |
           sudo mkdir jacoco-reports
