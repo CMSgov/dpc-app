@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: docker-logs
-          path: ./docker-logs.txt
+          path: ./docker-compose.log
       - name: "Move jacoco reports"
         run: |
           sudo mkdir jacoco-reports
