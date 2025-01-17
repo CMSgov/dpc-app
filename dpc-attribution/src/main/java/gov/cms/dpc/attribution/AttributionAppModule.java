@@ -69,4 +69,9 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Singleton
     @Named("queryChunkSize")
     int provideQueryChunkSize() { return configuration().getQueryChunkSize(); }
+
+    @Provides
+    @Singleton
+    @Named("DbBatchSize")
+    int provideDbBatchSize() { return configuration().getDbBatchSize(); }
 }

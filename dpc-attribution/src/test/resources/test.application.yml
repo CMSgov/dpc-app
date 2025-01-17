@@ -16,7 +16,7 @@ database:
     hibernate.order_inserts: true
     hibernate.show_sql: false
     hibernate.generate_statistics: true
-    queryChunkSize: 1000
+    queryChunkSize: 10000
 
 server:
   enableThreadNameFilter: false

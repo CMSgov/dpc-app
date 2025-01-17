@@ -22,7 +22,7 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 		DPCManagedSessionFactory dpcManagedSessionFactory = new DPCManagedSessionFactory(db.getSessionFactory());
 
 		// Chunk size is set to 10000 in the current config
-		patientDAO = new PatientDAO(dpcManagedSessionFactory, 1000);
+		patientDAO = new PatientDAO(dpcManagedSessionFactory, 10000);
 		organizationDAO = new OrganizationDAO(dpcManagedSessionFactory);
 	}
 
@@ -134,7 +134,7 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 		mbis.add(patientEntity.getBeneficiaryID());
 
 		// Add enough fake MBIs to make sure we have to chunk the query
-		for(int i=0; i< 50000; i++){
+		for(int i=0; i< 100000; i++){
 			mbis.add("fake_mbi");
 		}
 

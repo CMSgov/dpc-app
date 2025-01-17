@@ -1,7 +1,9 @@
 package gov.cms.dpc.attribution.resources.v1;
 
+import com.google.inject.name.Named;
 import gov.cms.dpc.attribution.jdbi.PatientDAO;
 import gov.cms.dpc.attribution.resources.AbstractPatientResource;
+import gov.cms.dpc.attribution.utils.RESTUtils;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -20,6 +22,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,11 +32,13 @@ public class PatientResource extends AbstractPatientResource {
     private static final WebApplicationException NOT_FOUND_EXCEPTION = new WebApplicationException("Cannot find patient with given ID", Response.Status.NOT_FOUND);
     private final FHIREntityConverter converter;
     private final PatientDAO dao;
+    private final int dbBatchSize;
 
     @Inject
-    PatientResource(FHIREntityConverter converter, PatientDAO dao) {
+    PatientResource(FHIREntityConverter converter, PatientDAO dao, @Named("DbBatchSize") int dbBatchSize) {
         this.dao = dao;
         this.converter = converter;
+        this.dbBatchSize = dbBatchSize;
     }
 
     @GET
@@ -90,15 +95,21 @@ public class PatientResource extends AbstractPatientResource {
             final UUID organizationID = FHIRExtractors.getEntityUUID(patient.getManagingOrganization().getReference());
             final String patientMBI = FHIRExtractors.getPatientMBI(patient);
 
-            // Check to see if Patient already exists, if so just return it.
+            final Response.Status status;
+            final Patient createdPatient;
+            // Check to see if Patient already exists, if so, ignore it.
             final List<PatientEntity> patientEntities = this.dao.patientSearch(null, patientMBI, organizationID);
             if (!patientEntities.isEmpty()) {
-                return Response.status(Response.Status.OK)
-                    .entity(this.converter.toFHIR(Patient.class, patientEntities.get(0)))
-                    .build();
+                status = Response.Status.OK;
+                createdPatient = this.converter.toFHIR(Patient.class, patientEntities.get(0));
             } else {
-                return insertPatient(patient);
+                status = Response.Status.CREATED;
+                createdPatient = insertPatient(patient);
             }
+
+            return Response.status(status)
+                .entity(createdPatient)
+                .build();
         } catch (IllegalArgumentException e) {
             throw new WebApplicationException("Invalid Patient resource", HttpStatus.UNPROCESSABLE_ENTITY_422);
         }
@@ -111,38 +122,25 @@ public class PatientResource extends AbstractPatientResource {
     @BundleReturnProperties(bundleType = Bundle.BundleType.COLLECTION)
     @Override
     public List<Patient> bulkSubmitPatients(Parameters params) {
-        // Get our list of patients
-        final Bundle bundle = (Bundle) params.getParameterFirstRep().getResource();
-
-        final List<Patient> patients = bundle.getEntry().stream()
-            .filter(Bundle.BundleEntryComponent::hasResource)
-            .map(Bundle.BundleEntryComponent::getResource)
-            .filter(resource -> resource.getClass().equals(Patient.class))
-            .map(Patient.class::cast)
-            .collect(Collectors.toList());
-
-        if(patients.isEmpty()) {
-            throw new WebApplicationException("No valid patients submitted", HttpStatus.UNPROCESSABLE_ENTITY_422);
+        // Get managing org from one of the patients
+        Optional<Patient> firstPat = FHIRExtractors.getResourceStream(params, Patient.class).findAny();
+        if (firstPat.isEmpty()) {
+            throw new WebApplicationException("No patients submitted", HttpStatus.UNPROCESSABLE_ENTITY_422);
         }
+        final UUID orgId = FHIRExtractors.getEntityUUID(firstPat.get().getManagingOrganization().getReference());
 
-        // Pull out the list of patient entities that already exist in the DB
-        final UUID organizationID = FHIRExtractors.getEntityUUID(patients.get(0).getManagingOrganization().getReference());
-        final List<String> mbis = patients.stream().map(FHIRExtractors::getPatientMBI).collect(Collectors.toList());
-        final List<PatientEntity> existingPatientEntities = dao.bulkPatientSearchByMbi(organizationID, mbis);
-
-        // Insert the rest of the patients
-        List<String> existingMbis = existingPatientEntities.stream().map(PatientEntity::getBeneficiaryID).collect(Collectors.toList());
-
-        List<Patient> insertedPatients = patients.stream()
-            .filter(patient -> ! existingMbis.contains(FHIRExtractors.getPatientMBI(patient)))
-            .map(patient -> {
-                Response response = insertPatient(patient);
-                if(! HttpStatus.isSuccess(response.getStatus())) {
-                    throw new WebApplicationException(response);
-                }
-                return (Patient) response.getEntity();
-            })
+        // Get MBIs of patients that already exist in the DB
+        final List<String> mbis = FHIRExtractors.getResourceStream(params, Patient.class)
+            .map(FHIRExtractors::getPatientMBI)
             .collect(Collectors.toList());
+
+        // Get patients that already exist in the DB
+        final List<PatientEntity> existingPatientEntities = dao.bulkPatientSearchByMbi(orgId, mbis);
+
+        // Insert the patients that don't already exist
+        List<Patient> insertedPatients = RESTUtils.bulkResourceHandler(
+            FHIRExtractors.getResourceStream(params, Patient.class), this::insertPatient, dao, dbBatchSize
+        );
 
         return Stream.concat(
             insertedPatients.stream(),
@@ -182,17 +180,9 @@ public class PatientResource extends AbstractPatientResource {
         }
     }
 
-
-    /**
-     * Inserts a {@link Patient} into the DB and creates an {@link Response} to send back to the caller.
-     * @param patient {@link Patient} to be inserted
-     * @return {@link Response} to send back to the user
-     */
-    private Response insertPatient(Patient patient) {
-        PatientEntity patientEntity = this.dao.persistPatient(this.converter.fromFHIR(PatientEntity.class, patient));
-
-        return Response.status(Response.Status.CREATED)
-            .entity(this.converter.toFHIR(Patient.class, patientEntity))
-            .build();
+    private Patient insertPatient(Patient patient) {
+        PatientEntity patientEntity = this.converter.fromFHIR(PatientEntity.class, patient);
+        patientEntity.setID(null);
+        return this.converter.toFHIR(Patient.class, this.dao.persistPatient(patientEntity));
     }
 }

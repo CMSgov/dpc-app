@@ -128,4 +128,9 @@ public class DPCAttributionConfiguration extends JobConfiguration implements IDP
         Map<String,String> properties = database.getProperties();
         return Integer.parseInt(properties.get("queryChunkSize"));
     }
+
+    public int getDbBatchSize() {
+        Map<String,String> properties = database.getProperties();
+        return Integer.parseInt(properties.get("hibernate.jdbc.batch_size"));
+    }
 }

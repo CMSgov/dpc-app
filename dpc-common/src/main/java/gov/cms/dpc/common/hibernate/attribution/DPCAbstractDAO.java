@@ -22,4 +22,13 @@ public class DPCAbstractDAO<E> extends AbstractDAO<E> {
         currentSession().refresh(databaseObject);
     }
 
+    /**
+     * Triggers a transaction synchronization and clears the Hibernate persistence cache.
+     * When batching inserts and updates, call this method after reaching your max batch size to prevent storing
+     * previous batches in memory any longer than you have to.
+     */
+    public void cleanUpBatch() {
+        currentSession().flush();
+        currentSession().clear();
+    }
 }

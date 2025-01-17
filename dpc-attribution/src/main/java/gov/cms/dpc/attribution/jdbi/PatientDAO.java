@@ -2,8 +2,8 @@ package gov.cms.dpc.attribution.jdbi;
 
 import com.google.inject.name.Named;
 import gov.cms.dpc.common.entities.*;
+import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
-import io.dropwizard.hibernate.AbstractDAO;
 import org.apache.commons.collections4.ListUtils;
 
 import javax.inject.Inject;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class PatientDAO extends AbstractDAO<PatientEntity> {
+public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
     private final int queryChunkSize;
 
     @Inject

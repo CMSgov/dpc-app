@@ -11,6 +11,7 @@ import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.testing.MBIUtil;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 
@@ -346,5 +347,29 @@ class PatientResourceTest extends AbstractAttributionTest {
         System.out.println("Insert time: " + duration.getSeconds());
     }
 
+    @Test
+    void testBulkInsertHandlesPatWithExistingId() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
+        Patient patient = AttributionTestHelpers.createPatientResource(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
+        patient.setId(UUID.randomUUID().toString());
+
+        Bundle patientBundle = AttributionTestHelpers.createBundle(patient);
+        Parameters params = new Parameters();
+        params.addParameter().setResource(patientBundle);
+
+        Bundle resultPatientBundle = client
+            .operation()
+            .onType(Patient.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        assertEquals(1, resultPatientBundle.getEntry().size());
+
+        // We should ignore an id sent by the customer and create our own
+        assertNotEquals(patient.getId(), resultPatientBundle.getEntry().get(0).getResource().getId());
+    }
 }
