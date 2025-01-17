@@ -22,7 +22,7 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 		DPCManagedSessionFactory dpcManagedSessionFactory = new DPCManagedSessionFactory(db.getSessionFactory());
 
 		// Chunk size is set to 10000 in the current config
-		patientDAO = new PatientDAO(dpcManagedSessionFactory, 10000);
+		patientDAO = new PatientDAO(dpcManagedSessionFactory, 1000);
 		organizationDAO = new OrganizationDAO(dpcManagedSessionFactory);
 	}
 
