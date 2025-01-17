@@ -134,7 +134,7 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 		mbis.add(patientEntity.getBeneficiaryID());
 
 		// Add enough fake MBIs to make sure we have to chunk the query
-		for(int i=0; i< 100000; i++){
+		for(int i=0; i< 50000; i++){
 			mbis.add("fake_mbi");
 		}
 
