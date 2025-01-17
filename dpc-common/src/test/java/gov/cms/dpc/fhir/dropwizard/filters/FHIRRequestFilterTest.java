@@ -16,8 +16,7 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class FHIRRequestFilterTest {
@@ -32,7 +31,7 @@ public class FHIRRequestFilterTest {
         setAcceptHeader(request, FHIRMediaTypes.FHIR_JSON);
         Mockito.when(request.getHeaders()).thenReturn(headerMap);
 
-        filter.filter(request);
+        assertDoesNotThrow(() -> filter.filter(request));
     }
 
     @Test
@@ -80,7 +79,7 @@ public class FHIRRequestFilterTest {
         Mockito.when(request.getAcceptableMediaTypes()).thenReturn(List.of(MediaType.APPLICATION_JSON_TYPE, MediaType.valueOf(FHIRMediaTypes.FHIR_JSON)));
         Mockito.when(request.getHeaders()).thenReturn(headerMap);
 
-        filter.filter(request);
+        assertDoesNotThrow(() -> filter.filter(request));
     }
 
     @Test
@@ -116,7 +115,7 @@ public class FHIRRequestFilterTest {
         setAcceptHeader(request, FHIRMediaTypes.FHIR_JSON);
         Mockito.when(request.getHeaders()).thenReturn(headerMap);
 
-        filter.filter(request);
+        assertDoesNotThrow(() -> filter.filter(request));
     }
 
     @Test
@@ -127,7 +126,7 @@ public class FHIRRequestFilterTest {
         setAcceptHeader(request, FHIRMediaTypes.FHIR_JSON);
         Mockito.when(request.getHeaders()).thenReturn(headerMap);
 
-        filter.filter(request);
+        assertDoesNotThrow(() -> filter.filter(request));
 
     }
 
