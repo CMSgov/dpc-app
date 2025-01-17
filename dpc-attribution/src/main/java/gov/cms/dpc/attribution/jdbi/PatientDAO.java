@@ -96,6 +96,7 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         return fullyUpdated;
     }
 
+    // TODO: this is part of the issue -acw
     // We have to suppress this because the list returned is actually Strings, but we can't prove it to the compiler
     @SuppressWarnings("rawtypes")
     public List fetchPatientMBIByRosterID(UUID rosterID, boolean activeOnly) {
@@ -103,12 +104,16 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
         final Root<PatientEntity> root = query.from(PatientEntity.class);
         query.select(root);
+        System.out.println("ROOT QUERY");
+        System.out.println(list(query));
 
         // Join across the AttributionRelationships
         final ListJoin<PatientEntity, AttributionRelationship> attrJoins = root.join(PatientEntity_.attributions);
         final Join<AttributionRelationship, RosterEntity> rosterJoin = attrJoins.join(AttributionRelationship_.roster);
 
         query.select(root.get(PatientEntity_.BENEFICIARY_I_D));
+        System.out.println("SELECT QUERY");
+        System.out.println(list(query));
 
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(builder.equal(rosterJoin.get(RosterEntity_.id), rosterID));
@@ -117,7 +122,9 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
             predicates.add(builder.equal(attrJoins.get(AttributionRelationship_.inactive), false));
         }
         query.where(predicates.toArray(new Predicate[0]));
-        return this.list(query);
+        System.out.println("PREDICATES QUERY");
+        System.out.println(list(query));
+        return list(query);
     }
 
     private int removeAttributionRelationships(PatientEntity patientEntity) {
