@@ -34,7 +34,7 @@ jobs:
           make ci-app
       - name: "Upload Docker logs"
         if: ${{ failure() && steps.api-build.outcome == 'failure' }}
-        uses: actions/upload-artifact
+        uses: actions/upload-artifact@v4
         with:
           name: docker-logs
           path: ./docker-logs.txt
