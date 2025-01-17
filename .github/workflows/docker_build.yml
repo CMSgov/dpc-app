@@ -20,7 +20,8 @@ jobs:
   docker_build:
     runs-on: self-hosted
     container:
-      image: alpine:latest
+      image: ubuntu:latest
+#      image: alpine:latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -38,13 +39,13 @@ jobs:
 #        with:
 #          python-version: "3.8.1"
 
-      - name: Install system packages
-        run: |
-          apk update
-          apk add make --no-cache
-          apk add aws-cli --no-cache
-          apk add docker --no-cache
-          apk add docker-compose --no-cache
+#      - name: Install system packages
+#        run: |
+#          apk update
+#          apk add make --no-cache
+#          apk add aws-cli --no-cache
+#          apk add docker --no-cache
+#          apk add docker-compose --no-cache
 
       - name: Build app
         run: docker --version && docker compose -f ./docker-compose.base.yml build base
