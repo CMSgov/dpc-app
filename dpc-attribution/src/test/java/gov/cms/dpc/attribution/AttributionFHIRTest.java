@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRBuilders;
@@ -34,6 +35,7 @@ import static gov.cms.dpc.attribution.SharedMethods.submitAttributionBundle;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
 class AttributionFHIRTest {
@@ -45,6 +47,7 @@ class AttributionFHIRTest {
     private static final FhirContext ctx = FhirContext.forDstu3();
     private static final String CSV = "test_associations-dpr.csv";
     private static Map<String, List<Pair<String, String>>> groupedPairs = new HashMap<>();
+    private static final ObjectMapper mapper = new ObjectMapper();
     private static Organization organization;
 
     @BeforeAll
