@@ -35,13 +35,7 @@ jobs:
       - name: "Get Docker logs"
         if: ${{ failure() && steps.api-build.outcome == 'failure' }}
         run: |
-          docker logs start-v1-app-api-1 > docker-compose.log
-      - name: "Upload Docker logs"
-        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-logs
-          path: ./docker-compose.log
+          docker logs start-v1-app-api-1
       - name: "Move jacoco reports"
         run: |
           sudo mkdir jacoco-reports

@@ -36,8 +36,7 @@ public class FHIRValidationModule extends AbstractModule {
     protected void configure() {
 
         // Create a multi-binder for automatically bundling and injecting a Set of ConstraintValidators
-        TypeLiteral<ConstraintValidator<?, ?>> constraintType = new TypeLiteral<>() {
-        };
+        TypeLiteral<ConstraintValidator<?, ?>> constraintType = new TypeLiteral<>() {};
         Multibinder<ConstraintValidator<?, ?>> constraintBinder = Multibinder.newSetBinder(binder(), constraintType);
         constraintBinder.addBinding().to(ProfileValidator.class);
 
