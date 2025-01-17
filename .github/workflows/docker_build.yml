@@ -44,7 +44,7 @@ jobs:
           apk add make --no-cache
           apk add aws-cli --no-cache
           apk add docker --no-cache
-#          apk add docker-cli --no-cache
+          apk add docker-compose --no-cache
 
       - name: Build app
         run: docker --version && docker compose -f ./docker-compose.base.yml build base
