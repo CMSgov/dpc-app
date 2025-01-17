@@ -46,7 +46,7 @@ class PublicKeyHandlerTest {
         void testValidKey(KeyType keyType) throws NoSuchAlgorithmException {
             final String encoded = generatePublicKey(keyType);
             final String key = String.format("-----BEGIN PUBLIC KEY-----\n%s\n-----END PUBLIC KEY-----\n", encoded);
-            PublicKeyHandler.parsePEMString(key);
+            assertDoesNotThrow(() -> PublicKeyHandler.parsePEMString(key));
         }
 
         @ParameterizedTest
