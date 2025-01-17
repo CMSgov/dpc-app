@@ -35,7 +35,7 @@ jobs:
       - name: "Get Docker logs"
         if: ${{ failure() && steps.api-build.outcome == 'failure' }}
         run: |
-          docker logs dpc-app-api-1 > docker-compose.log
+          docker logs start-v1-app-api-1 > docker-compose.log
       - name: "Upload Docker logs"
         if: ${{ failure() && steps.api-build.outcome == 'failure' }}
         uses: actions/upload-artifact@v4
