@@ -17,8 +17,7 @@ import java.util.List;
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_RESPOND_ASYNC;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
 public class FHIRAsyncRequestFilterTest {
@@ -49,7 +48,7 @@ public class FHIRAsyncRequestFilterTest {
             map.put(HttpHeaders.ACCEPT, List.of(FHIR_JSON));
             map.put(PREFER_HEADER, List.of(PREFER_RESPOND_ASYNC));
             Mockito.when(context.getHeaders()).thenReturn(map);
-            filter.filter(context);
+            assertDoesNotThrow(() -> filter.filter(context));
         }
 
         @Test
@@ -58,7 +57,7 @@ public class FHIRAsyncRequestFilterTest {
             map.put(HttpHeaders.ACCEPT, List.of("wrong", FHIR_JSON));
             map.put(PREFER_HEADER, List.of(PREFER_RESPOND_ASYNC));
             Mockito.when(context.getHeaders()).thenReturn(map);
-            filter.filter(context);
+            assertDoesNotThrow(() -> filter.filter(context));
         }
 
         @Test
@@ -89,7 +88,7 @@ public class FHIRAsyncRequestFilterTest {
             map.put(HttpHeaders.ACCEPT, List.of(FHIR_JSON));
             map.put(PREFER_HEADER, List.of(PREFER_RESPOND_ASYNC));
             Mockito.when(context.getHeaders()).thenReturn(map);
-            filter.filter(context);
+            assertDoesNotThrow(() -> filter.filter(context));
         }
 
         @Test
