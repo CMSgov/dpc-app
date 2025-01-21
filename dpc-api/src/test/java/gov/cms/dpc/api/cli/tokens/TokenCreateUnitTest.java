@@ -76,7 +76,7 @@ public class TokenCreateUnitTest {
         tokenEntity.setCreatedAt(OffsetDateTime.now());
         tokenEntity.setExpiresAt(OffsetDateTime.now());
         tokenEntity.setToken("test_token");
-        CollectionResponse collectionResponse = new CollectionResponse(List.of(tokenEntity));
+        CollectionResponse<TokenEntity> collectionResponse = new CollectionResponse<>(List.of(tokenEntity));
 
         ObjectMapper mapper = new ObjectMapper();
         String payload = mapper.writeValueAsString(collectionResponse);

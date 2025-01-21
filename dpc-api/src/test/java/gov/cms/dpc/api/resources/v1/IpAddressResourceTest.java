@@ -212,8 +212,6 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
             CloseableHttpResponse response = client.execute(post);
 
             return mapper.readValue(response.getEntity().getContent(), IpAddressEntity.class);
-        } catch (Exception e) {
-            throw e;
         }
     }
 }

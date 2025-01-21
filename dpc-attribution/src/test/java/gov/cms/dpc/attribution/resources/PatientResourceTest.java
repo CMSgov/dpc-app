@@ -183,7 +183,7 @@ class PatientResourceTest extends AbstractAttributionTest {
         // Create a practitioner and an attribution resource
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("2222222228");
 
-        final MethodOutcome outcome = client
+        client
                 .create()
                 .resource(practitioner)
                 .encodedJson()

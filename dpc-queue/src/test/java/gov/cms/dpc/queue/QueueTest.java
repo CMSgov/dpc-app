@@ -18,7 +18,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -106,11 +105,6 @@ class QueueTest {
                     return List.of(first, second, third, fourth, fifth);
                 })
                 .flatMap(Collection::stream);
-    }
-
-    @BeforeEach
-    void setupQueue() {
-
     }
 
     @AfterEach
@@ -247,7 +241,7 @@ class QueueTest {
                 transactionTime,
                 transactionTime, null, null,true, false);
 
-        // Check that the Job has a empty queue
+        // Check that the Job has an empty queue
         final Optional<JobQueueBatch> job = queue.getJobBatches(jobId).stream().findFirst();
         assertAll(() -> assertTrue(job.isPresent(), "Should be present in the queue."),
                 () -> assertEquals(JobStatus.QUEUED, job.get().getStatus(), "Job should be in queue"),

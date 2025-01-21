@@ -46,22 +46,7 @@ public class FileManager {
                 new File(path.toString()));
     }
 
-    public static class FilePointer {
-
-        private final String checksum;
-        private final long fileSize;
-        private final UUID jobID;
-        private final OffsetDateTime creationTime;
-        private final File file;
-
-        public FilePointer(String checksum, long fileSize, UUID jobID, OffsetDateTime creationTime, File file) {
-            this.checksum = checksum;
-            this.fileSize = fileSize;
-            this.jobID = jobID;
-            this.creationTime = creationTime;
-            this.file = file;
-        }
-
+    public record FilePointer(String checksum, long fileSize, UUID jobID, OffsetDateTime creationTime, File file) {
         public String getChecksum() {
             return checksum;
         }

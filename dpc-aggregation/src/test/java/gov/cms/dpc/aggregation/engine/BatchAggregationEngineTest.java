@@ -46,11 +46,11 @@ class BatchAggregationEngineTest {
     private LookBackService lookBackService;
     private ConsentService consentService;
 
-    static private final FhirContext fhirContext = FhirContext.forDstu3();
-    static private final FhirContext fhirContextR4 = FhirContext.forR4();
-    static private final MetricRegistry metricRegistry = new MetricRegistry();
-    static private final String exportPath = "/tmp";
-    static private OperationsConfig operationsConfig;
+    private static final FhirContext fhirContext = FhirContext.forDstu3();
+    private static final FhirContext fhirContextR4 = FhirContext.forR4();
+    private static final MetricRegistry metricRegistry = new MetricRegistry();
+    private static final String exportPath = "/tmp";
+    private static OperationsConfig operationsConfig;
 
     @BeforeAll
     static void setupAll() {
@@ -93,7 +93,7 @@ class BatchAggregationEngineTest {
     }
 
     /**
-     * Test if a engine can handle a simple job with one resource type, one test provider, and one patient.
+     * Test if an engine can handle a simple job with one resource type, one test provider, and one patient.
      */
     @Test
     void largeJobTestSingleResource() {
@@ -129,7 +129,7 @@ class BatchAggregationEngineTest {
     }
 
     /**
-     * Test if a engine can handle a simple job with one resource type, one test provider, and one patient.
+     * Test if an engine can handle a simple job with one resource type, one test provider, and one patient.
      */
     @Test
     void largeJobTest() {
@@ -169,7 +169,7 @@ class BatchAggregationEngineTest {
     }
 
     /**
-     * Test if a engine can handle a simple job with one resource type, one test provider, and one patient.
+     * Test if an engine can handle a simple job with one resource type, one test provider, and one patient.
      */
     @Test
     void largeJobWithBadPatientTest() {
@@ -194,7 +194,7 @@ class BatchAggregationEngineTest {
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
-                () -> assertEquals(5, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
+                () -> assertEquals(5, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob)),
                 () -> assertTrue(completeJob.getJobQueueFile(DPCResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
                 () -> assertFalse(completeJob.getJobQueueFile(DPCResourceType.OperationOutcome).isEmpty(), "Expect an error"));
 
@@ -233,7 +233,7 @@ class BatchAggregationEngineTest {
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
-                () -> assertEquals(1, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
+                () -> assertEquals(1, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob)),
                 () -> assertFalse(completeJob.getJobQueueFile(DPCResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
                 () -> assertTrue(completeJob.getJobQueueFile(DPCResourceType.OperationOutcome).isPresent(), "Expect an error"));
 
@@ -276,7 +276,7 @@ class BatchAggregationEngineTest {
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
-                () -> assertEquals(1, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
+                () -> assertEquals(1, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob)),
                 () -> assertFalse(completeJob.getJobQueueFile(DPCResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
                 () -> assertTrue(completeJob.getJobQueueFile(DPCResourceType.OperationOutcome).isPresent(), "Expect an error"));
 
@@ -319,7 +319,7 @@ class BatchAggregationEngineTest {
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
-                () -> assertEquals(1, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
+                () -> assertEquals(1, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob)),
                 () -> assertFalse(completeJob.getJobQueueFile(DPCResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
                 () -> assertTrue(completeJob.getJobQueueFile(DPCResourceType.OperationOutcome).isPresent(), "Expect an error"));
 
@@ -362,7 +362,7 @@ class BatchAggregationEngineTest {
         final var completeJob = queue.getJobBatches(jobID).stream().findFirst().orElseThrow();
         assertEquals(JobStatus.COMPLETED, completeJob.getStatus());
         assertAll(
-                () -> assertEquals(4, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob.toString())),
+                () -> assertEquals(4, completeJob.getJobQueueBatchFiles().size(), String.format("Unexpected JobModel: %s", completeJob)),
                 () -> assertTrue(completeJob.getJobQueueFile(DPCResourceType.ExplanationOfBenefit).isPresent(), "Expect a EOB"),
                 () -> assertFalse(completeJob.getJobQueueFile(DPCResourceType.OperationOutcome).isPresent(), "Expect an error"));
 

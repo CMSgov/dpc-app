@@ -76,7 +76,7 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
                 .stream()
                 .map(MacaroonCaveat::getCondition)
                 .filter(cond -> cond.getKey().equals(ORGANIZATION_CAVEAT_KEY))
-                .map(condition -> UUID.fromString(condition.getValue()))
+                .map(condition -> UUID.fromString(condition.value()))
                 .findAny()
                 .orElseThrow(() -> new WebApplicationException("JWT client token must have organization_id", Response.Status.UNAUTHORIZED));
     }

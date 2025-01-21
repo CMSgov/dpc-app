@@ -83,14 +83,6 @@ public class AddMBIToPatients {
         return bundle;
     }
 
-    private static class PatientMBI {
-        private final String mbi;
-        private final String mbiHash;
-
-        private PatientMBI(String mbi, String mbiHash) {
-            this.mbi = mbi;
-            this.mbiHash = mbiHash;
-        }
-    }
+    private record PatientMBI(String mbi, String mbiHash) {}
 
 }

@@ -17,8 +17,6 @@ class JobHeadersTest {
     private  String requestingIP;
     private  String jobID;
     private  String providerNPI;
-    private  final String  transactionTime = "2022-12-27T19:41:33.038Z";
-    private  boolean isBulk;
     private JobHeaders jobHeaders;
     private String randomUUID;
 
@@ -40,21 +38,20 @@ class JobHeadersTest {
 
     @Test
     void buildHeaders() {
-        this.isBulk=true;
-        this.jobHeaders = new JobHeaders(this.requestingIP,this.randomUUID , this.randomUUID, this.transactionTime,this.isBulk);
+        String transactionTime = "2022-12-27T19:41:33.038Z";
+        this.jobHeaders = new JobHeaders(this.requestingIP,this.randomUUID , this.randomUUID, transactionTime, true);
         assertThat(this.requestingIP).isNotNull().isEqualTo("127.0.0.1");
         assertThat(this.jobID).isNotNull().isEqualTo(this.randomUUID);
         assertThat(this.providerNPI).isNotNull().isEqualTo(this.randomUUID);
-        assertThat(this.transactionTime).isNotNull();
+        assertThat(transactionTime).isNotNull();
         headers = jobHeaders.buildHeaders();
         assertTrue(Maps.difference(headers, headers).areEqual());
         tearDown();
-        this.isBulk=false;
-        this.jobHeaders = new JobHeaders(this.requestingIP,this.randomUUID , this.randomUUID, this.transactionTime,this.isBulk);
+        this.jobHeaders = new JobHeaders(this.requestingIP,this.randomUUID , this.randomUUID, transactionTime, false);
         assertThat(this.requestingIP).isNotNull().isEqualTo("127.0.0.1");
         assertThat(this.jobID).isNotNull().isEqualTo(this.randomUUID);
         assertThat(this.providerNPI).isNotNull().isEqualTo(this.randomUUID);
-        assertThat(this.transactionTime).isNotNull();
+        assertThat(transactionTime).isNotNull();
         headers = jobHeaders.buildHeaders();
         assertTrue(Maps.difference(headers, headers).areEqual());
     }

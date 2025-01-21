@@ -76,7 +76,6 @@ class VarIntTests {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> VarInt.readUnsignedVarInt(is), "Should overflow with long value");
         assertEquals(VarInt.VARIABLE_LENGTH_QUANTITY_IS_TOO_LONG, exception.getMessage(), "Should have correct message");
 
-        //noinspection ResultOfMethodCallIgnored
         exception = assertThrows(IllegalArgumentException.class, () -> VarInt.readUnsignedVarInt(bos.toByteArray()), "Should overflow with long value");
         assertEquals(VarInt.VARIABLE_LENGTH_QUANTITY_IS_TOO_LONG, exception.getMessage(), "Should have correct message");
     }

@@ -73,7 +73,7 @@ class KeyListUnitTest {
         publicKeyEntity.setId(UUID.randomUUID());
         publicKeyEntity.setLabel("test public key");
         publicKeyEntity.setCreatedAt(OffsetDateTime.now());
-        CollectionResponse collectionResponse = new CollectionResponse(List.of(publicKeyEntity));
+        CollectionResponse<PublicKeyEntity> collectionResponse = new CollectionResponse<>(List.of(publicKeyEntity));
 
         ObjectMapper mapper = new ObjectMapper();
         String payload = mapper.writeValueAsString(collectionResponse);

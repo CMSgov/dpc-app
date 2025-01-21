@@ -49,12 +49,12 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         }
 
         query.where(predicates.toArray(new Predicate[0]));
-        return this.list(query);
+        return list(query);
     }
 
     /**
      * Returns a list of all {@link PatientEntity}s whose id is in resourceIds.
-     * @param resourceIDs
+     * @param resourceIDs list of IDs
      * @return List of {@link PatientEntity}s
      */
     public List<PatientEntity> patientSearch(UUID organizationId, List<UUID> resourceIDs) {
@@ -96,12 +96,11 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         return fullyUpdated;
     }
 
-    // TODO: this is part of the issue -acw
     // We have to suppress this because the list returned is actually Strings, but we can't prove it to the compiler
     @SuppressWarnings("rawtypes")
     public List fetchPatientMBIByRosterID(UUID rosterID, boolean activeOnly) {
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaQuery query = builder.createQuery();
+        final CriteriaQuery query = builder.createQuery(); // untyped to avoid QueryTypeMismatchException
         final Root<PatientEntity> root = query.from(PatientEntity.class);
         query.select(root);
 
@@ -121,7 +120,7 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
         return list(query);
     }
 
-    private int removeAttributionRelationships(PatientEntity patientEntity) {
+    private void removeAttributionRelationships(PatientEntity patientEntity) {
 
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaDelete<AttributionRelationship> criteriaDelete = builder.createCriteriaDelete(AttributionRelationship.class);
@@ -131,6 +130,6 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
                         .get(AttributionRelationship_.patient)
                         .get(PatientEntity_.id),
                 patientEntity.getID()));
-        return this.currentSession().createMutationQuery(criteriaDelete).executeUpdate();
+        this.currentSession().createMutationQuery(criteriaDelete).executeUpdate();
     }
 }

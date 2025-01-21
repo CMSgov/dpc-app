@@ -14,7 +14,7 @@ import org.testcontainers.utility.DockerImageName;
  * This is based around the DAOTestExtension that DropWizard already supports, except instead of using an H2 database
  * it uses PostgreSql in a test container.  It will provide each test with a fresh copy of the DB and take care of setting
  * it up and tearing it down.
- *
+ * <p>
  * Note: If you only need to support one Entity, use the {@link AbstractDAOTest}, the syntax is much cleaner for the
  * implementing classes.
  *

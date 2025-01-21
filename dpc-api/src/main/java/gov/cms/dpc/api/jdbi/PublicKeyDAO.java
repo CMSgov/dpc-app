@@ -29,7 +29,7 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
         final CriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
         final Root<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
 
-        query.where(builder.equal(root.get(PublicKeyEntity_.organization_id), organizationID));
+        query.where(builder.equal(root.get(PublicKeyEntity_.organizationId), organizationID));
         return list(query);
     }
 
@@ -39,7 +39,7 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
         final CriteriaQuery<PublicKeyEntity> query = builder.createQuery(PublicKeyEntity.class);
         final Root<PublicKeyEntity> root = query.from(PublicKeyEntity.class);
 
-        query.where(builder.and(builder.equal(root.get(PublicKeyEntity_.organization_id), organizationID),
+        query.where(builder.and(builder.equal(root.get(PublicKeyEntity_.organizationId), organizationID),
                 builder.equal(root.get(PublicKeyEntity_.id), keyID)));
 
         final List<PublicKeyEntity> resultList = list(query);
@@ -71,7 +71,7 @@ public class PublicKeyDAO extends AbstractDAO<PublicKeyEntity> {
 
         query.where(builder.and(
                 builder.equal(root.get(PublicKeyEntity_.id), keyID),
-                builder.equal(root.get(PublicKeyEntity_.organization_id), organizationID)));
+                builder.equal(root.get(PublicKeyEntity_.organizationId), organizationID)));
         return list(query);
     }
 }

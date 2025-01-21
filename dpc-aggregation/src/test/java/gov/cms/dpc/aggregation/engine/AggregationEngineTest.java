@@ -55,9 +55,9 @@ class AggregationEngineTest {
     private LookBackService lookBackService;
     private ConsentService mockConsentService;
 
-    static private final FhirContext fhirContext = FhirContext.forDstu3();
-    static private final MetricRegistry metricRegistry = new MetricRegistry();
-    static private final String exportPath = "/tmp";
+    private static final FhirContext fhirContext = FhirContext.forDstu3();
+    private static final MetricRegistry metricRegistry = new MetricRegistry();
+    private static final String exportPath = "/tmp";
 
     @BeforeAll
     static void setupAll() {
@@ -193,7 +193,7 @@ class AggregationEngineTest {
     }
 
     /**
-     * Test if a engine can handle a simple job with one resource type, one test provider, and one patient.
+     * Test if an engine can handle a simple job with one resource type, one test provider, and one patient.
      */
     @Test
     void simpleJobTest() {
@@ -225,7 +225,7 @@ class AggregationEngineTest {
     }
 
     /**
-     * Test if a engine can handle a simple job with one resource type, one test provider, one patient and since.
+     * Test if an engine can handle a simple job with one resource type, one test provider, one patient and since.
      */
     @Test
     void sinceJobTest() {
@@ -395,7 +395,7 @@ class AggregationEngineTest {
     void emptyJobTest() {
         final var orgID = UUID.randomUUID();
 
-        // Job with a unsupported resource type
+        // Job with an unsupported resource type
         final var jobID = queue.createJob(
                 orgID,
                 TEST_ORG_NPI,
@@ -429,7 +429,7 @@ class AggregationEngineTest {
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
 
-        // Job with a unsupported resource type
+        // Job with an unsupported resource type
         final var jobID = queue.createJob(
                 orgID,
                 TEST_ORG_NPI,
@@ -457,7 +457,7 @@ class AggregationEngineTest {
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0), MockBlueButtonClient.TEST_PATIENT_MBIS.get(1));
 
-        // Job with a unsupported resource type
+        // Job with an unsupported resource type
         final var jobID = queue.createJob(
                 orgID,
                 TEST_ORG_NPI,

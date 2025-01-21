@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
 
 /**
- * Response containing the
+ * Response containing the key pair
  */
 public class KeyPairResponse {
 

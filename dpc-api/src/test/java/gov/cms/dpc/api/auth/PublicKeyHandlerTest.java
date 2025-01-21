@@ -119,7 +119,7 @@ class PublicKeyHandlerTest {
         }
 
         @Test
-        void testECCKeyTooSmall() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+        void testECCKeyTooSmall() throws NoSuchAlgorithmException {
             final KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
             ECGenParameterSpec spec = new ECGenParameterSpec("secp160r1");
 

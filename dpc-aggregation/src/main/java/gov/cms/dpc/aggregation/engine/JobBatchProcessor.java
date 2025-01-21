@@ -127,7 +127,7 @@ public class JobBatchProcessor {
                 .blockingGet();
         queue.completePartialBatch(job, aggregatorID);
 
-        final String resourcesRequested = job.getResourceTypes().stream().map(DPCResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
+        final String resourcesRequested = job.getResourceTypes().stream().map(DPCResourceType::getPath).collect(Collectors.joining(";"));
         final String failReasonLabel = failReason.map(Enum::name).orElse("NA");
         stopWatch.stop();
         logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason.isEmpty(), failReasonLabel, resourcesRequested, stopWatch.getDuration());

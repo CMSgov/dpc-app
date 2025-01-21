@@ -86,7 +86,7 @@ public class MacaroonCaveat {
      * @return - {@code true} Caveat is a third-party caveat. {@code false} caveat is a first-party caveat.
      */
     public boolean isThirdParty() {
-        return !location.equals("");
+        return !location.isEmpty();
     }
 
     public MacaroonCondition getCondition() {
@@ -96,8 +96,7 @@ public class MacaroonCaveat {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MacaroonCaveat)) return false;
-        MacaroonCaveat that = (MacaroonCaveat) o;
+        if (!(o instanceof MacaroonCaveat that)) return false;
         return Objects.equals(location, that.location) &&
                 Arrays.equals(rawCaveat, that.rawCaveat) &&
                 Arrays.equals(verificationID, that.verificationID);

@@ -70,13 +70,13 @@ public class TokenListUnitTest {
 
     @Test
     public void testListTokens_happyPath() throws IOException {
-        UUID org_id = UUID.randomUUID();
-        TokenEntity tokenEntity = new TokenEntity("tokenID", org_id, TokenType.OAUTH);
+        UUID orgId = UUID.randomUUID();
+        TokenEntity tokenEntity = new TokenEntity("tokenID", orgId, TokenType.OAUTH);
         tokenEntity.setLabel("test list tokens");
         tokenEntity.setCreatedAt(OffsetDateTime.now());
         tokenEntity.setExpiresAt(OffsetDateTime.now());
         tokenEntity.setToken("token");
-        CollectionResponse collectionResponse = new CollectionResponse(List.of(tokenEntity));
+        CollectionResponse<TokenEntity> collectionResponse = new CollectionResponse<>(List.of(tokenEntity));
 
         ObjectMapper mapper = new ObjectMapper();
         String payload = mapper.writeValueAsString(collectionResponse);
@@ -86,7 +86,7 @@ public class TokenListUnitTest {
                 HttpRequest.request()
                     .withMethod("POST")
                     .withPath(taskUri.getPath() + "list-tokens")
-                    .withQueryStringParameters(List.of(Parameter.param("organization", org_id.toString())))
+                    .withQueryStringParameters(List.of(Parameter.param("organization", orgId.toString())))
             )
             .respond(
                 org.mockserver.model.HttpResponse.response()
@@ -94,7 +94,7 @@ public class TokenListUnitTest {
                     .withBody(payload)
             );
 
-        Optional<Throwable> errors = cli.run("list", org_id.toString());
+        Optional<Throwable> errors = cli.run("list", orgId.toString());
         assertTrue(errors.isEmpty());
 
         String results = stdOut.toString();

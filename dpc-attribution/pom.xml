@@ -247,6 +247,10 @@
                                             <key>packages</key>
                                             <value>gov.cms.dpc.common.entities</value>
                                         </property>
+                                        <property>
+                                            <key>dialect</key>
+                                            <value>org.hibernate.dialect.PostgreSQLDialect</value>
+                                        </property>
                                     </properties>
                                     <includes>.*</includes>
                                 </database>

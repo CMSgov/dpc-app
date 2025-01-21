@@ -112,7 +112,7 @@ public class ConsentServiceImplUnitTest {
         Date date = Date.from(Instant.now());
         consent.setDateTime(date);
 
-        Reference orgRef = new Reference("Organization/" + UUID.randomUUID().toString());
+        Reference orgRef = new Reference("Organization/" + UUID.randomUUID());
         consent.setOrganization(List.of(orgRef));
 
         String policyUrl = "http://hl7.org/fhir/ConsentPolicy/opt-out";

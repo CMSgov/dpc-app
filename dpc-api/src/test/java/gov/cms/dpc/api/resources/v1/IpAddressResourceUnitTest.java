@@ -42,7 +42,7 @@ class IpAddressResourceUnitTest {
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of(ipAddressEntity));
 
-        CollectionResponse response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
+        CollectionResponse<IpAddressEntity> response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
         assertEquals(1, response.getCount());
         assertTrue(response.getEntities().contains(ipAddressEntity));
     }
@@ -51,7 +51,7 @@ class IpAddressResourceUnitTest {
     public void testGet_nothingReturned() {
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of());
 
-        CollectionResponse response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
+        CollectionResponse<IpAddressEntity> response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
         assertEquals(0, response.getCount());
     }
 

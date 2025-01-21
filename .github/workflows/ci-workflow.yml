@@ -32,10 +32,6 @@ jobs:
         id: api-build
         run: |
           make ci-app
-      - name: "Get Docker logs"
-        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
-        run: |
-          docker logs start-v1-app
       - name: "Move jacoco reports"
         run: |
           sudo mkdir jacoco-reports

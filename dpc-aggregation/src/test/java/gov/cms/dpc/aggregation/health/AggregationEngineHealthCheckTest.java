@@ -49,10 +49,10 @@ public class AggregationEngineHealthCheckTest {
     private AggregationEngine engine;
     private ConsentService consentService;
 
-    static private final FhirContext fhirContext = FhirContext.forDstu3();
-    static private final FhirContext fhirContextR4 = FhirContext.forR4();
-    static private final MetricRegistry metricRegistry = new MetricRegistry();
-    static private final String exportPath = "/tmp";
+    private static final FhirContext fhirContext = FhirContext.forDstu3();
+    private static final FhirContext fhirContextR4 = FhirContext.forR4();
+    private static final MetricRegistry metricRegistry = new MetricRegistry();
+    private static final String exportPath = "/tmp";
 
 
     @BeforeAll

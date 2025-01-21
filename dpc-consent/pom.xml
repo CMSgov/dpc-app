@@ -279,6 +279,10 @@
                                             <!-- entity sources must be in a different module compiled before this one -->
                                             <!-- https://www.jooq.org/doc/3.12/manual/code-generation/codegen-jpa/ -->
                                         </property>
+                                        <property>
+                                            <key>dialect</key>
+                                            <value>org.hibernate.dialect.PostgreSQLDialect</value>
+                                        </property>
                                     </properties>
                                     <includes>.*</includes>
                                 </database>

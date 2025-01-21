@@ -130,7 +130,6 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
         }
 
-        // TODO: this is part of the issue -acw
         // We have to do this because Hibernate/Dropwizard gets confused when returning a single type (like String)
         @SuppressWarnings("unchecked") final List<String> patientMBIs = this.patientDAO.fetchPatientMBIByRosterID(rosterID, activeOnly);
 

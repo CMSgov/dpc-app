@@ -107,7 +107,7 @@ public class FHIRExtractorTests {
         final Patient patient = new Patient();
         patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("bad_mbi");
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> getPatientMBI(patient));
+        assertThrows(IllegalArgumentException.class, () -> getPatientMBI(patient));
     }
 
     @Test
@@ -115,10 +115,10 @@ public class FHIRExtractorTests {
         final Patient patient = new Patient();
         Identifier validMBI = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA01");
         Identifier invalidMBI = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("mbi2");
-        Identifier bene_id = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("bene_id");
+        Identifier beneId = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("bene_id");
         patient.addIdentifier(validMBI);
         patient.addIdentifier(invalidMBI);
-        patient.addIdentifier(bene_id);
+        patient.addIdentifier(beneId);
 
         assertEquals(List.of(validMBI.getValue()), FHIRExtractors.getPatientMBIs(patient));
     }
@@ -128,10 +128,10 @@ public class FHIRExtractorTests {
         final Patient patient = new Patient();
         Identifier validMBI1 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA01");
         Identifier validMBI2 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA02");
-        Identifier bene_id = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("bene_id");
+        Identifier beneId = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("bene_id");
         patient.addIdentifier(validMBI1);
         patient.addIdentifier(validMBI2);
-        patient.addIdentifier(bene_id);
+        patient.addIdentifier(beneId);
 
         assertEquals(List.of(validMBI1.getValue(), validMBI2.getValue()), FHIRExtractors.getPatientMBIs(patient));
     }
