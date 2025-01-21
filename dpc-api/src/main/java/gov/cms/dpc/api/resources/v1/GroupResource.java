@@ -478,6 +478,10 @@ public class GroupResource extends AbstractGroupResource {
             }
         } catch (ResourceNotFoundException e) {
             throw new WebApplicationException("Could not find provider defined in provenance header", HttpStatus.SC_UNPROCESSABLE_ENTITY);
+        } catch (Exception e) {
+            System.out.println("DIFFERENT EXCEPTION CAUGHT");
+            System.out.println(e);
+            throw e;
         }
 
     }
