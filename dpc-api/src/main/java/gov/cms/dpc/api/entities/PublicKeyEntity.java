@@ -33,8 +33,7 @@ public class PublicKeyEntity implements Serializable {
 
     @NotNull
     @JsonIgnore
-    @Column(name = "organization_id")
-    private UUID organizationId;
+    private UUID organization_id;
 
     @NotNull
     @Convert(converter = PublicKeyBytesConverter.class)
@@ -67,12 +66,12 @@ public class PublicKeyEntity implements Serializable {
         this.id = id;
     }
 
-    public UUID getOrganizationId() {
-        return organizationId;
+    public UUID getOrganization_id() {
+        return organization_id;
     }
 
-    public void setOrganizationId(UUID organizationId) {
-        this.organizationId = organizationId;
+    public void setOrganization_id(UUID organizationId) {
+        this.organization_id = organizationId;
     }
 
     public SubjectPublicKeyInfo getPublicKey() {

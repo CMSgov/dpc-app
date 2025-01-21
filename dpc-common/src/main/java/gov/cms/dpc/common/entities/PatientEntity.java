@@ -127,7 +127,8 @@ public class PatientEntity extends PersonEntity {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PatientEntity that)) return false;
+        if (!(o instanceof PatientEntity)) return false;
+        PatientEntity that = (PatientEntity) o;
         return Objects.equals(getID(), that.getID()) &&
                 Objects.equals(beneficiaryID, that.beneficiaryID) &&
                 Objects.equals(mbiHash, that.mbiHash) &&

@@ -112,7 +112,7 @@ public class KeyResourceUnitTest {
         Mockito.verify(publicKeyDao).persistPublicKey(keyEntityArgumentCaptor.capture());
 
         PublicKeyEntity keyEntity = keyEntityArgumentCaptor.getValue();
-        assertEquals(organizationPrincipal.getID(), keyEntity.getOrganizationId());
+        assertEquals(organizationPrincipal.getID(), keyEntity.getOrganization_id());
         assertEquals(label, keyEntity.getLabel());
         assertTrue(keySignature.getKey().replaceAll("[\n\r]+", "").contains(
                 Base64.getMimeEncoder().encodeToString(
