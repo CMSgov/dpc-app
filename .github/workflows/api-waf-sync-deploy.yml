@@ -30,7 +30,7 @@ jobs:
     name: 'Deploy API WAF sync'
     uses: CMSgov/dpc-app/.github/workflows/deploy_go_lambda.yml@jd/dpc-4472-dedupe-workflows
     with:
-      env: ${{ inputs.env || 'dev' }}
+      env: dev # ${{ inputs.env || 'dev' }} currently only available on dev
       project: api-waf-sync
       go_files: "main.go db.go aws.go"
     secrets: inherit
