@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotEmpty;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 
@@ -15,7 +14,6 @@ import java.time.OffsetDateTime;
 @Entity(name = "root_keys")
 public class RootKeyEntity implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = 42L;
 
     @Id

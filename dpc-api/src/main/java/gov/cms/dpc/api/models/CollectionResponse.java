@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -17,7 +16,6 @@ import java.util.Collection;
  * @param <T> - type parameter of encompassed class
  */
 public class CollectionResponse<T extends Serializable> implements Serializable {
-    @Serial
     private static final long serialVersionUID = 42L;
 
     private Collection<T> entities;

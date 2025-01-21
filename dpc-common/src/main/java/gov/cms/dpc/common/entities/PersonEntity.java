@@ -3,7 +3,6 @@ package gov.cms.dpc.common.entities;
 import gov.cms.dpc.common.annotations.NoHtml;
 import jakarta.persistence.*;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -12,7 +11,6 @@ import java.util.UUID;
 @MappedSuperclass
 public abstract class PersonEntity implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = 42L;
 
     @NoHtml

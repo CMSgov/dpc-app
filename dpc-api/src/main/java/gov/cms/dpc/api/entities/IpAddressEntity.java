@@ -13,14 +13,12 @@ import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity(name = "ip_addresses")
 public class IpAddressEntity implements Serializable {
-    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id

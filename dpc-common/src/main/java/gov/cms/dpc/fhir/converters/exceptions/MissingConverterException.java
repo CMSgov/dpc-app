@@ -1,10 +1,7 @@
 package gov.cms.dpc.fhir.converters.exceptions;
 
-import java.io.Serial;
-
 public class MissingConverterException extends FHIRConverterException {
 
-    @Serial
     private static final long serialVersionUID = 42L;
 
     private final Class<?> sourceClass;

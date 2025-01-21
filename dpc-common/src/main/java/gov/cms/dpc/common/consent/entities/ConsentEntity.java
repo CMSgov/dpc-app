@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -26,7 +25,6 @@ public class ConsentEntity implements Serializable {
     public static final String TREATMENT = "TREAT";
     public static final String SCOPE_CODE = "patient-privacy";
 
-    @Serial
     private static final long serialVersionUID = 8702499693412507926L;
 
     public enum SourceCode {

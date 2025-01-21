@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.hl7.fhir.dstu3.model.Endpoint;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -21,7 +20,6 @@ public class EndpointEntity implements Serializable {
         FAILED
     }
 
-    @Serial
     private static final long serialVersionUID = 42L;
 
     @Id
@@ -132,7 +130,6 @@ public class EndpointEntity implements Serializable {
     @Embeddable
     public static class ConnectionType implements Serializable {
 
-        @Serial
         private static final long serialVersionUID = 42L;
 
         @NotEmpty

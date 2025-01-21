@@ -7,10 +7,8 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 
 import java.io.IOException;
-import java.io.Serial;
 
 public class BakeryKeyPairDeserializer extends StdDeserializer<BakeryKeyPair> {
-    @Serial
     private static final long serialVersionUID = 42L;
 
     BakeryKeyPairDeserializer() {

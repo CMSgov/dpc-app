@@ -7,13 +7,11 @@ import io.swagger.annotations.ApiModelProperty;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.Duration;
 
 public class JWTAuthResponse implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = 42L;
 
     @NotNull

@@ -6,7 +6,6 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
@@ -17,12 +16,10 @@ import java.util.UUID;
  */
 @Entity(name = "job_queue_batch_file")
 public class JobQueueBatchFile implements Serializable {
-    @Serial
     private static final long serialVersionUID = 42L;
 
     @Embeddable
     public static class JobQueueBatchFileID implements Serializable {
-        @Serial
         private static final long serialVersionUID = 3L;
 
         @Column(name = "batch_id")

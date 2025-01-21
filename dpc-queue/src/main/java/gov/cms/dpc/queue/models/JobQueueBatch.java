@@ -9,7 +9,6 @@ import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -24,7 +23,6 @@ import java.util.*;
 @Entity(name = "job_queue_batch")
 public class JobQueueBatch implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = -578824686165779398L;
 
     /**

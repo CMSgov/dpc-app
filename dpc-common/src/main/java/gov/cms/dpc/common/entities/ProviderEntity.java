@@ -5,14 +5,12 @@ import gov.cms.dpc.common.annotations.NoHtml;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
-import java.io.Serial;
 import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "providers")
 public class ProviderEntity extends PersonEntity {
 
-    @Serial
     private static final long serialVersionUID = 42L;
 
     @NoHtml

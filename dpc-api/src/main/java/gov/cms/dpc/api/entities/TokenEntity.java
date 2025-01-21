@@ -13,7 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Transient;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Objects;
@@ -21,7 +20,6 @@ import java.util.UUID;
 
 @Entity(name = "organization_tokens")
 public class TokenEntity implements Serializable {
-    @Serial
     private static final long serialVersionUID = 42L;
 
     public enum TokenType {

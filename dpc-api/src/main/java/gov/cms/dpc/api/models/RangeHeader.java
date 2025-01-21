@@ -1,14 +1,12 @@
 package gov.cms.dpc.api.models;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 
 public class RangeHeader implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     private String unit;
     private Long start;
@@ -45,7 +43,8 @@ public class RangeHeader implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof RangeHeader that)) return false;
+        if (!(o instanceof RangeHeader)) return false;
+        RangeHeader that = (RangeHeader) o;
         return unit.equals(that.unit) &&
                 start.equals(that.start) &&
                 Objects.equals(end, that.end);

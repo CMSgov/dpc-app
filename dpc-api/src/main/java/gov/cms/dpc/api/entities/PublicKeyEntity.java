@@ -19,14 +19,12 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.Length;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity(name = "organization_keys")
 public class PublicKeyEntity implements Serializable {
-    @Serial
     private static final long serialVersionUID = 42L;
 
     @Id

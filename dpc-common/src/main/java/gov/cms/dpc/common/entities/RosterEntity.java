@@ -9,7 +9,6 @@ import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Reference;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
 
 @Entity(name = "rosters")
 public class RosterEntity implements Serializable {
-    @Serial
     private static final long serialVersionUID = 42L;
 
     @Id

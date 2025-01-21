@@ -9,14 +9,12 @@ import jakarta.validation.constraints.NotEmpty;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
 @Entity(name = "organizations")
 public class OrganizationEntity implements Serializable {
-    @Serial
     private static final long serialVersionUID = 42L;
 
     @Id
@@ -154,7 +152,6 @@ public class OrganizationEntity implements Serializable {
 
     @Embeddable
     public static class OrganizationID implements Serializable {
-        @Serial
         private static final long serialVersionUID = 42L;
 
         @Column(name = "id_system")

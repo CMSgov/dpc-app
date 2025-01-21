@@ -8,14 +8,12 @@ import jakarta.validation.constraints.NotNull;
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.StringType;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
 @Embeddable
 public class AddressEntity implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = 42L;
 
     @NotNull

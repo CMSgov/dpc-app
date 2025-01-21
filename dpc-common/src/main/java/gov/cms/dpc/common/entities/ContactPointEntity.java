@@ -6,13 +6,11 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
 
 @Entity(name = "contact_telecoms")
 public class ContactPointEntity implements Serializable {
-    @Serial
     private static final long serialVersionUID = 42L;
 
     @Id
