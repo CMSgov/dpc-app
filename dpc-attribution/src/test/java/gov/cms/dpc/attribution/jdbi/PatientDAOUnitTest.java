@@ -8,6 +8,7 @@ import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,10 +19,10 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 	private OrganizationDAO organizationDAO;
 
 	@BeforeEach
-	public void setup() {
+	public void setup() throws Exception {
 		DPCManagedSessionFactory dpcManagedSessionFactory = new DPCManagedSessionFactory(db.getSessionFactory());
 
-		// Chunk size is set to 10000 in the current config
+		// Chunk size is set to 1000 in the current config
 		patientDAO = new PatientDAO(dpcManagedSessionFactory, 1000);
 		organizationDAO = new OrganizationDAO(dpcManagedSessionFactory);
 	}
@@ -121,7 +122,7 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 	}
 
 	@Test
-	void test_bulkPatientSearchByMbi_handles_large_requests() {
+	void test_bulkPatientSearchByMbi_handles_large_requests() throws IOException {
 		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
 		PatientEntity patientEntity = AttributionTestHelpers.createPatientEntity(org);
 

@@ -12,12 +12,11 @@ import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.MBIUtil;
+import gov.cms.dpc.testing.factories.BundleFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -324,13 +323,12 @@ class PatientResourceTest extends AbstractAttributionTest {
         final int COUNT_TEST_PATIENTS = 25000;
 
         List<Patient> patients = AttributionTestHelpers.createPatientResources(DEFAULT_ORG_ID, COUNT_TEST_PATIENTS);
-        Bundle patientBundle = AttributionTestHelpers.createBundle(
+        Bundle patientBundle = BundleFactory.createBundle(
             patients.stream().map(Resource.class::cast).toArray(Resource[] ::new)
         );
         Parameters params = new Parameters();
         params.addParameter().setResource(patientBundle);
 
-        Instant startInstant = Instant.now();
         Bundle resultPatientBundle = client
             .operation()
             .onType(Patient.class)
@@ -339,12 +337,8 @@ class PatientResourceTest extends AbstractAttributionTest {
             .returnResourceType(Bundle.class)
             .encodedJson()
             .execute();
-        Instant endInstant = Instant.now();
 
         assertEquals(COUNT_TEST_PATIENTS, resultPatientBundle.getEntry().size());
-
-        Duration duration = Duration.between(startInstant, endInstant);
-        System.out.println("Insert time: " + duration.getSeconds());
     }
 
     @Test
@@ -354,7 +348,7 @@ class PatientResourceTest extends AbstractAttributionTest {
         Patient patient = AttributionTestHelpers.createPatientResource(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
         patient.setId(UUID.randomUUID().toString());
 
-        Bundle patientBundle = AttributionTestHelpers.createBundle(patient);
+        Bundle patientBundle = BundleFactory.createBundle(patient);
         Parameters params = new Parameters();
         params.addParameter().setResource(patientBundle);
 
@@ -390,7 +384,7 @@ class PatientResourceTest extends AbstractAttributionTest {
         assertTrue(outcome.getCreated());
 
         // Bulk submit duplicate patient
-        Bundle patientBundle = AttributionTestHelpers.createBundle(duplicatePatient);
+        Bundle patientBundle = BundleFactory.createBundle(duplicatePatient);
         Parameters params = new Parameters();
         params.addParameter().setResource(patientBundle);
 

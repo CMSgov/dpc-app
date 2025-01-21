@@ -13,6 +13,7 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
+import gov.cms.dpc.testing.factories.BundleFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -321,7 +322,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
         Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
-        Bundle practitionerBundle = AttributionTestHelpers.createBundle(practitioner);
+        Bundle practitionerBundle = BundleFactory.createBundle(practitioner);
         Parameters params = new Parameters();
         params.addParameter().setResource(practitionerBundle);
 
@@ -349,7 +350,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         Practitioner prac2 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
         Practitioner prac3 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
-        Bundle practitionerBundle = AttributionTestHelpers.createBundle(prac1, prac2, prac3);
+        Bundle practitionerBundle = BundleFactory.createBundle(prac1, prac2, prac3);
         Parameters params = new Parameters();
         params.addParameter().setResource(practitionerBundle);
 
@@ -376,7 +377,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
         practitioner.setId(UUID.randomUUID().toString());
 
-        Bundle practitionerBundle = AttributionTestHelpers.createBundle(practitioner);
+        Bundle practitionerBundle = BundleFactory.createBundle(practitioner);
         Parameters params = new Parameters();
         params.addParameter().setResource(practitionerBundle);
 
@@ -415,7 +416,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         assertTrue(outcome.getCreated());
         practitionersToCleanUp.add((Practitioner) outcome.getResource());
 
-        Bundle practitionerBundle = AttributionTestHelpers.createBundle(duplicatePractitioner);
+        Bundle practitionerBundle = BundleFactory.createBundle(duplicatePractitioner);
         Parameters params = new Parameters();
         params.addParameter().setResource(practitionerBundle);
 

@@ -22,6 +22,7 @@ import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
+import gov.cms.dpc.testing.factories.BundleFactory;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -29,6 +30,8 @@ import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.HttpMethod;
 import java.io.BufferedReader;
@@ -40,6 +43,7 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.sql.Date;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -73,6 +77,8 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     final IParser parser = ctx.newJsonParser();
     final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
     final IGenericClient consentClient = APITestHelpers.buildConsentClient(ctx);
+
+    private static final Logger logger = LoggerFactory.getLogger(PatientResourceTest.class);
 
     @Test
     @Order(1)
@@ -623,6 +629,39 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
        assertThrows(AuthenticationException.class, () ->
                APITestHelpers.getPatientEverything(orgBClient, orgAPatient.getIdElement().getIdPart(), generateProvenance(orgAContext.getOrgId(), orgAPractitionerId))
        , "Expected auth error when export another org's patient's data");
+    }
+
+    @Test
+    void testBatchSubmit() throws GeneralSecurityException, IOException, URISyntaxException {
+        final int COUNT_TEST_PATIENTS = 1000;
+
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        final TestOrganizationContext orgContext = registerAndSetupNewOrg();
+        List<Patient> patients = APITestHelpers.createPatientResources(orgContext.getOrgId(), COUNT_TEST_PATIENTS);
+
+        Bundle patientBundle = BundleFactory.createBundle(
+            patients.stream().map(Resource.class::cast).toArray(Resource[] ::new)
+        );
+        Parameters params = new Parameters();
+        params.addParameter().setResource(patientBundle);
+
+        Instant startInstant = Instant.now();
+
+        Bundle resultPatientBundle = client
+            .operation()
+            .onType(Patient.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        Instant stopInstant = Instant.now();
+        Duration submitDuration = Duration.between(startInstant, stopInstant);
+        float submitSeconds = submitDuration.getSeconds() + ((float) submitDuration.toMillisPart() / 1000);
+        logger.info("Submit operation time: {}", submitSeconds);
+
+        assertEquals(COUNT_TEST_PATIENTS, resultPatientBundle.getEntry().size());
     }
 
     private IGenericClient generateClient(String orgNPI, String keyLabel) throws IOException, URISyntaxException, GeneralSecurityException {

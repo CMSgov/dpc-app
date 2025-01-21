@@ -76,16 +76,6 @@ public class AttributionTestHelpers {
         return organization;
     }
 
-    public static Bundle createBundle(Resource... resources){
-        final Bundle bundle = new Bundle();
-        if(resources != null){
-            for(Resource resource:resources){
-                bundle.addEntry(new Bundle.BundleEntryComponent().setResource(resource));
-            }
-        }
-        return bundle;
-    }
-
     public static IGenericClient createFHIRClient(FhirContext ctx, String serverURL) {
         return createFHIRClient(ctx, serverURL, null);
     }
