@@ -123,9 +123,16 @@ public class PractitionerResource extends AbstractPractitionerResource {
         // Get practitioners that already exist in the DB
         final List<ProviderEntity> existingProviderEntities = dao.bulkProviderSearch(orgId, npis);
 
+        // Extract NPIs of practitioners that already exist in the DB
+        final List<String> existingNpis = existingProviderEntities.stream().map(ProviderEntity::getProviderNPI).collect(Collectors.toList());
+
         // Insert the practitioners that don't already exist
         List<Practitioner> insertedPractitioners = RESTUtils.bulkResourceHandler(
-            FHIRExtractors.getResourceStream(params, Practitioner.class), this::insertPractitioner, dao, dbBatchSize
+            FHIRExtractors.getResourceStream(params, Practitioner.class)
+                .filter(practitioner -> ! existingNpis.contains(FHIRExtractors.getProviderNPI(practitioner))),
+            this::insertPractitioner,
+            dao,
+            dbBatchSize
         );
 
         return Stream.concat(

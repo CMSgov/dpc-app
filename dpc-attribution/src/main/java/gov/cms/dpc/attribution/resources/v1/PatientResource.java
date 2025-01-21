@@ -97,6 +97,7 @@ public class PatientResource extends AbstractPatientResource {
 
             final Response.Status status;
             final Patient createdPatient;
+
             // Check to see if Patient already exists, if so, ignore it.
             final List<PatientEntity> patientEntities = this.dao.patientSearch(null, patientMBI, organizationID);
             if (!patientEntities.isEmpty()) {
@@ -129,7 +130,7 @@ public class PatientResource extends AbstractPatientResource {
         }
         final UUID orgId = FHIRExtractors.getEntityUUID(firstPat.get().getManagingOrganization().getReference());
 
-        // Get MBIs of patients that already exist in the DB
+        // Get MBIs of submitted patients
         final List<String> mbis = FHIRExtractors.getResourceStream(params, Patient.class)
             .map(FHIRExtractors::getPatientMBI)
             .collect(Collectors.toList());
@@ -137,11 +138,21 @@ public class PatientResource extends AbstractPatientResource {
         // Get patients that already exist in the DB
         final List<PatientEntity> existingPatientEntities = dao.bulkPatientSearchByMbi(orgId, mbis);
 
+        // Extract mbis of patients that already exist in the DB
+        final List<String> existingMbis = existingPatientEntities.stream()
+            .map(PatientEntity::getBeneficiaryID)
+            .collect(Collectors.toList());
+
         // Insert the patients that don't already exist
         List<Patient> insertedPatients = RESTUtils.bulkResourceHandler(
-            FHIRExtractors.getResourceStream(params, Patient.class), this::insertPatient, dao, dbBatchSize
+            FHIRExtractors.getResourceStream(params, Patient.class)
+                .filter(patient -> ! existingMbis.contains(FHIRExtractors.getPatientMBI(patient).toUpperCase())),
+            this::insertPatient,
+            dao,
+            dbBatchSize
         );
 
+        // Return both inserted and pre-existing patients
         return Stream.concat(
             insertedPatients.stream(),
             existingPatientEntities.stream().map(entity -> this.converter.toFHIR(Patient.class, entity))

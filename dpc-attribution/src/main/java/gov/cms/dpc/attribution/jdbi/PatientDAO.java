@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
     private final int queryChunkSize;
@@ -85,14 +86,16 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         // With large patient inserts, this can theoretically be called with 10s of thousands of patients, so break
         // it up into queries that we can handle without causing a stack overflow.
         List<List<String>> mbiChunks = ListUtils.partition(mbis, queryChunkSize);
-        mbiChunks.stream().forEach(mbiList -> {
+        mbiChunks.forEach(mbiList -> {
+            List<String> capitalizedMbis = mbiList.stream().map(String::toUpperCase).collect(Collectors.toList());
+
             final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
             final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
             final Root<PatientEntity> root = query.from(PatientEntity.class);
 
             query.select(root)
                 .where(builder.and(
-                    root.get(PatientEntity_.beneficiaryID).in(mbiList),
+                    root.get(PatientEntity_.beneficiaryID).in(capitalizedMbis),
                     builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), organizationId))
                 );
 

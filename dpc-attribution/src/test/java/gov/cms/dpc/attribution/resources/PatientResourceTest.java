@@ -372,4 +372,40 @@ class PatientResourceTest extends AbstractAttributionTest {
         // We should ignore an id sent by the customer and create our own
         assertNotEquals(patient.getId(), resultPatientBundle.getEntry().get(0).getResource().getId());
     }
+
+    @Test
+    void testBulkInsertHandlesDuplicatePatient() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        String mbi = MBIUtil.generateMBI();
+        Patient patient = AttributionTestHelpers.createPatientResource(mbi, DEFAULT_ORG_ID);
+        Patient duplicatePatient = AttributionTestHelpers.createPatientResource(mbi, DEFAULT_ORG_ID);
+
+        // Submit first patient
+        final MethodOutcome outcome = client
+            .create()
+            .resource(patient)
+            .encodedJson()
+            .execute();
+        assertTrue(outcome.getCreated());
+
+        // Bulk submit duplicate patient
+        Bundle patientBundle = AttributionTestHelpers.createBundle(duplicatePatient);
+        Parameters params = new Parameters();
+        params.addParameter().setResource(patientBundle);
+
+        Bundle resultPatientBundle = client
+            .operation()
+            .onType(Patient.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        assertEquals(1, resultPatientBundle.getEntry().size());
+
+        String resultMbi = FHIRExtractors.getPatientMBI((Patient) resultPatientBundle.getEntry().get(0).getResource());
+        assertNotEquals(mbi, resultMbi);
+    }
 }

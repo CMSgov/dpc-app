@@ -397,4 +397,42 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
         practitionersToCleanUp.add(resultPractitioner);
     }
+
+    @Test
+    void testBulkInsertWithDuplicatePractitioner() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        String npi = NPIUtil.generateNPI();
+        Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(npi);
+        Practitioner duplicatePractitioner = AttributionTestHelpers.createPractitionerResource(npi);
+
+        // Create first practitioner
+        final MethodOutcome outcome = client
+            .create()
+            .resource(practitioner)
+            .encodedJson()
+            .execute();
+        assertTrue(outcome.getCreated());
+        practitionersToCleanUp.add((Practitioner) outcome.getResource());
+
+        Bundle practitionerBundle = AttributionTestHelpers.createBundle(duplicatePractitioner);
+        Parameters params = new Parameters();
+        params.addParameter().setResource(practitionerBundle);
+
+        Bundle resultPractitionerBundle = client
+            .operation()
+            .onType(Practitioner.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        assertEquals(1, resultPractitionerBundle.getEntry().size());
+
+        Practitioner resultPractitioner = (Practitioner) resultPractitionerBundle.getEntry().get(0).getResource();
+        assertEquals(npi, FHIRExtractors.getProviderNPI(resultPractitioner));
+
+        practitionersToCleanUp.add(resultPractitioner);
+    }
 }
