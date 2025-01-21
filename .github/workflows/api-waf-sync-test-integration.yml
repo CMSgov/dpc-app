@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - .github/workflows/api-waf-sync-test-integration.yml
-      - .github/workflows/api-waf-sync-test-deploy.yml
+      - .github/workflows/api-waf-sync-deploy.yml
       - lambda/api-waf-sync/**
   workflow_dispatch:
 
@@ -16,7 +16,9 @@ jobs:
   # Deploy first if triggered by pull_request
   deploy:
     if: ${{ github.event_name == 'pull_request' }}
-    uses: ./.github/workflows/api-waf-sync-test-deploy.yml
+    uses: ./.github/workflows/api-waf-sync-deploy.yml
+    with:
+      env: test
     secrets: inherit
 
   trigger:
@@ -41,4 +43,4 @@ jobs:
         id: invoke-lambda
         run: |
           echo "STARTTIME=`date +%s`" >> "$GITHUB_OUTPUT"
-          aws lambda invoke --function-name dpc-dev-api-waf-sync test-result.txt
+          aws lambda invoke --function-name dpc-test-api-waf-sync test-result.txt

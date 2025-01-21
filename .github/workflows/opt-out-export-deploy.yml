@@ -1,0 +1,43 @@
+name: opt-out-export deploy
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: choice
+        default: "dev"
+        options:
+          - dev
+          - test
+          - prod
+
+  workflow_dispatch:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: choice
+        default: "dev"
+        options:
+          - dev
+          - test
+          - prod
+  push:
+    branches:
+      - main
+    paths:
+      - lambda/opt-out-export/**
+      - .github/workflows/opt-out-export-deploy.yml
+      - .github/workflows/deploy_go_lambda.yml
+
+jobs:
+  deploy:
+    name: 'Deploy Opt Out Export'
+    uses: CMSgov/dpc-app/.github/workflows/deploy_go_lambda.yml@jd/dpc-4472-dedupe-workflows
+    with:
+      env: ${{ inputs.env || "dev" }}
+      project: opt-out-export
+      go_files: "main.go db.go"
+    secrets: inherit

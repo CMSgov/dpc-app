@@ -1,0 +1,44 @@
+name: api-waf-sync dev deploy
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: choice
+        default: "dev"
+        options:
+          - dev
+          - test
+          - prod
+
+  workflow_dispatch:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: choice
+        default: "dev"
+        options:
+          - dev
+          - test
+          - prod
+
+  push:
+    branches:
+      - main
+    paths:
+      - lambda/api-waf-sync/**
+      - .github/workflows/api-waf-sync-deploy.yml
+      - .github/workflows/deploy_go_lambda.yml
+
+jobs:
+  deploy:
+    name: 'Deploy API WAF sync'
+    uses: CMSgov/dpc-app/.github/workflows/deploy_go_lambda.yml@jd/dpc-4472-dedupe-workflows
+    with:
+      env: ${{ inputs.env || "dev" }}
+      project: api-waf-sync
+      go_files: "main.go db.go aws.go"
+    secrets: inherit

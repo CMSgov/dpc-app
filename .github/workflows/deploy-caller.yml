@@ -1,0 +1,21 @@
+name: Go Lambda Workflow Caller
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: choice
+        default: "dev"
+        options:
+          - dev
+          - test
+          - prod
+jobs:
+  deploy:
+    name: 'Deploy API WAF sync'
+    uses: CMSgov/dpc-app/.github/workflows/api-waf-sync-deploy.yml@jd/dpc-4472-dedupe-workflows
+    with:
+      env: ${{ inputs.env || "dev" }}
+    secrets: inherit
