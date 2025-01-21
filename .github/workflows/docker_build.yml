@@ -26,6 +26,7 @@ jobs:
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
         with:
           params: |
             NEW_RELIC_API_KEY=/dpc/${{ inputs.env }}/newrelic/new_relic_user_key
