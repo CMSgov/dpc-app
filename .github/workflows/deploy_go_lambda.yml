@@ -6,11 +6,7 @@ on:
       env:
         description: AWS environment to deploy to
         required: true
-        type: choice
-        options:
-          - dev
-          - test
-          - prod
+        type: string
       project:
         description: Project name
         required: true
