@@ -22,9 +22,10 @@ permissions:
 
 jobs:
   docker_build:
-    runs-on: self-hosted
-    container:
-      image: alpine:latest
+    runs-on: ubuntu-20.04
+#    runs-on: self-hosted
+#    container:
+#      image: alpine:latest
     steps:
       - name: Install system packages
         run: |
@@ -32,19 +33,19 @@ jobs:
           apk add make --no-cache
           apk add aws-cli --no-cache
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
-
-      - name: Set environment variables from AWS
-        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
-        env:
-          AWS_REGION: ${{ vars.AWS_REGION }}
-        with:
-          params: |
-            NEW_RELIC_API_KEY=/dpc/${{ inputs.env }}/newrelic/new_relic_user_key
+#      - name: Configure AWS Credentials
+#        uses: aws-actions/configure-aws-credentials@v4
+#        with:
+#          aws-region: ${{ vars.AWS_REGION }}
+#          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+#
+#      - name: Set environment variables from AWS
+#        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+#        env:
+#          AWS_REGION: ${{ vars.AWS_REGION }}
+#        with:
+#          params: |
+#            NEW_RELIC_API_KEY=/dpc/${{ inputs.env }}/newrelic/new_relic_user_key
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -71,9 +72,13 @@ jobs:
 #          apk add docker --no-cache
 #          apk add docker-compose --no-cache
 
-      - name: Build app
+      - name: Docker manually
         run: docker --version && docker compose -f ./docker-compose.base.yml build base
 #        run: cat Makefile | grep ci-app -B 2 -A 3 && make ci-app
+
+      - name: Build app
+        run: docker --version && docker compose -f ./docker-compose.base.yml build base
+      #        run: cat Makefile | grep ci-app -B 2 -A 3 && make ci-app
 
       - name: Build portal # this is run in parallel with the app build on jenkins, might break out to separate job
         run: make ci-portals-v1
