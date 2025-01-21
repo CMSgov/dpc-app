@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.nio.file.Path;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -120,13 +121,13 @@ public class PublicKeyTests extends AbstractApplicationTest {
 
     }
 
-    private List<UUID> getKeyIDs(String organizationID) {
+    private List<UUID> getKeyIDs(String organizationID) throws Exception {
         stdOut.reset();
         stdErr.reset();
 
         final Optional<Throwable> s2 = cli.run("list", organizationID);
 
-        // Find all the key IDs
+        // Find all of the key IDs
         final List<UUID> matchedKeyIDs = Pattern.compile("║\\s([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})")
                 .matcher(stdOut.toString())
                 .results()
@@ -141,7 +142,7 @@ public class PublicKeyTests extends AbstractApplicationTest {
         return matchedKeyIDs;
     }
 
-    private Path writeToTempFile(String str) throws IOException {
+    private Path writeToTempFile(String str) throws NoSuchAlgorithmException, IOException {
         final File file = Files.newTemporaryFile();
 
         // Write the public key to the file

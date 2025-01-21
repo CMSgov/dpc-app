@@ -70,7 +70,7 @@ class TokenTests extends AbstractApplicationTest {
     }
 
     @Test
-    void testTokenLifecycle() {
+    void testTokenLifecycle() throws Exception {
         // Create the organization
         final Optional<Throwable> success = cli.run("register", "-f", "../src/main/resources/organization.tmpl.json", "--no-token", "--host", "http://localhost:3500/v1");
 
@@ -109,13 +109,13 @@ class TokenTests extends AbstractApplicationTest {
         assertTrue(tokenIDs.isEmpty(), "Should not have any tokens");
     }
 
-    List<UUID> getTokenIDs(String organizationID) {
+    List<UUID> getTokenIDs(String organizationID) throws Exception {
         stdOut.reset();
         stdErr.reset();
 
         final Optional<Throwable> s2 = cli.run("list", organizationID);
 
-        // Find all the token IDs
+        // Find all of the token IDs
         final List<UUID> matchedTokenIDs = Pattern.compile("║\\s([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})")
                 .matcher(stdOut.toString())
                 .results()

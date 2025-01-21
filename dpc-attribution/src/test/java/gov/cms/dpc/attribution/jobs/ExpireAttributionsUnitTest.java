@@ -177,6 +177,6 @@ class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
         when(this.dataSource.getConnection()).thenThrow(new SQLException());
         AttributionException exception = assertThrows(AttributionException.class,
                 () -> this.expireAttributions.doJob(this.jobContext));
-        assertEquals("An error occurred during the database operation.", exception.getMessage());
+        assertEquals(exception.getMessage(), "An error occurred during the database operation.");
     }
 }

@@ -135,7 +135,7 @@ public class PublicKeyHandler {
         // Verify we have a supported curve, which is currently secp256r1 or secp384r1
         final ASN1Primitive curveName = value.getAlgorithm().getParameters().toASN1Primitive();
         if (!(curveName.equals(SECObjectIdentifiers.secp256r1) || curveName.equals(SECObjectIdentifiers.secp384r1))) {
-            throw new PublicKeyException(String.format("ECC curve `%s` is not supported.", curveName));
+            throw new PublicKeyException(String.format("ECC curve `%s` is not supported.", curveName.toString()));
         }
     }
 

@@ -73,7 +73,7 @@ class KeyListUnitTest {
         publicKeyEntity.setId(UUID.randomUUID());
         publicKeyEntity.setLabel("test public key");
         publicKeyEntity.setCreatedAt(OffsetDateTime.now());
-        CollectionResponse<PublicKeyEntity> collectionResponse = new CollectionResponse<>(List.of(publicKeyEntity));
+        CollectionResponse collectionResponse = new CollectionResponse(List.of(publicKeyEntity));
 
         ObjectMapper mapper = new ObjectMapper();
         String payload = mapper.writeValueAsString(collectionResponse);
@@ -99,7 +99,7 @@ class KeyListUnitTest {
     }
 
     @Test
-    public void testListKeys_badResponse() {
+    public void testListKeys_badResponse() throws IOException {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()

@@ -106,7 +106,7 @@ public class EndpointResourceTest extends AbstractAttributionTest {
                 .resourceById("Endpoint", endpointId)
                 .execute();
 
-        IReadExecutable<Endpoint> readExec = client
+        IReadExecutable readExec = client
                 .read()
                 .resource(Endpoint.class)
                 .withId(endpointId);

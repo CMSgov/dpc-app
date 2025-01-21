@@ -27,7 +27,7 @@ public class OrganizationList extends AbstractAttributionCommand {
     public void run(Bootstrap<?> bootstrap, Namespace namespace) {
         System.out.println("Listing");
         final String attributionService = namespace.getString(ATTR_HOSTNAME);
-        System.out.printf("Connecting to Attribution service at: %s%n", attributionService);
+        System.out.println(String.format("Connecting to Attribution service at: %s", attributionService));
 
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
 
@@ -41,12 +41,13 @@ public class OrganizationList extends AbstractAttributionCommand {
         // Generate the table
         final String[] headers = {"ID", "NPI", "NAME"};
 
+        //noinspection FuseStreamOperations Fusing the operation here actually causes an issue with the print output
         final List<String[]> collect = organizations
                 .getEntry()
                 .stream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
                 .map(Bundle.BundleEntryComponent::getResource)
-                .map(Organization.class::cast)
+                .map(resource -> (Organization) resource)
                 .map(resource ->
                         List.of(resource.getId(), resource.getIdentifierFirstRep().getValue(), resource.getName()))
                 .map(values -> values.toArray(new String[0]))

@@ -3,28 +3,28 @@ package gov.cms.dpc.consent.resources;
 import gov.cms.dpc.common.utils.PropertiesProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedConstruction;
-import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doReturn;
 
 class BaseResourceUnitTest {
+	@InjectMocks
+	BaseResource baseResource;
+
+	@Mock
+	PropertiesProvider pp;
 
 	@BeforeEach
 	public void setup() {
 		MockitoAnnotations.openMocks(this);
 	}
 
-    @Test
+	@Test
 	public void testGetVersion() {
-        try(MockedConstruction<PropertiesProvider> mock = Mockito.mockConstruction(PropertiesProvider.class)) {
-            BaseResource baseResource = new BaseResource();
-
-            PropertiesProvider mockedPropertiesProvider = mock.constructed().get(0);
-            Mockito.when(mockedPropertiesProvider.getBuildVersion()).thenReturn("version");
-
-            assertEquals("version", baseResource.version());
-        }
+		doReturn("version").when(pp).getBuildVersion();
+		assertEquals("version", baseResource.version());
 	}
 }

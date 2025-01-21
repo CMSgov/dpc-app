@@ -11,6 +11,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -21,8 +22,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class DataServiceTest {
 
@@ -62,7 +61,7 @@ public class DataServiceTest {
 
         Mockito.doThrow(new RuntimeException("error")).when(queue).getJobBatches(Mockito.any(UUID.class));
 
-        assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
+        Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
     }
 
     @Test
@@ -70,7 +69,7 @@ public class DataServiceTest {
         DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
 
         workJob(true, resourceType);
-        assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
+        Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
     }
 
     @Test
@@ -79,7 +78,7 @@ public class DataServiceTest {
 
         workJob(false, resourceType);
         Resource resource = dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType);
-        assertInstanceOf(Bundle.class, resource);
+        Assertions.assertTrue(resource instanceof Bundle);
     }
 
     @Test
@@ -89,18 +88,18 @@ public class DataServiceTest {
 
         workJob(false, DPCResourceType.OperationOutcome);
         Resource resource = dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType);
-        assertInstanceOf(OperationOutcome.class, resource);
+        Assertions.assertTrue(resource instanceof OperationOutcome);
     }
 
     @Test
     public void whenPassingInNoResourceTypes() {
         workJob(false, DPCResourceType.ExplanationOfBenefit);
-        assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString())));
+        Assertions.assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString())));
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     private void workJob(boolean failBatch, DPCResourceType resourceType) {
-        Mockito.doAnswer(mock -> {
+        Mockito.doAnswer((mock) -> {
             Optional<JobQueueBatch> workBatch = queue.claimBatch(aggregatorID);
             while (workBatch.flatMap(batch -> batch.fetchNextPatient(aggregatorID)).isPresent()) {
                 queue.completePartialBatch(workBatch.get(), aggregatorID);

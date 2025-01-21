@@ -35,7 +35,7 @@ class ThirdPartyCaveatTests {
      * TestMacaroonPaperFig6 implements an example flow as described in the macaroons paper:
      * http://theory.stanford.edu/~ataly/Papers/macaroons.pdf
      * There are three services, ts, fs, as:
-     * ts is a store service which has delegated authority to a forum service fs.
+     * ts is a store service which has deligated authority to a forum service fs.
      * The forum service wants to require its users to be logged into to an authentication service as.
      * <p>
      * The client obtains a macaroon from fs (minted by ts, with a third party caveat addressed to as).

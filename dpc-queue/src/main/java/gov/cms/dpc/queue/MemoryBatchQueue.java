@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  */
 public class MemoryBatchQueue extends JobQueueCommon {
 
-    private static final Logger logger = LoggerFactory.getLogger(MemoryBatchQueue.class);
+    private static Logger logger = LoggerFactory.getLogger(MemoryBatchQueue.class);
 
     private final Map<UUID, JobQueueBatch> queue;
 

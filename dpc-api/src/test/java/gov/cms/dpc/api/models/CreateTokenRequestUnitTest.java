@@ -18,10 +18,14 @@ class CreateTokenRequestUnitTest {
         token2.setExpiresAt(token1.getExpiresAt());
         token2.setLabel(token1.getLabel());
 
-        assertEquals(token1, token2, "Tokens should have been equal");
-        assertEquals(token1.hashCode(), token2.hashCode(), "Hash code should match.");
+        assertTrue(token1.equals(token2), "Tokens should have been equal");
+        assertTrue(token2.equals(token1), "Tokens should have been equal");
+        assertTrue(token1.hashCode() == token2.hashCode(), "Hash code should match.");
         token2.setLabel("Different Test Label");
-        assertNotEquals(token1, token2, "Tokens should NOT have been equal");
-        assertNotEquals(token1.hashCode(), token2.hashCode(), "Hash code should NOT match.");
+        assertFalse(token1.equals(token2), "Tokens should NOT have been equal");
+        assertFalse(token2.equals(token1), "Tokens should NOT have been equal");
+        assertFalse(token1.hashCode() == token2.hashCode(), "Hash code should NOT match.");
+
+
     }
 }

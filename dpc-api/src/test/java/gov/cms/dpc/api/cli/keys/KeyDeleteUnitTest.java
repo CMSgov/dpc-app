@@ -18,6 +18,7 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.Parameter;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -86,7 +87,7 @@ class KeyDeleteUnitTest {
     }
 
     @Test
-    public void testDeleteKeys_badResponse() {
+    public void testDeleteKeys_badResponse() throws IOException {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()

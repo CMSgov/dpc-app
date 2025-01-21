@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.sql.Date;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -63,7 +64,7 @@ public class ClientUtils {
                 .map(search -> (Group) search.getEntryFirstRep().getResource())
                 .map(group -> jobCompletionLambda(exportClient, httpClient, group, overrideURL))
                 .peek(jobResponse -> {
-                    if (!jobResponse.getError().isEmpty()) {
+                    if (! jobResponse.getError().isEmpty()) {
                         ObjectMapper mapper = new ObjectMapper();
                         try {
                             logger.error(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jobResponse));
@@ -73,7 +74,9 @@ public class ClientUtils {
                         throw new IllegalStateException("Export job completed, but with errors");
                     }
                 })
-                .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> jobResponseHandler(httpClient, entry)));
+                .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> {
+                    jobResponseHandler(httpClient, entry);
+                }));
     }
 
     /**
@@ -154,7 +157,7 @@ public class ClientUtils {
         String jobLocationURL = jobLocation;
         if (jobLocation.startsWith("https://prod.dpc.cms.gov/api/v1")) {
             jobLocationURL = overrideURL.substring(0, overrideURL.indexOf("/api/v1")) + jobLocation.substring("https://prod.dpc.cms.gov".length());
-            logger.info("patched job url {}", jobLocationURL);
+            logger.info("patched job url " + jobLocationURL);
         }
         final HttpGet jobGet = new HttpGet(jobLocationURL);
         boolean done = false;
@@ -252,7 +255,7 @@ public class ClientUtils {
         System.out.println(entry.getUrl());
         try {
             final File file = fetchExportedFiles(entry.getUrl(), client);
-            System.out.printf("Downloaded file to: %s%n", file.getPath());
+            System.out.println(String.format("Downloaded file to: %s", file.getPath()));
             if(file.length() == 0){
                 throw new IllegalStateException(String.format("Downloaded file was empty. file path:  %s", file.getPath()));
             }
@@ -260,7 +263,7 @@ public class ClientUtils {
             throw new RuntimeException("Cannot output file", e);
         }
     }
-
+    
     private static JobCompletionModel jobCompletionLambda(IGenericClient exportClient, CloseableHttpClient client, Group group, String overrideURL) {
         final IOperationUntypedWithInput<Parameters> exportOperation = createExportOperation(exportClient, group.getId());
         try {
@@ -306,7 +309,7 @@ public class ClientUtils {
                 .getEntry()
                 .stream()
                 .map(Bundle.BundleEntryComponent::getResource)
-                .map(Patient.class::cast)
+                .map(resource -> (Patient) resource)
                 .forEach(patient -> patientReferences.put(patient.getIdentifierFirstRep().getValue(), new Reference(patient.getId())));
         } catch (BaseServerResponseException e) {
             handleBaseServerException(e, "patient");
@@ -329,8 +332,8 @@ public class ClientUtils {
         List<String> returnedIdentifiers = providerBundle.getEntry().stream().map(provider -> {
             Practitioner practitioner = (Practitioner) provider.getResource();
             return practitioner.getIdentifierFirstRep().getValue();
-        }).toList();
-        logger.info("Practitioners submitted and returned: {}", returnedIdentifiers);
+        }).collect(Collectors.toList());
+        logger.info("Practitioners submitted and returned: {}", returnedIdentifiers.toString());
 
         return providerBundle;
     }

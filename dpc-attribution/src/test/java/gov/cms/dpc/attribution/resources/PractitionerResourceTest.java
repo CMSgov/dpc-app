@@ -199,7 +199,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
         final Date updatedAt = pract3.getMeta().getLastUpdated();
 
-        // Set the Metadata, so we know it deeply matches
+        // Set the Meta data, so we know it deeply matches
         pract3.setMeta(meta);
 
         assertAll(() -> assertTrue(pract2.equalsDeep(pract3), "Updated values should match"),

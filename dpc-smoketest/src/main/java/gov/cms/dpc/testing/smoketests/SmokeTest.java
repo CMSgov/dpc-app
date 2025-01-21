@@ -155,7 +155,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                     .getEntry()
                     .stream()
                     .map(Bundle.BundleEntryComponent::getResource)
-                    .map(Practitioner.class::cast)
+                    .map(resource -> (Practitioner) resource)
                     .map(FHIRExtractors::getProviderNPI)
                     .collect(Collectors.toList());
 

@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 public class AuthRelatedLoggingFilterTest {
 
     private Filter<IAccessEvent> filter;
-    private final IAccessEvent event = Mockito.mock(IAccessEvent.class);
+    private IAccessEvent event = Mockito.mock(IAccessEvent.class);
 
     @BeforeEach
     public void setUp() {

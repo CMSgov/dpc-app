@@ -88,7 +88,7 @@ class AttributionFHIRTest {
                 .entrySet()
                 .stream()
                 .map((Map.Entry<String, List<Pair<String, String>>> entry) -> SeedProcessor.generateAttributionBundle(entry, orgID))
-                .flatMap(bundle -> Stream.of(
+                .flatMap((bundle) -> Stream.of(
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Submit"), () -> submitRoster(bundle)),
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update"), () -> updateRoster(bundle)),
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Remove"), () -> removeRoster(bundle))));
@@ -123,7 +123,7 @@ class AttributionFHIRTest {
         fetchedGroup.setMeta(null);
 
         assertAll(() -> assertTrue(createdGroup.equalsDeep(fetchedGroup), "Groups should be equal"),
-                () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of benes"));
+                () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of beneies"));
 
         final String patientID = bundle.getEntry().get(1).getResource().getId();
 
@@ -149,7 +149,7 @@ class AttributionFHIRTest {
 
         final Group group2 = groupSizeQuery.execute();
         assertAll(() -> assertTrue(fetchedGroup.equalsDeep(group2), "Groups should be equal"),
-                () -> assertEquals(bundle.getEntry().size() - 1, group2.getMember().size(), "Should have the same number of benes"));
+                () -> assertEquals(bundle.getEntry().size() - 1, group2.getMember().size(), "Should have the same number of beneies"));
 
         // Try to get attributed patients
         final Bundle attributed = client

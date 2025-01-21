@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Generate Rosters from SyntheticMass data
@@ -67,8 +68,8 @@ class GenerateRosters {
                 .getEntry()
                 .stream()
                 .map(Bundle.BundleEntryComponent::getResource)
-                .map(Patient.class::cast)
-                .toList();
+                .map(resource -> (Patient) resource)
+                .collect(Collectors.toList());
 
         for (int i = 0; i < patientResources.size(); i++) {
             final Patient patient = patientResources.get(i);

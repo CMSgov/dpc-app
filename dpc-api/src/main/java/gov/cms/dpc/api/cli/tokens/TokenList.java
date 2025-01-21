@@ -41,10 +41,10 @@ public class TokenList extends AbstractAdminCommand {
     public void run(Bootstrap<?> bootstrap, Namespace namespace) throws IOException, URISyntaxException {
         // Get the reference
         final String orgReference = namespace.getString("org-reference");
-        System.out.printf("Listing tokens for organization: %s.%n", orgReference);
+        System.out.println(String.format("Listing tokens for organization: %s.", orgReference));
 
         final String apiService = namespace.getString(API_HOSTNAME);
-        System.out.printf("Connecting to API service at: %s%n", apiService);
+        System.out.println(String.format("Connecting to API service at: %s", apiService));
 
         listTokens(apiService, orgReference);
     }
@@ -62,7 +62,8 @@ public class TokenList extends AbstractAdminCommand {
                     System.exit(1);
                 }
 
-                CollectionResponse<TokenEntity> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
+                CollectionResponse<TokenEntity> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<TokenEntity>>() {
+                });
                 generateTable(new ArrayList<>(tokens.getEntities()));
             }
         }

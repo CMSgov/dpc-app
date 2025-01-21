@@ -29,7 +29,6 @@ jobs:
         with:
           python-version: "3.8.1"
       - name: "API Build"
-        id: api-build
         run: |
           make ci-app
       - name: "Move jacoco reports"

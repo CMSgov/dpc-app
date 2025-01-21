@@ -1,12 +1,11 @@
 package gov.cms.dpc.common.entities;
 
-import org.junit.jupiter.api.Test;
-
-import java.time.OffsetDateTime;
-import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.Before;
+import org.junit.jupiter.api.Test;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 public class PersonEntityTest {
 	@Test

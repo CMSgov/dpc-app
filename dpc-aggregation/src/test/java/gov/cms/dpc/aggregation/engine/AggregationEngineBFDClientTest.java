@@ -22,6 +22,7 @@ import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
@@ -35,6 +36,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.nio.file.Path;
+import java.security.GeneralSecurityException;
 import java.time.YearMonth;
 import java.util.*;
 
@@ -58,9 +60,10 @@ public class AggregationEngineBFDClientTest {
     private final UUID orgID = UUID.randomUUID();
     private final String TEST_ORG_NPI = NPIUtil.generateNPI();
     private final String TEST_PROVIDER_NPI = NPIUtil.generateNPI();
+    private JobQueueBatch completeJob;
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws GeneralSecurityException {
         BlueButtonClient blueButtonClient = Mockito.spy(new BlueButtonClientImpl(bbClient, new BBClientConfiguration(), metricRegistry));
         OperationsConfig config = new OperationsConfig(1000, tempDir.toString(), 1, 1, 1, YearMonth.now(), List.of(orgID.toString()));
         JobBatchProcessor processor = new JobBatchProcessor(blueButtonClient, fhirContext, metricRegistry, config, lookBackService, mockConsentService);
@@ -90,6 +93,7 @@ public class AggregationEngineBFDClientTest {
         ArgumentCaptor<String> headerValue = ArgumentCaptor.forClass(String.class);
         Mockito.when(iQuery.withAdditionalHeader(headerKey.capture(), headerValue.capture())).thenReturn(iQuery);
 
+        UUID providerID = UUID.randomUUID();
         UUID jobID = queue.createJob(
                 orgID,
                 TEST_ORG_NPI,

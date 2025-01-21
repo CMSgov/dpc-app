@@ -76,7 +76,7 @@ public class TokenCreateUnitTest {
         tokenEntity.setCreatedAt(OffsetDateTime.now());
         tokenEntity.setExpiresAt(OffsetDateTime.now());
         tokenEntity.setToken("test_token");
-        CollectionResponse<TokenEntity> collectionResponse = new CollectionResponse<>(List.of(tokenEntity));
+        CollectionResponse collectionResponse = new CollectionResponse(List.of(tokenEntity));
 
         ObjectMapper mapper = new ObjectMapper();
         String payload = mapper.writeValueAsString(collectionResponse);
@@ -105,7 +105,7 @@ public class TokenCreateUnitTest {
     }
 
     @Test
-    public void testCreateToken_badResponse() {
+    public void testCreateToken_badResponse() throws IOException {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()

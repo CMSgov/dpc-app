@@ -102,7 +102,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
 
         assertTrue(methodOutcome.getCreated());
 
-        //Add a patient
+        //Add an additional patient
         final Patient patient2 = createPatient("0O00O00OO00", DEFAULT_ORG_ID);
         group.addMember().setEntity(new Reference(patient2.getIdElement()));
 
@@ -116,7 +116,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
         group.getMember().clear();
         group.addMember().setEntity(new Reference(patient2.getIdElement()));
 
-        client.update()
+        final MethodOutcome methodOutcomeUpdate = client.update()
                 .resource(group)
                 .withId(methodOutcome.getResource().getIdElement())
                 .encodedJson()

@@ -77,7 +77,7 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
     }
 
     private void registerOrganization(Bundle organization, String attributionService, boolean noToken, String apiService) throws IOException, URISyntaxException {
-        System.out.printf("Connecting to Attribution service at: %s%n", attributionService);
+        System.out.println(String.format("Connecting to Attribution service at: %s", attributionService));
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
 
         final Parameters parameters = new Parameters();
@@ -97,16 +97,16 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
                     .execute();
 
             organizationID = UUID.fromString(createdOrg.getIdElement().getIdPart());
-            System.out.printf("Registered organization: %s%n", organizationID);
+            System.out.println(String.format("Registered organization: %s", organizationID));
 
         } catch (Exception e) {
-            System.err.printf("Unable to register organization. %s%n", e.getMessage());
+            System.err.println(String.format("Unable to register organization. %s", e.getMessage()));
             System.exit(1);
         }
 
         // Now, create a token, unless --no-token has been passed
         if (!noToken) {
-            System.out.printf("Connecting to API service at: %s%n", apiService);
+            System.out.println(String.format("Connecting to API service at: %s", apiService));
             try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
                 final URIBuilder builder = new URIBuilder(String.format("%s/generate-token", apiService));
                 builder.setParameter("organization", organizationID.toString());
@@ -115,7 +115,7 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
 
                 try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                     final String token = EntityUtils.toString(response.getEntity());
-                    System.out.printf("Organization token: %s%n", token);
+                    System.out.println(String.format("Organization token: %s", token));
                 }
             }
         }

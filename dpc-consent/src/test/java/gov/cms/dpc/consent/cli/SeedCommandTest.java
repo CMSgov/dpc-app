@@ -56,7 +56,7 @@ class SeedCommandTest {
     }
 
     @Test
-    void testSeedCommand() {
+    void testSeedCommand() throws Exception {
 
         final Optional<Throwable> success = cli.run("seed", "src/test/resources/test.application.yml");
         /* dies here with the following error

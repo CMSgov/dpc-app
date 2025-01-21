@@ -20,6 +20,7 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.Parameter;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -67,7 +68,7 @@ class KeyUploadUnitTest {
     }
 
     @Test
-    public void testDeleteKeys_happyPath() {
+    public void testDeleteKeys_happyPath() throws IOException {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()
@@ -84,7 +85,7 @@ class KeyUploadUnitTest {
                     .withBody("org_id")
             );
 
-        Optional<Throwable> errors;
+        Optional<Throwable> errors = Optional.empty();
         try (MockedStatic<Files> files = Mockito.mockStatic(Files.class, Mockito.CALLS_REAL_METHODS)) {
             files.when(() -> Files.readString(eq(Paths.get("key_file")))).thenReturn("fake key data");
             files.when(() -> Files.readString(eq(Paths.get("sig_file")))).thenReturn("fake sig data");
@@ -98,7 +99,7 @@ class KeyUploadUnitTest {
     }
 
     @Test
-    public void testDeleteKeys_badResponse() {
+    public void testDeleteKeys_badResponse() throws IOException {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
                 .when(
                         HttpRequest.request()
@@ -119,7 +120,7 @@ class KeyUploadUnitTest {
         SecurityManager originalSecurityManager = System.getSecurityManager();
         System.setSecurityManager(new NoExitSecurityManager());
 
-        Optional<Throwable> errors;
+        Optional<Throwable> errors = Optional.empty();
         try (MockedStatic<Files> files = Mockito.mockStatic(Files.class, Mockito.CALLS_REAL_METHODS)) {
             files.when(() -> Files.readString(eq(Paths.get("key_file")))).thenReturn("fake key data");
             files.when(() -> Files.readString(eq(Paths.get("sig_file")))).thenReturn("fake sig data");

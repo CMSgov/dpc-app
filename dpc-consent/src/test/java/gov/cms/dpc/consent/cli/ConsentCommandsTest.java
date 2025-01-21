@@ -38,7 +38,6 @@ class ConsentCommandsTest {
     private static Bootstrap<DPCConsentConfiguration> setupBootstrap(DPCConsentService app) {
         // adapted from DropwizardTestSupport
         Bootstrap<DPCConsentConfiguration> bootstrap = new Bootstrap<>(app) {
-            @Override
             public void run(DPCConsentConfiguration configuration, Environment environment) throws Exception {
                 super.run(configuration, environment);
                 setConfigurationFactoryFactory((klass, validator, objectMapper, propertyPrefix) ->
@@ -50,7 +49,7 @@ class ConsentCommandsTest {
     }
 
     @BeforeAll
-    void cliSetup() {
+    void cliSetup() throws Exception {
         // Redirect stdout and stderr to our byte streams
         System.setOut(new PrintStream(stdOut));
         System.setErr(new PrintStream(stdErr));
@@ -78,16 +77,16 @@ class ConsentCommandsTest {
     }
 
     @Test
-    final void pertinentHelpMessageDisplayed() {
+    final void pertinentHelpMessageDisplayed() throws Exception {
         final Optional<Throwable> t1 = cli.run("consent", "create", "-h");
-        String errorMsg = String.format("Should have pertinent help message, got: %s", stdOut);
+        String errorMsg = String.format("Should have pertinent help message, got: %s", stdOut.toString());
         assertAll(() -> assertFalse(t1.isPresent(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"),
                 () -> assertTrue(stdOut.toString().contains("Create a new consent record"), errorMsg));
     }
 
     @Test
-    final void onlyAllowsInOrOut() {
+    final void onlyAllowsInOrOut() throws Exception {
         final Optional<Throwable> t1 = cli.run("consent", "create", configPath, "-p", "t2-mbi", "-d", "2019-11-22", "-i", "-o", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(t1.isPresent(), "Should have failed"),
                 () -> assertEquals("", stdOut.toString(), "Should not have output"),
@@ -96,7 +95,7 @@ class ConsentCommandsTest {
     }
 
     @Test
-    final void detectsInvalidDate() {
+    final void detectsInvalidDate() throws Exception {
         final Optional<Throwable> t5 = cli.run("consent", "create", configPath, "-p", "tA-mbi", "-d", "Nov 22 2019", "-i", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertTrue(t5.isPresent(), "Should have failed"),
                 () -> assertEquals("", stdOut.toString(), "Should not have output"),
@@ -105,14 +104,14 @@ class ConsentCommandsTest {
     }
 
     @Test
-    final void createDefaultOptInRecord() {
+    final void createDefaultOptInRecord() throws Exception {
         final Optional<Throwable> t2 = cli.run("consent", "create", configPath, "-p", "t2-mbi", "-d", "2019-11-22", "-i", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertFalse(t2.isPresent(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"));
     }
 
     @Test
-    final void createDefaultOptOutRecord() {
+    final void createDefaultOptOutRecord() throws Exception {
         final Optional<Throwable> t3 = cli.run("consent", "create", configPath, "-p", "t3-mbi", "-d", "2019-11-23", "-o", "--host", "http://localhost:3500/v1");
         assertAll(() -> assertFalse(t3.isPresent(), "Should have succeeded"),
                 () -> assertEquals("", stdErr.toString(), "Should not have errors"));

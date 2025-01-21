@@ -38,10 +38,10 @@ public class TokenDelete extends AbstractAdminCommand {
         // Get the reference
         final String orgReference = namespace.getString("org-reference");
         final String tokenID = namespace.getString("token-id");
-        System.out.printf("Deleting token %s for organization %s%n", tokenID, orgReference);
+        System.out.println(String.format("Deleting token %s for organization %s", tokenID, orgReference));
 
         final String apiService = namespace.getString(API_HOSTNAME);
-        System.out.printf("Connecting to API service at: %s%n", apiService);
+        System.out.println(String.format("Connecting to API service at: %s", apiService));
 
         // Delete the token
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {

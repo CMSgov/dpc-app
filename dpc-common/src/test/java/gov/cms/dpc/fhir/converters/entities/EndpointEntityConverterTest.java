@@ -68,7 +68,7 @@ public class EndpointEntityConverterTest {
         endpoint.setId("");
         EndpointEntity convertedEntity = entityConverter.fromFHIR(fhirEntityConverter, endpoint);
         assertNotNull(convertedEntity.getId());
-        assertEquals(convertedEntity.getId().toString().length(), uuid.toString().length());
+        assertTrue(convertedEntity.getId().toString().length() == uuid.toString().length());
     }
 
     @Test

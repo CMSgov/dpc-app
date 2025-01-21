@@ -140,7 +140,7 @@ class PatientResourceTest extends AbstractAttributionTest {
                 .search()
                 .forResource(Patient.class)
                 .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI))
-                .and(Patient.ORGANIZATION.hasId("Organization/" + UUID.randomUUID()))
+                .and(Patient.ORGANIZATION.hasId("Organization/" + UUID.randomUUID().toString()))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
@@ -156,7 +156,7 @@ class PatientResourceTest extends AbstractAttributionTest {
                 .search()
                 .forResource(Patient.class)
                 .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI.toLowerCase()))
-                .and(Patient.ORGANIZATION.hasId("Organization/" + UUID.randomUUID()))
+                .and(Patient.ORGANIZATION.hasId("Organization/" + UUID.randomUUID().toString()))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
@@ -183,7 +183,7 @@ class PatientResourceTest extends AbstractAttributionTest {
         // Create a practitioner and an attribution resource
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("2222222228");
 
-        client
+        final MethodOutcome outcome = client
                 .create()
                 .resource(practitioner)
                 .encodedJson()

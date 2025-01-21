@@ -1,18 +1,18 @@
 package gov.cms.dpc.common.entities;
 
-import org.hl7.fhir.dstu3.model.Address;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.hl7.fhir.dstu3.model.Address;
 
 public class AddressEntityTest {
-	private final String addressCity = "Galveston";
-	private final String addressCountry = "US";
-	private final String addressDistrict = "Southern";
-	private final String addressZip = "77550";
-	private final String addressState = "TX";
-	private final String addressLine1 = "416 21st St";
-	private final String addressLine2 = "N/A";
+	private String addressCity = "Galveston";
+	private String addressCountry = "US";
+	private String addressDistrict = "Southern";
+	private String addressZip = "77550";
+	private String addressState = "TX";
+	private String addressLine1 = "416 21st St";
+	private String addressLine2 = "N/A";
 
 	@Test
 	public void testGettersAndSetters() {

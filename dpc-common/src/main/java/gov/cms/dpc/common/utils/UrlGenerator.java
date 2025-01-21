@@ -18,7 +18,7 @@ public final class UrlGenerator {
 	 */
 	public static String generateVersionUrl(int port, String appContextPath) {
 		// If the path doesn't end in a "/", add one
-		if(!appContextPath.matches("/$")) {
+		if(!appContextPath.matches("\\/$")) {
 			appContextPath += "/";
 		}
 		return "http://localhost:" + port + appContextPath + "v1/version";

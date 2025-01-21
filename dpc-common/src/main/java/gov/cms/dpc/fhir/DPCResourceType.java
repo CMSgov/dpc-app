@@ -16,18 +16,29 @@ public enum DPCResourceType {
 
 
     public String getPath() {
-        return switch (this) {
-            case Bundle -> "bundle";
-            case Coverage -> "coverage";
-            case Endpoint -> "endpoint";
-            case ExplanationOfBenefit -> "explanationofbenefit";
-            case Group -> "group";
-            case OperationOutcome -> "operationoutcome";
-            case Organization -> "organization";
-            case Patient -> "patient";
-            case Practitioner -> "practitioner";
-            case Schedule -> "schedule";
-        };
+        switch (this) {
+            case Bundle:
+                return "bundle";
+            case Coverage:
+                return "coverage";
+            case Endpoint:
+                return "endpoint";
+            case ExplanationOfBenefit:
+                return "explanationofbenefit";
+            case Group:
+                return "group";
+            case OperationOutcome:
+                return "operationoutcome";
+            case Organization:
+                return "organization";
+            case Patient:
+                return "patient";
+            case Practitioner:
+                return "practitioner";
+            case Schedule:
+                return "schedule";
+        }
+        return null;
     }
 
 

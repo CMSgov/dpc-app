@@ -100,7 +100,7 @@ public class SeedProcessor {
         bundle.addEntry().setResource(practitioner).setFullUrl("http://something.gov/" + practitioner.getIdentifierFirstRep().getValue());
 
         entry.getValue()
-                .forEach(value -> {
+                .forEach((value) -> {
                     // Add some random values to the patient
                     final Patient patient = new Patient();
                     patient.addIdentifier().setValue(value.getRight()).setSystem(DPCIdentifierSystem.MBI.getSystem());

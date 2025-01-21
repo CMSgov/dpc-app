@@ -47,7 +47,7 @@ class FHIRPatientBuilderUnitTest {
 
     @Test
     public void testWithName() {
-        String first =  "Salvadorito";
+        String first =  "Salvadoritito";
         String last = "Burger";
         Patient patient = FHIRPatientBuilder.newBuild().withName(first,last).build();
         assertEquals(1,patient.getName().size());
@@ -85,7 +85,7 @@ class FHIRPatientBuilderUnitTest {
         patient = FHIRPatientBuilder.newBuild().managedBy(orgId.toString()).build();
         assertEquals("Organization/"+orgId,patient.getManagingOrganization().getReference());
 
-        patient = FHIRPatientBuilder.newBuild().managedBy("Organization/"+ orgId).build();
+        patient = FHIRPatientBuilder.newBuild().managedBy("Organization/"+orgId.toString()).build();
         assertEquals("Organization/"+orgId,patient.getManagingOrganization().getReference());
 
         patient = FHIRPatientBuilder.newBuild().managedBy(new IdType("Organization", orgId.toString())).build();

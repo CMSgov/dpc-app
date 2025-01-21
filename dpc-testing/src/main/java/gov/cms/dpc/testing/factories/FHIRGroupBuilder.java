@@ -2,6 +2,7 @@ package gov.cms.dpc.testing.factories;
 
 import org.hl7.fhir.dstu3.model.*;
 
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -15,7 +16,7 @@ public class FHIRGroupBuilder {
     static final String NPPES_SYSTEM =  "http://hl7.org/fhir/sid/us-npi";
     static final String DPC_SYSTEM = "https://dpc.cms.gov/organization_id#";
 
-    private final Group theGroup;
+    private Group theGroup;
 
     private FHIRGroupBuilder(){
         theGroup = new Group();

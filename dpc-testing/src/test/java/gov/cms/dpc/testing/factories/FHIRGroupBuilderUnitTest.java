@@ -85,7 +85,7 @@ public class FHIRGroupBuilderUnitTest {
         assertEquals("Patient/"+patientUUID,group.getMemberFirstRep().getEntity().getReference());
 
         //With id as reference string
-        group = FHIRGroupBuilder.newBuild().withPatients("Patient/"+ patientUUID).build();
+        group = FHIRGroupBuilder.newBuild().withPatients("Patient/"+patientUUID.toString()).build();
         assertEquals(1, group.getMember().size());
         assertEquals("Patient/"+patientUUID,group.getMemberFirstRep().getEntity().getReference());
 

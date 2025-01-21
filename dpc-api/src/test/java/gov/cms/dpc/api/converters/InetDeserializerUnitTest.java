@@ -46,6 +46,8 @@ class InetDeserializerUnitTest {
         when(p.getCodec().readTree(p)).thenReturn(treeNode);
         when(treeNode.get("address")).thenReturn(null);
 
-        assertThrows(IllegalArgumentException.class, () -> deserializer.deserialize(p, ctx));
+        assertThrows(IllegalArgumentException.class, () -> {
+            deserializer.deserialize(p, ctx);
+        });
     }
 }
