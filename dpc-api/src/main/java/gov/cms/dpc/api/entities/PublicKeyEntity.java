@@ -33,7 +33,7 @@ public class PublicKeyEntity implements Serializable {
 
     @NotNull
     @JsonIgnore
-    @Column(name = "organizationId")
+    @Column(name = "organization_id")
     private UUID organizationId;
 
     @NotNull
