@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - .github/workflows/deploy-caller.yml
+
 jobs:
   deploy:
     name: 'Deploy API WAF sync'
