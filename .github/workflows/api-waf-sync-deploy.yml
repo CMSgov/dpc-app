@@ -6,24 +6,16 @@ on:
       env:
         description: AWS environment to deploy to
         required: true
-        type: choice
+        type: string
         default: "dev"
-        options:
-          - dev
-          - test
-          - prod
 
   workflow_dispatch:
     inputs:
       env:
         description: AWS environment to deploy to
         required: true
-        type: choice
+        type: string
         default: "dev"
-        options:
-          - dev
-          - test
-          - prod
 
   push:
     branches:
