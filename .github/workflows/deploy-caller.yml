@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    name: 'Deploy API WAF sync'
+    name: 'Deploy API WAF Sync'
     uses: CMSgov/dpc-app/.github/workflows/api-waf-sync-deploy.yml@jd/dpc-4472-dedupe-workflows
     with:
       env: dev
