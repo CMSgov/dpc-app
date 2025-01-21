@@ -50,7 +50,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          path: ./dpc-app
+#          path: ./dpc-app
 #          ref: ${{ github.event.pull_request.head.sha || github.event.inputs.branch }}
           ref: ${{ github.ref_name }}
 
