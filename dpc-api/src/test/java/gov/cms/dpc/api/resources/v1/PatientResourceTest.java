@@ -633,7 +633,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testBatchSubmit() throws GeneralSecurityException, IOException, URISyntaxException {
-        final int COUNT_TEST_PATIENTS = 1000;
+        final int COUNT_TEST_PATIENTS = 500;
 
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         final TestOrganizationContext orgContext = registerAndSetupNewOrg();

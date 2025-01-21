@@ -29,7 +29,7 @@ public class APIHelpers {
         // We need to figure out how to validate the bundle entries
         resourceBundle
                 .getEntry()
-                .stream()
+                .parallelStream()
                 .filter(Bundle.BundleEntryComponent::hasResource)
                 .map(Bundle.BundleEntryComponent::getResource)
                 .filter(resource -> resource.getClass().equals(clazz))
