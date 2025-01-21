@@ -27,11 +27,11 @@ jobs:
 #    container:
 #      image: alpine:latest
     steps:
-      - name: Install system packages
-        run: |
-          apk update
-          apk add make --no-cache
-          apk add aws-cli --no-cache
+#      - name: Install system packages
+#        run: |
+#          apk update
+#          apk add make --no-cache
+#          apk add aws-cli --no-cache
 
 #      - name: Configure AWS Credentials
 #        uses: aws-actions/configure-aws-credentials@v4
