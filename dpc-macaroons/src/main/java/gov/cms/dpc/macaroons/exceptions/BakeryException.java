@@ -5,7 +5,7 @@ package gov.cms.dpc.macaroons.exceptions;
  * // TODO: Expand this to be more general purpose
  */
 public class BakeryException extends RuntimeException {
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     public BakeryException(String message) {
         super(message);

@@ -16,7 +16,7 @@ import java.util.Collection;
  * @param <T> - type parameter of encompassed class
  */
 public class CollectionResponse<T extends Serializable> implements Serializable {
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     private Collection<T> entities;
     private int count;

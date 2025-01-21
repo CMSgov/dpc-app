@@ -1,7 +1,7 @@
 package gov.cms.dpc.fhir.converters.exceptions;
 
 public class DataTranslationException extends FHIRConverterException {
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     private final Class<?> clazz;
     private final String element;

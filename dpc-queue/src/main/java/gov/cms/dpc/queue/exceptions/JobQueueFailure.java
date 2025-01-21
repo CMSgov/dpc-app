@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public class JobQueueFailure extends RuntimeException {
 
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     public JobQueueFailure(String message) {
         super(message);

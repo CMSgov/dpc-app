@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @SuppressWarnings("WeakerAccess")
 public class KeyView implements Serializable {
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     public UUID id;
     public String publicKey;

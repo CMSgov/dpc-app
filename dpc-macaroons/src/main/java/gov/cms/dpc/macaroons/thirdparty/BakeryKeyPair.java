@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 public class BakeryKeyPair implements Serializable {
 
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     private byte[] publicKey;
 

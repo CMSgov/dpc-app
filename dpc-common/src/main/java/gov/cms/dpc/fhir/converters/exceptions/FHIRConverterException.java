@@ -4,7 +4,7 @@ package gov.cms.dpc.fhir.converters.exceptions;
  * Base exception type for {@link gov.cms.dpc.fhir.converters.FHIRConverter}
  */
 public class FHIRConverterException extends RuntimeException {
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     private FHIRConverterException() {
         super();

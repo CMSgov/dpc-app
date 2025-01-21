@@ -1,7 +1,7 @@
 package gov.cms.dpc.api.exceptions;
 
 public class PublicKeyException extends RuntimeException {
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     public PublicKeyException(String message) {
         super(message);

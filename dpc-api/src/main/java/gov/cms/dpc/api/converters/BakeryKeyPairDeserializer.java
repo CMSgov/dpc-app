@@ -9,7 +9,7 @@ import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import java.io.IOException;
 
 public class BakeryKeyPairDeserializer extends StdDeserializer<BakeryKeyPair> {
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     BakeryKeyPairDeserializer() {
         this(null);

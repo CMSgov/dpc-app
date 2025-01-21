@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class BakeryKeyPairSerializer extends StdSerializer<BakeryKeyPair> {
 
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     BakeryKeyPairSerializer() {
         this(null);

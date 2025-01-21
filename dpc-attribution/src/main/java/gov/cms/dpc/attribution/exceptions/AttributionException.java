@@ -1,7 +1,7 @@
 package gov.cms.dpc.attribution.exceptions;
 
 public class AttributionException extends RuntimeException {
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     public AttributionException(String message) {
         super(message);
