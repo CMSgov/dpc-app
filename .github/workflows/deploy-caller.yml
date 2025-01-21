@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    name: 'Deploy Opt Out Export'
+    name: 'Deploy Opt Out Export Workflow'
     uses: CMSgov/dpc-app/.github/workflows/opt-out-export-deploy.yml@jd/dpc-4472-dedupe-workflows
     with:
       env: test

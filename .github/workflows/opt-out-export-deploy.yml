@@ -30,7 +30,7 @@ jobs:
     name: 'Deploy Opt Out Export'
     uses: CMSgov/dpc-app/.github/workflows/deploy_go_lambda.yml@jd/dpc-4472-dedupe-workflows
     with:
-      env: ${{ inputs.env || "dev" }}
+      env: ${{ inputs.env || 'dev' }}
       project: opt-out-export
       go_files: "main.go db.go"
     secrets: inherit
