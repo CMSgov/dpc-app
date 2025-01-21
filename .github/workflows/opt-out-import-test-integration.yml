@@ -36,7 +36,8 @@ jobs:
         run: make unit-test
     
   trigger:
-    needs: unit-test
+    if: ${{ always() }}
+    needs: deploy
     permissions:
       contents: read
       id-token: write
