@@ -12,7 +12,9 @@ import java.lang.reflect.Modifier;
 
 import static org.mockito.Mockito.*;
 
-@Disabled // TODO: open java.lang.reflect for access -acw
+// This hack has been deprecated in JDK-17, we'll need to find a new workaround
+// see: https://bugs.openjdk.org/browse/JDK-8210522
+@Disabled
 class LogHeaderFilterUnitTest {
 
 	private final Logger logger = mock(Logger.class);
@@ -31,8 +33,6 @@ class LogHeaderFilterUnitTest {
 		Field field = LogHeaderFilter.class.getDeclaredField("logger");
 		field.setAccessible(true);
 
-        // TODO: find a hack for this
-        // see: https://www.ensolvers.com/post/the-journey-of-migrating-from-java-11-to-17
 		Field modifiersField = Field.class.getDeclaredField("modifiers");
 		modifiersField.setAccessible(true);
 		modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
