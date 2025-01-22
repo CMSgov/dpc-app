@@ -28,7 +28,7 @@ on:
 jobs:
   deploy:
     name: 'Deploy Opt Out Export'
-    uses: CMSgov/dpc-app/.github/workflows/deploy_go_lambda.yml@jd/dpc-4472-dedupe-workflows
+    uses: CMSgov/dpc-app/.github/workflows/deploy_go_lambda.yml@${{ github.ref_name }}
     with:
       env: ${{ inputs.env || 'dev' }}
       project: opt-out-export
