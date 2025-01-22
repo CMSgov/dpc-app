@@ -70,8 +70,8 @@ public class PublicKeyEntity implements Serializable {
         return organization_id;
     }
 
-    public void setOrganization_id(UUID organizationId) {
-        this.organization_id = organizationId;
+    public void setOrganization_id(UUID organization_id) {
+        this.organization_id = organization_id;
     }
 
     public SubjectPublicKeyInfo getPublicKey() {
