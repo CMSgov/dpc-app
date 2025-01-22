@@ -31,7 +31,7 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
@@ -147,7 +147,8 @@ public class PractitionerResource extends AbstractPractitionerResource {
         final Bundle providerBundle = (Bundle) params.getParameterFirstRep().getResource();
         logger.info("submittedProviders={}", providerBundle.getEntry().size());
 
-        final Consumer<Practitioner> entryHandler = (resource) -> validateProvider(resource,
+        final Function<Practitioner, WebApplicationException> entryHandler =
+            resource -> validateProvider(resource,
                 organization.getOrganization().getId(),
                 validator,
                 PRACTITIONER_PROFILE);
@@ -202,13 +203,14 @@ public class PractitionerResource extends AbstractPractitionerResource {
         return ValidationHelpers.validateAgainstProfile(this.validator, parameters, PractitionerProfile.PROFILE_URI);
     }
 
-    private static void validateProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
-        logger.debug("Validating Practitioner {}", provider.toString());
+    private static WebApplicationException validateProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
         final ValidationResult result = validator.validateWithResult(provider, new ValidationOptions().addProfile(profileURL));
         if (!result.isSuccessful()) {
-            throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
+            return new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
+        } else {
+            APIHelpers.addOrganizationTag(provider, organizationID);
+            return null;
         }
-        APIHelpers.addOrganizationTag(provider, organizationID);
     }
 
 }
