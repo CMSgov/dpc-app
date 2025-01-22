@@ -29,7 +29,7 @@ jobs:
       - name: Install system packages
         run: |
           apt-get update
-          apt-get install docker --no-cache
+          apt-get install -y docker
 #          apk add make --no-cache
 #          apk add aws-cli --no-cache
 
