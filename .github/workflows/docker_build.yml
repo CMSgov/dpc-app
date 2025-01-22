@@ -16,10 +16,6 @@ permissions:
   id-token: write
   contents: read
 
-#env:
-#  VAULT_PW: ${{ secrets.VAULT_PW }}
-#  REPORT_COVERAGE: true
-
 jobs:
   docker_build:
     runs-on: self-hosted
@@ -38,6 +34,9 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
 
+      - name: Check docker version
+        run: docker --version
+
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
@@ -52,9 +51,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: "11"
-
-      - name: Docker manually
-        run: docker --version && docker compose -f ./docker-compose.base.yml build base
 
       - name: Build app
         run: make ci-app
