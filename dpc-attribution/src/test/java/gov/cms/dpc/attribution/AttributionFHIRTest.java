@@ -43,7 +43,8 @@ class AttributionFHIRTest {
     private static final String configPath = "src/test/resources/test.application.yml";
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION =
             new DropwizardTestSupport<>(DPCAttributionService.class, configPath,
-                    ConfigOverride.config("server.adminConnectors[0].port", "9905"));
+                    ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
+                    ConfigOverride.config("server.adminConnectors[0].port", "3728"));
     private static final FhirContext ctx = FhirContext.forDstu3();
     private static final String CSV = "test_associations-dpr.csv";
     private static Map<String, List<Pair<String, String>>> groupedPairs = new HashMap<>();
