@@ -13,7 +13,6 @@ set -o allexport
 set +o allexport
 
 function _finally {
-  docker logs start-v1-app-api-1
   docker compose -p start-v1-app down
   docker volume rm start-v1-app_pgdata16
 }
