@@ -110,11 +110,9 @@
             <artifactId>hapi-fhir-client</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- required by HAPI FHIR; specifying non-vulnerable version -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.11.0</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
