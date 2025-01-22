@@ -67,7 +67,6 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
 
-
         final String newOrgID = "1111111211";
         final Organization organization = OrganizationHelpers.createOrganization(ctx, client, newOrgID, true);
         assertNotNull(organization);

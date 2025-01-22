@@ -15,6 +15,7 @@ import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.BatchUpdateException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,7 +77,8 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
         Response.Status status = Response.Status.BAD_REQUEST;
         if (exception.getCause() instanceof ConstraintViolationException constraintViolationException) {
             message = generateErrorMessage(constraintViolationException);
-        } else if (exception.getCause() instanceof PSQLException) {
+        } else if (exception.getCause() instanceof PSQLException
+                || exception.getCause() instanceof BatchUpdateException) {
             message = exception.getMessage();
         } else {
             logger.error("Cannot persist to DB", exception);
