@@ -294,7 +294,7 @@ public class PatientResource extends AbstractPatientResource {
         patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
         final ValidationResult result = validator.validateWithResult(patient, new ValidationOptions().addProfile(PatientProfile.PROFILE_URI));
         if (!result.isSuccessful() && result.getMessages().get(0).getSeverity() != ResultSeverityEnum.INFORMATION) {
-                throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
+            throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
         }
     }
 }

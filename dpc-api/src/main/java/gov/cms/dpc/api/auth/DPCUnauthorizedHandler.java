@@ -14,7 +14,7 @@ public class DPCUnauthorizedHandler implements UnauthorizedHandler {
 
     @Inject
     public DPCUnauthorizedHandler() {
-        // not used
+        // no-op
     }
 
     @Override

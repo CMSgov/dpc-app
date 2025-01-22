@@ -35,7 +35,7 @@ public class ExpireAttributions extends Job {
     private Settings settings;
 
     public ExpireAttributions() {
-        // not used
+        // no-op
     }
 
     @Override
