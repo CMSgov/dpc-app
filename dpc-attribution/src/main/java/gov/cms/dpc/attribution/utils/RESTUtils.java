@@ -2,10 +2,11 @@ package gov.cms.dpc.attribution.utils;
 
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Resource;
 
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,42 +19,6 @@ public class RESTUtils {
 
     private RESTUtils() {
         // Not used
-    }
-
-    /**
-     * Helper method for bulk submitting a {@link Bundle} of specific resources
-     *
-     * @param clazz          - {@link Class} of type of filter {@link Bundle} entries
-     * @param params         - {@link Parameters} which has a {@link Parameters#getParameterFirstRep()}
-     * @param resourceAction - {@link Function} which performs the actual bulk action for a single {@link BaseResource} of type {@link T}
-     * @param <T>            - {@link T} generic type parameter which extends {@link BaseResource}
-     * @return - {@link Bundle} containing the processed results from the bulk submission
-     */
-    @SuppressWarnings("unchecked")
-    public static <T extends BaseResource> List<T> bulkResourceHandler(Class<T> clazz, Parameters params, Function<T, Response> resourceAction) {
-        final Bundle resourceBundle = (Bundle) params.getParameterFirstRep().getResource();
-        final Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.COLLECTION);
-        // Grab all of the providers and submit them individually (for now)
-        // TODO: Optimize insert as part of DPC-490
-
-        return resourceBundle
-                .getEntry()
-                .stream()
-                .filter(Bundle.BundleEntryComponent::hasResource)
-                .map(Bundle.BundleEntryComponent::getResource)
-                .filter(resource -> resource.getClass().equals(clazz))
-                .map(clazz::cast)
-                .map(resource -> {
-                    final Response response = resourceAction.apply(resource);
-                    if (HttpStatus.isSuccess(response.getStatus())) {
-                        return (Resource) response.getEntity();
-                    }
-                    // If there's an error, rethrow the original method
-                    throw new WebApplicationException(response);
-                })
-                .map(r -> (T) r)
-                .collect(Collectors.toList());
     }
 
     /**

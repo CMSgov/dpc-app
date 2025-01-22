@@ -145,6 +145,8 @@ public class PractitionerResource extends AbstractPractitionerResource {
     public Bundle bulkSubmitProviders(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
                                       @ApiParam Parameters params) {
         final Bundle providerBundle = (Bundle) params.getParameterFirstRep().getResource();
+        logger.info("submittedProviders={}", providerBundle.getEntry().size());
+
         final Consumer<Practitioner> entryHandler = (resource) -> validateProvider(resource,
                 organization.getOrganization().getId(),
                 validator,
