@@ -1,5 +1,6 @@
 package gov.cms.dpc.api;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
@@ -190,6 +191,7 @@ public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, 
     }
 
     // Never used in dpc-api, but required for the queue service
+    @JsonIgnore
     @Override
     public int getPollingFrequency() {
         throw new UnsupportedOperationException("getPollingFrequency() is not supported in dpc-api.");
