@@ -22,19 +22,18 @@ permissions:
 
 jobs:
   docker_build:
-#    runs-on: ubuntu-20.04
     runs-on: self-hosted
     container:
-      image: ubuntu:20.04
-#    container:
-#      image: alpine:latest
+      image: alpine:latest
     steps:
-#      - name: Install system packages
-#        run: |
-#          apk update
-#          apk add make --no-cache
-#          apk add aws-cli --no-cache
-
+      - name: Install system packages
+        run: |
+          apk update
+          apk add make --no-cache
+          apk add aws-cli --no-cache
+#          apk add docker --no-cache
+#          apk add docker-compose --no-cache
+#
 #      - name: Configure AWS Credentials
 #        uses: aws-actions/configure-aws-credentials@v4
 #        with:
@@ -66,17 +65,9 @@ jobs:
 #        with:
 #          python-version: "3.8.1"
 
-#      - name: Install system packages
-#        run: |
-#          apk update
-#          apk add make --no-cache
-#          apk add aws-cli --no-cache
-#          apk add docker --no-cache
-#          apk add docker-compose --no-cache
 
       - name: Docker manually
         run: docker --version && docker compose -f ./docker-compose.base.yml build base
-#        run: cat Makefile | grep ci-app -B 2 -A 3 && make ci-app
 
       - name: Build app
         run: docker --version && docker compose -f ./docker-compose.base.yml build base
