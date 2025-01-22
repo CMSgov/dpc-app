@@ -70,7 +70,6 @@ class IpAddressResourceUnitTest {
     @Test
     public void testPost_badIp() {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("1.bad.ip.addr");
-        IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
         assertThrows(WebApplicationException.class, () -> ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest));
     }
