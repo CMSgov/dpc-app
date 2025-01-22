@@ -30,22 +30,21 @@ jobs:
         run: |
           apt-get update
           apt-get install -y docker
-#          apk add make --no-cache
-#          apk add aws-cli --no-cache
+          apt-get install -y aws-cli
 
-#      - name: Configure AWS Credentials
-#        uses: aws-actions/configure-aws-credentials@v4
-#        with:
-#          aws-region: ${{ vars.AWS_REGION }}
-#          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
-#
-#      - name: Set environment variables from AWS
-#        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
-#        env:
-#          AWS_REGION: ${{ vars.AWS_REGION }}
-#        with:
-#          params: |
-#            NEW_RELIC_API_KEY=/dpc/${{ inputs.env }}/newrelic/new_relic_user_key
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+
+      - name: Set environment variables from AWS
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            NEW_RELIC_API_KEY=/dpc/${{ inputs.env }}/newrelic/new_relic_user_key
 
       - name: Checkout code
         uses: actions/checkout@v4
