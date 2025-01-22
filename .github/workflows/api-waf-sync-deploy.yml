@@ -28,7 +28,7 @@ on:
 jobs:
   deploy:
     name: 'Deploy API WAF sync'
-    uses: CMSgov/dpc-app/.github/workflows/deploy_go_lambda.yml@${{ github.ref_name }}
+    uses: CMSgov/dpc-app/.github/workflows/deploy_go_lambda.yml@${{ github.ref_name || github.head_ref }}
     with:
       env: dev # ${{ inputs.env || 'dev' }} currently only available on dev
       project: api-waf-sync
