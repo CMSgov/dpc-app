@@ -1,4 +1,4 @@
-# See: https://github.com/docker-library/openjdk/blob/master/11/jdk/slim/Dockerfile
+# See: https://github.com/corretto/corretto-docker/blob/a2a619f2ff274d58df109c775ae79acc7b8605a2/17/jdk/alpine/3.20/Dockerfile
 FROM amazoncorretto:17-alpine-jdk
 
 # Install additional packages used acros DPC images
