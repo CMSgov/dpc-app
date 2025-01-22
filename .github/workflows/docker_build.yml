@@ -24,16 +24,15 @@ jobs:
   docker_build:
     runs-on: self-hosted
     container:
-      image: alpine:latest
+      image: ubuntu:20.04
     steps:
       - name: Install system packages
         run: |
-          apk update
-          apk add make --no-cache
-          apk add aws-cli --no-cache
-#          apk add docker --no-cache
-#          apk add docker-compose --no-cache
-#
+          apt update
+          apt install docker --no-cache
+#          apk add make --no-cache
+#          apk add aws-cli --no-cache
+
 #      - name: Configure AWS Credentials
 #        uses: aws-actions/configure-aws-credentials@v4
 #        with:
@@ -60,18 +59,11 @@ jobs:
         with:
           java-version: "11"
 
-#      - name: "Set up Python 3.8.1"
-#        uses: actions/setup-python@v2
-#        with:
-#          python-version: "3.8.1"
-
-
       - name: Docker manually
         run: docker --version && docker compose -f ./docker-compose.base.yml build base
 
       - name: Build app
-        run: docker --version && docker compose -f ./docker-compose.base.yml build base
-      #        run: cat Makefile | grep ci-app -B 2 -A 3 && make ci-app
+        run: make ci-app
 
       - name: Build portal # this is run in parallel with the app build on jenkins, might break out to separate job
         run: make ci-portals-v1
