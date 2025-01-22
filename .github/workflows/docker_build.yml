@@ -30,7 +30,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y docker
-          apt-get install -y aws-cli
+#          apt-get install -y aws-cli
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
