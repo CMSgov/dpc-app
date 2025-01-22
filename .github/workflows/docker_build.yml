@@ -38,6 +38,9 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
 
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Set environment variables from AWS
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
@@ -70,6 +73,13 @@ jobs:
       - name: Save artifacts
         run: "echo 'Saving artifacts'"
 
-      - name: ECR Login
-        run: "log into ECR here and then push up images"
         # use ECR to save the artifacts
+        # TODO convert over to GHA
+#      - name: ECR Login
+#        run: "log into ECR here and then push up images"
+#               docker.withRegistry("https://$docker_ecr") {
+#               for (component in ['web', 'web-admin', 'web-portal']) {
+#               docker.image("${docker_ecr}/dpc-${component}:latest").push()
+#               docker.image("${docker_ecr}/dpc-${component}:$version_tag").push()
+#               }
+#               }
