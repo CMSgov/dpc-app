@@ -63,8 +63,19 @@ jobs:
         with:
           java-version: "11"
 
-      - name: Run docker command manually on self-hosted
-        run: docker compose -f ./docker-compose.base.yml build base
+      - name: Install Maven 3.6.3
+        run: |
+          export PATH="$PATH:/opt/maven/bin"
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          if mvn -v; then echo "Maven already installed" && exit 0; else echo "Installing Maven"; fi
+          tmpdir="$(mktemp -d)"
+          curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
+          sudo rm -rf /opt/maven
+          sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
+
+      - name: Clean maven
+        run: |
+          mvn -ntp -U clean
 
       - name: Build app
         run: make ci-app
