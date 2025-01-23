@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   docker_build:
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,6 +29,9 @@ jobs:
 
       - name: Check docker version
         run: docker --version
+
+      - name: Check make version
+        run: make --version
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
