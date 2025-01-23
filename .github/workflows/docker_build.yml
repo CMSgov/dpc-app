@@ -82,27 +82,27 @@ jobs:
       - name: Build portal # this is run in parallel with the app build on jenkins, might break out to separate job
         run: make ci-portals-v1
 
-      - name: Build, tag, and push docker image to Amazon ECR
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: api
-          IMAGE_TAG: hardcodedstringfornow
-        run: |
-#          REPOSITORIES=['api', 'attribution', 'aggregation', 'consent', 'web', 'web-admin', 'web-portal']
-          docker tag $REGISTRY/dpc-$REPOSITORY $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
-          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
-#
-#      - name: Push artifacts
-#        run: | # tag
-#
-#
-        # use ECR to save the artifacts
-        # TODO convert over to GHA
-#      - name: ECR Login
-#        run: "log into ECR here and then push up images"
-#               docker.withRegistry("https://$docker_ecr") {
-#               for (component in ['web', 'web-admin', 'web-portal']) {
-#               docker.image("${docker_ecr}/dpc-${component}:latest").push()
-#               docker.image("${docker_ecr}/dpc-${component}:$version_tag").push()
-#               }
-#               }
+#      - name: Build, tag, and push docker image to Amazon ECR
+#        env:
+#          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#          REPOSITORY: api
+#          IMAGE_TAG: hardcodedstringfornow
+#        run: |
+##          REPOSITORIES=['api', 'attribution', 'aggregation', 'consent', 'web', 'web-admin', 'web-portal']
+#          docker tag $REGISTRY/dpc-$REPOSITORY $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+#          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+##
+##      - name: Push artifacts
+##        run: | # tag
+##
+##
+#        # use ECR to save the artifacts
+#        # TODO convert over to GHA
+##      - name: ECR Login
+##        run: "log into ECR here and then push up images"
+##               docker.withRegistry("https://$docker_ecr") {
+##               for (component in ['web', 'web-admin', 'web-portal']) {
+##               docker.image("${docker_ecr}/dpc-${component}:latest").push()
+##               docker.image("${docker_ecr}/dpc-${component}:$version_tag").push()
+##               }
+##               }
