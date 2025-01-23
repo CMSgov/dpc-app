@@ -34,6 +34,11 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
 
+      - name: Install docker twice?
+        run: |
+          apt-get update
+          apt-get install -y docker
+
       - name: Check docker version
         run: docker --version
 
