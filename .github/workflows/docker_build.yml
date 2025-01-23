@@ -19,15 +19,19 @@ permissions:
 jobs:
   docker_build:
     runs-on: self-hosted
-#    container:
-#      image: ubuntu:20.04
+    container:
+      image: ubuntu:20.04
     steps:
       - name: Install system packages
         run: |
           apt-get update
+          apt-get install -y make
+          apt-get install docker.io
 #          apt-get install -y docker
-#          apt-get install -y make
 #          apt-get install -y aws-cli
+
+      - name: Check docker version
+        run: docker --version
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -35,16 +39,8 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
 
-#      - name: Install docker twice?
-#        run: |
-#          apt-get update
-#          apt-get install -y docker
-#
-#      - name: Check docker version
-#        run: docker --version
-#
-#      - name: Login to Amazon ECR
-#        uses: aws-actions/amazon-ecr-login@v2
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Checkout code
         uses: actions/checkout@v4
