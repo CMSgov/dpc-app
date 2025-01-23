@@ -26,7 +26,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y make
-          apt-get install docker.io
+          apt-get install -y docker.io
 #          apt-get install -y docker
 #          apt-get install -y aws-cli
 
