@@ -27,7 +27,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Install python3
-        run: dnf install python3=~3.11 --no-cache
+        run: dnf install python3
 
       - name: "Checkout code"
         uses: actions/checkout@v4
