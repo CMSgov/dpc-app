@@ -76,6 +76,11 @@ jobs:
       - name: Clean maven
         run: mvn -ntp -U clean
 
+      - name: "Set up Python 3.8.1"
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8.1"
+
       - name: Build app
         run: make ci-app
 
@@ -88,9 +93,10 @@ jobs:
 #          REPOSITORY: api
 #          IMAGE_TAG: hardcodedstringfornow
 #        run: |
-##          REPOSITORIES=['api', 'attribution', 'aggregation', 'consent', 'web', 'web-admin', 'web-portal']
 #          docker tag $REGISTRY/dpc-$REPOSITORY $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 #          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+
+#          REPOSITORIES=['api', 'attribution', 'aggregation', 'consent', 'web', 'web-admin', 'web-portal']
 ##
 ##      - name: Push artifacts
 ##        run: | # tag
