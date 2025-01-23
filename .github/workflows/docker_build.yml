@@ -2,9 +2,9 @@ name: Docker Build
 
 on:
   push:
-#    branches:
-#      - main
-#  pull_request:
+  #    branches:
+  #      - main
+  #  pull_request:
   workflow_call:
     inputs:
       branch:
@@ -18,17 +18,14 @@ permissions:
 
 jobs:
   docker_build:
-    runs-on: self-hosted
-    container:
-      image: ubuntu:20.04
+    runs-on: ubuntu-20.04
     steps:
-      - name: Install system packages
-        run: |
-          apt-get update
-          apt-get install -y make
-          apt-get install -y docker.io
-#          apt-get install -y docker
-#          apt-get install -y aws-cli
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          #          path: ./dpc-app
+          #          ref: ${{ github.event.pull_request.head.sha || github.event.inputs.branch }}
+          ref: ${{ github.ref_name }}
 
       - name: Check docker version
         run: docker --version
@@ -41,13 +38,6 @@ jobs:
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-#          path: ./dpc-app
-#          ref: ${{ github.event.pull_request.head.sha || github.event.inputs.branch }}
-          ref: ${{ github.ref_name }}
 
       - name: "Set up JDK 11"
         uses: actions/setup-java@v1
