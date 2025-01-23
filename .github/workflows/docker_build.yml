@@ -55,6 +55,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
 
       - name: Login to Amazon ECR
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: "Set up JDK 11"
@@ -71,19 +72,15 @@ jobs:
       - name: Build portal # this is run in parallel with the app build on jenkins, might break out to separate job
         run: make ci-portals-v1
 
-#      - name: Build, tag, and push docker image to Amazon ECR
-#        env:
-#          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#          REPOSITORY: my-ecr-repo
-#          IMAGE_TAG: ${{ github.sha }}
-#        run: |
-#          IMAGE_TAG=hardocedstringfornow
+      - name: Build, tag, and push docker image to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: api
+          IMAGE_TAG: hardcodedstringfornow
+        run: |
 #          REPOSITORIES=['api', 'attribution', 'aggregation', 'consent', 'web', 'web-admin', 'web-portal']
-#          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-#          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-#      - name: Tag images
-#        run: | # tag
-#          echo "hi"
+          docker tag $REGISTRY/dpc-$REPOSITORY $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 #
       - name: Push artifacts
         run: | # tag
