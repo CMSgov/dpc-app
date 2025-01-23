@@ -128,15 +128,14 @@ public class TokenEntity implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o instanceof TokenEntity that) {
-            return Objects.equals(id, that.id) &&
-                    Objects.equals(organizationID, that.organizationID) &&
-                    tokenType == that.tokenType &&
-                    Objects.equals(label, that.label) &&
-                    Objects.equals(createdAt, that.createdAt) &&
-                    Objects.equals(expiresAt, that.expiresAt);
-        }
-        return false;
+        if (!(o instanceof TokenEntity)) return false;
+        TokenEntity that = (TokenEntity) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(organizationID, that.organizationID) &&
+                tokenType == that.tokenType &&
+                Objects.equals(label, that.label) &&
+                Objects.equals(createdAt, that.createdAt) &&
+                Objects.equals(expiresAt, that.expiresAt);
     }
 
     @Override
