@@ -74,8 +74,7 @@ jobs:
           sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
 
       - name: Clean maven
-        run: |
-          mvn -ntp -U clean
+        run: mvn -ntp -U clean
 
       - name: Build app
         run: make ci-app
@@ -93,10 +92,10 @@ jobs:
           docker tag $REGISTRY/dpc-$REPOSITORY $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 #
-      - name: Push artifacts
-        run: | # tag
-          
-
+#      - name: Push artifacts
+#        run: | # tag
+#
+#
         # use ECR to save the artifacts
         # TODO convert over to GHA
 #      - name: ECR Login
