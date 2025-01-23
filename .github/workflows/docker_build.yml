@@ -34,16 +34,16 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
 
-      - name: Install docker twice?
-        run: |
-          apt-get update
-          apt-get install -y docker
-
-      - name: Check docker version
-        run: docker --version
-
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
+#      - name: Install docker twice?
+#        run: |
+#          apt-get update
+#          apt-get install -y docker
+#
+#      - name: Check docker version
+#        run: docker --version
+#
+#      - name: Login to Amazon ECR
+#        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Checkout code
         uses: actions/checkout@v4
