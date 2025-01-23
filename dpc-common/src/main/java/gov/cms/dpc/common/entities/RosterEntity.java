@@ -102,13 +102,15 @@ public class RosterEntity implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof RosterEntity that)) return false;
-        return Objects.equals(id, that.id) &&
-                Objects.equals(attributedProvider, that.attributedProvider) &&
-                Objects.equals(managingOrganization, that.managingOrganization) &&
-                Objects.equals(attributions, that.attributions) &&
-                Objects.equals(createdAt, that.createdAt) &&
-                Objects.equals(updatedAt, that.updatedAt);
+        if (o instanceof RosterEntity that) {
+            return Objects.equals(id, that.id) &&
+                    Objects.equals(attributedProvider, that.attributedProvider) &&
+                    Objects.equals(managingOrganization, that.managingOrganization) &&
+                    Objects.equals(attributions, that.attributions) &&
+                    Objects.equals(createdAt, that.createdAt) &&
+                    Objects.equals(updatedAt, that.updatedAt);
+        }
+        return false;
     }
 
     @Override

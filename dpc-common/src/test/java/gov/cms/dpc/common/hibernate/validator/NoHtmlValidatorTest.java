@@ -59,11 +59,7 @@ public class NoHtmlValidatorTest {
                 Arguments.of("<BODY onload!#$%&()*~+-_.,:;?@[/|\\]^`=alert(\"XSS\")>", false),
                 Arguments.of("<<SCRIPT>alert(\"XSS\");//\\<</SCRIPT>", false),
                 Arguments.of("<STYLE>li {list-style-image: url(\"javascript:alert('XSS')\");}</STYLE><UL><LI>XSS</br>\n", false),
-                Arguments.of("""
-                                            <!--[if gte IE 4]>
-                                            <SCRIPT>alert('XSS');</SCRIPT>
-                                            <![endif]-->
-                                        """, false),
+                Arguments.of("<!--[if gte IE 4]>\n<SCRIPT>alert('XSS');</SCRIPT>\n<![endif]-->", false),
                 Arguments.of("&#X000003C;", false),
                 Arguments.of("&#0000060;", false),
                 Arguments.of("/?param=<data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4=", false),
