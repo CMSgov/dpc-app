@@ -16,6 +16,12 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  VAULT_PW: ${{ secrets.VAULT_PW }}
+  REPORT_COVERAGE: true
+  DPC_CA_CERT: ${{ secrets.DPC_CA_CERT }}
+  ENV: "github-ci"
+
 jobs:
   docker_build:
     runs-on: self-hosted
@@ -65,8 +71,23 @@ jobs:
       - name: Build portal # this is run in parallel with the app build on jenkins, might break out to separate job
         run: make ci-portals-v1
 
-      - name: Save artifacts
-        run: "echo 'Saving artifacts'"
+#      - name: Build, tag, and push docker image to Amazon ECR
+#        env:
+#          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#          REPOSITORY: my-ecr-repo
+#          IMAGE_TAG: ${{ github.sha }}
+#        run: |
+#          IMAGE_TAG=hardocedstringfornow
+#          REPOSITORIES=['api', 'attribution', 'aggregation', 'consent', 'web', 'web-admin', 'web-portal']
+#          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+#          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+#      - name: Tag images
+#        run: | # tag
+#          echo "hi"
+#
+      - name: Push artifacts
+        run: | # tag
+          
 
         # use ECR to save the artifacts
         # TODO convert over to GHA
