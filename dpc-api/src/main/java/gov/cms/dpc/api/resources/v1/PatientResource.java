@@ -86,7 +86,7 @@ public class PatientResource extends AbstractPatientResource {
                 .where(Patient.ORGANIZATION.hasId(organization.getOrganization().getId()))
                 .returnBundle(Bundle.class);
 
-        if (patientMBI != null && !patientMBI.isEmpty()) {
+        if (patientMBI != null && !patientMBI.equals("")) {
 
             // Handle MBI parsing
             // This should come out as part of DPC-432
@@ -139,7 +139,7 @@ public class PatientResource extends AbstractPatientResource {
     public Bundle bulkSubmitPatients(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
                                      @ApiParam Parameters params) {
         final Bundle patientBundle = (Bundle) params.getParameterFirstRep().getResource();
-        final Consumer<Patient> entryHandler = patient -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator);
+        final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator);
 
         return bulkResourceClient(Patient.class, client, entryHandler, patientBundle);
     }
@@ -293,8 +293,11 @@ public class PatientResource extends AbstractPatientResource {
         // Set the Managing Org, since we need it for the validation
         patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
         final ValidationResult result = validator.validateWithResult(patient, new ValidationOptions().addProfile(PatientProfile.PROFILE_URI));
-        if (!result.isSuccessful() && result.getMessages().get(0).getSeverity() != ResultSeverityEnum.INFORMATION) {
-            throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
+        if (!result.isSuccessful()) {
+            // Temporary until DPC-536 is merged in
+            if (result.getMessages().get(0).getSeverity() != ResultSeverityEnum.INFORMATION) {
+                throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
+            }
         }
     }
 }
