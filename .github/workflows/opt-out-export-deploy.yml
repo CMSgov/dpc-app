@@ -1,4 +1,4 @@
-name: opt-out-export deploy
+name: Opt-Out-Export Deploy
 
 on:
   workflow_call:
