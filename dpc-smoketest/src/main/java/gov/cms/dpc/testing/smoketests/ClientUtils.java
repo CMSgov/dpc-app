@@ -64,10 +64,10 @@ public class ClientUtils {
                 .map(search -> (Group) search.getEntryFirstRep().getResource())
                 .map(group -> jobCompletionLambda(exportClient, httpClient, group, overrideURL))
                 .peek(jobResponse -> {
-                    if (jobResponse.getError().size() > 0) {
+                    if (! jobResponse.getError().isEmpty()) {
                         ObjectMapper mapper = new ObjectMapper();
                         try {
-                            logger.error(mapper.writeValueAsString(jobResponse));
+                            logger.error(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jobResponse));
                         } catch (JsonProcessingException e) {
                             throw new IllegalStateException("Export job completed, but with unserializable errors");
                         }

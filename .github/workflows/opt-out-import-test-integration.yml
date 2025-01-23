@@ -4,7 +4,8 @@ on:
   pull_request:
     paths:
       - .github/workflows/opt-out-import-test-integration.yml
-      - .github/workflows/opt-out-import-test-deploy.yml
+      - .github/workflows/opt-out-import-deploy.yml
+      - .github/workflows/deploy_go_lambda.yml
       - lambda/opt-out-import/**
   workflow_dispatch:
 
@@ -16,7 +17,9 @@ jobs:
   # Deploy first if triggered by pull_request
   deploy:
     if: ${{ github.event_name == 'pull_request' }}
-    uses: ./.github/workflows/opt-out-import-test-deploy.yml
+    uses: ./.github/workflows/opt-out-import-deploy.yml
+    with:
+      env: test
     secrets: inherit
 
   trigger:
@@ -88,4 +91,48 @@ jobs:
           echo "no new file found"
           exit 1
 
-  # TODO Run another job to check database for update (currently cannot connect to db)
+  verify-db-changes:
+    needs: trigger
+    runs-on: self-hosted
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+      - name: Get database credentials
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            DB_USER=/dpc/test/consent/db_read_only_user_dpc_consent
+            DB_PASSWORD=/dpc/test/consent/db_read_only_pass_dpc_consent
+            HOST=/dpc/test/db/url
+      - name: Stop old db container if exists
+        run: |
+          docker stop dpc-app-db-1 || echo 'noop, not running'
+      - name: Remove old db container if exists
+        run: |
+          docker rm dpc-app-db-1 || echo 'noop, not exists'
+      - name: Run db container
+        run: |
+          docker run --rm --name dpc-app-db-1 -e POSTGRES_PASSWORD="$DB_PASSWORD" -e PGPASSWORD="$DB_PASSWORD" -d postgres:16.4
+      - name: Verify response file was ingested
+        env:
+          FILENAME: ${{needs.trigger.outputs.filename}}
+        # CAUTION: if changing the script below, validate that sensitive information is not printed in the workflow
+        run: |
+          RESPONSE_FILE_ID=`docker exec dpc-app-db-1 psql --csv -t -U $DB_USER -h $HOST -d dpc_consent -c "SELECT id FROM opt_out_file WHERE name = '$FILENAME' LIMIT 1" 2>&1`
+          if [[ $? -ne 0 || -z $RESPONSE_FILE_ID ]]; then
+            echo "input file id query returned zero results or command failed"
+            exit 1
+          else
+            CONSENTS=`docker exec dpc-app-db-1 psql --csv -t -U $DB_USER -h $HOST -d dpc_consent -c "SELECT COUNT(mbi) FROM consent WHERE opt_out_file_id = '$RESPONSE_FILE_ID'" 2>&1`
+            if [[ $? -ne 0 || -z $CONSENTS ]]; then
+              echo "consents query returned zero results or command failed"
+              exit 1
+            fi
+          fi
