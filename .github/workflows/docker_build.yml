@@ -47,7 +47,7 @@ jobs:
           java-version: "11"
 
       - name: Run docker command manually on self-hosted
-        run: docker compose -f ./docker-compose.base.yml build base
+        run: docker-compose -f ./docker-compose.base.yml build base
 
       - name: Build app
         run: make ci-app
