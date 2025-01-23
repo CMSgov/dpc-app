@@ -19,14 +19,11 @@ permissions:
 jobs:
   docker_build:
     runs-on: self-hosted
-    container:
-      image: ubuntu:20.04
     steps:
-      - name: Checkout code
+      - name: "Checkout code"
         uses: actions/checkout@v4
         with:
-          #          path: ./dpc-app
-          #          ref: ${{ github.event.pull_request.head.sha || github.event.inputs.branch }}
+          path: dpc-app
           ref: ${{ github.ref_name }}
 
       - name: Check docker version
