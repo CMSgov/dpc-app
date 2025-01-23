@@ -26,6 +26,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y docker
+          apt-get install -y make
 #          apt-get install -y aws-cli
 
       - name: Configure AWS Credentials
