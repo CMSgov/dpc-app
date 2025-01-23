@@ -40,6 +40,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -144,7 +145,7 @@ public class PatientResource extends AbstractPatientResource {
         final Bundle patientBundle = (Bundle) params.getParameterFirstRep().getResource();
         logger.info("submittedPatients={}", patientBundle.getEntry().size());
 
-        final Function<Patient, WebApplicationException> entryHandler =
+        final Function<Patient, Optional<WebApplicationException>> entryHandler =
             patient -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator);
 
         return bulkResourceClient(Patient.class, client, entryHandler, patientBundle);
@@ -295,14 +296,14 @@ public class PatientResource extends AbstractPatientResource {
         return ValidationHelpers.validateAgainstProfile(this.validator, parameters, PatientProfile.PROFILE_URI);
     }
 
-    private static WebApplicationException validateAndAddOrg(Patient patient, String organizationID, FhirValidator validator) {
+    private static Optional<WebApplicationException> validateAndAddOrg(Patient patient, String organizationID, FhirValidator validator) {
         // Set the Managing Org, since we need it for the validation
         patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
         final ValidationResult result = validator.validateWithResult(patient, new ValidationOptions().addProfile(PatientProfile.PROFILE_URI));
         if ((!result.isSuccessful()) && (result.getMessages().get(0).getSeverity() != ResultSeverityEnum.INFORMATION)) {
-            return new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
+            return Optional.of(new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422));
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 }

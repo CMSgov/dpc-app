@@ -147,7 +147,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
         final Bundle providerBundle = (Bundle) params.getParameterFirstRep().getResource();
         logger.info("submittedProviders={}", providerBundle.getEntry().size());
 
-        final Function<Practitioner, WebApplicationException> entryHandler =
+        final Function<Practitioner, Optional<WebApplicationException>> entryHandler =
             resource -> validateProvider(resource,
                 organization.getOrganization().getId(),
                 validator,
@@ -203,13 +203,13 @@ public class PractitionerResource extends AbstractPractitionerResource {
         return ValidationHelpers.validateAgainstProfile(this.validator, parameters, PractitionerProfile.PROFILE_URI);
     }
 
-    private static WebApplicationException validateProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
+    private static Optional<WebApplicationException> validateProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
         final ValidationResult result = validator.validateWithResult(provider, new ValidationOptions().addProfile(profileURL));
         if (!result.isSuccessful()) {
-            return new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
+            return Optional.of(new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422));
         } else {
             APIHelpers.addOrganizationTag(provider, organizationID);
-            return null;
+            return Optional.empty();
         }
     }
 

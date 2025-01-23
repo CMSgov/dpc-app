@@ -30,7 +30,7 @@ public class APIHelpers {
     public static <T extends BaseResource> Bundle bulkResourceClient(
         Class<T> clazz,
         IGenericClient client,
-        Function<T, WebApplicationException> entryFunction,
+        Function<T, Optional<WebApplicationException>> entryFunction,
         Bundle resourceBundle)
     {
         AtomicReference<WebApplicationException> atomicWae = new AtomicReference<>();
@@ -42,12 +42,7 @@ public class APIHelpers {
             .map(Bundle.BundleEntryComponent::getResource)
             .filter(resource -> resource.getClass().equals(clazz))
             .map(clazz::cast)
-            .forEach(entry -> {
-                WebApplicationException returnedWae = entryFunction.apply(entry);
-                if( returnedWae != null ) {
-                    atomicWae.set(returnedWae);
-                }
-            });
+            .forEach(entry -> entryFunction.apply(entry).ifPresent(atomicWae::set));
 
         // If any of our threads returned a WebApplicationException, throw it to the caller.
         if( atomicWae.get() != null ) {
