@@ -1,4 +1,4 @@
-name: API-WAF-SYNC Deploy
+name: Api-Waf-Sync Deploy
 
 on:
   workflow_call:
