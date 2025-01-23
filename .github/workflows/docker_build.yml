@@ -19,14 +19,14 @@ permissions:
 jobs:
   docker_build:
     runs-on: self-hosted
-    container:
-      image: ubuntu:20.04
+#    container:
+#      image: ubuntu:20.04
     steps:
       - name: Install system packages
         run: |
           apt-get update
-          apt-get install -y docker
-          apt-get install -y make
+#          apt-get install -y docker
+#          apt-get install -y make
 #          apt-get install -y aws-cli
 
       - name: Configure AWS Credentials
