@@ -23,7 +23,7 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v4
         with:
-          path: dpc-app
+          # path: dpc-app
           ref: ${{ github.ref_name }}
 
       - name: Check docker version
