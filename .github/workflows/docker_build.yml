@@ -19,6 +19,8 @@ permissions:
 jobs:
   docker_build:
     runs-on: self-hosted
+    container:
+      image: ubuntu:20.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
