@@ -26,6 +26,9 @@ jobs:
   docker_build:
     runs-on: self-hosted
     steps:
+      - name: Install python3
+        run: dnf install python3=~3.11 --no-cache
+
       - name: "Checkout code"
         uses: actions/checkout@v4
         with:
@@ -75,9 +78,6 @@ jobs:
 
       - name: Clean maven
         run: mvn -ntp -U clean
-
-      - name: Install python3
-        run: apk add python3=~3.11 --no-cache
 
       - name: Build app
         run: make ci-app
