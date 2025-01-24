@@ -86,13 +86,13 @@ jobs:
 #         run: make ci-portals-v1
 #
       # breaking make portals into 3 steps...
-      - name: Web portal # this is run in parallel with the app build on jenkins, might break out to separate job
-        run: make ci-web-portal
+#      - name: Web portal # this is run in parallel with the app build on jenkins, might break out to separate job
+#        run: make ci-web-portal
+#
+#      - name: Admin portal
+#        run: make ci-admin-portal
 
-      - name: Admin portal
-        run: make ci-admin-portal
-
-      - name: Admin portal
+      - name: CI portal
         run: make ci-portal
 
       - name: Push to ECR
