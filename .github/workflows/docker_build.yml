@@ -85,6 +85,14 @@ jobs:
       - name: Build portal # this is run in parallel with the app build on jenkins, might break out to separate job
         run: make ci-portals-v1
 
+      - name: Push to ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: api
+          IMAGE_TAG: hardcodedstringfornow
+        run: |
+          docker tag $REGISTRY/dpc-$REPOSITORY $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+
 #      - name: Build, tag, and push docker image to Amazon ECR
 #        env:
 #          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
