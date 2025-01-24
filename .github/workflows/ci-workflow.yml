@@ -26,13 +26,6 @@ jobs:
           sudo chmod -R 777 .
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: "Set up Ansible"
-        run: |
-          sudo dnf -y install python3 python3-pip
-          pip install ansible
-          export PATH=$PATH:~/.local/bin
-          make secure-envs
-          wc -l ops/config/decrypted/local.env 
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -51,6 +44,13 @@ jobs:
       - name: Clean maven
         run: |
           mvn -ntp -U clean
+      - name: "Set up Ansible"
+        run: |
+          sudo dnf -y install python3 python3-pip
+          pip install ansible
+          export PATH=$PATH:~/.local/bin
+          make secure-envs
+          wc -l ops/config/decrypted/local.env 
       - name: "API Build"
         run: |
           make ci-app
