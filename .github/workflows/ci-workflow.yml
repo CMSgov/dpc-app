@@ -53,6 +53,8 @@ jobs:
           wc -l ops/config/decrypted/local.env 
       - name: "API Build"
         run: |
+          echo $PATH
+          export PATH=$PATH:~/.local/bin
           make ci-app
       - name: "Move jacoco reports"
         run: |
