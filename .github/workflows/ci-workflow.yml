@@ -30,7 +30,7 @@ jobs:
         run: |
           sudo dnf install python3
           python3 -m ensurepip
-          pip install ansible
+          pip3 install ansible
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
