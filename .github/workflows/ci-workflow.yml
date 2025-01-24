@@ -30,6 +30,8 @@ jobs:
         run: |
           sudo dnf -y install python3 python3-pip
           pip install ansible
+          make secure-envs
+          wc -l ops/config/decrypted/local.env 
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
