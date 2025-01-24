@@ -1,10 +1,11 @@
-name: opt-out-export integration tests
+name: Opt-Out-Export Integration Tests
 
 on:
   pull_request:
     paths:
       - .github/workflows/opt-out-export-test-integration.yml
-      - .github/workflows/opt-out-export-test-deploy.yml
+      - .github/workflows/opt-out-export-deploy.yml
+      - .github/workflows/deploy_go_lambda.yml
       - lambda/opt-out-export/**
   workflow_dispatch:
 
@@ -16,7 +17,9 @@ jobs:
   # Deploy first if triggered by pull_request
   deploy:
     if: ${{ github.event_name == 'pull_request' }}
-    uses: ./.github/workflows/opt-out-export-test-deploy.yml
+    uses: ./.github/workflows/opt-out-export-deploy.yml
+    with:
+      env: test
     secrets: inherit
 
   trigger:
