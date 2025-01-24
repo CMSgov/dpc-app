@@ -1,4 +1,4 @@
-name: dpc-portal accessibility test
+name: Dpc-Portal Accessibility Tests
 
 on:
   workflow_dispatch:

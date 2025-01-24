@@ -1,4 +1,4 @@
-name: api-waf-sync integration tests
+name: Api-Waf-Sync Integration Tests
 
 on:
   pull_request:
