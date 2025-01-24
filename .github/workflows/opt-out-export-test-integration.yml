@@ -1,4 +1,4 @@
-name: opt-out-export integration tests
+name: Opt-Out-Export Integration Tests
 
 on:
   pull_request:

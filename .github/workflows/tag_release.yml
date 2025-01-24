@@ -1,4 +1,4 @@
-name: 'Tag Repo Utility'
+name: utility-tag-repo
 
 on:
   workflow_call:

@@ -1,4 +1,4 @@
-name: opt-out-import unit tests
+name: Opt-Out-Import Unit Tests
 
 on:
   pull_request:
