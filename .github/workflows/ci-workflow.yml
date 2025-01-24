@@ -19,19 +19,36 @@ env:
 jobs:
   build-api:
     name: "Build and Test API"
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     steps:
-      - name: "Checkout code"
+      - name: chmod working directory
+        run: |
+          sudo chmod -R 777 .
+      - name: Checkout Code
         uses: actions/checkout@v4
-      - name: "Set up JDK 11"
-        uses: actions/setup-java@v1
-        with:
-          java-version: "11"
-      - name: "Set up Python 3.8.1"
+      - name: "Set up Ansible"
         run: |
           sudo dnf install python3
           python3 -m ensurepip
           pip install ansible
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: temurin
+          cache: maven
+      - name: Install Maven 3.6.3
+        run: |
+          export PATH="$PATH:/opt/maven/bin"
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          if mvn -v; then echo "Maven already installed" && exit 0; else echo "Installing Maven"; fi
+          tmpdir="$(mktemp -d)"
+          curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
+          sudo rm -rf /opt/maven
+          sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
+      - name: Clean maven
+        run: |
+          mvn -ntp -U clean
       - name: "API Build"
         run: |
           make ci-app
@@ -55,4 +72,3 @@ jobs:
         with:
           name: code-coverage-report-dpc-api
           path: ./jacoco-reports
-
