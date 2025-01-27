@@ -94,7 +94,7 @@ jobs:
         with:
           name: code-coverage-report-dpc-api
           path: ./jacoco-reports
-  build-api:
+  build-webapps:
     name: "Build and Test Webapps"
     runs-on: self-hosted
     steps:
