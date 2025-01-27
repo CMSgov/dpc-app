@@ -39,9 +39,6 @@ jobs:
         run: docker --version
 
       - name: Install docker compose manually
-#        run: sudo mkdir -p /usr/local/lib/docker/cli-plugins |
-#          curl -sL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-"$(uname -m)" -o /usr/local/lib/docker/cli-plugins/docker-compose
-#          sudo chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
         run: |
           sudo mkdir -p /usr/local/lib/docker/cli-plugins
           sudo curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
@@ -82,6 +79,15 @@ jobs:
       - name: Build app
         run: make ci-app
 
+      - name: Push to ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: api
+          IMAGE_TAG: hardcodedstringfornow
+        run: |
+          docker tag dpc-$REPOSITORY $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+
 #       - name: Build portal # this is run in parallel with the app build on jenkins, might break out to separate job
 #         run: make ci-portals-v1
 #
@@ -95,14 +101,14 @@ jobs:
       - name: CI portal
         run: make ci-portal
 
-      - name: Push to ECR
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: api
-          IMAGE_TAG: hardcodedstringfornow
-        run: |
-          docker tag dpc-$REPOSITORY $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
-          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+#      - name: Push to ECR
+#        env:
+#          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#          REPOSITORY: api
+#          IMAGE_TAG: hardcodedstringfornow
+#        run: |
+#          docker tag dpc-$REPOSITORY $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+#          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
 #      - name: Build, tag, and push docker image to Amazon ECR
 #        env:

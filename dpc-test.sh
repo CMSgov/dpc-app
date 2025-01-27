@@ -1,24 +1,24 @@
 #!/bin/bash
-#set -Ee
-#
-## Current working directory
-#DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-#
-## Configure the Maven log level
-#export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.defaultLogLevel=info
-#
-## Include secure environment variables
-#set -o allexport
-#[[ -f ${DIR}/ops/config/decrypted/local.env ]] && source ${DIR}/ops/config/decrypted/local.env
-#set +o allexport
-#
-#function _finally {
-#  docker compose -p start-v1-app down
-#  docker volume rm start-v1-app_pgdata16
-#}
-#
-#trap _finally EXIT
-#
+set -Ee
+
+# Current working directory
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
+# Configure the Maven log level
+export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.defaultLogLevel=info
+
+# Include secure environment variables
+set -o allexport
+[[ -f ${DIR}/ops/config/decrypted/local.env ]] && source ${DIR}/ops/config/decrypted/local.env
+set +o allexport
+
+function _finally {
+  docker compose -p start-v1-app down
+  docker volume rm start-v1-app_pgdata16
+}
+
+trap _finally EXIT
+
 #if [ -n "$REPORT_COVERAGE" ]; then
 #  echo "┌──────────────────────────────────────┐"
 #  echo "│                                      │"
@@ -34,10 +34,10 @@
 #  echo "└──────────────────────────────────────────┘"
 #fi
 #
-## Build the application
-#docker compose -p start-v1-app up db --wait
-#mvn clean compile -Perror-prone -B -V -ntp
-#mvn package -Pci -ntp
+# Build the application
+docker compose -p start-v1-app up db --wait
+mvn clean compile -Perror-prone -B -V -ntp
+mvn package -Pci -ntp
 #
 ## Format the test results
 #if [ -n "$REPORT_COVERAGE" ]; then
