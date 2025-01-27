@@ -81,7 +81,7 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
      * @return List of {@link PatientEntity}s
      */
     public List<PatientEntity> bulkPatientSearchByMbi(UUID organizationId, List<String> mbis) {
-        List<PatientEntity> results = new ArrayList<>(mbis.size());
+        List<PatientEntity> results = new ArrayList<>();
 
         // With large patient inserts, this can theoretically be called with 10s of thousands of patients, so break
         // it up into queries that we can handle without causing a stack overflow.
