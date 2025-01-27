@@ -204,6 +204,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     }
 
     private static Optional<WebApplicationException> validateProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
+        logger.debug("Validating Practitioner {}", provider);
         final ValidationResult result = validator.validateWithResult(provider, new ValidationOptions().addProfile(profileURL));
         if (!result.isSuccessful()) {
             return Optional.of(new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422));
