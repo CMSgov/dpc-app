@@ -28,7 +28,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 
-public class GroupResourceUnitTest {
+class GroupResourceUnitTest {
 
     private GroupResource groupResource;
 
@@ -64,7 +64,7 @@ public class GroupResourceUnitTest {
 
 
     @Test
-    public void testCreateRosterHappyCase(){
+    void testCreateRosterHappyCase(){
         //Arrange
         final UUID orgId = UUID.randomUUID();
         final String providerNpi = NPIUtil.generateNPI();
@@ -83,7 +83,7 @@ public class GroupResourceUnitTest {
         configuration.setExpirationThreshold(10);
         Mockito.when(rosterDAO.findEntities(isNull(),eq(orgId), eq(providerNpi), isNull())).thenReturn(List.of());
         Mockito.when(providerDAO.getProviders(isNull(),eq(providerNpi), eq(orgId))).thenReturn(List.of(new ProviderEntity()));
-        Mockito.when(patientDAO.patientSearch(eq(orgId), any(List.class))).thenReturn(Collections.nCopies(5, new PatientEntity()));
+        Mockito.when(patientDAO.bulkPatientSearchById(eq(orgId), any(List.class))).thenReturn(Collections.nCopies(5, new PatientEntity()));
 
         Mockito.when(rosterDAO.persistEntity(any(RosterEntity.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
 
@@ -97,7 +97,7 @@ public class GroupResourceUnitTest {
     }
 
     @Test
-    public void testCreateRosterWithInvalidPatient(){
+    void testCreateRosterWithInvalidPatient(){
         //Arrange
         final UUID orgId = UUID.randomUUID();
         final String providerNpi = NPIUtil.generateNPI();

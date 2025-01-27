@@ -13,6 +13,7 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
+import gov.cms.dpc.testing.factories.BundleFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -313,5 +314,126 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         practitionersToCleanUp.add(result2);
 
         assertNotNull(result2, "Should be created");
+    }
+
+    @Test
+    void testBulkInsert() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+
+        Bundle practitionerBundle = BundleFactory.createBundle(practitioner);
+        Parameters params = new Parameters();
+        params.addParameter().setResource(practitionerBundle);
+
+        Bundle resultPractitionerBundle = client
+            .operation()
+            .onType(Practitioner.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        assertEquals(1, resultPractitionerBundle.getEntry().size());
+        Practitioner resultPractitioner = (Practitioner) resultPractitionerBundle.getEntry().get(0).getResource();
+        assertEquals(FHIRExtractors.getProviderNPI(practitioner), FHIRExtractors.getProviderNPI(resultPractitioner));
+
+        practitionersToCleanUp.add(resultPractitioner);
+    }
+
+    @Test
+    void testBulkInsertMultiplePractioners() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        Practitioner prac1 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        Practitioner prac2 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        Practitioner prac3 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+
+        Bundle practitionerBundle = BundleFactory.createBundle(prac1, prac2, prac3);
+        Parameters params = new Parameters();
+        params.addParameter().setResource(practitionerBundle);
+
+        Bundle resultPractitionerBundle = client
+            .operation()
+            .onType(Practitioner.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        assertEquals(3, resultPractitionerBundle.getEntry().size());
+
+        resultPractitionerBundle.getEntry().forEach(entry -> {
+            practitionersToCleanUp.add((Practitioner) entry.getResource());
+        });
+    }
+
+    @Test
+    void testBulkInsertWithExistingId() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        practitioner.setId(UUID.randomUUID().toString());
+
+        Bundle practitionerBundle = BundleFactory.createBundle(practitioner);
+        Parameters params = new Parameters();
+        params.addParameter().setResource(practitionerBundle);
+
+        Bundle resultPractitionerBundle = client
+            .operation()
+            .onType(Practitioner.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        assertEquals(1, resultPractitionerBundle.getEntry().size());
+
+        // We should ignore an id sent by the customer and create our own
+        Practitioner resultPractitioner = (Practitioner) resultPractitionerBundle.getEntry().get(0).getResource();
+        assertNotEquals(practitioner.getId(), resultPractitioner.getId());
+
+        practitionersToCleanUp.add(resultPractitioner);
+    }
+
+    @Test
+    void testBulkInsertWithDuplicatePractitioner() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        String npi = NPIUtil.generateNPI();
+        Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(npi);
+        Practitioner duplicatePractitioner = AttributionTestHelpers.createPractitionerResource(npi);
+
+        // Create first practitioner
+        final MethodOutcome outcome = client
+            .create()
+            .resource(practitioner)
+            .encodedJson()
+            .execute();
+        assertTrue(outcome.getCreated());
+        practitionersToCleanUp.add((Practitioner) outcome.getResource());
+
+        Bundle practitionerBundle = BundleFactory.createBundle(duplicatePractitioner);
+        Parameters params = new Parameters();
+        params.addParameter().setResource(practitionerBundle);
+
+        Bundle resultPractitionerBundle = client
+            .operation()
+            .onType(Practitioner.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        assertEquals(1, resultPractitionerBundle.getEntry().size());
+
+        Practitioner resultPractitioner = (Practitioner) resultPractitionerBundle.getEntry().get(0).getResource();
+        assertEquals(npi, FHIRExtractors.getProviderNPI(resultPractitioner));
+
+        practitionersToCleanUp.add(resultPractitioner);
     }
 }

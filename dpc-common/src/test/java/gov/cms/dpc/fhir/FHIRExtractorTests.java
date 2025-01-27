@@ -1,19 +1,24 @@
 package gov.cms.dpc.fhir;
 
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import gov.cms.dpc.testing.MBIUtil;
+import gov.cms.dpc.testing.factories.OrganizationFactory;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static gov.cms.dpc.fhir.FHIRExtractors.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
-public class FHIRExtractorTests {
+class FHIRExtractorTests {
 
     private static final String MISSING_ID_FMT = "Cannot find identifier for system: %s";
     private static final String MISSING_MBI_FMT = "Patient: %s doesn't have an MBI";
@@ -307,5 +312,67 @@ public class FHIRExtractorTests {
         Identifier idBeneId = new Identifier().setSystem(DPCIdentifierSystem.BENE_ID.getSystem()).setValue("bene_id");
 
         assertTrue(FHIRExtractors.findMatchingIdentifiers(List.of(idMbi1, idMbi2, idBeneId), DPCIdentifierSystem.HICN).isEmpty());
+    }
+
+    @Test
+    void test_getResourceStream_from_Bundle() {
+        Patient pat1 = FHIRBuilders.buildPatientFromMBI(MBIUtil.generateMBI());
+        Patient pat2 = FHIRBuilders.buildPatientFromMBI(MBIUtil.generateMBI());
+        Organization org = OrganizationFactory.generateFakeOrganization();
+
+        Bundle bundle = new Bundle();
+        bundle.addEntry(new Bundle.BundleEntryComponent().setResource(pat1));
+        bundle.addEntry(new Bundle.BundleEntryComponent().setResource(pat2));
+        bundle.addEntry(new Bundle.BundleEntryComponent().setResource(org));
+
+        Stream<Patient> patStream = FHIRExtractors.getResourceStream(bundle, Patient.class);
+        List<Patient> patients = patStream.collect(Collectors.toList());
+        assertEquals(2, patients.size());
+
+        Stream<Organization> orgStream = FHIRExtractors.getResourceStream(bundle, Organization.class);
+        List<Organization> orgs = orgStream.collect(Collectors.toList());
+        assertEquals(1, orgs.size());
+
+        // Should return an empty stream if we ask for a resource that's not in our bundle
+        Stream<Practitioner> practitionerStream = FHIRExtractors.getResourceStream(bundle, Practitioner.class);
+        Optional<Practitioner> optionalPractitioner = practitionerStream.findAny();
+        assertTrue(optionalPractitioner.isEmpty());
+    }
+
+    @Test
+    void test_getResourceStream_from_Parameters() {
+        Patient pat = FHIRBuilders.buildPatientFromMBI(MBIUtil.generateMBI());
+
+        Bundle bundle = new Bundle();
+        bundle.addEntry(new Bundle.BundleEntryComponent().setResource(pat));
+
+        Parameters parameters = new Parameters();
+        parameters.setParameter(List.of(new Parameters.ParametersParameterComponent().setResource(bundle)));
+
+        Stream<Patient> patStream = FHIRExtractors.getResourceStream(parameters, Patient.class);
+        List<Patient> patients = patStream.collect(Collectors.toList());
+        assertEquals(1, patients.size());
+        assertSame(pat, patients.get(0));
+    }
+
+    @Test
+    void test_getResourceStream_from_Parameters_not_a_bundle() {
+        Patient pat = FHIRBuilders.buildPatientFromMBI(MBIUtil.generateMBI());
+
+        Parameters parameters = new Parameters();
+        parameters.setParameter(List.of(new Parameters.ParametersParameterComponent().setResource(pat)));
+
+        Stream<Patient> patStream = FHIRExtractors.getResourceStream(parameters, Patient.class);
+        Optional<Patient> optionalPatient = patStream.findAny();
+        assertTrue(optionalPatient.isEmpty());
+    }
+
+    @Test
+    void test_getResourceStream_from_Parameters_no_parameter() {
+        Parameters parameters = new Parameters();
+
+        Stream<Patient> patStream = FHIRExtractors.getResourceStream(parameters, Patient.class);
+        Optional<Patient> optionalPatient = patStream.findAny();
+        assertTrue(optionalPatient.isEmpty());
     }
 }

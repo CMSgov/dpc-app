@@ -40,9 +40,7 @@ public class PatientEntityConverter implements FHIRConverter<Patient, PatientEnt
 
         // Set the ID, if one exists
         final String id = resource.getId();
-        if (id == null) {
-            patient.setID(UUID.randomUUID());
-        } else {
+        if (id != null) {
             patient.setID(UUID.fromString(new IdType(id).getIdPart()));
         }
 

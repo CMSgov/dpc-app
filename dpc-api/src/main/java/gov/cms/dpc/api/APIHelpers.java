@@ -6,6 +6,7 @@ import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
 
@@ -13,7 +14,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class APIHelpers {
@@ -25,16 +27,27 @@ public class APIHelpers {
     }
 
 
-    public static <T extends BaseResource> Bundle bulkResourceClient(Class<T> clazz, IGenericClient client, Consumer<T> entryConsumer, Bundle resourceBundle) {
-        // We need to figure out how to validate the bundle entries
+    public static <T extends BaseResource> Bundle bulkResourceClient(
+        Class<T> clazz,
+        IGenericClient client,
+        Function<T, Optional<WebApplicationException>> entryFunction,
+        Bundle resourceBundle)
+    {
+        AtomicReference<WebApplicationException> atomicWae = new AtomicReference<>();
+
         resourceBundle
-                .getEntry()
-                .stream()
-                .filter(Bundle.BundleEntryComponent::hasResource)
-                .map(Bundle.BundleEntryComponent::getResource)
-                .filter(resource -> resource.getClass().equals(clazz))
-                .map(clazz::cast)
-                .forEach(entryConsumer);
+            .getEntry()
+            .parallelStream()
+            .filter(Bundle.BundleEntryComponent::hasResource)
+            .map(Bundle.BundleEntryComponent::getResource)
+            .filter(resource -> resource.getClass().equals(clazz))
+            .map(clazz::cast)
+            .forEach(entry -> entryFunction.apply(entry).ifPresent(atomicWae::set));
+
+        // If any of our threads returned a WebApplicationException, throw it to the caller.
+        if( atomicWae.get() != null ) {
+            throw atomicWae.get();
+        }
 
         final Parameters params = new Parameters();
         params.addParameter().setResource(resourceBundle);

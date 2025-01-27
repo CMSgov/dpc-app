@@ -65,7 +65,7 @@ class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
 
         DPCManagedSessionFactory dpcManagedSessionFactory = new DPCManagedSessionFactory(db.getSessionFactory());
         relationshipDAO = new RelationshipDAO(dpcManagedSessionFactory);
-        patientDAO = new PatientDAO(dpcManagedSessionFactory);
+        patientDAO = new PatientDAO(dpcManagedSessionFactory, 1);
         organizationDAO = new OrganizationDAO(dpcManagedSessionFactory);
         providerDAO = new ProviderDAO(dpcManagedSessionFactory);
         rosterDAO = new RosterDAO(dpcManagedSessionFactory);
