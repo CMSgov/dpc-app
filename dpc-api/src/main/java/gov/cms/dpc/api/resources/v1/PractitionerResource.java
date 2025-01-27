@@ -31,7 +31,7 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.*;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
@@ -145,7 +145,10 @@ public class PractitionerResource extends AbstractPractitionerResource {
     public Bundle bulkSubmitProviders(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
                                       @ApiParam Parameters params) {
         final Bundle providerBundle = (Bundle) params.getParameterFirstRep().getResource();
-        final Consumer<Practitioner> entryHandler = (resource) -> validateProvider(resource,
+        logger.info("submittedProviders={}", providerBundle.getEntry().size());
+
+        final Function<Practitioner, Optional<WebApplicationException>> entryHandler =
+            resource -> validateProvider(resource,
                 organization.getOrganization().getId(),
                 validator,
                 PRACTITIONER_PROFILE);
@@ -200,13 +203,14 @@ public class PractitionerResource extends AbstractPractitionerResource {
         return ValidationHelpers.validateAgainstProfile(this.validator, parameters, PractitionerProfile.PROFILE_URI);
     }
 
-    private static void validateProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
-        logger.debug("Validating Practitioner {}", provider.toString());
+    private static Optional<WebApplicationException> validateProvider(Practitioner provider, String organizationID, FhirValidator validator, String profileURL) {
         final ValidationResult result = validator.validateWithResult(provider, new ValidationOptions().addProfile(profileURL));
         if (!result.isSuccessful()) {
-            throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
+            return Optional.of(new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422));
+        } else {
+            APIHelpers.addOrganizationTag(provider, organizationID);
+            return Optional.empty();
         }
-        APIHelpers.addOrganizationTag(provider, organizationID);
     }
 
 }

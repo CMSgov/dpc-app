@@ -16,7 +16,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class PatientEntityConverterTest {
+class PatientEntityConverterTest {
     PatientEntityConverter converter = new PatientEntityConverter();
     FHIREntityConverter fhirEntityConverter = FHIREntityConverter.initialize();
     PatientEntity patientEntity;
@@ -77,7 +77,7 @@ public class PatientEntityConverterTest {
     void fromFHIR_NoId() {
         patient.setId("");
         PatientEntity convertedEntity = converter.fromFHIR(fhirEntityConverter, patient);
-        assertEquals(uuid.toString().length(), convertedEntity.getID().toString().length());
+        assertNull(convertedEntity.getID());
     }
 
     @Test
