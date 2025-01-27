@@ -23,7 +23,6 @@ import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.OrganizationHelpers;
-import gov.cms.dpc.testing.factories.OrganizationFactory;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -32,9 +31,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.HttpMethod;
@@ -144,10 +143,10 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         // Generate a golden macaroon
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
-        final Endpoint endpoint = OrganizationFactory.createFakeEndpoint();
+        final Patient patient = APITestHelpers.createPatientResource("1111111111", UUID.randomUUID().toString());
 
         final Bundle bundle = new Bundle();
-        bundle.addEntry().setResource(endpoint);
+        bundle.addEntry().setResource(patient);
 
         final Parameters parameters = new Parameters();
         parameters.addParameter().setName("resource").setResource(bundle);
