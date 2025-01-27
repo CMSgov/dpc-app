@@ -59,20 +59,6 @@ jobs:
         run: |
           export PATH=$PATH:~/.local/bin
           make ci-app
-      - name: "Get Docker logs"
-        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
-        run: |
-          mkdir -p appLogs
-          docker logs start-v1-app-aggregation-1 > appLogs/api.log
-          docker logs start-v1-app-attribution-1 > appLogs/api.log
-          docker logs start-v1-app-consent-1 > appLogs/api.log
-          docker logs start-v1-app-api-1 > appLogs/api.log
-      - name: "Upload Docker logs"
-        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-logs
-          path: ./appLogs
       - name: "Move jacoco reports"
         run: |
           sudo mkdir jacoco-reports
