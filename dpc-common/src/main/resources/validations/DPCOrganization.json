@@ -59,8 +59,8 @@
       {
         "id": "Organization.endpoint",
         "path": "Organization.endpoint",
-        "definition": "An Organization will always have at least one FHIR endpoint",
-        "min": 1,
+        "definition": "An Organization may have at least one FHIR endpoint",
+        "min": 0,
         "max": "*",
         "type": [
           {

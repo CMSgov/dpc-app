@@ -81,7 +81,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testCreateInvalidOrganization() throws IOException, URISyntaxException {
+    void testCreateInvalidOrganization() throws IOException {
         URL url = new URL(getBaseURL() + "/Organization/$submit");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(HttpMethod.POST);
@@ -96,7 +96,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
             StringBuilder respBuilder = new StringBuilder();
-            String respLine = null;
+            String respLine;
             while ((respLine = reader.readLine()) != null) {
                 respBuilder.append(respLine.trim());
             }
@@ -137,52 +137,6 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
                 .execute();
 
         assertNotNull(organization, "Should have organization");
-
-        // Try to get all public endpoints
-        final Bundle endPointBundle = client
-                .search()
-                .forResource(Endpoint.class)
-                .encodedJson()
-                .returnBundle(Bundle.class)
-                .execute();
-        assertEquals(1, endPointBundle.getTotal(), "Should have one endpoint");
-
-        // Try to fetch it
-        final Endpoint endpoint = (Endpoint) endPointBundle.getEntryFirstRep().getResource();
-        final Endpoint fetchedEndpoint = client
-                .read()
-                .resource(Endpoint.class)
-                .withId(endpoint.getId())
-                .encodedJson()
-                .execute();
-
-        assertTrue(endpoint.equalsDeep(fetchedEndpoint), "Should have matching records");
-    }
-
-
-    @Test
-    void testMissingEndpoint() throws IOException {
-        // Generate a golden macaroon
-        final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
-        final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
-        final Organization organization = OrganizationFactory.generateFakeOrganization();
-
-        final Bundle bundle = new Bundle();
-        bundle.addEntry().setResource(organization);
-
-        final Parameters parameters = new Parameters();
-        parameters.addParameter().setName("resource").setResource(bundle);
-
-        final IOperationUntypedWithInput<Organization> operation = client
-                .operation()
-                .onType(Organization.class)
-                .named("submit")
-                .withParameters(parameters)
-                .returnResourceType(Organization.class)
-                .encodedJson();
-
-        assertThrows(InvalidRequestException.class, operation::execute, "Should be unprocessable");
-
     }
 
     @Test
@@ -240,7 +194,6 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         assertEquals("1111121111", result.getIdentifierFirstRep().getValue());
         assertEquals(organization.getName(), result.getName(), "Name should be updated");
         assertTrue(organization.getContact().isEmpty(), "Contact list should be updated");
-        assertEquals(1, result.getEndpoint().size(), "Endpoint list should be unchanged");
 
         // Try to update when authenticated as different organization
         final String org2ID = UUID.randomUUID().toString();
@@ -266,7 +219,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         // Delegate the Macaroon
         final Macaroon macaroon = MacaroonBakery.deserializeMacaroon(GOLDEN_MACAROON).get(0);
         final String delegatedMacaroon = MacaroonsBuilder.modify(macaroon)
-                .add_first_party_caveat(String.format("organization_id = %s", orgDeletionID.toString()))
+                .add_first_party_caveat(String.format("organization_id = %s", orgDeletionID))
                 .getMacaroon()
                 .serialize(MacaroonVersion.SerializationVersion.V2_JSON);
 
@@ -309,8 +262,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<TokenEntity>>() {
-                });
+                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
             }
         }
     }
@@ -321,8 +273,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<PublicKeyEntity>>() {
-                });
+                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
             }
         }
     }
