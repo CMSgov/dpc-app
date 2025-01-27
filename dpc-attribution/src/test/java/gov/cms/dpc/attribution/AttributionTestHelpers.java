@@ -20,6 +20,7 @@ import org.hl7.fhir.dstu3.model.*;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,6 +56,14 @@ public class AttributionTestHelpers {
         return patient;
     }
 
+    public static List<Patient> createPatientResources(String organizationId, int numPatients) {
+        List<Patient> patients = new ArrayList<>(numPatients);
+        for(int i=0; i<numPatients; i++) {
+            patients.add(createPatientResource(MBIUtil.generateMBI(), organizationId));
+        }
+        return patients;
+    }
+
     public static Organization createOrgResource(String uuid, String npi){
         final Organization organization = new Organization();
         organization.setId(uuid);
@@ -64,18 +73,20 @@ public class AttributionTestHelpers {
         return organization;
     }
 
-    public static Bundle createBundle(Resource... resources){
-        final Bundle bundle = new Bundle();
-        if(resources != null){
-            for(Resource resource:resources){
-                bundle.addEntry(new Bundle.BundleEntryComponent().setResource(resource));
-            }
-        }
-        return bundle;
+    public static IGenericClient createFHIRClient(FhirContext ctx, String serverURL) {
+        return createFHIRClient(ctx, serverURL, null);
     }
 
-    public static IGenericClient createFHIRClient(FhirContext ctx, String serverURL) {
+    public static IGenericClient createFHIRClient(FhirContext ctx, String serverURL, Integer timeout) {
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+
+        // If they want a specific timeout use it, otherwise use the default.
+        if (timeout != null) {
+            ctx.getRestfulClientFactory().setSocketTimeout(timeout);
+            ctx.getRestfulClientFactory().setConnectTimeout(timeout);
+            ctx.getRestfulClientFactory().setConnectionRequestTimeout(timeout);
+        }
+
         IGenericClient client = ctx.newRestfulGenericClient(serverURL);
 
         // Disable logging for tests
@@ -116,7 +127,6 @@ public class AttributionTestHelpers {
 
     public static PatientEntity createPatientEntity(OrganizationEntity org) {
         PatientEntity patientEntity = new PatientEntity();
-        patientEntity.setID(UUID.randomUUID());
         patientEntity.setBeneficiaryID(MBIUtil.generateMBI());
         patientEntity.setDob(LocalDate.of(1980, 7, 14));
         patientEntity.setGender(Enumerations.AdministrativeGender.MALE);
@@ -127,7 +137,7 @@ public class AttributionTestHelpers {
 
     public static ProviderEntity createProviderEntity(OrganizationEntity org) {
         ProviderEntity providerEntity = new ProviderEntity();
-        providerEntity.setID(UUID.randomUUID());
+
         providerEntity.setProviderNPI(NPIUtil.generateNPI());
         providerEntity.setOrganization(org);
 

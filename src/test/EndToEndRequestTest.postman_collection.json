@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "ac6568e9-9212-4c68-a397-04d3503b72c4",
+		"_postman_id": "f0e99e62-42a1-4b8b-a667-ffde3b01aed8",
 		"name": "EndToEndRequestTest",
 		"description": "This test is an example of an end to end set of API requests to submit a roster and export patient data. Each element in the 'item' list is a single request.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -1412,7 +1412,8 @@
 									"    pm.expect(eob.length).to.equal(10);",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						},
 						{
@@ -1421,7 +1422,8 @@
 								"exec": [
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -1435,7 +1437,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://{{hostname}}:{{api_port}}/v1/Patient/728b270d-d7de-4143-82fe-d3ccd92cebe4/$everything",
+							"raw": "http://{{hostname}}:{{api_port}}/v1/{{single_patient_id}}/$everything",
 							"protocol": "http",
 							"host": [
 								"{{hostname}}"
@@ -1443,8 +1445,7 @@
 							"port": "{{api_port}}",
 							"path": [
 								"v1",
-								"Patient",
-								"728b270d-d7de-4143-82fe-d3ccd92cebe4",
+								"{{single_patient_id}}",
 								"$everything"
 							]
 						},

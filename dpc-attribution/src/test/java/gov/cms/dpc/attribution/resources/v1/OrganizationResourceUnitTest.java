@@ -10,6 +10,7 @@ import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 
+import gov.cms.dpc.testing.factories.BundleFactory;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.BeforeEach;
@@ -124,7 +125,7 @@ class OrganizationResourceUnitTest {
 
     private Bundle buildBundleWithTestOrg(String uuid){
         Organization organization = AttributionTestHelpers.createOrgResource(uuid, "1334567892");
-        return AttributionTestHelpers.createBundle(organization);
+        return BundleFactory.createBundle(organization);
     }
 
     private OrganizationEntity createOrganizationEntity(String orgId, String orgName) {

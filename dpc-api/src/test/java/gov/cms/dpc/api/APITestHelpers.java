@@ -27,6 +27,7 @@ import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
 import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.testing.MBIUtil;
 import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -53,10 +54,7 @@ import java.io.InputStream;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -245,6 +243,15 @@ public class APITestHelpers {
                 .withGender(Enumerations.AdministrativeGender.OTHER)
                 .managedBy(organizationID)
                 .build();
+    }
+
+    public static List<Patient> createPatientResources(String organizationID, int numPatients) {
+        List<Patient> patients = new ArrayList<>(numPatients);
+
+        for(int i=0; i<numPatients; i++) {
+            patients.add(createPatientResource(MBIUtil.generateMBI(), organizationID));
+        }
+        return patients;
     }
 
     public static Provenance createProvenance(String orgId, String practitionerId, List<String> patientIds){

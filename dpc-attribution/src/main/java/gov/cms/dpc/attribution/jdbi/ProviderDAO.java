@@ -3,8 +3,8 @@ package gov.cms.dpc.attribution.jdbi;
 import gov.cms.dpc.common.entities.OrganizationEntity_;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.entities.ProviderEntity_;
+import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
-import io.dropwizard.hibernate.AbstractDAO;
 
 import javax.inject.Inject;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class ProviderDAO extends AbstractDAO<ProviderEntity> {
+public class ProviderDAO extends DPCAbstractDAO<ProviderEntity> {
 
     @Inject
     public ProviderDAO(DPCManagedSessionFactory factory) {
@@ -94,6 +94,25 @@ public class ProviderDAO extends AbstractDAO<ProviderEntity> {
 
         query.where(predicates.toArray(new Predicate[0]));
         return currentSession().createQuery(query).getSingleResult();
+    }
+
+    /**
+     * Searches {@link ProviderEntity}s by organization and NPI
+     * @param organizationId The id of the organization to search for
+     * @param npis The NPIs of the providers to search for
+     * @return A list of {@link ProviderEntity}
+     */
+    public List<ProviderEntity> bulkProviderSearch(UUID organizationId, List<String> npis) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<ProviderEntity> query = builder.createQuery(ProviderEntity.class);
+        final Root<ProviderEntity> root = query.from(ProviderEntity.class);
+
+        query.select(root)
+            .where(builder.and(
+                root.get(ProviderEntity_.providerNPI).in(npis),
+                builder.equal(root.get(ProviderEntity_.organization).get(OrganizationEntity_.id), organizationId))
+            );
+        return list(query);
     }
 
     private List<Predicate> whereSelectorForProviders(CriteriaBuilder builder,

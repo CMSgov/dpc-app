@@ -9,11 +9,13 @@ database:
   properties:
     charSet: UTF-8
     hibernate.dialect: org.hibernate.dialect.PostgreSQL10Dialect
-    hibernate.jdbc.batch_size: 100
+    hibernate.jdbc.batch_size: 1000
     hibernate.order_updates: true
     hibernate.batch_versioned_data: true
     hibernate.order_inserts: true
     hibernate.show_sql: false
+    hibernate.generate_statistics: true
+    queryChunkSize: 1000
 
 server:
   enableThreadNameFilter: false
