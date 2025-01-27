@@ -49,26 +49,17 @@ jobs:
           sudo dnf -y install python3 python3-pip
           pip install ansible
       - name: "API Build"
+        id: api-build
         run: |
           export PATH=$PATH:~/.local/bin
-          make ci-app
-      - name: "Move jacoco reports"
+          make api && make start-api
+      - name: "Get Docker logs"
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
         run: |
-          sudo mkdir jacoco-reports
-          sudo cp ./dpc-aggregation/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-aggregation-it-jacoco.xml
-          sudo cp ./dpc-aggregation/target/site/jacoco/jacoco.xml jacoco-reports/dpc-aggregation-jacoco.xml
-          sudo cp ./dpc-api/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-api-it-jacoco.xml
-          sudo cp ./dpc-api/target/site/jacoco/jacoco.xml jacoco-reports/dpc-api-jacoco.xml
-          sudo cp ./dpc-attribution/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-attribution-it-jacoco.xml
-          sudo cp ./dpc-attribution/target/site/jacoco/jacoco.xml jacoco-reports/dpc-attribution-jacoco.xml
-          sudo cp ./dpc-bluebutton/target/site/jacoco/jacoco.xml jacoco-reports/dpc-bluebutton-jacoco.xml
-          sudo cp ./dpc-common/target/site/jacoco/jacoco.xml jacoco-reports/dpc-common-jacoco.xml
-          sudo cp ./dpc-consent/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-consent-it-jacoco.xml
-          sudo cp ./dpc-consent/target/site/jacoco/jacoco.xml jacoco-reports/dpc-consent-jacoco.xml
-          sudo cp ./dpc-macaroons/target/site/jacoco/jacoco.xml jacoco-reports/dpc-macaroons-jacoco.xml
-          sudo cp ./dpc-queue/target/site/jacoco/jacoco.xml jacoco-reports/dpc-queue-jacoco.xml
-      - name: Upload jacoco reports
+          docker logs dpc-app-api-1 > docker-compose.log
+      - name: "Upload Docker logs"
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
         uses: actions/upload-artifact@v4
         with:
-          name: code-coverage-report-dpc-api
-          path: ./jacoco-reports
+          name: docker-logs
+          path: ./docker-compose.log          
