@@ -52,7 +52,9 @@ jobs:
         id: api-build
         run: |
           export PATH=$PATH:~/.local/bin
-          make api && make start-api
+          make docker-base
+          make api
+          make start-api
       - name: "Get Docker logs"
         if: ${{ failure() && steps.api-build.outcome == 'failure' }}
         run: |
