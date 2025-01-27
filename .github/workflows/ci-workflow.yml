@@ -95,7 +95,7 @@ jobs:
           name: code-coverage-report-dpc-api
           path: ./jacoco-reports
   test-portal:
-    name: "Build and Test Webapps"
+    name: "Build and Test Portal"
     runs-on: self-hosted
     steps:
       - name: chmod working directory
@@ -127,7 +127,7 @@ jobs:
           name: code-coverage-report-dpc-portal
           path: ./portal-resultset.json
   test-admin:
-    name: "Build and Test Webapps"
+    name: "Build and Test Admin"
     runs-on: self-hosted
     steps:
       - name: chmod working directory
@@ -149,7 +149,7 @@ jobs:
         id: api-build
         run: |
           export PATH=$PATH:~/.local/bin
-          make ci-admin
+          make ci-admin-portal
       - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
         run: |
           sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-admin") then .key |= sub("/dpc-admin"; "/github/workspace/dpc-admin") else . end)' dpc-admin/coverage/.resultset.json > admin-resultset.json
@@ -159,7 +159,7 @@ jobs:
           name: code-coverage-report-dpc-admin
           path: ./admin-resultset.json
   test-web:
-    name: "Build and Test Webapps"
+    name: "Build and Test Web"
     runs-on: self-hosted
     steps:
       - name: chmod working directory
