@@ -18,7 +18,6 @@ env:
 
 jobs:
   test-api:
-    if: ${{ false }}
     name: "Build and Test API"
     runs-on: self-hosted
     steps:
