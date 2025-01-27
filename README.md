@@ -108,7 +108,7 @@ If you want to build applications locally, you'll need the following tools:
 In addition, it's helpful to have the following installed for more specific scenarios:
 
 - Running [smoke tests](#smoke-tests): Python 3 (includes `pip`)
-- Running [postman tests](#postman-collection): Node.js (includes `npm`)
+- Running [postman tests](#postman-collection): Node.js (includes `npm`; note: a [known issue](https://github.com/postmanlabs/newman/issues/3267) means you should not install node > 22.2.0)
 
 ### Recommended tools
 
