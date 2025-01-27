@@ -52,20 +52,4 @@ public class OrganizationFactory {
         endpoint.setStatus(Endpoint.EndpointStatus.ACTIVE);
         return endpoint;
     }
-
-    public static Endpoint createValidFakeEndpoint() {
-        Endpoint endpoint = createFakeEndpoint();
-        endpoint.setId((String)null);
-        endpoint.setName("Fake Endpoint");
-        endpoint.setManagingOrganization(new Reference(new IdType("Organization", "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0")));
-        endpoint.setAddress("http://www.example.com/endpoint");
-        return endpoint;
-    }
-
-
-    public static Endpoint createValidFakeEndpoint(String organizationId) {
-        Endpoint endpoint = createValidFakeEndpoint();
-        endpoint.setManagingOrganization(new Reference(new IdType("Organization", organizationId)));
-        return endpoint;
-    }
 }

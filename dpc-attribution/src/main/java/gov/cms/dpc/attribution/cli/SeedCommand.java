@@ -85,7 +85,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             final FhirContext ctx = FhirContext.forDstu3();
             final IParser parser = ctx.newJsonParser();
             final FHIREntityConverter converter = FHIREntityConverter.initialize();
-            // Start with the Organizations and their endpoints
+            // Start with the Organizations
             seedOrganizationBundle(converter, context, parser);
 
             // Providers next
