@@ -73,6 +73,9 @@ jobs:
           sudo dnf -y install python3 python3-pip
           pip install ansible
 
+      - name: "Docker build manually"
+        run: docker build .
+
       - name: Build app
         run: make ci-app
 
