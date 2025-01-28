@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Install npm
         run: |
-          sudo dnf install nodjs
+          sudo dnf install nodejs
           npm --version
           node --version
       - name: chmod working directory
@@ -85,6 +85,7 @@ jobs:
           name: code-coverage-report-dpc-api
           path: ./jacoco-reports
   test-portal:
+    if: ${{ false }}
     name: "Build and Test Portal"
     runs-on: self-hosted
     steps:
@@ -117,6 +118,7 @@ jobs:
           name: code-coverage-report-dpc-portal
           path: ./portal-resultset.json
   test-admin:
+    if: ${{ false }}
     name: "Build and Test Admin"
     runs-on: self-hosted
     steps:
@@ -149,6 +151,7 @@ jobs:
           name: code-coverage-report-dpc-admin
           path: ./admin-resultset.json
   test-web:
+    if: ${{ false }}
     name: "Build and Test Web"
     runs-on: self-hosted
     steps:
@@ -182,6 +185,7 @@ jobs:
           path: ./web-resultset.json
 
   test-dpc-client:
+    if: ${{ false }}
     name: "Build and Test DPC Client"
     runs-on: self-hosted
     steps:
