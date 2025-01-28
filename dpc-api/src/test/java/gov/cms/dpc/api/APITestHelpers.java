@@ -199,7 +199,6 @@ public class APITestHelpers {
     }
 
     private static void truncateDatabase() throws IOException {
-        // Attribution
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             // Attribution
             final HttpPost attributionPost = new HttpPost(ATTRIBUTION_TRUNCATE_TASK);
