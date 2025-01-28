@@ -6,6 +6,7 @@ import com.google.inject.name.Named;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import gov.cms.dpc.consent.resources.BaseResource;
 import gov.cms.dpc.consent.resources.ConsentResource;
+import gov.cms.dpc.consent.tasks.TruncateDatabase;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 class ConsentAppModule extends DropwizardAwareModule<DPCConsentConfiguration> {
@@ -16,6 +17,9 @@ class ConsentAppModule extends DropwizardAwareModule<DPCConsentConfiguration> {
         binder.bind(ConsentResource.class);
         binder.bind(BaseResource.class);
         binder.bind(ConsentDAO.class);
+
+        // Tasks
+        binder.bind(TruncateDatabase.class);
     }
 
     @Provides
