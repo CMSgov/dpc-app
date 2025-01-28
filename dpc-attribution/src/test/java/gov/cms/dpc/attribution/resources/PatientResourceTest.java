@@ -11,10 +11,13 @@ import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.testing.MBIUtil;
+import gov.cms.dpc.testing.factories.BundleFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
+import java.util.List;
 import java.util.UUID;
 
 import static gov.cms.dpc.attribution.AttributionTestHelpers.*;
@@ -310,5 +313,93 @@ class PatientResourceTest extends AbstractAttributionTest {
                 .resource(foundPatient);
 
         assertThrows(UnprocessableEntityException.class, update::execute);
+    }
+
+    @Test
+    void testBulkInsert() {
+        // dpc-api currently has a 20sec timeout when calling attribution, so we'll match that for this test
+        final IGenericClient client = createFHIRClient(ctx, getServerURL(), 20000);
+
+        final int COUNT_TEST_PATIENTS = 25000;
+
+        List<Patient> patients = AttributionTestHelpers.createPatientResources(DEFAULT_ORG_ID, COUNT_TEST_PATIENTS);
+        Bundle patientBundle = BundleFactory.createBundle(
+            patients.stream().map(Resource.class::cast).toArray(Resource[] ::new)
+        );
+        Parameters params = new Parameters();
+        params.addParameter().setResource(patientBundle);
+
+        Bundle resultPatientBundle = client
+            .operation()
+            .onType(Patient.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        assertEquals(COUNT_TEST_PATIENTS, resultPatientBundle.getEntry().size());
+    }
+
+    @Test
+    void testBulkInsertHandlesPatWithExistingId() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        Patient patient = AttributionTestHelpers.createPatientResource(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
+        patient.setId(UUID.randomUUID().toString());
+
+        Bundle patientBundle = BundleFactory.createBundle(patient);
+        Parameters params = new Parameters();
+        params.addParameter().setResource(patientBundle);
+
+        Bundle resultPatientBundle = client
+            .operation()
+            .onType(Patient.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        assertEquals(1, resultPatientBundle.getEntry().size());
+
+        // We should ignore an id sent by the customer and create our own
+        assertNotEquals(patient.getId(), resultPatientBundle.getEntry().get(0).getResource().getId());
+    }
+
+    @Test
+    void testBulkInsertHandlesDuplicatePatient() {
+        final IGenericClient client = createFHIRClient(ctx, getServerURL());
+
+        String mbi = MBIUtil.generateMBI();
+        Patient patient = AttributionTestHelpers.createPatientResource(mbi, DEFAULT_ORG_ID);
+        Patient duplicatePatient = AttributionTestHelpers.createPatientResource(mbi, DEFAULT_ORG_ID);
+
+        // Submit first patient
+        final MethodOutcome outcome = client
+            .create()
+            .resource(patient)
+            .encodedJson()
+            .execute();
+        assertTrue(outcome.getCreated());
+
+        // Bulk submit duplicate patient
+        Bundle patientBundle = BundleFactory.createBundle(duplicatePatient);
+        Parameters params = new Parameters();
+        params.addParameter().setResource(patientBundle);
+
+        Bundle resultPatientBundle = client
+            .operation()
+            .onType(Patient.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+
+        assertEquals(1, resultPatientBundle.getEntry().size());
+
+        String resultMbi = FHIRExtractors.getPatientMBI((Patient) resultPatientBundle.getEntry().get(0).getResource());
+        assertNotEquals(mbi, resultMbi);
     }
 }
