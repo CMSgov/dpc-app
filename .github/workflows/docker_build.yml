@@ -73,17 +73,28 @@ jobs:
           sudo dnf -y install python3 python3-pip
           pip install ansible
 
-      - name: Build app
+#      - name: Build app
+#        run: |
+#          export PATH=$PATH:~/.local/bin
+#          make ci-app
+
+      - name: Build portal
         run: |
-          export PATH=$PATH:~/.local/bin
-          make ci-app
+          make ci-portal
+      - name: list images
+        run: |
+          docker image ls
+          docker compose images
 
       - name: Push to ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: api
+#          REPOSITORY: api
+          REPOSITORY: web
           IMAGE_TAG: hardcodedstringfornow
         run: |
-          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+#          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+          docker tag dpc-$REPOSITORY:latest ${docker_ecr}/dpc-$REPOSITORY:latest
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+
       
