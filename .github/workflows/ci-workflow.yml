@@ -6,6 +6,9 @@ on:
       - .github/workflows/opt-out-*
       - lambda/**
   workflow_dispatch: # Allow manual trigger
+  push:
+    paths:
+      - .github/workflows/ci-workflow.yml
 
 env:
   VAULT_PW: ${{ secrets.VAULT_PW }}
@@ -65,6 +68,23 @@ jobs:
         run: |
           export PATH=$PATH:~/.local/bin
           make ci-app
+      - name: Consent Logs
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
+        run: docker logs start-v1-app-consent-1
+      - name: Attribution Logs
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
+        run: docker logs start-v1-app-attribution-1
+      - name: Aggregation Logs
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
+        run: docker logs start-v1-app-aggregation-1
+      - name: Api Logs
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
+        run: docker logs start-v1-app-api-1
+      - name: Down
+        if: ${{ always() }}
+        run: |
+          docker compose -p start-v1-app down
+          docker volume rm start-v1-app_pgdata16
       - name: "Move jacoco reports"
         run: |
           sudo mkdir jacoco-reports
