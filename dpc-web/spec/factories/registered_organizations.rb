@@ -3,6 +3,5 @@ FactoryBot.define do
     api_id { SecureRandom.uuid }
 
     organization
-
   end
 end
