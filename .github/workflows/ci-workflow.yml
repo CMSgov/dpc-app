@@ -21,7 +21,7 @@ jobs:
       - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
-          docker system prune --volumes -f
+          docker system prune -a --volumes -f
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Setup Java
@@ -89,7 +89,7 @@ jobs:
       - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
-          docker system prune --volumes -f
+          docker system prune -a --volumes -f
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: "Set up Ansible"
@@ -123,7 +123,7 @@ jobs:
       - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
-          docker system prune --volumes -f
+          docker system prune -a --volumes -f
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: "Set up Ansible"
@@ -157,7 +157,7 @@ jobs:
       - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
-          docker system prune --volumes -f
+          docker system prune -a --volumes -f
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: "Set up Ansible"
@@ -205,7 +205,7 @@ jobs:
       - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
-          docker system prune --volumes -f
+          docker system prune -a --volumes -f
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: Download web code coverage
@@ -247,7 +247,7 @@ jobs:
       - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
-          docker system prune --volumes -f
+          docker system prune -a --volumes -f
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: Download code coverage
@@ -286,7 +286,7 @@ jobs:
       - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
-          docker system prune --volumes -f
+          docker system prune -a --volumes -f
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Setup Java
