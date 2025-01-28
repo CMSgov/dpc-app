@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Install npm
         run: |
-          sudo dnf install nodejs
+          sudo dnf -y install nodejs
           npm --version
           node --version
       - name: chmod working directory
