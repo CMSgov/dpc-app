@@ -130,8 +130,7 @@ jobs:
           curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-      - name: "Test webapps"
-        id: api-build
+      - name: "Test portal"
         run: |
           export PATH=$PATH:~/.local/bin
           make ci-portal
@@ -168,8 +167,7 @@ jobs:
           curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-      - name: "Test webapps"
-        id: api-build
+      - name: "Test Admin"
         run: |
           export PATH=$PATH:~/.local/bin
           make ci-admin-portal
@@ -206,8 +204,7 @@ jobs:
           curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-      - name: "Test webapps"
-        id: api-build
+      - name: "Test Web"
         run: |
           export PATH=$PATH:~/.local/bin
           make ci-web-portal
