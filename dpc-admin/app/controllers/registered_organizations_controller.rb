@@ -6,11 +6,6 @@ class RegisteredOrganizationsController < ApplicationController
   def new
     @organization = Organization.find(org_id_param)
     @registered_organization = @organization.build_registered_organization
-    if prod_sbx?
-      @registered_organization.build_default_fhir_endpoint
-    else
-      @registered_organization.build_fhir_endpoint
-    end
   end
 
   def create
@@ -107,8 +102,6 @@ class RegisteredOrganizationsController < ApplicationController
   end
 
   def registered_organization_params
-    params.fetch(:registered_organization).permit(
-      :organization_id, fhir_endpoint_attributes: %i[id status uri name]
-    )
+    params.fetch(:registered_organization).permit(:organization_id)
   end
 end
