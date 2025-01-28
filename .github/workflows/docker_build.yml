@@ -78,7 +78,9 @@ jobs:
 #        run: docker build engines/api_client
 
       - name: Build app
-        run: make ci-app
+        run: |
+          export PATH=$PATH:~/.local/bin
+          make ci-app
 
       - name: Push to ECR
         env:
