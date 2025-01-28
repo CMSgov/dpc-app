@@ -30,6 +30,14 @@ jobs:
     container:
       image: alpine:latest
     steps:
+      - name: Cleanup Runner
+        run: |
+          sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ -n "$RUNNING" ]; then
+            docker stop $(docker ps -q)
+          fi
+          docker system prune -a --volumes -f
       - uses: slackapi/slack-github-action@v2.0.0
         name: Slack Starting
         with:
