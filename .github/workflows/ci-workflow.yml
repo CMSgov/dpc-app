@@ -6,9 +6,6 @@ on:
       - .github/workflows/opt-out-*
       - lambda/**
   workflow_dispatch: # Allow manual trigger
-  push:
-    paths:
-      - .github/workflows/ci-workflow.yml
 
 env:
   VAULT_PW: ${{ secrets.VAULT_PW }}
@@ -21,9 +18,10 @@ jobs:
     name: "Build and Test API"
     runs-on: self-hosted
     steps:
-      - name: chmod working directory
+      - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
+          docker system prune --volumes -f
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Setup Java
@@ -88,9 +86,10 @@ jobs:
     name: "Build and Test Portal"
     runs-on: self-hosted
     steps:
-      - name: chmod working directory
+      - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
+          docker system prune --volumes -f
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: "Set up Ansible"
@@ -121,9 +120,10 @@ jobs:
     name: "Build and Test Admin"
     runs-on: self-hosted
     steps:
-      - name: chmod working directory
+      - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
+          docker system prune --volumes -f
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: "Set up Ansible"
@@ -154,9 +154,10 @@ jobs:
     name: "Build and Test Web"
     runs-on: self-hosted
     steps:
-      - name: chmod working directory
+      - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
+          docker system prune --volumes -f
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: "Set up Ansible"
@@ -201,9 +202,10 @@ jobs:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
     steps:
-      - name: chmod working directory
+      - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
+          docker system prune --volumes -f
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: Download web code coverage
@@ -242,9 +244,10 @@ jobs:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
     steps:
-      - name: chmod working directory
+      - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
+          docker system prune --volumes -f
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: Download code coverage
@@ -280,9 +283,10 @@ jobs:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
-      - name: chmod working directory
+      - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
+          docker system prune --volumes -f
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: Setup Java
