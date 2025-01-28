@@ -12,6 +12,13 @@ set -o allexport
 [[ -f ${DIR}/ops/config/decrypted/local.env ]] && source ${DIR}/ops/config/decrypted/local.env
 set +o allexport
 
+function _finally {
+  docker compose -p start-v1-app down
+  docker volume rm start-v1-app_pgdata16
+}
+
+trap _finally EXIT
+
 if [ -n "$REPORT_COVERAGE" ]; then
   echo "┌──────────────────────────────────────┐"
   echo "│                                      │"
