@@ -81,6 +81,7 @@ jobs:
       - name: Build portal
         run: |
           make ci-portal
+
       - name: list images
         run: |
           docker image ls
@@ -89,12 +90,12 @@ jobs:
       - name: Push to ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#          REPOSITORY: api
           REPOSITORY: web
           IMAGE_TAG: hardcodedstringfornow
         run: |
-#          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker tag dpc-$REPOSITORY:latest ${docker_ecr}/dpc-$REPOSITORY:latest
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
-      
+#          REPOSITORY: api
+#          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+
