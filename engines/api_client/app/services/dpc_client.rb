@@ -13,7 +13,7 @@ class DpcClient
     'application/json'
   end
 
-  def create_organization(org, fhir_endpoint: {})
+  def create_organization(org)
     uri_string = "#{base_url}/Organization/$submit"
     json = OrganizationSubmitSerializer.new(org).to_json
     post_request(uri_string, json, fhir_headers(golden_macaroon))
