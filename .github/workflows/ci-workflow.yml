@@ -21,6 +21,10 @@ jobs:
       - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ ! -z ${RUNNING} ]; then
+            docker stop $(docker ps -q)
+          fi
           docker system prune -a --volumes -f
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -89,6 +93,10 @@ jobs:
       - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ ! -z ${RUNNING} ]; then
+            docker stop $(docker ps -q)
+          fi
           docker system prune -a --volumes -f
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -123,6 +131,10 @@ jobs:
       - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ ! -z ${RUNNING} ]; then
+            docker stop $(docker ps -q)
+          fi
           docker system prune -a --volumes -f
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -157,6 +169,10 @@ jobs:
       - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ ! -z ${RUNNING} ]; then
+            docker stop $(docker ps -q)
+          fi
           docker system prune -a --volumes -f
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -205,6 +221,10 @@ jobs:
       - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ ! -z ${RUNNING} ]; then
+            docker stop $(docker ps -q)
+          fi
           docker system prune -a --volumes -f
       - name: "Checkout code"
         uses: actions/checkout@v4
@@ -247,6 +267,10 @@ jobs:
       - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ ! -z ${RUNNING} ]; then
+            docker stop $(docker ps -q)
+          fi
           docker system prune -a --volumes -f
       - name: "Checkout code"
         uses: actions/checkout@v4
@@ -286,6 +310,10 @@ jobs:
       - name: Cleanup Runner
         run: |
           sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ ! -z ${RUNNING} ]; then
+            docker stop $(docker ps -q)
+          fi
           docker system prune -a --volumes -f
       - name: Checkout Code
         uses: actions/checkout@v4
