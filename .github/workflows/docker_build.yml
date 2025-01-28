@@ -93,7 +93,7 @@ jobs:
           REPOSITORY: dpc-web-portal
           IMAGE_TAG: hardcodedstringfornow
         run: |
-          docker tag dpc-$REPOSITORY:latest ${docker_ecr}/dpc-$REPOSITORY:latest
+          docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:latest
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
 #          REPOSITORY: api
