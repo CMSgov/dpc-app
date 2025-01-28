@@ -21,6 +21,11 @@ jobs:
     name: "Build and Test API"
     runs-on: self-hosted
     steps:
+      - name: Install npm
+        run: |
+          sudo dnf install nodjs
+          npm --version
+          node --version
       - name: chmod working directory
         run: |
           sudo chmod -R 777 .
