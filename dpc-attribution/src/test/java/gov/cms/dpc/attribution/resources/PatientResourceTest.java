@@ -11,7 +11,7 @@ import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.testing.MBIUtil;
+import gov.cms.dpc.testing.utils.MBIUtil;
 import gov.cms.dpc.testing.factories.BundleFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
@@ -400,6 +400,6 @@ class PatientResourceTest extends AbstractAttributionTest {
         assertEquals(1, resultPatientBundle.getEntry().size());
 
         String resultMbi = FHIRExtractors.getPatientMBI((Patient) resultPatientBundle.getEntry().get(0).getResource());
-        assertNotEquals(mbi, resultMbi);
+        assertEquals(mbi, resultMbi);
     }
 }

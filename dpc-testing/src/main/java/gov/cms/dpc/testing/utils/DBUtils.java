@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.utils;
+package gov.cms.dpc.testing.utils;
 
 import org.jooq.DSLContext;
 import org.jooq.Schema;

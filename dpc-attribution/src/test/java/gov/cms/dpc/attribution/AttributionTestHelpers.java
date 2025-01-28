@@ -15,7 +15,7 @@ import gov.cms.dpc.common.entities.RosterEntity;
 import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.testing.MBIUtil;
+import gov.cms.dpc.testing.utils.MBIUtil;
 import org.hl7.fhir.dstu3.model.*;
 
 import java.sql.Date;
