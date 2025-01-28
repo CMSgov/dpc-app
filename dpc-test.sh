@@ -39,6 +39,18 @@ docker compose -p start-v1-app up db --wait
 mvn clean compile -Perror-prone -B -V -ntp
 mvn package -Pci -ntp
 
+echo "docker compose images!"
+docker compose images
+
+echo "docker image ls"
+docker image ls
+
+echo "check the output here Luke ^^^^"
+echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 ## Format the test results
 #if [ -n "$REPORT_COVERAGE" ]; then
 #  mvn jacoco:report -ntp
