@@ -25,7 +25,7 @@ jobs:
         run: |
           sudo chmod -R 777 .
           RUNNING=`docker ps -q`
-          if [ ! -z ${RUNNING} ]; then
+          if [ -n "$RUNNING" ]; then
             docker stop $(docker ps -q)
           fi
           docker system prune -a --volumes -f
@@ -68,6 +68,9 @@ jobs:
         run: |
           export PATH=$PATH:~/.local/bin
           make ci-app
+      - name: Posgres Logs
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
+        run: docker logs start-v1-app-db-1
       - name: Consent Logs
         if: ${{ failure() && steps.api-build.outcome == 'failure' }}
         run: docker logs start-v1-app-consent-1
@@ -114,7 +117,7 @@ jobs:
         run: |
           sudo chmod -R 777 .
           RUNNING=`docker ps -q`
-          if [ ! -z ${RUNNING} ]; then
+          if [ -n "$RUNNING" ]; then
             docker stop $(docker ps -q)
           fi
           docker system prune -a --volumes -f
@@ -151,7 +154,7 @@ jobs:
         run: |
           sudo chmod -R 777 .
           RUNNING=`docker ps -q`
-          if [ ! -z ${RUNNING} ]; then
+          if [ -n "$RUNNING" ]; then
             docker stop $(docker ps -q)
           fi
           docker system prune -a --volumes -f
@@ -188,7 +191,7 @@ jobs:
         run: |
           sudo chmod -R 777 .
           RUNNING=`docker ps -q`
-          if [ ! -z ${RUNNING} ]; then
+          if [ -n "$RUNNING" ]; then
             docker stop $(docker ps -q)
           fi
           docker system prune -a --volumes -f
@@ -239,7 +242,7 @@ jobs:
         run: |
           sudo chmod -R 777 .
           RUNNING=`docker ps -q`
-          if [ ! -z ${RUNNING} ]; then
+          if [ -n "$RUNNING" ]; then
             docker stop $(docker ps -q)
           fi
           docker system prune -a --volumes -f
@@ -289,7 +292,7 @@ jobs:
         run: |
           sudo chmod -R 777 .
           RUNNING=`docker ps -q`
-          if [ ! -z ${RUNNING} ]; then
+          if [ -n "$RUNNING" ]; then
             docker stop $(docker ps -q)
           fi
           docker system prune -a --volumes -f
@@ -335,7 +338,7 @@ jobs:
         run: |
           sudo chmod -R 777 .
           RUNNING=`docker ps -q`
-          if [ ! -z ${RUNNING} ]; then
+          if [ -n "$RUNNING" ]; then
             docker stop $(docker ps -q)
           fi
           docker system prune -a --volumes -f
