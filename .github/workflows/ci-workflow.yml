@@ -83,11 +83,15 @@ jobs:
       - name: Api Logs
         if: ${{ failure() && steps.api-build.outcome == 'failure' }}
         run: docker logs start-v1-app-api-1
-      - name: Down
+      - name: Cleanup
         if: ${{ always() }}
         run: |
-          docker compose -p start-v1-app down
-          docker volume rm start-v1-app_pgdata16
+          sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ -n "$RUNNING" ]; then
+            docker stop $(docker ps -q)
+          fi
+          docker system prune -a --volumes -f
       - name: "Move jacoco reports"
         run: |
           sudo mkdir jacoco-reports
@@ -145,6 +149,15 @@ jobs:
         with:
           name: code-coverage-report-dpc-portal
           path: ./portal-resultset-raw.json
+      - name: Cleanup
+        if: ${{ always() }}
+        run: |
+          sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ -n "$RUNNING" ]; then
+            docker stop $(docker ps -q)
+          fi
+          docker system prune -a --volumes -f
 
   test-admin:
     name: "Build and Test Admin"
@@ -182,6 +195,15 @@ jobs:
         with:
           name: code-coverage-report-dpc-admin
           path: ./admin-resultset-raw.json
+      - name: Cleanup
+        if: ${{ always() }}
+        run: |
+          sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ -n "$RUNNING" ]; then
+            docker stop $(docker ps -q)
+          fi
+          docker system prune -a --volumes -f
 
   test-web:
     name: "Build and Test Web"
@@ -219,6 +241,15 @@ jobs:
         with:
           name: code-coverage-report-dpc-web
           path: ./web-resultset-raw.json
+      - name: Cleanup
+        if: ${{ always() }}
+        run: |
+          sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ -n "$RUNNING" ]; then
+            docker stop $(docker ps -q)
+          fi
+          docker system prune -a --volumes -f
 
   test-dpc-client:
     name: "Build and Test DPC Client"
@@ -229,6 +260,15 @@ jobs:
       - name: "DPC Client Build"
         run: |
           make ci-api-client
+      - name: Cleanup
+        if: ${{ always() }}
+        run: |
+          sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ -n "$RUNNING" ]; then
+            docker stop $(docker ps -q)
+          fi
+          docker system prune -a --volumes -f
 
   sonar-quality-gate-dpc-web-and-admin:
     name: Sonarqube Quality Gate for dpc-web and dpc-admin
@@ -279,6 +319,15 @@ jobs:
             -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
             -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
             -Dsonar.qualitygate.wait=true
+      - name: Cleanup
+        if: ${{ always() }}
+        run: |
+          sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ -n "$RUNNING" ]; then
+            docker stop $(docker ps -q)
+          fi
+          docker system prune -a --volumes -f
 
   sonar-quality-gate-dpc-portal:
     name: Sonarqube Quality Gate for dpc-portal
@@ -325,6 +374,15 @@ jobs:
             -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
             -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
             -Dsonar.qualitygate.wait=true
+      - name: Cleanup
+        if: ${{ always() }}
+        run: |
+          sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ -n "$RUNNING" ]; then
+            docker stop $(docker ps -q)
+          fi
+          docker system prune -a --volumes -f
 
   sonar-quality-gate-dpc-api:
     name: Sonarqube Quality Gate for dpc-api
@@ -384,3 +442,12 @@ jobs:
       - name: Run quality gate scan
         run: |
           mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.event_name == 'pull_request' && github.head_ref || github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }} -Dsonar.qualitygate.wait=true -Dsonar.coverage.jacoco.xmlReportPaths="../jacoco-reports/*.xml"
+      - name: Cleanup
+        if: ${{ always() }}
+        run: |
+          sudo chmod -R 777 .
+          RUNNING=`docker ps -q`
+          if [ -n "$RUNNING" ]; then
+            docker stop $(docker ps -q)
+          fi
+          docker system prune -a --volumes -f
