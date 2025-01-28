@@ -39,6 +39,42 @@ docker compose -p start-v1-app up db --wait
 mvn clean compile -Perror-prone -B -V -ntp
 mvn package -Pci -ntp
 
+# Format the test results
+if [ -n "$REPORT_COVERAGE" ]; then
+  mvn jacoco:report -ntp
+fi
+
+docker compose -p start-v1-app down
+docker volume rm start-v1-app_pgdata16
+USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
+
+# Run the integration tests
+docker compose -p start-v1-app up --exit-code-from tests tests
+
+docker compose -p start-v1-app down
+docker volume rm start-v1-app_pgdata16
+
+echo "Starting Postman tests"
+# Start the API server
+USE_BFD_MOCK=true AUTH_DISABLED=true docker compose -p start-v1-app up db attribution aggregation consent api --wait
+
+# Run the Postman tests
+npm install
+npm run test
+
+# Wait for Jacoco to finish writing the output files
+docker compose -p start-v1-app down -t 60
+
+# Collect the coverage reports for the Docker integration tests
+if [ -n "$REPORT_COVERAGE" ]; then
+  mvn jacoco:report-integration -Pci -ntp
+fi
+
+echo "┌──────────────────────────────────────────┐"
+echo "│                                          │"
+echo "│             All Tests Complete           │"
+echo "│                                          │"
+echo "└──────────────────────────────────────────┘"
 echo "docker compose images!"
 docker compose images
 
@@ -51,39 +87,3 @@ echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-## Format the test results
-#if [ -n "$REPORT_COVERAGE" ]; then
-#  mvn jacoco:report -ntp
-#fi
-#
-#docker compose -p start-v1-app down
-#docker volume rm start-v1-app_pgdata16
-#USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
-#
-## Run the integration tests
-#docker compose -p start-v1-app up --exit-code-from tests tests
-#
-#docker compose -p start-v1-app down
-#docker volume rm start-v1-app_pgdata16
-#
-#echo "Starting Postman tests"
-## Start the API server
-#USE_BFD_MOCK=true AUTH_DISABLED=true docker compose -p start-v1-app up db attribution aggregation consent api --wait
-#
-## Run the Postman tests
-#npm install
-#npm run test
-#
-## Wait for Jacoco to finish writing the output files
-#docker compose -p start-v1-app down -t 60
-#
-## Collect the coverage reports for the Docker integration tests
-#if [ -n "$REPORT_COVERAGE" ]; then
-#  mvn jacoco:report-integration -Pci -ntp
-#fi
-#
-#echo "┌──────────────────────────────────────────┐"
-#echo "│                                          │"
-#echo "│             All Tests Complete           │"
-#echo "│                                          │"
-#echo "└──────────────────────────────────────────┘"

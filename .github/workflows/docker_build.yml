@@ -73,10 +73,6 @@ jobs:
           sudo dnf -y install python3 python3-pip
           pip install ansible
 
-#      - name: "Docker build manually"
-#        run: USE_BFD_MOCK=true docker compose -p start-v1-app build db attribution aggregation --wait
-#        run: docker build engines/api_client
-
       - name: Build app
         run: |
           export PATH=$PATH:~/.local/bin
@@ -88,6 +84,6 @@ jobs:
           REPOSITORY: api
           IMAGE_TAG: hardcodedstringfornow
         run: |
-          docker tag dpc-$REPOSITORY $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
       
