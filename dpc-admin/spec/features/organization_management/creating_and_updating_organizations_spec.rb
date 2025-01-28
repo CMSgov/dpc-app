@@ -115,9 +115,6 @@ RSpec.feature 'creating and updating organizations' do
     find('[data-test="enable-org"]').click
 
     expect(page).to have_css('[data-test="new-reg-org"]')
-    fill_in 'registered_organization_fhir_endpoint_attributes_name', with: 'Test Sandbox Endpoint'
-    select 'Test', from: 'registered_organization_fhir_endpoint_attributes_status'
-    fill_in 'registered_organization_fhir_endpoint_attributes_uri', with: 'https://example.com'
     find('[data-test="form-submit"]').click
 
     expect(page).to have_content('API ID')
@@ -150,9 +147,7 @@ RSpec.feature 'creating and updating organizations' do
     fill_in 'organization_name', with: new_name
     find('[data-test="form-submit"]').click
 
-    expect(api_client).to have_received(:update_organization).with(reg_org.organization,
-                                                                   reg_org.api_id,
-                                                                   reg_org.api_endpoint_ref)
+    expect(api_client).to have_received(:update_organization).with(reg_org.organization, reg_org.api_id)
   end
 
   scenario 'updating an API enabled organization without npi unsuccessfully' do
@@ -165,9 +160,6 @@ RSpec.feature 'creating and updating organizations' do
 
 
     expect(page).to have_css('[data-test="new-reg-org"]')
-    fill_in 'registered_organization_fhir_endpoint_attributes_name', with: 'Test Sandbox Endpoint'
-    select 'Test', from: 'registered_organization_fhir_endpoint_attributes_status'
-    fill_in 'registered_organization_fhir_endpoint_attributes_uri', with: 'https://example.com'
     find('[data-test="form-submit"]').click
 
     expect(page).to have_css('[data-test="new-reg-org"]')
@@ -193,7 +185,6 @@ RSpec.feature 'creating and updating organizations' do
       response: default_org_creation_response
     )
     allow(api_client).to receive(:get_public_keys).and_return(api_client)
-    allow(api_client).to receive(:update_endpoint).and_return(api_client)
     allow(api_client).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
     find('[data-test="disable-org"]').click
     reg_org = Organization.find(org.id).reg_org

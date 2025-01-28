@@ -8,7 +8,6 @@ class GrantAccessJob < ApplicationJob
 
     unless organization.registered_organization.present?
       registered_organization = organization.build_registered_organization
-      registered_organization.build_default_fhir_endpoint
       registered_organization.save!
     end
 
