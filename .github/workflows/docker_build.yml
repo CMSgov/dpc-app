@@ -73,8 +73,9 @@ jobs:
           sudo dnf -y install python3 python3-pip
           pip install ansible
 
-      - name: "Docker build manually"
-        run: docker build .
+#      - name: "Docker build manually"
+#        run: USE_BFD_MOCK=true docker compose -p start-v1-app build db attribution aggregation --wait
+#        run: docker build engines/api_client
 
       - name: Build app
         run: make ci-app
