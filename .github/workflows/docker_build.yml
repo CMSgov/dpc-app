@@ -32,6 +32,8 @@ jobs:
           sudo chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
+      - name: Assert Ownership
+        run: sudo chmod -R 777 .
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
 
