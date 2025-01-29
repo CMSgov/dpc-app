@@ -161,7 +161,6 @@ RSpec.feature 'creating and updating organizations' do
     expect(page).to have_css('[data-test="new-reg-org"]')
     find('[data-test="form-submit"]').click
 
-    puts page.body
     expect(page).to have_css('[data-test="new-reg-org"]')
     expect(page).to have_content('Organization NPI missing. NPI required to register in API.')
   end
