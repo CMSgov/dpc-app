@@ -112,3 +112,6 @@ jobs:
           docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
+      - name: echo hello
+        run: echo "pushed portal images"
+
