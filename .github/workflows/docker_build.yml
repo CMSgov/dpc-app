@@ -72,15 +72,6 @@ jobs:
           sudo dnf -y install python3 python3-pip
           pip install ansible
 
-#      - name: Build app
-#        run: |
-#          export PATH=$PATH:~/.local/bin
-#          make ci-app
-#
-#      - name: Build portal
-#        run: |
-#          make ci-portal
-
       - name: Build portals
         run: |
           make ci-portals-v1
@@ -178,7 +169,7 @@ jobs:
           export PATH=$PATH:~/.local/bin
           make ci-app
 
-      - name: Push Rails Web Portal to ECR
+      - name: Push API to ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: api
@@ -187,7 +178,7 @@ jobs:
           docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
-      - name: Push Rails Admin Portal to ECR
+      - name: Push Attribution to ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: attribution
@@ -196,7 +187,7 @@ jobs:
           docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
-      - name: Push Web to ECR
+      - name: Push Aggregation to ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: aggregation
@@ -205,7 +196,7 @@ jobs:
           docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
-      - name: Push Web to ECR
+      - name: Push Consent to ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: consent
