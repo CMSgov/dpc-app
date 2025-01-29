@@ -6,9 +6,6 @@ on:
       - .github/workflows/opt-out-*
       - lambda/**
   workflow_dispatch: # Allow manual trigger
-  push:
-    paths:
-      - .github/workflows/ci-workflow.yml
 
 env:
   VAULT_PW: ${{ secrets.VAULT_PW }}
