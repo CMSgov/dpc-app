@@ -200,7 +200,7 @@ RSpec.describe RegisteredOrganizationsController, type: :controller do
         allow(Organization).to receive(:find).and_return(doubled_org)
         allow(doubled_org).to receive(:registered_organization).and_return(doubled_reg_org)
         allow(doubled_reg_org).to receive(:destroy).and_return(false)
-        allow(doubled_reg_org).to receive_message_chain(:errors, :full_messages).and_return(['test', 'message'])
+        allow(doubled_reg_org).to receive_message_chain(:errors, :full_messages).and_return(%w[test message])
 
         delete :destroy, params: {
           organization_id: organization.id,
