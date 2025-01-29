@@ -106,6 +106,10 @@ jobs:
       - name: echo hello
         run: echo "pushed portal images"
 
+      - name: Cleanup at the end too??
+        if: ${{ always() }}
+        run: ./scripts/cleanup-docker.sh
+
   docker_build_java:
     runs-on: self-hosted
     steps:
@@ -207,3 +211,7 @@ jobs:
 
       - name: echo hello
         run: echo "pushed java images"
+
+      - name: Cleanup at the end too??
+        if: ${{ always() }}
+        run: ./scripts/cleanup-docker.sh
