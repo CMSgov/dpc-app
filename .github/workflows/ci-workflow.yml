@@ -57,7 +57,6 @@ jobs:
           chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
       - name: "API Build"
-        id: api-build
         run: |
           export PATH=$PATH:~/.local/bin
           make ci-app
