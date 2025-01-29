@@ -436,10 +436,6 @@
     </changeSet>
 
     <changeSet id="increment-attributions_id_seq" author="MEsposito">
-        <alterSequence sequenceName="attributions_id_seq" incrementBy="100" />
-    </changeSet>
-
-    <changeSet id="drop-organization-endpoints-table" author="ashley-weaver">
-        <dropTable tableName="ORGANIZATION_ENDPOINTS"/>
+        <alterSequence sequenceName="attributions_id_seq" incrementBy="100"></alterSequence>
     </changeSet>
 </databaseChangeLog>
