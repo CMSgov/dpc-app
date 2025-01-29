@@ -25,18 +25,12 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - name: Check docker version
-        run: docker --version
-
       - name: Install docker compose manually
         run: |
           sudo mkdir -p /usr/local/lib/docker/cli-plugins
           sudo curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           sudo chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-
-      - name: Docker compose version
-        run: docker compose version
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -77,17 +71,16 @@ jobs:
 #        run: |
 #          export PATH=$PATH:~/.local/bin
 #          make ci-app
+#
+#      - name: Build portal
+#        run: |
+#          make ci-portal
 
-      - name: Build portal
+      - name: Build portals
         run: |
-          make ci-portal
+          make ci-portals-v1
 
-      - name: list images
-        run: |
-          docker image ls
-          docker compose images
-
-      - name: Push to ECR
+      - name: Push Rails Web Portal to ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: web-portal
@@ -96,7 +89,21 @@ jobs:
           docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
-#          docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:latest
-#          REPOSITORY: api
-#          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+      - name: Push Rails Admin Portal to ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: web-admin
+          IMAGE_TAG: hardcodedstringfornow
+        run: |
+          docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+
+      - name: Push Web to ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: web
+          IMAGE_TAG: hardcodedstringfornow
+        run: |
+          docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
