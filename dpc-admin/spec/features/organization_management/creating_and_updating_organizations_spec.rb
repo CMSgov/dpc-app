@@ -109,7 +109,7 @@ RSpec.feature 'creating and updating organizations' do
     org.users << crabby
     org.users << fishy
 
-    mailer = stub_sandbox_notification_mailer(org, [crabby, fishy])
+    stub_sandbox_notification_mailer(org, [crabby, fishy])
 
     visit organization_path(org)
     find('[data-test="enable-org"]').click
@@ -158,10 +158,10 @@ RSpec.feature 'creating and updating organizations' do
     visit organization_path(org)
     find('[data-test="enable-org"]').click
 
-
     expect(page).to have_css('[data-test="new-reg-org"]')
     find('[data-test="form-submit"]').click
 
+    puts page.body
     expect(page).to have_css('[data-test="new-reg-org"]')
     expect(page).to have_content('Organization NPI missing. NPI required to register in API.')
   end
@@ -176,7 +176,6 @@ RSpec.feature 'creating and updating organizations' do
     allow(stub).to receive(:response_body).and_return(default_org_creation_response, { 'entities' => [] })
 
     org = create(:organization, :api_enabled)
-    reg_org = org.reg_org
     visit organization_path(org)
 
     api_client = stub_api_client(
