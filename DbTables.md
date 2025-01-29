@@ -19,7 +19,6 @@ below to populate the necessary tables. Once completed, access to the DPC endpoi
 | api_id           | character varying           | b14f8e17-dfc2-469a-9e63-3b8550e4bb77          | Same as OrganizationID, dpc_attribute.organization |
 | created_at       | timestamp without time zone |                           2023-02-08 17:31:05 |                                                    |
 | updated_at       | timestamp without time zone |                           2023-02-08 17:31:05 |                                                    |
-| api_endpoint_ref | character varying           | Endpoint/b1a8394f-7026-431f-a823-e7b7f4c8c783 | Endpoint/'+(api_id in cell# A4)                    |
 | enabled          | boolean                     |                      TRUE                     |                                                    |
 
 
@@ -45,17 +44,6 @@ below to populate the necessary tables. Once completed, access to the DPC endpoi
 | user_id         | integer                     |                   1 |             |
 | created_at      | timestamp without time zone | 2023-02-08 17:30:49 |             |
 | updated_at      | timestamp without time zone | 2023-02-08 17:30:49 |             |
-
-### dpc-website_development_FHIR_ENDPOINTS
-
-| column_name                | data_type         | value            |
-|----------------------------|-------------------|------------------|
-| id                         | bigint            |                1 |
-| name                       | character varying | test             |
-| status                     | integer           |                0 |
-| uri                        | character varying | https://test.com |
-| organization_id            | integer           | null             |
-| registered_organization_id | integer           |                1 |
 
 ### dpc_attributions_ORGANIZATION
 
