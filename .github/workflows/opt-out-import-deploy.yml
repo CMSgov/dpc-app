@@ -1,4 +1,4 @@
-name: opt-out-import dev deploy
+name: Opt-Out-Import Deploy
 
 on:
   workflow_call:

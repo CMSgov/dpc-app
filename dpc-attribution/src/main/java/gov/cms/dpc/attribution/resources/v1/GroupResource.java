@@ -23,6 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,7 +102,7 @@ public class GroupResource extends AbstractGroupResource {
     @FHIR
     @UnitOfWork
     @Override
-    public List<Group> rosterSearch(@QueryParam(Group.SP_RES_ID) UUID rosterID,
+    public List<Group> rosterSearch(@QueryParam(IAnyResource.SP_RES_ID) UUID rosterID,
                                     @NotEmpty @QueryParam("_tag") String organizationToken,
                                     @QueryParam(Group.SP_CHARACTERISTIC_VALUE) String providerNPI,
                                     @QueryParam(Group.SP_MEMBER) String patientID) {
@@ -346,7 +347,7 @@ public class GroupResource extends AbstractGroupResource {
         // Get corresponding PatientEntities
         // As of 7/30/24, we're currently capped at 1350 patients per group.  If we ever raise that it might be worth
         // considering breaking this up into multiple queries.
-        List<PatientEntity> patientEntities = patientDAO.patientSearch(orgId, patientIds);
+        List<PatientEntity> patientEntities = patientDAO.bulkPatientSearchById(orgId, patientIds);
 
         // Make sure we have the same number of Ids and entities
         if(patientIds.size() != patientEntities.size()) {
