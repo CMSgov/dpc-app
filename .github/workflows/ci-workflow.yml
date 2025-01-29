@@ -14,7 +14,7 @@ env:
   ENV: "github-ci"
 
 jobs:
-  test-api:
+  build-api:
     name: "Build and Test API"
     runs-on: self-hosted
     steps:
@@ -24,11 +24,11 @@ jobs:
         uses: actions/checkout@v4
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
-      - name: Setup Java
+      - name: "Set up JDK 11"
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
-          distribution: 'corretto'
+          distribution: "corretto"
+          java-version: "11"
       - name: Install Maven 3.6.3
         run: |
           export PATH="$PATH:/opt/maven/bin"
@@ -84,13 +84,13 @@ jobs:
         if: ${{ always() }}
         run: ./scripts/cleanup-docker.sh
 
-  test-portal:
-    name: "Build and Test Portal"
+  build-dpc-web:
+    name: "Build and Test DPC Web"
     runs-on: self-hosted
     steps:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
-      - name: Checkout Code
+      - name: "Checkout code"
         uses: actions/checkout@v4
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
@@ -104,77 +104,7 @@ jobs:
           curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-      - name: "Test portal"
-        run: |
-          export PATH=$PATH:~/.local/bin
-          make ci-portal
-      - name: "Copy test results"
-        run: sudo cp dpc-portal/coverage/.resultset.json portal-resultset-raw.json
-      - name: Archive code coverage results
-        uses: actions/upload-artifact@v4
-        with:
-          name: code-coverage-report-dpc-portal
-          path: ./portal-resultset-raw.json
-      - name: Cleanup
-        if: ${{ always() }}
-        run: ./scripts/cleanup-docker.sh
-
-  test-admin:
-    name: "Build and Test Admin"
-    runs-on: self-hosted
-    steps:
-      - name: Assert Ownership
-        run: sudo chmod -R 777 .
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Cleanup Runner
-        run: ./scripts/cleanup-docker.sh
-      - name: "Set up Ansible"
-        run: |
-          sudo dnf -y install python3 python3-pip
-          pip install ansible
-      - name: Install docker compose manually
-        run: |
-          mkdir -p /usr/local/lib/docker/cli-plugins
-          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
-          chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
-          chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-      - name: "Test Admin"
-        run: |
-          export PATH=$PATH:~/.local/bin
-          make ci-admin-portal
-      - name: "Copy test results"
-        run: sudo cp dpc-admin/coverage/.resultset.json admin-resultset-raw.json
-      - name: Archive code coverage results
-        uses: actions/upload-artifact@v4
-        with:
-          name: code-coverage-report-dpc-admin
-          path: ./admin-resultset-raw.json
-      - name: Cleanup
-        if: ${{ always() }}
-        run: ./scripts/cleanup-docker.sh
-
-  test-web:
-    name: "Build and Test Web"
-    runs-on: self-hosted
-    steps:
-      - name: Assert Ownership
-        run: sudo chmod -R 777 .
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Cleanup Runner
-        run: ./scripts/cleanup-docker.sh
-      - name: "Set up Ansible"
-        run: |
-          sudo dnf -y install python3 python3-pip
-          pip install ansible
-      - name: Install docker compose manually
-        run: |
-          mkdir -p /usr/local/lib/docker/cli-plugins
-          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
-          chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
-          chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-      - name: "Test Web"
+      - name: "DPC Web Build"
         run: |
           export PATH=$PATH:~/.local/bin
           make ci-web-portal
@@ -189,7 +119,77 @@ jobs:
         if: ${{ always() }}
         run: ./scripts/cleanup-docker.sh
 
-  test-dpc-client:
+  build-dpc-admin:
+    name: "Build and Test DPC Admin Portal"
+    runs-on: self-hosted
+    steps:
+      - name: Assert Ownership
+        run: sudo chmod -R 777 .
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: Cleanup Runner
+        run: ./scripts/cleanup-docker.sh
+      - name: "Set up Ansible"
+        run: |
+          sudo dnf -y install python3 python3-pip
+          pip install ansible
+      - name: Install docker compose manually
+        run: |
+          mkdir -p /usr/local/lib/docker/cli-plugins
+          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
+          chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
+          chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+      - name: "DPC Admin Portal Build"
+        run: |
+          export PATH=$PATH:~/.local/bin
+          make ci-admin-portal
+      - name: "Copy test results"
+        run: sudo cp dpc-admin/coverage/.resultset.json admin-resultset-raw.json
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report-dpc-admin
+          path: ./admin-resultset-raw.json
+      - name: Cleanup
+        if: ${{ always() }}
+        run: ./scripts/cleanup-docker.sh
+
+  build-dpc-portal:
+    name: "Build and Test DPC Portal"
+    runs-on: self-hosted
+    steps:
+      - name: Assert Ownership
+        run: sudo chmod -R 777 .
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: Cleanup Runner
+        run: ./scripts/cleanup-docker.sh
+      - name: "Set up Ansible"
+        run: |
+          sudo dnf -y install python3 python3-pip
+          pip install ansible
+      - name: Install docker compose manually
+        run: |
+          mkdir -p /usr/local/lib/docker/cli-plugins
+          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
+          chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
+          chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+      - name: "DPC Portal Build"
+        run: |
+          export PATH=$PATH:~/.local/bin
+          make ci-portal
+      - name: "Copy test results"
+        run: sudo cp dpc-portal/coverage/.resultset.json portal-resultset-raw.json
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report-dpc-portal
+          path: ./portal-resultset-raw.json
+      - name: Cleanup
+        if: ${{ always() }}
+        run: ./scripts/cleanup-docker.sh
+
+  build-dpc-client:
     name: "Build and Test DPC Client"
     runs-on: self-hosted
     steps:
@@ -200,14 +200,15 @@ jobs:
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: "DPC Client Build"
-        run: make ci-api-client
+        run: |
+          make ci-api-client
       - name: Cleanup
         if: ${{ always() }}
         run: ./scripts/cleanup-docker.sh
 
   sonar-quality-gate-dpc-web-and-admin:
     name: Sonarqube Quality Gate for dpc-web and dpc-admin
-    needs: [test-admin, test-web]
+    needs: [build-dpc-admin, build-dpc-web]
     runs-on: self-hosted
     env:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
@@ -215,7 +216,7 @@ jobs:
     steps:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
-      - name: Checkout Code
+      - name: "Checkout code"
         uses: actions/checkout@v4
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
@@ -256,7 +257,7 @@ jobs:
 
   sonar-quality-gate-dpc-portal:
     name: Sonarqube Quality Gate for dpc-portal
-    needs: test-portal
+    needs: build-dpc-portal
     runs-on: self-hosted
     env:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
@@ -264,7 +265,7 @@ jobs:
     steps:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
-      - name: Checkout Code
+      - name: "Checkout code"
         uses: actions/checkout@v4
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
@@ -301,7 +302,7 @@ jobs:
 
   sonar-quality-gate-dpc-api:
     name: Sonarqube Quality Gate for dpc-api
-    needs: test-api
+    needs: build-api
     runs-on: self-hosted
     env:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
@@ -337,16 +338,19 @@ jobs:
           sudo rm -rf /opt/maven
           sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
       - name: Clean maven
-        run: mvn -ntp -U clean
+        run: |
+          mvn -ntp -U clean
       - name: Compile Project
-        run: mvn clean compile -Perror-prone -B -V -ntp
+        run: |
+          mvn clean compile -Perror-prone -B -V -ntp
       - name: Download code coverage
         uses: actions/download-artifact@v4
         with:
           name: code-coverage-report-dpc-api
           path: jacoco-reports
       - name: Verify download
-        run: find . -name dpc-api-jacoco.xml
+        run: |
+          find . -name dpc-api-jacoco.xml
       - name: Run quality gate scan
         run: |
           mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.event_name == 'pull_request' && github.head_ref || github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }} -Dsonar.qualitygate.wait=true -Dsonar.coverage.jacoco.xmlReportPaths="../jacoco-reports/*.xml"
