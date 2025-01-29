@@ -175,6 +175,7 @@ jobs:
 
       - name: Build ci app
         run: |
+          export PATH=$PATH:~/.local/bin
           make ci-app
 
       - name: Push Rails Web Portal to ECR
