@@ -29,7 +29,7 @@ jobs:
         with:
           distribution: "corretto"
           java-version: "11"
-      - name: "Set up Ansible"
+      - name: "Set up Python and install Ansible"
         run: |
           sudo dnf -y install python3 python3-pip
           pip install ansible
