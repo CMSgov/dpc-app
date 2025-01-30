@@ -89,7 +89,7 @@ RSpec.describe RegisteredOrganizationsController, type: :controller do
       end
     end
   end
-  
+
   describe '#destroy' do
     let!(:internal_user) { create(:internal_user) }
 
