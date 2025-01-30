@@ -15,6 +15,7 @@ on:
         required: true
         type: 'string'
         default: 'dev'
+
 permissions:
   id-token: write
   contents: read
@@ -38,7 +39,7 @@ jobs:
             channel: "CMC1E4AEQ"
             attachments:
               - color: warning
-                text: "GHA Smoke test of `${{ inputs.env }}` has started"
+                text: "Smoke test of `${{ inputs.env }}` has started"
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
                 mrkdown_in:
                   - footer
@@ -118,7 +119,7 @@ jobs:
             channel: "CMC1E4AEQ"
             attachments:
               - color: good
-                text: "GHA Smoke test of `${{ inputs.env }}` has succeeded"
+                text: "Smoke test of `${{ inputs.env }}` has succeeded"
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
                 mrkdown_in:
                   - footer
@@ -133,7 +134,7 @@ jobs:
             channel: "CMC1E4AEQ"
             attachments:
               - color: danger
-                text: "GHA Smoke test of `${{ inputs.env }}` has failed"
+                text: "Smoke test of `${{ inputs.env }}` has failed"
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
                 mrkdown_in:
                   - footer
