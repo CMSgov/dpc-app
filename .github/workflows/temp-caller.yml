@@ -9,7 +9,7 @@ on:
 jobs:
   deploy:
     name: Smoke Test Runner
-    uses: CMSgov/dpc-app/.github/workflows/smoke-test.yml@jd/dpc-4455-gha-smoke-test
+    uses: ./.github/workflows/smoke-test.yml
     with:
       env: dev
     secrets: inherit
