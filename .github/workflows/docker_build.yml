@@ -239,7 +239,7 @@ jobs:
           REPOSITORY: api
           IMAGE_TAG: hardcodedstringfornow
         run: |
-          docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
       - name: Push Attribution to ECR
