@@ -11,6 +11,6 @@ jobs:
     name: Smoke Test Runner
     uses: ./.github/workflows/smoke-test.yml
     with:
-      env: test
+      env: prod-sbx
     secrets: inherit
 
