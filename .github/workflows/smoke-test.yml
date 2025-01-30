@@ -84,19 +84,7 @@ jobs:
           echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
       - name: "Checkout code"
         uses: actions/checkout@v4
-      - name: Install bzt
-        run: |
-          sudo dnf -y install python3 python3-pip
-          test -d venv || python -m venv venv
-          . venv/bin/activate
-          touch venv/bin/activate
-          pip install -r requirements.txt
       - name: Build smoke test
-        run: |
-          export JAVA_HOME=/usr/lib/jvm/default-jvm
-          mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
-      - name: Run Smoke Test
-        id: run-smoke-test
         env:
           ELB_URL: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
           HOST_URL: ${{ steps.determine-host.outputs.HOST_URL }}
@@ -104,13 +92,13 @@ jobs:
           WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
           WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
         run: |
-          . venv/bin/activate
+          sudo dnf -y install python3 python3-pip
           if [ "${{ inputs.env }}" = 'prod' ]; then
-            bzt src/test/prod.smoke_test.yml
+            make smoke/prod
           elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
-            bzt src/test/sandbox.smoke_test.yml
+            make smoke/sandbox
           else
-            bzt src/test/remote.smoke_test.yml
+            make smoke/remote
           fi
       - name: Upload bzt logs
         if: ${{ failure() && steps.run-smoke-test.outcome == 'failure' }}
