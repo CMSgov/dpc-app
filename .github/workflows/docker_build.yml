@@ -193,7 +193,7 @@ jobs:
           REPOSITORY: attribution
           IMAGE_TAG: hardcodedstringfornow
         run: |
-          docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
       - name: Push Aggregation to ECR
@@ -202,7 +202,7 @@ jobs:
           REPOSITORY: aggregation
           IMAGE_TAG: hardcodedstringfornow
         run: |
-          docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
       - name: Push Consent to ECR
@@ -211,7 +211,7 @@ jobs:
           REPOSITORY: consent
           IMAGE_TAG: hardcodedstringfornow
         run: |
-          docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
       - name: echo hello
