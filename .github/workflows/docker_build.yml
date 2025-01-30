@@ -121,6 +121,10 @@ jobs:
           sudo dnf -y install python3 python3-pip
           pip install ansible
 
+      - name: "check npm version for postman tests"
+        run: |
+          npm --version
+
       - name: "Checkout code"
         uses: actions/checkout@v4
         with:
