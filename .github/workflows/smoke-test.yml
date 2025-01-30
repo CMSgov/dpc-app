@@ -42,6 +42,16 @@ jobs:
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
                 mrkdown_in:
                   - footer
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: "Set up Python and install bzt"
+        run: |
+          sudo dnf -y install python3 python3-pip
+          test -d venv || python3 -m venv venv
+          . venv/bin/activate
+          touch venv/bin/activate
+          pip install -r requirements.txt
+          which bzt
       - name: "Set up JDK 11"
         uses: actions/setup-java@v3
         with:
@@ -82,9 +92,12 @@ jobs:
           fi
           echo "HOST=$HOST" >> "$GITHUB_OUTPUT"
           echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
-      - name: "Checkout code"
-        uses: actions/checkout@v4
       - name: Build smoke test
+        run: |
+          export JAVA_HOME=/usr/lib/jvm/default-jvm
+          mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
+      - name: Run Smoke Test
+        id: run-smoke-test
         env:
           ELB_URL: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
           HOST_URL: ${{ steps.determine-host.outputs.HOST_URL }}
@@ -92,13 +105,13 @@ jobs:
           WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
           WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
         run: |
-          sudo dnf -y install python3 python3-pip
+          . venv/bin/activate
           if [ "${{ inputs.env }}" = 'prod' ]; then
-            make smoke/prod
+            bzt src/test/prod.smoke_test.yml
           elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
-            make smoke/sandbox
+            bzt src/test/sandbox.smoke_test.yml
           else
-            make smoke/remote
+            bzt src/test/remote.smoke_test.yml
           fi
       - name: Upload bzt logs
         if: ${{ failure() && steps.run-smoke-test.outcome == 'failure' }}
