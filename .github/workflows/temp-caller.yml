@@ -1,4 +1,4 @@
-name: 'Temp Caller - Smoke Test'
+name: 'Temp Caller - Smoke Test GHA'
 
 on:
   push:
