@@ -47,10 +47,6 @@ jobs:
         with:
           distribution: "corretto"
           java-version: "11"
-      - name: "Set up Python and install Ansible"
-        run: |
-          sudo dnf -y install python3 python3-pip
-          pip install ansible
       - name: Install Maven 3.6.3
         run: |
           export PATH="$PATH:/opt/maven/bin"
@@ -90,11 +86,17 @@ jobs:
         uses: actions/checkout@v4
       - name: Install bzt
         run: |
+          sudo dnf -y install python3 python3-pip
           test -d venv || python -m venv venv
           . venv/bin/activate
           touch venv/bin/activate
           pip install -r requirements.txt
       - name: Build smoke test
+        run: |
+          export JAVA_HOME=/usr/lib/jvm/default-jvm
+          mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
+      - name: Run Smoke Test
+        id: run-smoke-test
         env:
           ELB_URL: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
           HOST_URL: ${{ steps.determine-host.outputs.HOST_URL }}
@@ -102,12 +104,13 @@ jobs:
           WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
           WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
         run: |
+          . venv/bin/activate
           if [ "${{ inputs.env }}" = 'prod' ]; then
-            make smoke/prod
+            bzt src/test/prod.smoke_test.yml
           elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
-            make smoke/sandbox
+            bzt src/test/sandbox.smoke_test.yml
           else
-            make smoke/remote
+            bzt src/test/remote.smoke_test.yml
           fi
       - name: Upload bzt logs
         if: ${{ failure() && steps.run-smoke-test.outcome == 'failure' }}
