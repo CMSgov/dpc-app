@@ -119,7 +119,7 @@ jobs:
             attachments:
               - color: good
                 text: "GHA Smoke test of `${{ inputs.env }}` has succeeded"
-                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}/jobs/${{ github.job }}|Smoke Test - Build ${{ github.run_id }}>"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
                 mrkdown_in:
                   - footer
       - uses: slackapi/slack-github-action@v2.0.0
