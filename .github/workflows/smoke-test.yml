@@ -49,6 +49,8 @@ jobs:
         with:
           distribution: "corretto"
           java-version: "11"
+      - name: Install Python
+        run: sudo dnf -y install python3 python3-pip
       - name: Install Maven 3.6.3
         run: |
           export PATH="$PATH:/opt/maven/bin"
@@ -93,7 +95,6 @@ jobs:
           WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
           WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
         run: |
-          sudo dnf -y install python3 python3-pip
           if [ "${{ inputs.env }}" = 'prod' ]; then
             make smoke/prod
           elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
