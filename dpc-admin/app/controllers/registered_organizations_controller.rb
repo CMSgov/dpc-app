@@ -26,25 +26,6 @@ class RegisteredOrganizationsController < ApplicationController
     end
   end
 
-  def edit
-    @organization = Organization.find(org_id_param)
-    @registered_organization = @organization.registered_organization
-  end
-
-  def update
-    @organization = Organization.find(org_id_param)
-    @registered_organization = @organization.registered_organization
-
-    if @registered_organization.update(registered_organization_params)
-      flash[:notice] = 'Organization successfully updated in API.'
-      redirect_to organization_path(@organization)
-    else
-      flash[:alert] = "Organization could not be
-                      updated: #{model_error_string(@registered_organization)}."
-      render :edit
-    end
-  end
-
   def destroy
     @organization = Organization.find(org_id_param)
     @registered_organization = @organization.registered_organization
