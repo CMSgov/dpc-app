@@ -22,7 +22,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check API
         run: |
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} api-1 api api frontend v9
@@ -38,7 +38,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Web
         run: |
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} attribution attribution attribution backend v9
@@ -54,7 +54,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Web
         run: |
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} aggregation aggregation aggregation backend v9
@@ -70,7 +70,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Web
         run: |
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} consent consent consent backend v9
@@ -87,7 +87,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Web
         run: |
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} web-v2-1 web web frontend v9
@@ -104,7 +104,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Web Sidekiq
         run: |
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} sidekiq sidekiq sidekiq frontend v9
@@ -121,7 +121,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Web
         run: |
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} web-admin-1 web-admin web-admin frontend v9
@@ -138,7 +138,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Admin Sidekiq
         run: |
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} sidekiq-admin sidekiq-admin sidekiq-admin frontend v9
@@ -155,7 +155,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Web
         run: |
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} web-portal-1 dpc-portal web-portal frontend v9
@@ -172,7 +172,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Check Portal Sidekiq
         run: |
           ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} sidekiq-portal sidekiq-portal sidekiq-portal frontend v9
