@@ -75,3 +75,7 @@ echo "│                                          │"
 echo "│             All Tests Complete           │"
 echo "│                                          │"
 echo "└──────────────────────────────────────────┘"
+
+echo "images here!"
+docker image ls
+docker compose images
