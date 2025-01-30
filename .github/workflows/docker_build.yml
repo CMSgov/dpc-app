@@ -29,9 +29,6 @@ jobs:
 #        with:
 #          ref: ${{ github.ref_name }}
 
-      - name: Check docker version
-        run: docker --version
-
       - name: Install docker compose manually
         run: |
           sudo mkdir -p /usr/local/lib/docker/cli-plugins
@@ -39,8 +36,10 @@ jobs:
           sudo chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
-      - name: Docker compose version
-        run: docker compose version
+      # TODO replace w/ make ci-portals-v1 when disk space issue resolved
+      - name: Build portal
+        run: |
+          make ci-portal
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -51,16 +50,6 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-
-      - name: "Set up Ansible"
-        run: |
-          sudo dnf -y install python3 python3-pip
-          pip install ansible
-
-      # TODO replace w/ make ci-portals-v1 when disk space issue resolved
-      - name: Build portal
-        run: |
-          make ci-portal
 
       - name: Push to ECR
         env:
