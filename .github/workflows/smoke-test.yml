@@ -1,4 +1,4 @@
-name: 'Smoke Test GHA'
+name: 'Smoke Test'
 
 on:
   workflow_dispatch:
@@ -27,9 +27,9 @@ jobs:
   smoke-test:
     name: Smoke Test
     runs-on: self-hosted
-    container:
-      image: alpine:latest
     steps:
+      - name: check for aws
+        run: which aws
       - uses: slackapi/slack-github-action@v2.0.0
         name: Slack Starting
         with:
@@ -44,9 +44,27 @@ jobs:
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
                 mrkdown_in:
                   - footer
-      - name: "Install dependencies"
+      - name: "Set up JDK 11"
+        uses: actions/setup-java@v3
+        with:
+          distribution: "corretto"
+          java-version: "11"
+      - name: "Set up Python and install Ansible"
         run: |
-          apk add --no-cache python3 python3-dev py3-pip aws-cli curl gcc libc-dev linux-headers openjdk11 maven
+          sudo dnf -y install python3 python3-pip
+          pip install ansible
+      - name: Install Maven 3.6.3
+        run: |
+          export PATH="$PATH:/opt/maven/bin"
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          if mvn -v; then echo "Maven already installed" && exit 0; else echo "Installing Maven"; fi
+          tmpdir="$(mktemp -d)"
+          curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
+          sudo rm -rf /opt/maven
+          sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
+      - name: Clean maven
+        run: |
+          mvn -ntp -U clean
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:

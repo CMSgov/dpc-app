@@ -11,6 +11,6 @@ jobs:
     name: Smoke Test Runner
     uses: CMSgov/dpc-app/.github/workflows/smoke-test.yml@jd/dpc-4455-gha-smoke-test
     with:
-      env: prod-sbx
+      env: dev
     secrets: inherit
 
