@@ -121,8 +121,9 @@ jobs:
           sudo dnf -y install python3 python3-pip
           pip install ansible
 
-      - name: "check npm version for postman tests"
+      - name: "Install npm for Postman tests"
         run: |
+          sudo dnf -y install nodejs
           npm --version
 
       - name: "Checkout code"
