@@ -1,11 +1,8 @@
 name: Docker Build
 
 on:
-  pull_request:
-    branches:
-      - main
-# TODO make this work w/ workflow_call for manual builds
-# will want to update the "Checkout code" step
+  workflow_dispatch:
+
 
 permissions:
   id-token: write
