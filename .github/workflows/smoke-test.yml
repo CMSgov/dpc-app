@@ -94,7 +94,6 @@ jobs:
           echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
       - name: Build smoke test
         run: |
-          export JAVA_HOME=/usr/lib/jvm/default-jvm
           mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
       - name: Run Smoke Test
         id: run-smoke-test
