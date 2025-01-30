@@ -11,17 +11,7 @@ venv/bin/activate: requirements.txt
 	touch venv/bin/activate
 
 .PHONY: smoke
-smoke: ## If running on Jenkins, purges JMeter's library, then copies all of dpc-smoketests dependencies into it
 smoke:
-	@JENKINS_DIR="/var/jenkins_home/.bzt/jmeter-taurus/5.5/lib"; \
-	if [ -d $$JENKINS_DIR ]; then \
-		echo "Rebuilding JMeter lib"; \
-		rm $$JENKINS_DIR/*.jar; \
-		mvn clean install -DskipTests -Djib.skip=True -pl dpc-common -am -ntp; \
-		mvn dependency:copy-dependencies -pl dpc-smoketest -DoutputDirectory=$$JENKINS_DIR; \
-	else \
-		echo "Not running on Jenkins"; \
-	fi
 	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
 
 .PHONY: smoke/local
@@ -34,17 +24,17 @@ smoke/local: venv smoke start-dpc
 .PHONY: smoke/remote
 smoke/remote: venv smoke
 	@echo "Running Smoke Tests against ${HOST_URL}"
-	. venv/bin/activate; bzt src/test/remote.smoke_test.yml
+	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/remote.smoke_test.yml
 
 .PHONY: smoke/sandbox
 smoke/sandbox: venv smoke
 	@echo "Running Smoke Tests against ${HOST_URL}"
-	. venv/bin/activate; bzt src/test/sandbox.smoke_test.yml
+	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/sandbox.smoke_test.yml
 
 .PHONY: smoke/prod
 smoke/prod: venv smoke
 	@echo "Running Smoke Tests against ${HOST_URL}"
-	. venv/bin/activate; bzt src/test/prod.smoke_test.yml
+	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/prod.smoke_test.yml
 
 
 # Build commands
