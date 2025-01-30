@@ -67,8 +67,8 @@ jobs:
 #
 #      - name: "Checkout code"
 #        uses: actions/checkout@v4
-#        with:
-#          ref: ${{ github.ref_name }}
+##        with:
+##          ref: ${{ github.ref_name }}
 #
 #      - name: Install docker compose manually
 #        run: |
@@ -134,114 +134,134 @@ jobs:
 #      - name: Cleanup at the end too??
 #        if: ${{ always() }}
 #        run: ./scripts/cleanup-docker.sh
-#
-#  docker_build_java:
-#    runs-on: self-hosted
-#    steps:
-#      - name: Install python3
-#        run: sudo dnf install python3
-#
-#      - name: "Set up Ansible"
-#        run: |
-#          sudo dnf -y install python3 python3-pip
-#          pip install ansible
-#
-#      - name: "Install npm for Postman tests"
-#        run: |
-#          sudo dnf -y install nodejs
-#          npm --version
-#
-#      - name: "Checkout code"
-#        uses: actions/checkout@v4
+
+  docker_build_java:
+    runs-on: self-hosted
+    steps:
+      - name: Install python3
+        run: sudo dnf install python3
+
+      - name: "Set up Ansible"
+        run: |
+          sudo dnf -y install python3 python3-pip
+          pip install ansible
+
+      - name: "Install npm for Postman tests"
+        run: |
+          sudo dnf -y install nodejs
+          npm --version
+
+      - name: "Checkout code"
+        uses: actions/checkout@v4
 #        with:
 #          ref: ${{ github.ref_name }}
-#
-#      - name: Install docker compose manually
-#        run: |
-#          sudo mkdir -p /usr/local/lib/docker/cli-plugins
-#          sudo curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
-#          sudo chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
-#          sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-#
-#      - name: Assert Ownership
-#        run: sudo chmod -R 777 .
-#      - name: Cleanup Runner
-#        run: ./scripts/cleanup-docker.sh
-#
-#      - name: Configure AWS Credentials
-#        uses: aws-actions/configure-aws-credentials@v4
-#        with:
-#          aws-region: ${{ vars.AWS_REGION }}
-#          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-#
-#      - name: Login to Amazon ECR
-#        id: login-ecr
-#        uses: aws-actions/amazon-ecr-login@v2
-#
-#      - name: "Set up JDK 11"
-#        uses: actions/setup-java@v3
-#        with:
-#          java-version: "11"
-#          distribution: "corretto"
-#          cache: maven
-#
-#      - name: Install Maven 3.6.3
-#        run: |
-#          export PATH="$PATH:/opt/maven/bin"
-#          echo "PATH=$PATH" >> $GITHUB_ENV
-#          if mvn -v; then echo "Maven already installed" && exit 0; else echo "Installing Maven"; fi
-#          tmpdir="$(mktemp -d)"
-#          curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
-#          sudo rm -rf /opt/maven
-#          sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
-#
-#      - name: Clean maven
-#        run: mvn -ntp -U clean
-#
-#      - name: Build ci app
-#        run: |
-#          export PATH=$PATH:~/.local/bin
-#          make ci-app
-#
-#      - name: Push API to ECR
-#        env:
-#          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#          REPOSITORY: api
-#          IMAGE_TAG: hardcodedstringfornow
-#        run: |
-#          docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
-#          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
-#
-#      - name: Push Attribution to ECR
-#        env:
-#          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#          REPOSITORY: attribution
-#          IMAGE_TAG: hardcodedstringfornow
-#        run: |
-#          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
-#          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
-#
-#      - name: Push Aggregation to ECR
-#        env:
-#          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#          REPOSITORY: aggregation
-#          IMAGE_TAG: hardcodedstringfornow
-#        run: |
-#          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
-#          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
-#
-#      - name: Push Consent to ECR
-#        env:
-#          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#          REPOSITORY: consent
-#          IMAGE_TAG: hardcodedstringfornow
-#        run: |
-#          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
-#          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
-#
-#      - name: echo hello
-#        run: echo "pushed java images"
-#
-#      - name: Cleanup at the end too??
-#        if: ${{ always() }}
-#        run: ./scripts/cleanup-docker.sh
+
+      - name: Install docker compose manually
+        run: |
+          sudo mkdir -p /usr/local/lib/docker/cli-plugins
+          sudo curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
+          sudo chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
+          sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+      - name: Assert Ownership
+        run: sudo chmod -R 777 .
+      - name: Cleanup Runner
+        run: ./scripts/cleanup-docker.sh
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: "Set up JDK 11"
+        uses: actions/setup-java@v3
+        with:
+          java-version: "11"
+          distribution: "corretto"
+          cache: maven
+
+      - name: Install Maven 3.6.3
+        run: |
+          export PATH="$PATH:/opt/maven/bin"
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          if mvn -v; then echo "Maven already installed" && exit 0; else echo "Installing Maven"; fi
+          tmpdir="$(mktemp -d)"
+          curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
+          sudo rm -rf /opt/maven
+          sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
+
+      - name: Clean maven
+        run: mvn -ntp -U clean
+
+      - name: Build ci app
+        id: api-build
+        run: |
+          export PATH=$PATH:~/.local/bin
+          make ci-app
+
+      # add extra commands to log docker containers during failure
+      - name: Consent Logs
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
+        run: docker logs start-v1-app-consent-1
+      - name: Attribution Logs
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
+        run: docker logs start-v1-app-attribution-1
+      - name: Aggregation Logs
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
+        run: docker logs start-v1-app-aggregation-1
+      - name: Api Logs
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
+        run: docker logs start-v1-app-api-1
+      - name: Down
+        if: ${{ always() }}
+        run: |
+          docker compose -p start-v1-app down
+          docker volume rm start-v1-app_pgdata16
+
+      - name: Push API to ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: api
+          IMAGE_TAG: hardcodedstringfornow
+        run: |
+          docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+
+      - name: Push Attribution to ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: attribution
+          IMAGE_TAG: hardcodedstringfornow
+        run: |
+          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+
+      - name: Push Aggregation to ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: aggregation
+          IMAGE_TAG: hardcodedstringfornow
+        run: |
+          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+
+      - name: Push Consent to ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: consent
+          IMAGE_TAG: hardcodedstringfornow
+        run: |
+          docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+
+      - name: echo hello
+        run: echo "pushed java images"
+
+      - name: Cleanup at the end too??
+        if: ${{ always() }}
+        run: ./scripts/cleanup-docker.sh
