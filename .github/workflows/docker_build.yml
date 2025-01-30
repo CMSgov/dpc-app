@@ -217,11 +217,6 @@ jobs:
       - name: Api Logs
         if: ${{ failure() && steps.api-build.outcome == 'failure' }}
         run: docker logs start-v1-app-api-1
-      - name: Down
-        if: ${{ always() }}
-        run: |
-          docker compose -p start-v1-app down
-          docker volume rm start-v1-app_pgdata16
 
       - name: Push API to ECR
         env:
@@ -265,3 +260,9 @@ jobs:
       - name: Cleanup at the end too??
         if: ${{ always() }}
         run: ./scripts/cleanup-docker.sh
+
+#      - name: Down
+#        if: ${{ always() }}
+#        run: |
+#          docker compose -p start-v1-app down
+#          docker volume rm start-v1-app_pgdata16
