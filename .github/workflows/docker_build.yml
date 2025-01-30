@@ -1,7 +1,11 @@
 name: Docker Build
 
 on:
-  push:
+  pull_request:
+    branches:
+      - main
+# TODO make this work w/ workflow_call for manual builds
+# will want to update the "Checkout code" step
 
 permissions:
   id-token: write
@@ -58,17 +62,13 @@ jobs:
         run: |
           make ci-portal
 
-      - name: list images
-        run: |
-          docker image ls
-          docker compose images
-
       - name: Push to ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: web-portal
-          IMAGE_TAG: hardcodedstringfornow
+          IMAGE_TAG: ${{ github.sha }}
         run: |
+          docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:latest
           docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
       # TODO add additional steps to push dpc-web-admin and dpc-web, see docker_build_all_portals below
