@@ -49,11 +49,10 @@ docker compose -p start-v1-app down
 USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
 
 # Run the integration tests
-#echo "Starting integration tests"
-#docker compose -p start-v1-app up --exit-code-from tests tests
-#
-#docker compose -p start-v1-app down
-#
+docker compose -p start-v1-app up --exit-code-from tests tests
+
+docker compose -p start-v1-app down
+
 echo "Starting Postman tests"
 # Start the API server
 USE_BFD_MOCK=true AUTH_DISABLED=true docker compose -p start-v1-app up db attribution aggregation consent api --wait
