@@ -1,8 +1,7 @@
 name: Docker Build
 
 on:
-  push:
-#  workflow_dispatch:
+  workflow_dispatch:
 
 
 permissions:
@@ -24,8 +23,6 @@ jobs:
 
       - name: "Checkout code"
         uses: actions/checkout@v4
-#        with:
-#          ref: ${{ github.ref_name }}
 
       - name: Install docker compose manually
         run: |
@@ -250,15 +247,6 @@ jobs:
           docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
-      - name: echo hello
-        run: echo "pushed java images"
-
-      - name: Cleanup at the end too??
+      - name: Prune docker images and volumes
         if: ${{ always() }}
         run: ./scripts/cleanup-docker.sh
-
-#      - name: Down
-#        if: ${{ always() }}
-#        run: |
-#          docker compose -p start-v1-app down
-#          docker volume rm start-v1-app_pgdata16
