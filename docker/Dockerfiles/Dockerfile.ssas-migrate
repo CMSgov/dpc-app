@@ -1,4 +1,4 @@
-FROM migrate/migrate
+FROM public.ecr.aws/docker/library/migrate/migrate
 
 RUN apk update upgrade && \
     apk add git

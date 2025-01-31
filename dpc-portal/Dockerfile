@@ -1,4 +1,4 @@
-FROM ruby:3.3-alpine AS ruby_builder
+FROM public.ecr.aws/docker/library/ruby:3.3-alpine AS ruby_builder
 
 # Install build dependencies
 RUN apk update && \
