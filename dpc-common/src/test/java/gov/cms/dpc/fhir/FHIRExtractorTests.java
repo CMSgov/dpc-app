@@ -1,7 +1,7 @@
 package gov.cms.dpc.fhir;
 
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import gov.cms.dpc.testing.MBIUtil;
+import gov.cms.dpc.testing.utils.MBIUtil;
 import gov.cms.dpc.testing.factories.OrganizationFactory;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;

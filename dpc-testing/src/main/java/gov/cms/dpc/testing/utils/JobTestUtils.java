@@ -1,4 +1,4 @@
-package gov.cms.dpc.testing;
+package gov.cms.dpc.testing.utils;
 
 import io.dropwizard.testing.DropwizardTestSupport;
 import jakarta.ws.rs.client.Client;

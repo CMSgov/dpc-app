@@ -57,10 +57,6 @@ import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
 import static org.junit.jupiter.api.Assertions.*;
 
-/*
-    If you're running this locally, you'll need to wipe out the rows in the consent table in between runs.  If not, the
-    opt outs from the previous run will interfere with the current one.
- */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PatientResourceTest extends AbstractSecureApplicationTest {
     final java.util.Date dateYesterday = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));

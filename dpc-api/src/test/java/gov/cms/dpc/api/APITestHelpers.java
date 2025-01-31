@@ -27,9 +27,9 @@ import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
 import gov.cms.dpc.queue.models.JobQueueBatch;
-import gov.cms.dpc.testing.MBIUtil;
 import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
+import gov.cms.dpc.testing.utils.MBIUtil;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
@@ -63,6 +63,7 @@ public class APITestHelpers {
     private static final String CONSENT_URL = "http://localhost:3600/v1";
     public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
+    private static final String CONSENT_TRUNCATE_TASK = "http://localhost:9904/tasks/truncate";
     public static String BASE_URL = "https://dpc.cms.gov/api";
     public static String ORGANIZATION_NPI = "1111111112";
 
@@ -198,12 +199,13 @@ public class APITestHelpers {
     }
 
     private static void truncateDatabase() throws IOException {
+        List<String> taskUrls = List.of(ATTRIBUTION_TRUNCATE_TASK, CONSENT_TRUNCATE_TASK);
 
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost post = new HttpPost(ATTRIBUTION_TRUNCATE_TASK);
-
-            try (CloseableHttpResponse execute = client.execute(post)) {
-                assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should have truncated database");
+            for(String url : taskUrls) {
+                try (CloseableHttpResponse execute = client.execute(new HttpPost(url))) {
+                    assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should have truncated DB at " + url);
+                }
             }
         }
     }
