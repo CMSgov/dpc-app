@@ -139,9 +139,6 @@ jobs:
   docker_build_java:
     runs-on: self-hosted
     steps:
-      - name: Install python3
-        run: sudo dnf install python3
-
       - name: "Set up Ansible"
         run: |
           sudo dnf -y install python3 python3-pip
@@ -151,11 +148,6 @@ jobs:
         run: |
           sudo dnf -y install nodejs
           npm --version
-
-      - name: "Checkout code"
-        uses: actions/checkout@v4
-#        with:
-#          ref: ${{ github.ref_name }}
 
       - name: Install docker compose manually
         run: |
@@ -168,16 +160,6 @@ jobs:
         run: sudo chmod -R 777 .
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
 
       - name: "Set up JDK 11"
         uses: actions/setup-java@v3
@@ -199,6 +181,9 @@ jobs:
       - name: Clean maven
         run: mvn -ntp -U clean
 
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+
       - name: Build ci app
         id: api-build
         run: |
@@ -219,38 +204,48 @@ jobs:
         if: ${{ failure() && steps.api-build.outcome == 'failure' }}
         run: docker logs start-v1-app-api-1
 
-      - name: Push API to ECR
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: ECR (1 of 4) - Push API
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: api
-          IMAGE_TAG: hardcodedstringfornow
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
-      - name: Push Attribution to ECR
+      - name: ECR (2 of 4) - Push Attribution
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: attribution
-          IMAGE_TAG: hardcodedstringfornow
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
-      - name: Push Aggregation to ECR
+      - name: ECR (3 of 4) - Push Aggregation
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: aggregation
-          IMAGE_TAG: hardcodedstringfornow
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
 
-      - name: Push Consent to ECR
+      - name: ECR (4 of 4) - Push Consent
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: consent
-          IMAGE_TAG: hardcodedstringfornow
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker tag $REGISTRY/dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
