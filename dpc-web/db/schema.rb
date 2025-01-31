@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_01_28_130628) do
+ActiveRecord::Schema[7.2].define(version: 2020_09_09_153523) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -27,6 +27,15 @@ ActiveRecord::Schema[7.2].define(version: 2025_01_28_130628) do
     t.integer "address_use", default: 0, null: false
     t.integer "address_type", default: 0, null: false
     t.index ["addressable_type", "addressable_id"], name: "index_addresses_on_addressable_type_and_addressable_id"
+  end
+
+  create_table "fhir_endpoints", force: :cascade do |t|
+    t.string "name", null: false
+    t.integer "status", null: false
+    t.string "uri", null: false
+    t.integer "organization_id"
+    t.integer "registered_organization_id"
+    t.index ["registered_organization_id"], name: "index_fhir_endpoints_on_registered_organization_id"
   end
 
   create_table "internal_users", force: :cascade do |t|
