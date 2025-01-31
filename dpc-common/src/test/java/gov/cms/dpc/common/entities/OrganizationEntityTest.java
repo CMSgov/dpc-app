@@ -46,7 +46,7 @@ class OrganizationEntityTest {
 	}
 
 	@Test
-    void testUpdate() {
+	void testUpdate() {
 		OrganizationEntity o1 = new OrganizationEntity();
 		OrganizationEntity o2 = new OrganizationEntity();
 		o1.setOrganizationName("Test-Entity");
@@ -56,7 +56,7 @@ class OrganizationEntityTest {
 	}
 
 	@Test
-    void testOrganizationIDGettersAndSetters() {
+	void testOrganizationIDGettersAndSetters() {
 		OrganizationEntity.OrganizationID orgId = new OrganizationEntity.OrganizationID();
 		DPCIdentifierSystem system = DPCIdentifierSystem.NPPES;
 		String val = "1234";
@@ -69,7 +69,7 @@ class OrganizationEntityTest {
 	}
 
 	@Test
-    void testOrganizationIDToFHIR() {
+	void testOrganizationIDToFHIR() {
 		OrganizationEntity.OrganizationID orgId = new OrganizationEntity.OrganizationID(DPCIdentifierSystem.NPPES,
 				"1234");
 		Identifier fhirID = orgId.toFHIR();
