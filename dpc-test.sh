@@ -45,14 +45,13 @@ if [ -n "$REPORT_COVERAGE" ]; then
 fi
 
 docker compose -p start-v1-app down
-docker volume rm start-v1-app_pgdata16
+
 USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
 
 # Run the integration tests
 docker compose -p start-v1-app up --exit-code-from tests tests
 
 docker compose -p start-v1-app down
-docker volume rm start-v1-app_pgdata16
 
 echo "Starting Postman tests"
 # Start the API server
