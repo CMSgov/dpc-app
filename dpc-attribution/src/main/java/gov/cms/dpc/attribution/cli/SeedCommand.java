@@ -109,10 +109,10 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                 throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
             }
             final Bundle bundle = parser.parseResource(Bundle.class, orgBundleStream);
-            final List<EndpointEntity> endpointEntities = BundleParser.parse(Endpoint.class, bundle, endpoint -> converter.fromFHIR(EndpointEntity.class, endpoint), ORGANIZATION_ID);
+            final List<EndpointEntity> endpointEntities = BundleParser.parse(Endpoint.class, bundle, (endpoint) -> converter.fromFHIR(EndpointEntity.class, endpoint), ORGANIZATION_ID);
             final List<OrganizationEntity> organizationEntities = BundleParser.parse(Organization.class,
                     bundle,
-                    org -> converter.fromFHIR(OrganizationEntity.class, org), ORGANIZATION_ID);
+                    (org) -> converter.fromFHIR(OrganizationEntity.class, org), ORGANIZATION_ID);
 
             organizationEntities
                     .stream()
@@ -129,7 +129,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         try (final InputStream providerBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(PROVIDER_BUNDLE)) {
             final Parameters parameters = parser.parseResource(Parameters.class, providerBundleStream);
             final Bundle providerBundle = (Bundle) parameters.getParameterFirstRep().getResource();
-            final List<ProviderEntity> providers = BundleParser.parse(Practitioner.class, providerBundle, provider -> converter.fromFHIR(ProviderEntity.class, provider), organizationID);
+            final List<ProviderEntity> providers = BundleParser.parse(Practitioner.class, providerBundle, (provider) -> converter.fromFHIR(ProviderEntity.class, provider), organizationID);
 
             providers
                     .stream()
@@ -156,7 +156,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         try (final InputStream providerBundleStream = SeedCommand.class.getClassLoader().getResourceAsStream(PATIENT_BUNDLE)) {
             final Parameters parameters = parser.parseResource(Parameters.class, providerBundleStream);
             final Bundle patientBundle = (Bundle) parameters.getParameterFirstRep().getResource();
-            final List<PatientEntity> patients = BundleParser.parse(Patient.class, patientBundle, patient -> converter.fromFHIR(PatientEntity.class, patient), organizationID);
+            final List<PatientEntity> patients = BundleParser.parse(Patient.class, patientBundle, (patient) -> converter.fromFHIR(PatientEntity.class, patient), organizationID);
 
             Map<String, Reference> patientReferences = new HashMap<>();
 
