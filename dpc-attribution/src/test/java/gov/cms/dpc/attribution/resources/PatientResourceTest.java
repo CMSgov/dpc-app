@@ -11,7 +11,7 @@ import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.testing.MBIUtil;
+import gov.cms.dpc.testing.utils.MBIUtil;
 import gov.cms.dpc.testing.factories.BundleFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
@@ -373,7 +373,10 @@ class PatientResourceTest extends AbstractAttributionTest {
 
         String mbi = MBIUtil.generateMBI();
         Patient patient = AttributionTestHelpers.createPatientResource(mbi, DEFAULT_ORG_ID);
+        patient.getName().get(0).setFamily("original");
+
         Patient duplicatePatient = AttributionTestHelpers.createPatientResource(mbi, DEFAULT_ORG_ID);
+        duplicatePatient.getName().get(0).setFamily("duplicate");
 
         // Submit first patient
         final MethodOutcome outcome = client
@@ -397,9 +400,12 @@ class PatientResourceTest extends AbstractAttributionTest {
             .encodedJson()
             .execute();
 
+        // Second insert should be ignored and we should get back the original only
         assertEquals(1, resultPatientBundle.getEntry().size());
 
-        String resultMbi = FHIRExtractors.getPatientMBI((Patient) resultPatientBundle.getEntry().get(0).getResource());
-        assertNotEquals(mbi, resultMbi);
+        Patient resultPatient = (Patient) resultPatientBundle.getEntry().get(0).getResource();
+        String resultMbi = FHIRExtractors.getPatientMBI(resultPatient);
+        assertEquals(mbi, resultMbi);
+        assertEquals("original", resultPatient.getName().get(0).getFamily());
     }
 }
