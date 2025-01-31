@@ -163,9 +163,9 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                     })
                     .map(entity -> patientEntityToRecord(context, entity))
                     .peek(context::executeInsert)
-                    .forEach(patientsRecord -> {
-                        final Reference ref = new Reference(new IdType("Patient", patientsRecord.getId().toString()));
-                        patientReferences.put(patientsRecord.getBeneficiaryId(), ref);
+                    .forEach(patientRecord -> {
+                        final Reference ref = new Reference(new IdType("Patient", patientRecord.getId().toString()));
+                        patientReferences.put(patientRecord.getBeneficiaryId(), ref);
                     });
 
             return patientReferences;

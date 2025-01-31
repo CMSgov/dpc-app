@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class OrganizationEntityTest {
 
 	@Test
-    void testGettersAndSetters() {
+	void testGettersAndSetters() {
 		OrganizationEntity org = new OrganizationEntity();
 		UUID id = UUID.randomUUID();
 		OrganizationEntity.OrganizationID organizationID = new OrganizationEntity.OrganizationID(
