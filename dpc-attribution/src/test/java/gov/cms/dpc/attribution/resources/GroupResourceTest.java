@@ -11,7 +11,7 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.IntegrationTest;
-import gov.cms.dpc.testing.MBIUtil;
+import gov.cms.dpc.testing.utils.MBIUtil;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
