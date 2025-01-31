@@ -1,6 +1,6 @@
 package gov.cms.dpc.testing.utils;
 
-import gov.cms.dpc.testing.exceptions.DumbEngineerException;
+import gov.cms.dpc.testing.exceptions.NotATestEnvironmentException;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DefaultDSLContext;
@@ -23,7 +23,7 @@ class DBUtilsUnitTest {
 	void test_truncateAllTables_will_not_run_in_prod() {
 		envVars.set("ENV", "prod");
 
-		assertThrows(DumbEngineerException.class, () -> {
+		assertThrows(NotATestEnvironmentException.class, () -> {
 			DBUtils.truncateAllTables(context, "public");
 		});
 	}
@@ -32,7 +32,7 @@ class DBUtilsUnitTest {
 	void test_truncateAllTables_will_not_run_in_prod_sbx() {
 		envVars.set("ENV", "prod-sbx");
 
-		assertThrows(DumbEngineerException.class, () -> {
+		assertThrows(NotATestEnvironmentException.class, () -> {
 			DBUtils.truncateAllTables(context, "public");
 		});
 	}

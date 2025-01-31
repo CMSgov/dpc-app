@@ -27,9 +27,9 @@ import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
 import gov.cms.dpc.queue.models.JobQueueBatch;
-import gov.cms.dpc.testing.utils.MBIUtil;
 import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
+import gov.cms.dpc.testing.utils.MBIUtil;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
@@ -199,17 +199,13 @@ public class APITestHelpers {
     }
 
     private static void truncateDatabase() throws IOException {
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            // Attribution
-            final HttpPost attributionPost = new HttpPost(ATTRIBUTION_TRUNCATE_TASK);
-            try (CloseableHttpResponse execute = client.execute(attributionPost)) {
-                assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should have truncated attribution database");
-            }
+        List<String> taskUrls = List.of(ATTRIBUTION_TRUNCATE_TASK, CONSENT_TRUNCATE_TASK);
 
-            // Consent
-            final HttpPost consentPost = new HttpPost(CONSENT_TRUNCATE_TASK);
-            try (CloseableHttpResponse execute = client.execute(consentPost)) {
-                assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should have truncated consent database");
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            for(String url : taskUrls) {
+                try (CloseableHttpResponse execute = client.execute(new HttpPost(url))) {
+                    assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should have truncated DB at " + url);
+                }
             }
         }
     }

@@ -1,6 +1,6 @@
 package gov.cms.dpc.testing.utils;
 
-import gov.cms.dpc.testing.exceptions.DumbEngineerException;
+import gov.cms.dpc.testing.exceptions.NotATestEnvironmentException;
 import org.jooq.DSLContext;
 import org.jooq.Schema;
 import org.slf4j.Logger;
@@ -49,8 +49,8 @@ public class DBUtils {
     private static void checkEnv() {
         Optional<String> envOptional = Optional.ofNullable(System.getenv("ENV"));
         envOptional.ifPresent(env -> {
-            if( env.toUpperCase().contains("PROD") ) {
-                throw new DumbEngineerException("Do you really want to truncate a DB in " + env + "?");
+            if( ! env.equalsIgnoreCase("LOCAL") ) {
+                throw new NotATestEnvironmentException("Do you really want to truncate a DB in " + env + "?");
             }
         });
     }
