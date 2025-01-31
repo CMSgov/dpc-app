@@ -1,8 +1,12 @@
-package gov.cms.dpc.testing;
+package gov.cms.dpc.testing.utils;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
 public final class MBIUtil {
+	private MBIUtil() {
+		throw new IllegalStateException("Utility class");
+	}
+
 	/**
 	 * Creates a fake MBI that matches the format defined in PatientEntity
 	 * @return the MBI
@@ -21,6 +25,6 @@ public final class MBIUtil {
 		mbi += randomStringUtils.nextAlphabetic(2);
 		mbi += randomStringUtils.nextNumeric(2);
 
-		return mbi;
+		return mbi.toUpperCase();
 	}
 }
