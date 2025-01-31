@@ -16,49 +16,20 @@ env:
 jobs:
   build-api:
     name: "Build and Test API"
-    runs-on: self-hosted
+    runs-on: ubuntu-20.04
     steps:
-      - name: Assert Ownership
-        run: sudo chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
-      - name: Cleanup Runner
-        run: ./scripts/cleanup-docker.sh
       - name: "Set up JDK 11"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v1
         with:
-          distribution: "corretto"
           java-version: "11"
-      - name: "Set up Python and install Ansible"
-        run: |
-          sudo dnf -y install python3 python3-pip
-          pip install ansible
-      - name: Install Maven 3.6.3
-        run: |
-          export PATH="$PATH:/opt/maven/bin"
-          echo "PATH=$PATH" >> $GITHUB_ENV
-          if mvn -v; then echo "Maven already installed" && exit 0; else echo "Installing Maven"; fi
-          tmpdir="$(mktemp -d)"
-          curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
-          sudo rm -rf /opt/maven
-          sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
-      - name: Clean maven
-        run: |
-          mvn -ntp -U clean
-      - name: Install npm
-        run: |
-          sudo dnf -y install nodejs
-          npm --version
-          node --version
-      - name: Install docker compose manually
-        run: |
-          mkdir -p /usr/local/lib/docker/cli-plugins
-          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
-          chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
-          chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+      - name: "Set up Python 3.8.1"
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8.1"
       - name: "API Build"
         run: |
-          export PATH=$PATH:~/.local/bin
           make ci-app
       - name: "Move jacoco reports"
         run: |
@@ -80,116 +51,70 @@ jobs:
         with:
           name: code-coverage-report-dpc-api
           path: ./jacoco-reports
-      - name: Cleanup
-        if: ${{ always() }}
-        run: ./scripts/cleanup-docker.sh
 
   build-dpc-web:
     name: "Build and Test DPC Web"
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
-      - name: Assert Ownership
-        run: sudo chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
-      - name: Cleanup Runner
-        run: ./scripts/cleanup-docker.sh
-      - name: Install docker compose manually
-        run: |
-          mkdir -p /usr/local/lib/docker/cli-plugins
-          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
-          chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
-          chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
       - name: "DPC Web Build"
         run: |
           make ci-web-portal
-      - name: "Copy test results"
-        run: sudo cp dpc-web/coverage/.resultset.json web-resultset-raw.json
+      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
+        run: |
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-web") then .key |= sub("/dpc-web"; "/github/workspace/dpc-web") else . end)' dpc-web/coverage/.resultset.json > web-resultset.json
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report-dpc-web
-          path: ./web-resultset-raw.json
-      - name: Cleanup
-        if: ${{ always() }}
-        run: ./scripts/cleanup-docker.sh
+          path: ./web-resultset.json
 
   build-dpc-admin:
     name: "Build and Test DPC Admin Portal"
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
-      - name: Assert Ownership
-        run: sudo chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
-      - name: Cleanup Runner
-        run: ./scripts/cleanup-docker.sh
-      - name: Install docker compose manually
-        run: |
-          mkdir -p /usr/local/lib/docker/cli-plugins
-          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
-          chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
-          chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
       - name: "DPC Admin Portal Build"
         run: |
           make ci-admin-portal
-      - name: "Copy test results"
-        run: sudo cp dpc-admin/coverage/.resultset.json admin-resultset-raw.json
+      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
+        run: |
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-admin") then .key |= sub("/dpc-admin"; "/github/workspace/dpc-admin") else . end)' dpc-admin/coverage/.resultset.json > admin-resultset.json
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report-dpc-admin
-          path: ./admin-resultset-raw.json
-      - name: Cleanup
-        if: ${{ always() }}
-        run: ./scripts/cleanup-docker.sh
+          path: ./admin-resultset.json
 
   build-dpc-portal:
     name: "Build and Test DPC Portal"
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
-      - name: Assert Ownership
-        run: sudo chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
-      - name: Cleanup Runner
-        run: ./scripts/cleanup-docker.sh
-      - name: Install docker compose manually
-        run: |
-          mkdir -p /usr/local/lib/docker/cli-plugins
-          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
-          chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
-          chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
       - name: "DPC Portal Build"
         run: |
           make ci-portal
-      - name: "Copy test results"
-        run: sudo cp dpc-portal/coverage/.resultset.json portal-resultset-raw.json
+      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
+        run: |
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-portal") then .key |= sub("/dpc-portal"; "/github/workspace/dpc-portal") else . end)' dpc-portal/coverage/.resultset.json > portal-resultset.json
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report-dpc-portal
-          path: ./portal-resultset-raw.json
-      - name: Cleanup
-        if: ${{ always() }}
-        run: ./scripts/cleanup-docker.sh
+          path: ./portal-resultset.json
 
   build-dpc-client:
     name: "Build and Test DPC Client"
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
-      - name: Assert Ownership
-        run: sudo chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
-      - name: Cleanup Runner
-        run: ./scripts/cleanup-docker.sh
       - name: "DPC Client Build"
         run: |
           make ci-api-client
-      - name: Cleanup
-        if: ${{ always() }}
-        run: ./scripts/cleanup-docker.sh
 
   sonar-quality-gate-dpc-web-and-admin:
     name: Sonarqube Quality Gate for dpc-web and dpc-admin
@@ -199,12 +124,11 @@ jobs:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
     steps:
-      - name: Assert Ownership
-        run: sudo chmod -R 777 .
+      - name: chmod working directory
+        run: |
+          sudo chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
-      - name: Cleanup Runner
-        run: ./scripts/cleanup-docker.sh
       - name: Download web code coverage
         uses: actions/download-artifact@v4
         with:
@@ -213,10 +137,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: code-coverage-report-dpc-admin
-      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
-        run: |
-          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-web") then .key |= sub("/dpc-web"; "${{ github.workspace }}/dpc-web") else . end)' web-resultset-raw.json > web-resultset.json
-          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-admin") then .key |= sub("/dpc-admin"; "${{ github.workspace }}/dpc-admin") else . end)' admin-resultset-raw.json > admin-resultset.json
       - name: Set env vars from AWS params
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
@@ -236,9 +156,6 @@ jobs:
             -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
             -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
             -Dsonar.qualitygate.wait=true
-      - name: Cleanup
-        if: ${{ always() }}
-        run: ./scripts/cleanup-docker.sh
 
   sonar-quality-gate-dpc-portal:
     name: Sonarqube Quality Gate for dpc-portal
@@ -248,19 +165,15 @@ jobs:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
     steps:
-      - name: Assert Ownership
-        run: sudo chmod -R 777 .
+      - name: chmod working directory
+        run: |
+          sudo chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
-      - name: Cleanup Runner
-        run: ./scripts/cleanup-docker.sh
       - name: Download code coverage
         uses: actions/download-artifact@v4
         with:
           name: code-coverage-report-dpc-portal
-      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
-        run: |
-          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-portal") then .key |= sub("/dpc-portal"; "${{ github.workspace }}/dpc-portal") else . end)' portal-resultset-raw.json > portal-resultset.json
       - name: Set env vars from AWS params
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
@@ -281,9 +194,6 @@ jobs:
             -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
             -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
             -Dsonar.qualitygate.wait=true
-      - name: Cleanup
-        if: ${{ always() }}
-        run: ./scripts/cleanup-docker.sh
 
   sonar-quality-gate-dpc-api:
     name: Sonarqube Quality Gate for dpc-api
@@ -293,12 +203,11 @@ jobs:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
-      - name: Assert Ownership
-        run: sudo chmod -R 777 .
+      - name: chmod working directory
+        run: |
+          sudo chmod -R 777 .
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Cleanup Runner
-        run: ./scripts/cleanup-docker.sh
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -339,6 +248,3 @@ jobs:
       - name: Run quality gate scan
         run: |
           mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.event_name == 'pull_request' && github.head_ref || github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }} -Dsonar.qualitygate.wait=true -Dsonar.coverage.jacoco.xmlReportPaths="../jacoco-reports/*.xml"
-      - name: Cleanup
-        if: ${{ always() }}
-        run: ./scripts/cleanup-docker.sh
