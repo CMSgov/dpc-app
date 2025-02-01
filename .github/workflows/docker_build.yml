@@ -250,4 +250,4 @@ jobs:
 
       - name: Prune docker images and volumes
         if: ${{ always() }}
-        run: ./scripts/cleanup-docker.sh
+        run: ls && ls ./scripts && ./scripts/cleanup-docker.sh
