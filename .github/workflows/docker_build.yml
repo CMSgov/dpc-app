@@ -17,11 +17,9 @@ env:
 
 jobs:
   docker_build_rails_web_portal:
-    env:
-      REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      REPOSITORY: web-portal
-      IMAGE_TAG: ${{ github.sha }}
     runs-on: self-hosted
+    env:
+      REPOSITORY: web-portal
     steps:
       - name: check gzip
         run: gzip --version
@@ -54,6 +52,8 @@ jobs:
 
   docker_push_rails_web_portal_image:
     runs-on: self-hosted
+    env:
+      REPOSITORY: web-portal
     needs: docker_build_rails_web_portal
     steps:
       - name: Download artifact
@@ -79,12 +79,12 @@ jobs:
       - name: Push to ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: web-portal
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:latest
           docker tag dpc-$REPOSITORY:latest $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$REPOSITORY:$IMAGE_TAG
+
       - name: success
         run: "Did it work???"
       # TODO add additional steps to push dpc-web-admin and dpc-web, see docker_build_all_portals below
