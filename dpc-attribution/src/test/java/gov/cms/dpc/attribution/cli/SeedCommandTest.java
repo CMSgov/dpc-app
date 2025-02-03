@@ -70,7 +70,7 @@ class SeedCommandTest {
     @Test
     void testConnectionError() {
         String errMsg = "Connection error";
-        when(DSL.using((Connection) any(), (Settings) any())).thenThrow(new Exception(errMsg));
+        when(DSL.using(any(Connection.class), any(Settings.class))).thenThrow(new Exception(errMsg));
 
         final Optional<Throwable> failure = cli.run("seed", "src/test/resources/test.application.yml");
         assertFalse(failure.isEmpty(), "Should have not succeeded");
