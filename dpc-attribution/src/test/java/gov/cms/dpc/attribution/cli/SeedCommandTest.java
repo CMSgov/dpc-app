@@ -14,15 +14,17 @@ import org.jooq.impl.DSL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.sql.Connection;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @IntegrationTest
 class SeedCommandTest {
@@ -64,16 +66,19 @@ class SeedCommandTest {
     void testSeedCommand() {
         final Optional<Throwable> success = cli.run("seed", "src/test/resources/test.application.yml");
         assertTrue(success.isEmpty(), "Should have succeeded");
-        assertEquals("", stdErr.toString(), "Should not have errors");
+        assertTrue(stdErr.toString().isEmpty(), "Should not have errors");
     }
 
     @Test
     void testConnectionError() {
         String errMsg = "Connection error";
-        when(DSL.using(any(Connection.class), any(Settings.class))).thenThrow(new Exception(errMsg));
+        try (MockedStatic<DSL> mockedDSL = Mockito.mockStatic(DSL.class)) {
+            mockedDSL.when(() -> DSL.using(any(Connection.class), any(Settings.class)))
+                        .thenThrow(new RuntimeException(errMsg));
 
-        final Optional<Throwable> failure = cli.run("seed", "src/test/resources/test.application.yml");
-        assertFalse(failure.isEmpty(), "Should have not succeeded");
-        assertEquals(errMsg, stdErr.toString(), "Should have error message");
+            final Optional<Throwable> failure = cli.run("seed", "src/test/resources/test.application.yml");
+            assertFalse(failure.isEmpty(), "Should have not succeeded");
+            assertTrue(stdErr.toString().contains(errMsg), "Should have error message");
+        }
     }
 }
