@@ -22,7 +22,7 @@ class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
     }
 
     @Test
-    public void writesIpAddress() {
+    void writesIpAddress() {
         IpAddressEntity ipAddressEntity = createIpAddressEntity(UUID.randomUUID(), "192.168.1.1", "test label");
 
         IpAddressEntity returnedIp = db.inTransaction(() -> ipAddressDAO.persistIpAddress(ipAddressEntity));
@@ -35,14 +35,14 @@ class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
     }
 
     @Test
-    public void failsWritingBadIpAddress() {
+    void failsWritingBadIpAddress() {
         IpAddressEntity ipAddressEntity = createIpAddressEntity(UUID.randomUUID(), "bad_ip", "test label");
         assertThrows(PersistenceException.class, () ->
             db.inTransaction(() -> ipAddressDAO.persistIpAddress(ipAddressEntity)));
     }
 
     @Test
-    public void fetchesIpAddress() {
+    void fetchesIpAddress() {
         UUID orgId1 = UUID.randomUUID();
         UUID orgId2 = UUID.randomUUID();
 
@@ -68,7 +68,7 @@ class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
     }
 
     @Test
-    public void deletesIpAddress() {
+    void deletesIpAddress() {
         UUID orgId = UUID.randomUUID();
 
         IpAddressEntity persistedIpAddress = db.inTransaction(() ->
