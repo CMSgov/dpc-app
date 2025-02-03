@@ -81,10 +81,6 @@ class Organization < ApplicationRecord
   def reg_org
     registered_organization if registered_organization.present?
   end
-
-  def fhir_endpoint
-    registered_organization.fhir_endpoint
-  end
 end
 
 private

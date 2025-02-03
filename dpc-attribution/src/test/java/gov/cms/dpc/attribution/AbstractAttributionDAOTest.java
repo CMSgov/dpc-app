@@ -17,7 +17,6 @@ public class AbstractAttributionDAOTest extends AbstractMultipleDAOTest {
 			RosterEntity.class,
 			ProviderEntity.class,
 			ContactEntity.class,
-			EndpointEntity.class,
 			ContactPointEntity.class
 		);
 	}

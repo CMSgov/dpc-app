@@ -33,12 +33,6 @@ class GroupResourceUnitTest {
     private GroupResource groupResource;
 
     @Mock
-    OrganizationDAO mockOrganizationDao;
-
-    @Mock
-    EndpointDAO mockEndpointDao;
-
-    @Mock
     ProviderDAO providerDAO;
 
     @Mock
@@ -52,7 +46,7 @@ class GroupResourceUnitTest {
 
     private DPCAttributionConfiguration configuration;
 
-    private FHIREntityConverter converter = FHIREntityConverter.initialize();
+    private final FHIREntityConverter converter = FHIREntityConverter.initialize();
 
 
     @BeforeEach
@@ -69,7 +63,7 @@ class GroupResourceUnitTest {
         final UUID orgId = UUID.randomUUID();
         final String providerNpi = NPIUtil.generateNPI();
 
-        final Map<UUID,Patient> patientBank = makeTestPatients(5, orgId);
+        final Map<UUID,Patient> patientBank = makeTestPatients(5);
 
         final Group group = FHIRGroupBuilder
                 .newBuild()
@@ -102,7 +96,7 @@ class GroupResourceUnitTest {
         final UUID orgId = UUID.randomUUID();
         final String providerNpi = NPIUtil.generateNPI();
 
-        final Map<UUID,Patient> patientBank = makeTestPatients(5, orgId);
+        final Map<UUID,Patient> patientBank = makeTestPatients(5);
 
         final UUID badPatientUUID = UUID.randomUUID();
 
@@ -118,7 +112,7 @@ class GroupResourceUnitTest {
         configuration.setExpirationThreshold(10);
         Mockito.when(rosterDAO.findEntities(isNull(),eq(orgId), eq(providerNpi), isNull())).thenReturn(List.of());
         Mockito.when(providerDAO.getProviders(isNull(),eq(providerNpi), eq(orgId))).thenReturn(List.of(new ProviderEntity()));
-        patientBank.keySet().stream().forEach(patientId ->
+        patientBank.keySet().forEach(patientId ->
                 Mockito.when(patientDAO.patientSearch(eq(patientId), isNull(),eq(orgId))).thenReturn(List.of(new PatientEntity())));
 
         Mockito.when(patientDAO.patientSearch(eq(badPatientUUID), isNull(),eq(orgId))).thenReturn(List.of());
@@ -128,7 +122,7 @@ class GroupResourceUnitTest {
         assertThrows(WebApplicationException.class, () -> groupResource.createRoster(group), "Expected and exception if an invalid patient was added");
     }
 
-    private Map<UUID,Patient> makeTestPatients(int count, UUID orgId){
+    private Map<UUID,Patient> makeTestPatients(int count){
         if(count>88){
             throw new IllegalStateException("Don't support building more than 88 patients..yet (need a better mbi generator)");
         }
