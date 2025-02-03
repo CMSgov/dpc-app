@@ -1,8 +1,7 @@
 name: Docker Build
 
 on:
-#  workflow_dispatch:
-  push:
+  workflow_dispatch:
 
 
 permissions:
