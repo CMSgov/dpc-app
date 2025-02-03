@@ -17,10 +17,6 @@ env:
 
 jobs:
   docker_build_rails_web_portal:
-    env:
-      REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      REPOSITORY: web-portal
-      IMAGE_TAG: ${{ github.sha }}
     runs-on: self-hosted
     env:
       REPOSITORY: web-portal
