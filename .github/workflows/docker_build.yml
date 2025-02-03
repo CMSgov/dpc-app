@@ -42,14 +42,13 @@ jobs:
         run: |
           make ci-portal
 
-#        run: docker save dpc-$REPOSITORY:latest | gzip > ${{ runner.temp }}/dpc_$REPOSITORY_latest.tar.gz
       - name: gzip the image
         run: docker save dpc-$REPOSITORY:latest | gzip > ${{ runner.temp }}/dpc_web-portal_latest.tar.gz
       - name: upload tar artifact
         uses: actions/upload-artifact@v4
         with:
           name: dpc-$REPOSITORY
-          path: ${{ runner.temp }}/dpc_web-portal_latest.tar.gz
+          path: ${{ runner.temp }}/dpc_$REPOSITORY_latest.tar.gz.tar
 
   docker_push_rails_web_portal_image:
     runs-on: self-hosted
@@ -62,18 +61,6 @@ jobs:
         with:
           name: dpc-$REPOSITORY
           path: ${{ runner.temp }}
-
-      - name: Load image
-        run: |
-          docker load --input ${{ runner.temp }}/myimage.tar
-          docker image ls -a
-      - name: gzip the image
-        run: docker save dpc-$REPOSITORY:latest | gzip > $REPOSITORY_latest.tar.gz
-      - name: upload tar artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dpc-$REPOSITORY
-          path: ${{ runner.temp }}/$REPOSITORY_latest.tar.gz.tar
 
       - name: Load image
         run: |
