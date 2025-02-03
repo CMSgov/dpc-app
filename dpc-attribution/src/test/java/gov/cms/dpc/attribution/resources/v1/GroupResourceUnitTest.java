@@ -33,12 +33,6 @@ class GroupResourceUnitTest {
     private GroupResource groupResource;
 
     @Mock
-    OrganizationDAO mockOrganizationDao;
-
-    @Mock
-    EndpointDAO mockEndpointDao;
-
-    @Mock
     ProviderDAO providerDAO;
 
     @Mock
@@ -69,7 +63,7 @@ class GroupResourceUnitTest {
         final UUID orgId = UUID.randomUUID();
         final String providerNpi = NPIUtil.generateNPI();
 
-        final Map<UUID,Patient> patientBank = makeTestPatients(5, orgId);
+        final Map<UUID,Patient> patientBank = makeTestPatients(5);
 
         final Group group = FHIRGroupBuilder
                 .newBuild()
@@ -102,7 +96,7 @@ class GroupResourceUnitTest {
         final UUID orgId = UUID.randomUUID();
         final String providerNpi = NPIUtil.generateNPI();
 
-        final Map<UUID,Patient> patientBank = makeTestPatients(5, orgId);
+        final Map<UUID,Patient> patientBank = makeTestPatients(5);
 
         final UUID badPatientUUID = UUID.randomUUID();
 
@@ -128,7 +122,7 @@ class GroupResourceUnitTest {
         assertThrows(WebApplicationException.class, () -> groupResource.createRoster(group), "Expected and exception if an invalid patient was added");
     }
 
-    private Map<UUID,Patient> makeTestPatients(int count, UUID orgId){
+    private Map<UUID,Patient> makeTestPatients(int count){
         if(count>88){
             throw new IllegalStateException("Don't support building more than 88 patients..yet (need a better mbi generator)");
         }

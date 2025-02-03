@@ -3,11 +3,9 @@ package gov.cms.dpc.attribution.cli;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.dao.tables.OrganizationEndpoints;
 import gov.cms.dpc.attribution.dao.tables.Organizations;
 import gov.cms.dpc.attribution.dao.tables.Patients;
 import gov.cms.dpc.attribution.dao.tables.Providers;
-import gov.cms.dpc.attribution.dao.tables.records.OrganizationEndpointsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.OrganizationsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
@@ -87,7 +85,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             final FhirContext ctx = FhirContext.forDstu3();
             final IParser parser = ctx.newJsonParser();
             final FHIREntityConverter converter = FHIREntityConverter.initialize();
-            // Start with the Organizations and their endpoints
+            // Start with the Organizations
             seedOrganizationBundle(converter, context, parser);
 
             // Providers next
@@ -109,7 +107,6 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                 throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
             }
             final Bundle bundle = parser.parseResource(Bundle.class, orgBundleStream);
-            final List<EndpointEntity> endpointEntities = BundleParser.parse(Endpoint.class, bundle, (endpoint) -> converter.fromFHIR(EndpointEntity.class, endpoint), ORGANIZATION_ID);
             final List<OrganizationEntity> organizationEntities = BundleParser.parse(Organization.class,
                     bundle,
                     (org) -> converter.fromFHIR(OrganizationEntity.class, org), ORGANIZATION_ID);
@@ -117,10 +114,6 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             organizationEntities
                     .stream()
                     .map(entity -> organizationEntityToRecord(context, entity))
-                    .forEach(context::executeInsert);
-            endpointEntities
-                    .stream()
-                    .map(entity -> endpointsEntityToRecord(context, entity))
                     .forEach(context::executeInsert);
         }
     }
@@ -203,24 +196,6 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         record.setState(address.getState());
         record.setPostalCode(address.getPostalCode());
         record.setCountry(address.getCountry());
-        return record;
-    }
-
-    private static OrganizationEndpointsRecord endpointsEntityToRecord(DSLContext context, EndpointEntity entity) {
-        final OrganizationEndpointsRecord record = context.newRecord(OrganizationEndpoints.ORGANIZATION_ENDPOINTS, entity);
-
-        final EndpointEntity.ConnectionType connectionType = entity.getConnectionType();
-        record.setOrganizationId(entity.getOrganization().getId());
-        record.setSystem(connectionType.getSystem());
-        record.setCode(connectionType.getCode());
-
-        // Not sure why we have to manually set these values
-        record.setStatus(entity.getStatus().ordinal());
-        record.setName(entity.getName());
-        record.setAddress(entity.getAddress());
-        record.setValidationStatus(entity.getValidationStatus().ordinal());
-        record.setValidationMessage(entity.getValidationMessage());
-
         return record;
     }
 

@@ -134,24 +134,6 @@
     <div class="box__content">
       <% if  @organization.reg_org.present? && @organization.reg_org.enabled == true %>
         <h2 class="box__heading">API ID: <%= @organization.registered_organization.api_id %></h2>
-        <h4>FHIR Endpoint</h4>
-        <div class="ds-u-margin-bottom--1">
-          API Reference: <%= @organization.registered_organization.api_endpoint_ref %>
-        </div>
-        <div class="ds-u-margin-bottom--1">
-          Name: <%= @organization.registered_organization.fhir_endpoint.name %>
-        </div>
-        <div class="ds-u-margin-bottom--1">
-          URI: <%= @organization.registered_organization.fhir_endpoint.uri %>
-        </div>
-        <div class="ds-u-margin-bottom--1">
-          Status: <%= @organization.registered_organization.fhir_endpoint.status.titleize %>
-        </div>
-
-        <%= link_to "Edit", edit_organization_registered_organization_path(
-          organization_id: @organization.id,
-          id: @organization.registered_organization.id
-          ) %>
         <%= link_to "Disable Organization", organization_registered_organization_enable_or_disable_url(
           registered_organization_id: @organization.registered_organization.id,
           organization_id: @organization.id), data: { test: 'disable-org' } %>

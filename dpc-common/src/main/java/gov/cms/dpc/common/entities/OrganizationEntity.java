@@ -39,10 +39,6 @@ public class OrganizationEntity implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
     private List<ContactEntity> contacts;
 
-    @Valid
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "organization")
-    private List<EndpointEntity> endpoints;
-
     @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "organization")
     private List<ProviderEntity> providers;
 
@@ -96,18 +92,6 @@ public class OrganizationEntity implements Serializable {
         this.contacts = contacts;
     }
 
-    public List<EndpointEntity> getEndpoints() {
-        return endpoints;
-    }
-
-    public void setEndpoints(List<EndpointEntity> endpoints) {
-        this.endpoints = endpoints;
-    }
-
-    public void addEndpoint(EndpointEntity endpoint) {
-        this.endpoints.add(endpoint);
-    }
-
     public List<ProviderEntity> getProviders() {
         return providers;
     }
@@ -143,7 +127,6 @@ public class OrganizationEntity implements Serializable {
         this.setOrganizationName(updated.getOrganizationName());
         this.setOrganizationAddress(updated.getOrganizationAddress());
         this.setContacts(updated.getContacts());
-        this.setEndpoints(updated.getEndpoints());
         this.setPatients(updated.getPatients());
         this.setProviders(updated.getProviders());
 

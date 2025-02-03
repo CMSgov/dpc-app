@@ -24,11 +24,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Parameters;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Api(value = "Organization", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Organization")
@@ -193,19 +194,5 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .filter(resource -> resource.getResourceType().getPath().equals(DPCResourceType.Organization.getPath()))
                 .findAny()
                 .orElseThrow(() -> new WebApplicationException("Bundle must include Organization", Response.Status.BAD_REQUEST));
-
-
-        // Make sure we have some endpoints
-        final List<Resource> endpoints = organizationBundle
-                .getEntry()
-                .stream()
-                .filter(Bundle.BundleEntryComponent::hasResource)
-                .map(Bundle.BundleEntryComponent::getResource)
-                .filter(resource -> resource.getResourceType().getPath().equals(DPCResourceType.Endpoint.getPath()))
-                .collect(Collectors.toList());
-
-        if (endpoints.isEmpty()) {
-            throw new WebApplicationException("Organization must have at least 1 endpoint", Response.Status.BAD_REQUEST);
-        }
     }
 }

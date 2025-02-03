@@ -8,11 +8,9 @@ import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
-import gov.cms.dpc.testing.factories.OrganizationFactory;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-public class OrganizationResourceUnitTest {
+class OrganizationResourceUnitTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     IGenericClient attributionClient;
@@ -45,14 +43,12 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-    public void testSubmitOrganization() {
+    void testSubmitOrganization() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());
         Bundle bundle = new Bundle();
         bundle.addEntry().setResource(organization);
-        Endpoint endpoint = OrganizationFactory.createFakeEndpoint();
-        bundle.addEntry().setResource(endpoint);
 
         @SuppressWarnings("unchecked")
         IOperationUntypedWithInput<Organization> submitExec = mock(IOperationUntypedWithInput.class);
@@ -71,7 +67,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-    public void testSubmitOrganizationNoOrganization() {
+    void testSubmitOrganizationNoOrganization() {
         Bundle bundle = new Bundle();
 
         try {
@@ -85,25 +81,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-    public void testSubmitOrganizationNoEndpoints() {
-        UUID orgID = UUID.randomUUID();
-        Organization organization = new Organization();
-        organization.setId(orgID.toString());
-        Bundle bundle = new Bundle();
-        bundle.addEntry().setResource(organization);
-
-        try {
-            orgResource.submitOrganization(bundle);
-            fail("This call is supposed to fail");
-        } catch (WebApplicationException exc) {
-            String excMsg = "Organization must have at least 1 endpoint";
-            assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), exc.getResponse().getStatus());
-            assertEquals(excMsg, exc.getMessage());
-        }
-    }
-
-    @Test
-    public void testGetOrganization() {
+    void testGetOrganization() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());
@@ -123,7 +101,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-    public void testDeleteOrganization() {
+    void testDeleteOrganization() {
         UUID orgID = UUID.randomUUID();
 
         IDeleteTyped delRet = mock(IDeleteTyped.class);
@@ -138,7 +116,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-    public void testUpdateOrganization() {
+    void testUpdateOrganization() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());
@@ -160,7 +138,7 @@ public class OrganizationResourceUnitTest {
     }
 
     @Test
-    public void testUpdateOrganizationNoResource() {
+    void testUpdateOrganizationNoResource() {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());

@@ -2,9 +2,11 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.jdbi.EndpointDAO;
 import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
-import gov.cms.dpc.common.entities.*;
+import gov.cms.dpc.common.entities.AddressEntity;
+import gov.cms.dpc.common.entities.ContactEntity;
+import gov.cms.dpc.common.entities.NameEntity;
+import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import jakarta.ws.rs.core.Response;
@@ -26,13 +28,10 @@ import java.util.function.Supplier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 
-public class OrganizationResourceUnitTest {
+class OrganizationResourceUnitTest {
 
     @Mock
     OrganizationDAO mockOrganizationDao;
-
-    @Mock
-    EndpointDAO mockEndpointDao;
 
     @Mock
     Supplier<UUID> uuidSupplier;
@@ -49,7 +48,7 @@ public class OrganizationResourceUnitTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         configuration = new DPCAttributionConfiguration();
-        resource = new OrganizationResource(converter,mockOrganizationDao,mockEndpointDao, configuration);
+        resource = new OrganizationResource(converter,mockOrganizationDao, configuration);
     }
 
     @Test
@@ -137,8 +136,6 @@ public class OrganizationResourceUnitTest {
         contactEntity.setName(nameEntity);
         contactEntity.setAddress(addressEntity);
         contactEntity.setTelecom(List.of());
-        EndpointEntity endpointEntity = new EndpointEntity();
-        endpointEntity.setId(UUID.randomUUID());
         OrganizationEntity.OrganizationID orgEntId = new OrganizationEntity.OrganizationID(DPCIdentifierSystem.NPPES, orgId);
         OrganizationEntity organizationEntity = new OrganizationEntity();
         organizationEntity.setId(UUID.randomUUID());
@@ -146,7 +143,6 @@ public class OrganizationResourceUnitTest {
         organizationEntity.setOrganizationName(orgName);
         organizationEntity.setOrganizationAddress(addressEntity);
         organizationEntity.setContacts(List.of(contactEntity));
-        organizationEntity.setEndpoints(List.of(endpointEntity));
         return organizationEntity;
     }
 }

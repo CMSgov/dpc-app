@@ -25,8 +25,7 @@ public abstract class AbstractOrganizationResource {
     /**
      * Register a {@link Organization} with the API
      * <p>
-     * We're currently using a {@link Bundle} resource, which allows us to include both the {@link Organization}
-     * as well as any {@link org.hl7.fhir.dstu3.model.Endpoint} resources.
+     * We're currently using a {@link Bundle} resource, which allows us to include the {@link Organization}.
      * <p>
      * The {@link Bundle} is submitted as the Resource portion of the {@link Parameters} object.
      *

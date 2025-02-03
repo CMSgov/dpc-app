@@ -25,7 +25,6 @@ public class BaseResource extends AbstractBaseResource {
     private final AbstractGroupResource gr;
     private final AbstractJobResource jr;
     private final AbstractDataResource dr;
-    private final AbstractEndpointResource er;
     private final AbstractOrganizationResource or;
     private final AbstractPatientResource par;
     private final AbstractPractitionerResource pr;
@@ -40,7 +39,6 @@ public class BaseResource extends AbstractBaseResource {
                         GroupResource gr,
                         JobResource jr,
                         DataResource dr,
-                        EndpointResource er,
                         OrganizationResource or,
                         PatientResource par,
                         PractitionerResource pr,
@@ -53,7 +51,6 @@ public class BaseResource extends AbstractBaseResource {
         this.gr = gr;
         this.jr = jr;
         this.dr = dr;
-        this.er = er;
         this.or = or;
         this.par = par;
         this.pr = pr;
@@ -113,11 +110,6 @@ public class BaseResource extends AbstractBaseResource {
     @Override
     public AbstractDataResource dataOperations() {
         return this.dr;
-    }
-
-    @Override
-    public AbstractEndpointResource endpointOperations() {
-        return this.er;
     }
 
     @Override
