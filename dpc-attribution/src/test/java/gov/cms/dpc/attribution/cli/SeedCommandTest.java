@@ -9,19 +9,23 @@ import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import io.dropwizard.testing.POJOConfigurationFactory;
 import io.dropwizard.util.JarLocation;
+import org.jooq.conf.Settings;
+import org.jooq.impl.DSL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.sql.Connection;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @IntegrationTest
-public class SeedCommandTest {
+class SeedCommandTest {
 
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
@@ -36,6 +40,7 @@ public class SeedCommandTest {
         // Configure bootstrap - adapted from DropwizardTestSupport
         DPCAttributionService app = new DPCAttributionService();
         Bootstrap<DPCAttributionConfiguration> bs = new Bootstrap<>(app) {
+            @Override
             public void run(DPCAttributionConfiguration configuration, Environment environment) throws Exception {
                 super.run(configuration, environment);
                 setConfigurationFactoryFactory((klass, validator, objectMapper, propertyPrefix) ->
@@ -60,5 +65,15 @@ public class SeedCommandTest {
         final Optional<Throwable> success = cli.run("seed", "src/test/resources/test.application.yml");
         assertTrue(success.isEmpty(), "Should have succeeded");
         assertEquals("", stdErr.toString(), "Should not have errors");
+    }
+
+    @Test
+    void testConnectionError() {
+        String errMsg = "Connection error";
+        when(DSL.using((Connection) any(), (Settings) any())).thenThrow(new Exception(errMsg));
+
+        final Optional<Throwable> failure = cli.run("seed", "src/test/resources/test.application.yml");
+        assertFalse(failure.isEmpty(), "Should have not succeeded");
+        assertEquals(errMsg, stdErr.toString(), "Should have error message");
     }
 }
