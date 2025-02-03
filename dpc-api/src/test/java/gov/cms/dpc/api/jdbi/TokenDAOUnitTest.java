@@ -49,13 +49,13 @@ class TokenDAOUnitTest extends AbstractDAOTest<TokenEntity> {
 
         assertEquals(2, results.size());
 
-        TokenEntity org1Token = results.get(0);
-        assertEquals(orgId1, org1Token.getOrganizationID());
-        assertEquals("label 1", org1Token.getLabel());
+        TokenEntity token1 = results.get(0);
+        assertEquals(orgId1, token1.getOrganizationID());
+        assertEquals("label 1", token1.getLabel());
 
-        TokenEntity org2Token = results.get(1);
-        assertEquals(orgId1, org2Token.getOrganizationID());
-        assertEquals("label 2", org2Token.getLabel());
+        TokenEntity token2 = results.get(1);
+        assertEquals(orgId1, token2.getOrganizationID());
+        assertEquals("label 2", token2.getLabel());
     }
 
     @Test
