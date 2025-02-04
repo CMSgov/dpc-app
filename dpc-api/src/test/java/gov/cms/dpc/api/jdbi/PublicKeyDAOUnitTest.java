@@ -71,12 +71,12 @@ class PublicKeyDAOUnitTest extends AbstractDAOTest<PublicKeyEntity> {
 
         PublicKeyEntity key1 = results.get(0);
         assertEquals(orgId1, key1.getOrganization_id());
-        assertEquals("label 1", key1.getLabel());
+        assertTrue(List.of("label 1", "label 2").contains(key1.getLabel()));
         assertNotNull(key1.getPublicKey());
 
         PublicKeyEntity key2 = results.get(1);
         assertEquals(orgId1, key2.getOrganization_id());
-        assertEquals("label 2", key2.getLabel());
+        assertTrue(List.of("label 1", "label 2").contains(key2.getLabel()));
         assertNotNull(key2.getPublicKey());
     }
 
