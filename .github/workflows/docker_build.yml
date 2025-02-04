@@ -49,7 +49,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dpc-$REPOSITORY
-          path: ${{ runner.temp }}/dpc_$REPOSITORY_latest.tar.gz.tar
+          path: ${{ runner.temp }}/dpc_web-portal_latest.tar.gz
 
   docker_push_rails_web_portal_image:
     runs-on: self-hosted
