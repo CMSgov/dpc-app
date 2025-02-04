@@ -54,8 +54,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     @Test
     void testBasicRegistration() {
         final Organization organization = OrganizationHelpers.createOrganization(ctx, client);
-        assertAll(() -> assertNotNull(organization, "Should have an org back"),
-                () -> assertFalse(organization.getEndpoint().isEmpty(), "Should have endpoints"));
+        assertNotNull(organization, "Should have an org back");
         organizationsToCleanUp.add(organization);
     }
 
@@ -213,7 +212,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
 
     @Test
     void testGetOrganizationsByIds() {
-        List<String> ids = new ArrayList<String>();
+        List<String> ids = new ArrayList<>();
         Organization organization1 = OrganizationHelpers.createOrganization(ctx, client, "1633101112", true);
         Organization organization2 = OrganizationHelpers.createOrganization(ctx, client, "1235567892", false);
         ids.add(organization1.getIdentifierFirstRep().getValue());

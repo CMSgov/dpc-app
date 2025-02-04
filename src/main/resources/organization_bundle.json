@@ -51,11 +51,6 @@
             ],
             "text": "Healthcare Provider"
           }
-        ],
-        "endpoint": [
-          {
-            "reference": "Endpoint/3e0f5519-c2e4-456a-b888-c4341594426f"
-          }
         ]
       }
     },
@@ -97,11 +92,6 @@
             "value": "5087721000"
           }
         ],
-        "endpoint": [
-          {
-            "reference": "Endpoint/ebbfece4-b76a-40af-adbb-139400cb8087"
-          }
-        ],
         "type": [
           {
             "coding": [
@@ -114,38 +104,6 @@
             "text": "Healthcare Provider"
           }
         ]
-      }
-    },
-    {
-      "resource": {
-        "id": " ",
-        "resourceType": "Endpoint",
-        "status": "test",
-        "connectionType": {
-          "system": "http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
-          "code": "hl7-fhir-rest"
-        },
-        "name": "BETH ISRAEL DEACONESS HOSPITAL - PLYMOUTH FHIR endpoint",
-        "address": "http://test-address.first-org/fhir",
-        "managingOrganization": {
-          "reference": "Organization/46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0"
-        }
-      }
-    },
-    {
-      "resource": {
-        "id": "ebbfece4-b76a-40af-adbb-139400cb8087",
-        "resourceType": "Endpoint",
-        "status": "test",
-        "connectionType": {
-          "system": "http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
-          "code": "hl7-fhir-rest"
-        },
-        "name": "Norwood FHIR endpoint",
-        "address": "http://test-address.second-org/fhir",
-        "managingOrganization": {
-          "reference": "Organization/065fbe84-3551-4ec3-98a3-0d1198c3cb55"
-        }
       }
     }
   ]

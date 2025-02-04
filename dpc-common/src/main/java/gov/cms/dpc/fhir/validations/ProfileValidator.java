@@ -66,7 +66,6 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
     // This map must be updated if we need to use profiles for any other resources.
     private Map<Class<?>, String> setProfilesForResources() {
         return Map.of(
-            Endpoint.class, EndpointProfile.PROFILE_URI,
             Organization.class, OrganizationProfile.PROFILE_URI,
             Patient.class, PatientProfile.PROFILE_URI,
             Practitioner.class, PractitionerProfile.PROFILE_URI,
