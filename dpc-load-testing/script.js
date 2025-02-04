@@ -20,7 +20,7 @@ export default function() {
   if (!bearerToken) {
     const tokenResponse = generateDPCToken();
     if (tokenResponse.status.toString() == '200') {
-      bearerToken = tokenResponse.json()['access_token'];
+      bearerToken = tokenResponse.body;
       console.log('bearer token fetched successfully!');
     } else {
       console.error('failed to fetch bearer token');
