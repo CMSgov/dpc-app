@@ -31,12 +31,7 @@ class SyncOrganizationJob < ApplicationJob
 
   def create_dpc_api_org(provider_organization)
     org = OrgObject.new(provider_organization.name, provider_organization.npi)
-    fhir_endpoint = {
-      'status' => 'test',
-      'name' => "#{provider_organization.name} Endpoint",
-      'uri' => 'http://test-address.nope'
-    }
-    create_org_response = api_client.create_organization(org, fhir_endpoint:)
+    create_org_response = api_client.create_organization(org)
     if create_org_response.response_successful?
       org_id = create_org_response.response_body['id']
       provider_organization.dpc_api_organization_id = org_id

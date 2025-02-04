@@ -21,6 +21,6 @@ class ProfileValidatorTests {
 
         final List<StructureDefinition> definitions = support.fetchAllStructureDefinitions();
 
-        assertEquals(7, definitions.size(), "Should not have malformed or invalid resources");
+        assertEquals(6, definitions.size(), "Should not have malformed or invalid resources");
     }
 }

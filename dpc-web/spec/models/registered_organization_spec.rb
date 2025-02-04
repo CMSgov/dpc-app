@@ -52,7 +52,7 @@ RSpec.describe RegisteredOrganization, type: :model do
         reg_org = create(:registered_organization)
 
         expect(api_client).to have_received(:create_organization)
-          .with(reg_org.organization, fhir_endpoint: reg_org.fhir_endpoint.attributes.slice('name', 'status', 'uri'))
+          .with(reg_org.organization)
           .once
         expect(reg_org.create_api_organization).to eq(default_org_creation_response)
       end
@@ -65,19 +65,15 @@ RSpec.describe RegisteredOrganization, type: :model do
             message: :create_organization,
             success: true,
             response: {
-              'id' => '923a4f7b-eade-494a-8ca4-7a685edacfad',
-              'endpoint' => [
-                'reference' => 'Endpoint/437f7b17-3d48-4654-949d-57ea80f8f1d7'
-              ]
+              'id' => '923a4f7b-eade-494a-8ca4-7a685edacfad'
             }
           )
           allow_any_instance_of(Organization).to receive(:notify_users_of_sandbox_access)
 
-          reg_org = create(:registered_organization, api_endpoint_ref: nil, api_id: nil)
+          reg_org = create(:registered_organization, api_id: nil)
 
           expect(reg_org.organization).to have_received(:notify_users_of_sandbox_access).once
           expect(reg_org.api_id).to eq('923a4f7b-eade-494a-8ca4-7a685edacfad')
-          expect(reg_org.api_endpoint_ref).to eq('Endpoint/437f7b17-3d48-4654-949d-57ea80f8f1d7')
         end
       end
 
@@ -87,12 +83,10 @@ RSpec.describe RegisteredOrganization, type: :model do
 
           org = create(:organization)
 
-          reg_org = build(:registered_organization, api_endpoint_ref: nil, api_id: nil, organization: org)
-          reg_org.build_default_fhir_endpoint
+          reg_org = build(:registered_organization, api_id: nil, organization: org)
           reg_org.save
 
           expect(reg_org.api_id).to be_nil
-          expect(reg_org.api_endpoint_ref).to be_nil
           expect(reg_org.errors.count).to eq(1)
           expect(reg_org).not_to be_persisted
         end
@@ -147,12 +141,9 @@ RSpec.describe RegisteredOrganization, type: :model do
             success: true,
             response: default_org_creation_response
           )
-          allow(reg_org).to receive(:update_api_endpoint)
           reg_org.update(updated_at: Time.now)
 
-          expect(api_client).to have_received(:update_organization).with(reg_org.organization,
-                                                                         reg_org.api_id,
-                                                                         reg_org.api_endpoint_ref)
+          expect(api_client).to have_received(:update_organization).with(reg_org.organization, reg_org.api_id)
         end
       end
 
@@ -171,84 +162,12 @@ RSpec.describe RegisteredOrganization, type: :model do
             success: false,
             response: 'Bad error'
           )
-          allow(reg_org).to receive(:update_api_endpoint)
           reg_org.update(updated_at: Time.now)
 
-          expect(api_client).to have_received(:update_organization).with(reg_org.organization,
-                                                                         reg_org.api_id,
-                                                                         reg_org.api_endpoint_ref)
+          expect(api_client).to have_received(:update_organization).with(reg_org.organization, reg_org.api_id)
           expect(reg_org.errors.count).to eq(1)
         end
       end
-    end
-
-    describe '#update_api_endpoint' do
-      context 'successful API request' do
-        it 'makes update API request before update and updates object' do
-          api_client = stub_api_client(
-            message: :create_organization,
-            success: true,
-            response: default_org_creation_response
-          )
-          old_attr = 2.days.ago
-          new_attr = 1.day.ago
-          reg_org = create(:registered_organization, created_at: old_attr)
-
-          api_client = stub_api_client(
-            api_client:,
-            message: :update_endpoint,
-            success: true, response:
-            default_org_creation_response
-          )
-          allow(reg_org).to receive(:update_api_organization)
-          reg_org.update(created_at: new_attr)
-
-          expect(api_client).to have_received(:update_endpoint).with(reg_org.api_id,
-                                                                     reg_org.fhir_endpoint_id,
-                                                                     reg_org.fhir_endpoint)
-          expect(reg_org.created_at.to_i).to eq(new_attr.to_i)
-        end
-      end
-
-      context 'failed API request' do
-        it 'adds to errors and does not update object' do
-          api_client = stub_api_client(
-            message: :create_organization,
-            success: true,
-            response: default_org_creation_response
-          )
-          old_attr = 2.days.ago
-          new_attr = 1.day.ago
-          reg_org = create(:registered_organization, created_at: old_attr)
-
-          api_client = stub_api_client(
-            api_client:,
-            message: :update_endpoint,
-            success: false,
-            response: { issues: ['Bad request'] }
-          )
-          allow(reg_org).to receive(:update_api_organization)
-          reg_org.update(created_at: new_attr)
-
-          expect(api_client).to have_received(:update_endpoint).with(reg_org.api_id,
-                                                                     reg_org.fhir_endpoint_id,
-                                                                     reg_org.fhir_endpoint)
-          expect(reg_org.errors.count).to eq(1)
-          expect(reg_org.reload.created_at.to_i).to eq(old_attr.to_i)
-        end
-      end
-    end
-  end
-
-  describe '#build_default_fhir_endpoint' do
-    it 'builds fhir_endpoint with default attributes' do
-      reg_org = build(:registered_organization)
-
-      reg_org.build_default_fhir_endpoint
-      fhir_endpoint = reg_org.fhir_endpoint
-
-      expect([fhir_endpoint.name, fhir_endpoint.status, fhir_endpoint.uri])
-        .to eq(['DPC Sandbox Test Endpoint', 'test', 'https://dpc.cms.gov/test-endpoint'])
     end
   end
 end
