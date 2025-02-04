@@ -42,8 +42,9 @@ jobs:
         run: |
           make ci-portal
 
+#        run: docker save dpc-$REPOSITORY:latest | gzip > ${{ runner.temp }}/dpc_$REPOSITORY_latest.tar.gz
       - name: gzip the image
-        run: docker save dpc-$REPOSITORY:latest | gzip > ${{ runner.temp }}/dpc_$REPOSITORY_latest.tar.gz
+        run: docker save dpc-$REPOSITORY:latest | gzip > ${{ runner.temp }}/dpc_web-portal_latest.tar.gz
       - name: upload tar artifact
         uses: actions/upload-artifact@v4
         with:
