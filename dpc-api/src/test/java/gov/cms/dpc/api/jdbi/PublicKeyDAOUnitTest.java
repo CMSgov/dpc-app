@@ -9,6 +9,7 @@ import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -38,6 +39,15 @@ class PublicKeyDAOUnitTest extends AbstractDAOTest<PublicKeyEntity> {
         assertFalse(returnedKey.getCreatedAt().toString().isEmpty());
         assertFalse(returnedKey.getId().toString().isEmpty());
         assertNotNull(returnedKey.getPublicKey());
+    }
+
+    @Test
+    void failsWritingPublicKeyWithTooLongLabel() throws IOException, NoSuchAlgorithmException {
+        UUID orgId = UUID.randomUUID();
+        PublicKeyEntity publicKeyEntity = createPublicKeyEntity(orgId, "test label".repeat(3));
+        assertThrows(ConstraintViolationException.class, () ->
+                db.inTransaction(() -> publicKeyDAO.persistPublicKey(publicKeyEntity)));
+
     }
 
     @Test
