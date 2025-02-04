@@ -1,6 +1,5 @@
 gov.cms.dpc.fhir.validations.profiles.AddressProfile
 gov.cms.dpc.fhir.validations.profiles.AttributionRosterProfile
-gov.cms.dpc.fhir.validations.profiles.EndpointProfile
 gov.cms.dpc.fhir.validations.profiles.OrganizationProfile
 gov.cms.dpc.fhir.validations.profiles.PatientProfile
 gov.cms.dpc.fhir.validations.profiles.PractitionerProfile

@@ -10,24 +10,7 @@ RSpec.describe DpcClient do
            address_zip: '22222')
   end
   let!(:reg_org) do
-    double('RegisteredOrg',
-           api_id: 'some-api-key',
-           fhir_endpoint_id: 'some-fhir-endpoint-id',
-           api_endpoint_ref: 'Endpoint/some-fhir-endpoint-id')
-  end
-  let(:fhir_endpoint_attributes) do
-    { name: 'Cool SBX',
-      uri: 'https://cool.com',
-      status: 'active' }.with_indifferent_access
-  end
-  let!(:fhir_endpoint) do
-    double(
-      :fhir_endpoint,
-      name: fhir_endpoint_attributes[:name],
-      uri: fhir_endpoint_attributes[:uri],
-      status: fhir_endpoint_attributes[:status],
-      attributes: fhir_endpoint_attributes
-    )
+    double('RegisteredOrg', api_id: 'some-api-key')
   end
 
   # rubocop:disable Layout/LineLength
@@ -157,45 +140,23 @@ RSpec.describe DpcClient do
                       text: 'Healthcare Provider'
                     }]
                   }
-                }, {
-                  resource: {
-                    resourceType: 'Endpoint',
-                    status: fhir_endpoint.status,
-                    connectionType: {
-                      system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type',
-                      code: 'hl7-fhir-rest'
-                    },
-                    payloadType: [
-                      {
-                        coding: [
-                          {
-                            system: 'http://hl7.org/fhir/endpoint-payload-type',
-                            code: 'any'
-                          }
-                        ]
-                      }
-                    ],
-                    name: fhir_endpoint.name, address: fhir_endpoint.uri
-                  }
                 }]
               }
             }]
           }.to_json
         ).to_return(
           status: 200,
-          body: '{"id":"8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d",' \
-                '"endpoint":[{"reference":"Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66"}]}'
+          body: '{"id":"8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d"}'
         )
 
         api_client = DpcClient.new
 
-        api_client.create_organization(org, fhir_endpoint: fhir_endpoint.attributes)
+        api_client.create_organization(org)
 
         expect(api_client.response_status).to eq(200)
         expect(api_client.response_body).to eq(
           {
-            'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d',
-            'endpoint' => [{ 'reference' => 'Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66' }]
+            'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d'
           }
         )
       end
@@ -210,7 +171,7 @@ RSpec.describe DpcClient do
 
         api_client = DpcClient.new
 
-        api_client.create_organization(org, fhir_endpoint: fhir_endpoint.attributes)
+        api_client.create_organization(org)
 
         expect(api_client.response_status).to eq(500)
         expect(api_client.response_body).to eq(
@@ -260,26 +221,6 @@ RSpec.describe DpcClient do
                       text: 'Healthcare Provider'
                     }]
                   }
-                }, {
-                  resource: {
-                    resourceType: 'Endpoint',
-                    status: fhir_endpoint.status,
-                    connectionType: {
-                      system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type',
-                      code: 'hl7-fhir-rest'
-                    },
-                    payloadType: [
-                      {
-                        coding: [
-                          {
-                            system: 'http://hl7.org/fhir/endpoint-payload-type',
-                            code: 'any'
-                          }
-                        ]
-                      }
-                    ],
-                    name: fhir_endpoint.name, address: fhir_endpoint.uri
-                  }
                 }]
               }
             }]
@@ -292,7 +233,7 @@ RSpec.describe DpcClient do
 
         api_client = DpcClient.new
 
-        api_client.create_organization(org, fhir_endpoint: fhir_endpoint.attributes)
+        api_client.create_organization(org)
         parse_response = JSON.parse api_client.response_body
 
         expect(api_client.response_status).to eq(500)
@@ -325,7 +266,7 @@ RSpec.describe DpcClient do
           ).to_return(status: 200, body: '{}', headers: {})
 
         client = DpcClient.new
-        expect(client.update_organization(org, reg_org.api_id, reg_org.api_endpoint_ref)).to eq(client)
+        expect(client.update_organization(org, reg_org.api_id)).to eq(client)
         expect(client.response_successful?).to eq(true)
       end
     end
@@ -343,45 +284,7 @@ RSpec.describe DpcClient do
           ).to_return(status: 500, body: '', headers: {})
 
         client = DpcClient.new
-        expect(client.update_organization(org, reg_org.api_id, reg_org.fhir_endpoint_id)).to eq(client)
-        expect(client.response_successful?).to eq(false)
-      end
-    end
-  end
-
-  describe '#update_endpoint' do
-    context 'successful request' do
-      it 'sends endpoint data to API' do
-        stub_request(:put, "http://dpc.example.com/Endpoint/#{reg_org.fhir_endpoint_id}")
-          .with(
-            body: /#{reg_org.fhir_endpoint_id}/,
-            headers: {
-              'Accept' => 'application/fhir+json',
-              'Content-Type' => 'application/fhir+json',
-              'Authorization' => /.*/
-            }
-          ).to_return(status: 200, body: '{}', headers: {})
-
-        client = DpcClient.new
-        expect(client.update_endpoint(reg_org.api_id, reg_org.fhir_endpoint_id, fhir_endpoint)).to eq(client)
-        expect(client.response_successful?).to eq(true)
-      end
-    end
-
-    context 'unsuccessful request' do
-      it 'does not send org data to API' do
-        stub_request(:put, "http://dpc.example.com/Endpoint/#{reg_org.fhir_endpoint_id}")
-          .with(
-            body: /#{reg_org.fhir_endpoint_id}/,
-            headers: {
-              'Accept' => 'application/fhir+json',
-              'Content-Type' => 'application/fhir+json',
-              'Authorization' => /.*/
-            }
-          ).to_return(status: 500, body: '', headers: {})
-
-        client = DpcClient.new
-        expect(client.update_endpoint(reg_org.api_id, reg_org.fhir_endpoint_id, fhir_endpoint)).to eq(client)
+        expect(client.update_organization(org, reg_org.api_id)).to eq(client)
         expect(client.response_successful?).to eq(false)
       end
     end

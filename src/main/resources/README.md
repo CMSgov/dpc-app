@@ -12,7 +12,7 @@ Details on the data modifications are given [here](#patients).
 - [test_associations.csv](./test_associations.csv): A mapping of `Practitioner` resources to `Patient` resources (in a local environment only), which can be used to generate Patient rosters.
 Sample code for generating the corresponding `Group` resources is provided [here](https://github.com/CMSgov/dpc-app/blob/main/dpc-attribution/src/test/java/gov/cms/dpc/attribution/scripts/GenerateRosters.java).
   - [test_associations-dpr.csv](./test_associations-dpr.csv): Like `test_associations.csv`, but with IDs matching the BlueButton sandbox environment. This is the file to use when testing against any Data at the Point of Care environment.
-- [organization_bundle.json](./organization_bundle.json): A `Bundle` of 2 `Organization`s and their corresponding `Endpoint` resources.
+- [organization_bundle.json](./organization_bundle.json): A `Bundle` of 2 `Organization` resources.
 These can be used for bootstrapping a local development environment in which no Organizations have been registered yet.
 - [organization.tmpl.json](./organization.tmpl.json): The FHIR template used by DPC for registering organizations.
 
@@ -25,7 +25,7 @@ These can be used for bootstrapping a local development environment in which no 
 
 ## Patients
 
-- Added MBIs to match to match [test_associations](./test_associations.csv).
+- Added MBIs to match [test_associations](./test_associations.csv).
 - Normalized some of the language codes to ensure that they match the corresponding FHIR value sets/
 
 ## Organizations

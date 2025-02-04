@@ -13,9 +13,9 @@ class DpcClient
     'application/json'
   end
 
-  def create_organization(org, fhir_endpoint: {})
+  def create_organization(org)
     uri_string = "#{base_url}/Organization/$submit"
-    json = OrganizationSubmitSerializer.new(org, fhir_endpoint:).to_json
+    json = OrganizationSubmitSerializer.new(org).to_json
     post_request(uri_string, json, fhir_headers(golden_macaroon))
     self
   end
@@ -32,15 +32,9 @@ class DpcClient
     response_successful? ? FHIR::Bundle.new(org) : nil
   end
 
-  def update_organization(reg_org, api_id, api_endpoint_ref)
-    fhir_org = FhirResourceBuilder.new.fhir_org(reg_org, api_id, api_endpoint_ref)
+  def update_organization(reg_org, api_id)
+    fhir_org = FhirResourceBuilder.new.fhir_org(reg_org, api_id)
     update_fhir_request(api_id, fhir_org, api_id)
-    self
-  end
-
-  def update_endpoint(api_id, fhir_endpoint_id, fhir_endpoint)
-    fhir_resource = FhirResourceBuilder.new.fhir_endpoint(api_id, fhir_endpoint_id, fhir_endpoint)
-    update_fhir_request(api_id, fhir_resource, fhir_endpoint_id)
     self
   end
 

@@ -27,12 +27,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class OrganizationValidationTest {
 
     private static FhirValidator fhirValidator;
-    private static DPCProfileSupport dpcModule;
-    private static FhirContext ctx;
 
     @BeforeAll
     static void setup() {
-        ctx = FhirContext.forDstu3();
+        FhirContext ctx = FhirContext.forDstu3();
         final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 
         fhirValidator = ctx.newValidator();
@@ -40,8 +38,7 @@ class OrganizationValidationTest {
         fhirValidator.setValidateAgainstStandardSchema(false);
         fhirValidator.registerValidatorModule(instanceValidator);
 
-
-        dpcModule = new DPCProfileSupport(ctx);
+        DPCProfileSupport dpcModule = new DPCProfileSupport(ctx);
         final ValidationSupportChain chain = new ValidationSupportChain(
                 dpcModule,
                 new DefaultProfileValidationSupport(ctx),
