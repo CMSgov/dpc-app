@@ -30,16 +30,17 @@ jobs:
           docker run --rm -i -u "$(id -u):$(id -g)" -v "${PWD}:/xk6" grafana/xk6 build \
             --with github.com/LeonAdato/xk6-output-statsd
 
+      - name: Verify K6 Outputs
+        run: ./k6 run --list-extensions
+
       - name: Run K6 with StatsD output
         env:
           LOAD_TEST_CLIENT_TOKEN: ${{ secrets.LOAD_TEST_CLIENT_TOKEN }}
           LOAD_TEST_PRIVATE_KEY: ${{ secrets.LOAD_TEST_PRIVATE_KEY }}
           LOAD_TEST_PUBLIC_KEY_ID: ${{ secrets.LOAD_TEST_PUBLIC_KEY_ID }}
         run: |
-          ls -lah ./k6
-          ./k6 version
           ./k6 run \
-            --out statsd=localhost:8125,enableTags=true \
+            --out output-statsd=addr=localhost:8125,enableTags=true \
             ./dpc-app/dpc-load-testing/script.js
 
       - name: Cleanup StatsD Container
