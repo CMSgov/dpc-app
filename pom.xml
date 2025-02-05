@@ -51,6 +51,7 @@
         <newrelic.agent.version>7.11.1</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
         <h2.version>2.2.220</h2.version>
+        <sonar.coverage.exclusions>**/MockBlueButton*.java</sonar.coverage.exclusions>
     </properties>
 
     <developers>
@@ -831,6 +832,7 @@
                         <exclude>**/*_.class</exclude>
                         <!--Exclude auto-generated JOOQ classes-->
                         <exclude>gov/cms/dpc/attribution/dao/**/*</exclude>
+                        <exclude>gov/cms/dpc/consent/dao/**/*</exclude>
                         <!-- Exclude HL7 parsers, because they're too big-->
                         <exclude>org/hl7/fhir/r4/formats/*</exclude>
                         <exclude>org/hl7/fhir/r5/formats/*</exclude>

@@ -27,7 +27,7 @@ import java.util.UUID;
 
 public class OrganizationRegistration extends AbstractAttributionCommand {
 
-    private static final String ORG_FILE = "org-file";
+    protected static final String ORG_FILE = "org-file";
 
     public OrganizationRegistration() {
         super("register", "Register Organization");
