@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 import static gov.cms.dpc.consent.dao.tables.Consent.CONSENT;
 
 public class SeedCommand extends EnvironmentCommand<DPCConsentConfiguration> {
-    private static Logger logger = LoggerFactory.getLogger(SeedCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(SeedCommand.class);
     private static final String CSV = "test_consent.csv";
 
     private final Settings settings;
