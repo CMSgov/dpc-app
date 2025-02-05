@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
       - name: "Set up JDK 11"
         uses: actions/setup-java@v1
         with:
@@ -31,46 +31,222 @@ jobs:
       - name: "API Build"
         run: |
           make ci-app
-      - name: "Smoke Test"
+      - name: "Move jacoco reports"
         run: |
-          make smoke
+          sudo mkdir jacoco-reports
+          sudo cp ./dpc-aggregation/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-aggregation-it-jacoco.xml
+          sudo cp ./dpc-aggregation/target/site/jacoco/jacoco.xml jacoco-reports/dpc-aggregation-jacoco.xml
+          sudo cp ./dpc-api/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-api-it-jacoco.xml
+          sudo cp ./dpc-api/target/site/jacoco/jacoco.xml jacoco-reports/dpc-api-jacoco.xml
+          sudo cp ./dpc-attribution/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-attribution-it-jacoco.xml
+          sudo cp ./dpc-attribution/target/site/jacoco/jacoco.xml jacoco-reports/dpc-attribution-jacoco.xml
+          sudo cp ./dpc-bluebutton/target/site/jacoco/jacoco.xml jacoco-reports/dpc-bluebutton-jacoco.xml
+          sudo cp ./dpc-common/target/site/jacoco/jacoco.xml jacoco-reports/dpc-common-jacoco.xml
+          sudo cp ./dpc-consent/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-consent-it-jacoco.xml
+          sudo cp ./dpc-consent/target/site/jacoco/jacoco.xml jacoco-reports/dpc-consent-jacoco.xml
+          sudo cp ./dpc-macaroons/target/site/jacoco/jacoco.xml jacoco-reports/dpc-macaroons-jacoco.xml
+          sudo cp ./dpc-queue/target/site/jacoco/jacoco.xml jacoco-reports/dpc-queue-jacoco.xml
+      - name: Upload jacoco reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report-dpc-api
+          path: ./jacoco-reports
 
   build-dpc-web:
     name: "Build and Test DPC Web"
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
       - name: "DPC Web Build"
         run: |
           make ci-web-portal
+      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
+        run: |
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-web") then .key |= sub("/dpc-web"; "/github/workspace/dpc-web") else . end)' dpc-web/coverage/.resultset.json > web-resultset.json
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report-dpc-web
+          path: ./web-resultset.json
 
   build-dpc-admin:
     name: "Build and Test DPC Admin Portal"
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
       - name: "DPC Admin Portal Build"
         run: |
           make ci-admin-portal
+      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
+        run: |
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-admin") then .key |= sub("/dpc-admin"; "/github/workspace/dpc-admin") else . end)' dpc-admin/coverage/.resultset.json > admin-resultset.json
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report-dpc-admin
+          path: ./admin-resultset.json
 
   build-dpc-portal:
     name: "Build and Test DPC Portal"
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
       - name: "DPC Portal Build"
         run: |
           make ci-portal
+      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
+        run: |
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-portal") then .key |= sub("/dpc-portal"; "/github/workspace/dpc-portal") else . end)' dpc-portal/coverage/.resultset.json > portal-resultset.json
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report-dpc-portal
+          path: ./portal-resultset.json
 
   build-dpc-client:
     name: "Build and Test DPC Client"
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
       - name: "DPC Client Build"
         run: |
           make ci-api-client
+
+  sonar-quality-gate-dpc-web-and-admin:
+    name: Sonarqube Quality Gate for dpc-web and dpc-admin
+    needs: [build-dpc-admin, build-dpc-web]
+    runs-on: self-hosted
+    env:
+      # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
+    steps:
+      - name: chmod working directory
+        run: |
+          sudo chmod -R 777 .
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: Download web code coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: code-coverage-report-dpc-web
+      - name: Download admin code coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: code-coverage-report-dpc-admin
+      - name: Set env vars from AWS params
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            SONAR_HOST_URL=/sonarqube/url
+            SONAR_TOKEN=/sonarqube/token
+      - name: Run quality gate scan
+        uses: sonarsource/sonarqube-scan-action@master
+        with:
+          args:
+            -Dsonar.projectKey=bcda-dpc-web
+            -Dsonar.sources=./dpc-web/app,./dpc-web/lib,./dpc-admin/app,./dpc-admin/lib
+            -Dsonar.ruby.coverage.reportPaths=./web-resultset.json,./admin-resultset.json
+            -Dsonar.working.directory=./sonar_workspace
+            -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+            -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
+            -Dsonar.qualitygate.wait=true
+
+  sonar-quality-gate-dpc-portal:
+    name: Sonarqube Quality Gate for dpc-portal
+    needs: build-dpc-portal
+    runs-on: self-hosted
+    env:
+      # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
+    steps:
+      - name: chmod working directory
+        run: |
+          sudo chmod -R 777 .
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: Download code coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: code-coverage-report-dpc-portal
+      - name: Set env vars from AWS params
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            SONAR_HOST_URL=/sonarqube/url
+            SONAR_TOKEN=/sonarqube/token
+      - name: Run quality gate scan
+        uses: sonarsource/sonarqube-scan-action@master
+        with:
+          args:
+            -Dsonar.projectKey=bcda-dpc-portal
+            -Dsonar.sources=./dpc-portal/app,./dpc-portal/lib
+            -Dsonar.coverage.exclusions=**/*_preview.rb,**/*html.erb,**/application_*
+            -Dsonar.ruby.coverage.reportPaths=./portal-resultset.json
+            -Dsonar.working.directory=./sonar_workspace
+            -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+            -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
+            -Dsonar.qualitygate.wait=true
+
+  sonar-quality-gate-dpc-api:
+    name: Sonarqube Quality Gate for dpc-api
+    needs: build-api
+    runs-on: self-hosted
+    env:
+      # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+    steps:
+      - name: chmod working directory
+        run: |
+          sudo chmod -R 777 .
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: temurin
+          cache: maven
+      - name: Set env vars from AWS params
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            SONAR_HOST_URL=/sonarqube/url
+            SONAR_TOKEN=/sonarqube/token
+      - name: Install Maven 3.6.3
+        run: |
+          export PATH="$PATH:/opt/maven/bin"
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          if mvn -v; then echo "Maven already installed" && exit 0; else echo "Installing Maven"; fi
+          tmpdir="$(mktemp -d)"
+          curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
+          sudo rm -rf /opt/maven
+          sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
+      - name: Clean maven
+        run: |
+          mvn -ntp -U clean
+      - name: Compile Project
+        run: |
+          mvn clean compile -Perror-prone -B -V -ntp
+      - name: Download code coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: code-coverage-report-dpc-api
+          path: jacoco-reports
+      - name: Verify download
+        run: |
+          find . -name dpc-api-jacoco.xml
+      - name: Run quality gate scan
+        run: |
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.event_name == 'pull_request' && github.head_ref || github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }} -Dsonar.qualitygate.wait=true -Dsonar.coverage.jacoco.xmlReportPaths="../jacoco-reports/*.xml"
