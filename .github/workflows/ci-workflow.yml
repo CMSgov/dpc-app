@@ -129,6 +129,8 @@ jobs:
           sudo chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Download web code coverage
         uses: actions/download-artifact@v4
         with:
@@ -170,6 +172,8 @@ jobs:
           sudo chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Download code coverage
         uses: actions/download-artifact@v4
         with:
