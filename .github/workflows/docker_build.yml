@@ -65,7 +65,7 @@ jobs:
 
       - name: Load image
         run: |
-          docker load --input ${{ runner.temp }}/myimage.tar
+          docker load --input ${{ runner.temp }}/dpc_web-portal_latest.tar.gz
           docker image ls -a
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
