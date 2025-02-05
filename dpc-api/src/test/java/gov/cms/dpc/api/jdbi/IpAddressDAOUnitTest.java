@@ -22,27 +22,27 @@ class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
     }
 
     @Test
-    public void writesIpAddress() {
-        IpAddressEntity ipAddressEntity = createIpAddressEntity(UUID.randomUUID(), "192.168.1.1", "test label");
-
+    void writesIpAddress() {
+        UUID orgId = UUID.randomUUID();
+        IpAddressEntity ipAddressEntity = createIpAddressEntity(orgId, "192.168.1.1", "test label");
         IpAddressEntity returnedIp = db.inTransaction(() -> ipAddressDAO.persistIpAddress(ipAddressEntity));
 
+        assertEquals(orgId, returnedIp.getOrganizationId());
         assertEquals("192.168.1.1", returnedIp.getIpAddress().getAddress());
         assertEquals("test label", returnedIp.getLabel());
         assertFalse(returnedIp.getCreatedAt().toString().isEmpty());
         assertFalse(returnedIp.getId().toString().isEmpty());
-        assertFalse(returnedIp.getOrganizationId().toString().isEmpty());
     }
 
     @Test
-    public void failsWritingBadIpAddress() {
+    void failsWritingBadIpAddress() {
         IpAddressEntity ipAddressEntity = createIpAddressEntity(UUID.randomUUID(), "bad_ip", "test label");
         assertThrows(PersistenceException.class, () ->
             db.inTransaction(() -> ipAddressDAO.persistIpAddress(ipAddressEntity)));
     }
 
     @Test
-    public void fetchesIpAddress() {
+    void fetchesIpAddress() {
         UUID orgId1 = UUID.randomUUID();
         UUID orgId2 = UUID.randomUUID();
 
@@ -56,19 +56,19 @@ class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
 
         assertEquals(2, results.size());
 
-        IpAddressEntity org1 = results.get(0);
-        assertEquals(orgId1, org1.getOrganizationId());
-        assertEquals("192.168.1.1", org1.getIpAddress().getAddress());
-        assertEquals("label 1", org1.getLabel());
+        IpAddressEntity ip1 = results.get(0);
+        assertEquals(orgId1, ip1.getOrganizationId());
+        assertEquals("192.168.1.1", ip1.getIpAddress().getAddress());
+        assertEquals("label 1", ip1.getLabel());
 
-        IpAddressEntity org2 = results.get(1);
-        assertEquals(orgId1, org2.getOrganizationId());
-        assertEquals("192.168.1.2", org2.getIpAddress().getAddress());
-        assertEquals("label 2", org2.getLabel());
+        IpAddressEntity ip2 = results.get(1);
+        assertEquals(orgId1, ip2.getOrganizationId());
+        assertEquals("192.168.1.2", ip2.getIpAddress().getAddress());
+        assertEquals("label 2", ip2.getLabel());
     }
 
     @Test
-    public void deletesIpAddress() {
+    void deletesIpAddress() {
         UUID orgId = UUID.randomUUID();
 
         IpAddressEntity persistedIpAddress = db.inTransaction(() ->
