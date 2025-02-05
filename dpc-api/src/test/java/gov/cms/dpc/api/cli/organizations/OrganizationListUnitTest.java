@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import io.dropwizard.core.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
+import net.sourceforge.argparse4j.inf.Subparser;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -44,6 +45,13 @@ class OrganizationListUnitTest {
 	@Test
 	void test_constructor() {
 		assertDoesNotThrow(OrganizationList::new);
+	}
+
+	@Test
+	void test_addAdditionalOptions() {
+		OrganizationList organizationList = new OrganizationList();
+		Subparser subparser = mock(Subparser.class);
+		assertDoesNotThrow(() -> organizationList.addAdditionalOptions(subparser));
 	}
 
 	@Test
