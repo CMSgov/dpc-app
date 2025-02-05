@@ -36,6 +36,8 @@ jobs:
           LOAD_TEST_PRIVATE_KEY: ${{ secrets.LOAD_TEST_PRIVATE_KEY }}
           LOAD_TEST_PUBLIC_KEY_ID: ${{ secrets.LOAD_TEST_PUBLIC_KEY_ID }}
         run: |
+          ls -lah ./k6
+          ./k6 version
           ./k6 run \
             --out statsd=localhost:8125,enableTags=true \
             ./dpc-app/dpc-load-testing/script.js
