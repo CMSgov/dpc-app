@@ -11,10 +11,7 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
         resource: {
           resourceType: 'Bundle',
           type: 'collection',
-          entry: [
-            organization_resource,
-            endpoint_resources
-          ].flatten
+          entry: [organization_resource]
         }
       }
     ]
@@ -60,35 +57,6 @@ class OrganizationSubmitSerializer < ActiveModel::Serializer
       ],
       postalCode: object.address_zip,
       state: object.address_state
-    }
-  end
-
-  def endpoint_resources
-    [endpoint_resource(instance_options[:fhir_endpoint])]
-  end
-
-  def endpoint_resource(fhir_endpoint)
-    {
-      resource: {
-        resourceType: 'Endpoint',
-        status: fhir_endpoint['status'],
-        connectionType: {
-          system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type',
-          code: 'hl7-fhir-rest'
-        },
-        payloadType: [
-          {
-            coding: [
-              {
-                system: 'http://hl7.org/fhir/endpoint-payload-type',
-                code: 'any'
-              }
-            ]
-          }
-        ],
-        name: fhir_endpoint['name'],
-        address: fhir_endpoint['uri']
-      }
     }
   end
 end

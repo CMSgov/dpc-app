@@ -1,12 +1,18 @@
-<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::STEPS, 3)) if @invitation.authorized_official? %>
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::AO_STEPS, 3)) if @invitation.authorized_official? %>
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::CD_STEPS, 2)) if @invitation.credential_delegate? %>
 <div>
   <% if @invitation.credential_delegate? %>
-  <h1>Registration completed</h1>
+    <div class="usa-alert usa-alert--success margin-bottom-4">
+      <div class="usa-alert__body">
+        <p class="usa-alert__text">You're now authorized to manage the DPC API for <%= @organization.name %> (NPI <%= @organization.npi %>).</p>
+      </div>
+    </div>
+    <p>Thank you for accepting your invite. You can now manage your organization's credentials in the DPC Portal.</p>
   <% else %>
   <div class="usa-alert usa-alert--success margin-bottom-4">
     <div class="usa-alert__body">
       <p class="usa-alert__text">
-        <%= @organization.name %> is successfully registered with Data at the Point of Care.
+        <%= @organization.name %> (NPI <%= @organization.npi %>) is successfully registered with Data at the Point of Care.
       </p>
     </div>
   </div>

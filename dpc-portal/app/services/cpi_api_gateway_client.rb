@@ -4,7 +4,7 @@ require 'oauth2'
 
 # A client for requests to the CPI API Gateway
 class CpiApiGatewayClient
-  attr_accessor :access
+  attr_accessor :access, :client
 
   def initialize
     env = ENV.fetch('ENV', nil)
@@ -16,9 +16,7 @@ class CpiApiGatewayClient
     @client = OAuth2::Client.new(client_id, client_secret,
                                  site: cms_idm_url,
                                  token_url: '/oauth2/aus2151jb0hszrbLU297/v1/token',
-                                 ssl: {
-                                   verify: env != 'local'
-                                 })
+                                 ssl: { verify: env != 'local' })
     fetch_token
   end
 
@@ -44,9 +42,7 @@ class CpiApiGatewayClient
           id: ssn.to_s
         }
       },
-      dataSets: {
-        all: true
-      }
+      dataSets: { all: true }
     }.to_json
     fetch_provider_info(body)
   end
@@ -58,11 +54,27 @@ class CpiApiGatewayClient
         providerType: 'org',
         npi: npi.to_s
       },
-      dataSets: {
-        all: true
-      }
+      dataSets: { all: true }
     }.to_json
     fetch_provider_info(body)
+  end
+
+  # The CPI API Gateway doesn't support a healthcheck, and their suggestion was to just hit one of their
+  # end points and see if we get a response.  Don't over use this, as it counts against our rate limit.
+  def healthy_api?
+    # We'll get a 400 because the npi is bad, but any response indicates they're up and we're connected.
+    org_info('fake_npi')
+    true
+  rescue StandardError
+    false
+  end
+
+  def healthy_auth?
+    # Check if we can get a token
+    fetch_token
+    true
+  rescue StandardError
+    false
   end
 
   private
@@ -87,8 +99,7 @@ class CpiApiGatewayClient
   end
 
   def start_tracking(method_name, url)
-    @tracker = NewRelic::Agent::Tracer.start_external_request_segment(library: 'Net::HTTP', uri: url,
-                                                                      procedure: :post)
+    @tracker = NewRelic::Agent::Tracer.start_external_request_segment(library: 'Net::HTTP', uri: url, procedure: :post)
     @start = Time.now
     Rails.logger.info(
       ['Calling CPI API Gateway',

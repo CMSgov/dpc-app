@@ -48,7 +48,7 @@ describe AoInvitationService do
       end.to change { ProviderOrganization.count }.by 0
     end
 
-    it 'creates org wich PECOS name' do
+    it 'creates org with PECOS name' do
       service.create_invitation(*params, organization_npi)
       organization = ProviderOrganization.find_by(npi: organization_npi)
       expect(organization.name).to eq "Organization #{organization_npi}"
@@ -76,10 +76,21 @@ describe AoInvitationService do
     end
 
     it 'logs on success' do
-      allow(Rails.logger).to receive(:info)
-      expect(Rails.logger).to receive(:info).with(['Authorized Official invited',
-                                                   { actionContext: LoggingConstants::ActionContext::Registration,
-                                                     actionType: LoggingConstants::ActionType::AoInvited }])
+      organization = instance_double(ProviderOrganization)
+      expect(ProviderOrganization).to receive(:find_or_create_by).with(npi: organization_npi).and_return(organization)
+
+      invitation_id = 123
+      invitation = instance_double(Invitation)
+      expect(invitation).to receive(:id).and_return(invitation_id)
+      expect(Invitation).to receive(:create).and_return(invitation)
+
+      mailer = double(InvitationMailer)
+      expect(InvitationMailer).to receive(:with).with(invitation:, given_name: params[0], family_name: params[1])
+                                                .and_return(mailer)
+      expect(mailer).to receive(:invite_ao).and_return(mailer)
+      expect(mailer).to receive(:deliver_now)
+      expect(LogAoInviteJob).to receive(:perform_later).with(invitation_id)
+
       service.create_invitation(*params, organization_npi)
     end
   end

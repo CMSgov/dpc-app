@@ -14,7 +14,7 @@ set +o allexport
 
 function _finally {
   docker compose -p start-v1-app down
-  docker volume rm start-v1-app_pgdata14
+  docker volume rm start-v1-app_pgdata16
 }
 
 trap _finally EXIT
@@ -35,7 +35,7 @@ else
 fi
 
 # Build the application
-docker compose -p start-v1-app up start_core_dependencies
+docker compose -p start-v1-app up db --wait
 mvn clean compile -Perror-prone -B -V -ntp
 mvn package -Pci -ntp
 
@@ -45,20 +45,17 @@ if [ -n "$REPORT_COVERAGE" ]; then
 fi
 
 docker compose -p start-v1-app down
-docker volume rm start-v1-app_pgdata14
-docker compose -p start-v1-app up start_core_dependencies
-docker compose -p start-v1-app up start_api_dependencies
+
+USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
 
 # Run the integration tests
 docker compose -p start-v1-app up --exit-code-from tests tests
 
 docker compose -p start-v1-app down
-docker volume rm start-v1-app_pgdata14
-docker compose -p start-v1-app up start_core_dependencies
-docker compose -p start-v1-app up start_api_dependencies
 
+echo "Starting Postman tests"
 # Start the API server
-AUTH_DISABLED=true docker compose -p start-v1-app up start_api start_consent
+USE_BFD_MOCK=true AUTH_DISABLED=true docker compose -p start-v1-app up db attribution aggregation consent api --wait
 
 # Run the Postman tests
 npm install

@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
     Dir['{app,config,db,lib}/**/*', 'README.md']
   end
 
-  spec.add_dependency 'activemodel', '~> 7.1.3.2'
+  spec.add_dependency 'activemodel', '~> 7.2.2'
   spec.add_dependency 'active_model_serializers'
   spec.add_dependency 'macaroons'
   spec.add_dependency 'oauth2'

@@ -14,7 +14,7 @@ class Organization < ApplicationRecord
   has_many :users, through: :organization_user_assignments
   has_one :registered_organization, dependent: :destroy
 
-  enum organization_type: ORGANIZATION_TYPES
+  enum :organization_type, ORGANIZATION_TYPES
 
   validates :organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
   validates :name, uniqueness: true, presence: true
@@ -80,10 +80,6 @@ class Organization < ApplicationRecord
 
   def reg_org
     registered_organization if registered_organization.present?
-  end
-
-  def fhir_endpoint
-    registered_organization.fhir_endpoint
   end
 end
 

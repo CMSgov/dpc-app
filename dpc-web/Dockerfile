@@ -3,6 +3,8 @@ FROM ruby:3.3-alpine AS ruby_builder
 # Install build dependencies
 RUN apk update && \
     apk add --no-cache postgresql-dev && \
+    apk add --no-cache libffi-dev && \
+    apk add --no-cache yaml-dev && \
     apk add --no-cache shared-mime-info && \
     apk add --no-cache --virtual build-deps alpine-sdk npm tzdata && \
     apk add xz && \
@@ -25,7 +27,7 @@ RUN gem install bundler --no-document && \
     npm install
 
 # Run bundler audit
-RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2015-9284
+RUN bundle exec bundle audit update && bundle exec bundle audit check
 
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-web /dpc-web
@@ -42,7 +44,8 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
 FROM ruby:3.3-alpine
 
 # Install app dependencies
-RUN apk add --no-cache postgresql-client nodejs tzdata
+RUN apk add --no-cache postgresql-client nodejs tzdata && \
+    apk add --no-cache curl
 
 # Set the working directory
 RUN mkdir /dpc-web
@@ -51,6 +54,10 @@ WORKDIR /dpc-web
 # Copy the compiled Ruby app
 COPY --from=ruby_builder /usr/local/bundle/ /usr/local/bundle/
 COPY --from=ruby_builder /dpc-web /dpc-web
+
+# Add Federal Common Policy CA G2 root certificate for SMTP
+COPY certs/fcpcag2.crt /usr/local/share/ca-certificates/fcpcag2.crt
+RUN cat /usr/local/share/ca-certificates/fcpcag2.crt >> /etc/ssl/certs/ca-certificates.crt
 
 # Declare the entrypoint shell script
 ENTRYPOINT ["./docker/entrypoint.sh"]

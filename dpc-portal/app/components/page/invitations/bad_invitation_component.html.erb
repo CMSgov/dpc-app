@@ -2,7 +2,7 @@
   <h1><%= t(@status) %></h1>
   <div>
     <p>
-      <%=raw t(key=@text, org_name: @org_name) %>
+      <%=raw t(key=@text, org_name: @org_name, ao_full_name: @ao_full_name, ao_email: @ao_email) %>
     </p>
   </div>
   <% 'have to put the case statement here, as do not have route helper in ViewComponent'
@@ -12,13 +12,25 @@
             disabled: @invitation&.renewed?,
             destination: renew_organization_invitation_path(@invitation.provider_organization, @invitation),
             method: :post) %>
-      <% when :accepted %>
+      <% when :ao_accepted %>
         <%= button_to new_user_session_path, class: 'usa-button', method: :get, data: { turbo: false } do %>
           Sign in with <span class="login-button__logo">Login.gov</span>
         <% end %>
+      <% when :cd_accepted %>
+        <%= render Core::Button::ButtonComponent.new(label: "Go to DPC home",
+            destination: 'https://dpc.cms.gov/',
+            method: :get) %>
       <% when :invalid %>
         <%= render Core::Button::ButtonComponent.new(label: "Go to DPC home",
             destination: 'https://dpc.cms.gov/',
             method: :get) %>
+      <% when :pii_mismatch %>
+        <%= render Core::Button::ButtonComponent.new(label: "Sign out of Login.gov",
+            destination: login_dot_gov_logout_path(invitation_id: @invitation.id),
+            method: :delete) %>
+      <% when :email_mismatch %>
+        <%= render Core::Button::ButtonComponent.new(label: "Sign out of Login.gov",
+            destination: login_dot_gov_logout_path(invitation_id: @invitation.id),
+            method: :delete) %>
     <% end %>
 </div>

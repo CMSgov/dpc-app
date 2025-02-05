@@ -788,7 +788,7 @@ class JWTUnitTests {
         final PublicKeyDAO mock = mock(PublicKeyDAO.class);
 
         Mockito.when(mock.fetchPublicKey(Mockito.any(), Mockito.any())).then(answer -> {
-            @SuppressWarnings("RedundantCast") final KeyPair keyPair = JWTKeys.get((UUID) answer.getArgument(1));
+            final KeyPair keyPair = JWTKeys.get((UUID) answer.getArgument(1));
             if (keyPair == null) {
                 return Optional.empty();
             }

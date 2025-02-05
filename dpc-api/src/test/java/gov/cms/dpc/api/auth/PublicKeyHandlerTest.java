@@ -46,7 +46,7 @@ class PublicKeyHandlerTest {
         void testValidKey(KeyType keyType) throws NoSuchAlgorithmException {
             final String encoded = generatePublicKey(keyType);
             final String key = String.format("-----BEGIN PUBLIC KEY-----\n%s\n-----END PUBLIC KEY-----\n", encoded);
-            PublicKeyHandler.parsePEMString(key);
+            assertDoesNotThrow(() -> PublicKeyHandler.parsePEMString(key));
         }
 
         @ParameterizedTest
@@ -170,6 +170,14 @@ class PublicKeyHandlerTest {
 
             PublicKeyException pke = assertThrows(PublicKeyException.class, () -> PublicKeyHandler.verifySignature(publicKeyStr, snippet, sigStr));
             assertEquals("Key and signature do not match", pke.getMessage());
+        }
+
+        @Test
+        void testVerifySignatureBadSigStr() throws Exception {
+            KeyPair keyPair = APIAuthHelpers.generateKeyPair(KeyType.RSA);
+            String publicKeyStr = APIAuthHelpers.generatePublicKey(keyPair.getPublic());
+            String snippet = "Verify signature test";
+            assertThrows(PublicKeyException.class, ()  -> PublicKeyHandler.verifySignature(publicKeyStr, snippet, "hoohaw;"));
         }
     }
 

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'sinatra/base'
+require 'webrick'
 
 # This class simulates the CPI API Gateway and the IDM identity service
 #
@@ -22,9 +23,10 @@ require 'sinatra/base'
 #      3299073577: returns code 404
 #      3782297014: has no valid enrollments
 #   Enrollment Roles
-#    AO SSNS: 900111111
+#     Valid for testing in Login.gov
+#     AO SSNS: 900111111
 class FakeCpiGateway < Sinatra::Base
-  set :server, 'thin'
+  set :server, 'webrick'
 
   set(:method) do |method|
     method = method.to_s.upcase
@@ -32,22 +34,23 @@ class FakeCpiGateway < Sinatra::Base
   end
 
   before method: :post do
-    if request.env['CONTENT_TYPE'] == 'application/json'
-      request.body.rewind
-      @request_payload = JSON.parse request.body.read
-    end
+    @request_payload = JSON.parse(request.body.read) if request.env['CONTENT_TYPE'] == 'application/json'
   end
 
   # IDM identity service
   post '/oauth2/:token_id/v1/token' do
-    headers['content-type'] = 'application/json; charset=UTF-8'
-    {
-      access_token: 'fake-token',
-      token_type: 'Bearer',
-      expires_in: 3600,
-      refresh_token: 'fake-token',
-      scope: 'create'
-    }.to_json
+    if params['token_id'] == 'bad_token'
+      halt 401
+    else
+      headers['content-type'] = 'application/json; charset=UTF-8'
+      {
+        access_token: 'fake-token',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        refresh_token: 'fake-token',
+        scope: 'create'
+      }.to_json
+    end
   end
 
   # CPI API Gateway

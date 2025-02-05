@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution.resources;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
@@ -10,7 +11,7 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.IntegrationTest;
-import gov.cms.dpc.testing.MBIUtil;
+import gov.cms.dpc.testing.utils.MBIUtil;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,6 +62,27 @@ public class GroupResourceTest extends AbstractAttributionTest {
 
         assertTrue(methodOutcome.getCreated());
 
+    }
+
+    @Test
+    public void testCreateDuplicateRoster() {
+        final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
+        final Patient patient = createPatient(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
+
+        final Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
+        group.addMember().setEntity(new Reference(patient.getIdElement()));
+
+        client.create()
+            .resource(group)
+            .encodedJson()
+            .execute();
+
+        // "Create" a new roster for the same provider and org
+        assertThrows(ForbiddenOperationException.class, () ->
+            client.create()
+            .resource(group)
+            .encodedJson()
+            .execute(), "Should error on a duplicate roster");
     }
 
     @Test

@@ -19,10 +19,11 @@ class IpAddressesController < ApplicationController
     if new_ip_address[:response]
       log_credential_action(:ip_address, new_ip_address.dig(:message, 'id'), :add)
       flash[:notice] = 'IP address successfully created.'
-      redirect_to organization_path(@organization)
+      redirect_to organization_path(@organization, credential_start: true)
     else
-      flash[:alert] = "IP address could not be created: #{manager.errors.join(', ')}."
-      render Page::IpAddress::NewAddressComponent.new(@organization)
+      @errors = new_ip_address[:errors] || {}
+      flash[:alert] = @errors[:root] || 'IP address invalid'
+      render Page::IpAddress::NewAddressComponent.new(@organization, errors: @errors)
     end
   end
 
@@ -32,9 +33,9 @@ class IpAddressesController < ApplicationController
       flash[:notice] = 'IP address successfully deleted.'
       log_credential_action(:ip_address, params[:id], :remove)
     else
-      flash[:alert] = "IP address could not be deleted: #{manager.errors.join(', ')}."
+      flash[:alert] = manager.errors[:root] || 'IP address could not be deleted.'
     end
-    redirect_to organization_path(@organization)
+    redirect_to organization_path(@organization, credential_start: true)
   end
   # rubocop:enable Metrics/AbcSize
 end

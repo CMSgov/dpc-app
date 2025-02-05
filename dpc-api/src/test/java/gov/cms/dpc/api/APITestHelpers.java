@@ -29,6 +29,7 @@ import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFacto
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
+import gov.cms.dpc.testing.utils.MBIUtil;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
@@ -53,10 +54,7 @@ import java.io.InputStream;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -65,6 +63,7 @@ public class APITestHelpers {
     private static final String CONSENT_URL = "http://localhost:3600/v1";
     public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
+    private static final String CONSENT_TRUNCATE_TASK = "http://localhost:9904/tasks/truncate";
     public static String BASE_URL = "https://dpc.cms.gov/api";
     public static String ORGANIZATION_NPI = "1111111112";
 
@@ -200,12 +199,13 @@ public class APITestHelpers {
     }
 
     private static void truncateDatabase() throws IOException {
+        List<String> taskUrls = List.of(ATTRIBUTION_TRUNCATE_TASK, CONSENT_TRUNCATE_TASK);
 
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost post = new HttpPost(ATTRIBUTION_TRUNCATE_TASK);
-
-            try (CloseableHttpResponse execute = client.execute(post)) {
-                assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should have truncated database");
+            for(String url : taskUrls) {
+                try (CloseableHttpResponse execute = client.execute(new HttpPost(url))) {
+                    assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should have truncated DB at " + url);
+                }
             }
         }
     }
@@ -245,6 +245,15 @@ public class APITestHelpers {
                 .withGender(Enumerations.AdministrativeGender.OTHER)
                 .managedBy(organizationID)
                 .build();
+    }
+
+    public static List<Patient> createPatientResources(String organizationID, int numPatients) {
+        List<Patient> patients = new ArrayList<>(numPatients);
+
+        for(int i=0; i<numPatients; i++) {
+            patients.add(createPatientResource(MBIUtil.generateMBI(), organizationID));
+        }
+        return patients;
     }
 
     public static Provenance createProvenance(String orgId, String practitionerId, List<String> patientIds){

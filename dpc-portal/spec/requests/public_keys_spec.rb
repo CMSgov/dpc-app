@@ -188,14 +188,16 @@ RSpec.describe 'PublicKeys', type: :request do
         }
         expect(flash[:notice]).to eq('Public key successfully created.')
         expect(assigns(:organization)).to eq org
-        expect(response).to redirect_to(organization_path(org))
+        expect(response).to redirect_to(organization_path(org, credential_start: true))
       end
 
       it 'fails if missing params' do
-        stub_api_client(message: :get_organization,
-                        response: default_get_org_response(org_api_id))
         post "/organizations/#{org.id}/public_keys"
-        expect(flash[:alert]).to eq('Required values missing.')
+        expect(flash[:alert]).to eq("Fields can't be blank.")
+        expect(assigns(:errors)).to eq(public_key: "Public key can't be blank.",
+                                       snippet_signature: "Signature snippet can't be blank.",
+                                       label: "Label can't be blank.",
+                                       root: "Fields can't be blank.")
       end
 
       it 'fails if label over 25 characters' do
@@ -206,7 +208,8 @@ RSpec.describe 'PublicKeys', type: :request do
           public_key: file_fixture('stubbed_key.pem').read,
           snippet_signature: 'test snippet signature'
         }
-        expect(flash[:alert]).to eq('Label cannot be over 25 characters')
+        expect(flash[:alert]).to eq('Invalid label.')
+        expect(assigns(:errors)).to eq(label: 'Label must be 25 characters or fewer.', root: 'Invalid label.')
       end
 
       it 'shows error if problem' do
@@ -221,7 +224,7 @@ RSpec.describe 'PublicKeys', type: :request do
           public_key: file_fixture('stubbed_key.pem').read,
           snippet_signature: 'test snippet signature'
         }
-        expect(flash[:alert]).to eq('Public key could not be created.')
+        expect(flash[:alert]).to eq("We're sorry, but we can't complete your request. Please try again tomorrow.")
       end
     end
   end
@@ -254,7 +257,7 @@ RSpec.describe 'PublicKeys', type: :request do
                                        api_client:)
         delete "/organizations/#{org.id}/public_keys/#{key_guid}"
         expect(flash[:notice]).to eq('Public key successfully deleted.')
-        expect(response).to redirect_to(organization_path(org))
+        expect(response).to redirect_to(organization_path(org, credential_start: true))
       end
 
       it 'renders error if error' do

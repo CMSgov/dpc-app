@@ -67,7 +67,6 @@ The DPC application is split into multiple services.
 | [dpc-api](/dpc-api)                 |Public API| Asynchronous FHIR API for managing organizations and requesting or retrieving data     |Java (Dropwizard)|
 | [dpc-attribution](/dpc-attribution) |Internal API| Provides and updates data about attribution                                            |Java (Dropwizard)|
 | [dpc-consent](/dpc-consent)         |Internal API| Provides and updates information about data-sharing consent for individuals            |Java (Dropwizard)|
-| [dpc-queue](/dpc-queue)             |Internal API| Provides and updates data about export jobs and batches                                |Java (Dropwizard)|
 | [dpc-aggregation](/dpc-aggregation) |Internal Worker Service| Polls for job batches and exports data for singular batches                            |Java (Dropwizard + RxJava)|
 
 #### Shared Modules
@@ -78,6 +77,7 @@ In addition to services, several modules are shared across components.
 |---|---|---|
 |[dpc-bluebutton](/dpc-bluebutton)|Bluebutton API Client|Java|
 |[dpc-macaroons](/dpc-macaroons)|Implementation of macaroons for authentication|Java|
+|[dpc-queue](/dpc-queue)| Provides an interface for managing export jobs and batches|Java|
 |[dpc-common](/dpc-common)|Shared utilities for components|Java|
 |[dpc-testing](/dpc-testing)|Shared utilities for testing|Java|
 |[dpc-smoketest](/dpc-smoketest)|Smoke test suite|Java|
@@ -222,6 +222,8 @@ This command will convert the contents of `ops/config/decrypted/local.env` to Ma
 Then, run `mvn clean install` to build and test the application. Dependencies will need to be up and running for this option to succeed.
 
 Running `mvn clean install` will also construct the Docker images for the individual services. To skip the Docker build, pass `-Djib.skip=True`.
+
+If a build failure is encountered when running `mvn clean install`, attempt to resolve this by separating the build process into two steps by running `make api` followed by `mvn install`.
 
 Note that the `dpc-base` image produced by `make docker-base` is not stored in a remote repository. The `mvn clean install` process relies on the base image being available via the local Docker daemon.
 

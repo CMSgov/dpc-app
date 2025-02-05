@@ -118,7 +118,6 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     let!(:successful_parameters) do
       { invited_given_name: 'Bob',
         invited_family_name: 'Hodges',
-        phone_raw: '222-222-2222',
         invited_email: 'bob@example.com',
         invited_email_confirmation: 'bob@example.com' }
     end
@@ -136,11 +135,6 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         end.to change { Invitation.count }.by(1)
       end
 
-      it 'adds verification code to invitation record on success' do
-        post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
-        expect(assigns(:cd_invitation).verification_code.length).to eq 6
-      end
-
       it 'redirects on success' do
         post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
         expect(response).to redirect_to(success_organization_credential_delegate_invitation_path(api_id,
@@ -156,10 +150,22 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       end
 
       it 'logs on success' do
+        invitation_id = 123
+        invitation = instance_double(Invitation)
+        expect(invitation).to receive(:id).and_return(invitation_id)
+        expect(invitation).to receive(:save).and_return(true)
+        expect(Invitation).to receive(:new).and_return(invitation)
+
+        mailer = double(InvitationMailer)
+        expect(InvitationMailer).to receive(:with).with(invitation:).and_return(mailer)
+        expect(mailer).to receive(:invite_cd).and_return(mailer)
+        expect(mailer).to receive(:deliver_later)
+
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(['Credential Delegate invited',
                                                      { actionContext: LoggingConstants::ActionContext::Registration,
-                                                       actionType: LoggingConstants::ActionType::CdInvited }])
+                                                       actionType: LoggingConstants::ActionType::CdInvited,
+                                                       invitation: invitation_id }])
         post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
       end
 
@@ -174,6 +180,16 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         successful_parameters['invited_given_name'] = ''
         post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
         expect(response.status).to eq(400)
+      end
+
+      it 'does not create duplicate invitation record' do
+        post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
+        expect do
+          post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
+        end.to change { Invitation.count }.by(0)
+        expect(response.status).to eq(400)
+        expect(response.body).to include(I18n.t('errors.attributes.base.duplicate_cd.status'))
+        expect(response.body).to include(I18n.t('errors.attributes.base.duplicate_cd.text'))
       end
     end
 
@@ -242,7 +258,6 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         expect(flash[:notice]).to eq('Invitation cancelled.')
       end
       it 'returns error message on failure' do
-        invitation.errors.add(:invited_phone)
         invitation_class = class_double(Invitation).as_stubbed_const
         bad_invitation = instance_double(Invitation)
         expect(bad_invitation).to receive(:provider_organization).and_return(org)

@@ -6,7 +6,7 @@ class InvitationMailer < ApplicationMailer
     @invitation = params[:invitation]
     mail(
       to: @invitation.invited_email,
-      subject: 'You have been granted credential delegate authority in Data at the Point of Care'
+      subject: "You've been delegated to manage API access"
     )
   end
 
@@ -18,6 +18,16 @@ class InvitationMailer < ApplicationMailer
     mail(
       to: @invitation.invited_email,
       subject: 'Time to register your organization with DPC'
+    )
+  end
+
+  def cd_accepted
+    @invitation = params[:invitation]
+    @invited_given_name = params[:invited_given_name]
+    @invited_family_name = params[:invited_family_name]
+    mail(
+      to: @invitation&.invited_by&.email,
+      subject: 'Credential Delegate has signed up successfully'
     )
   end
 end

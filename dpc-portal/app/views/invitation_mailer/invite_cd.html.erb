@@ -5,13 +5,24 @@
     <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
   </head>
   <body>
-    <h1>Dear <%= @invitation.invited_given_name %> <%= @invitation.invited_family_name %>,</h1>
-    <p><%= @invitation.invited_by.given_name %> <%= @invitation.invited_by.family_name %> has invited you to manage
-      the credentials for <%= @invitation.provider_organization.name %> within Data at the Point of Care.</p>
-    <p><%= link_to 'Accept this invitation',
-	   accept_organization_invitation_url(@invitation.provider_organization, @invitation, protocol: Rails.env.production? ? 'https' : 'http') %></p>	   
-    <p>Sincerely,</p>
+    <h1>Accept your invitation to manage API access</h1>
+    <p>The Authorized Official (AO) of <%= @invitation.provider_organization.name %> (NPI <%= @invitation.provider_organization.npi %>) has assigned you to
+      complete the API onboarding process for Data at the Point of Care (DPC).</p>
+    <p><%= link_to 'Use this link to accept your invitation in the DPC Portal.',
+	   organization_invitation_url(@invitation.provider_organization, @invitation, protocol: Rails.env.production? ? 'https' : 'http') %></p>
+    <p>This link will expire in 48 hours.</p>
 
-    <p>The Data at the Point of Care Team</p>
+    <h2>What is DPC?</h2>
+    <p>DPC is an Application Programming Interface (API) that allows organizations to access patient medical data.
+      The API delivers information from Medicare claims for treatment purposes. <%= link_to 'Learn more about DPC.', 'https://dpc.cms.gov' %></p>
+
+    <h2>What happens after I begin onboarding?</h2>
+    <p>You'll be prompted to sign in or create an account with <%= link_to 'Login.gov', 'https://www.login.gov/what-is-login/' %> at the
+      DPC Portal. You may need to provide your state-Issued ID, a Social Security Number, and email address.
+      <%= link_to 'How to verify your identity.', 'https://www.login.gov/help/verify-your-identity/how-to-verify-your-identity/' %></p>
+    <p>You will then have access to the DPC Portal where you can manage your organization credentials.</p>
+
+    <p>Thank you for your interest in Data at the Point of Care.</p>
+    <p>- Centers for Medicare & Medicaid Services</p>
   </body>
 </html>

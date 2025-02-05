@@ -5,9 +5,11 @@
 # and config.ru via config.relative_url_root.
 #
 Rails.application.routes.draw do
-  devise_for :users, controllers: { omniauth_callbacks: 'login_dot_gov' }
+  devise_for :users, controllers: { sessions: 'users/sessions', omniauth_callbacks: 'login_dot_gov' }
   devise_scope :user do
     get '/users/auth/failure', to: 'login_dot_gov#failure', as: 'login_dot_gov_failure'
+    get '/users/auth/logged_out', to: 'login_dot_gov#logged_out'
+    delete '/logout', to: 'login_dot_gov#logout', as: 'login_dot_gov_logout'
     get 'active', to: 'users/sessions#active'
     get 'timeout', to: 'users/sessions#timeout'
   end
@@ -34,6 +36,8 @@ Rails.application.routes.draw do
       post 'register', on: :member
       post 'login', on: :member
       post 'renew', on: :member
+      get 'confirm_cd', on: :member
+      get 'set_idp_token', on: :member
     end
     get 'tos_form', on: :member
     post 'sign_tos', on: :member
@@ -41,6 +45,7 @@ Rails.application.routes.draw do
   end
 
   match '/download_snippet', to: 'public_keys#download_snippet', as: 'download_snippet', via: :post
+  get 'system-use-agreement', to: 'static_pages#system_use_agreement'
 
   if Rails.env.development?
     require 'sidekiq/web'

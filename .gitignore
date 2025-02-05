@@ -43,8 +43,9 @@ ops/config/decrypted/*
 !ops/config/decrypted/README.md
 .mvn/
 
-/tmp/letter_opener/admin/*
-/tmp/letter_opener/web/*
+# Ignore all contents in project tmp/ directory (except .keep file)
+tmp/
+!tmp/.keep
 
 # Ignore Go unit test results
 dpc-go/dpc-api/results.json

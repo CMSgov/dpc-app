@@ -1,7 +1,7 @@
 services:
 
   db:
-    image: postgres:14
+    image: postgres:16.4
     command: postgres -c 'max_connections=250'
     environment:
       - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth,dpc_consent,dpc-website_development,bcda,dpc-portal_development
@@ -12,7 +12,14 @@ services:
       # based on the POSTGRES_MULTIPLE_DATABASES variable above.
       - ./docker/postgres:/docker-entrypoint-initdb.d
       # Mount persistent volume to ensure data is not erased across containers.
-      - pgdata14:/var/lib/postgresql/data
+      - pgdata16:/var/lib/postgresql/data
+      - ./tmp:/var/tmp
+    healthcheck:
+      test: "pg_isready -U $${POSTGRES_USER}"
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
 
   aggregation:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
@@ -24,28 +31,43 @@ services:
       - ENV=local
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
       - EMIT_AWS_METRICS=${EMIT_AWS_METRICS:-false}
-      - JACOCO=${REPORT_COVERAGE}
+      - JACOCO=${REPORT_COVERAGE:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     depends_on:
-      - db
-      - consent
+      db:
+        condition: service_healthy
+      consent:
+        condition: service_healthy
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-aggregation:/jacoco-report
+    healthcheck:
+      test: curl --fail http://localhost:9901/healthcheck || exit 1
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
 
   attribution:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-attribution}:latest
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       - ENV=local
-      - JACOCO=${REPORT_COVERAGE}
+      - JACOCO=${REPORT_COVERAGE:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     ports:
       - "3500:8080"
       - "9902:9902"
     volumes:
       - ./jacocoReport/dpc-attribution:/jacoco-report
+    healthcheck:
+      test: curl --fail http://localhost:9902/healthcheck || exit 1
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
 
   api:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-api}:latest
@@ -56,54 +78,44 @@ services:
       - ./ops/config/decrypted/local.env
     environment:
       - ENV=local
-      - JACOCO=${REPORT_COVERAGE}
+      - JACOCO=${REPORT_COVERAGE:-false}
       - EXPORT_PATH=/app/data
       - AUTH_DISABLED=${AUTH_DISABLED:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
+      - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
     depends_on:
-      - attribution
+      attribution:
+        condition: service_healthy
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-api:/jacoco-report
+    healthcheck:
+      test: curl --fail http://localhost:9900/healthcheck || exit 1
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
 
   consent:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-consent}:latest
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       - ENV=local
-      - JACOCO=${REPORT_COVERAGE}
+      - JACOCO=${REPORT_COVERAGE:-false}
       - DEBUG_MODE=${DEBUG_MODE:-false}
     ports:
       - "3600:3600"
       - "9904:9904"
     volumes:
       - ./jacocoReport/dpc-consent:/jacoco-report
-
-  start_core_dependencies:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - db
-    command: db:5432
-
-  start_api_dependencies:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - attribution
-      - aggregation
-    command: attribution:8080 aggregation:9901
-
-  start_api:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - api
-    command: api:3002
-
-  start_consent:
-    image: dadarek/wait-for-dependencies
-    depends_on:
-      - consent
-    command: consent:3600
+    healthcheck:
+      test: curl --fail http://localhost:9904/healthcheck || exit 1
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
 
   tests:
     image: maven:3.6-jdk-11
@@ -113,11 +125,11 @@ services:
       - export-volume:/tmp
       - ./:/usr/src/mymaven
     working_dir: /usr/src/mymaven
-    command: sh -c "mvn test -Pintegration-tests -am -ntp"
+    command: sh -c "mvn verify -Pintegration-tests -am -ntp -Djib.skip=true"
     network_mode: host
 
 volumes:
-  pgdata14:
+  pgdata16:
   export-volume:
     driver: local
     driver_opts:

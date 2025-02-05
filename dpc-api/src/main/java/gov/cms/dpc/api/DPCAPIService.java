@@ -19,6 +19,7 @@ import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
+import gov.cms.dpc.common.logging.filters.LogHeaderFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.common.utils.UrlGenerator;
@@ -34,6 +35,7 @@ import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
+import org.apache.http.HttpHeaders;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 
@@ -95,6 +97,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         environment.jersey().register(new JsonParseExceptionMapper());
         environment.jersey().register(new GenerateRequestIdFilter(false));
         environment.jersey().register(new LogResponseFilter());
+        environment.jersey().register(new LogHeaderFilter(HttpHeaders.ACCEPT_ENCODING));
 
         // Find Guice-aware validator and swap in for Dropwizard's default hk2 validator.
         Optional<Injector> injector = InjectorLookup.getInjector(this);
