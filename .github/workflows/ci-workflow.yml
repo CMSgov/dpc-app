@@ -208,6 +208,8 @@ jobs:
           sudo chmod -R 777 .
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
