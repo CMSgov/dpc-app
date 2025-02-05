@@ -74,7 +74,7 @@ class SeedCommandTest {
         String errMsg = "Connection error";
         try (MockedStatic<DSL> mockedDSL = Mockito.mockStatic(DSL.class)) {
             mockedDSL.when(() -> DSL.using(any(Connection.class), any(Settings.class)))
-                        .thenThrow(new RuntimeException(errMsg));
+                    .thenThrow(new RuntimeException(errMsg));
 
             final Optional<Throwable> failure = cli.run("seed", "src/test/resources/test.application.yml");
             assertFalse(failure.isEmpty(), "Should have not succeeded");

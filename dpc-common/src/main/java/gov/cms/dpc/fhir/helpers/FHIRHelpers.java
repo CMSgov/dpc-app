@@ -1,15 +1,10 @@
 package gov.cms.dpc.fhir.helpers;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
@@ -117,54 +112,5 @@ public class FHIRHelpers {
             builder.lastModified(resource.getMeta().getLastUpdated());
         }
         return builder.build();
-    }
-
-    // TODO: Refactor this as part of DPC-511
-    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon) {
-        final IGenericClient client = ctx.newRestfulGenericClient(baseURL);
-        client.registerInterceptor(new MacaroonsInterceptor(macaroon));
-
-        return client;
-    }
-
-    public static String createGoldenMacaroon(String taskURL) throws IOException {
-
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost post = new HttpPost(String.format("%s/generate-token", taskURL));
-
-            try (CloseableHttpResponse execute = client.execute(post)) {
-                if (execute.getStatusLine().getStatusCode() != 200) {
-                    throw new IllegalStateException("Could not create Macaroon");
-                }
-                return EntityUtils.toString(execute.getEntity());
-            }
-        }
-    }
-
-    public static class MacaroonsInterceptor implements IClientInterceptor {
-
-        private String macaroon;
-
-        MacaroonsInterceptor(String macaroon) {
-            this.macaroon = macaroon;
-        }
-
-        @Override
-        public void interceptRequest(IHttpRequest theRequest) {
-            theRequest.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.macaroon);
-        }
-
-        @Override
-        public void interceptResponse(IHttpResponse theResponse) {
-            // Not used
-        }
-
-        public String getMacaroon() {
-            return macaroon;
-        }
-
-        public void setMacaroon(String macaroon) {
-            this.macaroon = macaroon;
-        }
     }
 }

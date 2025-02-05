@@ -898,7 +898,6 @@
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>test</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
@@ -909,6 +908,9 @@
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
                 <version>4.0.0</version>
+                <configuration>
+                  <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                </configuration>
                 <executions>
                     <execution>
                         <id>git-commit</id>
