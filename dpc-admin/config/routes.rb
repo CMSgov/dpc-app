@@ -12,7 +12,7 @@ Rails.application.routes.draw do
     end
 
     resources :organizations do
-      resources :registered_organizations, only: [:new, :create, :edit, :update, :destroy] do
+      resources :registered_organizations, only: [:new, :create, :destroy] do
         match :enable_or_disable, via: [:get, :post, :update]
       end
       match :add_or_delete, via: [:get, :post, :delete]

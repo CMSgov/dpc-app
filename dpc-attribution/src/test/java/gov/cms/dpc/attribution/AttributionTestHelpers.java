@@ -8,14 +8,13 @@ import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.AddressEntity;
 import gov.cms.dpc.common.entities.NameEntity;
 import gov.cms.dpc.common.entities.ContactEntity;
-import gov.cms.dpc.common.entities.EndpointEntity;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.entities.ProviderEntity;
 import gov.cms.dpc.common.entities.RosterEntity;
 import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.testing.MBIUtil;
+import gov.cms.dpc.testing.utils.MBIUtil;
 import org.hl7.fhir.dstu3.model.*;
 
 import java.sql.Date;
@@ -28,16 +27,14 @@ import java.util.UUID;
 public class AttributionTestHelpers {
 
     public static final String DEFAULT_ORG_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
-    public static final String DEFAULT_PATIENT_BENE_ID = "-19990000002901";
     public static final String DEFAULT_PATIENT_MBI = "3SQ0C00AA00";
 
-    public static Practitioner createPractitionerResource(String NPI) {
+    public static Practitioner createPractitionerResource(String npi) {
         final Practitioner practitioner = new Practitioner();
-        practitioner.addIdentifier().setValue(NPI).setSystem(DPCIdentifierSystem.NPPES.getSystem());
-        practitioner.addName()
-                .setFamily("Practitioner").addGiven("Test");
+        practitioner.addIdentifier().setValue(npi).setSystem(DPCIdentifierSystem.NPPES.getSystem());
+        practitioner.addName().setFamily("Practitioner").addGiven("Test");
 
-        // Meta data which includes the Org we're using
+        // Metadata which includes the Org we're using
         final Meta meta = new Meta();
         meta.addTag(DPCIdentifierSystem.DPC.getSystem(), DEFAULT_ORG_ID, "OrganizationID");
         practitioner.setMeta(meta);
@@ -45,11 +42,11 @@ public class AttributionTestHelpers {
         return practitioner;
     }
 
-    public static Patient createPatientResource(String MBI, String organizationID) {
+    public static Patient createPatientResource(String mbi, String organizationID) {
         final Patient patient = new Patient();
         patient.addIdentifier()
                 .setSystem(DPCIdentifierSystem.MBI.getSystem())
-                .setValue(MBI);
+                .setValue(mbi);
 
         patient.addName().setFamily("Patient").addGiven("Test");
         patient.setBirthDate(Date.valueOf("1990-01-01"));
@@ -117,12 +114,6 @@ public class AttributionTestHelpers {
         contactEntity.setAddress(addressEntity);
         contactEntity.setTelecom(List.of());
 
-        EndpointEntity endpointEntity = new EndpointEntity();
-        endpointEntity.setId(UUID.randomUUID());
-        endpointEntity.setName("endpoint");
-        endpointEntity.setStatus(Endpoint.EndpointStatus.ACTIVE);
-        endpointEntity.setAddress("http://www.endpoint.com");
-
         OrganizationEntity.OrganizationID orgEntId = new OrganizationEntity.OrganizationID(DPCIdentifierSystem.NPPES, NPIUtil.generateNPI());
         OrganizationEntity organizationEntity = new OrganizationEntity();
         organizationEntity.setId(UUID.randomUUID());
@@ -130,7 +121,6 @@ public class AttributionTestHelpers {
         organizationEntity.setOrganizationName("Name");
         organizationEntity.setOrganizationAddress(addressEntity);
         organizationEntity.setContacts(List.of(contactEntity));
-        organizationEntity.setEndpoints(List.of(endpointEntity));
 
         return organizationEntity;
     }

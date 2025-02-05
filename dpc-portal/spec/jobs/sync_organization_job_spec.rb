@@ -24,13 +24,6 @@ RSpec.describe SyncOrganizationJob, type: :job do
       dpc_api_organization_id: 'foo'
     )
   end
-  let(:fhir_endpoint) do
-    {
-      'status' => 'test',
-      'name' => 'Test Endpoint',
-      'uri' => 'http://test-address.nope'
-    }
-  end
 
   before(:each) do
     SyncOrganizationJob.perform_later(provider_organization.id)
@@ -49,8 +42,7 @@ RSpec.describe SyncOrganizationJob, type: :job do
         .with(have_attributes(
                 name: provider_organization.name,
                 npi: provider_organization.npi
-              ),
-              fhir_endpoint:)
+              ))
         .and_return(create_organization_success_response)
 
       perform_enqueued_jobs
@@ -86,8 +78,7 @@ RSpec.describe SyncOrganizationJob, type: :job do
         .with(have_attributes(
                 name: provider_organization.name,
                 npi: provider_organization.npi
-              ),
-              fhir_endpoint:)
+              ))
         .and_return(create_organization_unsuccessful_response)
 
       expect do
