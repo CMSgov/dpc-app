@@ -20,7 +20,7 @@ Environment variables are stored in Ansible Vault. These will all populate autom
 
 The K6 docker image that we rely on to run this both in GH Actions and locally does not actually run a Node.js environment. Therefore, we are unable to use most standard Node.js runtime utilities, including built-in library functions and the usual import syntax. 
 
-A workaround for Node.js libraries is to pull them directly from a CDN, e.g. `import KJUR from 'https://unpkg.com/jsrsasign@11.1.0/lib/jsrsasign.js';`. This may fail if the library in question depends on any code defined by Node or its JavaScript engine.
+A workaround for Node.js libraries is to pull them directly from a CDN, e.g. `import KJUR from 'https://unpkg.com/jsrsasign@11.1.0/lib/jsrsasign.js';`. Currently, we don't need any third-party packages; this note is for future reference.
 
 Many utilities are provided by K6. See: https://jslib.k6.io/. In addition, K6 provides a [JavaScript API](https://grafana.com/docs/k6/latest/javascript-api/) with utilities including HTTP requests, various cryptographic functions, and more.
 
