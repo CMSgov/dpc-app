@@ -35,6 +35,8 @@ jobs:
           LOAD_TEST_CLIENT_TOKEN: ${{ secrets.LOAD_TEST_CLIENT_TOKEN }}
           LOAD_TEST_PRIVATE_KEY: ${{ secrets.LOAD_TEST_PRIVATE_KEY }}
           LOAD_TEST_PUBLIC_KEY_ID: ${{ secrets.LOAD_TEST_PUBLIC_KEY_ID }}
+          LOAD_TEST_ORGANIZATION_ID: ${{ secrets.LOAD_TEST_ORGANIZATION_ID }}
+          API_ADMIN_URL: ${{ secrets.API_ADMIN_URL }}
         run: |
           ./k6 run \
             --out output-statsd=addr=localhost:8125,enableTags=true \
