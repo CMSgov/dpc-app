@@ -50,13 +50,12 @@ class DBUtilsUnitTest {
 
     @Test
     void test_truncateAllTables_schema_not_found() {
-        envVars.set("ENV", "LOCAL");
+        envVars.set("ENV", "local");
         Meta mockedMeta = mock(Meta.class);
         doReturn(mockedMeta).when(context).meta();
 
         IllegalArgumentException err = assertThrows(IllegalArgumentException.class, () ->
                 DBUtils.truncateAllTables(context, "foobar"));
-        System.out.println(err.getMessage());
         assertEquals("Cannot find schema 'foobar'", err.getMessage());
     }
 }

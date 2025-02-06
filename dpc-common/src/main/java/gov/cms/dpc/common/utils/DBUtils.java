@@ -35,10 +35,7 @@ public class DBUtils {
         }
 
         // Truncate all the tables (except for the liquibase metadata)
-        schemas
-                .get(0)
-                .getTables()
-                .stream()
+        schemas.get(0).getTables().stream()
                 .filter(table -> !table.getName().startsWith("databasechangelog"))
                 .forEach(table -> {
                     logger.trace("Truncating table: {}", table.getName());
