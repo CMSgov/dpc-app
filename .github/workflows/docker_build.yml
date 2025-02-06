@@ -30,6 +30,8 @@ jobs:
           - ecr_repository: web
             make_command: make ci-web-portal
     steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: Cleanup Runner
@@ -37,9 +39,6 @@ jobs:
 
       - name: Install python3
         run: sudo dnf install python3
-
-      - name: "Checkout code"
-        uses: actions/checkout@v4
 
       - name: Install docker compose manually
         run: |
