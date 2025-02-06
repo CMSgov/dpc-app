@@ -1,7 +1,8 @@
 name: Docker Build
 
 on:
-  workflow_dispatch:
+#  workflow_dispatch:
+  push:
 
 permissions:
   id-token: write
@@ -54,14 +55,14 @@ jobs:
           path: ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
           retention-days: 1
 
-  docker_push_rails_apps:
+  docker_push_all_apps:
     runs-on: self-hosted
     strategy:
       matrix:
-        ecr_repository: [ web-portal, web-admin, web ]
+        ecr_repository: [ web-portal, web-admin, web, api, attribution, aggregation, consent ]
     env:
       ECR_REPOSITORY: ${{ matrix.ecr_repository }}
-    needs: docker_build_rails_apps
+    needs: [ docker_build_rails_apps, docker_build_java ]
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -92,7 +93,7 @@ jobs:
           docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
 
 
-  docker_build_java:
+  docker_build_java: # builds dpc-api, dpc-attribution, dpc-aggregation, and dpc-consent
     runs-on: self-hosted
     steps:
       - name: "Set up Ansible"
@@ -165,38 +166,38 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: ECR (1 of 4) - Push API
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: api
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker tag $REGISTRY/dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+      - name: gzip image (1 of 4) - API
+        run: docker save ${{ steps.login-ecr.outputs.registry }}/dpc-api:latest | gzip > ${{ runner.temp }}/dpc_api_latest.tar.gz
+      - name: upload tar artifact (1 of 4) - API
+        uses: actions/upload-artifact@v4
+        with:
+          name: dpc-api
+          path: ${{ runner.temp }}/dpc_api_latest.tar.gz
+          retention-days: 1
 
-      - name: ECR (2 of 4) - Push Attribution
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: attribution
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker tag $REGISTRY/dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+      - name: gzip image (2 of 4) - Attribution
+        run: docker save ${{ steps.login-ecr.outputs.registry }}/dpc-attribution:latest | gzip > ${{ runner.temp }}/dpc_attribution_latest.tar.gz
+      - name: upload tar artifact (2 of 4) - Attribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: dpc-attribution
+          path: ${{ runner.temp }}/dpc_attribution_latest.tar.gz
+          retention-days: 1
 
-      - name: ECR (3 of 4) - Push Aggregation
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: aggregation
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker tag $REGISTRY/dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+      - name: gzip image (3 of 4) - Aggregation
+        run: docker save ${{ steps.login-ecr.outputs.registry }}/dpc-aggregation:latest | gzip > ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
+      - name: upload tar artifact (3 of 4) - Aggregation
+        uses: actions/upload-artifact@v4
+        with:
+          name: dpc-attribution
+          path: ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
+          retention-days: 1
 
-      - name: ECR (4 of 4) - Push Consent
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: consent
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker tag $REGISTRY/dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+      - name: gzip image (4 of 4) - Consent
+        run: docker save ${{ steps.login-ecr.outputs.registry }}/dpc-consent:latest | gzip > ${{ runner.temp }}/dpc_consent_latest.tar.gz
+      - name: upload tar artifact (4 of 4) - Consent
+        uses: actions/upload-artifact@v4
+        with:
+          name: dpc-consent
+          path: ${{ runner.temp }}/dpc_consent_latest.tar.gz
+          retention-days: 1
