@@ -35,6 +35,15 @@ jobs:
     steps:
       - name: check disk
         run: lsblk && df -h
+      - name: check docker disk usage (1 of 4)
+        run: docker system df
+      - name: check docker disk usage (2 of 4)
+        run: docker images -f "dangling=true"
+      - name: check docker disk usage (3 of 4)
+        run: docker ps -a --filter "status=exited"
+      - name: check docker disk usage (4 of 4)
+        run: docker volume ls -qf dangling=true
+
 
       - name: Install python3
         run: sudo dnf install python3
@@ -78,6 +87,14 @@ jobs:
     steps:
       - name: check disk
         run: lsblk && df -h
+      - name: check docker disk usage (1 of 4)
+        run: docker system df
+      - name: check docker disk usage (2 of 4)
+        run: docker images -f "dangling=true"
+      - name: check docker disk usage (3 of 4)
+        run: docker ps -a --filter "status=exited"
+      - name: check docker disk usage (4 of 4)
+        run: docker volume ls -qf dangling=true
 
       - name: Download artifact
         uses: actions/download-artifact@v4
