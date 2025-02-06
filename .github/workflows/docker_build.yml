@@ -28,8 +28,6 @@ jobs:
             make_command: make ci-admin-portal
           - repository: web
             make_command: make ci-web-portal
-    env:
-      MAKE_COMMAND: ${{ matrix.make_command }}
     steps:
       - name: Install python3
         run: sudo dnf install python3
@@ -45,7 +43,7 @@ jobs:
           sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
       - name: Build specified app
-        run: $MAKE_COMMAND
+        run: ${{ matrix.make_command }}
 
       - name: gzip the image
         run: docker save dpc-${{ matrix.repository }}:latest | gzip > ${{ runner.temp }}/dpc_${{ matrix.repository }}_latest.tar.gz
