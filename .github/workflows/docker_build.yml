@@ -193,7 +193,7 @@ jobs:
       - name: upload tar artifact (3 of 4) - Aggregation
         uses: actions/upload-artifact@v4
         with:
-          name: dpc-attribution
+          name: dpc-aggregation
           path: ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
           retention-days: 1
 
