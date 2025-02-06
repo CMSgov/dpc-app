@@ -12,6 +12,11 @@ set -o allexport
 [[ -f ${DIR}/ops/config/decrypted/local.env ]] && source ${DIR}/ops/config/decrypted/local.env
 set +o allexport
 
+# Remove jacocoReport directory
+if [ -d "${DIR}/jacocoReport" ]; then
+    rm -r "${DIR}/jacocoReport"
+fi
+
 function _finally {
   docker compose -p start-v1-app down
   docker volume rm start-v1-app_pgdata16
