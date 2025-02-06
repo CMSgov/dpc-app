@@ -1,6 +1,6 @@
-package gov.cms.dpc.testing.utils;
+package gov.cms.dpc.common.utils;
 
-import gov.cms.dpc.testing.exceptions.NotATestEnvironmentException;
+import gov.cms.dpc.common.exceptions.NotATestEnvironmentException;
 import org.jooq.DSLContext;
 import org.jooq.Schema;
 import org.slf4j.Logger;

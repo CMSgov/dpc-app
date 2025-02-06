@@ -1,7 +1,7 @@
 package gov.cms.dpc.consent.tasks;
 
+import gov.cms.dpc.common.utils.DBUtils;
 import gov.cms.dpc.consent.DPCConsentConfiguration;
-import gov.cms.dpc.testing.utils.DBUtils;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.servlets.tasks.Task;
