@@ -1,6 +1,13 @@
 name: "Generate and Load Golden Macaroon"
 
 on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: 'string'
+        default: 'dev'
   workflow_call:
     inputs:
       env:
@@ -8,6 +15,7 @@ on:
         required: true
         type: 'string'
         default: 'dev'
+
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.env }}
   cancel-in-progress: true
