@@ -161,11 +161,6 @@
             <version>4.0.1</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jooq</groupId>
-            <artifactId>jooq</artifactId>
-            <version>${jooq.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
