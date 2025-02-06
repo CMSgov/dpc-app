@@ -8,7 +8,6 @@ import io.dropwizard.testing.junit5.ResourceExtension;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,7 +27,6 @@ import static org.mockito.Mockito.when;
  * Tests ConsentResource using a mocked DAO, making it possible to run these tests with a database running.
  * The intent for these tests is to be able to test corner and edge cases in an easily controlled way.
  */
-@Disabled
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class ConsentResourceUnitTest {
 
@@ -65,21 +63,18 @@ public class ConsentResourceUnitTest {
 
     @Test
     final void getResource_withValidId_returnsConsentResource() {
-        try (Response response = resource.target("/Consent/" + TEST_ID)
+        try (Response response = resource.target("/v1/Consent/" + TEST_ID)
                 .request()
                 .accept(FHIR_JSON)
                 .get()) {
 
             assertEquals(HttpStatus.OK_200, response.getStatus(), "should find record for test id");
         }
-        // can't parse the result here; assuming this is a configuration issue as it throws a jackson mapping error
-        // final Consent resource = FhirContext.forDstu3().newJsonParser().parseResource(Consent.class, response.readEntity(InputStream.class));
-        // assertDoesNotThrow(() -> FhirContext.forDstu3().newJsonParser().encodeResourceToString(resource));
     }
 
     @Test
     final void search_withEmptyString_isInvalid() {
-        try (Response response = resource.target("/Consent/")
+        try (Response response = resource.target("/v1/Consent/")
                 .request()
                 .accept(FHIR_JSON)
                 .get()) {
