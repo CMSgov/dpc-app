@@ -1,0 +1,15 @@
+name: "Calls update golden macaroon"
+
+on:
+  push:
+    paths:
+      - .github/workflows/tmp-caller.yml
+      - .github/workflows/generate-macaroon.yml
+    
+jobs:
+  doit:
+    name: "Call generate macaroon"
+    uses: .github/workflows/generate-macaroon.yml
+    with:
+      env: dev
+    secrets: inherit
