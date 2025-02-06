@@ -52,6 +52,7 @@ jobs:
         with:
           name: dpc-${{ matrix.ecr_repository }}
           path: ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
+          retention-days: 1
 
   docker_push_rails_apps:
     runs-on: self-hosted
