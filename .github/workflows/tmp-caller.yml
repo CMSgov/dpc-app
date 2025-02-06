@@ -9,7 +9,7 @@ on:
 jobs:
   doit:
     name: "Call generate macaroon"
-    uses: .github/workflows/generate-macaroon.yml
+    uses: ./.github/workflows/generate-macaroon.yml
     with:
       env: dev
     secrets: inherit
