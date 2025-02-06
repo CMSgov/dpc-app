@@ -28,7 +28,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: Get and load Golden Macaroon
         run: |
-          ALB_URL=$(aws elbv2 describe-load-balancers --names dpc-${params.ENV}-frontend-internal | jq -r '.LoadBalancers[0].DNSName')
+          ALB_URL=$(aws elbv2 describe-load-balancers --names dpc-${{ inputs.env }}-frontend-internal | jq -r '.LoadBalancers[0].DNSName')
           token=$(curl -X POST ${ALB_URL}:9900/tasks/generate-token)
-          aws ssm put-parameter --name '/dpc/${params.ENV}/web/golden_macaroon' --type 'SecureString' --value "${token}" --key-id 'alias/dpc-${params.ENV}-master-key' --overwrite
+          aws ssm put-parameter --name '/dpc/${{ inputs.env }}/web/golden_macaroon' --type 'SecureString' --value "${token}" --key-id 'alias/dpc-${{ inputs.env }}-master-key' --overwrite
           
