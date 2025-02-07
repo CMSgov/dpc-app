@@ -61,14 +61,13 @@ jobs:
       - name: "DPC Web Build"
         run: |
           make ci-web-portal
-      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
-        run: |
-          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-web") then .key |= sub("/dpc-web"; "/github/workspace/dpc-web") else . end)' dpc-web/coverage/.resultset.json > web-resultset.json
+      - name: "Copy test results"
+        run: sudo cp dpc-web/coverage/.resultset.json web-resultset-raw.json
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report-dpc-web
-          path: ./web-resultset.json
+          path: ./web-resultset-raw.json
 
   build-dpc-admin:
     name: "Build and Test DPC Admin Portal"
@@ -79,14 +78,13 @@ jobs:
       - name: "DPC Admin Portal Build"
         run: |
           make ci-admin-portal
-      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
-        run: |
-          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-admin") then .key |= sub("/dpc-admin"; "/github/workspace/dpc-admin") else . end)' dpc-admin/coverage/.resultset.json > admin-resultset.json
+      - name: "Copy test results"
+        run: sudo cp dpc-admin/coverage/.resultset.json admin-resultset-raw.json
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report-dpc-admin
-          path: ./admin-resultset.json
+          path: ./admin-resultset-raw.json
 
   build-dpc-portal:
     name: "Build and Test DPC Portal"
@@ -97,14 +95,13 @@ jobs:
       - name: "DPC Portal Build"
         run: |
           make ci-portal
-      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
-        run: |
-          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-portal") then .key |= sub("/dpc-portal"; "/github/workspace/dpc-portal") else . end)' dpc-portal/coverage/.resultset.json > portal-resultset.json
+      - name: "Copy test results"
+        run: sudo cp dpc-portal/coverage/.resultset.json portal-resultset-raw.json
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report-dpc-portal
-          path: ./portal-resultset.json
+          path: ./portal-resultset-raw.json
 
   build-dpc-client:
     name: "Build and Test DPC Client"
@@ -139,6 +136,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: code-coverage-report-dpc-admin
+      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
+        run: |
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-web") then .key |= sub("/dpc-web"; "${{ github.workspace }}/dpc-web") else . end)' web-resultset-raw.json > web-resultset.json
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-admin") then .key |= sub("/dpc-admin"; "${{ github.workspace }}/dpc-admin") else . end)' admin-resultset-raw.json > admin-resultset.json
       - name: Set env vars from AWS params
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
@@ -178,6 +179,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: code-coverage-report-dpc-portal
+      - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
+        run: |
+          sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-portal") then .key |= sub("/dpc-portal"; "${{ github.workspace }}/dpc-portal") else . end)' portal-resultset-raw.json > portal-resultset.json
       - name: Set env vars from AWS params
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
