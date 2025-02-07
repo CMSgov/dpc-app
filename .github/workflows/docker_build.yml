@@ -103,11 +103,10 @@ jobs:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
         run: |
-          if [  ${{ matrix.ecr_repository }} == api || 
-                ${{ matrix.ecr_repository }}" == attribution || 
-                ${{ matrix.ecr_repository }}" == aggregation || 
-                ${{ matrix.ecr_repository }}" == consent
-          ]; then
+          if [ ${{ matrix.ecr_repository }} == 'api' ] || \
+             [ ${{ matrix.ecr_repository }} == 'attribution' ] || \
+             [ ${{ matrix.ecr_repository }} == 'aggregation' ] || \
+             [ ${{ matrix.ecr_repository }} == 'consent' ]; then
             echo "using image with registry as part of name for java app: ${{ matrix.ecr_repository }}"
             docker tag $REGISTRY/dpc-$ECR_REPOSITORY $REGISTRY/dpc-$ECR_REPOSITORY:latest
             docker tag $REGISTRY/dpc-$ECR_REPOSITORY $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
