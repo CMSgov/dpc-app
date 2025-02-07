@@ -15,6 +15,17 @@ env:
   ENV: "github-ci"
 
 jobs:
+  generate_docker_tag:
+    runs-on: self-hosted
+    outputs:
+      docker_tag: ${{ steps.output_docker_tag.outputs.docker_tag }}
+    steps:
+      - name: generate a tag with UTC date and GitHub run_id
+        id: output_docker_tag
+        run: |
+          DOCKER_TAG="rls-$(date -u +'%Y%m%d%H%M')-${{ github.run_id }}"
+          echo "docker_tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
+
   docker_build_rails_apps:
     runs-on: self-hosted
     strategy:
@@ -66,7 +77,7 @@ jobs:
         ecr_repository: [ web-portal, web-admin, web, api, attribution, aggregation, consent ]
     env:
       ECR_REPOSITORY: ${{ matrix.ecr_repository }}
-    needs: [ docker_build_rails_apps, docker_build_java ]
+    needs: [ docker_build_rails_apps, docker_build_java, generate_docker_tag ]
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -90,7 +101,7 @@ jobs:
       - name: Push to ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
         run: |
           docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
           docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
@@ -205,3 +216,14 @@ jobs:
           name: dpc-consent
           path: ${{ runner.temp }}/dpc_consent_latest.tar.gz
           retention-days: 1
+
+  output_build_tag:
+    runs-on: self-hosted
+    needs: docker_push_all_apps
+    outputs:
+      docker_tag: ${{ needs.generate_docker_tag.outputs.docker_tag }}
+    steps:
+      - name: Output docker tag after all builds are pushed to ECR
+        run: |
+          echo "submitting tag from generate_docker_tag job now that all builds are pushed to ECR
+          echo ${{ needs.generate_docker_tag.outputs.docker_tag }}
