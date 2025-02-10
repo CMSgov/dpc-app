@@ -34,6 +34,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: 'e307b6740d9c1c8ab8d3d2833a56457d7ba330d5'
+      - name: "Fetch git info"
+        run: |
+          git fetch --quiet
       - name: "Get Version Tag"
         id: get-version-tag
         run: |
