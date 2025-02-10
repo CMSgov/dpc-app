@@ -47,9 +47,25 @@ jobs:
           echo $VERSION_TAG
           echo "version_tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
           set -e
- build:
-   outputs:
-     ecr_image_tag: "latest"
-    
-  # deploy:
-  # smoke-test:
+  build:
+    name: Build
+    outputs:
+      ecr_image_tag: 'latest'
+    runs-on: self-hosted
+    steps:
+      - name: blank step
+        run: echo 'nothing to see here'
+
+  deploy:
+    uses: ./.github/workflows/ecs-deploy.yml
+    with:
+      env: ${{ inputs.env }}
+      confirm_env: ${{ inputs.confirm_env }}
+      tag: ${{ jobs.build.outputs.ecr_image_tag }}
+      app-version: ${{ jobs.get-version-tag.outputs.version_tag }}
+    secrets: inherit
+  smoke-test:
+    uses: ./.github/workflows/smoke-test.yml
+    with:
+      env: ${{ inputs.env }}
+    secrets: inherit
