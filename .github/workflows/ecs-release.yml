@@ -69,6 +69,7 @@ jobs:
       app-version: ${{ needs.get-version-tag.outputs.version_tag }}
     secrets: inherit
   smoke-test:
+    needs: deploy
     uses: ./.github/workflows/smoke-test.yml
     with:
       env: ${{ inputs.env }}
