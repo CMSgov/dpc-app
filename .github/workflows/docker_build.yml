@@ -71,55 +71,6 @@ jobs:
           path: ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
           retention-days: 1
 
-  docker_push_all_apps:
-    runs-on: self-hosted
-    strategy:
-      matrix:
-        ecr_repository: [ web-portal, web-admin, web, api, attribution, aggregation, consent ]
-    env:
-      ECR_REPOSITORY: ${{ matrix.ecr_repository }}
-    needs: [ docker_build_rails_apps, docker_build_java, generate_docker_tag ]
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: dpc-${{ matrix.ecr_repository }}
-          path: ${{ runner.temp }}
-      - name: Load docker image from artifact download
-        run: |
-          docker load --input ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
-          docker image ls -a
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Push to ECR
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
-        run: |
-          if [ ${{ matrix.ecr_repository }} == 'api' ] || \
-             [ ${{ matrix.ecr_repository }} == 'attribution' ] || \
-             [ ${{ matrix.ecr_repository }} == 'aggregation' ] || \
-             [ ${{ matrix.ecr_repository }} == 'consent' ]; then
-            echo "using image with registry as part of name for java app: ${{ matrix.ecr_repository }}"
-            docker tag $REGISTRY/dpc-$ECR_REPOSITORY $REGISTRY/dpc-$ECR_REPOSITORY:latest
-            docker tag $REGISTRY/dpc-$ECR_REPOSITORY $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-            docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-            docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
-          else
-            docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
-            docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-            docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-            docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
-          fi
-
   docker_build_java: # builds dpc-api, dpc-attribution, dpc-aggregation, and dpc-consent
     runs-on: self-hosted
     steps:
@@ -233,6 +184,55 @@ jobs:
           name: dpc-consent
           path: ${{ runner.temp }}/dpc_consent_latest.tar.gz
           retention-days: 1
+
+  docker_push_all_apps:
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        ecr_repository: [ web-portal, web-admin, web, api, attribution, aggregation, consent ]
+    env:
+      ECR_REPOSITORY: ${{ matrix.ecr_repository }}
+    needs: [ docker_build_rails_apps, docker_build_java, generate_docker_tag ]
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dpc-${{ matrix.ecr_repository }}
+          path: ${{ runner.temp }}
+      - name: Load docker image from artifact download
+        run: |
+          docker load --input ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
+          docker image ls -a
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Push to ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
+        run: |
+          if [ ${{ matrix.ecr_repository }} == 'api' ] || \
+             [ ${{ matrix.ecr_repository }} == 'attribution' ] || \
+             [ ${{ matrix.ecr_repository }} == 'aggregation' ] || \
+             [ ${{ matrix.ecr_repository }} == 'consent' ]; then
+            echo "using image with registry as part of name for java app: ${{ matrix.ecr_repository }}"
+            docker tag $REGISTRY/dpc-$ECR_REPOSITORY $REGISTRY/dpc-$ECR_REPOSITORY:latest
+            docker tag $REGISTRY/dpc-$ECR_REPOSITORY $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+            docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+            docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
+          else
+            docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
+            docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+            docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+            docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
+          fi
 
   output_build_tag:
     runs-on: self-hosted
