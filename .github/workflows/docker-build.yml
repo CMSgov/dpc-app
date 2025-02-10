@@ -47,10 +47,10 @@ jobs:
           - ecr_repository: web
             make_command: make ci-web-portal
     steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
       - name: Assert Ownership
         run: sudo chmod -R 777 .
+      - name: "Checkout code"
+        uses: actions/checkout@v4
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
 
