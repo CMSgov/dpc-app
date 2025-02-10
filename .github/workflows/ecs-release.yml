@@ -1,0 +1,47 @@
+name: 'Build and Deploy'
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: 'string'
+        default: 'dev'
+      confirm_env:
+        description: Double check for environment
+        required: true
+        type: 'string'
+        default: ''
+      ops-ref:
+        description: Branch of dpc-ops to use
+        required: false
+        type: 'string'
+        default: 'main'
+      
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.env }}
+  cancel-in-progress: false
+
+jobs:
+  get-version-tag:
+    name: "Get Version Tag"
+    runs-on: self-hosted
+    outputs:
+      version_tag: ${{ steps.get-version-tag.outputs.version_tag }}
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: "Get Version Tag"
+        id: get-version-tag
+        run: |
+          VERSION_TAG=`git describe --tags --exact-match`
+          if [ $? -ne 0 ]; then
+            BRANCH_HASH=`git show -s --format='%h'`
+            VERSION_TAG="commit_${BRANCH_HASH}"
+          fi
+          echo $VERSION_TAG
+          echo "version_tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
+  # build:
+  # deploy:
+  # smoke-test:

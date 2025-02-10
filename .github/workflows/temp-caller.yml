@@ -1,0 +1,17 @@
+name: "calll full deploy"
+
+on:
+  push:
+    paths:
+      - .github/workflows/temp-caller.yml
+      - .github/workflows/ecs-release.yml
+
+
+job:
+  runit:
+    uses: ./.github/workflows/ecs-release.yml
+    with:
+      env: test
+      confirm_env: test
+      opr-ref: main
+    secrets: inherit
