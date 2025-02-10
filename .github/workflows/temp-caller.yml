@@ -13,5 +13,5 @@ jobs:
     with:
       env: test
       confirm_env: test
-      opr-ref: main
+      ops-ref: main
     secrets: inherit
