@@ -2,6 +2,11 @@ name: Docker Build
 
 on:
   workflow_dispatch:
+  workflow_call:
+    outputs:
+      ecr_image_tag:
+        description: "Tag for associated docker images"
+        value: ${{ jobs.generate_docker_tag.outputs.docker_tag }}
 
 permissions:
   id-token: write
@@ -233,14 +238,3 @@ jobs:
           name: dpc-consent
           path: ${{ runner.temp }}/dpc_consent_latest.tar.gz
           retention-days: 1
-
-  output_build_tag:
-    runs-on: self-hosted
-    needs: docker_push_all_apps
-    outputs:
-      docker_tag: ${{ needs.generate_docker_tag.outputs.docker_tag }}
-    steps:
-      - name: Output docker tag after all builds are pushed to ECR
-        run: |
-          echo "submitting tag from generate_docker_tag job now that all builds are pushed to ECR"
-          echo ${{ needs.generate_docker_tag.outputs.docker_tag }}
