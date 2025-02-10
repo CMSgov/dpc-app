@@ -104,7 +104,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: "17"
-          distribution: "temurin"
+          distribution: "corretto"
           cache: maven
 
       - name: Install Maven 3.6.3
