@@ -1,7 +1,16 @@
 name: 'Build and Deploy'
 
 on:
-  workflow_call:
+  schedule:
+    - cron: '0 6 * * 1-5'
+  push:
+    branches:
+      - main
+    paths:
+      - dpc-**
+      - engines/**
+
+  workflow_dispatch:
     inputs:
       env:
         description: AWS environment to deploy to
@@ -18,18 +27,35 @@ on:
         required: false
         type: 'string'
         default: 'main'
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: 'string'
+        default: 'dev'
+      ops-ref:
+        description: Branch of dpc-ops to use
+        required: false
+        type: 'string'
+        default: 'main'
       
 concurrency:
-  group: ${{ github.workflow }}-top-${{ inputs.env }}
+  group: ${{ github.workflow }}-top-${{ inputs.env || 'dev' }}
   cancel-in-progress: false
 
 jobs:
-  get-version-tag:
-    name: "Get Version Tag"
+  set-parameters:
+    name: "Set Parameters"
     runs-on: self-hosted
     outputs:
       version_tag: ${{ steps.get-version-tag.outputs.version_tag }}
     steps:
+      - name: "Validate Environment"
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.env != inputs.confirm_env }}
+        run: |
+          echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
+          exit 1
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: "Fetch git info"
@@ -59,18 +85,20 @@ jobs:
 
   deploy:
     needs:
-      - get-version-tag
+      - set-parameters
       - build
     uses: ./.github/workflows/ecs-deploy.yml
     with:
-      env: ${{ inputs.env }}
-      confirm_env: ${{ inputs.confirm_env }}
+      env: ${{ inputs.env || 'dev'  }}
+      confirm_env: ${{ inputs.env || 'dev'  }}
       tag: ${{ needs.build.outputs.ecr_image_tag }}
-      app-version: ${{ needs.get-version-tag.outputs.version_tag }}
+      app-version: ${{ needs.set-parameters.outputs.version_tag }}
+      ops-ref: ${{ inputs.ops-ref || 'main' }}
     secrets: inherit
+
   smoke-test:
     needs: deploy
     uses: ./.github/workflows/smoke-test.yml
     with:
-      env: ${{ inputs.env }}
+      env: ${{ inputs.env || 'dev' }}
     secrets: inherit

@@ -12,6 +12,5 @@ jobs:
     uses: ./.github/workflows/ecs-release.yml
     with:
       env: dev
-      confirm_env: dev
       ops-ref: main
     secrets: inherit
