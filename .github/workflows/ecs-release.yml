@@ -35,6 +35,7 @@ jobs:
       - name: "Get Version Tag"
         id: get-version-tag
         run: |
+          set +e
           VERSION_TAG=`git describe --tags --exact-match`
           if [ $? -ne 0 ]; then
             BRANCH_HASH=`git show -s --format='%h'`
@@ -42,6 +43,7 @@ jobs:
           fi
           echo $VERSION_TAG
           echo "version_tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
+          set -e
   # build:
   # deploy:
   # smoke-test:
