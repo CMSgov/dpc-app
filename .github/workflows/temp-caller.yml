@@ -3,7 +3,7 @@ name: Temporary Workflow for calling build/deploy workflows
 on:
   push:
     branches:
-      - 'ls/task-temp-call-jdk17-build-and-deploy'
+      - 'ls/task-update-workflows-jdk-17'
 
 jobs:
   first_build_and_push_to_ecr:
