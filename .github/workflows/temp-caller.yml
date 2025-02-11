@@ -1,4 +1,4 @@
-name: "Call Full Deploy"
+name: "A Full Deploy"
 
 on:
   push:
