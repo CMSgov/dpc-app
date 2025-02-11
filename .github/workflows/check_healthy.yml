@@ -11,7 +11,7 @@ on:
 
 jobs:
   wait-for-services:
-    name: Wait for services to be health
+    name: Wait for services to be healthy
     runs-on: self-hosted
     strategy:
       matrix:
