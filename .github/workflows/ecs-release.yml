@@ -1,6 +1,9 @@
 name: 'Build and Deploy'
 
 on:
+  push:
+    paths:
+      - .github/workflows/ecs-release.yml
   schedule:
     - cron: '0 6 * * 1-5'
   push:
