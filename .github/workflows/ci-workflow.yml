@@ -1,6 +1,10 @@
 name: "DPC CI Workflow"
 
 on:
+  pull_request:
+    paths-ignore:
+      - .github/workflows/**
+      - lambda/**
   workflow_dispatch: # Allow manual trigger
 
 env:
