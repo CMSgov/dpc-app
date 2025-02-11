@@ -6,12 +6,6 @@ on:
       - .github/workflows/ecs-release.yml
   schedule:
     - cron: '0 6 * * 1-5'
-  push:
-    branches:
-      - main
-    paths:
-      - dpc-**
-      - engines/**
 
   workflow_dispatch:
     inputs:
