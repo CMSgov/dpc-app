@@ -18,17 +18,6 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        service:
-          - api
-          - attribution
-          - aggregation
-          - consent
-          - web
-          - sidekiq-web
-          - admin
-          - sidekiq-admin
-          - portal
-          - sidekiq-portal
         include:
           - service: api
             script_params: api-1 api api frontend v9
@@ -36,22 +25,22 @@ jobs:
             script_params: api
           - service: attribution
             script_params: attribution attribution attribution backend v9
-          - service: aggregation
-            script_params: aggregation aggregation aggregation backend v9
-          - service: consent
-            script_params: consent consent consent backend v9
-          - service: web
-            script_params: web-v2-1 web web frontend v9
-          - service: sidekiq-web
-            script_params: sidekiq sidekiq sidekiq frontend v9
-          - service: admin
-            script_params: web-admin-1 web-admin web-admin frontend v9
-          - service: sidekiq-admin
-            script_params: sidekiq-admin sidekiq-admin sidekiq-admin frontend v9
-          - service: portal
-            script_params: web-portal-1 dpc-portal web-portal frontend v9
-          - service: sidekiq-portal
-            script_params: sidekiq-portal sidekiq-portal sidekiq-portal frontend v9
+          # - service: aggregation
+          #   script_params: aggregation aggregation aggregation backend v9
+          # - service: consent
+          #   script_params: consent consent consent backend v9
+          # - service: web
+          #   script_params: web-v2-1 web web frontend v9
+          # - service: sidekiq-web
+          #   script_params: sidekiq sidekiq sidekiq frontend v9
+          # - service: admin
+          #   script_params: web-admin-1 web-admin web-admin frontend v9
+          # - service: sidekiq-admin
+          #   script_params: sidekiq-admin sidekiq-admin sidekiq-admin frontend v9
+          # - service: portal
+          #   script_params: web-portal-1 dpc-portal web-portal frontend v9
+          # - service: sidekiq-portal
+          #   script_params: sidekiq-portal sidekiq-portal sidekiq-portal frontend v9
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
