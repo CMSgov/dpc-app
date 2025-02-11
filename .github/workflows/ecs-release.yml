@@ -48,7 +48,7 @@ concurrency:
 
 jobs:
   set-parameters:
-    name: "Set Parameters"
+    name: "Set Parameters (now just version tag)"
     runs-on: self-hosted
     outputs:
       version_tag: ${{ steps.get-version-tag.outputs.version_tag }}
