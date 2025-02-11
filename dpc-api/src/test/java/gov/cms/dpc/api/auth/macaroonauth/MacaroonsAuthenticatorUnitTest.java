@@ -73,8 +73,8 @@ class MacaroonsAuthenticatorUnitTest {
 		when(searchQuery.whereMap(searchParams)).thenReturn(whereMapQuery);
 
 		IQuery<Bundle> bundleQuery = mock(IQuery.class);
-		Bundle bundle = mock(Bundle.class);
-		when(bundle.getTotal()).thenReturn(1);
+		Bundle bundle = mock(Bundle.class, RETURNS_DEEP_STUBS);
+		when(bundle.getEntry().size()).thenReturn(1);
 		when(whereMapQuery.returnBundle(Bundle.class).encodedJson()).thenReturn(bundleQuery);
 		when(bundleQuery.execute()).thenReturn(bundle);
 
@@ -132,8 +132,8 @@ class MacaroonsAuthenticatorUnitTest {
 		when(searchQuery.whereMap(searchParams)).thenReturn(whereMapQuery);
 
 		IQuery<Bundle> bundleQuery = mock(IQuery.class);
-		Bundle bundle = mock(Bundle.class);
-		when(bundle.getTotal()).thenReturn(1);
+		Bundle bundle = mock(Bundle.class, RETURNS_DEEP_STUBS);
+		when(bundle.getEntry().size()).thenReturn(1);
 		when(whereMapQuery.returnBundle(Bundle.class).encodedJson()).thenReturn(bundleQuery);
 		when(bundleQuery.execute()).thenReturn(bundle);
 
