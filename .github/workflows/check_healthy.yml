@@ -21,8 +21,6 @@ jobs:
         include:
           - service: api
             script_params: api-1 api api frontend v9
-          - service: api
-            script_params: api
           - service: attribution
             script_params: attribution attribution attribution backend v9
           # - service: aggregation
