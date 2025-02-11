@@ -1,6 +1,9 @@
 name: utility-check-healthy
 
 on:
+  push:
+    paths:
+      - .github/workflows/check_healthy.yml
   workflow_call:
     inputs:
       env:
@@ -61,4 +64,4 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
       - name: Check Service
         run: |
-          ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} ${{ matrix.script_params }}
+          ./dpc-app/scripts/check-deployment-status.sh dev ${{ matrix.script_params }}
