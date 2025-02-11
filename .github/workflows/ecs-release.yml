@@ -77,28 +77,10 @@ jobs:
   build:
     name: "Build Images"
     runs-on: self-hosted
+    needs: set-parameters
     outputs:
       ecr_image_tag: 'latest'
     steps:
       - name: blank step
         run: echo 'nothing to see here'
 
-  deploy:
-    needs:
-      - set-parameters
-      - build
-    uses: ./.github/workflows/ecs-deploy.yml
-    with:
-      env: ${{ inputs.env || 'dev'  }}
-      confirm_env: ${{ inputs.env || 'dev'  }}
-      tag: ${{ needs.build.outputs.ecr_image_tag }}
-      app-version: ${{ needs.set-parameters.outputs.version_tag }}
-      ops-ref: ${{ inputs.ops-ref || 'main' }}
-    secrets: inherit
-
-  smoke-test:
-    needs: deploy
-    uses: ./.github/workflows/smoke-test.yml
-    with:
-      env: ${{ inputs.env || 'dev' }}
-    secrets: inherit
