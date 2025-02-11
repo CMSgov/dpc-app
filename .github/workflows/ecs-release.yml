@@ -84,3 +84,15 @@ jobs:
       - name: blank step
         run: echo 'nothing to see here'
 
+  deploy:
+    needs:
+      - set-parameters
+      - build
+    uses: ./.github/workflows/ecs-deploy.yml
+    with:
+      env: ${{ inputs.env || 'dev'  }}
+      confirm_env: 'test'
+      tag: ${{ needs.build.outputs.ecr_image_tag }}
+      app-version: ${{ needs.set-parameters.outputs.version_tag }}
+      ops-ref: ${{ inputs.ops-ref || 'main' }}
+    secrets: inherit
