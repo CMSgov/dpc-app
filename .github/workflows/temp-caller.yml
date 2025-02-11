@@ -1,0 +1,30 @@
+name: Temporary Workflow for calling build/deploy workflows
+
+on:
+  push:
+    branches:
+      - 'ls/task-temp-call-jdk17-build-and-deploy'
+
+jobs:
+  first_build_and_push_to_ecr:
+    uses: ./.github/workflows/docker-build.yml
+
+  second_input_tag_to_ecs_deploy:
+    runs-on: self-hosted
+    needs: first_build_and_push_to_ecr
+    env:
+      ECR_IMAGE_TAG: ${{ needs.first_build_and_push_to_ecr.outputs.ecr_image_tag }}
+    steps:
+      - name: Retrieve ecr_image_tag from previous step
+        run: |
+          echo "this is the tag: $ECR_IMAGE_TAG"
+
+      - name: Run deploy w/ specified tag
+        uses: ./.github/workflows/ecs-deploy.yml
+        with:
+          env: 'test'
+          confirm_env: 'test'
+          ecr_image_tag: $ECR_IMAGE_TAG
+
+      - name: idk
+        run: echo "success????"
