@@ -1,11 +1,16 @@
 name: 'Build and Deploy'
 
 on:
-  push:
-    paths:
-      - .github/workflows/ecs-release.yml
   schedule:
     - cron: '0 6 * * 1-5'
+  push:
+    branches:
+      - main
+      - jd/dpc-4468-gha-full-deploy
+    paths:
+      - .github/workflows/ecs-release.yml
+      - dpc-**
+      - engines/**
 
   workflow_dispatch:
     inputs:
@@ -73,14 +78,11 @@ jobs:
 
   build:
     name: "Build Images"
-    runs-on: self-hosted
-    needs: set-parameters
-    outputs:
-      ecr_image_tag: 'latest'
-    steps:
-      - name: blank step
-        run: echo 'nothing to see here'
-
+    needs:
+      - set-parameters
+    uses: ./.github/workflows/docker-build.yml
+    secrets: inherit
+    
   deploy:
     needs:
       - set-parameters
@@ -88,8 +90,15 @@ jobs:
     uses: ./.github/workflows/ecs-deploy.yml
     with:
       env: ${{ inputs.env || 'dev'  }}
-      confirm_env: 'test'
-      tag: ${{ needs.build.outputs.ecr_image_tag }}
+      confirm_env: ${{ inputs.env || 'dev'  }}
+      ecr_image_tag: ${{ needs.build.outputs.ecr_image_tag }}
       app-version: ${{ needs.set-parameters.outputs.version_tag }}
       ops-ref: ${{ inputs.ops-ref || 'main' }}
+    secrets: inherit
+
+  smoke-test:
+    needs: deploy
+    uses: ./.github/workflows/smoke-test.yml
+    with:
+      env: ${{ inputs.env || 'dev' }}
     secrets: inherit
