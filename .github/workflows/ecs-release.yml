@@ -76,10 +76,12 @@ jobs:
 
   build:
     name: "Build Images"
-    needs:
-      - set-parameters
-    uses: ./.github/workflows/docker-build.yml
-    secrets: inherit
+    runs-on: self-hosted
+    outputs:
+      ecr_image_tag: 'latest'
+    steps:
+      - name: blank step
+        run: echo 'nothing to see here'
 
   deploy:
     needs:
