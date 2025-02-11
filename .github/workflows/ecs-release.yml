@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - main
-      - jd/dpc-4468-gha-full-deploy
     paths:
       - .github/workflows/ecs-release.yml
       - dpc-**
