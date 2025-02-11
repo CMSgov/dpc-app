@@ -29,18 +29,6 @@ on:
         required: false
         type: 'string'
         default: 'main'
-  workflow_call:
-    inputs:
-      env:
-        description: AWS environment to deploy to
-        required: true
-        type: 'string'
-        default: 'dev'
-      ops-ref:
-        description: Branch of dpc-ops to use
-        required: false
-        type: 'string'
-        default: 'main'
       
 concurrency:
   group: ${{ github.workflow }}-top-${{ inputs.env || 'dev' }}
