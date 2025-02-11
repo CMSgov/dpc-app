@@ -4,7 +4,6 @@
       <lastUpdated value="2019-03-29T14:07:59.605-04:00"/>
    </meta>
    <type value="searchset"/>
-   <total value="32"/>
    <link>
       <relation value="self"/>
       <url value="http://localhost:8083/v1/fhir/ExplanationOfBenefit?patient=-20140000008325&amp;count=10&amp;startIndex=20&amp;excludeSAMHSA=true"/>
