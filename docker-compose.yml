@@ -46,7 +46,7 @@ services:
       interval: 10s
       timeout: 5s
       start_period: 30s
-      retries: 5
+      retries: 10
 
   attribution:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-attribution}:latest
@@ -67,7 +67,7 @@ services:
       interval: 10s
       timeout: 5s
       start_period: 30s
-      retries: 5
+      retries: 10
 
   api:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-api}:latest
@@ -94,7 +94,7 @@ services:
       interval: 10s
       timeout: 5s
       start_period: 30s
-      retries: 5
+      retries: 10
 
   consent:
     image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-consent}:latest
@@ -115,7 +115,7 @@ services:
       interval: 10s
       timeout: 5s
       start_period: 30s
-      retries: 5
+      retries: 10
 
   tests:
     image: maven:3.6-jdk-11
