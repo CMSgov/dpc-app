@@ -2,8 +2,6 @@ package gov.cms.dpc.common.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -17,24 +15,11 @@ public class AttributionRelationship implements Serializable {
     private static final long serialVersionUID = 42L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "attributions_generator")
-    @GenericGenerator(
-        name="attributions_generator",
-        strategy = "sequence",
-        parameters = {
-            @Parameter(
-                name = "sequence_name",
-                value = "attributions_id_seq"
-            ),
-            @Parameter(
-                name = "increment_size",
-                value = "100"   // Tied to attributions_id_seq in dpc_attribution DB
-            ),
-            @Parameter(
-                name = "optimizer",
-                value = "pooled-lo"
-            )
-        }
+    @GeneratedValue(generator = "attributions_generator")
+    @SequenceGenerator(
+        name = "attributions_generator",
+        sequenceName = "attributions_id_seq",
+        allocationSize = 100   // Tied to attributions_id_seq in dpc_attribution
     )
     @Column(name = "id", updatable = false, nullable = false)
     @Access(AccessType.PROPERTY)

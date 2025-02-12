@@ -4,15 +4,13 @@ import gov.cms.dpc.attribution.AbstractAttributionDAOTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import jakarta.persistence.SequenceGenerator;
 import org.hibernate.Session;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,7 +33,7 @@ class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 	}
 
 	@Test
-	public void test_AttributionRelationship_batch_search_happy_path() {
+	void test_AttributionRelationship_batch_search_happy_path() {
 		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
 
 		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(org);
@@ -74,7 +72,7 @@ class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 	}
 
 	@Test
-	public void test_AttributionRelationship_batch_search_only_finds_correct_roster() {
+	void test_AttributionRelationship_batch_search_only_finds_correct_roster() {
 		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
 
 		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(org);
@@ -120,18 +118,13 @@ class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 	// failed inserts for duplicate keys.  Check that here to prevent someone from accidentally changing one and not the
 	// other.
 	@Test
-	public void test_SequenceIncrementSizeMatches() throws ClassNotFoundException, NoSuchFieldException {
+	void test_SequenceIncrementSizeMatches() throws ClassNotFoundException, NoSuchFieldException {
 		Field attributionID = ClassLoader.getSystemClassLoader()
 			.loadClass("gov.cms.dpc.common.entities.AttributionRelationship")
 			.getDeclaredField("attributionID");
 
-		GenericGenerator annotation = attributionID.getAnnotation(GenericGenerator.class);
-		Parameter[] params = annotation.parameters();
-
-		Integer hibernateIncrement = Arrays.stream(params)
-			.filter(parameter -> parameter.name().equals("increment_size"))
-			.map(parameter -> Integer.valueOf(parameter.value()))
-			.findAny().get();
+		SequenceGenerator annotation = attributionID.getAnnotation(SequenceGenerator.class);
+		Integer hibernateIncrement = annotation.allocationSize();
 
 		Session session = db.getSessionFactory().getCurrentSession();
 		String sql = "select increment_by from pg_sequences where sequencename = 'attributions_id_seq'";
