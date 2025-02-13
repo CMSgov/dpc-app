@@ -144,7 +144,7 @@ jobs:
       - name: Calculate app version
         id: calculate-version
         env:
-          - INPUT_APP_VERSION: ${{ inputs.app-version }}
+          INPUT_APP_VERSION: ${{ inputs.app-version }}
         run: |
           if [ -z $INPUT_APP_VERSION ] || [ $INPUT_APP_VERSION = 'unknown' ]; then
             IFS='-' read -ra TAG_BITS <<< ${{ steps.image-tag.outputs.image_tag }}
