@@ -1,5 +1,5 @@
 # See: https://github.com/docker-library/openjdk/blob/master/11/jdk/slim/Dockerfile
-FROM amazoncorretto:11-alpine-jdk
+FROM artifactory.cloud.cms.gov/docker/amazoncorretto:11-alpine-jdk
 
 # Install additional packages used acros DPC images
 RUN  apk update && apk add --no-cache aws-cli && apk add --no-cache curl
