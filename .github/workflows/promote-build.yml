@@ -1,9 +1,6 @@
 name: 'DPC - Promote Build'
 
 on:
-  push:
-    paths:
-      - .github/workflows/promote-build.yml
   workflow_dispatch:
       from_env:
         description: AWS environment to promote FROM
