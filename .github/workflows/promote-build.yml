@@ -38,6 +38,11 @@ jobs:
         run: |
           echo "Target deployment environment \"${{ inputs.to_env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
           exit 1
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: "Fetch Image and App Version from AWS"
         id: fetch-info
         run: |
