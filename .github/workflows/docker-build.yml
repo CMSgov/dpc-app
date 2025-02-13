@@ -144,6 +144,7 @@ jobs:
         id: api-build
         run: |
           export PATH=$PATH:~/.local/bin
+          make docker-base
           make api
 
       # add extra commands to log docker containers during failure
