@@ -1,0 +1,53 @@
+name: 'DPC - Promote Build'
+
+on:
+  push:
+    paths:
+      - .github/workflows/promote-build.yml
+  workflow_dispatch:
+      from_env:
+        description: AWS environment to promote FROM
+        required: true
+        type: 'string'
+        default: 'dev'
+      to_env:
+        description: AWS environment to promote TO
+        required: true
+        type: 'string'
+        default: 'dev'
+      confirm_env:
+        description: Double check environment to promote TO
+        required: true
+        type: 'string'
+        default: ''
+    
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.to_env }}
+  cancel-in-progress: false
+
+jobs:
+  set-parameters:
+    name: "Set Parameters"
+    runs-on: self-hosted
+    outputs:
+      version: ${{ steps.fetch-info.outputs.version }}
+      image: ${{ steps.fetch-info.outputs.image }}
+    steps:
+      - name: "Validate Environment"
+        if: ${{ inputs.to_env != inputs.confirm_env }}
+        run: |
+          echo "Target deployment environment \"${{ inputs.to_env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
+          exit 1
+      - name: "Fetch Image and App Version from AWS"
+        id: fetch-info
+        run: |
+          TASK_DEFINITION=`aws ecs describe-services --services dpc-prod-api-v9 --cluster dpc-prod-frontend --query "services[0].deployments[0].taskDefinition"`          
+          INFO=`aws ecs describe-task-definition --task-definition $TASK_DEFINITION --query "taskDefinition.containerDefinitions[0].{Image: image, Version: environment[?name=='APP_VERSION'].value | [0]}"`
+          IMAGE=`jq '.Image | split(":")[1]' <<< $INFO`
+          echo $IMAGE
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+          VERSION=`jq '.Version' <<< $INFO`
+          echo $VERSION
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          
+          
