@@ -46,7 +46,8 @@ jobs:
       - name: "Fetch Image and App Version from AWS"
         id: fetch-info
         run: |
-          TASK_DEFINITION=`aws ecs describe-services --services dpc-${{ inputs.from_env || 'dev' }}-api-v9 --cluster dpc-${{ inputs.from_env || 'dev' }}-frontend --query "services[0].deployments[0]" | jq -r '.taskDefinition | split(":")[-1]'`
+          DEPLOY_INFO=`aws ecs describe-services --services dpc-${{ inputs.from_env || 'dev' }}-api-v9 --cluster dpc-${{ inputs.from_env || 'dev' }}-frontend --query "services[0].deployments[0]"`
+          TASK_DEFINITION=`jq -r '.taskDefinition | split(":")[-1]' <<< $DEPLOY_INFO`
           INFO=`aws ecs describe-task-definition --task-definition dpc-${{ inputs.from_env || 'dev' }}-api:$TASK_DEFINITION" --query "taskDefinition.containerDefinitions[0].{Image: image, Version: environment[?name=='APP_VERSION'].value | [0]}"`
           IMAGE=`jq '.Image | split(":")[1]' <<< $INFO`
           echo $IMAGE
