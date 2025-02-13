@@ -44,7 +44,7 @@ jobs:
       - name: generate a tag with UTC date and GitHub run_id
         id: output_docker_tag
         run: |
-          DOCKER_TAG="rls-${{ steps.get-version-tag.outputs.docker_tag }}-$(date -u +'%Y%m%d%H%M')-${{ github.run_id }}"
+          DOCKER_TAG="rls-${{ steps.get-version-tag.outputs.version_tag }}-$(date -u +'%Y%m%d%H%M')-${{ github.run_id }}"
           echo "$DOCKER_TAG"
           echo "docker_tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
 
