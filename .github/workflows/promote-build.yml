@@ -66,3 +66,9 @@ jobs:
       app-version: ${{ needs.set-parameters.outputs.app_version }}
     secrets: inherit
       
+  smoke-test:
+    needs: deploy
+    uses: ./.github/workflows/smoke-test.yml
+    with:
+      env: ${{ inputs.env || 'test' }}
+    secrets: inherit
