@@ -22,8 +22,8 @@ on:
         default: ''
     
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.to_env }}
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ inputs.from_env }}-${{ inputs.to_env }}
+  cancel-in-progress: true
 
 jobs:
   set-parameters:
