@@ -57,11 +57,11 @@ jobs:
           # note this is confusing, but make ci-web-portal points to dpc-web-portal-test.sh which runs
           # docker compose -p ... dpc_web
           - ecr_repository: web-portal
-            make_command: make ci-portal
+            make_command: make portal
           - ecr_repository: web-admin
-            make_command: make ci-admin-portal
+            make_command: make admin
           - ecr_repository: web
-            make_command: make ci-web-portal
+            make_command: make website
     steps:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
@@ -144,7 +144,7 @@ jobs:
         id: api-build
         run: |
           export PATH=$PATH:~/.local/bin
-          make ci-app
+          make api
 
       # add extra commands to log docker containers during failure
       - name: Consent Logs
