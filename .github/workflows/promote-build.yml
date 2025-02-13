@@ -50,9 +50,3 @@ jobs:
           INFO=$(aws ecs describe-task-definition --task-definition dpc-${{ inputs.from_env || 'dev' }}-api:$TASK_DEFINITION" --query "taskDefinition.containerDefinitions[0].{Image: image, Version: environment[?name=='APP_VERSION'].value | [0]}")
           IMAGE=$(jq '.Image | split(":")[1]' <<< $INFO)
           echo $IMAGE
-          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
-          VERSION=$(jq '.Version' <<< $INFO)
-          echo $VERSION
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          
-          
