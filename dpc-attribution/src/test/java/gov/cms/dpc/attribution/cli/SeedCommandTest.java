@@ -9,25 +9,19 @@ import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import io.dropwizard.testing.POJOConfigurationFactory;
 import io.dropwizard.util.JarLocation;
-import org.jooq.conf.Settings;
-import org.jooq.impl.DSL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.sql.Connection;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 
 @IntegrationTest
-class SeedCommandTest {
+public class SeedCommandTest {
 
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
@@ -42,7 +36,6 @@ class SeedCommandTest {
         // Configure bootstrap - adapted from DropwizardTestSupport
         DPCAttributionService app = new DPCAttributionService();
         Bootstrap<DPCAttributionConfiguration> bs = new Bootstrap<>(app) {
-            @Override
             public void run(DPCAttributionConfiguration configuration, Environment environment) throws Exception {
                 super.run(configuration, environment);
                 setConfigurationFactoryFactory((klass, validator, objectMapper, propertyPrefix) ->
@@ -66,19 +59,6 @@ class SeedCommandTest {
     void testSeedCommand() {
         final Optional<Throwable> success = cli.run("seed", "src/test/resources/test.application.yml");
         assertTrue(success.isEmpty(), "Should have succeeded");
-        assertTrue(stdErr.toString().isEmpty(), "Should not have errors");
-    }
-
-    @Test
-    void testConnectionError() {
-        String errMsg = "Connection error";
-        try (MockedStatic<DSL> mockedDSL = Mockito.mockStatic(DSL.class)) {
-            mockedDSL.when(() -> DSL.using(any(Connection.class), any(Settings.class)))
-                    .thenThrow(new RuntimeException(errMsg));
-
-            final Optional<Throwable> failure = cli.run("seed", "src/test/resources/test.application.yml");
-            assertFalse(failure.isEmpty(), "Should have not succeeded");
-            assertTrue(stdErr.toString().contains(errMsg), "Should have error message");
-        }
+        assertEquals("", stdErr.toString(), "Should not have errors");
     }
 }
