@@ -1,15 +1,12 @@
 package gov.cms.dpc.common.entities;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.Test;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import org.junit.jupiter.api.Test;
+
+import java.time.*;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PatientEntityTest {
 
@@ -82,5 +79,20 @@ public class PatientEntityTest {
 		assertNotNull(convertedDate);
 		assertNotNull(utilityDate);
 		assertEquals(localDate, convertedDate);
+	}
+
+	@Test
+	public void testToLocalDateHandlesTimeZoneChange() {
+		// A previous version of toLocalDate failed when converting a date/time close to midnight because it converted
+		// to UTC before getting the LocalDate.  Make sure that's no longer the case.
+
+		// 1/1/2024 11:55pm EST
+		Date testDate = new Calendar.Builder()
+			.setDate(2024, 0, 1)
+			.setTimeOfDay(23, 55, 0).build().getTime();
+
+		LocalDate resultLocalDate = PatientEntity.toLocalDate(testDate);
+
+		assertEquals(LocalDate.of(2024, 1, 1), resultLocalDate);
 	}
 }

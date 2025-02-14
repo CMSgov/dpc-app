@@ -7,6 +7,7 @@ require_relative '../config/environment'
 # Prevent database truncation if the environment is production
 abort('The Rails environment is running in production mode!') if Rails.env.production?
 require 'rspec/rails'
+require 'capybara/rails'
 require 'support/component_support'
 require 'support/dpc_client_support'
 require 'support/match_html_fragment'
@@ -35,8 +36,13 @@ rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
 RSpec.configure do |config|
+  config.include FactoryBot::Syntax::Methods
+
+  # Devise test helpers
+  config.include Devise::Test::IntegrationHelpers, type: :request
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
-  config.fixture_path = "#{Rails.root}/spec/fixtures"
+  config.fixture_paths = ["#{Rails.root}/spec/fixtures"]
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
@@ -67,4 +73,7 @@ RSpec.configure do |config|
   # config.filter_gems_from_backtrace("gem name")
 
   config.include ViewComponent::TestHelpers, type: :component
+  config.expect_with :rspec do |c|
+    c.max_formatted_output_length = nil
+  end
 end

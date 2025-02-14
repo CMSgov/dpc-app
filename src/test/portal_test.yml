@@ -1,0 +1,31 @@
+execution:
+- executor: jmeter
+  scenario: portal_log_in_page
+- executor: jmeter
+  scenario: portal_org_page
+
+scenarios:
+  portal_log_in_page:
+    default-address: ${PORTAL_HOST}
+    requests:
+    - url: /portal
+      assert:
+      - contains:
+        - Data at the Point of Care
+        - Sign in
+        subject: body
+        regexp: false
+  portal_org_page:
+    default-address: ${PORTAL_HOST}
+    requests:
+    - url: /portal/organizations
+      assert:
+      - contains:
+        - Data at the Point of Care
+        - Sign in
+        subject: body
+        regexp: false
+reporting:
+  - module: passfail
+    criteria:
+      - "fail>1%, stop as failed"

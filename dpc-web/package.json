@@ -4,14 +4,14 @@
   "dependencies": {
     "@cmsgov/design-system-core": "^3.7.0",
     "@cmsgov/design-system-layout": "^3.7.0",
-    "jsrsasign": "^10.7.0",
+    "jsrsasign": "^11.1.0",
     "jsrsasign-util": "^1.0.5",
     "jwt-decode": "^2.2.0",
     "normalize.css": "^8.0.1",
     "svg4everybody": "^2.1.9"
   },
   "devDependencies": {
-    "jest": "^26.4.0"
+    "jest": "^29.7.0"
   },
   "scripts": {
     "test": "jest"

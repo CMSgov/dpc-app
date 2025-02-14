@@ -1,8 +1,10 @@
 package gov.cms.dpc.attribution.jdbi;
 
+import com.google.inject.name.Named;
 import gov.cms.dpc.common.entities.*;
+import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
-import io.dropwizard.hibernate.AbstractDAO;
+import org.apache.commons.collections4.ListUtils;
 
 import javax.inject.Inject;
 import javax.persistence.criteria.*;
@@ -10,12 +12,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-public class PatientDAO extends AbstractDAO<PatientEntity> {
+public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
+    private final int queryChunkSize;
 
     @Inject
-    public PatientDAO(DPCManagedSessionFactory factory) {
+    public PatientDAO(DPCManagedSessionFactory factory, @Named("queryChunkSize") int queryChunkSize) {
         super(factory.getSessionFactory());
+        this.queryChunkSize = queryChunkSize;
     }
 
     public PatientEntity persistPatient(PatientEntity patient) {
@@ -50,6 +55,54 @@ public class PatientDAO extends AbstractDAO<PatientEntity> {
 
         query.where(predicates.toArray(new Predicate[0]));
         return this.list(query);
+    }
+
+    /**
+     * Returns a list of all {@link PatientEntity}s whose id is in resourceIds.
+     * @param resourceIDs
+     * @return List of {@link PatientEntity}s
+     */
+    public List<PatientEntity> bulkPatientSearchById(UUID organizationId, List<UUID> resourceIDs) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
+        final Root<PatientEntity> root = query.from(PatientEntity.class);
+
+        query.select(root)
+            .where(builder.and(
+                root.get(PersonEntity_.id).in(resourceIDs),
+                builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), organizationId))
+            );
+        return list(query);
+    }
+
+    /**
+     * Returns a list of all {@link PatientEntity}s whose id is in resourceIds.
+     * @param mbis
+     * @return List of {@link PatientEntity}s
+     */
+    public List<PatientEntity> bulkPatientSearchByMbi(UUID organizationId, List<String> mbis) {
+        List<PatientEntity> results = new ArrayList<>();
+
+        // With large patient inserts, this can theoretically be called with 10s of thousands of patients, so break
+        // it up into queries that we can handle without causing a stack overflow.
+        List<List<String>> mbiChunks = ListUtils.partition(mbis, queryChunkSize);
+        mbiChunks.forEach(mbiList -> {
+            List<String> capitalizedMbis = mbiList.stream().map(String::toUpperCase).collect(Collectors.toList());
+
+            final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+            final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
+            final Root<PatientEntity> root = query.from(PatientEntity.class);
+
+            query.select(root)
+                .where(builder.and(
+                    root.get(PatientEntity_.beneficiaryID).in(capitalizedMbis),
+                    builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), organizationId))
+                );
+
+            results.addAll(list(query));
+        });
+
+        return results;
     }
 
     public boolean deletePatient(UUID patientID) {

@@ -25,16 +25,13 @@ Bundler.require(*Rails.groups)
 module DpcWebsite
   class Application < Rails::Application
 
-    #Dump and read as sql
-    config.active_record.schema_format = :sql
-
     # Check for STATIC_SITE_URL environment variable
     ENV['STATIC_SITE_URL'].present? ? ENV['STATIC_SITE_URL'] : ENV['STATIC_SITE_URL'] = 'https://dpc.cms.gov'
     config.autoload_paths << Rails.root.join('lib')
     config.autoload_paths << Rails.root.join('lib/luhnacy_lib')
 
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 5.2
+    config.load_defaults 7.1
 
     # Add fonts to asset pipeline
     config.assets.paths << Rails.root.join("app", "assets", "fonts")

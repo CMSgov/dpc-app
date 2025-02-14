@@ -15,7 +15,7 @@
     <properties>
         <mainClass>gov.cms.dpc.api.DPCAPIService</mainClass>
         <jjwt.version>0.11.4</jjwt.version>
-        <mockserverVersion>5.14.0</mockserverVersion>
+        <mockserverVersion>5.15.0</mockserverVersion>
     </properties>
 
     <dependencies>
@@ -58,10 +58,6 @@
         <dependency>
             <groupId>ru.vyarus</groupId>
             <artifactId>dropwizard-guicey</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${typesafe.config.groupID}</groupId>
-            <artifactId>typesafe-dropwizard-configuration</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -118,6 +114,11 @@
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-caching-caffeine</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -184,7 +185,7 @@
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
             <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
             <!-- Ideally, this should track the version used in Dropwizard-->
-            <version>2.39.1</version>
+            <version>2.41</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -214,14 +215,16 @@
             <version>${mockserverVersion}</version>
             <exclusions>
                 <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>net.minidev</groupId>
                     <artifactId>json-smart</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>gov.cms.dpc</groupId>
+            <artifactId>dpc-aggregation</artifactId>
+            <version>0.4.0-SNAPSHOT</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -260,6 +263,7 @@
                         <filter>
                             <artifact>*:*</artifact>
                             <excludes>
+                                <exclude>module-info.class</exclude>
                                 <exclude>META-INF/*.SF</exclude>
                                 <exclude>META-INF/*.DSA</exclude>
                                 <exclude>META-INF/*.RSA</exclude>
@@ -348,11 +352,6 @@
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M3</version>
             </plugin>
         </plugins>
     </build>

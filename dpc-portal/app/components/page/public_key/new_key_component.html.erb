@@ -1,23 +1,26 @@
 <div>
     <div class="margin-bottom-5">&larr; <%= link_to @organization.name, organization_path(organization.path_id) %></div>
-    <h1>Add Public Key</h1>
+    <h1>Add public key</h1>
 
     <section class="box">
         <div>
-            <h2>New Public Key for <%= @organization.name %></h2>
+            <h2>New public key for <%= @organization.name %></h2>
             <%= form_tag organization_public_keys_path(organization_id: organization.path_id), method: :post do %>
 
             <%= render(Core::Form::TextInputComponent.new(
               label: "Label", attribute: :label, default: params[:label], input_options: { maxlength: 25 },
-              hint: 'Choose a descriptive name to make your key easily identifiable to you.')
+              hint: 'Choose a descriptive name to make your key easily identifiable to you.',
+              error_msg: @errors[:label])
             ) %>
             <%= render(Core::Form::TextAreaComponent.new(
-              label: "Public Key", attribute: :public_key, default: params[:public_key],
-              hint: 'Must include the "BEGIN PUBLIC KEY" and "END PUBLIC KEY" tags from your public.pem file.')
+              label: "Public key", attribute: :public_key, default: params[:public_key],
+              hint: 'Must include the "BEGIN PUBLIC KEY" and "END PUBLIC KEY" tags from your public.pem file.',
+              error_msg: @errors[:public_key])
             ) %>
             <%= render(Core::Form::TextAreaComponent.new(
-              label: "Signature Snippet", attribute: :snippet_signature, default: params[:snippet_signature],
-              hint: 'Must yield "Verified Ok" results in order to generate the signature.sig file.')
+              label: "Signature snippet", attribute: :snippet_signature, default: params[:snippet_signature],
+              hint: 'Must yield "Verified Ok" results in order to generate the signature.sig file.',
+              error_msg: @errors[:snippet_signature])
             ) %>
 
             <%= submit_tag "Add key", class: "usa-button", data: { test: "form:submit" } %>

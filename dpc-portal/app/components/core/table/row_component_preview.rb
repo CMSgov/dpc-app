@@ -16,7 +16,7 @@ module Core
           attributes << i.to_s
         end
 
-        render(Core::Table::RowComponent.with_collection([obj], keys: attributes, delete_path: delete_path))
+        render(Core::Table::RowComponent.with_collection([obj], keys: attributes, delete_path:))
       end
 
       private

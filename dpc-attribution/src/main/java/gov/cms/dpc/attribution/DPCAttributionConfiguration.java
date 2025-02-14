@@ -1,12 +1,14 @@
 package gov.cms.dpc.attribution;
 
-import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
+import io.dropwizard.core.server.DefaultServerFactory;
 import io.dropwizard.db.DataSourceFactory;
-import org.knowm.dropwizard.sundial.SundialConfiguration;
+import io.dropwizard.jetty.HttpConnectorFactory;
+import io.dropwizard.jobs.JobConfiguration;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -14,8 +16,9 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
-public class DPCAttributionConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCFHIRConfiguration {
+public class DPCAttributionConfiguration extends JobConfiguration implements IDPCDatabase, IDPCFHIRConfiguration {
 
     @Valid
     private Duration expirationThreshold;
@@ -27,11 +30,6 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @JsonProperty("database")
     private DataSourceFactory database = new DataSourceFactory();
 
-    @Valid
-    @NotNull
-    @JsonProperty("sundial")
-    private SundialConfiguration sundial = new SundialConfiguration();
-
     @NotEmpty
     private String publicServerURL;
 
@@ -39,6 +37,9 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @NotNull
     @JsonProperty("fhir")
     private DPCFHIRConfiguration fhirConfig;
+
+    @JsonProperty("swagger")
+    private SwaggerBundleConfiguration swaggerBundleConfiguration;
 
     @Min(-1)
     private Integer providerLimit;
@@ -51,10 +52,6 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @Override
     public DataSourceFactory getDatabase() {
         return database;
-    }
-
-    public SundialConfiguration getSundial() {
-        return sundial;
     }
 
     public Duration getExpirationThreshold() {
@@ -81,6 +78,14 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
     @Override
     public void setFHIRConfiguration(DPCFHIRConfiguration config) {
         this.fhirConfig = config;
+    }
+
+    public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
+        return swaggerBundleConfiguration;
+    }
+
+    public void setSwaggerBundleConfiguration(SwaggerBundleConfiguration swaggerBundleConfiguration) {
+        this.swaggerBundleConfiguration = swaggerBundleConfiguration;
     }
 
     public Boolean getMigrationEnabled() {
@@ -111,5 +116,21 @@ public class DPCAttributionConfiguration extends TypesafeConfiguration implement
 
     public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {
         this.lookBackExemptOrgs = lookBackExemptOrgs;
+    }
+
+    public int getServicePort() {
+        DefaultServerFactory serverFactory = (DefaultServerFactory) this.getServerFactory();
+        HttpConnectorFactory connection = (HttpConnectorFactory) serverFactory.getApplicationConnectors().get(0);
+        return connection.getPort();
+    }
+
+    public int getQueryChunkSize() {
+        Map<String,String> properties = database.getProperties();
+        return Integer.parseInt(properties.get("queryChunkSize"));
+    }
+
+    public int getDbBatchSize() {
+        Map<String,String> properties = database.getProperties();
+        return Integer.parseInt(properties.get("hibernate.jdbc.batch_size"));
     }
 }

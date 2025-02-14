@@ -1,6 +1,7 @@
 package gov.cms.dpc.api;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -10,7 +11,6 @@ import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
-import com.typesafe.config.ConfigFactory;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
 import gov.cms.dpc.fhir.DPCResourceType;
@@ -29,6 +29,7 @@ import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFacto
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
+import gov.cms.dpc.testing.utils.MBIUtil;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
@@ -39,8 +40,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -53,10 +54,7 @@ import java.io.InputStream;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -65,8 +63,11 @@ public class APITestHelpers {
     private static final String CONSENT_URL = "http://localhost:3600/v1";
     public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
+    private static final String CONSENT_TRUNCATE_TASK = "http://localhost:9904/tasks/truncate";
     public static String BASE_URL = "https://dpc.cms.gov/api";
     public static String ORGANIZATION_NPI = "1111111112";
+
+    private static final String configPath = "src/test/resources/test.application.yml";
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -167,8 +168,10 @@ public class APITestHelpers {
             config.setSchematronValidation(true);
             config.setSchemaValidation(true);
 
-            final DPCProfileSupport dpcModule = new DPCProfileSupport(ctx);
-            final ValidationSupportChain support = new ValidationSupportChain(new DefaultProfileValidationSupport(), dpcModule);
+            final ValidationSupportChain support = new ValidationSupportChain(
+                    new DPCProfileSupport(ctx),
+                    new DefaultProfileValidationSupport(ctx),
+                    new InMemoryTerminologyServerValidationSupport(ctx));
             final InjectingConstraintValidatorFactory constraintFactory = new InjectingConstraintValidatorFactory(
                     Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, config, support).get())));
 
@@ -181,33 +184,33 @@ public class APITestHelpers {
         return builder.build();
     }
 
-    static <C extends io.dropwizard.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
+    static <C extends io.dropwizard.core.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
             Exception {
-        ConfigFactory.invalidateCaches();
         // Truncate attribution database
         truncateDatabase();
         application.before();
         // Truncate the Auth DB
         // dropwizard-guicey will raise a SharedStateError unless we clear the configuration state before each run
         SharedConfigurationState.clear();
-        application.getApplication().run("db", "drop-all", "--confirm-delete-everything", "ci.application.conf");
+        application.getApplication().run("db", "drop-all", "--confirm-delete-everything", configPath);
         SharedConfigurationState.clear();
-        application.getApplication().run("db", "migrate", "ci.application.conf");
+        application.getApplication().run("db", "migrate", configPath);
 
     }
 
     private static void truncateDatabase() throws IOException {
+        List<String> taskUrls = List.of(ATTRIBUTION_TRUNCATE_TASK, CONSENT_TRUNCATE_TASK);
 
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost post = new HttpPost(ATTRIBUTION_TRUNCATE_TASK);
-
-            try (CloseableHttpResponse execute = client.execute(post)) {
-                assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should have truncated database");
+            for(String url : taskUrls) {
+                try (CloseableHttpResponse execute = client.execute(new HttpPost(url))) {
+                    assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should have truncated DB at " + url);
+                }
             }
         }
     }
 
-    static <C extends io.dropwizard.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws
+    static <C extends io.dropwizard.core.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws
             IOException {
         // URI of the API Service Healthcheck
         final String healthURI = String.format("http://localhost:%s/healthcheck", application.getAdminPort());
@@ -242,6 +245,15 @@ public class APITestHelpers {
                 .withGender(Enumerations.AdministrativeGender.OTHER)
                 .managedBy(organizationID)
                 .build();
+    }
+
+    public static List<Patient> createPatientResources(String organizationID, int numPatients) {
+        List<Patient> patients = new ArrayList<>(numPatients);
+
+        for(int i=0; i<numPatients; i++) {
+            patients.add(createPatientResource(MBIUtil.generateMBI(), organizationID));
+        }
+        return patients;
     }
 
     public static Provenance createProvenance(String orgId, String practitionerId, List<String> patientIds){
