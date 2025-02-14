@@ -30,7 +30,6 @@ RUN gem install bundler --no-document && \
     npm install
 
 # Run bundler audit
-# ignoring CVE-2024-21510 as it affects Sinatra, which is only used internally
 RUN bundle exec bundle audit update && bundle exec bundle audit check
 
 # Copy the code, test the app, and build the assets pipeline
