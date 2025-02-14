@@ -30,7 +30,7 @@ Rails.application.configure do
   config.cache_store = :null_store
 
   # Raise exceptions instead of rendering exception templates.
-  config.action_dispatch.show_exceptions = false
+  config.action_dispatch.show_exceptions = :none
 
   # Disable request forgery protection in test environment.
   config.action_controller.allow_forgery_protection = false
@@ -40,8 +40,10 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
-  config.action_mailer.default_url_options = { host: ENV['HOST_NAME'], port: ENV['PORT'] }
-
+  config.action_mailer.default_url_options = { host: 'localhost', port: 3100 }
+  config.action_mailer.asset_host = "http://localhost:3100"
+  # Need to have this set up for capybara accessibility tests
+  config.action_controller.asset_host = "file://#{::Rails.root}/public" if ENV['ACCESSIBILITY'] == 'true'
   # Tell Action Mailer not to deliver emails to the real world.
   # The :test delivery method accumulates sent emails in the
   # ActionMailer::Base.deliveries array.
@@ -56,9 +58,15 @@ Rails.application.configure do
   # Tell Active Support which deprecation messages to disallow.
   config.active_support.disallowed_deprecation_warnings = []
 
+  # Tell ActiveJob to not send real requests
+  config.active_job.queue_adapter = :test
+
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
 
   # Annotate rendered view with file names.
   # config.action_view.annotate_rendered_view_with_filenames = true
 end
+ENV['CPI_API_GW_BASE_URL'] = 'https://val.cpiapi.cms.gov/'
+ENV['CMS_IDM_OAUTH_URL'] = 'https://impl.idp.idm.cms.gov/'
+ENV['IDP_HOST'] = 'idp.int.identitysandbox.gov'

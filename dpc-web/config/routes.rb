@@ -10,8 +10,6 @@ Rails.application.routes.draw do
     root 'portal#show', as: :authenticated_root, via: :get
   end
 
-  match '/portal', to: 'portal#show', via: :get
-
   resources :organizations, only: [:edit, :update] do
     resources :client_tokens, only: [:new, :create, :destroy]
     resources :public_keys, only: [:new, :create, :destroy]

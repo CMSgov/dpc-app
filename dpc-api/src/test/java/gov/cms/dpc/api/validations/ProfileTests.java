@@ -51,7 +51,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
                 .encodedJson()
                 .execute();
 
-        assertEquals(3, outcome.getIssue().size(), "Should have validation failures");
+        assertEquals(4, outcome.getIssue().size(), "Should have validation failures");
 
         // Try for a valid patient
         final Patient validPatient = invalidPatient.copy();

@@ -11,7 +11,7 @@ module Core
       # @param sort textarea
       def parameterized(caption: 'caption', columns: nil, sort: nil)
         column_titles = columns.present? ? columns.split(',') : %w[A B]
-        render(Core::Table::HeaderComponent.new(caption: caption, columns: column_titles, sort: sort&.to_i))
+        render(Core::Table::HeaderComponent.new(caption:, columns: column_titles, sort: sort&.to_i))
       end
 
       private

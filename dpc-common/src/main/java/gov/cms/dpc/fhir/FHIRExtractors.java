@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Helper class for extracting various features from FHIR resources
@@ -32,8 +33,6 @@ public class FHIRExtractors {
 
     /**
      * Extract the National Provider ID (NPI) from the given {@link Practitioner} resource
-     * This currently assumes that the NPI is the first ID associated to the resource,
-     * but eventually we'll need to do a more thorough check
      *
      * @param provider - {@link Practitioner} provider to get NPI from
      * @return - {@link String} provider NPI
@@ -175,7 +174,13 @@ public class FHIRExtractors {
             system = system.substring(0, system.length() - 1);
         }
         identifier.setSystem(system);
-        identifier.setValue(stringPair.getRight());
+        // Strip off any trailing '\' characters.
+        // These might come in when parsing an ID that was separated by comma
+        String value = stringPair.getRight();
+        if (value.endsWith("\\")) {
+            value = value.substring(0, value.length() - 1);
+        }
+        identifier.setValue(value);
         return identifier;
     }
 
@@ -204,7 +209,7 @@ public class FHIRExtractors {
      * @param identifiers List of {@link Identifier}s to search
      * @param system {@link DPCIdentifierSystem} to search identifiers for
      * @return {@link Identifier}
-     * @throws IllegalArgumentException
+     * @throws IllegalArgumentException thrown if no identifier is found
      */
     public static Identifier findMatchingIdentifier(List<Identifier> identifiers, DPCIdentifierSystem system) throws IllegalArgumentException {
         return identifiers
@@ -265,5 +270,38 @@ public class FHIRExtractors {
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Roster MUST have attributed Provider"));
+    }
+
+    /**
+     * Returns a stream of all {@link Resource}s of type clazz from the bundle
+     * @param bundle The bundle to stream the resources from
+     * @param clazz The type of resource to stream from the bundle
+     * @return A stream of all resources of type clazz in the bundle
+     * @param <R> Any FHIR resource descended from {@link Resource}
+     */
+    public static <R extends Resource> Stream<R> getResourceStream(Bundle bundle, Class<R> clazz) {
+        return bundle.getEntry().stream()
+            .filter(Bundle.BundleEntryComponent::hasResource)
+            .map(Bundle.BundleEntryComponent::getResource)
+            .filter(resource -> resource.getClass().equals(clazz))
+            .map(clazz::cast);
+    }
+
+    /**
+     * Assumes the {@link Parameters} has one parameter that is a {@link Bundle}.  Then returns a stream of all
+     * resources of type clazz from that {@link Bundle}
+     * @param parameters A {@link Parameters} object containing one parameter that is a {@link Bundle}
+     * @param clazz The type of resource to stream from the bundle
+     * @return A stream of all resources of type clazz in the bundle
+     * @param <R> Any FHIR resource descended from {@link Resource}
+     */
+    public static <R extends Resource> Stream<R> getResourceStream(Parameters parameters, Class<R> clazz) {
+        try {
+            Bundle bundle = (Bundle) parameters.getParameterFirstRep().getResource();
+            return getResourceStream(bundle, clazz);
+        } catch(NullPointerException | ClassCastException e) {
+            // If there's no first parameter, or it isn't a bundle, return an empty stream
+            return Stream.empty();
+        }
     }
 }

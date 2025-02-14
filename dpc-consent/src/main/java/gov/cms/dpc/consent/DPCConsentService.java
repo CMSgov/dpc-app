@@ -1,19 +1,24 @@
 package gov.cms.dpc.consent;
 
-import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
+import gov.cms.dpc.common.utils.UrlGenerator;
 import gov.cms.dpc.consent.cli.ConsentCommands;
 import gov.cms.dpc.consent.cli.SeedCommand;
 import gov.cms.dpc.fhir.FHIRModule;
-import io.dropwizard.Application;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.PooledDataSourceFactory;
+import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
+import io.federecio.dropwizard.swagger.SwaggerBundle;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import liquibase.exception.DatabaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +44,13 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
     @Override
     public void initialize(Bootstrap<DPCConsentConfiguration> bootstrap) {
         JerseyGuiceUtils.reset();
+
+        // Enable variable substitution with environment variables
+        EnvironmentVariableSubstitutor substitutor = new EnvironmentVariableSubstitutor(false);
+        SubstitutingSourceProvider provider =
+                new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), substitutor);
+        bootstrap.setConfigurationSourceProvider(provider);
+
         GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(
                         new DPCConsentHibernateModule<>(hibernateBundle),
@@ -48,7 +60,6 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
 
         bootstrap.addBundle(hibernateBundle);
         bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.consent"));
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(DPCConsentConfiguration configuration) {
@@ -61,6 +72,13 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
                 return "consent.migrations.xml";
             }
         });
+        bootstrap.addBundle(new SwaggerBundle<>() {
+            @Override
+            protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCConsentConfiguration configuration) {
+                return configuration.getSwaggerBundleConfiguration();
+            }
+        });
+
         bootstrap.addCommand(new SeedCommand(bootstrap.getApplication()));
         bootstrap.addCommand(new ConsentCommands());
     }
@@ -70,5 +88,10 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
         EnvironmentParser.getEnvironment("Consent");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
+
+        // Http health checks
+        environment.healthChecks().register("consent-self-check",
+            new HttpHealthCheck(UrlGenerator.generateVersionUrl(configuration.getServicePort()))
+        );
     }
 }

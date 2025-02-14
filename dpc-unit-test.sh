@@ -13,7 +13,7 @@ set -o allexport
 set +o allexport
 
 function _finally {
-  docker-compose down
+  docker compose down
 }
 trap _finally EXIT
 

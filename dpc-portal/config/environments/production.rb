@@ -53,25 +53,12 @@ Rails.application.configure do
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   # config.force_ssl = true
 
-  # Lograge config
-  config.lograge.enabled = true
-
-  # This specifies to log in JSON format
-  config.lograge.formatter = Lograge::Formatters::Json.new
-
   ## Disables log coloration
   config.colorize_logging = false
-
-  # Log to a dedicated file
-  config.lograge.logger = ActiveSupport::Logger.new(STDOUT)
 
   # Use the lowest log level to ensure availability of diagnostic information
   # when problems arise.
   config.log_level = ENV["LOG_LEVEL"] || :info
-
-
-  # Prepend all log lines with the following tags.
-  config.log_tags = [:request_id]
 
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
@@ -83,6 +70,17 @@ Rails.application.configure do
   config.action_mailer.perform_caching = false
 
   config.action_mailer.default_url_options = { host: ENV['HOST_NAME'], port: ENV['PORT'] }
+  config.action_mailer.asset_host = "https://#{ENV['HOST_NAME']}:#{ENV['PORT']}"
+
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address:         ENV['SMTP_ADDRESS'],
+    port:            ENV['SMTP_PORT'],
+    domain:          ENV['SMTP_DOMAIN'],
+    openssl_verify_mode:  'peer',
+    tls: true,
+    ca_file: '/etc/ssl/certs/ca-certificates.crt'
+  }
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
@@ -95,19 +93,10 @@ Rails.application.configure do
   # Don't log any deprecations.
   config.active_support.report_deprecations = false
 
-  # Use default logging formatter so that PID and timestamp are not suppressed.
-  config.log_formatter = ::Logger::Formatter.new
-
-  # Use a different logger for distributed setups.
-  # require "syslog/logger"
-  # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new "app-name")
-
-  if ENV['RAILS_LOG_TO_STDOUT'].present?
-    logger           = ActiveSupport::Logger.new($stdout)
-    logger.formatter = config.log_formatter
-    config.logger    = ActiveSupport::TaggedLogging.new(logger)
-  end
-
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 end
+# Do not log values for hashie (used by omniauth and warns in calls to IDM)
+# See https://github.com/omniauth/omniauth/issues/872#issuecomment-276501012
+# Only needs prod, as we stub IDM locally
+Hashie.logger = Logger.new(nil)

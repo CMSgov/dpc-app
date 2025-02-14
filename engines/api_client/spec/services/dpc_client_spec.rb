@@ -5,34 +5,18 @@ require 'rails_helper'
 RSpec.describe DpcClient do
   let!(:org) do
     double('organization',
-           npi: 'long thing', name: 'Org', address_use: 'work', address_type: 'both',
+           npi: '1111111112', name: 'Org', address_use: 'work', address_type: 'both',
            address_city: 'Akron', address_state: 'OH', address_street: '111 Main ST', 'address_street_2' => 'STE 5',
            address_zip: '22222')
   end
   let!(:reg_org) do
-    double('RegisteredOrg',
-           api_id: 'some-api-key',
-           fhir_endpoint_id: 'some-fhir-endpoint-id',
-           api_endpoint_ref: 'Endpoint/some-fhir-endpoint-id')
-  end
-  let(:fhir_endpoint_attributes) do
-    { name: 'Cool SBX',
-      uri: 'https://cool.com',
-      status: 'active' }.with_indifferent_access
-  end
-  let!(:fhir_endpoint) do
-    double(
-      :fhir_endpoint,
-      name: fhir_endpoint_attributes[:name],
-      uri: fhir_endpoint_attributes[:uri],
-      status: fhir_endpoint_attributes[:status],
-      attributes: fhir_endpoint_attributes
-    )
+    double('RegisteredOrg', api_id: 'some-api-key')
   end
 
   # rubocop:disable Layout/LineLength
   before(:each) do
     allow(ENV).to receive(:fetch).with('API_METADATA_URL').and_return('http://dpc.example.com')
+    allow(ENV).to receive(:fetch).with('API_ADMIN_URL').and_return('http://dpc.example.com')
     allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON').and_return('MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo')
   end
   # rubocop:enable Layout/LineLength
@@ -41,34 +25,79 @@ RSpec.describe DpcClient do
     let(:headers) do
       {
         'Accept' => 'application/fhir+json',
-        'Accept-Charset' => 'utf-8',
         'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-        'Host' => 'dpc.example.com',
-        'User-Agent' => 'Ruby FHIR Client',
+        'User-Agent' => 'Ruby',
         'Authorization' => /.*/
       }
     end
     context 'successful API request' do
-      it 'uses fhir_client to retrieve organization data from API' do
+      it 'retrieves organization data from API' do
         body = '{"resourceType":"Organization"}'
         stub_request(:get, "http://dpc.example.com/Organization/#{reg_org.api_id}")
-          .with(headers: headers).to_return(status: 200, body: body, headers: {})
+          .with(headers:).to_return(status: 200, body:, headers: {})
         client = DpcClient.new
-        fhir_client = client.get_organization(reg_org.api_id)
-        expect(fhir_client).to_not be_nil
-        expect(fhir_client.resourceType).to eq 'Organization'
+        response = client.get_organization(reg_org.api_id)
+        expect(response).to_not be_nil
+        expect(response.resourceType).to eq 'Organization'
       end
     end
 
     context 'unsuccessful request' do
-      it 'uses fhir_client to retrieve organization data from API' do
+      it 'does not retrieve organization data from API' do
         stub_request(:get, "http://dpc.example.com/Organization/#{reg_org.api_id}")
-          .with(headers: headers).to_return(status: 500, body: '', headers: {})
+          .with(headers:).to_return(status: 500, body: '', headers: {})
 
         client = DpcClient.new
+        response = client.get_organization(reg_org.api_id)
+        expect(response).to be_nil
+      end
 
-        fhir_client = client.get_organization(reg_org.api_id)
-        expect(fhir_client).to be_nil
+      it 'on credential error' do
+        stub_request(:get, "http://dpc.example.com/Organization/#{reg_org.api_id}")
+          .with(headers:).to_return(status: 401, body: 'Requires Credentials', headers: {})
+
+        client = DpcClient.new
+        response = client.get_organization(reg_org.api_id)
+        expect(response).to be_nil
+      end
+    end
+  end
+
+  describe '#get_organization_by_npi' do
+    let(:headers) do
+      {
+        'Accept' => 'application/fhir+json',
+        'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+        'Content-Type' => 'application/fhir+json',
+        'User-Agent' => 'Ruby',
+        'Authorization' => /.*/
+      }
+    end
+    context 'successful API request' do
+      it 'retrieves organization data from API' do
+        body = { resourceType: 'Bundle',
+                 entry: [{ resource: { resourceType: 'Organization',
+                                       id: '6dae2c89-6344-4f62-a334-ec4be642ecb4',
+                                       identifier: [{ system: 'http://hl7.org/fhir/sid/us-npi',
+                                                      value: '3304239163' }] } }] }.to_json
+        stub_request(:get, "http://dpc.example.com/Admin/Organization?npis=npi|#{org.npi}")
+          .with(headers:).to_return(status: 200, body:, headers: {})
+        client = DpcClient.new
+        response = client.get_organization_by_npi(org.npi)
+        expect(response&.entry).to_not be_nil
+        expect(response.entry.length).to eq 1
+        expect(response.entry.first.resource.id).to eq '6dae2c89-6344-4f62-a334-ec4be642ecb4'
+      end
+    end
+
+    context 'unsuccessful request' do
+      it 'does not retrieve organization data from API' do
+        stub_request(:get, "http://dpc.example.com/Admin/Organization?npis=npi|#{org.npi}")
+          .with(headers:).to_return(status: 500, body: '', headers: {})
+
+        client = DpcClient.new
+        response = client.get_organization_by_npi(org.npi)
+        expect(response).to be_nil
       end
     end
   end
@@ -111,45 +140,23 @@ RSpec.describe DpcClient do
                       text: 'Healthcare Provider'
                     }]
                   }
-                }, {
-                  resource: {
-                    resourceType: 'Endpoint',
-                    status: fhir_endpoint.status,
-                    connectionType: {
-                      system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type',
-                      code: 'hl7-fhir-rest'
-                    },
-                    payloadType: [
-                      {
-                        coding: [
-                          {
-                            system: 'http://hl7.org/fhir/endpoint-payload-type',
-                            code: 'any'
-                          }
-                        ]
-                      }
-                    ],
-                    name: fhir_endpoint.name, address: fhir_endpoint.uri
-                  }
                 }]
               }
             }]
           }.to_json
         ).to_return(
           status: 200,
-          body: '{"id":"8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d",' \
-                '"endpoint":[{"reference":"Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66"}]}'
+          body: '{"id":"8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d"}'
         )
 
         api_client = DpcClient.new
 
-        api_client.create_organization(org, fhir_endpoint: fhir_endpoint.attributes)
+        api_client.create_organization(org)
 
         expect(api_client.response_status).to eq(200)
         expect(api_client.response_body).to eq(
           {
-            'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d',
-            'endpoint' => [{ 'reference' => 'Endpoint/d385cfb4-dc36-4cd0-b8f8-400a6dea2d66' }]
+            'id' => '8453e48b-0b42-4ddf-8b43-07c7aa2a3d8d'
           }
         )
       end
@@ -164,7 +171,7 @@ RSpec.describe DpcClient do
 
         api_client = DpcClient.new
 
-        api_client.create_organization(org, fhir_endpoint: fhir_endpoint.attributes)
+        api_client.create_organization(org)
 
         expect(api_client.response_status).to eq(500)
         expect(api_client.response_body).to eq(
@@ -214,26 +221,6 @@ RSpec.describe DpcClient do
                       text: 'Healthcare Provider'
                     }]
                   }
-                }, {
-                  resource: {
-                    resourceType: 'Endpoint',
-                    status: fhir_endpoint.status,
-                    connectionType: {
-                      system: 'http://terminology.hl7.org/CodeSystem/endpoint-connection-type',
-                      code: 'hl7-fhir-rest'
-                    },
-                    payloadType: [
-                      {
-                        coding: [
-                          {
-                            system: 'http://hl7.org/fhir/endpoint-payload-type',
-                            code: 'any'
-                          }
-                        ]
-                      }
-                    ],
-                    name: fhir_endpoint.name, address: fhir_endpoint.uri
-                  }
                 }]
               }
             }]
@@ -246,7 +233,7 @@ RSpec.describe DpcClient do
 
         api_client = DpcClient.new
 
-        api_client.create_organization(org, fhir_endpoint: fhir_endpoint.attributes)
+        api_client.create_organization(org)
         parse_response = JSON.parse api_client.response_body
 
         expect(api_client.response_status).to eq(500)
@@ -267,75 +254,37 @@ RSpec.describe DpcClient do
 
   describe '#update_organization' do
     context 'successful request' do
-      it 'uses fhir_client to send org data to API' do
+      it 'sends org data to API' do
         stub_request(:put, "http://dpc.example.com/Organization/#{reg_org.api_id}")
           .with(
             body: /#{reg_org.api_id}/,
             headers: {
               'Accept' => 'application/fhir+json',
-              'Content-Type' => 'application/fhir+json;charset=utf-8',
+              'Content-Type' => 'application/fhir+json',
               'Authorization' => /.*/
             }
           ).to_return(status: 200, body: '{}', headers: {})
 
         client = DpcClient.new
-        expect(client.update_organization(org, reg_org.api_id, reg_org.api_endpoint_ref)).to eq(client)
+        expect(client.update_organization(org, reg_org.api_id)).to eq(client)
         expect(client.response_successful?).to eq(true)
       end
     end
 
     context 'unsuccessful request' do
-      it 'uses fhir_client to send org data to API' do
+      it 'does not send org data to API' do
         stub_request(:put, "http://dpc.example.com/Organization/#{reg_org.api_id}")
           .with(
             body: /#{reg_org.api_id}/,
             headers: {
               'Accept' => 'application/fhir+json',
-              'Content-Type' => 'application/fhir+json;charset=utf-8',
+              'Content-Type' => 'application/fhir+json',
               'Authorization' => /.*/
             }
           ).to_return(status: 500, body: '', headers: {})
 
         client = DpcClient.new
-        expect(client.update_organization(org, reg_org.api_id, reg_org.fhir_endpoint_id)).to eq(client)
-        expect(client.response_successful?).to eq(false)
-      end
-    end
-  end
-
-  describe '#update_endpoint' do
-    context 'successful request' do
-      it 'uses fhir_client to send endpoint data to API' do
-        stub_request(:put, "http://dpc.example.com/Endpoint/#{reg_org.fhir_endpoint_id}")
-          .with(
-            body: /#{reg_org.fhir_endpoint_id}/,
-            headers: {
-              'Accept' => 'application/fhir+json',
-              'Content-Type' => 'application/fhir+json;charset=utf-8',
-              'Authorization' => /.*/
-            }
-          ).to_return(status: 200, body: '{}', headers: {})
-
-        client = DpcClient.new
-        expect(client.update_endpoint(reg_org.api_id, reg_org.fhir_endpoint_id, fhir_endpoint)).to eq(client)
-        expect(client.response_successful?).to eq(true)
-      end
-    end
-
-    context 'unsuccessful request' do
-      it 'uses fhir_client to send org data to API' do
-        stub_request(:put, "http://dpc.example.com/Endpoint/#{reg_org.fhir_endpoint_id}")
-          .with(
-            body: /#{reg_org.fhir_endpoint_id}/,
-            headers: {
-              'Accept' => 'application/fhir+json',
-              'Content-Type' => 'application/fhir+json;charset=utf-8',
-              'Authorization' => /.*/
-            }
-          ).to_return(status: 500, body: '', headers: {})
-
-        client = DpcClient.new
-        expect(client.update_endpoint(reg_org.api_id, reg_org.fhir_endpoint_id, fhir_endpoint)).to eq(client)
+        expect(client.update_organization(org, reg_org.api_id)).to eq(client)
         expect(client.response_successful?).to eq(false)
       end
     end
@@ -632,24 +581,24 @@ RSpec.describe DpcClient do
     describe '#create_ip_address' do
       context 'successful API request' do
         it 'sends data to API and sets response instance variables' do
-          stub_request(:post, 'http://dpc.example.com/IpAddress?label=Sandbox+IP+1').with(
-            body: { ip_address: '136.226.19.87' }
+          stub_request(:post, 'http://dpc.example.com/IpAddress').with(
+            body: { ip_address: '136.226.19.87', label: 'Sandbox IP 1' }
           ).to_return(
             status: 200,
             body: '{"label":"Sandbox IP 1","createdAt":"2019-11-07T19:38:44.205Z",' \
-              '"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
+                  '"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
           )
 
           api_client = DpcClient.new
           api_client.create_ip_address(reg_org.api_id, params: { label: 'Sandbox IP 1', ip_address: '136.226.19.87' })
           expect(api_client.response_status).to eq(200)
           expect(api_client.response_body).to eq(
-                                                {
-                                                  'label' => 'Sandbox IP 1',
-                                                  'createdAt' => '2019-11-07T19:38:44.205Z',
-                                                  'id' => '3fa85f64-5717-4562-b3fc-2c963f66afa6'
-                                                }
-                                              )
+            {
+              'label' => 'Sandbox IP 1',
+              'createdAt' => '2019-11-07T19:38:44.205Z',
+              'id' => '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+            }
+          )
         end
       end
     end
@@ -657,12 +606,12 @@ RSpec.describe DpcClient do
     describe '#delete_ip_address' do
       context 'successful API request' do
         it 'sends data to API and sets response instance variables' do
-          stub_request(:post, 'http://dpc.example.com/IpAddress?label=Sandbox+IP+1').with(
-            body: { ip_address: '136.226.19.87' }
+          stub_request(:post, 'http://dpc.example.com/IpAddress').with(
+            body: { ip_address: '136.226.19.87', label: 'Sandbox IP 1' }
           ).to_return(
             status: 200,
             body: '{"label":"Sandbox IP 1","createdAt":"2019-11-07T19:38:44.205Z",' \
-              '"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
+                  '"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
           )
 
           api_client = DpcClient.new
@@ -686,8 +635,8 @@ RSpec.describe DpcClient do
 
       context 'unsuccessful API request' do
         it 'sends data to API and sets response instance variables' do
-          stub_request(:post, 'http://dpc.example.com/IpAddress?label=Sandbox+IP+1').with(
-            body: { ip_address: '136.226.19.87' }
+          stub_request(:post, 'http://dpc.example.com/IpAddress').with(
+            body: { ip_address: '136.226.19.87', label: 'Sandbox IP 1' }
           ).to_return(
             status: 500,
             body: '{}'
@@ -710,24 +659,24 @@ RSpec.describe DpcClient do
     describe '#get_ip_addresses' do
       context 'successful API request' do
         it 'sends data to API and sets response instance variables' do
-          stub_request(:get, 'http://dpc.example.com/IpAddress').with(
+          stub_request(:get, 'http://dpc.example.com/Key').with(
             headers: { 'Content-Type' => 'application/json' }
           ).to_return(
             status: 200,
             body: '[{"id":"4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66","label":"Sandbox IP 1",' \
-              '"createdAt":"2019-11-07T17:15:22.781Z"}]'
+                  '"createdAt":"2019-11-07T17:15:22.781Z"}]'
           )
 
           api_client = DpcClient.new
           api_client.get_public_keys(reg_org.api_id)
           expect(api_client.response_status).to eq(200)
           expect(api_client.response_body).to eq(
-                                                [{
-                                                   'id' => '4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66',
-                                                   'label' => 'Sandbox IP 1',
-                                                   'createdAt' => '2019-11-07T17:15:22.781Z'
-                                                 }]
-                                              )
+            [{
+              'id' => '4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66',
+              'label' => 'Sandbox IP 1',
+              'createdAt' => '2019-11-07T17:15:22.781Z'
+            }]
+          )
         end
       end
 
@@ -745,6 +694,49 @@ RSpec.describe DpcClient do
           expect(api_client.response_status).to eq(500)
           expect(api_client.response_body).to eq('{}')
         end
+      end
+    end
+  end
+
+  describe '#get healthcheck' do
+    context 'successful api request' do
+      it 'calls healthcheck' do
+        stub_request(:get, 'http://dpc.example.com/healthcheck')
+          .to_return(
+            status: 200,
+            body: ''
+          )
+
+        api_client = DpcClient.new
+        api_client.healthcheck
+        expect(api_client.response_status).to eq(200)
+      end
+    end
+
+    context 'unsuccessful api request' do
+      it 'calls healthcheck and gets bad response' do
+        stub_request(:get, 'http://dpc.example.com/healthcheck').with(
+          headers: {
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+          }
+        ).to_return(
+          status: 500,
+          body: ''
+        )
+
+        api_client = DpcClient.new
+        api_client.healthcheck
+        expect(api_client.response_status).to eq(500)
+      end
+      it 'cannot reach healthcheck due to error' do
+        http_stub = instance_double(Net::HTTP)
+        allow(Net::HTTP).to receive(:new).and_return(http_stub)
+        allow(http_stub).to receive(:request).and_raise(Socket::ResolutionError)
+
+        api_client = DpcClient.new
+        api_client.healthcheck
+        expect(api_client.response_status).to eq(500)
       end
     end
   end

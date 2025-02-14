@@ -1,0 +1,17 @@
+.login-button__logo {
+    vertical-align: middle;
+    color: #0000;
+    background: url(asset_path('lg-logo-white.svg')) 100% no-repeat;
+    margin-left: 2px;
+    font-size: 1.45rem
+}
+
+.line-separator {
+    border-top: 1px solid #e6e6e6;
+}
+
+.sign-in-instructions {
+    li {
+        line-height: 1.8;
+    }
+}
