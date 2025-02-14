@@ -116,8 +116,8 @@ class QueueTest {
 
             final Transaction tx = session.beginTransaction();
             try {
-                session.createQuery("delete from job_queue_batch_file").executeUpdate();
-                session.createQuery("delete from job_queue_batch").executeUpdate();
+                session.createMutationQuery("delete from job_queue_batch_file").executeUpdate();
+                session.createMutationQuery("delete from job_queue_batch").executeUpdate();
             } finally {
                 tx.commit();
             }

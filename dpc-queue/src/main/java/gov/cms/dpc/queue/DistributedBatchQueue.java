@@ -356,8 +356,8 @@ public class DistributedBatchQueue extends JobQueueCommon {
                 OffsetDateTime stuckSince = OffsetDateTime.now(ZoneId.systemDefault()).minusMinutes(3);
 
                 logger.debug("Checking aggregatorID({}) for stuck jobs since ({})...", aggregatorID, stuckSince);
-                Long stuckBatchCount = (Long) session
-                        .createQuery("select count(*) from job_queue_batch where aggregatorID = :aggregatorID and status = 1 and updateTime < :updateTime")
+                Long stuckBatchCount = session
+                        .createQuery("select count(*) from job_queue_batch where aggregatorID = :aggregatorID and status = 1 and updateTime < :updateTime", Long.class)
                         .setParameter("aggregatorID", aggregatorID)
                         .setParameter("updateTime", stuckSince)
                         .uniqueResult();
