@@ -1,4 +1,4 @@
-name: Docker Build
+name: 'DPC - Docker Build'
 
 on:
   workflow_dispatch:
@@ -24,13 +24,29 @@ jobs:
     outputs:
       docker_tag: ${{ steps.output_docker_tag.outputs.docker_tag }}
     steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: "Fetch git info"
+        run: |
+          git fetch --quiet
+      - name: "Get Version Tag"
+        id: get-version-tag
+        run: |
+          set +e
+          VERSION_TAG=`git describe --tags --exact-match`
+          if [ $? -ne 0 ]; then
+            BRANCH_HASH=`git show -s --format='%h'`
+            VERSION_TAG="commit_${BRANCH_HASH}"
+          fi
+          echo $VERSION_TAG
+          echo "version_tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
+          set -e
       - name: generate a tag with UTC date and GitHub run_id
         id: output_docker_tag
         run: |
-          DOCKER_TAG="rls-$(date -u +'%Y%m%d%H%M')-${{ github.run_id }}"
+          DOCKER_TAG="rls-${{ steps.get-version-tag.outputs.version_tag }}-$(date -u +'%Y%m%d%H%M')-${{ github.run_id }}"
+          echo "$DOCKER_TAG"
           echo "docker_tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
-      - name: print tag to STDOUT
-        run: echo "$DOCKER_TAG"
 
   docker_build_rails_apps:
     runs-on: self-hosted
@@ -96,11 +112,12 @@ jobs:
           sudo chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
+      - name: Assert Ownership
+        run: sudo chmod -R 777 .
+
       - name: "Checkout code"
         uses: actions/checkout@v4
 
-      - name: Assert Ownership
-        run: sudo chmod -R 777 .
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
 
