@@ -6,6 +6,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
@@ -16,23 +17,22 @@ import java.util.UUID;
  */
 @Entity(name = "job_queue_batch_file")
 public class JobQueueBatchFile implements Serializable {
+    @Serial
     private static final long serialVersionUID = 42L;
 
     @Embeddable
     public static class JobQueueBatchFileID implements Serializable {
+        @Serial
         private static final long serialVersionUID = 3L;
 
         @Column(name = "batch_id")
-        private UUID batchID;
+        private final UUID batchID;
 
         @Column(name = "resource_type")
-        private DPCResourceType resourceType;
+        private final DPCResourceType resourceType;
 
         @Column(name = "sequence")
-        private int sequence;
-
-        public JobQueueBatchFileID() {
-        }
+        private final int sequence;
 
         public JobQueueBatchFileID(UUID batchID, DPCResourceType resourceType, int sequence) {
             this.batchID = batchID;
@@ -55,8 +55,7 @@ public class JobQueueBatchFile implements Serializable {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof JobQueueBatchFileID)) return false;
-            JobQueueBatchFileID that = (JobQueueBatchFileID) o;
+            if (!(o instanceof JobQueueBatchFileID that)) return false;
             return sequence == that.sequence &&
                     batchID.equals(that.batchID) &&
                     resourceType == that.resourceType;
@@ -169,8 +168,7 @@ public class JobQueueBatchFile implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof JobQueueBatchFile)) return false;
-        JobQueueBatchFile that = (JobQueueBatchFile) o;
+        if (!(o instanceof JobQueueBatchFile that)) return false;
         return jobQueueBatchFileID.equals(that.jobQueueBatchFileID) &&
                 jobID.equals(that.jobID);
     }

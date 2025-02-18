@@ -1,10 +1,12 @@
 package gov.cms.dpc.queue.exceptions;
 
+import java.io.Serial;
 import java.util.UUID;
 
 public class JobQueueFailure extends RuntimeException {
 
-    public static final long serialVersionUID = 42L;
+    @Serial
+    private static final long serialVersionUID = 42L;
 
     public JobQueueFailure(String message) {
         super(message);
