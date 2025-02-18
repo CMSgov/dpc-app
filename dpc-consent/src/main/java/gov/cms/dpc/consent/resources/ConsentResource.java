@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Path("v1/Consent")
 public class ConsentResource {
@@ -92,7 +93,7 @@ public class ConsentResource {
         return entities
                 .stream()
                 .map(e -> ConsentEntityConverter.toFhir(e, fhirReferenceURL))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @GET

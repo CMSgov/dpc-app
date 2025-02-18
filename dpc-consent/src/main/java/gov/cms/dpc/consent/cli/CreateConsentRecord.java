@@ -99,8 +99,8 @@ public class CreateConsentRecord extends ConsentCommand {
 
         try (final Connection connection = dataSource.getConnection()) {
             DSLContext context = DSL.using(connection, this.settings);
-            ConsentRecord consentRecord = context.newRecord(CONSENT, entity);
-            context.executeInsert(consentRecord);
+            ConsentRecord record = context.newRecord(CONSENT, entity);
+            context.executeInsert(record);
         }
     }
 }

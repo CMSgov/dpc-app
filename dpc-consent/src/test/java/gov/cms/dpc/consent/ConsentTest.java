@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ConsentTest extends AbstractConsentTest {
+public class ConsentTest extends AbstractConsentTest {
 
     @Test
-    void testTrue() {
+    public void testTrue() {
         assertTrue(true);
     }
 }

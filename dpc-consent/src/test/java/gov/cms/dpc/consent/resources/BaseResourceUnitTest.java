@@ -23,7 +23,7 @@ class BaseResourceUnitTest {
 	}
 
 	@Test
-    void testGetVersion() {
+	public void testGetVersion() {
 		doReturn("version").when(pp).getBuildVersion();
 		assertEquals("version", baseResource.version());
 	}

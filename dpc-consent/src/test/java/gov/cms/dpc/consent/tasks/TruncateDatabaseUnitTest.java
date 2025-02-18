@@ -40,7 +40,7 @@ class TruncateDatabaseUnitTest {
 	@Mock
 	private PrintWriter printWriter;
 
-	private final Map<String, List<String>> map = Map.of();
+	private Map<String, List<String>> map = Map.of();
 
 	MockedStatic<DSL> mockedDsl;
 	MockedStatic<DBUtils> mockedDBUtils;
