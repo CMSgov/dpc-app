@@ -22,13 +22,12 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 		super(JobQueueBatch.class, JobQueueBatchFile.class);
 	}
 
-	private DPCQueueManagedSessionFactory sessionFactory;
-	private DistributedBatchQueue queue;
+    private DistributedBatchQueue queue;
 	private Session session;
 
 	@BeforeEach
 	void setup() {
-		sessionFactory = new DPCQueueManagedSessionFactory(db.getSessionFactory());
+        DPCQueueManagedSessionFactory sessionFactory = new DPCQueueManagedSessionFactory(db.getSessionFactory());
 		queue = new DistributedBatchQueue(sessionFactory, 100, new MetricRegistry());
 		session = sessionFactory.getSessionFactory().openSession();
 	}

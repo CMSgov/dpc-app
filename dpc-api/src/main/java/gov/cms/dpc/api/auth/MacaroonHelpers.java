@@ -79,8 +79,8 @@ public class MacaroonHelpers {
                     .getCaveats(rootMacaroon)
                     .stream()
                     .map(MacaroonCaveat::getCondition)
-                    .filter(condition -> condition.getKey().equals(ORGANIZATION_CAVEAT_KEY))
-                    .map(condition -> UUID.fromString(condition.getValue()))
+                    .filter(condition -> condition.key().equals(ORGANIZATION_CAVEAT_KEY))
+                    .map(condition -> UUID.fromString(condition.value()))
                     .findAny();
     }
 

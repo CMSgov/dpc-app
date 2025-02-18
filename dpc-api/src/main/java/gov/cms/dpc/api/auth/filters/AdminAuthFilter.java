@@ -63,7 +63,7 @@ public class AdminAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
         final boolean isGoldenMacaroon = MacaroonBakery.getCaveats(m1.get(0))
                 .stream()
                 .map(MacaroonCaveat::getCondition)
-                .anyMatch(cond -> cond.getKey().equals("organization_id"));
+                .anyMatch(cond -> cond.key().equals("organization_id"));
 
         if (isGoldenMacaroon) {
             logger.error("Attempted to call Admin endpoint with Organization token");

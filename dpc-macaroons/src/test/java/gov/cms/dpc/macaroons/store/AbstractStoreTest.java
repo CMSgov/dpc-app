@@ -28,8 +28,8 @@ public abstract class AbstractStoreTest {
     @Test
     void simpleCreateTest() {
         final IDKeyPair idKeyPair = store.create();
-        final String key2 = store.get(idKeyPair.getId());
-        assertEquals(idKeyPair.getKey(), key2, "Keys should be equal");
+        final String key2 = store.get(idKeyPair.id());
+        assertEquals(idKeyPair.key(), key2, "Keys should be equal");
     }
 
     @Test

@@ -5,7 +5,6 @@ import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.whispersystems.curve25519.Curve25519;
 
 import java.security.SecureRandom;
 
@@ -17,9 +16,9 @@ class ConditionParsingTests {
     @Test
     void testSimpleCaveatParsing() {
         final MacaroonCondition macaroonCondition = MacaroonCondition.parseFromString("test = valid");
-        assertAll(() -> assertEquals("test", macaroonCondition.getKey(), "Key should match"),
-                () -> assertEquals(MacaroonCondition.Operator.EQ, macaroonCondition.getOp(), "Op should match"),
-                () -> assertEquals("valid", macaroonCondition.getValue(), "Value should match"));
+        assertAll(() -> assertEquals("test", macaroonCondition.key(), "Key should match"),
+                () -> assertEquals(MacaroonCondition.Operator.EQ, macaroonCondition.op(), "Op should match"),
+                () -> assertEquals("valid", macaroonCondition.value(), "Value should match"));
     }
 
     @Test
@@ -44,8 +43,6 @@ class ConditionParsingTests {
     @Test
     void testSecretEncodingRoundTrip() {
         // Create a test key pairs for first party and third party
-        final Curve25519 instance = Curve25519.getInstance(Curve25519.BEST);
-
         final BakeryKeyPair thirdParty = BakeryKeyPair.generate();
         final BakeryKeyPair firstParty = BakeryKeyPair.generate();
 

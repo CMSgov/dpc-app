@@ -1,13 +1,12 @@
 package gov.cms.dpc.macaroons;
 
-import com.github.nitram509.jmacaroons.CaveatPacket;
 import com.github.nitram509.jmacaroons.MacaroonsConstants;
 
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MacaroonCondition {
+public record MacaroonCondition(String key, gov.cms.dpc.macaroons.MacaroonCondition.Operator op, String value) {
     // Regex for matching key, op and value from a given caveat string
     private static final Pattern caveatPattern = Pattern.compile("([a-zA-Z0-9_]*)\\s([=><!]{1,2})\\s(.*)");
 
@@ -57,50 +56,6 @@ public class MacaroonCondition {
         }
     }
 
-    private final String key;
-    private final String value;
-    private final Operator op;
-
-    /**
-     * Create a first-party caveat (e.g. one that does not have a location)
-     *
-     * @param key   -{@link String} Caveat key
-     * @param op    - {@link Operator} Caveat operator
-     * @param value - {@link String Caveat value}
-     */
-    public MacaroonCondition(String key, Operator op, String value) {
-        this.key = key;
-        this.op = op;
-        this.value = value;
-    }
-
-    /**
-     * Get the caveat key
-     *
-     * @return - {@link String} caveat key
-     */
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * Get the caveat comparison operator
-     *
-     * @return - {@link Operator}
-     */
-    public Operator getOp() {
-        return op;
-    }
-
-    /**
-     * Get the caveat value
-     *
-     * @return - {@link String} caveat value
-     */
-    public String getValue() {
-        return value;
-    }
-
     public byte[] toBytes() {
         return toString().getBytes(MacaroonsConstants.IDENTIFIER_CHARSET);
     }
@@ -113,27 +68,16 @@ public class MacaroonCondition {
      */
     @Override
     public String toString() {
-        return String.format("%s %s %s", this.getKey(), this.getOp().getOp(), this.getValue());
+        return String.format("%s %s %s", this.key(), this.op().getOp(), this.value());
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MacaroonCondition)) return false;
-        MacaroonCondition that = (MacaroonCondition) o;
+        if (!(o instanceof MacaroonCondition that)) return false;
         return Objects.equals(key, that.key) &&
                 Objects.equals(value, that.value) &&
                 op == that.op;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(key, value, op);
-    }
-
-    static MacaroonCondition parseFromPacket(CaveatPacket packet) {
-        final String packetValue = packet.getValueAsText();
-        return parseFromString(packetValue);
     }
 
     static MacaroonCondition parseFromString(String caveatValue) {

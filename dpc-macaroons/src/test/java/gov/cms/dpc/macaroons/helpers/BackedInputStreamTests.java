@@ -44,7 +44,6 @@ class BackedInputStreamTests {
 
         final byte[] outputBytes = ByteBuffer.allocate(testString.length() - 1).array();
 
-        //noinspection ResultOfMethodCallIgnored
         assertThrows(IndexOutOfBoundsException.class, () -> bis.read(outputBytes, 0, testString.length()), "Cannot read out of bounds");
     }
 }

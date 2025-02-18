@@ -26,13 +26,16 @@ public class JobQueueBatchFile implements Serializable {
         private static final long serialVersionUID = 3L;
 
         @Column(name = "batch_id")
-        private final UUID batchID;
+        private UUID batchID;
 
         @Column(name = "resource_type")
-        private final DPCResourceType resourceType;
+        private DPCResourceType resourceType;
 
         @Column(name = "sequence")
-        private final int sequence;
+        private int sequence;
+
+        public JobQueueBatchFileID() {
+        }
 
         public JobQueueBatchFileID(UUID batchID, DPCResourceType resourceType, int sequence) {
             this.batchID = batchID;

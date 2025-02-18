@@ -16,14 +16,14 @@ public class ExpirationCaveatVerifier implements CaveatVerifier {
 
     public static final String CAVEAT_INVALID = "Caveat is expired";
 
-    public ExpirationCaveatVerifier(TokenPolicy policy) { }
+    public ExpirationCaveatVerifier() { }
 
     @Override
     public Optional<String> check(MacaroonCondition caveat) {
 
-        if (caveat.getKey().equals(ExpirationCaveatSupplier.EXPIRATION_KEY)) {
+        if (caveat.key().equals(ExpirationCaveatSupplier.EXPIRATION_KEY)) {
 
-            final OffsetDateTime caveatExpiration = OffsetDateTime.parse(caveat.getValue());
+            final OffsetDateTime caveatExpiration = OffsetDateTime.parse(caveat.value());
             final OffsetDateTime currentTime = OffsetDateTime.now(ZoneOffset.UTC);
             final boolean isBefore = caveatExpiration.isBefore(currentTime);
             if (isBefore) {

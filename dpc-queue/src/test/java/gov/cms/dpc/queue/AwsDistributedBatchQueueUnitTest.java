@@ -13,34 +13,31 @@ import java.util.concurrent.TimeUnit;
 import static org.mockito.Mockito.*;
 
 class AwsDistributedBatchQueueUnitTest {
-	private AwsDistributedBatchQueue queue;
-	private MetricRegistry metricRegistry;
-	private DPCAwsQueueConfiguration config;
-	private final Session session = mock(Session.class);
+    private final Session session = mock(Session.class);
 	private final SessionFactory sessionFactory = mock(SessionFactory.class);
 	private final Slf4jReporter ageReporter = mock(Slf4jReporter.class);
 	private final Slf4jReporter sizeReporter = mock(Slf4jReporter.class);
 
 	@Test
 	void testReporterStarted() {
-		metricRegistry = new MetricRegistry();
-		config = new DPCAwsQueueConfiguration()
-			.setQueueSizeMetricName("sizeMetricName")
-			.setQueueAgeMetricName("ageMetricName")
-			.setEnvironment("env")
-			.setAwsAgeReportingInterval(60)
-			.setAwsSizeReportingInterval(60);
+        MetricRegistry metricRegistry = new MetricRegistry();
+        DPCAwsQueueConfiguration config = new DPCAwsQueueConfiguration()
+                .setQueueSizeMetricName("sizeMetricName")
+                .setQueueAgeMetricName("ageMetricName")
+                .setEnvironment("env")
+                .setAwsAgeReportingInterval(60)
+                .setAwsSizeReportingInterval(60);
 
 		when(sessionFactory.openSession()).thenReturn(session);
 
-		queue = new AwsDistributedBatchQueue(
-			new DPCQueueManagedSessionFactory(sessionFactory),
-			100,
-			metricRegistry,
-			ageReporter,
-			sizeReporter,
-			config
-			);
+        new AwsDistributedBatchQueue(
+                new DPCQueueManagedSessionFactory(sessionFactory),
+                100,
+                metricRegistry,
+                ageReporter,
+                sizeReporter,
+                config
+        );
 
 		verify(ageReporter, times(1)).start(60, TimeUnit.SECONDS);
 		verify(sizeReporter, times(1)).start(60, TimeUnit.SECONDS);

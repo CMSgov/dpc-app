@@ -110,7 +110,7 @@ class BakeryTest {
 
         caveatBakery.verifyMacaroon(Collections.singletonList(macaroon));
 
-        // Add an additional caveat and try to validate again, which should fail
+        // Add another caveat and try to validate again, which should fail
         final Macaroon macaroon1 = caveatBakery.addCaveats(macaroon, new MacaroonCaveat("", new MacaroonCondition("expires", MacaroonCondition.Operator.LT, "now")));
 
         assertThrows(BakeryException.class, () -> caveatBakery.verifyMacaroon(Collections.singletonList(macaroon1)));
@@ -125,11 +125,11 @@ class BakeryTest {
     @Test
     void testDefaultCaveatSuppliers() {
 
-        final MacaroonCaveat test_caveat = new MacaroonCaveat("", new MacaroonCondition("test_caveat", MacaroonCondition.Operator.EQ, "1"));
-        final CaveatSupplier testSupplier = () -> test_caveat;
-        final CaveatVerifier testVerifier = (caveat) -> {
-            if (caveat.getKey().equals("test_caveat")) {
-                assertEquals(caveat, test_caveat.getCondition(), "Caveats should match");
+        final MacaroonCaveat testCaveat = new MacaroonCaveat("", new MacaroonCondition("test_caveat", MacaroonCondition.Operator.EQ, "1"));
+        final CaveatSupplier testSupplier = () -> testCaveat;
+        final CaveatVerifier testVerifier = caveat -> {
+            if (caveat.key().equals("test_caveat")) {
+                assertEquals(caveat, testCaveat.getCondition(), "Caveats should match");
             }
             return Optional.empty();
         };

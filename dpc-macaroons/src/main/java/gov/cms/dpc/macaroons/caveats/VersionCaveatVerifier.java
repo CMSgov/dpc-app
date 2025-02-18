@@ -22,8 +22,8 @@ public class VersionCaveatVerifier implements CaveatVerifier {
     @Override
     public Optional<String> check(MacaroonCondition caveat) {
 
-        if (caveat.getKey().equals(VersionCaveatSupplier.VERSION_KEY)) {
-            final int tokenVersion = Integer.parseInt(caveat.getValue());
+        if (caveat.key().equals(VersionCaveatSupplier.VERSION_KEY)) {
+            final int tokenVersion = Integer.parseInt(caveat.value());
             if (tokenVersion < minimumVersion) {
                 return Optional.of(String.format("Token version '%d' is not supported. Minimum is: %s", tokenVersion, minimumVersion));
             }
