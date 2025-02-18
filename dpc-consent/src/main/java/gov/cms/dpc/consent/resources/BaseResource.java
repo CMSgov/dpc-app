@@ -15,7 +15,7 @@ import jakarta.ws.rs.core.MediaType;
 @Path("/v1")
 public class BaseResource {
 
-    private PropertiesProvider pp;
+    private final PropertiesProvider pp;
 
     @Inject
     public BaseResource() {
