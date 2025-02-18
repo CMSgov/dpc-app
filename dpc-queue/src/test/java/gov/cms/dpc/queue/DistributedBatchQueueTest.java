@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
-class DistributedBatchQueueTest {
+public class DistributedBatchQueueTest {
 
     private final UUID aggregatorID = UUID.randomUUID();
     private SessionFactory sessionFactory;

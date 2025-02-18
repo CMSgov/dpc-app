@@ -37,7 +37,7 @@ public class BakeryProvider implements Provider<MacaroonBakery> {
         return new MacaroonBakery.MacaroonBakeryBuilder(publicURL, store, thirdPartyKeyStore)
                 .withKeyPair(keyPair)
                 .addDefaultVerifier(new VersionCaveatVerifier(tokenPolicy))
-                .addDefaultVerifier(new ExpirationCaveatVerifier())
+                .addDefaultVerifier(new ExpirationCaveatVerifier(tokenPolicy))
                 .build();
     }
 }

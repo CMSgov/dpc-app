@@ -90,5 +90,8 @@ public class TokenPolicy {
             this.expirationUnit = expirationUnit;
         }
 
+        public void setExpirationUnit(String expirationUnit) {
+            this.expirationUnit = ChronoUnit.valueOf(expirationUnit);
+        }
     }
 }

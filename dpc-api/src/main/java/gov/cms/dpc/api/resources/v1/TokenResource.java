@@ -48,6 +48,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.auth.MacaroonHelpers.ORGANIZATION_CAVEAT_KEY;
 import static gov.cms.dpc.api.auth.MacaroonHelpers.generateCaveatsForToken;
@@ -320,7 +321,7 @@ public class TokenResource extends AbstractTokenResource {
         final List<MacaroonCaveat> caveats = generateCaveatsForToken(policy.getVersionPolicy().getCurrentVersion(), organizationID, tokenLifetime)
                 .stream()
                 .map(CaveatSupplier::get)
-                .toList();
+                .collect(Collectors.toList());
         return this.bakery.createMacaroon(caveats);
     }
 
@@ -376,7 +377,7 @@ public class TokenResource extends AbstractTokenResource {
                 .getCaveats(macaroon)
                 .stream()
                 .map(MacaroonCaveat::getCondition)
-                .noneMatch(cond -> cond.key().equals(ORGANIZATION_CAVEAT_KEY));
+                .noneMatch(cond -> cond.getKey().equals(ORGANIZATION_CAVEAT_KEY));
 
         if (idMissing) {
             logger.error("GOLDEN MACAROON WAS GENERATED IN TOKEN RESOURCE!");

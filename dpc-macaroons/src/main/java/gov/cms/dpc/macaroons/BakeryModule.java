@@ -1,6 +1,7 @@
 package gov.cms.dpc.macaroons;
 
 import com.google.inject.PrivateModule;
+import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import gov.cms.dpc.macaroons.store.IRootKeyStore;
 import gov.cms.dpc.macaroons.store.hibernate.HibernateKeyStore;
@@ -18,4 +19,8 @@ public class BakeryModule extends PrivateModule {
         expose(MacaroonBakery.class);
     }
 
+    @Provides
+    SecureRandom provideRandom() {
+        return new SecureRandom();
+    }
 }

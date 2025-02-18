@@ -18,14 +18,15 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("rawtypes")
 @ExtendWith(BufferedLoggerHandler.class)
-class QueueHealthTest {
+public class QueueHealthTest {
 
-    private final Session session = mock(Session.class);
+    private Session session = mock(Session.class);
     private final SessionFactory factory = mock(SessionFactory.class);
-    private final DPCQueueManagedSessionFactory managedSessionFactory = new DPCQueueManagedSessionFactory(factory);
-    private final Query<Long> query = mock(Query.class);
-    private final MetricRegistry metrics = new MetricRegistry();
+    private DPCQueueManagedSessionFactory managedSessionFactory = new DPCQueueManagedSessionFactory(factory);
+    private Query<Long> query = mock(Query.class);
+    private MetricRegistry metrics = new MetricRegistry();
 
     @BeforeEach
     void setupQueueDependencies() {

@@ -11,7 +11,7 @@ import java.time.ZoneOffset;
 class ExpirationVerifierTest extends AbstractVerifierTest<ExpirationCaveatVerifier> {
 
     ExpirationVerifierTest() {
-        super(new ExpirationCaveatVerifier());
+        super(new ExpirationCaveatVerifier(getTokenPolicy()));
     }
 
     @Override

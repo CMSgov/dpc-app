@@ -20,9 +20,9 @@ class CaveatSupplierTests {
         final MacaroonCaveat caveat = new ExpirationCaveatSupplier(lifetime).get();
 
         assertAll(() -> assertNotNull(caveat),
-                () -> assertEquals(ExpirationCaveatSupplier.EXPIRATION_KEY, caveat.getCondition().key(), "Should have correct key"),
-                () -> assertEquals(MacaroonCondition.Operator.EQ, caveat.getCondition().op(), "Should have equals op"),
-                () -> assertTrue(OffsetDateTime.parse(caveat.getCondition().value()).truncatedTo(ChronoUnit.MINUTES)
+                () -> assertEquals(ExpirationCaveatSupplier.EXPIRATION_KEY, caveat.getCondition().getKey(), "Should have correct key"),
+                () -> assertEquals(MacaroonCondition.Operator.EQ, caveat.getCondition().getOp(), "Should have equals op"),
+                () -> assertTrue(OffsetDateTime.parse(caveat.getCondition().getValue()).truncatedTo(ChronoUnit.MINUTES)
                         .isEqual(now.plusMinutes(5).truncatedTo(ChronoUnit.MINUTES)), "Should be 5 minutes in the future"));
     }
 
@@ -31,8 +31,8 @@ class CaveatSupplierTests {
         final MacaroonCaveat caveat = new VersionCaveatSupplier(1).get();
 
         assertAll(() -> assertNotNull(caveat),
-                () -> assertEquals(VersionCaveatSupplier.VERSION_KEY, caveat.getCondition().key(), "Should have correct key"),
-                () -> assertEquals(MacaroonCondition.Operator.EQ, caveat.getCondition().op(), "Should have equals op"),
-                () -> assertEquals("1", caveat.getCondition().value(), "Should have correct version"));
+                () -> assertEquals(VersionCaveatSupplier.VERSION_KEY, caveat.getCondition().getKey(), "Should have correct key"),
+                () -> assertEquals(MacaroonCondition.Operator.EQ, caveat.getCondition().getOp(), "Should have equals op"),
+                () -> assertEquals("1", caveat.getCondition().getValue(), "Should have correct version"));
     }
 }
