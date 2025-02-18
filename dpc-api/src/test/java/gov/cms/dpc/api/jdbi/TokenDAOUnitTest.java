@@ -12,7 +12,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class TokenDAOUnitTest extends AbstractDAOTest<TokenEntity> {
+class TokenDAOUnitTest extends AbstractDAOTest {
     TokenDAO tokenDAO;
 
     @BeforeEach
