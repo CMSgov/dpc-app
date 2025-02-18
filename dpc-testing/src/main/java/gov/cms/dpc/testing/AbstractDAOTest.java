@@ -20,7 +20,7 @@ import org.testcontainers.utility.DockerImageName;
  */
 @ExtendWith(DropwizardExtensionsSupport.class)
 @Testcontainers
-public abstract class AbstractDAOTest {
+public abstract class AbstractDAOTest<E> {
     @Container
     private final PostgreSQLContainer<?> postgreSql = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16"));
 
