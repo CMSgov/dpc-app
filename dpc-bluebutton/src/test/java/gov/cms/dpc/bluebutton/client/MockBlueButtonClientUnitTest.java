@@ -25,7 +25,7 @@ class MockBlueButtonClientUnitTest {
 	@Test
 	void testRequestPatientFromServerByMbi() {
 		Bundle resultBundle = client.requestPatientFromServerByMbi(mbi, Map.of());
-		assertEquals(1, resultBundle.getTotal());
+		assertEquals(1, resultBundle.getEntry().size());
 
 		Patient pat = (Patient) resultBundle.getEntryFirstRep().getResource();
 		assertEquals(pat.getIdPart(), id);
@@ -37,7 +37,7 @@ class MockBlueButtonClientUnitTest {
 			.setLowerBound("2000-12-31")
 			.setUpperBound("2100-01-01");
 		Bundle resultBundle = client.requestPatientFromServer(id, dateRangeParam, Map.of());
-		assertEquals(1, resultBundle.getTotal());
+		assertEquals(1, resultBundle.getEntry().size());
 
 		Patient pat = (Patient) resultBundle.getEntryFirstRep().getResource();
 		assertEquals(pat.getIdPart(), id);
