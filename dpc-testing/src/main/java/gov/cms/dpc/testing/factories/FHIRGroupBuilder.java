@@ -2,11 +2,9 @@ package gov.cms.dpc.testing.factories;
 
 import org.hl7.fhir.dstu3.model.*;
 
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 //This is now the official DPC FHIR Group Generator. To be used by any service for test purposes.
 public class FHIRGroupBuilder {
@@ -16,7 +14,7 @@ public class FHIRGroupBuilder {
     static final String NPPES_SYSTEM =  "http://hl7.org/fhir/sid/us-npi";
     static final String DPC_SYSTEM = "https://dpc.cms.gov/organization_id#";
 
-    private Group theGroup;
+    private final Group theGroup;
 
     private FHIRGroupBuilder(){
         theGroup = new Group();
@@ -58,7 +56,7 @@ public class FHIRGroupBuilder {
         List<IdType> patientIdTypes = Arrays.stream(patientIds)
                 .map(IdType::new)
                 .map(type -> new IdType("Patient", type.getIdPart()))
-                .collect(Collectors.toList());
+                .toList();
 
         return withPatients(patientIdTypes.toArray(IdType[]::new));
     }
@@ -66,7 +64,7 @@ public class FHIRGroupBuilder {
     public FHIRGroupBuilder withPatients(UUID... patientUUIDs){
         List<IdType> patientIdTypes = Arrays.stream(patientUUIDs)
                 .map(uuid -> new IdType("Patient", uuid.toString()))
-                .collect(Collectors.toList());
+                .toList();
 
         return withPatients(patientIdTypes.toArray(IdType[]::new));
     }

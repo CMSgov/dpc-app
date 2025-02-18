@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(SystemStubsExtension.class)
 class DBUtilsUnitTest {
 	@SystemStub
-	private EnvironmentVariables envVars;
+	private final EnvironmentVariables envVars = new EnvironmentVariables();
 
 	DSLContext context = new DefaultDSLContext(SQLDialect.DEFAULT);
 
@@ -23,17 +23,15 @@ class DBUtilsUnitTest {
 	void test_truncateAllTables_will_not_run_in_prod() {
 		envVars.set("ENV", "prod");
 
-		assertThrows(NotATestEnvironmentException.class, () -> {
-			DBUtils.truncateAllTables(context, "public");
-		});
+		assertThrows(NotATestEnvironmentException.class, () ->
+                DBUtils.truncateAllTables(context, "public"));
 	}
 
 	@Test
 	void test_truncateAllTables_will_not_run_in_prod_sbx() {
 		envVars.set("ENV", "prod-sbx");
 
-		assertThrows(NotATestEnvironmentException.class, () -> {
-			DBUtils.truncateAllTables(context, "public");
-		});
+		assertThrows(NotATestEnvironmentException.class, () ->
+                DBUtils.truncateAllTables(context, "public"));
 	}
 }

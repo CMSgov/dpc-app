@@ -12,9 +12,9 @@ public class FHIRPatientBuilder {
 
     //This constant is found in DPCIdentifierSystem; but I did not want to introduce a circular dependency.
     //TODO revisit during test refactoring
-    final static String MBI_SYSTEM = "http://hl7.org/fhir/sid/us-mbi";
+    static final String MBI_SYSTEM = "http://hl7.org/fhir/sid/us-mbi";
 
-    private Patient thePatient;
+    private final Patient thePatient;
 
     private FHIRPatientBuilder(){
         thePatient = new Patient();

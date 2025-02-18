@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class FHIRPatientBuilderUnitTest {
 
     @Test
-    public void testBuildWithMultiple() {
+    void testBuildWithMultiple() {
         String gender =  "other";
         UUID orgId =  UUID.randomUUID();
 
@@ -26,7 +26,7 @@ class FHIRPatientBuilderUnitTest {
     }
 
     @Test
-    public void withId() {
+    void withId() {
         UUID id = UUID.randomUUID();
         Patient patient = FHIRPatientBuilder.newBuild().withId(id).build();
         assertEquals(id.toString(),patient.getId());
@@ -37,7 +37,7 @@ class FHIRPatientBuilderUnitTest {
     }
 
     @Test
-    public void withMbi() {
+    void withMbi() {
         String mbi =  "4S41C00AA00";
         Patient patient = FHIRPatientBuilder.newBuild().withMbi(mbi).build();
         assertEquals(1,patient.getIdentifier().size());
@@ -46,8 +46,8 @@ class FHIRPatientBuilderUnitTest {
     }
 
     @Test
-    public void testWithName() {
-        String first =  "Salvadoritito";
+    void testWithName() {
+        String first =  "Salvadorito";
         String last = "Burger";
         Patient patient = FHIRPatientBuilder.newBuild().withName(first,last).build();
         assertEquals(1,patient.getName().size());
@@ -56,7 +56,7 @@ class FHIRPatientBuilderUnitTest {
     }
 
     @Test
-    public void testWithBirthDate() {
+    void testWithBirthDate() {
         String dob =  "1990-10-10";
         Patient patient = FHIRPatientBuilder.newBuild().withBirthDate(dob).build();
         assertEquals(Date.valueOf(dob), patient.getBirthDate());
@@ -67,7 +67,7 @@ class FHIRPatientBuilderUnitTest {
 
 
     @Test
-    public void testWithGender() {
+    void testWithGender() {
         String gender =  "other";
         Patient patient = FHIRPatientBuilder.newBuild().withGender(gender).build();
         assertEquals(Enumerations.AdministrativeGender.OTHER, patient.getGender());
@@ -77,7 +77,7 @@ class FHIRPatientBuilderUnitTest {
     }
 
     @Test
-    public void testManagedBy() {
+    void testManagedBy() {
         UUID orgId =  UUID.randomUUID();
         Patient patient = FHIRPatientBuilder.newBuild().managedBy(orgId).build();
         assertEquals("Organization/"+orgId,patient.getManagingOrganization().getReference());
@@ -85,7 +85,7 @@ class FHIRPatientBuilderUnitTest {
         patient = FHIRPatientBuilder.newBuild().managedBy(orgId.toString()).build();
         assertEquals("Organization/"+orgId,patient.getManagingOrganization().getReference());
 
-        patient = FHIRPatientBuilder.newBuild().managedBy("Organization/"+orgId.toString()).build();
+        patient = FHIRPatientBuilder.newBuild().managedBy("Organization/"+orgId).build();
         assertEquals("Organization/"+orgId,patient.getManagingOrganization().getReference());
 
         patient = FHIRPatientBuilder.newBuild().managedBy(new IdType("Organization", orgId.toString())).build();
