@@ -22,7 +22,7 @@ public class BufferedLoggerHandler implements TestWatcher, BeforeAllCallback {
     public static final String LOGGER_PATTERN = "%-4relative [%thread] %-5level %logger{35} - %msg %n";
 
     @Override
-    public void beforeAll(ExtensionContext extensionContext) {
+    public void beforeAll(ExtensionContext extensionContext) throws Exception {
         final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         // Create the logger
         final RingBufferLogger logger = new RingBufferLogger();

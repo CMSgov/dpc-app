@@ -8,10 +8,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FHIRGroupBuilderUnitTest {
+public class FHIRGroupBuilderUnitTest {
 
     @Test
-    void testFullBuild() {
+    public void testFullBuild() {
         UUID patient1Id = UUID.randomUUID();
         UUID patient2Id = UUID.randomUUID();
         UUID orgId = UUID.randomUUID();
@@ -49,13 +49,13 @@ class FHIRGroupBuilderUnitTest {
     }
 
     @Test
-    void testNewBuild() {
+    public void testNewBuild() {
         FHIRGroupBuilder result = FHIRGroupBuilder.newBuild();
         assertNotNull(result);
     }
 
     @Test
-    void testAttributedTo() {
+    public void testAttributedTo() {
         FHIRGroupBuilder builder = FHIRGroupBuilder.newBuild();
         builder.attributedTo("12345");
         Group group = builder.build();
@@ -76,7 +76,7 @@ class FHIRGroupBuilderUnitTest {
 
 
     @Test
-    void testWithPatient() {
+    public void testWithPatient() {
         UUID patientUUID = UUID.randomUUID();
 
         //With id as string
@@ -85,7 +85,7 @@ class FHIRGroupBuilderUnitTest {
         assertEquals("Patient/"+patientUUID,group.getMemberFirstRep().getEntity().getReference());
 
         //With id as reference string
-        group = FHIRGroupBuilder.newBuild().withPatients("Patient/"+patientUUID).build();
+        group = FHIRGroupBuilder.newBuild().withPatients("Patient/"+patientUUID.toString()).build();
         assertEquals(1, group.getMember().size());
         assertEquals("Patient/"+patientUUID,group.getMemberFirstRep().getEntity().getReference());
 
@@ -103,7 +103,7 @@ class FHIRGroupBuilderUnitTest {
         assertEquals("Patient/"+id2,group.getMember().get(1).getEntity().getReference());
     }
     @Test
-    void withOrgTag() {
+    public void withOrgTag() {
         UUID orgId = UUID.randomUUID();
 
         //With id as UUID

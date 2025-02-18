@@ -3,7 +3,6 @@ package gov.cms.dpc.testing.models;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.util.StdConverter;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -11,8 +10,7 @@ import java.util.UUID;
 
 @SuppressWarnings("WeakerAccess")
 public class KeyView implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     public UUID id;
     public String publicKey;

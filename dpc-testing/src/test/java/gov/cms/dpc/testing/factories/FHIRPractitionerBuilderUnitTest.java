@@ -5,15 +5,15 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FHIRPractitionerBuilderUnitTest {
+public class FHIRPractitionerBuilderUnitTest {
 
     @Test
-    void newBuilder() {
+    public void newBuilder() {
         assertNotNull(FHIRPractitionerBuilder.newBuilder());
     }
 
     @Test
-    void build() {
+    public void build() {
         Practitioner practitioner = FHIRPractitionerBuilder.newBuilder()
                 .withNpi("7127445550")
                 .withName("Test", "Practitioner")

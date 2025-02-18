@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Implements a distributed {@link gov.cms.dpc.queue.models.JobQueueBatch} using a Postgres database
@@ -183,7 +184,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
             final Root<JobQueueBatch> root = query.from(JobQueueBatch.class);
 
             query.select(root);
-            query.where(root.get("batchID").in(stuckBatchIDs.stream().map(UUID::fromString).toList()));
+            query.where(root.get("batchID").in(stuckBatchIDs.stream().map(UUID::fromString).collect(Collectors.toList())));
             final List<JobQueueBatch> stuckJobList = session.createQuery(query).getResultList();
 
             for ( JobQueueBatch stuckJob : stuckJobList ) {

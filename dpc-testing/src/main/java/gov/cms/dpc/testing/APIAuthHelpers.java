@@ -409,6 +409,10 @@ public class APIAuthHelpers {
             // We don't need this
         }
 
+        public AuthResponse getAuthResponse() {
+            return this.response;
+        }
+
         private void refreshAuthToken() {
             System.out.println("Refreshing access token");
             try {

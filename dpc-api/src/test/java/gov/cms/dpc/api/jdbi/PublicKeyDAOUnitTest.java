@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class PublicKeyDAOUnitTest extends AbstractDAOTest<PublicKeyEntity> {
+class PublicKeyDAOUnitTest extends AbstractDAOTest {
     PublicKeyDAO publicKeyDAO;
 
     @BeforeEach
