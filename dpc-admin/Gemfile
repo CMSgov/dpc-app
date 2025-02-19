@@ -47,8 +47,7 @@ gem 'lograge'
 gem 'macaroons'
 gem 'sprockets-rails', '>= 3.4.2'
 gem 'truemail'
-# < 1.16.5 has a vulnerability, and is required by other gems
-gem 'nokogiri', '>= 1.16.5'
+gem 'nokogiri', '>= 1.18.3'
 
 gem 'api_client', path: 'vendor/api_client'
 

@@ -322,7 +322,7 @@ GEM
       net-protocol
     newrelic_rpm (8.16.0)
     nio4r (2.7.3)
-    nokogiri (1.16.8)
+    nokogiri (1.18.3)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     oauth2 (2.0.9)
@@ -626,7 +626,7 @@ DEPENDENCIES
   luhnacy (~> 0.2.1)
   macaroons
   newrelic_rpm (~> 8.10)
-  nokogiri (>= 1.16.5)
+  nokogiri (>= 1.18.3)
   omniauth-rails_csrf_protection
   omniauth_openid_connect
   pg (>= 0.18, < 2.0)
