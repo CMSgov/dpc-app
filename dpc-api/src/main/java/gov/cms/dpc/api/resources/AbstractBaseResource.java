@@ -27,9 +27,6 @@ public abstract class AbstractBaseResource {
     @Path("/Data")
     public abstract AbstractDataResource dataOperations();
 
-    @Path("/Endpoint")
-    public abstract AbstractEndpointResource endpointOperations();
-
     @Path("/Group")
     public abstract AbstractGroupResource groupOperations();
 

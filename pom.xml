@@ -34,26 +34,24 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <dropwizard.version>2.1.7</dropwizard.version>
-        <junit.jupiter.version>5.9.3</junit.jupiter.version>
-        <slf4j.version>1.7.36</slf4j.version>
-        <!--Custom group IDs for pulling dependencies from JitPack-->
-        <jitpack.groupID>com.github.nickrobison-usds</jitpack.groupID>
-        <typesafe.config.groupID>${jitpack.groupID}</typesafe.config.groupID>
+        <dropwizard.version>3.0.10</dropwizard.version>
+        <junit.jupiter.version>5.11.4</junit.jupiter.version>
+        <slf4j.version>2.0.12</slf4j.version>
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
-        <hapi.fhir.version>4.2.0</hapi.fhir.version>
-        <pgsql.version>42.6.0</pgsql.version>
+        <hapi.fhir.version>7.6.0</hapi.fhir.version>
+        <pgsql.version>42.7.4</pgsql.version>
         <java.version>11</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
         <jib.ecr.root>755619740999.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
         <timestamp>${maven.build.timestamp}</timestamp>
-        <jacoco.version>0.8.5</jacoco.version>
+        <jacoco.version>0.8.12</jacoco.version>
         <jooq.version>3.13.4</jooq.version>
         <bouncey.version>1.70</bouncey.version>
         <pitest.version>1.5.1</pitest.version>
         <newrelic.agent.version>7.11.1</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
         <h2.version>2.2.220</h2.version>
+        <sonar.coverage.exclusions>**/MockBlueButton*.java</sonar.coverage.exclusions>
     </properties>
 
     <developers>
@@ -156,7 +154,7 @@
             <dependency>
                 <groupId>ru.vyarus.guicey</groupId>
                 <artifactId>guicey-bom</artifactId>
-                <version>5.9.1</version>
+                <version>6.2.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -175,12 +173,12 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-io</artifactId>
-                <version>9.4.51.v20230217</version>
+                <version>10.0.20</version>
             </dependency>
             <dependency>
                 <groupId>ru.vyarus</groupId>
                 <artifactId>dropwizard-guicey</artifactId>
-                <version>5.9.1</version>
+                <version>6.2.2</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.eclipse.jetty</groupId>
@@ -192,11 +190,6 @@
                 <groupId>com.typesafe</groupId>
                 <artifactId>config</artifactId>
                 <version>1.4.3</version>
-            </dependency>
-            <dependency>
-                <groupId>${typesafe.config.groupID}</groupId>
-                <artifactId>typesafe-dropwizard-configuration</artifactId>
-                <version>33ba32769f05acb6aea60e1d2da076f0b36251cc</version>
             </dependency>
             <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
             <dependency>
@@ -255,14 +248,29 @@
                 <version>${hapi.fhir.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.smoketurner</groupId>
-                <artifactId>dropwizard-swagger</artifactId>
-                <version>2.0.12-1</version>
+                <groupId>${hapi.fhir.groupID}</groupId>
+                <artifactId>hapi-fhir-caching-caffeine</artifactId>
+                <version>${hapi.fhir.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.knowm</groupId>
-                <artifactId>dropwizard-sundial</artifactId>
-                <version>1.3.1</version>
+                <groupId>com.smoketurner</groupId>
+                <artifactId>dropwizard-swagger</artifactId>
+                <version>3.0.0-1</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.dropwizard-jobs</groupId>
+                <artifactId>dropwizard-jobs-core</artifactId>
+                <version>5.1.4</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.dropwizard-jobs</groupId>
+                <artifactId>dropwizard-jobs-guice</artifactId>
+                <version>5.1.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.quartz-scheduler</groupId>
+                <artifactId>quartz</artifactId>
+                <version>2.3.2</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -287,6 +295,12 @@
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-params</artifactId>
                 <version>${junit.jupiter.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>uk.org.webcompere</groupId>
+                <artifactId>system-stubs-jupiter</artifactId>
+                <version>2.1.6</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -361,6 +375,11 @@
                 <version>3.7.0</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.18.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -369,6 +388,11 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.org.webcompere</groupId>
+            <artifactId>system-stubs-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -393,7 +417,7 @@
         <dependency>
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity-engine-core</artifactId>
-            <version>2.3</version>
+            <version>2.4.1</version>
         </dependency>
     </dependencies>
 
@@ -405,10 +429,29 @@
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>integration-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                            </execution>
+                            <execution>
+                                <id>verify</id>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                                <phase>verify</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration combine.self="override">
-                            <groups>Integration</groups>
-                            <forkedProcessExitTimeoutInSeconds>600</forkedProcessExitTimeoutInSeconds>
+                        <configuration>
+                            <skip>true</skip>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -494,6 +537,7 @@
                                         <arg>-XDcompilePolicy=simple</arg>
                                         <!--All ErrorProne configuration options need to be included in a single arg line-->
                                         <arg>-Xplugin:ErrorProne -XepExcludedPaths:.*/target/generated-sources/.*
+                                            -Xep:EmptyBlockTag:OFF -Xep:MissingSummary:OFF -Xep:UnusedVariable:OFF
                                             -Xep:RemoveUnusedImports:ERROR
                                         </arg>
                                         <!-- Tell ErrorProne to ignore checking for processed annotations-->
@@ -567,7 +611,6 @@
     <build>
         <pluginManagement>
             <plugins>
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
@@ -575,8 +618,69 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.5.2</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>me.fabriciorby</groupId>
+                            <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                            <version>1.3.0</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <reportFormat>plain</reportFormat>
+                        <consoleOutputReporter>
+                            <disable>true</disable>
+                        </consoleOutputReporter>
+                        <statelessTestsetInfoReporter
+                                implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+                            <theme>UNICODE</theme>
+                            <printStacktraceOnError>true</printStacktraceOnError>
+                            <printStacktraceOnFailure>true</printStacktraceOnFailure>
+                            <printStdoutOnError>false</printStdoutOnError>
+                            <printStdoutOnFailure>false</printStdoutOnFailure>
+                            <printStdoutOnSuccess>false</printStdoutOnSuccess>
+                            <printStderrOnError>true</printStderrOnError>
+                            <printStderrOnFailure>true</printStderrOnFailure>
+                            <printStderrOnSuccess>false</printStderrOnSuccess>
+                        </statelessTestsetInfoReporter>
+                        <includes>
+                            <include>**/*Test.java</include>
+                            <include>**/*Tests.java</include>
+                        </includes>
+                        <groups>Integration</groups>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M3</version>
+                    <version>3.5.2</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>me.fabriciorby</groupId>
+                            <artifactId>maven-surefire-junit5-tree-reporter</artifactId>
+                            <version>1.3.0</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <reportFormat>plain</reportFormat>
+                        <consoleOutputReporter>
+                            <disable>true</disable>
+                        </consoleOutputReporter>
+                        <statelessTestsetInfoReporter
+                                implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+                            <theme>UNICODE</theme>
+                            <printStacktraceOnError>true</printStacktraceOnError>
+                            <printStacktraceOnFailure>true</printStacktraceOnFailure>
+                            <printStdoutOnError>false</printStdoutOnError>
+                            <printStdoutOnFailure>false</printStdoutOnFailure>
+                            <printStdoutOnSuccess>false</printStdoutOnSuccess>
+                            <printStderrOnError>true</printStderrOnError>
+                            <printStderrOnFailure>true</printStderrOnFailure>
+                            <printStderrOnSuccess>false</printStderrOnSuccess>
+                        </statelessTestsetInfoReporter>
+                        <excludedGroups>Integration</excludedGroups>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -613,7 +717,7 @@
                 <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
-                    <version>2.5.2</version>
+                    <version>3.4.1</version>
                     <configuration>
                         <to>
                             <image>${jib.ecr.root}/${project.artifactId}</image>
@@ -637,7 +741,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.5</version>
+                    <version>0.8.12</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -658,13 +762,6 @@
         </pluginManagement>
 
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludedGroups>Integration</excludedGroups>
-                </configuration>
-            </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
@@ -735,6 +832,7 @@
                         <exclude>**/*_.class</exclude>
                         <!--Exclude auto-generated JOOQ classes-->
                         <exclude>gov/cms/dpc/attribution/dao/**/*</exclude>
+                        <exclude>gov/cms/dpc/consent/dao/**/*</exclude>
                         <!-- Exclude HL7 parsers, because they're too big-->
                         <exclude>org/hl7/fhir/r4/formats/*</exclude>
                         <exclude>org/hl7/fhir/r5/formats/*</exclude>
@@ -753,7 +851,6 @@
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>test</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
@@ -764,6 +861,9 @@
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
                 <version>4.0.0</version>
+                <configuration>
+                  <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                </configuration>
                 <executions>
                     <execution>
                         <id>git-commit</id>
@@ -788,6 +888,15 @@
                     </dependency>
                 </dependencies>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <failOnError>false</failOnError>
+                    <retryOnError>true</retryOnError>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -808,10 +917,4 @@
         </plugins>
     </reporting>
 
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
 </project>

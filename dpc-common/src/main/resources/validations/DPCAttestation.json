@@ -51,7 +51,7 @@
         "id": "Provenance.reason[x]:system",
         "path": "Provenance.reason.system",
         "min": 1,
-        "fixedCode": "http://hl7.org/fhir/v3/ActReason"
+        "fixedUri": "http://hl7.org/fhir/v3/ActReason"
       },
       {
         "id": "Provenance.reason[x]:code",

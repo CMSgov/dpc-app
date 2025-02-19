@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title>Data at the Point of Care</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -8,22 +8,30 @@
     <%= javascript_include_tag '@uswds/uswds/dist/js/uswds-init.min.js' %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   </head>
-  <body class="grid-container margin-top-5 margin-bottom-8">
+  <body class="minh-viewport bg-base-lightest">
     <%= javascript_include_tag '@uswds/uswds/dist/js/uswds.min.js' %>
-    <div class="grid-row">
-      <div class="grid-col-fill">
-        <% if notice %>
-          <%= render Core::Alert::Component.new do %>
-            <%= notice %>
+    <%= render Core::SiteHeader::Component.new(logged_in: !!current_user) %>
+    <div class="grid-container margin-top-5 margin-bottom-8">
+      <div class="grid-row">
+        <div class="grid-col-fill">
+          <% if notice %>
+            <%= render Core::Alert::Component.new do %>
+              <%= notice %>
+            <% end %>
           <% end %>
-        <% end %>
-        <% if alert %>
-          <%= render Core::Alert::Component.new(status: :error) do %>
-            <%= alert %>
+          <% if alert %>
+            <%= render Core::Alert::Component.new(status: :error) do %>
+              <%=raw alert %>
+            <% end %>
           <% end %>
-        <% end %>
-        <%= yield %>
+          <main class="<%= 'margin-top-5' if notice or alert %>">
+            <%= yield %>
+          </main>
+        </div>
       </div>
     </div>
+    <% if user_signed_in? %>
+        <%= auto_session_timeout_js %>
+    <% end %>
   </body>
 </html>

@@ -64,6 +64,6 @@ class ClientTokensController < ApplicationController
 
   def unauthorized
     flash[:error] = 'Unauthorized'
-    redirect_to portal_path
+    redirect_to authenticated_root_path
   end
 end

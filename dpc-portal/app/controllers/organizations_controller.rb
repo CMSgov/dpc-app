@@ -2,31 +2,98 @@
 
 # Shows Credential Delegates info about the organizations they manage the credentials for
 class OrganizationsController < ApplicationController
-  before_action :load_organization
+  before_action :authenticate_user!
+  before_action :check_user_verification
+  before_action :load_organization, only: %i[show tos_form sign_tos success]
+  before_action :require_can_access, only: %i[show]
+  before_action :check_npi, only: %i[create]
+  before_action :require_ao, only: %i[tos_form sign_tos success]
+  before_action :tos_accepted, only: %i[show]
 
   def index
-    @organizations = [@organization]
-    render(Page::Organization::OrganizationListComponent.new(organizations: @organizations))
+    @links = current_user.provider_links
+    ao_or_cd = @links.any? { |link| link.is_a?(AoOrgLink) }
+    render(Page::Organization::OrganizationListComponent.new(ao_or_cd:, links: @links))
   end
 
   def show
-    render(Page::Organization::ShowComponent.new(@organization))
+    @delegate_information = {}
+    if current_user.ao?(@organization)
+      # Invitation expiration is determined in relation to the `created_at` field; the `status` field will
+      # never be `'expired'`. Therefore, we need to further filter out expired invitations from this query.
+      @delegate_information[:pending] = Invitation.where(provider_organization: @organization,
+                                                         invited_by: current_user,
+                                                         status: :pending).reject(&:expired?)
+      @delegate_information[:expired] = Invitation.where(provider_organization: @organization,
+                                                         invited_by: current_user).select(&:expired?)
+      @delegate_information[:active] = CdOrgLink.where(provider_organization: @organization, disabled_at: nil)
+    end
+    render(Page::Organization::CompoundShowComponent.new(@organization, @delegate_information,
+                                                         params[:credential_start]))
+  end
+
+  def new
+    render(Page::Organization::NewOrganizationComponent.new)
+  end
+
+  def create
+    @organization = ProviderOrganization.find_or_create_by(npi: params[:npi]) do |org|
+      org.name = CpiApiGatewayClient.new.org_info(params[:npi]).dig('provider', 'orgName')
+    end
+
+    @ao_org_link = AoOrgLink.find_or_create_by(user: current_user, provider_organization: @organization)
+
+    create_response
+  end
+
+  def tos_form
+    render(Page::Organization::TosFormComponent.new(@organization))
+  end
+
+  def sign_tos
+    @organization.terms_of_service_accepted_at = DateTime.now
+    @organization.terms_of_service_accepted_by = current_user
+    @organization.save!
+    Rails.logger.info(['Authorized Official signed Terms of Service',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::AoSignedToS }])
+    redirect_to organization_path(@organization)
+  end
+
+  def success
+    render(Page::Organization::NewOrganizationSuccessComponent.new(@organization))
+  end
+
+  def check_npi
+    @npi_error = if params[:npi].blank?
+                   "can't be blank"
+                 elsif params[:npi].length != 10
+                   'length has to be 10'
+                 end
+
+    render(Page::Organization::NewOrganizationComponent.new(@npi_error), status: :bad_request) if @npi_error.present?
   end
 
   private
 
-  def load_organization
-    @organization = case ENV.fetch('ENV', nil)
-                    when 'prod-sbx'
-                      redirect_to root_url
-                    when 'test'
-                      Organization.new('6a1dbf47-825b-40f3-b81d-4a7ffbbdc270')
-                    when 'dev'
-                      Organization.new('78d02106-2837-4d07-8c51-8d73332aff09')
-                    else
-                      Organization.new(params[:id])
-                    end
-  rescue DpcRecordNotFound
-    render file: "#{Rails.root}/public/404.html", layout: false, status: :not_found
+  def organization_id
+    params[:id]
+  end
+
+  def create_response
+    if @ao_org_link.errors.present?
+      log_link_error
+      flash[:alert] = 'System Error: unable to create link'
+      redirect_to organizations_path
+    elsif @organization.terms_of_service_accepted_at.present?
+      redirect_to success_organization_path(@organization)
+    else
+      redirect_to tos_form_organization_path(@organization)
+    end
+  end
+
+  def log_link_error
+    errors = @ao_org_link.errors.messages.map { |k, v| "#{k}: #{v.join(',')}" }.join(' | ')
+    logger.error("Unable to create AoOrgLink: #{errors}")
   end
 end

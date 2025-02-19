@@ -16,14 +16,13 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class OrganizationEntityConverterTest {
+class OrganizationEntityConverterTest {
     FHIREntityConverter fhirEntityConverter = FHIREntityConverter.initialize();
     OrganizationEntityConverter organizationEntityConverter = new OrganizationEntityConverter();
     OrganizationEntity organizationEntity;
     Organization organization;
 
     UUID uuid = UUID.randomUUID();
-    UUID endpointEntityUuid = UUID.randomUUID();
     String orgIdValue = "5";
     String line1 = "222 Baker ST";
 
@@ -41,8 +40,6 @@ public class OrganizationEntityConverterTest {
         contactEntity.setName(nameEntity);
         contactEntity.setAddress(addressEntity);
         contactEntity.setTelecom(List.of());
-        EndpointEntity endpointEntity = new EndpointEntity();
-        endpointEntity.setId(endpointEntityUuid);
         OrganizationEntity.OrganizationID orgId = new OrganizationEntity.OrganizationID(DPCIdentifierSystem.NPPES, orgIdValue);
         organizationEntity = new OrganizationEntity();
         organizationEntity.setId(uuid);
@@ -50,7 +47,6 @@ public class OrganizationEntityConverterTest {
         organizationEntity.setOrganizationName(orgName);
         organizationEntity.setOrganizationAddress(addressEntity);
         organizationEntity.setContacts(List.of(contactEntity));
-        organizationEntity.setEndpoints(List.of(endpointEntity));
 
         Address address = new Address().setLine(List.of(new StringType(line1)));
         organization = new Organization();
@@ -85,9 +81,8 @@ public class OrganizationEntityConverterTest {
         OrganizationEntity.OrganizationID orgId = new OrganizationEntity.OrganizationID(DPCIdentifierSystem.MBI, orgIdValue);
 
         organization.setIdentifier(List.of(orgId.toFHIR()));
-        Exception exception = assertThrows(DataFormatException.class, () -> {
-            organizationEntityConverter.fromFHIR(fhirEntityConverter, organization);
-        });
+        Exception exception = assertThrows(DataFormatException.class, () ->
+                organizationEntityConverter.fromFHIR(fhirEntityConverter, organization));
         assertEquals("Identifier must be NPPES or PECOS", exception.getMessage());
     }
 
@@ -95,9 +90,8 @@ public class OrganizationEntityConverterTest {
     void fromFHIR_BadIdentifierSystem() {
         Identifier identifier = new Identifier().setSystem("bad system");
         organization.setIdentifier(List.of(identifier));
-        Exception exception = assertThrows(DataFormatException.class, () -> {
-            organizationEntityConverter.fromFHIR(fhirEntityConverter, organization);
-        });
+        Exception exception = assertThrows(DataFormatException.class, () ->
+                organizationEntityConverter.fromFHIR(fhirEntityConverter, organization));
         assertEquals("Identifier must be NPPES or PECOS", exception.getMessage());
     }
 
@@ -111,7 +105,6 @@ public class OrganizationEntityConverterTest {
         assertEquals(orgName, convertedResource.getName());
         assertEquals(line1, convertedResource.getAddress().get(0).getLine().get(0).toString());
         assertEquals(family, convertedResource.getContact().get(0).getName().getFamily());
-        assertEquals("Endpoint/" + endpointEntityUuid.toString(), convertedResource.getEndpoint().get(0).getReference());
     }
 
     @Test

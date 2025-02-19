@@ -38,7 +38,7 @@ class PublicKeysController < ApplicationController
     )
 
     if new_public_key[:response]
-      redirect_to portal_path
+      redirect_to authenticated_root_path
     else
       render_error new_public_key[:message]
     end
@@ -74,6 +74,6 @@ class PublicKeysController < ApplicationController
 
   def unauthorized
     flash[:error] = 'Unauthorized'
-    redirect_to portal_path
+    redirect_to authenticated_root_path
   end
 end

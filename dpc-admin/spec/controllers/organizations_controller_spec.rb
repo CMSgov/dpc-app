@@ -18,7 +18,7 @@ RSpec.describe OrganizationsController, type: :controller do
       it 'assigns @organizations to all organizations' do
         organizations = create_list(:organization, 2)
         get :index
-        expect(assigns(:organizations)).to eq(organizations)
+        expect(assigns(:organizations).sort).to eq(organizations.sort)
       end
     end
   end

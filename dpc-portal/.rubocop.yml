@@ -1,6 +1,7 @@
 AllCops:
+  SuggestExtensions: false
   NewCops: enable
-  TargetRubyVersion: 3.0
+  TargetRubyVersion: 3.3
   Exclude:
     - "app/jobs/application_job.rb"
     - "app/mailers/application_mailer.rb"
@@ -16,6 +17,14 @@ AllCops:
 Metrics/BlockLength:
   Exclude:
     - "spec/**/*"
+    - "lib/tasks/dpc.rake"
+    - "app/concerns/*"
 
 Metrics/MethodLength:
   Max: 20
+
+Metrics/ClassLength:
+  Exclude:
+    - app/controllers/invitations_controller.rb
+    - app/models/invitation.rb
+    - spec/support/fake_cpi_gateway.rb
