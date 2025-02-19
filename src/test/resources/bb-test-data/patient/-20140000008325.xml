@@ -4,7 +4,6 @@
         <lastUpdated value="2020-01-01T00:01:23.456-04:00"/>
     </meta>
     <type value="searchset"/>
-    <total value="1"/>
     <link>
         <relation value="self"/>
         <url value="http://localhost:8083/v1/fhir/Patient?identifier=https://bluebutton.cms.gov/resources/identifier/mbi-hash|abadf57ff8dc94610ca0d479feadb1743c9cd3c77caf1eafde5719a154379fb6"/>
