@@ -1,4 +1,4 @@
-name: 'Build and Deploy'
+name: 'DPC - Build and Deploy'
 
 on:
   schedule:

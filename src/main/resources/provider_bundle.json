@@ -191,7 +191,6 @@
           }
         ],
         "resourceType": "Bundle",
-        "total": 4,
         "type": "searchset"
       }
     }
