@@ -115,11 +115,11 @@ GEM
     multi_xml (0.6.0)
     net-http (0.4.1)
       uri
-    nokogiri (1.18.3-aarch64-linux-musl)
+    nokogiri (1.16.6-aarch64-linux)
       racc (~> 1.4)
-    nokogiri (1.18.3-arm64-darwin)
+    nokogiri (1.16.6-arm64-darwin)
       racc (~> 1.4)
-    nokogiri (1.18.3-x86_64-linux-gnu)
+    nokogiri (1.16.6-x86_64-linux)
       racc (~> 1.4)
     oauth2 (1.4.11)
       faraday (>= 0.17.3, < 3.0)
@@ -242,7 +242,7 @@ DEPENDENCIES
   api_client!
   fhir_models
   macaroons
-  nokogiri (>= 1.18.3)
+  nokogiri (>= 1.16.5)
   oauth2
   rspec-rails
   rubocop
