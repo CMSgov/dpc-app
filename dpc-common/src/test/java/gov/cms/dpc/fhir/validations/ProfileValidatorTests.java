@@ -19,8 +19,8 @@ class ProfileValidatorTests {
     void testBasicLoading() {
         final DPCProfileSupport support = new DPCProfileSupport(ctx);
 
-        final List<StructureDefinition> definitions = support.fetchAllStructureDefinitions(ctx);
+        final List<StructureDefinition> definitions = support.fetchAllStructureDefinitions();
 
-        assertEquals(7, definitions.size(), "Should not have malformed or invalid resources");
+        assertEquals(6, definitions.size(), "Should not have malformed or invalid resources");
     }
 }

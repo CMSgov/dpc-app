@@ -5,7 +5,6 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SchemaBaseValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
-import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(BufferedLoggerHandler.class)
 class CapabilitiesTest {
@@ -27,10 +26,8 @@ class CapabilitiesTest {
 
         validator = ctx.newValidator();
 
-        final SchemaBaseValidator val1 = new SchemaBaseValidator(ctx);
-        final SchematronBaseValidator val2 = new SchematronBaseValidator(ctx);
-        validator.registerValidatorModule(val1);
-        validator.registerValidatorModule(val2);
+        final SchemaBaseValidator val = new SchemaBaseValidator(ctx);
+        validator.registerValidatorModule(val);
     }
 
     @Test

@@ -1,12 +1,14 @@
 package gov.cms.dpc.aggregation;
 
-import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
-import gov.cms.dpc.queue.DPCQueueConfig;
+import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
+import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
+import gov.cms.dpc.queue.config.DPCQueueConfig;
+import io.dropwizard.core.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 
 import javax.validation.Valid;
@@ -18,7 +20,7 @@ import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.List;
 
-public class DPCAggregationConfiguration extends TypesafeConfiguration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig {
+public class DPCAggregationConfiguration extends Configuration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig {
 
     @Valid
     @NotNull
@@ -37,8 +39,16 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
 
     @Valid
     @NotNull
-    @JsonProperty("consentServiceUrl")
-    private String consentServiceUrl;
+    @JsonProperty("consentClient")
+    private final FHIRClientConfiguration consentClientConfiguration = new FHIRClientConfiguration();
+
+    @NotNull
+    @JsonProperty("awsQueue")
+    private final DPCAwsQueueConfiguration dpcAwsQueueConfiguration = new DPCAwsQueueConfiguration();
+
+    @NotEmpty
+    @NotNull
+    private String consentHealthCheckURL;
 
     // The path to the folder that will contain the output files
     @NotEmpty
@@ -57,6 +67,7 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
     // How often in milliseconds to check the queue for new batches
     @Min(50)
     private final int pollingFrequency = 500;
+
 
     @Min(1)
     private final int jobTimeoutInSeconds = 5;
@@ -106,6 +117,8 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
         return this.clientConfiguration;
     }
 
+    public FHIRClientConfiguration getConsentClientConfiguration() { return this.consentClientConfiguration; }
+
     @Override
     public int getPollingFrequency() {
         return pollingFrequency;
@@ -127,12 +140,13 @@ public class DPCAggregationConfiguration extends TypesafeConfiguration implement
         return lookBackExemptOrgs;
     }
 
-    public String getConsentServiceUrl() {
-        return consentServiceUrl;
-    }
+    public String getConsentHealthCheckURL() { return consentHealthCheckURL; }
 
     @SuppressWarnings("unused")
     public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {
         this.lookBackExemptOrgs = lookBackExemptOrgs;
     }
+
+    @Override
+    public DPCAwsQueueConfiguration getDpcAwsQueueConfiguration() { return this.dpcAwsQueueConfiguration; }
 }

@@ -6,9 +6,10 @@ module Page
     class NewKeyComponent < ViewComponent::Base
       attr_accessor :organization, :obj_name
 
-      def initialize(organization)
+      def initialize(organization, errors: {})
         super
         @organization = organization
+        @errors = errors
         @obj_name = 'public key'
       end
     end

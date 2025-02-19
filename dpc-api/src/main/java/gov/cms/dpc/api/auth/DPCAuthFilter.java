@@ -3,6 +3,7 @@ package gov.cms.dpc.api.auth;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.common.MDCConstants;
+import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.common.utils.XSSSanitizerUtil;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
@@ -61,8 +62,9 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         final String resourceRequested = XSSSanitizerUtil.sanitize(uriInfo.getPath());
         final String method = requestContext.getMethod();
 
-        // TODO Remove this when we want to turn on the IpAddress end point
-        if(resourceRequested.equals("v1/IpAddress")) {
+        // TODO Remove this when we want to turn on the IpAddress end point on Prod
+        final String environment = EnvironmentParser.getEnvironment("API", false);
+        if(resourceRequested.equals("v1/IpAddress") && environment.equals("prod")) {
             throw new WebApplicationException(Response.Status.FORBIDDEN);
         }
 

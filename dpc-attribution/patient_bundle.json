@@ -6,7 +6,6 @@
       "resource": {
         "resourceType": "Bundle",
         "type": "searchset",
-        "total": 100,
         "link": [
           {
             "relation": "search",

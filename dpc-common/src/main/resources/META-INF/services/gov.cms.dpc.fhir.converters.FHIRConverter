@@ -2,9 +2,7 @@ gov.cms.dpc.fhir.converters.entities.AddressEntityConverter
 gov.cms.dpc.fhir.converters.entities.ContactPointConverter
 gov.cms.dpc.fhir.converters.entities.OrganizationContactEntityConverter
 gov.cms.dpc.fhir.converters.entities.OrganizationEntityConverter
-gov.cms.dpc.fhir.converters.entities.EndpointEntityConverter
 gov.cms.dpc.fhir.converters.entities.NameEntityConverter
-gov.cms.dpc.fhir.converters.entities.ConnectionTypeConverter
 gov.cms.dpc.fhir.converters.entities.PatientEntityConverter
 gov.cms.dpc.fhir.converters.entities.ProviderEntityConverter
 gov.cms.dpc.fhir.converters.entities.RosterEntityConverter
