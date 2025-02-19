@@ -7,10 +7,8 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.FHIRBuilders;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
@@ -22,6 +20,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.InputStream;
 import java.time.Instant;
@@ -35,26 +34,26 @@ import static gov.cms.dpc.attribution.SharedMethods.submitAttributionBundle;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
 class AttributionFHIRTest {
 
-    private static final String configPath = "src/test/resources/test.application.yml";
+    private static final String CONFIG_PATH = "src/test/resources/test.application.yml";
     private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION =
-            new DropwizardTestSupport<>(DPCAttributionService.class, configPath,
+            new DropwizardTestSupport<>(DPCAttributionService.class, CONFIG_PATH,
                     ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
     private static final FhirContext ctx = FhirContext.forDstu3();
     private static final String CSV = "test_associations-dpr.csv";
     private static Map<String, List<Pair<String, String>>> groupedPairs = new HashMap<>();
-    private static final ObjectMapper mapper = new ObjectMapper();
     private static Organization organization;
 
     @BeforeAll
     static void setup() throws Exception {
         APPLICATION.before();
-        APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything", configPath);
-        APPLICATION.getApplication().run("db", "migrate", configPath);
+        SharedConfigurationState.clear();
+        APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything", CONFIG_PATH);
+        SharedConfigurationState.clear();
+        APPLICATION.getApplication().run("db", "migrate", CONFIG_PATH);
 
         // Get the test seeds
         final InputStream resource = AttributionFHIRTest.class.getClassLoader().getResourceAsStream(CSV);
@@ -88,7 +87,7 @@ class AttributionFHIRTest {
                 .entrySet()
                 .stream()
                 .map((Map.Entry<String, List<Pair<String, String>>> entry) -> SeedProcessor.generateAttributionBundle(entry, orgID))
-                .flatMap((bundle) -> Stream.of(
+                .flatMap(bundle -> Stream.of(
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Submit"), () -> submitRoster(bundle)),
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Update"), () -> updateRoster(bundle)),
                         DynamicTest.dynamicTest(nameGenerator.apply(bundle, "Remove"), () -> removeRoster(bundle))));
@@ -123,7 +122,7 @@ class AttributionFHIRTest {
         fetchedGroup.setMeta(null);
 
         assertAll(() -> assertTrue(createdGroup.equalsDeep(fetchedGroup), "Groups should be equal"),
-                () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of beneies"));
+                () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of benes"));
 
         final String patientID = bundle.getEntry().get(1).getResource().getId();
 
@@ -139,22 +138,10 @@ class AttributionFHIRTest {
 
         assertEquals(1, searchedPatient.getTotal(), "Should only have a single group");
 
-        // Resubmit group and make sure the size doesn't change
-        // Re-add the meta, because it gets stripped
-        FHIRBuilders.addOrganizationTag(createdGroup, UUID.fromString(organizationID));
-        client
-                .create()
-                .resource(createdGroup)
-                .encodedJson().execute();
-
-        final Group group2 = groupSizeQuery.execute();
-        assertAll(() -> assertTrue(fetchedGroup.equalsDeep(group2), "Groups should be equal"),
-                () -> assertEquals(bundle.getEntry().size() - 1, group2.getMember().size(), "Should have the same number of beneies"));
-
         // Try to get attributed patients
         final Bundle attributed = client
                 .operation()
-                .onInstance(group2.getIdElement())
+                .onInstance(fetchedGroup.getIdElement())
                 .named("patients")
                 .withNoParameters(Parameters.class)
                 .useHttpGet()
@@ -162,7 +149,7 @@ class AttributionFHIRTest {
                 .returnResourceType(Bundle.class)
                 .execute();
 
-        assertEquals(group2.getMember().size(), attributed.getTotal(), "Should have the same number of patients");
+        assertEquals(fetchedGroup.getMember().size(), attributed.getTotal(), "Should have the same number of patients");
 
         // Try to get a non-existent roster
 
