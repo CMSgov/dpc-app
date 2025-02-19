@@ -3,6 +3,7 @@
 require 'rails_helper'
 
 RSpec.feature 'user resends confirmation instructions' do
+  include ActiveJob::TestHelper
   let(:user) { create :user, confirmed_at: nil }
 
   context 'when successful' do
@@ -13,7 +14,7 @@ RSpec.feature 'user resends confirmation instructions' do
 
       expect do
         find('input[data-test="submit"]').click
-        Sidekiq::Worker.drain_all
+        perform_enqueued_jobs
       end.to change(ActionMailer::Base.deliveries, :count).by(2)
 
       last_delivery = ActionMailer::Base.deliveries.last
@@ -25,7 +26,7 @@ RSpec.feature 'user resends confirmation instructions' do
 
       visit confirmation_link
 
-      expect(page.body).to include("Welcome, #{user.first_name}!")
+      expect(page.body).to include('Welcome!')
     end
   end
 
@@ -37,7 +38,7 @@ RSpec.feature 'user resends confirmation instructions' do
 
       expect do
         find('input[data-test="submit"]').click
-        Sidekiq::Worker.drain_all
+        perform_enqueued_jobs
       end.to change(ActionMailer::Base.deliveries, :count).by(0)
 
       expect(page.body).to include('If your email address exists in our database, you will receive an email with instructions for how to confirm your email address in a few minutes.')
@@ -61,7 +62,7 @@ RSpec.feature 'user resends confirmation instructions' do
       # towards the mailing threshold (as this email can only ever be sent once anyways)
       expect do
         find('input[data-test="submit"]').click
-        Sidekiq::Worker.drain_all
+        perform_enqueued_jobs
       end.to change(ActionMailer::Base.deliveries, :count).by(2)
 
       visit new_user_confirmation_path
@@ -70,7 +71,7 @@ RSpec.feature 'user resends confirmation instructions' do
 
       expect do
         find('input[data-test="submit"]').click
-        Sidekiq::Worker.drain_all
+        perform_enqueued_jobs
       end.to change(ActionMailer::Base.deliveries, :count).by(0)
     end
   end

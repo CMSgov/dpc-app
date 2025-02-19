@@ -2,38 +2,39 @@
 
 # Provides interaction with dpc-api
 class DpcClient
-  attr_reader :base_url, :response_body, :response_status
+  attr_reader :base_url, :admin_url, :response_body, :response_status
 
   def initialize
     @base_url = ENV.fetch('API_METADATA_URL')
+    @admin_url = ENV.fetch('API_ADMIN_URL')
   end
 
   def json_content
     'application/json'
   end
 
-  def create_organization(org, fhir_endpoint: {})
+  def create_organization(org)
     uri_string = "#{base_url}/Organization/$submit"
-    json = OrganizationSubmitSerializer.new(org, fhir_endpoint: fhir_endpoint).to_json
+    json = OrganizationSubmitSerializer.new(org).to_json
     post_request(uri_string, json, fhir_headers(golden_macaroon))
     self
   end
 
   def get_organization(api_id)
-    client = FHIR::Client.new(base_url)
-    client.additional_headers = auth_header(delegated_macaroon(api_id))
-    client.read(FHIR::Organization, api_id).resource
+    uri_string = "#{base_url}/Organization/#{api_id}"
+    org = get_fhir_request(uri_string, delegated_macaroon(api_id))
+    response_successful? ? FHIR::Organization.new(org) : nil
   end
 
-  def update_organization(reg_org, api_id, api_endpoint_ref)
-    fhir_org = FhirResourceBuilder.new.fhir_org(reg_org, api_id, api_endpoint_ref)
-    fhir_client_update_request(api_id, fhir_org, api_id)
-    self
+  def get_organization_by_npi(npi)
+    uri_string = "#{base_url}/Admin/Organization?npis=npi|#{npi}"
+    org = get_fhir_request(uri_string, golden_macaroon)
+    response_successful? ? FHIR::Bundle.new(org) : nil
   end
 
-  def update_endpoint(api_id, fhir_endpoint_id, fhir_endpoint)
-    fhir_resource = FhirResourceBuilder.new.fhir_endpoint(api_id, fhir_endpoint_id, fhir_endpoint)
-    fhir_client_update_request(api_id, fhir_resource, fhir_endpoint_id)
+  def update_organization(reg_org, api_id)
+    fhir_org = FhirResourceBuilder.new.fhir_org(reg_org, api_id)
+    update_fhir_request(api_id, fhir_org, api_id)
     self
   end
 
@@ -90,8 +91,8 @@ class DpcClient
   def create_ip_address(reg_org_api_id, params: {})
     post_text_request(
       "#{base_url}/IpAddress",
-      { ip_address: params[:ip_address],  label: params[:label] }.to_json,
-      { },
+      { ip_address: params[:ip_address], label: params[:label] }.to_json,
+      {},
       delegated_macaroon(reg_org_api_id)
     )
     self
@@ -105,12 +106,12 @@ class DpcClient
     get_request("#{base_url}/IpAddress", delegated_macaroon(reg_org_api_id))
   end
 
-  def response_successful?
-    (200...299).cover? @response_status
+  def healthcheck
+    get_request("#{admin_url}/healthcheck", nil)
   end
 
-  def fhir_client
-    @fhir_client ||= FHIR::Client.new(base_url)
+  def response_successful?
+    (200...299).cover? @response_status
   end
 
   private
@@ -151,6 +152,13 @@ class DpcClient
     http_request(request, uri)
   end
 
+  def get_fhir_request(uri_string, token)
+    uri = URI.parse uri_string
+    request = Net::HTTP::Get.new(uri.request_uri, fhir_headers(token))
+
+    http_request(request, uri)
+  end
+
   def post_request(uri_string, json, headers)
     uri = URI.parse uri_string
     request = Net::HTTP::Post.new(uri.request_uri, headers)
@@ -173,7 +181,7 @@ class DpcClient
   def http_request(request, uri)
     http = Net::HTTP.new(uri.host, uri.port)
 
-    if use_ssl?
+    if use_ssl?(uri)
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_PEER
     end
@@ -181,32 +189,34 @@ class DpcClient
     response = http.request(request)
     @response_status = response.code.to_i
     @response_body = response_successful? ? parsed_response(response) : response.body
-  rescue Errno::ECONNREFUSED
-    connection_error
+  rescue StandardError => e
+    # There are a whole bunch of errors that can get thrown if we're having network issues and we want to catch them all
+    connection_error(e)
   end
 
-  def fhir_client_update_request(reg_org_api_id, resource, resource_id)
-    fhir_client.additional_headers = auth_header(delegated_macaroon(reg_org_api_id))
-    response = fhir_client.update(resource, resource_id)
+  def update_fhir_request(reg_org_api_id, resource, resource_id)
+    uri = URI.parse "#{base_url}/#{resource.resourceType}/#{resource_id}"
+    request = Net::HTTP::Put.new(uri.request_uri, fhir_headers(delegated_macaroon(reg_org_api_id)))
+    request.body = resource.to_json.to_s
 
-    @response_status = response.response[:code].to_i
-    @response_body = response.response[:body]
+    http_request(request, uri)
   end
 
   def headers(token)
-    { 'Content-Type' => json_content, Accept: json_content }.merge(auth_header(token))
+    headers = { 'Content-Type' => json_content, Accept: json_content }
+    token.nil? ? headers : headers.merge(auth_header(token))
   end
 
   def fhir_headers(token)
     { 'Content-Type' => 'application/fhir+json', Accept: 'application/fhir+json' }.merge(auth_header(token))
   end
 
-  def use_ssl?
-    !(Rails.env.development? || Rails.env.test?)
+  def use_ssl?(uri)
+    !(Rails.env.development? || Rails.env.test?) && (uri.scheme == 'https')
   end
 
-  def connection_error
-    Rails.logger.warn 'Could not connect to API'
+  def connection_error(error)
+    Rails.logger.warn "Could not connect to API: #{error}"
     @response_status = 500
     @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' } }] }
   end

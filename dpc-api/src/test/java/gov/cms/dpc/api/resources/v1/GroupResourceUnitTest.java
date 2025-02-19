@@ -2,11 +2,13 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.ICreate;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.net.HttpHeaders;
+import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
@@ -14,11 +16,13 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.queue.IJobQueue;
+import gov.cms.dpc.testing.factories.FHIRGroupBuilder;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -29,6 +33,7 @@ import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -109,6 +114,49 @@ public class GroupResourceUnitTest {
 
         assertEquals("Organization ID", result.getMeta().getTag(DPCIdentifierSystem.DPC.getSystem(), orgId.toString()).getDisplay());
         assertEquals(group, result);
+    }
+
+    @Test
+    public void testCreateRosterUsesCorrectTag() {
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+        Organization organization = organizationPrincipal.getOrganization();
+
+        Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), organization.getId());
+        practitioner.setId(UUID.randomUUID().toString());
+
+        Provenance provenance = APITestHelpers.createProvenance(organization.getId(), practitioner.getId(), Collections.emptyList());
+
+        Group groupWithBadTag = FHIRGroupBuilder.newBuild()
+            .attributedTo(practitioner.getIdentifierFirstRep().getValue())
+            .withOrgTag(UUID.randomUUID())
+            .build();
+
+        // Mock practitioner check when Group tries to verify headers
+        IReadExecutable<Practitioner> readExec = mock(IReadExecutable.class);
+        when(attributionClient.read().resource(Practitioner.class).withId(practitioner.getId()).encodedJson()).thenReturn(readExec);
+        when(readExec.execute()).thenReturn(practitioner);
+
+        // Mock the create call to attribution.  We can't use deep stubs because we need to verify a parameter midway
+        // through the chain.
+        ICreate iCreate = mock(ICreate.class);
+        doReturn(iCreate).when(attributionClient).create();
+
+        ICreateTyped iCreateTyped = mock(ICreateTyped.class);
+        doReturn(iCreateTyped).when(iCreate).resource(groupWithBadTag);
+        doReturn(iCreateTyped).when(iCreateTyped).encodedJson();
+
+        MethodOutcome outcome = new MethodOutcome();
+        outcome.setResource(new Group());
+        doReturn(outcome).when(iCreateTyped).execute();
+
+        // Run the create and verify that the org sent to attribution has the correct org tag
+        resource.createRoster(organizationPrincipal, provenance, groupWithBadTag);
+
+        ArgumentCaptor<Group> groupArg = ArgumentCaptor.forClass(Group.class);
+        verify(iCreate, times(1)).resource(groupArg.capture());
+
+        Group capturedGroup = groupArg.getValue();
+        assertEquals(organization.getId(), capturedGroup.getMeta().getTagFirstRep().getCode());
     }
 
     @Test

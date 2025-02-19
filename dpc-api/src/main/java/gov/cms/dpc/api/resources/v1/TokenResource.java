@@ -6,7 +6,7 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
-import gov.cms.dpc.api.auth.annotations.Public;
+import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.auth.jwt.ValidatingKeyResolver;
 import gov.cms.dpc.api.entities.TokenEntity;
@@ -289,7 +289,7 @@ public class TokenResource extends AbstractTokenResource {
         // Get org id from macaroon caveats
         UUID orgId = MacaroonHelpers.extractOrgIDFromCaveats(macaroons).orElseThrow(() -> {
             logger.error("No organization found on macaroon");
-            throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
+            return new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
         });
 
         // Determine if claims are present and valid
@@ -302,7 +302,7 @@ public class TokenResource extends AbstractTokenResource {
         final OffsetDateTime expiryTime = OffsetDateTime.now(ZoneOffset.UTC)
                 .plus(tokenLifetime);
 
-        // Add an additional restriction to the root Macaroons
+        // Add a restriction to the root Macaroons
         final Macaroon restrictedMacaroon = this.bakery.addCaveats(macaroons.get(0), new MacaroonCaveat(new MacaroonCondition(EXPIRATION_KEY, MacaroonCondition.Operator.EQ, expiryTime.toString())));
 
         final List<Macaroon> discharged = this.bakery.dischargeAll(Collections.singletonList(restrictedMacaroon), this.bakery::discharge);
@@ -368,7 +368,7 @@ public class TokenResource extends AbstractTokenResource {
 
         // Ensure the expiration time for the token is not more than 5 minutes in the future
         final Date expiration = getClaimIfPresent("expiration", claims.getBody().getExpiration());
-        if (OffsetDateTime.now(ZoneOffset.UTC).plus(5, ChronoUnit.MINUTES).isBefore(expiration.toInstant().atOffset(ZoneOffset.UTC))) {
+        if (OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(5).isBefore(expiration.toInstant().atOffset(ZoneOffset.UTC))) {
             throw new WebApplicationException("Not authorized", Response.Status.UNAUTHORIZED);
         }
     }

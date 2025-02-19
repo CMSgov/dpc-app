@@ -13,6 +13,8 @@ class User < ApplicationRecord
 
   before_save :requested_num_providers_to_zero_if_blank
 
+  before_update :grant_access_on_confirmed
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable,
   # :trackable, and :omniauthable, :recoverable,
@@ -21,7 +23,7 @@ class User < ApplicationRecord
          :timeoutable, :recoverable, :confirmable,
          :password_expirable, :password_archivable
 
-  enum requested_organization_type: ORGANIZATION_TYPES
+  enum :requested_organization_type, ORGANIZATION_TYPES
 
   validate :password_complexity
   validates :requested_organization_type, inclusion: { in: ORGANIZATION_TYPES.keys }
@@ -141,5 +143,11 @@ class User < ApplicationRecord
 
   def requested_num_providers_to_zero_if_blank
     self.requested_num_providers = 0 if requested_num_providers.blank?
+  end
+
+  def grant_access_on_confirmed
+    return unless confirmed_at_changed?(from: nil)
+
+    GrantAccessJob.perform_later(id)
   end
 end

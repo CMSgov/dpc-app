@@ -25,6 +25,7 @@ public abstract class PersonEntity implements Serializable {
     protected OffsetDateTime updatedAt;
 
     @Id
+    @GeneratedValue
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
     protected UUID id;
 

@@ -4,7 +4,6 @@
         <lastUpdated value='2020-09-17T17:53:11.476+00:00'/>
     </meta>
     <type value='searchset'/>
-    <total value='10'/>
     <link>
         <relation value='first'/>
         <url value='https://sandbox.bluebutton.cms.gov/v1/fhir/ExplanationOfBenefit?_format=application%2Fjson%2Bfhir&amp;startIndex=0&amp;_count=10&amp;patient=-20000000001809'/>

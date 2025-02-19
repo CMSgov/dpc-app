@@ -1,0 +1,55 @@
+<div>
+  <% unless cd_invite.errors[:base].empty? %>
+    <div class="usa-alert usa-alert--error margin-bottom-4">
+      <div class="usa-alert__body">
+        <h2 class="usa-alert__heading"><%= cd_invite.errors[:base].first[:status] %></h2>
+        <p class="usa-alert__text"><%= cd_invite.errors[:base].first[:text] %></p>
+      </div>
+    </div>
+  <% end %>
+  <h1>Invite new user</h1>
+  <div class="usa-alert usa-alert--warning margin-bottom-4">
+    <div class="usa-alert__body">
+      <h2 class="usa-alert__heading">Exact match required</h2>
+      <p class="usa-alert__text">
+        The name and contact info you enter must be an exact match to the name and contact info your Credential Delegate will provide after receiving this invite.
+      </p>
+    </div>
+  </div>
+  <div>
+    <h2>Contact Information</h2>
+    <%= form_tag organization_credential_delegate_invitations_path(@organization.path_id), method: :post, class: ['usa-form'], id: "cd-form" do %>
+      <%= render(Core::Form::TextInputComponent.new(label: 'First or given name',
+          attribute: :invited_given_name,
+          hint: 'For example, Jose, Darren, or Mai',
+          default: cd_invite.invited_given_name,
+          error_msg: cd_invite.errors[:invited_given_name]&.first,
+          input_options: { maxlength: 25 })) %>
+      <%= render(Core::Form::TextInputComponent.new(label: 'Last or family name',
+          attribute: :invited_family_name,
+          hint: 'For example, Martinez Gonzalez, Gu, or Smith',
+          default: cd_invite.invited_family_name,
+          error_msg: cd_invite.errors[:invited_family_name]&.first,
+          input_options: { maxlength: 25 })) %>
+      <%= render(Core::Form::TextInputComponent.new(label: 'Email',
+          attribute: :invited_email,
+          error_msg: cd_invite.errors[:invited_email]&.first,
+          default: cd_invite.invited_email)) %>
+      <%= render(Core::Form::TextInputComponent.new(label: 'Confirm email',
+          attribute: :invited_email_confirmation,
+          error_msg: cd_invite.errors[:invited_email_confirmation]&.first,
+          default: cd_invite.invited_email_confirmation)) %>
+    <% end %>
+    <%= link_to 'Go Back', organization_path(organization.path_id), class: ['usa-button', 'usa-button--outline'] %>
+    <a href="#verify-modal" aria-controls="verify-modal" class="usa-button" data-open-modal>Send invite</a>
+    <%= render(Core::Modal::ModalComponent.new(
+        'Acknowledgement',
+        "<p>By assigning this user as a delegate, you are providing them with access to private health information. This means you assume responsibility for their compliance with the Health Insurance Portability and Accountability Act (HIPAA).</p>
+        <p>Do you acknowledge your responsibility for your delegate's compliance with HIPAA regulations?</p>
+        <p>Upon your acknowledgement they will receive an invitation to sign up for access to the DPC Portal. This invitation will expire in 48 hours.</p>",
+        submit_tag("Yes, I acknowledge", class: "usa-button", form: "cd-form"),
+        'Cancel',
+        'verify-modal')) %>
+  </div>
+</div>
+

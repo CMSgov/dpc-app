@@ -60,7 +60,7 @@ RSpec.describe Core::Table::RowComponent, type: :component do
     end
 
     context 'with date' do
-      let(:obj) { { 'a' => '2023-12-12 18:58', 'b' => 'Second' } }
+      let(:obj) { { 'a' => '2023-12-12T18:58:27.867', 'b' => 'Second' } }
       let(:expected_html) do
         <<~HTML
           <tbody>

@@ -2,7 +2,11 @@
 
 # Handles public key requests
 class PublicKeysController < ApplicationController
+  before_action :authenticate_user!
+  before_action :check_user_verification
   before_action :load_organization
+  before_action :require_can_access
+  before_action :tos_accepted
 
   def new
     render Page::PublicKey::NewKeyComponent.new(@organization)
@@ -10,10 +14,7 @@ class PublicKeysController < ApplicationController
 
   # rubocop:disable Metrics/AbcSize
   def create
-    return render_error('Required values missing.') if missing_params
-    return render_error('Label cannot be over 25 characters') if label_length
-
-    manager = PublicKeyManager.new(params[:organization_id])
+    manager = PublicKeyManager.new(@organization.dpc_api_organization_id)
 
     new_public_key = manager.create_public_key(
       public_key: params[:public_key],
@@ -22,19 +23,22 @@ class PublicKeysController < ApplicationController
     )
 
     if new_public_key[:response]
+      log_credential_action(:public_key, new_public_key.dig(:message, 'id'), :add)
       flash[:notice] = 'Public key successfully created.'
-      redirect_to organization_path(params[:organization_id])
+      redirect_to organization_path(@organization, credential_start: true)
     else
-      render_error 'Public key could not be created.'
+      @errors = new_public_key[:errors]
+      render_error @errors[:root] || 'Invalid encoding'
     end
   end
   # rubocop:enable Metrics/AbcSize
 
   def destroy
-    manager = PublicKeyManager.new(params[:organization_id])
+    manager = PublicKeyManager.new(@organization.dpc_api_organization_id)
     if manager.delete_public_key(params)
+      log_credential_action(:public_key, params[:id], :remove)
       flash[:notice] = 'Public key successfully deleted.'
-      redirect_to organization_path(params[:organization_id])
+      redirect_to organization_path(@organization, credential_start: true)
     else
       flash[:alert] = 'Public key could not be deleted.'
     end
@@ -46,22 +50,9 @@ class PublicKeysController < ApplicationController
 
   private
 
-  def load_organization
-    @organization = case ENV.fetch('ENV', nil)
-                    when 'prod-sbx'
-                      redirect_to root_url
-                    when 'test'
-                      Organization.new('6a1dbf47-825b-40f3-b81d-4a7ffbbdc270')
-                    when 'dev'
-                      Organization.new('78d02106-2837-4d07-8c51-8d73332aff09')
-                    else
-                      Organization.new(params[:organization_id])
-                    end
-  end
-
   def render_error(msg)
     flash[:alert] = msg
-    render Page::PublicKey::NewKeyComponent.new(@organization)
+    render Page::PublicKey::NewKeyComponent.new(@organization, errors: @errors)
   end
 
   def missing_params

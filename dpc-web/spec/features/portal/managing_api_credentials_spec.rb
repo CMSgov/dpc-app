@@ -12,7 +12,7 @@ RSpec.feature 'managing api credentials' do
     end
 
     it 'cannot manage api credentials' do
-      visit portal_path
+      visit authenticated_root_path
       expect(page).not_to have_css('[data-test="new-client-token"]')
       expect(page).not_to have_css('[data-test="new-public-key"]')
     end
@@ -29,7 +29,7 @@ RSpec.feature 'managing api credentials' do
     end
 
     it 'cannot manage api credentials' do
-      visit portal_path
+      visit authenticated_root_path
       expect(page).not_to have_css('[data-test="new-client-token"]')
       expect(page).not_to have_css('[data-test="new-public-key"]')
     end
@@ -55,7 +55,7 @@ RSpec.feature 'managing api credentials' do
       api_client = stub_empty_key_request
       api_client = stub_empty_token_request(api_client)
 
-      visit portal_path
+      visit authenticated_root_path
 
       api_client = stub_token_creation_request(api_client)
       find('[data-test="new-client-token"]').click
@@ -80,7 +80,7 @@ RSpec.feature 'managing api credentials' do
       api_client = stub_empty_key_request
       api_client = stub_empty_token_request(api_client)
 
-      visit portal_path
+      visit authenticated_root_path
       find('[data-test="new-public-key"]').click
 
       fill_in 'label', with: 'Sandbox Key 1'
@@ -103,7 +103,7 @@ RSpec.feature 'managing api credentials' do
   end
 
   def stub_key_creation_request(api_client=nil)
-    stub_api_client(api_client: api_client, message: :create_public_key, success: true, response: {
+    stub_api_client(api_client:, message: :create_public_key, success: true, response: {
       'label' => 'Sandbox Key 1',
       'createdAt' => '2019-11-07T19:38:44.205Z',
       'id' => '3fa85f64-5717-4562-b3fc-2c963f66afa6'
@@ -111,15 +111,15 @@ RSpec.feature 'managing api credentials' do
   end
 
   def stub_empty_key_request(api_client=nil)
-    stub_api_client(api_client: api_client, message: :get_public_keys, success: true, response: { 'entities' => [] })
+    stub_api_client(api_client:, message: :get_public_keys, success: true, response: { 'entities' => [] })
   end
 
   def stub_empty_token_request(api_client=nil)
-    stub_api_client(api_client: api_client, message: :get_client_tokens, success: true, response: { 'entities' => [] })
+    stub_api_client(api_client:, message: :get_client_tokens, success: true, response: { 'entities' => [] })
   end
 
   def stub_key_get_request(api_client=nil)
-    stub_api_client(api_client: api_client, message: :get_public_keys, success: true, response: {
+    stub_api_client(api_client:, message: :get_public_keys, success: true, response: {
       'entities' => [{
         'id' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
         'publicKey' => '---PUBLIC KEY---......---END PUBLIC KEY---',
@@ -140,7 +140,7 @@ RSpec.feature 'managing api credentials' do
   end
 
   def stub_token_get_request(api_client=nil)
-    stub_api_client(api_client: api_client, message: :get_client_tokens, success: true, response: {
+    stub_api_client(api_client:, message: :get_client_tokens, success: true, response: {
       'entities' => [{
         'id' => '456a4f7b-ttwe-494a-8ca4-7a685edalrep',
         'tokenType' => 'MACAROON',

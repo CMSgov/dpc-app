@@ -13,10 +13,6 @@ module OrganizationsHelper
     enum_for_select(Address.address_types)
   end
 
-  def statuses_for_select
-    enum_for_select(FhirEndpoint.statuses)
-  end
-
   def enum_for_select(collection)
     collection.keys.map do |key|
       [key.to_s.titleize, key]

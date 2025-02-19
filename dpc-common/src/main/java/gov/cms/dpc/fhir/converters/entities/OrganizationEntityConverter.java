@@ -94,14 +94,6 @@ public class OrganizationEntityConverter implements FHIRConverter<Organization, 
                 .collect(Collectors.toList());
         org.setContact(contactComponents);
 
-        final List<Reference> endpointReferences = entity
-                .getEndpoints()
-                .stream()
-                .map(ep -> new Reference(new IdType("Endpoint", ep.getId().toString())))
-                .collect(Collectors.toList());
-
-        org.setEndpoint(endpointReferences);
-
         return org;
     }
 

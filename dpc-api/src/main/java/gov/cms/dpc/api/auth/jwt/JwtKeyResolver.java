@@ -35,7 +35,6 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
     }
 
     @Override
-    @SuppressWarnings("rawtypes") // We need to suppress this because the Raw type is part of the signature we inherit
     public Key resolveSigningKey(JwsHeader header, Claims claims) {
         final String keyId = header.getKeyId();
         if (keyId == null) {
@@ -65,7 +64,7 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
     }
 
     protected UUID getOrganizationID(String macaroon) {
-        if (macaroon == null || macaroon.equals("")) {
+        if (macaroon == null || macaroon.isEmpty()) {
             throw new WebApplicationException("JWT must have client_id", Response.Status.UNAUTHORIZED);
         }
         final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(macaroon);

@@ -3,6 +3,7 @@
 require 'rails_helper'
 
 RSpec.feature 'user resets password' do
+  include ActiveJob::TestHelper
   let(:user) { create :user }
 
   context 'when successful' do
@@ -13,7 +14,7 @@ RSpec.feature 'user resets password' do
 
       expect do
         find('input[data-test="submit"]').click
-        Sidekiq::Worker.drain_all
+        perform_enqueued_jobs
       end.to change(ActionMailer::Base.deliveries, :count).by(1)
 
       last_delivery = ActionMailer::Base.deliveries.last
@@ -37,7 +38,7 @@ RSpec.feature 'user resets password' do
 
       expect do
         find('input[data-test="submit"]').click
-        Sidekiq::Worker.drain_all
+        perform_enqueued_jobs
       end.to change(ActionMailer::Base.deliveries, :count).by(1)
 
       last_delivery = ActionMailer::Base.deliveries.last
@@ -90,7 +91,7 @@ RSpec.feature 'user resets password' do
 
       expect do
         find('input[data-test="submit"]').click
-        Sidekiq::Worker.drain_all
+        perform_enqueued_jobs
       end.to change(ActionMailer::Base.deliveries, :count).by(1)
 
       visit new_user_password_path
@@ -99,7 +100,7 @@ RSpec.feature 'user resets password' do
 
       expect do
         find('input[data-test="submit"]').click
-        Sidekiq::Worker.drain_all
+        perform_enqueued_jobs
       end.to change(ActionMailer::Base.deliveries, :count).by(0)
     end
   end
