@@ -248,7 +248,7 @@ public class TokenResource extends AbstractTokenResource {
                     .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
                     .build()
                     .parseSignedClaims(jwt);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | UnsupportedJwtException e) {
             // This is fine, we just want the body
         } catch (MalformedJwtException e) {
             throw new WebApplicationException("JWT is not formatted correctly", Response.Status.BAD_REQUEST);
