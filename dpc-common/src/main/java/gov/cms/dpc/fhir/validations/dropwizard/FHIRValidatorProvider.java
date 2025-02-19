@@ -5,8 +5,8 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.Logger;
@@ -53,10 +53,9 @@ public class FHIRValidatorProvider implements Provider<FhirValidator> {
 
     @Override
     public FhirValidator get() {
-        logger.debug("Schema validation enabled: {}.\nSchematron validation enabled: {}", validationConfiguration.isSchemaValidation(), validationConfiguration.isSchematronValidation());
-        final FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
+        logger.debug("Schema validation enabled: {}", validationConfiguration.isSchemaValidation());
+        final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
         final FhirValidator fhirValidator = ctx.newValidator();
-        fhirValidator.setValidateAgainstStandardSchematron(validationConfiguration.isSchematronValidation());
         fhirValidator.setValidateAgainstStandardSchema(validationConfiguration.isSchemaValidation());
         fhirValidator.registerValidatorModule(instanceValidator);
 

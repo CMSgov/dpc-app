@@ -75,7 +75,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
         }
 
 
-        CollectionResponse currentIps = getOrganizationIpAddresses(organizationPrincipal);
+        CollectionResponse<IpAddressEntity> currentIps = getOrganizationIpAddresses(organizationPrincipal);
 
         if(currentIps.getCount() >= MAX_IPS) {
             logger.debug(String.format("Cannot add Ip for org: %s.  They are already at the max of %d.", organizationPrincipal.getID(), MAX_IPS));
@@ -105,11 +105,11 @@ public class IpAddressResource extends AbstractIpAddressResource {
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
             @ApiParam @NotNull @PathParam(value = "ipAddressId") UUID ipAddressId
     ) {
-        CollectionResponse currentIps = getOrganizationIpAddresses(organizationPrincipal);
+        CollectionResponse<IpAddressEntity> currentIps = getOrganizationIpAddresses(organizationPrincipal);
         Optional<IpAddressEntity> optionalIp = currentIps.getEntities().stream().filter(ip ->
-            ((IpAddressEntity)ip).getId().equals(ipAddressId)).findFirst();
+            ip.getId().equals(ipAddressId)).findFirst();
 
-        if(!optionalIp.isEmpty()) {
+        if(optionalIp.isPresent()) {
             this.dao.deleteIpAddress(optionalIp.get());
             return Response.noContent().build();
         } else {

@@ -1,6 +1,5 @@
 package gov.cms.dpc.api;
 
-import ca.mestevens.java.configuration.TypesafeConfiguration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
@@ -8,19 +7,25 @@ import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.common.hibernate.auth.IDPCAuthDatabase;
 import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
+import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
+import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
+import gov.cms.dpc.queue.config.DPCQueueConfig;
 import io.dropwizard.client.JerseyClientConfiguration;
+import io.dropwizard.core.Configuration;
+import io.dropwizard.core.server.DefaultServerFactory;
 import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.jetty.HttpConnectorFactory;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
-public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDatabase, IDPCQueueDatabase, IDPCAuthDatabase, IDPCFHIRConfiguration, BlueButtonBundleConfiguration {
+public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig, IDPCAuthDatabase, IDPCFHIRConfiguration, BlueButtonBundleConfiguration {
 
     @NotEmpty
     private String exportPath;
@@ -49,9 +54,14 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
     @JsonProperty("bbclient")
     private BBClientConfiguration clientConfiguration = new BBClientConfiguration();
 
+    @Valid
+    @NotNull
+    @JsonProperty("attributionClient")
+    private final FHIRClientConfiguration fhirClientConfiguration = new FHIRClientConfiguration();
+
     @NotEmpty
     @NotNull
-    private String attributionURL;
+    private String attributionHealthCheckURL;
 
     @Valid
     @NotNull
@@ -111,12 +121,8 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
         this.httpClient = httpClient;
     }
 
-    public String getAttributionURL() {
-        return attributionURL;
-    }
-
-    public void setAttributionURL(String attributionURL) {
-        this.attributionURL = attributionURL;
+    public String getAttributionHealthCheckURL() {
+        return attributionHealthCheckURL;
     }
 
     public String getExportPath() {
@@ -165,17 +171,44 @@ public class DPCAPIConfiguration extends TypesafeConfiguration implements IDPCDa
         return this.clientConfiguration;
     }
 
+    public FHIRClientConfiguration getFhirClientConfiguration() {
+        return this.fhirClientConfiguration;
+    }
+
     public int getJobTimeoutInSeconds() {
         return jobTimeoutInSeconds;
     }
 
     public List<String> getLookBackExemptOrgs() {
         if(lookBackExemptOrgs == null){
-            return new LinkedList<>();
+            return new ArrayList<>();
         }
         return lookBackExemptOrgs; }
 
     public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {
         this.lookBackExemptOrgs = lookBackExemptOrgs;
+    }
+
+    // Never used in dpc-api, but required for the queue service
+    @Override
+    public int getPollingFrequency() {
+        throw new UnsupportedOperationException("getPollingFrequency() is not supported in dpc-api.");
+    }
+
+    // dpc-api isn't currently using an AWS queue.
+    @Override
+    public DPCAwsQueueConfiguration getDpcAwsQueueConfiguration() {
+        return null;
+    }
+
+    public int getServicePort() {
+        DefaultServerFactory serverFactory = (DefaultServerFactory) this.getServerFactory();
+        HttpConnectorFactory connection = (HttpConnectorFactory) serverFactory.getApplicationConnectors().get(0);
+        return connection.getPort();
+    }
+
+    public String getAppContextPath() {
+        DefaultServerFactory serverFactory = (DefaultServerFactory) this.getServerFactory();
+        return serverFactory.getApplicationContextPath();
     }
 }

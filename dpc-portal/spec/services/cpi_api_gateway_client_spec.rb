@@ -1,94 +1,172 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require './app/services/cpi_api_gateway_client'
+require 'rails_helper'
 
 describe CpiApiGatewayClient do
-  cpi_api_gateway_url = ENV.fetch('CPI_API_GW_BASE_URL', nil)
-  let(:oauth_client) { instance_double(OAuth2::Client) }
-  let(:client_credentials_strategy_instance) { instance_double(OAuth2::Strategy::ClientCredentials) }
-  let(:access_token_object_instance) { instance_double(OAuth2::AccessToken) }
-  let(:response_double) { instance_double(OAuth2::Response) }
-
+  let(:client) { CpiApiGatewayClient.new }
+  let(:host) { ENV.fetch('CPI_API_GW_BASE_URL', nil) }
   describe '.new' do
     it 'sets a token' do
-      allow(OAuth2::Client).to receive(:new).and_return(oauth_client)
-      allow(oauth_client).to receive(:client_credentials).and_return(client_credentials_strategy_instance)
-      expect(client_credentials_strategy_instance).to receive(:get_token).and_return(access_token_object_instance)
-      client = CpiApiGatewayClient.new
-
-      expect(client.access).to eq access_token_object_instance
+      expect(client.access).to_not be_nil
     end
   end
 
-  describe '.fetch_enrollment' do
-    it 'makes a post request' do
-      allow(OAuth2::Client).to receive(:new).and_return(oauth_client)
-      allow(oauth_client).to receive(:client_credentials).and_return(client_credentials_strategy_instance)
-      expect(client_credentials_strategy_instance).to receive(:get_token).and_return(access_token_object_instance)
-      client = CpiApiGatewayClient.new
-      allow(client.access).to receive(:expired?).and_return(false)
-
-      expect(client).to receive(:request_client).and_return access_token_object_instance
-      expect(client.access).to receive(:post)
-                           .with("#{cpi_api_gateway_url}api/1.0/ppr/providers/enrollments",
-                                 { body: { providerID: { npi: '12345' } }.to_json,
-                                   headers: { 'Content-Type': 'application/json' } })
-        .and_return(response_double)
-      expect(response_double).to receive(:parsed)
-      client.fetch_enrollment(12_345)
+  describe '.fetch_profile' do
+    it 'returns enrollments' do
+      verify_logs(status: 200, url: "#{host}api/1.0/ppr/providers/profile", method_name: :fetch_profile, method: :post)
+      enrollment = client.fetch_profile(12_345)
+      expect(enrollment.dig('provider', 'enrollments').length).to eq 2
+      expect(enrollment.dig('provider', 'enrollments', 0, 'status')).to eq 'INACTIVE'
+      expect(enrollment.dig('provider', 'enrollments', 1, 'status')).to eq 'APPROVED'
     end
-  end
 
-  describe '.fetch_enrollment_roles' do
-    it 'makes a get request' do
-      allow(OAuth2::Client).to receive(:new).and_return(oauth_client)
-      allow(oauth_client).to receive(:client_credentials).and_return(client_credentials_strategy_instance)
-      expect(client_credentials_strategy_instance).to receive(:get_token).and_return(access_token_object_instance)
-      allow(access_token_object_instance).to receive(:expired?).and_return(false)
-      client = CpiApiGatewayClient.new
+    it 'returns inactive enrollments with specific npi' do
+      enrollment = client.fetch_profile('3782297014')
+      expect(enrollment.dig('provider', 'enrollments').length).to eq 2
+      expect(enrollment.dig('provider', 'enrollments', 0, 'status')).to eq 'INACTIVE'
+      expect(enrollment.dig('provider', 'enrollments', 1, 'status')).to eq 'IN REVIEW'
+    end
 
-      expect(client).to receive(:request_client).and_return access_token_object_instance
-      expect(client.access).to receive(:get)
-                           .with("#{cpi_api_gateway_url}api/1.0/ppr/providers/enrollments/123456/roles",
-                                 { headers: { 'Content-Type': 'application/json' } })
-        .and_return(response_double)
-      expect(response_double).to receive(:parsed)
-      client.fetch_enrollment_roles(123_456)
+    it 'fetches roles' do
+      roles = client.fetch_profile(12_345)
+      expect(roles.dig('provider', 'enrollments', 0, 'roles', 0, 'roleCode')).to eq '10'
+      expect(roles.dig('provider', 'enrollments', 0, 'roles', 0, 'ssn')).to eq '900222222'
+
+      %w[900111111 900666666 900777777].each_with_index do |ssn, idx|
+        expect(roles.dig('provider', 'enrollments', 1, 'roles', idx, 'roleCode')).to eq '10'
+        expect(roles.dig('provider', 'enrollments', 1, 'roles', idx, 'ssn')).to eq ssn
+      end
+    end
+
+    context 'fetches med sanctions' do
+      it 'returns sanctions with specific npi' do
+        npi = '3598564557'
+        sanctions = client.fetch_profile(npi)
+        expect(sanctions.dig('provider', 'medSanctions').size).to eq(1)
+        expect(sanctions.dig('provider', 'waiverInfo')).to be_blank
+      end
+
+      it 'returns waiver with specific npi' do
+        npi = '3098168743'
+        sanctions = client.fetch_profile(npi)
+        expect(sanctions.dig('provider', 'medSanctions').size).to eq(1)
+        expect(sanctions.dig('provider', 'waiverInfo').size).to eq(1)
+      end
+
+      it 'does not return sanctions or waivers with other npi' do
+        npi = '3740677877'
+        sanctions = client.fetch_profile(npi)
+        expect(sanctions.dig('provider', 'medSanctions')).to be_blank
+        expect(sanctions.dig('provider', 'waiverInfo')).to be_blank
+      end
     end
   end
 
   describe '.fetch_authorized_official_med_sanctions' do
-    it 'makes a post request' do
-      allow(OAuth2::Client).to receive(:new).and_return(oauth_client)
-      allow(oauth_client).to receive(:client_credentials).and_return(client_credentials_strategy_instance)
-      expect(client_credentials_strategy_instance).to receive(:get_token).and_return(access_token_object_instance)
-      allow(access_token_object_instance).to receive(:expired?).and_return(false)
-      client = CpiApiGatewayClient.new
-
-      request_body = {
-        providerID: {
-          providerType: 'ind',
-          identity: {
-            idType: 'ssn',
-            id: '111223456'
-          }
-        },
-        dataSets: {
-          subjectAreas: {
-            medSanctions: true
-          }
-        }
-      }
-
-      expect(client).to receive(:request_client).and_return access_token_object_instance
-      expect(client.access).to receive(:post)
-                           .with("#{cpi_api_gateway_url}api/1.0/ppr/providers",
-                                 { body: request_body.to_json,
-                                   headers: { 'Content-Type': 'application/json' } })
-        .and_return(response_double)
-      expect(response_double).to receive(:parsed)
-      client.fetch_authorized_official_med_sanctions(111_223_456)
+    it 'returns sanctions with specific ssn' do
+      verify_logs(status: 200, url: "#{host}api/1.0/ppr/providers", method_name: :fetch_provider_info,
+                  method: :post)
+      ssn = '900666666'
+      sanctions = client.fetch_med_sanctions_and_waivers_by_ssn(ssn)
+      expect(sanctions.dig('provider', 'medSanctions').size).to eq(1)
+      expect(sanctions.dig('provider', 'waiverInfo').size).to eq(0)
     end
+
+    it 'returns waiver with specific ssn' do
+      ssn = '900777777'
+      sanctions = client.fetch_med_sanctions_and_waivers_by_ssn(ssn)
+      expect(sanctions.dig('provider', 'medSanctions').size).to eq(1)
+      expect(sanctions.dig('provider', 'waiverInfo').size).to eq(1)
+    end
+
+    it 'does not return sanctions or waivers with other ssn' do
+      ssn = '900121234'
+      sanctions = client.fetch_med_sanctions_and_waivers_by_ssn(ssn)
+      expect(sanctions.dig('provider', 'medSanctions').size).to eq(0)
+      expect(sanctions.dig('provider', 'waiverInfo').size).to eq(0)
+    end
+  end
+
+  describe '.org_info' do
+    it 'returns sanctions with specific npi' do
+      verify_logs(status: 200, url: "#{host}api/1.0/ppr/providers", method_name: :fetch_provider_info, method: :post)
+      npi = '3598564557'
+      sanctions = client.org_info(npi)
+      expect(sanctions.dig('provider', 'medSanctions').size).to eq(1)
+      expect(sanctions.dig('provider', 'waiverInfo').size).to eq(0)
+    end
+
+    it 'returns waiver with specific npi' do
+      npi = '3098168743'
+      sanctions = client.org_info(npi)
+      expect(sanctions.dig('provider', 'medSanctions').size).to eq(1)
+      expect(sanctions.dig('provider', 'waiverInfo').size).to eq(1)
+    end
+
+    it 'does not return sanctions or waivers with other npi' do
+      npi = '3740677877'
+      sanctions = client.org_info(npi)
+      expect(sanctions.dig('provider', 'medSanctions').size).to eq(0)
+      expect(sanctions.dig('provider', 'waiverInfo').size).to eq(0)
+    end
+  end
+
+  describe '.healthy_api?' do
+    it 'returns true when the api responds' do
+      expect(client.healthy_api?).to eq(true)
+    end
+
+    it 'returns false when the api does not respond' do
+      stub_request(:post, 'https://val.cpiapi.cms.gov/api/1.0/ppr/providers').to_timeout
+      expect(client.healthy_api?).to eq(false)
+    end
+  end
+
+  describe '.healthy_auth?' do
+    it 'returns true when it can get a token' do
+      expect(client.healthy_auth?).to eq(true)
+    end
+
+    it 'returns false when it cannot get a token' do
+      client.client = OAuth2::Client.new(
+        'fake_id',
+        'fake_secret',
+        site: ENV.fetch('CMS_IDM_OAUTH_URL', nil),
+        token_url: '/oauth2/bad_token/v1/token'
+      )
+      expect(client.healthy_auth?).to eq(false)
+    end
+  end
+
+  def verify_logs(status:, url:, method_name:, method: :get)
+    verify_new_relic(url, method)
+    verify_rails(status:, url:, method_name:, method:)
+  end
+
+  def verify_new_relic(uri, procedure)
+    new_relic_tracer = instance_double(NewRelic::Agent::Transaction::ExternalRequestSegment)
+    expect(NewRelic::Agent::Tracer).to receive(:start_external_request_segment)
+      .with(library: 'Net::HTTP', uri:, procedure:)
+      .and_return(new_relic_tracer)
+    expect(new_relic_tracer).to receive(:finish)
+  end
+
+  def verify_rails(status:, url:, method_name:, method:)
+    allow(Rails.logger).to receive(:info)
+    expect(Rails.logger).to receive(:info).with(
+      ['Calling CPI API Gateway',
+       { cpi_api_gateway_request_method: method,
+         cpi_api_gateway_request_url: url,
+         cpi_api_gateway_request_method_name: method_name }]
+    )
+    expect(Rails.logger).to receive(:info).with(
+      ['CPI API Gateway response info',
+       { cpi_api_gateway_request_method: method,
+         cpi_api_gateway_request_url: url,
+         cpi_api_gateway_request_method_name: method_name,
+         cpi_api_gateway_response_status_code: status,
+         cpi_api_gateway_response_duration: anything }]
+    )
   end
 end

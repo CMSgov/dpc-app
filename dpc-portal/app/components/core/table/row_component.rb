@@ -21,7 +21,11 @@ module Core
       end
 
       def format_if_date(str)
-        datetime = DateTime.parse(str)
+        # parses non-date strings normally
+        return str unless str.length > 18
+
+        # Using strict parsing because guids were being parsed
+        datetime = DateTime.strptime(str[..18], '%Y-%m-%dT%H:%M:%S')
         datetime.strftime('%m/%d/%Y at %l:%M%p UTC')
       rescue Date::Error
         str

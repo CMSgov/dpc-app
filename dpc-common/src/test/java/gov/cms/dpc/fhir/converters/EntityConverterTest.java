@@ -1,6 +1,5 @@
 package gov.cms.dpc.fhir.converters;
 
-import com.google.common.collect.ArrayListMultimap;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.fhir.converters.exceptions.DataTranslationException;
 import gov.cms.dpc.fhir.converters.exceptions.FHIRConverterException;

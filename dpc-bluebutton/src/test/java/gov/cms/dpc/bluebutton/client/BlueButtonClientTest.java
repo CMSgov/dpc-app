@@ -33,7 +33,6 @@ import org.mockserver.model.Parameter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 import java.util.MissingResourceException;
@@ -64,11 +63,9 @@ class BlueButtonClientTest {
 
     private static BlueButtonClient bbc;
     private static ClientAndServer mockServer;
-    private static Config conf;
 
     @BeforeAll
     static void setupBlueButtonClient() throws IOException {
-        conf = getTestConfig();
         final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule<>(getClientConfig()));
         bbc = injector.getInstance(BlueButtonClient.class);
 
@@ -190,28 +187,11 @@ class BlueButtonClientTest {
     }
 
     @Test
-    void shouldGetFHIRFromPatientMbiHash() {
-        Bundle ret = bbc.requestPatientFromServerByMbiHash(TEST_PATIENT_MBI_HASH, null);
-
-        assertNotNull(ret, "Bundle returned from BlueButtonClient should not be null");
-        assertTrue(ret.hasEntry(), "Bundle should have an entry");
-        assertEquals(1, ret.getEntry().size(), "Entry should have size 1");
-        Patient pt = (Patient) ret.getEntryFirstRep().getResource();
-
-        String patientDataCorrupted = "The demo Patient object data differs from what is expected";
-        assertEquals(pt.getBirthDate(), java.sql.Date.valueOf("2014-06-01"), patientDataCorrupted);
-        assertEquals(pt.getGender().getDisplay(), "Unknown", patientDataCorrupted);
-        assertEquals(pt.getName().size(), 1, patientDataCorrupted);
-        assertEquals(pt.getName().get(0).getFamily(), "Doe", patientDataCorrupted);
-        assertEquals(pt.getName().get(0).getGiven().get(0).toString(), "Jane", patientDataCorrupted);
-    }
-
-    @Test
     void shouldGetEOBFromPatientID() {
         Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
         assertNotNull(response, "The demo patient should have a non-null EOB bundle");
-        assertEquals(32, response.getTotal(), "The demo patient should have exactly 32 EOBs");
+        assertEquals(10, response.getEntry().size(), "The demo patient's first bundle should have exactly 10 EOBs");
     }
 
     @Test
@@ -219,7 +199,7 @@ class BlueButtonClientTest {
         Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID, TEST_LAST_UPDATED, null);
 
         assertNotNull(response, "The demo patient should have a non-null EOB bundle");
-        assertEquals(1, response.getTotal(), "The demo patient should have exactly 1 EOBs");
+        assertEquals(1, response.getEntry().size(), "The demo patient should have exactly 1 EOBs");
         assertNull(response.getLink(Bundle.LINK_NEXT), "Should have no next link since all the resources are in the bundle");
     }
 
@@ -250,7 +230,7 @@ class BlueButtonClientTest {
         final Bundle response = bbc.requestCoverageFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
         assertNotNull(response, "The demo patient should have a non-null Coverage bundle");
-        assertEquals(3, response.getTotal(), "The demo patient should have exactly 3 Coverage");
+        assertEquals(3, response.getEntry().size(), "The demo patient should have exactly 3 Coverage");
     }
 
     @Test
@@ -265,7 +245,7 @@ class BlueButtonClientTest {
     @Test
     void shouldHandlePatientsWithOnlyOneEOB() {
         final Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID, TEST_LAST_UPDATED, null);
-        assertEquals(1, response.getTotal(), "This demo patient should have exactly 1 EOB");
+        assertEquals(1, response.getEntry().size(), "This demo patient should have exactly 1 EOB");
     }
 
     @Test
@@ -281,25 +261,6 @@ class BlueButtonClientTest {
                 () -> bbc.requestEOBFromServer(TEST_NONEXISTENT_PATIENT_ID, null, null),
                 "BlueButton client should throw exceptions when asked to retrieve EOBs for a non-existent patient"
         );
-    }
-
-    @Test
-    void shouldHashMbi() throws GeneralSecurityException {
-        // Cases from BFD tests https://github.com/CMSgov/beneficiary-fhir-data/blob/master/apps/bfd-pipeline/bfd-pipeline-rif-load/src/test/java/gov/cms/bfd/pipeline/rif/load/RifLoaderTest.java
-        String hash = bbc.hashMbi("123456789A");
-        assertEquals("d95a418b0942c7910fb1d0e84f900fe12e5a7fd74f312fa10730cc0fda230e9a", hash);
-
-        hash = bbc.hashMbi("3456789");
-        assertEquals("ec49dc08f8dd8b4e189f623ab666cfc8b81f201cc94fe6aef860a4c3bd57f278", hash);
-    }
-
-    @Test
-    void shouldNotHashMbi() throws GeneralSecurityException {
-        String hash = bbc.hashMbi(null);
-        assertEquals("", hash);
-
-        hash = bbc.hashMbi("");
-        assertEquals("", hash);
     }
 
     /**

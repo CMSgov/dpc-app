@@ -7,11 +7,10 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 gemspec
 
 gem 'active_model_serializers'
-# rubocop:disable Bundler/OrderedGems
+gem 'fhir_models'
 gem 'macaroons'
-gem 'fhir_client'
-# rubocop:enable Bundler/OrderedGems
-gem 'nokogiri'
+gem 'nokogiri', '>= 1.16.5'
+gem 'oauth2'
 gem 'rspec-rails'
 gem 'rubocop'
 gem 'simplecov'

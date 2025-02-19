@@ -42,9 +42,9 @@ public class TokenResourceUnitTest {
     private static TokenPolicy policy;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private static Macaroon macaroon;
-    private static SigningKeyResolverAdapter resolver = Mockito.mock(SigningKeyResolverAdapter.class);
-    private static IJTICache cache = Mockito.mock(IJTICache.class);
-    private static String authURL = "auth_url";
+    private static final SigningKeyResolverAdapter resolver = Mockito.mock(SigningKeyResolverAdapter.class);
+    private static final IJTICache cache = Mockito.mock(IJTICache.class);
+    private static final String authURL = "auth_url";
     private TokenResource tokenResource;
 
     @BeforeEach
@@ -60,7 +60,7 @@ public class TokenResourceUnitTest {
         organization.setId(orgId.toString());
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
         TokenEntity tokenEntity = new TokenEntity("46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0", orgId, TokenEntity.TokenType.MACAROON);
-        List<TokenEntity> tokenEntityList = new ArrayList<TokenEntity>();
+        List<TokenEntity> tokenEntityList = new ArrayList<>();
         tokenEntityList.add(tokenEntity);
         CollectionResponse<TokenEntity> expected = new CollectionResponse<>(tokenEntityList);
 
@@ -79,7 +79,7 @@ public class TokenResourceUnitTest {
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
         UUID tokenId = UUID.randomUUID();
         TokenEntity tokenEntity = new TokenEntity(tokenId.toString(), orgId, TokenEntity.TokenType.MACAROON);
-        List<TokenEntity> tokenEntityList = new ArrayList<TokenEntity>();
+        List<TokenEntity> tokenEntityList = new ArrayList<>();
         tokenEntityList.add(tokenEntity);
 
         Mockito.when(mockTokenDao.findTokenByOrgAndID(orgId, tokenId)).thenAnswer(answer -> tokenEntityList);
@@ -113,7 +113,7 @@ public class TokenResourceUnitTest {
         expirationPolicy.setExpirationOffset(0);
         VersionPolicy versionPolicy = new VersionPolicy();
         versionPolicy.setCurrentVersion(1);
-        List<MacaroonCaveat> macaroonCaveats = new ArrayList<MacaroonCaveat>();
+        List<MacaroonCaveat> macaroonCaveats = new ArrayList<>();
         MacaroonCaveat macaroonCaveat = new MacaroonCaveat();
         macaroonCaveat.setRawCaveat("organization_id = org".getBytes());
         macaroonCaveats.add(macaroonCaveat);
@@ -149,7 +149,7 @@ public class TokenResourceUnitTest {
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
         UUID tokenId = UUID.randomUUID();
         TokenEntity tokenEntity = new TokenEntity(tokenId.toString(), orgId, TokenEntity.TokenType.MACAROON);
-        List<TokenEntity> tokenEntityList = new ArrayList<TokenEntity>();
+        List<TokenEntity> tokenEntityList = new ArrayList<>();
         tokenEntityList.add(tokenEntity);
 
         Mockito.when(mockTokenDao.findTokenByOrgAndID(orgId, tokenId)).thenAnswer(answer -> tokenEntityList);

@@ -8,36 +8,33 @@
 #
 # Use this hook to configure devise mailer, warden hooks and so forth.
 # Many of these configuration options can be set straight in your model.
+
+require "dpc_portal_utils"
+
 Devise.setup do |config|
+  include DpcPortalUtils
   begin
     private_key = OpenSSL::PKey::RSA.new(ENV['LOGIN_GOV_PRIVATE_KEY'])
   rescue TypeError, OpenSSL::PKey::RSAError => e
     Rails.logger.error("Unable to create private key for omniauth: #{e}")
     private_key = OpenSSL::PKey::RSA.new(1024)
   end
-  host = case ENV['ENV']
-         when 'local'
-           'http://localhost:3100'
-         when 'prod'
-           'https://dpc.cms.gov'
-         else
-           "https://#{ENV['ENV']}.dpc.cms.gov"
-         end
+  idp_host = ENV.fetch('IDP_HOST', 'idp.int.identitysandbox.gov')
   config.omniauth :openid_connect, {
                     name: :openid_connect,
-                    issuer: 'https://idp.int.identitysandbox.gov/',
+                    issuer: "https://#{idp_host}/",
                     discovery: true,
-                    scope: %i[openid email profile phone social_security_number],
+                    scope: %i[openid email all_emails],
                     response_type: :code,
-                    acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
+                    acr_values: 'http://idmanagement.gov/ns/assurance/ial/1',
                     client_auth_method: :jwt_bearer,
                     client_options: {
                       port: 443,
                       scheme: 'https',
-                      host: 'idp.int.identitysandbox.gov',
+                      host: idp_host,
                       identifier: "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
                       private_key: private_key,
-                      redirect_uri: "#{host}/portal/users/auth/openid_connect/callback"
+                      redirect_uri: "#{my_protocol_host}/portal/users/auth/openid_connect/callback"
                     }
                   }
   # The secret key used by Devise. Devise uses this key to generate
@@ -46,6 +43,7 @@ Devise.setup do |config|
   # Devise will use the `secret_key_base` as its `secret_key`
   # by default. You can change it below and use your own secret key.
   # config.secret_key = '7c6c088e32429add964776c6270e102769c71e4be2817e0e198857372f78142dfde431b4c94fdda416eaf8b5b958710f5f7fbb9cec18944159d76ec1b3b23d80'
+  config.secret_key = Rails.application.secret_key_base
 
   # ==> Controller configuration
   # Configure the parent class to the devise controllers.
@@ -195,7 +193,7 @@ Devise.setup do |config|
 
   # ==> Configuration for :rememberable
   # The time the user will be remembered without asking for credentials again.
-  # config.remember_for = 2.weeks
+  config.remember_for = 12.hours
 
   # Invalidates all the remember me tokens when the user signs out.
   config.expire_all_remember_me_on_sign_out = true
@@ -219,7 +217,7 @@ Devise.setup do |config|
   # ==> Configuration for :timeoutable
   # The time you want to timeout the user session without activity. After this
   # time the user will be asked for credentials again. Default is 30 minutes.
-  # config.timeout_in = 30.minutes
+  config.timeout_in = 30.minutes
 
   # ==> Configuration for :lockable
   # Defines which strategy will be used to lock an account.

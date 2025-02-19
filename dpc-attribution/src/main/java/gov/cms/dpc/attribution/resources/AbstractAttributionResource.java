@@ -19,9 +19,6 @@ public abstract class AbstractAttributionResource {
     @Path("/Organization")
     public abstract AbstractOrganizationResource orgOperations();
 
-    @Path("/Endpoint")
-    public abstract AbstractEndpointResource endpointOperations();
-
     @Path("/Patient")
     public abstract AbstractPatientResource patientOperations();
 

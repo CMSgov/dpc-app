@@ -6,19 +6,15 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
-import com.google.inject.name.Names;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.BlueButtonClientImpl;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
-import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2;
-import gov.cms.dpc.bluebutton.clientV2.BlueButtonClientV2Provider;
-import gov.cms.dpc.bluebutton.clientV2.R4ClientProvider;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
 import gov.cms.dpc.bluebutton.health.BlueButtonHealthCheck;
-import io.dropwizard.Configuration;
-import org.apache.commons.lang3.StringUtils;
+import gov.cms.dpc.fhir.configuration.TimeoutConfiguration;
+import io.dropwizard.core.Configuration;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
@@ -71,15 +67,6 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
             binder.bind(BlueButtonHealthCheck.class);
         }
 
-        final BBClientConfiguration.R4Configuration r4Configuration = this.bbClientConfiguration.getR4Configuration();
-        if (r4Configuration != null && StringUtils.isNotEmpty(r4Configuration.getServerBaseUrl())) {
-            R4ClientProvider client = new R4ClientProvider(r4Configuration.getServerBaseUrl());
-            binder.requestInjection(client);
-            binder.bind(IGenericClient.class).annotatedWith(Names.named("bbclientR4")).toProvider(client).asEagerSingleton();
-            BlueButtonClientV2Provider blueButtonClientV2Provider = new BlueButtonClientV2Provider(this.bbClientConfiguration);
-            binder.requestInjection(blueButtonClientV2Provider);
-            binder.bind(BlueButtonClientV2.class).toProvider(blueButtonClientV2Provider).asEagerSingleton();
-        }
         logger.info("Blue Button health checks are {}.", healthCheckEnabled ? "enabled" : "disabled");
     }
 
@@ -129,17 +116,17 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
         if (this.bbClientConfiguration.getKeystore().getLocation() == null) {
             keyStoreStream = BlueButtonClientImpl.class.getResourceAsStream(KEYSTORE_RESOURCE_KEY);
             if (keyStoreStream == null) {
-                logger.error("KeyStore location is empty, cannot find keyStore {} in resources", KEYSTORE_RESOURCE_KEY);
+                logger.error("KeyStore location is empty, cannot find keyStore " + KEYSTORE_RESOURCE_KEY + " in resources");
                 throw new BlueButtonClientSetupException("Unable to get keystore from resources",
                         new MissingResourceException("", BlueButtonClientImpl.class.getName(), KEYSTORE_RESOURCE_KEY));
             }
         } else {
             final String keyStorePath = this.bbClientConfiguration.getKeystore().getLocation();
-            logger.debug("Opening keystream from location: {}", keyStorePath);
+            logger.debug("Opening keystream from location: " + keyStorePath);
             try {
                 keyStoreStream = new FileInputStream(keyStorePath);
             } catch (FileNotFoundException e) {
-                logger.error("Could not find keystore at location: {}" + Paths.get(keyStorePath).toAbsolutePath().toString());
+                logger.error("Could not find keystore at location: " + Paths.get(keyStorePath).toAbsolutePath());
                 throw new BlueButtonClientSetupException("Unable to find keystore", e);
             }
         }
@@ -170,7 +157,7 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
         }
 
         // Configure the socket timeout for the connection, incl. ssl tunneling
-        final BBClientConfiguration.TimeoutConfiguration timeouts = this.bbClientConfiguration.getTimeouts();
+        final TimeoutConfiguration timeouts = this.bbClientConfiguration.getTimeouts();
         RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectTimeout(timeouts.getConnectionTimeout())
                 .setConnectionRequestTimeout(timeouts.getRequestTimeout())

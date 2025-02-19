@@ -10,7 +10,7 @@ FactoryBot.define do
     npi {
       loop do
         npi = LuhnacyLib.generate_npi
-        break npi unless Organization.where(npi: npi).exists?
+        break npi unless Organization.where(npi:).exists?
       end
     }
 
