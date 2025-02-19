@@ -30,9 +30,6 @@ jobs:
           ref: ${{ inputs.repo_ref || 'main' }}
         with:
           fetch-depth: 0
-      - name: "Fetch git info"
-        run: |
-          git fetch --quiet
       - name: "Calculate Next Revision"
         id: set_revs
         run: |
