@@ -13,14 +13,11 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
 import gov.cms.dpc.testing.OrganizationHelpers;
-import io.dropwizard.testing.ConfigOverride;
-import io.dropwizard.testing.DropwizardTestSupport;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.InputStream;
 import java.time.Instant;
@@ -36,12 +33,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
-class AttributionFHIRTest {
+class AttributionFHIRTest extends AbstractAttributionTest {
 
-    private static final String CONFIG_PATH = "src/test/resources/test.application.yml";
-    private static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION =
-            new DropwizardTestSupport<>(DPCAttributionService.class, CONFIG_PATH,
-                    ConfigOverride.config("server.applicationConnectors[0].port", "3727"));
     private static final FhirContext ctx = FhirContext.forDstu3();
     private static final String CSV = "test_associations-dpr.csv";
     private static Map<String, List<Pair<String, String>>> groupedPairs = new HashMap<>();
@@ -49,12 +42,6 @@ class AttributionFHIRTest {
 
     @BeforeAll
     static void setup() throws Exception {
-        APPLICATION.before();
-        SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("db", "drop-all", "--confirm-delete-everything", CONFIG_PATH);
-        SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("db", "migrate", CONFIG_PATH);
-
         // Get the test seeds
         final InputStream resource = AttributionFHIRTest.class.getClassLoader().getResourceAsStream(CSV);
         if (resource == null) {
@@ -66,11 +53,6 @@ class AttributionFHIRTest {
 
         // Create the Organization
         organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, String.format("http://localhost:%s/v1/", APPLICATION.getLocalPort())));
-    }
-
-    @AfterAll
-    static void shutdown() {
-        APPLICATION.after();
     }
 
     @TestFactory
