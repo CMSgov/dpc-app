@@ -1,20 +1,24 @@
 package gov.cms.dpc.fhir.validations;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.sql.Date;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,7 +32,7 @@ class PatientValidationTest {
     @BeforeAll
     static void setup() {
         ctx = FhirContext.forDstu3();
-        final FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
+        final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 
         fhirValidator = ctx.newValidator();
         fhirValidator.setValidateAgainstStandardSchematron(false);
@@ -37,19 +41,22 @@ class PatientValidationTest {
 
 
         dpcModule = new DPCProfileSupport(ctx);
-        final ValidationSupportChain chain = new ValidationSupportChain(new DefaultProfileValidationSupport(), dpcModule);
+        final ValidationSupportChain chain = new ValidationSupportChain(
+                dpcModule,
+                new DefaultProfileValidationSupport(ctx),
+                new InMemoryTerminologyServerValidationSupport(ctx)
+        );
         instanceValidator.setValidationSupport(chain);
     }
 
     @Test
     void definitionIsValid() {
-        final StructureDefinition patientDefinition = dpcModule.fetchStructureDefinition(ctx, PatientProfile.PROFILE_URI);
+        final StructureDefinition patientDefinition = dpcModule.fetchStructureDefinition(PatientProfile.PROFILE_URI);
         final ValidationResult result = fhirValidator.validateWithResult(patientDefinition);
-        // There should be a single failure, but we know about it.
-        // This needs to stay until https://github.com/jamesagnew/hapi-fhir/pull/1375 lands in upstream.
-        // Apparently, the patch was not sufficient, so this error remains.
-        assertAll(() -> assertEquals(1, result.getMessages().size(), "Should have a single failure"),
-                () -> assertTrue( result.getMessages().get(0).getMessage().startsWith("URI values cannot have whitespace"), "Should have URI failure"));
+        Stream<SingleValidationMessage> errorMessages = result.getMessages().stream()
+                .filter(error -> error.getSeverity().equals(ResultSeverityEnum.ERROR));
+        assertEquals(1, errorMessages.toArray().length, "Should have a single error message");
+        assertTrue(result.getMessages().get(0).getMessage().contains("Found # expecting a token name"));
     }
 
     @Test
@@ -103,7 +110,7 @@ class PatientValidationTest {
 
         final ValidationResult result = fhirValidator.validateWithResult(patient);
         assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
-                () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
+                () -> assertEquals(2, result.getMessages().size(), "Should have two failures for ID slice"));
 
         // Add an NPI
         patient.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("test-npi");

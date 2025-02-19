@@ -1,0 +1,2 @@
+gov.cms.dpc.common.logging.filters.AuthRelatedLoggingFilter
+gov.cms.dpc.common.logging.filters.SecretLoggingFilter

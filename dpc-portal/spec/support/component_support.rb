@@ -3,15 +3,15 @@
 module ComponentSupport
   # Mocks an org from dpc-api
   class MockOrg
-    attr_accessor :path_id, :name, :npi
+    attr_accessor :name, :npi, :to_param, :path_id
 
     def initialize(row_count = 0)
-      @path_id = '99790463-de1f-4f7f-a529-3e4f59dc7131'
+      @to_param = @path_id = '2'
       @name = 'Health'
       @npi = '11111'
       @row_count = row_count
-      @created = '2023-12-15 17:01'
-      @expires = '2023-12-16 17:01'
+      @created = '2023-12-15T17:01:01'
+      @expires = '2023-12-16T17:01:01'
       @guid = '99790463-de1f-4f7f-a529-3e4f59dc713'
     end
 

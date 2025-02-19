@@ -12,7 +12,8 @@ module RedisStore
       # Retrieve redis instance with a provided namespace
       @limit = Rails.configuration.x.mail_throttle.limit
       @expiration = Rails.configuration.x.mail_throttle.expiration
-      @redis = Redis::Namespace.new(NAMESPACE, redis: Redis.current)
+      redis_url = "#{ENV.fetch('REDIS_URL', 'redis://localhost')}:6379/1"
+      @redis = Redis::Namespace.new(NAMESPACE, redis: Redis.new(url: redis_url))
     end
 
     def can_email?(key)

@@ -1,0 +1,21 @@
+settings:
+  env:
+    HOST: ${HOST_URL}
+    WEB_HOST: ${WEB_HOST}
+    WEB_ADMIN_HOST: ${WEB_ADMIN_HOST}
+    ADMIN_URL: ${ELB_URL}
+    SEED_FILE: src/main/resources/test_associations-dpr.csv
+    PROVIDER_BUNDLE: provider_bundle.json
+    PATIENT_BUNDLE: patient_bundle-dpr.json
+  artifacts-dir: bzt-out/%Y-%m-%d_%H-%M-%S.%f
+
+modules:
+  jmeter:
+    path: src/vendor
+  console:
+    disable: true
+
+included-configs:
+  - smoke_test.yml
+  - src/test/web_admin_test.yml
+  - src/test/web_test.yml

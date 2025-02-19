@@ -40,7 +40,7 @@ RSpec.describe Organization, type: :model do
 
           npi = LuhnacyLib.generate_npi
 
-          org = create(:organization, npi: npi)
+          org = create(:organization, npi:)
           org.assign_id
           expect(org.npi).to eq(npi)
         end
@@ -56,7 +56,7 @@ RSpec.describe Organization, type: :model do
 
     it 'does not replace non-blank values' do
       npi = LuhnacyLib.generate_npi
-      org = create(:organization, npi: npi)
+      org = create(:organization, npi:)
       expect(org.npi).to eq(npi)
     end
   end
@@ -66,7 +66,7 @@ RSpec.describe Organization, type: :model do
       it 'returns true if org has a registered org and an npi' do
         npi = LuhnacyLib.generate_npi
         stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-        org = create(:organization, :api_enabled, organization_type: 'primary_care_clinic', npi: npi)
+        org = create(:organization, :api_enabled, organization_type: 'primary_care_clinic', npi:)
 
         expect(org.registered_organization).to be_present
       end
@@ -115,9 +115,9 @@ RSpec.describe Organization, type: :model do
 
     it 'sends org sandbox email to users if sandbox was added' do
       stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-      create(:registered_organization, organization: organization)
+      create(:registered_organization, organization:)
 
-      assignment = create(:organization_user_assignment, organization: organization)
+      assignment = create(:organization_user_assignment, organization:)
       organization.notify_users_of_sandbox_access
 
       expect(UserMailer).to have_received(:with)

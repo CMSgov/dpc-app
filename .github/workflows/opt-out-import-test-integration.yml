@@ -1,0 +1,138 @@
+name: Opt-Out-Import Integration Tests
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/opt-out-import-test-integration.yml
+      - .github/workflows/opt-out-import-deploy.yml
+      - .github/workflows/deploy_go_lambda.yml
+      - lambda/opt-out-import/**
+  workflow_dispatch:
+
+# Ensure we have only one integration test running at a time
+concurrency:
+  group: opt-out-import-test-integration
+
+jobs:
+  # Deploy first if triggered by pull_request
+  deploy:
+    if: ${{ github.event_name == 'pull_request' }}
+    uses: ./.github/workflows/opt-out-import-deploy.yml
+    with:
+      env: test
+    secrets: inherit
+
+  trigger:
+    if: ${{ always() }}
+    needs: deploy
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./lambda/opt-out-import
+    outputs:
+      filename: ${{ steps.createfile.outputs.FILENAME }}
+      start_time: ${{ steps.createfile.outputs.STARTTIME }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          # Note that we use the BFD role with access to the bucket
+          role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/bfd-test-eft-dpc-bucket-role
+          role-chaining: true
+          role-skip-session-tagging: true
+      - name: Upload test file to the BFD bucket to trigger lambda function via SNS message
+        id: createfile
+        run: |
+          fname=T.NGD.DPC.RSP.D$(date +'%y%m%d').T$(date +'%H%M%S')1.IN
+          echo "FILENAME=$fname" >> "$GITHUB_OUTPUT"
+          echo "STARTTIME=`date +%s`" >> "$GITHUB_OUTPUT"
+          aws s3 cp --no-progress synthetic_test_data/T.NGD.DPC.RSP.D240123.T1122001.IN \
+            s3://bfd-test-eft/bfdeft01/dpc/in/$fname
+
+  verify-bucket:
+    needs: trigger
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          # Note that we use the BFD role with access to the bucket
+          role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/bfd-test-eft-dpc-bucket-role
+          role-chaining: true
+          role-skip-session-tagging: true
+      - name: Verify confirmation file put in bucket
+        env:
+          STARTTIME: ${{needs.trigger.outputs.start_time}}
+        run: |
+          while read line; do
+            filedate_s=`echo $line | awk '{print $1 " " $2}'`
+            filedate=`date -d "$filedate_s" +%s`
+            if [[ $((filedate > STARTTIME)) == 1 ]]; then
+              echo "we have a winner!"
+              exit 0
+            fi
+          done < <(aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/out/ | grep CONF)
+          echo "no new file found"
+          exit 1
+
+  verify-db-changes:
+    needs: trigger
+    runs-on: self-hosted
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+      - name: Get database credentials
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            DB_USER=/dpc/test/consent/db_read_only_user_dpc_consent
+            DB_PASSWORD=/dpc/test/consent/db_read_only_pass_dpc_consent
+            HOST=/dpc/test/db/url
+      - name: Stop old db container if exists
+        run: |
+          docker stop dpc-app-db-1 || echo 'noop, not running'
+      - name: Remove old db container if exists
+        run: |
+          docker rm dpc-app-db-1 || echo 'noop, not exists'
+      - name: Run db container
+        run: |
+          docker run --rm --name dpc-app-db-1 -e POSTGRES_PASSWORD="$DB_PASSWORD" -e PGPASSWORD="$DB_PASSWORD" -d postgres:16.4
+      - name: Verify response file was ingested
+        env:
+          FILENAME: ${{needs.trigger.outputs.filename}}
+        # CAUTION: if changing the script below, validate that sensitive information is not printed in the workflow
+        run: |
+          RESPONSE_FILE_ID=`docker exec dpc-app-db-1 psql --csv -t -U $DB_USER -h $HOST -d dpc_consent -c "SELECT id FROM opt_out_file WHERE name = '$FILENAME' LIMIT 1" 2>&1`
+          if [[ $? -ne 0 || -z $RESPONSE_FILE_ID ]]; then
+            echo "input file id query returned zero results or command failed"
+            exit 1
+          else
+            CONSENTS=`docker exec dpc-app-db-1 psql --csv -t -U $DB_USER -h $HOST -d dpc_consent -c "SELECT COUNT(mbi) FROM consent WHERE opt_out_file_id = '$RESPONSE_FILE_ID'" 2>&1`
+            if [[ $? -ne 0 || -z $CONSENTS ]]; then
+              echo "consents query returned zero results or command failed"
+              exit 1
+            fi
+          fi

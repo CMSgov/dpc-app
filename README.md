@@ -2,7 +2,7 @@
 This document serves as a guide for running the Data at the Point of Care (DPC) API on your local environment. 
 
 
-[![Build Status](https://travis-ci.org/CMSgov/dpc-app.svg?branch=master)](https://travis-ci.org/CMSgov/dpc-app)
+[![Build Status](https://travis-ci.org/CMSgov/dpc-app.svg?branch=main)](https://travis-ci.org/CMSgov/dpc-app)
 [![Maintainability](https://api.codeclimate.com/v1/badges/46309e9b1877a7b18324/maintainability)](https://codeclimate.com/github/CMSgov/dpc-app/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/46309e9b1877a7b18324/test_coverage)](https://codeclimate.com/github/CMSgov/dpc-app/test_coverage)
 
@@ -67,7 +67,6 @@ The DPC application is split into multiple services.
 | [dpc-api](/dpc-api)                 |Public API| Asynchronous FHIR API for managing organizations and requesting or retrieving data     |Java (Dropwizard)|
 | [dpc-attribution](/dpc-attribution) |Internal API| Provides and updates data about attribution                                            |Java (Dropwizard)|
 | [dpc-consent](/dpc-consent)         |Internal API| Provides and updates information about data-sharing consent for individuals            |Java (Dropwizard)|
-| [dpc-queue](/dpc-queue)             |Internal API| Provides and updates data about export jobs and batches                                |Java (Dropwizard)|
 | [dpc-aggregation](/dpc-aggregation) |Internal Worker Service| Polls for job batches and exports data for singular batches                            |Java (Dropwizard + RxJava)|
 
 #### Shared Modules
@@ -78,6 +77,7 @@ In addition to services, several modules are shared across components.
 |---|---|---|
 |[dpc-bluebutton](/dpc-bluebutton)|Bluebutton API Client|Java|
 |[dpc-macaroons](/dpc-macaroons)|Implementation of macaroons for authentication|Java|
+|[dpc-queue](/dpc-queue)| Provides an interface for managing export jobs and batches|Java|
 |[dpc-common](/dpc-common)|Shared utilities for components|Java|
 |[dpc-testing](/dpc-testing)|Shared utilities for testing|Java|
 |[dpc-smoketest](/dpc-smoketest)|Smoke test suite|Java|
@@ -179,7 +179,7 @@ Note that this will always generate a unique hash, even if you didn't change the
 DPC requires an external Postgres database to be running. While a separate Postgres server can be used, the `docker-compose` file includes everything needed, and can be started like so: 
 
 ```bash
-docker-compose up start_core_dependencies
+docker compose up start_core_dependencies
 ```
 
 **Warning**: If you do have an existing Postgres database running on port 5342, docker-compose **will not** alert you to the port conflict. Ensure any local Postgres databases are stopped before starting docker-compose.
@@ -193,24 +193,17 @@ By default, the API components will attempt to connect to the `dpc_attribution`,
 
 All of these databases should be created automatically from the previous step. When the API applications start, migrations will run and initialize the databases with the correct tables and data. If this behavior is not desired, set an environment variable of `DB_MIGRATION=0`.
 
-The defaults can be overridden in the configuration files.
-Common configuration options (such as database connection strings) are stored in a [server.conf](src/main/resources/server.conf) file and included in the various modules via the `include "server.conf"` attribute in module application config files.
-See the `dpc-attribution` [application.conf](dpc-attribution/src/main/resources/application.conf) for an example.
-
-Default settings can be overridden, either directly in the module configurations or via an `application.local.conf` file in the project root directory. 
+Default settings can be overridden, either directly in the module configurations or via `local.application.env` file in the project resources directory. 
 For example, modifying the `dpc-attribution` configuration:
 
 ```yaml
-dpc.attribution {
-  database = {
-    driverClass = org.postgresql.Driver
-    url = "jdbc:postgresql://localhost:5432/dpc-dev"
-    user = postgres
-  }
-}
+database:
+  driverClass: org.postgresql.Driver
+  url: "jdbc:postgresql://localhost:5432/dpc-dev"
+  user: postgres
 ```
 
-**Note**: On startup, the services look for a local override file (application.local.conf) in the root of their *current* working directory. This can create an issue when running tests with IntelliJ. The default sets the working directory to be the module root, which means any local overrides are ignored.
+**Note**: On startup, the services look for a local override file (local.application.env) in the root of their *current* working directory. This can create an issue when running tests with IntelliJ. The default sets the working directory to be the module root, which means any local overrides are ignored.
 This can be fixed by setting the working directory to the project root, but needs to be done manually.
 
 ### There are two ways to build DPC:
@@ -230,6 +223,8 @@ Then, run `mvn clean install` to build and test the application. Dependencies wi
 
 Running `mvn clean install` will also construct the Docker images for the individual services. To skip the Docker build, pass `-Djib.skip=True`.
 
+If a build failure is encountered when running `mvn clean install`, attempt to resolve this by separating the build process into two steps by running `make api` followed by `mvn install`.
+
 Note that the `dpc-base` image produced by `make docker-base` is not stored in a remote repository. The `mvn clean install` process relies on the base image being available via the local Docker daemon.
 
 ## Running the DPC API
@@ -244,7 +239,7 @@ The application (along with all required dependencies) can be automatically star
 The individual services can be started (along with their dependencies) by passing the service name to the `up` command.
 
 ```bash
-docker-compose up {db,aggregation,attribution,api}
+docker compose up {db,aggregation,attribution,api}
 ``` 
 
 By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always returns the same value.
@@ -265,24 +260,9 @@ db:
 ```
 ### Generating a golden macaroon
 
-You will need a macaroon for the Docker configuration. Run the command below to generate one:
-`curl -X POST http://localhost:9903/tasks/generate-token`
+Golden macaroons are automatically generated and configured upon startup for the frontend applications. To generate your own for use, run the command below:
 
-
-Also, the docker-compose.portal.yml file requires adding the **`API_METADATA URL`** variable and the **`GOLDEN_MACAROON`** variable.
-```yaml
-dpc-web: 
-  ... 
-environments: 
-  ... 
-  - GOLDEN_MACAROON: ...  
-  - API_METADATA_URL=http://host.docker.internal:3002/v1
-  .. 
-dpc_admin: 
-  ...
-  - API_METADATA_URL=${API_METADATA URL}
-  - GOLDEN_MACAROON: ...
-```
+`curl -X POST -w '\n' http://localhost:9903/tasks/generate-token`
 
 ### Manual JAR execution
 
@@ -292,9 +272,9 @@ When manually running the individual services, you'll need to ensure that there 
 
 **Important Note**: The API service requires authentication before performing actions. This will cause most integration tests to fail, as they expect the endpoints to be open. Authentication can be disabled in one of two ways: 
 * Set the `ENV` environment variable to `local` (which is the default when running under Docker).
-* Set `dpc.api.authenticationDisabled=true` in the config file (the default from the sample config file).   
+* Set `authenticationDisabled=true` in the config file (the default from the sample config file).   
 
-Next, start each service in a new terminal window, from within the the `dpc-app` root directory. 
+Next, start each service in a new terminal window, from within the `dpc-app` root directory. 
 
 ```bash
 java -jar dpc-attribution/target/dpc-attribution.jar server
@@ -302,13 +282,11 @@ java -jar dpc-aggregation/target/dpc-aggregation.jar server
 java -jar dpc-api/target/dpc-api.jar server
 ```
 
-By default, the services will attempt to load the `local.application.conf` file from the current execution directory. 
-This can be overridden in two ways:
-* Passing `ENV={dev,test,prod}` will load a `{dev,test,prod}.application.conf` file from the service resources directory.
-* Manually specifying a configuration file after the server command `server src/main/resources/application.conf` will directly load that configuration set.
+By default, the services will attempt to load the `local.application.env` file from the current execution directory. 
+This can be overridden by passing `ENV={dev,test,prod}`, which will load `{dev,test,prod}.application.env` file from the service resources directory.
 
 **Note**: Manually specifying a config file will disable the normal configuration merging process. 
-This means that only the config variables directly specified in the file will be loaded, no other `application.conf` or `reference.conf` files will be processed. 
+This means that only the config variables directly specified in the file will be loaded, no other `application.env` files will be processed. 
 
 * You can check that the application is running by requesting the FHIR `CapabilitiesStatement` for the `dpc-api` service, which will return a JSON-formatted FHIR resource.
     ```bash
@@ -475,12 +453,13 @@ If you want to run and debug integration tests through IntelliJ there are a few 
   - This will recompile dpc with debug extensions included and start containers for dpc-attribution, dpc-aggregation, dpc-consent and a db.
 - Now you should be able to run any of the integration tests under dpc-api by clicking on the little green arrow next to their implementation.
   - Need to debug a test?  Right click on the triangle and select debug.
+  - If running ExpirationJobTest results in a port collision error, you can stop the attribution service in Docker and try running the test again. 
 - If you have to debug one of the dependant services, for instance because an IT is calling dpc-attribution and getting a 500, and you can't figure out why, follow the instructions under [Local Debugging](#local-debugging) to open up the dependant service's debugger port in docker-compose, then rerun `make start-it-debug`.
   - Now you can attach your debugger to that service and still run integration tests as described above.
   - You'll have one debugger tab open on an IT in dpc-api and another on the dependant service, allowing you to set break points in either and examine the test end to end.
 
 #### Running Integration Tests Against the BFD Sandbox
-Want to run your integration tests against the real BFD sandbox instead of using the MockBlueButtonClient?  In docker-compose.yml, under the aggregation service, set the USE_BFD_MOCK env variable to true and then rerun `make start-it-debug.`
+Want to run your integration tests against the real BFD sandbox instead of using the MockBlueButtonClient?  In docker-compose.yml, under the aggregation service, set the USE_BFD_MOCK env variable to false and then rerun `make start-it-debug.`
 
 Note: Many of our integration tests are written for specific test data that only exists in our MockBlueButtonClient.  If you switch to the real BFD sandbox these tests will fail, but if you want a true end to end test this is the way to go.  A list of synthetic patients in the sandbox can be found [here](https://github.com/CMSgov/beneficiary-fhir-data/wiki/Synthetic-Data-Guide).
 

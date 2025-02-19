@@ -1,0 +1,63 @@
+{
+  "transactionTime": "2024-04-10T12:02:49.492+00:00",
+  "request": "http://dev.dpc.cms.gov/api/v1/Group/82771a76-f010-44bd-9f7a-7fb02b130f11/$export_format=json",
+  "requiresAccessToken": true,
+  "output": [
+    {
+      "type": "Patient",
+      "url": "https://dev.dpc.cms.gov/api/v1/Data/4173e1d6-3ea4-40f9-8998-aeb497dfc5fc-0.patient.ndjson",
+      "count": 3,
+      "extension": [
+        {
+          "url": "https://dpc.cms.gov/checksum",
+          "valueString": "sha256:b2eff2f375d1be93ad9d2097c4a2b95a599fbc6a999de34e0143edaca42b9518"
+        },
+        {
+          "url": "https://dpc.cms.gov/file_length",
+          "valueDecimal": 3496
+        }
+      ]
+    },
+    {
+      "type": "ExplanationOfBenefit",
+      "url": "https://dev.dpc.cms.gov/api/v1/Data/4173e1d6-3ea4-40f9-8998-aeb497dfc5fc-0.explanationofbenefit.ndjson",
+      "count": 210,
+      "extension": [
+        {
+          "url": "https://dpc.cms.gov/checksum",
+          "valueString": "sha256:3ca9e7bf6f5fe524a2245575924536b76a3a7080e744839d29d1fd2a19e6e8ca"
+        },
+        {
+          "url": "https://dpc.cms.gov/file_length",
+          "valueDecimal": 2042068
+        }
+      ]
+    },
+    {
+      "type": "Coverage",
+      "url": "https://dev.dpc.cms.gov/api/v1/Data/4173e1d6-3ea4-40f9-8998-aeb497dfc5fc-0.coverage.ndjson",
+      "count": 12,
+      "extension": [
+        {
+          "url": "https://dpc.cms.gov/checksum",
+          "valueString": "sha256:50598474d157eadcc3cce14a545b0d696233b08751902998ddc1a9a78f47bfd8"
+        },
+        {
+          "url": "https://dpc.cms.gov/file_length",
+          "valueDecimal": 93985
+        }
+      ]
+    }
+  ],
+  "error": [],
+  "extension": [
+    {
+      "url": "https://dpc.cms.gov/submit_time",
+      "valueDateTime": "2024-04-12T14:20:38.044+00:00"
+    },
+    {
+      "url": "https://dpc.cms.gov/complete_time",
+      "valueDateTime": "2024-04-12T14:20:39.714+00:00"
+    }
+  ]
+}

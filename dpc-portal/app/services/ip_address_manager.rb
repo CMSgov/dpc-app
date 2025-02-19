@@ -3,38 +3,25 @@
 # Manages ip addresses for an organization
 class IpAddressManager
   require 'ipaddr'
+  include CredentialManager
 
-  attr_reader :api_id, :errors
-
-  def initialize(api_id)
-    @api_id = api_id
-    @errors = []
-  end
-
-  # rubocop:disable Metrics/AbcSize
   def create_ip_address(ip_address:, label:)
-    if missing_params(ip_address, label)
-      return { response: false, message: "Failed to create IP address: #{@errors.join(', ')}." }
-    end
-
     label = strip_carriage_returns(label)
     ip_address = strip_carriage_returns(ip_address)
-    if invalid_ip?(ip_address) || label_length?(label)
-      return { response: false, message: "Failed to create IP address: #{@errors.join(', ')}." }
-    end
+    return { response: false, errors: @errors } if invalid_input?(ip_address, label)
 
     api_client = DpcClient.new
-    api_client.create_ip_address(api_id, params: { label: label, ip_address: ip_address })
+    api_client.create_ip_address(api_id, params: { label:, ip_address: })
 
     unless api_client.response_successful?
       Rails.logger.error "Failed to create IP address: #{api_client.response_body}"
-      @errors << (api_client.response_body || 'failed to create IP address')
+      parse_errors(api_client.response_body)
     end
 
     { response: api_client.response_successful?,
-      message: api_client.response_body }
+      message: api_client.response_body,
+      errors: }
   end
-  # rubocop:enable Metrics/AbcSize
 
   def delete_ip_address(params)
     api_client = DpcClient.new
@@ -42,7 +29,7 @@ class IpAddressManager
 
     unless api_client.response_successful?
       Rails.logger.error "Failed to delete IP address: #{api_client.response_body}"
-      @errors << (api_client.response_body || 'failed to delete IP address')
+      parse_errors(api_client.response_body) if api_client.response_body.present?
     end
 
     api_client.response_successful?
@@ -56,33 +43,40 @@ class IpAddressManager
       api_client.response_body['entities']
     else
       Rails.logger.warn "Could not get IP addresses: #{api_client.response_body}"
-      @errors << api_client.response_body
+      parse_errors(api_client.response_body) if api_client.response_body.present?
       []
     end
   end
 
   private
 
-  def missing_params(ip_address, label)
-    @errors << 'missing label' if label.blank?
-    @errors << 'missing IP address' if ip_address.blank?
-    ip_address.blank? || label.blank?
+  def invalid_input?(ip_address, label)
+    validate_label(label)
+    validate_ip_address(ip_address)
+    handle_root_errors if @root_errors.present?
+    @errors.present?
   end
 
-  def invalid_ip?(addr_string)
-    IPAddr.new(addr_string)
-    false
+  def validate_ip_address(addr_string)
+    if addr_string.blank?
+      @errors[:ip_address] = "IP address can't be blank."
+    else
+      IPAddr.new(addr_string).blank?
+    end
   rescue IPAddr::InvalidAddressError
-    @errors << 'invalid IP address'
-    true
-  end
-
-  def label_length?(label)
-    @errors << 'label cannot be over 25 characters' if label.length > 25
-    label.length > 25
+    @errors[:ip_address] = 'Invalid IP address.'
+    @root_errors << 'Invalid IP address.'
   end
 
   def strip_carriage_returns(str)
-    str.gsub("\r", '')
+    str&.gsub("\r", '')
+  end
+
+  def parse_errors(error_msg)
+    @errors[:root] = if error_msg&.include?('Max Ips for organization reached')
+                       'You entered the maximum number of IP addresses.'
+                     else
+                       SERVER_ERROR_MSG
+                     end
   end
 end

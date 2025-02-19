@@ -23,7 +23,7 @@ class CaveatSupplierTests {
                 () -> assertEquals(ExpirationCaveatSupplier.EXPIRATION_KEY, caveat.getCondition().getKey(), "Should have correct key"),
                 () -> assertEquals(MacaroonCondition.Operator.EQ, caveat.getCondition().getOp(), "Should have equals op"),
                 () -> assertTrue(OffsetDateTime.parse(caveat.getCondition().getValue()).truncatedTo(ChronoUnit.MINUTES)
-                        .isEqual(now.plus(5, ChronoUnit.MINUTES).truncatedTo(ChronoUnit.MINUTES)), "Should be 5 minutes in the future"));
+                        .isEqual(now.plusMinutes(5).truncatedTo(ChronoUnit.MINUTES)), "Should be 5 minutes in the future"));
     }
 
     @Test

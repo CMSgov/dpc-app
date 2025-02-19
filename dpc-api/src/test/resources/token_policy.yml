@@ -1,0 +1,7 @@
+versionPolicy:
+  minimumVersion: 1
+  currentVersion: 2
+
+expirationPolicy:
+  expirationOffset: 1
+  expirationUnit: "YEARS"
