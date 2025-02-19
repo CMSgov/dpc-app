@@ -49,7 +49,7 @@ public class OrganizationHelpers {
                     .encodedJson()
                     .execute();
 
-            if (searchBundle.getTotal() > 0) {
+            if (searchBundle.isEmpty()) {
                 return (Organization) searchBundle.getEntryFirstRep().getResource();
             }
         }

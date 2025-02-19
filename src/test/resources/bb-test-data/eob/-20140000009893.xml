@@ -4,7 +4,6 @@
       <lastUpdated value="2019-04-02T15:09:38.948-04:00"/>
    </meta>
    <type value="searchset"/>
-   <total value="1"/>
    <link>
       <relation value="self"/>
       <url value="https://fhir.backend.bluebutton.hhsdevcloud.us/v1/fhir/ExplanationOfBenefit?patient=20140000009893&amp;excludeSAMHSA=true"/>
