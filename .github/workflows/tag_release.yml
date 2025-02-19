@@ -1,4 +1,5 @@
 name: utility-tag-repo
+
 on:
   workflow_call:
     inputs:
@@ -26,6 +27,8 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v4
         with:
+          ref: ${{ inputs.repo_ref || 'main' }}
+        with:
           fetch-depth: 0
       - name: "Fetch git info"
         run: |
@@ -50,12 +53,10 @@ jobs:
             BODY='No changes'
           fi
           echo $BODY
-          echo 'body<<EOF' >> $GITHUB_OUTPUT
-          echo "$BODY" >> $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
-
+          echo "body=$BODY" >> "$GITHUB_OUTPUT"
       - name: Release
-        env:
-          BODY: ${{ steps.set_body.outputs.body }}
-        run: |
-          echo $BODY
+        if: ${{ false }}
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ steps.set_body.outputs.body }}
+          tag_name: ${{ steps.set_revs.outputs.next_rev }}
