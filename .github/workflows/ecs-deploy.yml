@@ -93,14 +93,14 @@ jobs:
       - name: Set Deployed Image Tag
         id: image-tag
         env:
-          EXPLICIT_TAG: ${{ inputs.tag }}
+          EXPLICIT_TAG: ${{ inputs.ecr_image_tag }}
         run: |
           if [ -z $EXPLICIT_TAG ] || [ $EXPLICIT_TAG = 'latest' ]; then
             image_tag=`aws --region us-east-1 ecr describe-images --repository-name dpc-api --image-ids 'imageTag=latest' '--query=imageDetails[].imageTags[] | [?contains(@, \`rls-\`)] | [0]' --output text`
             echo "image_tag=$image_tag" >> "$GITHUB_OUTPUT"
           else
           # Note: this will fail if the image doesn't exist
-            aws --region us-east-1 ecr describe-images --repository-name dpc-api --image-ids 'imageTag=${{ inputs.tag }}' > /dev/null
+            aws --region us-east-1 ecr describe-images --repository-name dpc-api --image-ids 'imageTag=${{ inputs.ecr_image_tag }}' > /dev/null
             echo "image_tag=$EXPLICIT_TAG" >> "$GITHUB_OUTPUT"
           fi
           echo $image_tag
@@ -172,7 +172,7 @@ jobs:
   services-up:
     name: All Services Healthy
     needs: deploy
-    uses: CMSgov/dpc-app/.github/workflows/check_healthy.yml@main
+    uses: ./.github/workflows/check_healthy.yml
     with:
       env: ${{ inputs.env }}
     secrets: inherit

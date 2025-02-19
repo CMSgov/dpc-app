@@ -246,11 +246,11 @@ public class JobBatchProcessor {
         }
 
         // If we get more than one unique Patient for an MBI then we've got some upstream problems.
-        if (patients.getTotal() == 1) {
+        if (patients.getEntry().size() == 1) {
             return Optional.of((Patient) patients.getEntryFirstRep().getResource());
         }
 
-        logger.error("Expected 1 Patient to match MBI but found {}", patients.getTotal());
+        logger.error("Expected 1 Patient to match MBI but found {}", patients.getEntry().size());
         return Optional.empty();
     }
 
