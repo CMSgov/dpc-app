@@ -50,8 +50,10 @@ jobs:
           if [ -z "$BODY" ]; then
             BODY='No changes'
           fi
+          echo $BODY
           echo "body=$BODY" >> "$GITHUB_OUTPUT"
       - name: Release
+        if: ${{ false }}
         uses: softprops/action-gh-release@v2
         with:
           body: ${{ steps.set_body.outputs.body }}
