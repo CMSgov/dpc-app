@@ -9,7 +9,7 @@ gemspec
 gem 'active_model_serializers'
 gem 'fhir_models'
 gem 'macaroons'
-gem 'nokogiri', '>= 1.16.5'
+gem 'nokogiri', '>= 1.18.3'
 gem 'oauth2'
 gem 'rspec-rails'
 gem 'rubocop'
