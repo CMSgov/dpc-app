@@ -191,7 +191,7 @@ class BlueButtonClientTest {
         Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
         assertNotNull(response, "The demo patient should have a non-null EOB bundle");
-        assertEquals(32, response.getTotal(), "The demo patient should have exactly 32 EOBs");
+        assertEquals(10, response.getEntry().size(), "The demo patient's first bundle should have exactly 10 EOBs");
     }
 
     @Test
@@ -199,7 +199,7 @@ class BlueButtonClientTest {
         Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID, TEST_LAST_UPDATED, null);
 
         assertNotNull(response, "The demo patient should have a non-null EOB bundle");
-        assertEquals(1, response.getTotal(), "The demo patient should have exactly 1 EOBs");
+        assertEquals(1, response.getEntry().size(), "The demo patient should have exactly 1 EOBs");
         assertNull(response.getLink(Bundle.LINK_NEXT), "Should have no next link since all the resources are in the bundle");
     }
 
@@ -230,7 +230,7 @@ class BlueButtonClientTest {
         final Bundle response = bbc.requestCoverageFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
         assertNotNull(response, "The demo patient should have a non-null Coverage bundle");
-        assertEquals(3, response.getTotal(), "The demo patient should have exactly 3 Coverage");
+        assertEquals(3, response.getEntry().size(), "The demo patient should have exactly 3 Coverage");
     }
 
     @Test
@@ -245,7 +245,7 @@ class BlueButtonClientTest {
     @Test
     void shouldHandlePatientsWithOnlyOneEOB() {
         final Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID, TEST_LAST_UPDATED, null);
-        assertEquals(1, response.getTotal(), "This demo patient should have exactly 1 EOB");
+        assertEquals(1, response.getEntry().size(), "This demo patient should have exactly 1 EOB");
     }
 
     @Test
