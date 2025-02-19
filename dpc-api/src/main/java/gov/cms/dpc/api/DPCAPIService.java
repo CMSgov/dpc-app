@@ -1,6 +1,5 @@
 package gov.cms.dpc.api;
 
-import ca.mestevens.java.configuration.bundle.TypesafeConfigurationBundle;
 import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
@@ -20,17 +19,23 @@ import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
+import gov.cms.dpc.common.logging.filters.LogHeaderFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
+import gov.cms.dpc.common.utils.UrlGenerator;
 import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.macaroons.BakeryModule;
 import gov.cms.dpc.queue.JobQueueModule;
-import io.dropwizard.Application;
 import io.dropwizard.auth.AuthValueFactoryProvider;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
+import org.apache.http.HttpHeaders;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 
@@ -56,6 +61,12 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
     @Override
     public void initialize(final Bootstrap<DPCAPIConfiguration> bootstrap) {
+        // Enable variable substitution with environment variables
+        EnvironmentVariableSubstitutor substitutor = new EnvironmentVariableSubstitutor(false);
+        SubstitutingSourceProvider provider =
+                new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), substitutor);
+        bootstrap.setConfigurationSourceProvider(provider);
+
         setupJacksonMapping(bootstrap);
         // Setup Guice bundle and module injection
         final GuiceBundle guiceBundle = setupGuiceBundle();
@@ -68,7 +79,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         bootstrap.addBundle(hibernateAuthBundle);
 
         bootstrap.addBundle(guiceBundle);
-        bootstrap.addBundle(new TypesafeConfigurationBundle("dpc.api"));
 
         // Wrapper around some of the uglier bundle initialization commands
         setupCustomBundles(bootstrap);
@@ -87,6 +97,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         environment.jersey().register(new JsonParseExceptionMapper());
         environment.jersey().register(new GenerateRequestIdFilter(false));
         environment.jersey().register(new LogResponseFilter());
+        environment.jersey().register(new LogHeaderFilter(HttpHeaders.ACCEPT_ENCODING));
 
         // Find Guice-aware validator and swap in for Dropwizard's default hk2 validator.
         Optional<Injector> injector = InjectorLookup.getInjector(this);
@@ -94,6 +105,12 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
             ValidatorFactory validatorFactory = injector.get().getInstance(ValidatorFactory.class);
             environment.setValidator(validatorFactory.getValidator());
         }
+
+        // Http healthchecks on dependent services
+        environment.healthChecks().register("api-self-check",
+            new HttpHealthCheck(UrlGenerator.generateVersionUrl(configuration.getServicePort(), configuration.getAppContextPath()))
+        );
+        environment.healthChecks().register("dpc-attribution", new HttpHealthCheck(configuration.getAttributionHealthCheckURL()));
     }
 
     private GuiceBundle setupGuiceBundle() {

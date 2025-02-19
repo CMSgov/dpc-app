@@ -4,7 +4,6 @@
         <lastUpdated value='2020-04-24T18:46:46.726+00:00'/>
     </meta>
     <type value='searchset'/>
-    <total value='1'/>
     <link>
         <relation value='first'/>
         <url value='https://sandbox.bluebutton.cms.gov/v1/fhir/Patient?_format=application%2Fjson%2Bfhir&amp;startIndex=0&amp;_count=10&amp;_id=-20000000001809'/>
@@ -113,6 +112,10 @@
                 <identifier>
                     <system value='https://bluebutton.cms.gov/resources/identifier/mbi-hash'/>
                     <value value='a006edba97087f2911a35706e46bf1287d21d8fa515024ace44d589bdef9d819'/>
+                </identifier>
+                <identifier>
+                    <system value="http://hl7.org/fhir/sid/us-mbi"/>
+                    <value value="1SQ3F00AA00"/>
                 </identifier>
                 <name>
                     <use value='usual'/>

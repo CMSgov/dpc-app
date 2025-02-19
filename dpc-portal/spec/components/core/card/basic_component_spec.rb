@@ -13,7 +13,7 @@ RSpec.describe Core::Card::BasicComponent, type: :component do
     let(:expected_html) do
       <<~HTML
         <div>
-          <div class="shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-x-3 padding-bottom-3">
+          <div class="bg-white shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-x-3 padding-bottom-3">
             <div class="display-flex flex-row flex-justify">
               <div class="flex-align-self-center">
                 <h1>Welcome</h1>
@@ -39,7 +39,7 @@ RSpec.describe Core::Card::BasicComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <div>
-            <div class="shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-x-3 padding-bottom-3">
+            <div class="bg-white shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-x-3 padding-bottom-3">
               <div class="display-flex flex-row flex-justify">
                 <div class="flex-align-self-center">
                   <h1>Yo</h1>

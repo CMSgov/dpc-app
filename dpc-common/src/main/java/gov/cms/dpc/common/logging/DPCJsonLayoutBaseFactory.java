@@ -4,12 +4,13 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.LayoutBase;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import io.dropwizard.logging.common.layout.DiscoverableLayoutFactory;
 import io.dropwizard.logging.json.EventJsonLayoutBaseFactory;
 
 import java.util.TimeZone;
 
 @JsonTypeName("json-dpc")
-public class DPCJsonLayoutBaseFactory extends EventJsonLayoutBaseFactory {
+public class DPCJsonLayoutBaseFactory extends EventJsonLayoutBaseFactory implements DiscoverableLayoutFactory<ILoggingEvent> {
 
     @Override
     public LayoutBase<ILoggingEvent> build(LoggerContext context, TimeZone timeZone) {

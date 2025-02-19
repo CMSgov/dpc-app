@@ -3,6 +3,7 @@
 require 'rails_helper'
 
 RSpec.feature 'new user signs up for account' do
+  include ActiveJob::TestHelper
   include MailerHelper
 
   before(:each) do
@@ -31,13 +32,13 @@ RSpec.feature 'new user signs up for account' do
     end
 
     scenario 'the email entered in to our job queue' do
-      assert_equal 1, Sidekiq::Worker.jobs.size
-      Sidekiq::Worker.drain_all
-      assert_equal 0, Sidekiq::Worker.jobs.size
+      assert_enqueued_jobs 1
+      perform_enqueued_jobs
+      assert_enqueued_jobs 0
     end
 
     scenario 'user sent a confirmation email with confirmation token' do
-      Sidekiq::Worker.drain_all
+      perform_enqueued_jobs
       expect(:confirmation_token).to be_present
 
       ctoken = last_email.body.match(/confirmation_token=[^"]*/)
@@ -46,7 +47,7 @@ RSpec.feature 'new user signs up for account' do
     end
 
     scenario 'user clicks on confirmation link to navigate to portal' do
-      Sidekiq::Worker.drain_all
+      perform_enqueued_jobs
       ctoken = last_email.body.match(/confirmation_token=[^"]*/)
 
       visit "/users/confirmation?#{ctoken}"
@@ -156,7 +157,7 @@ RSpec.feature 'new user signs up for account' do
 
       click_on('Sign up')
 
-      Sidekiq::Worker.drain_all
+      perform_enqueued_jobs
 
       visit new_user_session_path
 

@@ -6,10 +6,11 @@ module Page
     class NewAddressComponent < ViewComponent::Base
       attr_accessor :organization, :obj_name
 
-      def initialize(organization)
+      def initialize(organization, errors: {})
         super
         @organization = organization
         @obj_name = 'IP address'
+        @errors = errors
       end
     end
   end

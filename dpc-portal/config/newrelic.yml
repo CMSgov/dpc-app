@@ -1,0 +1,18 @@
+common: &default_settings
+  log_level: info
+  log_file_name: STDOUT
+
+  distributed_tracing:
+    enabled: false
+
+test:
+  <<: *default_settings
+  log_file_name: test_new_relic.log
+
+development:
+  <<: *default_settings
+  log_file_name: dev_newrelic.log
+  app_name: dpc-web-portal-local
+
+production:
+  <<: *default_settings

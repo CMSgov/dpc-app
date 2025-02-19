@@ -12,24 +12,35 @@ module Page
     class OrganizationListComponentPreview < ViewComponent::Preview
       OrgStruct = Struct.new(:name, :npi, :api_id)
 
+      def multiple_orgs_ao
+        links = []
+        3.times do |i|
+          org = ProviderOrganization.new(name: "Test Organization #{i}", npi: "#{i}111111111", id: i,
+                                         terms_of_service_accepted_at: 2.days.ago)
+          links << AoOrgLink.new(provider_organization: org)
+        end
+        render(Page::Organization::OrganizationListComponent.new(ao_or_cd: :ao, links:))
+      end
+
       def multiple_orgs
-        render(Page::Organization::OrganizationListComponent.new(
-                 organizations: [
-                   OrgStruct.new('Test Organization 1', 'npi_111111', 'api_111'),
-                   OrgStruct.new('Test Organization 2', 'npi_222222', 'api_222'),
-                   OrgStruct.new('Test Organization 3', 'npi_333333', 'api_333')
-                 ]
-               ))
+        links = []
+        3.times do |i|
+          org = ProviderOrganization.new(name: "Test Organization #{i}", npi: "#{i}111111111", id: i,
+                                         terms_of_service_accepted_at: 2.days.ago)
+          links << CdOrgLink.new(provider_organization: org)
+        end
+        render(Page::Organization::OrganizationListComponent.new(ao_or_cd: :cd, links:))
       end
 
       def one_org
-        render(Page::Organization::OrganizationListComponent.new(organizations: [OrgStruct.new('Test Organization',
-                                                                                               'npi_123456',
-                                                                                               'api_123')]))
+        org = ProviderOrganization.new(name: 'Health Hut', npi: '1111111111', id: 2,
+                                       terms_of_service_accepted_at: 2.days.ago)
+        link = CdOrgLink.new(provider_organization: org)
+        render(Page::Organization::OrganizationListComponent.new(ao_or_cd: :cd, links: [link]))
       end
 
       def no_org
-        render(Page::Organization::OrganizationListComponent.new(organizations: []))
+        render(Page::Organization::OrganizationListComponent.new(ao_or_cd: :cd, links: []))
       end
     end
   end

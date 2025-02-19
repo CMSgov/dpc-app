@@ -1,5 +1,7 @@
 package gov.cms.dpc.fhir.validations.dropwizard;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -10,8 +12,8 @@ import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration.FHIRValidationConfigu
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
 import org.glassfish.jersey.server.internal.inject.ConfiguredValidator;
-import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorFactory;
@@ -59,6 +61,10 @@ public class FHIRValidationModule extends AbstractModule {
 
     @Provides
     ValidationSupportChain provideSupportChain(DPCProfileSupport dpcModule) {
-        return new ValidationSupportChain(new DefaultProfileValidationSupport(), dpcModule);
+        FhirContext ctx = FhirContext.forDstu3();
+        return new ValidationSupportChain(
+                dpcModule,
+                new DefaultProfileValidationSupport(ctx),
+                new InMemoryTerminologyServerValidationSupport(ctx));
     }
 }

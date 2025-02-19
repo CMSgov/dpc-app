@@ -1,0 +1,33 @@
+execution:
+- executor: jmeter
+  scenario: web_admin_log_in_page
+- executor: jmeter
+  scenario: web_admin_org_page
+
+scenarios:
+  web_admin_log_in_page:
+    default-address: ${WEB_ADMIN_HOST}
+    retrieve-resources: false
+    requests:
+    - url: /admin/internal/sign_in
+      assert:
+      - contains:
+        - Data at the Point of Care
+        - Log in
+        subject: body
+        regexp: false
+  web_admin_org_page:
+    default-address: ${WEB_ADMIN_HOST}
+    retrieve-resources: false
+    requests:
+    - url: /admin/organizations
+      assert:
+      - contains:
+        - Data at the Point of Care
+        - Log in
+        subject: body
+        regexp: false
+reporting:
+  - module: passfail
+    criteria:
+      - "fail>1%, stop as failed"

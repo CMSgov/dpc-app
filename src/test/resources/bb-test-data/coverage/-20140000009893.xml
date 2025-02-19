@@ -4,7 +4,6 @@
         <lastUpdated value="2019-05-25T23:45:16.962-04:00"></lastUpdated>
     </meta>
     <type value="searchset"></type>
-    <total value="3"></total>
     <link>
         <relation value="self"></relation>
         <url value="https://sandbox.bluebutton.cms.gov/v1/fhir/Coverage/?_format=application%2Fjson%2Bfhir&amp;beneficiary=Patient%2F20140000009893&amp;_count=10&amp;startIndex=0"></url>

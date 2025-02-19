@@ -20,7 +20,6 @@
                 }
               ],
               "gender": "male",
-              "id": "0c527d2e-2e8a-4808-b11d-0fa06baf8254",
               "identifier": [
                 {
                   "system": "http://hl7.org/fhir/sid/us-npi",
@@ -66,7 +65,6 @@
                 }
               ],
               "gender": "female",
-              "id": "3461C774-B48F-11E8-96F8-529269fb1459",
               "identifier": [
                 {
                   "system": "http://hl7.org/fhir/sid/us-npi",
@@ -114,7 +112,6 @@
                 }
               ],
               "gender": "female",
-              "id": "C74C008D-42F8-4ED9-BF88-CEE659C7F692",
               "identifier": [
                 {
                   "system": "http://hl7.org/fhir/sid/us-npi",
@@ -162,7 +159,6 @@
                 }
               ],
               "gender": "male",
-              "id": "8D80925A-027E-43DD-8AED-9A501CC4CD91",
               "identifier": [
                 {
                   "system": "http://hl7.org/fhir/sid/us-npi",
@@ -195,7 +191,6 @@
           }
         ],
         "resourceType": "Bundle",
-        "total": 4,
         "type": "searchset"
       }
     }

@@ -32,8 +32,9 @@ RSpec.describe ClientTokensController, type: :controller do
       context 'with invalid organization id' do
         it 'redirects to portal' do
           other_org = create(:organization)
-          get :new, params: { organization_id: other_org.id }
-          expect(response.location).to include(portal_path)
+          expect(get(:new, params: {
+            organization_id: other_org.id
+          })).to redirect_to(authenticated_root_path)
         end
       end
     end
@@ -118,8 +119,11 @@ RSpec.describe ClientTokensController, type: :controller do
 
         it 'redirects to portal if invalid org' do
           other_org = create(:organization)
-          post :create, params: { organization_id: other_org.id, label: 'Test', api_environment: 'sandbox' }
-          expect(response.location).to include(portal_path)
+          expect(post(:create, params: {
+            organization_id: other_org.id,
+            label: 'Test',
+            api_environment: 'sandbox'
+          })).to redirect_to(authenticated_root_path)
         end
       end
 
@@ -130,7 +134,7 @@ RSpec.describe ClientTokensController, type: :controller do
         context 'successful API request' do
           before(:each) do
             stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-            reg_org = create(:registered_organization, organization: organization)
+            reg_org = create(:registered_organization, organization:)
 
             manager = instance_double(ClientTokenManager)
             allow(ClientTokenManager).to receive(:new)
@@ -152,7 +156,7 @@ RSpec.describe ClientTokensController, type: :controller do
         context 'unsuccessful API request' do
           before(:each) do
             stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
-            reg_org = create(:registered_organization, organization: organization)
+            reg_org = create(:registered_organization, organization:)
 
             manager = instance_double(ClientTokenManager)
             allow(ClientTokenManager).to receive(:new)
