@@ -10,9 +10,32 @@ on:
         default: 'dev'
 
 jobs:
-  wait-for-api:
-    name: Wait for dpc-api to be healthy
+  wait-for-services:
+    name: Wait for services to be healthy
     runs-on: self-hosted
+    strategy:
+      matrix:
+        include:
+          - service: api
+            script_params: api-1 api api frontend v9
+          - service: attribution
+            script_params: attribution attribution attribution backend v9
+          - service: aggregation
+            script_params: aggregation aggregation aggregation backend v9
+          - service: consent
+            script_params: consent consent consent backend v9
+          - service: web
+            script_params: web-v2-1 web web frontend v9
+          - service: sidekiq-web
+            script_params: sidekiq sidekiq sidekiq frontend v9
+          - service: admin
+            script_params: web-admin-1 web-admin web-admin frontend v9
+          - service: sidekiq-admin
+            script_params: sidekiq-admin sidekiq-admin sidekiq-admin frontend v9
+          - service: portal
+            script_params: web-portal-1 dpc-portal web-portal frontend v9
+          - service: sidekiq-portal
+            script_params: sidekiq-portal sidekiq-portal sidekiq-portal frontend v9
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
@@ -22,157 +45,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Check API
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+      - name: Check Service
         run: |
-          ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} api-1 api api frontend v9
-  wait-for-attribution:
-    name: Wait for dpc-attribution to be healthy
-    runs-on: self-hosted
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
-        with:
-          path: dpc-app
-      - name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Check Web
-        run: |
-          ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} attribution attribution attribution backend v9
-  wait-for-aggregation:
-    name: Wait for dpc-aggregation to be healthy
-    runs-on: self-hosted
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
-        with:
-          path: dpc-app
-      - name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Check Web
-        run: |
-          ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} aggregation aggregation aggregation backend v9
-  wait-for-consent:
-    name: Wait for dpc-consent to be healthy
-    runs-on: self-hosted
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
-        with:
-          path: dpc-app
-      - name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Check Web
-        run: |
-          ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} consent consent consent backend v9
-  wait-for-web:
-    name: Wait for dpc-web to be healthy
-    if: inputs.env != 'prod'
-    runs-on: self-hosted
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
-        with:
-          path: dpc-app
-      - name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Check Web
-        run: |
-          ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} web-v2-1 web web frontend v9
-  wait-for-web-sidekiq:
-    name: Wait for dpc-web sidekiq to be healthy
-    if: inputs.env != 'prod'
-    runs-on: self-hosted
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
-        with:
-          path: dpc-app
-      - name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Check Web Sidekiq
-        run: |
-          ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} sidekiq sidekiq sidekiq frontend v9
-  wait-for-web-admin:
-    name: Wait for dpc-admin to be healthy
-    if: inputs.env != 'prod'
-    runs-on: self-hosted
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
-        with:
-          path: dpc-app
-      - name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Check Web
-        run: |
-          ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} web-admin-1 web-admin web-admin frontend v9
-  wait-for-admin-sidekiq:
-    name: Wait for dpc-admin sidekiq to be healthy
-    if: inputs.env != 'prod'
-    runs-on: self-hosted
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
-        with:
-          path: dpc-app
-      - name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Check Admin Sidekiq
-        run: |
-          ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} sidekiq-admin sidekiq-admin sidekiq-admin frontend v9
-  wait-for-portal:
-    name: Wait for dpc-portal to be healthy
-    if: inputs.env != 'prod'
-    runs-on: self-hosted
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
-        with:
-          path: dpc-app
-      - name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Check Web
-        run: |
-          ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} web-portal-1 dpc-portal web-portal frontend v9
-  wait-for-portal-sidekiq:
-    name: Wait for dpc-portal sidekiq to be healthy
-    if: inputs.env != 'prod'
-    runs-on: self-hosted
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
-        with:
-          path: dpc-app
-      - name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Check Portal Sidekiq
-        run: |
-          ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} sidekiq-portal sidekiq-portal sidekiq-portal frontend v9
+          ./dpc-app/scripts/check-deployment-status.sh ${{ inputs.env }} ${{ matrix.script_params }}
