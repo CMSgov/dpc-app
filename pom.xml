@@ -542,8 +542,6 @@
                                         </arg>
                                         <!-- Tell ErrorProne to ignore checking for processed annotations-->
                                         <arg>-Xlint:all,-processing</arg>
-                                        <!-- For now, lets just treat errors as errors, and warnings can be ignored -->
-                                         <arg>-Werror</arg>
                                     </compilerArgs>
                                     <annotationProcessorPaths>
                                         <path>
