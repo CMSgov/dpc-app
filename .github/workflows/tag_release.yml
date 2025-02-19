@@ -1,5 +1,4 @@
 name: utility-tag-repo
-
 on:
   workflow_call:
     inputs:
@@ -51,7 +50,10 @@ jobs:
             BODY='No changes'
           fi
           echo $BODY
-          echo "body=$BODY" >> "$GITHUB_OUTPUT"
+          echo 'body<<EOF' >> $GITHUB_OUTPUT
+          echo "$BODY" >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+
       - name: Release
         if: ${{ false }}
         uses: softprops/action-gh-release@v2
