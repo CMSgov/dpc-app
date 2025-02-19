@@ -30,6 +30,8 @@ import io.swagger.annotations.*;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -38,8 +40,9 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
@@ -48,6 +51,7 @@ import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 @Api(value = "Patient", authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Patient")
 public class PatientResource extends AbstractPatientResource {
+    private static final Logger logger = LoggerFactory.getLogger(PatientResource.class);
 
     // TODO: This should be moved into a helper class, in DPC-432.
     // This checks to see if the Identifier is fully specified or not.
@@ -139,7 +143,10 @@ public class PatientResource extends AbstractPatientResource {
     public Bundle bulkSubmitPatients(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
                                      @ApiParam Parameters params) {
         final Bundle patientBundle = (Bundle) params.getParameterFirstRep().getResource();
-        final Consumer<Patient> entryHandler = (patient) -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator);
+        logger.info("submittedPatients={}", patientBundle.getEntry().size());
+
+        final Function<Patient, Optional<WebApplicationException>> entryHandler =
+            patient -> validateAndAddOrg(patient, organization.getOrganization().getId(), validator);
 
         return bulkResourceClient(Patient.class, client, entryHandler, patientBundle);
     }
@@ -289,15 +296,14 @@ public class PatientResource extends AbstractPatientResource {
         return ValidationHelpers.validateAgainstProfile(this.validator, parameters, PatientProfile.PROFILE_URI);
     }
 
-    private static void validateAndAddOrg(Patient patient, String organizationID, FhirValidator validator) {
+    private static Optional<WebApplicationException> validateAndAddOrg(Patient patient, String organizationID, FhirValidator validator) {
         // Set the Managing Org, since we need it for the validation
         patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
         final ValidationResult result = validator.validateWithResult(patient, new ValidationOptions().addProfile(PatientProfile.PROFILE_URI));
-        if (!result.isSuccessful()) {
-            // Temporary until DPC-536 is merged in
-            if (result.getMessages().get(0).getSeverity() != ResultSeverityEnum.INFORMATION) {
-                throw new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422);
-            }
+        if ((!result.isSuccessful()) && (result.getMessages().get(0).getSeverity() != ResultSeverityEnum.INFORMATION)) {
+            return Optional.of(new WebApplicationException(APIHelpers.formatValidationMessages(result.getMessages()), HttpStatus.UNPROCESSABLE_ENTITY_422));
+        } else {
+            return Optional.empty();
         }
     }
 }

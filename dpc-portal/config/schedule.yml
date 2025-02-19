@@ -1,0 +1,27 @@
+verify_ao_job:
+  cron: "0 1 * * 0"
+  class: "VerifyAoJob"
+  queue: portal
+
+verify_dpc_health_job:
+  cron: "*/1 * * * *"
+  class: "VerifyResourceHealthJob"
+  queue: portal
+  args:
+    check_dpc: true
+    check_cpi: false
+    check_idp: false
+
+verify_non_dpc_health_job:
+  cron: "0 * * * *"
+  class: "VerifyResourceHealthJob"
+  queue: portal
+  args:
+    check_dpc: false
+    check_cpi: true
+    check_idp: true
+
+log_organizations_api_credential_status_job:
+  cron: "0 0 * * *"
+  class: "LogOrganizationsApiCredentialStatusJob"
+  queue: portal

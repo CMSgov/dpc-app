@@ -3,24 +3,22 @@ package gov.cms.dpc.attribution.cli;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.dao.tables.OrganizationEndpoints;
 import gov.cms.dpc.attribution.dao.tables.Organizations;
 import gov.cms.dpc.attribution.dao.tables.Patients;
 import gov.cms.dpc.attribution.dao.tables.Providers;
-import gov.cms.dpc.attribution.dao.tables.records.OrganizationEndpointsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.OrganizationsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
 import gov.cms.dpc.attribution.jdbi.RosterUtils;
-import gov.cms.dpc.attribution.utils.DBUtils;
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
-import io.dropwizard.Application;
-import io.dropwizard.cli.EnvironmentCommand;
+import gov.cms.dpc.testing.utils.DBUtils;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.cli.EnvironmentCommand;
+import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.db.PooledDataSourceFactory;
-import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.hl7.fhir.dstu3.model.*;
@@ -40,7 +38,7 @@ import java.util.*;
 
 public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration> {
 
-    private static Logger logger = LoggerFactory.getLogger(SeedCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(SeedCommand.class);
     private static final String CSV = "test_associations.csv";
     private static final String ORGANIZATION_BUNDLE = "organization_bundle.json";
     private static final String PROVIDER_BUNDLE = "provider_bundle.json";
@@ -87,7 +85,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             final FhirContext ctx = FhirContext.forDstu3();
             final IParser parser = ctx.newJsonParser();
             final FHIREntityConverter converter = FHIREntityConverter.initialize();
-            // Start with the Organizations and their endpoints
+            // Start with the Organizations
             seedOrganizationBundle(converter, context, parser);
 
             // Providers next
@@ -109,7 +107,6 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                 throw new MissingResourceException("Can not find seeds file", this.getClass().getName(), CSV);
             }
             final Bundle bundle = parser.parseResource(Bundle.class, orgBundleStream);
-            final List<EndpointEntity> endpointEntities = BundleParser.parse(Endpoint.class, bundle, (endpoint) -> converter.fromFHIR(EndpointEntity.class, endpoint), ORGANIZATION_ID);
             final List<OrganizationEntity> organizationEntities = BundleParser.parse(Organization.class,
                     bundle,
                     (org) -> converter.fromFHIR(OrganizationEntity.class, org), ORGANIZATION_ID);
@@ -117,10 +114,6 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             organizationEntities
                     .stream()
                     .map(entity -> organizationEntityToRecord(context, entity))
-                    .forEach(context::executeInsert);
-            endpointEntities
-                    .stream()
-                    .map(entity -> endpointsEntityToRecord(context, entity))
                     .forEach(context::executeInsert);
         }
     }
@@ -203,24 +196,6 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         record.setState(address.getState());
         record.setPostalCode(address.getPostalCode());
         record.setCountry(address.getCountry());
-        return record;
-    }
-
-    private static OrganizationEndpointsRecord endpointsEntityToRecord(DSLContext context, EndpointEntity entity) {
-        final OrganizationEndpointsRecord record = context.newRecord(OrganizationEndpoints.ORGANIZATION_ENDPOINTS, entity);
-
-        final EndpointEntity.ConnectionType connectionType = entity.getConnectionType();
-        record.setOrganizationId(entity.getOrganization().getId());
-        record.setSystem(connectionType.getSystem());
-        record.setCode(connectionType.getCode());
-
-        // Not sure why we have to manually set these values
-        record.setStatus(entity.getStatus().ordinal());
-        record.setName(entity.getName());
-        record.setAddress(entity.getAddress());
-        record.setValidationStatus(entity.getValidationStatus().ordinal());
-        record.setValidationMessage(entity.getValidationMessage());
-
         return record;
     }
 

@@ -4,11 +4,14 @@ module Page
   module Organization
     # Render a USWDS-styled organization list for an implementer.
     class OrganizationListComponent < ViewComponent::Base
-      def initialize(organizations:)
+      def initialize(ao_or_cd:, links:)
         super
-        @organizations = organizations
-        @org_names = organizations.map(&:name)
-        @org_npis = organizations.map(&:npi)
+        @ao = ao_or_cd == :ao
+        @links = links
+      end
+
+      def ao?
+        @ao
       end
     end
   end

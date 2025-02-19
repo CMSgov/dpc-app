@@ -1,0 +1,17 @@
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::AO_STEPS, @step)) %>
+<div>
+  <div class="usa-alert usa-alert--error margin-bottom-4">
+    <div class="usa-alert__body">
+      <p class="usa-alert__text">
+        <%= t(@status) %>
+      </p>
+    </div>
+  </div>
+  <p><%=raw t(key=@text, org_name: @org_name) %></p>
+  <% 'have to put statement here, as do not have route helper in ViewComponent'
+    if @reason == :fail_to_proof %>
+      <%= button_to login_organization_invitation_url(@invitation.provider_organization, @invitation), class: 'usa-button margin-bottom-3', data: { turbo: false } do %>
+        Sign in with <span class="login-button__logo">Login.gov</span>
+      <% end %>
+    <% end %>
+</div>

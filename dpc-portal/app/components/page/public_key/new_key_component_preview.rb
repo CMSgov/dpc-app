@@ -4,18 +4,17 @@ module Page
   module PublicKey
     # Renders public_keys/new preview
     class NewKeyComponentPreview < ViewComponent::Preview
-      def default
-        render(Page::PublicKey::NewKeyComponent.new(MockOrg.new('Health Hut')))
-      end
-    end
-
-    # Mocks dpc-api organization
-    class MockOrg
-      attr_accessor :name, :path_id
-
-      def initialize(name)
-        @name = name
-        @path_id = 'some-guid'
+      # @param show_errors "Show errors" toggle
+      def default(show_errors: false)
+        errors = if show_errors
+                   { label: 'Cannot be blank',
+                     public_key: 'Cannot be blank',
+                     snippet_signature: "Can't be blank" }
+                 else
+                   {}
+                 end
+        org = ProviderOrganization.new(name: 'Health Hut', npi: '1111111111', id: 2)
+        render(Page::PublicKey::NewKeyComponent.new(org, errors:))
       end
     end
   end

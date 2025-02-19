@@ -24,7 +24,10 @@ Rails.application.configure do
 
   # Compress JavaScripts and CSS.
   
-  config.assets.js_compressor = Uglifier.new(:harmony => true)
+  config.assets.configure do |conf|
+    conf.js_compressor = :uglifier
+    conf.css_compressor = :sass
+  end
   # config.assets.css_compressor = :sass
 
   # Do not fallback to assets pipeline if a precompiled asset is missed.
@@ -86,8 +89,9 @@ Rails.application.configure do
     user_name:            ENV['SMTP_USER_NAME'],
     password:             ENV['SMTP_PASSWORD'],
     authentication:       ENV['SMTP_AUTH'],
-    openssl_verify_mode:  ENV['SMTP_SSL_VERIFY'],
-    enable_starttls_auto: true
+    openssl_verify_mode:  'peer',
+    tls: true,
+    ca_file: '/etc/ssl/certs/ca-certificates.crt'
   }
 
   # Ignore bad email addresses and do not raise email delivery errors.

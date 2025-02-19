@@ -25,8 +25,7 @@ public abstract class AbstractOrganizationResource {
     /**
      * Register a {@link Organization} with the API
      * <p>
-     * We're currently using a {@link Bundle} resource, which allows us to include both the {@link Organization}
-     * as well as any {@link org.hl7.fhir.dstu3.model.Endpoint} resources.
+     * We're currently using a {@link Bundle} resource, which allows us to include the {@link Organization}.
      * <p>
      * The {@link Bundle} is submitted as the Resource portion of the {@link Parameters} object.
      *
@@ -54,7 +53,7 @@ public abstract class AbstractOrganizationResource {
      *
      * @param organizationID {@link UUID} of organization
      * @param organization   {@link Organization}
-     * @return - {@link Response} whether or not the {@link Organization} was updated
+     * @return - {@link Response} whether the {@link Organization} was updated
      */
     @PUT
     @FHIR
@@ -67,7 +66,7 @@ public abstract class AbstractOrganizationResource {
      * Note: This drop ALL resources associated to the given Organization
      *
      * @param organizationID - {@link UUID} of organization
-     * @return - {@link Response} whether or not the drop was successful
+     * @return - {@link Response} whether the drop was successful
      */
     @DELETE
     @FHIR

@@ -1,0 +1,42 @@
+<%= javascript_tag do %>
+function make_current(link_index) {
+  const selectors = <%= raw @selectors.to_s %>;
+  var current_index = 0;
+  for (anchor of document.querySelector('#<%= @header_id %>').getElementsByTagName("button")) {
+    if (current_index == link_index){
+      anchor.className = 'usa-button usa-button--outline usa-button--active';
+      anchor.style.borderBottom = '5px solid #162E51';
+    if (document.querySelector(selectors[current_index])) {
+        document.querySelector(selectors[current_index]).style.display = 'block';
+      }
+    } else {
+      anchor.className = 'usa-button usa-button--outline';
+      anchor.style.borderBottom = '5px solid transparent';
+      if (document.querySelector(selectors[current_index])) {
+        document.querySelector(selectors[current_index]).style.display = 'none';
+      }
+    }
+    current_index++;
+  }
+}
+document.addEventListener("DOMContentLoaded", function() {
+    if (document.querySelector("#<%= @header_id %>")) {
+      document.querySelector("#<%= @header_id %>").style.display = 'block';
+    }
+    make_current(<%= @start_index %>);
+});
+<% end %>
+<div class="usa-overlay"></div>
+<header id="<%= @header_id %>" class="usa-header usa-header--extended margin-bottom-2" style="display: none">
+  <nav>
+    <ul class="usa-button-group">
+        <% @links.each_with_index do |link, index|
+           text, _, _ = link
+        %>
+        <li><button type="button" style="box-shadow: none; border-radius: 0;" class="usa-button usa-button--outline" onclick="make_current(<%= index %>); return false">
+	  <%= text %>
+        </button></li>
+          <% end %>
+      </ul>
+  </nav>
+</header>

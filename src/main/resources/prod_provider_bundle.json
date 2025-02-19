@@ -20,7 +20,6 @@
                 }
               ],
               "gender": "female",
-              "id": "3461C774-B48F-11E8-96F8-529269fb1459",
               "identifier": [
                 {
                   "system": "http://hl7.org/fhir/sid/us-npi",
@@ -68,7 +67,6 @@
                 }
               ],
               "gender": "female",
-              "id": "C74C008D-42F8-4ED9-BF88-CEE659C7F692",
               "identifier": [
                 {
                   "system": "http://hl7.org/fhir/sid/us-npi",
@@ -101,7 +99,6 @@
           }
         ],
         "resourceType": "Bundle",
-        "total": 4,
         "type": "searchset"
       }
     }

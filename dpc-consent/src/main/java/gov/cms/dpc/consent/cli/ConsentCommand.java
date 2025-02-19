@@ -2,8 +2,8 @@ package gov.cms.dpc.consent.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.consent.DPCConsentConfiguration;
-import io.dropwizard.cli.Command;
-import io.dropwizard.cli.ConfiguredCommand;
+import io.dropwizard.core.cli.Command;
+import io.dropwizard.core.cli.ConfiguredCommand;
 import net.sourceforge.argparse4j.inf.Subparser;
 
 /**
@@ -30,6 +30,7 @@ public abstract class ConsentCommand extends ConfiguredCommand<DPCConsentConfigu
                 .required(true)
                 .setDefault("http://localhost:3500/v1")
                 .help("URL of the Attribution Service (used to verify ids)");
+        this.addFileArgument(subparser);
     }
 
     public abstract void addAdditionalOptions(Subparser subparser);

@@ -8,7 +8,7 @@
 ### AbstractDAOTest
 This class is used to write tests for DAO objects.  It provides a ```DAOTestExtension``` configured to use Postgres in a TestContainer for your tests.  It takes care of the lifecycle of the container, manages DB migrations and ensures that you have a fresh DB for each of your tests.
 
-For an example of how to use the class, see [IpAddressDAOUnitTest.java](https://github.com/CMSgov/dpc-app/blob/master/dpc-api/src/test/java/gov/cms/dpc/api/jdbi/IpAddressDAOTest.java)
+For an example of how to use the class, see [IpAddressDAOUnitTest.java](https://github.com/CMSgov/dpc-app/blob/main/dpc-api/src/test/java/gov/cms/dpc/api/jdbi/IpAddressDAOTest.java)
 
 For info on TestContainers, see: [https://testcontainers.com](https://testcontainers.com)
 

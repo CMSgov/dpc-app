@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+if ! gem list foreman -i --silent; then
+  echo "Installing foreman..."
+  gem install foreman
+fi
+
+echo "Starting Procfile.nonprod"
+export EVERYTHING_AFTER_PIPE_REGEX='s/[^|]*|//'
+exec foreman start -f Procfile.sidekiq-nonprod "$@" | sed $EVERYTHING_AFTER_PIPE_REGEX

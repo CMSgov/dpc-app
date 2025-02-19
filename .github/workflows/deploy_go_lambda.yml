@@ -1,0 +1,72 @@
+name: utility-deploy-go-lambda
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: string
+      project:
+        description: Project name
+        required: true
+        type: string
+      go_files:
+        description: space-delimited go files
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    name: "Build and Deploy"
+    if: ${{ inputs.env != 'prod' }}
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./lambda/${{ inputs.project }}
+    environment: ${{ inputs.env }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+      - name: Build ${{ inputs.project }} zip file
+        env:
+          CGO_ENABLED: 0
+        run: |
+          go build -o bootstrap ${{ inputs.go_files }}
+          zip function.zip bootstrap
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+      - name: Upload and reload
+        env:
+          LABEL: ${{ inputs.env }}-${{ inputs.project }}
+        run: |
+          aws s3 cp --no-progress function.zip \
+            s3://dpc-$LABEL-function/function-${{ github.sha }}.zip
+          aws lambda update-function-code --function-name dpc-$LABEL \
+            --s3-bucket dpc-$LABEL-function --s3-key function-${{ github.sha }}.zip
+
+  promote:
+    name: "Promote to prod"
+    if: ${{ inputs.env == 'prod' }}
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-github-actions
+      - name: Promote lambda code from test to prod
+        run: |
+          aws s3 cp --no-progress \
+            s3://dpc-test-${{ inputs.project }}-function/function-${{ github.sha }}.zip \
+            s3://dpc-prod-${{ inputs.project }}-function/function-${{ github.sha }}.zip
+          aws lambda update-function-code --function-name dpc-prod-${{ inputs.project }} \
+            --s3-bucket dpc-prod-${{ inputs.project }}-function --s3-key function-${{ github.sha }}.zip
