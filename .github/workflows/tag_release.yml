@@ -50,7 +50,7 @@ jobs:
           fi
           echo $BODY
           echo "body<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$BDOY" >> "$GITHUB_OUTPUT"
+          echo "$BODY" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
       - name: Release
         env:
