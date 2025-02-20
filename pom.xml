@@ -39,7 +39,7 @@
         <slf4j.version>2.0.12</slf4j.version>
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
         <hapi.fhir.version>7.6.0</hapi.fhir.version>
-        <pgsql.version>42.7.4</pgsql.version>
+        <pgsql.version>42.7.5</pgsql.version>
         <java.version>11</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
         <jib.ecr.root>755619740999.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
@@ -275,7 +275,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>32.0.0-jre</version>
+                <version>32.1.3-jre</version>
             </dependency>
             <dependency>
                 <groupId>com.newrelic.agent.java</groupId>
@@ -542,8 +542,6 @@
                                         </arg>
                                         <!-- Tell ErrorProne to ignore checking for processed annotations-->
                                         <arg>-Xlint:all,-processing</arg>
-                                        <!-- For now, lets just treat errors as errors, and warnings can be ignored -->
-                                        <!-- <arg>-Werror</arg> -->
                                     </compilerArgs>
                                     <annotationProcessorPaths>
                                         <path>
