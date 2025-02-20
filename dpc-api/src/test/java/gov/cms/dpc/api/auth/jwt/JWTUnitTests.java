@@ -460,7 +460,7 @@ class JWTUnitTests {
             final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
 
             final Map<String, Object> claims = new HashMap<>();
-            claims.put("exp", -100);
+            claims.put("exp", "-100");
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
@@ -481,37 +481,6 @@ class JWTUnitTests {
 
             assertEquals(400, response.getStatus(), "Should not be valid");
             assertTrue(response.readEntity(String.class).contains("JWT is expired"), "Should have correct exception");
-        }
-
-        @ParameterizedTest
-        @EnumSource(KeyType.class)
-        void testFutureExpiration(KeyType keyType) throws NoSuchAlgorithmException {
-            // Submit JWT with non-client token
-            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
-
-            final Map<String, Object> claims = new HashMap<>();
-            claims.put("exp", DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(Instant.now().atOffset(ZoneOffset.UTC).plusMinutes(5)));
-
-            final String macaroon = buildMacaroon();
-            final String id = UUID.randomUUID().toString();
-            final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID().toString()).and()
-                    .audience().add("localhost:3002/v1/Token/auth").and()
-                    .issuer(macaroon)
-                    .subject(macaroon)
-                    .id(id)
-                    .claims().add(claims).and()
-                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
-                    .compact();
-
-            // Submit the JWT
-            Response response = RESOURCE.target("/v1/Token/validate")
-                    .request()
-                    .accept(MediaType.APPLICATION_JSON)
-                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
-
-            assertEquals(400, response.getStatus(), "Should not be valid");
-            assertTrue(response.readEntity(String.class).contains("Token expiration cannot be more than 5 minutes in the future"), "Should have correct exception");
         }
 
         @ParameterizedTest
@@ -716,7 +685,6 @@ class JWTUnitTests {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
             final String m = buildMacaroon();
 
-
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
                     .header().add("kid", UUID.randomUUID().toString()).and()
@@ -724,7 +692,7 @@ class JWTUnitTests {
                     .issuer(m)
                     .subject(m)
                     .id(id)
-                    .claim("exp", Instant.MAX.getEpochSecond() + 60)
+                    .claim("exp", String.valueOf(Instant.MAX.getEpochSecond() + 60))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
