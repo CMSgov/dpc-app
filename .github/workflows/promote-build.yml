@@ -2,6 +2,7 @@ name: 'DPC - Promote Build'
 
 on:
   workflow_dispatch:
+    inputs:
       from_env:
         description: AWS environment to promote FROM
         required: true
@@ -11,7 +12,7 @@ on:
         description: AWS environment to promote TO
         required: true
         type: 'string'
-        default: 'dev'
+        default: 'test'
       confirm_env:
         description: Double check environment to promote TO
         required: true
