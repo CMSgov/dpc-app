@@ -242,7 +242,7 @@ DEPENDENCIES
   api_client!
   fhir_models
   macaroons
-  nokogiri (>= 1.16.5)
+  nokogiri (>= 1.18.3)
   oauth2
   rspec-rails
   rubocop
