@@ -13,6 +13,8 @@ jobs:
   wait-for-services:
     name: Wait for services to be healthy
     runs-on: self-hosted
+    env:
+      JAVA_TOOL_OPTIONS: -Xmx5536m -Xms1536m -XX:MaxMetaspaceSize=5024m
     strategy:
       matrix:
         include:
