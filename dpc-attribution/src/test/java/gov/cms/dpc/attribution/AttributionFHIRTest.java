@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.*;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -15,6 +16,7 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
 import gov.cms.dpc.testing.OrganizationHelpers;
 import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,8 +24,6 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -128,14 +128,18 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         // Try to create roster for provider with existing one
         // Re-add the meta, because it gets stripped
         FHIRBuilders.addOrganizationTag(createdGroup, UUID.fromString(organizationID));
-        WebApplicationException e = assertThrows(WebApplicationException.class,
+        ForbiddenOperationException exception = assertThrows(ForbiddenOperationException.class,
                 () -> client
                         .create()
                         .resource(createdGroup)
                         .encodedJson().execute()
         );
-        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-        assertTrue(e.getMessage().contains("Could not create a roster for this provider as they already have one."));
+
+        OperationOutcome outcome = (OperationOutcome) exception.getOperationOutcome();
+        assertEquals(HttpStatus.FORBIDDEN_403, exception.getStatusCode());
+        assertEquals(
+                "Could not create a roster for this provider as they already have one.  Try updating it instead, or first deleting it.",
+                outcome.getIssueFirstRep().getDetails().getText());
 
         // Try to get attributed patients
         final Bundle attributed = client
