@@ -49,6 +49,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import static java.sql.Date.from;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -117,7 +118,7 @@ public class APIAuthHelpers {
                 .issuer(macaroon)
                 .subject(macaroon)
                 .id(UUID.randomUUID().toString())
-                .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
+                .expiration(from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
                 .signWith(privateKey, getSigningAlgorithm(KeyType.RSA))
                 .compact();
 
@@ -407,10 +408,6 @@ public class APIAuthHelpers {
         @Override
         public void interceptResponse(IHttpResponse theResponse) {
             // We don't need this
-        }
-
-        public AuthResponse getAuthResponse() {
-            return this.response;
         }
 
         private void refreshAuthToken() {
