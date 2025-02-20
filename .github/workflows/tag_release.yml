@@ -28,9 +28,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.repo_ref || 'main' }}
-      - name: "Fetch git info"
-        run: |
-          git fetch --quiet
+          fetch-depth: 0
       - name: "Calculate Next Revision"
         id: set_revs
         run: |
@@ -50,7 +48,10 @@ jobs:
           if [ -z "$BODY" ]; then
             BODY='No changes'
           fi
-          echo "body=$BODY" >> "$GITHUB_OUTPUT"
+          echo $BODY
+          echo "body<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$BODY" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
