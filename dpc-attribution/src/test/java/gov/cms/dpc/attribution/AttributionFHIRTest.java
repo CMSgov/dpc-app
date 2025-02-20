@@ -128,15 +128,14 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         // Try to create roster for provider with existing one
         // Re-add the meta, because it gets stripped
         FHIRBuilders.addOrganizationTag(createdGroup, UUID.fromString(organizationID));
-        try {
-            client
-                    .create()
-                    .resource(createdGroup)
-                    .encodedJson().execute();
-        } catch (WebApplicationException e) {
-            assertEquals(Response.Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
-            assertTrue(e.getMessage().contains("Could not create a roster for this provider as they already have one."));
-        }
+        WebApplicationException e = assertThrows(WebApplicationException.class,
+                () -> client
+                        .create()
+                        .resource(createdGroup)
+                        .encodedJson().execute()
+        );
+        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), e.getResponse().getStatus());
+        assertTrue(e.getMessage().contains("Could not create a roster for this provider as they already have one."));
 
         // Try to get attributed patients
         final Bundle attributed = client
