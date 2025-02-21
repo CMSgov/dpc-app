@@ -17,7 +17,6 @@ jobs:
   build-api:
     name: "Build and Test API"
     runs-on: ubuntu-20.04
-    if: ${{ false }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
@@ -56,7 +55,6 @@ jobs:
   build-dpc-web:
     name: "Build and Test DPC Web"
     runs-on: ubuntu-latest
-    if: ${{ false }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
@@ -74,7 +72,6 @@ jobs:
   build-dpc-admin:
     name: "Build and Test DPC Admin Portal"
     runs-on: ubuntu-latest
-    if: ${{ false }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
@@ -92,7 +89,6 @@ jobs:
   build-dpc-portal:
     name: "Build and Test DPC Portal"
     runs-on: ubuntu-latest
-    if: ${{ false }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
