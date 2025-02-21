@@ -16,9 +16,6 @@ echo "│                           │"
 echo "│  Running Api Gem Tests    │"
 echo "│                           │"
 echo "└───────────────────────────┘"
-docker run --rm -v ${PWD}/engines/api_client/Gemfile.lock:/api-client/Gemfile.lock api-client bundle update nokogiri
-cat Gemfile.lock
-git diff Gemfile.lock
 docker run --rm -v ${PWD}/engines/api_client/coverage:/api-client/coverage api-client bundle exec rspec
 docker run --rm api-client bundle exec rubocop
 
