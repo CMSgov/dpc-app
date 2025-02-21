@@ -436,6 +436,13 @@
     </changeSet>
 
     <changeSet id="increment-attributions_id_seq" author="MEsposito">
-        <alterSequence sequenceName="attributions_id_seq" incrementBy="100"></alterSequence>
+        <alterSequence sequenceName="attributions_id_seq" incrementBy="100"/>
+    </changeSet>
+
+    <!-- "value" is protected in jdk 17 -->
+    <changeSet id="update-value-column-name" author="ashley-weaver">
+        <renameColumn tableName="CONTACT_TELECOMS"
+                      oldColumnName="value"
+                      newColumnName="contact_value"/>
     </changeSet>
 </databaseChangeLog>
