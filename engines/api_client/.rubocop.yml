@@ -1,6 +1,7 @@
 AllCops:
   NewCops: enable
   TargetRubyVersion: 3.3
+  SuggestExtensions: false
   Exclude:
     - 'app/jobs/application_job.rb'
     - 'app/mailers/application_mailer.rb'
