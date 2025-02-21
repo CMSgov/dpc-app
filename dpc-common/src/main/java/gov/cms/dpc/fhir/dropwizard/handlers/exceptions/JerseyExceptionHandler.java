@@ -4,22 +4,22 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import io.dropwizard.jersey.validation.ConstraintMessage;
 import io.dropwizard.jersey.validation.JerseyViolationException;
+import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolation;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.Provider;
 import org.apache.commons.lang3.tuple.Pair;
 import org.glassfish.jersey.server.model.Invocable;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 
-import javax.inject.Inject;
-import javax.validation.ConstraintViolation;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.Provider;
 import java.util.Set;
 
 /**
  * Custom exception handler for {@link JerseyViolationException}.
- * It provides human readable error messages which can help pinpoint which violates the user needs to address.
+ * It provides human-readable error messages which can help pinpoint which violates the user needs to address.
  */
 @Provider
 public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyViolationException> {

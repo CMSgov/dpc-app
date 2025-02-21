@@ -112,7 +112,7 @@ class FHIRExtractorTests {
         final Patient patient = new Patient();
         patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("bad_mbi");
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> getPatientMBI(patient));
+        assertThrows(IllegalArgumentException.class, () -> getPatientMBI(patient));
     }
 
     @Test
@@ -120,10 +120,10 @@ class FHIRExtractorTests {
         final Patient patient = new Patient();
         Identifier validMBI = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA01");
         Identifier invalidMBI = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("mbi2");
-        Identifier bene_id = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("bene_id");
+        Identifier beneId = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("bene_id");
         patient.addIdentifier(validMBI);
         patient.addIdentifier(invalidMBI);
-        patient.addIdentifier(bene_id);
+        patient.addIdentifier(beneId);
 
         assertEquals(List.of(validMBI.getValue()), FHIRExtractors.getPatientMBIs(patient));
     }
@@ -133,10 +133,10 @@ class FHIRExtractorTests {
         final Patient patient = new Patient();
         Identifier validMBI1 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA01");
         Identifier validMBI2 = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA02");
-        Identifier bene_id = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("bene_id");
+        Identifier beneId = new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("bene_id");
         patient.addIdentifier(validMBI1);
         patient.addIdentifier(validMBI2);
-        patient.addIdentifier(bene_id);
+        patient.addIdentifier(beneId);
 
         assertEquals(List.of(validMBI1.getValue(), validMBI2.getValue()), FHIRExtractors.getPatientMBIs(patient));
     }
@@ -172,13 +172,13 @@ class FHIRExtractorTests {
         final IdType id1 = new IdType("Organization", uuid1.toString());
         assertEquals(uuid1, getEntityUUID(id1.toString()), "Should have Org ID");
         assertEquals(uuid1, getEntityUUID(uuid1.toString()), "Should parse UUID correctly");
-        assertEquals(uuid1, getEntityUUID(String.format("/%s", uuid1.toString())), "Should ignore leading slash");
+        assertEquals(uuid1, getEntityUUID(String.format("/%s", uuid1)), "Should ignore leading slash");
 
 
         assertEquals(uuid1, getEntityUUID(uuid1.toString()), "Should have org id");
         final IdType idType = new IdType("Organization/not-a-uuid");
         final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> getEntityUUID(idType.toString()), "Should not parse non-UUID");
-        assertEquals(String.format(ENTITY_ID_ERROR, idType.toString()), exception.getMessage(), "Should have correct error message");
+        assertEquals(String.format(ENTITY_ID_ERROR, idType), exception.getMessage(), "Should have correct error message");
 
         final IllegalArgumentException exception1 = assertThrows(IllegalArgumentException.class, () -> getEntityUUID("not-a-uuid"), "Should throw with non-uuid");
         assertEquals("Invalid UUID string: not-a-uuid", exception1.getMessage(), "Should have correct exception message");

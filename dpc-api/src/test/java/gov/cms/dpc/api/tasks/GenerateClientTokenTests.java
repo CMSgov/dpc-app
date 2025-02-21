@@ -14,6 +14,7 @@ import gov.cms.dpc.api.tasks.tokens.ListClientTokens;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
+import jakarta.ws.rs.WebApplicationException;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import javax.ws.rs.WebApplicationException;
 import java.io.*;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -37,11 +37,11 @@ import static org.mockito.Mockito.times;
 @ExtendWith(BufferedLoggerHandler.class)
 public class GenerateClientTokenTests {
 
-    private TokenResource tokenResource = Mockito.mock(TokenResource.class);
-    private static MacaroonBakery bakery = Mockito.mock(MacaroonBakery.class);
-    private ArgumentCaptor<OrganizationPrincipal> principalCaptor = ArgumentCaptor.forClass(OrganizationPrincipal.class);
-    private ArgumentCaptor<String> tokenLabelCaptor = ArgumentCaptor.forClass(String.class);
-    private ArgumentCaptor<Optional<OffsetDateTimeParam>> expirationCaptor = ArgumentCaptor.forClass(Optional.class);
+    private final TokenResource tokenResource = Mockito.mock(TokenResource.class);
+    private static final MacaroonBakery bakery = Mockito.mock(MacaroonBakery.class);
+    private final ArgumentCaptor<OrganizationPrincipal> principalCaptor = ArgumentCaptor.forClass(OrganizationPrincipal.class);
+    private final ArgumentCaptor<String> tokenLabelCaptor = ArgumentCaptor.forClass(String.class);
+    private final ArgumentCaptor<Optional<OffsetDateTimeParam>> expirationCaptor = ArgumentCaptor.forClass(Optional.class);
     private final GenerateClientTokens gct;
     private final ListClientTokens lct;
     private final DeleteToken dct;
@@ -66,7 +66,7 @@ public class GenerateClientTokenTests {
         final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
-            Mockito.verify(bakery, times(1)).createMacaroon(eq(Collections.emptyList()));
+            Mockito.verify(bakery, times(1)).createMacaroon(Collections.emptyList());
         }
     }
 
@@ -84,7 +84,7 @@ public class GenerateClientTokenTests {
         final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
-            Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
+            Mockito.verify(bakery, never()).createMacaroon(Collections.emptyList());
             Mockito.verify(tokenResource, times(1)).createOrganizationToken(principalCaptor.capture(), Mockito.isNull(), Mockito.isNull(), eq(Optional.empty()));
             assertEquals(id, principalCaptor.getValue().getID(), "Should have correct ID");
         }
@@ -105,7 +105,7 @@ public class GenerateClientTokenTests {
         final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()), "label", List.of(tokenLabel));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
-            Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
+            Mockito.verify(bakery, never()).createMacaroon(Collections.emptyList());
             Mockito.verify(tokenResource, times(1)).createOrganizationToken(Mockito.isNotNull(), Mockito.isNull(), tokenLabelCaptor.capture(), eq(Optional.empty()));
             assertEquals(tokenLabel, tokenLabelCaptor.getValue(), "Should have correct label");
         }
@@ -124,7 +124,7 @@ public class GenerateClientTokenTests {
         final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()), "expiration", List.of(""));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
-            Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
+            Mockito.verify(bakery, never()).createMacaroon(Collections.emptyList());
             Mockito.verify(tokenResource, times(1)).createOrganizationToken(Mockito.isNotNull(), Mockito.isNull(), tokenLabelCaptor.capture(), eq(Optional.empty()));
         }
     }
@@ -144,7 +144,7 @@ public class GenerateClientTokenTests {
         final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()), "expiration", List.of(expires));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             gct.execute(map, new PrintWriter(new OutputStreamWriter(bos)));
-            Mockito.verify(bakery, never()).createMacaroon(eq(Collections.emptyList()));
+            Mockito.verify(bakery, never()).createMacaroon(Collections.emptyList());
             Mockito.verify(tokenResource, times(1)).createOrganizationToken(Mockito.isNotNull(), Mockito.isNull(), Mockito.any(), expirationCaptor.capture());
             assertEquals(optExpires, expirationCaptor.getValue(), "Should have correct expiration");
         }

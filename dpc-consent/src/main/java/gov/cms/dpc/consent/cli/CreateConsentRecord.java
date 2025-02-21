@@ -97,9 +97,8 @@ public class CreateConsentRecord extends ConsentCommand {
         final PooledDataSourceFactory dataSourceFactory = dpcConsentConfiguration.getConsentDatabase();
         final ManagedDataSource dataSource = dataSourceFactory.build(bootstrap.getMetricRegistry(), "consent-cli");
 
-        try (final Connection connection = dataSource.getConnection();
-             DSLContext context = DSL.using(connection, this.settings)) {
-
+        try (final Connection connection = dataSource.getConnection()) {
+            DSLContext context = DSL.using(connection, this.settings);
             ConsentRecord record = context.newRecord(CONSENT, entity);
             context.executeInsert(record);
         }

@@ -1,9 +1,9 @@
 package gov.cms.dpc.api.converters;
 
+import jakarta.persistence.AttributeConverter;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.hibernate.MappingException;
 
-import javax.persistence.AttributeConverter;
 import java.io.IOException;
 
 /**

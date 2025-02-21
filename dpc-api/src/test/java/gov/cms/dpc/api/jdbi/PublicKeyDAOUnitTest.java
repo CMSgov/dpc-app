@@ -5,11 +5,11 @@ import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.AbstractDAOTest;
 import gov.cms.dpc.testing.KeyType;
+import jakarta.validation.ConstraintViolationException;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;

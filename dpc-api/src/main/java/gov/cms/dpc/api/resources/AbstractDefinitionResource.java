@@ -2,10 +2,10 @@ package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.annotations.FHIR;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
 import java.util.List;
 
 @Path("/StructureDefinition")

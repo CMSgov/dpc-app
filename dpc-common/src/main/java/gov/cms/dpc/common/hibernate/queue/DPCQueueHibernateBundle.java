@@ -1,13 +1,12 @@
 package gov.cms.dpc.common.hibernate.queue;
 
-import com.google.inject.Inject;
 import io.dropwizard.core.Configuration;
 import io.dropwizard.core.ConfiguredBundle;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.SessionFactoryFactory;
-
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 import java.util.Collections;
 
@@ -22,7 +21,7 @@ import static gov.cms.dpc.common.hibernate.EntityScanner.applicationEntities;
 @Singleton
 public class DPCQueueHibernateBundle<T extends Configuration & IDPCQueueDatabase> extends HibernateBundle<T> implements ConfiguredBundle<T> {
 
-    public static String PREFIX_STRING = "gov.cms.dpc.queue.models";
+    public static final String PREFIX_STRING = "gov.cms.dpc.queue.models";
 
     @Inject
     public DPCQueueHibernateBundle() {

@@ -34,9 +34,9 @@ db:
 ```xml
 
 <profile>
-    <id>jdk-11-config</id>
+    <id>jdk-17-config</id>
     <activation>
-        <jdk>11</jdk>
+        <jdk>17</jdk>
     </activation>
     <properties>
         <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>

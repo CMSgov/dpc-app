@@ -6,17 +6,17 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
-import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.auth.jwt.ValidatingKeyResolver;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
-import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.api.models.CreateTokenRequest;
+import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.macaroons.CaveatSupplier;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
@@ -28,20 +28,20 @@ import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SecurityException;
 import io.swagger.annotations.*;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -152,9 +152,9 @@ public class TokenResource extends AbstractTokenResource {
         tokenEntity.setExpiresAt(handleExpirationTime(expiration, optionalBody));
 
         //Set the label, if provided, otherwise, generate a default one
-        if(optionalBody.isPresent() && StringUtils.isNotEmpty(optionalBody.get().getLabel())){
+        if (optionalBody.isPresent() && StringUtils.isNotEmpty(optionalBody.get().getLabel())) {
             tokenEntity.setLabel(optionalBody.get().getLabel());
-        }else{
+        } else {
             tokenEntity.setLabel(Optional.ofNullable(tokenLabel).orElse(String.format("Token for organization %s.", organizationID)));
         }
         logger.info("Generating access token: {}", tokenEntity);
@@ -241,7 +241,6 @@ public class TokenResource extends AbstractTokenResource {
     @Public
     @Override
     public Response validateJWT(@NoHtml @NotEmpty(message = "Must submit JWT") String jwt) {
-
         try {
             Jwts.parser()
                     .requireAudience(this.authURL)
