@@ -270,7 +270,7 @@
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz</artifactId>
-                <version>2.3.2</version>
+                <version>2.5.0</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -632,8 +632,7 @@
                         <consoleOutputReporter>
                             <disable>true</disable>
                         </consoleOutputReporter>
-                        <statelessTestsetInfoReporter
-                                implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+                        <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
                             <theme>UNICODE</theme>
                             <printStacktraceOnError>true</printStacktraceOnError>
                             <printStacktraceOnFailure>true</printStacktraceOnFailure>
@@ -667,8 +666,7 @@
                         <consoleOutputReporter>
                             <disable>true</disable>
                         </consoleOutputReporter>
-                        <statelessTestsetInfoReporter
-                                implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+                        <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
                             <theme>UNICODE</theme>
                             <printStacktraceOnError>true</printStacktraceOnError>
                             <printStacktraceOnFailure>true</printStacktraceOnFailure>
