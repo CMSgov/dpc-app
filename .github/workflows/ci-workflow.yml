@@ -109,7 +109,7 @@ jobs:
 
   build-dpc-client:
     name: "Build and Test DPC Client"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
