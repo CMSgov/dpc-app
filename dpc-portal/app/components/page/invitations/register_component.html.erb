@@ -1,4 +1,4 @@
-<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::AO_STEPS, 2)) if @invitation.authorized_official? %>
+<%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::AO_STEPS, 3)) if @invitation.authorized_official? %>
 <div>
   <div>
     <p>Complete your registration of <%= @organization.name %> (NPI <%= @organization.npi %>).</p>
