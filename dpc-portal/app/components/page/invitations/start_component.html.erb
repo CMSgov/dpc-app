@@ -13,7 +13,7 @@
         <div class="usa-prose">
           <% if @invitation.authorized_official? %>
             <p>To access the DPC API portal, an Authorized Official (AO) needs to register your organization. This registration request is for <strong><%= @invitation.invited_email %></strong> at <%= @organization.name %> (NPI <%= @organization.npi %>). Use this email to sign in or create a Login.gov account.</p>
-            <p>DPC uses Login.gov for identity verification. Continue to sign in or created a Login.gov account.</p>
+            <p>DPC uses Login.gov for identity verification. Continue to sign in or create a Login.gov account.</p>
           <% end %>
           <% if @invitation.credential_delegate? %>
             <p>Welcome <%= @invitation.show_attributes['full_name'] %> (<%= @invitation.invited_email %>).</p>
