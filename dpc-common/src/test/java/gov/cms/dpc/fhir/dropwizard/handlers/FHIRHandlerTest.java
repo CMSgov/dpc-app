@@ -2,6 +2,8 @@ package gov.cms.dpc.fhir.dropwizard.handlers;
 
 import ca.uhn.fhir.context.FhirContext;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.BaseResource;
@@ -12,8 +14,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,8 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class FHIRHandlerTest {
 
-    private static FhirContext ctx = FhirContext.forDstu3();
-    private static FHIRHandler handler = new FHIRHandler(ctx);
+    private static final FhirContext ctx = FhirContext.forDstu3();
+    private static final FHIRHandler handler = new FHIRHandler(ctx);
 
     @Nested
     @DisplayName("FHIR reader tests")

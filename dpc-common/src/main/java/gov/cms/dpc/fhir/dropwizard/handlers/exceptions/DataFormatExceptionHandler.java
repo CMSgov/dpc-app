@@ -2,14 +2,13 @@ package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
 import ca.uhn.fhir.parser.DataFormatException;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.Provider;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
-
-import javax.inject.Inject;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.Provider;
 
 @Provider
 public class DataFormatExceptionHandler extends AbstractFHIRExceptionHandler<DataFormatException> {

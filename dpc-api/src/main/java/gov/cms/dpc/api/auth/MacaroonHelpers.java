@@ -7,13 +7,13 @@ import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
 import gov.cms.dpc.macaroons.caveats.ExpirationCaveatSupplier;
 import gov.cms.dpc.macaroons.caveats.VersionCaveatSupplier;
+import jakarta.annotation.Nullable;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import org.apache.http.HttpHeaders;
 
-import javax.annotation.Nullable;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,17 +64,12 @@ public class MacaroonHelpers {
      * @return - {@link List} of {@link CaveatSupplier} to use for generating token
      */
     public static List<CaveatSupplier> generateCaveatsForToken(int tokenVersion, UUID organizationID, Duration tokenLifetime) {
-        switch (tokenVersion) {
-            case 1: {
-                return generateV1Caveats(tokenLifetime, organizationID);
-            }
-            case 2: {
-                return generateV2Caveats(tokenLifetime, organizationID);
-            }
-            default: {
-                throw new IllegalArgumentException(String.format("Cannot created token with version: %s", tokenVersion));
-            }
-        }
+        return switch (tokenVersion) {
+            case 1 -> generateV1Caveats(tokenLifetime, organizationID);
+            case 2 -> generateV2Caveats(tokenLifetime, organizationID);
+            default ->
+                    throw new IllegalArgumentException(String.format("Cannot created token with version: %s", tokenVersion));
+        };
     }
 
     public static Optional<UUID> extractOrgIDFromCaveats(List<Macaroon> macaroons) {

@@ -1,6 +1,10 @@
 package gov.cms.dpc.fhir.dropwizard.filters;
 
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MultivaluedHashMap;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -8,10 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MultivaluedHashMap;
 import java.util.List;
 
 import static gov.cms.dpc.fhir.FHIRHeaders.PREFER_HEADER;
@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(BufferedLoggerHandler.class)
 public class FHIRAsyncRequestFilterTest {
 
-    private static FHIRAsyncRequestFilter filter = new FHIRAsyncRequestFilter();
-    private static ContainerRequestContext context = Mockito.mock(ContainerRequestContext.class);
+    private static final FHIRAsyncRequestFilter filter = new FHIRAsyncRequestFilter();
+    private static final ContainerRequestContext context = Mockito.mock(ContainerRequestContext.class);
 
     @BeforeAll
     static void setup() {
@@ -43,7 +43,7 @@ public class FHIRAsyncRequestFilterTest {
         }
 
         @Test
-        void testCorrectAcceptsHeader() {
+        void testCorrectAcceptsHeader() {  // TODO: add assertions to these tests
             final MultivaluedHashMap<String, String> map = new MultivaluedHashMap<>();
             map.put(HttpHeaders.ACCEPT, List.of(FHIR_JSON));
             map.put(PREFER_HEADER, List.of(PREFER_RESPOND_ASYNC));

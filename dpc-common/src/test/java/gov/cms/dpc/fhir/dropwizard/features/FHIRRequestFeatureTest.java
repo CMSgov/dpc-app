@@ -5,13 +5,13 @@ import gov.cms.dpc.fhir.annotations.FHIRAsync;
 import gov.cms.dpc.fhir.dropwizard.filters.FHIRAsyncRequestFilter;
 import gov.cms.dpc.fhir.dropwizard.filters.FHIRRequestFilter;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.FeatureContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.FeatureContext;
 import java.lang.reflect.Method;
 
 @ExtendWith(DropwizardExtensionsSupport.class)

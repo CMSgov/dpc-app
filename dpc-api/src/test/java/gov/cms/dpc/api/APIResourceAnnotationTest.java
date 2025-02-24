@@ -10,6 +10,7 @@ import gov.cms.dpc.api.resources.v1.BaseResource;
 import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.swagger.annotations.ApiOperation;
+import jakarta.ws.rs.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +20,6 @@ import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 
-import javax.ws.rs.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Set;

@@ -46,8 +46,8 @@ public class DistributedBatchQueueTest {
         try (final Session session = sessionFactory.openSession()) {
             final Transaction tx = session.beginTransaction();
             try {
-                session.createQuery("delete from job_queue_batch_file").executeUpdate();
-                session.createQuery("delete from job_queue_batch").executeUpdate();
+                session.createMutationQuery("delete from job_queue_batch_file").executeUpdate();
+                session.createMutationQuery("delete from job_queue_batch").executeUpdate();
             } finally {
                 tx.commit();
             }
@@ -135,7 +135,7 @@ public class DistributedBatchQueueTest {
         try (final Session session = sessionFactory.openSession()) {
             final Transaction tx = session.beginTransaction();
             try {
-                session.createQuery("update job_queue_batch set updateTime = :updateTime where jobID = :jobID")
+                session.createMutationQuery("update job_queue_batch set updateTime = :updateTime where jobID = :jobID")
                         .setParameter("jobID", jobID)
                         .setParameter("updateTime", OffsetDateTime.now().minusMinutes(15))
                         .executeUpdate();

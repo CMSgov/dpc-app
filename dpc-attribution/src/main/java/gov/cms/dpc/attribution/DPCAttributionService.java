@@ -1,6 +1,6 @@
 package gov.cms.dpc.attribution;
 
-import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
+import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListener;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.attribution.jobs.ExpireAttributions;
@@ -26,6 +26,8 @@ import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
+
+import java.util.List;
 
 public class DPCAttributionService extends Application<DPCAttributionConfiguration> {
 
@@ -108,6 +110,6 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
             }
         });
 
-        bootstrap.addBundle(new JobsBundle(new ExpireAttributions()));
+        bootstrap.addBundle(new JobsBundle(List.of(new ExpireAttributions())));
     }
 }

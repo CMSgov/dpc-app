@@ -1,11 +1,11 @@
 package gov.cms.dpc.common.hibernate.attribution;
 
-import com.google.inject.Inject;
 import io.dropwizard.core.Configuration;
 import io.dropwizard.core.ConfiguredBundle;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.SessionFactoryFactory;
+import jakarta.inject.Inject;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,7 +20,7 @@ import static gov.cms.dpc.common.hibernate.EntityScanner.applicationEntities;
  */
 public class DPCHibernateBundle<T extends Configuration & IDPCDatabase> extends HibernateBundle<T> implements ConfiguredBundle<T> {
 
-    public static String PREFIX_STRING = "gov.cms.dpc.common.entities";
+    public static final String PREFIX_STRING = "gov.cms.dpc.common.entities";
 
     @Inject
     public DPCHibernateBundle() {

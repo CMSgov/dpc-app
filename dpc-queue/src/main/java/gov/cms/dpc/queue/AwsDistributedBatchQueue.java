@@ -3,13 +3,13 @@ package gov.cms.dpc.queue;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
-import com.google.inject.name.Named;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.queue.annotations.QueueBatchSize;
 import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import io.github.azagniotov.metrics.reporter.cloudwatch.DimensionedName;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
-import javax.inject.Inject;
 import java.util.concurrent.TimeUnit;
 
 /**

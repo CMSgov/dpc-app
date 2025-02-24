@@ -5,9 +5,8 @@ import com.google.inject.Scopes;
 import io.dropwizard.core.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.db.ManagedDataSource;
+import jakarta.inject.Singleton;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
-
-import javax.inject.Singleton;
 
 
 public class DPCHibernateModule<T extends Configuration & IDPCDatabase> extends DropwizardAwareModule<T> {
