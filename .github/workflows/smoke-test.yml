@@ -21,7 +21,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.env }}
+  group: smoke-test-${{ inputs.env }}
   cancel-in-progress: false
 
 jobs:
