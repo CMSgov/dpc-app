@@ -8,6 +8,11 @@ RSpec.describe Page::Invitations::StartComponent, type: :component do
 
   describe 'ao' do
     let(:invitation) { create(:invitation, :ao) }
+    it 'should have step component at step 1' do
+      expect(page).to have_selector('.usa-step-indicator__current-step')
+      expect(page.find('.usa-step-indicator__current-step').text).to eq '1'
+    end
+
     it 'should show start button' do
       button = page.find('.usa-button')
       expect(button.text).to eq 'Begin registration'
@@ -37,6 +42,11 @@ RSpec.describe Page::Invitations::StartComponent, type: :component do
 
   describe 'cd' do
     let(:invitation) { create(:invitation, :cd) }
+    it 'should have step component at step 1' do
+      expect(page).to have_selector('.usa-step-indicator__current-step')
+      expect(page.find('.usa-step-indicator__current-step').text).to eq '1'
+    end
+
     it 'should show start button' do
       button = page.find('.usa-button')
       expect(button.text).to eq 'Accept invitation'

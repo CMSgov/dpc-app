@@ -15,9 +15,9 @@ class Invitation < ApplicationRecord
   belongs_to :provider_organization, required: true
   belongs_to :invited_by, class_name: 'User', required: false
 
-  AO_STEPS = ['Sign in or create a Login.gov account', 'Confirm your identity', 'Confirm organization registration',
-              'Finished'].freeze
-  CD_STEPS = ['Sign in or create a Login.gov account', 'Accept invite', 'Finished'].freeze
+  AO_STEPS = ['Welcome to DPC Portal', 'Sign in or create a Login.gov account', 'Confirm your identity',
+              'Confirm organization registration', 'Finished'].freeze
+  CD_STEPS = ['Welcome to DPC Portal', 'Sign in or create a Login.gov account', 'Accept invite', 'Finished'].freeze
 
   def show_attributes
     { full_name: "#{invited_given_name} #{invited_family_name}",

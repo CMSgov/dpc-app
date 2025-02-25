@@ -33,9 +33,9 @@ RSpec.describe Page::Invitations::InvitationLoginComponent, type: :component do
     let(:invitation) { create(:invitation, :ao) }
     let(:component) { described_class.new(invitation) }
     before { render_inline(component) }
-    it 'should have step component at step 1' do
+    it 'should have step component at step 2' do
       expect(page).to have_selector('.usa-step-indicator__current-step')
-      expect(page.find('.usa-step-indicator__current-step').text).to eq '1'
+      expect(page.find('.usa-step-indicator__current-step').text).to eq '2'
     end
   end
 
@@ -43,9 +43,9 @@ RSpec.describe Page::Invitations::InvitationLoginComponent, type: :component do
     let(:invitation) { create(:invitation, :cd) }
     let(:component) { described_class.new(invitation) }
     before { render_inline(component) }
-    it 'should have step component at step 1' do
+    it 'should have step component at step 2' do
       expect(page).to have_selector('.usa-step-indicator__current-step')
-      expect(page.find('.usa-step-indicator__current-step').text).to eq '1'
+      expect(page.find('.usa-step-indicator__current-step').text).to eq '2'
     end
   end
 end

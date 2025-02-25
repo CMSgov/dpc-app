@@ -13,7 +13,7 @@ RSpec.describe Page::Invitations::AoFlowFailComponent, type: :component do
     context 'step 1' do
       let(:step) { 1 }
       it 'should show step 1 header' do
-        expected_text = 'Step 2 of 4'
+        expected_text = 'Step 2 of 5'
         node = page.find('.usa-step-indicator__heading')
         result_text = node.text.split.map(&:strip).join(' ')
         expect(result_text).to include(expected_text)
@@ -22,7 +22,7 @@ RSpec.describe Page::Invitations::AoFlowFailComponent, type: :component do
     context 'step 2' do
       let(:step) { 2 }
       it 'should show step 2 header' do
-        expected_text = 'Step 3 of 4'
+        expected_text = 'Step 3 of 5'
         node = page.find('.usa-step-indicator__heading')
         result_text = node.text.split.map(&:strip).join(' ')
         expect(result_text).to include(expected_text)

@@ -21,9 +21,9 @@ RSpec.describe Page::Invitations::RegisterComponent, type: :component do
 
   describe 'ao' do
     let(:invitation) { create(:invitation, :ao) }
-    it 'should have step component at step 3' do
+    it 'should have step component at step 4' do
       expect(page).to have_selector('.usa-step-indicator__current-step')
-      expect(page.find('.usa-step-indicator__current-step').text).to eq '3'
+      expect(page.find('.usa-step-indicator__current-step').text).to eq '4'
     end
 
     it 'should post to register' do
