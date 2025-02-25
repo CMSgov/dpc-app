@@ -57,7 +57,7 @@ on:
         default: 'main'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.env }}
+  group: deploy-to-${{ inputs.env }}
   cancel-in-progress: false
 
 permissions:
