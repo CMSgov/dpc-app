@@ -48,7 +48,7 @@ jobs:
 
 
   verify-bucket:
-    if: ${{ always() && needs.trigger.result == 'success' }}
+    if: ${{ always() && needs.trigger.result == 'foo' }}
     needs: trigger
     permissions:
       contents: read
