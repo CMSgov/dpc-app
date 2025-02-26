@@ -39,7 +39,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            lambda/opt-out-export
+            lambda/opt-out-import
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
