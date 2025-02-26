@@ -58,6 +58,7 @@ jobs:
             s3://bfd-test-eft/bfdeft01/dpc/in/$fname
 
   verify-bucket:
+    if: ${{ always() && needs.trigger.result == 'success' }}
     needs: trigger
     permissions:
       contents: read
@@ -92,6 +93,7 @@ jobs:
           exit 1
 
   verify-db-changes:
+    if: ${{ always() && needs.trigger.result == 'success' }}
     needs: trigger
     runs-on: self-hosted
     env:
