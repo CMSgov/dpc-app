@@ -39,7 +39,6 @@ jobs:
         with:
           sparse-checkout: |
             lambda/opt-out-export
-
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
@@ -59,6 +58,10 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
