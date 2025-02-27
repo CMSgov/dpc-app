@@ -15,6 +15,7 @@ import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.reactivex.Flowable;
+import jakarta.inject.Inject;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
@@ -23,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import javax.inject.Inject;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -127,7 +127,7 @@ public class JobBatchProcessor {
                 .blockingGet();
         queue.completePartialBatch(job, aggregatorID);
 
-        final String resourcesRequested = job.getResourceTypes().stream().map(DPCResourceType::getPath).filter(Objects::nonNull).collect(Collectors.joining(";"));
+        final String resourcesRequested = job.getResourceTypes().stream().map(DPCResourceType::getPath).collect(Collectors.joining(";"));
         final String failReasonLabel = failReason.map(Enum::name).orElse("NA");
         stopWatch.stop();
         logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason.isEmpty(), failReasonLabel, resourcesRequested, stopWatch.getDuration());
@@ -178,7 +178,7 @@ public class JobBatchProcessor {
         Flowable<Resource> eobs = lookBackPair.getRight();
 
         if (isLookBackExempt(job.getOrgID())) {
-            logger.info("Skipping lookBack for org: {}", job.getOrgID().toString());
+            logger.info("Skipping lookBack for org: {}", job.getOrgID());
             MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
         } else {
             if (!passesLookBack(answers)) {
@@ -287,7 +287,7 @@ public class JobBatchProcessor {
                         sequenceCount.set(file.getSequence());
                     });
                     final var writer = new ResourceWriter(fhirContext, job, dpcResourceType, operationsConfig);
-                    return groupedByResourceFlow.compose((upstream) -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount));
+                    return groupedByResourceFlow.compose(upstream -> bufferAndWrite(upstream, writer, resourceCount, sequenceCount));
                 });
     }
 

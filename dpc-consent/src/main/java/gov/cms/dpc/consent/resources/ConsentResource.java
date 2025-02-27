@@ -3,7 +3,6 @@ package gov.cms.dpc.consent.resources;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Splitter;
-import com.google.inject.name.Named;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -15,14 +14,15 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 import org.hl7.fhir.dstu3.model.Identifier;
 
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -129,20 +129,13 @@ public class ConsentResource {
     }
 
     private List<ConsentEntity> getEntitiesByPatient(Identifier patientIdentifier) {
-        String field;
-
         // we have been asked to search for a patient id defined by one among two (soon three!) coding systems
         // we need to determine which database field that system's value is stored in
-        switch (DPCIdentifierSystem.fromString(patientIdentifier.getSystem())) {
-            case MBI:
-                field = "mbi";
-                break;
-            case HICN:
-                field = "hicn";
-                break;
-            default:
-                throw new WebApplicationException("Unknown Patient ID code system", Response.Status.BAD_REQUEST);
-        }
+        String field = switch (DPCIdentifierSystem.fromString(patientIdentifier.getSystem())) {
+            case MBI -> "mbi";
+            case HICN -> "hicn";
+            default -> throw new WebApplicationException("Unknown Patient ID code system", Response.Status.BAD_REQUEST);
+        };
 
         return this.dao.findBy(field, patientIdentifier.getValue());
     }

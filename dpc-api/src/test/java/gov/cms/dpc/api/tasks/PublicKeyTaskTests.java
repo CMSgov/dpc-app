@@ -9,6 +9,7 @@ import gov.cms.dpc.api.tasks.keys.DeletePublicKey;
 import gov.cms.dpc.api.tasks.keys.ListPublicKeys;
 import gov.cms.dpc.api.tasks.keys.UploadPublicKey;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import jakarta.ws.rs.WebApplicationException;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import javax.ws.rs.WebApplicationException;
 import java.io.*;
 import java.util.*;
 
@@ -25,8 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(BufferedLoggerHandler.class)
 public class PublicKeyTaskTests {
 
-    private KeyResource keyResource = Mockito.mock(KeyResource.class);
-    private ArgumentCaptor<OrganizationPrincipal> principalCaptor = ArgumentCaptor.forClass(OrganizationPrincipal.class);
+    private final KeyResource keyResource = Mockito.mock(KeyResource.class);
+    private final ArgumentCaptor<OrganizationPrincipal> principalCaptor = ArgumentCaptor.forClass(OrganizationPrincipal.class);
     private final UploadPublicKey upk;
     private final ListPublicKeys lpk;
     private final DeletePublicKey dpk;

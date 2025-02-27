@@ -7,6 +7,7 @@ import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
 import gov.cms.dpc.testing.APIAuthHelpers;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -19,7 +20,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.jupiter.api.*;
 
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.UUID;
@@ -92,7 +92,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         assertNotNull(responseIp.getCreatedAt());
 
         // Save the updated ipAddressEntity for future tests
-        this.ipAddressEntityResponse = responseIp;
+        ipAddressEntityResponse = responseIp;
     }
 
     @Test
@@ -109,7 +109,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         CloseableHttpResponse response = client.execute(get);
         assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
 
-        TypeReference<CollectionResponse<IpAddressEntity>> typeRef = new TypeReference<CollectionResponse<IpAddressEntity>>() {};
+        TypeReference<CollectionResponse<IpAddressEntity>> typeRef = new TypeReference<>() {};
         CollectionResponse<IpAddressEntity> responseCollection = mapper.readValue(response.getEntity().getContent(), typeRef);
         assertEquals(1, responseCollection.getCount());
 
@@ -209,8 +209,6 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
             CloseableHttpResponse response = client.execute(post);
 
             return mapper.readValue(response.getEntity().getContent(), IpAddressEntity.class);
-        } catch (Exception e) {
-            throw e;
         }
     }
 }
