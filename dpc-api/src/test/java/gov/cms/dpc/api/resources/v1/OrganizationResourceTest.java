@@ -23,7 +23,6 @@ import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.OrganizationHelpers;
-import jakarta.ws.rs.HttpMethod;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -37,6 +36,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
 
+import javax.ws.rs.HttpMethod;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -65,6 +65,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         // Generate a golden macaroon
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
+
 
         final String newOrgID = "1111111211";
         final Organization organization = OrganizationHelpers.createOrganization(ctx, client, newOrgID, true);

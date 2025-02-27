@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
@@ -18,17 +19,16 @@ import gov.cms.dpc.fhir.annotations.Profiled;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 
+import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 import java.util.UUID;
 
 @Api(value = "Organization", authorizations = @Authorization(value = "access_token"))

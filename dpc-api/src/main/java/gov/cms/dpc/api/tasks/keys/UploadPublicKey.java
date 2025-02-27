@@ -6,10 +6,10 @@ import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.resources.v1.KeyResource;
 import gov.cms.dpc.api.tasks.TasksCommon;
 import io.dropwizard.servlets.tasks.PostBodyTask;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import org.hl7.fhir.dstu3.model.Organization;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;

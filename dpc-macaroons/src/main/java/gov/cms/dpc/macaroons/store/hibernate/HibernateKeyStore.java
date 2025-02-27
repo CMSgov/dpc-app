@@ -5,11 +5,11 @@ import gov.cms.dpc.macaroons.helpers.SecretHelpers;
 import gov.cms.dpc.macaroons.store.IDKeyPair;
 import gov.cms.dpc.macaroons.store.IRootKeyStore;
 import gov.cms.dpc.macaroons.store.hibernate.entities.RootKeyEntity;
-import jakarta.inject.Inject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import javax.inject.Inject;
 import java.security.SecureRandom;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;

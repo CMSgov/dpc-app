@@ -28,7 +28,7 @@
             <artifactId>guice</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.hibernate.orm</groupId>
+            <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
         </dependency>
         <dependency>
@@ -36,8 +36,8 @@
             <artifactId>hibernate-validator</artifactId>
         </dependency>
         <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
+            <groupId>javax.persistence</groupId>
+            <artifactId>javax.persistence-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -52,10 +52,16 @@
             <groupId>com.codahale</groupId>
             <artifactId>xsalsa20poly1305</artifactId>
             <version>0.11.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15on</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk18on</artifactId>
+            <artifactId>bcprov-jdk15on</artifactId>
             <version>${bouncey.version}</version>
         </dependency>
         <dependency>
@@ -66,10 +72,6 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.inject</groupId>
-            <artifactId>jakarta.inject-api</artifactId>
         </dependency>
     </dependencies>
 

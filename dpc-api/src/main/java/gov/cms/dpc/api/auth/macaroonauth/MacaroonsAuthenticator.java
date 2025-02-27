@@ -1,22 +1,22 @@
 package gov.cms.dpc.api.auth.macaroonauth;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import io.dropwizard.auth.Authenticator;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.util.*;
 
 /**
- * Implementation of {@link Authenticator} which matches an {@link Organization} to the given Macaroon (base64 encoded string)
+ * Implementation of {@link Authenticator} which matches an {@link Organization} to the given Macaroon (base64 encoded string
  * If no {@link Organization} is found, this returns an empty optional, which signifies and authorization failure.
  */
 public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials, OrganizationPrincipal> {

@@ -40,7 +40,7 @@ ports:
 in the `db` service. E.g.:
 ```yaml
 db: 
-  image: postgres:16
+  image: postgres:11 
   ports: 
     - "5432:5432"
 ```

@@ -1,14 +1,16 @@
 package gov.cms.dpc.api.validations;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.hl7.fhir.dstu3.model.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;
@@ -113,7 +115,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
         final Practitioner validPractitioner = invalidPractitioner.copy();
         validPractitioner.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("1232312110");
 
-        client
+        final MethodOutcome created = client
                 .create()
                 .resource(validPractitioner)
                 .encodedJson()
@@ -138,6 +140,8 @@ class ProfileTests extends AbstractSecureApplicationTest {
     }
 
     @Test
+    @Disabled
+        // Disabled until DPC-614 and DPC-616 are merged.
     void testAttributionProfile() {
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
@@ -149,7 +153,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
                 .resource(invalidGroup)
                 .encodedJson();
 
-        assertThrows(InvalidRequestException.class, groupCreation::execute, "Should throw a creation exception");
+        final UnprocessableEntityException exception = assertThrows(UnprocessableEntityException.class, groupCreation::execute, "Should throw a creation exception");
 
         final Group validGroup = invalidGroup.copy();
         validGroup.setType(Group.GroupType.PERSON);
@@ -164,7 +168,7 @@ class ProfileTests extends AbstractSecureApplicationTest {
                 .resource(validGroup)
                 .encodedJson();
 
-        // Since we're creating a group with a patient that doesn't exist, we should throw an error
-        assertThrows(InvalidRequestException.class, groupCreation2::execute, "Should throw bad request error");
+        // Since we're creating a group with a patient that doesn't exist, we should throw an error, just not a validation one.
+        assertThrows(InternalErrorException.class, groupCreation2::execute, "Should thrown internal error");
     }
 }

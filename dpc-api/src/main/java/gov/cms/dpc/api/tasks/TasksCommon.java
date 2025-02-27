@@ -1,9 +1,9 @@
 package gov.cms.dpc.api.tasks;
 
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Organization;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
 

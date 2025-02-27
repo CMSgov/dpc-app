@@ -6,7 +6,6 @@ import gov.cms.dpc.attribution.exceptions.AttributionException;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.jobs.Job;
 import io.dropwizard.jobs.annotations.On;
-import jakarta.inject.Inject;
 import org.jooq.DSLContext;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
@@ -14,6 +13,7 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
@@ -34,9 +34,7 @@ public class ExpireAttributions extends Job {
     @Inject
     private Settings settings;
 
-    public ExpireAttributions() {
-        // no-op
-    }
+    public ExpireAttributions() {}
 
     @Override
     public void doJob(JobExecutionContext jobContext) {
@@ -44,10 +42,9 @@ public class ExpireAttributions extends Job {
         // Find all the jobs and expire them
         logger.debug("Expiring active attribution relationships before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
 
-        try (final Connection connection = this.dataSource.getConnection()) {
+        try (final Connection connection = this.dataSource.getConnection(); final DSLContext context = DSL.using(connection, this.settings)) {
             connection.setAutoCommit(false);
 
-            final DSLContext context = DSL.using(connection, this.settings);
             final int updated = context
                     .update(Attributions.ATTRIBUTIONS)
                     .set(Attributions.ATTRIBUTIONS.INACTIVE, true)

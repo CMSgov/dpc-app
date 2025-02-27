@@ -1,6 +1,5 @@
 package gov.cms.dpc.api;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
@@ -18,11 +17,11 @@ import io.dropwizard.core.Configuration;
 import io.dropwizard.core.server.DefaultServerFactory;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.jetty.HttpConnectorFactory;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -191,7 +190,6 @@ public class DPCAPIConfiguration extends Configuration implements IDPCDatabase, 
     }
 
     // Never used in dpc-api, but required for the queue service
-    @JsonIgnore
     @Override
     public int getPollingFrequency() {
         throw new UnsupportedOperationException("getPollingFrequency() is not supported in dpc-api.");

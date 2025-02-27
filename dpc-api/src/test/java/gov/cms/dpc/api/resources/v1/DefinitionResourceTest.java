@@ -8,13 +8,13 @@ import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
-import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;

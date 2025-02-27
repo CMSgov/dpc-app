@@ -3,14 +3,14 @@ package gov.cms.dpc.fhir.parameters;
 import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Injector;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.ext.Provider;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
 import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
 import org.hl7.fhir.dstu3.model.Provenance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.inject.Inject;
+import javax.ws.rs.ext.Provider;
 import java.util.function.Function;
 
 /**
@@ -30,9 +30,10 @@ public class ProvenanceResourceFactoryProvider implements ValueParamProvider {
 
     @Override
     public Function<ContainerRequest, Provenance> getValueProvider(Parameter parameter) {
-        // If the parameter is a resource, pass it off to the resource factory
-        if (parameter.getDeclaredAnnotation(ProvenanceHeader.class) != null && IBaseResource.class.isAssignableFrom(parameter.getRawType())) {
-            return request -> new ProvenanceResourceValueFactory(injector, ctx).provide();
+        if (parameter.getDeclaredAnnotation(ProvenanceHeader.class) != null) {
+            // If the parameter is a resource, pass it off to the resource factory
+            if (IBaseResource.class.isAssignableFrom(parameter.getRawType()))
+                return request -> new ProvenanceResourceValueFactory(injector, ctx).provide();
         }
 
         return null;

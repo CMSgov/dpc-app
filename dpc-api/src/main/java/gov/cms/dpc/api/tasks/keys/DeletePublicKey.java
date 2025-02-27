@@ -3,12 +3,12 @@ package gov.cms.dpc.api.tasks.keys;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.resources.v1.KeyResource;
 import io.dropwizard.servlets.tasks.Task;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Organization;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;

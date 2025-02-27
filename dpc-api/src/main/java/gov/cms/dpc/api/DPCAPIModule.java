@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
+import com.google.inject.name.Named;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
 import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
@@ -36,12 +37,12 @@ import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
-import jakarta.inject.Named;
-import jakarta.inject.Singleton;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
+
+import javax.inject.Singleton;
 
 public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 

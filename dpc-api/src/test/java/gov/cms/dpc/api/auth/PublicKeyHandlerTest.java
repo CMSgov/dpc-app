@@ -45,7 +45,7 @@ class PublicKeyHandlerTest {
         @EnumSource(KeyType.class)
         void testValidKey(KeyType keyType) throws NoSuchAlgorithmException {
             final String encoded = generatePublicKey(keyType);
-            final String key = String.format("-----BEGIN PUBLIC KEY-----%n%s%n-----END PUBLIC KEY-----%n", encoded);
+            final String key = String.format("-----BEGIN PUBLIC KEY-----\n%s\n-----END PUBLIC KEY-----\n", encoded);
             assertDoesNotThrow(() -> PublicKeyHandler.parsePEMString(key));
         }
 
@@ -53,7 +53,7 @@ class PublicKeyHandlerTest {
         @EnumSource(KeyType.class)
         void testInvalidKeyHeader(KeyType keyType) throws NoSuchAlgorithmException {
             final String encoded = generatePublicKey(keyType);
-            final String key = String.format("-----BEGIN RSA PUBLIC KEY-----%n%s%n-----END RSA PUBLIC KEY-----%n", encoded);
+            final String key = String.format("-----BEGIN RSA PUBLIC KEY-----\n%s\n-----END RSA PUBLIC KEY-----\n", encoded);
             assertThrows(PublicKeyException.class, () -> PublicKeyHandler.parsePEMString(key));
         }
 
@@ -73,7 +73,7 @@ class PublicKeyHandlerTest {
             final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
             final String encoded = Base64.getMimeEncoder().encodeToString(keyPair.getPrivate().getEncoded());
 
-            final String key = String.format("-----BEGIN RSA PRIVATE KEY-----%n%s%n-----END RSA PRIVATE KEY-----%n", encoded);
+            final String key = String.format("-----BEGIN RSA PRIVATE KEY-----\n%s\n-----END RSA PRIVATE KEY-----\n", encoded);
             final PublicKeyException exception = assertThrows(PublicKeyException.class, () -> PublicKeyHandler.parsePEMString(key));
             assertEquals("Not a valid public key", exception.getMessage(), "Should have correct error message");
         }
@@ -89,7 +89,7 @@ class PublicKeyHandlerTest {
             final byte[] keyValue = "Not a real key".getBytes(StandardCharsets.UTF_8);
             Mockito.when(keyInfo.getEncoded()).thenReturn(keyValue);
             final String publicKey = PublicKeyHandler.pemEncodePublicKey(keyInfo);
-            assertEquals(String.format("-----BEGIN PUBLIC KEY-----%n%s%n-----END PUBLIC KEY-----%n", Base64.getMimeEncoder().encodeToString(keyValue)), publicKey, "Public key should have bad data");
+            assertEquals(String.format("-----BEGIN PUBLIC KEY-----\n%s\n-----END PUBLIC KEY-----\n", Base64.getMimeEncoder().encodeToString(keyValue)), publicKey, "Public key should have bad data");
         }
 
         @Test
@@ -119,18 +119,22 @@ class PublicKeyHandlerTest {
         }
 
         @Test
-        void testECCKeyTooSmall() throws NoSuchAlgorithmException {
+        void testECCKeyTooSmall() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
             final KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
             ECGenParameterSpec spec = new ECGenParameterSpec("secp160r1");
+            kpg.initialize(spec);
+            final KeyPair keyPair = kpg.generateKeyPair();
+            final byte[] encoded = keyPair.getPublic().getEncoded();
+            final SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(encoded));
 
-            final InvalidAlgorithmParameterException exception = assertThrows(InvalidAlgorithmParameterException.class, () -> kpg.initialize(spec));
-            assertEquals("Curve not supported: secp160r1 (1.3.132.0.8)", exception.getMessage(), "Should have correct error message");
+            final PublicKeyException exception = assertThrows(PublicKeyException.class, () -> PublicKeyHandler.validatePublicKey(publicKeyInfo));
+            assertEquals("ECC curve `1.3.132.0.8` is not supported.", exception.getMessage(), "Should have correct error message");
         }
 
         @Test
         void testECCWrongAlgorithm() {
             final SubjectPublicKeyInfo publicKeyInfo = Mockito.mock(SubjectPublicKeyInfo.class);
-            Mockito.when(publicKeyInfo.getAlgorithm()).thenAnswer(answer -> new AlgorithmIdentifier(new ASN1ObjectIdentifier("1.2.840.10045.5")));
+            Mockito.when(publicKeyInfo.getAlgorithm()).thenAnswer((answer) -> new AlgorithmIdentifier(new ASN1ObjectIdentifier("1.2.840.10045.5")));
             final PublicKeyException exception = assertThrows(PublicKeyException.class, () -> PublicKeyHandler.validatePublicKey(publicKeyInfo));
             assertEquals("Unsupported key type `1.2.840.10045.5`.", exception.getMessage(), "Should have correct error message");
         }
@@ -185,7 +189,7 @@ class PublicKeyHandlerTest {
         final KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         final KeyPair keyPair = kpg.generateKeyPair();
         final String encoded = Base64.getMimeEncoder().encodeToString(keyPair.getPublic().getEncoded());
-        final String key = String.format("-----BEGIN PUBLIC KEY-----%n%s%n-----END PUBLIC KEY-----%n", encoded);
+        final String key = String.format("-----BEGIN PUBLIC KEY-----\n%s\n-----END PUBLIC KEY-----\n", encoded);
         final SubjectPublicKeyInfo publicKeyInfo = PublicKeyHandler.parsePEMString(key);
 
         cipher.init(Cipher.ENCRYPT_MODE, keyPair.getPrivate());

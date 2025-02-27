@@ -5,7 +5,6 @@ import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.consent.jdbi.ConsentDAO;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
-import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.junit.jupiter.api.BeforeAll;
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

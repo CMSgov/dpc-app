@@ -2,9 +2,9 @@ package gov.cms.dpc.macaroons.store;
 
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import gov.cms.dpc.macaroons.helpers.SecretHelpers;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 

@@ -13,11 +13,6 @@ import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.CacheControl;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.StreamingOutput;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
@@ -25,6 +20,11 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -69,7 +69,7 @@ public class DataResource extends AbstractDataResource {
             @ApiResponse(code = HttpStatus.OK_200, message = "File of newline-delimited JSON FHIR objects", responseHeaders = {
                     @ResponseHeader(name = HttpHeaders.ETAG, description = "SHA256 checksum of file"),
                     @ResponseHeader(name = HttpHeaders.CONTENT_LENGTH, description = "size of file (in bytes)"),
-                    @ResponseHeader(name = HttpHeaders.LAST_MODIFIED, description = "creation timestamp of file (in milliseconds since Unix epoch)"),
+                    @ResponseHeader(name = HttpHeaders.LAST_MODIFIED, description = "creation timestamp of file (in miliseconds since Unix epoch)"),
                     @ResponseHeader(name = HttpHeaders.ACCEPT_RANGES, description = "Accepted HTTP range request (bytes only)")
             }),
             @ApiResponse(code = HttpStatus.NOT_MODIFIED_304, message = "No newer files available"),
@@ -83,7 +83,7 @@ public class DataResource extends AbstractDataResource {
                                    @ApiParam(value = "Download file only if provided SHA256 checksum doesn't match")
                                            Optional<String> fileChecksum,
                                    @HeaderParam(HttpHeaders.IF_MODIFIED_SINCE)
-                                   @ApiParam(value = "Download file only if provided timestamp (milliseconds since Unix Epoch) is older than file creation timestamp", example = "1575394136")
+                                   @ApiParam(value = "Download file only if provided timestamp (miliseconds since Unix Epoch) is older than file creation timestamp", example = "1575394136")
                                            Optional<String> modifiedHeader,
                                    @PathParam("fileID")
                                    @ApiParam(required = true, value = "NDJSON file name", example = "728b270d-d7de-4143-82fe-d3ccd92cebe4-1-coverage.ndjson")
@@ -116,7 +116,7 @@ public class DataResource extends AbstractDataResource {
             @ApiResponse(code = HttpStatus.OK_200, message = "File of newline-delimited JSON FHIR objects", responseHeaders = {
                     @ResponseHeader(name = HttpHeaders.ETAG, description = "SHA256 checksum of file"),
                     @ResponseHeader(name = HttpHeaders.CONTENT_LENGTH, description = "size of file (in bytes)"),
-                    @ResponseHeader(name = HttpHeaders.LAST_MODIFIED, description = "creation timestamp of file (in milliseconds since Unix epoch)")
+                    @ResponseHeader(name = HttpHeaders.LAST_MODIFIED, description = "creation timestamp of file (in miliseconds since Unix epoch)")
             }),
             @ApiResponse(code = HttpStatus.PARTIAL_CONTENT_206, message = "Returning a partial byte range of file", responseHeaders = {
                     @ResponseHeader(name = HttpHeaders.ACCEPT_RANGES, description = "Accepted HTTP range request (bytes only)"),
@@ -135,7 +135,7 @@ public class DataResource extends AbstractDataResource {
                                        @ApiParam(value = "Download file only if provided SHA256 checksum doesn't match")
                                                Optional<String> fileChecksum,
                                        @HeaderParam(HttpHeaders.IF_MODIFIED_SINCE)
-                                       @ApiParam(value = "Download file only if provided timestamp (milliseconds since Unix Epoch) is older than file creation timestamp", example = "1575394136")
+                                       @ApiParam(value = "Download file only if provided timestamp (miliseconds since Unix Epoch) is older than file creation timestamp", example = "1575394136")
                                                Optional<String> modifiedHeader,
                                        @PathParam("fileID")
                                        @ApiParam(required = true, value = "NDJSON file name", example = "728b270d-d7de-4143-82fe-d3ccd92cebe4-1-coverage.ndjson")
@@ -212,7 +212,7 @@ public class DataResource extends AbstractDataResource {
             throw new WebApplicationException("Range end cannot be before begin", Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
         }
 
-        RandomAccessFile randomAccessFile;
+        RandomAccessFile randomAccessFile = null;
         try {
             randomAccessFile = new RandomAccessFile(file, "r");
         } catch (IOException e) {
@@ -267,7 +267,7 @@ public class DataResource extends AbstractDataResource {
     private static class PartialFileStreamer implements StreamingOutput {
 
         private int length;
-        private final RandomAccessFile raf;
+        private RandomAccessFile raf;
         final byte[] buf = new byte[4096];
 
         PartialFileStreamer(int length, RandomAccessFile raf) {

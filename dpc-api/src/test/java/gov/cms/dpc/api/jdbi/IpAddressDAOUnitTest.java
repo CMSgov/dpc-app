@@ -4,10 +4,10 @@ import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
 import gov.cms.dpc.testing.AbstractDAOTest;
 import io.hypersistence.utils.hibernate.type.basic.Inet;
-import jakarta.persistence.PersistenceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.persistence.PersistenceException;
 import java.util.List;
 import java.util.UUID;
 

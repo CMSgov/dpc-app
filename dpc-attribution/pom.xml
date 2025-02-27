@@ -51,9 +51,10 @@
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
         </dependency>
+        <!--No longer shipped with Java 11, so we need to include it manually-->
         <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
         </dependency>
         <dependency>
             <groupId>ru.vyarus</groupId>
@@ -109,9 +110,11 @@
             <artifactId>hapi-fhir-client</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- required by HAPI FHIR; specifying non-vulnerable version -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+            <version>2.11.0</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -246,7 +249,7 @@
                                         </property>
                                         <property>
                                             <key>dialect</key>
-                                            <value>org.hibernate.dialect.PostgreSQLDialect</value>
+                                            <value>org.hibernate.dialect.PostgreSQL10Dialect</value>
                                         </property>
                                     </properties>
                                     <includes>.*</includes>
@@ -265,13 +268,13 @@
                 <dependencies>
                     <dependency>
                         <groupId>org.jooq</groupId>
-                        <artifactId>jooq-meta-extensions-hibernate</artifactId>
+                        <artifactId>jooq-meta-extensions</artifactId>
                         <version>${jooq.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>jakarta.persistence</groupId>
-                        <artifactId>jakarta.persistence-api</artifactId>
-                        <version>3.2.0</version>
+                        <groupId>javax.persistence</groupId>
+                        <artifactId>javax.persistence-api</artifactId>
+                        <version>2.2</version>
                     </dependency>
                 </dependencies>
             </plugin>

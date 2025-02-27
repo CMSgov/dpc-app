@@ -1,10 +1,10 @@
 package gov.cms.dpc.common.entities;
 
-import jakarta.persistence.*;
-import jakarta.validation.Valid;
 import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.Organization;
 
+import javax.persistence.*;
+import javax.validation.Valid;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Entity(name = "organization_contacts")
 public class ContactEntity implements Serializable {
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

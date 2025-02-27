@@ -12,7 +12,6 @@ import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import gov.cms.dpc.queue.config.DPCQueueConfig;
 import io.dropwizard.core.Configuration;
 import io.github.azagniotov.metrics.reporter.cloudwatch.CloudWatchReporter;
-import jakarta.inject.Singleton;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +21,7 @@ import org.mockito.Mockito;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 import software.amazon.awssdk.regions.Region;
 
+import javax.inject.Singleton;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,23 +70,23 @@ class JobQueueModuleUnitTest {
 	}
 
 	@Test
-	void test_provideDpcAwsQueueConfiguration() {
+	void test_provideDpcAwsQueueConfiguration() throws NoSuchMethodException {
 		assertSame(awsConfig, queueModule.provideDpcAwsQueueConfiguration());
 	}
 
 	@Test
-	void test_provideAgeReporter() {
+	void test_provideAgeReporter() throws NoSuchMethodException {
 		assertInstanceOf(Slf4jReporter.class, queueModule.provideAgeScheduledReporter(metricRegistry));
 	}
 
 	@Test
-	void test_provideSizeReporter_emitting_to_aws() {
+	void test_provideSizeReporter_emitting_to_aws() throws NoSuchMethodException {
 		when(awsConfig.getEmitAwsMetrics()).thenReturn(true);
 		assertInstanceOf(CloudWatchReporter.class, queueModule.provideSizeScheduledReporter(metricRegistry));
 	}
 
 	@Test
-	void test_provideSizeReporter_not_emitting_to_aws() {
+	void test_provideSizeReporter_not_emitting_to_aws() throws NoSuchMethodException {
 		when(awsConfig.getEmitAwsMetrics()).thenReturn(false);
 		assertInstanceOf(Slf4jReporter.class, queueModule.provideSizeScheduledReporter(metricRegistry));
 	}
@@ -122,7 +122,7 @@ class JobQueueModuleUnitTest {
 	}
 
 	// Dummy Module that implements the providers we need to build our queues.
-	private static class MockModule <T extends Configuration & DPCQueueConfig> extends DropwizardAwareModule<T> {
+	private class MockModule <T extends Configuration & DPCQueueConfig> extends DropwizardAwareModule<T> {
 		@Provides
 		@JobTimeout
 		public int provideJobTimeoutInSeconds() {

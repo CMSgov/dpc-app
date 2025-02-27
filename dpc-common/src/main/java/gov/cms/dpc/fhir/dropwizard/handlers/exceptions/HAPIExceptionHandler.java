@@ -3,10 +3,11 @@ package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.jersey.errors.LoggingExceptionMapper;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.Provider;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
+
+import javax.inject.Inject;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Provider;
 
 
 /**

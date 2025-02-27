@@ -1,9 +1,9 @@
 package gov.cms.dpc.fhir.annotations;
 
 import gov.cms.dpc.fhir.FHIRMediaTypes;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.Produces;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.Produces;
 import java.lang.annotation.*;
 
 /**

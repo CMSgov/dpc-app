@@ -1,19 +1,19 @@
 package gov.cms.dpc.api.resources;
 
-import jakarta.ws.rs.BadRequestException;
-import org.apache.commons.lang3.StringUtils;
-
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.DateTimeFormatter;
+
+import javax.ws.rs.BadRequestException;
+import org.apache.commons.lang3.StringUtils;
 
 public abstract class AbstractResourceWithSince {
 
   protected AbstractResourceWithSince() {
     // Not used
   }
-
+  
   protected OffsetDateTime handleSinceQueryParam(String sinceParam) {
         if (!StringUtils.isBlank(sinceParam)) {
             try{

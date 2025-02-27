@@ -4,7 +4,6 @@ import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
-import jakarta.ws.rs.WebApplicationException;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;

@@ -1,7 +1,7 @@
 package gov.cms.dpc.api.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotEmpty;
 
 public class CreateIpAddressRequest {
     private String label;

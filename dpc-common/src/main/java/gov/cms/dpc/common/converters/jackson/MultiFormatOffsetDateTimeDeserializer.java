@@ -2,9 +2,9 @@ package gov.cms.dpc.common.converters.jackson;
 
 import com.fasterxml.jackson.databind.util.StdConverter;
 import gov.cms.dpc.fhir.FHIRFormatters;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;

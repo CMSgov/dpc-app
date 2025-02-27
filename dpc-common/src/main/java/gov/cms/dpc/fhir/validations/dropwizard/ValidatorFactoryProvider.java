@@ -1,13 +1,13 @@
 package gov.cms.dpc.fhir.validations.dropwizard;
 
-import com.google.inject.Provider;
-import jakarta.inject.Inject;
-import jakarta.validation.ConstraintValidatorFactory;
-import jakarta.validation.Validation;
-import jakarta.validation.ValidatorFactory;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.validation.ConstraintValidatorFactory;
+import javax.validation.Validation;
+import javax.validation.ValidatorFactory;
 
 /**
- * Provide our custom {@link ValidatorFactory} that supports injecting resources into our custom {@link jakarta.validation.ConstraintValidator}
+ * Provide our custom {@link ValidatorFactory} that supports injecting resources into our custom {@link javax.validation.ConstraintValidator}
  */
 public class ValidatorFactoryProvider implements Provider<ValidatorFactory> {
 

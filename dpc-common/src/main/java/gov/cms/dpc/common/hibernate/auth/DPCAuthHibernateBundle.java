@@ -1,12 +1,13 @@
 package gov.cms.dpc.common.hibernate.auth;
 
+import com.google.inject.Inject;
 import io.dropwizard.core.Configuration;
 import io.dropwizard.core.ConfiguredBundle;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.hibernate.SessionFactoryFactory;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+
+import javax.inject.Singleton;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +23,7 @@ import static gov.cms.dpc.common.hibernate.EntityScanner.applicationEntities;
 @Singleton
 public class DPCAuthHibernateBundle<T extends Configuration & IDPCAuthDatabase> extends HibernateBundle<T> implements ConfiguredBundle<T> {
 
-    public static final String PREFIX_STRING = "gov.cms.dpc.api.entities";
+    public static String PREFIX_STRING = "gov.cms.dpc.api.entities";
 
     @Inject
     public DPCAuthHibernateBundle() {

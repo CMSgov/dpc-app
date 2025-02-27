@@ -3,9 +3,9 @@ package gov.cms.dpc.queue.health;
 import com.codahale.metrics.health.HealthCheck;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.annotations.AggregatorID;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.UUID;
 
 /**

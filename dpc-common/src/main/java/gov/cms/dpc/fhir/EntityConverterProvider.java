@@ -1,8 +1,9 @@
 package gov.cms.dpc.fhir;
 
-import com.google.inject.Provider;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
-import jakarta.inject.Inject;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * {@link Provider} for {@link FHIREntityConverter}

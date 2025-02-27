@@ -7,13 +7,13 @@ import gov.cms.dpc.api.converters.BakeryKeyPairSerializer;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
 import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
 
 /**
- * Response containing the key pair
+ * Response containing the
  */
 public class KeyPairResponse {
 

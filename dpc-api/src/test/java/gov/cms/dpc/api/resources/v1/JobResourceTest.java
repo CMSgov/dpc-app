@@ -9,12 +9,12 @@ import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import jakarta.ws.rs.core.Response;
 import org.bouncycastle.util.encoders.Hex;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -115,7 +115,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a completed job
-        final var requestUrl = String.format(TEST_JOB_URL, UUID.randomUUID());
+        final var requestUrl = String.format(TEST_JOB_URL, UUID.randomUUID().toString());
         final var jobID = queue.createJob(orgID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,
@@ -164,7 +164,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
 
         // Setup a completed job with one error
-        final var requestUrl = String.format(TEST_JOB_URL, UUID.randomUUID()) + "?since=2020-02-20T12:00:00.000-05:00";
+        final var requestUrl = String.format(TEST_JOB_URL, UUID.randomUUID().toString()) + "?since=2020-02-20T12:00:00.000-05:00";
         final var jobID = queue.createJob(orgID,
                 TEST_ORG_NPI,
                 TEST_PROVIDER_NPI,

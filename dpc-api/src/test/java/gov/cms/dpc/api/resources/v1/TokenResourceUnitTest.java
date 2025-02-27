@@ -13,13 +13,13 @@ import gov.cms.dpc.macaroons.config.TokenPolicy.ExpirationPolicy;
 import gov.cms.dpc.macaroons.config.TokenPolicy.VersionPolicy;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.jsonwebtoken.SigningKeyResolverAdapter;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;

@@ -3,13 +3,13 @@ package gov.cms.dpc.common.hibernate.validator;
 import gov.cms.dpc.common.annotations.OrganizationId;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import jakarta.validation.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import javax.validation.*;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;

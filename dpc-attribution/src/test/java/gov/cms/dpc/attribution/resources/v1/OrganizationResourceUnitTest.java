@@ -9,7 +9,7 @@ import gov.cms.dpc.common.entities.NameEntity;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
-import jakarta.ws.rs.core.Response;
+
 import gov.cms.dpc.testing.factories.BundleFactory;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -19,13 +19,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import javax.ws.rs.core.Response;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
 class OrganizationResourceUnitTest {

@@ -1,10 +1,10 @@
 package gov.cms.dpc.common.logging.filters;
 
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.container.ContainerRequestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
 import java.io.IOException;
 
 public class LogHeaderFilter implements ContainerRequestFilter {

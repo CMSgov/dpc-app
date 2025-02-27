@@ -9,16 +9,16 @@ import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.common.utils.XSSSanitizerUtil;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.auth.Authenticator;
-import jakarta.annotation.Priority;
-import jakarta.ws.rs.Priorities;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import java.util.UUID;
 
 

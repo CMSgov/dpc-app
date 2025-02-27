@@ -1,14 +1,14 @@
 package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.fhir.FHIRExtractors;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Reference;
 
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Entity(name = "rosters")
 public class RosterEntity implements Serializable {
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     @Id
     @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
@@ -102,15 +102,14 @@ public class RosterEntity implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o instanceof RosterEntity that) {
-            return Objects.equals(id, that.id) &&
-                    Objects.equals(attributedProvider, that.attributedProvider) &&
-                    Objects.equals(managingOrganization, that.managingOrganization) &&
-                    Objects.equals(attributions, that.attributions) &&
-                    Objects.equals(createdAt, that.createdAt) &&
-                    Objects.equals(updatedAt, that.updatedAt);
-        }
-        return false;
+        if (!(o instanceof RosterEntity)) return false;
+        RosterEntity that = (RosterEntity) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(attributedProvider, that.attributedProvider) &&
+                Objects.equals(managingOrganization, that.managingOrganization) &&
+                Objects.equals(attributions, that.attributions) &&
+                Objects.equals(createdAt, that.createdAt) &&
+                Objects.equals(updatedAt, that.updatedAt);
     }
 
     @Override

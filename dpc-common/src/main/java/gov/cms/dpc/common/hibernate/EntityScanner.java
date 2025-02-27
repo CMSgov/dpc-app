@@ -1,11 +1,11 @@
 package gov.cms.dpc.common.hibernate;
 
 import com.google.common.collect.ImmutableList;
-import jakarta.persistence.Entity;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.Entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -38,7 +38,7 @@ public class EntityScanner {
     }
 
     /**
-     * Scan the given {@link List} of package prefixes for any {@link Entity} annotated classes
+     * Scan the given {@link List} of package prefixes for any {@link Entity} annoted classes
      *
      * @param paths - {@link String} class package to class
      * @return - {@link ImmutableList} of annotated {@link Class}es
@@ -53,7 +53,7 @@ public class EntityScanner {
                     final Set<Class<?>> entities = reflections.getTypesAnnotatedWith(Entity.class);
                     logger.info("Found {} Hibernate entities", entities.getClass());
                     if (logger.isDebugEnabled()) {
-                        entities.forEach(entity -> logger.debug("Registered {}.", entity.getName()));
+                        entities.forEach((entity) -> logger.debug("Registered {}.", entity.getName()));
                     }
                     return entities;
                 })

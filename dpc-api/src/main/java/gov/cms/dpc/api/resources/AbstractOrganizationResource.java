@@ -2,13 +2,13 @@ package gov.cms.dpc.api.resources;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 import java.util.UUID;
 
 @Path("/Organization")

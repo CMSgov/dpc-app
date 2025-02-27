@@ -5,17 +5,18 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.MDCConstants;
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -34,7 +35,7 @@ public class GenerateRequestIdFilterUnitTest {
 
     @Test
     public void testRequestIdIsGeneratedWhenMissingInHeader() throws IOException {
-        Mockito.when(mockContext.getHeaderString(Constants.DPC_REQUEST_ID_HEADER)).thenReturn(null);
+        Mockito.when(mockContext.getHeaderString(ArgumentMatchers.eq(Constants.DPC_REQUEST_ID_HEADER))).thenReturn(null);
         UriInfo mockUriInfo = Mockito.mock(UriInfo.class);
         Mockito.when(mockUriInfo.getPath()).thenReturn("v1/Patients");
         Mockito.when(mockContext.getUriInfo()).thenReturn(mockUriInfo);
@@ -70,7 +71,7 @@ public class GenerateRequestIdFilterUnitTest {
     @Test
     public void testRequestIdIsNotExtractedWhenExtractionDisabled() throws IOException {
         String requestId = UUID.randomUUID().toString();
-        Mockito.when(mockContext.getHeaderString(Constants.DPC_REQUEST_ID_HEADER)).thenReturn(requestId);
+        Mockito.when(mockContext.getHeaderString(ArgumentMatchers.eq(Constants.DPC_REQUEST_ID_HEADER))).thenReturn(requestId);
         UriInfo mockUriInfo = Mockito.mock(UriInfo.class);
         Mockito.when(mockUriInfo.getPath()).thenReturn("v1/Patients");
         Mockito.when(mockContext.getUriInfo()).thenReturn(mockUriInfo);
@@ -98,7 +99,7 @@ public class GenerateRequestIdFilterUnitTest {
     @Test
     public void testRequestIdIsExtractedWhenExtractionIsEnabled() throws IOException {
         String requestId = UUID.randomUUID().toString();
-        Mockito.when(mockContext.getHeaderString(Constants.DPC_REQUEST_ID_HEADER)).thenReturn(requestId);
+        Mockito.when(mockContext.getHeaderString(ArgumentMatchers.eq(Constants.DPC_REQUEST_ID_HEADER))).thenReturn(requestId);
         UriInfo mockUriInfo = Mockito.mock(UriInfo.class);
         Mockito.when(mockUriInfo.getPath()).thenReturn("v1/Patients");
         Mockito.when(mockContext.getUriInfo()).thenReturn(mockUriInfo);
@@ -126,7 +127,7 @@ public class GenerateRequestIdFilterUnitTest {
     @Test
     public void testMdcIsBeingCleared() throws IOException {
         String requestId = UUID.randomUUID().toString();
-        Mockito.when(mockContext.getHeaderString(Constants.DPC_REQUEST_ID_HEADER)).thenReturn(requestId);
+        Mockito.when(mockContext.getHeaderString(ArgumentMatchers.eq(Constants.DPC_REQUEST_ID_HEADER))).thenReturn(requestId);
         UriInfo mockUriInfo = Mockito.mock(UriInfo.class);
         Mockito.when(mockUriInfo.getPath()).thenReturn("v1/Patients");
         Mockito.when(mockContext.getUriInfo()).thenReturn(mockUriInfo);

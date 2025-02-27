@@ -1,10 +1,9 @@
 package gov.cms.dpc.macaroons.store.hibernate.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotEmpty;
-
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 
@@ -14,7 +13,7 @@ import java.time.OffsetDateTime;
 @Entity(name = "root_keys")
 public class RootKeyEntity implements Serializable {
 
-    private static final long serialVersionUID = 42L;
+    public static final long serialVersionUID = 42L;
 
     @Id
     private String id;

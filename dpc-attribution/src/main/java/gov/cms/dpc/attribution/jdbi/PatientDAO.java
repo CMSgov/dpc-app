@@ -4,10 +4,10 @@ import com.google.inject.name.Named;
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
-import jakarta.inject.Inject;
-import jakarta.persistence.criteria.*;
 import org.apache.commons.collections4.ListUtils;
 
+import javax.inject.Inject;
+import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -54,12 +54,12 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         }
 
         query.where(predicates.toArray(new Predicate[0]));
-        return list(query);
+        return this.list(query);
     }
 
     /**
      * Returns a list of all {@link PatientEntity}s whose id is in resourceIds.
-     * @param resourceIDs list of IDs
+     * @param resourceIDs
      * @return List of {@link PatientEntity}s
      */
     public List<PatientEntity> bulkPatientSearchById(UUID organizationId, List<UUID> resourceIDs) {
@@ -115,7 +115,7 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         // Delete all the attribution relationships
         removeAttributionRelationships(patientEntity);
 
-        this.currentSession().remove(patientEntity);
+        this.currentSession().delete(patientEntity);
 
         return true;
     }
@@ -135,7 +135,7 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
     @SuppressWarnings("rawtypes")
     public List fetchPatientMBIByRosterID(UUID rosterID, boolean activeOnly) {
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaQuery query = builder.createQuery(); // untyped to avoid QueryTypeMismatchException
+        final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
         final Root<PatientEntity> root = query.from(PatientEntity.class);
         query.select(root);
 
@@ -143,7 +143,7 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         final ListJoin<PatientEntity, AttributionRelationship> attrJoins = root.join(PatientEntity_.attributions);
         final Join<AttributionRelationship, RosterEntity> rosterJoin = attrJoins.join(AttributionRelationship_.roster);
 
-        query.select(root.get(PatientEntity_.BENEFICIARY_I_D));
+        query.select(root.get(PatientEntity_.BENEFICIARY_ID));
 
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(builder.equal(rosterJoin.get(RosterEntity_.id), rosterID));
@@ -152,10 +152,10 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
             predicates.add(builder.equal(attrJoins.get(AttributionRelationship_.inactive), false));
         }
         query.where(predicates.toArray(new Predicate[0]));
-        return list(query);
+        return this.list(query);
     }
 
-    private void removeAttributionRelationships(PatientEntity patientEntity) {
+    private int removeAttributionRelationships(PatientEntity patientEntity) {
 
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaDelete<AttributionRelationship> criteriaDelete = builder.createCriteriaDelete(AttributionRelationship.class);
@@ -165,6 +165,6 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
                         .get(AttributionRelationship_.patient)
                         .get(PatientEntity_.id),
                 patientEntity.getID()));
-        this.currentSession().createMutationQuery(criteriaDelete).executeUpdate();
+        return this.currentSession().createQuery(criteriaDelete).executeUpdate();
     }
 }

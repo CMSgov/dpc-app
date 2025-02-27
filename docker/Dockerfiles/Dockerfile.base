@@ -1,8 +1,8 @@
-# See: https://github.com/corretto/corretto-docker/blob/main/17/jdk/alpine/3.20/Dockerfile
-FROM amazoncorretto:17-alpine-jdk
+# See: https://github.com/docker-library/openjdk/blob/master/11/jdk/slim/Dockerfile
+FROM amazoncorretto:11-alpine-jdk
 
-# Install additional packages used across DPC images
+# Install additional packages used acros DPC images
 RUN  apk update && apk add --no-cache aws-cli && apk add --no-cache curl
 
-# Use the default command/entrypoint
+# Use the openjdk:11-jdk-slim default command/entrypoint
 CMD ["jshell"]

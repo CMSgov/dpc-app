@@ -34,9 +34,10 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-hibernate</artifactId>
         </dependency>
+        <!--No longer shipped with Java 11, so we need to include it manually-->
         <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
         </dependency>
         <dependency>
             <groupId>ru.vyarus</groupId>
@@ -104,9 +105,13 @@
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
             <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
             <!-- Ideally, this should track the version used in Dropwizard-->
-            <version>4.0.0-M1</version>
+            <version>2.41</version>
             <scope>test</scope>
             <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>javax.servlet-api</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>junit</groupId>
                     <artifactId>junit</artifactId>
@@ -119,9 +124,11 @@
             <version>${newrelic.agent.version}</version>
             <type>${newrelic.agent.type}</type>
         </dependency>
+        <!-- required by HAPI FHIR; specifying non-vulnerable version -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+            <version>2.8.9</version>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
@@ -237,19 +244,19 @@
                     <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
                     <annotationProcessorPaths>
                         <annotationProcessorPath>
-                            <groupId>org.hibernate.orm</groupId>
+                            <groupId>org.hibernate</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
-                            <version>6.6.3.Final</version>
+                            <version>5.6.15.Final</version>
                         </annotationProcessorPath>
                         <path>
-                            <groupId>jakarta.xml.bind</groupId>
-                            <artifactId>jakarta.xml.bind-api</artifactId>
-                            <version>4.0.2</version>
+                            <groupId>javax.xml.bind</groupId>
+                            <artifactId>jaxb-api</artifactId>
+                            <version>2.3.0</version>
                         </path>
                         <path>
-                            <groupId>jakarta.annotation</groupId>
-                            <artifactId>jakarta.annotation-api</artifactId>
-                            <version>3.0.0</version>
+                            <groupId>javax.annotation</groupId>
+                            <artifactId>javax.annotation-api</artifactId>
+                            <version>1.3.1</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -278,7 +285,7 @@
                                         </property>
                                         <property>
                                             <key>dialect</key>
-                                            <value>org.hibernate.dialect.PostgreSQLDialect</value>
+                                            <value>org.hibernate.dialect.PostgreSQL10Dialect</value>
                                         </property>
                                     </properties>
                                     <includes>.*</includes>
@@ -297,13 +304,13 @@
                 <dependencies>
                     <dependency>
                         <groupId>org.jooq</groupId>
-                        <artifactId>jooq-meta-extensions-hibernate</artifactId>
+                        <artifactId>jooq-meta-extensions</artifactId>
                         <version>${jooq.version}</version>
                     </dependency>
                     <dependency>
-                        <groupId>jakarta.persistence</groupId>
-                        <artifactId>jakarta.persistence-api</artifactId>
-                        <version>3.2.0</version>
+                        <groupId>javax.persistence</groupId>
+                        <artifactId>javax.persistence-api</artifactId>
+                        <version>2.2</version>
                     </dependency>
                 </dependencies>
             </plugin>

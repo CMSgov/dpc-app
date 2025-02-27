@@ -5,15 +5,15 @@ import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.common.annotations.Public;
 import io.dropwizard.auth.AuthDynamicFeature;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.container.DynamicFeature;
-import jakarta.ws.rs.container.ResourceInfo;
-import jakarta.ws.rs.core.FeatureContext;
-import jakarta.ws.rs.ext.Provider;
 import org.glassfish.jersey.server.model.AnnotatedMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+import javax.ws.rs.container.DynamicFeature;
+import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.FeatureContext;
+import javax.ws.rs.ext.Provider;
 import java.lang.annotation.Annotation;
 
 /**
@@ -47,7 +47,7 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
 
         // Check for @PathAuthorizer annotated param
         if (isMethodClassAnnotated(PathAuthorizer.class, resourceInfo, am)) {
-            logger.trace("Registering PathAuthorizer param on method {}", am);
+            logger.trace("Registering PathAuthorizer param on method {}", am.toString());
             final PathAuthorizer pa = am.getAnnotation(PathAuthorizer.class);
             context.register(this.factory.createPathAuthorizer(pa));
             return;
@@ -55,7 +55,7 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
 
         // Check for @Authorized annotated param
         if (isMethodClassAnnotated(Authorizer.class, resourceInfo, am)) {
-            logger.trace("Registering Auth param on method {}", am);
+            logger.trace("Registering Auth param on method {}", am.toString());
             context.register(this.factory.createStandardAuthorizer());
             return;
         }

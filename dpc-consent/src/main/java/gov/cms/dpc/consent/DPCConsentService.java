@@ -1,6 +1,6 @@
 package gov.cms.dpc.consent;
 
-import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListener;
+import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
@@ -19,9 +19,12 @@ import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import liquibase.exception.DatabaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
+
+import java.sql.SQLException;
 
 
 public class DPCConsentService extends Application<DPCConsentConfiguration> {
@@ -81,7 +84,7 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
     }
 
     @Override
-    public void run(DPCConsentConfiguration configuration, Environment environment) {
+    public void run(DPCConsentConfiguration configuration, Environment environment) throws DatabaseException, SQLException {
         EnvironmentParser.getEnvironment("Consent");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);

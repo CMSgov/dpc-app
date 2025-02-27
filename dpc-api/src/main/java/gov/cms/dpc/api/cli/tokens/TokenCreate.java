@@ -2,7 +2,6 @@ package gov.cms.dpc.api.cli.tokens;
 
 import gov.cms.dpc.api.cli.AbstractAdminCommand;
 import io.dropwizard.core.setup.Bootstrap;
-import jakarta.ws.rs.core.MediaType;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import org.apache.http.HttpHeaders;
@@ -15,6 +14,7 @@ import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.IdType;
 
+import javax.ws.rs.core.MediaType;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -48,7 +48,7 @@ public class TokenCreate extends AbstractAdminCommand {
     public void run(Bootstrap<?> bootstrap, Namespace namespace) throws Exception {
         final IdType orgID = new IdType(namespace.getString("org-reference"));
         final String apiService = namespace.getString(API_HOSTNAME);
-        System.out.printf("Connecting to API service at: %s%n", apiService);
+        System.out.println(String.format("Connecting to API service at: %s", apiService));
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/generate-token", apiService));
 
@@ -75,7 +75,7 @@ public class TokenCreate extends AbstractAdminCommand {
                     System.exit(1);
                 }
                 final String token = EntityUtils.toString(response.getEntity());
-                System.out.printf("Organization token: %s%n", token);
+                System.out.println(String.format("Organization token: %s", token));
             }
         }
     }

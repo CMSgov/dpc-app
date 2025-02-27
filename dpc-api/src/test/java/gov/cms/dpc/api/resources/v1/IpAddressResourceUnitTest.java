@@ -6,8 +6,6 @@ import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -42,7 +42,7 @@ class IpAddressResourceUnitTest {
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of(ipAddressEntity));
 
-        CollectionResponse<IpAddressEntity> response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
+        CollectionResponse response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
         assertEquals(1, response.getCount());
         assertTrue(response.getEntities().contains(ipAddressEntity));
     }
@@ -51,7 +51,7 @@ class IpAddressResourceUnitTest {
     public void testGet_nothingReturned() {
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of());
 
-        CollectionResponse<IpAddressEntity> response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
+        CollectionResponse response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
         assertEquals(0, response.getCount());
     }
 
@@ -70,8 +70,11 @@ class IpAddressResourceUnitTest {
     @Test
     public void testPost_badIp() {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("1.bad.ip.addr");
+        IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
-        assertThrows(WebApplicationException.class, () -> ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest));
+        assertThrows(WebApplicationException.class, () -> {
+            ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest);
+        });
     }
 
     @Test
@@ -85,7 +88,9 @@ class IpAddressResourceUnitTest {
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(existingIps);
 
-        assertThrows(WebApplicationException.class, () -> ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest));
+        assertThrows(WebApplicationException.class, () -> {
+            ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest);
+        });
     }
 
     @Test
@@ -105,6 +110,8 @@ class IpAddressResourceUnitTest {
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of(existingIp));
 
-        assertThrows(WebApplicationException.class, () -> ipAddressResource.deleteIpAddress(organizationPrincipal, UUID.randomUUID()));
+        assertThrows(WebApplicationException.class, () -> {
+            ipAddressResource.deleteIpAddress(organizationPrincipal, UUID.randomUUID());
+        });
     }
 }

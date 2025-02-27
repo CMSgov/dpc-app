@@ -1,10 +1,10 @@
 package gov.cms.dpc.queue.converters;
 
 import gov.cms.dpc.fhir.DPCResourceType;
-import jakarta.persistence.AttributeConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.AttributeConverter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
@@ -16,7 +16,7 @@ import java.util.StringJoiner;
 public class ResourceTypeListConverter implements AttributeConverter<List<DPCResourceType>, String>  {
     private static final String LIST_DELIM = ",";
 
-    private static final Logger logger = LoggerFactory.getLogger(ResourceTypeListConverter.class);
+    private static Logger logger = LoggerFactory.getLogger(ResourceTypeListConverter.class);
 
     @Override
     public String convertToDatabaseColumn(List<DPCResourceType> attribute) {

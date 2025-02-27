@@ -29,14 +29,6 @@
             <artifactId>guice</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.inject.extensions</groupId>
-            <artifactId>guice-servlet</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject.extensions</groupId>
-            <artifactId>guice-multibindings</artifactId>
-        </dependency>
-        <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-base</artifactId>
             <exclusions>
@@ -55,27 +47,18 @@
             <artifactId>hapi-fhir-structures-dstu3</artifactId>
         </dependency>
         <dependency>
-            <groupId>jakarta.ws.rs</groupId>
-            <artifactId>jakarta.ws.rs-api</artifactId>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.hibernate.orm</groupId>
+            <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
+            <groupId>javax.persistence</groupId>
+            <artifactId>javax.persistence-api</artifactId>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.validation</groupId>
-            <artifactId>jakarta.validation-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-            <scope>provided</scope>
         </dependency>
         <!-- update with dropwizard upgrade -->
         <dependency>
@@ -147,9 +130,11 @@
             <artifactId>commons-csv</artifactId>
             <version>1.12.0</version>
         </dependency>
+        <!-- required by HAPI FHIR; specifying non-vulnerable version -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+            <version>2.10.1</version>
         </dependency>
 
         <!--Test resources-->
@@ -169,6 +154,12 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -179,19 +170,19 @@
                     <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
                     <annotationProcessorPaths>
                         <annotationProcessorPath>
-                            <groupId>org.hibernate.orm</groupId>
+                            <groupId>org.hibernate</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
-                            <version>6.6.3.Final</version>
+                            <version>5.6.15.Final</version>
                         </annotationProcessorPath>
                         <path>
-                            <groupId>jakarta.xml.bind</groupId>
-                            <artifactId>jakarta.xml.bind-api</artifactId>
-                            <version>4.0.2</version>
+                            <groupId>javax.xml.bind</groupId>
+                            <artifactId>jaxb-api</artifactId>
+                            <version>2.3.0</version>
                         </path>
                         <path>
-                            <groupId>jakarta.annotation</groupId>
-                            <artifactId>jakarta.annotation-api</artifactId>
-                            <version>3.0.0</version>
+                            <groupId>javax.annotation</groupId>
+                            <artifactId>javax.annotation-api</artifactId>
+                            <version>1.3.1</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

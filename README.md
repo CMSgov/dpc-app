@@ -99,7 +99,11 @@ In that scenario, you only need the following dependencies:
 If you want to build applications locally, you'll need the following tools:
 
 - Ruby and `bundler`
-- Java 17 and Maven (`mvn`)
+- Java 11 and Maven (`mvn`)
+
+> **Note:** DPC only supports Java 11 due to our use of new languages features, which prevents using older JDK versions. 
+>
+> In addition, some of the upstream dependencies have not been updated to support Java 12 and newer, but we plan on adding support at a later date. 
 
 In addition, it's helpful to have the following installed for more specific scenarios:
 
@@ -250,7 +254,7 @@ ports:
 in the `db` node e.g.
 ```yaml
 db: 
-  image: postgres:16 
+  image: postgres:11 
   ports: 
     - "5432:5432"
 ```

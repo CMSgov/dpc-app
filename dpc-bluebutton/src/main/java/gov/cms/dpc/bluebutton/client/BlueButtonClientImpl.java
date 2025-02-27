@@ -8,11 +8,11 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import com.google.inject.name.Named;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import jakarta.inject.Named;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -20,6 +20,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,10 +39,10 @@ public class BlueButtonClientImpl implements BlueButtonClient {
 
     private static final Logger logger = LoggerFactory.getLogger(BlueButtonClientImpl.class);
 
-    private final IGenericClient client;
-    private final BBClientConfiguration config;
-    private final Map<String, Timer> timers;
-    private final Map<String, Meter> exceptionMeters;
+    private IGenericClient client;
+    private BBClientConfiguration config;
+    private Map<String, Timer> timers;
+    private Map<String, Meter> exceptionMeters;
     private static final String HASH_ALGORITHM = "PBKDF2WithHmacSHA256";
 
     private static String formBeneficiaryID(String fromPatientID) {
@@ -80,7 +81,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
      * @return {@link Bundle} A FHIR Bundle of Patient resources
      */
     @Override
-    public Bundle requestPatientFromServerByMbi(String mbi, Map<String, String> headers) throws ResourceNotFoundException {
+    public Bundle requestPatientFromServerByMbi(String mbi, Map<String, String> headers) throws ResourceNotFoundException, GeneralSecurityException {
         return instrumentCall(REQUEST_PATIENT_METRIC, () -> {
             IQuery<IBaseBundle> query = client
                 .search()
@@ -96,7 +97,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
 
     /**
      * Queries Blue Button server for Explanations of Benefit associated with a given patient
-     * <p>
+     *
      * There are two edge cases to consider when pulling EoB data given a patientID:
      *  1. No patient with the given ID exists: if this is the case, BlueButton should return a Bundle with no
      *  entry, i.e. ret.hasEntry() will evaluate to false. For this case, the method will throw a
@@ -116,7 +117,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     public Bundle requestEOBFromServer(String patientId, DateRangeParam lastUpdated, Map<String, String> headers) {
         logger.debug("Attempting to fetch EOBs for patient ID {} from baseURL: {}", patientId, client.getServerBase());
 
-        List<ICriterion<? extends IParam>> criteria = new ArrayList<>();
+        List<ICriterion<? extends IParam>> criteria = new ArrayList<ICriterion<? extends IParam>>();
         criteria.add(ExplanationOfBenefit.PATIENT.hasId(patientId));
         criteria.add(new TokenClientParam("excludeSAMHSA").exactly().code("true"));
 
@@ -130,7 +131,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
 
     /**
      * Queries Blue Button server for Coverage associated with a given patient
-     * <p>
+     *
      * Like for the EOB resource, there are two edge cases to consider when pulling coverage data given a patientID:
      *  1. No patient with the given ID exists: if this is the case, BlueButton should return a Bundle with no
      *  entry, i.e. ret.hasEntry() will evaluate to false. For this case, the method will throw a
@@ -150,7 +151,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     public Bundle requestCoverageFromServer(String patientId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
         logger.debug("Attempting to fetch Coverage for patient ID {} from baseURL: {}", patientId, client.getServerBase());
 
-        List<ICriterion<? extends IParam>> criteria = new ArrayList<>();
+        List<ICriterion<? extends IParam>> criteria = new ArrayList<ICriterion<? extends IParam>>();
         criteria.add(Coverage.BENEFICIARY.hasId(formBeneficiaryID(patientId)));
 
         return instrumentCall(REQUEST_COVERAGE_METRIC, () ->
@@ -240,7 +241,9 @@ public class BlueButtonClientImpl implements BlueButtonClient {
         if (headers != null) {
             headers.entrySet().stream()
                     .filter(e -> StringUtils.isNotBlank(e.getValue()))
-                    .forEach(e -> query.withAdditionalHeader(e.getKey(), e.getValue()));
+                    .forEach(e -> {
+                        query.withAdditionalHeader(e.getKey(), e.getValue());
+                    });
         }
 
     }

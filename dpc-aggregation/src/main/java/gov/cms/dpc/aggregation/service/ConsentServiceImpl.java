@@ -2,10 +2,10 @@ package gov.cms.dpc.aggregation.service;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import jakarta.inject.Named;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 
+import javax.inject.Named;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
