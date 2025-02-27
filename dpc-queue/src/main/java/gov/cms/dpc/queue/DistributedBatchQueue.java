@@ -174,7 +174,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
     @SuppressWarnings("unchecked")
     private void restartStuckBatches(Session session) {
         // Find stuck batches
-        List<String> stuckBatchIDs = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 1 AND update_time < current_timestamp - interval '5 minutes' FOR UPDATE SKIP LOCKED")
+        List<String> stuckBatchIDs = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 1 AND update_time < current_timestamp - interval '15 minutes' FOR UPDATE SKIP LOCKED")
                 .getResultList();
 
         // Unstick stuck batches
@@ -251,10 +251,12 @@ public class DistributedBatchQueue extends JobQueueCommon {
                 final Optional<OffsetDateTime> lastUpdate = job.getUpdateTime();
 
                 // We just need to persist the job, as any results will be attached to the job and cascade
-                session.merge(job);
+                JobQueueBatch mergedJob = (JobQueueBatch) session.merge(job);
 
                 final var delay = Duration.between(lastUpdate.orElseThrow(), job.getUpdateTime().orElseThrow());
                 partialTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);
+
+                mergedJob.setUpdateTime();
             } finally {
                 tx.commit();
             }
