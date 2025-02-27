@@ -5,15 +5,15 @@ import gov.cms.dpc.api.models.KeyPairResponse;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.macaroons.thirdparty.BakeryKeyPair;
 import io.dropwizard.servlets.tasks.Task;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.whispersystems.curve25519.Curve25519;
 import org.whispersystems.curve25519.Curve25519KeyPair;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.io.PrintWriter;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -22,7 +22,7 @@ import java.util.Map;
 
 /**
  * Admin task to create a new {@link BakeryKeyPair} for use by the {@link gov.cms.dpc.macaroons.MacaroonBakery} component.
- * This will generated an X25519 keypair that is used to encrypt the third-party caveats.
+ * This will generate an X25519 keypair that is used to encrypt the third-party caveats.
  * <p>
  * Note: This is not in the `keys` package because it doesn't pertain to the organization public signing keys
  */

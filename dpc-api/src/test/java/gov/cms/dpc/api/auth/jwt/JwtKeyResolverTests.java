@@ -10,6 +10,7 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.KeyType;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwsHeader;
+import jakarta.ws.rs.WebApplicationException;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -20,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import javax.ws.rs.WebApplicationException;
 import java.io.IOException;
 import java.security.Key;
 import java.security.KeyPair;
@@ -32,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings("rawtypes")
 @ExtendWith(BufferedLoggerHandler.class)
 class JwtKeyResolverTests {
 
@@ -40,12 +39,12 @@ class JwtKeyResolverTests {
     private static KeyPair keyPair;
     private static KeyPair eccKeyPair;
 
-    private final static UUID badKeyID = UUID.randomUUID();
-    private final static UUID correctKeyID = UUID.randomUUID();
-    private final static UUID eccKeyID = UUID.randomUUID();
-    private final static UUID notRealKeyID = UUID.randomUUID();
-    private final static UUID organization1 = UUID.randomUUID();
-    private final static UUID organization2 = UUID.randomUUID();
+    private static final UUID badKeyID = UUID.randomUUID();
+    private static final UUID correctKeyID = UUID.randomUUID();
+    private static final UUID eccKeyID = UUID.randomUUID();
+    private static final UUID notRealKeyID = UUID.randomUUID();
+    private static final UUID organization1 = UUID.randomUUID();
+    private static final UUID organization2 = UUID.randomUUID();
 
     private static final String org1Macaroon = makeMacaroon(organization1);
     private static final String org2Macaroon = makeMacaroon(organization2);
@@ -66,8 +65,8 @@ class JwtKeyResolverTests {
         // Good entity with real key
         final PublicKeyEntity goodEntity = mock(PublicKeyEntity.class);
         final PublicKeyEntity goodECCEntity = mock(PublicKeyEntity.class);
-        Mockito.when(goodECCEntity.getPublicKey()).thenAnswer((answer) -> SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(eccKeyPair.getPublic().getEncoded())));
-        Mockito.when(goodEntity.getPublicKey()).thenAnswer((answer) -> SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(keyPair.getPublic().getEncoded())));
+        Mockito.when(goodECCEntity.getPublicKey()).thenAnswer(answer -> SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(eccKeyPair.getPublic().getEncoded())));
+        Mockito.when(goodEntity.getPublicKey()).thenAnswer(answer -> SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(keyPair.getPublic().getEncoded())));
 
         Mockito.when(dao.fetchPublicKey(organization1, badKeyID)).thenReturn(Optional.of(badEntity));
         Mockito.when(dao.fetchPublicKey(organization1, correctKeyID)).thenReturn(Optional.of(goodEntity));
@@ -197,7 +196,7 @@ class JwtKeyResolverTests {
         final Macaroon m = MacaroonsBuilder.create("test.local", "fake key", "make id");
         if (orgID != null) {
             return MacaroonsBuilder.modify(m)
-                    .add_first_party_caveat(String.format("organization_id = %s", orgID.toString()))
+                    .add_first_party_caveat(String.format("organization_id = %s", orgID))
                     .getMacaroon()
                     .serialize(MacaroonVersion.SerializationVersion.V1_BINARY);
         }

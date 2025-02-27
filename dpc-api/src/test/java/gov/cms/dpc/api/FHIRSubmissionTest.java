@@ -21,6 +21,9 @@ import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.spi.internal.ValueParamProvider;
@@ -33,9 +36,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
@@ -135,7 +135,7 @@ class FHIRSubmissionTest {
         final var job = queue.claimBatch(AGGREGATOR_ID);
         assertTrue(job.isPresent());
         final var resources = job.get().getResourceTypes();
-        assertAll(() -> assertEquals(resources.size(), 1),
+        assertAll(() -> assertEquals(1, resources.size()),
                 () -> assertTrue(resources.contains(DPCResourceType.Patient)));
     }
 

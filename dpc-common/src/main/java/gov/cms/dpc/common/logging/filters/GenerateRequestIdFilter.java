@@ -3,14 +3,14 @@ package gov.cms.dpc.common.logging.filters;
 import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.utils.XSSSanitizerUtil;
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import javax.annotation.Priority;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
 import java.io.IOException;
 import java.util.UUID;
 

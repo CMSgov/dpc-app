@@ -1,10 +1,8 @@
 package gov.cms.dpc.common.entities;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
@@ -14,27 +12,14 @@ import java.util.Objects;
 @Entity(name = "attributions")
 public class AttributionRelationship implements Serializable {
 
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "attributions_generator")
-    @GenericGenerator(
-        name="attributions_generator",
-        strategy = "sequence",
-        parameters = {
-            @Parameter(
-                name = "sequence_name",
-                value = "attributions_id_seq"
-            ),
-            @Parameter(
-                name = "increment_size",
-                value = "100"   // Tied to attributions_id_seq in dpc_attribution DB
-            ),
-            @Parameter(
-                name = "optimizer",
-                value = "pooled-lo"
-            )
-        }
+    @GeneratedValue(generator = "attributions_generator")
+    @SequenceGenerator(
+        name = "attributions_generator",
+        sequenceName = "attributions_id_seq",
+        allocationSize = 100   // Tied to attributions_id_seq in dpc_attribution
     )
     @Column(name = "id", updatable = false, nullable = false)
     @Access(AccessType.PROPERTY)
@@ -128,8 +113,7 @@ public class AttributionRelationship implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AttributionRelationship)) return false;
-        AttributionRelationship that = (AttributionRelationship) o;
+        if (!(o instanceof AttributionRelationship that)) return false;
         return inactive == that.inactive &&
                 Objects.equals(attributionID, that.attributionID) &&
                 Objects.equals(roster, that.roster) &&
