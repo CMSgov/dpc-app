@@ -1,11 +1,10 @@
 package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.junit.jupiter.api.Test;
-
-import javax.ws.rs.core.Response;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

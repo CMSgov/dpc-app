@@ -6,14 +6,13 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.common.MDCConstants;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
+import jakarta.annotation.Priority;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.MDC;
-
-import javax.annotation.Priority;
-import javax.inject.Inject;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.container.ContainerRequestContext;
 
 /**
  * WARNING: DO NOT USE IN PRODUCTION

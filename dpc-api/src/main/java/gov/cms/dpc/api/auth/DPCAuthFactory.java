@@ -8,8 +8,7 @@ import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
-
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class DPCAuthFactory implements AuthFactory {
 

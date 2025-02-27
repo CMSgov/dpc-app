@@ -3,21 +3,21 @@ package gov.cms.dpc.api.resources.v1;
 import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.api.resources.AbstractDefinitionResource;
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import io.swagger.annotations.*;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Api(value = "StructureDefinition")

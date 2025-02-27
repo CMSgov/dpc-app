@@ -4,10 +4,10 @@ import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import jakarta.inject.Inject;
+import jakarta.persistence.criteria.*;
 import org.hibernate.query.Query;
 
-import javax.inject.Inject;
-import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +49,7 @@ public class RosterDAO extends DPCAbstractDAO<RosterEntity> {
         }
 
         if (providerNPI != null) {
-            predicates.add(builder.equal(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.PROVIDER_NP_I), providerNPI));
+            predicates.add(builder.equal(root.get(RosterEntity_.ATTRIBUTED_PROVIDER).get(ProviderEntity_.PROVIDER_N_P_I), providerNPI));
         }
 
         if (patientReference != null) {
@@ -77,6 +77,6 @@ public class RosterDAO extends DPCAbstractDAO<RosterEntity> {
     }
 
     public void delete(RosterEntity rosterEntity) {
-        currentSession().delete(rosterEntity);
+        currentSession().remove(rosterEntity);
     }
 }

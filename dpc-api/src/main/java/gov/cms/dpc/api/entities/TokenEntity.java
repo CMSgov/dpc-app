@@ -2,16 +2,17 @@ package gov.cms.dpc.api.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.common.converters.jackson.OffsetDateTimeToStringConverter;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 import org.hibernate.annotations.CreationTimestamp;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Transient;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Objects;
@@ -19,7 +20,7 @@ import java.util.UUID;
 
 @Entity(name = "organization_tokens")
 public class TokenEntity implements Serializable {
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     public enum TokenType {
         MACAROON,
@@ -52,7 +53,6 @@ public class TokenEntity implements Serializable {
     @JsonDeserialize(converter = StringToOffsetDateTimeConverter.class)
     private OffsetDateTime expiresAt;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     @Transient
     private String token;
 
@@ -115,6 +115,8 @@ public class TokenEntity implements Serializable {
         this.expiresAt = expiresAt;
     }
 
+    @JsonProperty("token")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public String getToken() {
         return token;
     }
