@@ -1,7 +1,7 @@
 services:
 
   db:
-    image: artifactory.cloud.cms.gov/docker/postgres:16.4
+    image: postgres:16.4
     command: postgres -c 'max_connections=250'
     environment:
       - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth,dpc_consent,dpc-website_development,bcda,dpc-portal_development
@@ -118,7 +118,7 @@ services:
       retries: 10
 
   tests:
-    image: artifactory.cloud.cms.gov/docker/maven:3.6-jdk-11
+    image: maven:3.9.9-amazoncorretto-17
     env_file:
       - ./ops/config/decrypted/local.env
     volumes:
