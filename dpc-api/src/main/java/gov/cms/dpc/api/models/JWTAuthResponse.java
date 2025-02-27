@@ -4,15 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gov.cms.dpc.common.converters.jackson.DurationToSecondsConverter;
 import io.swagger.annotations.ApiModelProperty;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.Duration;
 
 public class JWTAuthResponse implements Serializable {
 
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @NotNull
     @JsonProperty(value = "access_token")

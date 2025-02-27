@@ -2,11 +2,10 @@ package gov.cms.dpc.api.converters;
 
 import gov.cms.dpc.api.models.RangeHeader;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 
 import static gov.cms.dpc.api.converters.HttpRangeHeaderParamConverter.RANGE_MSG_FORMATTER;
 import static org.junit.jupiter.api.Assertions.*;

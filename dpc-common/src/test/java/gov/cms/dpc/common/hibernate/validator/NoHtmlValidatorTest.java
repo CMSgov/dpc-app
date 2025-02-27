@@ -1,16 +1,16 @@
 package gov.cms.dpc.common.hibernate.validator;
 
 import gov.cms.dpc.common.annotations.NoHtml;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -59,9 +59,7 @@ public class NoHtmlValidatorTest {
                 Arguments.of("<BODY onload!#$%&()*~+-_.,:;?@[/|\\]^`=alert(\"XSS\")>", false),
                 Arguments.of("<<SCRIPT>alert(\"XSS\");//\\<</SCRIPT>", false),
                 Arguments.of("<STYLE>li {list-style-image: url(\"javascript:alert('XSS')\");}</STYLE><UL><LI>XSS</br>\n", false),
-                Arguments.of("<!--[if gte IE 4]>\n" +
-                        "<SCRIPT>alert('XSS');</SCRIPT>\n" +
-                        "<![endif]-->", false),
+                Arguments.of("<!--[if gte IE 4]>\n<SCRIPT>alert('XSS');</SCRIPT>\n<![endif]-->", false),
                 Arguments.of("&#X000003C;", false),
                 Arguments.of("&#0000060;", false),
                 Arguments.of("/?param=<data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4=", false),

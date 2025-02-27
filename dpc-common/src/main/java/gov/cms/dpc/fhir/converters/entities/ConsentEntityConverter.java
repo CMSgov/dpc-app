@@ -3,14 +3,14 @@ package gov.cms.dpc.fhir.converters.entities;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -42,16 +42,15 @@ public class ConsentEntityConverter {
         boolean noHicn = hicn == null || hicn.isEmpty();
         boolean noMbi = mbi == null || mbi.isEmpty();
 
-        StringBuilder sb = new StringBuilder("Consent status of ");
-        sb.append(inOrOut);
-        sb.append(" for the patient with identifiers [");
-        sb.append(noHicn ? "" : patientIdentifier(DPCIdentifierSystem.HICN, hicn));
-        sb.append((!noHicn && !noMbi) ? "], [" : "");
-        sb.append(noMbi ? "" : patientIdentifier(DPCIdentifierSystem.MBI, mbi));
-        sb.append("]");
+        String str = "Consent status of " + inOrOut +
+                " for the patient with identifiers [" +
+                (noHicn ? "" : patientIdentifier(DPCIdentifierSystem.HICN, hicn)) +
+                ((!noHicn && !noMbi) ? "], [" : "") +
+                (noMbi ? "" : patientIdentifier(DPCIdentifierSystem.MBI, mbi)) +
+                "]";
 
         Narrative text = new Narrative();
-        text.setDiv(new XhtmlNode(NodeType.Text).setValue(sb.toString()));
+        text.setDiv(new XhtmlNode(NodeType.Text).setValue(str));
         text.setStatus(Narrative.NarrativeStatus.GENERATED);
         return text;
     }

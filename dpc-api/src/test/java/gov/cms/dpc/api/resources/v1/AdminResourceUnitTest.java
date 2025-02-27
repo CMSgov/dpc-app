@@ -1,16 +1,7 @@
 package gov.cms.dpc.api.resources.v1;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.MockitoAnnotations.openMocks;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -20,8 +11,10 @@ import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.IQuery;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 public class AdminResourceUnitTest {
 
@@ -44,7 +37,7 @@ public class AdminResourceUnitTest {
         UUID orgID2 = UUID.randomUUID();
         Organization organization2 = new Organization();
         organization2.setId(orgID2.toString());
-        String ids = "id|"+orgID1.toString()+","+orgID2.toString();
+        String ids = "id|"+ orgID1 +","+ orgID2;
         Bundle bundle = new Bundle();
         bundle.addEntry().setResource(organization1);
         bundle.addEntry().setResource(organization2);
