@@ -1,7 +1,7 @@
 package gov.cms.dpc.common.hibernate.consent;
 
-import com.google.inject.Inject;
 import io.dropwizard.lifecycle.Managed;
+import jakarta.inject.Inject;
 import org.hibernate.SessionFactory;
 
 /**

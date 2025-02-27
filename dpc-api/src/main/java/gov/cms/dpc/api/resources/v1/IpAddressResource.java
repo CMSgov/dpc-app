@@ -13,14 +13,14 @@ import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.hypersistence.utils.hibernate.type.basic.Inet;
 import io.swagger.annotations.*;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -78,7 +78,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
         CollectionResponse<IpAddressEntity> currentIps = getOrganizationIpAddresses(organizationPrincipal);
 
         if(currentIps.getCount() >= MAX_IPS) {
-            logger.debug(String.format("Cannot add Ip for org: %s.  They are already at the max of %d.", organizationPrincipal.getID(), MAX_IPS));
+            logger.debug("Cannot add Ip for org: {}.  They are already at the max of {}.", organizationPrincipal.getID(), MAX_IPS);
             throw new WebApplicationException(String.format("Max Ips for organization reached: %d", MAX_IPS), Response.Status.BAD_REQUEST);
         } else {
             IpAddressEntity ipAddressEntity = new IpAddressEntity()

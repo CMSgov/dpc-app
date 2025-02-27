@@ -2,16 +2,16 @@ package gov.cms.dpc.common.entities;
 
 import gov.cms.dpc.common.annotations.NPI;
 import gov.cms.dpc.common.annotations.NoHtml;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "providers")
 public class ProviderEntity extends PersonEntity {
 
-    public static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42L;
 
     @NoHtml
     @NPI

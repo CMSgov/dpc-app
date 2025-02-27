@@ -10,6 +10,8 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.testing.factories.FHIRGroupBuilder;
 import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,8 +20,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

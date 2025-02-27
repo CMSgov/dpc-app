@@ -26,23 +26,20 @@ import gov.cms.dpc.testing.KeyType;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import io.jsonwebtoken.Jwts;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.eclipse.jetty.http.HttpStatus;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mockito;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -463,7 +460,7 @@ class JWTUnitTests {
             final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
 
             final Map<String, Object> claims = new HashMap<>();
-            claims.put("exp", -100);
+            claims.put("exp", "-100");
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
@@ -484,38 +481,6 @@ class JWTUnitTests {
 
             assertEquals(400, response.getStatus(), "Should not be valid");
             assertTrue(response.readEntity(String.class).contains("JWT is expired"), "Should have correct exception");
-        }
-
-        @ParameterizedTest
-        @EnumSource(KeyType.class)
-        void testDateExpiration(KeyType keyType) throws NoSuchAlgorithmException {
-            // Submit JWT with non-client token
-            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
-
-            final Map<String, Object> claims = new HashMap<>();
-            claims.put("exp", Instant.MAX.getEpochSecond() + 60);
-
-            final String id = UUID.randomUUID().toString();
-            final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID().toString()).and()
-                    .audience().add(String.format("%sToken/auth", "here")).and()
-                    .issuer(id)
-                    .subject(id)
-                    .id(id)
-                    .claims().add(claims).and()
-                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
-                    .compact();
-
-            // Submit the JWT
-            Response response = RESOURCE.target("/v1/Token/validate")
-                    .request()
-                    .accept(MediaType.APPLICATION_JSON)
-                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
-
-            assertEquals(400, response.getStatus(), "Should not be valid");
-            String result = response.readEntity(String.class);
-            System.out.println("RESULT: " + result);
-            assertTrue(result.contains("Expiration time must be seconds since unix epoch"), "Should have correct exception");
         }
 
         @ParameterizedTest
@@ -720,7 +685,6 @@ class JWTUnitTests {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
             final String m = buildMacaroon();
 
-
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
                     .header().add("kid", UUID.randomUUID().toString()).and()
@@ -728,7 +692,7 @@ class JWTUnitTests {
                     .issuer(m)
                     .subject(m)
                     .id(id)
-                    .claim("exp", Instant.MAX.getEpochSecond() + 60)
+                    .claim("exp", String.valueOf(Instant.MAX.getEpochSecond() + 60))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 

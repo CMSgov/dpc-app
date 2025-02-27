@@ -2,12 +2,11 @@ package gov.cms.dpc.bluebutton.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 public class BBClientConfiguration extends FHIRClientConfiguration {
 
@@ -29,7 +28,9 @@ public class BBClientConfiguration extends FHIRClientConfiguration {
 
     private boolean useBfdMock = false;
 
-    public int getResourcesCount() { return resourcesCount; }
+    public int getResourcesCount() {
+        return resourcesCount;
+    }
 
     public KeystoreConfiguration getKeystore() {
         return keystore;
@@ -46,7 +47,6 @@ public class BBClientConfiguration extends FHIRClientConfiguration {
     public void setHealthcheckName(String healthcheckName) {
         this.healthcheckName = healthcheckName;
     }
-
 
     public boolean isRegisterHealthCheck() {
         return registerHealthCheck;

@@ -3,6 +3,8 @@ package gov.cms.dpc.fhir.parameters;
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.HttpServletRequest;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -13,8 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.function.Function;
 
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(BufferedLoggerHandler.class)
 class FHIRParamValueFactoryTest {
 
-    private static FhirContext ctx = FhirContext.forDstu3();
+    private static final FhirContext ctx = FhirContext.forDstu3();
 
     private static FHIRParamValueFactory factory;
 
@@ -50,9 +50,7 @@ class FHIRParamValueFactoryTest {
         final Function<ContainerRequest, Object> valueFunc = factory.getValueProvider(parameter);
 
         try (MockedConstruction<ParamResourceFactory> mocked = Mockito.mockConstruction(ParamResourceFactory.class,
-            (mock, context) -> {
-                Mockito.when(mock.provide()).thenReturn(provenance);
-            })) {
+            (mock, context) -> Mockito.when(mock.provide()).thenReturn(provenance))) {
             assertAll(() -> assertNotNull(valueFunc, "Should have factory function"),
                     () -> assertEquals(Provenance.class, valueFunc.apply(request).getClass(), "Should have provenance"));
         }
