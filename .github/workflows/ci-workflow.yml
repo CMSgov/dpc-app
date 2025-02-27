@@ -33,15 +33,15 @@ jobs:
         run: |
           sudo dnf -y install python3 python3-pip
           pip install ansible
-      - name: Install Maven 3.6.3
+      - name: Install Maven 3.9.9
         run: |
           export PATH="$PATH:/opt/maven/bin"
           echo "PATH=$PATH" >> $GITHUB_ENV
           if mvn -v; then echo "Maven already installed" && exit 0; else echo "Installing Maven"; fi
           tmpdir="$(mktemp -d)"
-          curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
+          curl -LsS https://downloads.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz | tar xzf - -C "$tmpdir"
           sudo rm -rf /opt/maven
-          sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
+          sudo mv "$tmpdir/apache-maven-3.9.9" /opt/maven
       - name: Clean maven
         run: |
           mvn -ntp -U clean
