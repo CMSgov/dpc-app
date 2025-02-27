@@ -1,5 +1,5 @@
 # User Guide
-This document serves as a guide for running the Data at the Point of Care (DPC) API on your local environment.
+This document serves as a guide for running the Data at the Point of Care (DPC) API on your local environment. 
 
 
 [![Build Status](https://travis-ci.org/CMSgov/dpc-app.svg?branch=main)](https://travis-ci.org/CMSgov/dpc-app)
@@ -43,14 +43,14 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
   * [Debugging Integration Tests](#debugging-integration-tests)
   * [Other Notes](#other-notes)
     * [BFD transaction time details](#bfd-transaction-time-details)
-  * [Troubleshooting](#troubleshooting)
+  * [Troubleshooting](#troubleshooting) 
 <!-- TOC -->
 
 
 ## What Is DPC?
 
 DPC is a pilot application programming interface (API) whose goal is to enable healthcare
-providers to deliver high quality care directly to Medicare beneficiaries. See
+providers to deliver high quality care directly to Medicare beneficiaries. See 
 [DPC One-Pager](https://dpc.cms.gov/assets/downloads/dpc-one-pager.pdf) and the [DPC Website](https://dpc.cms.gov/) to learn more about the API.
 
 ## Components
@@ -172,7 +172,7 @@ Note that this will always generate a unique hash, even if you didn't change the
 ###### [`^`](#table-of-contents)
 
 
-DPC requires an external Postgres database to be running. While a separate Postgres server can be used, the `docker-compose` file includes everything needed, and can be started like so:
+DPC requires an external Postgres database to be running. While a separate Postgres server can be used, the `docker-compose` file includes everything needed, and can be started like so: 
 
 ```bash
 docker compose up start_core_dependencies
@@ -189,7 +189,7 @@ By default, the API components will attempt to connect to the `dpc_attribution`,
 
 All of these databases should be created automatically from the previous step. When the API applications start, migrations will run and initialize the databases with the correct tables and data. If this behavior is not desired, set an environment variable of `DB_MIGRATION=0`.
 
-Default settings can be overridden, either directly in the module configurations or via `local.application.env` file in the project resources directory.
+Default settings can be overridden, either directly in the module configurations or via `local.application.env` file in the project resources directory. 
 For example, modifying the `dpc-attribution` configuration:
 
 ```yaml
@@ -228,30 +228,30 @@ Note that the `dpc-base` image produced by `make docker-base` is not stored in a
 
 Once the JARs are built, they can be run in two ways, either via [`docker-compose`](https://docs.docker.com/compose/overview/) or by manually running the JARs.
 
-### Running the DPC API via Docker
+### Running the DPC API via Docker 
 
 Click on [Install Docker](https://www.docker.com/products/docker-desktop) to set up Docker.
-The application (along with all required dependencies) can be automatically started with the following command: `make start-app`.
+The application (along with all required dependencies) can be automatically started with the following command: `make start-app`. 
 The individual services can be started (along with their dependencies) by passing the service name to the `up` command.
 
 ```bash
 docker compose up {db,aggregation,attribution,api}
-```
+``` 
 
 By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always returns the same value.
-This can be overridden during startup by setting the `AUTH_DISABLED=false` environment variable.
+This can be overridden during startup by setting the `AUTH_DISABLED=false` environment variable. 
 
 When running locally, you'll need to update the docker-compse.yml file by adding:
 ```yaml
-ports:
+ports: 
   - "5432:5432"
 ```
 
 in the `db` node e.g.
 ```yaml
-db:
-  image: postgres:16
-  ports:
+db: 
+  image: postgres:16 
+  ports: 
     - "5432:5432"
 ```
 ### Generating a golden macaroon
@@ -266,11 +266,11 @@ Alternatively, the individual services can be manually executing the `server` co
 
 When manually running the individual services, you'll need to ensure that there are no listening port collisions. By default, each service starts with the same application (8080) and admin (9900) ports. We provide a sample `application.local.conf` file which contains all the necessary configuration options. This file can be copied and used directly: `cp application.local.conf.sample application.local.conf`.
 
-**Important Note**: The API service requires authentication before performing actions. This will cause most integration tests to fail, as they expect the endpoints to be open. Authentication can be disabled in one of two ways:
+**Important Note**: The API service requires authentication before performing actions. This will cause most integration tests to fail, as they expect the endpoints to be open. Authentication can be disabled in one of two ways: 
 * Set the `ENV` environment variable to `local` (which is the default when running under Docker).
-* Set `authenticationDisabled=true` in the config file (the default from the sample config file).
+* Set `authenticationDisabled=true` in the config file (the default from the sample config file).   
 
-Next, start each service in a new terminal window, from within the `dpc-app` root directory.
+Next, start each service in a new terminal window, from within the `dpc-app` root directory. 
 
 ```bash
 java -jar dpc-attribution/target/dpc-attribution.jar server
@@ -278,11 +278,11 @@ java -jar dpc-aggregation/target/dpc-aggregation.jar server
 java -jar dpc-api/target/dpc-api.jar server
 ```
 
-By default, the services will attempt to load the `local.application.env` file from the current execution directory.
+By default, the services will attempt to load the `local.application.env` file from the current execution directory. 
 This can be overridden by passing `ENV={dev,test,prod}`, which will load `{dev,test,prod}.application.env` file from the service resources directory.
 
-**Note**: Manually specifying a config file will disable the normal configuration merging process.
-This means that only the config variables directly specified in the file will be loaded, no other `application.env` files will be processed.
+**Note**: Manually specifying a config file will disable the normal configuration merging process. 
+This means that only the config variables directly specified in the file will be loaded, no other `application.env` files will be processed. 
 
 * You can check that the application is running by requesting the FHIR `CapabilitiesStatement` for the `dpc-api` service, which will return a JSON-formatted FHIR resource.
     ```bash
@@ -301,12 +301,12 @@ We provide a small CSV [file](src/main/resources/test_associations.csv) which as
 
 The database can be automatically migrated and seeded by running `make seed-db` or by using the following commands:
 
-**Note:** For instances where one cannot set up the DPC due to authorization issues, follow the steps in the [manual table setup document](DbTables.md) to populate the necessary tables manually.
+**Note:** For instances where one cannot set up the DPC due to authorization issues, follow the steps in the [manual table setup document](DbTables.md) to populate the necessary tables manually. 
 
 ```bash
 java -jar dpc-attribution/target/dpc-attribution.jar db migrate
 java -jar dpc-attribution/target/dpc-attribution.jar seed
-```
+``` 
 
 ## Testing the Application
 ###### [`^`](#table-of-contents)
@@ -320,7 +320,7 @@ It can be executed with the following command:
 
 **Note**: The demo client expects the entire system (all databases and services) to be running from a new state (no data in the database).
 This is the default when starting the services from the docker-compose file.
-When running the JARs manually, the user will need to ensure that the `dpc_attribution` database is truncated after each run.
+When running the JARs manually, the user will need to ensure that the `dpc_attribution` database is truncated after each run. 
 
 The demo performs the following actions:
 
@@ -337,18 +337,18 @@ This allows easy visualization of responses, as well as simplifies adding the ne
 
 Steps for testing the data export:
 
-1. Start the services using either the `docker-compose` command or through manually running the JARs. If running the JARs manually, you will need to migrate and seed the database before continuing.
+1. Start the services using either the `docker-compose` command or through manually running the JARs. If running the JARs manually, you will need to migrate and seed the database before continuing. 
 1. Make an initial GET request to the following endpoint: `http://localhost:3002/v1/Group/3461C774-B48F-11E8-96F8-529269fb1459/$export`.
 This will request a data export for all the patients attribution to provider: `3461C774-B48F-11E8-96F8-529269fb1459`.
 You will need to set the Accept header to `application/fhir+json` (per the FHIR bulk spec).
-1. The response from the Export endpoint should be a **204** with the `Content-Location` header containing a URL which the user can use to to check the status of the job.
+1. The response from the Export endpoint should be a **204** with the `Content-Location` header containing a URL which the user can use to to check the status of the job. 
 1. Make a GET request using the URL provided by the `/Group` endpoint from the previous step.
  Which has this format: `http://localhost:3002/v1/Jobs/{unique UUID of export job}`.
  You will need to ensure that the Accept header is set to `application/fhir+json` (per the FHIR bulk spec).
  You will need to ensure that the Prefer header is set to `respond-async`.
  The server should return a **204** response until the job has completed.
  Once the job is complete, the endpoint should return data in the following format (the actual values will be different):
-
+ 
      ```javascript
     {
         "transactionTime": 1550868647.776162,
@@ -375,7 +375,7 @@ In order to run the tests, you'll need to ensure that `virtualenv` is installed.
 ```bash
 pip3 install virtualenv
 ```
-## Generating the Source Code Documentation via JavaDoc
+## Generating the Source Code Documentation via JavaDoc 
 ###### [`^`](#table-of-contents)
 
 The entire project's code base documentation can be generated in HTML format by using the Java's
@@ -391,7 +391,7 @@ JavaDoc tool. The [Intelli-J Idea](https://jetbrains.com/idea) integrated develo
 
 ### Postman collection
 
-Note: Prior to running the tests, ensure that you've updated these Postman Environment variables:
+Note: Prior to running the tests, ensure that you've updated these Postman Environment variables: 
 - organization-id
 - client-token
 - public-key
@@ -428,7 +428,7 @@ Once the development environment is up and running, you should now be able to ru
 If you're running locally through Docker and you want to use your debugger there are two steps.
 - Open up port 5005 on whichever service you want to debug
   - Add the following to docker-compose.yml under api, aggregation, attribution or consent.
-    ```
+    ```    
     ports:
         - "5005:5005"
     ```
@@ -449,7 +449,7 @@ If you want to run and debug integration tests through IntelliJ there are a few 
   - This will recompile dpc with debug extensions included and start containers for dpc-attribution, dpc-aggregation, dpc-consent and a db.
 - Now you should be able to run any of the integration tests under dpc-api by clicking on the little green arrow next to their implementation.
   - Need to debug a test?  Right click on the triangle and select debug.
-  - If running ExpirationJobTest results in a port collision error, you can stop the attribution service in Docker and try running the test again.
+  - If running ExpirationJobTest results in a port collision error, you can stop the attribution service in Docker and try running the test again. 
 - If you have to debug one of the dependant services, for instance because an IT is calling dpc-attribution and getting a 500, and you can't figure out why, follow the instructions under [Local Debugging](#local-debugging) to open up the dependant service's debugger port in docker-compose, then rerun `make start-it-debug`.
   - Now you can attach your debugger to that service and still run integration tests as described above.
   - You'll have one debugger tab open on an IT in dpc-api and another on the dependant service, allowing you to set break points in either and examine the test end to end.
@@ -462,7 +462,7 @@ Note: Many of our integration tests are written for specific test data that only
 ## Other Notes
 ###### [`^`](#table-of-contents)
 
-### BFD transaction time details
+### BFD transaction time details   
 
 When requesting data from BFD, you must ensure that the `_since` time in the request is after the current BFD transaction time.
 
@@ -490,7 +490,7 @@ Therefore, using a fake patient ID which is guaranteed not to match is an easy w
 }
 ```
 
-## Troubleshooting
+## Troubleshooting  
 ###### [`^`](#table-of-contents)
 
 Please see the [troublshooting document ](Troubleshooting.md) for more help.
