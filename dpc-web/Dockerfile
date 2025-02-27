@@ -1,4 +1,4 @@
-FROM artifactory.cloud.cms.gov/docker/ruby:3.3-alpine AS ruby_builder
+FROM ruby:3.3-alpine AS ruby_builder
 
 # Install build dependencies
 RUN apk update && \
@@ -41,7 +41,7 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "Gemfile.lock" -delete
 
 
-FROM artifactory.cloud.cms.gov/docker/ruby:3.3-alpine
+FROM ruby:3.3-alpine
 
 # Install app dependencies
 RUN apk add --no-cache postgresql-client nodejs tzdata && \

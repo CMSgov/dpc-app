@@ -1,4 +1,4 @@
-FROM artifactory.cloud.cms.gov/docker/migrate/migrate
+FROM migrate/migrate
 
 RUN apk update upgrade && \
     apk add git

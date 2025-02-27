@@ -1,5 +1,5 @@
 # See: https://github.com/corretto/corretto-docker/blob/main/17/jdk/alpine/3.20/Dockerfile
-FROM artifactory.cloud.cms.gov/docker/amazoncorretto:17-alpine-jdk
+FROM amazoncorretto:17-alpine-jdk
 
 # Install additional packages used across DPC images
 RUN  apk update && apk add --no-cache aws-cli && apk add --no-cache curl
