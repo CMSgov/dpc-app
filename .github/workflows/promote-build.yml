@@ -20,7 +20,7 @@ on:
         default: ''
     
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.to_env }}
+  group: promote-to-${{ inputs.to_env }}
   cancel-in-progress: true
 
 jobs:
