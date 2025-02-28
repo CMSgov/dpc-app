@@ -23,14 +23,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
-import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.InputStream;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static gov.cms.dpc.attribution.SharedMethods.submitAttributionBundle;
@@ -129,12 +127,11 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         // Try to create roster for provider with existing one
         // Re-add the meta, because it gets stripped
         FHIRBuilders.addOrganizationTag(createdGroup, UUID.fromString(organizationID));
-        ForbiddenOperationException exception = assertThrows(ForbiddenOperationException.class,
-                () -> client
-                        .create()
-                        .resource(createdGroup)
-                        .encodedJson().execute()
-        );
+        ICreateTyped badCreate = client
+                .create()
+                .resource(createdGroup)
+                .encodedJson();
+        ForbiddenOperationException exception = assertThrows(ForbiddenOperationException.class, badCreate::execute);
 
         OperationOutcome outcome = (OperationOutcome) exception.getOperationOutcome();
         assertEquals(HttpStatus.FORBIDDEN_403, exception.getStatusCode());
@@ -276,12 +273,12 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         final List<Group.GroupMemberComponent> inactiveMembers = members
                 .stream()
                 .filter(Group.GroupMemberComponent::getInactive)
-                .collect(Collectors.toList());
+                .toList();
 
         final List<Group.GroupMemberComponent> activeMembers = members
                 .stream()
                 .filter(member -> !member.getInactive())
-                .collect(Collectors.toList());
+                .toList();
 
         // Add 10 minutes to avoid comparison differences with milliseconds on the Date values
         // Since we're only comparing Date values, adding a minute offset ensure the test passes, but is still valid
