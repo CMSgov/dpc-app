@@ -9,7 +9,7 @@
   "TODO": "upgrade newman when https://github.com/postmanlabs/newman/issues/3267 resolved",
   "dependencies": {
     "newman": "6.2.1",
-    "ansi-regex": ">=5.0.1"
+    "ansi-regex": ">=6.1.0"
   },
   "dependenciesComments": {
     "ansi-regex": "included to avoid vulnerable version"
