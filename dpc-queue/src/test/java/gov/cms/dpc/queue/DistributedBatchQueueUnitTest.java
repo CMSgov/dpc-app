@@ -15,6 +15,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -71,5 +72,39 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 		// We could probably mock the system time and the results coming back from Hibernate, but this is enough to
 		// prove it works.
 		assertTrue(age > 0 && age < .001);
+	}
+
+	@Test
+	void test_completePartialBatch_sets_update_time() throws InterruptedException {
+		Transaction transaction = session.beginTransaction();
+
+		UUID aggregatorId = UUID.randomUUID();
+		JobQueueBatch jobQueueBatch = new JobQueueBatch(
+			UUID.randomUUID(),
+			UUID.randomUUID(),
+			"orgNpi",
+			"providerNpi",
+			List.of(),
+			List.of(),
+			OffsetDateTime.now(),
+			OffsetDateTime.now(),
+			"reqIp",
+			"reqUrl",
+			true
+		);
+
+		jobQueueBatch.setAggregatorIDForTesting(aggregatorId);
+		jobQueueBatch.setRunningStatus(aggregatorId);
+		jobQueueBatch.setUpdateTime();
+		OffsetDateTime initialUpdateTime = jobQueueBatch.getUpdateTime().get();
+		session.persist(jobQueueBatch);
+		transaction.commit();
+
+		sleep(500);
+		queue.completePartialBatch(jobQueueBatch, UUID.randomUUID());
+		session.refresh(jobQueueBatch);
+		OffsetDateTime retrievedUpdateTime = jobQueueBatch.getUpdateTime().get();
+
+		assertTrue(retrievedUpdateTime.compareTo(initialUpdateTime) > 0);
 	}
 }
