@@ -28,7 +28,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     defaults:
       run:
         working-directory: ./lambda/opt-out-import
@@ -37,6 +37,9 @@ jobs:
       start_time: ${{ steps.createfile.outputs.STARTTIME }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            lambda/opt-out-import
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
@@ -58,13 +61,13 @@ jobs:
             s3://bfd-test-eft/bfdeft01/dpc/in/$fname
 
   verify-bucket:
+    if: ${{ always() && needs.trigger.result == 'success' }}
     needs: trigger
     permissions:
       contents: read
       id-token: write
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
@@ -92,12 +95,12 @@ jobs:
           exit 1
 
   verify-db-changes:
+    if: ${{ always() && needs.trigger.result == 'success' }}
     needs: trigger
     runs-on: self-hosted
     env:
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
     steps:
-      - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
