@@ -10,12 +10,12 @@ import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
 import java.util.List;
 
 import static gov.cms.dpc.api.auth.MacaroonHelpers.BEARER_PREFIX;
@@ -59,7 +59,7 @@ public class AdminAuthFilter extends AuthFilter<DPCAuthCredentials, Organization
         assert m1.size() == 1 : "Should only have a single Macaroon";
 
         // Ensure that we don't have any organization IDs
-        // Since we ALWAYS generate organization_id caveats for tokens, its absence indicates that its a Golden Macaroon
+        // Since we ALWAYS generate organization_id caveats for tokens, its absence indicates that it's a Golden Macaroon
         final boolean isGoldenMacaroon = MacaroonBakery.getCaveats(m1.get(0))
                 .stream()
                 .map(MacaroonCaveat::getCondition)

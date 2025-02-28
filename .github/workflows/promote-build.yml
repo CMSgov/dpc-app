@@ -68,5 +68,5 @@ jobs:
     needs: deploy
     uses: ./.github/workflows/smoke-test.yml
     with:
-      env: ${{ inputs.env || 'test' }}
+      env: ${{ inputs.to_env || 'test' }}
     secrets: inherit

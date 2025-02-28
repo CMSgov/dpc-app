@@ -96,7 +96,6 @@ class BlueButtonClientTest {
                     List.of(
                             Parameter.param("patient", patientId),
                             Parameter.param("excludeSAMHSA", "true"),
-                            Parameter.param("_count", "10"),
                             Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
             );
 
@@ -106,7 +105,6 @@ class BlueButtonClientTest {
                     getRawXML(SAMPLE_COVERAGE_PATH_PREFIX + patientId + ".xml"),
                     List.of(
                             Parameter.param("beneficiary", "Patient/" + patientId),
-                            Parameter.param("_count", "10"),
                             Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
             );
         }
@@ -119,13 +117,12 @@ class BlueButtonClientTest {
         );
 
         createMockServerExpectation(
-            "/v1/fhir/ExplainationOfBenefit",
+            "/v1/fhir/ExplanationOfBenefit",
             HttpStatus.OK_200,
             getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_SINGLE_EOB_PATIENT_ID + ".xml"),
             List.of(
                     Parameter.param("patient", TEST_SINGLE_EOB_PATIENT_ID),
                     Parameter.param("excludeSAMHSA", "true"),
-                    Parameter.param("_count", "10"),
                     Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
         );
 
@@ -136,7 +133,6 @@ class BlueButtonClientTest {
                 HttpStatus.OK_200,
                 getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_PATIENT_ID + "_" + startIndex + ".xml"),
                 List.of(Parameter.param("patient", TEST_PATIENT_ID),
-                        Parameter.param("count", "10"),
                         Parameter.param("startIndex", startIndex),
                         Parameter.param("excludeSAMHSA", "true"))
             );
@@ -160,10 +156,10 @@ class BlueButtonClientTest {
 
         String patientDataCorrupted = "The demo Patient object data differs from what is expected";
         assertEquals(patient.getBirthDate(), java.sql.Date.valueOf("2014-06-01"), patientDataCorrupted);
-        assertEquals(patient.getGender().getDisplay(), "Unknown", patientDataCorrupted);
-        assertEquals(patient.getName().size(), 1, patientDataCorrupted);
-        assertEquals(patient.getName().get(0).getFamily(), "Doe", patientDataCorrupted);
-        assertEquals(patient.getName().get(0).getGiven().get(0).toString(), "Jane", patientDataCorrupted);
+        assertEquals("Unknown", patient.getGender().getDisplay(), patientDataCorrupted);
+        assertEquals(1, patient.getName().size(), patientDataCorrupted);
+        assertEquals("Doe", patient.getName().get(0).getFamily(), patientDataCorrupted);
+        assertEquals("Jane", patient.getName().get(0).getGiven().get(0).toString(), patientDataCorrupted);
     }
 
     @Test
@@ -218,7 +214,7 @@ class BlueButtonClientTest {
     void shouldReturnBundleContainingOnlyEOBs() {
         Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
 
-        response.getEntry().forEach((entry) -> assertEquals(
+        response.getEntry().forEach(entry -> assertEquals(
                 entry.getResource().getResourceType().getPath(),
                 DPCResourceType.ExplanationOfBenefit.getPath(),
                 "EOB bundles returned by the BlueButton client should only contain EOB objects"

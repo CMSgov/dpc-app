@@ -1,8 +1,8 @@
 package gov.cms.dpc.api;
 
-import com.codahale.metrics.jersey2.InstrumentedResourceMethodApplicationListener;
+import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListener;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
+import com.fasterxml.jackson.datatype.hibernate6.Hibernate6Module;
 import com.google.inject.Injector;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.api.auth.AuthModule;
@@ -35,11 +35,11 @@ import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
+import jakarta.validation.ValidatorFactory;
 import org.apache.http.HttpHeaders;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 
-import javax.validation.ValidatorFactory;
 import java.util.List;
 import java.util.Optional;
 
@@ -154,9 +154,9 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     private void setupJacksonMapping(final Bootstrap<DPCAPIConfiguration> bootstrap) {
         // By default, Jackson will ignore @Transient annotated fields. We need to disable this so we can use Hibernate entities for serialization as well.
         // We can still ignore fields using @JsonIgnore
-        final Hibernate5Module h5M = new Hibernate5Module();
-        h5M.disable(Hibernate5Module.Feature.USE_TRANSIENT_ANNOTATION);
-        bootstrap.getObjectMapper().registerModule(h5M);
+        final Hibernate6Module h6M = new Hibernate6Module();
+        h6M.disable(Hibernate6Module.Feature.USE_TRANSIENT_ANNOTATION);
+        bootstrap.getObjectMapper().registerModule(h6M);
         bootstrap.getObjectMapper().disable(DeserializationFeature.WRAP_EXCEPTIONS);
     }
 }

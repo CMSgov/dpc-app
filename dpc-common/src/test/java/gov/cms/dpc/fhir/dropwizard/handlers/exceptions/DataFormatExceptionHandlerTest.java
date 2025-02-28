@@ -1,16 +1,14 @@
 package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
 import ca.uhn.fhir.parser.DataFormatException;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Response;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DataFormatExceptionHandlerTest {
 
@@ -31,11 +29,7 @@ public class DataFormatExceptionHandlerTest {
     void testHandleNonFHIRException() {
         final DataFormatExceptionHandler handler = new DataFormatExceptionHandler(Mockito.mock(ResourceInfo.class));
 
-        try {
-            handler.handleNonFHIRException(new DataFormatException());
-            fail("This call is supposed to fail.");
-        } catch (IllegalStateException exception) {
-            assertEquals("Cannot throw FHIR Parser exception from non-FHIR endpoint", exception.getMessage());
-        }
+        Exception exception = assertThrows((IllegalStateException.class), () -> handler.handleNonFHIRException(new DataFormatException()));
+        assertEquals("Cannot throw FHIR Parser exception from non-FHIR endpoint", exception.getMessage());
     }
 }

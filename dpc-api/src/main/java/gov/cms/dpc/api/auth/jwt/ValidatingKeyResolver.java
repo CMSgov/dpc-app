@@ -3,10 +3,10 @@ package gov.cms.dpc.api.auth.jwt;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import io.jsonwebtoken.*;
+import jakarta.annotation.Nullable;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
-import javax.annotation.Nullable;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.security.Key;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -19,7 +19,7 @@ import java.util.UUID;
  * As far as I can tell, this is the only way to get access to the JWS claims without actually verifying the signature.
  * See: https://github.com/jwtk/jjwt/issues/205
  * <p>
- * The downside is that this method will always return a null {@link Key}, which means the {@link Jwts#parser()} method will always throw an {@link IllegalArgumentException}, which we need to catch.
+ * The downside is that this method will always return a null {@link Key}, which means the {@link Jwts#parser()} method will always throw an {@link UnsupportedJwtException}, which we need to catch.
  */
 public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
 
