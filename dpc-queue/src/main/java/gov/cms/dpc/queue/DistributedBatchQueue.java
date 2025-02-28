@@ -251,7 +251,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
                 final Optional<OffsetDateTime> lastUpdate = job.getUpdateTime();
 
                 // We just need to persist the job, as any results will be attached to the job and cascade
-                JobQueueBatch mergedJob = (JobQueueBatch) session.merge(job);
+                JobQueueBatch mergedJob = session.merge(job);
 
                 final var delay = Duration.between(lastUpdate.orElseThrow(), job.getUpdateTime().orElseThrow());
                 partialTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);
