@@ -28,7 +28,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     defaults:
       run:
         working-directory: ./lambda/opt-out-export
@@ -36,6 +36,9 @@ jobs:
       start_time: ${{ steps.invoke-lambda.outputs.STARTTIME }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            lambda/opt-out-export
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
@@ -48,13 +51,13 @@ jobs:
 
 
   verify-bucket:
+    if: ${{ always() && needs.trigger.result == 'success' }}
     needs: trigger
     permissions:
       contents: read
       id-token: write
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
