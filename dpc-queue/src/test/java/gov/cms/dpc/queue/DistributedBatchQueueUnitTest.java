@@ -70,4 +70,37 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 		// prove it works.
 		assertTrue(age > 0 && age < .001);
 	}
+
+	@Test
+	void test_completePartialBatch_sets_update_time() throws InterruptedException {
+		Transaction transaction = session.beginTransaction();
+
+		UUID aggregatorId = UUID.randomUUID();
+		JobQueueBatch jobQueueBatch = new JobQueueBatch(
+			UUID.randomUUID(),
+			UUID.randomUUID(),
+			"orgNpi",
+			"providerNpi",
+			List.of(),
+			List.of(),
+			OffsetDateTime.now(),
+			OffsetDateTime.now(),
+			"reqIp",
+			"reqUrl",
+			true
+		);
+
+		jobQueueBatch.setAggregatorIDForTesting(aggregatorId);
+		jobQueueBatch.setRunningStatus(aggregatorId);
+		jobQueueBatch.setUpdateTime();
+		OffsetDateTime initialUpdateTime = jobQueueBatch.getUpdateTime().get();
+		session.persist(jobQueueBatch);
+		transaction.commit();
+
+		queue.completePartialBatch(jobQueueBatch, UUID.randomUUID());
+		session.refresh(jobQueueBatch);
+		OffsetDateTime retrievedUpdateTime = jobQueueBatch.getUpdateTime().get();
+
+		assertTrue(retrievedUpdateTime.isAfter(initialUpdateTime));
+	}
 }
