@@ -3,6 +3,7 @@ package gov.cms.dpc.common;
 public final class MDCConstants {
     private MDCConstants() {}
 
+    // This is actually the patient's MBI hash
     public static final String PATIENT_ID = "patientID";
     public static final String JOB_ID = "jobID";
     public static final String JOB_BATCH_ID = "batchID";
@@ -15,4 +16,7 @@ public final class MDCConstants {
     public static final String IS_SMOKE_TEST_ORG = "is_smoke_test";
     public static final String IS_BULK = "is_bulk";
     public static final String IS_V2 = "is_v2";
+
+    // This is the id of the patient's FHIR resource
+    public static final String PATIENT_FHIR_ID = "patientFhirId";
 }

@@ -8,6 +8,7 @@ import gov.cms.dpc.aggregation.service.EveryoneGetsDataLookBackServiceImpl;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.IJobQueue;
@@ -22,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.MDC;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -92,6 +94,7 @@ class JobBatchProcessorUnitTest {
                 mbi
         );
 
+        assertEquals(MockBlueButtonClient.MBI_BENE_ID_MAP.get(mbi), MDC.get(MDCConstants.PATIENT_FHIR_ID));
         assertEquals(1, results.size());
         JobQueueBatchFile completedJob = results.get(0);
 
@@ -137,6 +140,7 @@ class JobBatchProcessorUnitTest {
                 mbi
         );
 
+        assertEquals(MockBlueButtonClient.MBI_BENE_ID_MAP.get(mbi), MDC.get(MDCConstants.PATIENT_FHIR_ID));
         assertEquals(1, results.size());
         JobQueueBatchFile completedJob = results.get(0);
 
@@ -185,6 +189,7 @@ class JobBatchProcessorUnitTest {
                 job,
                 mbis.get(0)
         );
+        assertEquals(MockBlueButtonClient.MBI_BENE_ID_MAP.get(mbis.get(0)), MDC.get(MDCConstants.PATIENT_FHIR_ID));
 
         List<JobQueueBatchFile> results2 = jobBatchProcessor.processJobBatchPartial(
                 UUID.randomUUID(),
@@ -192,6 +197,7 @@ class JobBatchProcessorUnitTest {
                 job,
                 mbis.get(1)
         );
+        assertEquals(MockBlueButtonClient.MBI_BENE_ID_MAP.get(mbis.get(1)), MDC.get(MDCConstants.PATIENT_FHIR_ID));
 
 
         assertEquals(1, results1.size());

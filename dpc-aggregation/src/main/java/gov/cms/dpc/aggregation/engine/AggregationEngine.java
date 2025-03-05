@@ -171,6 +171,7 @@ public class AggregationEngine implements Runnable {
 
             //Clear last patient seen from MDC
             MDC.remove(MDCConstants.PATIENT_ID);
+            MDC.remove(MDCConstants.PATIENT_FHIR_ID);
             // Finish processing the batch
             if (this.isRunning()) {
                 final String jobTime = SplunkTimestamp.getSplunkTimestamp();
