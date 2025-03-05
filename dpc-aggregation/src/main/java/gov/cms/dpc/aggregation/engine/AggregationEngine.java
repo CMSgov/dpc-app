@@ -185,7 +185,7 @@ public class AggregationEngine implements Runnable {
         } catch (Exception error) {
             try {
                 final String jobTime = SplunkTimestamp.getSplunkTimestamp();
-                logger.info("dpcMetric=jobFail,completionResult={},jobID={},jobCompleteTime={}", "FAILED", job.getJobID(), jobTime);
+                logger.info("dpcMetric=jobFail,completionResult={},jobID={},jobCompleteTime={},failureReason={}", "FAILED", job.getJobID(), jobTime, error.getMessage());
                 this.queue.failBatch(job, aggregatorID);
             } catch (Exception failedBatchException) {
                 logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 5 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);
