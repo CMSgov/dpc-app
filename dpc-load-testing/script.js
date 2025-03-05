@@ -19,7 +19,11 @@ export const options = {
 let org1Id;
 let org2Id;
 
-// Sets up two test organizations and saves their UUIDs for use later.
+let org1Token;
+let org2Token;
+
+// Sets up two test organizations and saves their UUIDs,
+// then fetches a token for each organization.
 export function setup() {
   // Fake NPIs generated online: https://jsfiddle.net/alexdresko/cLNB6
   const org1 = createOrganization('2782823019', 'Test Org 1');
@@ -48,20 +52,33 @@ export function setup() {
 
   org1Id = org1.json().id;
   org2Id = org2.json().id;
-}
 
-let bearerToken;
-
-export default function() {
-  if (!bearerToken) {
-    const tokenResponse = generateDPCToken();
+  if (!org1Token) {
+    const tokenResponse = generateDPCToken(org1Id);
     if (tokenResponse.status.toString() == '200') {
-      bearerToken = tokenResponse.body;
-      console.log('bearer token fetched successfully!');
+      org1Token = tokenResponse.body;
+      console.log('bearer token for org1 fetched successfully!');
     } else {
       console.error('failed to fetch bearer token');
     }
   }
+
+  if (!org2Token) {
+    const tokenResponse = generateDPCToken(org2Id);
+    if (tokenResponse.status.toString() == '200') {
+      org2Token = tokenResponse.body;
+      console.log('bearer token for org2 fetched successfully!');
+    } else {
+      console.error('failed to fetch bearer token');
+    }
+  }
+}
+
+export default function() {
+  
+
+  // generate a patient and iterate mbis
+  // generate a provider and iterate npis
 
   http.get('https://test.k6.io');
   sleep(1);
