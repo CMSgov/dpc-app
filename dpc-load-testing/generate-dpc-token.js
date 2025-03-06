@@ -12,8 +12,8 @@ class TokenCache {
     this.tokens = {};
   }
 
-  setGoldenMacaroon(macaroon) {
-    this.goldenMacaroon = macaroon;
+  setGoldenMacaroon() {
+    this.goldenMacaroon = fetchGoldenMacaroon();
   }
 
   getGoldenMacaroon() {

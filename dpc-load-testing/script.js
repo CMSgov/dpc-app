@@ -26,8 +26,7 @@ let goldenMacaroon;
 
 // Sets up two test organizations
 export function setup() {
-  goldenMacaroon = fetchGoldenMacaroon();
-  tokenCache.setGoldenMacaroon(goldenMacaroon);
+  tokenCache.setGoldenMacaroon();
   // Fake NPIs generated online: https://jsfiddle.net/alexdresko/cLNB6
   const org1 = createOrganization('2782823019', 'Test Org 1');
   const org2 = createOrganization('8197402604', 'Test Org 2');
@@ -68,7 +67,7 @@ export function workflowA(data) {
     tokenCache.setToken(orgId, tokenResponse.body);
     console.log('bearer token for workflow A fetched successfully!');
   } else {
-    console.error('failed to fetch bearer token for workflow A');
+    fail('failed to fetch bearer token for workflow A');
   }
   
   const orgResponse = getOrganization(orgId);
@@ -89,7 +88,7 @@ export function workflowB(data) {
     tokenCache.setToken(orgId, tokenResponse.body);
     console.log('bearer token for workflow B fetched successfully!');
   } else {
-    console.error('failed to fetch bearer token for workflow B');
+    fail('failed to fetch bearer token for workflow B');
   }
 
   const orgResponse = getOrganization(orgId);
