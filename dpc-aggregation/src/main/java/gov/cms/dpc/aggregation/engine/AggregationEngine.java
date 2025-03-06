@@ -61,6 +61,8 @@ public class AggregationEngine implements Runnable {
         this.queue = queue;
         this.operationsConfig = operationsConfig;
         this.jobBatchProcessor = jobBatchProcessor;
+
+        MDC.put(MDCConstants.AGGREGATOR_ID, this.aggregatorID.toString());
     }
 
     /**

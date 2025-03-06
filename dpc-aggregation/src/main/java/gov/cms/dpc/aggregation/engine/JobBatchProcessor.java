@@ -216,7 +216,8 @@ public class JobBatchProcessor {
                 job.getBatchID(),
                 resourceType,
                 since,
-                job.getTransactionTime());
+                job.getTransactionTime(),
+                operationsConfig.getFetchWarnThresholdSeconds());
         return fetcher.fetchResources(patient, new JobHeaders(job.getRequestingIP(),job.getJobID().toString(),
                         job.getProviderNPI(),job.getTransactionTime().toString(),job.isBulk()).buildHeaders())
                            .flatMap(Flowable::fromIterable);

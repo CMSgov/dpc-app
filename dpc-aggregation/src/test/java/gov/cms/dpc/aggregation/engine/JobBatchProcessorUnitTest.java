@@ -121,13 +121,14 @@ class JobBatchProcessorUnitTest {
 
         // Create a config with our org look back exempt
         OperationsConfig operationsConfig = new OperationsConfig(
-                1000,
-                exportPath,
-                1,
-                500,
-                120,
-                YearMonth.of(2014, 3),
-                List.of(job.getOrgID().toString())
+            1000,
+            exportPath,
+            1,
+            500,
+            120,
+            YearMonth.of(2014, 3),
+            List.of(job.getOrgID().toString()),
+            30
         );
         JobBatchProcessor jobBatchProcessor = getJobBatchProcessor(bbClient, operationsConfig, new EveryoneGetsDataLookBackServiceImpl(), consentService);
 
@@ -170,13 +171,14 @@ class JobBatchProcessorUnitTest {
 
         // Create a config with our org look back exempt
         OperationsConfig operationsConfig = new OperationsConfig(
-                1,
-                exportPath,
-                1,
-                500,
-                120,
-                YearMonth.of(2014, 3),
-                List.of(job.getOrgID().toString())
+            1,
+            exportPath,
+            1,
+            500,
+            120,
+            YearMonth.of(2014, 3),
+            List.of(job.getOrgID().toString()),
+            30
         );
         JobBatchProcessor jobBatchProcessor = getJobBatchProcessor(bbClient, operationsConfig, new EveryoneGetsDataLookBackServiceImpl(), consentService);
 

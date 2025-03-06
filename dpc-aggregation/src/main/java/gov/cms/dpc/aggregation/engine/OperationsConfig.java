@@ -15,6 +15,7 @@ public class OperationsConfig {
     private int lookBackMonths;
     private final YearMonth lookBackDate;
     private List<String> lookBackExemptOrgs;
+    private int fetchWarnThresholdSeconds;
 
     public OperationsConfig(
             int resourcesPerFileCount,
@@ -23,7 +24,8 @@ public class OperationsConfig {
             int pollingFrequency,
             int lookBackMonths,
             YearMonth lookBackDate,
-            List<String> lookBackExemptOrgs
+            List<String> lookBackExemptOrgs,
+            int fetchWarnThresholdSeconds
     ) {
         this.retryCount = retryCount;
         this.resourcesPerFileCount = resourcesPerFileCount;
@@ -32,6 +34,7 @@ public class OperationsConfig {
         this.lookBackMonths = lookBackMonths;
         this.lookBackDate = lookBackDate;
         this.lookBackExemptOrgs = lookBackExemptOrgs;
+        this.fetchWarnThresholdSeconds = fetchWarnThresholdSeconds;
     }
 
     public OperationsConfig(
@@ -45,6 +48,7 @@ public class OperationsConfig {
         this.exportPath = exportPath;
         this.pollingFrequency = pollingFrequency;
         this.lookBackDate = lookBackDate;
+        this.fetchWarnThresholdSeconds = 30;
     }
 
     @SuppressWarnings("unused")
@@ -73,4 +77,6 @@ public class OperationsConfig {
     }
 
     public List<String> getLookBackExemptOrgs() { return lookBackExemptOrgs; }
+
+    public int getFetchWarnThresholdSeconds() { return fetchWarnThresholdSeconds; }
 }
