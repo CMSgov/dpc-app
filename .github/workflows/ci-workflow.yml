@@ -24,10 +24,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: "17"
-      - name: "Set up Python 3.9"
+      - name: "Set up Python 3.13"
         uses: actions/setup-python@v2
         with:
-          python-version: "3.9"
+          python-version: "3.13"
       - name: "API Build"
         run: |
           make ci-app
