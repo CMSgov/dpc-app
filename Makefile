@@ -84,6 +84,10 @@ start-app: secure-envs start-db start-api-dependencies
 start-api: ## Start the API
 start-api: start-app
 
+start-api-load-tests: ## Start the API
+start-api-load-tests: secure-envs
+	USE_BFD_MOCK=true AUTH_DISABLED=true docker compose -p dpc-load-tests up api --wait
+
 start-web: ## Start the sandbox portal
 start-web:
 	@docker compose -f docker-compose.yml -f docker-compose.portals.yml up dpc_web --wait
@@ -133,6 +137,10 @@ start-it-debug: secure-envs
 down-dpc: ## Shut down all services
 down-dpc:
 	@docker compose -f docker-compose.yml -f docker-compose.portals.yml down
+
+down-dpc-load-tests: ## Shut down all services
+down-dpc-load-tests:
+	@docker compose -p dpc-load-tests down
 
 down-portals: ## Shut down all services
 down-portals: down-dpc
@@ -212,3 +220,6 @@ ci-api-client:
 .PHONY: unit-tests
 unit-tests:
 	@bash ./dpc-unit-test.sh
+
+.PHONY: load-tests
+load-tests: start-api-load-tests start-load-tests down-dpc-load-tests
