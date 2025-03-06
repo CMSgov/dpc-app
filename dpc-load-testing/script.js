@@ -1,7 +1,7 @@
 import { check, fail } from 'k6';
 import exec from 'k6/execution'
 import generateDPCToken from './generate-dpc-token.js';
-import { createOrganization, getOrganization } from './dpc-api-client.js';
+import { createOrganization, deleteOrganization, getOrganization } from './dpc-api-client.js';
 
 // See https://grafana.com/docs/k6/latest/using-k6/k6-options/reference for
 // details on this configuration object.
@@ -68,8 +68,7 @@ export function workflowA(data) {
     console.error('failed to fetch bearer token for workflow A');
   }
   
-  const orgResponse = getOrganization(orgId);
-  console.log(orgResponse.json());
+  const orgResponse = getOrganization(token, orgId);
   const checkOutput = check(
     orgResponse, 
     { 'response code was 200': res => res.status === 200 }
@@ -91,7 +90,7 @@ export function workflowB(data) {
     console.error('failed to fetch bearer token for workflow B');
   }
 
-  const orgResponse = getOrganization(orgId);
+  const orgResponse = getOrganization(token, orgId);
   const checkOutput = check(
     orgResponse, 
     { 'response code was 200': res => res.status === 200 }
@@ -99,5 +98,13 @@ export function workflowB(data) {
 
   if (!checkOutput) {
     fail('Failed to get a 200 response in workflow B');
+  }
+}
+
+export function teardown(data) {
+  for (const orgId of data) {
+    if (orgId) {
+      deleteOrganization(orgId);
+    }
   }
 }

@@ -58,3 +58,15 @@ export function getOrganization(token, id) {
 
   return res;
 }
+
+export function deleteOrganization(id) {
+  const res = http.del(`${urlRoot}/Organization/${id}`, null, {
+    headers: {
+      'Authorization': `Bearer ${goldenMacaroon}`,
+      'Content-Type': 'application/fhir+json',
+      'Accept': 'application/fhir+json'
+    }
+  });
+
+  return res;
+}
