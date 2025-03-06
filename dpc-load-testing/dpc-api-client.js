@@ -46,3 +46,15 @@ export function createPatient(token, mbi) {
 
   return res;
 }
+
+export function getOrganization(token, id) {
+  const res = http.get(`${urlRoot}/Organization/${id}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/fhir+json',
+      'Accept': 'application/fhir+json'
+    }
+  });
+
+  return res;
+}
