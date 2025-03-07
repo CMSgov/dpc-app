@@ -96,13 +96,14 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         final var config = configuration();
 
         return new OperationsConfig(
-                config.getResourcesPerFileCount(),
-                config.getExportPath(),
-                config.getRetryCount(),
-                config.getPollingFrequency(),
-                config.getLookBackMonths(),
-                config.getLookBackDate(),
-                config.getLookBackExemptOrgs()
+            config.getResourcesPerFileCount(),
+            config.getExportPath(),
+            config.getRetryCount(),
+            config.getPollingFrequency(),
+            config.getLookBackMonths(),
+            config.getLookBackDate(),
+            config.getLookBackExemptOrgs(),
+            config.getFetchWarnThresholdSeconds()
         );
     }
 

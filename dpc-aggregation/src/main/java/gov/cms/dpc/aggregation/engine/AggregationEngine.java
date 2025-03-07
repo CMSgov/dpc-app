@@ -96,6 +96,8 @@ public class AggregationEngine implements Runnable {
      * The main run-loop of the engine.
      */
     protected void pollQueue() {
+        MDC.put(MDCConstants.AGGREGATOR_ID, this.aggregatorID.toString());
+
         this.subscribe = this.createQueueObserver()
                 .repeatWhen(completed -> {
                     logger.debug("Configuring queue to poll every {} milliseconds", operationsConfig.getPollingFrequency());
@@ -153,6 +155,7 @@ public class AggregationEngine implements Runnable {
     protected void processJobBatch(JobQueueBatch job) {
         final String queueCompleteTime = SplunkTimestamp.getSplunkTimestamp();
         try {
+            MDC.put(MDCConstants.AGGREGATOR_ID, this.aggregatorID.toString());
             MDC.put(MDCConstants.JOB_ID, job.getJobID().toString());
             MDC.put(MDCConstants.JOB_BATCH_ID, job.getBatchID().toString());
             MDC.put(MDCConstants.ORGANIZATION_ID, job.getOrgID().toString());
@@ -171,6 +174,7 @@ public class AggregationEngine implements Runnable {
 
             //Clear last patient seen from MDC
             MDC.remove(MDCConstants.PATIENT_ID);
+            MDC.remove(MDCConstants.PATIENT_FHIR_ID);
             // Finish processing the batch
             if (this.isRunning()) {
                 final String jobTime = SplunkTimestamp.getSplunkTimestamp();
@@ -185,7 +189,7 @@ public class AggregationEngine implements Runnable {
         } catch (Exception error) {
             try {
                 final String jobTime = SplunkTimestamp.getSplunkTimestamp();
-                logger.info("dpcMetric=jobFail,completionResult={},jobID={},jobCompleteTime={}", "FAILED", job.getJobID(), jobTime);
+                logger.info("dpcMetric=jobFail,completionResult={},jobID={},jobCompleteTime={},failureReason={}", "FAILED", job.getJobID(), jobTime, error.getMessage());
                 this.queue.failBatch(job, aggregatorID);
             } catch (Exception failedBatchException) {
                 logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 5 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);

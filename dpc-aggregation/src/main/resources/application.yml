@@ -74,6 +74,8 @@ logging:
       # While nice from a performance standpoint, we must ensure full audit capability of the application
       discardingThreshold: 0
 
+fetchWarnThresholdSeconds: 30
+
 bbclient:
   registerHealthCheck: ${BB_REGISTER_HEALTH_CHECK:-true}
   keyStore:
