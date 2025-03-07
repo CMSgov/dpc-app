@@ -41,7 +41,7 @@ server:
             application: ${APPLICATION:-"dpc-aggregation"}
 
 logging:
-  level: INFO
+  level: WARN
   loggers:
     "liquibase": INFO
     "gov.cms.dpc.aggregation.engine": INFO
