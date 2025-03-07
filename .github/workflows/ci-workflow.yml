@@ -16,7 +16,7 @@ env:
 jobs:
   build-api:
     name: "Build and Test API"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
@@ -24,10 +24,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: "17"
-      - name: "Set up Python 3.8.1"
+      - name: "Set up Python 3.13"
         uses: actions/setup-python@v2
         with:
-          python-version: "3.8.1"
+          python-version: "3.13"
       - name: "API Build"
         run: |
           make ci-app
