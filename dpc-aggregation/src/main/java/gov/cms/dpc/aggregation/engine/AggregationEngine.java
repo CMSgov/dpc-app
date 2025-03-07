@@ -61,8 +61,6 @@ public class AggregationEngine implements Runnable {
         this.queue = queue;
         this.operationsConfig = operationsConfig;
         this.jobBatchProcessor = jobBatchProcessor;
-
-        MDC.put(MDCConstants.AGGREGATOR_ID, this.aggregatorID.toString());
     }
 
     /**
@@ -98,6 +96,8 @@ public class AggregationEngine implements Runnable {
      * The main run-loop of the engine.
      */
     protected void pollQueue() {
+        MDC.put(MDCConstants.AGGREGATOR_ID, this.aggregatorID.toString());
+
         this.subscribe = this.createQueueObserver()
                 .repeatWhen(completed -> {
                     logger.debug("Configuring queue to poll every {} milliseconds", operationsConfig.getPollingFrequency());
@@ -155,6 +155,7 @@ public class AggregationEngine implements Runnable {
     protected void processJobBatch(JobQueueBatch job) {
         final String queueCompleteTime = SplunkTimestamp.getSplunkTimestamp();
         try {
+            MDC.put(MDCConstants.AGGREGATOR_ID, this.aggregatorID.toString());
             MDC.put(MDCConstants.JOB_ID, job.getJobID().toString());
             MDC.put(MDCConstants.JOB_BATCH_ID, job.getBatchID().toString());
             MDC.put(MDCConstants.ORGANIZATION_ID, job.getOrgID().toString());
