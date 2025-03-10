@@ -22,6 +22,6 @@ public class LogHeaderFilter implements ContainerRequestFilter {
 			headerValue = headerValue.replace(",", "\\,");
 		}
 
-		logger.info("{}={}", headerKey, headerValue);
+		logger.info("{}={}, uri={}", headerKey, headerValue, requestContext.getUriInfo().getRequestUri());
 	}
 }

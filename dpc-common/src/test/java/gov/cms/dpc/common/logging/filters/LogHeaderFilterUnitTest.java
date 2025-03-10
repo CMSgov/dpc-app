@@ -5,10 +5,13 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.UriInfo;
+import org.glassfish.jersey.server.internal.routing.UriRoutingContext;
 import org.junit.jupiter.api.*;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -42,10 +45,17 @@ class LogHeaderFilterUnitTest {
 	@Test
 	void testLogsHeader() throws IOException {
 		final String headerValue = "fakeValue,fakervalue";
-		final String headerValueLogged = headerKey + "=fakeValue\\,fakervalue";
+        final String fakeUrl = "fake/fake/path";
+		final String fakeHeaderValueAdded = headerKey + "=fakeValue\\,fakervalue";
+        final String fakeUriValueAdded = "uri=" + fakeUrl;
+        final String headerValueLogged = fakeHeaderValueAdded + ", " + fakeUriValueAdded;
 
 		ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
 		when(requestContext.getHeaderString(headerKey)).thenReturn(headerValue);
+        final URI fakeUri = URI.create(fakeUrl);
+        UriInfo uriInfo = mock(UriInfo.class);
+        when(uriInfo.getRequestUri()).thenReturn(fakeUri);
+        when(requestContext.getUriInfo()).thenReturn(uriInfo);
 
 		logHeaderFilter.filter(requestContext);
 
