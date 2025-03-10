@@ -7,10 +7,7 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import gov.cms.dpc.aggregation.service.ConsentResult;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
@@ -656,6 +653,40 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         logger.info("Submit operation time: {}", submitSeconds);
 
         assertEquals(COUNT_TEST_PATIENTS, resultPatientBundle.getEntry().size());
+    }
+
+    @Test
+    void testPatientEverythingWithFailedLookBack() throws IOException, URISyntaxException, GeneralSecurityException {
+        IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
+
+        // Register a patient with no EoB resources
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
+        Patient patient = APITestHelpers.createPatientResource(mbi, APITestHelpers.ORGANIZATION_ID);
+        client.create()
+            .resource(patient)
+            .encodedJson()
+            .execute();
+        Patient retrievedPatient = fetchPatient(client, mbi);
+        String patientId = FHIRExtractors.getEntityUUID(retrievedPatient.getId()).toString();
+
+        APITestHelpers.setupPractitionerTest(client, parser);
+        Practitioner practitioner = fetchPractitionerByNPI(client);
+
+        IOperationUntypedWithInput<Bundle> getEverythingOperation = client
+            .operation()
+            .onInstance(new IdType("Patient", patientId))
+            .named("$everything")
+            .withNoParameters(Parameters.class)
+            .returnResourceType(Bundle.class)
+            .useHttpGet()
+            .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
+
+        ForbiddenOperationException exception = assertThrows(ForbiddenOperationException.class, getEverythingOperation::execute,
+            "Expected forbidden when retrieving patient that fails look back."
+        );
+        assertTrue(exception.getResponseBody().contains("\"text\":\"DPC couldn't find any claims for this MBI; unable to demonstrate relationship with provider or organization\""),
+            "Incorrect or missing operation outcome in response body."
+        );
     }
 
     private IGenericClient generateClient(String orgNPI, String keyLabel) throws IOException, URISyntaxException, GeneralSecurityException {

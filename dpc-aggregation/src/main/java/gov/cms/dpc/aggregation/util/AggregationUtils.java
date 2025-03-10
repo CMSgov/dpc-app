@@ -23,14 +23,24 @@ public final class AggregationUtils {
         }
     }
 
+    /**
+     * Returns an {@link OperationOutcome} of type Exception.
+     * @param failReason The reason the operation failed
+     * @param patientID The patient's ID
+     * @return {@link OperationOutcome}
+     */
     public static OperationOutcome toOperationOutcome(OutcomeReason failReason, String patientID) {
+        return toOperationOutcome(failReason, patientID, OperationOutcome.IssueType.EXCEPTION);
+    }
+
+    public static OperationOutcome toOperationOutcome(OutcomeReason failReason, String patientID, OperationOutcome.IssueType issueType) {
         final var patientLocation = List.of(new StringType("Patient"), new StringType("id"), new StringType(patientID));
         final var outcome = new OperationOutcome();
         outcome.addIssue()
-                .setSeverity(OperationOutcome.IssueSeverity.ERROR)
-                .setCode(OperationOutcome.IssueType.EXCEPTION)
-                .setDetails(new CodeableConcept().setText(failReason.detail))
-                .setLocation(patientLocation);
+            .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+            .setCode(issueType)
+            .setDetails(new CodeableConcept().setText(failReason.detail))
+            .setLocation(patientLocation);
         return outcome;
     }
 

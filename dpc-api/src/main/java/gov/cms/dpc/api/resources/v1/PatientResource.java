@@ -230,7 +230,7 @@ public class PatientResource extends AbstractPatientResource {
             // An OperationOutcome (ERROR) was returned
             OperationOutcome resultOp = (OperationOutcome) result;
             // getIssueFirstRep() grabs the first issue only - there may be others
-            throw new WebApplicationException(resultOp.getIssueFirstRep().getDetails().getText());
+            throw new WebApplicationException(resultOp.getIssueFirstRep().getDetails().getText(), Response.Status.FORBIDDEN);
         }
 
         throw new WebApplicationException(HttpStatus.INTERNAL_SERVER_ERROR_500);

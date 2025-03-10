@@ -184,9 +184,15 @@ public class JobBatchProcessor {
             if (!passesLookBack(answers)) {
                 OutcomeReason failReason = LookBackAnalyzer.analyze(answers);
                 return Pair.of(
-                        Flowable.just(AggregationUtils.toOperationOutcome(failReason, FHIRExtractors.getPatientMBI(patient))),
-                        failReason
-                        );
+                    Flowable.just(
+                        AggregationUtils.toOperationOutcome(
+                            failReason,
+                            FHIRExtractors.getPatientMBI(patient),
+                            OperationOutcome.IssueType.SUPPRESSED
+                        )
+                    ),
+                    failReason
+                );
             }
         }
 
