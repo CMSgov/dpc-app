@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ExtendWith(BufferedLoggerHandler.class)
-public class JobQueueBatchTest {
+class JobQueueBatchTest {
 
     private static final UUID jobID = UUID.randomUUID();
     private static final UUID orgID = UUID.randomUUID();
@@ -414,6 +414,7 @@ public class JobQueueBatchTest {
             job1.submitTime = timestamp;
             job2.submitTime = timestamp;
             assertEquals(job1, job2);
+            assertEquals(job1.hashCode(), job2.hashCode());
         }
     }
 
