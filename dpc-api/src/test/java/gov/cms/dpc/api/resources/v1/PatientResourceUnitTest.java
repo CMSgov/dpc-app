@@ -250,6 +250,86 @@ public class PatientResourceUnitTest {
     }
 
     @Test
+    void testEverythingHandlesFailedLookback() {
+        UUID practitionerId = UUID.randomUUID();
+        Practitioner practitioner = new Practitioner();
+        practitioner.setId(practitionerId.toString());
+        String pracNpi = NPIUtil.generateNPI();
+        practitioner.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(pracNpi);
+        @SuppressWarnings("unchecked")
+        IReadExecutable<Practitioner> pracExec = mock(IReadExecutable.class);
+        when(
+            attributionClient.read().resource(Practitioner.class).withId(practitionerId.toString()).encodedJson()
+        ).thenReturn(pracExec);
+        when(pracExec.execute()).thenReturn(practitioner);
+
+        UUID patientId = UUID.randomUUID();
+        Patient patient = new Patient();
+        patient.setId(patientId.toString());
+        String patientMbi = "3aa0C00aA00";
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(patientMbi);
+        @SuppressWarnings("unchecked")
+        IReadExecutable<Patient> patExec = mock(IReadExecutable.class);
+        when(
+            attributionClient.read().resource(Patient.class).withId(patientId.toString()).encodedJson()
+        ).thenReturn(patExec);
+        when(patExec.execute()).thenReturn(patient);
+
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        String orgNpi = NPIUtil.generateNPI();
+        organization.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(orgNpi);
+        @SuppressWarnings("unchecked")
+        IReadExecutable<Organization> orgExec = mock(IReadExecutable.class);
+        when(attributionClient
+            .read()
+            .resource(Organization.class)
+            .withId(orgId.toString())
+            .encodedJson()
+        ).thenReturn(orgExec);
+        when(orgExec.execute()).thenReturn(organization);
+
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(patient);
+        Provenance provenance = createProvenance(
+            orgId.toString(), practitionerId.toString(), List.of(patientId.toString())
+        );
+
+        String since = "2000-01-01T12:00+00:00";
+        OffsetDateTime sinceTime = OffsetDateTime.parse(since, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        String requestUrl = "http://localhost:3000/v1/Patient/12345/everything";
+        String requestIp = "200.0.200.200";
+        when(request.getRequestURL()).thenReturn(new StringBuffer(requestUrl));
+        when(request.getHeader(HttpHeaders.X_FORWARDED_FOR)).thenReturn(requestIp);
+
+        OperationOutcome.OperationOutcomeIssueComponent issueComponent = new OperationOutcome.OperationOutcomeIssueComponent();
+        issueComponent.setSeverity(OperationOutcome.IssueSeverity.ERROR);
+        issueComponent.setCode(OperationOutcome.IssueType.SUPPRESSED);
+        issueComponent.setLocation(List.of(new StringType(patientId.toString())));
+        issueComponent.setDetails(new CodeableConcept().setText("Failed lookback"));
+        OperationOutcome failedOutcome = new OperationOutcome();
+        failedOutcome.addIssue(issueComponent);
+
+        when(dataService.retrieveData(
+            eq(orgId), eq(orgNpi), eq(pracNpi), eq(List.of(patientMbi)), eq(sinceTime), any(), eq(requestIp), eq(requestUrl),
+            eq(DPCResourceType.Patient), eq(DPCResourceType.ExplanationOfBenefit), eq(DPCResourceType.Coverage)
+        )).thenReturn(failedOutcome);
+        when(
+            bfdClient.requestPatientFromServer(anyString(), any(), any())
+        ).thenReturn(bundle);
+
+        WebApplicationException exception = assertThrows(WebApplicationException.class, () -> {
+            patientResource.everything(organizationPrincipal, provenance, patientId, since, request);
+        });
+
+        assertEquals(HttpStatus.FORBIDDEN_403, exception.getResponse().getStatus());
+        assertEquals("Failed lookback", exception.getMessage());
+    }
+
+    @Test
     public void testEverythingNoPractitioner() {
         UUID practitionerId = UUID.randomUUID();
         UUID patientId = UUID.randomUUID();
