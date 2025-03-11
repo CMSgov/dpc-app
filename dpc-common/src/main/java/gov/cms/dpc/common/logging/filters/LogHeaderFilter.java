@@ -2,6 +2,7 @@ package gov.cms.dpc.common.logging.filters;
 
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,11 @@ public class LogHeaderFilter implements ContainerRequestFilter {
 			headerValue = headerValue.replace(",", "\\,");
 		}
 
-		logger.info("{}={}, uri={}", headerKey, headerValue, requestContext.getUriInfo().getRequestUri());
+        UriInfo uriInfo = requestContext.getUriInfo();
+        String uriValue = null;
+        if(uriInfo != null) {
+            uriValue = String.valueOf(uriInfo.getRequestUri());
+        }
+		logger.info("{}={}, uri={}", headerKey, headerValue, uriValue);
 	}
 }
