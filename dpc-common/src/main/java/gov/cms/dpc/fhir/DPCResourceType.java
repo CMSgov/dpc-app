@@ -1,5 +1,6 @@
 package gov.cms.dpc.fhir;
 
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
 
 public enum DPCResourceType {
@@ -41,6 +42,20 @@ public enum DPCResourceType {
             case "Practitioner" -> Practitioner;
             case "Schedule" -> Schedule;
             default -> throw new FHIRException("Unknown resource type: " + code);
+        };
+    }
+
+    public static Class<? extends Resource> toResource(DPCResourceType resourceType) {
+        return switch(resourceType) {
+            case Bundle -> Bundle.class;
+            case Coverage -> Coverage.class;
+            case ExplanationOfBenefit -> ExplanationOfBenefit.class;
+            case Group -> Group.class;
+            case OperationOutcome -> OperationOutcome.class;
+            case Organization -> Organization.class;
+            case Patient -> Patient.class;
+            case Practitioner -> Practitioner.class;
+            case Schedule -> Schedule.class;
         };
     }
 

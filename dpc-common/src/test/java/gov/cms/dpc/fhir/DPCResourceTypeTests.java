@@ -12,10 +12,11 @@ class DPCResourceTypeTests {
 
     @ParameterizedTest
     @EnumSource(DPCResourceType.class)
-    void testGetPath(DPCResourceType resourceType) {
+    void testDPCResourceTypes(DPCResourceType resourceType) {
         String resourceName = resourceType.toString();
         assertEquals(resourceName.toLowerCase(), resourceType.getPath());
         assertEquals(resourceType, DPCResourceType.fromCode(resourceName));
+        assertEquals(resourceName, DPCResourceType.toResource(resourceType).getSimpleName());
     }
 
     @Test
