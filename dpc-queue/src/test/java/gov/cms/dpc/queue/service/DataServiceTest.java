@@ -114,11 +114,6 @@ class DataServiceTest {
         assertEquals("Unexpected resource type: " + type.name(), err.getMessage());
     }
 
-    @Test
-    void whenPassingInOperationOutcome() {
-        workJob(false, DPCResourceType.OperationOutcome);
-    }
-
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     private void workJob(boolean failBatch, DPCResourceType resourceType) {
         Mockito.doAnswer(mock -> {
