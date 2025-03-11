@@ -66,7 +66,7 @@ class LogHeaderFilterUnitTest {
 
 	@Test
 	void testLogsNull() throws IOException {
-		final String headerValueLogged = headerKey + "=null";
+		final String headerValueLogged = headerKey + "=null, uri=null";
 
 		ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
 		when(requestContext.getHeaderString(headerKey)).thenReturn(null);
