@@ -3,12 +3,12 @@ package gov.cms.dpc.api.tasks.tokens;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.resources.v1.TokenResource;
 import io.dropwizard.servlets.tasks.Task;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Organization;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +19,7 @@ import static gov.cms.dpc.api.tasks.TasksCommon.extractOrganization;
 /**
  * Admin task to delete a {@link gov.cms.dpc.api.entities.TokenEntity} registered for a given {@link Organization}
  * <p>
- * This requires `organization` and `token` query parms.
+ * This requires `organization` and `token` query params.
  */
 @Singleton
 public class DeleteToken extends Task {

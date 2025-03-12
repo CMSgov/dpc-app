@@ -17,7 +17,7 @@ on:
         default: 'dev'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.env }}
+  group: generate-macaroon-for-${{ inputs.env }}
   cancel-in-progress: true
 
 permissions:

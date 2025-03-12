@@ -29,7 +29,7 @@ on:
         default: 'main'
       
 concurrency:
-  group: ${{ github.workflow }}-top-${{ inputs.env || 'dev' }}
+  group: release-to-${{ inputs.env || 'dev' }}
   cancel-in-progress: false
 
 jobs:

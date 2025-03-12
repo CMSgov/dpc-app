@@ -7,6 +7,7 @@ import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.KeyType;
 import gov.cms.dpc.testing.models.KeyView;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -20,7 +21,6 @@ import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
@@ -144,8 +144,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             keyGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
 
             try (CloseableHttpResponse response = client.execute(keyGet)) {
-                final CollectionResponse<KeyView> fetched = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<KeyView>>() {
-                });
+                final CollectionResponse<KeyView> fetched = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
                 assertEquals(3, fetched.getCount(), "Should have multiple keys");
             }
 
@@ -160,8 +159,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
 
             // Check to see everything is gone.
             try (CloseableHttpResponse response = client.execute(keyGet)) {
-                final CollectionResponse<KeyView> fetched = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<KeyView>>() {
-                });
+                final CollectionResponse<KeyView> fetched = this.mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
                 assertEquals(2, fetched.getEntities().size(), "Should have one less key");
             }
         }
@@ -184,7 +182,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             try (CloseableHttpResponse response = client.execute(post)) {
                 assertEquals(HttpStatus.UNPROCESSABLE_ENTITY_422, response.getStatusLine().getStatusCode(), "ECC key should be rejected");
                 Map<String, String> respBody = new ObjectMapper().readValue(response.getEntity().getContent(), Map.class);
-                assertEquals(respBody.get("message"), "ECC keys are not currently supported", "Should return helpful error message");
+                assertEquals("ECC keys are not currently supported", respBody.get("message"), "Should return helpful error message");
             }
         }
     }

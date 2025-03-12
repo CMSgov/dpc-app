@@ -1,9 +1,8 @@
 package gov.cms.dpc.fhir.validations.dropwizard;
 
 import io.dropwizard.jersey.validation.DropwizardConfiguredValidator;
-
-import javax.inject.Inject;
-import javax.validation.Validator;
+import jakarta.validation.Validator;
+import jakarta.inject.Inject;
 
 public class InjectingConfiguredValidator extends DropwizardConfiguredValidator {
 

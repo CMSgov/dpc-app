@@ -776,7 +776,7 @@
 									"  pm.environment.set(\"content_location\", pm.response.headers.get(\"Content-Location\"));",
 									"} else {",
 									"  // Fail the test, no content location.",
-									"  postman.setNextRequest(null);",
+									"  pm.execution.setNextRequest(null);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -915,7 +915,7 @@
 									"    pm.test(\"Status code is 202\", function () {",
 									"        pm.response.to.have.status(202);",
 									"    });",
-									"    postman.setNextRequest(\"Job response\");",
+									"    pm.execution.setNextRequest(\"Job response\");",
 									"}"
 								],
 								"type": "text/javascript"
@@ -1274,7 +1274,7 @@
 									"  pm.environment.set(\"since_content_location\", pm.response.headers.get(\"Content-Location\"));",
 									"} else {",
 									"  // Fail the test, no content location.",
-									"  postman.setNextRequest(null);",
+									"  pm.execution.setNextRequest(null);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -1369,7 +1369,7 @@
 									"    pm.test(\"Status code is 202\", function () {",
 									"        pm.response.to.have.status(202);",
 									"    });",
-									"    postman.setNextRequest(\"_since job response\");",
+									"    pm.execution.setNextRequest(\"_since job response\");",
 									"}"
 								],
 								"type": "text/javascript"

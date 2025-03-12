@@ -1,9 +1,8 @@
 package gov.cms.dpc.attribution.resources.v1;
 
 import gov.cms.dpc.attribution.resources.*;
-
-import javax.inject.Inject;
-import javax.ws.rs.Path;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Path;
 
 @Path("/v1")
 public class V1AttributionResource extends AbstractAttributionResource {

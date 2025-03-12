@@ -4,6 +4,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
+import jakarta.ws.rs.WebApplicationException;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.model.Parameter;
@@ -13,8 +14,6 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-
-import javax.ws.rs.WebApplicationException;
 
 import static org.junit.jupiter.api.Assertions.*;
 

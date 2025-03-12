@@ -7,7 +7,7 @@ import gov.cms.dpc.queue.health.JobQueueHealthCheck;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.query.NativeQuery;
+import org.hibernate.query.Query;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +25,7 @@ public class QueueHealthTest {
     private Session session = mock(Session.class);
     private final SessionFactory factory = mock(SessionFactory.class);
     private DPCQueueManagedSessionFactory managedSessionFactory = new DPCQueueManagedSessionFactory(factory);
-    private NativeQuery query = mock(NativeQuery.class);
+    private Query<Long> query = mock(Query.class);
     private MetricRegistry metrics = new MetricRegistry();
 
     @BeforeEach
@@ -35,7 +35,7 @@ public class QueueHealthTest {
         when(factory.openSession())
                 .thenReturn(session);
 
-        when(session.createQuery(Mockito.anyString()))
+        when(session.createQuery(Mockito.anyString(), eq(Long.class)))
                 .thenReturn(query);
 
         when(query.setParameter(Mockito.anyString(), Mockito.any()))

@@ -57,7 +57,7 @@ on:
         default: 'main'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.env }}
+  group: deploy-to-${{ inputs.env }}
   cancel-in-progress: false
 
 permissions:
@@ -89,7 +89,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
       - name: Set Deployed Image Tag
         id: image-tag
         env:
@@ -199,10 +199,14 @@ jobs:
             if [ -z "$application_stanza" ] || [ "$application_stanza" = "null" ]; then
               echo "Service $service not found in New Relic, skipping gracefully."
             else
-              echo "Notifying New Relic about deployment of $service to ${{ inputs.env }}"
               application_id=`echo $application_stanza | jq -r ".[] | select(.name == \"$service\") | .applicationId"`
-              docker run --rm -e NEW_RELIC_API_KEY="$NEW_RELIC_API_KEY" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18 apm deployment create --applicationId "$application_id" --revision "${{ needs.deploy.outputs.image_tag }}" --user jenkins
-              counter=$((counter+1))
+              if [ -z "$application_id" ] || [ "$application_id" = "null" ]; then
+                 echo "Service $service not found in New Relic, skipping gracefully."
+              else
+                echo "Notifying New Relic about deployment of $service to ${{ inputs.env }}"
+                docker run --rm -e NEW_RELIC_API_KEY="$NEW_RELIC_API_KEY" -e NEW_RELIC_REGION="US" newrelic/cli:v0.18 apm deployment create --applicationId "$application_id" --revision "${{ needs.deploy.outputs.image_tag }}" --user jenkins
+                counter=$((counter+1))
+              fi
             fi
           done
           echo "counter=$counter" >> "$GITHUB_OUTPUT"

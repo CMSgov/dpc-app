@@ -150,7 +150,7 @@ GEM
       xpath (~> 3.2)
     case_transform (0.2)
       activesupport
-    cgi (0.4.1)
+    cgi (0.4.2)
     climate_control (1.2.0)
     coderay (1.1.3)
     coercible (1.0.0)
@@ -375,7 +375,7 @@ GEM
       nio4r (~> 2.0)
     raabro (1.4.0)
     racc (1.8.1)
-    rack (3.1.10)
+    rack (3.1.12)
     rack-oauth2 (2.2.1)
       activesupport
       attr_required
@@ -546,7 +546,7 @@ GEM
     unicode-display_width (3.1.2)
       unicode-emoji (~> 4.0, >= 4.0.4)
     unicode-emoji (4.0.4)
-    uri (0.13.0)
+    uri (1.0.3)
     useragent (0.16.11)
     validate_url (1.0.15)
       activemodel (>= 3.0.0)
@@ -633,7 +633,7 @@ DEPENDENCIES
   pry
   pry-nav
   puma (~> 6.4.3)
-  rack (~> 3)
+  rack (>= 3.1.11)
   rails-controller-testing
   railties (~> 7.2.2.1)
   rbnacl

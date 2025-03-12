@@ -7,13 +7,13 @@ import gov.cms.dpc.api.models.CreateTokenRequest;
 import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.common.annotations.NoHtml;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +30,7 @@ public abstract class AbstractTokenResource {
 
     /**
      * Get authentication token for {@link org.hl7.fhir.dstu3.model.Organization}.
-     * If no tokens exists, returns an empty {@link List}
+     * If no tokens exist, returns an empty {@link List}
      *
      * @param organizationPrincipal - {@link OrganizationPrincipal} supplied by auth handler
      * @return - {@link List} {@link String} base64 (URL) encoded token

@@ -2,10 +2,10 @@ package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.jersey.errors.LoggingExceptionMapper;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.Provider;
 
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.Provider;
 
 @Provider
 public abstract class AbstractFHIRExceptionHandler<E extends Throwable> extends LoggingExceptionMapper<E> {

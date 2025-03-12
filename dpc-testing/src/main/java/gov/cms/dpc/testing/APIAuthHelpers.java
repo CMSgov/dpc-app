@@ -14,7 +14,8 @@ import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.testing.models.KeyView;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.SignatureAlgorithm;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
@@ -35,7 +36,6 @@ import org.eclipse.jetty.http.HttpStatus;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -43,13 +43,13 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.ECGenParameterSpec;
-import java.sql.Date;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import static java.sql.Date.from;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -113,12 +113,12 @@ public class APIAuthHelpers {
             audience = "https://prod.dpc.cms.gov/api/v1";
         }
         final String jwt = Jwts.builder()
-                .setHeaderParam("kid", keyID.toString())
-                .setAudience(String.format("%s/Token/auth", audience))
-                .setIssuer(macaroon)
-                .setSubject(macaroon)
-                .setId(UUID.randomUUID().toString())
-                .setExpiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
+                .header().add("kid", keyID.toString()).and()
+                .audience().add(String.format("%s/Token/auth", audience)).and()
+                .issuer(macaroon)
+                .subject(macaroon)
+                .id(UUID.randomUUID().toString())
+                .expiration(from(Instant.now().plus(5, ChronoUnit.MINUTES).minus(30, ChronoUnit.SECONDS)))
                 .signWith(privateKey, getSigningAlgorithm(KeyType.RSA))
                 .compact();
 
@@ -197,7 +197,7 @@ public class APIAuthHelpers {
 
     public static String generatePublicKey(PublicKey key) {
         final String encoded = Base64.getMimeEncoder().encodeToString(key.getEncoded());
-        return String.format("-----BEGIN PUBLIC KEY-----\n%s\n-----END PUBLIC KEY-----\n", encoded);
+        return String.format("-----BEGIN PUBLIC KEY-----%n%s%n-----END PUBLIC KEY-----%n", encoded);
     }
 
     /**
@@ -288,7 +288,7 @@ public class APIAuthHelpers {
         return new TrustManager[]{new X509TrustManager() {
             @Override
             public X509Certificate[] getAcceptedIssuers() {
-                return null;
+                return new X509Certificate[0];
             }
 
             @Override
@@ -326,7 +326,7 @@ public class APIAuthHelpers {
      * @return - {@link SignatureAlgorithm} to use for signing JWT
      */
     public static SignatureAlgorithm getSigningAlgorithm(KeyType keyType) {
-        return keyType == KeyType.ECC ? SignatureAlgorithm.ES256 : SignatureAlgorithm.RS384;
+        return keyType == KeyType.ECC ? Jwts.SIG.ES256 : Jwts.SIG.RS384;
     }
 
 
@@ -408,10 +408,6 @@ public class APIAuthHelpers {
         @Override
         public void interceptResponse(IHttpResponse theResponse) {
             // We don't need this
-        }
-
-        public AuthResponse getAuthResponse() {
-            return this.response;
         }
 
         private void refreshAuthToken() {

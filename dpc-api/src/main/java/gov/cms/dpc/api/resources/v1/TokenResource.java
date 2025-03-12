@@ -6,17 +6,17 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
-import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.auth.jwt.ValidatingKeyResolver;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
-import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.api.models.CreateTokenRequest;
+import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.macaroons.CaveatSupplier;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
@@ -28,20 +28,20 @@ import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SecurityException;
 import io.swagger.annotations.*;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -152,9 +152,9 @@ public class TokenResource extends AbstractTokenResource {
         tokenEntity.setExpiresAt(handleExpirationTime(expiration, optionalBody));
 
         //Set the label, if provided, otherwise, generate a default one
-        if(optionalBody.isPresent() && StringUtils.isNotEmpty(optionalBody.get().getLabel())){
+        if (optionalBody.isPresent() && StringUtils.isNotEmpty(optionalBody.get().getLabel())) {
             tokenEntity.setLabel(optionalBody.get().getLabel());
-        }else{
+        } else {
             tokenEntity.setLabel(Optional.ofNullable(tokenLabel).orElse(String.format("Token for organization %s.", organizationID)));
         }
         logger.info("Generating access token: {}", tokenEntity);
@@ -241,14 +241,13 @@ public class TokenResource extends AbstractTokenResource {
     @Public
     @Override
     public Response validateJWT(@NoHtml @NotEmpty(message = "Must submit JWT") String jwt) {
-
         try {
-            Jwts.parserBuilder()
+            Jwts.parser()
                     .requireAudience(this.authURL)
-                    .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, this.authURL))
+                    .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
                     .build()
-                    .parseClaimsJws(jwt);
-        } catch (IllegalArgumentException e) {
+                    .parseSignedClaims(jwt);
+        } catch (IllegalArgumentException | UnsupportedJwtException e) {
             // This is fine, we just want the body
         } catch (MalformedJwtException e) {
             throw new WebApplicationException("JWT is not formatted correctly", Response.Status.BAD_REQUEST);
@@ -276,14 +275,14 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
-        final Jws<Claims> claims = Jwts.parserBuilder()
+        final Jws<Claims> claims = Jwts.parser()
                 .setSigningKeyResolver(this.resolver)
                 .requireAudience(this.authURL)
                 .build()
-                .parseClaimsJws(jwtBody);
+                .parseSignedClaims(jwtBody);
 
         // Extract the Client Macaroon from the subject field (which is the same as the issuer)
-        final String clientMacaroon = claims.getBody().getSubject();
+        final String clientMacaroon = claims.getPayload().getSubject();
         final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(clientMacaroon);
 
         // Get org id from macaroon caveats
@@ -354,20 +353,20 @@ public class TokenResource extends AbstractTokenResource {
     @SuppressWarnings("JdkObsolete") // Date class is used by Jwt
     private void handleJWTClaims(UUID organizationID, Jws<Claims> claims) {
         // Issuer and Sub must be present and identical
-        final String issuer = getClaimIfPresent("issuer", claims.getBody().getIssuer());
-        final String subject = getClaimIfPresent("subject", claims.getBody().getSubject());
+        final String issuer = getClaimIfPresent("issuer", claims.getPayload().getIssuer());
+        final String subject = getClaimIfPresent("subject", claims.getPayload().getSubject());
         if (!issuer.equals(subject)) {
             throw new WebApplicationException("Issuer and Subject must be identical", Response.Status.BAD_REQUEST);
         }
 
         // JTI must be present and have not been used in the past 5 minutes.
-        if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getBody().getId()), true)) {
+        if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getPayload().getId()), true)) {
             logger.warn("JWT being replayed for organization {}", organizationID);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
         }
 
         // Ensure the expiration time for the token is not more than 5 minutes in the future
-        final Date expiration = getClaimIfPresent("expiration", claims.getBody().getExpiration());
+        final Date expiration = getClaimIfPresent("expiration", claims.getPayload().getExpiration());
         if (OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(5).isBefore(expiration.toInstant().atOffset(ZoneOffset.UTC))) {
             throw new WebApplicationException("Not authorized", Response.Status.UNAUTHORIZED);
         }
