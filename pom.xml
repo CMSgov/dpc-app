@@ -34,7 +34,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
         <dropwizard.version>4.0.11</dropwizard.version>
         <junit.jupiter.version>5.11.4</junit.jupiter.version>
         <slf4j.version>2.0.16</slf4j.version>
@@ -183,7 +182,7 @@
             <dependency>
                 <groupId>com.typesafe</groupId>
                 <artifactId>config</artifactId>
-                <version>1.4.3</version>
+                <version>1.4.2</version>
             </dependency>
             <!--Locking this dependency version to the one provided by Dropwizard, we'll need to manually update it as we go along-->
             <dependency>
@@ -312,7 +311,6 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-
                 <version>33.4.0-jre</version>
             </dependency>
             <dependency>
@@ -356,7 +354,7 @@
             <dependency>
                 <groupId>com.helger</groupId>
                 <artifactId>ph-schematron</artifactId>
-                <version>5.6.5</version>
+                <version>5.3.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -398,13 +396,13 @@
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>junit-jupiter</artifactId>
-                <version>1.20.4</version>
+                <version>1.19.3</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>1.20.4</version>
+                <version>1.19.3</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -679,7 +677,8 @@
                         <consoleOutputReporter>
                             <disable>true</disable>
                         </consoleOutputReporter>
-                        <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+                        <statelessTestsetInfoReporter
+                                implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
                             <theme>UNICODE</theme>
                             <printStacktraceOnError>true</printStacktraceOnError>
                             <printStacktraceOnFailure>true</printStacktraceOnFailure>
@@ -713,7 +712,8 @@
                         <consoleOutputReporter>
                             <disable>true</disable>
                         </consoleOutputReporter>
-                        <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
+                        <statelessTestsetInfoReporter
+                                implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoTreeReporter">
                             <theme>UNICODE</theme>
                             <printStacktraceOnError>true</printStacktraceOnError>
                             <printStacktraceOnFailure>true</printStacktraceOnFailure>
