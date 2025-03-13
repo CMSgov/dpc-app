@@ -10,12 +10,15 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import io.reactivex.Flowable;
+import org.apache.commons.lang3.time.StopWatch;
 import org.hl7.fhir.dstu3.model.*;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.slf4j.spi.LoggingEventBuilder;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -33,6 +36,7 @@ class ResourceFetcher {
     private final DPCResourceType resourceType;
     private final OffsetDateTime since;
     private final OffsetDateTime transactionTime;
+    private final int fetchWarnThresholdSeconds;
 
     /**
      * Create a context for fetching FHIR resources
@@ -48,13 +52,15 @@ class ResourceFetcher {
                     UUID batchID,
                     DPCResourceType resourceType,
                     OffsetDateTime since,
-                    OffsetDateTime transactionTime) {
+                    OffsetDateTime transactionTime,
+                    int fetchWarnThresholdSeconds) {
         this.blueButtonClient = blueButtonClient;
         this.jobID = jobID;
         this.batchID = batchID;
         this.resourceType = resourceType;
         this.since = since;
         this.transactionTime = transactionTime;
+        this.fetchWarnThresholdSeconds = fetchWarnThresholdSeconds;
     }
 
     /**
@@ -67,10 +73,17 @@ class ResourceFetcher {
      */
     Flowable<List<Resource>> fetchResources(Patient patient, Map<String, String> headers) {
         return Flowable.fromCallable(() -> {
+            StopWatch stopWatch = StopWatch.createStarted();
+
             String fetchId = UUID.randomUUID().toString();
             logger.debug("Fetching first {} from BlueButton for {}", resourceType.toString(), fetchId);
             final Bundle firstFetched = fetchFirst(patient, headers);
-            return fetchAllBundles(firstFetched, fetchId, headers);
+            List<Resource> bundles = fetchAllBundles(firstFetched, fetchId, headers);
+
+            stopWatch.stop();
+            logFetchDuration(stopWatch.getDuration(), bundles.size(), fetchId);
+
+            return bundles;
         })
                 .onErrorResumeNext((Throwable error) -> handleError(patient, error));
     }
@@ -223,5 +236,27 @@ class ResourceFetcher {
                     transactionTime);
             throw new JobQueueFailure("BFD's transaction time regression");
         }
+    }
+
+    /**
+     * Logs how long it took to fetch the asked for resources.  Over the set threshold we log at WARN, under and we only
+     * log at info.
+     * @param duration  The {@link Duration} of how long the fetch took.
+     * @param resourceCount  How many resources were returned.
+     * @param fetchId  The ID of this resource fetch.
+     */
+    private void logFetchDuration(Duration duration, int resourceCount, String fetchId) {
+        double seconds = duration.getSeconds() + ((double) duration.getNano() / 1000000000);
+
+        LoggingEventBuilder loggingEventBuilder;
+        if(seconds > this.fetchWarnThresholdSeconds) {
+            loggingEventBuilder = logger.atWarn();
+        } else {
+            loggingEventBuilder = logger.atInfo();
+        }
+
+        loggingEventBuilder.log("dpcMetric=ResourceFetched,resourceType={},fetchId={},durationSeconds={},resourceCount={}",
+            resourceType.toString(), fetchId, seconds, resourceCount
+        );
     }
 }
