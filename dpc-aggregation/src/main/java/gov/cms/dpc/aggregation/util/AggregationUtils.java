@@ -33,6 +33,13 @@ public final class AggregationUtils {
         return toOperationOutcome(failReason, patientID, OperationOutcome.IssueType.EXCEPTION);
     }
 
+    /**
+     * Returns an {@link OperationOutcome} of type Exception.
+     * @param failReason The reason the operation failed
+     * @param patientID The patient's ID
+     * @param issueType The {@link OperationOutcome.IssueType} that lead to the {@link OperationOutcome}
+     * @return {@link OperationOutcome}
+     */
     public static OperationOutcome toOperationOutcome(OutcomeReason failReason, String patientID, OperationOutcome.IssueType issueType) {
         final var patientLocation = List.of(new StringType("Patient"), new StringType("id"), new StringType(patientID));
         final var outcome = new OperationOutcome();
