@@ -1,8 +1,10 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.*;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -52,6 +54,8 @@ public class PatientResourceUnitTest {
     BlueButtonClient bfdClient;
 
     PatientResource patientResource;
+
+    FhirContext ctx = FhirContext.forDstu3();
 
     @BeforeEach
     public void setUp() {
@@ -321,12 +325,13 @@ public class PatientResourceUnitTest {
             bfdClient.requestPatientFromServer(anyString(), any(), any())
         ).thenReturn(bundle);
 
-        WebApplicationException exception = assertThrows(WebApplicationException.class, () -> {
+        ForbiddenOperationException exception = assertThrows(ForbiddenOperationException.class, () -> {
             patientResource.everything(organizationPrincipal, provenance, patientId, since, request);
         });
 
-        assertEquals(HttpStatus.FORBIDDEN_403, exception.getResponse().getStatus());
-        assertEquals("Failed lookback", exception.getMessage());
+        assertEquals(HttpStatus.FORBIDDEN_403, exception.getStatusCode());
+        OperationOutcome returnedOperationOutcome = (OperationOutcome) exception.getOperationOutcome();
+        assertTrue(returnedOperationOutcome.equalsDeep(failedOutcome));
     }
 
     @Test

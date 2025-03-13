@@ -27,7 +27,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -684,7 +687,10 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         ForbiddenOperationException exception = assertThrows(ForbiddenOperationException.class, getEverythingOperation::execute,
             "Expected forbidden when retrieving patient that fails look back."
         );
-        assertTrue(exception.getResponseBody().contains("\"text\":\"DPC couldn't find any claims for this MBI; unable to demonstrate relationship with provider or organization\""),
+
+        OperationOutcome resultOperationOutcome = (OperationOutcome) exception.getOperationOutcome();
+        assertTrue(resultOperationOutcome.getIssueFirstRep().getDetails().getText().contains(
+            "DPC couldn't find any claims for this MBI; unable to demonstrate relationship with provider or organization"),
             "Incorrect or missing operation outcome in response body."
         );
     }

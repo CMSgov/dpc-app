@@ -187,7 +187,7 @@ public class JobBatchProcessor {
                     Flowable.just(
                         AggregationUtils.toOperationOutcome(
                             failReason,
-                            FHIRExtractors.getPatientMBI(patient),
+                            patient.getId(),
                             OperationOutcome.IssueType.SUPPRESSED
                         )
                     ),

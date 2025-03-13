@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationOptions;
@@ -63,7 +64,10 @@ public class PatientResource extends AbstractPatientResource {
     private final BlueButtonClient bfdClient;
 
     @Inject
-    public PatientResource(@Named("attribution") IGenericClient client, FhirValidator validator, DataService dataService, BlueButtonClient bfdClient) {
+    public PatientResource(@Named("attribution") IGenericClient client,
+                           FhirValidator validator,
+                           DataService dataService,
+                           BlueButtonClient bfdClient) {
         this.client = client;
         this.validator = validator;
         this.dataService = dataService;
@@ -228,9 +232,8 @@ public class PatientResource extends AbstractPatientResource {
         }
         if (DPCResourceType.OperationOutcome.getPath().equals(result.getResourceType().getPath())) {
             // An OperationOutcome (ERROR) was returned
-            OperationOutcome resultOp = (OperationOutcome) result;
-            // getIssueFirstRep() grabs the first issue only - there may be others
-            throw new WebApplicationException(resultOp.getIssueFirstRep().getDetails().getText(), Response.Status.FORBIDDEN);
+            OperationOutcome operationOutcome = (OperationOutcome) result;
+            throw new ForbiddenOperationException(operationOutcome.getIssueFirstRep().getDetails().getText(), operationOutcome);
         }
 
         throw new WebApplicationException(HttpStatus.INTERNAL_SERVER_ERROR_500);
