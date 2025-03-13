@@ -77,6 +77,10 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
 
     private List<String> lookBackExemptOrgs;
 
+    // If a resource fetch takes longer than this, it'll get logged as a warning
+    @Min(0)
+    private int fetchWarnThresholdSeconds;
+
     @NotNull
     private final YearMonth lookBackDate = YearMonth.now(ZoneId.systemDefault());
 
@@ -148,4 +152,8 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
 
     @Override
     public DPCAwsQueueConfiguration getDpcAwsQueueConfiguration() { return this.dpcAwsQueueConfiguration; }
+
+    public int getFetchWarnThresholdSeconds() {
+        return fetchWarnThresholdSeconds;
+    }
 }
