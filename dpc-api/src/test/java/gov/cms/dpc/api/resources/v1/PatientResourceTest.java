@@ -7,7 +7,10 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.*;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.aggregation.service.ConsentResult;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
@@ -489,8 +492,11 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .useHttpGet()
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
 
-        InternalErrorException exception = assertThrows(InternalErrorException.class, getEverythingOperation::execute, "Expected Internal server error when retrieving opted out patient.");
-        assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
+        ForbiddenOperationException exception = assertThrows(ForbiddenOperationException.class, getEverythingOperation::execute,
+            "Expected Internal server error when retrieving opted out patient.");
+        OperationOutcome outcome = (OperationOutcome) exception.getOperationOutcome();
+        assertTrue(outcome.getIssueFirstRep().getDetails().getText().contains("Data not available for opted out patient"),
+            "Incorrect or missing operation outcome in response body.");
     }
 
     @Test
@@ -516,8 +522,11 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .useHttpGet()
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
 
-        InternalErrorException exception = assertThrows(InternalErrorException.class, getEverythingOperation::execute, "Expected Internal server error when retrieving opted out patient.");
-        assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
+        ForbiddenOperationException exception = assertThrows(ForbiddenOperationException.class, getEverythingOperation::execute,
+            "Expected Internal server error when retrieving opted out patient.");
+        OperationOutcome outcome = (OperationOutcome) exception.getOperationOutcome();
+        assertTrue(outcome.getIssueFirstRep().getDetails().getText().contains("Data not available for opted out patient"),
+            "Incorrect or missing operation outcome in response body.");
     }
 
     @Test
