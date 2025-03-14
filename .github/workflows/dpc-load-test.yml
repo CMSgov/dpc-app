@@ -2,18 +2,43 @@ name: DPC Load Test
 
 on:
   workflow_dispatch:
+    inputs:
+      ops-ref:
+        description: Branch of dpc-ops to use
+        required: false
+        type: 'string'
+        default: 'main'
 
 jobs:
+  start-test-with-auth-disabled:
+    name: "Start test environment with auth disabled"
+    uses: ./.github/workflows/ecs-deploy.yml
+    with:
+      env: 'test'
+      confirm_env: 'test'
+      ops-ref: ${{ inputs.ops-ref }}
+      auth-disabled: 'true'
+    secrets: inherit
+
   run-load-test:
     name: "Run DPC API Load Test"
     runs-on: self-hosted
 
     steps:
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+      - name: Get admin url
+        id: admin-url
+        run: |
+          ADMIN_URL=$(aws elbv2 describe-load-balancers --names dpc-test-frontend-internal | jq -r '.LoadBalancers[0].DNSName')
+          echo "admin_url=$ADMIN_URL" >> "$GITHUB_OUTPUT"
       - name: Checkout
         uses: actions/checkout@v4
         with:
           path: ./dpc-app
-
       - name: Start StatsD Integration
         run: |
           docker run -d \
@@ -32,8 +57,8 @@ jobs:
 
       - name: Run K6 with StatsD output
         env:
-          LOAD_TEST_ORGANIZATION_ID: ${{ secrets.LOAD_TEST_ORGANIZATION_ID }}
-          API_ADMIN_URL: ${{ secrets.API_ADMIN_URL }}
+          ENVIRONMENT: 'test'
+          API_ADMIN_URL: ${{ steps.admin-url.outputs.admin_url }}
         run: |
           ./k6 run \
             --out output-statsd=addr=localhost:8125,enableTags=true \
@@ -47,3 +72,14 @@ jobs:
             docker stop newrelic-statsd
             docker rm newrelic-statsd
           fi
+  restart-test-with-auth-enabled:
+    name: "Restart test environment with auth enabled"
+    uses: ./.github/workflows/ecs-deploy.yml
+    with:
+      env: 'test'
+      confirm_env: 'test'
+      ops-ref: ${{ inputs.ops-ref }}
+      ecr_image_tag: 'rls-r190-202503122037-13821075659'
+      app-version: 'r190'
+      auth-disabled: 'false'
+    secrets: inherit
