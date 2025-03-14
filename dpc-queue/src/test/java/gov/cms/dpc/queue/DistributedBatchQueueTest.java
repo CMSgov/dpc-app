@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
-public class DistributedBatchQueueTest {
+class DistributedBatchQueueTest {
 
     private final UUID aggregatorID = UUID.randomUUID();
     private SessionFactory sessionFactory;
@@ -84,8 +84,8 @@ public class DistributedBatchQueueTest {
     @Test
     void validateHealthyQueue() {
         // This test is kind of crappy, since there is nothing to assert
-        // If the queue is not health, an exception is thrown
-        queue.assertHealthy(aggregatorID);
+        // If the queue is not healthy, an exception is thrown
+        assertDoesNotThrow(() -> queue.assertHealthy(aggregatorID));
     }
 
     @Test
@@ -95,23 +95,45 @@ public class DistributedBatchQueueTest {
 
         this.buildStuckBatchScenario(orgID);
 
-        try {
-            queue.assertHealthy(aggregatorID);
-            fail("Expected JobQueueUnhealthy exception not throw");
-        } catch (JobQueueUnhealthy e) {
-            assertEquals("Aggregator is not making progress on the queue", e.getMessage());
-        }
+        JobQueueUnhealthy e = assertThrows(JobQueueUnhealthy.class, () -> queue.assertHealthy(aggregatorID));
+        assertEquals("Aggregator is not making progress on the queue", e.getMessage());
     }
 
-    private UUID buildStuckBatchScenario(UUID orgID) {
-        // Add a job
-        var jobID = queue.createJob(orgID,
+    @Test
+    void pauseBatch() {
+        UUID orgID = UUID.randomUUID();
+        createJob(orgID);
+
+        Optional<JobQueueBatch> workBatch = queue.claimBatch(aggregatorID);
+        assertTrue(workBatch.isPresent());
+
+        UUID firstBatchID = workBatch.get().getBatchID();
+        Optional<JobQueueBatch> runningJob = queue.getBatch(firstBatchID);
+        assertTrue(runningJob.isPresent());
+        assertEquals(JobStatus.RUNNING, runningJob.get().getStatus());
+
+        queue.pauseBatch(runningJob.get(), aggregatorID);
+        Optional<JobQueueBatch> pausedJob = queue.getBatch(firstBatchID);
+        assertTrue(pausedJob.isPresent());
+        assertAll(
+                () -> assertEquals(JobStatus.QUEUED, pausedJob.get().getStatus()),
+                () -> assertTrue(pausedJob.get().getAggregatorID().isEmpty())
+        );
+    }
+
+    private UUID createJob(UUID orgID) {
+        return queue.createJob(orgID,
                 NPIUtil.generateNPI(),
                 NPIUtil.generateNPI(),
                 List.of("test-patient-1", "test-patient-2"),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                OffsetDateTime.now(ZoneOffset.UTC), null, null,true, false);
+                OffsetDateTime.now(ZoneOffset.UTC), null, null, true, false);
+    }
+
+    private UUID buildStuckBatchScenario(UUID orgID) {
+        // Add a job
+        var jobID = createJob(orgID);
 
         // Work the job
         Optional<JobQueueBatch> workBatch = queue.claimBatch(aggregatorID);

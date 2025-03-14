@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Helper class for scanning a given class path and returning an {@link ImmutableList} of {@link Entity} annotated classes.
@@ -58,7 +57,7 @@ public class EntityScanner {
                     return entities;
                 })
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
 
         return ImmutableList.copyOf(collect);
     }

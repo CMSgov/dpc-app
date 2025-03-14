@@ -176,12 +176,11 @@ public class DataService {
     }
 
     private Class<? extends Resource> getClassForResourceType(DPCResourceType resourceType) {
-        return switch (resourceType) {
-            case Coverage -> Coverage.class;
-            case ExplanationOfBenefit -> ExplanationOfBenefit.class;
-            case Patient -> Patient.class;
-            default -> throw new DataRetrievalException("Unexpected resource type: " + resourceType);
-        };
+        List<DPCResourceType> acceptedTypes = List.of(DPCResourceType.Coverage, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Patient);
+        if (acceptedTypes.contains(resourceType)) {
+            return DPCResourceType.toResource(resourceType);
+        }
+        throw new DataRetrievalException("Unexpected resource type: " + resourceType);
     }
 
     private void addResourceEntries(Class<? extends Resource> clazz, Path path, Bundle bundle) {

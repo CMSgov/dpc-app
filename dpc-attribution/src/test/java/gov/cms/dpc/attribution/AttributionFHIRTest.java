@@ -31,8 +31,6 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-import static gov.cms.dpc.attribution.SharedMethods.submitAttributionBundle;
-import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
@@ -54,6 +52,7 @@ class AttributionFHIRTest extends AbstractAttributionTest {
 
         // Read in the seeds and create the 'Roster' bundle
         groupedPairs = SeedProcessor.extractProviderMap(resource);
+        groupedPairs.forEach((providerId, pairList) -> pairList.forEach(pair -> assertEquals(providerId, pair.getLeft())));
 
         // Create the Organization
         organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, String.format("http://localhost:%s/v1/", APPLICATION.getLocalPort())));
@@ -93,7 +92,7 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         loggingInterceptor.setLogResponseSummary(false);
         client.registerInterceptor(loggingInterceptor);
 
-        final Group createdGroup = submitAttributionBundle(client, bundle);
+        final Group createdGroup = SharedMethods.submitAttributionBundle(client, bundle);
 
         // Get the patients
         final IReadExecutable<Group> groupSizeQuery = client
@@ -211,7 +210,13 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         final String groupID = searchedProviderGroup.getEntryFirstRep().getResource().getId();
 
         // Create a new Group, and update
-        final Group newRoster = createBaseAttributionGroup(providerID, organizationID);
+        final Group newRoster = SeedProcessor.createBaseAttributionGroup(providerID, organizationID);
+        assertAll(
+                () -> assertTrue(newRoster.getActive()),
+                () -> assertEquals(Group.GroupType.PERSON, newRoster.getType()),
+                () -> assertEquals(organizationID, newRoster.getMeta().getTag().get(0).getCode())
+        );
+
         final Reference patientReference = new Reference(newPatient.getId());
         newRoster.addMember().setEntity(patientReference);
 
