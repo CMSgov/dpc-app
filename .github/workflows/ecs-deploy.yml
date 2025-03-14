@@ -84,7 +84,7 @@ jobs:
           echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
           exit 1
       - name: Run and Fail if auth disabled but not test environment
-        if: ${{ inputs.disable-auth == "true" && inputs.env != "test" }}
+        if: ${{ inputs.disable-auth == 'true' && inputs.env != 'test' }}
         run: |
           echo "Target deployment environment \"${{ inputs.env }}\" must == \"test\" if auth disabled"
           exit 1
@@ -152,13 +152,13 @@ jobs:
           cd dpc-ops/terraform/${{ inputs.env }}/persistent
           terraform apply dpc-release-${{ inputs.env }}.tfplan
       - name: Verify main environment plan
-        if: ${{ inputs.disable-auth != "true" }}
+        if: ${{ inputs.disable-auth != 'true' }}
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
           terraform init
           terraform plan -var 'release_version=${{ inputs.app-version}}' -var 'aggregation_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'api_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'attribution_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'consent_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'web_admin_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'web_portal_image_tag=${{ steps.image-tag.outputs.image_tag }}' -var 'web_image_tag=${{ steps.image-tag.outputs.image_tag }}' -out dpc-release-${{ inputs.env }}.tfplan
       - name: Verify main environment plan with auth disabled (test environment only)
-        if: ${{ inputs.disable-auth == "true" }}
+        if: ${{ inputs.disable-auth == 'true' }}
         run: |
           cd dpc-ops/terraform/test
           terraform init
