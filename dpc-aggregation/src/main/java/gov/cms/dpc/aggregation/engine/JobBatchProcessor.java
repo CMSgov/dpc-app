@@ -184,9 +184,15 @@ public class JobBatchProcessor {
             if (!passesLookBack(answers)) {
                 OutcomeReason failReason = LookBackAnalyzer.analyze(answers);
                 return Pair.of(
-                        Flowable.just(AggregationUtils.toOperationOutcome(failReason, FHIRExtractors.getPatientMBI(patient))),
-                        failReason
-                        );
+                    Flowable.just(
+                        AggregationUtils.toOperationOutcome(
+                            failReason,
+                            patient.getId(),
+                            OperationOutcome.IssueType.SUPPRESSED
+                        )
+                    ),
+                    failReason
+                );
             }
         }
 
@@ -216,7 +222,8 @@ public class JobBatchProcessor {
                 job.getBatchID(),
                 resourceType,
                 since,
-                job.getTransactionTime());
+                job.getTransactionTime(),
+                operationsConfig.getFetchWarnThresholdSeconds());
         return fetcher.fetchResources(patient, new JobHeaders(job.getRequestingIP(),job.getJobID().toString(),
                         job.getProviderNPI(),job.getTransactionTime().toString(),job.isBulk()).buildHeaders())
                            .flatMap(Flowable::fromIterable);
@@ -247,7 +254,9 @@ public class JobBatchProcessor {
 
         // If we get more than one unique Patient for an MBI then we've got some upstream problems.
         if (patients.getEntry().size() == 1) {
-            return Optional.of((Patient) patients.getEntryFirstRep().getResource());
+            Patient patient = (Patient) patients.getEntryFirstRep().getResource();
+            MDC.put(MDCConstants.PATIENT_FHIR_ID, patient.getIdPart());
+            return Optional.of(patient);
         }
 
         logger.error("Expected 1 Patient to match MBI but found {}", patients.getEntry().size());
