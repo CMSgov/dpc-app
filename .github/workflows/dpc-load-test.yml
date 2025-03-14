@@ -23,7 +23,7 @@ jobs:
   run-load-test:
     name: "Run DPC API Load Test"
     runs-on: self-hosted
-
+    needs: start-test-with-auth-disabled
     steps:
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -73,7 +73,9 @@ jobs:
             docker rm newrelic-statsd
           fi
   restart-test-with-auth-enabled:
+    if: ${{ always() }}
     name: "Restart test environment with auth enabled"
+    needs: run-load-test
     uses: ./.github/workflows/ecs-deploy.yml
     with:
       env: 'test'
