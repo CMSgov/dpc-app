@@ -1,6 +1,7 @@
 import http from 'k6/http';
 
 const adminUrl = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:9903' : __ENV.API_ADMIN_URL;
+const goldenMacaroon = __ENV.GOLDEN_MACAROON;
 
 const fetchGoldenMacaroonURL = `${adminUrl}/tasks/generate-token`
 const fetchTokenURL = id => `${fetchGoldenMacaroonURL}?organization=${id}`;
@@ -29,6 +30,7 @@ class TokenCache {
 }
 
 export function fetchGoldenMacaroon() {
+  if (goldenMacaroon) { return goldenMacaroon }
   const headers = { 
     'Accept': 'application/json',
     'Content-Type': 'application/x-www-form-urlencoded'

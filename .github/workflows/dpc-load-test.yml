@@ -10,31 +10,54 @@ on:
         default: 'main'
 
 jobs:
+  set-parameters:
+    # Environments atart up much more quickly when deploying same image
+    runs-on: self-hosted
+    outputs:
+      app_version: ${{ steps.fetch-info.outputs.app_version }}
+      ecr_image_tag: ${{ steps.fetch-info.outputs.ecr_image_tag }}
+      admin_url: ${{ steps.fetch-info.outputs.admin_url }}
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: "Fetch Image and App Version from AWS"
+        id: fetch-info
+        run: |
+          SERVICE_INFO=$(aws ecs describe-services --services dpc-test-api-v9 --cluster dpc-test-frontend --query "services[0].deployments[0]")
+          TASK_DEFINITION=`echo $SERVICE_INFO | jq -r '.taskDefinition | split(":")[-1]'`
+          TASK_INFO=`aws ecs describe-task-definition --task-definition dpc-test-api:$TASK_DEFINITION --query "taskDefinition.containerDefinitions[0].{Image: image, Version: environment[?name=='APP_VERSION'].value | [0]}"`
+          IMAGE_TAG=`echo $TASK_INFO | jq -r '.Image | split(":")[1]'`
+          echo $IMAGE_TAG
+          echo "ecr_image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          APP_VERSION=`echo $TASK_INFO | jq -r '.Version'`
+          echo $APP_VERSION
+          echo "app_version=$APP_VERSION" >> "$GITHUB_OUTPUT"
+          ADMIN_URL=$(aws elbv2 describe-load-balancers --names dpc-test-frontend-internal | jq -r '.LoadBalancers[0].DNSName')
+          echo "admin_url=$ADMIN_URL" >> "$GITHUB_OUTPUT"
+
   start-test-with-auth-disabled:
     name: "Start test environment with auth disabled"
+    needs: set-parameters
     uses: ./.github/workflows/ecs-deploy.yml
     with:
       env: 'test'
       confirm_env: 'test'
       ops-ref: ${{ inputs.ops-ref }}
+      ecr_image_tag: ${{ needs.set-parameters.outputs.ecr_image_tag }}
+      app-version: ${{ needs.set-parameters.outputs.app_version }}
       auth-disabled: 'true'
     secrets: inherit
 
   run-load-test:
     name: "Run DPC API Load Test"
     runs-on: self-hosted
-    needs: start-test-with-auth-disabled
+    needs:
+      - set-parameters
+      - start-test-with-auth-disabled
     steps:
-      - name: AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
-      - name: Get admin url
-        id: admin-url
-        run: |
-          ADMIN_URL=$(aws elbv2 describe-load-balancers --names dpc-test-frontend-internal | jq -r '.LoadBalancers[0].DNSName')
-          echo "admin_url=$ADMIN_URL" >> "$GITHUB_OUTPUT"
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -58,7 +81,7 @@ jobs:
       - name: Run K6 with StatsD output
         env:
           ENVIRONMENT: 'test'
-          API_ADMIN_URL: ${{ steps.admin-url.outputs.admin_url }}
+          API_ADMIN_URL: ${{ needs.set-parameters.outputs.admin_url }}
         run: |
           ./k6 run \
             --out output-statsd=addr=localhost:8125,enableTags=true \
@@ -73,15 +96,18 @@ jobs:
             docker rm newrelic-statsd
           fi
   restart-test-with-auth-enabled:
-    if: ${{ always() }}
+    if: ${{ always() && needs.start-test-with-auth-disabled.result == 'success' }}
     name: "Restart test environment with auth enabled"
-    needs: run-load-test
+    needs:
+      - start-test-with-auth-disabled
+      - run-load-test
+      - set-parameters
     uses: ./.github/workflows/ecs-deploy.yml
     with:
       env: 'test'
       confirm_env: 'test'
       ops-ref: ${{ inputs.ops-ref }}
-      ecr_image_tag: 'rls-r190-202503122037-13821075659'
-      app-version: 'r190'
+      ecr_image_tag: ${{ needs.set-parameters.outputs.ecr_image_tag }}
+      app-version: ${{ needs.set-parameters.outputs.app_version }}
       auth-disabled: 'false'
     secrets: inherit
