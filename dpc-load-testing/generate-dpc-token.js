@@ -44,7 +44,8 @@ export function generateDPCToken(orgId) {
     'Content-Type': 'application/x-www-form-urlencoded'
   };
 
-  return http.post(fetchTokenURL(orgId), {}, { headers: headers })
+  const res = http.post(fetchTokenURL(orgId), {}, { headers: headers })
+  return res
 }
 
 const tokenCache = new TokenCache();
