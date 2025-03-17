@@ -1,7 +1,7 @@
 import { check, fail } from 'k6';
 import exec from 'k6/execution'
 import tokenCache, { generateDPCToken, fetchGoldenMacaroon } from './generate-dpc-token.js';
-import { createOrganization, deleteOrganization, getOrganization } from './dpc-api-client.js';
+import { findByNpi, createOrganization, deleteOrganization, getOrganization } from './dpc-api-client.js';
 
 // See https://grafana.com/docs/k6/latest/using-k6/k6-options/reference for
 // details on this configuration object.
@@ -28,6 +28,13 @@ let goldenMacaroon;
 export function setup() {
   tokenCache.setGoldenMacaroon();
   // Fake NPIs generated online: https://jsfiddle.net/alexdresko/cLNB6
+  const searchRes = findByNpi('2782823019', '8197402604');
+  const search = searchRes.json();
+  if (search.total > 0) {
+    for ( const entry of search.entry ) {
+      deleteOrganization(entry.resource.id);
+    }
+  }
   const org1 = createOrganization('2782823019', 'Test Org 1');
   const org2 = createOrganization('8197402604', 'Test Org 2');
 
