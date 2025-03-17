@@ -1,7 +1,7 @@
 import { check, fail } from 'k6';
 import exec from 'k6/execution'
 import tokenCache, { generateDPCToken, fetchGoldenMacaroon } from './generate-dpc-token.js';
-import { createOrganization, deleteOrganization, getOrganization } from './dpc-api-client.js';
+import { createOrganization, createProvider, deleteOrganization, getOrganization } from './dpc-api-client.js';
 
 // See https://grafana.com/docs/k6/latest/using-k6/k6-options/reference for
 // details on this configuration object.
@@ -63,22 +63,20 @@ export function setup() {
 export function workflowA(data) {
   const orgId = data[exec.vu.idInInstance];
   const tokenResponse = generateDPCToken(orgId);
-  if (tokenResponse.status.toString() == '200') {
+  if (tokenResponse.status == 200) {
     tokenCache.setToken(orgId, tokenResponse.body);
     console.log('bearer token for workflow A fetched successfully!');
   } else {
     fail('failed to fetch bearer token for workflow A');
   }
   
-  const orgResponse = getOrganization(orgId);
-  const checkOutput = check(
-    orgResponse, 
-    { 'response code was 200': res => res.status === 200 }
-  )
-
-  if (!checkOutput) {
-    fail('Failed to get a 200 response in workflow A');
+  const practitionerResponse = createProvider("1232131239", orgId);
+  if (practitionerResponse.status == 201) {
+    console.log('practitioner created for workflow A successfully!');
+  } else {
+    fail('failed to create practitioner for workflow A');
   }
+
 }
 
 export function workflowB(data) {

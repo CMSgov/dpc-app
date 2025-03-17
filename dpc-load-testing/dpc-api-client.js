@@ -21,13 +21,14 @@ export function createOrganization(npi, name) {
   return res;
 }
 
-export function createProvider(npi) {
+export function createProvider(npi, orgId) {
   const body = generateProviderResourceBody(npi);
   const res = http.post(`${urlRoot}/Practitioner`, JSON.stringify(body), {
     headers: {
-      'Authorization': `Bearer ${tokenCache.token}`,
+      'Authorization': `Bearer ${tokenCache.getToken(orgId)}`,
       'Content-Type': 'application/fhir+json',
-      'Accept': 'application/fhir+json'
+      'Accept': 'application/fhir+json',
+      'Organization': orgId     // Required if we're not using auth
     }
   });
 
