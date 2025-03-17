@@ -8,7 +8,7 @@ import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.aggregation.service.ConsentResult;
@@ -30,7 +30,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -489,8 +492,11 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .useHttpGet()
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
 
-        InternalErrorException exception = assertThrows(InternalErrorException.class, getEverythingOperation::execute, "Expected Internal server error when retrieving opted out patient.");
-        assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
+        ForbiddenOperationException exception = assertThrows(ForbiddenOperationException.class, getEverythingOperation::execute,
+            "Expected Internal server error when retrieving opted out patient.");
+        OperationOutcome outcome = (OperationOutcome) exception.getOperationOutcome();
+        assertTrue(outcome.getIssueFirstRep().getDetails().getText().contains("Data not available for opted out patient"),
+            "Incorrect or missing operation outcome in response body.");
     }
 
     @Test
@@ -516,8 +522,11 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .useHttpGet()
                 .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
 
-        InternalErrorException exception = assertThrows(InternalErrorException.class, getEverythingOperation::execute, "Expected Internal server error when retrieving opted out patient.");
-        assertTrue(exception.getResponseBody().contains("\"text\":\"Data not available for opted out patient\""), "Incorrect or missing operation outcome in response body.");
+        ForbiddenOperationException exception = assertThrows(ForbiddenOperationException.class, getEverythingOperation::execute,
+            "Expected Internal server error when retrieving opted out patient.");
+        OperationOutcome outcome = (OperationOutcome) exception.getOperationOutcome();
+        assertTrue(outcome.getIssueFirstRep().getDetails().getText().contains("Data not available for opted out patient"),
+            "Incorrect or missing operation outcome in response body.");
     }
 
     @Test
@@ -656,6 +665,43 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         logger.info("Submit operation time: {}", submitSeconds);
 
         assertEquals(COUNT_TEST_PATIENTS, resultPatientBundle.getEntry().size());
+    }
+
+    @Test
+    void testPatientEverythingWithFailedLookBack() throws IOException, URISyntaxException, GeneralSecurityException {
+        IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
+
+        // Register a patient with no EoB resources
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
+        Patient patient = APITestHelpers.createPatientResource(mbi, APITestHelpers.ORGANIZATION_ID);
+        client.create()
+            .resource(patient)
+            .encodedJson()
+            .execute();
+        Patient retrievedPatient = fetchPatient(client, mbi);
+        String patientId = FHIRExtractors.getEntityUUID(retrievedPatient.getId()).toString();
+
+        APITestHelpers.setupPractitionerTest(client, parser);
+        Practitioner practitioner = fetchPractitionerByNPI(client);
+
+        IOperationUntypedWithInput<Bundle> getEverythingOperation = client
+            .operation()
+            .onInstance(new IdType("Patient", patientId))
+            .named("$everything")
+            .withNoParameters(Parameters.class)
+            .returnResourceType(Bundle.class)
+            .useHttpGet()
+            .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
+
+        ForbiddenOperationException exception = assertThrows(ForbiddenOperationException.class, getEverythingOperation::execute,
+            "Expected forbidden when retrieving patient that fails look back."
+        );
+
+        OperationOutcome resultOperationOutcome = (OperationOutcome) exception.getOperationOutcome();
+        assertTrue(resultOperationOutcome.getIssueFirstRep().getDetails().getText().contains(
+            "DPC couldn't find any claims for this MBI; unable to demonstrate relationship with provider or organization"),
+            "Incorrect or missing operation outcome in response body."
+        );
     }
 
     private IGenericClient generateClient(String orgNPI, String keyLabel) throws IOException, URISyntaxException, GeneralSecurityException {
