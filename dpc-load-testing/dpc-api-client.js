@@ -8,10 +8,10 @@ import tokenCache from './generate-dpc-token.js';
 
 const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/v1' : 'https://test.dpc.cms.gov/api/v1';
 
-export function findByNpi(npiA, npiB) {
+export function findByNpi(npiA, npiB, goldenMacaroon) {
   const res = http.get(`${urlRoot}/Admin/Organization?npis=npi|${npiA},${npiB}`, {
     headers: {
-      'Authorization': `Bearer ${tokenCache.goldenMacaroon}`,
+      'Authorization': `Bearer ${goldenMacaroon}`,
       'Content-Type': 'application/fhir+json',
       'Accept': 'application/fhir+json'
     }
@@ -21,11 +21,11 @@ export function findByNpi(npiA, npiB) {
 }
 
 
-export function createOrganization(npi, name) {
+export function createOrganization(npi, name, goldenMacaroon) {
   const body = generateOrganizationResourceBody(npi, name);
   const res = http.post(`${urlRoot}/Organization/$submit`, JSON.stringify(body), {
     headers: {
-      'Authorization': `Bearer ${tokenCache.goldenMacaroon}`,
+      'Authorization': `Bearer ${goldenMacaroon}`,
       'Content-Type': 'application/fhir+json',
       'Accept': 'application/fhir+json'
     }
@@ -60,10 +60,10 @@ export function createPatient(mbi) {
   return res;
 }
 
-export function getOrganization(id) {
-  const res = http.get(`${urlRoot}/Organization/${id}`, {
+export function getOrganization(id, token) {
+  const res = http.get(`${urlRoot}/Organization`, {
     headers: {
-      'Authorization': `Bearer ${tokenCache.token}`,
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/fhir+json',
       'Accept': 'application/fhir+json'
     }
@@ -72,10 +72,10 @@ export function getOrganization(id) {
   return res;
 }
 
-export function deleteOrganization(id) {
+export function deleteOrganization(id, goldenMacaroon) {
   const res = http.del(`${urlRoot}/Organization/${id}`, null, {
     headers: {
-      'Authorization': `Bearer ${tokenCache.goldenMacaroon}`,
+      'Authorization': `Bearer ${goldenMacaroon}`,
       'Content-Type': 'application/fhir+json',
       'Accept': 'application/fhir+json'
     }

@@ -35,7 +35,7 @@ export function fetchGoldenMacaroon() {
     'Content-Type': 'application/x-www-form-urlencoded'
   };
 
-  return http.post(fetchGoldenMacaroonURL, {}, { headers: headers })
+  return http.post(fetchGoldenMacaroonURL, {}, { headers: headers }).body
 }
 
 export function generateDPCToken(orgId) {
@@ -45,7 +45,7 @@ export function generateDPCToken(orgId) {
   };
 
   const res = http.post(fetchTokenURL(orgId), {}, { headers: headers })
-  return res
+  return res.body
 }
 
 const tokenCache = new TokenCache();
