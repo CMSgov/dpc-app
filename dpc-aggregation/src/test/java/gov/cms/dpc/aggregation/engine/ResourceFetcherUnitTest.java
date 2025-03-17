@@ -228,7 +228,8 @@ class ResourceFetcherUnitTest {
                 UUID.randomUUID(),
                 resourceType,
                 since,
-                transactionTime
+                transactionTime,
+                30
         );
     }
 }
