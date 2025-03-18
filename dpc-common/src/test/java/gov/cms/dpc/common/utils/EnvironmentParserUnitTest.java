@@ -52,7 +52,7 @@ class EnvironmentParserUnitTest {
         assertAll(
                 () -> assertEquals(1, listAppender.list.size()),
                 () -> assertEquals(Level.INFO, listAppender.list.get(0).getLevel()),
-                () -> assertEquals("Starting DPC Service in environment: local", listAppender.list.get(0).getFormattedMessage())
+                () -> assertEquals("Starting DPC Service in environment: " + currEnv, listAppender.list.get(0).getFormattedMessage())
         );
     }
 
