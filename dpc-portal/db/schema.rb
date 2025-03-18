@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_10_17_133900) do
+ActiveRecord::Schema[7.2].define(version: 2025_03_18_133706) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -92,6 +92,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_17_133900) do
     t.integer "verification_status"
     t.integer "verification_reason"
     t.datetime "last_checked_at"
+    t.boolean "config_complete", default: false
     t.index ["dpc_api_organization_id"], name: "index_provider_organizations_on_dpc_api_organization_id", unique: true
     t.index ["npi"], name: "index_provider_organizations_on_npi", unique: true
   end

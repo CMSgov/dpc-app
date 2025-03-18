@@ -172,19 +172,29 @@ RSpec.describe 'IpAddresses', type: :request do
       end
 
       it 'succeeds with valid params' do
-        api_client = stub_api_client(message: :get_organization,
-                                     response: default_get_org_response(org_api_id))
         stub_self_returning_api_client(message: :create_ip_address,
-                                       response: default_get_ip_addresses['entities'].first,
-                                       api_client:)
+                                       response: default_get_ip_addresses['entities'].first)
         post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
         expect(response).to redirect_to(organization_path(org, credential_start: true))
         expect(assigns(:organization)).to eq org
       end
 
+      it 'checks if configuration complete on success' do
+        config_complete_checker = class_double('CheckConfigCompleteJob').as_stubbed_const
+        expect(config_complete_checker).to receive(:perform_later).with(org.id)
+        stub_self_returning_api_client(message: :create_ip_address,
+                                       response: default_get_ip_addresses['entities'].first)
+        post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
+      end
+      it 'does not check for complete of complete = true' do
+        config_complete_checker = class_double('CheckConfigCompleteJob').as_stubbed_const
+        expect(config_complete_checker).to_not receive(:perform_later).with(org.id)
+        org.update_attribute(:config_complete, true)
+        stub_self_returning_api_client(message: :create_ip_address,
+                                       response: default_get_ip_addresses['entities'].first)
+        post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
+      end
       it 'fails if missing params' do
-        stub_api_client(message: :get_organization,
-                        response: default_get_org_response(org_api_id))
         post "/organizations/#{org.id}/ip_addresses"
         expect(assigns(:organization)).to eq org
         expect(flash[:alert]).to eq("Fields can't be blank.")
@@ -192,12 +202,14 @@ RSpec.describe 'IpAddresses', type: :request do
                                        root: "Fields can't be blank.")
       end
 
+      it 'does not check for complete on failure' do
+        config_complete_checker = class_double('CheckConfigCompleteJob').as_stubbed_const
+        expect(config_complete_checker).to_not receive(:perform_later).with(org.id)
+        post "/organizations/#{org.id}/ip_addresses"
+      end
       it 'fails if invalid IP' do
-        api_client = stub_api_client(message: :get_organization,
-                                     response: default_get_org_response(org_api_id))
         stub_self_returning_api_client(message: :create_ip_address,
-                                       response: default_get_ip_addresses['entities'].first,
-                                       api_client:)
+                                       response: default_get_ip_addresses['entities'].first)
         post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '333.333.333.333' }
         expect(assigns(:organization)).to eq org
         error_msg = 'Invalid IP address.'
@@ -206,11 +218,8 @@ RSpec.describe 'IpAddresses', type: :request do
       end
 
       it 'fails if label over 25 characters' do
-        api_client = stub_api_client(message: :get_organization,
-                                     response: default_get_org_response(org_api_id))
         stub_self_returning_api_client(message: :create_ip_address,
-                                       response: default_get_ip_addresses['entities'].first,
-                                       api_client:)
+                                       response: default_get_ip_addresses['entities'].first)
         post "/organizations/#{org.id}/ip_addresses",
              params: { label: 'aaaaabbbbbcccccdddddeeeeefffff', ip_address: '136.226.19.87' }
         expect(assigns(:organization)).to eq org
@@ -219,12 +228,9 @@ RSpec.describe 'IpAddresses', type: :request do
       end
 
       it 'shows error if problem' do
-        api_client = stub_api_client(message: :get_organization,
-                                     response: default_get_org_response(org_api_id))
         stub_self_returning_api_client(message: :create_ip_address,
                                        success: false,
-                                       response: nil,
-                                       api_client:)
+                                       response: nil)
         post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
         expect(flash[:alert]).to eq("We're sorry, but we can't complete your request. Please try again tomorrow.")
       end
@@ -251,12 +257,9 @@ RSpec.describe 'IpAddresses', type: :request do
 
       it 'flashes success if succeeds' do
         addr_guid = SecureRandom.uuid
-        api_client = stub_api_client(message: :get_organization,
-                                     response: default_get_org_response(org_api_id))
         stub_self_returning_api_client(message: :delete_ip_address,
                                        response: nil,
-                                       with: [org_api_id, addr_guid],
-                                       api_client:)
+                                       with: [org_api_id, addr_guid])
         delete "/organizations/#{org.id}/ip_addresses/#{addr_guid}"
         expect(flash[:notice]).to eq('IP address successfully deleted.')
         expect(response).to redirect_to(organization_path(org, credential_start: true))
@@ -264,13 +267,10 @@ RSpec.describe 'IpAddresses', type: :request do
 
       it 'renders error if error' do
         addr_guid = SecureRandom.uuid
-        api_client = stub_api_client(message: :get_organization,
-                                     response: default_get_org_response(org_api_id))
         stub_self_returning_api_client(message: :delete_ip_address,
                                        response: nil,
                                        success: false,
-                                       with: [org_api_id, addr_guid],
-                                       api_client:)
+                                       with: [org_api_id, addr_guid])
         delete "/organizations/#{org.id}/ip_addresses/#{addr_guid}"
         expect(flash[:alert]).to eq('IP address could not be deleted.')
         expect(response).to redirect_to(organization_path(org, credential_start: true))
