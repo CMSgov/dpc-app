@@ -24,48 +24,26 @@ export function createOrganization(npi, name) {
 
 export function createProvider(npi, orgId) {
   const body = generateProviderResourceBody(npi);
-  const res = http.post(`${urlRoot}/Practitioner`, JSON.stringify(body), {
-    headers: {
-      'Content-Type': 'application/fhir+json',
-      'Accept': 'application/fhir+json',
-      'Organization': orgId     // We need to specify the org with auth disabled since we can't pull it from the token
-    }
-  });
+  const res = http.post(`${urlRoot}/Practitioner`, JSON.stringify(body), createHeaderParam(orgId));
 
   return res;
 }
 
 export function createPatient(mbi, orgId) {
   const body = generatePatientResourceBody(mbi);
-  const res = http.post(`${urlRoot}/Patient`, JSON.stringify(body), {
-    headers: {
-      'Content-Type': 'application/fhir+json',
-      'Accept': 'application/fhir+json',
-      'Organization': orgId
-    }
-  });
+  const res = http.post(`${urlRoot}/Patient`, JSON.stringify(body), createHeaderParam(orgId));
 
   return res;
 }
 
-export function getOrganization(id) {
-  const res = http.get(`${urlRoot}/Organization/${id}`, {
-    headers: {
-      'Content-Type': 'application/fhir+json',
-      'Accept': 'application/fhir+json'
-    }
-  });
+export function getOrganization(orgId) {
+  const res = http.get(`${urlRoot}/Organization/${orgId}`, createHeaderParam(orgId));
 
   return res;
 }
 
-export function deleteOrganization(id) {
-  const res = http.del(`${urlRoot}/Organization/${id}`, null, {
-    headers: {
-      'Content-Type': 'application/fhir+json',
-      'Accept': 'application/fhir+json'
-    }
-  });
+export function deleteOrganization(orgId) {
+  const res = http.del(`${urlRoot}/Organization/${orgId}`, null, createHeaderParam(orgId));
 
   return res;
 }
@@ -73,14 +51,9 @@ export function deleteOrganization(id) {
 export function createGroup(orgId, practitionerId, practitionerNpi) {
     const groupBody = generateGroupResourceBody(practitionerNpi);
     const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
-    const res = http.post(`${urlRoot}/Group`, JSON.stringify(groupBody), {
-        headers: {
-          'Content-Type': 'application/fhir+json',
-          'Accept': 'application/fhir+json',
-          'X-Provenance': JSON.stringify(provenanceBody),
-          'Organization': orgId
-        }
-    });
+    const res = http.post(`${urlRoot}/Group`, JSON.stringify(groupBody), 
+      createHeaderParam(orgId, {'X-Provenance': JSON.stringify(provenanceBody)})
+    );
 
     return res;
 }
@@ -91,42 +64,42 @@ export function getGroup(orgId, groupId) {
     } else {
         var url = `${urlRoot}/Group`;
     }
-
-    const res = http.get(url, {
-        headers: {
-          'Content-Type': 'application/fhir+json',
-          'Accept': 'application/fhir+json',
-          'Organization': orgId
-        }
-      });
+    const res = http.get(url, createHeaderParam(orgId));
     
-      return res;
+    return res;
 }
 
 export function updateGroup(orgId, groupId, patientId, practitionerId, practitionerNpi) {
     const groupBody = generateGroupResourceBody(practitionerNpi, patientId);
     const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
-    const res = http.put(`${urlRoot}/Group/${groupId}`, JSON.stringify(groupBody), {
-        headers: {
-          'Content-Type': 'application/fhir+json',
-          'Accept': 'application/fhir+json',
-          'X-Provenance': JSON.stringify(provenanceBody),
-          'Organization': orgId
-        }
-    });
+    const res = http.put(`${urlRoot}/Group/${groupId}`, JSON.stringify(groupBody), 
+      createHeaderParam(orgId, {'X-Provenance': JSON.stringify(provenanceBody)})
+    );
 
     return res;
 }
 
 export function exportGroup(orgId, groupId) {
-    const res = http.get(`${urlRoot}/Group/${groupId}/$export`, {
-        headers: {
-          'Content-Type': 'application/fhir+json',
-          'Accept': 'application/fhir+json',
-          'Prefer': 'respond-async',
-          'Organization': orgId
-        }
-      });
+    const res = http.get(`${urlRoot}/Group/${groupId}/$export`, 
+      createHeaderParam(orgId, {'Prefer': 'respond-async'})
+    );
     
       return res;
+}
+
+/**
+ * Returns a parameters object with the default headers we use for every request, along with any additional
+ * headers passed in.
+ * @param {*} orgId 
+ * @param {*} headers Additional headers that should be included.
+ * @returns Headers wrapped in a Parameters object.
+ */
+function createHeaderParam(orgId, headers) {
+  const defaultHeaders = {
+    'Content-Type': 'application/fhir+json',
+    'Accept': 'application/fhir+json',
+    'Organization': orgId   // We need to specify the org for the static auth filter with auth disabled in dpc-api
+  }
+
+  return {'headers': Object.assign({}, defaultHeaders, headers)};
 }
