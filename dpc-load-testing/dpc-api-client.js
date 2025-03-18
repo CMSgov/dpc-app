@@ -6,7 +6,6 @@ import {
   generateGroupResourceBody,
   generateProvenanceResourceBody
 } from "./resource-request-bodies.js"
-import tokenCache from './generate-dpc-token.js';
 
 const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/v1' : 'https://test.dpc.cms.gov/api/v1';
 
@@ -88,7 +87,7 @@ export function exportGroup(orgId, groupId) {
 }
 
 /**
- * Returns a parameters object with the default headers we use for every request, along with any additional
+ * Returns a Parameters object with the default headers we use for every request, along with any additional
  * headers passed in.
  * @param {*} orgId 
  * @param {*} headers Additional headers that should be included.

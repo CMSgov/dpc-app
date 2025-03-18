@@ -1,6 +1,5 @@
 import { check, fail, group } from 'k6';
 import exec from 'k6/execution'
-import tokenCache, { generateDPCToken, fetchGoldenMacaroon } from './generate-dpc-token.js';
 import { 
     createGroup, createOrganization, createPatient, createProvider, deleteOrganization, exportGroup, getGroup, getOrganization, 
     updateGroup
@@ -29,7 +28,6 @@ let goldenMacaroon;
 
 // Sets up two test organizations
 export function setup() {
-  tokenCache.setGoldenMacaroon();
   // Fake NPIs generated online: https://jsfiddle.net/alexdresko/cLNB6
   const org1 = createOrganization('2782823019', 'Test Org 1');
   const org2 = createOrganization('8197402604', 'Test Org 2');
@@ -65,13 +63,6 @@ export function setup() {
 
 export function workflowA(data) {
   const orgId = data[exec.vu.idInInstance];
-  const tokenResponse = generateDPCToken(orgId);
-  if (tokenResponse.status == 200) {
-    tokenCache.setToken(orgId, tokenResponse.body);
-    console.log('bearer token for workflow A fetched successfully!');
-  } else {
-    fail('failed to fetch bearer token for workflow A');
-  }
   
   // POST practitioner
   const practitionerResponse = createProvider("1232131239", orgId);
@@ -133,13 +124,6 @@ export function workflowA(data) {
 
 export function workflowB(data) {
   const orgId = data[exec.vu.idInInstance];
-  const tokenResponse = generateDPCToken(orgId);
-  if (tokenResponse.status.toString() == '200') {
-    tokenCache.setToken(orgId, tokenResponse.body);
-    console.log('bearer token for workflow B fetched successfully!');
-  } else {
-    fail('failed to fetch bearer token for workflow B');
-  }
 
   const orgResponse = getOrganization(orgId);
   const checkOutput = check(
