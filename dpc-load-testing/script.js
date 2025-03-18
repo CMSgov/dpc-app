@@ -1,7 +1,14 @@
 import { check, fail, group } from 'k6';
 import exec from 'k6/execution'
 import { 
-    createGroup, createOrganization, createPatient, createProvider, deleteOrganization, exportGroup, getGroup, getOrganization, 
+    createGroup, 
+    createOrganization, 
+    createPatient, 
+    createProvider, 
+    deleteOrganization, 
+    exportGroup, 
+    getGroup, 
+    getOrganization, 
     updateGroup
 } from './dpc-api-client.js';
 
