@@ -14,6 +14,8 @@ import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -24,6 +26,7 @@ class EnvironmentParserUnitTest {
     private EnvironmentVariables envVars;
 
     static final ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+    static String currEnv = Optional.ofNullable(System.getenv("ENV")).orElse("local");
 
     @BeforeAll
     static void setUp() {
@@ -45,12 +48,18 @@ class EnvironmentParserUnitTest {
 
     @Test
     void getEnvironment() {
-        assertEquals("local", EnvironmentParser.getEnvironment("DPC"));
+        assertEquals(currEnv, EnvironmentParser.getEnvironment("DPC"));
         assertAll(
                 () -> assertEquals(1, listAppender.list.size()),
                 () -> assertEquals(Level.INFO, listAppender.list.get(0).getLevel()),
                 () -> assertEquals("Starting DPC Service in environment: local", listAppender.list.get(0).getFormattedMessage())
         );
+    }
+
+    @Test
+    void getEnvironment_skipLog() {
+        assertEquals(currEnv, EnvironmentParser.getEnvironment("DPC", false));
+        assertEquals(0, listAppender.list.size());
     }
 
     @Test
@@ -63,11 +72,5 @@ class EnvironmentParserUnitTest {
                 () -> assertEquals(Level.INFO, listAppender.list.get(0).getLevel()),
                 () -> assertEquals("Starting DPC Service in environment: dev", listAppender.list.get(0).getFormattedMessage())
         );
-    }
-
-    @Test
-    void getEnvironment_skipLog() {
-        assertEquals("local", EnvironmentParser.getEnvironment("DPC", false));
-        assertEquals(0, listAppender.list.size());
     }
 }
