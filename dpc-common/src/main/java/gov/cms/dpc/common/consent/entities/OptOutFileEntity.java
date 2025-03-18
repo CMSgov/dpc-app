@@ -7,8 +7,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.Optional;
 import java.util.UUID;
 
 @Entity(name = "opt_out_file")
@@ -69,21 +67,4 @@ public class OptOutFileEntity implements Serializable {
 
     public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
 
-    public static OptOutFileEntity defaultOptOutEntity(Optional<UUID> id, Optional<String> name) {
-        OptOutFileEntity optOut = new OptOutFileEntity();
-
-        optOut.setId(UUID.randomUUID());
-        id.ifPresent(optOut::setId);
-
-        optOut.setName("TestOptOutFile");
-        name.ifPresent(optOut::setName);
-
-        optOut.setImportStatus(IMPORT_STATUS_COMPLETED);
-
-        optOut.setTimestamp(LocalDate.now(ZoneId.of("UTC")));
-        optOut.setCreatedAt(OffsetDateTime.now(ZoneId.of("UTC")));
-        optOut.setUpdatedAt(OffsetDateTime.now(ZoneId.of("UTC")));
-
-        return optOut;
-    }
 }
