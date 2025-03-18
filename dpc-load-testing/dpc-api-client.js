@@ -100,5 +100,5 @@ function createHeaderParam(orgId, headers) {
     'Organization': orgId   // We need to specify the org for the static auth filter with auth disabled in dpc-api
   }
 
-  return {'headers': Object.assign({}, defaultHeaders, headers)};
+  return {'headers': {...defaultHeaders, ...headers}};
 }
