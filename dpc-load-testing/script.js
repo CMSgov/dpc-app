@@ -76,12 +76,11 @@ export function setup() {
 }
 
 export function workflowA(data) {
-  const orgId = data[exec.vu.idInInstance];
+  const orgId = data.orgIds[exec.vu.idInInstance];
   const token = generateDPCToken(orgId, data.goldenMacaroon);
 
   // POST practitioner
   const practitionerResponse = createProvider(token, "1232131239");
-  console.log(practitionerResponse);
   if (practitionerResponse.status != 201) {
     fail('failed to create practitioner for workflow A');
   }
@@ -97,7 +96,7 @@ export function workflowA(data) {
   const patientId = patientResponse.json().id;
 
   // POST group
-  const createGroupResponse = createGroup(token, practitionerId, practitionerNpi);
+  const createGroupResponse = createGroup(token, orgId, practitionerId, practitionerNpi);
   if (createGroupResponse.status != 201) {
     fail('failed to create group for workflow A');
   }
@@ -115,7 +114,7 @@ export function workflowA(data) {
   }
 
   // PUT patient in group
-  const updateGroupResponse = updateGroup(token, groupId, patientId, practitionerId, practitionerNpi);
+  const updateGroupResponse = updateGroup(token, orgId, groupId, patientId, practitionerId, practitionerNpi);
   if (updateGroupResponse.status != 200) {
     fail('failed to update group for workflow A');
   }
@@ -132,7 +131,7 @@ export function workflowA(data) {
   }
 
   // GET group export
-  const getGroupExportResponse = exportGroup(orgId, groupId, token);
+  const getGroupExportResponse = exportGroup(token, groupId);
   if (getGroupExportResponse.status != 202) {
     fail('failed to export group for workflow A');
   }

@@ -1,5 +1,5 @@
 import http from 'k6/http';
-import { 
+import {
   generateOrganizationResourceBody,
   generateProviderResourceBody,
   generatePatientResourceBody,
@@ -24,7 +24,6 @@ export function findByNpi(npiA, npiB, goldenMacaroon) {
 
 export function createOrganization(npi, name, goldenMacaroon) {
   const body = generateOrganizationResourceBody(npi, name);
-  console.log(body);
   const res = http.post(`${urlRoot}/Organization/$submit`, JSON.stringify(body), {
     headers: {
       'Authorization': `Bearer ${goldenMacaroon}`,
@@ -62,10 +61,10 @@ export function deleteOrganization(orgId, goldenMacaroon) {
   return res;
 }
 
-export function createGroup(token, practitionerId, practitionerNpi) {
+export function createGroup(token, orgId, practitionerId, practitionerNpi) {
     const groupBody = generateGroupResourceBody(practitionerNpi);
     const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
-    const res = http.post(`${urlRoot}/Group`, JSON.stringify(groupBody), 
+    const res = http.post(`${urlRoot}/Group`, JSON.stringify(groupBody),
       createHeaderParam(token, {'X-Provenance': JSON.stringify(provenanceBody)})
     );
 
@@ -79,14 +78,14 @@ export function getGroup(token, groupId) {
         var url = `${urlRoot}/Group`;
     }
     const res = http.get(url, createHeaderParam(token));
-    
+
     return res;
 }
 
-export function updateGroup(token, groupId, patientId, practitionerId, practitionerNpi) {
+export function updateGroup(token, orgId, groupId, patientId, practitionerId, practitionerNpi) {
     const groupBody = generateGroupResourceBody(practitionerNpi, patientId);
     const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
-    const res = http.put(`${urlRoot}/Group/${groupId}`, JSON.stringify(groupBody), 
+    const res = http.put(`${urlRoot}/Group/${groupId}`, JSON.stringify(groupBody),
       createHeaderParam(token, {'X-Provenance': JSON.stringify(provenanceBody)})
     );
 
@@ -94,17 +93,17 @@ export function updateGroup(token, groupId, patientId, practitionerId, practitio
 }
 
 export function exportGroup(token, groupId) {
-    const res = http.get(`${urlRoot}/Group/${groupId}/$export`, 
+    const res = http.get(`${urlRoot}/Group/${groupId}/$export`,
       createHeaderParam(token, {'Prefer': 'respond-async'})
     );
-    
+
       return res;
 }
 
 /**
  * Returns a Parameters object with the default headers we use for every request, along with any additional
  * headers passed in.
- * @param {*} orgId 
+ * @param {*} orgId
  * @param {*} headers Additional headers that should be included.
  * @returns Headers wrapped in a Parameters object.
  */
