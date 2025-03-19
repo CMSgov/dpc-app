@@ -86,7 +86,7 @@ start-api: start-app
 
 start-api-load-tests: ## Start a new API env for load tests
 start-api-load-tests: secure-envs
-	USE_BFD_MOCK=true AUTH_DISABLED=true docker compose -p dpc-load-tests up api --wait
+	USE_BFD_MOCK=true AUTH_DISABLED=true docker compose -p dpc-load-tests up api aggregation --wait
 
 start-web: ## Start the sandbox portal
 start-web:
