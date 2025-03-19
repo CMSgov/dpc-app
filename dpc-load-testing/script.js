@@ -1,7 +1,16 @@
-import { check, fail } from 'k6';
+import { check, fail, group } from 'k6';
 import exec from 'k6/execution'
-import tokenCache, { generateDPCToken, fetchGoldenMacaroon } from './generate-dpc-token.js';
-import { createOrganization, deleteOrganization, getOrganization } from './dpc-api-client.js';
+import { 
+    createGroup, 
+    createOrganization, 
+    createPatient, 
+    createProvider, 
+    deleteOrganization, 
+    exportGroup, 
+    getGroup, 
+    getOrganization, 
+    updateGroup
+} from './dpc-api-client.js';
 
 // See https://grafana.com/docs/k6/latest/using-k6/k6-options/reference for
 // details on this configuration object.
@@ -26,7 +35,6 @@ let goldenMacaroon;
 
 // Sets up two test organizations
 export function setup() {
-  tokenCache.setGoldenMacaroon();
   // Fake NPIs generated online: https://jsfiddle.net/alexdresko/cLNB6
   const org1 = createOrganization('2782823019', 'Test Org 1');
   const org2 = createOrganization('8197402604', 'Test Org 2');
@@ -62,34 +70,67 @@ export function setup() {
 
 export function workflowA(data) {
   const orgId = data[exec.vu.idInInstance];
-  const tokenResponse = generateDPCToken(orgId);
-  if (tokenResponse.status.toString() == '200') {
-    tokenCache.setToken(orgId, tokenResponse.body);
-    console.log('bearer token for workflow A fetched successfully!');
-  } else {
-    fail('failed to fetch bearer token for workflow A');
-  }
   
-  const orgResponse = getOrganization(orgId);
-  const checkOutput = check(
-    orgResponse, 
-    { 'response code was 200': res => res.status === 200 }
-  )
+  // POST practitioner
+  const practitionerResponse = createProvider("1232131239", orgId);
+  if (practitionerResponse.status != 201) {
+    fail('failed to create practitioner for workflow A');
+  }
+  // There's only 1 identifier in our synthetic practitioner, so we don't have to search for npi
+  const practitionerNpi = practitionerResponse.json().identifier[0].value;
+  const practitionerId = practitionerResponse.json().id;
 
-  if (!checkOutput) {
-    fail('Failed to get a 200 response in workflow A');
+  // POST patient
+  const patientResponse = createPatient("1S00EU8FE91", orgId);
+  if (patientResponse.status != 201) {
+    fail('failed to create patient for workflow A');
+  }
+  const patientId = patientResponse.json().id;
+ 
+  // POST group
+  const createGroupResponse = createGroup(orgId, practitionerId, practitionerNpi);
+  if (createGroupResponse.status != 201) {
+    fail('failed to create group for workflow A');
+  }
+  const groupId = createGroupResponse.json().id;
+
+  // GET all groups
+  const getGroupsResponse = getGroup(orgId);
+  if (getGroupsResponse.status != 200) {
+    fail('failed to get groups for workflow A');
+  }
+  // There should only be one group returned
+  const foundGroupId = getGroupsResponse.json().entry[0].resource.id;
+  if (foundGroupId != groupId) {
+    fail("failed to find created group for workflow A");
+  }
+
+  // PUT patient in group
+  const updateGroupResponse = updateGroup(orgId, groupId, patientId, practitionerId, practitionerNpi);
+  if (updateGroupResponse.status != 200) {
+    fail('failed to update group for workflow A');
+  }
+
+  // GET specific group
+  const getGroupResponse = getGroup(orgId, groupId);
+  if (getGroupResponse.status != 200) {
+    fail('failed to read group for workflow A');
+  }
+  // Should only be a reference to one patient, in the format "Patient/id"
+  const addedPatientId = getGroupResponse.json().member[0].entity.reference.replace("Patient/", "");
+  if (addedPatientId != patientId) {
+    fail('patient not found in group for workflow A');
+  }
+
+  // GET group export
+  const getGroupExportResponse = exportGroup(orgId, groupId);
+  if (getGroupExportResponse.status != 202) {
+    fail('failed to export group for workflow A');
   }
 }
 
 export function workflowB(data) {
   const orgId = data[exec.vu.idInInstance];
-  const tokenResponse = generateDPCToken(orgId);
-  if (tokenResponse.status.toString() == '200') {
-    tokenCache.setToken(orgId, tokenResponse.body);
-    console.log('bearer token for workflow B fetched successfully!');
-  } else {
-    fail('failed to fetch bearer token for workflow B');
-  }
 
   const orgResponse = getOrganization(orgId);
   const checkOutput = check(
