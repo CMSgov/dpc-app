@@ -1,7 +1,7 @@
 import { check, fail } from 'k6';
 import exec from 'k6/execution'
 import { Macaroon, fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
-import { createOrganization, deleteOrganization, findByNpi, getOrganization } from './dpc-api-client.js';
+import { createOrganization, deleteOrganization, findByNpi, getOrganization, getPatients, createPatient } from './dpc-api-client.js';
 
 // See https://grafana.com/docs/k6/latest/using-k6/k6-options/reference for
 // details on this configuration object.
@@ -81,14 +81,14 @@ export function workflowA(data) {
 export function workflowB(data) {
   const orgId = data.orgIds[exec.vu.idInInstance];
   const token = generateDPCToken(orgId, data.goldenMacaroon);
-  const orgResponse = getOrganization(token);
+  const createPatientResponse = createPatient('1S00A00AA00', token);
   const checkOutput = check(
-    orgResponse, 
-    { 'response code was 200': res => res.status === 200 }
+    createPatientResponse, 
+    { 'response code was 201': res => res.status === 201 }
   )
 
   if (!checkOutput) {
-    fail('Failed to get a 200 response in workflow B');
+    fail('Failed to get a 201 response in workflow B');
   }
 }
 
