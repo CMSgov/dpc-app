@@ -1,3 +1,4 @@
+import { hmac } from 'k6/crypto'
 import { CryptoKey, crypto } from 'k6/experimental/webcrypto';
 import encoding from 'k6/encoding';
 
@@ -46,6 +47,7 @@ export class Macaroon {
     this.identifier = null;
     this.signature = null;
     this.signatureChunk = null;
+    this.caveats = [];
   }
 
   deserialize(buf) {
@@ -63,15 +65,27 @@ export class Macaroon {
       } else if (keyValue[0] == 'signature') {
 	const offset = index + PACKET_PREFIX_LENGTH + 'signature '.length;
 	this.signature = new Uint8Array(buf, offset, len - (PACKET_PREFIX_LENGTH + 'signature '.length + 1)) ;
+      } else if (keyValue[0] == 'cid') {
+	this.caveats.push(keyValue.slice(1).join(' '));
       }
       index = index + len;
     }
   };
+
   serialize() {
-    const locationArray = packetize('location', this.location);
-    const identifierArray = packetize('identifier', this.identifier)
-    const signatureArray = packetizeSignature(this.signature);
-    return typedArrayConcat(locationArray, identifierArray, signatureArray);
+    const arrays = [];
+    arrays.push(packetize('location', this.location));
+    arrays.push(packetize('identifier', this.identifier));
+    for (const caveat of this.caveats) {
+      arrays.push(packetize('cid', caveat));
+    }
+    arrays.push(packetizeSignature(this.signature));
+    return typedArrayConcat(arrays);
+  };
+  addFirstPartyCaveat(caveat) {
+    this.caveats.push(caveat);
+    const raw = hmac('sha256', this.signature, caveat, 'binary');
+    this.signature = new Uint8Array(raw);
   }
 };
 
@@ -87,10 +101,10 @@ const packetizeSignature = function(data) {
   const packetSize = PACKET_PREFIX_LENGTH + 2 + key.length + data.length;
   const packetSizeHex = packetSize.toString(16).padStart(PACKET_PREFIX_LENGTH, '0');
   const header = string2Uint8Array(`${packetSizeHex}${key} `);
-  return typedArrayConcat(header, data, string2Uint8Array('\n'));
+  return typedArrayConcat([header, data, string2Uint8Array('\n')]);
 }
 
-function typedArrayConcat(...arrays) {
+function typedArrayConcat(arrays) {
   let totalLength = 0;
   for (const arr of arrays) {
     totalLength += arr.length;

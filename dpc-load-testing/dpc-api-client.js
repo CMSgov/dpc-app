@@ -60,7 +60,7 @@ export function createPatient(mbi) {
   return res;
 }
 
-export function getOrganization(id, token) {
+export function getOrganization(token) {
   const res = http.get(`${urlRoot}/Organization`, {
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -82,4 +82,5 @@ export function deleteOrganization(id, goldenMacaroon) {
   });
 
   return res;
+
 }

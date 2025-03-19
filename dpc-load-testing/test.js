@@ -5,7 +5,7 @@ import { sleep } from 'k6';
 import { b64encode, b64decode } from 'k6/encoding';
 import { fetchGoldenMacaroon } from './generate-dpc-token.js';
 import { crypto } from 'k6/experimental/webcrypto';
-import { findByNpi } from './dpc-api-client.js';
+import { findByNpi, getOrganization } from './dpc-api-client.js';
 import {
   encodeJwt,
   arrayBuffer2String,
@@ -17,21 +17,25 @@ import {
 export const options = {
   iterations: 1,
 };
-const MACAROON='MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciAwNThkNzI3MC1jMWZmLTRmZTItYmQ5Mi05NTVlYzRlMjk1NjgKMDAyZnNpZ25hdHVyZSB0BgPWZYgo1_aybd54qKuapfB8qh-9rP6iBS8MLj-vlgo'
-const m1='MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMg=='
-export default async function () {
-  // const goldenMacaroon = fetchGoldenMacaroon();
-  // const decodedS = encoding.b64decode(goldenMacaroon, 'rawurl', 's');
-  // const decoded = encoding.b64decode(goldenMacaroon, 'rawurl');
-  // console.log(decodedS);
-  const decoded = encoding.b64decode(MACAROON, 'rawurl');
+const MACAROON='MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciA1NGQ2MjMwNS01MDcyLTQxNTUtODE4OC0zMTg3ZGM5ODZjZmUKMDAyZnNpZ25hdHVyZSC08NyRP4Ws6g9N2_3qNIZ7h_NWNifv026Di9Hu2gmIdAo'
+const CAVEATED='MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciA1NGQ2MjMwNS01MDcyLTQxNTUtODE4OC0zMTg3ZGM5ODZjZmUKMDAyMWNpZCBkcGNfbWFjYXJvb25fdmVyc2lvbiA9IDEKMDAyZnNpZ25hdHVyZSD8ZEsh3PE5w11Kzcihm9251hx59qCAhiWQR9keuBsW-go';
+export default function () {
+  const goldenMacaroon = fetchGoldenMacaroon();
+  const decodedMac = encoding.b64decode(goldenMacaroon, 'rawurl');
+  const decodedCav = encoding.b64decode(CAVEATED, 'rawurl');
   const macaroon = new Macaroon();
-  macaroon.deserialize(decoded);
-  
+  macaroon.deserialize(decodedMac);
+  macaroon.addFirstPartyCaveat('dpc_macaroon_version = 1');
+  macaroon.addFirstPartyCaveat("organization_id = c4171882-d99b-4f96-91e7-00f52579001a")
   const serialized = macaroon.serialize();
+  // console.log(arrayBuffer2String(decodedCav));
+  // console.log(arrayBuffer2String(serialized));
   const newMacaroon = encoding.b64encode(serialized, 'rawurl');
-  console.log(newMacaroon == MACAROON);
-  // const recoded = encoding.b64encode(decoded, 'rawurl');
-  // const searchRes = findByNpi('2782823019', '8197402604', newMacaroon);
-  // console.log(searchRes.status);
+  // console.log(newMacaroon);
+  // console.log(newMacaroon == CAVEATED);
+  const macCav = new Macaroon();
+  macCav.deserialize(decodedCav);
+  // console.log(macCav.signature);
+  const searchRes = getOrganization(newMacaroon);
+  console.log(searchRes.status);
 }
