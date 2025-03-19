@@ -4,27 +4,21 @@ on:
   workflow_dispatch:
 
 jobs:
-  set-parameters:
-    # Environments atart up much more quickly when deploying same image
+  run-load-test:
+    name: "Run DPC API Load Test"
     runs-on: self-hosted
-    outputs:
-      admin_url: ${{ steps.fetch-info.outputs.admin_url }}
+    needs: set-parameters
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
-      - name: "Fetch Image and App Version from AWS"
+      - name: "Fetch Admin URL from AWS"
         id: fetch-info
         run: |
           ADMIN_URL=$(aws elbv2 describe-load-balancers --names dpc-test-frontend-internal | jq -r '.LoadBalancers[0].DNSName')
           echo "admin_url=$ADMIN_URL" >> "$GITHUB_OUTPUT"
-  run-load-test:
-    name: "Run DPC API Load Test"
-    runs-on: self-hosted
-    needs: set-parameters
-    steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -48,7 +42,7 @@ jobs:
 
       - name: Run K6 with StatsD output
         env:
-          API_ADMIN_URL: ${{ needs.set-parameters.outputs.admin_url }}}}
+          API_ADMIN_URL: ${{ steps.fetch-info.outputs.admin_url }}
         run: |
           ./k6 run \
             --out output-statsd=addr=localhost:8125,enableTags=true \
