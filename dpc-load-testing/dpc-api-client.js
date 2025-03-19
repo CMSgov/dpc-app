@@ -2,7 +2,9 @@ import http from 'k6/http';
 import { 
   generateOrganizationResourceBody,
   generateProviderResourceBody,
-  generatePatientResourceBody
+  generatePatientResourceBody,
+  generateGroupResourceBody,
+  generateProvenanceResourceBody
 } from "./resource-request-bodies.js"
 
 const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/v1' : 'https://test.dpc.cms.gov/api/v1';
@@ -22,6 +24,7 @@ export function findByNpi(npiA, npiB, goldenMacaroon) {
 
 export function createOrganization(npi, name, goldenMacaroon) {
   const body = generateOrganizationResourceBody(npi, name);
+  console.log(body);
   const res = http.post(`${urlRoot}/Organization/$submit`, JSON.stringify(body), {
     headers: {
       'Authorization': `Bearer ${goldenMacaroon}`,
@@ -33,63 +36,84 @@ export function createOrganization(npi, name, goldenMacaroon) {
   return res;
 }
 
-export function createProvider(npi, token) {
+export function createProvider(token, npi) {
   const body = generateProviderResourceBody(npi);
-  const res = http.post(`${urlRoot}/Practitioner`, JSON.stringify(body), {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/fhir+json',
-      'Accept': 'application/fhir+json'
-    }
-  });
+  const res = http.post(`${urlRoot}/Practitioner`, JSON.stringify(body), createHeaderParam(token));
 
   return res;
 }
 
-export function createPatient(mbi, token) {
+export function createPatient(token, mbi) {
   const body = generatePatientResourceBody(mbi);
-  const res = http.post(`${urlRoot}/Patient`, JSON.stringify(body), {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/fhir+json',
-      'Accept': 'application/fhir+json'
-    }
-  });
+  const res = http.post(`${urlRoot}/Patient`, JSON.stringify(body), createHeaderParam(token));
 
   return res;
 }
 
-export function getPatients(token) {
-  const res = http.get(`${urlRoot}/Patient`, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/fhir+json',
-      'Accept': 'application/fhir+json'
-    }
-  });
-
-  return res;
-}
 export function getOrganization(token) {
-  const res = http.get(`${urlRoot}/Organization`, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/fhir+json',
-      'Accept': 'application/fhir+json'
-    }
-  });
+  const res = http.get(`${urlRoot}/Organization`, createHeaderParam(token));
 
   return res;
 }
 
-export function deleteOrganization(id, goldenMacaroon) {
-  const res = http.del(`${urlRoot}/Organization/${id}`, null, {
-    headers: {
-      'Authorization': `Bearer ${goldenMacaroon}`,
-      'Content-Type': 'application/fhir+json',
-      'Accept': 'application/fhir+json'
-    }
-  });
+export function deleteOrganization(orgId, goldenMacaroon) {
+  const res = http.del(`${urlRoot}/Organization/${orgId}`, null, createHeaderParam(goldenMacaroon));
 
   return res;
+}
+
+export function createGroup(token, practitionerId, practitionerNpi) {
+    const groupBody = generateGroupResourceBody(practitionerNpi);
+    const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
+    const res = http.post(`${urlRoot}/Group`, JSON.stringify(groupBody), 
+      createHeaderParam(token, {'X-Provenance': JSON.stringify(provenanceBody)})
+    );
+
+    return res;
+}
+
+export function getGroup(token, groupId) {
+    if (groupId != undefined) {
+        var url = `${urlRoot}/Group/${groupId}`;
+    } else {
+        var url = `${urlRoot}/Group`;
+    }
+    const res = http.get(url, createHeaderParam(token));
+    
+    return res;
+}
+
+export function updateGroup(token, groupId, patientId, practitionerId, practitionerNpi) {
+    const groupBody = generateGroupResourceBody(practitionerNpi, patientId);
+    const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
+    const res = http.put(`${urlRoot}/Group/${groupId}`, JSON.stringify(groupBody), 
+      createHeaderParam(token, {'X-Provenance': JSON.stringify(provenanceBody)})
+    );
+
+    return res;
+}
+
+export function exportGroup(token, groupId) {
+    const res = http.get(`${urlRoot}/Group/${groupId}/$export`, 
+      createHeaderParam(token, {'Prefer': 'respond-async'})
+    );
+    
+      return res;
+}
+
+/**
+ * Returns a Parameters object with the default headers we use for every request, along with any additional
+ * headers passed in.
+ * @param {*} orgId 
+ * @param {*} headers Additional headers that should be included.
+ * @returns Headers wrapped in a Parameters object.
+ */
+function createHeaderParam(token, headers) {
+  const defaultHeaders = {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/fhir+json',
+    'Accept': 'application/fhir+json',
+  }
+
+  return {'headers': {...defaultHeaders, ...headers}};
 }

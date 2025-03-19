@@ -3,11 +3,8 @@ import encoding from 'k6/encoding';
 import { hmac } from 'k6/crypto'
 
 const adminUrl = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:9903' : __ENV.API_ADMIN_URL;
-const testOrgId = __ENV.LOAD_TEST_ORGANIZATION_ID;
 
 const fetchGoldenMacaroonURL = `${adminUrl}/tasks/generate-token`
-const fetchTokenURL = id => `${fetchGoldenMacaroonURL}?organization=${id}`;
-
 
 export function fetchGoldenMacaroon() {
   const headers = { 
