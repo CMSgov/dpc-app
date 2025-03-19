@@ -83,7 +83,7 @@ export function workflowB(data) {
   const token = generateDPCToken(orgId, data.goldenMacaroon);
   const createPatientResponse = createPatient('1S00A00AA00', token);
   const checkOutput = check(
-    createPatientResponse,
+    createPatientResponse, 
     { 'response code was 201': res => res.status === 201 }
   )
 
