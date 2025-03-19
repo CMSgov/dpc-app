@@ -4,7 +4,6 @@ import {
   generateProviderResourceBody,
   generatePatientResourceBody
 } from "./resource-request-bodies.js"
-import tokenCache from './generate-dpc-token.js';
 
 const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/v1' : 'https://test.dpc.cms.gov/api/v1';
 
@@ -34,11 +33,11 @@ export function createOrganization(npi, name, goldenMacaroon) {
   return res;
 }
 
-export function createProvider(npi) {
+export function createProvider(npi, token) {
   const body = generateProviderResourceBody(npi);
   const res = http.post(`${urlRoot}/Practitioner`, JSON.stringify(body), {
     headers: {
-      'Authorization': `Bearer ${tokenCache.token}`,
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/fhir+json',
       'Accept': 'application/fhir+json'
     }
@@ -47,11 +46,11 @@ export function createProvider(npi) {
   return res;
 }
 
-export function createPatient(mbi) {
+export function createPatient(mbi, token) {
   const body = generatePatientResourceBody(mbi);
   const res = http.post(`${urlRoot}/Patient`, JSON.stringify(body), {
     headers: {
-      'Authorization': `Bearer ${tokenCache.token}`,
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/fhir+json',
       'Accept': 'application/fhir+json'
     }
@@ -82,5 +81,4 @@ export function deleteOrganization(id, goldenMacaroon) {
   });
 
   return res;
-
 }

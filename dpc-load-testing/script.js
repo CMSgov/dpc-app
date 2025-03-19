@@ -1,7 +1,7 @@
 import { check, fail } from 'k6';
 import exec from 'k6/execution'
-import { generateDPCToken, fetchGoldenMacaroon } from './generate-dpc-token.js';
-import { findByNpi, createOrganization, deleteOrganization, getOrganization } from './dpc-api-client.js';
+import { Macaroon, fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
+import { createOrganization, deleteOrganization, findByNpi, getOrganization } from './dpc-api-client.js';
 
 // See https://grafana.com/docs/k6/latest/using-k6/k6-options/reference for
 // details on this configuration object.
@@ -25,12 +25,10 @@ export const options = {
 // Sets up two test organizations
 export function setup() {
   const goldenMacaroon = fetchGoldenMacaroon();
-  console.log(goldenMacaroon);
   // Fake NPIs generated online: https://jsfiddle.net/alexdresko/cLNB6
-  const searchRes = findByNpi('2782823019', '8197402604', goldenMacaroon);
-  const search = searchRes.json();
-  if (search.total > 0) {
-    for ( const entry of search.entry ) {
+  const existingOrgs = findByNpi('2782823019', '8197402604', goldenMacaroon).json();
+  if ( existingOrgs.total ) {
+    for ( const entry of existingOrgs.entry ) {
       deleteOrganization(entry.resource.id, goldenMacaroon);
     }
   }
@@ -68,9 +66,8 @@ export function setup() {
 
 export function workflowA(data) {
   const orgId = data.orgIds[exec.vu.idInInstance];
-  const token = generateDPCToken(orgId);
-  const orgResponse = getOrganization(orgId, token);
-
+  const token = generateDPCToken(orgId, data.goldenMacaroon);
+  const orgResponse = getOrganization(token);
   const checkOutput = check(
     orgResponse, 
     { 'response code was 200': res => res.status === 200 }
@@ -82,6 +79,17 @@ export function workflowA(data) {
 }
 
 export function workflowB(data) {
+  const orgId = data.orgIds[exec.vu.idInInstance];
+  const token = generateDPCToken(orgId, data.goldenMacaroon);
+  const orgResponse = getOrganization(token);
+  const checkOutput = check(
+    orgResponse, 
+    { 'response code was 200': res => res.status === 200 }
+  )
+
+  if (!checkOutput) {
+    fail('Failed to get a 200 response in workflow B');
+  }
 }
 
 export function teardown(data) {
