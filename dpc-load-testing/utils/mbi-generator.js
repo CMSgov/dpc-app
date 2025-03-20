@@ -38,7 +38,7 @@ export default class MBIGenerator {
 
   iterate() {
     const mbi = generateMBI(this.counter);
-    counter++;
+    this.counter++;
     return mbi;
   }
 }

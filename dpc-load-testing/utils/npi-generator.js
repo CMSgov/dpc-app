@@ -38,7 +38,7 @@ export default class NPIGenerator {
 
   iterate() {
     const npi = generateNPI(this.counter);
-    counter++;
+    this.counter++;
     return npi;
   }
 }
