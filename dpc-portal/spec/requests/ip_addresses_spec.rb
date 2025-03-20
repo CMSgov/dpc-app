@@ -186,7 +186,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                        response: default_get_ip_addresses['entities'].first)
         post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
       end
-      it 'does not check for complete of complete = true' do
+      it 'does not check for complete if complete = true' do
         config_complete_checker = class_double('CheckConfigCompleteJob').as_stubbed_const
         expect(config_complete_checker).to_not receive(:perform_later).with(org.id)
         org.update_attribute(:config_complete, true)
