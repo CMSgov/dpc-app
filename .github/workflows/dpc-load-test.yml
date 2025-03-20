@@ -17,7 +17,7 @@ jobs:
         id: fetch-info
         run: |
           ADMIN_URL=$(aws elbv2 describe-load-balancers --names dpc-test-frontend-internal | jq -r '.LoadBalancers[0].DNSName')
-          echo "admin_url=http://$ADMIN_URL" >> "$GITHUB_OUTPUT"
+          echo "admin_url=http://$ADMIN_URL:9900" >> "$GITHUB_OUTPUT"
       - name: Checkout
         uses: actions/checkout@v4
         with:
