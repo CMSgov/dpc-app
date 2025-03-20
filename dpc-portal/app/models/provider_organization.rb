@@ -59,6 +59,12 @@ class ProviderOrganization < ApplicationRecord
     id
   end
 
+  def ao
+    user = User.joins(:ao_org_links).find_by(ao_org_links: {provider_organization: self, verification_status: true})
+    return "No verified AO" if user.nil?
+    "#{user.given_name} #{user.family_name}"
+  end
+
   private
 
   def disable_rejected

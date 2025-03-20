@@ -43,4 +43,10 @@ class User < ApplicationRecord
   def cd?(organization)
     CdOrgLink.where(user: self, provider_organization: organization, disabled_at: nil).exists?
   end
+
+  def role(organization)
+    return "Authorized Official" if ao?(organization)
+    return "Credential Delegate" if cd?(organization)
+    raise "Unknown user role"
+  end
 end

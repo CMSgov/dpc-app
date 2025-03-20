@@ -11,7 +11,7 @@ class OrganizationsController < ApplicationController
   before_action :tos_accepted, only: %i[show]
 
   def index
-    @links = current_user.provider_links
+    @links = current_user.provider_links if @links.nil?
     ao_or_cd = @links.any? { |link| link.is_a?(AoOrgLink) }
     render(Page::Organization::OrganizationListComponent.new(ao_or_cd:, links: @links))
   end
@@ -28,8 +28,19 @@ class OrganizationsController < ApplicationController
                                                          invited_by: current_user).select(&:expired?)
       @delegate_information[:active] = CdOrgLink.where(provider_organization: @organization, disabled_at: nil)
     end
-    render(Page::Organization::CompoundShowComponent.new(@organization, @delegate_information,
-                                                         params[:credential_start]))
+
+    @links = current_user.provider_links if @links.nil?
+    invitation_link = @links.find { |link| link.provider_organization_id == @organization.id }
+    @invitation = Invitation.find_by(id: invitation_link.invitation_id)
+
+    render(Page::Organization::CompoundShowComponent.new(@organization, 
+                                                         @delegate_information,
+                                                         params[:credential_start], 
+                                                         current_user.role(@organization),
+                                                         @invitation.status.capitalize
+                                                        )
+    )
+                                                        
   end
 
   def new
