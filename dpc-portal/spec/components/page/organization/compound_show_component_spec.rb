@@ -19,7 +19,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
     context 'cd tab' do
       let(:delegate_info) { { active: [], pending: [], expired: [] } }
       let(:role) { 'Authorized Official' }
-      let(:status) { 'Accepted' }
+      let(:status) { :accepted }
       context 'credential delegate start' do
         let(:credential_start) { false }
         it 'Should have org name' do
@@ -32,7 +32,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
           is_expected.to include("<span class=\"text-bold\">Role:</span> #{role}")
         end
         it 'Should have status' do
-          is_expected.to include("<span class=\"text-bold\">Status:</span> #{status}")
+          is_expected.to include("<span class=\"text-bold\">Status:</span> #{status.capitalize}")
         end
         it 'Should have AO' do
           allow(org).to receive(:ao).and_return('John Doe')
@@ -57,12 +57,15 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
           is_expected.to include('}make_current(0);')
           is_expected.to_not include('}make_current(1);')
         end
-      end
-      context 'credential start' do
-        let(:credential_start) { true }
-        it 'Should start on credential page' do
-          is_expected.to_not include('}make_current(0);')
-          is_expected.to include('}make_current(1);')
+        it 'Should not show warning icon' do
+          is_expected.not_to include('.svg#warning')
+        end
+
+        context 'status is not accepted' do
+          let(:status) { :expired }
+          it 'Should show warning icon' do
+            is_expected.to include('.svg#warning')
+          end
         end
       end
     end
@@ -71,7 +74,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       let(:delegate_info) { {} }
       let(:credential_start) { true }
       let(:role) { 'Credential Delegate' }
-      let(:status) { 'Configuration Required' }
+      let(:status) { :accepted }
       it 'Should have org name' do
         is_expected.to include("<h1>#{org.name}</h1>")
       end
@@ -82,7 +85,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
         is_expected.to include("<span class=\"text-bold\">Role:</span> #{role}")
       end
       it 'Should have status' do
-        is_expected.to include("<span class=\"text-bold\">Status:</span> #{status}")
+        is_expected.to include("<span class=\"text-bold\">Status:</span> #{status.capitalize}")
       end
       it 'Should have AO' do
         allow(org).to receive(:ao).and_return('John Doe')
@@ -102,6 +105,16 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       end
       it 'Should have credentials' do
         is_expected.to include('<div id="credentials">')
+      end
+      it 'Should not show warning icon' do
+        is_expected.not_to include('.svg#warning')
+      end
+
+      context 'status is not accepted' do
+        let(:status) { :expired }
+        it 'Should show warning icon' do
+          is_expected.to include('.svg#warning')
+        end
       end
     end
   end

@@ -37,7 +37,7 @@ class OrganizationsController < ApplicationController
                                                          @delegate_information,
                                                          params[:credential_start], 
                                                          current_user.role(@organization),
-                                                         @invitation.status.capitalize
+                                                         @invitation.status
                                                         )
     )
                                                         
