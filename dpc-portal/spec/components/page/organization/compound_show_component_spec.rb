@@ -10,7 +10,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       normalize_space(rendered_content)
     end
     let(:org) { build(:provider_organization, name: 'Health Hut', npi: '11111111', id: 2) }
-    let(:component) { described_class.new(org, delegate_info, credential_start) }
+    let(:component) { described_class.new(org, delegate_info, credential_start, role, status) }
 
     before do
       render_inline(component)
@@ -18,16 +18,28 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
 
     context 'cd tab' do
       let(:delegate_info) { { active: [], pending: [], expired: [] } }
+      let(:role) { 'Authorized Official' }
+      let(:status) { 'Accepted' }
       context 'credential delegate start' do
         let(:credential_start) { false }
         it 'Should have org name' do
           is_expected.to include("<h1>#{org.name}</h1>")
         end
         it 'Should have npi' do
-          is_expected.to include("NPI: #{org.npi}")
+          is_expected.to include("<span class=\"text-bold\">NPI-2:</span> #{org.npi}")
+        end
+        it 'Should have role' do
+          is_expected.to include("<span class=\"text-bold\">Role:</span> #{role}")
+        end
+        it 'Should have status' do
+          is_expected.to include("<span class=\"text-bold\">Status:</span> #{status}")
+        end
+        it 'Should have AO' do
+          allow(org).to receive(:ao).and_return('John Doe')
+          is_expected.to include("<span class=\"text-bold\">Authorized Official:</span> John Doe")
         end
         it 'Should have org id' do
-          is_expected.to include("Organization ID: #{org.dpc_api_organization_id}")
+          is_expected.to include("<span class=\"text-bold\">Organization ID:</span> #{org.dpc_api_organization_id}")
         end
         it 'Should have script tag' do
           is_expected.to include('<script')
@@ -58,14 +70,26 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
     context 'credentials tab' do
       let(:delegate_info) { {} }
       let(:credential_start) { true }
+      let(:role) { 'Credential Delegate' }
+      let(:status) { 'Configuration Required' }
       it 'Should have org name' do
         is_expected.to include("<h1>#{org.name}</h1>")
       end
       it 'Should have npi' do
-        is_expected.to include("NPI: #{org.npi}")
+        is_expected.to include("<span class=\"text-bold\">NPI-2:</span> #{org.npi}")
+      end
+      it 'Should have role' do
+        is_expected.to include("<span class=\"text-bold\">Role:</span> #{role}")
+      end
+      it 'Should have status' do
+        is_expected.to include("<span class=\"text-bold\">Status:</span> #{status}")
+      end
+      it 'Should have AO' do
+        allow(org).to receive(:ao).and_return('John Doe')
+        is_expected.to include("<span class=\"text-bold\">Authorized Official:</span> John Doe")
       end
       it 'Should have org id' do
-        is_expected.to include("Organization ID: #{org.dpc_api_organization_id}")
+        is_expected.to include("<span class=\"text-bold\">Organization ID:</span> #{org.dpc_api_organization_id}")
       end
       it 'Should not have script tag' do
         is_expected.to_not include('<script')
