@@ -19,4 +19,5 @@ jobs:
         with:
           node-version: 22
       - name: Run unit tests for dpc-load-testing utilities
-        run: yarn test
+      - run: yarn
+      - run: yarn test
