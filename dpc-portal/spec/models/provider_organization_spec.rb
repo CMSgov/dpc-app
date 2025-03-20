@@ -166,4 +166,22 @@ RSpec.describe ProviderOrganization, type: :model do
       expect(org.audits.count).to eq 1
     end
   end
+
+  describe :ao do
+    let(:org) { create(:provider_organization) }
+    let(:noAoOrg) { create(:provider_organization) }
+    let(:user) { create(:user, given_name: 'John', family_name: 'Doe') }
+    let(:ao_org_link) { create(:ao_org_link, user:, provider_organization: org, verification_status: true) }
+    
+    it 'should return name if AO exists' do
+      org.save
+      user.save
+      ao_org_link.save
+      expect(org.ao).to eq('John Doe')
+    end
+
+    it 'should return "No verified AO" if AO does not exist' do
+      expect(noAoOrg.ao).to eq('No verified AO')
+    end
+  end
 end
