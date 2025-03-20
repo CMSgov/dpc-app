@@ -8,13 +8,6 @@ jobs:
     name: "Run DPC API Load Test"
     runs-on: self-hosted
     steps:
-      - name: Set env vars from AWS params
-        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
-        env:
-          AWS_REGION: ${{ vars.AWS_REGION }}
-        with:
-          params: |
-            GOLDEN_MACAROON=/dpc/test/web/golden_macaroon
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -35,6 +28,14 @@ jobs:
         run: |
           docker run --rm -i -u "$(id -u):$(id -g)" -v "${PWD}:/xk6" grafana/xk6 build \
             --with github.com/LeonAdato/xk6-output-statsd
+
+      - name: Set env vars from AWS params
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            GOLDEN_MACAROON=/dpc/test/web/golden_macaroon
 
       - name: Run K6 with StatsD output
         run: |
