@@ -48,14 +48,14 @@ export class Macaroon {
       const packet = new Uint8Array(buf, index + PACKET_PREFIX_LENGTH, len - (PACKET_PREFIX_LENGTH + 1));
       const keyValue = arrayBuffer2String(packet).split(" ");
       if (keyValue[0] == 'location') {
-	this.location = keyValue[1];
+        this.location = keyValue[1];
       } else if ( keyValue[0] == 'identifier' ) {
-	this.identifier = keyValue[1];
+        this.identifier = keyValue[1];
       } else if (keyValue[0] == 'signature') {
-	const offset = index + PACKET_PREFIX_LENGTH + 'signature '.length;
-	this.signature = new Uint8Array(buf, offset, len - (PACKET_PREFIX_LENGTH + 'signature '.length + 1)) ;
+        const offset = index + PACKET_PREFIX_LENGTH + 'signature '.length;
+        this.signature = new Uint8Array(buf, offset, len - (PACKET_PREFIX_LENGTH + 'signature '.length + 1));
       } else if (keyValue[0] == 'cid') {
-	this.caveats.push(keyValue.slice(1).join(' '));
+        this.caveats.push(keyValue.slice(1).join(' '));
       }
       index = index + len;
     }
