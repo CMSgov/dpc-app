@@ -99,6 +99,28 @@ class DataServiceTest {
         assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString())));
     }
 
+    @Test
+    void whenQueueIsEmpty() {
+        Mockito.when(queue.getJobBatches(Mockito.any(UUID.class))).thenReturn(List.of());
+
+        DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
+        assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
+    }
+
+    @Test
+    void whenJobIsIncomplete() {
+        Mockito.doAnswer(mock -> {
+            Optional<JobQueueBatch> workBatch = queue.claimBatch(aggregatorID);
+            while (workBatch.flatMap(batch -> batch.fetchNextPatient(aggregatorID)).isPresent()) {
+                queue.completePartialBatch(workBatch.get(), aggregatorID);
+            }
+            return List.of(workBatch.get());
+        }).when(queue).getJobBatches(Mockito.any());
+
+        DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
+        assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
+    }
+
     @ParameterizedTest
     @EnumSource(value = DPCResourceType.class, names = {"Coverage", "ExplanationOfBenefit", "Patient"})
     void whenPassingInValidResourceTypes(DPCResourceType type) {
