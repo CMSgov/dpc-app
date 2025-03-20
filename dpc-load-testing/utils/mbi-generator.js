@@ -30,3 +30,15 @@ export function generateMBI(counter) {
 
   return output;
 }
+
+export default class MBIGenerator {
+  constructor() {
+    this.counter = 0;
+  }
+
+  iterate() {
+    const mbi = generateMBI(this.counter);
+    counter++;
+    return mbi;
+  }
+}

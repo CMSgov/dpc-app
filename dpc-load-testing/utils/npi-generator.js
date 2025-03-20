@@ -30,3 +30,15 @@ export function generateNPI(counter) {
   const paddedNumber = counter.toString().padStart(9, '0');
   return paddedNumber + generateLuhnCheckDigit(paddedNumber);
 }
+
+export default class NPIGenerator {
+  constructor() {
+    this.counter = 1;
+  }
+
+  iterate() {
+    const npi = generateNPI(this.counter);
+    counter++;
+    return npi;
+  }
+}
