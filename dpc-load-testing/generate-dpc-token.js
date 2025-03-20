@@ -7,6 +7,9 @@ const adminUrl = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:990
 const fetchGoldenMacaroonURL = `${adminUrl}/tasks/generate-token`
 
 export function fetchGoldenMacaroon() {
+  if (__ENV.GOLDEN_MACAROON) {
+    return __ENV.GOLDEN_MACAROON;
+  }
   const headers = {
     'Accept': 'application/json',
     'Content-Type': 'application/x-www-form-urlencoded'

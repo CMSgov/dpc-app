@@ -8,16 +8,13 @@ jobs:
     name: "Run DPC API Load Test"
     runs-on: self-hosted
     steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Set env vars from AWS params
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
         with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
-      - name: "Fetch Admin URL from AWS"
-        id: fetch-info
-        run: |
-          ADMIN_URL=$(aws elbv2 describe-load-balancers --names dpc-test-frontend-internal | jq -r '.LoadBalancers[0].DNSName')
-          echo "admin_url=http://$ADMIN_URL:9900" >> "$GITHUB_OUTPUT"
+          params: |
+            GOLDEN_MACAROON=/dpc/test/web/golden_macaroon
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -40,8 +37,6 @@ jobs:
             --with github.com/LeonAdato/xk6-output-statsd
 
       - name: Run K6 with StatsD output
-        env:
-          API_ADMIN_URL: ${{ steps.fetch-info.outputs.admin_url }}
         run: |
           ./k6 run \
             --out output-statsd=addr=localhost:8125,enableTags=true \
