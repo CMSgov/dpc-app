@@ -1,15 +1,17 @@
 import { check, fail, group } from 'k6';
 import exec from 'k6/execution'
-import { 
-    createGroup, 
-    createOrganization, 
-    createPatient, 
-    createProvider, 
-    deleteOrganization, 
-    exportGroup, 
-    getGroup, 
-    getOrganization, 
-    updateGroup
+import { Macaroon, fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
+import {
+  createGroup,
+  createOrganization,
+  createPatient,
+  createProvider,
+  deleteOrganization,
+  exportGroup,
+  findByNpi,
+  getGroup,
+  getOrganization,
+  updateGroup
 } from './dpc-api-client.js';
 
 // See https://grafana.com/docs/k6/latest/using-k6/k6-options/reference for
@@ -31,25 +33,30 @@ export const options = {
   }
 };
 
-let goldenMacaroon;
-
 // Sets up two test organizations
 export function setup() {
+  const goldenMacaroon = fetchGoldenMacaroon();
   // Fake NPIs generated online: https://jsfiddle.net/alexdresko/cLNB6
-  const org1 = createOrganization('2782823019', 'Test Org 1');
-  const org2 = createOrganization('8197402604', 'Test Org 2');
+  const existingOrgs = findByNpi('2782823019', '8197402604', goldenMacaroon).json();
+  if ( existingOrgs.total ) {
+    for ( const entry of existingOrgs.entry ) {
+      deleteOrganization(entry.resource.id, goldenMacaroon);
+    }
+  }
+  const org1 = createOrganization('2782823019', 'Test Org 1', goldenMacaroon);
+  const org2 = createOrganization('8197402604', 'Test Org 2', goldenMacaroon);
 
   const checkOutput1 = check(
     org1,
-    { 
+    {
       'response code was 200': res => res.status === 200,
       'response has id field': res => res.json().hasOwnProperty('id'),
-      'id field is not null or undefined': res => res.json().id != null && res.json().id != undefined 
+      'id field is not null or undefined': res => res.json().id != null && res.json().id != undefined
     }
   );
   const checkOutput2 = check(
     org2,
-    { 
+    {
       'response code was 200': res => res.status === 200,
       'response has id field': res => res.json().hasOwnProperty('id'),
       'id field is not null or undefined': res => res.json().id != null && res.json().id != undefined
@@ -65,14 +72,15 @@ export function setup() {
   orgIds[1] = org1.json().id;
   orgIds[2] = org2.json().id;
 
-  return orgIds;
+  return { orgIds: orgIds, goldenMacaroon: goldenMacaroon };
 }
 
 export function workflowA(data) {
-  const orgId = data[exec.vu.idInInstance];
-  
+  const orgId = data.orgIds[exec.vu.idInInstance];
+  const token = generateDPCToken(orgId, data.goldenMacaroon);
+
   // POST practitioner
-  const practitionerResponse = createProvider("1232131239", orgId);
+  const practitionerResponse = createProvider(token, "1232131239");
   if (practitionerResponse.status != 201) {
     fail('failed to create practitioner for workflow A');
   }
@@ -81,21 +89,21 @@ export function workflowA(data) {
   const practitionerId = practitionerResponse.json().id;
 
   // POST patient
-  const patientResponse = createPatient("1S00EU8FE91", orgId);
+  const patientResponse = createPatient(token, "1S00EU8FE91");
   if (patientResponse.status != 201) {
     fail('failed to create patient for workflow A');
   }
   const patientId = patientResponse.json().id;
- 
+
   // POST group
-  const createGroupResponse = createGroup(orgId, practitionerId, practitionerNpi);
+  const createGroupResponse = createGroup(token, orgId, practitionerId, practitionerNpi);
   if (createGroupResponse.status != 201) {
     fail('failed to create group for workflow A');
   }
   const groupId = createGroupResponse.json().id;
 
   // GET all groups
-  const getGroupsResponse = getGroup(orgId);
+  const getGroupsResponse = getGroup(token);
   if (getGroupsResponse.status != 200) {
     fail('failed to get groups for workflow A');
   }
@@ -106,13 +114,13 @@ export function workflowA(data) {
   }
 
   // PUT patient in group
-  const updateGroupResponse = updateGroup(orgId, groupId, patientId, practitionerId, practitionerNpi);
+  const updateGroupResponse = updateGroup(token, orgId, groupId, patientId, practitionerId, practitionerNpi);
   if (updateGroupResponse.status != 200) {
     fail('failed to update group for workflow A');
   }
 
   // GET specific group
-  const getGroupResponse = getGroup(orgId, groupId);
+  const getGroupResponse = getGroup(token, groupId);
   if (getGroupResponse.status != 200) {
     fail('failed to read group for workflow A');
   }
@@ -123,18 +131,18 @@ export function workflowA(data) {
   }
 
   // GET group export
-  const getGroupExportResponse = exportGroup(orgId, groupId);
+  const getGroupExportResponse = exportGroup(token, groupId);
   if (getGroupExportResponse.status != 202) {
     fail('failed to export group for workflow A');
   }
 }
 
 export function workflowB(data) {
-  const orgId = data[exec.vu.idInInstance];
-
-  const orgResponse = getOrganization(orgId);
+  const orgId = data.orgIds[exec.vu.idInInstance];
+  const token = generateDPCToken(orgId, data.goldenMacaroon);
+  const orgResponse = getOrganization(token);
   const checkOutput = check(
-    orgResponse, 
+    orgResponse,
     { 'response code was 200': res => res.status === 200 }
   )
 
@@ -144,9 +152,9 @@ export function workflowB(data) {
 }
 
 export function teardown(data) {
-  for (const orgId of data) {
+  for (const orgId of data.orgIds) {
     if (orgId) {
-      deleteOrganization(orgId);
+      deleteOrganization(orgId, data.goldenMacaroon);
     }
   }
 }
