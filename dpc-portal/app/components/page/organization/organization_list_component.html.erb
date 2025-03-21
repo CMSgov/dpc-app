@@ -11,18 +11,38 @@
 <% end %>
 
 <table class="usa-table usa-table--borderless usa-table--sticky-header">
+  <caption>
+    Borderless table: A borderless table can be useful when you want the
+    information to feel more a part of the text it accompanies and extends.
+  </caption>
   <thead>
     <tr>
-      <th scope="col" style="width: 50%;">Organization Name</th> <!-- 6/12 -->
-      <th scope="col" style="width: 16.67%;">NPI-2</th> <!-- 2/12 -->
-      <th scope="col" style="width: 8.33%;">Role</th> <!-- 1/12 -->
-      <th scope="col" style="width: 25%;">Status</th> <!-- 3/12 -->
+      <th scope="col">Organization Name</th>
+      <th scope="col">NPI-2</th>
+      <th scope="col">Role</th>
+      <th scope="col">Status</th>
     </tr>
   </thead>
   <tbody>
-    <%= render Core::Card::OrganizationCardComponent.with_collection(@links)%>
+    <% @links.each do |link| %>
+      <tr>
+        <th scope="row"> <%= link.provider_organization.name %> </th>
+        <td> <%= link.provider_organization.npi %> </td>
+        <td>
+          <% if link.is_ao? %>
+            AO
+          <% else %>
+            CD
+          <% end %>
+        </td>
+        <td>put status here</td>
+      </tr>
+    <% end %>
   </tbody>
 </table>
 
+<ul class="usa-card-group">
+   <%= render Core::Card::OrganizationCardComponent.with_collection(@links)%>
+</ul>
 <%=raw "<p>You don't have any organizations to show.</p>" if @links.blank? %>
 </div>
