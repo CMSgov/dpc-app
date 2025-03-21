@@ -30,7 +30,7 @@ jobs:
       - name: Make test results directory
         run: |
           mkdir test-results
-          sudo chmod +w test-results
+          sudo chmod 777 test-results
       - name: Test Macaroons
         run: |
           docker run --rm -v ./test-results/:/test-results -v ./dpc-load-testing:/src grafana/k6 run /src/macaroonTests.js
