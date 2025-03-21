@@ -27,6 +27,8 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+      - name: Assert Ownership
+        run: sudo chmod -R 777 .
       - name: Test Macaroons
         run: |
           docker run --rm -v ./test-results/:/test-results -v ./dpc-load-testing:/src -i grafana/k6 run /src/macaroonTests.js
