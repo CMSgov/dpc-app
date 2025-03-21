@@ -114,13 +114,13 @@ public class JobQueueBatch implements Serializable {
     /**
      * The since parameter from the export request
      */
-    @Column(name = "since", nullable = true)
+    @Column(name = "since")
     private OffsetDateTime since;
 
     /**
      * The transaction time parameter from the job creation
      */
-    @Column(name = "transaction_time", nullable = true)
+    @Column(name = "transaction_time")
     private OffsetDateTime transactionTime;
 
     /**
@@ -132,31 +132,31 @@ public class JobQueueBatch implements Serializable {
     /**
      * The time the job was last processed
      */
-    @Column(name = "update_time", nullable = true)
+    @Column(name = "update_time")
     protected OffsetDateTime updateTime;
 
     /**
      * The time the job was submitted
      */
-    @Column(name = "submit_time", nullable = true)
+    @Column(name = "submit_time")
     protected OffsetDateTime submitTime;
 
     /**
      * The time the job started to work
      */
-    @Column(name = "start_time", nullable = true)
+    @Column(name = "start_time")
     protected OffsetDateTime startTime;
 
     /**
      * The time the job was completed
      */
-    @Column(name = "complete_time", nullable = true)
+    @Column(name = "complete_time")
     protected OffsetDateTime completeTime;
 
     /**
      * The url used when the job was started
      */
-    @Column(name = "request_url", nullable = true)
+    @Column(name = "request_url")
     protected String requestUrl;
 
     /**
@@ -215,17 +215,12 @@ public class JobQueueBatch implements Serializable {
      * @return True if the fields are consistent with each other
      */
     public Boolean isValid() {
-        switch (status) {
-            case QUEUED:
-                return submitTime != null && aggregatorID == null;
-            case RUNNING:
-                return submitTime != null && startTime != null && updateTime != null && aggregatorID != null;
-            case COMPLETED:
-            case FAILED:
-                return submitTime != null && startTime != null && updateTime != null && completeTime != null && aggregatorID == null;
-            default:
-                return false;
-        }
+        return switch (status) {
+            case QUEUED -> submitTime != null && aggregatorID == null;
+            case RUNNING -> submitTime != null && startTime != null && updateTime != null && aggregatorID != null;
+            case COMPLETED, FAILED ->
+                    submitTime != null && startTime != null && updateTime != null && completeTime != null && aggregatorID == null;
+        };
     }
 
 
@@ -509,9 +504,7 @@ public class JobQueueBatch implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
 
-        if (!(o instanceof JobQueueBatch)) return false;
-
-        JobQueueBatch that = (JobQueueBatch) o;
+        if (!(o instanceof JobQueueBatch that)) return false;
 
         return new EqualsBuilder()
                 .append(batchID, that.batchID)

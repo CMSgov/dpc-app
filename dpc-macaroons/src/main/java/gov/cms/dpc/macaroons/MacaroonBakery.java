@@ -51,7 +51,7 @@ public class MacaroonBakery {
         this.defaultVerifiers = defaultVerifiers
                 .stream()
                 .map(CaveatWrapper::new)
-                .collect(Collectors.toList());
+                .toList();
         this.defaultSuppliers = defaultSuppliers;
         this.thirdPartyKeyStore = thirdPartyKeyStore;
         this.keyPair = keyPair;
@@ -159,27 +159,13 @@ public class MacaroonBakery {
     public void verifyMacaroon(List<Macaroon> macaroons, String... exactVerifiers) {
         // Convert the String checks into a caveat wrapper by generating a lambda which handles teh actual checking
         final List<CaveatWrapper> verifiers = Arrays.stream(exactVerifiers)
-                .map(ev -> new CaveatWrapper((caveat) -> {
+                .map(ev -> new CaveatWrapper(caveat -> {
                     if (caveat.toString().equals(ev)) {
                         return Optional.empty();
                     }
                     return Optional.of("Caveat is not satisfied");
-                }))
-                .collect(Collectors.toList());
+                })).toList();
 
-        verifyMacaroonImpl(macaroons, verifiers);
-    }
-
-    /**
-     * Verify the {@link Macaroon} using both the default verifiers, as well as the ones provided in this method.
-     *
-     * @param macaroons       - {@link List} of {@link Macaroon} to verify, along with any discharges
-     * @param caveatVerifiers - {@link CaveatVerifier} which will be executed against the {@link MacaroonCaveat}
-     */
-    public void verifyMacaroon(List<Macaroon> macaroons, CaveatVerifier... caveatVerifiers) {
-        final List<CaveatWrapper> verifiers = Arrays.stream(caveatVerifiers)
-                .map(CaveatWrapper::new)
-                .collect(Collectors.toList());
         verifyMacaroonImpl(macaroons, verifiers);
     }
 
@@ -306,7 +292,7 @@ public class MacaroonBakery {
 
         // addCaveats adds any required third party caveats to the need slice
         // that aren't already present .
-        Consumer<Macaroon> addCaveats = (macaroon) -> MacaroonBakery.getCaveats(macaroon)
+        Consumer<Macaroon> addCaveats = macaroon -> MacaroonBakery.getCaveats(macaroon)
                 .stream()
                 .filter(cav -> cav.getVerificationID().length > 1 && !haveCaveat.containsKey(cav.toString()))
                 .forEach(needCaveat::add);
