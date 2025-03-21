@@ -79,14 +79,14 @@ export class Macaroon {
   }
 };
 
-const packetize = function(key, data) {
+export const packetize = function(key, data) {
   const packetSize = PACKET_PREFIX_LENGTH + 2 + key.length + data.length;
   const packetSizeHex = packetSize.toString(16).padStart(PACKET_PREFIX_LENGTH, '0');
   const packet = `${packetSizeHex}${key} ${data}\n`
   return string2Uint8Array(packet);
 }
 
-const packetizeSignature = function(data) {
+export const packetizeSignature = function(data) {
   const key = 'signature';
   const packetSize = PACKET_PREFIX_LENGTH + 2 + key.length + data.length;
   const packetSizeHex = packetSize.toString(16).padStart(PACKET_PREFIX_LENGTH, '0');

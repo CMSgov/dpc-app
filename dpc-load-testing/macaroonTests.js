@@ -1,28 +1,14 @@
 import { check, fail } from 'k6';
 import encoding from 'k6/encoding';
-import { Macaroon, arrayBuffer2String } from './generate-dpc-token.js';
+import { Macaroon, packetize, packetizeSignature, arrayBuffer2String } from './generate-dpc-token.js';
 
 
 export const options = {
   scenarios: {
-    test_1: {
-      executor: 'per-vu-iterations',
-      vus: 1,
-      iterations: 1,
-      exec: "testSerialization"
-    },
-    test_2: {
-      executor: 'per-vu-iterations',
-      vus: 1,
-      iterations: 1,
-      exec: "testDeserialization"
-    },
-    test_3: {
-      executor: 'per-vu-iterations',
-      vus: 1,
-      iterations: 1,
-      exec: "testAddFirstPartyCaveat"
-    },
+    testSerialization: { executor: 'per-vu-iterations', vus: 1, iterations: 1, exec: "testSerialization" },
+    testDeserialization: { executor: 'per-vu-iterations', vus: 1, iterations: 1, exec: "testDeserialization" },
+    testAddCaveat: { executor: 'per-vu-iterations', vus: 1, iterations: 1, exec: "testAddFirstPartyCaveat" },
+    testPacketizers: { executor: 'per-vu-iterations', vus: 1, iterations: 1, exec: "testPacketizers" },
   }
 };
 
@@ -50,9 +36,8 @@ export function testSerialization(data) {
     console.log('Macaroon with caveat did not produce correct macaroon');
     return;
   }
-  
-  
-}
+};
+ 
 export function testDeserialization() {
   const macaroon = builtMacaroon();
   const checkLocation = check(
@@ -80,6 +65,7 @@ export function testDeserialization() {
 
 export function testAddFirstPartyCaveat() {
   const macaroon = builtMacaroon();
+  const macaroonSignature = macaroon.signature;
   macaroon.addFirstPartyCaveat('d = e');
   
   const checkCaveatLength = check(
@@ -99,12 +85,46 @@ export function testAddFirstPartyCaveat() {
     console.log('Macaroon caveat value should be d = e, was', macaroon.caveats[0]);
     return
   }
+
+  const checkSignatureChange = check(
+    macaroon,
+    { 'new signature does not match old': macaroon => macaroon.signature !== macaroonSignature }
+  )
+  if (!checkSignatureChange) {
+    console.log('Signature after adding caveat should change, but did not');
+  }
 }
+
+export function testPacketizers() {
+  const expectedPacket = "000ekey value\n"
+  const packet = packetize('key', 'value');
+  const checkPacket = check(
+    packet,
+    { 'matches expected packet': packet => arrayBuffer2String(packet) === expectedPacket }
+  );
+  if (!checkPacket) {
+    console.log(`expected ${arrayBuffer2String(packet)} to equal ${expectedPacket}`);
+  }
+
+  const expectedSigPacket = "0014signature \x00\x00\x00\x00\x00\n"
+  const sigPacket = packetizeSignature('value');
+  const checkSigPacket = check(
+    sigPacket,
+    { 'matches expected packet': packet => arrayBuffer2String(packet) === expectedSigPacket }
+  );
+  if (!checkSigPacket) {
+    console.log(`expected ${arrayBuffer2String(sigPacket)} to equal ${expectedSigPacket}`);
+  }
+};
 
 export function handleSummary(data) {
   const fails = data.root_group.checks.map(x => x.fails).reduce((mem, x) => { return mem + x }, 0);
   console.log('Fails:', fails);
-  return { '/output/fail-count.txt': fails.toString() };
+  if (__ENV.ENVIRONMENT == 'local') {
+    return { stdout: `Number of failed tests: ${fails.toString()}` };
+  } else {
+    return { '/test-results/macaroons-fail-count.txt': fails.toString() };
+  }
 }
 
 function builtMacaroon() {
@@ -113,6 +133,7 @@ function builtMacaroon() {
   macaroon.deserialize(macaroonData);
   return macaroon;
 }
+
 function serialzedB64Macaroon(macaroon) {
   const serialized = macaroon.serialize();
   return encoding.b64encode(serialized, 'rawurl');

@@ -107,6 +107,10 @@ start-load-tests: ## Run DPC performance tests locally in a Docker image provide
 start-load-tests: secure-envs
 	@docker run --rm -v $(shell pwd)/dpc-load-testing:/src --env-file $(shell pwd)/ops/config/decrypted/local.env -e ENVIRONMENT=local -i grafana/k6 run /src/script.js
 
+start-macaroon-tests: ## Test load-test macaroons
+start-macaroon-tests:
+	@docker run --rm -v $(shell pwd)/dpc-load-testing:/src -e ENVIRONMENT=local -i grafana/k6 run /src/macaroonTests.js
+
 
 # Debug commands
 # ==============
