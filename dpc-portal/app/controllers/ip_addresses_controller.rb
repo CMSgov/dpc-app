@@ -17,6 +17,7 @@ class IpAddressesController < ApplicationController
     manager = IpAddressManager.new(@organization.dpc_api_organization_id)
     new_ip_address = manager.create_ip_address(ip_address: params[:ip_address], label: params[:label])
     if new_ip_address[:response]
+      CheckConfigCompleteJob.perform_later(@organization.id) unless @organization.config_complete
       log_credential_action(:ip_address, new_ip_address.dig(:message, 'id'), :add)
       flash[:notice] = 'IP address successfully created.'
       redirect_to organization_path(@organization, credential_start: true)

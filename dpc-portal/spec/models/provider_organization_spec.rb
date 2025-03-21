@@ -4,11 +4,6 @@ require 'rails_helper'
 
 RSpec.describe ProviderOrganization, type: :model do
   include ActiveJob::TestHelper
-  let(:mock_ctm) { instance_double(ClientTokenManager) }
-
-  before do
-    allow(ClientTokenManager).to receive(:new).and_return(mock_ctm)
-  end
 
   describe :validations do
     let(:provider_organization) { create(:provider_organization) }
@@ -90,6 +85,12 @@ RSpec.describe ProviderOrganization, type: :model do
   end
 
   describe 'disable_rejected' do
+    let(:mock_ctm) { instance_double(ClientTokenManager) }
+
+    before do
+      allow(ClientTokenManager).to receive(:new).and_return(mock_ctm)
+    end
+
     let(:org) do
       create(:provider_organization, dpc_api_organization_id: SecureRandom.uuid, verification_status: :approved)
     end
@@ -166,4 +167,61 @@ RSpec.describe ProviderOrganization, type: :model do
       expect(org.audits.count).to eq 1
     end
   end
+
+  describe :check_config_complete do
+    let(:org) { create(:provider_organization, dpc_api_organization_id: 'some-guid') }
+    it 'should mark org complete if has all credentials' do
+      expect(org.config_complete).to be false
+      set_credentials :client_token, :public_key, :ip_address
+      org.check_config_complete
+      expect(org.config_complete).to be true
+    end
+    it 'should not mark org complete if no ip addresses' do
+      expect(org.config_complete).to be false
+      set_credentials :client_token, :public_key
+      org.check_config_complete
+      expect(org.config_complete).to be false
+    end
+    it 'should not mark org complete if no public keys' do
+      expect(org.config_complete).to be false
+      set_credentials :client_token, :ip_address
+      org.check_config_complete
+      expect(org.config_complete).to be false
+    end
+    it 'should not mark org complete if no client tokens' do
+      expect(org.config_complete).to be false
+      set_credentials :public_key, :ip_address
+      org.check_config_complete
+      expect(org.config_complete).to be false
+    end
+    it 'should update if no longer complete' do
+      org.update(config_complete: true)
+      expect(org.config_complete).to be true
+      set_credentials :public_key, :ip_address
+      org.check_config_complete
+      expect(org.config_complete).to be false
+    end
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  def set_credentials(*args)
+    tokens = []
+    tokens << { 'token' => 'exampleToken' } if args.include?(:client_token)
+    mock_ctm = instance_double(ClientTokenManager)
+    allow(ClientTokenManager).to receive(:new).and_return(mock_ctm)
+    allow(mock_ctm).to receive(:client_tokens).and_return(tokens)
+
+    keys = []
+    keys << { 'id' => 'key-guid' } if args.include?(:public_key)
+    mock_pkm = instance_double(PublicKeyManager)
+    allow(PublicKeyManager).to receive(:new).and_return(mock_pkm)
+    allow(mock_pkm).to receive(:public_keys).and_return(keys)
+
+    addresses = []
+    addresses << { 'id' => 'address-guid' } if args.include?(:ip_address)
+    mock_ipm = instance_double(IpAddressManager)
+    allow(IpAddressManager).to receive(:new).and_return(mock_ipm)
+    allow(mock_ipm).to receive(:ip_addresses).and_return(addresses)
+  end
+  # rubocop:enable Metrics/AbcSize
 end
