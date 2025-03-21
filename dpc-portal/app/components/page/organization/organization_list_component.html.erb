@@ -1,20 +1,16 @@
 <div>
 <% if ao? %>
   <h1>Welcome to the DPC Portal</h1>
-  <p>As an Authorized Official (AO), use this portal to manage access to Medicare claims data through the Data at the Point of Care (DPC) application programming interface (API)</p>
+  <p>Use this portal to manage your organization's access to Data at the Point of Care (DPC). Depending on your role, you can register your organization, sign terms of service, and complete API configuration.</p>
   <div class="display-flex flex-row flex-justify">
     <div class="flex-align-self-center">
       <h2 class="margin-bottom-0">My organizations</h2>
     </div>
   </div>
-  <p>These are organizations for which you serve as an AO. Organizations cannot access Medicare claims data without an AO agreement to follow terms of service.</p>
+  <p>You’re designated as an Authorized Official (AO) and/or Credential Delegate (CD) of the following organizations. An AO is accountable for organization-level access to the API. The AO can can assign a CD to complete configuration steps on their behalf.</p>
 <% end %>
 
 <table class="usa-table usa-table--borderless usa-table--sticky-header">
-  <caption>
-    Borderless table: A borderless table can be useful when you want the
-    information to feel more a part of the text it accompanies and extends.
-  </caption>
   <thead>
     <tr>
       <th scope="col">Organization Name</th>
