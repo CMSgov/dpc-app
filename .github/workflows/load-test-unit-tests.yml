@@ -27,10 +27,10 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-      - name: Assert Ownership
+      - name: Make test results directory
         run: |
           mkdir test-results
-          sudo chmod -R 777 .
+          sudo chmod 777 test-results
       - name: Test Macaroons
         run: |
           docker run --rm -v ./test-results/:/test-results -v ./dpc-load-testing:/src -i grafana/k6 run /src/macaroonTests.js
