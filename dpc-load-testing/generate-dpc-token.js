@@ -6,6 +6,7 @@ const adminUrl = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:990
 
 const fetchGoldenMacaroonURL = `${adminUrl}/tasks/generate-token`
 
+const TOKEN_EXPIRATION_MINUTES = 5;
 export function fetchGoldenMacaroon() {
   if (__ENV.GOLDEN_MACAROON) {
     return __ENV.GOLDEN_MACAROON;
@@ -24,7 +25,7 @@ export function generateDPCToken(orgId, goldenMacaroon) {
   macaroon.deserialize(rawGoldenMacaroon);
   macaroon.addFirstPartyCaveat('dpc_macaroon_version = 1');
   macaroon.addFirstPartyCaveat(`organization_id = ${orgId}`);
-  macaroon.addFirstPartyCaveat(`expires = ${new Date(new Date().getTime() + 5*60000).toISOString()}`);
+  macaroon.addFirstPartyCaveat(`expires = ${new Date(new Date().getTime() + TOKEN_EXPIRATION_MINUTES*60000).toISOString()}`);
   const rawToken = macaroon.serialize();
   return encoding.b64encode(rawToken, 'rawurl');
 }
