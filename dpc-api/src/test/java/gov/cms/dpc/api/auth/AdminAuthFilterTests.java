@@ -63,7 +63,7 @@ class AdminAuthFilterTests {
     }
 
     @Test
-    void ensureEmptyStringRejected() {
+    void ensureInvalidMacaroonRejected() {
         ContainerRequestContext request = mock(ContainerRequestContext.class);
         MultivaluedMap<String, String> headers = mock(MultivaluedMap.class);
         Mockito.when(request.getHeaders()).thenReturn(headers);

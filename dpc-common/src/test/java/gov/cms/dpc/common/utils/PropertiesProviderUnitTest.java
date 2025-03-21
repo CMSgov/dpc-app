@@ -53,5 +53,4 @@ class PropertiesProviderUnitTest {
         String expectedBuildVersion = String.format("%s.%s", properties.getProperty("git.commit.id.abbrev"), expectedTimestamp);
         assertEquals(expectedBuildVersion, provider.getBuildVersion());
     }
-
 }

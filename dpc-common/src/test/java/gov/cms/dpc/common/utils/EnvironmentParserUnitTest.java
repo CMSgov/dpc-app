@@ -47,7 +47,7 @@ class EnvironmentParserUnitTest {
     }
 
     @Test
-    void getEnvironment() {
+    void testGetEnvironment() {
         assertEquals(currEnv, EnvironmentParser.getEnvironment("DPC"));
         assertAll(
                 () -> assertEquals(1, listAppender.list.size()),
@@ -57,13 +57,13 @@ class EnvironmentParserUnitTest {
     }
 
     @Test
-    void getEnvironment_skipLog() {
+    void testGetEnvironment_skipLog() {
         assertEquals(currEnv, EnvironmentParser.getEnvironment("DPC", false));
         assertEquals(0, listAppender.list.size());
     }
 
     @Test
-    void getEnvironment_withValues() {
+    void testGetEnvironment_withValues() {
         envVars.set("ENV", "dev");
 
         assertEquals("dev", EnvironmentParser.getEnvironment("DPC"));

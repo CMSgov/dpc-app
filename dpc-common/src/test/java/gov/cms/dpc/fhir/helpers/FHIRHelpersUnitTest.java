@@ -39,7 +39,7 @@ class FHIRHelpersUnitTest {
     static final String ADMIN_URL = "admin.url";
 
     @Test
-    void registerOrganization() throws IOException {
+    void testRegisterOrganization() throws IOException {
         IParser parser = mock(IParser.class);
         Bundle bundle = new Bundle();
         bundle.addEntry().setResource(new Organization());
@@ -80,7 +80,7 @@ class FHIRHelpersUnitTest {
     }
 
     @Test
-    void handleMethodOutcome_nullResource() {
+    void testHandleMethodOutcome_nullResource() {
         WebApplicationException exception = assertThrows(WebApplicationException.class, () ->
                 FHIRHelpers.handleMethodOutcome(new MethodOutcome()));
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), exception.getResponse().getStatus());
@@ -88,7 +88,7 @@ class FHIRHelpersUnitTest {
     }
 
     @Test
-    void handleMethodOutcome_created() {
+    void testHandleMethodOutcome_created() {
         MethodOutcome outcome = new MethodOutcome();
         Organization organization = buildOrganization();
         outcome.setResource(organization);
@@ -100,7 +100,7 @@ class FHIRHelpersUnitTest {
     }
 
     @Test
-    void handleMethodOutcome_ok() {
+    void testHandleMethodOutcome_ok() {
         MethodOutcome outcome = new MethodOutcome();
         Organization organization = buildOrganization();
         outcome.setResource(organization);

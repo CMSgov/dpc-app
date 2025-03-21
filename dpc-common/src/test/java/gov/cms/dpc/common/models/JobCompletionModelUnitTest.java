@@ -89,5 +89,4 @@ class JobCompletionModelUnitTest {
         JobCompletionModel jobCompletionModel = mapper.readValue(json, JobCompletionModel.class);
         assertEquals("http://dev.dpc.cms.gov/api/v1/Group/82771a76-f010-44bd-9f7a-7fb02b130f11/$export_format=json", jobCompletionModel.getRequest());
     }
-
 }

@@ -56,7 +56,7 @@ class DistributedBatchQueueTest {
     }
 
     @Test
-    void handleStuckBatchWithClaim() {
+    void testHandleStuckBatchWithClaim() {
         // One organization id for both jobs
         final UUID orgID = UUID.randomUUID();
 
@@ -82,14 +82,14 @@ class DistributedBatchQueueTest {
     }
 
     @Test
-    void validateHealthyQueue() {
+    void testValidateHealthyQueue() {
         // This test is kind of crappy, since there is nothing to assert
         // If the queue is not healthy, an exception is thrown
         assertDoesNotThrow(() -> queue.assertHealthy(aggregatorID));
     }
 
     @Test
-    void validateUnhealthyQueueDueToJobFailure() {
+    void testValidateUnhealthyQueueDueToJobFailure() {
         // One organization id for both jobs
         final UUID orgID = UUID.randomUUID();
 
@@ -100,7 +100,7 @@ class DistributedBatchQueueTest {
     }
 
     @Test
-    void pauseBatch() {
+    void testPauseBatch() {
         UUID orgID = UUID.randomUUID();
         createJob(orgID);
 

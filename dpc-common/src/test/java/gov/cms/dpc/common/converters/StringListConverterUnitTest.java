@@ -14,26 +14,26 @@ class StringListConverterUnitTest {
     static StringListConverter converter = new StringListConverter();
 
     @Test
-    void convertToDatabaseColumn() {
+    void testConvertToDatabaseColumn() {
         List<String> attributes = List.of("foo", "bar", "baz");
         String expected = String.join(",", attributes);
         assertEquals(expected, converter.convertToDatabaseColumn(attributes));
     }
 
     @Test
-    void convertToDatabaseColumn_nullValue() {
+    void testConvertToDatabaseColumn_nullValue() {
         assertEquals("", converter.convertToDatabaseColumn(null));
     }
 
     @Test
-    void convertToEntityAttribute() {
+    void testConvertToEntityAttribute() {
         String dbData = "foo,bar,baz";
         List<String> expected = new ArrayList<>(Arrays.asList(dbData.split(",")));
         assertEquals(expected, converter.convertToEntityAttribute(dbData));
     }
 
     @Test
-    void convertToEntityAttribute_emptyString() {
+    void testConvertToEntityAttribute_emptyString() {
         assertEquals(List.of(), converter.convertToEntityAttribute(""));
     }
 }

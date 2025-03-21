@@ -55,7 +55,7 @@ class ProfileValidatorTest {
 
     @ParameterizedTest
     @MethodSource("provideResources")
-    void isValid(BaseResource resource) {
+    void testIsValid(BaseResource resource) {
         assertTrue(profileValidator.isValid(resource, validatorContext));
     }
 

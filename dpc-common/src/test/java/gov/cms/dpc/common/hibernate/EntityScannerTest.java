@@ -21,7 +21,7 @@ class EntityScannerTest {
     static final String PREFIX_STRING = "gov.cms.dpc.common.entities";
 
     @Test
-    void applicationEntities() {
+    void testApplicationEntities() {
         Logger logger = (Logger) LoggerFactory.getLogger(EntityScanner.class);
         listAppender.start();
         logger.addAppender(listAppender);
