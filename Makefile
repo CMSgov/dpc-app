@@ -109,7 +109,7 @@ start-load-tests: secure-envs
 
 start-macaroon-tests: ## Test load-test macaroons
 start-macaroon-tests:
-	@docker run --rm -v $(shell pwd)/dpc-load-testing:/src -e ENVIRONMENT=local -i grafana/k6 run /src/macaroonTests.js
+	@docker run --rm -v ./dpc-load-testing:/src -e ENVIRONMENT=local -i grafana/k6 run /src/macaroonTests.js
 
 
 # Debug commands
