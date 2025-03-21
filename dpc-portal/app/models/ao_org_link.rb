@@ -16,4 +16,8 @@ class AoOrgLink < ApplicationRecord
   belongs_to :user, required: true
   belongs_to :provider_organization, required: true
   belongs_to :invitation, required: false
+
+  def is_ao?
+      true
+  end
 end

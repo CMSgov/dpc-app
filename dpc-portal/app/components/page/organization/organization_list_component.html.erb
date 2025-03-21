@@ -9,6 +9,38 @@
   </div>
   <p>These are organizations for which you serve as an AO. Organizations cannot access Medicare claims data without an AO agreement to follow terms of service.</p>
 <% end %>
+
+<table class="usa-table usa-table--borderless usa-table--sticky-header">
+  <caption>
+    Borderless table: A borderless table can be useful when you want the
+    information to feel more a part of the text it accompanies and extends.
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col">Organization Name</th>
+      <th scope="col">NPI-2</th>
+      <th scope="col">Role</th>
+      <th scope="col">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @links.each do |link| %>
+      <tr>
+        <th scope="row"> <%= link.provider_organization.name %> </th>
+        <td> <%= link.provider_organization.npi %> </td>
+        <td>
+          <% if link.is_ao? %>
+            AO
+          <% else %>
+            CD
+          <% end %>
+        </td>
+        <td>put status here</td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
 <ul class="usa-card-group">
    <%= render Core::Card::OrganizationCardComponent.with_collection(@links)%>
 </ul>
