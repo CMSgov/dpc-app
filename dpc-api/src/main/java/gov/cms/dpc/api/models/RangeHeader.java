@@ -43,8 +43,7 @@ public class RangeHeader implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof RangeHeader)) return false;
-        RangeHeader that = (RangeHeader) o;
+        if (!(o instanceof RangeHeader that)) return false;
         return unit.equals(that.unit) &&
                 start.equals(that.start) &&
                 Objects.equals(end, that.end);

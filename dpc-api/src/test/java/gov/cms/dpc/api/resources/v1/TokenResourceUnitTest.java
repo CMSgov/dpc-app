@@ -160,4 +160,27 @@ public class TokenResourceUnitTest {
         assertEquals(204, actualResponse.getStatus());
     }
 
+    @Test
+    void testAuthorizeJWT_invalidQueryParams() {
+        String scope = "system/*.*";
+        String grantType = "client_credentials";
+        String clientAssertionType = TokenResource.CLIENT_ASSERTION_TYPE;
+        String jwtBody = "dummyJWT";
+
+        WebApplicationException scopeExc = assertThrows(WebApplicationException.class, () ->
+                tokenResource.authorizeJWT("", grantType, clientAssertionType, jwtBody));
+        assertEquals(String.format("Access Scope must be '%s'", scope), scopeExc.getMessage());
+
+        WebApplicationException grantTypeExc = assertThrows(WebApplicationException.class, () ->
+                tokenResource.authorizeJWT(scope, "", clientAssertionType, jwtBody));
+        assertEquals(String.format("Grant Type must be '%s'", grantType), grantTypeExc.getMessage());
+
+        WebApplicationException clientAssertionExc = assertThrows(WebApplicationException.class, () ->
+                tokenResource.authorizeJWT(scope, grantType, "", jwtBody));
+        assertEquals(String.format("Client Assertion Type must be '%s'", clientAssertionType), clientAssertionExc.getMessage());
+
+        WebApplicationException jwtBodyExc = assertThrows(WebApplicationException.class, () ->
+                tokenResource.authorizeJWT(scope, grantType, clientAssertionType, ""));
+        assertEquals("Client Assertion must be present", jwtBodyExc.getMessage());
+    }
 }

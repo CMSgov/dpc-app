@@ -5,6 +5,7 @@ import gov.cms.dpc.api.auth.filters.AdminAuthFilter;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;
+import gov.cms.dpc.macaroons.exceptions.BakeryException;
 import gov.cms.dpc.macaroons.store.MemoryRootKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import io.dropwizard.auth.AuthenticationException;
@@ -16,6 +17,7 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.nio.charset.StandardCharsets;
@@ -24,15 +26,14 @@ import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
 class AdminAuthFilterTests {
 
     private final MacaroonBakery bakery;
     private final AdminAuthFilter filter;
-    private final Authenticator authenticator;
+    private final Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator;
 
     AdminAuthFilterTests() {
         this.bakery = new MacaroonBakery.MacaroonBakeryBuilder("http://test.local", new MemoryRootKeyStore(new SecureRandom()), new MemoryThirdPartyKeyStore()).build();
@@ -53,12 +54,27 @@ class AdminAuthFilterTests {
 
         // Mock the request context and pass it through
         final ContainerRequestContext request = mock(ContainerRequestContext.class);
-        final MultivaluedMap headers = mock(MultivaluedMap.class);
+        final MultivaluedMap<String, String> headers = mock(MultivaluedMap.class);
         Mockito.when(request.getHeaders()).thenReturn(headers);
         Mockito.when(headers.getFirst(HttpHeaders.AUTHORIZATION)).thenReturn(String.format("Bearer %s", macaroonValue));
 
         this.filter.filter(request);
         Mockito.verify(authenticator, times(1)).authenticate(Mockito.any());
+    }
+
+    @Test
+    void ensureInvalidMacaroonRejected() {
+        ContainerRequestContext request = mock(ContainerRequestContext.class);
+        MultivaluedMap<String, String> headers = mock(MultivaluedMap.class);
+        Mockito.when(request.getHeaders()).thenReturn(headers);
+        Mockito.when(headers.getFirst(HttpHeaders.AUTHORIZATION)).thenReturn("Bearer ");
+        String errMsg = "Cannot deserialize empty string";
+
+        try (MockedStatic<MacaroonBakery> mockedStatic = mockStatic(MacaroonBakery.class)) {
+            mockedStatic.when(() -> MacaroonBakery.deserializeMacaroon(anyString())).thenThrow(new BakeryException(errMsg));
+            WebApplicationException exception = assertThrows(WebApplicationException.class, () -> this.filter.filter(request));
+            assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus());
+        }
     }
 
     @Test
@@ -69,7 +85,7 @@ class AdminAuthFilterTests {
 
         // Mock the request context and pass it through
         final ContainerRequestContext request = mock(ContainerRequestContext.class);
-        final MultivaluedMap headers = mock(MultivaluedMap.class);
+        final MultivaluedMap<String, String> headers = mock(MultivaluedMap.class);
         Mockito.when(request.getHeaders()).thenReturn(headers);
         Mockito.when(headers.getFirst(HttpHeaders.AUTHORIZATION)).thenReturn(String.format("Bearer %s", macaroonValue));
 
