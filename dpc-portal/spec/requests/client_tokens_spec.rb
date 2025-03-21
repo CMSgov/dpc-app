@@ -173,16 +173,28 @@ RSpec.describe 'ClientTokens', type: :request do
 
       it 'succeeds if label' do
         token_guid = SecureRandom.uuid
-        api_client = stub_api_client(message: :get_organization,
-                                     response: default_get_org_response(org_api_id))
         stub_self_returning_api_client(message: :create_client_token,
-                                       response: default_get_client_tokens(guid: token_guid)['entities'].first,
-                                       api_client:)
+                                       response: default_get_client_tokens(guid: token_guid)['entities'].first)
         post "/organizations/#{org.id}/client_tokens", params: { label: 'New Token' }
         expect(assigns(:organization)).to eq org
         expect(assigns(:client_token)['id']).to eq token_guid
       end
 
+      it 'checks if configuration complete on success' do
+        config_complete_checker = class_double('CheckConfigCompleteJob').as_stubbed_const
+        expect(config_complete_checker).to receive(:perform_later).with(org.id)
+        stub_self_returning_api_client(message: :create_client_token,
+                                       response: default_get_client_tokens['entities'].first)
+        post "/organizations/#{org.id}/client_tokens", params: { label: 'New Token' }
+      end
+      it 'does not check configuration complete on success if already configured' do
+        config_complete_checker = class_double('CheckConfigCompleteJob').as_stubbed_const
+        expect(config_complete_checker).to_not receive(:perform_later).with(org.id)
+        org.update_attribute(:config_complete, true)
+        stub_self_returning_api_client(message: :create_client_token,
+                                       response: default_get_client_tokens['entities'].first)
+        post "/organizations/#{org.id}/client_tokens", params: { label: 'New Token' }
+      end
       it 'fails if no label' do
         post "/organizations/#{org.id}/client_tokens"
         expect(assigns(:organization)).to eq org
@@ -190,13 +202,15 @@ RSpec.describe 'ClientTokens', type: :request do
         expect(assigns(:errors)).to eq(label: "Label can't be blank.", root: "Fields can't be blank.")
       end
 
+      it 'does not check for complete on failure' do
+        config_complete_checker = class_double('CheckConfigCompleteJob').as_stubbed_const
+        expect(config_complete_checker).to_not receive(:perform_later).with(org.id)
+        post "/organizations/#{org.id}/client_tokens"
+      end
       it 'shows error if problem' do
-        api_client = stub_api_client(message: :get_organization,
-                                     response: default_get_org_response(org_api_id))
         stub_self_returning_api_client(message: :create_client_token,
                                        success: false,
-                                       response: nil,
-                                       api_client:)
+                                       response: nil)
         post "/organizations/#{org.id}/client_tokens", params: { label: 'New Token' }
         expect(flash[:alert]).to eq("We're sorry, but we can't complete your request. Please try again tomorrow.")
       end
