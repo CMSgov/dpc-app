@@ -22,7 +22,12 @@
   <tbody>
     <% @links.each do |link| %>
       <tr>
-        <th scope="row"> <%= link.provider_organization.name %> </th>
+        <%# Put new class here to UPPERCASE and ellipsis... link.provider_organization.name %>
+        <th scope="row">
+          <a href="<%= organization_path(link.provider_organization)%>" >
+            <%= link.provider_organization.name %>
+          </a>
+        </th>
         <td> <%= link.provider_organization.npi %> </td>
         <td>
           <% if link.is_ao? %>
