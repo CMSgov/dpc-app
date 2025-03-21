@@ -15,4 +15,8 @@ class CdOrgLink < ApplicationRecord
   def verification_status?
     disabled_at.blank?
   end
+
+  def is_ao?
+      false
+  end
 end
