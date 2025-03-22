@@ -42,8 +42,5 @@
   </tbody>
 </table>
 
-<ul class="usa-card-group">
-   <%= render Core::Card::OrganizationCardComponent.with_collection(@links)%>
-</ul>
 <%=raw "<p>You don't have any organizations to show.</p>" if @links.blank? %>
 </div>
