@@ -85,7 +85,7 @@ export function workflowA(data) {
   const token = generateDPCToken(orgId, data.goldenMacaroon);
 
   // POST practitioner
-  const practitionerResponse = createProvider(npiGenerator.iterate(), orgId);
+  const practitionerResponse = createProvider(token, npiGenerator.iterate());
   if (practitionerResponse.status != 201) {
     fail('failed to create practitioner for workflow A');
   }
@@ -94,7 +94,7 @@ export function workflowA(data) {
   const practitionerId = practitionerResponse.json().id;
 
   // POST patient
-  const patientResponse = createPatient(mbiGenerator.iterate(), orgId);
+  const patientResponse = createPatient(token, mbiGenerator.iterate());
   if (patientResponse.status != 201) {
     fail('failed to create patient for workflow A');
   }
