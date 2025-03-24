@@ -64,6 +64,16 @@ class ProviderOrganization < ApplicationRecord
     id
   end
 
+  def get_status
+#     return :api_disabled if org&.reg_org&.enabled == false
+    is_config_complete = public_ips.present? && public_keys.present? && client_tokens.present?
+
+    return :needs_terms_of_service_signed unless terms_of_service_accepted_by.present?
+    return :configuration_complete if is_config_complete
+    return :configuration_needed unless is_config_complete
+    nil
+  end
+
   private
 
   def disable_rejected
