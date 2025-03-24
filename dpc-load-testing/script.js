@@ -37,7 +37,18 @@ export const options = {
 export function setup() {
   const goldenMacaroon = fetchGoldenMacaroon();
   // Fake NPIs generated online: https://jsfiddle.net/alexdresko/cLNB6
-  const existingOrgs = findByNpi('2782823019', '8197402604', goldenMacaroon).json();
+  const existingOrgsResponse = findByNpi('2782823019', '8197402604', goldenMacaroon);
+  const checkFindOutput = check(
+    existingOrgsResponse,
+    {
+      'response code was 200': res => res.status === 200,
+    }
+  );
+  if (!checkFindOutput) {
+    exec.test.abort('failed to check for existing orgs');
+  }
+
+  const existingOrgs =  existingOrgsResponse.json();
   if ( existingOrgs.total ) {
     for ( const entry of existingOrgs.entry ) {
       deleteOrganization(entry.resource.id, goldenMacaroon);
