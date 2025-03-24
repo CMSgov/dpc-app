@@ -21,6 +21,18 @@ class HttpRangeHeaderParamConverterTest {
     }
 
     @Test
+    void testRangeHeader() {
+        RangeHeader expected = new RangeHeader();
+        expected.setStart(0L);
+        expected.setEnd(1L);
+        expected.setUnit("bytes");
+
+        String rangeValue = "bytes=0-1";
+        RangeHeader converted = converter.fromString(rangeValue);
+        assertEquals(expected, converted);
+    }
+
+    @Test
     void testFullParsing() {
         final String rangeValue = "bytes=0-1";
         final RangeHeader header = converter.fromString(rangeValue);

@@ -23,6 +23,7 @@ class PublicKeysController < ApplicationController
     )
 
     if new_public_key[:response]
+      CheckConfigCompleteJob.perform_later(@organization.id) unless @organization.config_complete
       log_credential_action(:public_key, new_public_key.dig(:message, 'id'), :add)
       flash[:notice] = 'Public key successfully created.'
       redirect_to organization_path(@organization, credential_start: true)

@@ -11,7 +11,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(BufferedLoggerHandler.class)
-class ProfileValidatorTests {
+class DPCProfileSupportTest {
 
     private final FhirContext ctx = FhirContext.forDstu3();
 

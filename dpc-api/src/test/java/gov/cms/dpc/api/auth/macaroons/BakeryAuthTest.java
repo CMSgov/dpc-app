@@ -21,10 +21,11 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import java.security.SecureRandom;
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(BufferedLoggerHandler.class)
-class BakeryTests {
+class BakeryAuthTest {
 
     private static final String ORGANIZATION_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8254";
     private static final String BAD_ORG_ID = "0c527d2e-2e8a-4808-b11d-0fa06baf8252";
@@ -33,7 +34,8 @@ class BakeryTests {
 
     @BeforeEach
     void setup() {
-        bakery = new BakeryProvider(generateTokenPolicy(), new MemoryRootKeyStore(new SecureRandom()), new MemoryThirdPartyKeyStore(), "http://test.local", BakeryKeyPair.generate()).get();
+        BakeryProvider provider = new BakeryProvider(generateTokenPolicy(), new MemoryRootKeyStore(new SecureRandom()), new MemoryThirdPartyKeyStore(), "http://test.local", BakeryKeyPair.generate());
+        bakery = assertDoesNotThrow(provider::get);
     }
 
 
@@ -50,6 +52,6 @@ class BakeryTests {
 
     private TokenPolicy generateTokenPolicy() {
         Yaml yaml = new Yaml(new Constructor(TokenPolicy.class, new LoaderOptions()));
-        return yaml.load(BakeryTests.class.getClassLoader().getResourceAsStream("token_policy.yml"));
+        return yaml.load(BakeryAuthTest.class.getClassLoader().getResourceAsStream("token_policy.yml"));
     }
 }
