@@ -43,12 +43,3 @@ export default class MBIGenerator {
     return mbi;
   }
 }
-
-// function test() {
-//   const gen = new MBIGenerator();
-//   for (let i = 0; i <= 20; i++) {
-//     console.log(gen.iterate());
-//   }
-// }
-
-// test();
