@@ -10,7 +10,8 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       normalize_space(rendered_content)
     end
     let(:org) { build(:provider_organization, name: 'Health Hut', npi: '11111111', id: 2) }
-    let(:component) { described_class.new(org, delegate_info, credential_start, role, status) }
+    let(:invitation) { build(:invitation, status: :accepted)}
+    let(:component) { described_class.new(org, delegate_info, credential_start, role, invitation) }
 
     before do
       render_inline(component)
@@ -19,7 +20,6 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
     context 'cd tab' do
       let(:delegate_info) { { active: [], pending: [], expired: [] } }
       let(:role) { 'Authorized Official' }
-      let(:status) { :accepted }
       context 'credential delegate start' do
         let(:credential_start) { false }
         it 'Should have org name' do
@@ -32,7 +32,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
           is_expected.to include("<span class=\"text-bold\">Role:</span> #{role}")
         end
         it 'Should have status' do
-          is_expected.to include("<span class=\"text-bold\">Status:</span> #{status.capitalize}")
+          is_expected.to include("<span class=\"text-bold\">Status:</span> #{invitation.status.capitalize}")
         end
         it 'Should have AO' do
           allow(org).to receive(:ao).and_return('John Doe')
@@ -62,7 +62,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
         end
 
         context 'status is not accepted' do
-          let(:status) { :expired }
+          let(:invitation) { build(:invitation, status: :expired)}
           it 'Should show warning icon' do
             is_expected.to include('.svg#warning')
           end
@@ -74,7 +74,6 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       let(:delegate_info) { {} }
       let(:credential_start) { true }
       let(:role) { 'Credential Delegate' }
-      let(:status) { :accepted }
       it 'Should have org name' do
         is_expected.to include("<h1>#{org.name}</h1>")
       end
@@ -85,7 +84,8 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
         is_expected.to include("<span class=\"text-bold\">Role:</span> #{role}")
       end
       it 'Should have status' do
-        is_expected.to include("<span class=\"text-bold\">Status:</span> #{status.capitalize}")
+        invitation.status = :accepted
+        is_expected.to include("<span class=\"text-bold\">Status:</span> #{invitation.status.capitalize}")
       end
       it 'Should have AO' do
         allow(org).to receive(:ao).and_return('John Doe')
@@ -111,7 +111,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       end
 
       context 'status is not accepted' do
-        let(:status) { :expired }
+        let(:invitation) { build(:invitation, status: :expired)}
         it 'Should show warning icon' do
           is_expected.to include('.svg#warning')
         end
