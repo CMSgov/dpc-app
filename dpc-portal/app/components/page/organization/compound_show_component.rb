@@ -14,11 +14,7 @@ module Page
         @expired_cd_invitations = delegate_information[:expired]
         @show_cds = !delegate_information.empty?
         @role = role
-        if invitation.status.match?('accepted') then
-          @show_status_alert = false
-        else
-          @show_status_alert = true
-        end
+        @show_status_alert = !invitation.status.match?('accepted')
         @status = invitation.status.capitalize
       end
     end

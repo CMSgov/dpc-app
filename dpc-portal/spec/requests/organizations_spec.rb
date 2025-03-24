@@ -185,7 +185,7 @@ RSpec.describe 'Organizations', type: :request do
     context 'as cd' do
       let!(:user) { create(:user) }
       let!(:org) { create(:provider_organization) }
-      let!(:invitation) { create(:invitation, :cd, provider_organization: org, status: :accepted)}
+      let!(:invitation) { create(:invitation, :cd, provider_organization: org, status: :accepted) }
       let!(:link) { create(:cd_org_link, user:, provider_organization: org, invitation:) }
       before { sign_in user }
 
@@ -230,21 +230,21 @@ RSpec.describe 'Organizations', type: :request do
             invitation.status = :accepted
             invitation.save
             get "/organizations/#{org.id}"
-            expect(normalize_space(response.body)).to include ("Status:</span> Accepted")
+            expect(normalize_space(response.body)).to include('Status:</span> Accepted')
           end
 
           it 'does not show invitation status warning when accepted' do
             invitation.status = :accepted
             invitation.save
             get "/organizations/#{org.id}"
-            expect(normalize_space(response.body)).to_not include (".svg#warning>")
+            expect(normalize_space(response.body)).to_not include('.svg#warning>')
           end
 
           it 'does show invitation status warning when not accepted' do
             invitation.status = :expired
             invitation.save
             get "/organizations/#{org.id}"
-            expect(normalize_space(response.body)).to include (".svg#warning>")
+            expect(normalize_space(response.body)).to include('.svg#warning>')
           end
         end
       end
@@ -252,7 +252,7 @@ RSpec.describe 'Organizations', type: :request do
 
     context 'as ao' do
       let!(:user) { create(:user) }
-      let!(:invitation) { create(:invitation, :ao, provider_organization: org, status: :accepted)}
+      let!(:invitation) { create(:invitation, :ao, provider_organization: org, status: :accepted) }
       before do
         create(:ao_org_link, user:, provider_organization: org, invitation:)
         sign_in user
@@ -371,21 +371,21 @@ RSpec.describe 'Organizations', type: :request do
             invitation.status = :accepted
             invitation.save
             get "/organizations/#{org.id}"
-            expect(normalize_space(response.body)).to include ("Status:</span> Accepted")
+            expect(normalize_space(response.body)).to include('Status:</span> Accepted')
           end
-  
+
           it 'does not show invitation status warning when accepted' do
             invitation.status = :accepted
             invitation.save
             get "/organizations/#{org.id}"
-            expect(normalize_space(response.body)).to_not include (".svg#warning>")
+            expect(normalize_space(response.body)).to_not include('.svg#warning>')
           end
-  
+
           it 'does show invitation status warning when not accepted' do
             invitation.status = :expired
             invitation.save
             get "/organizations/#{org.id}"
-            expect(normalize_space(response.body)).to include (".svg#warning>")
+            expect(normalize_space(response.body)).to include('.svg#warning>')
           end
         end
       end

@@ -45,8 +45,9 @@ class User < ApplicationRecord
   end
 
   def role(organization)
-    return "Authorized Official" if ao?(organization)
-    return "Credential Delegate" if cd?(organization)
-    raise "Unknown user role"
+    return 'Authorized Official' if ao?(organization)
+    return 'Credential Delegate' if cd?(organization)
+
+    raise 'Unknown user role'
   end
 end

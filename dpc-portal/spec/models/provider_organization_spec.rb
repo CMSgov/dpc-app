@@ -173,7 +173,7 @@ RSpec.describe ProviderOrganization, type: :model do
     let(:noAoOrg) { create(:provider_organization) }
     let(:user) { create(:user, given_name: 'John', family_name: 'Doe') }
     let(:ao_org_link) { create(:ao_org_link, user:, provider_organization: org, verification_status: true) }
-    
+
     it 'should return name if AO exists' do
       org.save
       user.save

@@ -10,7 +10,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       normalize_space(rendered_content)
     end
     let(:org) { build(:provider_organization, name: 'Health Hut', npi: '11111111', id: 2) }
-    let(:invitation) { build(:invitation, status: :accepted)}
+    let(:invitation) { build(:invitation, status: :accepted) }
     let(:component) { described_class.new(org, delegate_info, credential_start, role, invitation) }
 
     before do
@@ -36,7 +36,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
         end
         it 'Should have AO' do
           allow(org).to receive(:ao).and_return('John Doe')
-          is_expected.to include("<span class=\"text-bold\">Authorized Official:</span> John Doe")
+          is_expected.to include('<span class="text-bold">Authorized Official:</span> John Doe')
         end
         it 'Should have org id' do
           is_expected.to include("<span class=\"text-bold\">Organization ID:</span> #{org.dpc_api_organization_id}")
@@ -62,7 +62,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
         end
 
         context 'status is not accepted' do
-          let(:invitation) { build(:invitation, status: :expired)}
+          let(:invitation) { build(:invitation, status: :expired) }
           it 'Should show warning icon' do
             is_expected.to include('.svg#warning')
           end
@@ -89,7 +89,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       end
       it 'Should have AO' do
         allow(org).to receive(:ao).and_return('John Doe')
-        is_expected.to include("<span class=\"text-bold\">Authorized Official:</span> John Doe")
+        is_expected.to include('<span class="text-bold">Authorized Official:</span> John Doe')
       end
       it 'Should have org id' do
         is_expected.to include("<span class=\"text-bold\">Organization ID:</span> #{org.dpc_api_organization_id}")
@@ -111,7 +111,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       end
 
       context 'status is not accepted' do
-        let(:invitation) { build(:invitation, status: :expired)}
+        let(:invitation) { build(:invitation, status: :expired) }
         it 'Should show warning icon' do
           is_expected.to include('.svg#warning')
         end
