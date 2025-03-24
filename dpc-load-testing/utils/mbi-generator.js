@@ -1,4 +1,5 @@
-const alpha = 'ACDEFGHJKMNPQRTUVWXY';
+// These letters are not allowed in valid MBIs. We don't want to accidentally test on real peoples' MBIs, so we'll use these to generate fakes.
+const alpha = 'BILOSZ'; 
 const numericFrom1 = '123456789';
 const numericFrom0 = '0123456789';
 const alphaNumeric = alpha + numericFrom0;
@@ -42,3 +43,12 @@ export default class MBIGenerator {
     return mbi;
   }
 }
+
+// function test() {
+//   const gen = new MBIGenerator();
+//   for (let i = 0; i <= 20; i++) {
+//     console.log(gen.iterate());
+//   }
+// }
+
+// test();
