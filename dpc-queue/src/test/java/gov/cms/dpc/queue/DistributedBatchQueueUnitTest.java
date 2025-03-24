@@ -22,13 +22,12 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 		super(JobQueueBatch.class, JobQueueBatchFile.class);
 	}
 
-	private DPCQueueManagedSessionFactory sessionFactory;
 	private DistributedBatchQueue queue;
 	private Session session;
 
 	@BeforeEach
 	void setup() {
-		sessionFactory = new DPCQueueManagedSessionFactory(db.getSessionFactory());
+		DPCQueueManagedSessionFactory sessionFactory = new DPCQueueManagedSessionFactory(db.getSessionFactory());
 		queue = new DistributedBatchQueue(sessionFactory, 100, new MetricRegistry());
 		session = sessionFactory.getSessionFactory().openSession();
 	}
@@ -63,7 +62,7 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 		session.persist(jobQueueBatch);
 		transaction.commit();
 
-		Double age = queue.queueAge();
+		double age = queue.queueAge();
 
 		// Check that our submitted job is between 0 and 0.001 hours old (about 3.6 seconds).
 		// We could probably mock the system time and the results coming back from Hibernate, but this is enough to
@@ -72,7 +71,36 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 	}
 
 	@Test
-	void test_completePartialBatch_sets_update_time() throws InterruptedException {
+	void test_queueType_works() {
+		assertEquals("Database Queue", queue.queueType());
+	}
+
+	@Test
+	void test_queueSize_works() {
+		 assertEquals(0, queue.queueSize());
+
+		Transaction transaction = session.beginTransaction();
+		JobQueueBatch jobQueueBatch = new JobQueueBatch(
+				UUID.randomUUID(),
+				UUID.randomUUID(),
+				"orgNpi",
+				"providerNpi",
+				List.of(),
+				List.of(),
+				OffsetDateTime.now(),
+				OffsetDateTime.now(),
+				"reqIp",
+				"reqUrl",
+				true
+		);
+		session.persist(jobQueueBatch);
+		transaction.commit();
+
+		assertEquals(1, queue.queueSize());
+    }
+
+	@Test
+	void test_completePartialBatch_sets_update_time() {
 		Transaction transaction = session.beginTransaction();
 
 		UUID aggregatorId = UUID.randomUUID();
