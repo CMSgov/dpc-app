@@ -18,6 +18,10 @@ Environment variables are stored in Ansible Vault. These will all populate autom
 
 This will trigger the build of a new API environment with `AUTH_DISABLED=true`. It then triggers the load test suite to run, and finally tears down the new API environment.
 
+#### Unit Testing
+
+A few of our utilities require unit tests, which live in the `__tests__` directory. Run unit tests by running `yarn test` from this directory.
+
 ### A note on modules
 
 The K6 docker image that we rely on to run this both in GH Actions and locally does not actually run a Node.js environment. Therefore, we are unable to use most standard Node.js runtime utilities, including built-in library functions and the usual import syntax. 
