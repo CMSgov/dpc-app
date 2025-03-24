@@ -15,7 +15,7 @@ module Page
         @show_cds = !delegate_information.empty?
         @role = role
         @status = status.capitalize
-        if status == :accepted then
+        if status.match?('accepted') then
           @show_status_alert = false
         else
           @show_status_alert = true

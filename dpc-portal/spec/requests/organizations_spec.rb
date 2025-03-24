@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'Organizations', type: :request do
   include DpcClientSupport
+  include ComponentSupport
 
   describe 'GET /index' do
     context 'not logged in' do
@@ -184,7 +185,8 @@ RSpec.describe 'Organizations', type: :request do
     context 'as cd' do
       let!(:user) { create(:user) }
       let!(:org) { create(:provider_organization) }
-      let!(:link) { create(:cd_org_link, user:, provider_organization: org) }
+      let!(:invitation) { create(:invitation, :cd, provider_organization: org, status: :accepted)}
+      let!(:link) { create(:cd_org_link, user:, provider_organization: org, invitation:) }
       before { sign_in user }
 
       context :not_signed_tos do
@@ -222,13 +224,37 @@ RSpec.describe 'Organizations', type: :request do
           get "/organizations/#{org.id}"
           expect(assigns(:pending_invitations)).to be_nil
         end
+
+        context :invitation_status do
+          it 'shows invitation status' do
+            invitation.status = :accepted
+            invitation.save
+            get "/organizations/#{org.id}"
+            expect(normalize_space(response.body)).to include ("Status:</span> Accepted")
+          end
+
+          it 'does not show invitation status warning when accepted' do
+            invitation.status = :accepted
+            invitation.save
+            get "/organizations/#{org.id}"
+            expect(normalize_space(response.body)).to_not include (".svg#warning>")
+          end
+
+          it 'does show invitation status warning when not accepted' do
+            invitation.status = :expired
+            invitation.save
+            get "/organizations/#{org.id}"
+            expect(normalize_space(response.body)).to include (".svg#warning>")
+          end
+        end
       end
     end
 
     context 'as ao' do
       let!(:user) { create(:user) }
+      let!(:invitation) { create(:invitation, :ao, provider_organization: org, status: :accepted)}
       before do
-        create(:ao_org_link, user:, provider_organization: org)
+        create(:ao_org_link, user:, provider_organization: org, invitation:)
         sign_in user
       end
 
@@ -337,6 +363,29 @@ RSpec.describe 'Organizations', type: :request do
             create(:cd_org_link, provider_organization: org, disabled_at: 1.day.ago)
             get "/organizations/#{org.id}"
             expect(assigns(:delegate_information)[:active].size).to eq 0
+          end
+        end
+
+        context :invitation_status do
+          it 'shows invitation status' do
+            invitation.status = :accepted
+            invitation.save
+            get "/organizations/#{org.id}"
+            expect(normalize_space(response.body)).to include ("Status:</span> Accepted")
+          end
+  
+          it 'does not show invitation status warning when accepted' do
+            invitation.status = :accepted
+            invitation.save
+            get "/organizations/#{org.id}"
+            expect(normalize_space(response.body)).to_not include (".svg#warning>")
+          end
+  
+          it 'does show invitation status warning when not accepted' do
+            invitation.status = :expired
+            invitation.save
+            get "/organizations/#{org.id}"
+            expect(normalize_space(response.body)).to include (".svg#warning>")
           end
         end
       end
