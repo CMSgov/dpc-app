@@ -378,14 +378,14 @@ RSpec.describe 'Accessibility', type: :system do
     it 'should show accept page' do
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-      expect(page).to have_text('Step 2')
+      expect(page).to have_text('Step 3')
       expect(page).to be_axe_clean
     end
     it 'should show register page' do
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
       page.find('.usa-button', text: 'Continue to register').click
-      expect(page).to have_text('Step 3')
+      expect(page).to have_text('Step 4')
       expect(page).to be_axe_clean
     end
     it 'should show success page' do
@@ -393,7 +393,7 @@ RSpec.describe 'Accessibility', type: :system do
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
       page.find('.usa-button', text: 'Continue to register').click
       page.find('.usa-button', text: 'Complete registration').click
-      expect(page).to have_text('Step 4')
+      expect(page).to have_text('Step 5')
       expect(page).to be_axe_clean
     end
     context :failure do
