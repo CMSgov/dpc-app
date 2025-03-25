@@ -10,8 +10,9 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       normalize_space(rendered_content)
     end
     let(:org) { build(:provider_organization, name: 'Health Hut', npi: '11111111', id: 2) }
-    let(:invitation) { build(:invitation, status: :accepted) }
-    let(:component) { described_class.new(org, delegate_info, credential_start, role, invitation) }
+    let(:component) do
+      described_class.new(org, delegate_info, credential_start, role, {icon: 'verified', classes: %i[text-accent-cool], status: 'Accepted'})
+    end
 
     before do
       render_inline(component)
@@ -30,9 +31,6 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
         end
         it 'Should have role' do
           is_expected.to include("<span class=\"text-bold\">Role:</span> #{role}")
-        end
-        it 'Should have status' do
-          is_expected.to include("<span class=\"text-bold\">Status:</span> #{invitation.status.capitalize}")
         end
         it 'Should have AO' do
           allow(org).to receive(:ao).and_return('John Doe')
@@ -57,15 +55,11 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
           is_expected.to include('}make_current(0);')
           is_expected.to_not include('}make_current(1);')
         end
-        it 'Should not show warning icon' do
-          is_expected.not_to include('.svg#warning')
+        it 'Should show status' do
+          is_expected.to include('<span class="margin-top-neg-2px">Accepted</span>')
         end
-
-        context 'status is not accepted' do
-          let(:invitation) { build(:invitation, status: :expired) }
-          it 'Should show warning icon' do
-            is_expected.to include('.svg#warning')
-          end
+        it 'Should show icon' do
+          is_expected.to include('.svg#verified')
         end
       end
     end
@@ -82,10 +76,6 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       end
       it 'Should have role' do
         is_expected.to include("<span class=\"text-bold\">Role:</span> #{role}")
-      end
-      it 'Should have status' do
-        invitation.status = :accepted
-        is_expected.to include("<span class=\"text-bold\">Status:</span> #{invitation.status.capitalize}")
       end
       it 'Should have AO' do
         allow(org).to receive(:ao).and_return('John Doe')
@@ -106,15 +96,11 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       it 'Should have credentials' do
         is_expected.to include('<div id="credentials">')
       end
-      it 'Should not show warning icon' do
-        is_expected.not_to include('.svg#warning')
+      it 'Should show status' do
+        is_expected.to include('<span class="margin-top-neg-2px">Accepted</span>')
       end
-
-      context 'status is not accepted' do
-        let(:invitation) { build(:invitation, status: :expired) }
-        it 'Should show warning icon' do
-          is_expected.to include('.svg#warning')
-        end
+      it 'Should show icon' do
+        is_expected.to include('.svg#verified')
       end
     end
   end

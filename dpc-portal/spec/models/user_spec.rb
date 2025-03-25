@@ -62,31 +62,6 @@ RSpec.describe User, type: :model do
       expect(user.cd?(provider_organization)).to be false
     end
   end
-
-  describe :role do
-    let(:user) { create(:user) }
-    let(:provider_organization) { create(:provider_organization) }
-
-    it 'should be Authorized Official if ao?' do
-      allow(user).to receive(:ao?).and_return(true)
-      expect(user.role(provider_organization)).to be 'Authorized Official'
-    end
-
-    it 'should be Credential Delegate if cd?' do
-      allow(user).to receive(:ao?).and_return(false)
-      allow(user).to receive(:cd?).and_return(true)
-      expect(user.role(provider_organization)).to be 'Credential Delegate'
-    end
-
-    it 'should raise exception if not ao or cd?' do
-      allow(user).to receive(:ao?).and_return(false)
-      allow(user).to receive(:cd?).and_return(false)
-      expect do
-        user.role(provider_organization)
-      end.to raise_error('Unknown user role')
-    end
-  end
-
   describe :can_access do
     let(:user) { create(:user) }
     let(:other_user) { create(:user) }

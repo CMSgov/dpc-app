@@ -2,6 +2,7 @@
 
 # Shows Credential Delegates info about the organizations they manage the credentials for
 class OrganizationsController < ApplicationController
+  include Organization
   before_action :authenticate_user!
   before_action :check_user_verification
   before_action :load_organization, only: %i[show tos_form sign_tos success]
@@ -18,13 +19,17 @@ class OrganizationsController < ApplicationController
 
   def show
     @delegate_information = {}
-    @delegate_information = ao_delegate_information if current_user.ao?(@organization)
+    role = 'Credential Delegate'
+    if current_user.ao?(@organization)
+      @delegate_information = ao_delegate_information
+      role = 'Authorized Official'
+    end
 
     render(Page::Organization::CompoundShowComponent.new(@organization,
                                                          @delegate_information,
                                                          params[:credential_start],
-                                                         current_user.role(@organization),
-                                                         current_invitation))
+                                                         role,
+                                                         cur_org_status))
   end
 
   def new
@@ -92,10 +97,10 @@ class OrganizationsController < ApplicationController
     logger.error("Unable to create AoOrgLink: #{errors}")
   end
 
-  def current_invitation
+  def cur_org_status
     @links = current_user.provider_links if @links.nil?
-    invitation_link = @links.find { |link| link.provider_organization_id == @organization.id }
-    Invitation.find_by(id: invitation_link.invitation_id)
+    cur_link = @links.find { |link| link.provider_organization_id == @organization.id }
+    user_status(@organization, cur_link)
   end
 
   def ao_delegate_information

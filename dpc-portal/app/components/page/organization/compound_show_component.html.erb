@@ -4,10 +4,8 @@
     <div><span class="text-bold">NPI-2:</span> <%= @organization.npi %></div>
     <div><span class="text-bold">Role:</span> <%= @role %></div>
     <div><span class="text-bold">Status:</span> 
-        <% if @show_status_alert %>
-            <%= render Core::Icon::UswdsComponent.new('warning', additional_classes: %i[text-gold]) %>
-        <% end %>
-        <%= @status %>
+      <%= render Core::Icon::UswdsComponent.new(@icon, additional_classes: @classes) %>
+      <span class="margin-top-neg-2px"><%= @status %></span>
     </div>
   </div>
   <div class="margin-bottom-3"><span class="text-bold">Authorized Official:</span> <%= @organization.ao %></div>
