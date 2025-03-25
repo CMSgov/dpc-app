@@ -18,15 +18,15 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SuppressWarnings("rawtypes")
 @ExtendWith(BufferedLoggerHandler.class)
 public class QueueHealthTest {
 
-    private Session session = mock(Session.class);
+    private final Session session = mock(Session.class);
     private final SessionFactory factory = mock(SessionFactory.class);
-    private DPCQueueManagedSessionFactory managedSessionFactory = new DPCQueueManagedSessionFactory(factory);
-    private Query<Long> query = mock(Query.class);
-    private MetricRegistry metrics = new MetricRegistry();
+    private final DPCQueueManagedSessionFactory managedSessionFactory = new DPCQueueManagedSessionFactory(factory);
+    private final Query<Long> query = mock(Query.class);
+    private final MetricRegistry metrics = new MetricRegistry();
+    private static final UUID aggregatorId = UUID.randomUUID();
 
     @BeforeEach
     void setupQueueDependencies() {
@@ -48,10 +48,10 @@ public class QueueHealthTest {
                 .thenReturn(0L);
 
         final DistributedBatchQueue queue = new DistributedBatchQueue(managedSessionFactory, 100, metrics);
-        assertDoesNotThrow(() -> queue.assertHealthy(UUID.randomUUID()), "Queue should be healthy");
+        assertDoesNotThrow(() -> queue.assertHealthy(aggregatorId), "Queue should be healthy");
 
         // Healthcheck should pass
-        final JobQueueHealthCheck jobQueueHealthCheck = new JobQueueHealthCheck(queue, UUID.randomUUID());
+        final JobQueueHealthCheck jobQueueHealthCheck = new JobQueueHealthCheck(queue, aggregatorId);
         assertTrue(jobQueueHealthCheck.check().isHealthy(), "Should be healthy");
     }
 
@@ -61,10 +61,10 @@ public class QueueHealthTest {
                 .thenReturn(2L);
 
         final DistributedBatchQueue queue = new DistributedBatchQueue(managedSessionFactory, 100, metrics);
-        assertThrows(JobQueueUnhealthy.class, () -> queue.assertHealthy(UUID.randomUUID()), "Queue should be unhealthy");
+        assertThrows(JobQueueUnhealthy.class, () -> queue.assertHealthy(aggregatorId), "Queue should be unhealthy");
 
         // Healthcheck should pass
-        final JobQueueHealthCheck jobQueueHealthCheck = new JobQueueHealthCheck(queue, UUID.randomUUID());
+        final JobQueueHealthCheck jobQueueHealthCheck = new JobQueueHealthCheck(queue, aggregatorId);
         assertFalse(jobQueueHealthCheck.check().isHealthy(), "Should be unhealthy");
     }
 }

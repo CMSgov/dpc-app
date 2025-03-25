@@ -18,9 +18,8 @@ class JobQueueBatchFileTest {
         final var a = new JobQueueBatchFile(jobID, batchID, DPCResourceType.Patient, 0, 1);
         final var b = new JobQueueBatchFile(jobID, batchID, DPCResourceType.Patient, 0, 1);
         final var c = new JobQueueBatchFile(jobID, batchID, DPCResourceType.ExplanationOfBenefit, 0, 1);
-        assertTrue(a.equals(b), "expected a to equal b");
-        assertFalse(a.equals(c), "expected a to not equal c");
-        assertTrue(a.equals(a));
+        assertEquals(a, b, "expected a to equal b");
+        assertNotEquals(a, c, "expected a to not equal c");
     }
 
     @Test
@@ -43,6 +42,6 @@ class JobQueueBatchFileTest {
         assertEquals(DPCResourceType.Patient, a.getResourceType());
         assertEquals(0, a.getSequence());
         assertEquals(1, a.getCount());
-        assertEquals(new JobQueueBatchFile.JobQueueBatchFileID(batchID, DPCResourceType.Patient, 0), a.getJobQueueBatchFileID());;
+        assertEquals(new JobQueueBatchFile.JobQueueBatchFileID(batchID, DPCResourceType.Patient, 0), a.getJobQueueBatchFileID());
     }
 }

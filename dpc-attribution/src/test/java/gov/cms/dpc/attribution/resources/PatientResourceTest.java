@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -143,7 +144,7 @@ class PatientResourceTest extends AbstractAttributionTest {
                 .search()
                 .forResource(Patient.class)
                 .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI))
-                .and(Patient.ORGANIZATION.hasId("Organization/" + UUID.randomUUID().toString()))
+                .and(Patient.ORGANIZATION.hasId("Organization/" + UUID.randomUUID()))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
@@ -159,7 +160,7 @@ class PatientResourceTest extends AbstractAttributionTest {
                 .search()
                 .forResource(Patient.class)
                 .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), DEFAULT_PATIENT_MBI.toLowerCase()))
-                .and(Patient.ORGANIZATION.hasId("Organization/" + UUID.randomUUID().toString()))
+                .and(Patient.ORGANIZATION.hasId("Organization/" + UUID.randomUUID()))
                 .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
@@ -186,7 +187,7 @@ class PatientResourceTest extends AbstractAttributionTest {
         // Create a practitioner and an attribution resource
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("2222222228");
 
-        final MethodOutcome outcome = client
+        client
                 .create()
                 .resource(practitioner)
                 .encodedJson()
@@ -268,11 +269,11 @@ class PatientResourceTest extends AbstractAttributionTest {
         final Patient updatedPatient = (Patient) updated.getResource();
 
         foundPatient.getNameFirstRep().setFamily("<script>Family</script>");
-        assertThrows(InvalidRequestException.class, () -> client
+        IUpdateExecutable badUpdate = client
                 .update()
                 .resource(foundPatient)
-                .encodedJson()
-                .execute(), "Should not have updated patient");
+                .encodedJson();
+        assertThrows(InvalidRequestException.class, badUpdate::execute, "Should not have updated patient");
 
         // Try to pull the record, again, from the DB
 

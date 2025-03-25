@@ -67,22 +67,24 @@ class FHIRHelpersUnitTest {
         when(httpEntity.getContent()).thenReturn(inputStream);
         when(httpResponse.getEntity()).thenReturn(httpEntity);
 
+        String orgIDStr = orgID.toString();
         String response = assertDoesNotThrow(() ->
-                FHIRHelpers.registerOrganization(client, parser, orgID.toString(), orgNPI, ADMIN_URL));
+                FHIRHelpers.registerOrganization(client, parser, orgIDStr, orgNPI, ADMIN_URL));
         assertEquals(MACAROON, response);
 
         // Token generation error
         when(httpResponse.getStatusLine().getStatusCode()).thenReturn(HttpStatus.SC_BAD_REQUEST);
         when(httpResponse.getStatusLine().getReasonPhrase()).thenReturn("Bad request");
         IllegalStateException stateException = assertThrows(IllegalStateException.class, () ->
-                FHIRHelpers.registerOrganization(client, parser, orgID.toString(), orgNPI, ADMIN_URL));
+                FHIRHelpers.registerOrganization(client, parser, orgIDStr, orgNPI, ADMIN_URL));
         assertEquals("Unable to generate token: " + httpResponse.getStatusLine().getReasonPhrase(), stateException.getMessage());
     }
 
     @Test
     void testHandleMethodOutcome_nullResource() {
+        MethodOutcome outcome = new MethodOutcome();
         WebApplicationException exception = assertThrows(WebApplicationException.class, () ->
-                FHIRHelpers.handleMethodOutcome(new MethodOutcome()));
+                FHIRHelpers.handleMethodOutcome(outcome));
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), exception.getResponse().getStatus());
         assertEquals("Unable to get resource.", exception.getMessage());
     }

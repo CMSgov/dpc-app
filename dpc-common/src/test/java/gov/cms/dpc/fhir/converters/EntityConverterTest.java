@@ -48,7 +48,8 @@ public class EntityConverterTest {
 
     @Test
     void testMissingConverter() {
-        final MissingConverterException exception = assertThrows(MissingConverterException.class, () -> converter.toFHIR(Patient.class, new PatientEntity()));
+        PatientEntity entity = new PatientEntity();
+        final MissingConverterException exception = assertThrows(MissingConverterException.class, () -> converter.toFHIR(Patient.class, entity));
         assertAll(() -> assertEquals(PatientEntity.class, exception.getSourceClass(), "Should have patient entity source"),
                 () -> assertEquals(Patient.class, exception.getTargetClass(), "Should have patient target class"));
     }
@@ -104,7 +105,9 @@ public class EntityConverterTest {
     @Test
     void testDuplicateConverters() {
         converter.addConverter(new PatientGenderConverter());
-        final FHIRConverterException exception = assertThrows(FHIRConverterException.class, () -> converter.addConverter(new PatientGenderConverter()));
+
+        PatientGenderConverter duplicateConverter = new PatientGenderConverter();
+        final FHIRConverterException exception = assertThrows(FHIRConverterException.class, () -> converter.addConverter(duplicateConverter));
         assertEquals("Existing converter for org.hl7.fhir.dstu3.model.Patient and gov.cms.dpc.fhir.converters.EntityConverterTest$PatientGenderConverter$PatientGender", exception.getMessage(), "Should have correct error message");
     }
 

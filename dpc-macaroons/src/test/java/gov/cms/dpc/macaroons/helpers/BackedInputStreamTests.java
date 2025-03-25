@@ -42,9 +42,9 @@ class BackedInputStreamTests {
         final ByteBuffer bb = ByteBuffer.wrap(testString.getBytes(StandardCharsets.UTF_8));
         final ByteBufferBackedInputStream bis = new ByteBufferBackedInputStream(bb);
 
-        final byte[] outputBytes = ByteBuffer.allocate(testString.length() - 1).array();
+        final int stringLength = testString.length();
+        final byte[] outputBytes = ByteBuffer.allocate(stringLength - 1).array();
 
-        //noinspection ResultOfMethodCallIgnored
-        assertThrows(IndexOutOfBoundsException.class, () -> bis.read(outputBytes, 0, testString.length()), "Cannot read out of bounds");
+        assertThrows(IndexOutOfBoundsException.class, () -> bis.read(outputBytes, 0, stringLength), "Cannot read out of bounds");
     }
 }

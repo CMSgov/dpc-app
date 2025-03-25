@@ -39,8 +39,8 @@ class RESTUtilsUnitTest {
 	void test_bulkResourceHandler_error_on_action() {
 		Mockito.when(action.apply(any())).thenThrow(UncheckedException.class);
 
-		assertThrows(WebApplicationException.class, () ->
-			RESTUtils.bulkResourceHandler(Stream.of(new Patient()), action, dao, 10));
+        Stream<Resource> stream = Stream.of(new Patient());
+		assertThrows(WebApplicationException.class, () -> RESTUtils.bulkResourceHandler(stream, action, dao, 10));
 	}
 
 	@Test

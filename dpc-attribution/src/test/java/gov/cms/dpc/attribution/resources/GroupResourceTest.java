@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.resources;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static org.junit.jupiter.api.Assertions.*;
@@ -237,14 +237,14 @@ public class GroupResourceTest extends AbstractAttributionTest {
         final Parameters parameters = new Parameters();
         parameters.addParameter().setResource(group);
 
-        assertThrows(InvalidRequestException.class, () -> client
+        IOperationUntypedWithInput<Group> badAddOp = client
                 .operation()
                 .onInstance(createdGroup.getIdElement())
                 .named("$add")
                 .withParameters(parameters)
                 .returnResourceType(Group.class)
-                .encodedJson()
-                .execute());
+                .encodedJson();
+        assertThrows(InvalidRequestException.class, badAddOp::execute);
 
         //Add same patient to existing group, should not throw an error nor should it update any members
 
@@ -392,6 +392,6 @@ public class GroupResourceTest extends AbstractAttributionTest {
 
         return patientsReturned.getEntry().stream()
             .map(component -> (Patient) component.getResource())
-            .collect(Collectors.toList());
+            .toList();
     }
 }

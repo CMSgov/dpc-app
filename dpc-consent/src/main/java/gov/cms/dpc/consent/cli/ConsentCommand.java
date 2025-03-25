@@ -17,7 +17,6 @@ public abstract class ConsentCommand extends ConfiguredCommand<DPCConsentConfigu
     protected ConsentCommand(String name, String description) {
         super(name, description);
         this.ctx = FhirContext.forDstu3();
-//        this.ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
     }
 
     @Override

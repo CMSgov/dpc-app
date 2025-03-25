@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -432,14 +433,11 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         assertNotNull(foundGroup, "Org B should have been able to retrieve their own group");
         assertEquals(orgBGroup.getId(), foundGroup.getId(), "Returned group ID should have been the same as requested ID");
 
-
-        assertThrows(AuthenticationException.class, () ->
-                orgBClient.read()
-                        .resource(Group.class)
-                        .withId(orgAGroup.getId())
-                        .encodedJson()
-                        .execute(),
-                "Organization B should not be able to retrieve group from another organization (Org A)");
+        IReadExecutable<Group> badRead = orgBClient.read()
+                .resource(Group.class)
+                .withId(orgAGroup.getId())
+                .encodedJson();
+        assertThrows(AuthenticationException.class, badRead::execute, "Organization B should not be able to retrieve group from another organization (Org A)");
     }
 
     @Test
@@ -530,23 +528,25 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
         final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
+        final String orgAId = orgAContext.getOrgId();
+        final String orgBId = orgBContext.getOrgId();
 
         //Setup Org A with a practitioner and patient.
-        final Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(), orgAClient);
-        final Patient orgAPatient = (Patient) APITestHelpers.createResource(orgAClient, APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId())).getResource();
+        final Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAId, orgAClient);
+        final Patient orgAPatient = (Patient) APITestHelpers.createResource(orgAClient, APITestHelpers.createPatientResource("4S41C00AA00", orgAId)).getResource();
         assertNotNull(orgAPatient, "Patient should have been created");
 
         //Setup OrgB with a practitioner
-        final Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
+        final Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBId, orgBClient);
 
         //Assert org A can add their own patient to roster successfully.
-        final String orgAPatientId = orgAPatient.getId();
-        final Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Collections.singletonList(orgAPatientId));
+        List<String> orgAPatientIds = Collections.singletonList(orgAPatient.getId());
+        final Group orgAGroup = createAndSubmitGroup(orgAId, orgAPractitioner, orgAClient, orgAPatientIds);
         assertNotNull(orgAGroup, "Roster for Org A should have been created with patient they manage.");
 
         //Assert Org B can NOT add OrgA's patient
         InvalidRequestException e = assertThrows(InvalidRequestException.class, () ->
-                        createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.singletonList(orgAPatientId)),
+                        createAndSubmitGroup(orgBId, orgBPractitioner, orgBClient, orgAPatientIds),
                 "Org should not be able to add patients they do not managed to their group.");
 
         assertTrue(e.getResponseBody().contains("All patients in group must exist."));
@@ -568,14 +568,16 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         //Setup Org B with a practitioner, and empty group.
         final Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
         final Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
+        final String orgBGroupId = orgBGroup.getId();
 
         //Assert an org can NOT update their group with another org's patient.
-        InvalidRequestException e = assertThrows(InvalidRequestException.class, () -> {
-            orgBGroup.addMember(new Group.GroupMemberComponent().setEntity(new Reference(orgAPatient.getId())));
-            Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
-            String provenanceStr = ctx.newJsonParser().encodeResourceToString(provenance);
-            APITestHelpers.updateResource(orgBClient, orgBGroup.getId(), orgBGroup, Map.of("X-Provenance", provenanceStr));
-        }, "Org B should not be able to update roster with patient managed by Org A ");
+        orgBGroup.addMember(new Group.GroupMemberComponent().setEntity(new Reference(orgAPatient.getId())));
+        Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
+        String provenanceStr = ctx.newJsonParser().encodeResourceToString(provenance);
+        Map<String, String> headers = Map.of("X-Provenance", provenanceStr);
+        InvalidRequestException e = assertThrows(InvalidRequestException.class, () ->
+                APITestHelpers.updateResource(orgBClient, orgBGroupId, orgBGroup, headers),
+                "Org B should not be able to update roster with patient managed by Org A ");
 
         assertTrue(e.getResponseBody().contains("All patients in group must exist."));
     }

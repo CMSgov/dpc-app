@@ -8,7 +8,6 @@ import org.hl7.fhir.dstu3.model.Organization;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Entity(name = "organization_contacts")
 public class ContactEntity implements Serializable {
@@ -79,10 +78,7 @@ public class ContactEntity implements Serializable {
 
         contactComponent.setName(this.name.toFHIR());
 
-        final List<ContactPoint> cps = this.telecom
-                .stream()
-                .map(ContactPointEntity::toFHIR)
-                .collect(Collectors.toList());
+        final List<ContactPoint> cps = this.telecom.stream().map(ContactPointEntity::toFHIR).toList();
 
         contactComponent.setTelecom(cps);
         contactComponent.setAddress(this.address.toFHIR());

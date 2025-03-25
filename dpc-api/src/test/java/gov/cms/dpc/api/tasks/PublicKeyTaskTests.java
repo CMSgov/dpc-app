@@ -129,7 +129,8 @@ public class PublicKeyTaskTests {
         final UUID id = UUID.randomUUID();
         final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(bos));
+            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dpk.execute(map, writer));
             assertEquals("Must have key", ex.getMessage(), "Should have correct message");
         }
     }

@@ -75,11 +75,13 @@ public class DistributedBatchQueue extends JobQueueCommon {
     public void submitJobBatches(List<JobQueueBatch> jobBatches) {
         JobQueueBatch firstBatch = jobBatches.stream().findFirst().orElseThrow(() -> new JobQueueFailure("No job batches to submit"));
 
-        logger.debug("Adding jobID {} ({} batches) to the queue at {} with for organization {}.",
-                firstBatch.getJobID(),
-                jobBatches.size(),
-                firstBatch.getSubmitTime().orElseThrow(() -> new JobQueueFailure(firstBatch.getJobID(), firstBatch.getBatchID(), "The batches have not been prepared for submission")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                firstBatch.getOrgID());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Adding jobID {} ({} batches) to the queue at {} with for organization {}.",
+                    firstBatch.getJobID(),
+                    jobBatches.size(),
+                    firstBatch.getSubmitTime().orElseThrow(() -> new JobQueueFailure(firstBatch.getJobID(), firstBatch.getBatchID(), "The batches have not been prepared for submission")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                    firstBatch.getOrgID());
+        }
 
         // Persist the batches in postgres
         try (final Session session = this.factory.openSession()) {

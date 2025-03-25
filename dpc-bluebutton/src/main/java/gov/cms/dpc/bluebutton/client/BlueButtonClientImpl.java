@@ -43,7 +43,6 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     private final BBClientConfiguration config;
     private final Map<String, Timer> timers;
     private final Map<String, Meter> exceptionMeters;
-    private static final String HASH_ALGORITHM = "PBKDF2WithHmacSHA256";
 
     private static String formBeneficiaryID(String fromPatientID) {
         return "Patient/" + fromPatientID;
