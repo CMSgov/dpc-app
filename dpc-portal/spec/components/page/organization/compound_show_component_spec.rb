@@ -11,7 +11,8 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
     end
     let(:org) { build(:provider_organization, name: 'Health Hut', npi: '11111111', id: 2) }
     let(:component) do
-      described_class.new(org, delegate_info, credential_start, role, {icon: 'verified', classes: %i[text-accent-cool], status: 'Accepted'})
+      described_class.new(org, delegate_info, credential_start, role,
+                          { icon: 'verified', classes: %i[text-accent-cool], status: 'Accepted' })
     end
 
     before do

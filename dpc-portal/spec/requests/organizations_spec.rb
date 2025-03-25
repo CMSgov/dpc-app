@@ -197,7 +197,7 @@ RSpec.describe 'Organizations', type: :request do
       end
 
       context :signed_tos do
-        before { org.update(terms_of_service_accepted_by: user, terms_of_service_accepted_at: Time.now()) }
+        before { org.update(terms_of_service_accepted_by: user, terms_of_service_accepted_at: Time.now) }
 
         it 'returns success' do
           get "/organizations/#{org.id}"
@@ -263,7 +263,7 @@ RSpec.describe 'Organizations', type: :request do
       end
 
       context :signed_tos do
-        before { org.update(terms_of_service_accepted_by: user, terms_of_service_accepted_at: Time.now()) }
+        before { org.update(terms_of_service_accepted_by: user, terms_of_service_accepted_at: Time.now) }
         it 'returns success' do
           get "/organizations/#{org.id}"
           expect(response).to be_ok

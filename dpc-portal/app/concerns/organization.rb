@@ -8,7 +8,8 @@ module Organization
     def user_status(organization, link)
       message_prefix = link.is_a?(AoOrgLink) ? 'verification' : 'cd_access'
       if organization.rejected?
-        { icon: 'lock', classes: %i[text-gray-50], status: t("#{message_prefix}.#{organization.verification_reason}_status") }
+        { icon: 'lock', classes: %i[text-gray-50],
+          status: t("#{message_prefix}.#{organization.verification_reason}_status") }
       elsif !link.verification_status?
         { icon: 'lock', classes: %i[text-gray-50], status: t("verification.#{link.verification_reason}_status") }
       elsif organization.terms_of_service_accepted_at.blank?
