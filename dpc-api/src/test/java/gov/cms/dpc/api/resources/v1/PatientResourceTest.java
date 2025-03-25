@@ -603,9 +603,9 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         final Patient orgAPatient = (Patient) APITestHelpers.createResource(orgAClient, APITestHelpers.createPatientResource(MockBlueButtonClient.TEST_PATIENT_MBIS.get(2), orgAContext.getOrgId())).getResource();
         final Patient orgBPatient = (Patient) APITestHelpers.createResource(orgBClient, APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId())).getResource();
         final String orgAPatientId = orgAPatient.getIdElement().getIdPart();
-        final String orgBPatientId = orgAPatient.getIdElement().getIdPart();
+        final String orgBPatientId = orgBPatient.getIdElement().getIdPart();
 
-        //GET /Patient/{id}
+        //Test GET /Patient/{id}
         APITestHelpers.getResourceById(orgAClient, Patient.class, orgAPatientId);
         APITestHelpers.getResourceById(orgBClient, Patient.class, orgBPatientId);
         assertThrows(AuthenticationException.class, () -> APITestHelpers.getResourceById(orgBClient, Patient.class, orgAPatientId), "Expected auth error when accessing another org's patient");
