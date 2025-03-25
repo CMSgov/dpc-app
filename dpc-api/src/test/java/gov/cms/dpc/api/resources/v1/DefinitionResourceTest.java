@@ -69,7 +69,7 @@ class DefinitionResourceTest {
 
         final DPCProfileSupport profileSupport = new DPCProfileSupport(ctx);
 
-        final DefinitionResource definitionResource = new DefinitionResource(ctx, profileSupport);
+        final DefinitionResource definitionResource = new DefinitionResource(profileSupport);
         return APITestHelpers.buildResourceExtension(ctx,
                 List.of(definitionResource),
                 Collections.emptyList(), true);

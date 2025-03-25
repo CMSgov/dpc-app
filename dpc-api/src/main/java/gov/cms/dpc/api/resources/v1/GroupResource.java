@@ -55,6 +55,7 @@ public class GroupResource extends AbstractGroupResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
     static final String SYNTHETIC_BENE_ID = "-19990000000001";
+    static final String GROUP_TYPE = "Group";
 
     // The delimiter for the '_types' list query param.
     static final String LIST_DELIMITER = ",";
@@ -156,7 +157,7 @@ public class GroupResource extends AbstractGroupResource {
         return this.client
                 .read()
                 .resource(Group.class)
-                .withId(new IdType("Group", rosterID.toString()))
+                .withId(new IdType(GROUP_TYPE, rosterID.toString()))
                 .encodedJson()
                 .execute();
     }
@@ -188,7 +189,7 @@ public class GroupResource extends AbstractGroupResource {
         final MethodOutcome outcome = this.client
                 .update()
                 .resource(rosterUpdate)
-                .withId(new IdType("Group", rosterID.toString()))
+                .withId(new IdType(GROUP_TYPE, rosterID.toString()))
                 .encodedJson()
                 .execute();
 
@@ -241,7 +242,7 @@ public class GroupResource extends AbstractGroupResource {
     public Response deleteRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID) {
         this.client
                 .delete()
-                .resourceById(new IdType("Group", rosterID.toString()))
+                .resourceById(new IdType(GROUP_TYPE, rosterID.toString()))
                 .encodedJson()
                 .execute();
 
@@ -290,7 +291,7 @@ public class GroupResource extends AbstractGroupResource {
         // Check the parameters
         checkExportRequest(outputFormat, Prefer);
 
-        final Group group = fetchGroup(new IdType("Group", rosterID));
+        final Group group = fetchGroup(new IdType(GROUP_TYPE, rosterID));
 
         // Get the attributed patients
         final List<String> attributedPatients = fetchPatientMBIs(group);
@@ -327,7 +328,7 @@ public class GroupResource extends AbstractGroupResource {
         parameters.addParameter().setResource(groupUpdate);
         return this.client
                 .operation()
-                .onInstance(new IdType("Group", rosterID.toString()))
+                .onInstance(new IdType(GROUP_TYPE, rosterID.toString()))
                 .named(operationName)
                 .withParameters(parameters)
                 .returnResourceType(Group.class)
@@ -403,7 +404,7 @@ public class GroupResource extends AbstractGroupResource {
                 .stream()
                 .map(entry -> (Patient) entry.getResource())
                 .map(FHIRExtractors::getPatientMBI)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private String fetchOrganizationNPI(IdType orgID) {
@@ -441,7 +442,7 @@ public class GroupResource extends AbstractGroupResource {
         if (rosterID == null) {
             groupIDLog = "";
         } else {
-            groupIDLog = String.format(" for roster %s", new IdType("Group", rosterID.toString()));
+            groupIDLog = String.format(" for roster %s", new IdType(GROUP_TYPE, rosterID.toString()));
         }
 
         final Coding reason = provenance.getReasonFirstRep();
@@ -453,7 +454,7 @@ public class GroupResource extends AbstractGroupResource {
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
                 .map(Reference::getReference)
-                .collect(Collectors.toList());
+                .toList();
 
         logger.info("Organization {} is attesting a {} purpose between provider {} and patient(s) {}{}", performer.getWhoReference().getReference(),
                 reason.getCode(),

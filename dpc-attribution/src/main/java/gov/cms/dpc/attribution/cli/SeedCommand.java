@@ -109,7 +109,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
             final Bundle bundle = parser.parseResource(Bundle.class, orgBundleStream);
             final List<OrganizationEntity> organizationEntities = BundleParser.parse(Organization.class,
                     bundle,
-                    (org) -> converter.fromFHIR(OrganizationEntity.class, org), ORGANIZATION_ID);
+                    org -> converter.fromFHIR(OrganizationEntity.class, org), ORGANIZATION_ID);
 
             organizationEntities
                     .stream()
@@ -163,9 +163,9 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
                     })
                     .map(entity -> patientEntityToRecord(context, entity))
                     .peek(context::executeInsert)
-                    .forEach(record -> {
-                        final Reference ref = new Reference(new IdType("Patient", record.getId().toString()));
-                        patientReferences.put(record.getBeneficiaryId(), ref);
+                    .forEach(r -> {
+                        final Reference ref = new Reference(new IdType("Patient", r.getId().toString()));
+                        patientReferences.put(r.getBeneficiaryId(), ref);
                     });
 
             return patientReferences;
@@ -182,44 +182,44 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
 
     private static OrganizationsRecord organizationEntityToRecord(DSLContext context, OrganizationEntity entity) {
         // We have to manually map the embedded fields
-        final OrganizationsRecord record = context.newRecord(Organizations.ORGANIZATIONS, entity);
-        record.setIdSystem(entity.getOrganizationID().getSystem().ordinal());
-        record.setIdValue(entity.getOrganizationID().getValue());
+        final OrganizationsRecord organizationsRecord = context.newRecord(Organizations.ORGANIZATIONS, entity);
+        organizationsRecord.setIdSystem(entity.getOrganizationID().getSystem().ordinal());
+        organizationsRecord.setIdValue(entity.getOrganizationID().getValue());
 
         final AddressEntity address = entity.getOrganizationAddress();
-        record.setAddressType(address.getType().ordinal());
-        record.setAddressUse(address.getUse().ordinal());
-        record.setLine1(address.getLine1());
-        record.setLine2(address.getLine2());
-        record.setCity(address.getCity());
-        record.setDistrict(address.getDistrict());
-        record.setState(address.getState());
-        record.setPostalCode(address.getPostalCode());
-        record.setCountry(address.getCountry());
-        return record;
+        organizationsRecord.setAddressType(address.getType().ordinal());
+        organizationsRecord.setAddressUse(address.getUse().ordinal());
+        organizationsRecord.setLine1(address.getLine1());
+        organizationsRecord.setLine2(address.getLine2());
+        organizationsRecord.setCity(address.getCity());
+        organizationsRecord.setDistrict(address.getDistrict());
+        organizationsRecord.setState(address.getState());
+        organizationsRecord.setPostalCode(address.getPostalCode());
+        organizationsRecord.setCountry(address.getCountry());
+        return organizationsRecord;
     }
 
     private static ProvidersRecord providersEntityToRecord(DSLContext context, ProviderEntity entity) {
-        final ProvidersRecord record = context.newRecord(Providers.PROVIDERS, entity);
-        record.setOrganizationId(entity.getOrganization().getId());
+        final ProvidersRecord providersRecord = context.newRecord(Providers.PROVIDERS, entity);
+        providersRecord.setOrganizationId(entity.getOrganization().getId());
         final OffsetDateTime created = OffsetDateTime.now(ZoneOffset.UTC);
-        record.setCreatedAt(created);
-        record.setUpdatedAt(created);
-        record.setId(UUID.randomUUID());
+        providersRecord.setCreatedAt(created);
+        providersRecord.setUpdatedAt(created);
+        providersRecord.setId(UUID.randomUUID());
 
-        return record;
+        return providersRecord;
     }
 
     private static PatientsRecord patientEntityToRecord(DSLContext context, PatientEntity entity) {
         // Generate a temporary ID
-        final PatientsRecord record = context.newRecord(Patients.PATIENTS, entity);
-        record.setOrganizationId(entity.getOrganization().getId());
+        final PatientsRecord patientsRecord = context.newRecord(Patients.PATIENTS, entity);
+        patientsRecord.setOrganizationId(entity.getOrganization().getId());
         final OffsetDateTime created = OffsetDateTime.now(ZoneOffset.UTC);
-        record.setCreatedAt(created);
-        record.setUpdatedAt(created);
-        record.setGender(entity.getGender().ordinal());
-        record.setId(UUID.randomUUID());
+        patientsRecord.setCreatedAt(created);
+        patientsRecord.setUpdatedAt(created);
+        patientsRecord.setGender(entity.getGender().ordinal());
+        patientsRecord.setId(UUID.randomUUID());
 
-        return record;
+        return patientsRecord;
     }
 }

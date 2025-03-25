@@ -105,6 +105,7 @@ class IpAddressResourceUnitTest {
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of(existingIp));
 
-        assertThrows(WebApplicationException.class, () -> ipAddressResource.deleteIpAddress(organizationPrincipal, UUID.randomUUID()));
+        UUID notFound = UUID.randomUUID();
+        assertThrows(WebApplicationException.class, () -> ipAddressResource.deleteIpAddress(organizationPrincipal, notFound));
     }
 }

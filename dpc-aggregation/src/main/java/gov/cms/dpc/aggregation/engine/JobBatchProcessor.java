@@ -143,11 +143,12 @@ public class JobBatchProcessor {
     private Optional<Pair<Flowable<Resource>, OutcomeReason>> checkForOptOut(Patient patient) {
         final Pair<Optional<List<ConsentResult>>, Optional<OperationOutcome>> consentResult = getConsent(patient);
 
-        if (consentResult.getRight().isPresent()) {
+        Optional<OperationOutcome> outcome = consentResult.getRight();
+        if (outcome.isPresent()) {
             // Consent check returned an error
             return Optional.of(
                     Pair.of(
-                        Flowable.just(consentResult.getRight().get()),
+                        Flowable.just(outcome.get()),
                         OutcomeReason.INTERNAL_ERROR
                     )
             );

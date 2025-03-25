@@ -35,8 +35,7 @@ import static gov.cms.dpc.api.auth.MacaroonHelpers.BEARER_PREFIX;
  */
 public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, OrganizationPrincipal> {
 
-    private static final Logger logger = LoggerFactory.getLogger(DPCAuthFilter.class);
-
+    private static final Logger log = LoggerFactory.getLogger(DPCAuthFilter.class);
 
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
@@ -72,18 +71,18 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         if (!authenticated) {
             throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
         }
-        logger.info("event_type=request-received, resource_requested={}, organization_id={}, method={}", resourceRequested, orgId, method);
+        log.info("event_type=request-received, resource_requested={}, organization_id={}, method={}", resourceRequested, orgId, method);
     }
 
     private DPCAuthCredentials validateMacaroon(String macaroon, UriInfo uriInfo) {
 
-        logger.trace("Making request to validate token.");
+        log.trace("Making request to validate token.");
 
         final List<Macaroon> m1;
         try {
             m1 = MacaroonBakery.deserializeMacaroon(macaroon);
         } catch (BakeryException e) {
-            logger.error("Cannot deserialize Macaroon", e);
+            log.error("Cannot deserialize Macaroon", e);
             throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
         }
 
@@ -98,7 +97,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         try {
             this.bakery.verifyMacaroon(m1, String.format("organization_id = %s", orgID));
         } catch (BakeryException e) {
-            logger.error("Macaroon verification failed", e);
+            log.error("Macaroon verification failed", e);
             throw new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
         }
 
@@ -121,7 +120,7 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
             // Find the org_id caveat and extract the value
             orgID = MacaroonHelpers.extractOrgIDFromCaveats(Collections.singletonList(rootMacaroon))
                     .orElseThrow(() -> {
-                        logger.error("Cannot find organization_id on Macaroon");
+                        log.error("Cannot find organization_id on Macaroon");
                         return new WebApplicationException(dpc401handler.buildResponse(BEARER_PREFIX, realm));
                     });
         }

@@ -60,11 +60,11 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         String decodedToken = new String(Base64.getDecoder().decode(ORGANIZATION_TOKEN));
         String orgTokenId = decodedToken.substring(decodedToken.indexOf("\"i\":\"")+5,decodedToken.indexOf("\",\"c\":"));
 
-        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(this.fullyAuthedToken);
 
         List<TokenEntity> tokensToBeDeleted = tokens.getEntities().stream()
                 .filter(token -> !token.getId().equals(orgTokenId))
-                .collect(Collectors.toList());
+                .toList();
 
         tokensToBeDeleted.forEach(token -> deleteToken(token.getId()));
     }
@@ -72,7 +72,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
     @Test
     void testTokenList() throws IOException {
 
-        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(this.fullyAuthedToken);
         assertFalse(tokens.getEntities().isEmpty(), "Should have at least one token");
         assertEquals(LocalDate.now(ZoneOffset.UTC), tokens.getCreatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDate(), "Should have created date");
         final TokenEntity token = ((List<TokenEntity>) tokens.getEntities()).get(0);
@@ -113,7 +113,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         }
 
         // List the tokens
-        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(this.fullyAuthedToken);
         assertEquals(1, tokens
                 .getEntities()
                 .stream()
@@ -159,7 +159,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
             }
         }
 
-        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(this.fullyAuthedToken);
         assertEquals(1, tokens.getEntities().stream().filter(token -> token.getExpiresAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDate().equals(expiresFinal.toLocalDate())).count(), "Should have 1 token with matching expiration");
     }
 
@@ -212,7 +212,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
             }
         }
 
-        final CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(this.fullyAuthedToken);
         assertEquals(1, tokens.getEntities().stream()
                 .filter(token -> token.getExpiresAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDate().equals(expiresFinal.toLocalDate()))
                 .filter(token -> token.getLabel().equals("custom-label")).count(), "Should have 1 token with matching expiration and custom label");
@@ -255,7 +255,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         TokenEntity token = createToken();
 
         //Ensure it was crated and persisted
-        CollectionResponse<TokenEntity> tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
+        CollectionResponse<TokenEntity> tokens = fetchTokens(this.fullyAuthedToken);
         assertFalse(tokens.getEntities().isEmpty(), "Should have a token");
         List<TokenEntity> tokenList = tokens.getEntities().stream().filter(t -> t.getId().equals(token.getId())).collect(Collectors.toList());
         assertEquals(1, tokenList.size(), "There should exist exactly 1 token with matching token ID");
@@ -271,11 +271,11 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         }
 
         //Ensure it is no longer returned when listing tokens
-        tokens = fetchTokens(ORGANIZATION_ID, this.fullyAuthedToken);
-        tokenList = tokens.getEntities().stream().filter(t -> t.getId().equals(token.getId())).collect(Collectors.toList());
+        tokens = fetchTokens(this.fullyAuthedToken);
+        tokenList = tokens.getEntities().stream().filter(t -> t.getId().equals(token.getId())).toList();
         assertEquals(0, tokenList.size(), "There should exist exactly 0 tokens with matching token ID");
 
-        //Ensure it is not longer returned when fetched by id
+        //Ensure it is no longer returned when fetched by id
         final HttpGet httpGet = new HttpGet(getBaseURL() + "/Token/"+token.getId());
         httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
         try (final CloseableHttpClient client = HttpClients.createDefault();CloseableHttpResponse response = client.execute(httpGet)) {
@@ -293,16 +293,15 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         }
     }
 
-    private boolean deleteToken(String tokenId){
+    private void deleteToken(String tokenId){
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpDelete httpDelete = new HttpDelete(getBaseURL() + String.format("/Token/%s", tokenId));
             httpDelete.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             try (CloseableHttpResponse response = client.execute(httpDelete)) {
-                return response.getStatusLine().getStatusCode() == 204;
+                response.getStatusLine().getStatusCode();
             }
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
     }
 
@@ -314,25 +313,26 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
 
         // Create a new JWT
-        final APIAuthHelpers.AuthResponse authResponse = APIAuthHelpers.jwtAuthFlow(this.getBaseURL(), fullyAuthedToken, PUBLIC_KEY_ID, PRIVATE_KEY);
+        final String baseUrl = this.getBaseURL();
+        final APIAuthHelpers.AuthResponse authResponse = APIAuthHelpers.jwtAuthFlow(baseUrl, fullyAuthedToken, PUBLIC_KEY_ID, PRIVATE_KEY);
         assertAll(() -> assertNotEquals("", authResponse.accessToken, "Should have token"),
                 () -> assertEquals(300, authResponse.expiresIn, "Should be valid for 300 seconds"),
                 () -> assertEquals("system/*.*", authResponse.scope, "Should have correct scope"),
                 () -> assertEquals("bearer", authResponse.tokenType, "Should be a macaroon"));
 
         // Try to authenticate using the private key for org 1 and the token for org 2, should throw an exception, but in the auth handler
-        final AssertionFailedError error = assertThrows(AssertionFailedError.class, () -> APIAuthHelpers.jwtAuthFlow(this.getBaseURL(), m2, PUBLIC_KEY_ID, PRIVATE_KEY));
-        error.getMessage();
+        final AssertionFailedError error = assertThrows(AssertionFailedError.class, () -> APIAuthHelpers.jwtAuthFlow(baseUrl, m2, PUBLIC_KEY_ID, PRIVATE_KEY));
+        System.out.println(error.getMessage());
+        // TODO: add assertion -acw
     }
 
-    CollectionResponse<TokenEntity> fetchTokens(String orgID, String token) throws IOException {
+    CollectionResponse<TokenEntity> fetchTokens(String token) throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpGet httpGet = new HttpGet(getBaseURL() + "/Token");
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<TokenEntity>>() {
-                });
+                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
             }
         }
     }

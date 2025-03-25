@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -72,8 +71,8 @@ public class AttestationUnitTests {
         group.addMember().setEntity(new Reference("Patient/test-patient"));
         final Provenance provenance = createTestProvenance();
 
-
-        assertThrows(NullPointerException.class, () -> groupResource.createRoster(new OrganizationPrincipal(org), provenance, group));
+        final OrganizationPrincipal principal = new OrganizationPrincipal(org);
+        assertThrows(NullPointerException.class, () -> groupResource.createRoster(principal, provenance, group));
 
         // Check the log worked correctly
         assertEquals(1, listAppender.list.size(), "Should have a logged message");
@@ -87,7 +86,7 @@ public class AttestationUnitTests {
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
                 .map(Reference::getReference)
-                .collect(Collectors.toList());
+                .toList();
         final String expectedMessage = String.format("Organization %s is attesting a %s purpose between provider %s and patient(s) %s", performer.getWhoReference().getReference(), reason.getCode(), performer.getOnBehalfOfReference().getReference(), attributedPatients);
         assertEquals(expectedMessage, listAppender.list.get(0).getFormattedMessage(), "Should have correct message");
     }
@@ -103,7 +102,8 @@ public class AttestationUnitTests {
         final Provenance provenance = createTestProvenance();
         final UUID rosterID = UUID.randomUUID();
 
-        assertThrows(NullPointerException.class, () -> groupResource.updateRoster(new OrganizationPrincipal(org), rosterID, provenance, group));
+        final OrganizationPrincipal principal = new OrganizationPrincipal(org);
+        assertThrows(NullPointerException.class, () -> groupResource.updateRoster(principal, rosterID, provenance, group));
 
         // Check the log worked correctly
         assertEquals(1, listAppender.list.size(), "Should have a logged message");
@@ -117,7 +117,7 @@ public class AttestationUnitTests {
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
                 .map(Reference::getReference)
-                .collect(Collectors.toList());
+                .toList();
         final String expectedMessage = String.format("Organization %s is attesting a %s purpose between provider %s and patient(s) %s for roster %s", performer.getWhoReference().getReference(), reason.getCode(), performer.getOnBehalfOfReference().getReference(), attributedPatients, new IdType("Group", rosterID.toString()));
         assertEquals(expectedMessage, listAppender.list.get(0).getFormattedMessage(), "Should have correct message");
     }
@@ -135,7 +135,8 @@ public class AttestationUnitTests {
         final Provenance provenance = createTestProvenance();
         final UUID rosterID = UUID.randomUUID();
 
-        assertThrows(NullPointerException.class, () -> groupResource.addRosterMembers(new OrganizationPrincipal(org), rosterID, provenance, group));
+        final OrganizationPrincipal principal = new OrganizationPrincipal(org);
+        assertThrows(NullPointerException.class, () -> groupResource.addRosterMembers(principal, rosterID, provenance, group));
 
         // Check the log worked correctly
         assertEquals(1, listAppender.list.size(), "Should have a logged message");
@@ -149,7 +150,7 @@ public class AttestationUnitTests {
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
                 .map(Reference::getReference)
-                .collect(Collectors.toList());
+                .toList();
         final String expectedMessage = String.format("Organization %s is attesting a %s purpose between provider %s and patient(s) %s for roster %s", performer.getWhoReference().getReference(), reason.getCode(), performer.getOnBehalfOfReference().getReference(), attributedPatients, new IdType("Group", rosterID.toString()));
         assertEquals(expectedMessage, listAppender.list.get(0).getFormattedMessage(), "Should have correct message");
     }
@@ -167,7 +168,8 @@ public class AttestationUnitTests {
         final Provenance provenance = createTestProvenance();
         final UUID rosterID = UUID.randomUUID();
 
-        assertThrows(NullPointerException.class, () -> groupResource.updateRoster(new OrganizationPrincipal(org), rosterID, provenance, group));
+        final OrganizationPrincipal principal = new OrganizationPrincipal(org);
+        assertThrows(NullPointerException.class, () -> groupResource.updateRoster(principal, rosterID, provenance, group));
 
         // Check the log worked correctly
         assertEquals(1, listAppender.list.size(), "Should have a logged message");
@@ -181,7 +183,7 @@ public class AttestationUnitTests {
                 .stream()
                 .map(Group.GroupMemberComponent::getEntity)
                 .map(Reference::getReference)
-                .collect(Collectors.toList());
+                .toList();
         final String expectedMessage = String.format("Organization %s is attesting a %s purpose between provider %s and patient(s) %s for roster %s", performer.getWhoReference().getReference(), reason.getCode(), performer.getOnBehalfOfReference().getReference(), attributedPatients, new IdType("Group", rosterID.toString()));
         assertEquals(expectedMessage, listAppender.list.get(0).getFormattedMessage(), "Should have correct message");
     }

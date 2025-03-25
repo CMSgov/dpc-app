@@ -44,7 +44,7 @@ public class StaticAuthFilter extends AuthFilter<DPCAuthCredentials, Organizatio
         MDC.put(MDCConstants.ORGANIZATION_ID, orgID);
 
         final Organization org = new Organization();
-        org.setId(new IdType("Organization", orgID));
+        org.setId(new IdType(ORG_HEADER, orgID));
         this.authenticate(requestContext, new DPCAuthCredentials(null, org, null, ""), null);
     }
 }

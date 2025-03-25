@@ -4,6 +4,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.IDeleteTyped;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -174,11 +176,11 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         group.getCharacteristicFirstRep().getCode().getCodingFirstRep().setCode("<script>nope</script>");
 
         // Submit the group
-        assertThrows(InvalidRequestException.class, () -> client
+        ICreateTyped badCreate = client
                 .create()
                 .resource(group)
-                .encodedJson()
-                .execute());
+                .encodedJson();
+        assertThrows(InvalidRequestException.class, badCreate::execute);
 
         // Reset back to good safe value
         group.getCharacteristicFirstRep().getCode().getCodingFirstRep().setCode(safeCodeValue);
@@ -207,12 +209,12 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         provenance.addAgent(component);
 
         //Provenance parser can't parse
-        assertThrows(UnprocessableEntityException.class, () -> client
+        ICreateTyped badProvenance = client
                 .create()
                 .resource(group)
                 .encodedJson()
-                .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
-                .execute());
+                .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance));
+        assertThrows(UnprocessableEntityException.class, badProvenance::execute);
     }
 
     @Test
@@ -454,13 +456,12 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
         Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
-        assertThrows(AuthenticationException.class, () ->
-                orgBClient.delete()
-                        .resource(orgAGroup)
-                        .encodedJson()
-                        .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
-                        .execute(),
-                "Organization should not be able to delete another organization's group.");
+        IDeleteTyped badDelete = orgBClient
+                .delete()
+                .resource(orgAGroup)
+                .encodedJson()
+                .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance));
+        assertThrows(AuthenticationException.class, badDelete::execute, "Organization should not be able to delete another organization's group.");
 
         MethodOutcome result = orgBClient
                 .delete()
@@ -484,12 +485,12 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
         Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
-        assertThrows(AuthenticationException.class, () ->
-                orgBClient.update().resource(orgAGroup)
-                        .encodedJson()
-                        .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
-                        .execute(),
-                "Org should receive auth error when updating another org's group.");
+        IUpdateExecutable badUpdate = orgBClient
+                .update()
+                .resource(orgAGroup)
+                .encodedJson()
+                .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance));
+        assertThrows(AuthenticationException.class, badUpdate::execute, "Org should receive auth error when updating another org's group.");
 
         MethodOutcome response = orgBClient.update().resource(orgBGroup)
                 .encodedJson()

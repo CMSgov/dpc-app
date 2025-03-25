@@ -230,32 +230,34 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
         final Practitioner orgAPractitioner = (Practitioner) APITestHelpers.createResource(orgAClient, practitioner1).getResource();
         final Practitioner orgBPractitioner = (Practitioner) APITestHelpers.createResource(orgBClient, practitioner2).getResource();
+        final String orgAPractitionerId = orgAPractitioner.getIdElement().getIdPart();
+        final String orgBPractitionerId = orgBPractitioner.getIdElement().getIdPart();
 
         //Test GET /Practitioner/{id}
-        assertNotNull(APITestHelpers.getResourceById(orgAClient, Practitioner.class, orgAPractitioner.getIdElement().getIdPart()));
-        assertNotNull(APITestHelpers.getResourceById(orgBClient, Practitioner.class, orgBPractitioner.getIdElement().getIdPart()));
+        assertNotNull(APITestHelpers.getResourceById(orgAClient, Practitioner.class, orgAPractitionerId));
+        assertNotNull(APITestHelpers.getResourceById(orgBClient, Practitioner.class, orgBPractitionerId));
         assertThrows(AuthenticationException.class,
-                () -> APITestHelpers.getResourceById(orgBClient, Practitioner.class, orgAPractitioner.getIdElement().getIdPart())
+                () -> APITestHelpers.getResourceById(orgBClient, Practitioner.class, orgAPractitionerId)
                 , "Expected auth exception when accessing another org's practitioner.");
 
         //Test PUT /Practitioner/{id}
         assertThrows(AuthenticationException.class,
-                () -> APITestHelpers.updateResource(orgBClient, orgAPractitioner.getIdElement().getIdPart(), orgAPractitioner)
+                () -> APITestHelpers.updateResource(orgBClient, orgAPractitionerId, orgAPractitioner)
                 , "Expected auth exception when updating another org's practitioner.");
         assertThrows(NotImplementedOperationException.class,
-                () -> APITestHelpers.updateResource(orgAClient, orgAPractitioner.getIdElement().getIdPart(), orgAPractitioner)
+                () -> APITestHelpers.updateResource(orgAClient, orgAPractitionerId, orgAPractitioner)
                 , "Expected Not Implemented exception when updating a practitioner.");
         assertThrows(NotImplementedOperationException.class,
-                () -> APITestHelpers.updateResource(orgBClient, orgBPractitioner.getIdElement().getIdPart(), orgBPractitioner)
+                () -> APITestHelpers.updateResource(orgBClient, orgBPractitionerId, orgBPractitioner)
                 , "Expected Not Implemented exception when updating a practitioner.");
 
         //Test DELETE /Practitioner/{id}
         assertThrows(AuthenticationException.class,
-                () -> APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Practitioner, orgAPractitioner.getIdElement().getIdPart())
+                () -> APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Practitioner, orgAPractitionerId)
                 , "Expected auth exception when deleting another org's practitioner.");
 
-        APITestHelpers.deleteResourceById(orgAClient, DPCResourceType.Practitioner, orgAPractitioner.getIdElement().getIdPart());
-        APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Practitioner, orgBPractitioner.getIdElement().getIdPart());
+        APITestHelpers.deleteResourceById(orgAClient, DPCResourceType.Practitioner, orgAPractitionerId);
+        APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Practitioner, orgBPractitionerId);
     }
 
     @Test

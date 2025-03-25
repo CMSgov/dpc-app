@@ -2,6 +2,8 @@ package gov.cms.dpc.attribution.resources;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
@@ -46,10 +48,11 @@ public class GroupResourceTest extends AbstractAttributionTest {
         group.addMember().setEntity(new Reference(patient1.getIdElement()));
         group.addMember().setEntity(new Reference(patient2.getIdElement()));
 
-        assertThrows(InvalidRequestException.class, () -> client.create()
+        ICreateTyped badCreate = client
+                .create()
                 .resource(group)
-                .encodedJson()
-                .execute());
+                .encodedJson();
+        assertThrows(InvalidRequestException.class, badCreate::execute);
 
         //Remove second patient
         group.getMember().remove(1);
@@ -78,11 +81,11 @@ public class GroupResourceTest extends AbstractAttributionTest {
             .execute();
 
         // "Create" a new roster for the same provider and org
-        assertThrows(ForbiddenOperationException.class, () ->
-            client.create()
-            .resource(group)
-            .encodedJson()
-            .execute(), "Should error on a duplicate roster");
+        ICreateTyped duplicateCreate = client
+                .create()
+                .resource(group)
+                .encodedJson();
+        assertThrows(ForbiddenOperationException.class, duplicateCreate::execute, "Should error on a duplicate roster");
     }
 
     @Test
@@ -102,21 +105,21 @@ public class GroupResourceTest extends AbstractAttributionTest {
 
         assertTrue(methodOutcome.getCreated());
 
-        //Add an additional patient
+        //Add a patient
         final Patient patient2 = createPatient("0O00O00OO00", DEFAULT_ORG_ID);
         group.addMember().setEntity(new Reference(patient2.getIdElement()));
 
-        assertThrows(InvalidRequestException.class, () -> client.update()
+        IUpdateExecutable badUpdate = client.update()
                 .resource(group)
                 .withId(groupId)
-                .encodedJson()
-                .execute());
+                .encodedJson();
+        assertThrows(InvalidRequestException.class, badUpdate::execute);
 
         //Replace patient
         group.getMember().clear();
         group.addMember().setEntity(new Reference(patient2.getIdElement()));
 
-        final MethodOutcome methodOutcomeUpdate = client.update()
+        client.update()
                 .resource(group)
                 .withId(methodOutcome.getResource().getIdElement())
                 .encodedJson()

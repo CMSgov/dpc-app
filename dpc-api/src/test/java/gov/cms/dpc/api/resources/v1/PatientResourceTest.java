@@ -54,7 +54,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
@@ -315,27 +314,27 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(64, resultEmptySince.getTotal(), "Should have 64 entries in Bundle");
 
         // Request with an invalid since parameter should throw an error
-        assertThrows(InvalidRequestException.class, () -> client
+        IOperationUntypedWithInput<Bundle> invalidSinceOp = client
                 .operation()
                 .onInstance(new IdType("Patient", patientId))
                 .named("$everything")
                 .withSearchParameter(Parameters.class, "_since", new StringParam("foo"))
                 .returnResourceType(Bundle.class)
                 .useHttpGet()
-                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
-                .execute());
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
+        assertThrows(InvalidRequestException.class, invalidSinceOp::execute);
 
         // Request with a since parameter in the future should throw an error
-        String sinceInvalid = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusDays(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        assertThrows(InvalidRequestException.class, () -> client
+        String sinceFuture = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusDays(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        IOperationUntypedWithInput<Bundle> futureSinceOp = client
                 .operation()
                 .onInstance(new IdType("Patient", patientId))
                 .named("$everything")
-                .withSearchParameter(Parameters.class, "_since", new StringParam(sinceInvalid))
+                .withSearchParameter(Parameters.class, "_since", new StringParam(sinceFuture))
                 .returnResourceType(Bundle.class)
                 .useHttpGet()
-                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
-                .execute());
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
+        assertThrows(InvalidRequestException.class, futureSinceOp::execute);
 
         // Request with a valid since parameter should return data
         String sinceValid = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).minusSeconds(5).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
@@ -387,7 +386,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(64, resultNoSince.getTotal(), "Should have 64 entries in Bundle");
         for (Bundle.BundleEntryComponent bec : resultNoSince.getEntry()) {
             List<DPCResourceType> resourceTypes = List.of(DPCResourceType.Coverage, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Patient);
-            assertTrue(resourceTypes.stream().map(Enum::toString).collect(Collectors.toList()).contains(bec.getResource().getResourceType().toString()), "Resource type should be Coverage, EOB, or Patient");
+            assertTrue(resourceTypes.stream().map(Enum::toString).toList().contains(bec.getResource().getResourceType().toString()), "Resource type should be Coverage, EOB, or Patient");
         }
 
         Bundle resultEmptySince = client
@@ -402,26 +401,26 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         assertEquals(64, resultEmptySince.getTotal(), "Should have 64 entries in Bundle");
 
-        assertThrows(InvalidRequestException.class, () -> client
+        IOperationUntypedWithInput<Bundle> invalidSinceOp = client
                 .operation()
                 .onInstance(new IdType("Patient", patientId))
                 .named("$everything")
                 .withSearchParameter(Parameters.class, "_since", new StringParam("foo"))
                 .returnResourceType(Bundle.class)
                 .useHttpGet()
-                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
-                .execute());
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
+        assertThrows(InvalidRequestException.class, invalidSinceOp::execute);
 
-        String sinceInvalid = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusDays(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        assertThrows(InvalidRequestException.class, () -> client
+        String sinceFuture = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusDays(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        IOperationUntypedWithInput<Bundle> futureSinceOp = client
                 .operation()
                 .onInstance(new IdType("Patient", patientId))
                 .named("$everything")
-                .withSearchParameter(Parameters.class, "_since", new StringParam(sinceInvalid))
+                .withSearchParameter(Parameters.class, "_since", new StringParam(sinceFuture))
                 .returnResourceType(Bundle.class)
                 .useHttpGet()
-                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
-                .execute());
+                .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()));
+        assertThrows(InvalidRequestException.class, futureSinceOp::execute);
 
         // Request with a valid since parameter should return data
         String sinceValid = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).minusSeconds(5).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
@@ -568,13 +567,15 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         //Setup org A with a patient
         final Patient orgAPatient = (Patient) APITestHelpers.createResource(orgAClient, APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId())).getResource();
+        final String orgAPatientId = orgAPatient.getId();
 
         //Setup org B with a patient
         final Patient orgBPatient = (Patient) APITestHelpers.createResource(orgBClient, APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId())).getResource();
+        final String orgBPatientId = orgBPatient.getId();
 
-        assertNotNull(APITestHelpers.getResourceById(orgAClient, Patient.class,orgAPatient.getId()), "Org should be able to retrieve their own patient.");
-        assertNotNull(APITestHelpers.getResourceById(orgBClient,Patient.class, orgBPatient.getId()), "Org should be able to retrieve their own patient.");
-        assertThrows(AuthenticationException.class, () -> APITestHelpers.getResourceById(orgAClient,Patient.class, orgBPatient.getId()), "Expected auth error when retrieving another org's patient.");
+        assertNotNull(APITestHelpers.getResourceById(orgAClient, Patient.class, orgAPatientId), "Org should be able to retrieve their own patient.");
+        assertNotNull(APITestHelpers.getResourceById(orgBClient, Patient.class, orgBPatientId), "Org should be able to retrieve their own patient.");
+        assertThrows(AuthenticationException.class, () -> APITestHelpers.getResourceById(orgAClient, Patient.class, orgBPatientId), "Expected auth error when retrieving another org's patient.");
     }
 
     @Test
@@ -586,8 +587,9 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         //Setup org B with a patient
         final Patient orgBPatient = (Patient) APITestHelpers.createResource(orgBClient, APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId())).getResource();
+        String orgBPatientId = orgBPatient.getIdElement().getIdPart();
 
-        assertThrows(AuthenticationException.class, () -> APITestHelpers.deleteResourceById(orgAClient, DPCResourceType.Patient, orgBPatient.getIdElement().getIdPart()), "Expected auth error when deleting another org's patient.");
+        assertThrows(AuthenticationException.class, () -> APITestHelpers.deleteResourceById(orgAClient, DPCResourceType.Patient, orgBPatientId), "Expected auth error when deleting another org's patient.");
         APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Patient, orgBPatient.getIdElement().getIdPart());
     }
 
@@ -600,22 +602,18 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         final Patient orgAPatient = (Patient) APITestHelpers.createResource(orgAClient, APITestHelpers.createPatientResource(MockBlueButtonClient.TEST_PATIENT_MBIS.get(2), orgAContext.getOrgId())).getResource();
         final Patient orgBPatient = (Patient) APITestHelpers.createResource(orgBClient, APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId())).getResource();
+        final String orgAPatientId = orgAPatient.getIdElement().getIdPart();
+        final String orgBPatientId = orgAPatient.getIdElement().getIdPart();
 
-        //Test GET /Patient/{id}
-        APITestHelpers.getResourceById(orgAClient,Patient.class,orgAPatient.getIdElement().getIdPart());
-        APITestHelpers.getResourceById(orgBClient,Patient.class,orgBPatient.getIdElement().getIdPart());
-        assertThrows(AuthenticationException.class, () -> APITestHelpers.getResourceById(orgBClient,Patient.class,orgAPatient.getIdElement().getIdPart()), "Expected auth error when accessing another org's patient");
-
-        //Test PUT /Patient/{id}
-        APITestHelpers.updateResource(orgAClient,orgAPatient.getIdElement().getIdPart(),orgAPatient);
-        APITestHelpers.updateResource(orgBClient,orgBPatient.getIdElement().getIdPart(),orgBPatient);
-        assertThrows(AuthenticationException.class, () -> APITestHelpers.updateResource(orgBClient,orgAPatient.getIdElement().getIdPart(),orgAPatient), "Expected auth error when updating another org's patient");
+        //GET /Patient/{id}
+        APITestHelpers.getResourceById(orgAClient, Patient.class, orgAPatientId);
+        APITestHelpers.getResourceById(orgBClient, Patient.class, orgBPatientId);
+        assertThrows(AuthenticationException.class, () -> APITestHelpers.getResourceById(orgBClient, Patient.class, orgAPatientId), "Expected auth error when accessing another org's patient");
 
         //Test PUT /Patient/{id}
-        APITestHelpers.updateResource(orgAClient,orgAPatient.getIdElement().getIdPart(),orgAPatient);
-        APITestHelpers.updateResource(orgBClient,orgBPatient.getIdElement().getIdPart(),orgBPatient);
-        assertThrows(AuthenticationException.class, () -> APITestHelpers.updateResource(orgBClient,orgAPatient.getIdElement().getIdPart(),orgAPatient), "Expected auth error when updating another org's patient");
-
+        APITestHelpers.updateResource(orgAClient, orgAPatientId, orgAPatient);
+        APITestHelpers.updateResource(orgBClient, orgBPatientId, orgBPatient);
+        assertThrows(AuthenticationException.class, () -> APITestHelpers.updateResource(orgBClient, orgAPatientId, orgAPatient), "Expected auth error when updating another org's patient");
 
         //Test Get /Patient/{id}/$everything
         Practitioner orgAPractitioner = FHIRPractitionerBuilder.newBuilder()
@@ -628,10 +626,9 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
        Bundle result = APITestHelpers.getPatientEverything(orgAClient, orgAPatient.getIdElement().getIdPart(), generateProvenance(orgAContext.getOrgId(),orgAPractitioner.getIdElement().getIdPart()));
        assertEquals(64, result.getTotal(), "Should have 64 entries in Bundle");
 
-        final String orgAPractitionerId = orgAPractitioner.getIdElement().getIdPart();
-       assertThrows(AuthenticationException.class, () ->
-               APITestHelpers.getPatientEverything(orgBClient, orgAPatient.getIdElement().getIdPart(), generateProvenance(orgAContext.getOrgId(), orgAPractitionerId))
-       , "Expected auth error when export another org's patient's data");
+       final String provenance = generateProvenance(orgAContext.getOrgId(), orgAPractitioner.getIdElement().getIdPart());
+       assertThrows(AuthenticationException.class, () -> APITestHelpers.getPatientEverything(orgBClient, orgAPatientId, provenance),
+               "Expected auth error when export another org's patient's data");
     }
 
     @Test

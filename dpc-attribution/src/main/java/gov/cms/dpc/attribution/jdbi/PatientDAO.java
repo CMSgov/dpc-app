@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
     private final int queryChunkSize;
@@ -87,7 +86,7 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         // it up into queries that we can handle without causing a stack overflow.
         List<List<String>> mbiChunks = ListUtils.partition(mbis, queryChunkSize);
         mbiChunks.forEach(mbiList -> {
-            List<String> capitalizedMbis = mbiList.stream().map(String::toUpperCase).collect(Collectors.toList());
+            List<String> capitalizedMbis = mbiList.stream().map(String::toUpperCase).toList();
 
             final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
             final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);

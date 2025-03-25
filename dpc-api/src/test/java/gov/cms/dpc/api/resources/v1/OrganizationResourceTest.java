@@ -75,7 +75,8 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         assertThrows(InvalidRequestException.class, () -> OrganizationHelpers.createOrganization(ctx, client, newOrgID, true));
 
         // Now, try to create one again, but using an actual org token
-        assertThrows(AuthenticationException.class, () -> OrganizationHelpers.createOrganization(ctx, APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY), "1111111112", true));
+        IGenericClient authClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        assertThrows(AuthenticationException.class, () -> OrganizationHelpers.createOrganization(ctx, authClient, "1111111112", true));
     }
 
     @Test

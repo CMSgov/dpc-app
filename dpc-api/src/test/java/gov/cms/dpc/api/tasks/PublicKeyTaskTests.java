@@ -48,7 +48,8 @@ public class PublicKeyTaskTests {
     void testKeyUploadNoOrg() throws Exception {
         final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> upk.execute(map, "", new PrintWriter(new OutputStreamWriter(bos))));
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(bos));
+            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> upk.execute(map, "", writer));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
         }
     }
@@ -107,7 +108,8 @@ public class PublicKeyTaskTests {
     void testKeyListNoOrg() throws IOException {
         final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> lpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(bos));
+            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> lpk.execute(map, writer));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
         }
     }
@@ -116,7 +118,8 @@ public class PublicKeyTaskTests {
     void testKeyDeletionNoOrg() throws IOException {
         final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dpk.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(bos));
+            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dpk.execute(map, writer));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
         }
     }

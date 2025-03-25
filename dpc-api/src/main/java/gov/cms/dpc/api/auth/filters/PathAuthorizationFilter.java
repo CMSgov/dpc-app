@@ -29,7 +29,7 @@ import java.util.UUID;
 @Priority(Priorities.AUTHENTICATION)
 public class PathAuthorizationFilter extends DPCAuthFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(PathAuthorizationFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(PathAuthorizationFilter.class);
     private final PathAuthorizer pa;
 
     public PathAuthorizationFilter(MacaroonBakery bakery, Authenticator<DPCAuthCredentials, OrganizationPrincipal> auth, TokenDAO dao, PathAuthorizer pa, DPCUnauthorizedHandler dpc401handler) {
@@ -42,14 +42,12 @@ public class PathAuthorizationFilter extends DPCAuthFilter {
         final String pathParam = this.pa.pathParam();
         final String pathValue = uriInfo.getPathParameters().getFirst(pathParam);
         if (pathValue == null) {
-            logger.error("Cannot find path param {} on request. Has: {}", XSSSanitizerUtil.sanitize(pathParam), uriInfo.getPathParameters().keySet());
+            log.error("Cannot find path param {} on request. Has: {}", XSSSanitizerUtil.sanitize(pathParam), uriInfo.getPathParameters().keySet());
             throw new WebApplicationException("Unable to get path parameter from request", Response.Status.INTERNAL_SERVER_ERROR);
         }
 
         final Organization organization = new Organization();
         organization.setId(new IdType("Organization", organizationID.toString()));
-        return new DPCAuthCredentials(macaroon,
-                organization,
-                this.pa, pathValue);
+        return new DPCAuthCredentials(macaroon, organization, this.pa, pathValue);
     }
 }

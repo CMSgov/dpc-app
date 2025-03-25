@@ -39,21 +39,25 @@ public class PublicKeyHandler {
         final ByteArrayInputStream bas = new ByteArrayInputStream(pem.getBytes(StandardCharsets.ISO_8859_1));
         try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(bas, StandardCharsets.UTF_8))) {
             try (PEMParser pemParser = new PEMParser(bufferedReader)) {
-                try {
-                    final Object object = pemParser.readObject();
-                    if (object == null) {
-                        throw new PublicKeyException("Cannot parse public key, returned value is null");
-                    }
-                    if (!(object instanceof SubjectPublicKeyInfo)) {
-                        throw new PublicKeyException(String.format("Cannot convert %s to %s.", object.getClass().getName(), SubjectPublicKeyInfo.class.getName()));
-                    }
-                    return (SubjectPublicKeyInfo) object;
-                } catch (PEMException e) {
-                    throw new PublicKeyException("Not a valid public key", e);
-                }
+                return parsePublicKeyObject(pemParser);
             }
         } catch (IOException e) {
             throw new PublicKeyException("Cannot parse Public Key input", e);
+        }
+    }
+
+    private static SubjectPublicKeyInfo parsePublicKeyObject(PEMParser pemParser) throws IOException {
+        try {
+            final Object object = pemParser.readObject();
+            if (object == null) {
+                throw new PublicKeyException("Cannot parse public key, returned value is null");
+            }
+            if (!(object instanceof SubjectPublicKeyInfo)) {
+                throw new PublicKeyException(String.format("Cannot convert %s to %s.", object.getClass().getName(), SubjectPublicKeyInfo.class.getName()));
+            }
+            return (SubjectPublicKeyInfo) object;
+        } catch (PEMException e) {
+            throw new PublicKeyException("Not a valid public key", e);
         }
     }
 

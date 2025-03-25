@@ -12,6 +12,7 @@ import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import io.reactivex.Flowable;
 import org.apache.commons.lang3.time.StopWatch;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +90,7 @@ class ResourceFetcher {
     }
 
     /**
-     * Given a bundle, return a list of resources in the passed in bundle and all
+     * Given a bundle, return a list of resources in the passed-in bundle and all
      * the resources from the next bundles.
      *
      * @param firstBundle of resources. Included in the result list
@@ -102,7 +103,7 @@ class ResourceFetcher {
 
         // Loop until no more next bundles
         var bundle = firstBundle;
-        while (bundle.getLink(Bundle.LINK_NEXT) != null) {
+        while (bundle.getLink(IBaseBundle.LINK_NEXT) != null) {
             logger.debug("Fetching next bundle {} from BlueButton for {}", resourceType.toString(), fetchId);
             bundle = blueButtonClient.requestNextBundleFromServer(bundle, headers);
             checkBundleTransactionTime(bundle);

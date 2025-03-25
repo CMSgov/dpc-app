@@ -15,6 +15,7 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import jakarta.inject.Named;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -67,7 +68,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     @Override
     public Bundle requestPatientFromServer(String patientId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
         logger.debug("Attempting to fetch patient ID {} from baseURL: {}", patientId, client.getServerBase());
-        ICriterion<ReferenceClientParam> criterion = new ReferenceClientParam(Patient.SP_RES_ID).hasId(patientId);
+        ICriterion<ReferenceClientParam> criterion = new ReferenceClientParam(IAnyResource.SP_RES_ID).hasId(patientId);
         return instrumentCall(REQUEST_PATIENT_METRIC, () ->
                 fetchBundle(Patient.class, Collections.singletonList(criterion), patientId, lastUpdated, headers));
     }
@@ -160,7 +161,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     @Override
     public Bundle requestNextBundleFromServer(Bundle bundle, Map<String, String> headers) throws ResourceNotFoundException {
         return instrumentCall(REQUEST_NEXT_METRIC, () -> {
-            var nextURL = bundle.getLink(Bundle.LINK_NEXT).getUrl();
+            var nextURL = bundle.getLink(IBaseBundle.LINK_NEXT).getUrl();
             logger.debug("Attempting to fetch next bundle from url: {}", nextURL);
             return client
                     .loadPage()
