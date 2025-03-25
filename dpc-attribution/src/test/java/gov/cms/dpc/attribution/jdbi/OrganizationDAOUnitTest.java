@@ -7,7 +7,11 @@ import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OrganizationDAOUnitTest extends AbstractAttributionDAOTest {
 	private RelationshipDAO relationshipDAO;
@@ -18,7 +22,7 @@ class OrganizationDAOUnitTest extends AbstractAttributionDAOTest {
 	private DPCManagedSessionFactory dpcManagedSessionFactory;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		dpcManagedSessionFactory = new DPCManagedSessionFactory(db.getSessionFactory());
 		relationshipDAO = new RelationshipDAO(dpcManagedSessionFactory);
 		patientDAO = new PatientDAO(dpcManagedSessionFactory, 1);
@@ -43,6 +47,13 @@ class OrganizationDAOUnitTest extends AbstractAttributionDAOTest {
 			rosterDAO.persistEntity(roster);
 			relationshipDAO.addAttributionRelationship(attribution);
 		});
+
+		// Verify
+		List<OrganizationEntity> listOrganizations = organizationDAO.listOrganizations();
+		assertEquals(org.getId(), listOrganizations.get(0).getId());
+
+		List<OrganizationEntity> getOrganizationsByIds = organizationDAO.getOrganizationsByIds(Set.of(org.getOrganizationID().getValue()));
+		assertEquals(org.getOrganizationID(), getOrganizationsByIds.get(0).getOrganizationID());
 
 		// Delete
 		db.inTransaction(() -> {

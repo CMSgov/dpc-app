@@ -86,7 +86,7 @@ start-api: start-app
 
 start-api-load-tests: ## Start a new API env for load tests
 start-api-load-tests: secure-envs
-	USE_BFD_MOCK=true AUTH_DISABLED=true docker compose -p dpc-load-tests up api aggregation --wait
+	USE_BFD_MOCK=true docker compose -p dpc-load-tests up api --wait
 
 start-web: ## Start the sandbox portal
 start-web:
@@ -106,6 +106,10 @@ start-portals: start-db start-web start-admin start-portal
 start-load-tests: ## Run DPC performance tests locally in a Docker image provided by Grafana/K6
 start-load-tests: secure-envs
 	@docker run --rm -v $(shell pwd)/dpc-load-testing:/src --env-file $(shell pwd)/ops/config/decrypted/local.env -e ENVIRONMENT=local -i grafana/k6 run /src/script.js
+
+start-macaroon-tests: ## Test load-test macaroons
+start-macaroon-tests:
+	@docker run --rm -v ./dpc-load-testing:/src -e ENVIRONMENT=local -i grafana/k6 run /src/macaroonTests.js
 
 
 # Debug commands

@@ -25,3 +25,9 @@ log_organizations_api_credential_status_job:
   cron: "0 0 * * *"
   class: "LogOrganizationsApiCredentialStatusJob"
   queue: portal
+
+check_config_complete_job:
+  cron: "0 2 * * 0"
+  class: "CheckConfigCompleteJob"
+  queue: portal
+
