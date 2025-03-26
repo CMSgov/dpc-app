@@ -12,7 +12,7 @@ class OrganizationsController < ApplicationController
   before_action :tos_accepted, only: %i[show]
 
   def index
-    @links = current_user.provider_links if @links.nil?
+    @links = current_user.provider_links
     ao_or_cd = @links.any? { |link| link.is_a?(AoOrgLink) }
     render(Page::Organization::OrganizationListComponent.new(ao_or_cd:, links: @links))
   end
@@ -98,7 +98,7 @@ class OrganizationsController < ApplicationController
   end
 
   def cur_org_status
-    @links = current_user.provider_links if @links.nil?
+    @links = current_user.provider_links
     cur_link = @links.find { |link| link.provider_organization_id == @organization.id }
     org_status(@organization, cur_link)
   end
