@@ -2,7 +2,7 @@ package gov.cms.dpc.fhir.validations.profiles;
 
 public class AddressProfile implements IProfileLoader {
 
-    public static String PROFILE_URI = "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-address";
+    public static final String PROFILE_URI = "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-address";
 
     @Override
     public String getPath() {
