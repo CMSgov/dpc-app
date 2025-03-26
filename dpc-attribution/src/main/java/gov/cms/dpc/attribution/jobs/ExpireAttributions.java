@@ -41,9 +41,11 @@ public class ExpireAttributions extends Job {
     @Override
     public void doJob(JobExecutionContext jobContext) {
         final OffsetDateTime expirationTemporal = OffsetDateTime.now(ZoneOffset.UTC);
-        // Find all the jobs and expire them
-        logger.debug("Expiring active attribution relationships before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Expiring active attribution relationships before {}.", expirationTemporal.format(DateTimeFormatter.ISO_DATE_TIME));
+        }
 
+        // Find all the jobs and expire them
         try (final Connection connection = this.dataSource.getConnection()) {
             connection.setAutoCommit(false);
 

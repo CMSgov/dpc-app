@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution.resources;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -148,26 +149,26 @@ class OrganizationResourceTest extends AbstractAttributionTest {
                 .execute();
 
         // Try to read the resources, should get 404s
-        assertThrows(ResourceNotFoundException.class, () -> client
+        IReadExecutable<Patient> patientSearch = client
                 .read()
                 .resource(Patient.class)
                 .withId(createdPatient.getId())
-                .encodedJson()
-                .execute(), "Should not have found patient");
+                .encodedJson();
+        assertThrows(ResourceNotFoundException.class, patientSearch::execute, "Should not have found patient");
 
-        assertThrows(ResourceNotFoundException.class, () -> client
+        IReadExecutable<Practitioner> practitionerSearch = client
                 .read()
                 .resource(Practitioner.class)
                 .withId(createdPractitioner.getId())
-                .encodedJson()
-                .execute(), "Should not have found practitioner");
+                .encodedJson();
+        assertThrows(ResourceNotFoundException.class, practitionerSearch::execute, "Should not have found practitioner");
 
-        assertThrows(ResourceNotFoundException.class, () -> client
+        IReadExecutable<Organization> organizationSearch = client
                 .read()
                 .resource(Organization.class)
                 .withId(organization.getId())
-                .encodedJson()
-                .execute(), "Should not have found organization");
+                .encodedJson();
+        assertThrows(ResourceNotFoundException.class, organizationSearch::execute, "Should not have found organization");
     }
 
     @Test
@@ -186,10 +187,8 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         assertTrue(organization.equalsDeep(orgResult));
 
         organization.setName("<script>nope</script");
-        assertThrows(InvalidRequestException.class, () -> client
-                .update()
-                .resource(organization)
-                .execute(), "Should not have updated organization");
+        IUpdateTyped badUpdate = client.update().resource(organization);
+        assertThrows(InvalidRequestException.class, badUpdate::execute, "Should not have updated organization");
         organizationsToCleanUp.add(organization);
     }
 

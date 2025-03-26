@@ -9,6 +9,7 @@ import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -22,8 +23,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PractitionerResourceUnitTest {
 
@@ -147,7 +147,14 @@ public class PractitionerResourceUnitTest {
 
     @Test
     public void testUpdateProvider() {
-        // TODO: Not yet implemented
+        UUID providerId = UUID.randomUUID();
+        Practitioner practitioner = new Practitioner();
+        practitioner.setId(providerId.toString());
+
+        WebApplicationException exception = assertThrows(WebApplicationException.class,
+                () -> practitionerResource.updateProvider(providerId, practitioner));
+        assertEquals(Response.Status.NOT_IMPLEMENTED.getStatusCode(), exception.getResponse().getStatus());
+        assertEquals("Update Practitioner not yet implemented.", exception.getMessage());
     }
 
     @Test

@@ -30,7 +30,7 @@ class DataServiceTest {
 
     private final UUID aggregatorID = UUID.randomUUID();
     private final UUID orgID = UUID.randomUUID();
-    private final UUID patientID = UUID.randomUUID();
+    private final List<String> patientIDs = List.of(UUID.randomUUID().toString());
     private final String orgNPI = NPIUtil.generateNPI();
     private final String providerNPI = NPIUtil.generateNPI();
     private final String exportPath = "/tmp";
@@ -64,7 +64,7 @@ class DataServiceTest {
 
         Mockito.doThrow(new RuntimeException("error")).when(queue).getJobBatches(Mockito.any(UUID.class));
 
-        assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
+        assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, patientIDs, resourceType));
     }
 
     @Test
@@ -72,7 +72,7 @@ class DataServiceTest {
         DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
 
         workJob(true, resourceType);
-        assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
+        assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, patientIDs, resourceType));
     }
 
     @Test
@@ -80,7 +80,7 @@ class DataServiceTest {
         DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
 
         workJob(false, resourceType);
-        Resource resource = dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType);
+        Resource resource = dataService.retrieveData(orgID, orgNPI, providerNPI, patientIDs, resourceType);
         assertInstanceOf(Bundle.class, resource);
     }
 
@@ -89,14 +89,14 @@ class DataServiceTest {
         DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
 
         workJob(false, DPCResourceType.OperationOutcome);
-        Resource resource = dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType);
+        Resource resource = dataService.retrieveData(orgID, orgNPI, providerNPI, patientIDs, resourceType);
         assertInstanceOf(OperationOutcome.class, resource);
     }
 
     @Test
     void whenPassingInNoResourceTypes() {
         workJob(false, DPCResourceType.ExplanationOfBenefit);
-        assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString())));
+        assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, patientIDs));
     }
 
     @Test
@@ -104,7 +104,7 @@ class DataServiceTest {
         Mockito.when(queue.getJobBatches(Mockito.any(UUID.class))).thenReturn(List.of());
 
         DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
-        assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
+        assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, patientIDs, resourceType));
     }
 
     @Test
@@ -118,21 +118,21 @@ class DataServiceTest {
         }).when(queue).getJobBatches(Mockito.any());
 
         DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
-        assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType));
+        assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, patientIDs, resourceType));
     }
 
     @ParameterizedTest
     @EnumSource(value = DPCResourceType.class, names = {"Coverage", "ExplanationOfBenefit", "Patient"})
     void whenPassingInValidResourceTypes(DPCResourceType type) {
         workJob(false, type);
-        assertDoesNotThrow(() -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), type));
+        assertDoesNotThrow(() -> dataService.retrieveData(orgID, orgNPI, providerNPI, patientIDs, type));
     }
 
     @ParameterizedTest
     @EnumSource(value = DPCResourceType.class, names = {"Coverage", "ExplanationOfBenefit", "Patient", "OperationOutcome"}, mode = EnumSource.Mode.EXCLUDE)
     void whenPassingInInvalidResourceTypes(DPCResourceType type) {
         workJob(false, type);
-        DataRetrievalException err = assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), type));
+        DataRetrievalException err = assertThrows(DataRetrievalException.class, () -> dataService.retrieveData(orgID, orgNPI, providerNPI, patientIDs, type));
         assertEquals("Unexpected resource type: " + type.name(), err.getMessage());
     }
 

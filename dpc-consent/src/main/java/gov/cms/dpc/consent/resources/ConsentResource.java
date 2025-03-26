@@ -22,6 +22,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +65,7 @@ public class ConsentResource {
             "<p>Must provide ONE OF Consent ID as an _id or identifier, or a patient MBI or HICN to search for.", response = Bundle.class)
     @ApiResponses(@ApiResponse(code = 400, message = "Must provide Consent or Patient id"))
     public List<Consent> search(
-            @ApiParam(value = "Consent resource _id") @QueryParam(Consent.SP_RES_ID) Optional<UUID> id,
+            @ApiParam(value = "Consent resource _id") @QueryParam(IAnyResource.SP_RES_ID) Optional<UUID> id,
             @ApiParam(value = "Consent resource identifier") @QueryParam(Consent.SP_IDENTIFIER) Optional<UUID> identifier,
             @ApiParam(value = "Patient Identifier") @QueryParam(Consent.SP_PATIENT) Optional<String> patientId) {
 

@@ -60,9 +60,11 @@ public class LookBackServiceImpl implements LookBackService {
                 .addEobBillingPeriod(billingPeriod)
                 .addEobOrganization(eobOrganizationNPI)
                 .addEobProviders(allNPIs);
-        LOGGER.trace("billingPeriodDate={}, lookBackDate={}, monthsDifference={}, eobProvider={}, eobCareTeamProviders={}, jobProvider={}, eobOrganization={}, jobOrganization={}, withinLimit={}, eobProviderMatch={}, eobOrganizationMatch={}",
-                billingPeriod, operationsConfig.getLookBackDate(), lookBackAnswer.calculatedMonthDifference(), npis.getLeft(), Joiner.on(";").join(npis.getRight()), practitionerNPI, eobOrganizationNPI,
-                organizationNPI, lookBackAnswer.matchDateCriteria(), lookBackAnswer.practitionerMatchEob(), lookBackAnswer.orgMatchEob());
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("billingPeriodDate={}, lookBackDate={}, monthsDifference={}, eobProvider={}, eobCareTeamProviders={}, jobProvider={}, eobOrganization={}, jobOrganization={}, withinLimit={}, eobProviderMatch={}, eobOrganizationMatch={}",
+                    billingPeriod, operationsConfig.getLookBackDate(), lookBackAnswer.calculatedMonthDifference(), npis.getLeft(), Joiner.on(";").join(npis.getRight()), practitionerNPI, eobOrganizationNPI,
+                    organizationNPI, lookBackAnswer.matchDateCriteria(), lookBackAnswer.practitionerMatchEob(), lookBackAnswer.orgMatchEob());
+        }
 
         MDC.remove(EOB_ID);
         return lookBackAnswer;
