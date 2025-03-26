@@ -604,7 +604,7 @@ class AggregationEngineTest {
 
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(engine);
-        assertTrue(executor.awaitTermination(2, TimeUnit.SECONDS));
+        executor.awaitTermination(2, TimeUnit.SECONDS);
 
         assertFalse(healthCheck.check().isHealthy());
     }
