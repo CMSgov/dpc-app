@@ -12,7 +12,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
     let(:org) { build(:provider_organization, name: 'Health Hut', npi: '11111111', id: 2) }
     let(:component) do
       described_class.new(org, delegate_info, credential_start, role,
-                          { icon: 'verified', classes: %i[text-accent-cool], status: 'Accepted' })
+                          ['verified', %i[text-accent-cool], 'Manage your organization.'])
     end
 
     before do
@@ -57,7 +57,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
           is_expected.to_not include('}make_current(1);')
         end
         it 'Should show status' do
-          is_expected.to include('<span class="margin-top-neg-2px">Accepted</span>')
+          is_expected.to include('<span class="margin-top-neg-2px">Manage your organization.</span>')
         end
         it 'Should show icon' do
           is_expected.to include('.svg#verified')
@@ -98,7 +98,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
         is_expected.to include('<div id="credentials">')
       end
       it 'Should show status' do
-        is_expected.to include('<span class="margin-top-neg-2px">Accepted</span>')
+        is_expected.to include('<span class="margin-top-neg-2px">Manage your organization.</span>')
       end
       it 'Should show icon' do
         is_expected.to include('.svg#verified')

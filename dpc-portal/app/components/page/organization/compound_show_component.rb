@@ -14,9 +14,7 @@ module Page
         @expired_cd_invitations = delegate_information[:expired]
         @show_cds = !delegate_information.empty?
         @role = role
-        @icon = status_display[:icon]
-        @classes = status_display[:classes]
-        @status = status_display[:status]
+        @icon, @classes, @status = status_display
       end
     end
   end

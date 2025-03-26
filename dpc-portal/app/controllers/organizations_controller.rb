@@ -2,7 +2,7 @@
 
 # Shows Credential Delegates info about the organizations they manage the credentials for
 class OrganizationsController < ApplicationController
-  include Organization
+  include OrganizationUtils
   before_action :authenticate_user!
   before_action :check_user_verification
   before_action :load_organization, only: %i[show tos_form sign_tos success]
@@ -100,7 +100,7 @@ class OrganizationsController < ApplicationController
   def cur_org_status
     @links = current_user.provider_links if @links.nil?
     cur_link = @links.find { |link| link.provider_organization_id == @organization.id }
-    user_status(@organization, cur_link)
+    org_status(@organization, cur_link)
   end
 
   def ao_delegate_information

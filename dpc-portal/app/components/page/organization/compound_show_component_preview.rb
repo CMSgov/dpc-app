@@ -6,7 +6,7 @@ module Page
     class CompoundShowComponentPreview < ViewComponent::Preview
       def authorized_official
         org = ProviderOrganization.new(name: 'Health Hut', npi: '1111111111', id: 2)
-        status_display = { icon: 'verified', classes: %i[text-accent-cool], status: 'Accepted' }
+        status_display = { icon: 'verified', classes: %i[text-accent-cool], status: 'Manage your organization.' }
         render(Page::Organization::CompoundShowComponent.new(org, { active: [], pending: [], expired: [] }, true,
                                                              'Authorized Official', status_display))
       end

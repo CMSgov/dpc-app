@@ -4,7 +4,7 @@ module Core
   module Card
     # Render a USWDS-styled card for an organization.
     class OrganizationCardComponent < ViewComponent::Base
-      include Organization
+      include OrganizationUtils
       with_collection_parameter :link
 
       def initialize(link:)
@@ -14,10 +14,7 @@ module Core
       end
 
       def before_render
-        status_display = user_status(@organization, @link)
-        @icon = status_display[:icon]
-        @classes = status_display[:classes]
-        @status = status_display[:status]
+        @icon, @classes, @status = org_status(@organization, @link)
       end
     end
   end

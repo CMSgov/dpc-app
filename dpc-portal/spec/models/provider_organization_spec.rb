@@ -181,8 +181,8 @@ RSpec.describe ProviderOrganization, type: :model do
       expect(org.ao).to eq('John Doe')
     end
 
-    it 'should return "No verified AO" if AO does not exist' do
-      expect(noAoOrg.ao).to eq('No verified AO')
+    it 'should return blank if AO does not exist' do
+      expect(noAoOrg.ao).to eq('')
     end
   end
 
