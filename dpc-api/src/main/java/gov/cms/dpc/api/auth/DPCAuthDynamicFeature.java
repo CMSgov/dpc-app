@@ -3,6 +3,7 @@ package gov.cms.dpc.api.auth;
 import gov.cms.dpc.api.auth.annotations.AdminOperation;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
+import gov.cms.dpc.common.annotations.Public;
 import io.dropwizard.auth.AuthDynamicFeature;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.DynamicFeature;
@@ -56,6 +57,12 @@ public class DPCAuthDynamicFeature implements DynamicFeature {
         if (isMethodClassAnnotated(Authorizer.class, resourceInfo, am)) {
             logger.trace("Registering Auth param on method {}", am);
             context.register(this.factory.createStandardAuthorizer());
+            return;
+        }
+
+        // If we're public don't do anything
+        if (isMethodClassAnnotated(Public.class, resourceInfo, am)) {
+            return;
         }
     }
 
