@@ -13,32 +13,14 @@
 <table class="usa-table usa-table--borderless usa-table--sticky-header">
   <thead>
     <tr>
-      <th scope="col">Organization Name</th>
-      <th scope="col">NPI-2</th>
-      <th scope="col">Role</th>
-      <th scope="col">Status</th>
+      <th scope="col" style="width: 50%;">Organization Name</th> <!-- 6/12 -->
+      <th scope="col" style="width: 16.67%;">NPI-2</th> <!-- 2/12 -->
+      <th scope="col" style="width: 8.33%;">Role</th> <!-- 1/12 -->
+      <th scope="col" style="width: 25%;">Status</th> <!-- 3/12 -->
     </tr>
   </thead>
   <tbody>
-    <% @links.each do |link| %>
-      <tr>
-        <%# Put new class here to UPPERCASE and ellipsis... link.provider_organization.name %>
-        <th scope="row">
-          <a href="<%= organization_path(link.provider_organization)%>" >
-            <%= link.provider_organization.name %>
-          </a>
-        </th>
-        <td> <%= link.provider_organization.npi %> </td>
-        <td>
-          <% if link.is_ao? %>
-            AO
-          <% else %>
-            CD
-          <% end %>
-        </td>
-        <td><%= link.provider_organization.get_status %></td>
-      </tr>
-    <% end %>
+    <%= render Core::Card::OrganizationCardComponent.with_collection(@links)%>
   </tbody>
 </table>
 
