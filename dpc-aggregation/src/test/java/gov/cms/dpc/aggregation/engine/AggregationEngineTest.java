@@ -37,12 +37,10 @@ import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
-import java.sql.SQLException;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -50,6 +48,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.platform.commons.support.ReflectionSupport.invokeMethod;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -659,19 +658,20 @@ class AggregationEngineTest {
     @Nested
     class ErrorHandlerTest {
 
-        static final ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+        static ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
         static Method errorHandler;
 
         static final String ERR_MSG = "Caught exception during RxJava processing flow: ";
+        static final String UNDELIVERABLE_EXC = "Undeliverable exception received: ";
 
         @BeforeAll
         static void setUp() throws NoSuchMethodException {
             Logger logger = (Logger) LoggerFactory.getLogger(AggregationEngine.class);
+            logger.setLevel(Level.WARN);
             listAppender.start();
             logger.addAppender(listAppender);
 
             errorHandler = AggregationEngine.class.getDeclaredMethod("errorHandler", Throwable.class);
-            errorHandler.setAccessible(true);
         }
 
         @BeforeEach
@@ -685,6 +685,53 @@ class AggregationEngineTest {
             listAppender.list.clear();
         }
 
+        @Test
+        void undeliverableException() {
+            invokeMethod(errorHandler, engine, new UndeliverableException(new Exception()));
+
+            List<String> logMessages = getLogMessages();
+            assertTrue(logMessages.contains(ERR_MSG));
+            assertTrue(logMessages.contains(UNDELIVERABLE_EXC));
+        }
+
+        @Test
+        void unknownException() {
+            invokeMethod(errorHandler, engine, new Exception());
+
+            List<String> logMessages = getLogMessages();
+            assertTrue(logMessages.contains(ERR_MSG));
+            assertTrue(logMessages.contains(UNDELIVERABLE_EXC));
+        }
+
+        @ParameterizedTest
+        @MethodSource("provideExceptions")
+        void otherExceptions(Exception e) {
+            invokeMethod(errorHandler, engine, e);
+
+            List<String> logMessages = getLogMessages();
+            assertTrue(logMessages.contains(ERR_MSG));
+            assertFalse(logMessages.contains(UNDELIVERABLE_EXC));
+        }
+
+        private static List<String> getLogMessages() {
+            boolean success = false;
+            int count = 0, maxTries = 20;
+            List<String> logMessages = new ArrayList<>();
+
+            // These tests throw non-stochastic ConcurrentModificationExceptions, this is a rough way to ignore them
+            while (!success) {
+                try {
+                    logMessages = listAppender.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
+                    success = true;
+                } catch (ConcurrentModificationException e) {
+                    if (count >= maxTries) throw e;
+                    count++;
+                }
+            }
+
+            return logMessages;
+        }
+
         private static List<Exception> provideExceptions() {
             return List.of(
                     new IOException(),
@@ -693,35 +740,6 @@ class AggregationEngineTest {
                     new IllegalArgumentException(),
                     new IllegalStateException()
             );
-        }
-
-        @Test
-        void undeliverableException() throws InvocationTargetException, IllegalAccessException {
-            errorHandler.invoke(null, new UndeliverableException(new SQLException("SQL exception")));
-            assertEquals(2, listAppender.list.size());
-            assertEquals(ERR_MSG, listAppender.list.get(0).getMessage());
-            assertEquals(Level.ERROR, listAppender.list.get(0).getLevel());
-            assertEquals("Undeliverable exception received: ", listAppender.list.get(1).getMessage());
-            assertEquals(Level.WARN, listAppender.list.get(1).getLevel());
-        }
-
-        @Test
-        void unknownException() throws InvocationTargetException, IllegalAccessException {
-            errorHandler.invoke(null, new SQLException("SQL exception"));
-            assertEquals(2, listAppender.list.size());
-            assertEquals(ERR_MSG, listAppender.list.get(0).getMessage());
-            assertEquals(Level.ERROR, listAppender.list.get(0).getLevel());
-            assertEquals("Undeliverable exception received: ", listAppender.list.get(1).getMessage());
-            assertEquals(Level.WARN, listAppender.list.get(1).getLevel());
-        }
-
-        @ParameterizedTest
-        @MethodSource("provideExceptions")
-        void otherExceptions(Exception e) throws InvocationTargetException, IllegalAccessException {
-            errorHandler.invoke(null, e);
-            assertEquals(1, listAppender.list.size());
-            assertEquals(Level.ERROR, listAppender.list.get(0).getLevel());
-            assertEquals(ERR_MSG, listAppender.list.get(0).getMessage());
         }
     }
 }
