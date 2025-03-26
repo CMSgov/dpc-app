@@ -1,6 +1,5 @@
 package gov.cms.dpc.api.entities;
 
-import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.KeyType;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -29,13 +28,13 @@ class PublicKeyEntityTest {
         OffsetDateTime createdAt = OffsetDateTime.now();
 
         publicKey.setId(id);
-        publicKey.setOrganization_id(orgId);
+        publicKey.setOrganizationId(orgId);
         publicKey.setPublicKey(mockInfo);
         publicKey.setLabel(label);
         publicKey.setCreatedAt(createdAt);
 
         assertEquals(id, publicKey.getId());
-        assertEquals(orgId, publicKey.getOrganization_id());
+        assertEquals(orgId, publicKey.getOrganizationId());
         assertEquals(mockInfo, publicKey.getPublicKey());
         assertEquals(label, publicKey.getLabel());
         assertEquals(createdAt, publicKey.getCreatedAt());

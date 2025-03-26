@@ -34,7 +34,7 @@ class PublicKeyDAOUnitTest extends AbstractDAOTest<PublicKeyEntity> {
         PublicKeyEntity publicKeyEntity = createPublicKeyEntity(orgId, "test label");
         PublicKeyEntity returnedKey = db.inTransaction(() -> publicKeyDAO.persistPublicKey(publicKeyEntity));
 
-        assertEquals(orgId, returnedKey.getOrganization_id());
+        assertEquals(orgId, returnedKey.getOrganizationId());
         assertEquals("test label", returnedKey.getLabel());
         assertFalse(returnedKey.getCreatedAt().toString().isEmpty());
         assertFalse(returnedKey.getId().toString().isEmpty());
@@ -70,12 +70,12 @@ class PublicKeyDAOUnitTest extends AbstractDAOTest<PublicKeyEntity> {
         assertEquals(2, results.size());
 
         PublicKeyEntity key1 = results.get(0);
-        assertEquals(orgId1, key1.getOrganization_id());
+        assertEquals(orgId1, key1.getOrganizationId());
         assertTrue(List.of("label 1", "label 2").contains(key1.getLabel()));
         assertNotNull(key1.getPublicKey());
 
         PublicKeyEntity key2 = results.get(1);
-        assertEquals(orgId1, key2.getOrganization_id());
+        assertEquals(orgId1, key2.getOrganizationId());
         assertTrue(List.of("label 1", "label 2").contains(key2.getLabel()));
         assertNotNull(key2.getPublicKey());
     }
@@ -98,7 +98,7 @@ class PublicKeyDAOUnitTest extends AbstractDAOTest<PublicKeyEntity> {
     private PublicKeyEntity createPublicKeyEntity(UUID orgId, String label) throws IOException, NoSuchAlgorithmException {
         PublicKeyEntity newEntity = new PublicKeyEntity();
         newEntity.setId(UUID.randomUUID());
-        newEntity.setOrganization_id(orgId);
+        newEntity.setOrganizationId(orgId);
         newEntity.setLabel(label);
 
         SubjectPublicKeyInfo mockInfo = mock(SubjectPublicKeyInfo.class);

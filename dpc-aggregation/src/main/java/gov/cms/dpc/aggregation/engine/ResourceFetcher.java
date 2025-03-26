@@ -77,7 +77,7 @@ class ResourceFetcher {
             StopWatch stopWatch = StopWatch.createStarted();
 
             String fetchId = UUID.randomUUID().toString();
-            logger.debug("Fetching first {} from BlueButton for {}", resourceType.toString(), fetchId);
+            logger.debug("Fetching first {} from BlueButton for {}", resourceType, fetchId);
             final Bundle firstFetched = fetchFirst(patient, headers);
             List<Resource> bundles = fetchAllBundles(firstFetched, fetchId, headers);
 
@@ -104,13 +104,13 @@ class ResourceFetcher {
         // Loop until no more next bundles
         var bundle = firstBundle;
         while (bundle.getLink(IBaseBundle.LINK_NEXT) != null) {
-            logger.debug("Fetching next bundle {} from BlueButton for {}", resourceType.toString(), fetchId);
+            logger.debug("Fetching next bundle {} from BlueButton for {}", resourceType, fetchId);
             bundle = blueButtonClient.requestNextBundleFromServer(bundle, headers);
             checkBundleTransactionTime(bundle);
             addResources(resources, bundle);
         }
 
-        logger.debug("Done fetching bundles {} for {}", resourceType.toString(), fetchId);
+        logger.debug("Done fetching bundles {} for {}", resourceType, fetchId);
         return resources;
     }
 
@@ -146,16 +146,12 @@ class ResourceFetcher {
 
         String patientId = patient.getIdElement().getIdPart();
         DateRangeParam lastUpdated = formLastUpdatedParam();
-        switch (resourceType) {
-            case Patient:
-                return blueButtonClient.requestPatientFromServer(patientId, lastUpdated, headers);
-            case ExplanationOfBenefit:
-                return blueButtonClient.requestEOBFromServer(patientId, lastUpdated, headers);
-            case Coverage:
-                return blueButtonClient.requestCoverageFromServer(patientId, lastUpdated, headers);
-            default:
-                throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType);
-        }
+        return switch (resourceType) {
+            case Patient -> blueButtonClient.requestPatientFromServer(patientId, lastUpdated, headers);
+            case ExplanationOfBenefit -> blueButtonClient.requestEOBFromServer(patientId, lastUpdated, headers);
+            case Coverage -> blueButtonClient.requestCoverageFromServer(patientId, lastUpdated, headers);
+            default -> throw new JobQueueFailure(jobID, batchID, "Unexpected resource type: " + resourceType);
+        };
     }
 
     /**
@@ -165,10 +161,10 @@ class ResourceFetcher {
      * @param bundle - the bundle to extract resources from
      */
     private void addResources(ArrayList<Resource> resources, Bundle bundle) {
-        bundle.getEntry().forEach((entry) -> {
+        bundle.getEntry().forEach(entry -> {
             final var resource = entry.getResource();
             if (!resource.getResourceType().getPath().equals(resourceType.getPath())) {
-                throw new DataFormatException(String.format("Unexpected resource type: got %s expected: %s", resource.getResourceType().toString(), resourceType.toString()));
+                throw new DataFormatException(String.format("Unexpected resource type: got %s expected: %s", resource.getResourceType().toString(), resourceType));
             }
             resources.add(resource);
         });
@@ -184,8 +180,7 @@ class ResourceFetcher {
         String details;
         if (ex instanceof ResourceNotFoundException) {
             details = String.format("%s resource not found in Blue Button for id: %s", resourceType.toString(), patientID);
-        } else if (ex instanceof BaseServerResponseException) {
-            final var serverException = (BaseServerResponseException) ex;
+        } else if (ex instanceof BaseServerResponseException serverException) {
             details = String.format("Blue Button error fetching %s resource. HTTP return code: %s", resourceType.toString(), serverException.getStatusCode());
         } else {
             details = String.format("Internal error: %s", ex.getMessage());
