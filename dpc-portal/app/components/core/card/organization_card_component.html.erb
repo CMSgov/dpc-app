@@ -1,18 +1,18 @@
 <tr>
-  <th scope="row" style="background-color: #f0f0f0;">
+  <th scope="row">
     <a href="<%= organization_path(@organization)%>" >
       <%= @organization.name %>
     </a>
   </th>
-  <td style="background-color: #f0f0f0;"> <%= @organization.npi %> </td>
-  <td style="background-color: #f0f0f0;">
+  <td> <%= @organization.npi %> </td>
+  <td>
     <% if @link.is_ao? %>
       AO
     <% else %>
       CD
     <% end %>
   </td>
-  <td style="background-color: #f0f0f0;">
+  <td>
     <div class="clearfix">
       <div class="float-left"><%= render Core::Icon::UswdsComponent.new(@icon, additional_classes: @classes) %></div>
       <div class="float-left margin-left-1 margin-top-neg-2px"><%= @status %></div>
