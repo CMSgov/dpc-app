@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -102,7 +103,7 @@ public class FHIRExtractors {
                 }
             })
             .filter(Objects::nonNull)
-            .toList();
+            .collect(Collectors.toList());
     }
 
     /**
@@ -229,7 +230,7 @@ public class FHIRExtractors {
         return identifiers
                 .stream()
                 .filter(id -> id.getSystem().equals(system.getSystem()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**
