@@ -50,6 +50,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.platform.commons.support.ReflectionSupport.invokeMethod;
 import static org.mockito.Mockito.*;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ExtendWith(BufferedLoggerHandler.class)
@@ -111,7 +112,7 @@ class AggregationEngineTest {
      * Verify that an exception in the claimBatch method doesn't kill polling the queue
      */
     @Test
-    void claimBatchException() throws InterruptedException {
+    void claimBatchException() {
         final var orgID = UUID.randomUUID();
 
         // Make a simple job with one resource type
@@ -148,7 +149,7 @@ class AggregationEngineTest {
 
         // Wait for the queue to finish processing before finishing the test
         while (engine.isRunning()) {
-            Thread.sleep(100);
+            await().atMost(100, TimeUnit.MILLISECONDS);
         }
 
         // The last mock doesn't get called because the engine gets stopped during the last call
@@ -168,7 +169,7 @@ class AggregationEngineTest {
      * Verify that an exception in the processJobBatch method doesn't kill polling the queue
      */
     @Test
-    void processJobBatchException() throws InterruptedException {
+    void processJobBatchException() {
         doReturn(Optional.empty())
                 .doReturn(Optional.empty())
                 .doReturn(Optional.empty())
@@ -194,7 +195,7 @@ class AggregationEngineTest {
 
         // Wait for the queue to finish processing before finishing the test
         while (engine.isRunning()) {
-            Thread.sleep(100);
+            await().atMost(100, TimeUnit.MILLISECONDS);
         }
 
         verify(queue, Mockito.times(5)).claimBatch(any(UUID.class));
@@ -603,7 +604,7 @@ class AggregationEngineTest {
 
         ExecutorService executor = Executors.newCachedThreadPool();
         executor.execute(engine);
-        executor.awaitTermination(2, TimeUnit.SECONDS);
+        assertTrue(executor.awaitTermination(2, TimeUnit.SECONDS));
 
         assertFalse(healthCheck.check().isHealthy());
     }
@@ -715,7 +716,7 @@ class AggregationEngineTest {
 
         private static List<String> getLogMessages() {
             boolean success = false;
-            int count = 0, maxTries = 20;
+            int count = 0, maxTries = 10;
             List<String> logMessages = new ArrayList<>();
 
             // These tests throw non-stochastic ConcurrentModificationExceptions, this is a rough way to ignore them
@@ -726,6 +727,7 @@ class AggregationEngineTest {
                 } catch (ConcurrentModificationException e) {
                     if (count >= maxTries) throw e;
                     count++;
+                    await().atMost(100, TimeUnit.MILLISECONDS);
                 }
             }
 

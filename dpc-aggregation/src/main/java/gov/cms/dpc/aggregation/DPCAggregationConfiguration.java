@@ -62,14 +62,14 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     // The max number of resources that we will place into a single file
     @Min(10)
     @Max(100000) // Keep files under a GB
-    private final int resourcesPerFileCount = 10000;
+    private static final int resourcesPerFileCount = 10000;
 
     // How often in milliseconds to check the queue for new batches
     @Min(50)
-    private final int pollingFrequency = 500;
+    private static final int pollingFrequency = 500;
 
     @Min(1)
-    private final int jobTimeoutInSeconds = 5;
+    private static final int jobTimeoutInSeconds = 5;
 
     @Min(-1)
     @SuppressWarnings("unused")
