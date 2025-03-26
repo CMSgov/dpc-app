@@ -66,7 +66,7 @@ public class PatientEntityTest {
 		p1.setBeneficiaryID("abcd1234");
 		p2.setBeneficiaryID("abcd1234");
 
-        assertEquals(p1, p2);
+		assertEquals(p1, p2);
 		assertEquals(p1.hashCode(), p2.hashCode());
 	}
 
