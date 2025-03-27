@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 public class PropertiesProvider {
 
     private static final String[] PROPERTIES_FILES = {"app.properties", "git.properties"};
-    private static final DateTimeFormatter MAVEN_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX");
 
     private final Properties properties;
 
@@ -22,7 +21,7 @@ public class PropertiesProvider {
     }
 
     public OffsetDateTime getBuildTimestamp() {
-        return OffsetDateTime.parse(this.properties.getProperty("application.builddate"), MAVEN_FORMATTER);
+        return OffsetDateTime.parse(this.properties.getProperty("application.builddate"), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
     /**
