@@ -13,6 +13,8 @@ import {
   getOrganization,
   updateGroup
 } from './dpc-api-client.js';
+import NPIGenerator from './utils/npi-generator.js';
+import MBIGenerator from './utils/mbi-generator.js';
 
 // See https://grafana.com/docs/k6/latest/using-k6/k6-options/reference for
 // details on this configuration object.
@@ -33,11 +35,25 @@ export const options = {
   }
 };
 
+const npiGenerator = new NPIGenerator();
+const mbiGenerator = new MBIGenerator();
+
 // Sets up two test organizations
 export function setup() {
   const goldenMacaroon = fetchGoldenMacaroon();
   // Fake NPIs generated online: https://jsfiddle.net/alexdresko/cLNB6
-  const existingOrgs = findByNpi('2782823019', '8197402604', goldenMacaroon).json();
+  const existingOrgsResponse = findByNpi('2782823019', '8197402604', goldenMacaroon);
+  const checkFindOutput = check(
+    existingOrgsResponse,
+    {
+      'response code was 200': res => res.status === 200,
+    }
+  );
+  if (!checkFindOutput) {
+    exec.test.abort('failed to check for existing orgs');
+  }
+
+  const existingOrgs =  existingOrgsResponse.json();
   if ( existingOrgs.total ) {
     for ( const entry of existingOrgs.entry ) {
       deleteOrganization(entry.resource.id, goldenMacaroon);
@@ -80,7 +96,7 @@ export function workflowA(data) {
   const token = generateDPCToken(orgId, data.goldenMacaroon);
 
   // POST practitioner
-  const practitionerResponse = createProvider(token, "1232131239");
+  const practitionerResponse = createProvider(token, npiGenerator.iterate());
   if (practitionerResponse.status != 201) {
     fail('failed to create practitioner for workflow A');
   }
@@ -89,7 +105,7 @@ export function workflowA(data) {
   const practitionerId = practitionerResponse.json().id;
 
   // POST patient
-  const patientResponse = createPatient(token, "1S00EU8FE91");
+  const patientResponse = createPatient(token, mbiGenerator.iterate());
   if (patientResponse.status != 201) {
     fail('failed to create patient for workflow A');
   }
