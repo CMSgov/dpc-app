@@ -26,20 +26,17 @@ class CredentialDelegateInvitationsController < ApplicationController
       if Rails.env.local?
         logger.info("Invitation URL: #{accept_organization_invitation_url(@organization, @cd_invitation)}")
       end
-      redirect_to success_organization_credential_delegate_invitation_path(@organization.path_id, 'new-invitation')
+      flash[:success] = 'Credential Delegate invited successfully.'
+      redirect_to organization_path(@organization)
     else
       render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, @cd_invitation), status: :bad_request)
     end
   end
   # rubocop:enable Metrics/AbcSize
 
-  def success
-    render(Page::CredentialDelegate::InvitationSuccessComponent.new(@organization))
-  end
-
   def destroy
     if @invitation.update(status: :cancelled)
-      flash[:notice] = 'Invitation cancelled.'
+      flash[:success] = 'Invitation cancelled successfully.'
     else
       flash[:alert] = destroy_error_message
     end

@@ -205,9 +205,9 @@ RSpec.describe 'Organizations', type: :request do
 
         it 'shows credential page' do
           get "/organizations/#{org.id}"
-          expect(response.body).to include('<h2>Client Tokens</h2>')
-          expect(response.body).to include('<h2>Public Keys</h2>')
-          expect(response.body).to include('<h2>Public IPs</h2>')
+          expect(response.body).to include('<h2>Client tokens</h2>')
+          expect(response.body).to include('<h2>Public keys</h2>')
+          expect(response.body).to include('<h2>Public IP addresses</h2>')
         end
 
         it 'does not show CD list page' do
