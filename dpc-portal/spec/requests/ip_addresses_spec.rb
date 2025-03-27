@@ -177,6 +177,7 @@ RSpec.describe 'IpAddresses', type: :request do
         post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
         expect(response).to redirect_to(organization_path(org, credential_start: true))
         expect(assigns(:organization)).to eq org
+        expect(flash[:success]).to eq('Public IP address created successfully.')
       end
 
       it 'checks if configuration complete on success' do
@@ -261,7 +262,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                        response: nil,
                                        with: [org_api_id, addr_guid])
         delete "/organizations/#{org.id}/ip_addresses/#{addr_guid}"
-        expect(flash[:notice]).to eq('IP address successfully deleted.')
+        expect(flash[:success]).to eq('IP address deleted successfully.')
         expect(response).to redirect_to(organization_path(org, credential_start: true))
       end
 

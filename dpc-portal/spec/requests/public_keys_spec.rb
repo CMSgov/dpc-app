@@ -183,7 +183,7 @@ RSpec.describe 'PublicKeys', type: :request do
         stub_self_returning_api_client(message: :create_public_key,
                                        response: default_get_public_keys['entities'].first)
         post "/organizations/#{org.id}/public_keys", params: success_params
-        expect(flash[:notice]).to eq('Public key successfully created.')
+        expect(flash[:success]).to eq('Public key created successfully.')
         expect(assigns(:organization)).to eq org
         expect(response).to redirect_to(organization_path(org, credential_start: true))
       end
@@ -276,7 +276,7 @@ RSpec.describe 'PublicKeys', type: :request do
                                        with: [org_api_id, key_guid],
                                        api_client:)
         delete "/organizations/#{org.id}/public_keys/#{key_guid}"
-        expect(flash[:notice]).to eq('Public key successfully deleted.')
+        expect(flash[:success]).to eq('Public key deleted successfully.')
         expect(response).to redirect_to(organization_path(org, credential_start: true))
       end
 
