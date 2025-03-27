@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -70,6 +71,7 @@ public class ConsentResourceUnitTest {
 
             System.out.println(response);
             assertEquals(HttpStatus.OK_200, response.getStatus(), "should find record for test id");
+            fail("shaky test");
         }
     }
 
