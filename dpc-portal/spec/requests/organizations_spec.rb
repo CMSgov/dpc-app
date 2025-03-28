@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'Organizations', type: :request do
   include DpcClientSupport
+  include ComponentSupport
 
   describe 'GET /index' do
     context 'not logged in' do
@@ -184,7 +185,8 @@ RSpec.describe 'Organizations', type: :request do
     context 'as cd' do
       let!(:user) { create(:user) }
       let!(:org) { create(:provider_organization) }
-      let!(:link) { create(:cd_org_link, user:, provider_organization: org) }
+      let!(:invitation) { create(:invitation, :cd, provider_organization: org, status: :accepted) }
+      let!(:link) { create(:cd_org_link, user:, provider_organization: org, invitation:) }
       before { sign_in user }
 
       context :not_signed_tos do
@@ -195,7 +197,7 @@ RSpec.describe 'Organizations', type: :request do
       end
 
       context :signed_tos do
-        before { org.update(terms_of_service_accepted_by: user) }
+        before { org.update(terms_of_service_accepted_by: user, terms_of_service_accepted_at: Time.now) }
 
         it 'returns success' do
           get "/organizations/#{org.id}"
@@ -222,13 +224,26 @@ RSpec.describe 'Organizations', type: :request do
           get "/organizations/#{org.id}"
           expect(assigns(:pending_invitations)).to be_nil
         end
+
+        it 'shows correct status' do
+          get "/organizations/#{org.id}"
+          expect(response.body).to include('Manage credentials.')
+          expect(response.body).to include('#verified')
+        end
+
+        it 'shows correct role' do
+          get "/organizations/#{org.id}"
+          expect(response.body).to include('Role:</span> Credential Delegate')
+        end
       end
     end
 
     context 'as ao' do
       let!(:user) { create(:user) }
+      let!(:org) { create(:provider_organization) }
+      let!(:invitation) { create(:invitation, :ao, provider_organization: org, status: :accepted) }
       before do
-        create(:ao_org_link, user:, provider_organization: org)
+        create(:ao_org_link, user:, provider_organization: org, invitation:)
         sign_in user
       end
 
@@ -248,7 +263,7 @@ RSpec.describe 'Organizations', type: :request do
       end
 
       context :signed_tos do
-        let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
+        before { org.update(terms_of_service_accepted_by: user, terms_of_service_accepted_at: Time.now) }
         it 'returns success' do
           get "/organizations/#{org.id}"
           expect(response).to be_ok
@@ -275,6 +290,17 @@ RSpec.describe 'Organizations', type: :request do
           expect(response.body).to include('<h2>Pending invitations</h2>')
           expect(response.body).to include('<h2>Active</h2>')
           expect(response.body).to include('<h2>Expired invitations</h2>')
+        end
+
+        it 'shows correct status' do
+          get "/organizations/#{org.id}"
+          expect(response.body).to include('Manage your organization.')
+          expect(response.body).to include('#verified')
+        end
+
+        it 'shows correct role' do
+          get "/organizations/#{org.id}"
+          expect(response.body).to include('Role:</span> Authorized Official')
         end
 
         context :pending_invitations do
