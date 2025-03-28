@@ -138,7 +138,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       it 'redirects on success' do
         post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
         expect(flash[:success]).to eq('Credential Delegate invited successfully.')
-        expect(response).to redirect_to(organizations_path(org.id))
+        expect(response).to redirect_to(organization_path(org.id))
       end
 
       it 'sends an invitation email on success' do
