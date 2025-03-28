@@ -239,7 +239,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       end
       it 'flashes success if succeeds' do
         delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
-        expect(flash[:success]).to eq('Invitation cancelled successfully.')
+        expect(flash[:success]).to eq('Credential Delegate invitation cancelled successfully.')
       end
       it 'returns error message on failure' do
         invitation_class = class_double(Invitation).as_stubbed_const

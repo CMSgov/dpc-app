@@ -262,7 +262,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                        response: nil,
                                        with: [org_api_id, addr_guid])
         delete "/organizations/#{org.id}/ip_addresses/#{addr_guid}"
-        expect(flash[:success]).to eq('IP address deleted successfully.')
+        expect(flash[:success]).to eq('Public IP address deleted successfully.')
         expect(response).to redirect_to(organization_path(org, credential_start: true))
       end
 
@@ -273,7 +273,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                        success: false,
                                        with: [org_api_id, addr_guid])
         delete "/organizations/#{org.id}/ip_addresses/#{addr_guid}"
-        expect(flash[:alert]).to eq('IP address could not be deleted.')
+        expect(flash[:alert]).to eq('Public IP address could not be deleted.')
         expect(response).to redirect_to(organization_path(org, credential_start: true))
       end
     end

@@ -36,7 +36,7 @@ class CredentialDelegateInvitationsController < ApplicationController
 
   def destroy
     if @invitation.update(status: :cancelled)
-      flash[:success] = 'Invitation cancelled successfully.'
+      flash[:success] = 'Credential Delegate invitation cancelled successfully.'
     else
       flash[:alert] = destroy_error_message
     end
