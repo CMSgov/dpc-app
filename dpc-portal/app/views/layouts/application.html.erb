@@ -14,14 +14,9 @@
     <div class="grid-container margin-top-5 margin-bottom-8">
       <div class="grid-row">
         <div class="grid-col-fill">
-          <% if notice %>
-            <%= render Core::Alert::Component.new do %>
-              <%= notice %>
-            <% end %>
-          <% end %>
-          <% if alert %>
-            <%= render Core::Alert::Component.new(status: :error) do %>
-              <%=raw alert %>
+	  <% flash.each do |key, message| %>
+            <%= render Core::Alert::Component.new(status: key) do %>
+              <%=raw message %>
             <% end %>
           <% end %>
           <main class="<%= 'margin-top-5' if notice or alert %>">

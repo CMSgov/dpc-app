@@ -59,6 +59,15 @@ RSpec.describe Core::Alert::Component, type: :component do
 
   describe 'status option' do
     context 'when no status is given' do
+      subject(:component) { described_class.new }
+
+      it 'is an info alert' do
+        render_component
+        expect(page).to have_selector('.usa-alert.usa-alert--info')
+      end
+    end
+
+    context 'when the status is blank' do
       subject(:component) { described_class.new status: '' }
 
       it 'is an info alert' do
@@ -67,8 +76,8 @@ RSpec.describe Core::Alert::Component, type: :component do
       end
     end
 
-    context 'when the status is info' do
-      subject(:component) { described_class.new status: 'info' }
+    context 'when the status is :notice' do
+      subject(:component) { described_class.new status: :notice }
 
       it 'is an info alert' do
         render_component
@@ -76,17 +85,8 @@ RSpec.describe Core::Alert::Component, type: :component do
       end
     end
 
-    context 'when the status is warning' do
-      subject(:component) { described_class.new status: 'warning' }
-
-      it 'is an warning alert' do
-        render_component
-        expect(page).to have_selector('.usa-alert.usa-alert--warning')
-      end
-    end
-
-    context 'when the status is error' do
-      subject(:component) { described_class.new status: 'error' }
+    context 'when the status is :alert' do
+      subject(:component) { described_class.new status: :alert }
 
       it 'is an error alert' do
         render_component

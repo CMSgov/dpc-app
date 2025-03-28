@@ -63,7 +63,7 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       let(:org) { ComponentSupport::MockOrg.new(2) }
       it 'should have token table header' do
         header = <<~HTML
-          <caption aria-hidden="true" hidden>Public Key Table</caption>
+          <caption aria-hidden="true" hidden>Public key table</caption>
           <thead>
             <tr>
               <th scope="row" role="columnheader">Label</th>
@@ -111,7 +111,7 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       end
       it 'should have key table header' do
         header = <<~HTML
-          <caption aria-hidden="true" hidden>Public Key Table</caption>
+          <caption aria-hidden="true" hidden>Public key table</caption>
           <thead>
             <tr>
               <th scope="row" role="columnheader">
@@ -164,7 +164,7 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       end
       it 'should have ip_addr table header' do
         header = <<~HTML
-          <caption aria-hidden="true" hidden>Public IP Table</caption>
+          <caption aria-hidden="true" hidden>Public IP address table</caption>
           <thead>
             <tr>
               <th scope="row" role="columnheader">

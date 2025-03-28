@@ -178,6 +178,7 @@ RSpec.describe 'ClientTokens', type: :request do
         post "/organizations/#{org.id}/client_tokens", params: { label: 'New Token' }
         expect(assigns(:organization)).to eq org
         expect(assigns(:client_token)['id']).to eq token_guid
+        expect(flash[:success]).to eq('Client token created successfully.')
       end
 
       it 'checks if configuration complete on success' do
@@ -244,8 +245,8 @@ RSpec.describe 'ClientTokens', type: :request do
                                        with: [org_api_id, token_guid],
                                        api_client:)
         delete "/organizations/#{org.id}/client_tokens/#{token_guid}"
-        expect(flash[:notice]).to eq('Client token successfully deleted.')
-        expect(response).to redirect_to(organization_path(org.id))
+        expect(flash[:success]).to eq('Client token deleted successfully.')
+        expect(response).to redirect_to(organization_path(org.id, credential_start: true))
       end
 
       it 'renders error if error' do
@@ -259,7 +260,7 @@ RSpec.describe 'ClientTokens', type: :request do
                                        api_client:)
         delete "/organizations/#{org.id}/client_tokens/#{token_guid}"
         expect(flash[:alert]).to eq('Client token could not be deleted.')
-        expect(response).to redirect_to(organization_path(org.id))
+        expect(response).to redirect_to(organization_path(org.id, credential_start: true))
       end
     end
   end
