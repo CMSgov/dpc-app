@@ -72,7 +72,7 @@ public class ConsentResourceUnitTest {
             System.out.println("RESPONSE STATUS: " + response.getStatus());
             System.out.println(response);
             assertEquals(HttpStatus.OK_200, response.getStatus(), "should find record for test id");
-            fail("shaky test");
+            fail("didn't fail");
         }
     }
 
