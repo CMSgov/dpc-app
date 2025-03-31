@@ -177,8 +177,8 @@ RSpec.describe ProviderOrganization, type: :model do
     end
 
     it 'should return blank if AO does not exist' do
-      noAoOrg = create(:provider_organization)
-      expect(noAoOrg.ao).to eq('')
+      no_ao_org = create(:provider_organization)
+      expect(no_ao_org.ao).to eq('')
     end
   end
 
