@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -69,8 +71,9 @@ public class ConsentResourceUnitTest {
                 .accept(FHIR_JSON)
                 .get()) {
 
-            System.out.println("RESPONSE STATUS: " + response.getStatus());
-            System.out.println(response);
+            Logger logger = LoggerFactory.getLogger(ConsentResourceUnitTest.class);
+            logger.warn("RESPONSE STATUS: {}", response.getStatus());
+            logger.warn(response.toString());
             assertEquals(HttpStatus.OK_200, response.getStatus(), "should find record for test id");
             fail("didn't fail");
         }
