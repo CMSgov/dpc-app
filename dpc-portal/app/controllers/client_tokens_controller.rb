@@ -28,17 +28,18 @@ class ClientTokensController < ApplicationController
   def destroy
     manager = ClientTokenManager.new(@organization.dpc_api_organization_id)
     if manager.delete_client_token(id: params[:id])
-      flash[:notice] = 'Client token successfully deleted.'
+      flash[:success] = 'Client token deleted successfully.'
       log_credential_action(:client_token, params[:id], :remove)
     else
       flash[:alert] = 'Client token could not be deleted.'
     end
-    redirect_to organization_path(@organization)
+    redirect_to organization_path(@organization, credential_start: true)
   end
 
   private
 
   def creation_side_effects
+    flash[:success] = 'Client token created successfully.'
     CheckConfigCompleteJob.perform_later(@organization.id) unless @organization.config_complete
     log_credential_action(:client_token, @client_token['id'], :add)
   end

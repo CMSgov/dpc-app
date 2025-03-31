@@ -137,8 +137,8 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
 
       it 'redirects on success' do
         post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
-        expect(response).to redirect_to(success_organization_credential_delegate_invitation_path(api_id,
-                                                                                                 'new-invitation'))
+        expect(flash[:success]).to eq('Credential Delegate invited successfully.')
+        expect(response).to redirect_to(organization_path(org.id))
       end
 
       it 'sends an invitation email on success' do
@@ -208,22 +208,6 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     end
   end
 
-  describe 'GET /success' do
-    let!(:user) { create(:user) }
-    let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
-
-    before do
-      sign_in user
-      create(:ao_org_link, provider_organization: org, user:)
-    end
-
-    it 'returns success' do
-      get "/organizations/#{org.id}/credential_delegate_invitations/foo/success"
-      expect(assigns(:organization)).to eq org
-      expect(response).to have_http_status(200)
-    end
-  end
-
   describe 'Delete /destroy' do
     let!(:user) { create(:user) }
     let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
@@ -255,7 +239,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       end
       it 'flashes success if succeeds' do
         delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
-        expect(flash[:notice]).to eq('Invitation cancelled.')
+        expect(flash[:success]).to eq('Credential Delegate invitation cancelled successfully.')
       end
       it 'returns error message on failure' do
         invitation_class = class_double(Invitation).as_stubbed_const
