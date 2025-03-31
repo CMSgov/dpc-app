@@ -169,19 +169,15 @@ RSpec.describe ProviderOrganization, type: :model do
   end
 
   describe :ao do
-    let(:org) { create(:provider_organization) }
-    let(:noAoOrg) { create(:provider_organization) }
-    let(:user) { create(:user, given_name: 'John', family_name: 'Doe') }
-    let(:ao_org_link) { create(:ao_org_link, user:, provider_organization: org, verification_status: true) }
-
     it 'should return name if AO exists' do
-      org.save
-      user.save
-      ao_org_link.save
+      org = create(:provider_organization)
+      user = create(:user, given_name: 'John', family_name: 'Doe')
+      create(:ao_org_link, user:, provider_organization: org, verification_status: true)
       expect(org.ao).to eq('John Doe')
     end
 
     it 'should return blank if AO does not exist' do
+      noAoOrg = create(:provider_organization)
       expect(noAoOrg.ao).to eq('')
     end
   end

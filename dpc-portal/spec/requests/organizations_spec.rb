@@ -185,8 +185,7 @@ RSpec.describe 'Organizations', type: :request do
     context 'as cd' do
       let!(:user) { create(:user) }
       let!(:org) { create(:provider_organization) }
-      let!(:invitation) { create(:invitation, :cd, provider_organization: org, status: :accepted) }
-      let!(:link) { create(:cd_org_link, user:, provider_organization: org, invitation:) }
+      let!(:link) { create(:cd_org_link, user:, provider_organization: org) }
       before { sign_in user }
 
       context :not_signed_tos do
@@ -241,9 +240,8 @@ RSpec.describe 'Organizations', type: :request do
     context 'as ao' do
       let!(:user) { create(:user) }
       let!(:org) { create(:provider_organization) }
-      let!(:invitation) { create(:invitation, :ao, provider_organization: org, status: :accepted) }
       before do
-        create(:ao_org_link, user:, provider_organization: org, invitation:)
+        create(:ao_org_link, user:, provider_organization: org)
         sign_in user
       end
 

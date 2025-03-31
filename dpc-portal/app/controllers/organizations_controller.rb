@@ -98,8 +98,7 @@ class OrganizationsController < ApplicationController
   end
 
   def cur_org_status
-    @links = current_user.provider_links
-    cur_link = @links.find { |link| link.provider_organization_id == @organization.id }
+    cur_link = current_user.provider_links.find { |link| link.provider_organization_id == @organization.id }
     org_status(@organization, cur_link)
   end
 
