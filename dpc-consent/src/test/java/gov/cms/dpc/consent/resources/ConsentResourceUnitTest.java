@@ -74,6 +74,8 @@ public class ConsentResourceUnitTest {
             Logger logger = LoggerFactory.getLogger(ConsentResourceUnitTest.class);
             logger.warn("RESPONSE STATUS: {}", response.getStatus());
             logger.warn(response.toString());
+            System.out.println("RESPONSE STATUS: " + response.getStatus());
+            System.out.println(response);
             assertEquals(HttpStatus.OK_200, response.getStatus(), "should find record for test id");
             fail("didn't fail");
         }
