@@ -5,16 +5,19 @@ import {
   createGroup,
   createOrganization,
   createPatient,
-  createProvider,
+  createPractitioner,
   deleteOrganization,
   exportGroup,
-  findByNpi,
+  findOrganizationByNpi,
+  findPatientByMbi,
+  findPractitionerByNpi,
   getGroup,
+  findGroupByPractitionerNpi,
   getOrganization,
   updateGroup
 } from './dpc-api-client.js';
-import NPIGenerator from './utils/npi-generator.js';
-import MBIGenerator from './utils/mbi-generator.js';
+import NPIGenerator, { NPIGeneratorCache } from './utils/npi-generator.js';
+import MBIGenerator, { MBIGeneratorCache } from './utils/mbi-generator.js';
 
 // See https://grafana.com/docs/k6/latest/using-k6/k6-options/reference for
 // details on this configuration object.
@@ -35,14 +38,14 @@ export const options = {
   }
 };
 
-const npiGenerator = new NPIGenerator();
-const mbiGenerator = new MBIGenerator();
+const npiGeneratorCache = new NPIGeneratorCache();
+const mbiGeneratorCache = new MBIGeneratorCache();
 
 // Sets up two test organizations
 export function setup() {
   const goldenMacaroon = fetchGoldenMacaroon();
   // Fake NPIs generated online: https://jsfiddle.net/alexdresko/cLNB6
-  const existingOrgsResponse = findByNpi('2782823019', '8197402604', goldenMacaroon);
+  const existingOrgsResponse = findOrganizationByNpi('2782823019', '8197402604', goldenMacaroon);
   const checkFindOutput = check(
     existingOrgsResponse,
     {
@@ -92,11 +95,14 @@ export function setup() {
 }
 
 export function workflowA(data) {
+  const npiGenerator = npiGeneratorCache.getGenerator(__VU);
+  const mbiGenerator = mbiGeneratorCache.getGenerator(__VU);
+
   const orgId = data.orgIds[exec.vu.idInInstance];
   const token = generateDPCToken(orgId, data.goldenMacaroon);
 
   // POST practitioner
-  const practitionerResponse = createProvider(token, npiGenerator.iterate());
+  const practitionerResponse = createPractitioner(token, npiGenerator.iterate());
   if (practitionerResponse.status != 201) {
     fail('failed to create practitioner for workflow A');
   }
@@ -154,17 +160,71 @@ export function workflowA(data) {
 }
 
 export function workflowB(data) {
+  const npiGenerator = npiGeneratorCache.getGenerator(__VU);
+  const mbiGenerator = mbiGeneratorCache.getGenerator(__VU);
+
   const orgId = data.orgIds[exec.vu.idInInstance];
   const token = generateDPCToken(orgId, data.goldenMacaroon);
-  const orgResponse = getOrganization(token);
-  const checkOutput = check(
-    orgResponse,
-    { 'response code was 200': res => res.status === 200 }
-  )
-
-  if (!checkOutput) {
-    fail('Failed to get a 200 response in workflow B');
+  
+  // POST practitioner
+  const postPractitionerResponse = createPractitioner(token, npiGenerator.iterate());
+  if (postPractitionerResponse.status != 201) {
+    console.log('practitioner response', postPractitionerResponse.json());
+    fail('failed to create practitioner for workflow B');
   }
+  // There's only 1 identifier in our synthetic practitioner, so we don't have to search for npi
+  const practitionerNpi = postPractitionerResponse.json().identifier[0].value;
+  const practitionerId = postPractitionerResponse.json().id;
+
+  // POST patient
+  let postPatientResponse = createPatient(token, mbiGenerator.iterate());
+  if (postPatientResponse.status != 201) {
+    fail('failed to create patient for workflow B');
+  }
+  const patientId = postPatientResponse.json().id;
+  const patientMbi = postPatientResponse.json().identifier[0].value;
+
+  // POST group
+  const createGroupResponse = createGroup(token, orgId, practitionerId, practitionerNpi);
+  if (createGroupResponse.status != 201) {
+    fail('failed to create group for workflow B');
+  }
+  let groupId = createGroupResponse.json().id;
+
+  // GET practitioner
+  const getPractitionerResponse = findPractitionerByNpi(token, practitionerNpi);
+  if (getPractitionerResponse.status != 200) {
+    fail('failed to get practioner for workflow B');
+  }
+  const practitionerResource = getPractitionerResponse.json();
+
+  // GET patient
+  const getPatientResponse = findPatientByMbi(token, patientMbi);
+  if (getPatientResponse.status != 200) {
+    fail('failed to get patient for workflow B');
+  }
+  const patientResource = getPatientResponse.json();
+
+  // GET group by practitioner NPI
+  const getGroupResponse = findGroupByPractitionerNpi(token, practitionerNpi);
+  if (getGroupResponse.status != 200) {
+    fail('failed to get group for workflow B');
+  }
+
+  // PUT patient in group
+  const updateGroupResponse = updateGroup(token, orgId, groupId, patientId, practitionerId, practitionerNpi);
+  if (updateGroupResponse.status != 200) {
+    fail('failed to update group for workflow A');
+  }
+  console.log('updated group', updateGroupResponse.json());
+
+  // GET group export
+  const getGroupExportResponse = exportGroup(token, groupId);
+  if (getGroupExportResponse.status != 202) {
+    fail('failed to export group for workflow A');
+  }
+
+  console.log('group export response', getGroupExportResponse.json())
 }
 
 export function teardown(data) {

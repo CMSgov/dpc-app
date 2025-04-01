@@ -1,3 +1,5 @@
+import exec from 'k6/execution'
+
 /**
  * Returns a Luhn check digit, which should be the last digit of an NPI. This serves as a 
  * validation mechanism. 
@@ -32,13 +34,41 @@ export function generateNPI(counter) {
 }
 
 export default class NPIGenerator {
-  constructor() {
-    this.counter = 1;
+  constructor(counter=1) {
+    this.counter = counter;
   }
 
   iterate() {
     const npi = generateNPI(this.counter);
     this.counter++;
     return npi;
+  }
+}
+
+/**
+ * A simple cache to store instance of NPIGenerator, to be used across iterations 
+ * for each workflow.
+ * 
+ * Generators need to be instantiated within the scope of each workflow. However,
+ * simply calling NPIGenerator.instantiate within the scope of a workflow will cause a new
+ * instance to be created on every iteration. 
+ * 
+ * Instantiated instance reserves 10000 unique identifiers.
+ * 
+ */
+export class NPIGeneratorCache {
+  constructor() {
+    this.generators = {};
+  }
+
+  getGenerator(vuId) {
+    if (vuId === undefined) {
+      exec.test.abort('No VU passed to NPIGenerator; aborting test.');
+    }
+    if (this.generators[vuId] === undefined) {
+      this.generators[vuId] = new NPIGenerator(vuId * 10000);
+    }
+    
+    return this.generators[vuId];
   }
 }
