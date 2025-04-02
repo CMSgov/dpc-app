@@ -33,7 +33,7 @@ export function generateNPI(counter) {
   return paddedNumber + generateLuhnCheckDigit(paddedNumber);
 }
 
-export default class NPIGenerator {
+export class NPIGenerator {
   constructor(counter=1) {
     this.counter = counter;
   }
@@ -56,7 +56,7 @@ export default class NPIGenerator {
  * Instantiated instance reserves 10000 unique identifiers.
  * 
  */
-export class NPIGeneratorCache {
+export default class NPIGeneratorCache {
   constructor() {
     this.generators = {};
   }

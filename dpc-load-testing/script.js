@@ -1,4 +1,4 @@
-import { check, fail, group } from 'k6';
+import { check, fail } from 'k6';
 import exec from 'k6/execution'
 import { fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
 import {
@@ -16,8 +16,8 @@ import {
   updateGroup,
   findJobById
 } from './dpc-api-client.js';
-import { NPIGeneratorCache } from './utils/npi-generator.js';
-import { MBIGeneratorCache } from './utils/mbi-generator.js';
+import NPIGeneratorCache from './utils/npi-generator.js';
+import MBIGeneratorCache from './utils/mbi-generator.js';
 
 // See https://grafana.com/docs/k6/latest/using-k6/k6-options/reference for
 // details on this configuration object.

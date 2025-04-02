@@ -32,7 +32,7 @@ export function generateMBI(counter) {
   return output;
 }
 
-export default class MBIGenerator {
+export class MBIGenerator {
   constructor(counter=0) {
     this.counter = counter;
   }
@@ -55,7 +55,7 @@ export default class MBIGenerator {
  * Instantiated instance reserves 10000 unique identifiers.
  * 
  */
-export class MBIGeneratorCache {
+export default class MBIGeneratorCache {
   constructor() {
     this.generators = {};
   }
