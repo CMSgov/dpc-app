@@ -160,14 +160,12 @@ export function workflowA(data) {
 
   const jobId = getGroupExportResponse.headers['Content-Location'].split('/').pop();
   if (!jobId) {
-    fail('failed to get a location to query the export job in workflow B');
+    fail('failed to get a location to query the export job in workflow A');
   }
   const jobResponse = findJobById(token, jobId);
   if (jobResponse.status != 200 && jobResponse.status != 202) {
     fail('failed to successfully query job in workflow A');
   }
-  
-  // TODO: we'll want to continue to check the status of active jobs while they exist. Put them into an array and, on each iteration, query them until done.
 }
 
 export function workflowB(data) {
@@ -204,7 +202,7 @@ export function workflowB(data) {
   // GET practitioner
   const getPractitionerResponse = findPractitionerByNpi(token, practitionerNpi);
   if (getPractitionerResponse.status != 200) {
-    fail('failed to get practioner for workflow B');
+    fail('failed to get practitioner for workflow B');
   }
   const practitionerResource = getPractitionerResponse.json();
 
@@ -240,9 +238,7 @@ export function workflowB(data) {
   const jobResponse = findJobById(token, jobId);
   if (jobResponse.status != 200 && jobResponse.status != 202) {
     fail('failed to successfully query job in workflow B');
-  }
-  
-  // TODO: we'll want to continue to check the status of active jobs while they exist. Put them into an array and, on each iteration, query them until done.
+  } 
 }
 
 export function teardown(data) {
