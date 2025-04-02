@@ -1,5 +1,3 @@
-import exec from 'k6/execution'
-
 /**
  * Returns a Luhn check digit, which should be the last digit of an NPI. This serves as a 
  * validation mechanism. 
@@ -63,7 +61,7 @@ export default class NPIGeneratorCache {
 
   getGenerator(vuId) {
     if (vuId === undefined) {
-      exec.test.abort('No VU passed to NPIGenerator; aborting test.');
+      throw new Error('No VU passed to NPIGenerator; aborting test.');
     }
     if (this.generators[vuId] === undefined) {
       this.generators[vuId] = new NPIGenerator(vuId * 10000);

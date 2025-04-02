@@ -62,7 +62,7 @@ export default class MBIGeneratorCache {
 
   getGenerator(vuId) {
     if (vuId === undefined) {
-      exec.test.abort('No VU passed to MBIGenerator; aborting test.');
+      throw new Error('No VU passed to MBIGenerator; aborting test.');
     }
     if (this.generators[vuId] === undefined) {
       this.generators[vuId] = new MBIGenerator(vuId * 10000);
