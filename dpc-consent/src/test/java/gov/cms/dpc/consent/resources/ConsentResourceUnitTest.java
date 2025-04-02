@@ -48,6 +48,7 @@ public class ConsentResourceUnitTest {
     public static final ResourceExtension resource = ResourceExtension.builder()
             .addResource(new ConsentResource(mockedDAO, "http://test-org-url"))
             .setTestContainerFactory(testContainer)
+            .setRegisterDefaultExceptionMappers(false)
             .build();
 
     private ConsentResourceUnitTest() {
