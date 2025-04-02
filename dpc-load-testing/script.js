@@ -95,8 +95,8 @@ export function setup() {
 }
 
 export function workflowA(data) {
-  const npiGenerator = npiGeneratorCache.getGenerator(__VU);
-  const mbiGenerator = mbiGeneratorCache.getGenerator(__VU);
+  const npiGenerator = npiGeneratorCache.getGenerator(exec.vu.idInInstance);
+  const mbiGenerator = mbiGeneratorCache.getGenerator(exec.vu.idInInstance);
 
   const orgId = data.orgIds[exec.vu.idInInstance];
   const token = generateDPCToken(orgId, data.goldenMacaroon);
@@ -169,8 +169,8 @@ export function workflowA(data) {
 }
 
 export function workflowB(data) {
-  const npiGenerator = npiGeneratorCache.getGenerator(__VU);
-  const mbiGenerator = mbiGeneratorCache.getGenerator(__VU);
+  const npiGenerator = npiGeneratorCache.getGenerator(exec.vu.idInInstance);
+  const mbiGenerator = mbiGeneratorCache.getGenerator(exec.vu.idInInstance);
 
   const orgId = data.orgIds[exec.vu.idInInstance];
   const token = generateDPCToken(orgId, data.goldenMacaroon);
