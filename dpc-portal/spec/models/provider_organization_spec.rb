@@ -168,6 +168,20 @@ RSpec.describe ProviderOrganization, type: :model do
     end
   end
 
+  describe :ao do
+    it 'should return name if AO exists' do
+      org = create(:provider_organization)
+      user = create(:user, given_name: 'John', family_name: 'Doe')
+      create(:ao_org_link, user:, provider_organization: org, verification_status: true)
+      expect(org.ao).to eq('John Doe')
+    end
+
+    it 'should return blank if AO does not exist' do
+      no_ao_org = create(:provider_organization)
+      expect(no_ao_org.ao).to eq('')
+    end
+  end
+
   describe :check_config_complete do
     let(:org) { create(:provider_organization, dpc_api_organization_id: 'some-guid') }
     it 'should mark org complete if has all credentials' do

@@ -2,6 +2,7 @@
 
 # Shows Credential Delegates info about the organizations they manage the credentials for
 class OrganizationsController < ApplicationController
+  include OrganizationUtils
   before_action :authenticate_user!
   before_action :check_user_verification
   before_action :load_organization, only: %i[show tos_form sign_tos success]
@@ -18,18 +19,17 @@ class OrganizationsController < ApplicationController
 
   def show
     @delegate_information = {}
+    role = 'Credential Delegate'
     if current_user.ao?(@organization)
-      # Invitation expiration is determined in relation to the `created_at` field; the `status` field will
-      # never be `'expired'`. Therefore, we need to further filter out expired invitations from this query.
-      @delegate_information[:pending] = Invitation.where(provider_organization: @organization,
-                                                         invited_by: current_user,
-                                                         status: :pending).reject(&:expired?)
-      @delegate_information[:expired] = Invitation.where(provider_organization: @organization,
-                                                         invited_by: current_user).select(&:expired?)
-      @delegate_information[:active] = CdOrgLink.where(provider_organization: @organization, disabled_at: nil)
+      @delegate_information = ao_delegate_information
+      role = 'Authorized Official'
     end
-    render(Page::Organization::CompoundShowComponent.new(@organization, @delegate_information,
-                                                         params[:credential_start]))
+
+    render(Page::Organization::CompoundShowComponent.new(@organization,
+                                                         @delegate_information,
+                                                         params[:credential_start],
+                                                         role,
+                                                         cur_org_status))
   end
 
   def new
@@ -95,5 +95,22 @@ class OrganizationsController < ApplicationController
   def log_link_error
     errors = @ao_org_link.errors.messages.map { |k, v| "#{k}: #{v.join(',')}" }.join(' | ')
     logger.error("Unable to create AoOrgLink: #{errors}")
+  end
+
+  def cur_org_status
+    cur_link = current_user.provider_links.find { |link| link.provider_organization_id == @organization.id }
+    org_status(@organization, cur_link)
+  end
+
+  def ao_delegate_information
+    # Invitation expiration is determined in relation to the `created_at` field; the `status` field will
+    # never be `'expired'`. Therefore, we need to further filter out expired invitations from this query.
+    @delegate_information[:pending] = Invitation.where(provider_organization: @organization,
+                                                       invited_by: current_user,
+                                                       status: :pending).reject(&:expired?)
+    @delegate_information[:expired] = Invitation.where(provider_organization: @organization,
+                                                       invited_by: current_user).select(&:expired?)
+    @delegate_information[:active] = CdOrgLink.where(provider_organization: @organization, disabled_at: nil)
+    @delegate_information
   end
 end
