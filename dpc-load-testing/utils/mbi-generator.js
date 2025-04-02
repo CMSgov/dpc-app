@@ -32,14 +32,42 @@ export function generateMBI(counter) {
   return output;
 }
 
-export default class MBIGenerator {
-  constructor() {
-    this.counter = 0;
+export class MBIGenerator {
+  constructor(counter=0) {
+    this.counter = counter;
   }
 
   iterate() {
     const mbi = generateMBI(this.counter);
     this.counter++;
     return mbi;
+  }
+}
+
+/**
+ * A simple cache to store instance of MBIGenerator, to be used across iterations 
+ * for each workflow.
+ * 
+ * Generators need to be instantiated within the scope of each workflow. However,
+ * simply calling MBIGenerator.instantiate within the scope of a workflow will cause a new
+ * instance to be created on every iteration. 
+ * 
+ * Instantiated instance reserves 10000 unique identifiers.
+ * 
+ */
+export default class MBIGeneratorCache {
+  constructor() {
+    this.generators = {};
+  }
+
+  getGenerator(vuId) {
+    if (vuId === undefined) {
+      throw new Error('No VU passed to MBIGenerator; aborting test.');
+    }
+    if (this.generators[vuId] === undefined) {
+      this.generators[vuId] = new MBIGenerator(vuId * 10000);
+    }
+    
+    return this.generators[vuId];
   }
 }
