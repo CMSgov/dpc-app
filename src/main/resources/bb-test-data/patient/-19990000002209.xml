@@ -123,7 +123,6 @@
                     <given value='Jane'/>
                     <given value='X'/>
                 </name>
-                <gender value='female'/>
                 <birthDate value='1999-06-01'/>
                 <address>
                     <district value='999'/>
