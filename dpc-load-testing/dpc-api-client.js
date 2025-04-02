@@ -91,7 +91,7 @@ export function getGroup(token, groupId) {
 }
 
 export function findGroupByPractitionerNpi(token, practitionerNpi) {
-  return http.get(`${urlRoot}/Group/characteristic-value=attributed-to$${practitionerNpi}`, createHeaderParam(token));
+  return http.get(`${urlRoot}/Group?characteristic-value=attributed-to$${practitionerNpi}`, createHeaderParam(token));
 }
 
 export function updateGroup(token, orgId, groupId, patientId, practitionerId, practitionerNpi) {
@@ -113,7 +113,8 @@ export function exportGroup(token, groupId) {
 }
 
 export function findJobById(token, jobId) {
-  return http.get(`${urlRoot}/Job/${jobId}`, createHeaderParam(token));
+  // Request fails with 406 status when made with Content-Type or Accept header
+  return http.get(`${urlRoot}/Jobs/${jobId}`, { 'headers': { 'Authorization': `Bearer ${token}` } });
 }
 
 /**

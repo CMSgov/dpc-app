@@ -1,6 +1,6 @@
 import { check, fail, group } from 'k6';
 import exec from 'k6/execution'
-import { Macaroon, fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
+import { fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
 import {
   createGroup,
   createOrganization,
@@ -13,11 +13,11 @@ import {
   findPractitionerByNpi,
   getGroup,
   findGroupByPractitionerNpi,
-  getOrganization,
-  updateGroup
+  updateGroup,
+  findJobById
 } from './dpc-api-client.js';
-import NPIGenerator, { NPIGeneratorCache } from './utils/npi-generator.js';
-import MBIGenerator, { MBIGeneratorCache } from './utils/mbi-generator.js';
+import { NPIGeneratorCache } from './utils/npi-generator.js';
+import { MBIGeneratorCache } from './utils/mbi-generator.js';
 
 // See https://grafana.com/docs/k6/latest/using-k6/k6-options/reference for
 // details on this configuration object.
@@ -157,6 +157,17 @@ export function workflowA(data) {
   if (getGroupExportResponse.status != 202) {
     fail('failed to export group for workflow A');
   }
+
+  const jobId = getGroupExportResponse.headers['Content-Location'].split('/').pop();
+  if (!jobId) {
+    fail('failed to get a location to query the export job in workflow B');
+  }
+  const jobResponse = findJobById(token, jobId);
+  if (jobResponse.status != 200 && jobResponse.status != 202) {
+    fail('failed to successfully query job in workflow A');
+  }
+  
+  // TODO: we'll want to continue to check the status of active jobs while they exist. Put them into an array and, on each iteration, query them until done.
 }
 
 export function workflowB(data) {
@@ -169,7 +180,6 @@ export function workflowB(data) {
   // POST practitioner
   const postPractitionerResponse = createPractitioner(token, npiGenerator.iterate());
   if (postPractitionerResponse.status != 201) {
-    console.log('practitioner response', postPractitionerResponse.json());
     fail('failed to create practitioner for workflow B');
   }
   // There's only 1 identifier in our synthetic practitioner, so we don't have to search for npi
@@ -214,17 +224,25 @@ export function workflowB(data) {
   // PUT patient in group
   const updateGroupResponse = updateGroup(token, orgId, groupId, patientId, practitionerId, practitionerNpi);
   if (updateGroupResponse.status != 200) {
-    fail('failed to update group for workflow A');
+    fail('failed to update group for workflow B');
   }
-  console.log('updated group', updateGroupResponse.json());
 
   // GET group export
   const getGroupExportResponse = exportGroup(token, groupId);
   if (getGroupExportResponse.status != 202) {
-    fail('failed to export group for workflow A');
+    fail('failed to export group for workflow B');
   }
-
-  console.log('group export response', getGroupExportResponse.json())
+  
+  const jobId = getGroupExportResponse.headers['Content-Location'].split('/').pop();
+  if (!jobId) {
+    fail('failed to get a location to query the export job in workflow B');
+  }
+  const jobResponse = findJobById(token, jobId);
+  if (jobResponse.status != 200 && jobResponse.status != 202) {
+    fail('failed to successfully query job in workflow B');
+  }
+  
+  // TODO: we'll want to continue to check the status of active jobs while they exist. Put them into an array and, on each iteration, query them until done.
 }
 
 export function teardown(data) {
