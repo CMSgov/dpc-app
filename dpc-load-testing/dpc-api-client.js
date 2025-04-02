@@ -9,7 +9,7 @@ import {
 
 const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/api/v1' : 'https://test.dpc.cms.gov/api/v1';
 
-export function findByNpi(npiA, npiB, goldenMacaroon) {
+export function findOrganizationByNpi(npiA, npiB, goldenMacaroon) {
   const res = http.get(`${urlRoot}/Admin/Organization?npis=npi|${npiA},${npiB}`, {
     headers: {
       'Authorization': `Bearer ${goldenMacaroon}`,
@@ -35,11 +35,15 @@ export function createOrganization(npi, name, goldenMacaroon) {
   return res;
 }
 
-export function createProvider(token, npi) {
+export function createPractitioner(token, npi) {
   const body = generateProviderResourceBody(npi);
   const res = http.post(`${urlRoot}/Practitioner`, JSON.stringify(body), createHeaderParam(token));
 
   return res;
+}
+
+export function findPractitionerByNpi(token, npi) {
+  return http.get(`${urlRoot}/Practitioner?identifier=${npi}`, createHeaderParam(token));
 }
 
 export function createPatient(token, mbi) {
@@ -47,6 +51,10 @@ export function createPatient(token, mbi) {
   const res = http.post(`${urlRoot}/Patient`, JSON.stringify(body), createHeaderParam(token));
 
   return res;
+}
+
+export function findPatientByMbi(token, mbi) {
+  return http.get(`${urlRoot}/Patient?identifier=${mbi}`, createHeaderParam(token));
 }
 
 export function getOrganization(token) {
@@ -82,6 +90,10 @@ export function getGroup(token, groupId) {
     return res;
 }
 
+export function findGroupByPractitionerNpi(token, practitionerNpi) {
+  return http.get(`${urlRoot}/Group?characteristic-value=attributed-to$${practitionerNpi}`, createHeaderParam(token));
+}
+
 export function updateGroup(token, orgId, groupId, patientId, practitionerId, practitionerNpi) {
     const groupBody = generateGroupResourceBody(practitionerNpi, patientId);
     const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
@@ -98,6 +110,11 @@ export function exportGroup(token, groupId) {
     );
 
       return res;
+}
+
+export function findJobById(token, jobId) {
+  // Request fails with 406 status when made with Content-Type or Accept header
+  return http.get(`${urlRoot}/Jobs/${jobId}`, { 'headers': { 'Authorization': `Bearer ${token}` } });
 }
 
 /**
