@@ -11,5 +11,10 @@ export default defineConfig([
 		    "no-undef": "warn",
 		    "no-unused-vars": "warn",
 		},
+		languageOptions: {
+		    globals: {
+		        __ENV: "readonly",
+		    },
+		},
 	},
 ]);
