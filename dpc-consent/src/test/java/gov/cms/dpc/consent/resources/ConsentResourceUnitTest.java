@@ -41,10 +41,12 @@ public class ConsentResourceUnitTest {
 
     private static final ConsentDAO mockedDAO = mock(ConsentDAO.class);
     private static final GrizzlyWebTestContainerFactory testContainer = new GrizzlyWebTestContainerFactory();
+    private static final ConsentResource consentResource = new ConsentResource(mockedDAO, "http://test-org-url");
 
     public static final ResourceExtension resource = ResourceExtension.builder()
-            .addResource(new ConsentResource(mockedDAO, "http://test-org-url"))
+            .addResource(consentResource)
             .setTestContainerFactory(testContainer)
+            .setRegisterDefaultExceptionMappers(false)  // don't handle exceptions quietly
             .build();
 
     private ConsentResourceUnitTest() {
@@ -55,7 +57,6 @@ public class ConsentResourceUnitTest {
         // Broke when introducing findBy
         ConsentEntity goodRecord = ConsentEntity.defaultConsentEntity(Optional.of(TEST_ID), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
         List<ConsentEntity> goodRecordList = List.of(goodRecord);
-        when(mockedDAO.getConsent(null)).thenThrow(new IllegalArgumentException("empty"));
         when(mockedDAO.getConsent(TEST_ID)).thenReturn(Optional.of(goodRecord));
         when(mockedDAO.findBy("mbi", TEST_MBI)).thenReturn(goodRecordList);
         when(mockedDAO.findBy("hicn", TEST_HICN)).thenReturn(goodRecordList);
