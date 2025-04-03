@@ -204,14 +204,12 @@ export function workflowB(data) {
   if (getPractitionerResponse.status != 200) {
     fail('failed to get practitioner for workflow B');
   }
-  const practitionerResource = getPractitionerResponse.json();
 
   // GET patient
   const getPatientResponse = findPatientByMbi(token, patientMbi);
   if (getPatientResponse.status != 200) {
     fail('failed to get patient for workflow B');
   }
-  const patientResource = getPatientResponse.json();
 
   // GET group by practitioner NPI
   const getGroupResponse = findGroupByPractitionerNpi(token, practitionerNpi);
