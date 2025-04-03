@@ -22,6 +22,8 @@ jobs:
         run: npm install -g yarn
       - name: Set up tests for dpc-load-testing utilities
         run: yarn
+      - name: Run ESLint
+        run: eslint .
       - name: Run unit tests
         run: yarn test
   test-macaroons:
