@@ -7,10 +7,6 @@ export default defineConfig([
 		files: ["**/*.js"],
 		plugins: { js },
 		extends: ["js/recommended"],
-		rules: {
-		    "no-undef": "warn",
-		    "no-unused-vars": "warn",
-		},
 		languageOptions: {
 		    globals: {
 		        __ENV: "readonly",
