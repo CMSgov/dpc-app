@@ -57,7 +57,6 @@ public class ConsentResourceUnitTest {
         // Broke when introducing findBy
         ConsentEntity goodRecord = ConsentEntity.defaultConsentEntity(Optional.of(TEST_ID), Optional.of(TEST_HICN), Optional.of(TEST_MBI));
         List<ConsentEntity> goodRecordList = List.of(goodRecord);
-        when(mockedDAO.getConsent(null)).thenThrow(new IllegalArgumentException("empty"));
         when(mockedDAO.getConsent(TEST_ID)).thenReturn(Optional.of(goodRecord));
         when(mockedDAO.findBy("mbi", TEST_MBI)).thenReturn(goodRecordList);
         when(mockedDAO.findBy("hicn", TEST_HICN)).thenReturn(goodRecordList);
