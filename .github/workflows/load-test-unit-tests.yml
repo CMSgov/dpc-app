@@ -23,7 +23,7 @@ jobs:
       - name: Set up tests for dpc-load-testing utilities
         run: yarn
       - name: Run ESLint
-        run: npm run lint
+        run: yarn run lint
       - name: Run unit tests
         run: yarn test
   test-macaroons:
