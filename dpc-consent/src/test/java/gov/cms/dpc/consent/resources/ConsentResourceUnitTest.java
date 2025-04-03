@@ -41,11 +41,12 @@ public class ConsentResourceUnitTest {
 
     private static final ConsentDAO mockedDAO = mock(ConsentDAO.class);
     private static final GrizzlyWebTestContainerFactory testContainer = new GrizzlyWebTestContainerFactory();
+    private static final ConsentResource consentResource = new ConsentResource(mockedDAO, "http://test-org-url");
 
     public static final ResourceExtension resource = ResourceExtension.builder()
-            .addResource(new ConsentResource(mockedDAO, "http://test-org-url"))
+            .addResource(consentResource)
             .setTestContainerFactory(testContainer)
-            .setRegisterDefaultExceptionMappers(false)
+            .setRegisterDefaultExceptionMappers(false)  // don't handle exceptions quietly
             .build();
 
     private ConsentResourceUnitTest() {
