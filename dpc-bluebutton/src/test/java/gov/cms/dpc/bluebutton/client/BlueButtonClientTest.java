@@ -156,7 +156,7 @@ class BlueButtonClientTest {
 
         String patientDataCorrupted = "The demo Patient object data differs from what is expected";
         assertEquals(patient.getBirthDate(), java.sql.Date.valueOf("2014-06-01"), patientDataCorrupted);
-        assertNull(patient.getGender(), patientDataCorrupted);
+        assertEquals("Unknown", patient.getGender().getDisplay(), patientDataCorrupted);
         assertEquals(1, patient.getName().size(), patientDataCorrupted);
         assertEquals("Doe", patient.getName().get(0).getFamily(), patientDataCorrupted);
         assertEquals("Jane", patient.getName().get(0).getGiven().get(0).toString(), patientDataCorrupted);
