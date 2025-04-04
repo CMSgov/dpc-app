@@ -1,0 +1,44 @@
+$link-color: rgb(0, 0, 238);
+
+.organizations-list-header {
+  .organization-name {
+    width: 50%;
+  }
+  .organization-npi {
+    width: 16.67%;
+  }
+  .orglink-role {
+    width: 8.33%;
+  }
+  .organization-status {
+    width: 25%;
+  }
+}
+
+.organizations-list-row {
+  .organization-link {
+    color: $link-color;
+    text-decoration: underline;
+    text-overflow: ellipsis;
+
+    &:visited {
+      color: $link-color;
+    }
+
+    &:hover {
+      color: $link-color;
+    }
+  }
+
+  .organization-name {
+    display: inline-block;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  th, td {
+    background-color: #f0f0f0;
+  }
+}
