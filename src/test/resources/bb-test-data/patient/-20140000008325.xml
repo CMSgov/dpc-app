@@ -22,9 +22,6 @@
                         <display value="White"/>
                     </valueCoding>
                 </extension>
-                <extension url="http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex">
-                    <valueCode value="248153007"/>
-                </extension>
                 <identifier>
                     <system value="https://bluebutton.cms.gov/resources/variables/bene_id"/>
                     <value value="-20140000008325"/>
@@ -43,6 +40,7 @@
                     <given value="Jane"/>
                     <given value="X"/>
                 </name>
+                <gender value="unknown"/>
                 <birthDate value="2014-06-01"/>
                 <address>
                     <district value="999"/>

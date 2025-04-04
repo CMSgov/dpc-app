@@ -12,10 +12,6 @@
         },
         "extension": [
           {
-            "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
-            "valueCode" : "248153007"
-          },
-          {
             "url": "https://bluebutton.cms.gov/resources/variables/race",
             "valueCoding": {
               "system": "https://bluebutton.cms.gov/resources/variables/race",
@@ -115,6 +111,7 @@
             ]
           }
         ],
+        "gender": "male",
         "birthDate": "1972-11-11",
         "address": [
           {
