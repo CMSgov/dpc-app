@@ -80,10 +80,11 @@ export function createGroup(token, orgId, practitionerId, practitionerNpi) {
 }
 
 export function getGroup(token, groupId) {
+    let url;
     if (groupId != undefined) {
-        var url = `${urlRoot}/Group/${groupId}`;
+        url = `${urlRoot}/Group/${groupId}`;
     } else {
-        var url = `${urlRoot}/Group`;
+        url = `${urlRoot}/Group`;
     }
     const res = http.get(url, createHeaderParam(token));
 
