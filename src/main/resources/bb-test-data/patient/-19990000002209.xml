@@ -30,6 +30,9 @@
                         <display value='White'/>
                     </valueCoding>
                 </extension>
+                <extension url="http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex">
+                    <valueCode value="248153007"/>
+                </extension>
                 <extension url='https://bluebutton.cms.gov/resources/variables/rfrnc_yr'>
                     <valueDate value='0003'/>
                 </extension>
@@ -123,7 +126,6 @@
                     <given value='Jane'/>
                     <given value='X'/>
                 </name>
-                <gender value='female'/>
                 <birthDate value='1999-06-01'/>
                 <address>
                     <district value='999'/>

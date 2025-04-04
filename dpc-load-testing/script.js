@@ -69,16 +69,16 @@ export function setup() {
     org1,
     {
       'response code was 200': res => res.status === 200,
-      'response has id field': res => res.json().hasOwnProperty('id'),
-      'id field is not null or undefined': res => res.json().id != null && res.json().id != undefined
+      'response has id field': res => res.json().id != undefined,
+      'id field is not null': res => res.json().id != null
     }
   );
   const checkOutput2 = check(
     org2,
     {
       'response code was 200': res => res.status === 200,
-      'response has id field': res => res.json().hasOwnProperty('id'),
-      'id field is not null or undefined': res => res.json().id != null && res.json().id != undefined
+      'response has id field': res => res.json().id != undefined,
+      'id field is not null or undefined': res => res.json().id != null
     }
   )
 
@@ -174,7 +174,7 @@ export function workflowB(data) {
 
   const orgId = data.orgIds[exec.vu.idInInstance];
   const token = generateDPCToken(orgId, data.goldenMacaroon);
-  
+
   // POST practitioner
   const postPractitionerResponse = createPractitioner(token, npiGenerator.iterate());
   if (postPractitionerResponse.status != 201) {
@@ -204,14 +204,12 @@ export function workflowB(data) {
   if (getPractitionerResponse.status != 200) {
     fail('failed to get practitioner for workflow B');
   }
-  const practitionerResource = getPractitionerResponse.json();
 
   // GET patient
   const getPatientResponse = findPatientByMbi(token, patientMbi);
   if (getPatientResponse.status != 200) {
     fail('failed to get patient for workflow B');
   }
-  const patientResource = getPatientResponse.json();
 
   // GET group by practitioner NPI
   const getGroupResponse = findGroupByPractitionerNpi(token, practitionerNpi);
@@ -230,7 +228,7 @@ export function workflowB(data) {
   if (getGroupExportResponse.status != 202) {
     fail('failed to export group for workflow B');
   }
-  
+
   const jobId = getGroupExportResponse.headers['Content-Location'].split('/').pop();
   if (!jobId) {
     fail('failed to get a location to query the export job in workflow B');
@@ -238,7 +236,7 @@ export function workflowB(data) {
   const jobResponse = findJobById(token, jobId);
   if (jobResponse.status != 200 && jobResponse.status != 202) {
     fail('failed to successfully query job in workflow B');
-  } 
+  }
 }
 
 export function teardown(data) {
