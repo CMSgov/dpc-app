@@ -1,6 +1,9 @@
 $link-color: rgb(0, 0, 238);
 
-.organizations-list-header {
+.organizations-list {
+  table-layout: fixed;
+  width: 100%;
+
   .organization-name {
     width: 50%;
   }
@@ -18,8 +21,9 @@ $link-color: rgb(0, 0, 238);
 .organizations-list-row {
   .organization-link {
     color: $link-color;
+    display: inline-block;
     text-decoration: underline;
-    text-overflow: ellipsis;
+    max-width: 100%;
 
     &:visited {
       color: $link-color;
@@ -30,12 +34,13 @@ $link-color: rgb(0, 0, 238);
     }
   }
 
-  .organization-name {
+  .organization-name-truncated {
     display: inline-block;
     max-width: 100%;
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    vertical-align: bottom;
+    white-space: nowrap;
   }
 
   th, td {
