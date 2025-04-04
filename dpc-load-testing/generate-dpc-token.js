@@ -45,7 +45,6 @@ export class Macaroon {
     while (index < buf.byteLength) {
       const packetLength = new Uint8Array(buf, index, PACKET_PREFIX_LENGTH);
       const len = parseInt(arrayBuffer2String(packetLength), 16);
-      const chunk = new Uint8Array(buf, index, len);
       const packet = new Uint8Array(buf, index + PACKET_PREFIX_LENGTH, len - (PACKET_PREFIX_LENGTH + 1));
       const keyValue = arrayBuffer2String(packet).split(" ");
       if (keyValue[0] == 'location') {

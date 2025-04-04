@@ -8,9 +8,12 @@
   "type": "module",
   "devDependencies": {
     "@types/k6": "^0.54.2",
+    "eslint": "^9.23.0",
     "jest": "^29.7.0"
   },
   "scripts": {
-    "test": "NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' jest"
+    "test": "NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' jest",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix ."
   }
 }
