@@ -8,7 +8,6 @@ import org.hl7.fhir.dstu3.model.Consent;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class ConsentServiceImpl implements ConsentService {
     private final IGenericClient consentClient;
@@ -36,14 +35,14 @@ public class ConsentServiceImpl implements ConsentService {
                 consentResult.setConsentId(consent.getId());
                 consentResult.setPolicyType(ConsentResult.PolicyType.fromPolicyUrl(consent.getPolicyRule()));
                 return consentResult;
-            }).collect(Collectors.toList())
+            }).toList()
         );
     }
 
     private Bundle doConsentSearch(List<String> mbis){
         List<String> fullMbis = mbis.stream()
                 .map( mbi -> String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), mbi) )
-                .collect(Collectors.toList());
+                .toList();
 
         return consentClient
             .search()

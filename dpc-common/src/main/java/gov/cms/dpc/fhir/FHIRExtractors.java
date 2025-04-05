@@ -98,7 +98,7 @@ public class FHIRExtractors {
                 if(mbiPattern.matcher(identifier.getValue()).matches()) {
                     return identifier.getValue();
                 } else {
-                    logger.warn("MBI: " + identifier.getValue() + " for patient: " + patient.getId() + " does not match MBI format");
+                    logger.warn("MBI: {} for patient: {} does not match MBI format", identifier.getValue(), patient.getId());
                     return null;
                 }
             })
@@ -135,7 +135,7 @@ public class FHIRExtractors {
         }
 
         final Matcher matcher = idExtractor.matcher(idString);
-        if (!matcher.find() || !(matcher.groupCount() == 1)) {
+        if (!matcher.find() || matcher.groupCount() != 1) {
             throw new IllegalArgumentException(String.format(ENTITY_ID_ERROR, idString));
         }
 

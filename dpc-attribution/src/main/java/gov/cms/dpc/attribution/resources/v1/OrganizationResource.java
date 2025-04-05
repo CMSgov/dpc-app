@@ -21,9 +21,11 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.RESTUtils.parseTokenTag;
 
@@ -54,7 +56,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             return this.dao.listOrganizations()
                     .stream()
                     .map(o -> this.converter.toFHIR(Organization.class, o))
-                    .collect(Collectors.toList());
+                    .toList();
         }
         String parsedToken = parseTokenTag(tag -> tag, identifier);
         Set<String> idSet = Set.of(parsedToken.split(","));
@@ -62,7 +64,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
             return this.dao.getOrganizationsByIds(idSet)
                 .stream()
                 .map(o -> this.converter.toFHIR(Organization.class, o))
-                .collect(Collectors.toList());
+                .toList();
         }
         // Pull out the NPI, keeping it as a string.
         final List<OrganizationEntity> queryList = this.dao.searchByIdentifier(parsedToken);
@@ -70,7 +72,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
         return queryList
                 .stream()
                 .map(o -> this.converter.toFHIR(Organization.class, o))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

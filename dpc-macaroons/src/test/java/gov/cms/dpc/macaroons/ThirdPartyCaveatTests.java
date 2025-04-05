@@ -35,7 +35,7 @@ class ThirdPartyCaveatTests {
      * TestMacaroonPaperFig6 implements an example flow as described in the macaroons paper:
      * http://theory.stanford.edu/~ataly/Papers/macaroons.pdf
      * There are three services, ts, fs, as:
-     * ts is a store service which has deligated authority to a forum service fs.
+     * ts is a store service which has delegated authority to a forum service fs.
      * The forum service wants to require its users to be logged into to an authentication service as.
      * <p>
      * The client obtains a macaroon from fs (minted by ts, with a third party caveat addressed to as).
@@ -71,9 +71,11 @@ class ThirdPartyCaveatTests {
         // TS sends the Macaroon to fs which adds a third party caveat to be discharged
         final MacaroonCondition condition = new MacaroonCondition("user", MacaroonCondition.Operator.EQ, "bob");
 
-        final Macaroon m1 = fs.addCaveats(tsMacaroon, new MacaroonCaveat("as-loc", condition.toBytes()));
+        final List<Macaroon> macaroons = Collections.singletonList(
+                fs.addCaveats(tsMacaroon, new MacaroonCaveat("as-loc", condition.toBytes()))
+        );
 
-        final BakeryException bakeryException = assertThrows(BakeryException.class, () -> ts.verifyMacaroon(Collections.singletonList(m1)));
+        final BakeryException bakeryException = assertThrows(BakeryException.class, () -> ts.verifyMacaroon(macaroons));
         assertEquals("Couldn't verify 3rd party macaroon, because no discharged macaroon was provided to the verifier.", bakeryException.getMessage(), "Should have correct error message");
     }
 

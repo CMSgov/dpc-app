@@ -15,7 +15,9 @@ public class OptOutFileEntity implements Serializable {
     public static final String IMPORT_STATUS_COMPLETED = "Completed";
     public static final String IMPORT_STATUS_FAILED = "Failed";
 
-    public OptOutFileEntity() {}
+    public OptOutFileEntity() {
+        // constructor
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

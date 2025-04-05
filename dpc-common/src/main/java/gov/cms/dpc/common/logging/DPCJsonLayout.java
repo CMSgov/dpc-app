@@ -43,10 +43,7 @@ public class DPCJsonLayout extends EventJsonLayout {
             map.put(MESSAGE, maskedMessage);
             parseJsonMessageIfPossible(map, maskedMessage);
         }
-        if(map.get(EXCEPTION) != null){
-            String maskedExceptionDetails = maskPSQLData(map.get(EXCEPTION).toString());
-            map.put(EXCEPTION, maskedExceptionDetails);
-        }
+        map.computeIfPresent(EXCEPTION, (exc, unmasked) -> maskPSQLData(unmasked.toString()));
         return map;
     }
 

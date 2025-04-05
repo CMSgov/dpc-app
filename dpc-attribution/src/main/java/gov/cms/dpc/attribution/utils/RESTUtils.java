@@ -1,7 +1,7 @@
 package gov.cms.dpc.attribution.utils;
 
-import jakarta.ws.rs.WebApplicationException;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
+import jakarta.ws.rs.WebApplicationException;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -12,7 +12,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class RESTUtils {
@@ -44,13 +43,12 @@ public class RESTUtils {
                 }
             })
             // Flush and clear the Hibernate cache after each batch
-            .map(resource -> {
+            .peek(resource -> {
                 if (index.incrementAndGet() % batchSize == 0) {
                     dao.cleanUpBatch();
                 }
-                return resource;
             })
-            .collect(Collectors.toList());
+            .toList();
     }
 
     /**

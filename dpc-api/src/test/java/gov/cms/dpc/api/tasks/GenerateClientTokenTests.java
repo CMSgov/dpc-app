@@ -154,7 +154,8 @@ public class GenerateClientTokenTests {
     void testTokenListNoOrg() throws IOException {
         final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> lct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(bos));
+            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> lct.execute(map, writer));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
         }
     }
@@ -182,7 +183,8 @@ public class GenerateClientTokenTests {
     void testTokenDeleteNoOrg() throws IOException {
         final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(bos));
+            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dct.execute(map, writer));
             assertEquals("Must have organization", ex.getMessage(), "Should have correct message");
         }
     }
@@ -192,7 +194,8 @@ public class GenerateClientTokenTests {
         final UUID id = UUID.randomUUID();
         final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dct.execute(map, new PrintWriter(new OutputStreamWriter(bos))));
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(bos));
+            final WebApplicationException ex = assertThrows(WebApplicationException.class, () -> dct.execute(map, writer));
             assertEquals("Must have token", ex.getMessage(), "Should have correct message");
         }
     }

@@ -38,8 +38,10 @@ class KeyPairGenerationTests {
 
     @Test
     void checkRequiresUsername() throws IOException {
+        final Map<String, List<String>> map = Map.of();
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> task.execute(Map.of(), new PrintWriter(new OutputStreamWriter(bos))));
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(bos));
+            final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> task.execute(map, writer));
             assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus(), "Should have bad response"),
                     () -> assertEquals("Must have ID of user generating keypair", exception.getMessage(), "Should show missing user"));
         }

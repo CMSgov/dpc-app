@@ -1,8 +1,8 @@
 package gov.cms.dpc.fhir;
 
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import gov.cms.dpc.testing.utils.MBIUtil;
 import gov.cms.dpc.testing.factories.OrganizationFactory;
+import gov.cms.dpc.testing.utils.MBIUtil;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static gov.cms.dpc.fhir.FHIRExtractors.*;
@@ -176,9 +175,9 @@ class FHIRExtractorTests {
 
 
         assertEquals(uuid1, getEntityUUID(uuid1.toString()), "Should have org id");
-        final IdType idType = new IdType("Organization/not-a-uuid");
-        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> getEntityUUID(idType.toString()), "Should not parse non-UUID");
-        assertEquals(String.format(ENTITY_ID_ERROR, idType), exception.getMessage(), "Should have correct error message");
+        final String idValue = "Organization/not-a-uuid";
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> getEntityUUID(idValue), "Should not parse non-UUID");
+        assertEquals(String.format(ENTITY_ID_ERROR, new IdType(idValue)), exception.getMessage(), "Should have correct error message");
 
         final IllegalArgumentException exception1 = assertThrows(IllegalArgumentException.class, () -> getEntityUUID("not-a-uuid"), "Should throw with non-uuid");
         assertEquals("Invalid UUID string: not-a-uuid", exception1.getMessage(), "Should have correct exception message");
@@ -325,12 +324,10 @@ class FHIRExtractorTests {
         bundle.addEntry(new Bundle.BundleEntryComponent().setResource(pat2));
         bundle.addEntry(new Bundle.BundleEntryComponent().setResource(org));
 
-        Stream<Patient> patStream = FHIRExtractors.getResourceStream(bundle, Patient.class);
-        List<Patient> patients = patStream.collect(Collectors.toList());
+        List<Patient> patients = FHIRExtractors.getResourceStream(bundle, Patient.class).toList();
         assertEquals(2, patients.size());
 
-        Stream<Organization> orgStream = FHIRExtractors.getResourceStream(bundle, Organization.class);
-        List<Organization> orgs = orgStream.collect(Collectors.toList());
+        List<Organization> orgs = FHIRExtractors.getResourceStream(bundle, Organization.class).toList();
         assertEquals(1, orgs.size());
 
         // Should return an empty stream if we ask for a resource that's not in our bundle
@@ -349,8 +346,7 @@ class FHIRExtractorTests {
         Parameters parameters = new Parameters();
         parameters.setParameter(List.of(new Parameters.ParametersParameterComponent().setResource(bundle)));
 
-        Stream<Patient> patStream = FHIRExtractors.getResourceStream(parameters, Patient.class);
-        List<Patient> patients = patStream.collect(Collectors.toList());
+        List<Patient> patients = FHIRExtractors.getResourceStream(parameters, Patient.class).toList();
         assertEquals(1, patients.size());
         assertSame(pat, patients.get(0));
     }

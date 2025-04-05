@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * {@link MessageBodyWriter} implementation that creates {@link Bundle} resources from a given {@link Collection} of {@link Resource}es.
@@ -59,8 +58,7 @@ public class BundleHandler implements MessageBodyWriter<Collection<Resource>> {
                     final Bundle.BundleEntryComponent bundleEntryComponent = new Bundle.BundleEntryComponent();
                     bundleEntryComponent.setResource(resource);
                     return bundleEntryComponent;
-                })
-                .collect(Collectors.toList());
+                }).toList();
 
         bundle.setEntry(entries);
         this.handler.writeTo(bundle, type, genericType, annotations, mediaType, httpHeaders, entityStream);
