@@ -13,13 +13,13 @@ module OrganizationUtils
         ['warning', %i[text-gold], t("#{message_prefix}.sign_tos")]
       elsif organization.rejected?
         ['lock', %i[text-gray-50], t("#{message_prefix}.access_denied")]
+      elsif link.user.can_access?(organization)
+        ['link_off', %i[text-gray-50], t("#{message_prefix}.api_disabled")]
       elsif !organization_config_complete
         ['warning', %i[text-gold], t("#{message_prefix}.configuration_needed")]
       else
         ['check', %i[text-green], t("#{message_prefix}.configuration_complete")]
       end
-#       elsif API_DISABLED
-#         ['link_off', %i[text-gray-50], t("#{message_prefix}.api_disabled")]
     end
   end
 end
