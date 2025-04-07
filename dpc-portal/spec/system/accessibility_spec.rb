@@ -243,7 +243,7 @@ RSpec.describe 'Accessibility', type: :system do
               page.fill_in 'label', with: 'new key'
               page.fill_in 'public_key', with: 'key'
               page.all('.usa-button')[1].click
-              expect(page).to have_text('Public key successfully created')
+              expect(page).to have_text('Public key created successfully')
               expect(page).to be_axe_clean
             end
           end
@@ -268,7 +268,7 @@ RSpec.describe 'Accessibility', type: :system do
               expect(mock_ip_address_manager).to receive(:create_ip_address).and_return(success_response)
               visit "/organizations/#{org.id}/ip_addresses/new"
               page.find_button(value: 'Add IP').click
-              expect(page).to have_text('IP address successfully created')
+              expect(page).to have_text('IP address created successfully')
               expect(page).to be_axe_clean
             end
           end
@@ -295,7 +295,7 @@ RSpec.describe 'Accessibility', type: :system do
               page.find('.usa-button', text: 'Send invite').click
               page.find_button(value: 'Yes, I acknowledge').click
               expect(page).to_not have_text("can't be blank")
-              expect(page).to have_text('Credential delegate invite sent')
+              expect(page).to have_text('Credential Delegate invited successfully')
               expect(page).to be_axe_clean
             end
             it 'should show duplicate error' do
