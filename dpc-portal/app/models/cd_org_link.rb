@@ -16,7 +16,7 @@ class CdOrgLink < ApplicationRecord
     disabled_at.blank?
   end
 
-  def is_ao?
-      false
+  def ao?
+    false
   end
 end

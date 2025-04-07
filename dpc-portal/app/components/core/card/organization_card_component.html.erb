@@ -6,7 +6,7 @@
   </th>
   <td class="organization-npi"> <%= @organization.npi %> </td>
   <td class="orglink-role">
-    <% if @link.is_ao? %>
+    <% if @link.ao? %>
       AO
     <% else %>
       CD
