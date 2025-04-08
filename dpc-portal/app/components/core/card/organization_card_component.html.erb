@@ -1,18 +1,18 @@
 <tr class="organizations-list-row">
-  <th scope="row" class="organization-name">
+  <th scope="row" style="width: 50%;">
     <a class="organization-link" href="<%= organization_path(@organization)%>">
       <span class="organization-name-truncated"><%= @organization.name %></span>
     </a>
   </th>
-  <td class="organization-npi"> <%= @organization.npi %> </td>
-  <td class="orglink-role">
+  <td style="width: 16.67%;"> <%= @organization.npi %> </td>
+  <td style="width: 8.33%;">
     <% if @link.ao? %>
       AO
     <% else %>
       CD
     <% end %>
   </td>
-  <td class="organization-status">
+  <td style="width: 25%;">
     <div class="clearfix">
       <div class="float-left"><%= render Core::Icon::UswdsComponent.new(@icon, additional_classes: @classes) %></div>
       <div class="float-left margin-left-1 margin-top-neg-2px"><%= @status %></div>
