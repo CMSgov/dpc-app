@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 module Core
-  module Card
+  module OrganizationListRow
     # Organization Card Component
     # ----------------
     #
     # [See at USWDS](https://designsystem.digital.gov/components/card/)
     #
-    class OrganizationCardComponentPreview < ViewComponent::Preview
+    class OrganizationListRowComponentPreview < ViewComponent::Preview
       # @param tos_accepted
       # @param failure_code
       # @after_render :wrap_in_ul
