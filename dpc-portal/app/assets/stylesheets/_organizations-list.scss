@@ -1,23 +1,22 @@
-$link-color: #005ea2;
+$visited-blue-link-color: #005ea2;
 
 .organizations-list {
   table-layout: fixed;
 }
 
+.visited\:text-blue{
+  color: $visited-blue-link-color
+
+  &:visited {
+    color: $visited-blue-link-color
+  }
+}
+
 .organizations-list-row {
   .organization-link {
-    color: $link-color;
     display: inline-block;
     text-decoration: underline;
     max-width: 100%;
-
-    &:visited {
-      color: $link-color;
-    }
-
-    &:hover {
-      color: $link-color;
-    }
   }
 
   .organization-name-truncated {
@@ -29,6 +28,9 @@ $link-color: #005ea2;
     white-space: nowrap;
   }
 
+}
+
+.table-bg-transparent {
   th, td {
     background-color: transparent;
   }
