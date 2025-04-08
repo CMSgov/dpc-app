@@ -1,7 +1,7 @@
 <tr class="organizations-list-row">
   <th scope="row" style="width: 50%;">
-    <a class="organization-link visited:text-blue" href="<%= organization_path(@organization)%>">
-      <span class="organization-name-truncated"><%= @organization.name %></span>
+    <a class="display-block maxw-full visited:text-blue text-underline truncate-text-ellipsis" href="<%= organization_path(@organization)%>">
+      <%= @organization.name %>
     </a>
   </th>
   <td style="width: 16.67%;"> <%= @organization.npi %> </td>

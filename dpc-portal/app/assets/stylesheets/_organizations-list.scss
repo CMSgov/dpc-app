@@ -1,33 +1,17 @@
 $visited-blue-link-color: #005ea2;
 
-.organizations-list {
-  table-layout: fixed;
-}
-
 .visited\:text-blue{
-  color: $visited-blue-link-color
+  color: $visited-blue-link-color;
 
   &:visited {
-    color: $visited-blue-link-color
+    color: $visited-blue-link-color;
   }
 }
 
-.organizations-list-row {
-  .organization-link {
-    display: inline-block;
-    text-decoration: underline;
-    max-width: 100%;
-  }
-
-  .organization-name-truncated {
-    display: inline-block;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    vertical-align: bottom;
-    white-space: nowrap;
-  }
-
+.truncate-text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .table-bg-transparent {
