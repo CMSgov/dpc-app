@@ -106,8 +106,6 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         // Remove meta so we can do equality between the two resources
         fetchedGroup.setMeta(null);
 
-        System.out.println("CREATED: " + createdGroup.children());
-        System.out.println("FETCHED: " + fetchedGroup.children());
         assertAll(() -> assertTrue(createdGroup.equalsDeep(fetchedGroup), "Groups should be equal"),
                 () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of benes"));
 
