@@ -349,7 +349,7 @@
             <dependency>
                 <groupId>com.helger</groupId>
                 <artifactId>ph-schematron</artifactId>
-                <version>5.3.0</version>
+                <version>5.6.5</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
