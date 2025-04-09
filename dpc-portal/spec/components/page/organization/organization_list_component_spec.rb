@@ -60,7 +60,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
                          </tr>
                        </thead>
                        <tbody>
-                         <tr class="organizations-list-row">
+                         <tr>
                            <th scope="row" style="width: 50%;">
                              <a class="display-block maxw-full visited:text-blue text-underline truncate-text-ellipsis" href="/portal/organizations/5">
                                name
