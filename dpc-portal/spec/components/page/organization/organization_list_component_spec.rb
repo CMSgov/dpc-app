@@ -9,7 +9,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
       normalize_space(rendered_content)
     end
 
-    let(:ao_ref) { 'As an Authorized Official' }
+    let(:ao_or_cd_ref) { 'as an Authorized Official (AO) and/or Credential Delegate (CD)' }
     def normalize_space(str)
       str.gsub(/^ +/, '').gsub("\n", '')
     end
@@ -22,7 +22,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
       end
 
       it 'should have reference to Authorized Official' do
-        is_expected.to include(normalize_space(ao_ref))
+        is_expected.to include(normalize_space(ao_or_cd_ref))
       end
     end
     context 'when has no options and is cd' do
@@ -32,9 +32,10 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
         render_inline(component)
       end
 
-      it 'should have not reference to Authorized Official' do
-        is_expected.to_not include(normalize_space(ao_ref))
+      it 'should have generic AO/CD message' do
+        is_expected.to include(normalize_space(ao_or_cd_ref))
       end
+
       it 'should say no organizations' do
         empty_npi_search = "<p>You don't have any organizations to show.</p>"
         is_expected.to include(normalize_space(empty_npi_search))
