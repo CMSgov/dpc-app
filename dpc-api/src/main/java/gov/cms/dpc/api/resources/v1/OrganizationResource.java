@@ -11,6 +11,7 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.AbstractOrganizationResource;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
@@ -30,6 +31,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.UUID;
 
@@ -75,7 +77,8 @@ public class OrganizationResource extends AbstractOrganizationResource {
                 .encodedJson()
                 .execute();
 
-        logger.info("dpcMetric=organizationCreated,orgId={}", createdOrg.getIdElement().getIdPart());
+        MDC.put(MDCConstants.ORGANIZATION_ID, createdOrg.getIdElement().getIdPart());
+        logger.info("dpcMetric=organizationCreated");
         return createdOrg;
     }
 
