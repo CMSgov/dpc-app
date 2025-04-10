@@ -73,11 +73,12 @@ RSpec.describe 'Accessibility', type: :system do
       end
       context 'ao' do
         before do
-          org_good = create(:provider_organization, terms_of_service_accepted_at: 1.day.ago)
-          org_not_ao = create(:provider_organization, terms_of_service_accepted_at: 1.day.ago)
+          org_good = create(:provider_organization, terms_of_service_accepted_at: 1.day.ago, name: 'org_good')
+          org_not_ao = create(:provider_organization, terms_of_service_accepted_at: 1.day.ago, name: 'org_not_ao')
           org_bad_org = create(:provider_organization, terms_of_service_accepted_at: 1.day.ago,
                                                        verification_status: :rejected,
-                                                       verification_reason: :no_approved_enrollment)
+                                                       verification_reason: :no_approved_enrollment,
+                                                       name: 'org_bad_org')
           create(:ao_org_link, user:, provider_organization: org)
           create(:ao_org_link, user:, provider_organization: org_good)
           create(:ao_org_link, user:, provider_organization: org_not_ao,
@@ -85,48 +86,48 @@ RSpec.describe 'Accessibility', type: :system do
                                verification_reason: :user_not_authorized_official)
           create(:ao_org_link, user:, provider_organization: org_bad_org)
         end
-        it 'should show all organizations' do
+        it 'should show all organizations for ao' do
           visit '/organizations'
           expect(page).to_not have_text("You don't have any organizations to show.")
-          expect(page).to have_text(I18n.t('verification.tos_not_signed'))
-          expect(page).to have_text(I18n.t('verification.manage_org'))
-          expect(page).to have_text(I18n.t('verification.user_not_authorized_official_status'))
-          expect(page).to have_text(I18n.t('verification.no_approved_enrollment_status'))
+          expect(page).to have_text(I18n.t('verification.sign_tos'))
+          expect(page).to have_text(I18n.t('verification.configuration_needed'))
+          expect(page).to have_text(I18n.t('verification.access_denied'))
           expect(page).to be_axe_clean
         end
       end
       context 'cd' do
         before do
-          org_good = create(:provider_organization, terms_of_service_accepted_at: 1.day.ago)
+          org_good = create(:provider_organization, terms_of_service_accepted_at: 1.day.ago, name: 'org_good')
           create(:provider_organization, terms_of_service_accepted_at: 1.day.ago)
           org_bad_org = create(:provider_organization, terms_of_service_accepted_at: 1.day.ago,
                                                        verification_status: :rejected,
-                                                       verification_reason: :no_approved_enrollment)
+                                                       verification_reason: :no_approved_enrollment,
+                                                       name: 'org_bad_org')
           create(:cd_org_link, user:, provider_organization: org)
           create(:cd_org_link, user:, provider_organization: org_good)
           create(:cd_org_link, user:, provider_organization: org_bad_org)
         end
-        it 'should show all organizations' do
+        it 'should show all organizations for cd' do
           visit '/organizations'
           expect(page).to_not have_text("You don't have any organizations to show.")
-          expect(page).to have_text(I18n.t('cd_access.tos_not_signed'))
-          expect(page).to have_text(I18n.t('cd_access.manage_org'))
-          expect(page).to have_text(I18n.t('cd_access.no_approved_enrollment_status'))
+          expect(page).to have_text(I18n.t('cd_access.sign_tos'))
+          expect(page).to have_text(I18n.t('cd_access.configuration_needed'))
+          expect(page).to have_text(I18n.t('cd_access.access_denied'))
           expect(page).to be_axe_clean
         end
       end
       context 'ao cd mix' do
         before do
-          ao_org = create(:provider_organization, terms_of_service_accepted_at: 1.day.ago)
-          cd_org = create(:provider_organization, terms_of_service_accepted_at: 1.day.ago)
+          ao_org = create(:provider_organization, terms_of_service_accepted_at: 1.day.ago, name: 'ao_org')
+          cd_org = create(:provider_organization, terms_of_service_accepted_at: 1.day.ago, name: 'cd_org')
           create(:ao_org_link, user:, provider_organization: ao_org)
           create(:cd_org_link, user:, provider_organization: cd_org)
         end
-        it 'should show all organizations' do
+        it 'should show all organizations for ao and cd' do
           visit '/organizations'
           expect(page).to_not have_text("You don't have any organizations to show.")
-          expect(page).to have_text(I18n.t('verification.manage_org'))
-          expect(page).to have_text(I18n.t('cd_access.manage_org'))
+          expect(page).to have_text(I18n.t('verification.configuration_needed'))
+          expect(page).to have_text(I18n.t('cd_access.configuration_needed'))
           expect(page).to be_axe_clean
         end
       end

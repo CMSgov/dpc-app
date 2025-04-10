@@ -1,6 +1,6 @@
 <tr>
-  <th scope="row" style="width: 50%;">
-    <a class="display-block maxw-full visited:text-blue text-underline truncate-text-ellipsis" href="<%= organization_path(@organization)%>">
+  <th scope="row" style="width: 50%;" aria-label="<%= @organization.name %>" >
+    <a class="display-block maxw-full visited:text-blue text-underline text-normal truncate-text-ellipsis" href="<%= organization_path(@organization)%>" aria-label="<%= @organization.name %>">
       <%= @organization.name %>
     </a>
   </th>
