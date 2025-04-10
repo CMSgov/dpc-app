@@ -20,7 +20,7 @@ module Page
         org = ProviderOrganization.new(name: 'Test Organization 1 - configuration needed', npi: '1111111111', id: 1,
                                        terms_of_service_accepted_at: 2.days.ago)
         links << CdOrgLink.new(provider_organization: org)
-        org = ProviderOrganization.new(name: 'Test Organization 2 - configuration needed', npi: '2111111111', id: 2,
+        org = ProviderOrganization.new(name: 'Test Organization 2 - configuration complete', npi: '2111111111', id: 2,
                                        terms_of_service_accepted_at: 2.days.ago, config_complete: true)
         links << AoOrgLink.new(provider_organization: org)
 
