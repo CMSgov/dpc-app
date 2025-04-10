@@ -9,7 +9,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
       normalize_space(rendered_content)
     end
 
-    let(:ao_ref) { 'As an Authorized Official' }
+    let(:ao_or_cd_ref) { 'as an Authorized Official (AO) and/or Credential Delegate (CD)' }
     def normalize_space(str)
       str.gsub(/^ +/, '').gsub("\n", '')
     end
@@ -22,7 +22,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
       end
 
       it 'should have reference to Authorized Official' do
-        is_expected.to include(normalize_space(ao_ref))
+        is_expected.to include(normalize_space(ao_or_cd_ref))
       end
     end
     context 'when has no options and is cd' do
@@ -32,9 +32,10 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
         render_inline(component)
       end
 
-      it 'should have not reference to Authorized Official' do
-        is_expected.to_not include(normalize_space(ao_ref))
+      it 'should have generic AO/CD message' do
+        is_expected.to include(normalize_space(ao_or_cd_ref))
       end
+
       it 'should say no organizations' do
         empty_npi_search = "<p>You don't have any organizations to show.</p>"
         is_expected.to include(normalize_space(empty_npi_search))
@@ -49,39 +50,41 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
       end
       let(:expected_html) do
         <<~HTML
-                <ul class="usa-card-group">
-                  <li class="usa-card tablet-lg:grid-col-1 widescreen:grid-col-1" style="list-style:none; visibility:visible;" data-npi="npi" data-name="name">
-                      <div class="usa-card__container">
-                      <div class="usa-card__header">
-                          <h2 class="usa-card__heading">
-                          name
-                          </h2>
-                      </div>
-                      <div class="usa-card__body">
-                          <div class="clearfix">
-                          <div id="npi_div" class="float-left">
-                          <p class="usa-card__text">
-                              <span style="font-weight:bold">NPI</span>
-                              <span>npi</span>
-                          </p>
-                          </div>
-                          <div id="status_div" class="float-right">
-                          <p class="usa-card__text">
-                              <form class="button_to" method="get" action="/portal/organizations/5"><button class="usa-button--outline usa-button" type="submit">View Details</button></form>
-                          </p>
-                          </div>
-                      </div>
-                  <div class="clearfix">
-                    <div class="float-left">  <svg class="text-accent-cool usa-icon" style="transform: scale(1)" aria-hidden="true" role="img">
-                        <use xlink:href=/portal/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#verified></use>
+          <table class="usa-table usa-table--borderless organizations-list table-bg-transparent" style="table-layout: fixed; width: 100%;">
+            <caption class="usa-sr-only">
+              A list of organizations you are affiliated with, including name, NPI-2, your role, and the status for API access.
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col" style="width: 50%;">Organization Name</th>
+                <th scope="col" style="width: 16.67%;">NPI-2</th>
+                <th scope="col" style="width: 8.33%;">Role</th>
+                <th scope="col" style="width: 25%;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" style="width: 50%;" aria-label="name" >
+                  <a class="display-block maxw-full visited:text-blue text-underline text-normal truncate-text-ellipsis" href="/portal/organizations/5" aria-label="name">
+                    name
+                  </a>
+                </th>
+                <td style="width: 16.67%;"> npi </td>
+                <td style="width: 8.33%;">
+                    CD
+                </td>
+                <td style="width: 25%;">
+                    <div class="clearfix">
+                      <div class="float-left">  <svg class="text-gold usa-icon" style="transform: scale(1)" aria-hidden="true" role="img">
+                        <use xlink:href=/portal/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#warning></use>
                       </svg>
-                    </div>
-                    <div class="float-left margin-left-1 margin-top-neg-2px">#{I18n.t('cd_access.manage_org')}</div>
+                      </div>
+                    <div class="float-left margin-left-1 margin-top-neg-2px">Configuration needed</div>
                   </div>
-                </div>
-              </div>
-            </li>
-          </ul>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         HTML
       end
 
@@ -89,7 +92,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
         render_inline(component)
       end
 
-      it 'should have one card in list' do
+      it 'should have one row in table' do
         is_expected.to include(normalize_space(expected_html))
       end
     end

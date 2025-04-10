@@ -1,0 +1,21 @@
+<tr>
+  <th scope="row" style="width: 50%;" aria-label="<%= @organization.name %>" >
+    <a class="display-block maxw-full visited:text-blue text-underline text-normal truncate-text-ellipsis" href="<%= organization_path(@organization)%>" aria-label="<%= @organization.name %>">
+      <%= @organization.name %>
+    </a>
+  </th>
+  <td style="width: 16.67%;"> <%= @organization.npi %> </td>
+  <td style="width: 8.33%;">
+    <% if @link.ao? %>
+      AO
+    <% else %>
+      CD
+    <% end %>
+  </td>
+  <td style="width: 25%;">
+    <div class="clearfix">
+      <div class="float-left"><%= render Core::Icon::UswdsComponent.new(@icon, additional_classes: @classes) %></div>
+      <div class="float-left margin-left-1 margin-top-neg-2px"><%= @status %></div>
+    </div>
+  </td>
+</tr>
