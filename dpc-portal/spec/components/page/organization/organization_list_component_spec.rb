@@ -76,7 +76,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
                       <use xlink:href=/portal/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#warning></use>
                     </svg>
                     </div>
-                    <div class="float-left margin-left-1 margin-top-neg-2px"><span class="translation_missing" title="translation missing: en.cd_access.configuration_needed">Configuration Needed</span></div>
+                    <div class="float-left margin-left-1 margin-top-neg-2px">Configuration needed</div>
                   </div>
                 </td>
               </tr>

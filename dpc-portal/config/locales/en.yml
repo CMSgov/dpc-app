@@ -48,6 +48,11 @@ en:
     org_med_sanctions_text: This organization is listed as an excluded entity by the Office of Inspector General (OIG), which prohibits it from accessing beneficiary claims data.
     manage_org: Manage credentials.
     tos_not_signed: DPC Terms of Service not yet signed.
+    sign_tos: Sign terms of service
+    configuration_needed: Configuration needed
+    configuration_complete: Configuration complete
+    api_disabled: API disabled
+    access_denied: Access denied
   errors:
     attributes:
       base:
