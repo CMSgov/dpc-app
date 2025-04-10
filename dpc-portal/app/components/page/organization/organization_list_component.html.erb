@@ -25,7 +25,7 @@
       <%= render Core::OrganizationListRow::OrganizationListRowComponent.with_collection(@links)%>
     </tbody>
   </table>
+<% else %>
+  <p>You don't have any organizations to show.</p>
 <% end %>
-
-<%=raw "<p>You don't have any organizations to show.</p>" if @links.blank? %>
 </div>
