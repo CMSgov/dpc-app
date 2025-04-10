@@ -23,6 +23,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.time.Instant;
@@ -106,6 +108,9 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         // Remove meta so we can do equality between the two resources
         fetchedGroup.setMeta(null);
 
+        Logger logger = LoggerFactory.getLogger(AttributionFHIRTest.class);
+        logger.warn("CREATED: {}", createdGroup);
+        logger.warn("FETCHED: {}", fetchedGroup);
         System.out.println("CREATED: " + createdGroup.listChildrenByName("*"));
         System.out.println("FETCHED: " + fetchedGroup.listChildrenByName("*"));
         assertAll(() -> assertTrue(createdGroup.equalsDeep(fetchedGroup), "Groups should be equal"),
