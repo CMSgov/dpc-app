@@ -14,14 +14,14 @@ module Page
 
       def multiple_orgs
         links = []
-        org = ProviderOrganization.new(name: "Test Organization 0 - needs ToS", npi: "0111111111", id: 0,
-                                         terms_of_service_accepted_at: nil)
+        org = ProviderOrganization.new(name: 'Test Organization 0 - needs ToS', npi: '0111111111', id: 0,
+                                       terms_of_service_accepted_at: nil)
         links << AoOrgLink.new(provider_organization: org)
-        org = ProviderOrganization.new(name: "Test Organization 1 - configuration needed", npi: "1111111111", id: 1,
-                                         terms_of_service_accepted_at: 2.days.ago)
+        org = ProviderOrganization.new(name: 'Test Organization 1 - configuration needed', npi: '1111111111', id: 1,
+                                       terms_of_service_accepted_at: 2.days.ago)
         links << CdOrgLink.new(provider_organization: org)
-        org = ProviderOrganization.new(name: "Test Organization 2 - configuration needed", npi: "2111111111", id: 2,
-                                         terms_of_service_accepted_at: 2.days.ago, config_complete: true)
+        org = ProviderOrganization.new(name: 'Test Organization 2 - configuration needed', npi: '2111111111', id: 2,
+                                       terms_of_service_accepted_at: 2.days.ago, config_complete: true)
         links << AoOrgLink.new(provider_organization: org)
 
         render(Page::Organization::OrganizationListComponent.new(ao_or_cd: :ao, links:))
