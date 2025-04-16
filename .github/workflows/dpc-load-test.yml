@@ -2,6 +2,16 @@ name: DPC Load Test
 
 on:
   workflow_dispatch:
+    inputs:
+      test_type:
+        description: Load test script to run
+        required: true
+        type: choice
+        options:
+          - script  # Leaving this for now until the average and stress test scripts are created
+          - average
+          - stress
+        default: script
 
 jobs:
   run-load-test:
@@ -42,7 +52,7 @@ jobs:
         run: |
           ./k6 run \
             --out output-statsd=addr=localhost:8125,enableTags=true \
-            ./dpc-app/dpc-load-testing/script.js
+            ./dpc-app/dpc-load-testing/${{ inputs.test_type }}.js
 
       - name: Cleanup StatsD Container
         if: always()
