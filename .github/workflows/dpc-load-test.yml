@@ -9,8 +9,8 @@ on:
         type: choice
         options:
           - script  # Leaving this for now until the average and stress test scripts are created
-          - average
-          - stress
+          - average-load-test
+          - stress-test
         default: script
 
 jobs:
