@@ -1,6 +1,8 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.aggregation.service.ConsentResult;
 import gov.cms.dpc.aggregation.service.ConsentService;
@@ -23,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.nio.file.Files;
@@ -34,6 +37,8 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+
+
 
 @ExtendWith(MockitoExtension.class)
 class JobBatchProcessorUnitTest {
@@ -49,6 +54,19 @@ class JobBatchProcessorUnitTest {
     private BlueButtonClient bbClient = new MockBlueButtonClient(FhirContext.forDstu3());
     @Mock
     private ConsentService consentService;
+
+    private static class TestLoggerAppender extends AppenderBase<ILoggingEvent> {
+        private final List<String> logMessages = new ArrayList<>();
+
+        @Override
+        protected void append(ILoggingEvent event) {
+            logMessages.add(event.getFormattedMessage());
+        }
+
+        public String getLastLogMessage() {
+            return logMessages.get(logMessages.size() - 1);
+        }
+    }
 
     @BeforeAll
     static void setup() {
@@ -500,6 +518,57 @@ class JobBatchProcessorUnitTest {
 
         assertError(completedJob.getBatchID(), DPCResourceType.Patient);
     }
+
+    @Test
+    public void loggerOutputContainsAllStructuredFields() {
+        // Setup test logger
+        TestLoggerAppender testLogger = new TestLoggerAppender();
+        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(JobBatchProcessor.class);
+        logger.addAppender(testLogger);
+        testLogger.start();
+
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
+        UUID aggregatorId = UUID.randomUUID();
+
+        OperationsConfig operationsConfig = getOperationsConfig();
+        JobBatchProcessor jobBatchProcessor = getJobBatchProcessor(bbClient, operationsConfig, new EveryoneGetsDataLookBackServiceImpl(), consentService);
+
+        IJobQueue queue = new MemoryBatchQueue();
+        final var jobID = queue.createJob(
+                UUID.randomUUID(),
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
+                Collections.singletonList(mbi),
+                List.of(DPCResourceType.Patient, DPCResourceType.Coverage),
+                null,
+                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                null, null, true, false
+        );
+        List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
+        JobQueueBatch job = jobs.get(0);
+
+        // Setup mocks
+        Mockito.when(consentService.getConsent(List.of(mbi))).thenReturn(Optional.of(List.of(optIn)));
+
+        // Process job
+        jobBatchProcessor.processJobBatchPartial(aggregatorId, queue, job, mbi);
+
+        // Verify log message format
+        // Verify log message format
+        String logMessage = testLogger.getLastLogMessage();
+        assertTrue(logMessage.contains("dpcMetric=DataExportResult"), "Log should contain metric name");
+        assertTrue(logMessage.contains("PatientIndex " + job.getPatientIndex()), "Log should contain patient index");
+        assertTrue(logMessage.contains("AggregatorId " + aggregatorId), "Log should contain aggregator ID");
+        assertTrue(logMessage.contains("dataRetrieved=true"), "Log should indicate data was retrieved");
+        assertTrue(logMessage.contains("failReason=NA"), "Log should show no failure");
+        assertTrue(logMessage.contains("resourcesRequested=patient;coverage"), "Log should list requested resources");
+        assertTrue(logMessage.contains("resourceFileSizes="), "Log should contain resource sizes");
+        assertTrue(logMessage.contains("patient:"), "Log should contain Patient resource size");
+        assertTrue(logMessage.contains("coverage:"), "Log should contain Coverage resource size");
+        // Cleanup
+        logger.detachAppender(testLogger);
+    }
+
 
     private JobBatchProcessor getJobBatchProcessor(BlueButtonClient bbClient, OperationsConfig config, LookBackService lookBackSrvc, ConsentService consentSrvc) {
         return new JobBatchProcessor(
