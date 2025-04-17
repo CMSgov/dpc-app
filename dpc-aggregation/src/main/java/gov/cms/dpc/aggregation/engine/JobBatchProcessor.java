@@ -130,7 +130,7 @@ public class JobBatchProcessor {
         final String resourcesRequested = job.getResourceTypes().stream().map(DPCResourceType::getPath).collect(Collectors.joining(";"));
 
         final String resourceFileSizes = job.getResourceTypes().stream()
-                .map(resourceType -> String.format("%s=%s",
+                .map(resourceType -> String.format("%s:%s",
                         resourceType.getPath(),
                         job.getJobQueueBatchFiles().stream()
                                 .filter(file -> file.getResourceType().equals(resourceType))
@@ -140,8 +140,8 @@ public class JobBatchProcessor {
 
         final String failReasonLabel = failReason.map(Enum::name).orElse("NA");
         stopWatch.stop();
-        logger.info("dpcMetric=DataExportResult,PatientMbi {}, AggregatorId {}, dataRetrieved={},failReason={},resourcesRequested={},duration={} , resourceFileSizes={}",
-                mbi, aggregatorID,failReason.isEmpty(), failReasonLabel, resourcesRequested, stopWatch.getDuration(),resourceFileSizes);
+        logger.info("dpcMetric=DataExportResult,PatientIndex {}, AggregatorId {}, dataRetrieved={},failReason={},resourcesRequested={},duration={} , resourceFileSizes={}",
+               job.getPatientIndex(), aggregatorID,failReason.isEmpty(), failReasonLabel, resourcesRequested, stopWatch.getDuration(),resourceFileSizes);
         return results;
     }
 
