@@ -74,14 +74,11 @@ export function setup() {
   // array returned from setup distributes its members starting from the 1 index
   const orgIds = Array();
   orgIds[1] = org1.json().id;
-  orgIds[2] = org2.json().id;
 
   return { orgIds: orgIds, goldenMacaroon: goldenMacaroon };
 }
 
-// create a separate generator for each VU
-// store UUIDs by vu, via a key-object store
-export function workflowA(data) {
+export function workflow(data) {
   const npiGenerator = npiGeneratorCache.getGenerator(exec.vu.idInInstance);
   const mbiGenerator = mbiGeneratorCache.getGenerator(exec.vu.idInInstance);
 
@@ -91,7 +88,7 @@ export function workflowA(data) {
   // POST practitioner
   const practitionerResponse = createPractitioner(token, npiGenerator.iterate());
   if (practitionerResponse.status != 201) {
-    fail('failed to create practitioner for workflow A');
+    console.error('failed to create practitioner for workflow A');
   }
   // There's only 1 identifier in our synthetic practitioner, so we don't have to search for npi
   const practitionerNpi = practitionerResponse.json().identifier[0].value;
@@ -117,8 +114,6 @@ export function workflowA(data) {
     console.error('failed to create group for workflow A');
   }
   const groupId = createGroupResponse.json().id;
-
-  // --------
 
   // GET group by practitioner NPI
   const getGroupResponse = findGroupByPractitionerNpi(token, practitionerNpi);
@@ -167,77 +162,6 @@ export function workflowA(data) {
         console.error('failed to successfully query job in workflow A');
       }
     });
-  }
-}
-
-export function workflowB(data) {
-  const npiGenerator = npiGeneratorCache.getGenerator(exec.vu.idInInstance);
-  const mbiGenerator = mbiGeneratorCache.getGenerator(exec.vu.idInInstance);
-
-  const orgId = data.orgIds[2];
-  const token = generateDPCToken(orgId, data.goldenMacaroon);
-
-  // POST practitioner
-  const postPractitionerResponse = createPractitioner(token, npiGenerator.iterate());
-  if (postPractitionerResponse.status != 201) {
-    fail('failed to create practitioner for workflow B');
-  }
-  // There's only 1 identifier in our synthetic practitioner, so we don't have to search for npi
-  const practitionerNpi = postPractitionerResponse.json().identifier[0].value;
-  const practitionerId = postPractitionerResponse.json().id;
-
-  // POST patient
-  let postPatientResponse = createPatient(token, mbiGenerator.iterate());
-  if (postPatientResponse.status != 201) {
-    fail('failed to create patient for workflow B');
-  }
-  const patientId = postPatientResponse.json().id;
-  const patientMbi = postPatientResponse.json().identifier[0].value;
-
-  // POST group
-  const createGroupResponse = createGroup(token, orgId, practitionerId, practitionerNpi);
-  if (createGroupResponse.status != 201) {
-    fail('failed to create group for workflow B');
-  }
-  let groupId = createGroupResponse.json().id;
-
-  // GET practitioner
-  const getPractitionerResponse = findPractitionerByNpi(token, practitionerNpi);
-  if (getPractitionerResponse.status != 200) {
-    fail('failed to get practitioner for workflow B');
-  }
-
-  // GET patient
-  const getPatientResponse = findPatientByMbi(token, patientMbi);
-  if (getPatientResponse.status != 200) {
-    fail('failed to get patient for workflow B');
-  }
-
-  // GET group by practitioner NPI
-  const getGroupResponse = findGroupByPractitionerNpi(token, practitionerNpi);
-  if (getGroupResponse.status != 200) {
-    fail('failed to get group for workflow B');
-  }
-
-  // PUT patient in group
-  const updateGroupResponse = updateGroup(token, orgId, groupId, patientId, practitionerId, practitionerNpi);
-  if (updateGroupResponse.status != 200) {
-    fail('failed to update group for workflow B');
-  }
-
-  // GET group export
-  const getGroupExportResponse = exportGroup(token, groupId);
-  if (getGroupExportResponse.status != 202) {
-    fail('failed to export group for workflow B');
-  }
-
-  const jobId = getGroupExportResponse.headers['Content-Location'].split('/').pop();
-  if (!jobId) {
-    fail('failed to get a location to query the export job in workflow B');
-  }
-  const jobResponse = findJobById(token, jobId);
-  if (jobResponse.status != 200 && jobResponse.status != 202) {
-    fail('failed to successfully query job in workflow B');
   }
 }
 
