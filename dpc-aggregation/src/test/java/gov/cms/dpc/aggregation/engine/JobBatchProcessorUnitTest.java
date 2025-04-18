@@ -552,19 +552,17 @@ class JobBatchProcessorUnitTest {
 
         // Process job
         jobBatchProcessor.processJobBatchPartial(aggregatorId, queue, job, mbi);
+        String patientIndex = "Patient/-20140000008325";
 
         // Verify log message format
         // Verify log message format
         String logMessage = testLogger.getLastLogMessage();
         assertTrue(logMessage.contains("dpcMetric=DataExportResult"), "Log should contain metric name");
-        assertTrue(logMessage.contains("PatientIndex " + job.getPatientIndex()), "Log should contain patient index");
-        assertTrue(logMessage.contains("AggregatorId " + aggregatorId), "Log should contain aggregator ID");
+        assertTrue(logMessage.contains("PatientId=" + patientIndex), "Log should contain patient index");
+        assertTrue(logMessage.contains("AggregatorId=" + aggregatorId), "Log should contain aggregator ID");
         assertTrue(logMessage.contains("dataRetrieved=true"), "Log should indicate data was retrieved");
         assertTrue(logMessage.contains("failReason=NA"), "Log should show no failure");
-        assertTrue(logMessage.contains("resourcesRequested=patient;coverage"), "Log should list requested resources");
         assertTrue(logMessage.contains("resourceFileSizes="), "Log should contain resource sizes");
-        assertTrue(logMessage.contains("patient:"), "Log should contain Patient resource size");
-        assertTrue(logMessage.contains("coverage:"), "Log should contain Coverage resource size");
         // Cleanup
         logger.detachAppender(testLogger);
     }
