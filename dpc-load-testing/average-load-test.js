@@ -1,4 +1,4 @@
-import { workflowA, workflowB, setup, teardown } from "./workflows.js";
+import { workflow, setup, teardown } from "./workflows.js";
 
 // See https://grafana.com/docs/k6/latest/using-k6/k6-options/reference for
 // details on this configuration object.
@@ -11,9 +11,9 @@ export const options = {
       timeUnit: '1h',
       preAllocatedVUs: 5,
       maxVUs: 50,
-      exec: "workflowA"
+      exec: "workflow"
     }
   }
 };
 
-export { workflowA, workflowB, setup, teardown };
+export { workflow, setup, teardown };
