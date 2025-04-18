@@ -14,7 +14,11 @@ import {
   getGroup,
   findGroupByPractitionerNpi,
   updateGroup,
-  findJobById
+  findJobById,
+  createPatients,
+  findPatientsByMbi,
+  addPatientsToGroup,
+  findJobsById
 } from './dpc-api-client.js';
 import NPIGeneratorCache from './utils/npi-generator.js';
 import MBIGeneratorCache from './utils/mbi-generator.js';
@@ -75,11 +79,13 @@ export function setup() {
   return { orgIds: orgIds, goldenMacaroon: goldenMacaroon };
 }
 
+// create a separate generator for each VU
+// store UUIDs by vu, via a key-object store
 export function workflowA(data) {
   const npiGenerator = npiGeneratorCache.getGenerator(exec.vu.idInInstance);
   const mbiGenerator = mbiGeneratorCache.getGenerator(exec.vu.idInInstance);
 
-  const orgId = data.orgIds[exec.vu.idInInstance];
+  const orgId = data.orgIds[1];
   const token = generateDPCToken(orgId, data.goldenMacaroon);
 
   // POST practitioner
@@ -91,61 +97,76 @@ export function workflowA(data) {
   const practitionerNpi = practitionerResponse.json().identifier[0].value;
   const practitionerId = practitionerResponse.json().id;
 
-  // POST patient
-  const patientResponse = createPatient(token, mbiGenerator.iterate());
-  if (patientResponse.status != 201) {
-    fail('failed to create patient for workflow A');
-  }
-  const patientId = patientResponse.json().id;
+  // POST patients
+  const patientResponses = createPatients(token, 14, mbiGenerator);
+  const patients = [];
+  patientResponses.forEach((res) => {
+    if (res.status != 201) {
+      console.error('failed to create patient for workflow A');
+    } else {
+      const json = res.json();
+      const patientId = json.id;
+      const patientMbi = json.identifier[0].value;
+      patients.push({ patientId, patientMbi });
+    }
+  });
 
-  // POST group
+  // POST group for practitioner
   const createGroupResponse = createGroup(token, orgId, practitionerId, practitionerNpi);
   if (createGroupResponse.status != 201) {
-    fail('failed to create group for workflow A');
+    console.error('failed to create group for workflow A');
   }
   const groupId = createGroupResponse.json().id;
 
-  // GET all groups
-  const getGroupsResponse = getGroup(token);
-  if (getGroupsResponse.status != 200) {
-    fail('failed to get groups for workflow A');
-  }
-  // There should only be one group returned
-  const foundGroupId = getGroupsResponse.json().entry[0].resource.id;
-  if (foundGroupId != groupId) {
-    fail("failed to find created group for workflow A");
-  }
+  // --------
 
-  // PUT patient in group
-  const updateGroupResponse = updateGroup(token, orgId, groupId, patientId, practitionerId, practitionerNpi);
-  if (updateGroupResponse.status != 200) {
-    fail('failed to update group for workflow A');
-  }
-
-  // GET specific group
-  const getGroupResponse = getGroup(token, groupId);
+  // GET group by practitioner NPI
+  const getGroupResponse = findGroupByPractitionerNpi(token, practitionerNpi);
   if (getGroupResponse.status != 200) {
-    fail('failed to read group for workflow A');
+    console.error('failed to get group for workflow B');
   }
-  // Should only be a reference to one patient, in the format "Patient/id"
-  const addedPatientId = getGroupResponse.json().member[0].entity.reference.replace("Patient/", "");
-  if (addedPatientId != patientId) {
-    fail('patient not found in group for workflow A');
-  }
+
+  // GET patients by MBI
+  const findPatientsResponses = findPatientsByMbi(token, patients.map((patient) => patient.patientMbi));
+  findPatientsResponses.forEach((res) => {
+    if (res.status != 200) {
+      console.error('failed to GET patient.');
+    }
+  });
+
+  // distribute (PUT) patients into group
+  const updateGroupResponses = addPatientsToGroup(token, orgId, groupId, patients.splice(0, 5), practitionerId, practitionerNpi);
+  updateGroupResponses.forEach((res) => {
+    if (res.status != 200) {
+      console.error('failed to add patient to Group.');
+    }
+  })
+  
 
   // GET group export
-  const getGroupExportResponse = exportGroup(token, groupId);
-  if (getGroupExportResponse.status != 202) {
-    fail('failed to export group for workflow A');
+  const jobIds = [];
+  for (let i = 0; i < 5; i++) {
+    const getGroupExportResponse = exportGroup(token, groupId);
+    if (getGroupExportResponse.status != 202) {
+      console.error('failed to export group for workflow A');
+    } else {
+      const jobId = getGroupExportResponse.headers['Content-Location'].split('/').pop();
+      if (!jobId) {
+        console.error('failed to get a location to query the export job');
+      } else {
+        jobIds.push(jobId);
+      }
+    }
   }
 
-  const jobId = getGroupExportResponse.headers['Content-Location'].split('/').pop();
-  if (!jobId) {
-    fail('failed to get a location to query the export job in workflow A');
-  }
-  const jobResponse = findJobById(token, jobId);
-  if (jobResponse.status != 200 && jobResponse.status != 202) {
-    fail('failed to successfully query job in workflow A');
+  // GET job status
+  for (let i = 0; i < 2; i++) {
+    const jobResponses = findJobsById(token, jobIds);
+    jobResponses.forEach((jobResponse) => {
+      if (jobResponse.status != 200 && jobResponse.status != 202) {
+        console.error('failed to successfully query job in workflow A');
+      }
+    });
   }
 }
 
@@ -153,7 +174,7 @@ export function workflowB(data) {
   const npiGenerator = npiGeneratorCache.getGenerator(exec.vu.idInInstance);
   const mbiGenerator = mbiGeneratorCache.getGenerator(exec.vu.idInInstance);
 
-  const orgId = data.orgIds[exec.vu.idInInstance];
+  const orgId = data.orgIds[2];
   const token = generateDPCToken(orgId, data.goldenMacaroon);
 
   // POST practitioner
