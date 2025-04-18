@@ -128,10 +128,10 @@ jobs:
           ref: ${{ inputs.ops-ref }}
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
           path: dpc-ops
-      - name: install terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Terraform install
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/setup-tfenv-terraform@main
         with:
-          terraform_version: "1.10.5"
+          directory: .
       - name: Verify persistent plan
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}/persistent
