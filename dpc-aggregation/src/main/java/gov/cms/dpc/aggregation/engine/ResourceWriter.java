@@ -90,6 +90,8 @@ class ResourceWriter {
                 writer.write(str.getBytes(StandardCharsets.UTF_8));
                 writer.write(DELIM);
             }
+            int dataSize = byteStream.size();
+            file.setFileLength(dataSize);
             writer.flush();
             writer.close();
             writeToFile(byteStream.toByteArray(), outputPath, shouldAppendToFile);
