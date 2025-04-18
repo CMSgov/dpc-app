@@ -36,6 +36,11 @@ en:
     server_error_text: We're experiencing a temporary outage due to an external system error. Please try again later. 
     manage_org: Manage your organization.
     tos_not_signed: You must sign DPC Terms of Service.
+    sign_tos: Sign terms of service
+    configuration_needed: Configuration needed
+    configuration_complete: Configuration complete
+    api_disabled: API disabled
+    access_denied: Access denied
   cd_access:
     no_approved_enrollment_status: This organization is not currently approved by Medicare.
     no_approved_enrollment_text: This organization must have an approved enrollment status with Medicare to access beneficiary claims data.
@@ -43,6 +48,11 @@ en:
     org_med_sanctions_text: This organization is listed as an excluded entity by the Office of Inspector General (OIG), which prohibits it from accessing beneficiary claims data.
     manage_org: Manage credentials.
     tos_not_signed: DPC Terms of Service not yet signed.
+    sign_tos: Sign terms of service
+    configuration_needed: Configuration needed
+    configuration_complete: Configuration complete
+    api_disabled: API disabled
+    access_denied: Access denied
   errors:
     attributes:
       base:

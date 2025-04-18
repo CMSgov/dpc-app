@@ -166,7 +166,7 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-io</artifactId>
-                <version>11.0.24</version>
+                <version>11.0.25</version>
             </dependency>
             <dependency>
                 <groupId>ru.vyarus</groupId>
@@ -188,7 +188,7 @@
             <dependency>
                 <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>6.6.10.Final</version>
+                <version>6.6.11.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate.orm</groupId>
@@ -311,7 +311,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>33.4.0-jre</version>
+                <version>33.4.6-jre</version>
             </dependency>
             <dependency>
                 <groupId>com.newrelic.agent.java</groupId>

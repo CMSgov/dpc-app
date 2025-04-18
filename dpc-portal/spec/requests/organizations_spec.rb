@@ -226,8 +226,8 @@ RSpec.describe 'Organizations', type: :request do
 
         it 'shows correct status' do
           get "/organizations/#{org.id}"
-          expect(response.body).to include('Manage credentials.')
-          expect(response.body).to include('#verified')
+          expect(response.body).to include('Configuration needed')
+          expect(response.body).to include('#warning')
         end
 
         it 'shows correct role' do
@@ -292,8 +292,8 @@ RSpec.describe 'Organizations', type: :request do
 
         it 'shows correct status' do
           get "/organizations/#{org.id}"
-          expect(response.body).to include('Manage your organization.')
-          expect(response.body).to include('#verified')
+          expect(response.body).to include('Configuration needed')
+          expect(response.body).to include('#warning')
         end
 
         it 'shows correct role' do
