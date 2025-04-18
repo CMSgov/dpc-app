@@ -4,13 +4,10 @@ import { workflowA, workflowB, setup, teardown } from "./workflows.js";
 // details on this configuration object.
 export const options = {
   scenarios: {
-    workflow_a: {
-      executor: 'constant-arrival-rate',
-      duration: '1h',
-      rate: 50,
-      timeUnit: '1h',
-      preAllocatedVUs: 5,
-      maxVUs: 50,
+    workflow_1: {
+      executor: 'per-vu-iterations',
+      vus: 1,
+      iterations: 1,
       exec: "workflowA"
     }
   }
