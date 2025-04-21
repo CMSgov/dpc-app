@@ -128,10 +128,15 @@ jobs:
           ref: ${{ inputs.ops-ref }}
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
           path: dpc-ops
-      - name: Terraform install
-        uses: cmsgov/ab2d-bcda-dpc-platform/actions/setup-tfenv-terraform@main
-        with:
-          directory: .
+
+      - name: Install tfenv
+        run: apk add tfenv --no-cache
+      - name: Install terraform via tfenv
+        run: tfenv install
+#      - name: Terraform install
+#        uses: cmsgov/ab2d-bcda-dpc-platform/actions/setup-tfenv-terraform@main
+#        with:
+#          directory: .
       - name: Verify persistent plan
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}/persistent
