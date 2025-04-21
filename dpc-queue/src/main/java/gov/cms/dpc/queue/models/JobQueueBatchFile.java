@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -106,9 +107,13 @@ public class JobQueueBatchFile implements Serializable {
     @Column(name = "file_length")
     private long fileLength;
 
+    @Transient
+    private long patientFileSize;
+
     public JobQueueBatchFile() {
         // for hibernate
     }
+
 
     public JobQueueBatchFile(UUID jobID, UUID batchID, DPCResourceType resourceType, int sequence, int count) {
         this.jobQueueBatchFileID = new JobQueueBatchFileID(batchID, resourceType, sequence);
@@ -163,6 +168,14 @@ public class JobQueueBatchFile implements Serializable {
 
     public void setFileLength(long fileLength) {
         this.fileLength = fileLength;
+    }
+
+    public long getPatientFileSize() {
+        return patientFileSize;
+    }
+
+    public void setPatientFileSize(long patientFileSize) {
+        this.patientFileSize = patientFileSize;
     }
 
     @Override
