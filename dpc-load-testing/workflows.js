@@ -20,6 +20,13 @@ import {
 import NPIGeneratorCache from './utils/npi-generator.js';
 import MBIGeneratorCache from './utils/mbi-generator.js';
 
+const requestCounts = {
+  createPatient: 14,
+  addPatientsToGroup: 5,
+  getGroupExport: 5,
+  findJobsById: 2,
+}
+
 const npiGeneratorCache = new NPIGeneratorCache();
 const mbiGeneratorCache = new MBIGeneratorCache();
 
@@ -92,7 +99,7 @@ export function workflow(data) {
   const practitionerId = practitionerResponse.json().id;
 
   // POST patients
-  const patientResponses = createPatients(token, 14, mbiGenerator);
+  const patientResponses = createPatients(token, requestCounts.createPatient, mbiGenerator);
   const patients = [];
   patientResponses.forEach((res) => {
     if (res.status != 201) {
@@ -127,7 +134,7 @@ export function workflow(data) {
   });
 
   // distribute (PUT) patients into group
-  const updateGroupResponses = addPatientsToGroup(token, orgId, groupId, patients.splice(0, 5), practitionerId, practitionerNpi);
+  const updateGroupResponses = addPatientsToGroup(token, orgId, groupId, patients.splice(0, requestCounts.addPatientsToGroup), practitionerId, practitionerNpi);
   updateGroupResponses.forEach((res) => {
     if (res.status != 200) {
       console.error('failed to add patient to Group.');
@@ -137,7 +144,7 @@ export function workflow(data) {
 
   // GET group export
   const jobIds = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < requestCounts.getGroupExport; i++) {
     const getGroupExportResponse = exportGroup(token, groupId);
     if (getGroupExportResponse.status != 202) {
       console.error('failed to export group for workflow A');
@@ -152,7 +159,7 @@ export function workflow(data) {
   }
 
   // GET job status
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < requestCounts.findJobsById; i++) {
     const jobResponses = findJobsById(token, jobIds);
     jobResponses.forEach((jobResponse) => {
       if (jobResponse.status != 200 && jobResponse.status != 202) {
