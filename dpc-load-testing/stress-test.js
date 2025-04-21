@@ -13,7 +13,7 @@ export const options = {
         { target: 50, duration: '30m' },
         { target: 100, duration: '30m' },
         { target: 150, duration: '30m' },
-        { target: 200, duration: '30m' },
+        { target: 250, duration: '30m' },
       ],
       exec: "workflow"
     }
