@@ -131,9 +131,10 @@ public class JobBatchProcessor {
         AtomicReference<String> fileSize = new AtomicReference<>("");
         results.forEach(file -> {
                     if (file.getResourceType() != null) {
-                        fileSize.set(fileSize + file.getResourceType().name() + ":" + file.getFileLength() + ";");
+                        fileSize.set(fileSize + file.getResourceType().name() + ":" + file.getPatientFileSize() + ";");
                     }
                 });
+
         double durationInSeconds = stopWatch.getDuration().getSeconds() + ((double) stopWatch.getDuration().getNano() / 1000000000);
         final String failReasonLabel = failReason.map(Enum::name).orElse("NA");
         stopWatch.stop();

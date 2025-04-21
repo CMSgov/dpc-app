@@ -91,7 +91,7 @@ class ResourceWriter {
                 writer.write(DELIM);
             }
             int dataSize = byteStream.size();
-            file.setFileLength(dataSize);
+            file.setPatientFileSize(dataSize);
             writer.flush();
             writer.close();
             writeToFile(byteStream.toByteArray(), outputPath, shouldAppendToFile);
