@@ -1,7 +1,7 @@
 /*global console*/ 
 /* eslint no-console: "off" */
 
-import { check } from 'k6';
+import { check, fail } from 'k6';
 import exec from 'k6/execution'
 import { fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
 import {
@@ -92,7 +92,7 @@ export function workflow(data) {
   // POST practitioner
   const practitionerResponse = createPractitioner(token, npiGenerator.iterate());
   if (practitionerResponse.status != 201) {
-    console.error('failed to create practitioner for workflow A');
+    fail('failed to create practitioner');
   }
   // There's only 1 identifier in our synthetic practitioner, so we don't have to search for npi
   const practitionerNpi = practitionerResponse.json().identifier[0].value;
@@ -112,24 +112,28 @@ export function workflow(data) {
     }
   });
 
+  if (patients.length === 0) {
+    fail('failed to create any patients');
+  }
+
   // POST group for practitioner
   const createGroupResponse = createGroup(token, orgId, practitionerId, practitionerNpi);
   if (createGroupResponse.status != 201) {
-    console.error('failed to create group for workflow A');
+    fail('failed to create group');
   }
   const groupId = createGroupResponse.json().id;
 
   // GET group by practitioner NPI
   const getGroupResponse = findGroupByPractitionerNpi(token, practitionerNpi);
   if (getGroupResponse.status != 200) {
-    console.error('failed to get group for workflow B');
+    console.error('failed to get group');
   }
 
   // GET patients by MBI
   const findPatientsResponses = findPatientsByMbi(token, patients.map((patient) => patient.patientMbi));
   findPatientsResponses.forEach((res) => {
     if (res.status != 200) {
-      console.error('failed to GET patient.');
+      console.error('failed to GET patient');
     }
   });
 
@@ -137,7 +141,7 @@ export function workflow(data) {
   const updateGroupResponses = addPatientsToGroup(token, orgId, groupId, patients.splice(0, requestCounts.addPatientsToGroup), practitionerId, practitionerNpi);
   updateGroupResponses.forEach((res) => {
     if (res.status != 200) {
-      console.error('failed to add patient to Group.');
+      console.error('failed to add patient to group');
     }
   })
   
