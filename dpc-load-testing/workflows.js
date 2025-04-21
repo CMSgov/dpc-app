@@ -154,12 +154,12 @@ export function workflow(data) {
       console.error('failed to export group for workflow A');
     } else {
       let findJobUrl = getGroupExportResponse.headers['Content-Location'];
-      if (__ENV.ENVIRONMENT === 'local') {
-        findJobUrl = findJobUrl.replace('localhost', 'host.docker.internal');
-      }
       if (!findJobUrl) {
         console.error('failed to get a location to query the export job');
       } else {
+        if (__ENV.ENVIRONMENT === 'local') {
+          findJobUrl = findJobUrl.replace('localhost', 'host.docker.internal');
+        }
         findJobUrls.push(findJobUrl);
       }
     }
