@@ -143,24 +143,27 @@ export function workflow(data) {
   
 
   // GET group export
-  const jobIds = [];
+  const findJobUrls = []
   for (let i = 0; i < requestCounts.getGroupExport; i++) {
     const getGroupExportResponse = exportGroup(token, groupId);
     if (getGroupExportResponse.status != 202) {
       console.error('failed to export group for workflow A');
     } else {
-      const jobId = getGroupExportResponse.headers['Content-Location'].split('/').pop();
-      if (!jobId) {
+      let findJobUrl = getGroupExportResponse.headers['Content-Location'];
+      if (__ENV.ENVIRONMENT === 'local') {
+        findJobUrl = findJobUrl.replace('localhost', 'host.docker.internal');
+      }
+      if (!findJobUrl) {
         console.error('failed to get a location to query the export job');
       } else {
-        jobIds.push(jobId);
+        findJobUrls.push(findJobUrl);
       }
     }
   }
 
   // GET job status
   for (let i = 0; i < requestCounts.findJobsById; i++) {
-    const jobResponses = findJobsById(token, jobIds);
+    const jobResponses = findJobsById(token, findJobUrls);
     jobResponses.forEach((jobResponse) => {
       if (jobResponse.status != 200 && jobResponse.status != 202) {
         console.error('failed to successfully query job in workflow A');

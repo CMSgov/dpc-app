@@ -166,11 +166,11 @@ export function findJobById(token, jobId) {
   return http.get(`${urlRoot}/Jobs/${jobId}`, { 'headers': { 'Authorization': `Bearer ${token}` } });
 }
 
-export function findJobsById(token, jobIds) {
-  const batchRequests = jobIds.map((jobId) => {
+export function findJobsById(token, urls) {
+  const batchRequests = urls.map((url) => {
     return {
       method: 'GET',
-      url: `${urlRoot}/Jobs/${jobId}`,
+      url: url,
       params: { 'headers': { 'Authorization': `Bearer ${token}` } }
     }
   });
