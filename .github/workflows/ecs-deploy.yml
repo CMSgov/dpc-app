@@ -85,6 +85,8 @@ jobs:
           apk add openssh --no-cache
           apk add npm --no-cache
           apk add aws-cli --no-cache
+          apk add curl --no-cache # for using setup-tfenv-terraform action
+          apk add bash --no-cache
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -128,10 +130,10 @@ jobs:
           ref: ${{ inputs.ops-ref }}
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
           path: dpc-ops
-      - name: install terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Terraform install
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/setup-tfenv-terraform@main
         with:
-          terraform_version: "1.10.5"
+          directory: .
       - name: Verify persistent plan
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}/persistent
