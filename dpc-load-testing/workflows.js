@@ -15,7 +15,7 @@ import {
   createPatients,
   findPatientsByMbi,
   addPatientsToGroup,
-  findJobsById
+  findJobs
 } from './dpc-api-client.js';
 import NPIGeneratorCache from './utils/npi-generator.js';
 import MBIGeneratorCache from './utils/mbi-generator.js';
@@ -105,7 +105,7 @@ export function workflow(data) {
   const patients = [];
   patientResponses.forEach((res) => {
     if (res.status != 201) {
-      console.error('failed to create patient for workflow A');
+      console.error('failed to create patient');
     } else {
       const json = res.json();
       const patientId = json.id;
@@ -153,7 +153,7 @@ export function workflow(data) {
   for (let i = 0; i < requestCounts.getGroupExport; i++) {
     const getGroupExportResponse = exportGroup(token, groupId);
     if (getGroupExportResponse.status != 202) {
-      console.error('failed to export group for workflow A');
+      console.error('failed to export group');
     } else {
       let findJobUrl = getGroupExportResponse.headers['Content-Location'];
       if (!findJobUrl) {
@@ -169,10 +169,10 @@ export function workflow(data) {
 
   // GET job status
   for (let i = 0; i < requestCounts.findJobsById; i++) {
-    const jobResponses = findJobsById(token, findJobUrls);
+    const jobResponses = findJobs(token, findJobUrls);
     jobResponses.forEach((jobResponse) => {
       if (jobResponse.status != 200 && jobResponse.status != 202) {
-        console.error('failed to successfully query job in workflow A');
+        console.error('failed to successfully query job');
       }
     });
   }

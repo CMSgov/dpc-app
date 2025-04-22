@@ -166,7 +166,7 @@ export function findJobById(token, jobId) {
   return http.get(`${urlRoot}/Jobs/${jobId}`, { 'headers': { 'Authorization': `Bearer ${token}` } });
 }
 
-export function findJobsById(token, urls) {
+export function findJobs(token, urls) {
   const batchRequests = urls.map((url) => {
     return {
       method: 'GET',
