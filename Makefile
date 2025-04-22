@@ -113,6 +113,10 @@ start-average-load-test: secure-envs
 	@TEST_TYPE=single-iteration && \
 	docker run --rm -v $(shell pwd)/dpc-load-testing:/src --env-file $(shell pwd)/ops/config/decrypted/local.env -e ENVIRONMENT=local -e TEST_TYPE=$$TEST_TYPE -i grafana/k6 run /src/$$TEST_TYPE.js
 
+start-stress-test:
+start-stress-test: secure-envs
+	@TEST_TYPE=stress-test && \
+	docker run --rm -v $(shell pwd)/dpc-load-testing:/src --env-file $(shell pwd)/ops/config/decrypted/local.env -e ENVIRONMENT=local -e TEST_TYPE=$$TEST_TYPE -i grafana/k6 run /src/$$TEST_TYPE.js
 
 start-macaroon-tests: ## Test load-test macaroons
 start-macaroon-tests:
