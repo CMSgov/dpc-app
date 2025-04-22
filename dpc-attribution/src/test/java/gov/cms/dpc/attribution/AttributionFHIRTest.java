@@ -23,8 +23,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.time.Instant;
@@ -108,11 +106,22 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         // Remove meta so we can do equality between the two resources
         fetchedGroup.setMeta(null);
 
-        Logger logger = LoggerFactory.getLogger(AttributionFHIRTest.class);
-        logger.warn("CREATED: {}", createdGroup);
-        logger.warn("FETCHED: {}", fetchedGroup);
-        System.out.println("CREATED: " + createdGroup.listChildrenByName("*"));
-        System.out.println("FETCHED: " + fetchedGroup.listChildrenByName("*"));
+        assertAll(
+                () -> assertEquals(createdGroup.getIdentifier(), fetchedGroup.getIdentifier()),
+                () -> assertEquals(createdGroup.getActive(), fetchedGroup.getActive()),
+                () -> assertEquals(createdGroup.getType(), fetchedGroup.getType()),
+                () -> assertEquals(createdGroup.getActual(), fetchedGroup.getActual()),
+                () -> assertEquals(createdGroup.getName(), fetchedGroup.getName()),
+                () -> assertEquals(createdGroup.getQuantity(), fetchedGroup.getQuantity()),
+                () -> assertEquals(createdGroup.getCharacteristic().size(), fetchedGroup.getCharacteristic().size()),
+                () -> assertEquals(createdGroup.getMember().size(), fetchedGroup.getMember().size())
+        );
+        CodeableConcept createdCode = createdGroup.getCode();
+        CodeableConcept fetchedCode = fetchedGroup.getCode();
+        assertAll(
+                () -> assertEquals(createdCode.getCoding(), fetchedCode.getCoding()),
+                () -> assertEquals(createdCode.getText(), fetchedCode.getText())
+        );
         assertAll(() -> assertTrue(createdGroup.equalsDeep(fetchedGroup), "Groups should be equal"),
                 () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of benes"));
         fail("did not fail");
