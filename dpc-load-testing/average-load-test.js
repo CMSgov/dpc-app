@@ -10,7 +10,7 @@ export const options = {
       duration: '1h',
       rate: 50,
       timeUnit: '1h',
-      preAllocatedVUs: 3,
+      preAllocatedVUs: constants.preAllocatedVUs,
       exec: "workflow",
       maxVUs: constants.maxVUs,
     }

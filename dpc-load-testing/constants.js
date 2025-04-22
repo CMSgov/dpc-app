@@ -7,6 +7,7 @@ function getVUsCount() {
 }
 
 const constants = {
+  preAllocatedVUs: 3,
   maxVUs: getVUsCount(),
 }
 
