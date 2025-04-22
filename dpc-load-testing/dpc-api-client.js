@@ -9,8 +9,8 @@ import {
 
 const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/api/v1' : 'https://test.dpc.cms.gov/api/v1';
 
-export function findOrganizationByNpi(npiA, npiB, goldenMacaroon) {
-  const res = http.get(`${urlRoot}/Admin/Organization?npis=npi|${npiA},${npiB}`, {
+export function findOrganizationByNpi(npi, goldenMacaroon) {
+  const res = http.get(`${urlRoot}/Admin/Organization?npis=npi|${npi}`, {
     headers: {
       'Authorization': `Bearer ${goldenMacaroon}`,
       'Content-Type': 'application/fhir+json',
@@ -53,8 +53,40 @@ export function createPatient(token, mbi) {
   return res;
 }
 
+export function createPatients(token, number, mbiGenerator) {
+  const batchRequests = [];
+  for (let i = 0; i < number; i++) {
+    const mbi = mbiGenerator.iterate();
+    const body = generatePatientResourceBody(mbi);
+    const request = {
+      method: 'POST',
+      url: `${urlRoot}/Patient`,
+      body: JSON.stringify(body),
+      params: createHeaderParam(token)
+    };
+
+    batchRequests.push(request);
+  }
+
+  const res = http.batch(batchRequests);
+  return res;
+}
+
 export function findPatientByMbi(token, mbi) {
   return http.get(`${urlRoot}/Patient?identifier=${mbi}`, createHeaderParam(token));
+}
+
+export function findPatientsByMbi(token, mbis) {
+  const batchRequests = mbis.map((mbi) => {
+    return {
+      method: 'GET',
+      url: `${urlRoot}/Patient?identifier=${mbi}`,
+      params: createHeaderParam(token)
+    }
+  });
+  
+  const res = http.batch(batchRequests);
+  return res;
 }
 
 export function getOrganization(token) {
@@ -105,17 +137,46 @@ export function updateGroup(token, orgId, groupId, patientId, practitionerId, pr
     return res;
 }
 
+export function addPatientsToGroup(token, orgId, groupId, patients, practitionerId, practitionerNpi) {
+  const batchRequests = patients.map((patient) => {
+    const groupBody = generateGroupResourceBody(practitionerNpi, patient.patientId);
+    const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
+    return {
+      method: 'PUT',
+      url: `${urlRoot}/Group/${groupId}`,
+      body: JSON.stringify(groupBody),
+      params: createHeaderParam(token, {'X-Provenance': JSON.stringify(provenanceBody)})
+    };
+  });
+
+  const res = http.batch(batchRequests);
+  return res;
+}
+
 export function exportGroup(token, groupId) {
     const res = http.get(`${urlRoot}/Group/${groupId}/$export`,
       createHeaderParam(token, {'Prefer': 'respond-async'})
     );
 
-      return res;
+    return res;
 }
 
 export function findJobById(token, jobId) {
   // Request fails with 406 status when made with Content-Type or Accept header
   return http.get(`${urlRoot}/Jobs/${jobId}`, { 'headers': { 'Authorization': `Bearer ${token}` } });
+}
+
+export function findJobs(token, urls) {
+  const batchRequests = urls.map((url) => {
+    return {
+      method: 'GET',
+      url: url,
+      params: { 'headers': { 'Authorization': `Bearer ${token}` } }
+    }
+  });
+
+  const res = http.batch(batchRequests);
+  return res;
 }
 
 /**
