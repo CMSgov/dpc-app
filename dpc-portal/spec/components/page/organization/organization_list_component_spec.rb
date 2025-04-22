@@ -52,7 +52,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
         <<~HTML
           <table class="usa-table usa-table--borderless organizations-list table-bg-transparent" style="table-layout: fixed; width: 100%;">
             <caption class="usa-sr-only">
-              A list of organizations you are affiliated with, including name, NPI-2, your role, and the status for API access.
+              Organizations you manage as the AO or CD
             </caption>
             <thead>
               <tr>
