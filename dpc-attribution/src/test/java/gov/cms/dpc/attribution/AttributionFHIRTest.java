@@ -119,7 +119,7 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         );
         assertAll(() -> assertTrue(createdGroup.equalsDeep(fetchedGroup), "Groups should be equal"),
                 () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of benes"));
-        //fail("did not fail");
+        fail("did not fail");
 
         final String patientID = bundle.getEntry().get(1).getResource().getId();
 
