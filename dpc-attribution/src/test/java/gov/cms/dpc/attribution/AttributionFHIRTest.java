@@ -106,17 +106,10 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         // Remove meta so we can do equality between the two resources
         fetchedGroup.setMeta(null);
 
-        assertAll(
-                () -> assertEquals(createdGroup.getIdentifier(), fetchedGroup.getIdentifier()),
-                () -> assertEquals(createdGroup.getActive(), fetchedGroup.getActive()),
-                () -> assertEquals(createdGroup.getType(), fetchedGroup.getType()),
-                () -> assertEquals(createdGroup.getActual(), fetchedGroup.getActual()),
-                () -> assertTrue(createdGroup.getCode().equalsDeep(fetchedGroup.getCode())),
-                () -> assertEquals(createdGroup.getName(), fetchedGroup.getName()),
-                () -> assertEquals(createdGroup.getQuantity(), fetchedGroup.getQuantity()),
-                () -> assertTrue(createdGroup.getCharacteristicFirstRep().equalsDeep(fetchedGroup.getCharacteristicFirstRep())),
-                () -> assertTrue(createdGroup.getMemberFirstRep().equalsDeep(fetchedGroup.getMemberFirstRep()))
-        );
+        System.out.println("CREATED: " + createdGroup.getMemberFirstRep().listChildrenByName("*"));
+        System.out.println("FETCHED: " + fetchedGroup.getMemberFirstRep().listChildrenByName("*"));
+        assertTrue(createdGroup.getMemberFirstRep().equalsDeep(fetchedGroup.getMemberFirstRep()), "Member lists should be equal");
+
         assertAll(() -> assertTrue(createdGroup.equalsDeep(fetchedGroup), "Groups should be equal"),
                 () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of benes"));
         fail("did not fail");
