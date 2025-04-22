@@ -111,20 +111,15 @@ class AttributionFHIRTest extends AbstractAttributionTest {
                 () -> assertEquals(createdGroup.getActive(), fetchedGroup.getActive()),
                 () -> assertEquals(createdGroup.getType(), fetchedGroup.getType()),
                 () -> assertEquals(createdGroup.getActual(), fetchedGroup.getActual()),
+                () -> assertTrue(createdGroup.getCode().equalsDeep(fetchedGroup.getCode())),
                 () -> assertEquals(createdGroup.getName(), fetchedGroup.getName()),
                 () -> assertEquals(createdGroup.getQuantity(), fetchedGroup.getQuantity()),
-                () -> assertEquals(createdGroup.getCharacteristic().size(), fetchedGroup.getCharacteristic().size()),
-                () -> assertEquals(createdGroup.getMember().size(), fetchedGroup.getMember().size())
-        );
-        CodeableConcept createdCode = createdGroup.getCode();
-        CodeableConcept fetchedCode = fetchedGroup.getCode();
-        assertAll(
-                () -> assertEquals(createdCode.getCoding(), fetchedCode.getCoding()),
-                () -> assertEquals(createdCode.getText(), fetchedCode.getText())
+                () -> assertTrue(createdGroup.getCharacteristicFirstRep().equalsDeep(fetchedGroup.getCharacteristicFirstRep())),
+                () -> assertTrue(createdGroup.getMemberFirstRep().equalsDeep(fetchedGroup.getMemberFirstRep()))
         );
         assertAll(() -> assertTrue(createdGroup.equalsDeep(fetchedGroup), "Groups should be equal"),
                 () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of benes"));
-        fail("did not fail");
+        //fail("did not fail");
 
         final String patientID = bundle.getEntry().get(1).getResource().getId();
 
