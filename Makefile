@@ -105,11 +105,11 @@ start-portals: start-db start-web start-admin start-portal
 
 start-load-tests: ## Run one iteration of DPC performance tests locally in a Docker image provided by Grafana/K6
 start-load-tests: secure-envs
-	@docker run --rm -v $(shell pwd)/dpc-load-testing:/src --env-file $(shell pwd)/ops/config/decrypted/local.env -e ENVIRONMENT=local -i grafana/k6 run /src/single-iteration.js
+	@docker run --rm -v $(shell pwd)/dpc-load-testing:/src --env-file $(shell pwd)/ops/config/decrypted/local.env -e ENVIRONMENT=local -e TEST_TYPE=single-iteration -i grafana/k6 run /src/single-iteration.js
 
 start-average-load-test: ## Run one iteration of DPC performance tests locally in a Docker image provided by Grafana/K6
 start-average-load-test: secure-envs
-	@docker run --rm -v $(shell pwd)/dpc-load-testing:/src --env-file $(shell pwd)/ops/config/decrypted/local.env -e ENVIRONMENT=local -i grafana/k6 run /src/average-load-test.js
+	@docker run --rm -v $(shell pwd)/dpc-load-testing:/src --env-file $(shell pwd)/ops/config/decrypted/local.env -e ENVIRONMENT=local -e TEST_TYPE=average-load-test -i grafana/k6 run /src/average-load-test.js
 
 
 start-macaroon-tests: ## Test load-test macaroons

@@ -49,6 +49,8 @@ jobs:
             GOLDEN_MACAROON=/dpc/test/web/golden_macaroon
 
       - name: Run K6 with StatsD output
+        env:
+          TEST_TYPE: ${{ inputs.test_type }}
         run: |
           ./k6 run \
             --out output-statsd=addr=localhost:8125,enableTags=true \

@@ -1,3 +1,4 @@
+import { constants } from "./constants.js";
 import { workflow, setup, teardown } from "./workflows.js";
 
 // See https://grafana.com/docs/k6/latest/using-k6/k6-options/reference for
@@ -6,7 +7,7 @@ export const options = {
   scenarios: {
     workflow_1: {
       executor: 'per-vu-iterations',
-      vus: 1,
+      vus: constants.maxVUs,
       iterations: 1,
       exec: "workflow"
     }

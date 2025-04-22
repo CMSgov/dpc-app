@@ -19,6 +19,7 @@ import {
 } from './dpc-api-client.js';
 import NPIGeneratorCache from './utils/npi-generator.js';
 import MBIGeneratorCache from './utils/mbi-generator.js';
+import { constants } from './constants.js';
 
 const requestCounts = {
   createPatient: 14,
@@ -33,51 +34,48 @@ const mbiGeneratorCache = new MBIGeneratorCache();
 // Sets up two test organizations
 export function setup() {
   const goldenMacaroon = fetchGoldenMacaroon();
-  // Fake NPIs generated online: https://jsfiddle.net/alexdresko/cLNB6
-  const existingOrgsResponse = findOrganizationByNpi('2782823019', '8197402604', goldenMacaroon);
-  const checkFindOutput = check(
-    existingOrgsResponse,
-    {
-      'response code was 200': res => res.status === 200,
-    }
-  );
-  if (!checkFindOutput) {
-    exec.test.abort('failed to check for existing orgs');
-  }
-
-  const existingOrgs =  existingOrgsResponse.json();
-  if ( existingOrgs.total ) {
-    for ( const entry of existingOrgs.entry ) {
-      deleteOrganization(entry.resource.id, goldenMacaroon);
-    }
-  }
-  const org1 = createOrganization('2782823019', 'Test Org 1', goldenMacaroon);
-  const org2 = createOrganization('8197402604', 'Test Org 2', goldenMacaroon);
-
-  const checkOutput1 = check(
-    org1,
-    {
-      'response code was 200': res => res.status === 200,
-      'response has id field': res => res.json().id != undefined,
-      'id field is not null': res => res.json().id != null
-    }
-  );
-  const checkOutput2 = check(
-    org2,
-    {
-      'response code was 200': res => res.status === 200,
-      'response has id field': res => res.json().id != undefined,
-      'id field is not null or undefined': res => res.json().id != null
-    }
-  )
-
-  if (!checkOutput1 || !checkOutput2) {
-    exec.test.abort('failed to create organizations on setup')
-  }
-
-  // array returned from setup distributes its members starting from the 1 index
   const orgIds = Array();
-  orgIds[1] = org1.json().id;
+  const npiGenerator = npiGeneratorCache.getGenerator(0);
+  // array returned from setup distributes its members starting from the 1 index
+  for (let i = 1; i <= constants.maxVUs; i++) {
+    const npi = npiGenerator.iterate();
+    // check if org with npi exists
+    const existingOrgResponse = findOrganizationByNpi(npi, goldenMacaroon);
+    const checkFindOutput = check(
+      existingOrgResponse,
+      {
+        'response code was 200': res => res.status === 200,
+      }
+    );
+
+    if (!checkFindOutput) {
+      exec.test.abort('failed to check for existing orgs');
+    }
+    // delete if org exists with npi
+    const existingOrgs =  existingOrgResponse.json();
+    if ( existingOrgs.total ) {
+      for ( const entry of existingOrgs.entry ) {
+        deleteOrganization(entry.resource.id, goldenMacaroon);
+      }
+    }
+
+    const org = createOrganization(npi, `Test Org ${i}`, goldenMacaroon);
+
+    const checkOutput = check(
+      org,
+      {
+        'response code was 200': res => res.status === 200,
+        'response has id field': res => res.json().id != undefined,
+        'id field is not null': res => res.json().id != null
+      }
+    );
+
+    if (!checkOutput) {
+      exec.test.abort('failed to create organizations on setup')
+    }
+
+    orgIds[i] = org.json().id;
+  }
 
   return { orgIds: orgIds, goldenMacaroon: goldenMacaroon };
 }
@@ -86,7 +84,11 @@ export function workflow(data) {
   const npiGenerator = npiGeneratorCache.getGenerator(exec.vu.idInInstance);
   const mbiGenerator = mbiGeneratorCache.getGenerator(exec.vu.idInInstance);
 
-  const orgId = data.orgIds[1];
+  const orgId = data.orgIds[exec.vu.idInInstance];
+  if (!orgId) {
+    fail('error indexing VU ID against orgIds array');
+  }
+
   const token = generateDPCToken(orgId, data.goldenMacaroon);
 
   // POST practitioner
