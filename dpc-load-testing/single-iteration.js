@@ -5,7 +5,7 @@ import { workflow, setup, teardown } from "./workflows.js";
 // details on this configuration object.
 export const options = {
   scenarios: {
-    workflow_1: {
+    workflow: {
       executor: 'per-vu-iterations',
       vus: constants.maxVUs,
       iterations: 1,

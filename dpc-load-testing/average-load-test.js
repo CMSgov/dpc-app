@@ -5,7 +5,7 @@ import { constants } from "./constants.js";
 // details on this configuration object.
 export const options = {
   scenarios: {
-    workflow_a: {
+    workflow: {
       executor: 'constant-arrival-rate',
       duration: '1h',
       rate: 50,
