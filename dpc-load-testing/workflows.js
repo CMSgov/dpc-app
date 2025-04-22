@@ -141,6 +141,9 @@ export function workflow(data) {
 
   // distribute (PUT) patients into group
   const updateGroupResponses = addPatientsToGroup(token, orgId, groupId, patients.splice(0, requestCounts.addPatientsToGroup), practitionerId, practitionerNpi);
+  if (!updateGroupResponses.some(res => res.status === 200)) {
+    fail('failed to add any patients to group');
+  }
   updateGroupResponses.forEach((res) => {
     if (res.status != 200) {
       console.error('failed to add patient to group');
