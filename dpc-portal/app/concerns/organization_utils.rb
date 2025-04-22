@@ -7,14 +7,17 @@ module OrganizationUtils
   included do
     def org_status(organization, link)
       message_prefix = link.is_a?(AoOrgLink) ? 'verification' : 'cd_access'
-      if organization.rejected?
-        ['lock', %i[text-gray-50], t("#{message_prefix}.#{organization.verification_reason}_status")]
-      elsif !link.verification_status?
-        ['lock', %i[text-gray-50], t("verification.#{link.verification_reason}_status")]
-      elsif organization.terms_of_service_accepted_at.blank?
-        ['warning', %i[text-gold], t("#{message_prefix}.tos_not_signed")]
+
+      if organization.terms_of_service_accepted_at.blank?
+        ['warning', %i[text-gold], t("#{message_prefix}.sign_tos")]
+      elsif organization.rejected?
+        ['lock', %i[text-gray-50], t("#{message_prefix}.access_denied")]
+      elsif link.user && !link.user.can_access?(organization)
+        ['link_off', %i[text-gray-50], t("#{message_prefix}.api_disabled")]
+      elsif !organization.config_complete
+        ['warning', %i[text-gold], t("#{message_prefix}.configuration_needed")]
       else
-        ['verified', %i[text-accent-cool], t("#{message_prefix}.manage_org")]
+        ['check', %i[text-green], t("#{message_prefix}.configuration_complete")]
       end
     end
   end
