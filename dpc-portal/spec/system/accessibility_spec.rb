@@ -9,7 +9,7 @@ RSpec.describe 'Accessibility', type: :system do
     driven_by(:selenium_headless)
   end
   let(:dpc_api_organization_id) { 'some-gnarly-guid' }
-  let(:axe_standard) { [ 'best-practice', 'wcag21aa' ] }
+  let(:axe_standard) { %w[best-practice wcag21aa] }
   context 'login' do
     it 'shows login page ok' do
       visit '/users/sign_in'
