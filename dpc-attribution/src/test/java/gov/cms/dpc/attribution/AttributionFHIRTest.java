@@ -108,6 +108,13 @@ class AttributionFHIRTest extends AbstractAttributionTest {
 
         System.out.println("CREATED: " + createdGroup.getMemberFirstRep().listChildrenByName("*"));
         System.out.println("FETCHED: " + fetchedGroup.getMemberFirstRep().listChildrenByName("*"));
+        Group.GroupMemberComponent createdMember = createdGroup.getMemberFirstRep();
+        Group.GroupMemberComponent fetchedMember = fetchedGroup.getMemberFirstRep();
+        assertAll(
+                () -> assertTrue(createdMember.getEntity().equalsDeep(fetchedMember.getEntity())),
+                () -> assertTrue(createdMember.getPeriod().equalsDeep(fetchedMember.getPeriod())),
+                () -> assertEquals(createdMember.getInactive(), fetchedMember.getInactive())
+        );
         assertTrue(createdGroup.getMemberFirstRep().equalsDeep(fetchedGroup.getMemberFirstRep()), "Member lists should be equal");
 
         assertAll(() -> assertTrue(createdGroup.equalsDeep(fetchedGroup), "Groups should be equal"),
