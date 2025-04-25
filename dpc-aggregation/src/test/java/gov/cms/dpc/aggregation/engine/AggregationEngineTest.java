@@ -31,7 +31,6 @@ import org.assertj.core.util.Lists;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
@@ -680,7 +679,6 @@ class AggregationEngineTest {
     }
 
     @Nested
-    @Isolated
     class ErrorHandlerTest {
 
         static ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
@@ -738,9 +736,9 @@ class AggregationEngineTest {
             assertFalse(logMessages.contains(UNDELIVERABLE_EXC));
         }
 
-        private static List<String> getLogMessages() {
+        private synchronized List<String> getLogMessages() {
             boolean success = false;
-            int count = 0, maxTries = 20;
+            int count = 0, maxTries = 50;
             List<String> logMessages = new ArrayList<>();
 
             // These tests throw non-stochastic ConcurrentModificationExceptions, this is a rough way to ignore them
