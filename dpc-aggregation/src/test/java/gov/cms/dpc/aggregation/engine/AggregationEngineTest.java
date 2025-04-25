@@ -736,7 +736,7 @@ class AggregationEngineTest {
             assertFalse(logMessages.contains(UNDELIVERABLE_EXC));
         }
 
-        private List<String> getLogMessages() {
+        private static List<String> getLogMessages() {
             boolean success = false;
             int count = 0, maxTries = 50;
             List<String> logMessages = new ArrayList<>();
