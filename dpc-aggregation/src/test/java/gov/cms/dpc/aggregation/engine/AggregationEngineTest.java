@@ -15,6 +15,7 @@ import gov.cms.dpc.aggregation.service.EveryoneGetsDataLookBackServiceImpl;
 import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
@@ -30,11 +31,13 @@ import org.assertj.core.util.Lists;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -162,6 +165,7 @@ class AggregationEngineTest {
         assertTrue(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(EXPORT_PATH, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
+        assertMDCReset();
     }
 
     /**
@@ -198,6 +202,7 @@ class AggregationEngineTest {
         }
 
         verify(queue, Mockito.times(5)).claimBatch(any(UUID.class));
+        assertMDCReset();
     }
 
     /**
@@ -230,6 +235,7 @@ class AggregationEngineTest {
         assertTrue(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(EXPORT_PATH, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
+        assertMDCReset();
     }
 
     /**
@@ -261,6 +267,7 @@ class AggregationEngineTest {
         assertFalse(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(EXPORT_PATH, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertFalse(Files.exists(Path.of(errorFilePath)), "expect no error file");
+        assertMDCReset();
     }
 
     /**
@@ -293,6 +300,7 @@ class AggregationEngineTest {
             var outputFilePath = ResourceWriter.formOutputFilePath(EXPORT_PATH, queue.getJobBatches(jobID).stream().findFirst().get().getBatchID(), resourceType, 0);
             assertTrue(Files.exists(Path.of(outputFilePath)));
         });
+        assertMDCReset();
     }
 
     /**
@@ -356,6 +364,7 @@ class AggregationEngineTest {
             var outputFilePath = ResourceWriter.formOutputFilePath(EXPORT_PATH, queue.getJobBatches(jobID).stream().findFirst().get().getBatchID(), resourceType, 0);
             assertTrue(Files.exists(Path.of(outputFilePath)));
         });
+        assertMDCReset();
     }
 
     /**
@@ -394,6 +403,7 @@ class AggregationEngineTest {
         } catch (Exception e) {
             fail("Failed to read output file");
         }
+        assertMDCReset();
     }
 
     /**
@@ -426,6 +436,7 @@ class AggregationEngineTest {
             assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(EXPORT_PATH, retrievedJob.getBatchID(), DPCResourceType.Patient, 0))));
             assertFalse(Files.exists(Path.of(ResourceWriter.formOutputFilePath(EXPORT_PATH, retrievedJob.getBatchID(), DPCResourceType.OperationOutcome, 0))));
         });
+        assertMDCReset();
     }
 
 
@@ -455,6 +466,7 @@ class AggregationEngineTest {
         // Look at the result
         assertAll(() -> assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent(), "Unable to retrieve job from queue."),
                 () -> assertEquals(JobStatus.FAILED, queue.getJobBatches(jobID).stream().findFirst().get().getStatus()));
+        assertMDCReset();
     }
 
     /**
@@ -488,6 +500,7 @@ class AggregationEngineTest {
         // Job will be left in a running state, but that's okay, as the stuck batch logic will take over and retry the job in 5 minutes
         assertAll(() -> assertTrue(queue.getJobBatches(jobID).stream().findFirst().isPresent(), "Unable to retrieve job from queue."),
                 () -> assertEquals(JobStatus.RUNNING, queue.getJobBatches(jobID).stream().findFirst().get().getStatus()));
+        assertMDCReset();
     }
 
     /**
@@ -537,6 +550,7 @@ class AggregationEngineTest {
                 () -> assertEquals(3, actual.getJobQueueBatchFiles().size(), "expected 3 (2 good patient ids and 1 bad patient id that failed lookback)"),
                 () -> assertFalse(actual.getJobQueueFile(DPCResourceType.OperationOutcome).isEmpty(), "bad patient id fails lookback"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
+        assertMDCReset();
     }
 
     @Test
@@ -568,6 +582,7 @@ class AggregationEngineTest {
                 () -> assertEquals(1, actual.getJobQueueBatchFiles().size(), "Should be one error file for lookback failure"),
                 () -> assertFalse(actual.getJobQueueFile(DPCResourceType.OperationOutcome).isEmpty(), "Should be one error for lookback failure"),
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "Error file should not exist"));
+        assertMDCReset();
     }
 
     @Test
@@ -655,7 +670,17 @@ class AggregationEngineTest {
                 () -> assertTrue(Files.exists(Path.of(expectedErrorPath)), "expected an error file"));
     }
 
+    /**
+     * Asserts that the MDC is empty except for the aggregator id.
+     */
+    private void assertMDCReset() {
+        Map<String, String> mdc = MDC.getCopyOfContextMap();
+        assertEquals(1, mdc.size());
+        assertEquals(engine.getAggregatorID().toString(), mdc.get(MDCConstants.AGGREGATOR_ID));
+    }
+
     @Nested
+    @Isolated
     class ErrorHandlerTest {
 
         static ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
