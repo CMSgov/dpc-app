@@ -106,20 +106,22 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         // Remove meta so we can do equality between the two resources
         fetchedGroup.setMeta(null);
 
-        System.out.println("CREATED: " + createdGroup.getMemberFirstRep().listChildrenByName("*"));
-        System.out.println("FETCHED: " + fetchedGroup.getMemberFirstRep().listChildrenByName("*"));
-        Group.GroupMemberComponent createdMember = createdGroup.getMemberFirstRep();
         Group.GroupMemberComponent fetchedMember = fetchedGroup.getMemberFirstRep();
-        assertAll(
-                () -> assertTrue(createdMember.getEntity().equalsDeep(fetchedMember.getEntity())),
-                () -> assertTrue(createdMember.getPeriod().equalsDeep(fetchedMember.getPeriod())),
-                () -> assertEquals(createdMember.getInactive(), fetchedMember.getInactive())
-        );
-        assertTrue(createdGroup.getMemberFirstRep().equalsDeep(fetchedGroup.getMemberFirstRep()), "Member lists should be equal");
 
-        assertAll(() -> assertTrue(createdGroup.equalsDeep(fetchedGroup), "Groups should be equal"),
-                () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of benes"));
-        fail("did not fail");
+        // TODO: is it that the members aren't necessarily in the same order in each group? -acw
+        // update: YES (:
+        assertAll(
+                () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of benes"),
+                () -> assertEquals(createdGroup.getIdentifier(), fetchedGroup.getIdentifier()),
+                () -> assertEquals(createdGroup.getActive(), fetchedGroup.getActive()),
+                () -> assertEquals(createdGroup.getType(), fetchedGroup.getType()),
+                () -> assertEquals(createdGroup.getActual(), fetchedGroup.getActual()),
+                () -> assertTrue(createdGroup.getCode().equalsDeep(fetchedGroup.getCode())),
+                () -> assertEquals(createdGroup.getName(), fetchedGroup.getName()),
+                () -> assertEquals(createdGroup.getQuantity(), fetchedGroup.getQuantity()),
+                () -> assertTrue(Base.compareDeep(createdGroup.getCharacteristic(), fetchedGroup.getCharacteristic(), true)),
+                () -> assertTrue(Base.compareDeep(createdGroup.getMember(), fetchedGroup.getMember(), true))
+        );
 
         final String patientID = bundle.getEntry().get(1).getResource().getId();
 
