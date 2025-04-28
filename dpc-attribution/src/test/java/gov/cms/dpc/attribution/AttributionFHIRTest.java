@@ -106,7 +106,6 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         // Remove meta so we can do equality between the two resources
         fetchedGroup.setMeta(null);
 
-        Group.GroupMemberComponent fetchedMember = fetchedGroup.getMemberFirstRep();
 
         // TODO: is it that the members aren't necessarily in the same order in each group? -acw
         // update: YES (:
