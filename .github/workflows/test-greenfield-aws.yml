@@ -11,9 +11,9 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID_GF_LOWER }}:role/delegatedadmin/developer/dpc-dev-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID_GF_UPPER }}:role/delegatedadmin/developer/dpc-dev-github-actions
 
-      - name: Login to Amazon ECR
+      - name: Login to Amazon ECR (prod)
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
