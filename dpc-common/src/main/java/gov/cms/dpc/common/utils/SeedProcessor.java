@@ -96,8 +96,8 @@ public class SeedProcessor {
         // Add the Organization ID
         FHIRBuilders.addOrganizationTag(practitioner, organizationID);
 
+        // Generate bundle entries
         List<Bundle.BundleEntryComponent> componentList = new ArrayList<>();
-
         entry.getValue()
                 .forEach(value -> {
                     // Add some random values to the patient
@@ -122,6 +122,7 @@ public class SeedProcessor {
                 .setFullUrl("http://something.gov/" + practitioner.getIdentifierFirstRep().getValue());
         componentList.add(0, practitionerComponent);
         bundle.setEntry(componentList);
+
         return bundle;
     }
 
