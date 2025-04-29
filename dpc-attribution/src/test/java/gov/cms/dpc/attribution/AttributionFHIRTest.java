@@ -108,18 +108,8 @@ class AttributionFHIRTest extends AbstractAttributionTest {
 
         // TODO: is it that the members aren't necessarily in the same order in each group? -acw
         // update: YES (:
-        assertAll(
-                () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of benes"),
-                () -> assertEquals(createdGroup.getIdentifier(), fetchedGroup.getIdentifier()),
-                () -> assertEquals(createdGroup.getActive(), fetchedGroup.getActive()),
-                () -> assertEquals(createdGroup.getType(), fetchedGroup.getType()),
-                () -> assertEquals(createdGroup.getActual(), fetchedGroup.getActual()),
-                () -> assertTrue(createdGroup.getCode().equalsDeep(fetchedGroup.getCode())),
-                () -> assertEquals(createdGroup.getName(), fetchedGroup.getName()),
-                () -> assertEquals(createdGroup.getQuantity(), fetchedGroup.getQuantity()),
-                () -> assertTrue(Base.compareDeep(createdGroup.getCharacteristic(), fetchedGroup.getCharacteristic(), true)),
-                () -> assertTrue(Base.compareDeep(createdGroup.getMember(), fetchedGroup.getMember(), true))
-        );
+        assertAll(() -> assertTrue(createdGroup.equalsDeep(fetchedGroup), "Groups should be equal"),
+                () -> assertEquals(bundle.getEntry().size() - 1, fetchedGroup.getMember().size(), "Should have the same number of benes"));
 
         final String patientID = bundle.getEntry().get(1).getResource().getId();
 
