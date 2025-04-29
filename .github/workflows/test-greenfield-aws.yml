@@ -1,0 +1,23 @@
+name: 'DPC - test new accounts'
+
+on:
+  push:
+
+jobs:
+  test_gf_aws_access_lower:
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID_GF_LOWER }}:role/delegatedadmin/developer/dpc-dev-github-actions
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Verify access to ECR
+        run: |
+          echo "Checking ECR repositories..."
+          aws ecr describe-repositories
