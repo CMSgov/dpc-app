@@ -48,6 +48,7 @@ gem 'macaroons'
 gem 'sprockets-rails', '>= 3.4.2'
 gem 'truemail'
 gem 'nokogiri', '>= 1.18.3'
+gem 'net-imap', '>= 0.5.8'
 
 gem 'api_client', path: 'vendor/api_client'
 
