@@ -24,7 +24,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     outputs:
       docker_tag: ${{ steps.output_docker_tag.outputs.docker_tag }}
     steps:
@@ -54,7 +54,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     strategy:
       matrix:
         ecr_repository: [ web-portal, web-admin, web ]
@@ -99,7 +99,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - name: "Set up Ansible"
         run: |
@@ -210,7 +210,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     strategy:
       matrix:
         ecr_repository: [ web-portal, web-admin, web, api, attribution, aggregation, consent ]
