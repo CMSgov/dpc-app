@@ -1,10 +1,31 @@
-name: 'DPC - test new accounts'
-
-on:
-  push:
-
-jobs:
-#  test_gf_aws_access_dev:
+#name: 'DPC - test new accounts'
+#
+#on:
+#  push:
+#
+#jobs:
+##  test_gf_aws_access_dev:
+##    permissions:
+##      contents: read
+##      id-token: write
+##    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+##    steps:
+##      - name: Configure AWS Credentials
+##        uses: aws-actions/configure-aws-credentials@v4
+##        with:
+##          aws-region: ${{ vars.AWS_REGION }}
+##          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+##
+##      - name: Login to Amazon ECR (dev)
+##        id: login-ecr
+##        uses: aws-actions/amazon-ecr-login@v2
+##
+##      - name: Verify access to ECR
+##        run: |
+##          echo "Checking ECR repositories..."
+##          aws ecr describe-repositories
+#
+#  test_gf_aws_access_sandbox:
 #    permissions:
 #      contents: read
 #      id-token: write
@@ -14,7 +35,7 @@ jobs:
 #        uses: aws-actions/configure-aws-credentials@v4
 #        with:
 #          aws-region: ${{ vars.AWS_REGION }}
-#          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+#          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-sandbox-github-actions
 #
 #      - name: Login to Amazon ECR (dev)
 #        id: login-ecr
@@ -24,24 +45,3 @@ jobs:
 #        run: |
 #          echo "Checking ECR repositories..."
 #          aws ecr describe-repositories
-
-  test_gf_aws_access_sandbox:
-    permissions:
-      contents: read
-      id-token: write
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-sandbox-github-actions
-
-      - name: Login to Amazon ECR (dev)
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Verify access to ECR
-        run: |
-          echo "Checking ECR repositories..."
-          aws ecr describe-repositories
