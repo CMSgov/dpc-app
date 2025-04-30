@@ -57,6 +57,7 @@ gem 'uglifier', '>= 1.3.0'
 gem 'view_component', '~> 3.9'
 gem 'webrick'
 gem 'yard', '>= 0.9.36'
+gem 'net-imap', '>= 0.5.8'
 
 gem 'api_client', path: 'vendor/api_client'
 
