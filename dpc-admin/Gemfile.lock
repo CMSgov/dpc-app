@@ -216,7 +216,7 @@ GEM
       rbnacl-libsodium (~> 1.0)
     mail (2.8.1)
       mini_mime (>= 0.1.1)
-      net-imap
+      net-imap (>= 0.5.7)
       net-pop
       net-smtp
     marcel (1.0.4)
@@ -233,7 +233,7 @@ GEM
     multi_xml (0.6.0)
     net-http (0.4.1)
       uri
-    net-imap (0.5.6)
+    net-imap (>= 0.5.7)
       date
       net-protocol
     net-pop (0.1.2)
