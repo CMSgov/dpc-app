@@ -75,10 +75,16 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Fetch admin host
+#      - name: Fetch admin host
+#        id: fetch-admin-host
+#        run: |
+#          admin_host=`aws elbv2 describe-load-balancers --names dpc-${{ inputs.env }}-frontend-internal --query="LoadBalancers[0].DNSName" --output text`
+#          echo "admin_host=$admin_host" >> "$GITHUB_OUTPUT"
+#          echo "ELB_URL=http://$admin_host:9900/tasks" >> "$GITHUB_OUTPUT"
+      - name: Fetch admin host for dev only manually (delete me)
         id: fetch-admin-host
         run: |
-          admin_host=`aws elbv2 describe-load-balancers --names dpc-${{ inputs.env }}-frontend-internal --query="LoadBalancers[0].DNSName" --output text`
+          admin_host=`aws elbv2 describe-load-balancers --names dpc-dev-frontend-internal --query="LoadBalancers[0].DNSName" --output text`
           echo "admin_host=$admin_host" >> "$GITHUB_OUTPUT"
           echo "ELB_URL=http://$admin_host:9900/tasks" >> "$GITHUB_OUTPUT"
       - name: Determine host
