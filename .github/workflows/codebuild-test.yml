@@ -8,6 +8,7 @@ jobs:
       - run: if command -v python3; then python3 --version; fi
       - run: if command -v python; then python --version; fi
       - run: if command -v pip; then pip --version; fi
+      - run: pip list
       - run: if command -v docker-compose; then docker-compose --version; fi
       - run: |
           if command -v node; then node --version; fi
