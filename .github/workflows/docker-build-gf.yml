@@ -1,4 +1,4 @@
-name: 'DPC - Docker Build'
+name: 'DPC - Docker Build (Greenfield)'
 
 on:
   workflow_dispatch:
@@ -7,6 +7,7 @@ on:
       ecr_image_tag:
         description: "Tag for associated docker images"
         value: ${{ jobs.generate_docker_tag.outputs.docker_tag }}
+  push:
 
 permissions:
   id-token: write
@@ -20,7 +21,10 @@ env:
 
 jobs:
   generate_docker_tag:
-    runs-on: self-hosted
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     outputs:
       docker_tag: ${{ steps.output_docker_tag.outputs.docker_tag }}
     steps:
@@ -38,24 +42,22 @@ jobs:
             BRANCH_HASH=`git show -s --format='%h'`
             VERSION_TAG="commit_${BRANCH_HASH}"
           fi
-          echo $VERSION_TAG
           echo "version_tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
           set -e
       - name: generate a tag with UTC date and GitHub run_id
         id: output_docker_tag
         run: |
           DOCKER_TAG="rls-${{ steps.get-version-tag.outputs.version_tag }}-$(date -u +'%Y%m%d%H%M')-${{ github.run_id }}"
-          echo "$DOCKER_TAG"
           echo "docker_tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
-
   docker_build_rails_apps:
-    runs-on: self-hosted
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     strategy:
       matrix:
         ecr_repository: [ web-portal, web-admin, web ]
         include:
-          # note this is confusing, but make ci-web-portal points to dpc-web-portal-test.sh which runs
-          # docker compose -p ... dpc_web
           - ecr_repository: web-portal
             make_command: make ci-portal
           - ecr_repository: web-admin
@@ -79,7 +81,6 @@ jobs:
           sudo curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           sudo chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-
       - name: Build specified app
         run: ${{ matrix.make_command }}
 
@@ -93,41 +94,37 @@ jobs:
           retention-days: 1
 
   docker_build_java: # builds dpc-api, dpc-attribution, dpc-aggregation, and dpc-consent
-    runs-on: self-hosted
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - name: "Set up Ansible"
         run: |
           sudo dnf -y install python3 python3-pip
           pip install ansible
-
       - name: "Install npm for Postman tests"
         run: |
           sudo dnf -y install nodejs
           npm --version
-
       - name: Install docker compose manually
         run: |
           sudo mkdir -p /usr/local/lib/docker/cli-plugins
           sudo curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           sudo chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-
       - name: Assert Ownership
         run: sudo chmod -R 777 .
-
       - name: "Checkout code"
         uses: actions/checkout@v4
-
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
-
       - name: "Set up JDK 17"
         uses: actions/setup-java@v3
         with:
           java-version: "17"
           distribution: "corretto"
           cache: maven
-
       - name: Install Maven 3.6.3
         run: |
           export PATH="$PATH:/opt/maven/bin"
@@ -137,7 +134,6 @@ jobs:
           curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
           sudo rm -rf /opt/maven
           sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
-
       - name: Clean maven
         run: mvn -ntp -U clean
 
@@ -146,7 +142,6 @@ jobs:
         run: |
           export PATH=$PATH:~/.local/bin
           make ci-app
-
       # add extra commands to log docker containers during failure
       - name: Consent Logs
         if: ${{ failure() && steps.api-build.outcome == 'failure' }}
@@ -161,45 +156,38 @@ jobs:
         if: ${{ failure() && steps.api-build.outcome == 'failure' }}
         run: docker logs start-v1-app-api-1
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+      - name: list docker images
+        run: docker image ls  # anticipate this will include legacy id and need updating!
 
+      # should fail
       - name: gzip image (1 of 4) - API
-        run: docker save ${{ steps.login-ecr.outputs.registry }}/dpc-api:latest | gzip > ${{ runner.temp }}/dpc_api_latest.tar.gz
+        run: docker save dpc/dpc-api:latest | gzip > ${{ runner.temp }}/dpc_api_latest.tar.gz
+      - name: gzip image (2 of 4) - Attribution
+        run: docker save dpc/dpc-attribution:latest | gzip > ${{ runner.temp }}/dpc_attribution_latest.tar.gz
+      - name: gzip image (3 of 4) - Aggregation
+        run: docker save dpc/dpc-aggregation:latest | gzip > ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
+      - name: gzip image (4 of 4) - Consent
+        run: docker save dpc/dpc-consent:latest | gzip > ${{ runner.temp }}/dpc_consent_latest.tar.gz
+
       - name: upload tar artifact (1 of 4) - API
         uses: actions/upload-artifact@v4
         with:
           name: dpc-api
           path: ${{ runner.temp }}/dpc_api_latest.tar.gz
           retention-days: 1
-
-      - name: gzip image (2 of 4) - Attribution
-        run: docker save ${{ steps.login-ecr.outputs.registry }}/dpc-attribution:latest | gzip > ${{ runner.temp }}/dpc_attribution_latest.tar.gz
       - name: upload tar artifact (2 of 4) - Attribution
         uses: actions/upload-artifact@v4
         with:
           name: dpc-attribution
           path: ${{ runner.temp }}/dpc_attribution_latest.tar.gz
           retention-days: 1
-
-      - name: gzip image (3 of 4) - Aggregation
-        run: docker save ${{ steps.login-ecr.outputs.registry }}/dpc-aggregation:latest | gzip > ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
       - name: upload tar artifact (3 of 4) - Aggregation
         uses: actions/upload-artifact@v4
         with:
           name: dpc-aggregation
           path: ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
           retention-days: 1
-
-      - name: gzip image (4 of 4) - Consent
-        run: docker save ${{ steps.login-ecr.outputs.registry }}/dpc-consent:latest | gzip > ${{ runner.temp }}/dpc_consent_latest.tar.gz
       - name: upload tar artifact (4 of 4) - Consent
         uses: actions/upload-artifact@v4
         with:
@@ -208,7 +196,10 @@ jobs:
           retention-days: 1
 
   docker_push_all_apps:
-    runs-on: self-hosted
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     strategy:
       matrix:
         ecr_repository: [ web-portal, web-admin, web, api, attribution, aggregation, consent ]
@@ -225,31 +216,73 @@ jobs:
         run: |
           docker load --input ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
           docker image ls -a
-
-      - name: Configure AWS Credentials
+      #   _______                         __________                   .___
+      #   \      \   ____   ____          \______   \_______  ____   __| _/
+      #   /   |   \ /  _ \ /    \   ______ |     ___/\_  __ \/  _ \ / __ |
+      #   /    |    (  <_> )   |  \ /_____/ |    |     |  | \(  <_> ) /_/ |
+      #   \____|__  /\____/|___|  /         |____|     |__|   \____/\____ |
+      #   \/            \/                                       \/
+      - name: Configure non-prod AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Login to Amazon ECR
-        id: login-ecr
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Login to Amazon ECR (non-prod)
+        id: login-ecr-non-prod
         uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Push to ECR
+      - name: Push image to registries for non-prod aws account
         env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
+          REGISTRY: ${{ steps.login-ecr-non-prod.outputs.registry }}
         run: |
           if [ ${{ matrix.ecr_repository }} == 'api' ] || \
              [ ${{ matrix.ecr_repository }} == 'attribution' ] || \
              [ ${{ matrix.ecr_repository }} == 'aggregation' ] || \
              [ ${{ matrix.ecr_repository }} == 'consent' ]; then
-            echo "using image with registry as part of name for java app: ${{ matrix.ecr_repository }}"
+            echo "tagging java/jib build for $ECR_REPOSITORY"
             docker tag dpc/dpc-$ECR_REPOSITORY $REGISTRY/dpc-$ECR_REPOSITORY:latest
             docker tag dpc/dpc-$ECR_REPOSITORY $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
             docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
             docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
           else
+            echo "tagging rails app build for $ECR_REPOSITORY"
+            docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
+            docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+            docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+            docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
+          fi
+      # prod arn
+      # arn:aws:iam::202533514245:role/delegatedadmin/developer/dpc-prod-github-actions
+      #   __________                   .___             __  .__
+      #   \______   \_______  ____   __| _/_ __   _____/  |_|__| ____   ____
+      #   |     ___/\_  __ \/  _ \ / __ |  |  \_/ ___\   __\  |/  _ \ /    \
+      #   |    |     |  | \(  <_> ) /_/ |  |  /\  \___|  | |  (  <_> )   |  \
+      #   |____|     |__|   \____/\____ |____/  \___  >__| |__|\____/|___|  /
+      #   \/           \/                    \/
+      - name: Configure prod AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-github-actions
+      - name: Login to Amazon ECR (prod)
+        id: login-ecr-prod
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Push image to registries for prod aws account
+        env:
+          IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
+          REGISTRY: ${{ steps.login-ecr-prod.outputs.registry }}
+        run: |
+          if [ ${{ matrix.ecr_repository }} == 'api' ] || \
+             [ ${{ matrix.ecr_repository }} == 'attribution' ] || \
+             [ ${{ matrix.ecr_repository }} == 'aggregation' ] || \
+             [ ${{ matrix.ecr_repository }} == 'consent' ]; then
+            echo "tagging java/jib build for $ECR_REPOSITORY"
+            docker tag dpc/dpc-$ECR_REPOSITORY $REGISTRY/dpc-$ECR_REPOSITORY:latest
+            docker tag dpc/dpc-$ECR_REPOSITORY $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+            docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+            docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
+          else
+            echo "tagging rails app build for $ECR_REPOSITORY"
             docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
             docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
             docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG

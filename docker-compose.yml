@@ -22,7 +22,7 @@ services:
       retries: 5
 
   aggregation:
-    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-aggregation}:latest
+    image: dpc/dpc-aggregation:latest
     ports:
       - "9901:9901"
     env_file:
@@ -49,7 +49,7 @@ services:
       retries: 10
 
   attribution:
-    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-attribution}:latest
+    image: dpc/dpc-attribution:latest
     depends_on:
       db:
         condition: service_healthy
@@ -70,7 +70,7 @@ services:
       retries: 10
 
   api:
-    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-api}:latest
+    image: dpc/dpc-api:latest
     ports:
       - "3002:3002"
       - "9903:9900"
@@ -97,7 +97,7 @@ services:
       retries: 10
 
   consent:
-    image: ${ECR_HOST:-755619740999.dkr.ecr.us-east-1.amazonaws.com/dpc-consent}:latest
+    image: dpc/dpc-consent:latest
     depends_on:
       db:
         condition: service_healthy
