@@ -232,4 +232,3 @@ jobs:
             docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
             docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
             docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-            docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
