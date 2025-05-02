@@ -5,14 +5,18 @@ jobs:
     runs-on:
       - codebuild-dpc-app-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
+      - run: if command -v python3; then python3 --version; fi
+      - run: if command -v python; then python --version; fi
+      - run: if command -v pip; then pip --version; fi
+      - run: if command -v docker-compose; then docker-compose --version; fi
+      - run: if command -v node; then node --version; fi
+      - run: if command -v npm; then npm --version; fi
+      - run: if command -v ruby; then ruby --version; fi
+      - run: if command -v gem; then gem --version; fi
       - name: "Set up JDK 17"
         uses: actions/setup-java@v4
         with:
           java-version: "17"
           distribution: "corretto"
-      - run: python3 --version
-      - run: if command -v pip; then pip --version; fi
-      - run: if command -v docker-compose; then docker-compose --version; fi
-      - run: if command -v npm; then npm --version; fi
-      - run: java -version
-      - run: mvn -version
+      - run: if command -v java; then java -version; fi
+      - run: if command -v mvn; then mvn -version; fi
