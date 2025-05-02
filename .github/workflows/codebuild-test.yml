@@ -11,6 +11,7 @@ jobs:
           java-version: "17"
           distribution: "corretto"
       - run: python3 --version
-      - run: command -v docker-compose
+      - run: if command -v pip; then pip --version; fi
+      - run: if command -v docker-compose; then docker-compose --version; fi
       - run: java -version
       - run: mvn -version
