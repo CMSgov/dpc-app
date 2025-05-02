@@ -271,19 +271,7 @@ jobs:
           IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
           REGISTRY: ${{ steps.login-ecr-prod.outputs.registry }}
         run: |
-          if [ ${{ matrix.ecr_repository }} == 'api' ] || \
-             [ ${{ matrix.ecr_repository }} == 'attribution' ] || \
-             [ ${{ matrix.ecr_repository }} == 'aggregation' ] || \
-             [ ${{ matrix.ecr_repository }} == 'consent' ]; then
-            echo "tagging java/jib build for $ECR_REPOSITORY"
-            docker tag dpc/dpc-$ECR_REPOSITORY $REGISTRY/dpc-$ECR_REPOSITORY:latest
-            docker tag dpc/dpc-$ECR_REPOSITORY $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-            docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-            docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
-          else
-            echo "tagging rails app build for $ECR_REPOSITORY"
-            docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
-            docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-            docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-            docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
-          fi
+          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
+          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest

@@ -751,7 +751,7 @@
                     <version>3.4.1</version>
                     <configuration>
                         <to>
-                            <image>dpc/${project.artifactId}</image>
+                            <image>${project.artifactId}</image>
                             <tags>
                                 <tag>latest</tag>
                             </tags>

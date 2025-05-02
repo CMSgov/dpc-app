@@ -240,18 +240,7 @@ jobs:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
         run: |
-          if [ ${{ matrix.ecr_repository }} == 'api' ] || \
-             [ ${{ matrix.ecr_repository }} == 'attribution' ] || \
-             [ ${{ matrix.ecr_repository }} == 'aggregation' ] || \
-             [ ${{ matrix.ecr_repository }} == 'consent' ]; then
-            echo "using image with registry as part of name for java app: ${{ matrix.ecr_repository }}"
-            docker tag dpc/dpc-$ECR_REPOSITORY $REGISTRY/dpc-$ECR_REPOSITORY:latest
-            docker tag dpc/dpc-$ECR_REPOSITORY $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-            docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-            docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
-          else
-            docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
-            docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-            docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-            docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
-          fi
+          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
+          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
