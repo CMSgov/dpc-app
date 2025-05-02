@@ -13,5 +13,6 @@ jobs:
       - run: python3 --version
       - run: if command -v pip; then pip --version; fi
       - run: if command -v docker-compose; then docker-compose --version; fi
+      - run: if command -v npm; then npm --version; fi
       - run: java -version
       - run: mvn -version
