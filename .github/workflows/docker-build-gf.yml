@@ -137,13 +137,13 @@ jobs:
 
 
       - name: gzip image (1 of 4) - API
-        run: docker save dpc/dpc-api:latest | gzip > ${{ runner.temp }}/dpc_api_latest.tar.gz
+        run: docker save dpc-api:latest | gzip > ${{ runner.temp }}/dpc_api_latest.tar.gz
       - name: gzip image (2 of 4) - Attribution
-        run: docker save dpc/dpc-attribution:latest | gzip > ${{ runner.temp }}/dpc_attribution_latest.tar.gz
+        run: docker save dpc-attribution:latest | gzip > ${{ runner.temp }}/dpc_attribution_latest.tar.gz
       - name: gzip image (3 of 4) - Aggregation
-        run: docker save dpc/dpc-aggregation:latest | gzip > ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
+        run: docker save dpc-aggregation:latest | gzip > ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
       - name: gzip image (4 of 4) - Consent
-        run: docker save dpc/dpc-consent:latest | gzip > ${{ runner.temp }}/dpc_consent_latest.tar.gz
+        run: docker save dpc-consent:latest | gzip > ${{ runner.temp }}/dpc_consent_latest.tar.gz
 
       - name: upload tar artifact (1 of 4) - API
         uses: actions/upload-artifact@v4
