@@ -9,8 +9,12 @@ jobs:
       - run: if command -v python; then python --version; fi
       - run: if command -v pip; then pip --version; fi
       - run: if command -v docker-compose; then docker-compose --version; fi
-      - run: if command -v node; then node --version; fi
-      - run: if command -v npm; then npm --version; fi
+      - run: |
+          if command -v node; then node --version; fi
+          if command -v npm; then npm --version; fi
+          sudo dnf -y install nodejs
+          node --version
+          npm --version
       - run: if command -v ruby; then ruby --version; fi
       - run: if command -v gem; then gem --version; fi
       - name: "Set up JDK 17"
