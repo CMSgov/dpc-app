@@ -58,18 +58,23 @@ jobs:
       - name: Clean maven
         run: |
           mvn -ntp -U clean
-      - name: set Role ARN based on env (Non-prod Env)
+#      - name: set Role ARN based on env (Non-prod Env)
 #        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
+#        uses: aws-actions/configure-aws-credentials@v4
+#        with:
+#          aws-region: ${{ vars.AWS_REGION }}
+#          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+#      - name: set Role ARN based on env (Prod Env)
+#        if: ${{ inputs.env == 'prod' || inputs.env == 'prod-sbx' }}
+#        uses: aws-actions/configure-aws-credentials@v4
+#        with:
+#          aws-region: ${{ vars.AWS_REGION }}
+#          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+      - name: manually setting dev role (delete me)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
-      - name: set Role ARN based on env (Prod Env)
-        if: ${{ inputs.env == 'prod' || inputs.env == 'prod-sbx' }}
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Fetch admin host
         id: fetch-admin-host
         run: |
