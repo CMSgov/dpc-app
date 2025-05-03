@@ -36,6 +36,7 @@ gem 'lograge'
 gem 'lookbook', '>= 2.2.1' # install lookbook so it can be deployed in lower environments.
 gem 'luhnacy', '~> 0.2.1'
 gem 'macaroons'
+gem 'net-imap', '>= 0.5.8'
 gem 'newrelic_rpm', '~> 8.10'
 gem 'nokogiri', '>= 1.18.3'
 gem 'omniauth_openid_connect'
