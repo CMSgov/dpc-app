@@ -15,7 +15,6 @@ on:
         required: true
         type: 'string'
         default: 'dev'
-  push:
 
 permissions:
   id-token: write
@@ -58,33 +57,22 @@ jobs:
       - name: Clean maven
         run: |
           mvn -ntp -U clean
-#      - name: set Role ARN based on env (Non-prod Env)
-#        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
-#        uses: aws-actions/configure-aws-credentials@v4
-#        with:
-#          aws-region: ${{ vars.AWS_REGION }}
-#          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
-#      - name: set Role ARN based on env (Prod Env)
-#        if: ${{ inputs.env == 'prod' || inputs.env == 'prod-sbx' }}
-#        uses: aws-actions/configure-aws-credentials@v4
-#        with:
-#          aws-region: ${{ vars.AWS_REGION }}
-#          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
-      - name: manually setting dev role (delete me)
+      - name: set Role ARN based on env (Non-prod Env)
+        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-#      - name: Fetch admin host
-#        id: fetch-admin-host
-#        run: |
-#          admin_host=`aws elbv2 describe-load-balancers --names dpc-${{ inputs.env }}-frontend-internal --query="LoadBalancers[0].DNSName" --output text`
-#          echo "admin_host=$admin_host" >> "$GITHUB_OUTPUT"
-#          echo "ELB_URL=http://$admin_host:9900/tasks" >> "$GITHUB_OUTPUT"
-      - name: Fetch admin host for dev only manually (delete me)
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+      - name: set Role ARN based on env (Prod Env)
+        if: ${{ inputs.env == 'prod' || inputs.env == 'prod-sbx' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+      - name: Fetch admin host
         id: fetch-admin-host
         run: |
-          admin_host=`aws elbv2 describe-load-balancers --names dpc-dev-frontend-internal --query="LoadBalancers[0].DNSName" --output text`
+          admin_host=`aws elbv2 describe-load-balancers --names dpc-${{ inputs.env }}-frontend-internal --query="LoadBalancers[0].DNSName" --output text`
           echo "admin_host=$admin_host" >> "$GITHUB_OUTPUT"
           echo "ELB_URL=http://$admin_host:9900/tasks" >> "$GITHUB_OUTPUT"
       - name: Determine host
@@ -115,6 +103,8 @@ jobs:
           else
             make smoke/remote
           fi
+# upon successful execution of smoke tests, uncomment the following code:
+#
 #      - name: Upload bzt logs
 #        if: ${{ failure() && steps.run-smoke-test.outcome == 'failure' }}
 #        uses: actions/upload-artifact@v4
