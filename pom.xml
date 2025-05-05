@@ -42,7 +42,6 @@
         <pgsql.version>42.7.5</pgsql.version>
         <java.version>17</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
-        <jib.ecr.root>755619740999.dkr.ecr.us-east-1.amazonaws.com</jib.ecr.root>
         <timestamp>${maven.build.timestamp}</timestamp>
         <jacoco.version>0.8.12</jacoco.version>
         <jooq.version>3.19.19</jooq.version>
@@ -752,7 +751,7 @@
                     <version>3.4.1</version>
                     <configuration>
                         <to>
-                            <image>${jib.ecr.root}/${project.artifactId}</image>
+                            <image>${project.artifactId}</image>
                             <tags>
                                 <tag>latest</tag>
                             </tags>
