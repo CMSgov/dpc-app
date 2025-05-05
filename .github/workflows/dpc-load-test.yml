@@ -44,6 +44,7 @@ jobs:
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
+          K6_STATSD_ENABLE_TAGS: true
         with:
           params: |
             GOLDEN_MACAROON=/dpc/test/web/golden_macaroon
