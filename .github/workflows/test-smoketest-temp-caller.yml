@@ -5,7 +5,7 @@ on:
 
 jobs:
   temp-caller:
-    uses: cmsgov/dpc-app/.github/workflows/smoke-test-gf.yml@your-branch-name@ls/dpc-4687-smoke-test-gf
+    uses: cmsgov/dpc-app/.github/workflows/smoke-test-gf.yml@ls/dpc-4687-smoke-test-gf
     with:
       env: 'dev'
 
