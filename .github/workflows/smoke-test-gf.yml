@@ -32,20 +32,20 @@ jobs:
       id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
-      - uses: slackapi/slack-github-action@v2.0.0
-        name: Slack Starting
-        with:
-          method: chat.postMessage
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
-          # Sends to dpc-deploys
-          payload: |
-            channel: "CMC1E4AEQ"
-            attachments:
-              - color: warning
-                text: "Smoke test of `${{ inputs.env }}` has started"
-                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
-                mrkdown_in:
-                  - footer
+#      - uses: slackapi/slack-github-action@v2.0.0
+#        name: Slack Starting
+#        with:
+#          method: chat.postMessage
+#          token: ${{ secrets.SLACK_BOT_TOKEN }}
+#          # Sends to dpc-deploys
+#          payload: |
+#            channel: "CMC1E4AEQ"
+#            attachments:
+#              - color: warning
+#                text: "Smoke test of `${{ inputs.env }}` has started"
+#                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
+#                mrkdown_in:
+#                  - footer
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: "Set up JDK 17"
