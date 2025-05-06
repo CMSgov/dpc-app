@@ -27,7 +27,7 @@ concurrency:
 jobs:
   smoke-test:
     name: Smoke Test
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: self-hosted
     steps:
       - uses: slackapi/slack-github-action@v2.0.0
         name: Slack Starting
@@ -68,7 +68,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
       - name: Fetch admin host
         id: fetch-admin-host
         run: |
@@ -78,14 +78,20 @@ jobs:
       - name: Determine host
         id: determine-host
         run: |
-          HOST="http://${{ steps.fetch-admin-host.outputs.admin_host }}"
+          if [ "${{ inputs.env }}" = 'prod' ]; then
+            HOST="http://${{ steps.fetch-admin-host.outputs.admin_host }}"
+          elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
+            HOST="https://sandbox.dpc.cms.gov"
+          else
+            HOST="https://${{ inputs.env }}.dpc.cms.gov"
+          fi
           echo "HOST=$HOST" >> "$GITHUB_OUTPUT"
           echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
       - name: Run Smoke Test
         id: run-smoke-test
         env:
           ELB_URL: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
-          HOST_URL: "https://dpc-dev-1-2109181523.us-east-1.elb.amazonaws.com"
+          HOST_URL: ${{ steps.determine-host.outputs.HOST_URL }}
           PORTAL_HOST: ${{ steps.determine-host.outputs.HOST }}
           WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
           WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}

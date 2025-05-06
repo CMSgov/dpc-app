@@ -7,6 +7,7 @@ on:
       ecr_image_tag:
         description: "Tag for associated docker images"
         value: ${{ jobs.generate_docker_tag.outputs.docker_tag }}
+
 permissions:
   id-token: write
   contents: read
@@ -70,15 +71,6 @@ jobs:
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
 
-      - name: Install python3
-        run: sudo dnf install python3
-
-      - name: Install docker compose manually
-        run: |
-          sudo mkdir -p /usr/local/lib/docker/cli-plugins
-          sudo curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
-          sudo chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
-          sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
       - name: Build specified app
         run: ${{ matrix.make_command }}
 
@@ -97,12 +89,8 @@ jobs:
       id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
-      - name: Install docker compose manually
-        run: |
-          sudo mkdir -p /usr/local/lib/docker/cli-plugins
-          sudo curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
-          sudo chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
-          sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+      - name: "Set up Ansible"
+        run: pip install ansible
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
@@ -110,20 +98,11 @@ jobs:
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: "Set up JDK 17"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: "17"
           distribution: "corretto"
           cache: maven
-      - name: Install Maven 3.6.3
-        run: |
-          export PATH="$PATH:/opt/maven/bin"
-          echo "PATH=$PATH" >> $GITHUB_ENV
-          if mvn -v; then echo "Maven already installed" && exit 0; else echo "Installing Maven"; fi
-          tmpdir="$(mktemp -d)"
-          curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
-          sudo rm -rf /opt/maven
-          sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
       - name: Clean maven
         run: mvn -ntp -U clean
 
@@ -131,8 +110,7 @@ jobs:
         id: api-build
         run: |
           export PATH=$PATH:~/.local/bin
-          make docker-base
-          make api
+          make ci-app
       # add extra commands to log docker containers during failure
       - name: Consent Logs
         if: ${{ failure() && steps.api-build.outcome == 'failure' }}
@@ -148,10 +126,6 @@ jobs:
         run: docker logs start-v1-app-api-1
 
 
-      - name: list docker images
-        run: docker image ls  # anticipate this will include legacy id and need updating!
-
-      # should fail
       - name: gzip image (1 of 4) - API
         run: docker save dpc-api:latest | gzip > ${{ runner.temp }}/dpc_api_latest.tar.gz
       - name: gzip image (2 of 4) - Attribution
@@ -210,9 +184,9 @@ jobs:
       #   _______                         __________                   .___
       #   \      \   ____   ____          \______   \_______  ____   __| _/
       #   /   |   \ /  _ \ /    \   ______ |     ___/\_  __ \/  _ \ / __ |
-      #   /    |    (  <_> )   |  \ /_____/ |    |     |  | \(  <_> ) /_/ |
-      #   \____|__  /\____/|___|  /         |____|     |__|   \____/\____ |
-      #   \/            \/                                       \/
+      #  /    |    (  <_> )   |  \ /_____/ |    |     |  | \(  <_> ) /_/ |
+      #  \____|__  /\____/|___|  /         |____|     |__|   \____/\____ |
+      #          \/            \/                                       \/
       - name: Configure non-prod AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -226,7 +200,30 @@ jobs:
           IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
           REGISTRY: ${{ steps.login-ecr-non-prod.outputs.registry }}
         run: |
-            echo "tagging app build for $ECR_REPOSITORY"
-            docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
-            docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-            docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
+          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
+      #  __________                   .___             __  .__
+      #  \______   \_______  ____   __| _/_ __   _____/  |_|__| ____   ____
+      #   |     ___/\_  __ \/  _ \ / __ |  |  \_/ ___\   __\  |/  _ \ /    \
+      #   |    |     |  | \(  <_> ) /_/ |  |  /\  \___|  | |  (  <_> )   |  \
+      #   |____|     |__|   \____/\____ |____/  \___  >__| |__|\____/|___|  /
+      #                                \/           \/                    \/
+      - name: Configure prod AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-github-actions
+      - name: Login to Amazon ECR (prod)
+        id: login-ecr-prod
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Push image to registries for prod aws account
+        env:
+          IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
+          REGISTRY: ${{ steps.login-ecr-prod.outputs.registry }}
+        run: |
+          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
+          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
