@@ -15,6 +15,7 @@ on:
         required: true
         type: 'string'
         default: 'dev'
+  push:
 
 permissions:
   id-token: write
@@ -63,7 +64,7 @@ jobs:
           echo "environment: ${{ inputs.env }}"
 
       - name: set Role ARN based on env (Non-prod Env)
-        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
+#        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
