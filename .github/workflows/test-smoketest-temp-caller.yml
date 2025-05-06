@@ -8,4 +8,3 @@ jobs:
     uses: cmsgov/dpc-app/.github/workflows/smoke-test-gf.yml@ls/dpc-4687-smoke-test-gf
     with:
       env: 'dev'
-
