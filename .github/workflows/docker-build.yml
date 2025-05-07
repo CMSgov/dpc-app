@@ -172,7 +172,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: gzip image (1 of 4) - API
-        run: docker save ${{ steps.login-ecr.outputs.registry }}/dpc-api:latest | gzip > ${{ runner.temp }}/dpc_api_latest.tar.gz
+        run: docker save dpc-api:latest | gzip > ${{ runner.temp }}/dpc_api_latest.tar.gz
       - name: upload tar artifact (1 of 4) - API
         uses: actions/upload-artifact@v4
         with:
@@ -181,7 +181,7 @@ jobs:
           retention-days: 1
 
       - name: gzip image (2 of 4) - Attribution
-        run: docker save ${{ steps.login-ecr.outputs.registry }}/dpc-attribution:latest | gzip > ${{ runner.temp }}/dpc_attribution_latest.tar.gz
+        run: docker save dpc-attribution:latest | gzip > ${{ runner.temp }}/dpc_attribution_latest.tar.gz
       - name: upload tar artifact (2 of 4) - Attribution
         uses: actions/upload-artifact@v4
         with:
@@ -190,7 +190,7 @@ jobs:
           retention-days: 1
 
       - name: gzip image (3 of 4) - Aggregation
-        run: docker save ${{ steps.login-ecr.outputs.registry }}/dpc-aggregation:latest | gzip > ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
+        run: docker save dpc-aggregation:latest | gzip > ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
       - name: upload tar artifact (3 of 4) - Aggregation
         uses: actions/upload-artifact@v4
         with:
