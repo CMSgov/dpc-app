@@ -153,7 +153,7 @@ jobs:
       - name: Apply persistent plan
         run: |
           cd dpc-ops/terraform/gf-${{ inputs.env }}/persistent
-          terraform apply dpc-release-${{ inputs.env }}-gf.tfplan
+          terraform apply dpc-release-gf-${{ inputs.env }}.tfplan
       - name: Verify main environment plan
         run: |
           cd dpc-ops/terraform/gf-${{ inputs.env }}
