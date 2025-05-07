@@ -19,7 +19,7 @@ jobs:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
           params: |
-            NEW_RELIC_API_KEY=/dpc/${{ inputs.env }}/newrelic/new_relic_user_key
+            NEW_RELIC_API_KEY=/dpc/dev/newrelic/new_relic_user_key
       - run: if command -v python3; then python3 --version; fi
       - run: if command -v python; then python --version; fi
       - run: if command -v pip; then pip --version; fi
