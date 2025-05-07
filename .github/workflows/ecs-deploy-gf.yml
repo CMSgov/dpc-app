@@ -159,13 +159,7 @@ jobs:
           cd dpc-ops/terraform/gf-${{ inputs.env }}
           terraform init
           terraform plan -var 'release_version=${{ inputs.app-version}}' \
-                         -var 'aggregation_image_tag=${{ steps.image-tag.outputs.image_tag }}' \
-                         -var 'api_image_tag=${{ steps.image-tag.outputs.image_tag }}' \
-                         -var 'attribution_image_tag=${{ steps.image-tag.outputs.image_tag }}' \
-                         -var 'consent_image_tag=${{ steps.image-tag.outputs.image_tag }}' \
-                         -var 'web_admin_image_tag=${{ steps.image-tag.outputs.image_tag }}' \
-                         -var 'web_portal_image_tag=${{ steps.image-tag.outputs.image_tag }}' \
-                         -var 'web_image_tag=${{ steps.image-tag.outputs.image_tag }}' \
+                         -var 'image_tag=${{ steps.image-tag.outputs.image_tag }}' \
                          -out dpc-release-gf-${{ inputs.env }}.tfplan
       - name: Apply main environment plan
         run: |
