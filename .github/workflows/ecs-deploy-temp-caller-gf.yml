@@ -1,0 +1,31 @@
+name: 'temporary caller workflow for ECS Deploy (Greenfield)'
+
+on:
+  push:
+
+concurrency:
+  group: deploy-to-${{ inputs.env }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  call_workflow:
+#    name: just a name dude
+#    permissions:
+#      contents: read
+#      id-token: write
+#    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+#    container:
+#      image: alpine:latest
+#    steps:
+#      - name: call the workflow
+    uses: cmsgov/dpc-app/.github/workflows/ecs-deploy-gf.yml@ls/dpc-4688-gf-nonprod-deploy
+    with:
+      env: 'dev'
+      confirm_env: 'dev'
+      ecr_image_tag: 'latest'
+      ops-ref: 'main'
+    secrets: inherit
