@@ -1,10 +1,25 @@
 name: Hello World
 on: [push]
+permissions:
+  id-token: write
+  contents: read
 jobs:
   evaluate-available-software:
     runs-on:
       - codebuild-dpc-app-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
+      - name: AWS Credentials (non-prod)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Set env vars from AWS params
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            NEW_RELIC_API_KEY=/dpc/${{ inputs.env }}/newrelic/new_relic_user_key
       - run: if command -v python3; then python3 --version; fi
       - run: if command -v python; then python --version; fi
       - run: if command -v pip; then pip --version; fi
