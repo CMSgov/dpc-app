@@ -50,12 +50,13 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
 
+#            s3://dpc-$LABEL-function/function-${{ github.sha }}.zip
       - name: Upload and reload
         env:
           LABEL: ${{ inputs.env }}-${{ inputs.project }}
         run: |
           aws s3 cp --no-progress function.zip \
-            s3://dpc-$LABEL-function/function-${{ github.sha }}.zip
+            s3://dpc-$LABEL-function/function-${{ github.sha }}.zip --sse=aws:kms
           aws lambda update-function-code --function-name dpc-$LABEL \
             --s3-bucket dpc-$LABEL-function --s3-key function-${{ github.sha }}.zip
 
