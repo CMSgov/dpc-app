@@ -1,4 +1,4 @@
-name: 'Test File for calling Smoke Test on remote branch'
+name: 'Test File for deploying lambdas (Greenfield)'
 
 on:
   push:

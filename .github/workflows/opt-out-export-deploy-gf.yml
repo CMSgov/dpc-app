@@ -1,4 +1,4 @@
-name: Opt-Out-Export Deploy
+name: Opt-Out-Export Deploy (Greenfield)
 
 on:
   workflow_call:
