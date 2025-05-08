@@ -1,0 +1,25 @@
+name: 'Test File for calling Smoke Test on remote branch'
+
+on:
+  push:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  call_workflow_deploy_opt_export:
+    uses: cmsgov/dpc-app/.github/workflows/opt-out-export-deploy-gf.yml@ls/task-dpc-4699-migrate-lambdas-workflow
+    with:
+      env: 'dev'
+    secrets: inherit
+  call_workflow_deploy_opt_out_import:
+    uses: cmsgov/dpc-app/.github/workflows/opt-out-import-deploy-gf.yml@ls/task-dpc-4699-migrate-lambdas-workflow
+    with:
+      env: 'dev'
+    secrets: inherit
+  call_workflow_deploy_waf_sync:
+    uses: cmsgov/dpc-app/.github/workflows/api-waf-sync-deploy-gf.yml@ls/task-dpc-4699-migrate-lambdas-workflow
+    with:
+      env: 'dev'
+    secrets: inherit

@@ -1,0 +1,36 @@
+name: Opt-Out-Export Deploy
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: string
+        default: "dev"
+
+  workflow_dispatch:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: string
+        default: "dev"
+
+  push:
+    branches:
+      - main
+    paths:
+      - lambda/opt-out-export/**
+      - .github/workflows/opt-out-export-deploy.yml
+      - .github/workflows/deploy_go_lambda_gf.yml
+
+jobs:
+  deploy:
+    name: 'Deploy Opt Out Export'
+    uses: ./.github/workflows/deploy_go_lambda_gf.yml
+    with:
+      env: ${{ inputs.env || 'dev' }}
+      project: opt-out-export
+      go_files: "main.go db.go"
+    secrets: inherit

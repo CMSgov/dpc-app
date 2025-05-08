@@ -1,0 +1,36 @@
+name: Api-Waf-Sync Deploy (Greenfield)
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: string
+        default: "dev"
+
+  workflow_dispatch:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: string
+        default: "dev"
+
+  push:
+    branches:
+      - main
+    paths:
+      - lambda/api-waf-sync/**
+      - .github/workflows/api-waf-sync-deploy.yml
+      - .github/workflows/deploy_go_lambda_gf.yml
+
+jobs:
+  deploy:
+    name: 'Deploy API WAF sync'
+    uses: ./.github/workflows/deploy_go_lambda_gf.yml
+    with:
+      env: dev # ${{ inputs.env || 'dev' }} currently only available on dev
+      project: api-waf-sync
+      go_files: "main.go db.go aws.go"
+    secrets: inherit
