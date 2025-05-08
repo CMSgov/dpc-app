@@ -33,4 +33,5 @@ jobs:
       env: ${{ inputs.env || 'dev' }}
       project: opt-out-export
       go_files: "main.go db.go"
+      s3_lookup_key: "/dpc/dev/dpc-dev-opt-out-export-bucket"
     secrets: inherit
