@@ -33,5 +33,5 @@ jobs:
       env: dev # ${{ inputs.env || 'dev' }} currently only available on dev
       project: api-waf-sync
       go_files: "main.go db.go aws.go"
-      s3_lookup_key: "/dpc/dev/dpc-dev-api-waf-sync-bucket"
+#      s3_lookup_key: "/dpc/dev/dpc-dev-api-waf-sync-bucket"
     secrets: inherit

@@ -33,5 +33,5 @@ jobs:
       env: ${{ inputs.env || 'dev' }}
       project: opt-out-import
       go_files: "main.go parsers.go utils.go models.go db.go"
-      s3_lookup_key: "/dpc/dev/dpc-dev-opt-out-import-bucket"
+#      s3_lookup_key: "/dpc/dev/dpc-dev-opt-out-import-bucket"
     secrets: inherit
