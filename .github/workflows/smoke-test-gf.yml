@@ -89,6 +89,9 @@ jobs:
           fi
           echo "HOST=$HOST" >> "$GITHUB_OUTPUT"
           echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
+      - name: Echo host
+        run: |
+          echo "using this host for testing: ${{ steps.fetch-admin-host.outputs.ELB_URL }}"
       - name: Run Smoke Test
         id: run-smoke-test
         env:
