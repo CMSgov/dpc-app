@@ -52,7 +52,7 @@ jobs:
 
 
   verify-bucket:
-    if: ${{ always() && needs.trigger.result == 'success' }}
+#    if: ${{ always() && needs.trigger.result == 'success' }}
     needs: trigger
     permissions:
       contents: read
@@ -77,8 +77,8 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           # Note that we use the BFD role with access to the bucket
           role-to-assume: ${{ steps.retrieve_bfd_bucket_role.outputs.bfd_bucket_role }}
-          role-chaining: true
-          role-skip-session-tagging: true
+          # role-chaining: true
+          # role-skip-session-tagging: true
       - name: Verify confirmation file put in bucket
         env:
           STARTTIME: ${{needs.trigger.outputs.start_time}}
