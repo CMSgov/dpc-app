@@ -1,0 +1,15 @@
+name: 'Test File for calling Smoke Test on remote branch'
+
+on:
+  push:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  call_workflow:
+    uses: cmsgov/dpc-app/.github/workflows/smoke-test-gf.yml@ls/dpc-4687-smoke-test-gf
+    with:
+      env: 'dev'
+    secrets: inherit
