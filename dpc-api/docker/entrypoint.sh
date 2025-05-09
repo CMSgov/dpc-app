@@ -7,7 +7,8 @@ bootstrap_config() {
   mkdir -p /config
 
   # Sync the aws bucket
-  aws s3 sync s3://dpc-$ENV-app-config/ config/
+  bucket=$(aws ssm get-parameter --name /dpc/"$ENV"/config_bucket --query Parameter.Value --output text)
+  aws s3 sync "s3://$bucket" config/
 }
 
 if [ -n "$JACOCO" ]; then
