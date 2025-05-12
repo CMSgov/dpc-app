@@ -7,12 +7,9 @@ RSpec.describe DpcPortalUtils do
   it 'should return localhost' do
     expect(my_protocol_host).to eq 'http://localhost:3100'
   end
-  it 'should return sandbox.dpc.cms.gov if prod-sbx' do
-    expect(ENV).to receive(:fetch).with('ENV', nil).and_return('prod-sbx')
-    expect(my_protocol_host).to eq 'https://sandbox.dpc.cms.gov'
-  end
-  it 'should return {env}.dpc.cms.gov unless prod-sbx' do
-    expect(ENV).to receive(:fetch).with('ENV', nil).and_return('fake_env')
-    expect(my_protocol_host).to eq 'https://fake_env.dpc.cms.gov'
+  it 'should fetch HOST_NAME from env if not local' do
+    expect(ENV).to receive(:fetch).with('ENV', nil).and_return('dev')
+    expect(ENV).to receive(:fetch).with('HOST_NAME', nil).and_return('dev.dpc.cms.gov')
+    expect(my_protocol_host).to eq 'https://dev.dpc.cms.gov'
   end
 end
