@@ -1,12 +1,12 @@
 name: Opt-Out-Export Integration Tests (Greenfield)
 
 on:
-#  pull_request:
-#    paths:
-#      - .github/workflows/opt-out-export-test-integration.yml
-#      - .github/workflows/opt-out-export-deploy.yml
-#      - .github/workflows/deploy_go_lambda.yml
-#      - lambda/opt-out-export/**
+  pull_request:
+    paths:
+      - .github/workflows/opt-out-export-test-integration.yml
+      - .github/workflows/opt-out-export-deploy.yml
+      - .github/workflows/deploy_go_lambda.yml
+      - lambda/opt-out-export/**
   workflow_dispatch:
   workflow_call:
 
@@ -16,16 +16,16 @@ concurrency:
 
 jobs:
   # Deploy first if triggered by pull_request
-#  deploy:
-#    if: ${{ github.event_name == 'pull_request' }}
-#    uses: ./.github/workflows/opt-out-export-deploy.yml
-#    with:
-#      env: dev
-#    secrets: inherit
+  deploy:
+    if: ${{ github.event_name == 'pull_request' }}
+    uses: ./.github/workflows/opt-out-export-deploy-gf.yml
+    with:
+      env: dev
+    secrets: inherit
 
   trigger:
-#    if: ${{ always() }}
-#    needs: deploy
+    if: ${{ always() }}
+    needs: deploy
     permissions:
       contents: read
       id-token: write
@@ -51,7 +51,7 @@ jobs:
           aws lambda invoke --function-name dpc-dev-opt-out-export test-result.txt
 
   verify-bucket:
-#    if: ${{ always() && needs.trigger.result == 'success' }}
+    if: ${{ always() && needs.trigger.result == 'success' }}
     needs: trigger
     permissions:
       contents: read
