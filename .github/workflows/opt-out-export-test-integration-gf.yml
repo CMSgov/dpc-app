@@ -64,21 +64,17 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-opt-out-import-function
       - name: retrieve bfd bucket role
-        id: retrieve_bfd_bucket_role
-        run: |
-          BFD_BUCKET_ROLE_LOOKUP_KEY=/opt-out-import/dpc/dev/bfd-bucket-role-arn
-          bfd_bucket_role=$(aws ssm get-parameter --name "$BFD_BUCKET_ROLE_LOOKUP_KEY" --with-decryption --query "Parameter.Value" --output text)
-          echo "bfd_bucket_role=$LAMBDA_BUCKET_NAME" >> "$GITHUB_OUTPUT"
-
-      #          /opt-out-import/dpc/${{ inputs.env }}/bfd-bucket-role-arn
-#               role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/bfd-test-eft-dpc-bucket-role
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            BFD_BUCKET_ROLE=/opt-out-import/dpc/${{ inputs.env }}/bfd-bucket-role-arn
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          # Note that we use the BFD role with access to the bucket
-          role-to-assume: ${{ steps.retrieve_bfd_bucket_role.outputs.bfd_bucket_role }}
-          # role-chaining: true
-          # role-skip-session-tagging: true
+          role-to-assume: ${{ env.BFD_BUCKET_ROLE }}
+          role-chaining: true
       - name: Verify confirmation file put in bucket
         env:
           STARTTIME: ${{needs.trigger.outputs.start_time}}
