@@ -25,4 +25,6 @@ jobs:
 #    secrets: inherit
   call_workflow_opt_out_export_integration_test:
     uses: cmsgov/dpc-app/.github/workflows/opt-out-export-test-integration-gf.yml@ls/task-dpc-4699-migrate-lambdas-workflow
+    with:
+      env: 'dev'
     secrets: inherit
