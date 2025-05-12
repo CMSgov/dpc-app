@@ -30,8 +30,7 @@ jobs:
     name: 'Deploy API WAF sync'
     uses: ./.github/workflows/deploy_go_lambda_gf.yml
     with:
-      env: dev # ${{ inputs.env || 'dev' }} currently only available on dev
+      env: ${{ inputs.env || 'dev' }}
       project: api-waf-sync
       go_files: "main.go db.go aws.go"
-#      s3_lookup_key: "/dpc/dev/dpc-dev-api-waf-sync-bucket"
     secrets: inherit
