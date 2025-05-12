@@ -50,7 +50,6 @@ jobs:
           echo "STARTTIME=`date +%s`" >> "$GITHUB_OUTPUT"
           aws lambda invoke --function-name dpc-dev-opt-out-export test-result.txt
 
-
   verify-bucket:
 #    if: ${{ always() && needs.trigger.result == 'success' }}
     needs: trigger
