@@ -59,10 +59,6 @@ jobs:
       id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-opt-out-import-function
       - name: retrieve bfd bucket role
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
@@ -74,8 +70,13 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-opt-out-import-function
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ env.BFD_BUCKET_ROLE }}
           role-chaining: true
+          role-skip-session-tagging: true
       - name: Verify confirmation file put in bucket
         env:
           STARTTIME: ${{needs.trigger.outputs.start_time}}
