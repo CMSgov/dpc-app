@@ -6,10 +6,8 @@ module DpcPortalUtils
     env = ENV.fetch('ENV', nil)
     case env
     when 'local'
-      puts 'in local'
       'http://localhost:3100'
     else
-      puts 'in else'
       host_name = ENV.fetch('HOST_NAME', nil)
       Rails.logger.error 'HOST_NAME is not set by env' if host_name.nil?
       "https://#{host_name}"
