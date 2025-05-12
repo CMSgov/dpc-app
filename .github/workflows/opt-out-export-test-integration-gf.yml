@@ -68,8 +68,9 @@ jobs:
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
+          #TODO Consider parameterizing the `dev` env with an input
           params: |
-            BFD_BUCKET_ROLE=/opt-out-import/dpc/${{ inputs.env }}/bfd-bucket-role-arn
+            BFD_BUCKET_ROLE=/opt-out-import/dpc/dev/bfd-bucket-role-arn
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
