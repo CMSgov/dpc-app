@@ -8,7 +8,19 @@ on:
       - .github/workflows/deploy_go_lambda.yml
       - lambda/opt-out-export/**
   workflow_dispatch:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: 'string'
+        default: 'dev'
   workflow_call:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: 'string'
+        default: 'dev'
 
 # Ensure we have only one integration test running at a time
 concurrency:
@@ -40,10 +52,18 @@ jobs:
         with:
           sparse-checkout: |
             lambda/opt-out-export
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure non-prod AWS Credentials
+        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Configure prod AWS Credentials
+        if: ${{ inputs.env == 'prod-sbx' || inputs.env == 'prod' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-github-actions
       - name: Send event to trigger export lambda function
         id: invoke-lambda
         run: |
@@ -58,23 +78,41 @@ jobs:
       id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure GHA non-prod AWS Credentials
+        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Configure GHA prod AWS Credentials
+        if: ${{ inputs.env == 'prod-sbx' || inputs.env == 'prod' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-github-actions
       - name: retrieve bfd bucket role
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
-          #TODO Consider parameterizing the `dev` env with an input
           params: |
-            BFD_BUCKET_ROLE=/opt-out-import/dpc/dev/bfd-bucket-role-arn
-      - uses: aws-actions/configure-aws-credentials@v4
+            BFD_BUCKET_ROLE=/opt-out-import/dpc/${{ inputs.env || 'dev' }}/bfd-bucket-role-arn
+
+      - name: Configure import lambda non-prod AWS Credentials
+        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-opt-out-import-function
-      - uses: aws-actions/configure-aws-credentials@v4
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${ inputs.env || 'dev' }-opt-out-import-function
+      - name: Configure import lambda non-prod AWS Credentials
+        if: ${{ inputs.env == 'prod-sbx' || inputs.env == 'prod' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${ inputs.env }-opt-out-import-function
+
+      - name: Configure BFD bucket credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ env.BFD_BUCKET_ROLE }}
