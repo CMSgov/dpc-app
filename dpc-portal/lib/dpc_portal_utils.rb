@@ -9,9 +9,7 @@ module DpcPortalUtils
       'http://localhost:3100'
     else
       host_name = ENV.fetch('HOST_NAME', nil)
-      if host_name == nil
-        Rails.logger.error "HOST_NAME is not set by env"
-      end
+      Rails.logger.error 'HOST_NAME is not set by env' if host_name.nil?
       host_name
     end
   end
