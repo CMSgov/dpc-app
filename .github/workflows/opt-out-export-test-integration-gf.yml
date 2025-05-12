@@ -102,9 +102,8 @@ jobs:
           params: |
             BFD_BUCKET_ROLE=/opt-out-import/dpc/${{ inputs.env || 'dev' }}/bfd-bucket-role-arn
 
-      # if: ${{ github.event_name == 'pull_request' || inputs.env == 'dev' || inputs.env == 'test' }}
-      #   role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${ inputs.env || 'dev' }-opt-out-import-function
       - name: Configure import lambda non-prod AWS Credentials
+        if: ${{ github.event_name == 'pull_request' || inputs.env == 'dev' || inputs.env == 'test' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
@@ -114,7 +113,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${ inputs.env }-opt-out-import-function
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-opt-out-import-function
 
       - name: Configure BFD bucket credentials
         uses: aws-actions/configure-aws-credentials@v4
