@@ -199,7 +199,7 @@ jobs:
           retention-days: 1
 
       - name: gzip image (4 of 4) - Consent
-        run: docker save ${{ steps.login-ecr.outputs.registry }}/dpc-consent:latest | gzip > ${{ runner.temp }}/dpc_consent_latest.tar.gz
+        run: docker save dpc-consent:latest | gzip > ${{ runner.temp }}/dpc_consent_latest.tar.gz
       - name: upload tar artifact (4 of 4) - Consent
         uses: actions/upload-artifact@v4
         with:

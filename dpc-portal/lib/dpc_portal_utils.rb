@@ -7,10 +7,10 @@ module DpcPortalUtils
     case env
     when 'local'
       'http://localhost:3100'
-    when 'prod-sbx'
-      'https://sandbox.dpc.cms.gov'
     else
-      "https://#{env}.dpc.cms.gov"
+      host_name = ENV.fetch('HOST_NAME', nil)
+      Rails.logger.error 'HOST_NAME is not set by env' if host_name.nil?
+      "https://#{host_name}"
     end
   end
 end
