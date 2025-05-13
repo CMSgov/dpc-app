@@ -50,11 +50,12 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
 
       - name: retrieve s3 bucket
-        id: retrieve_s3_bucket
-        run: |
-          S3_LOOKUP_KEY="/dpc/${{ inputs.env }}/dpc-${{ inputs.env }}-${{ inputs.project }}-bucket"
-          LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name "$S3_LOOKUP_KEY" --with-decryption --query "Parameter.Value" --output text)
-          echo "lambda_bucket_name=$LAMBDA_BUCKET_NAME" >> "$GITHUB_OUTPUT"
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            LAMBDA_BUCKET_NAME=/dpc/${{ inputs.env }}/dpc-${{ inputs.env }}-${{ inputs.project }}-bucket
 
       - name: Upload and reload
         env:
