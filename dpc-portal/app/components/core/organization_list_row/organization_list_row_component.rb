@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module Core
-  module Card
+  module OrganizationListRow
     # Render a USWDS-styled card for an organization.
-    class OrganizationCardComponent < ViewComponent::Base
+    class OrganizationListRowComponent < ViewComponent::Base
       include OrganizationUtils
       with_collection_parameter :link
 

@@ -96,8 +96,8 @@ public class SeedProcessor {
         // Add the Organization ID
         FHIRBuilders.addOrganizationTag(practitioner, organizationID);
 
-        bundle.addEntry().setResource(practitioner).setFullUrl("http://something.gov/" + practitioner.getIdentifierFirstRep().getValue());
-
+        // Generate bundle entries
+        List<Bundle.BundleEntryComponent> componentList = new ArrayList<>();
         entry.getValue()
                 .forEach(value -> {
                     // Add some random values to the patient
@@ -110,8 +110,19 @@ public class SeedProcessor {
                     final Bundle.BundleEntryComponent component = new Bundle.BundleEntryComponent();
                     component.setResource(patient);
                     component.setFullUrl("http://something.gov/" + patient.getIdentifierFirstRep().getValue());
-                    bundle.addEntry(component);
+                    componentList.add(component);
                 });
+
+        // Sort patients by ID to avoid test errors
+        componentList.sort(Comparator.comparing(component ->
+                ((Patient) component.getResource()).getIdentifierFirstRep().getValue()
+        ));
+        Bundle.BundleEntryComponent practitionerComponent = new Bundle.BundleEntryComponent()
+                .setResource(practitioner)
+                .setFullUrl("http://something.gov/" + practitioner.getIdentifierFirstRep().getValue());
+        componentList.add(0, practitionerComponent);
+        bundle.setEntry(componentList);
+
         return bundle;
     }
 

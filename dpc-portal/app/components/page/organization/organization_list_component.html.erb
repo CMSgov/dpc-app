@@ -1,16 +1,31 @@
 <div>
-<% if ao? %>
-  <h1>Welcome to the DPC Portal</h1>
-  <p>As an Authorized Official (AO), use this portal to manage access to Medicare claims data through the Data at the Point of Care (DPC) application programming interface (API)</p>
-  <div class="display-flex flex-row flex-justify">
-    <div class="flex-align-self-center">
-      <h2 class="margin-bottom-0">My organizations</h2>
-    </div>
+<h1>Welcome to the DPC Portal</h1>
+<p>Use this portal to manage your organization's access to Data at the Point of Care (DPC). Depending on your role, you can register your organization, sign terms of service, and complete API configuration.</p>
+<div class="display-flex flex-row flex-justify">
+  <div class="flex-align-self-center">
+    <h2 class="margin-bottom-0">My organizations</h2>
   </div>
-  <p>These are organizations for which you serve as an AO. Organizations cannot access Medicare claims data without an AO agreement to follow terms of service.</p>
+</div>
+<p>You’re designated as an Authorized Official (AO) and/or Credential Delegate (CD) of the following organizations. An AO is accountable for organization-level access to the API. The AO can can assign a CD to complete configuration steps on their behalf.</p>
+
+<% if @links.present? %>
+  <table class="usa-table usa-table--borderless organizations-list table-bg-transparent" style="table-layout: fixed; width: 100%;">
+    <caption class="usa-sr-only">
+      Organizations you manage as the AO or CD
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col" style="width: 50%;">Organization Name</th>
+        <th scope="col" style="width: 16.67%;">NPI-2</th>
+        <th scope="col" style="width: 8.33%;">Role</th>
+        <th scope="col" style="width: 25%;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= render Core::OrganizationListRow::OrganizationListRowComponent.with_collection(@links)%>
+    </tbody>
+  </table>
+<% else %>
+  <p>You don't have any organizations to show.</p>
 <% end %>
-<ul class="usa-card-group">
-   <%= render Core::Card::OrganizationCardComponent.with_collection(@links)%>
-</ul>
-<%=raw "<p>You don't have any organizations to show.</p>" if @links.blank? %>
 </div>

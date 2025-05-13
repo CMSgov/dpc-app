@@ -17,6 +17,7 @@ import org.slf4j.MDC;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -108,16 +109,7 @@ public class AggregationEngine implements Runnable {
                 .retry()
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .doOnDispose(() -> {
-                    MDC.remove(MDCConstants.JOB_ID);
-                    MDC.remove(MDCConstants.JOB_BATCH_ID);
-                    MDC.remove(MDCConstants.ORGANIZATION_ID);
-                    MDC.remove(MDCConstants.PROVIDER_NPI);
-                    MDC.remove(MDCConstants.IS_SMOKE_TEST_ORG);
-                    MDC.remove(MDCConstants.IS_BULK);
-
-
-                })
+                .doOnDispose(this::resetMDC)
                 .subscribe(
                         this::processJobBatch,
                         this::onError,
@@ -128,11 +120,13 @@ public class AggregationEngine implements Runnable {
     protected void onError(Throwable error) {
         logger.error("Error processing queue. Exiting...", error);
         queueRunning.set(false);
+        resetMDC();
     }
 
     protected void onCompleted() {
         logger.info("Finished processing queue. Exiting...");
         queueRunning.set(false);
+        resetMDC();
     }
 
     /**
@@ -172,9 +166,6 @@ public class AggregationEngine implements Runnable {
                 nextPatientID = processPatient(job, patientId);
             }
 
-            //Clear last patient seen from MDC
-            MDC.remove(MDCConstants.PATIENT_ID);
-            MDC.remove(MDCConstants.PATIENT_FHIR_ID);
             // Finish processing the batch
             if (this.isRunning()) {
                 final String jobTime = SplunkTimestamp.getSplunkTimestamp();
@@ -195,6 +186,9 @@ public class AggregationEngine implements Runnable {
                 logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 5 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);
             }
         }
+
+        // Clear the MDC before the next batch
+        resetMDC();
     }
 
     private Optional<String> processPatient(JobQueueBatch job, String patientId) {
@@ -270,5 +264,14 @@ public class AggregationEngine implements Runnable {
 
     protected void setSubscribe(Disposable subscribe) {
         this.subscribe = subscribe;
+    }
+
+    /**
+     * Used to reset the {@link MDC} after each batch is processed.
+     */
+    private void resetMDC() {
+        // Empty out the existing MDC and put the aggregator ID back
+        MDC.setContextMap(Collections.emptyMap());
+        MDC.put(MDCConstants.AGGREGATOR_ID, this.aggregatorID.toString());
     }
 }

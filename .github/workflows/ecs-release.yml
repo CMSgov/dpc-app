@@ -9,6 +9,7 @@ on:
     paths:
       - dpc-**
       - engines/**
+      - .github/workflows/**
 
   workflow_dispatch:
     inputs:
