@@ -62,6 +62,6 @@ jobs:
           LABEL: ${{ inputs.env }}-${{ inputs.project }}
         run: |
           aws s3 cp --no-progress function.zip \
-            s3://${{ steps.retrieve_s3_bucket.outputs.lambda_bucket_name }}/function.zip
-          aws lambda update-function-code --function-name dpc-$LABEL \
-            --s3-bucket ${{ steps.retrieve_s3_bucket.outputs.lambda_bucket_name }} --s3-key function.zip
+          "s3://${LAMBDA_BUCKET_NAME}/function.zip"
+          aws lambda update-function-code --function-name "dpc-${LABEL}" \
+          --s3-bucket "$LAMBDA_BUCKET_NAME" --s3-key function.zip
