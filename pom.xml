@@ -47,7 +47,7 @@
         <jooq.version>3.19.19</jooq.version>
         <bouncey.version>1.80</bouncey.version>
         <pitest.version>1.5.1</pitest.version>
-        <newrelic.agent.version>8.19.0</newrelic.agent.version>
+        <newrelic.agent.version>8.20.0</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
         <h2.version>2.3.232</h2.version>
         <sonar.coverage.exclusions>**/MockBlueButton*.java</sonar.coverage.exclusions>
@@ -310,7 +310,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>33.4.7-jre</version>
+                <version>33.4.8-jre</version>
             </dependency>
             <dependency>
                 <groupId>com.newrelic.agent.java</groupId>
