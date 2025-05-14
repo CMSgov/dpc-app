@@ -1,6 +1,7 @@
 name: 'DPC - Smoke Test (Greenfield)'
 
 on:
+  push:
   workflow_dispatch:
     inputs:
       env:
