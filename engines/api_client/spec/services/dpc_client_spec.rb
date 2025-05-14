@@ -743,14 +743,14 @@ RSpec.describe DpcClient do
   end
 
   describe 'check ssl settings' do
-    context 'not ignoring ssl errors' do
-      before do
-        # Force healthcheck to go over https for this test
-        allow(ENV).to receive(:fetch).with('API_ADMIN_URL').and_return('https://dpc.example.com')
-        allow(Rails.env).to receive(:development?).and_return(false)
-        allow(Rails.env).to receive(:test?).and_return(false)
-      end
+    before do
+      # Force healthcheck to go over https for these tests
+      allow(ENV).to receive(:fetch).with('API_ADMIN_URL').and_return('https://dpc.example.com')
+      allow(Rails.env).to receive(:development?).and_return(false)
+      allow(Rails.env).to receive(:test?).and_return(false)
+    end
 
+    context 'not ignoring ssl errors' do
       it 'sets open ssl verify mode to peer' do
         stub_request(:get, 'https://dpc.example.com/healthcheck')
           .with(
@@ -773,7 +773,9 @@ RSpec.describe DpcClient do
         api_client = DpcClient.new
         api_client.healthcheck
       end
+    end
 
+    context 'ignoring ssl errors' do
       it 'sets open ssl verify mode to none' do
         allow(ENV).to receive(:fetch).with('ALLOW_INVALID_SSL_CERT').and_return('true')
 
