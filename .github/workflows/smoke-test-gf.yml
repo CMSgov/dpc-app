@@ -1,9 +1,6 @@
 name: 'DPC - Smoke Test (Greenfield)'
 
 on:
-  push:
-    paths:
-      - .github/workflows/smoke-test-gf.yml
   workflow_dispatch:
     inputs:
       env:
