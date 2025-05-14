@@ -32,6 +32,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
+import org.junit.platform.commons.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -167,7 +169,8 @@ public class APIAuthHelpers {
 
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost post = new HttpPost(String.format("%s/generate-token", taskURL));
-
+            Logger logger = (Logger) LoggerFactory.getLogger(APIAuthHelpers.class);
+            logger.warn("HTTP POST: {}", post);
             try (CloseableHttpResponse execute = client.execute(post)) {
                 assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Generated macaroon");
                 return EntityUtils.toString(execute.getEntity());
