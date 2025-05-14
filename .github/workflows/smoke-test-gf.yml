@@ -26,7 +26,7 @@ concurrency:
 
 jobs:
   smoke-test:
-    name: Smoke Test
+    name: Smoke Test (Greenfield)
     permissions:
       contents: read
       id-token: write
@@ -53,7 +53,6 @@ jobs:
         with:
           java-version: "17"
           distribution: "corretto"
-          cache: maven
       - name: Clean maven
         run: |
           mvn -ntp -U clean
@@ -74,7 +73,7 @@ jobs:
       - name: Fetch admin host
         id: fetch-admin-host
         run: |
-          admin_host=`aws elbv2 describe-load-balancers --names dpc-${{ inputs.env }}-frontend-internal --query="LoadBalancers[0].DNSName" --output text`
+          admin_host=`aws elbv2 describe-load-balancers --names dpc-${{ inputs.env }}-1 --query="LoadBalancers[0].DNSName" --output text`
           echo "admin_host=$admin_host" >> "$GITHUB_OUTPUT"
           echo "ELB_URL=http://$admin_host:9900/tasks" >> "$GITHUB_OUTPUT"
       - name: Determine host
