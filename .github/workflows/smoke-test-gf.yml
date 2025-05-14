@@ -73,7 +73,7 @@ jobs:
         run: |
           admin_host=`aws elbv2 describe-load-balancers --names dpc-${{ inputs.env }}-1 --query="LoadBalancers[0].DNSName" --output text`
           echo "admin_host=$admin_host" >> "$GITHUB_OUTPUT"
-          echo "ELB_URL=http://$admin_host/tasks" >> "$GITHUB_OUTPUT"
+          echo "ELB_URL=http://$admin_host:3002/tasks" >> "$GITHUB_OUTPUT"
       - name: Determine host
         id: determine-host
         run: |
