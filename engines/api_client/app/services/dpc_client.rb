@@ -7,6 +7,7 @@ class DpcClient
   def initialize
     @base_url = ENV.fetch('API_METADATA_URL')
     @admin_url = ENV.fetch('API_ADMIN_URL')
+    @allow_invalid_ssl_cert = ActiveModel::Type::Boolean.new.cast(ENV.fetch('ALLOW_INVALID_SSL_CERT'))
   end
 
   def json_content
@@ -183,7 +184,7 @@ class DpcClient
 
     if use_ssl?(uri)
       http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      http.verify_mode = verify_mode
     end
 
     response = http.request(request)
@@ -219,5 +220,11 @@ class DpcClient
     Rails.logger.warn "Could not connect to API: #{error}"
     @response_status = 500
     @response_body = { 'issue' => [{ 'details' => { 'text' => 'Connection error' } }] }
+  end
+
+  def verify_mode
+    return OpenSSL::SSL::VERIFY_NONE if @allow_invalid_ssl_cert
+
+    OpenSSL::SSL::VERIFY_PEER
   end
 end
