@@ -27,7 +27,7 @@ concurrency:
 jobs:
   smoke-test:
     name: Smoke Test (Greenfield)
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: self-hosted #codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
 #      - uses: slackapi/slack-github-action@v2.0.0
 #        name: Slack Starting
