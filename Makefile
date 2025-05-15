@@ -24,7 +24,7 @@ smoke/local: venv smoke start-dpc
 .PHONY: smoke/remote
 smoke/remote: venv smoke
 	@echo "Running Smoke Tests against ${HOST_URL}"
-	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/remote.smoke_test.yml
+	. venv/bin/activate; pip install -Ur requirements.txt; bzt -v src/test/remote.smoke_test.yml
 
 .PHONY: smoke/sandbox
 smoke/sandbox: venv smoke
