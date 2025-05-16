@@ -97,6 +97,8 @@ jobs:
       - name: Echo host
         run: |
           echo "using this host for testing: ${{ steps.fetch-admin-host.outputs.ELB_URL }}"
+          dnf install nmap
+          ncat -zv ${{ steps.fetch-admin-host.outputs.ELB_URL }}
       - name: Run Smoke Test
         id: run-smoke-test
         env:
