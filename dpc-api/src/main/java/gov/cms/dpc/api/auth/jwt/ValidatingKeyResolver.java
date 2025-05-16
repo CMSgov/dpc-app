@@ -6,6 +6,8 @@ import io.jsonwebtoken.*;
 import jakarta.annotation.Nullable;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.Key;
 import java.time.Instant;
@@ -108,11 +110,16 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
 
         // Test correct aud claim
         final Set<String> audience = getClaimIfPresent("audience", claims.getAudience());
+        System.out.println("AUDIENCE");
+        System.out.println(audience);
+        System.out.println("AUD CLAIM");
+        System.out.println(this.audClaim);
         if (!audience.equals(this.audClaim)) {
-            System.out.println("AUDIENCE");
-            System.out.println(audience);
-            System.out.println("AUD CLAIM");
-            System.out.println(this.audClaim);
+            Logger logger = LoggerFactory.getLogger(ValidatingKeyResolver.class);
+            logger.info("AUDIENCE");
+            logger.info(audience.toString());
+            logger.info("AUD CLAIM");
+            logger.info(this.audClaim.toString());
             throw new WebApplicationException("Audience claim value is incorrect", Response.Status.BAD_REQUEST);
         }
     }
