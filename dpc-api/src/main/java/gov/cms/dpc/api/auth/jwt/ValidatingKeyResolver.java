@@ -107,17 +107,14 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
         }
 
         // Test correct aud claim
-        System.out.println("AUD CLAIM: " + this.audClaim);
         final Set<String> audience = getClaimIfPresent("audience", claims.getAudience());
+        assert audience.equals(this.audClaim);
         if (!audience.equals(this.audClaim)) {
             throw new WebApplicationException("Audience claim value is incorrect", Response.Status.BAD_REQUEST);
         }
     }
 
     private static <T> T getClaimIfPresent(String claimName, @Nullable T claim) {
-        if (claimName.equals("audience")) {
-            System.out.println("AUDIENCE: " + claim);
-        }
         if (claim == null) {
             throw new WebApplicationException(String.format("Claim `%s` must be present", claimName), Response.Status.BAD_REQUEST);
         }
