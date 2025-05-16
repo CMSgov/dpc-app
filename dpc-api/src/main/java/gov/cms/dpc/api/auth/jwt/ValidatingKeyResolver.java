@@ -112,10 +112,7 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
         final Set<String> audience = getClaimIfPresent("audience", claims.getAudience());
         if (!audience.equals(this.audClaim)) {
             Logger logger = LoggerFactory.getLogger(ValidatingKeyResolver.class);
-            logger.info("AUDIENCE");
-            logger.info(audience.toString());
-            logger.info("AUD CLAIM");
-            logger.info(this.audClaim.toString());
+            logger.error("AUDIENCE: %s, AUD_CLAIM: %s", audience, this.audClaim);
             throw new WebApplicationException("Audience claim value is incorrect", Response.Status.BAD_REQUEST);
         }
     }
