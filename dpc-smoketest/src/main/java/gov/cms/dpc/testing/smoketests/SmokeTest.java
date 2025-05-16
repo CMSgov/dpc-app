@@ -287,7 +287,6 @@ public class SmokeTest extends AbstractJavaSamplerClient {
                 .add_first_party_caveat(String.format("organization_id = %s", orgId))
                 .getMacaroon().serialize(MacaroonVersion.SerializationVersion.V2_JSON);
 
-        logger.info("Org-specific Macaroon: {}", orgSpecificGoldenMacaroon);
         IGenericClient orgSpecificAdminClient = APIAuthHelpers.buildAdminClient(fhirContext, apiHost, orgSpecificGoldenMacaroon, true, true);
 
         try {
@@ -314,9 +313,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
     private String createGoldenMacaroon(){
         try {
-            String macaroon = APIAuthHelpers.createGoldenMacaroon(apiAdminUrl);
-            logger.info("Macaroon set: {}", macaroon);
-            return macaroon;
+            return APIAuthHelpers.createGoldenMacaroon(apiAdminUrl);
         } catch (Exception e) {
             throw new IllegalStateException("Failed creating Macaroon", e);
         }
