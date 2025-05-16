@@ -6,8 +6,6 @@ import io.jsonwebtoken.*;
 import jakarta.annotation.Nullable;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.security.Key;
 import java.time.Instant;
@@ -109,15 +107,17 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
         }
 
         // Test correct aud claim
+        System.out.println("AUD CLAIM: " + this.audClaim);
         final Set<String> audience = getClaimIfPresent("audience", claims.getAudience());
         if (!audience.equals(this.audClaim)) {
-            Logger logger = LoggerFactory.getLogger(ValidatingKeyResolver.class);
-            logger.error("AUDIENCE: %s, AUD_CLAIM: %s", audience, this.audClaim);
             throw new WebApplicationException("Audience claim value is incorrect", Response.Status.BAD_REQUEST);
         }
     }
 
     private static <T> T getClaimIfPresent(String claimName, @Nullable T claim) {
+        if (claimName.equals("audience")) {
+            System.out.println("AUDIENCE: " + claim);
+        }
         if (claim == null) {
             throw new WebApplicationException(String.format("Claim `%s` must be present", claimName), Response.Status.BAD_REQUEST);
         }
