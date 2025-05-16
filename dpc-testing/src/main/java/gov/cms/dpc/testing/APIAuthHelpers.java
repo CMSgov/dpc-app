@@ -129,11 +129,7 @@ public class APIAuthHelpers {
             post.setEntity(new StringEntity(jwt));
             post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
 
-            System.out.println("POST: " + post);
-            System.out.println("ENTITY: " + post.getEntity());
-            System.out.println("AUDIENCE: " + String.format("%s/Token/auth", audience));
             try (CloseableHttpResponse response = client.execute(post)) {
-                System.out.println("RESPONSE: " + response);
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token validation should have succeeded");
             }
         }
@@ -152,6 +148,7 @@ public class APIAuthHelpers {
             final HttpPost post = new HttpPost(builder.build());
             post.setEntity(entity);
             post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
+
             try (CloseableHttpResponse response = client.execute(post)) {
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token request should have succeeded");
                 authResponse = mapper.readValue(response.getEntity().getContent(), AuthResponse.class);

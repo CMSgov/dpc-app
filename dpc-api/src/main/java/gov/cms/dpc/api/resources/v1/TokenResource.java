@@ -250,7 +250,6 @@ public class TokenResource extends AbstractTokenResource {
         } catch (IllegalArgumentException | UnsupportedJwtException e) {
             // This is fine, we just want the body
         } catch (MalformedJwtException e) {
-            System.out.println("VALIDATION EXCEPTION: " + e);
             throw new WebApplicationException("JWT is not formatted correctly", Response.Status.BAD_REQUEST);
         }
 
