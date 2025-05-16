@@ -6,6 +6,7 @@ import io.jsonwebtoken.*;
 import jakarta.annotation.Nullable;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.MDC;
 
 import java.security.Key;
 import java.time.Instant;
@@ -108,8 +109,9 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
 
         // Test correct aud claim
         final Set<String> audience = getClaimIfPresent("audience", claims.getAudience());
-        assert audience.equals(this.audClaim);
         if (!audience.equals(this.audClaim)) {
+            MDC.put("audience", audience.toString());
+            MDC.put("audClaim", this.audClaim.toString());
             throw new WebApplicationException("Audience claim value is incorrect", Response.Status.BAD_REQUEST);
         }
     }
