@@ -241,6 +241,7 @@ public class TokenResource extends AbstractTokenResource {
     @Public
     @Override
     public Response validateJWT(@NoHtml @NotEmpty(message = "Must submit JWT") String jwt) {
+        System.out.println("VALIDATING TOKEN");
         try {
             Jwts.parser()
                     .requireAudience(this.authURL)
