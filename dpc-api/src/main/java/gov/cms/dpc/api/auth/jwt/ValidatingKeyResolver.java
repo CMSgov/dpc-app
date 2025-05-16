@@ -120,7 +120,8 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
             logger.info(audience.toString());
             logger.info("AUD CLAIM");
             logger.info(this.audClaim.toString());
-            throw new WebApplicationException("Audience claim value is incorrect", Response.Status.BAD_REQUEST);
+            String errMsg = String.format("Audience claim value is incorrect: %s =/= %s", audience.toString(), this.audClaim.toString());
+            throw new WebApplicationException(errMsg, Response.Status.BAD_REQUEST);
         }
     }
 
