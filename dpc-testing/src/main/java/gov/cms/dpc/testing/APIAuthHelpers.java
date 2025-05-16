@@ -123,17 +123,18 @@ public class APIAuthHelpers {
                 .compact();
 
         // Verify JWT with /validate endpoint
-//        TODO: debug
-//        try (final CloseableHttpClient client = createCustomHttpClient().trusting().build()) {
-//            final URIBuilder builder = new URIBuilder(String.format("%s/Token/validate", baseURL));
-//            final HttpPost post = new HttpPost(builder.build());
-//            post.setEntity(new StringEntity(jwt));
-//            post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
-//
-//            try (CloseableHttpResponse response = client.execute(post)) {
-//                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token validation should have succeeded");
-//            }
-//        }
+        try (final CloseableHttpClient client = createCustomHttpClient().trusting().build()) {
+            final URIBuilder builder = new URIBuilder(String.format("%s/Token/validate", baseURL));
+            final HttpPost post = new HttpPost(builder.build());
+            post.setEntity(new StringEntity(jwt));
+            post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
+
+            System.out.println("POST: " + post);
+            try (CloseableHttpResponse response = client.execute(post)) {
+                System.out.println("RESPONSE: " + response);
+                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token validation should have succeeded");
+            }
+        }
 
         // Submit JWT to /auth endpoint
         final List<NameValuePair> formData = new ArrayList<>();
@@ -149,9 +150,7 @@ public class APIAuthHelpers {
             final HttpPost post = new HttpPost(builder.build());
             post.setEntity(entity);
             post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
-            System.out.println("POST: " + post);
             try (CloseableHttpResponse response = client.execute(post)) {
-                System.out.println("RESPONSE: " + response);
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token request should have succeeded");
                 authResponse = mapper.readValue(response.getEntity().getContent(), AuthResponse.class);
                 assertNotEquals(macaroon, authResponse.accessToken, "New Macaroon should not be identical");
