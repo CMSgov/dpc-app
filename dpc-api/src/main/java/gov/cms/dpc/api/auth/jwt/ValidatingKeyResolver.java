@@ -108,9 +108,9 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
 
         // Test correct aud claim
         final Set<String> audience = getClaimIfPresent("audience", claims.getAudience());
+        throw new WebApplicationException(String.format("AUDIENCE: %s, AUD_CLAIM: %s", String.join(",", audience), String.join(",", this.audClaim)));
         if (!audience.equals(this.audClaim)) {
-            String errMsg = String.format("audience: [%s], aud_claim: [%s]", String.join(",", audience), String.join(",", this.audClaim));
-            throw new WebApplicationException(errMsg, Response.Status.BAD_REQUEST);
+            throw new WebApplicationException("Audience claim value is incorrect", Response.Status.BAD_REQUEST);
         }
     }
 
