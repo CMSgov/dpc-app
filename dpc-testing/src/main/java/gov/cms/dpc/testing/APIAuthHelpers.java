@@ -131,7 +131,7 @@ public class APIAuthHelpers {
 
             System.out.println("POST: " + post);
             System.out.println("ENTITY: " + post.getEntity());
-            System.out.println("AUDIENCE: " + post.getURI());
+            System.out.println("AUDIENCE: " + String.format("%s/Token/auth", audience));
             try (CloseableHttpResponse response = client.execute(post)) {
                 System.out.println("RESPONSE: " + response);
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token validation should have succeeded");
