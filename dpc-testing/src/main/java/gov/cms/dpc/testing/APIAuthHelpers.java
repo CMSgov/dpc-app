@@ -130,6 +130,7 @@ public class APIAuthHelpers {
             post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
 
             try (CloseableHttpResponse response = client.execute(post)) {
+                System.out.println("RESPONSE: " + response.getStatusLine());
                 assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token validation should have succeeded");
             }
         }
