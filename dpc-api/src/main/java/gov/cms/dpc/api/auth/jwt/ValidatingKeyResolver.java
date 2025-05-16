@@ -111,7 +111,7 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
         final Set<String> audience = getClaimIfPresent("audience", claims.getAudience());
         if (!audience.equals(this.audClaim)) {
             MDC.put("audience", audience.toString());
-            MDC.put("audClaim", this.audClaim.toString());
+            MDC.put("aud_claim", this.audClaim.toString());
             throw new WebApplicationException("Audience claim value is incorrect", Response.Status.BAD_REQUEST);
         }
     }
