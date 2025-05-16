@@ -313,7 +313,10 @@ public class SmokeTest extends AbstractJavaSamplerClient {
 
     private String createGoldenMacaroon(){
         try {
-            return APIAuthHelpers.createGoldenMacaroon(apiAdminUrl);
+            String macaroon = APIAuthHelpers.createGoldenMacaroon(apiAdminUrl);
+            logger.info("Macaroon set: {}", macaroon);
+            System.out.println("Macaroon set: " + macaroon);
+            return macaroon;
         } catch (Exception e) {
             throw new IllegalStateException("Failed creating Macaroon", e);
         }
