@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - main
-      - cr/dpc-4690 # TODO: remove after testing
     paths:
       - dpc-**
       - engines/**
