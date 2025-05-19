@@ -1,16 +1,6 @@
 name: 'DPC - Build and Deploy'
 
 on:
-  schedule:
-    - cron: '0 6 * * 1-5'
-  push:
-    branches:
-      - main
-    paths:
-      - dpc-**
-      - engines/**
-      - .github/workflows/**
-
   workflow_dispatch:
     inputs:
       env:
