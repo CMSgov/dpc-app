@@ -73,9 +73,14 @@ jobs:
           echo "ELB_URL=http://$admin_host:9900/tasks" >> "$GITHUB_OUTPUT"
       - name: Determine host
         id: determine-host
-        # TODO: put env conditional back
         run: |
-          HOST="http://${{ steps.fetch-admin-host.outputs.admin_host }}"
+          if [ "${{ inputs.env }}" = 'prod' ]; then
+            HOST="http://${{ steps.fetch-admin-host.outputs.admin_host }}"
+          elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
+            HOST="https://sandbox.dpc.cms.gov"
+          else
+            HOST="https://${{ inputs.env }}.dpc.cms.gov"
+          fi
           echo "HOST=$HOST" >> "$GITHUB_OUTPUT"
           echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
       - name: Echo host
