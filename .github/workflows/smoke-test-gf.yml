@@ -74,13 +74,7 @@ jobs:
       - name: Determine host
         id: determine-host
         run: |
-          if [ "${{ inputs.env }}" = 'prod' ]; then
-            HOST="http://${{ steps.fetch-admin-host.outputs.admin_host }}"
-          elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
-            HOST="https://sandbox.dpc.cms.gov"
-          else
-            HOST="https://${{ inputs.env }}.dpc.cms.gov"
-          fi
+          HOST="http://${{ steps.fetch-admin-host.outputs.admin_host }}"
           echo "HOST=$HOST" >> "$GITHUB_OUTPUT"
           echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
       - name: Run Smoke Test
