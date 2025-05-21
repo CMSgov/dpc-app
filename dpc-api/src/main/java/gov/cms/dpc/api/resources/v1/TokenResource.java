@@ -7,7 +7,6 @@ import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
-import gov.cms.dpc.api.auth.jwt.ValidatingKeyResolver;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
@@ -244,7 +243,7 @@ public class TokenResource extends AbstractTokenResource {
         try {
             Jwts.parser()
                     .requireAudience(this.authURL)
-                    .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
+                    .setSigningKeyResolver(this.resolver)
                     .build()
                     .parseSignedClaims(jwt);
         } catch (IllegalArgumentException | UnsupportedJwtException e) {
