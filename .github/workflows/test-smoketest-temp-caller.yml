@@ -9,12 +9,12 @@ permissions:
 
 jobs:
   call_gf_smoketest_workflow:
-    uses: cmsgov/dpc-app/.github/workflows/smoke-test.yml@aw/smoke-test-gf
+    uses: cmsgov/dpc-app/.github/workflows/smoke-test.yml@ls/smoke-test-gf
     with:
       env: 'dev'
     secrets: inherit
   call_legacy_smoketest_workflow:
-    uses: cmsgov/dpc-app/.github/workflows/smoke-test.yml@aw/smoke-test-gf
+    uses: cmsgov/dpc-app/.github/workflows/smoke-test.yml@ls/smoke-test-gf
     with:
       env: 'dev'
     secrets: inherit
