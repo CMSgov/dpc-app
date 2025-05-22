@@ -64,18 +64,11 @@ jobs:
       - name: Clean maven
         run: |
           mvn -ntp -U clean
-      - name: AWS Credentials (non-prod)
-        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
+      - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
-      - name: AWS Credentials (prod)
-        if: ${{ inputs.env == 'prod-sbx' || inputs.env == 'prod' }}
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
       - name: Fetch admin host
         id: fetch-admin-host
         run: |
