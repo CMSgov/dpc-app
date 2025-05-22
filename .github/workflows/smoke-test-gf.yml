@@ -75,7 +75,6 @@ jobs:
           echo "ELB_URL=http://$admin_host:9900/tasks" >> "$GITHUB_OUTPUT"
       - name: Determine host
         id: determine-host
-#        TODO: sandbox?
         run: |
           HOST="http://${{ steps.fetch-admin-host.outputs.admin_host }}"
           echo "HOST=$HOST" >> "$GITHUB_OUTPUT"
