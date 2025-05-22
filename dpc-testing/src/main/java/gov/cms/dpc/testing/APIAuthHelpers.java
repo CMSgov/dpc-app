@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.dockerjava.api.model.AuthResponse;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
 import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import com.google.common.net.HttpHeaders;
@@ -52,6 +51,7 @@ import java.util.*;
 
 import static java.sql.Date.from;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class APIAuthHelpers {
     public static final String TASK_URL = "http://localhost:9900/tasks/";
