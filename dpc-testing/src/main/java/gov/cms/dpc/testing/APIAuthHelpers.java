@@ -108,13 +108,16 @@ public class APIAuthHelpers {
          * - git diff f2d3abe1f23e4d1ad2f2a01 5d799c57712418de674 <<< green is good
          * see also https://github.com/CMSgov/dpc-app/pull/849
          */
-//        String audience = baseURL;
-//        if (baseURL.startsWith("http://internal-dpc-prod-")) {
-//            audience = "https://prod.dpc.cms.gov/api/v1";
-//        }
+        String audience = baseURL;
+        if (baseURL.startsWith("http://internal-dpc-prod-")) {
+            audience = "https://prod.dpc.cms.gov/api/v1";
+        }
+        if (baseURL.startsWith("http://internal-dpc-dev-")) { // TODO: if this is right, make this select by env
+            audience = "https://dev.dpc.cms.gov/api/v1";
+        }
         final String jwt = Jwts.builder()
                 .header().add("kid", keyID.toString()).and()
-                .audience().add(String.format("%s/Token/auth", baseURL)).and()
+                .audience().add(String.format("%s/Token/auth", audience)).and()
                 .issuer(macaroon)
                 .subject(macaroon)
                 .id(UUID.randomUUID().toString())

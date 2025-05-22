@@ -243,7 +243,7 @@ public class TokenResource extends AbstractTokenResource {
     public Response validateJWT(@NoHtml @NotEmpty(message = "Must submit JWT") String jwt) {
         try {
             Jwts.parser()
-//                    .requireAudience(this.authURL)
+                    .requireAudience(this.authURL)
                     .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
                     .build()
                     .parseSignedClaims(jwt);
@@ -277,7 +277,7 @@ public class TokenResource extends AbstractTokenResource {
     private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
         final Jws<Claims> claims = Jwts.parser()
                 .setSigningKeyResolver(this.resolver)
-//                .requireAudience(this.authURL)
+                .requireAudience(this.authURL)
                 .build()
                 .parseSignedClaims(jwtBody);
 
