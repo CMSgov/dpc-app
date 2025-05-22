@@ -112,9 +112,6 @@ public class APIAuthHelpers {
         if (baseURL.startsWith("http://internal-dpc-prod-")) {
             audience = "https://prod.dpc.cms.gov/api/v1";
         }
-        if (baseURL.startsWith("http://internal-dpc-dev-")) { // TODO: if this is right, make this select by env
-            audience = "https://dev.dpc.cms.gov/api/v1";
-        }
         final String jwt = Jwts.builder()
                 .header().add("kid", keyID.toString()).and()
                 .audience().add(String.format("%s/Token/auth", audience)).and()
