@@ -91,7 +91,7 @@ jobs:
           HOST_URL: ${{ steps.determine-host.outputs.HOST_URL }}
           PORTAL_HOST: ${{ steps.determine-host.outputs.PUBLIC_HOST }}
           WEB_HOST: ${{ steps.determine-host.outputs.PUBLIC_HOST }}
-          WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
+          WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.PUBLIC_HOST }}
         run: |
           if [ "${{ inputs.env }}" = 'prod' ]; then
             make smoke/prod
