@@ -80,7 +80,7 @@ jobs:
           HOST="http://${{ steps.fetch-admin-host.outputs.admin_host }}"
           echo "HOST=$HOST" >> "$GITHUB_OUTPUT"
           echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
-          PUBLIC_HOST="http://${{ steps.fetch-admin-host.outputs.public_host }}"
+          PUBLIC_HOST="https://${{ steps.fetch-admin-host.outputs.public_host }}"
           echo "PUBLIC_HOST=$PUBLIC_HOST" >> "$GITHUB_OUTPUT"
           echo "PUBLIC_URL=$PUBLIC_HOST/api/v1" >> "$GITHUB_OUTPUT"
       - name: Run Smoke Test
