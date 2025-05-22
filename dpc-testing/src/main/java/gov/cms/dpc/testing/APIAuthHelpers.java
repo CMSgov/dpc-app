@@ -109,8 +109,8 @@ public class APIAuthHelpers {
          * see also https://github.com/CMSgov/dpc-app/pull/849
          */
         String audience = baseURL;
-        if (baseURL.startsWith("http://internal-dpc-prod-")) {
-            audience = "https://prod.dpc.cms.gov/api/v1";
+        if (baseURL.startsWith("http://internal-dpc-")) {
+            audience = System.getenv("PUBLIC_URL");
         }
         final String jwt = Jwts.builder()
                 .header().add("kid", keyID.toString()).and()
