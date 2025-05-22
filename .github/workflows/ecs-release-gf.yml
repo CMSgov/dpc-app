@@ -107,7 +107,7 @@ jobs:
 
   smoke-test:
      needs: deploy
-     uses: ./.github/workflows/smoke-test.yml
+     uses: ./.github/workflows/smoke-test-gf.yml
      with:
        env: ${{ inputs.env || 'dev' }}
      secrets: inherit
