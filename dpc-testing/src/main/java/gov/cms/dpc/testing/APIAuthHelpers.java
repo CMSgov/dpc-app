@@ -109,8 +109,11 @@ public class APIAuthHelpers {
          * see also https://github.com/CMSgov/dpc-app/pull/849
          */
         String audience = baseURL;
-        if (baseURL.startsWith("http://internal-dpc-")) {
+        if (baseURL.startsWith("http://internal-dpc-") && System.getenv("PUBLIC_URL") != null) {
             audience = System.getenv("PUBLIC_URL");
+        }
+        else if (baseURL.startsWith("http://internal-dpc-prod-")) {
+            audience = "https://prod.dpc.cms.gov/api/v1"; // for backwards compatibility w/ account before greenfield migration
         }
         final String jwt = Jwts.builder()
                 .header().add("kid", keyID.toString()).and()

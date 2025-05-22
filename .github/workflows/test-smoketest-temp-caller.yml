@@ -8,7 +8,12 @@ permissions:
   contents: read
 
 jobs:
-  call_workflow:
+  call_gf_smoketest_workflow:
+    uses: cmsgov/dpc-app/.github/workflows/smoke-test.yml@aw/smoke-test-gf
+    with:
+      env: 'dev'
+    secrets: inherit
+  call_legacy_smoketest_workflow:
     uses: cmsgov/dpc-app/.github/workflows/smoke-test.yml@aw/smoke-test-gf
     with:
       env: 'dev'
