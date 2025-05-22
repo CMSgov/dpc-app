@@ -12,7 +12,7 @@ class ApplicationController < ActionController::Base
   end
 
   def prod_sbx?
-    ENV['ENV'] == 'prod-sbx'
+    ENV['ENV'] == 'sandbox'
   end
   helper_method :prod_sbx?
 end

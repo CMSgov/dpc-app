@@ -68,7 +68,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'sandbox' && 'sbx' || inputs.env  }}-github-actions
       - name: Fetch admin host
         id: fetch-admin-host
         run: |
@@ -80,7 +80,7 @@ jobs:
         run: |
           if [ "${{ inputs.env }}" = 'prod' ]; then
             HOST="http://${{ steps.fetch-admin-host.outputs.admin_host }}"
-          elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
+          elif [ "${{ inputs.env }}" = 'sandbox' ]; then
             HOST="https://sandbox.dpc.cms.gov"
           else
             HOST="https://${{ inputs.env }}.dpc.cms.gov"
@@ -98,7 +98,7 @@ jobs:
         run: |
           if [ "${{ inputs.env }}" = 'prod' ]; then
             make smoke/prod
-          elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
+          elif [ "${{ inputs.env }}" = 'sandbox' ]; then
             make smoke/sandbox
           else
             make smoke/remote

@@ -7,9 +7,9 @@ RSpec.describe OrganizationUserAssignment, type: :model do
 
   describe 'callbacks' do
     describe '#send_organization_sandbox_email' do
-      it 'sends email if org is enabled in API in the prod-sbx environment' do
+      it 'sends email if org is enabled in API in the sandbox environment' do
         allow(ENV).to receive(:[]).and_call_original
-        allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
+        allow(ENV).to receive(:[]).with('ENV').and_return('sandbox')
         stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
 
         org = create(:organization)
@@ -28,7 +28,7 @@ RSpec.describe OrganizationUserAssignment, type: :model do
         expect(mailer).to have_received(:deliver_later)
       end
 
-      it 'does not send email if org is not enabled in API in the prod-sbx environment' do
+      it 'does not send email if org is not enabled in API in the sandbox environment' do
         org = create(:organization)
 
         allow(UserMailer).to receive(:with)
@@ -48,7 +48,7 @@ RSpec.describe OrganizationUserAssignment, type: :model do
 
         it 'does not send an email' do
           allow(ENV).to receive(:[]).and_call_original
-          allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
+          allow(ENV).to receive(:[]).with('ENV').and_return('sandbox')
 
           stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
 
