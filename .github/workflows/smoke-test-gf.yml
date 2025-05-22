@@ -29,20 +29,20 @@ jobs:
     name: Smoke Test (Greenfield)
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
-#      - uses: slackapi/slack-github-action@v2.0.0
-#        name: Slack Starting
-#        with:
-#          method: chat.postMessage
-#          token: ${{ secrets.SLACK_BOT_TOKEN }}
-#          # Sends to dpc-deploys
-#          payload: |
-#            channel: "CMC1E4AEQ"
-#            attachments:
-#              - color: warning
-#                text: "Smoke test of `${{ inputs.env }}` has started"
-#                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
-#                mrkdown_in:
-#                  - footer
+      - uses: slackapi/slack-github-action@v2.0.0
+        name: Slack Starting
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            attachments:
+              - color: warning
+                text: "Smoke test of `${{ inputs.env }}` has started"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: "Set up JDK 17"
@@ -99,38 +99,38 @@ jobs:
           else
             make smoke/remote
           fi
-#      - name: Upload bzt logs
-#        if: ${{ failure() && steps.run-smoke-test.outcome == 'failure' }}
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: bzt-logs
-#          path: ./bzt-out
-#      - uses: slackapi/slack-github-action@v2.0.0
-#        name: Slack Success
-#        with:
-#          method: chat.postMessage
-#          token: ${{ secrets.SLACK_BOT_TOKEN }}
-#          # Sends to dpc-deploys
-#          payload: |
-#            channel: "CMC1E4AEQ"
-#            attachments:
-#              - color: good
-#                text: "Smoke test of `${{ inputs.env }}` has succeeded"
-#                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
-#                mrkdown_in:
-#                  - footer
-#      - uses: slackapi/slack-github-action@v2.0.0
-#        name: Slack failure
-#        if: ${{ failure() }}
-#        with:
-#          method: chat.postMessage
-#          token: ${{ secrets.SLACK_BOT_TOKEN }}
-#          # Sends to dpc-deploys
-#          payload: |
-#            channel: "CMC1E4AEQ"
-#            attachments:
-#              - color: danger
-#                text: "Smoke test of `${{ inputs.env }}` has failed"
-#                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
-#                mrkdown_in:
-#                  - footer
+      - name: Upload bzt logs
+        if: ${{ failure() && steps.run-smoke-test.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: bzt-logs
+          path: ./bzt-out
+      - uses: slackapi/slack-github-action@v2.0.0
+        name: Slack Success
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            attachments:
+              - color: good
+                text: "Smoke test of `${{ inputs.env }}` has succeeded"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer
+      - uses: slackapi/slack-github-action@v2.0.0
+        name: Slack failure
+        if: ${{ failure() }}
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            attachments:
+              - color: danger
+                text: "Smoke test of `${{ inputs.env }}` has failed"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer
