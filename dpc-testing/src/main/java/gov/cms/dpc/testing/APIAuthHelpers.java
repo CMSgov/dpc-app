@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.dockerjava.api.model.AuthResponse;
 import com.github.nitram509.jmacaroons.MacaroonVersion;
 import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import com.google.common.net.HttpHeaders;
@@ -51,7 +52,6 @@ import java.util.*;
 
 import static java.sql.Date.from;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class APIAuthHelpers {
     public static final String TASK_URL = "http://localhost:9900/tasks/";
@@ -114,7 +114,10 @@ public class APIAuthHelpers {
         }
         // TODO: get env from url to choose audience
         if (baseURL.startsWith("http://internal-dpc-dev-")) {
-            audience = "https://dev.dpc.cms.gov/api/v1";
+            audience = System.getenv("PUBLIC_URL");
+            if (audience.isEmpty()) {
+                audience = "https://dev.dpc.cms.gov/api/v1";
+            }
         }
         final String jwt = Jwts.builder()
                 .header().add("kid", keyID.toString()).and()
