@@ -18,5 +18,5 @@ jobs:
   call_legacy_smoketest_workflow:
     uses: cmsgov/dpc-app/.github/workflows/smoke-test.yml@main
     with:
-      env: 'dev'
+      env: 'test'
     secrets: inherit
