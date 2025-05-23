@@ -32,7 +32,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: self-hosted
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     defaults:
       run:
         working-directory: ./lambda/opt-out-import
@@ -70,7 +70,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: self-hosted
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -101,7 +101,7 @@ jobs:
   verify-db-changes:
     if: ${{ always() && needs.trigger.result == 'success' }}
     needs: trigger
-    runs-on: self-hosted
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     env:
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
     steps:
