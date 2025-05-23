@@ -91,7 +91,7 @@ jobs:
       - set-parameters
     uses: ./.github/workflows/docker-build-gf.yml
     secrets: inherit
-    
+
   deploy:
     needs:
       - set-parameters
@@ -105,9 +105,9 @@ jobs:
       ops-ref: ${{ inputs.ops-ref || 'main' }}
     secrets: inherit
 
-  # smoke-test:
-  #   needs: deploy
-  #   uses: ./.github/workflows/smoke-test.yml
-  #   with:
-  #     env: ${{ inputs.env || 'dev' }}
-  #   secrets: inherit
+  smoke-test:
+     needs: deploy
+     uses: ./.github/workflows/smoke-test-gf.yml
+     with:
+       env: ${{ inputs.env || 'dev' }}
+     secrets: inherit
