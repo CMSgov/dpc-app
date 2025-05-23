@@ -12,7 +12,7 @@
 <!-- Tealium Tag Manager - ASYNC -->
 <script type="text/javascript">
     (function(a,b,c,d){
-    a="<%= "https://tealium-tags.cms.gov/cms-dpc/#{ ENV['ENV'] == 'sandbox' ? 'prod' : 'dev'}/utag.js" %>";
+    a="<%= "https://tealium-tags.cms.gov/cms-dpc/#{ ENV['ENV'] == 'prod-sbx' || ENV['ENV'] == 'sandbox' ? 'prod' : 'dev'}/utag.js" %>";
     b=document;c='script';d=b.createElement(c);
     d.src=a;d.type='text/java'+c;d.async=true;
     a=b.getElementsByTagName(c)[0];a.parentNode.insertBefore(d,a);
