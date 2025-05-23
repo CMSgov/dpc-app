@@ -1,6 +1,9 @@
 name: 'DPC - Promote Build (Greenfield)'
 
 on:
+  push:
+    branches:
+      - cr/dpc-4691
   workflow_dispatch:
     inputs:
       from_env:
