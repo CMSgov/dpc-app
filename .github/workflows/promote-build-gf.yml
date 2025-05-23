@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - cr/dpc-4691
+    paths:
+      - .github/workflows/promote-build-gf.yml
   workflow_dispatch:
     inputs:
       from_env:
