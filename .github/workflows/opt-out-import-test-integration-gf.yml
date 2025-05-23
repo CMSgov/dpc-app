@@ -23,7 +23,7 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     uses: ./.github/workflows/opt-out-import-deploy-gf.yml
     with:
-      env: dev # TODO: change to test
+      env: test
     secrets: inherit
 
   trigger:
@@ -47,7 +47,7 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-opt-out-import-function # TODO: change dev to test
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
@@ -75,7 +75,7 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-opt-out-import-function # TODO: change dev to test
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
@@ -108,17 +108,16 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions # use test
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
       - name: Get database credentials
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
-          # TODO: change dev to test
           params: |
-            DB_USER=/dpc/dev/consent/db_read_only_user_dpc_consent
-            DB_PASSWORD=/dpc/dev/consent/db_read_only_pass_dpc_consent
-            HOST=/dpc/dev/db/url
+            DB_USER=/dpc/test/consent/db_read_only_user_dpc_consent
+            DB_PASSWORD=/dpc/test/consent/db_read_only_pass_dpc_consent
+            HOST=/dpc/test/db/url
       - name: Stop old db container if exists
         run: |
           docker stop dpc-app-db-1 || echo 'noop, not running'
