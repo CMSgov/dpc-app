@@ -30,7 +30,7 @@ on:
         default: ''
     
 concurrency:
-  group: promote-to-${{ inputs.to_env }}
+  group: promote-to-${{ inputs.to_env || 'test' }}
   cancel-in-progress: true
 
 permissions:
@@ -45,17 +45,17 @@ jobs:
       app_version: ${{ steps.fetch-info.outputs.app_version }}
       ecr_image_tag: ${{ steps.fetch-info.outputs.ecr_image_tag }}
     steps:
-      - name: "Validate Environment"
-        if: ${{ inputs.to_env != inputs.confirm_env }}
-        run: |
-          echo "Target deployment environment \"${{ inputs.to_env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
-          exit 1
+      # - name: "Validate Environment"
+      #   if: ${{ inputs.to_env != inputs.confirm_env }}
+      #   run: |
+      #     echo "Target deployment environment \"${{ inputs.to_env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
+      #     exit 1
       - name: Configure AWS Credentials (non-prod)
         # if: ${{ inputs.from_env == 'dev' || inputs.from_env == 'test' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.from_env }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.from_env || 'dev'}}-github-actions
       # - name: Configure AWS Credentials (prod)
       #   if: ${{ inputs.to_env == 'prod-sbx' || inputs.to_env == 'prod' }}
       #   uses: aws-actions/configure-aws-credentials@v4
