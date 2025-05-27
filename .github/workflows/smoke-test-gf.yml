@@ -1,4 +1,4 @@
-name: 'DPC - Smoke Test'
+name: 'DPC - Smoke Test (Greenfield)'
 
 on:
   workflow_dispatch:
@@ -26,8 +26,8 @@ concurrency:
 
 jobs:
   smoke-test:
-    name: Smoke Test
-    runs-on: self-hosted
+    name: Smoke Test (Greenfield)
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - uses: slackapi/slack-github-action@v2.0.0
         name: Slack Starting
@@ -46,29 +46,25 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: "Set up JDK 17"
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "corretto"
           java-version: "17"
-      - name: Install Python
-        run: sudo dnf -y install python3 python3-pip
-      - name: Install Maven 3.6.3
-        run: |
-          export PATH="$PATH:/opt/maven/bin"
-          echo "PATH=$PATH" >> $GITHUB_ENV
-          if mvn -v; then echo "Maven already installed" && exit 0; else echo "Installing Maven"; fi
-          tmpdir="$(mktemp -d)"
-          curl -LsS https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar xzf - -C "$tmpdir"
-          sudo rm -rf /opt/maven
-          sudo mv "$tmpdir/apache-maven-3.6.3" /opt/maven
       - name: Clean maven
         run: |
           mvn -ntp -U clean
-      - name: AWS Credentials
+      - name: AWS Credentials (non-prod)
+        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env == 'prod-sbx' && 'sbx' || inputs.env  }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+      - name: AWS Credentials (prod)
+        if: ${{ inputs.env == 'sandbox' || inputs.env == 'prod' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: Fetch admin host
         id: fetch-admin-host
         run: |
@@ -80,30 +76,25 @@ jobs:
       - name: Determine host
         id: determine-host
         run: |
-          if [ "${{ inputs.env }}" = 'prod' ]; then
-            HOST="http://${{ steps.fetch-admin-host.outputs.admin_host }}"
-          elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
-            HOST="https://sandbox.dpc.cms.gov"
-          else
-            HOST="https://${{ inputs.env }}.dpc.cms.gov"
-          fi
+          HOST="http://${{ steps.fetch-admin-host.outputs.admin_host }}"
           echo "HOST=$HOST" >> "$GITHUB_OUTPUT"
           echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
           PUBLIC_HOST="https://${{ steps.fetch-admin-host.outputs.public_host }}"
           echo "PUBLIC_HOST=$PUBLIC_HOST" >> "$GITHUB_OUTPUT"
+          echo "PUBLIC_URL=$PUBLIC_HOST/api/v1" >> "$GITHUB_OUTPUT"
       - name: Run Smoke Test
         id: run-smoke-test
         env:
           ELB_URL: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
           PUBLIC_URL: ${{ steps.determine-host.outputs.PUBLIC_URL }}
           HOST_URL: ${{ steps.determine-host.outputs.HOST_URL }}
-          PORTAL_HOST: ${{ steps.determine-host.outputs.HOST }}
-          WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
-          WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
+          PORTAL_HOST: ${{ steps.determine-host.outputs.PUBLIC_HOST }}
+          WEB_HOST: ${{ steps.determine-host.outputs.PUBLIC_HOST }}
+          WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.PUBLIC_HOST }}
         run: |
           if [ "${{ inputs.env }}" = 'prod' ]; then
             make smoke/prod
-          elif [ "${{ inputs.env }}" = 'prod-sbx' ]; then
+          elif [ "${{ inputs.env }}" = 'sandbox' ]; then
             make smoke/sandbox
           else
             make smoke/remote
