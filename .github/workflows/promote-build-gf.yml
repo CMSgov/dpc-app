@@ -30,8 +30,12 @@ on:
         default: ''
     
 concurrency:
-  group: promote-to-${{ inputs.to_env || 'test' }}
+  group: promote-to-${{ inputs.to_env }}
   cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   set-parameters:
