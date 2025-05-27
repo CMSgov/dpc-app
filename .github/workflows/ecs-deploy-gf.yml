@@ -247,6 +247,7 @@ jobs:
 
   notify-slack:
     name: Notify Slack
+    if: ${{ !cancelled() }}
     needs:
       - deploy
       - services-up
@@ -275,7 +276,7 @@ jobs:
                     value: ${{ needs.deploy.outputs.image_tag }}
       - uses: slackapi/slack-github-action@v2.0.0
         name: Slack failure
-        if: ${{ cancelled() || contains(needs.*.result, 'failure') }}
+        if: ${{ needs.services-up.result != 'success' }}
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
