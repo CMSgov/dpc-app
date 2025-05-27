@@ -30,7 +30,7 @@ on:
         default: ''
     
 concurrency:
-  group: promote-to-${{ inputs.to_env || 'test' }}
+  group: promote-to-${{ inputs.to_env || 'sandbox' }}
   cancel-in-progress: true
 
 permissions:
@@ -55,19 +55,19 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.from_env || 'dev'}}-github-actions
-      # - name: Configure AWS Credentials (prod)
-      #   if: ${{ inputs.to_env == 'prod-sbx' || inputs.to_env == 'prod' }}
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     aws-region: ${{ vars.AWS_REGION }}
-      #     role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.to_env }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.from_env || 'test'}}-github-actions
+      - name: Configure AWS Credentials (prod)
+        # if: ${{ inputs.to_env == 'sandbox' || inputs.to_env == 'prod' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.to_env || 'sandbox' }}-github-actions
       - name: "Fetch Image and App Version from AWS"
         id: fetch-info
         run: |
-          SERVICE_INFO=$(aws ecs describe-services --services dpc-${{ inputs.from_env || 'dev' }}-api-v9 --cluster dpc-${{ inputs.from_env || 'dev' }}-frontend --query "services[0].deployments[0]")
+          SERVICE_INFO=$(aws ecs describe-services --services dpc-${{ inputs.from_env || 'test' }}-api-v9 --cluster dpc-${{ inputs.from_env || 'test' }}-frontend --query "services[0].deployments[0]")
           TASK_DEFINITION=`echo $SERVICE_INFO | jq -r '.taskDefinition | split(":")[-1]'`
-          TASK_INFO=`aws ecs describe-task-definition --task-definition dpc-${{ inputs.from_env || 'dev' }}-api:$TASK_DEFINITION --query "taskDefinition.containerDefinitions[0].{Image: image, Version: environment[?name=='APP_VERSION'].value | [0]}"`
+          TASK_INFO=`aws ecs describe-task-definition --task-definition dpc-${{ inputs.from_env || 'test' }}-api:$TASK_DEFINITION --query "taskDefinition.containerDefinitions[0].{Image: image, Version: environment[?name=='APP_VERSION'].value | [0]}"`
           IMAGE_TAG=`echo $TASK_INFO | jq -r '.Image | split(":")[1]'`
           echo $IMAGE_TAG
           echo "ecr_image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
@@ -79,8 +79,8 @@ jobs:
     needs: set-parameters
     uses: ./.github/workflows/ecs-deploy-gf.yml
     with:
-      env: ${{ inputs.to_env || 'test'  }}
-      confirm_env: ${{ inputs.to_env || 'test' }}
+      env: ${{ inputs.to_env || 'sandbox'  }}
+      confirm_env: ${{ inputs.to_env || 'sandbox' }}
       ecr_image_tag: ${{ needs.set-parameters.outputs.ecr_image_tag }}
       app-version: ${{ needs.set-parameters.outputs.app_version }}
     secrets: inherit
@@ -89,5 +89,5 @@ jobs:
     needs: deploy
     uses: ./.github/workflows/smoke-test-gf.yml
     with:
-      env: ${{ inputs.to_env || 'test' }}
+      env: ${{ inputs.to_env || 'sandbox' }}
     secrets: inherit
