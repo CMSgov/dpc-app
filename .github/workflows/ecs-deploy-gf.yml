@@ -275,7 +275,7 @@ jobs:
                     value: ${{ needs.deploy.outputs.image_tag }}
       - uses: slackapi/slack-github-action@v2.0.0
         name: Slack failure
-        if: ${{ contains(needs.*.result, 'failure') }}
+        if: ${{ cancelled() || contains(needs.*.result, 'failure') }}
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
