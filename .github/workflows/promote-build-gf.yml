@@ -5,7 +5,10 @@ on:
     branches:
       - cr/dpc-4691
     paths:
-      - .github/workflows/promote-build-gf.yml
+      - .github/workflows/**
+  pull_request:
+    paths:
+      - .github/workflows/**
       
   workflow_dispatch:
     inputs:
