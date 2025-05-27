@@ -3,6 +3,7 @@ name: 'DPC - Promote Build (Greenfield)'
 on:
   push:
     branches:
+      - main
       - cr/dpc-4691
     paths:
       - .github/workflows/**
