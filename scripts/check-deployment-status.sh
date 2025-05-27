@@ -46,7 +46,7 @@ then
 fi
 
 # Try polling for 30 minutes max to verify a deployment's health
-TIMEOUT=18
+TIMEOUT=1800
 ELAPSED=0
 SLEEP_SECONDS=15
 VIABLE=4
