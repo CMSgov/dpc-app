@@ -59,7 +59,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Configure prod AWS Credentials
-        if: ${{ inputs.env == 'prod-sbx' || inputs.env == 'prod' }}
+        if: ${{ inputs.env == 'sandbox' || inputs.env == 'prod' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
@@ -85,7 +85,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Configure GHA prod AWS Credentials
-        if: ${{ inputs.env == 'prod-sbx' || inputs.env == 'prod' }}
+        if: ${{ inputs.env == 'sandbox' || inputs.env == 'prod' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
@@ -109,7 +109,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-opt-out-import-function
       - name: Configure import lambda non-prod AWS Credentials
-        if: ${{ inputs.env == 'prod-sbx' || inputs.env == 'prod' }}
+        if: ${{ inputs.env == 'sandbox' || inputs.env == 'prod' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
