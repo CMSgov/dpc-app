@@ -30,7 +30,7 @@ on:
         default: ''
     
 concurrency:
-  group: promote-to-${{ inputs.to_env }}
+  group: promote-to-${{ inputs.to_env || 'test' }}
   cancel-in-progress: true
 
 jobs:
