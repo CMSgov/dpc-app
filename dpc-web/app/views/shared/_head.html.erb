@@ -36,6 +36,6 @@
   <%= stylesheet_link_tag 'https://cdnjs.cloudflare.com/ajax/libs/uswds/2.13.3/css/uswds.min.css', crossorigin: 'anonymous'%>
   <%= stylesheet_link_tag    'application', media: 'all' %>
 
-  <%= javascript_include_tag "https://tealium-tags.cms.gov/cms-dpc/#{ ENV['ENV'] == 'prod-sbx' ? 'prod' : 'dev'}/utag.sync.js" %>
+  <%= javascript_include_tag "https://tealium-tags.cms.gov/cms-dpc/#{ ENV['ENV'] == 'prod-sbx' || ENV['ENV'] == 'sandbox' ? 'prod' : 'dev'}/utag.sync.js" %>
 
 </head>
