@@ -1,0 +1,17 @@
+
+name: 'Test File for calling opt-out-export integration test on remote branch'
+
+on:
+  push:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  call_workflow:
+    uses: cmsgov/dpc-app/.github/workflows/opt-out-export-test-integration-gf.yml@ls/dpc-4736-opt-out-integration-test
+    with:
+      env: 'test'
+    secrets: inherit
+
