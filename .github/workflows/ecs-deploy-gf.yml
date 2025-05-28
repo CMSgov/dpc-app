@@ -247,6 +247,7 @@ jobs:
 
   notify-slack:
     name: Notify Slack
+    # Force this to run unless the workflow was canceled
     if: ${{ !cancelled() }}
     needs:
       - deploy
