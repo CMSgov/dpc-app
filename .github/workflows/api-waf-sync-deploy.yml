@@ -29,6 +29,9 @@ jobs:
   deploy:
     name: 'Deploy API WAF sync'
     uses: ./.github/workflows/deploy_go_lambda.yml
+    permissions:
+      id-token: write
+      contents: read
     with:
       env: dev # ${{ inputs.env || 'dev' }} currently only available on dev
       project: api-waf-sync
