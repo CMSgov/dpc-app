@@ -56,12 +56,6 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.from_env || 'test'}}-github-actions
-      - name: Configure AWS Credentials (prod)
-        # if: ${{ inputs.to_env == 'sandbox' || inputs.to_env == 'prod' }}
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.to_env || 'sandbox' }}-github-actions
       - name: "Fetch Image and App Version from AWS"
         id: fetch-info
         run: |
