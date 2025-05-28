@@ -98,7 +98,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: AWS Credentials (prod)
-        if: ${{ inputs.env == 'prod-sbx' || inputs.env == 'prod' }}
+        if: ${{ inputs.env == 'sandbox' || inputs.env == 'prod' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
@@ -187,7 +187,7 @@ jobs:
   services-up:
     name: All Services Healthy
     needs: deploy
-    uses: ./.github/workflows/check_healthy.yml
+    uses: ./.github/workflows/check_healthy_gf.yml
     with:
       env: ${{ inputs.env }}
     secrets: inherit
@@ -247,6 +247,8 @@ jobs:
 
   notify-slack:
     name: Notify Slack
+    # Force this to run unless the workflow was canceled
+    if: ${{ !cancelled() }}
     needs:
       - deploy
       - services-up
@@ -275,7 +277,7 @@ jobs:
                     value: ${{ needs.deploy.outputs.image_tag }}
       - uses: slackapi/slack-github-action@v2.0.0
         name: Slack failure
-        if: ${{ contains(needs.*.result, 'failure') }}
+        if: ${{ needs.services-up.result != 'success' }}
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}

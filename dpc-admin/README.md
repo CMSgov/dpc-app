@@ -49,7 +49,7 @@ GITHUB_ORG_TEAM_ID=123
 If you want to switch to the sandbox environment, add the `ENV` variable:
 
 ```
-ENV=prod-sbx
+ENV=sandbox
 ```
 
 ### The Database
