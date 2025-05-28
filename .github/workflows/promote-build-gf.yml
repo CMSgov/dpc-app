@@ -7,9 +7,6 @@ on:
       - cr/dpc-4691
     paths:
       - .github/workflows/**
-  pull_request:
-    paths:
-      - .github/workflows/**
       
   workflow_dispatch:
     inputs:
