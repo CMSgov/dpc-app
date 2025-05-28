@@ -58,7 +58,24 @@ RSpec.describe RegisteredOrganization, type: :model do
       end
 
       context 'successful API response' do
-        it 'updates attributes and notifies users' do
+        it 'updates attributes and notifies users on prod-sbx' do
+          allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
+
+          stub_api_client(
+            message: :create_organization,
+            success: true,
+            response: {
+              'id' => '923a4f7b-eade-494a-8ca4-7a685edacfad'
+            }
+          )
+          allow_any_instance_of(Organization).to receive(:notify_users_of_sandbox_access)
+
+          reg_org = create(:registered_organization, api_id: nil)
+
+          expect(reg_org.organization).to have_received(:notify_users_of_sandbox_access).once
+          expect(reg_org.api_id).to eq('923a4f7b-eade-494a-8ca4-7a685edacfad')
+        end
+        it 'updates attributes and notifies users on sandbox' do
           allow(ENV).to receive(:[]).with('ENV').and_return('sandbox')
 
           stub_api_client(
@@ -97,6 +114,17 @@ RSpec.describe RegisteredOrganization, type: :model do
       before do
         # stub default value
         allow(ENV).to receive(:[]).and_call_original
+      end
+
+      context 'when prod-sbx' do
+        it 'tells organization to notify users' do
+          allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
+
+          stub_api_client(message: :create_organization, success: true, response: default_org_creation_response)
+          expect_any_instance_of(Organization).to receive(:notify_users_of_sandbox_access)
+
+          create(:registered_organization)
+        end
       end
 
       context 'when sandbox' do
