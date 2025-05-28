@@ -46,6 +46,44 @@ RSpec.describe Organization, type: :model do
         end
       end
     end
+    describe '#ENV=sandbox' do
+      before(:each) do
+        allow(ENV).to receive(:[]).with('ENV').and_return('sandbox')
+      end
+
+      describe '#fake_npi' do
+        it 'creates fake npi' do
+          # stub default value
+          allow(ENV).to receive(:[]).and_call_original
+
+          org = create(:organization, npi: nil)
+          org.assign_id
+          expect(org.npi).to be_present
+          expect(org.npi).to start_with('3')
+        end
+
+        it 'does sets npi if nil' do
+          # stub default value
+          allow(ENV).to receive(:[]).and_call_original
+
+          org = create(:organization, npi: nil)
+          org.assign_id
+          expect(org.npi).to be_present
+          expect(org.npi).to start_with('3')
+        end
+
+        it 'does not set npi if present' do
+          # stub default value
+          allow(ENV).to receive(:[]).and_call_original
+
+          npi = LuhnacyLib.generate_npi
+
+          org = create(:organization, npi:)
+          org.assign_id
+          expect(org.npi).to eq(npi)
+        end
+      end
+    end
   end
 
   describe '#npi=' do
@@ -102,7 +140,7 @@ RSpec.describe Organization, type: :model do
 
     before(:each) do
       allow(ENV).to receive(:[]).and_call_original
-      allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
+      allow(ENV).to receive(:[]).with('ENV').and_return('sandbox')
       allow(UserMailer).to receive(:with).and_return(mailer)
       allow(mailer).to receive(:organization_sandbox_email).and_return(mailer)
       allow(mailer).to receive(:deliver_later)
