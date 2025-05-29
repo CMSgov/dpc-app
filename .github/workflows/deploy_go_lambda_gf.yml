@@ -101,7 +101,7 @@ jobs:
       - name: Promote lambda code to prod
         run: |
           aws s3 cp --no-progress \
-            function.zip
+            function.zip \
             "s3://${PROD_LAMBDA_BUCKET_NAME}/function-${{ github.sha }}.zip"
           # TODO: uncomment when we really want to run the lambda from greenfield
           # aws lambda update-function-code --function-name dpc-prod-${{ inputs.project }} \
