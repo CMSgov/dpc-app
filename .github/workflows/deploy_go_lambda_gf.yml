@@ -37,7 +37,7 @@ jobs:
         run: |
           go build -o bootstrap ${{ inputs.go_files }}
           zip function.zip bootstrap
-      - name: AWS Credentials (non-prod) # there are no go lambdas on sandbox
+      - name: AWS Credentials (non-prod) # there are no go lambdas on sandbox, but lets make sure!
         if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -73,7 +73,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
       - name: retrieve test S3 bucket
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
@@ -90,14 +90,14 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-github-actions
       - name: retrieve prod S3 bucket
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
           params: |
-            PROD_LAMBDA_BUCKET_NAME=/dpc/${{ inputs.env }}/dpc-${{ inputs.env }}-${{ inputs.project }}-bucket
+            PROD_LAMBDA_BUCKET_NAME=/dpc/prod/dpc-prod-${{ inputs.project }}-bucket
       - name: Promote lambda code to prod
         run: |
           aws s3 cp --no-progress \
