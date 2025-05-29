@@ -28,6 +28,9 @@ on:
 jobs:
   deploy:
     name: 'Deploy Opt Out Export'
+    permissions:
+      contents: read
+      id-token: write
     uses: ./.github/workflows/deploy_go_lambda_gf.yml
     with:
       env: ${{ inputs.env || 'dev' }}
