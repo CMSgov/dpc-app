@@ -22,6 +22,9 @@ jobs:
   deploy:
     if: ${{ github.event_name == 'pull_request' }}
     uses: ./.github/workflows/api-waf-sync-deploy-gf.yml
+    permissions:
+      id-token: write
+      contents: read
     with:
       env: dev
     secrets: inherit
@@ -43,7 +46,7 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Send event to trigger lambda function
         id: invoke-lambda
         run: |
