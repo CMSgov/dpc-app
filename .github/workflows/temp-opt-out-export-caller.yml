@@ -17,6 +17,6 @@ jobs:
   call_workflow2:
     uses: cmsgov/dpc-app/.github/workflows/opt-out-export-test-integration-gf.yml@ls/dpc-4736-opt-out-integration-test
     with:
-      env: 'test'
+      env: 'dev'
     secrets: inherit
 
