@@ -84,7 +84,7 @@ jobs:
       - name: Download lambda code from test
         run: |
           aws s3 cp --no-progress \
-            "s3://${TEST_LAMBDA_BUCKET_NAME}/function-${{ github.sha }}.zip"
+            "s3://${TEST_LAMBDA_BUCKET_NAME}/function-${{ github.sha }}.zip" \
             function.zip
       - name: AWS Credentials (prod)
         uses: aws-actions/configure-aws-credentials@v4
