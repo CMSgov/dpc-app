@@ -41,6 +41,10 @@ concurrency:
   group: release-to-${{ inputs.env || 'dev' }}
   cancel-in-progress: false
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   set-parameters:
     name: "Set Parameters"
