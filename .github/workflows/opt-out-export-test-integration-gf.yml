@@ -58,12 +58,6 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Configure prod AWS Credentials
-        if: ${{ inputs.env == 'prod' }}
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-github-actions
       - name: Send event to trigger export lambda function
         id: invoke-lambda
         run: |
@@ -84,12 +78,6 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
-      - name: Configure GHA prod AWS Credentials
-        if: ${{ inputs.env == 'prod' }}
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-github-actions
       - name: echo role arn
         run: |
           echo "/opt-out-import/dpc/${{ inputs.env || 'test' }}/bfd-bucket-role-arn"
@@ -108,12 +96,6 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env || 'test' }}-opt-out-import-function
-      - name: Configure import lambda prod AWS Credentials
-        if: ${{ inputs.env == 'prod' }}
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env || 'test' }}-opt-out-import-function
 
       - name: Configure BFD bucket credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -133,6 +115,6 @@ jobs:
               echo "we have a winner!"
               exit 0
             fi
-          done < <(aws s3 ls s3://bfd-${{ inputs.env == 'prod' && 'prod' || 'test' }}-eft/bfdeft01/dpc/out/ | grep REQ)
+          done < <(aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/out/ | grep REQ)
           echo "no new file found"
           exit 1
