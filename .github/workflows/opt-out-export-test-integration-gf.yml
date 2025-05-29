@@ -133,6 +133,6 @@ jobs:
               echo "we have a winner!"
               exit 0
             fi
-          done < <(aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/out/ | grep REQ)
+          done < <(aws s3 ls s3://bfd-${{ input.env == 'prod' && 'prod' || 'test' }}-eft/bfdeft01/dpc/out/ | grep REQ)
           echo "no new file found"
           exit 1
