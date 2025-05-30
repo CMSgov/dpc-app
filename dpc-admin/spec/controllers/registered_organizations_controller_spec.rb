@@ -44,6 +44,22 @@ RSpec.describe RegisteredOrganizationsController, type: :controller do
         expect(response).to render_template(:new)
       end
     end
+
+    context 'successful sandbox API organization new' do
+      it 'renders the blank registerd org fields with the org for sandbox' do
+        allow(ENV).to receive(:[]).and_call_original
+        allow(ENV).to receive(:[]).with('ENV').and_return('sandbox')
+
+        get :new, params: {
+          organization_id: organization.id
+        }
+
+        expect(response.status).to eq(200)
+        expect(assigns(:organization)).not_to be_nil
+        expect(assigns(:registered_organization)).not_to be_nil
+        expect(response).to render_template(:new)
+      end
+    end
   end
 
   describe '#create' do
