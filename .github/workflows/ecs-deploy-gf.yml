@@ -200,6 +200,18 @@ jobs:
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     needs: deploy
     steps:
+      - name: AWS Credentials (non-prod)
+        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+      - name: AWS Credentials (prod)
+        if: ${{ inputs.env == 'sandbox' || inputs.env == 'prod' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: Set env vars from AWS params
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
