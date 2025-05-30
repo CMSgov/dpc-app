@@ -48,6 +48,11 @@ jobs:
     outputs:
       start_time: ${{ steps.invoke-lambda.outputs.STARTTIME }}
     steps:
+      - name: Fail if env is prod
+        if: ${{ inputs.env == 'prod' }}
+        run: |
+          echo "This workflow is not allowed to run in the 'prod' environment."
+          exit 1
       - uses: actions/checkout@v4
         with:
           sparse-checkout: |
