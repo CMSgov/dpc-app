@@ -29,6 +29,9 @@ jobs:
   trigger:
     if: ${{ always() }}
     needs: deploy
+    permissions:
+      contents: read
+      id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     defaults:
       run:
@@ -40,7 +43,7 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
       - name: Send event to trigger lambda function
         id: invoke-lambda
         run: |
