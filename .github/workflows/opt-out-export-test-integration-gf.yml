@@ -8,6 +8,19 @@ on:
       - .github/workflows/deploy_go_lambda.yml
       - lambda/opt-out-export/**
   workflow_dispatch:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: 'string'
+        default: 'test'
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: 'string'
+        default: 'test'
 
 # Ensure we have only one integration test running at a time
 concurrency:
@@ -18,9 +31,6 @@ jobs:
   deploy:
     if: ${{ github.event_name == 'pull_request' }}
     uses: ./.github/workflows/opt-out-export-deploy-gf.yml
-    permissions:
-      contents: read
-      id-token: write
     with:
       env: test
     secrets: inherit
@@ -38,20 +48,26 @@ jobs:
     outputs:
       start_time: ${{ steps.invoke-lambda.outputs.STARTTIME }}
     steps:
+      - name: Fail if env is prod
+        if: ${{ inputs.env == 'prod' }}
+        run: |
+          echo "This workflow is not allowed to run in the 'prod' environment."
+          exit 1
       - uses: actions/checkout@v4
         with:
           sparse-checkout: |
             lambda/opt-out-export
-      - name: Configure AWS Credentials
+      - name: Configure non-prod AWS Credentials
+        if: ${{ github.event_name == 'pull_request' || inputs.env == 'dev' || inputs.env == 'test' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Send event to trigger export lambda function
         id: invoke-lambda
         run: |
           echo "STARTTIME=`date +%s`" >> "$GITHUB_OUTPUT"
-          aws lambda invoke --function-name dpc-test-opt-out-export test-result.txt
+          aws lambda invoke --function-name dpc-${{ inputs.env || 'test' }}-opt-out-export test-result.txt
 
   verify-bucket:
     if: ${{ always() && needs.trigger.result == 'success' }}
@@ -61,18 +77,31 @@ jobs:
       id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
-      - name: Configure AWS Credentials
+      - name: Configure GHA non-prod AWS Credentials
+        if: ${{ github.event_name == 'pull_request' ||  inputs.env == 'dev' || inputs.env == 'test' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: echo role arn
+        run: |
+          echo "/opt-out-import/dpc/${{ inputs.env || 'test' }}/bfd-bucket-role-arn"
+
       - name: retrieve bfd bucket role
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
           params: |
-            BFD_BUCKET_ROLE=/opt-out-import/dpc/test/bfd-bucket-role-arn
+            BFD_BUCKET_ROLE=/opt-out-import/dpc/${{ inputs.env || 'test' }}/bfd-bucket-role-arn
+
+      - name: Configure import lambda non-prod AWS Credentials
+        if: ${{ github.event_name == 'pull_request' || inputs.env == 'dev' || inputs.env == 'test' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env || 'test' }}-opt-out-import-function
+
       - name: Configure BFD bucket credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
