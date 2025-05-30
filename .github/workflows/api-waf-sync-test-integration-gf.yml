@@ -22,9 +22,6 @@ jobs:
   deploy:
     if: ${{ github.event_name == 'pull_request' }}
     uses: ./.github/workflows/api-waf-sync-deploy-gf.yml
-    permissions:
-      id-token: write
-      contents: read
     with:
       env: dev
     secrets: inherit
