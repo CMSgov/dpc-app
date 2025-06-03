@@ -69,28 +69,27 @@ jobs:
         id: fetch-admin-host
         run: |
           admin_host=`aws elbv2 describe-load-balancers --names dpc-${{ inputs.env }}-frontend-internal --query="LoadBalancers[0].DNSName" --output text`
-          public_host=`aws elbv2 describe-load-balancers --names dpc-${{ inputs.env }}-1 --query="LoadBalancers[0].DNSName" --output text`
           echo "admin_host=$admin_host" >> "$GITHUB_OUTPUT"
-          echo "public_host=$public_host" >> "$GITHUB_OUTPUT"
           echo "ELB_URL=http://$admin_host:9900/tasks" >> "$GITHUB_OUTPUT"
       - name: Determine host
         id: determine-host
         run: |
-          HOST="http://${{ steps.fetch-admin-host.outputs.admin_host }}"
+          if [ "${{ inputs.env }}" = 'prod' ]; then
+            HOST="http://${{ steps.fetch-admin-host.outputs.admin_host }}"
+          else
+            HOST="https://${{ inputs.env }}.dpc.cms.gov"
+          fi
           echo "HOST=$HOST" >> "$GITHUB_OUTPUT"
           echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
-          PUBLIC_HOST="https://${{ steps.fetch-admin-host.outputs.public_host }}"
-          echo "PUBLIC_HOST=$PUBLIC_HOST" >> "$GITHUB_OUTPUT"
-          echo "PUBLIC_URL=$PUBLIC_HOST/api/v1" >> "$GITHUB_OUTPUT"
       - name: Run Smoke Test
         id: run-smoke-test
         env:
           ELB_URL: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
-          PUBLIC_URL: ${{ steps.determine-host.outputs.PUBLIC_URL }}
           HOST_URL: ${{ steps.determine-host.outputs.HOST_URL }}
-          PORTAL_HOST: ${{ steps.determine-host.outputs.PUBLIC_HOST }}
-          WEB_HOST: ${{ steps.determine-host.outputs.PUBLIC_HOST }}
-          WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.PUBLIC_HOST }}
+          PORTAL_HOST: ${{ steps.determine-host.outputs.HOST }}
+          WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
+          WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
+          PUBLIC_URL: ${{ steps.determine-host.outputs.HOST }}
         run: |
           if [ "${{ inputs.env }}" = 'prod' ]; then
             make smoke/prod
