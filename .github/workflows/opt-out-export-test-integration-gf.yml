@@ -33,6 +33,9 @@ jobs:
     uses: ./.github/workflows/opt-out-export-deploy-gf.yml
     with:
       env: test
+    permissions:
+      contents: read
+      id-token: write
     secrets: inherit
 
   trigger:
