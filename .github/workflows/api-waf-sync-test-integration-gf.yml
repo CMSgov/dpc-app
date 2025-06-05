@@ -1,11 +1,11 @@
-name: Api-Waf-Sync Integration Tests
+name: Api-Waf-Sync Integration Tests (Greenfield)
 
 on:
   pull_request:
     paths:
-      - .github/workflows/api-waf-sync-test-integration.yml
-      - .github/workflows/api-waf-sync-deploy.yml
-      - .github/workflows/deploy_go_lambda.yml
+      - .github/workflows/api-waf-sync-test-integration-gf.yml
+      - .github/workflows/api-waf-sync-deploy-gf.yml
+      - .github/workflows/deploy_go_lambda-gf.yml
       - lambda/api-waf-sync/**
   workflow_dispatch:
 
@@ -13,11 +13,15 @@ on:
 concurrency:
   group: api-waf-sync-test-integration
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   # Deploy first if triggered by pull_request
   deploy:
     if: ${{ github.event_name == 'pull_request' }}
-    uses: ./.github/workflows/api-waf-sync-deploy.yml
+    uses: ./.github/workflows/api-waf-sync-deploy-gf.yml
     with:
       env: dev
     secrets: inherit
@@ -28,7 +32,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: ubuntu-latest
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     defaults:
       run:
         working-directory: ./lambda/api-waf-sync
@@ -39,7 +43,7 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
       - name: Send event to trigger lambda function
         id: invoke-lambda
         run: |
