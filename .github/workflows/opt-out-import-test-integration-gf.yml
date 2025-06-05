@@ -1,11 +1,11 @@
-name: Opt-Out-Import Integration Tests
+name: Opt-Out-Import Integration Tests (Greenfield)
 
 on:
   pull_request:
     paths:
-      - .github/workflows/opt-out-import-test-integration.yml
-      - .github/workflows/opt-out-import-deploy.yml
-      - .github/workflows/deploy_go_lambda.yml
+      - .github/workflows/opt-out-import-test-integration-gf.yml
+      - .github/workflows/opt-out-import-deploy-gf.yml
+      - .github/workflows/deploy_go_lambda_gf.yml
       - lambda/opt-out-import/**
   workflow_dispatch:
 
@@ -13,14 +13,15 @@ on:
 concurrency:
   group: opt-out-import-test-integration
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   # Deploy first if triggered by pull_request
   deploy:
     if: ${{ github.event_name == 'pull_request' }}
-    uses: ./.github/workflows/opt-out-import-deploy.yml
-    permissions:
-      id-token: write
-      contents: read
+    uses: ./.github/workflows/opt-out-import-deploy-gf.yml
     with:
       env: test
     secrets: inherit
@@ -31,7 +32,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: self-hosted
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     defaults:
       run:
         working-directory: ./lambda/opt-out-import
@@ -46,12 +47,12 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
           # Note that we use the BFD role with access to the bucket
-          role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/bfd-test-eft-dpc-bucket-role
+          role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/delegatedadmin/developer/bfd-test-eft-dpc-ct-bucket-role
           role-chaining: true
           role-skip-session-tagging: true
       - name: Upload test file to the BFD bucket to trigger lambda function via SNS message
@@ -69,17 +70,17 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: self-hosted
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
           # Note that we use the BFD role with access to the bucket
-          role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/bfd-test-eft-dpc-bucket-role
+          role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/delegatedadmin/developer/bfd-test-eft-dpc-ct-bucket-role
           role-chaining: true
           role-skip-session-tagging: true
       - name: Verify confirmation file put in bucket
@@ -100,14 +101,14 @@ jobs:
   verify-db-changes:
     if: ${{ always() && needs.trigger.result == 'success' }}
     needs: trigger
-    runs-on: self-hosted
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     env:
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
     steps:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
       - name: Get database credentials
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:

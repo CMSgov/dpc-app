@@ -151,7 +151,7 @@ RSpec.feature 'updating users' do
  
   scenario 'sending sandbox email to user added to a sandbox org' do
     allow(ENV).to receive(:[]).and_call_original
-    allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
+    allow(ENV).to receive(:[]).with('ENV').and_return('sandbox')
 
     stub_api_client(
       message: :create_organization,

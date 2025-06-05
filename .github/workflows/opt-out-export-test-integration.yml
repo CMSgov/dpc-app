@@ -18,6 +18,9 @@ jobs:
   deploy:
     if: ${{ github.event_name == 'pull_request' }}
     uses: ./.github/workflows/opt-out-export-deploy.yml
+    permissions:
+      id-token: write
+      contents: read
     with:
       env: test
     secrets: inherit
