@@ -90,4 +90,9 @@ ignore:
     - '*':
         reason: false positive; already upgraded
         created: 2021-12-22T12:46:0.0Z
+  "pkg:maven/org.jooq/jooq":
+    - reason: "Incompatible with JDK 17"
+      created: 2025-06-05T13:22:0.0Z
+      versions:
+        - ">=3.20.0"
 patch: {}
