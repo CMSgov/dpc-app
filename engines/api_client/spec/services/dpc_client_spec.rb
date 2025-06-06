@@ -18,6 +18,7 @@ RSpec.describe DpcClient do
     allow(ENV).to receive(:fetch).with('API_METADATA_URL').and_return('http://dpc.example.com')
     allow(ENV).to receive(:fetch).with('API_ADMIN_URL').and_return('http://dpc.example.com')
     allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON').and_return('MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo')
+    allow(ENV).to receive(:fetch).with('ALLOW_INVALID_SSL_CERT').and_return('false')
   end
   # rubocop:enable Layout/LineLength
 
@@ -737,6 +738,67 @@ RSpec.describe DpcClient do
         api_client = DpcClient.new
         api_client.healthcheck
         expect(api_client.response_status).to eq(500)
+      end
+    end
+  end
+
+  describe 'check ssl settings' do
+    before do
+      # Force healthcheck to go over https for these tests
+      allow(ENV).to receive(:fetch).with('API_ADMIN_URL').and_return('https://dpc.example.com')
+      allow(Rails.env).to receive(:development?).and_return(false)
+      allow(Rails.env).to receive(:test?).and_return(false)
+    end
+
+    context 'not ignoring ssl errors' do
+      it 'sets open ssl verify mode to peer' do
+        stub_request(:get, 'https://dpc.example.com/healthcheck')
+          .with(
+            headers: {
+              'Accept' => 'application/json',
+              'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+              'Content-Type' => 'application/json',
+              'User-Agent' => 'Ruby'
+            }
+          )
+          .to_return(status: 200, body: '', headers: {})
+
+        http_stub = instance_double(Net::HTTP)
+        allow(Net::HTTP).to receive(:new).and_return(http_stub)
+        # Let the request error out, we only care about the SSL settings
+        allow(http_stub).to receive(:request).and_raise(Socket::ResolutionError)
+        expect(http_stub).to receive(:use_ssl=).with(true)
+        expect(http_stub).to receive(:verify_mode=).with(OpenSSL::SSL::VERIFY_PEER)
+
+        api_client = DpcClient.new
+        api_client.healthcheck
+      end
+    end
+
+    context 'ignoring ssl errors' do
+      it 'sets open ssl verify mode to none' do
+        allow(ENV).to receive(:fetch).with('ALLOW_INVALID_SSL_CERT').and_return('true')
+
+        stub_request(:get, 'https://dpc.example.com/healthcheck')
+          .with(
+            headers: {
+              'Accept' => 'application/json',
+              'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+              'Content-Type' => 'application/json',
+              'User-Agent' => 'Ruby'
+            }
+          )
+          .to_return(status: 200, body: '', headers: {})
+
+        http_stub = instance_double(Net::HTTP)
+        allow(Net::HTTP).to receive(:new).and_return(http_stub)
+        # Let the request error out, we only care about the SSL settings
+        allow(http_stub).to receive(:request).and_raise(Socket::ResolutionError)
+        expect(http_stub).to receive(:use_ssl=).with(true)
+        expect(http_stub).to receive(:verify_mode=).with(OpenSSL::SSL::VERIFY_NONE)
+
+        api_client = DpcClient.new
+        api_client.healthcheck
       end
     end
   end

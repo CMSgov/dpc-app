@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -55,8 +56,7 @@ public class JobQueueBatchFile implements Serializable {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof JobQueueBatchFileID)) return false;
-            JobQueueBatchFileID that = (JobQueueBatchFileID) o;
+            if (!(o instanceof JobQueueBatchFileID that)) return false;
             return sequence == that.sequence &&
                     batchID.equals(that.batchID) &&
                     resourceType == that.resourceType;
@@ -107,9 +107,13 @@ public class JobQueueBatchFile implements Serializable {
     @Column(name = "file_length")
     private long fileLength;
 
+    @Transient
+    private long patientFileSize;
+
     public JobQueueBatchFile() {
         // for hibernate
     }
+
 
     public JobQueueBatchFile(UUID jobID, UUID batchID, DPCResourceType resourceType, int sequence, int count) {
         this.jobQueueBatchFileID = new JobQueueBatchFileID(batchID, resourceType, sequence);
@@ -166,11 +170,18 @@ public class JobQueueBatchFile implements Serializable {
         this.fileLength = fileLength;
     }
 
+    public long getPatientFileSize() {
+        return patientFileSize;
+    }
+
+    public void setPatientFileSize(long patientFileSize) {
+        this.patientFileSize = patientFileSize;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof JobQueueBatchFile)) return false;
-        JobQueueBatchFile that = (JobQueueBatchFile) o;
+        if (!(o instanceof JobQueueBatchFile that)) return false;
         return jobQueueBatchFileID.equals(that.jobQueueBatchFileID) &&
                 jobID.equals(that.jobID);
     }

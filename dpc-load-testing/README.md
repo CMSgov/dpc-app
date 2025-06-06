@@ -14,7 +14,13 @@ In GitHub Actions, the load tests must be manually triggered. Developers can run
 
 Environment variables are stored in Ansible Vault. These will all populate automatically when you run the make command. To test locally, follow these steps:
 1. Run `yarn` in order to get IDE integration for K6 libraries. 
-2. Run `make start-load-tests`.
+2. Run `make load-tests`.
+
+This will trigger the build of a new API environment with `AUTH_DISABLED=true`. It then triggers the load test suite to run, and finally tears down the new API environment.
+
+#### Unit Testing
+
+A few of our utilities require unit tests, which live in the `__tests__` directory. Run unit tests by running `yarn test` from this directory.
 
 ### A note on modules
 

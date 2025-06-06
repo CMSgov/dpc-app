@@ -28,7 +28,8 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicReference;
+
 
 import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBI;
 import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBIs;
@@ -127,10 +128,19 @@ public class JobBatchProcessor {
                 .blockingGet();
         queue.completePartialBatch(job, aggregatorID);
 
-        final String resourcesRequested = job.getResourceTypes().stream().map(DPCResourceType::getPath).collect(Collectors.joining(";"));
+        AtomicReference<String> fileSize = new AtomicReference<>("");
+        results.forEach(file -> {
+                    if (file.getResourceType() != null) {
+                        fileSize.set(fileSize + file.getResourceType().name() + ":" + file.getPatientFileSize() + ";");
+                    }
+                });
+
+        double durationInSeconds = stopWatch.getDuration().getSeconds() + ((double) stopWatch.getDuration().getNano() / 1000000000);
         final String failReasonLabel = failReason.map(Enum::name).orElse("NA");
         stopWatch.stop();
-        logger.info("dpcMetric=DataExportResult,dataRetrieved={},failReason={},resourcesRequested={},duration={}", failReason.isEmpty(), failReasonLabel, resourcesRequested, stopWatch.getDuration());
+        String patientId = optPatient.isPresent() ? optPatient.get().getId() : "-1";
+        logger.info("dpcMetric=DataExportResult,PatientId={}, AggregatorId={}, dataRetrieved={},failReason={},duration={} , resourceFileSizes={}",
+                patientId, aggregatorID,failReason.isEmpty(), failReasonLabel, durationInSeconds,fileSize.get());
         return results;
     }
 
@@ -184,9 +194,15 @@ public class JobBatchProcessor {
             if (!passesLookBack(answers)) {
                 OutcomeReason failReason = LookBackAnalyzer.analyze(answers);
                 return Pair.of(
-                        Flowable.just(AggregationUtils.toOperationOutcome(failReason, FHIRExtractors.getPatientMBI(patient))),
-                        failReason
-                        );
+                    Flowable.just(
+                        AggregationUtils.toOperationOutcome(
+                            failReason,
+                            patient.getId(),
+                            OperationOutcome.IssueType.SUPPRESSED
+                        )
+                    ),
+                    failReason
+                );
             }
         }
 

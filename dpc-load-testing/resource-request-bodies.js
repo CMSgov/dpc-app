@@ -118,3 +118,85 @@ export function generatePatientResourceBody(mbi) {
     "resourceType": "Patient"
   }
 }
+
+export function generateGroupResourceBody(practitionerNpi, patientId) {
+  const groupResource = 
+  {
+    "resourceType": "Group",
+    "type": "person",
+    "actual": true,
+    "active": true,
+    "characteristic": [
+      {
+        "code": {
+          "coding": [
+            {
+                "code": "attributed-to"
+            }
+          ]
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+                "system": "http://hl7.org/fhir/sid/us-npi",
+                "code": practitionerNpi
+            }
+          ]
+        }
+      }
+    ]
+  }
+
+  if (patientId != undefined) {
+    groupResource["member"] = [
+      {
+        "entity": {
+          "reference": "Patient/" + patientId
+        }
+      }
+    ];
+  };
+  
+  return groupResource;
+}
+
+export function generateProvenanceResourceBody(orgId, practitionerId) {
+    return {
+      "resourceType":"Provenance",
+      "meta":
+        {
+        "profile": [
+            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attestation"
+        ]
+        },
+        "recorded":"2024-10-25T18:39:41.042Z",
+        "reason": [
+        {
+            "system":"http://hl7.org/fhir/v3/ActReason",
+            "code": "TREAT"
+        }
+        ],
+        "agent": [
+          {
+            "role": [
+              {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/v3/RoleClass",
+                    "code": "AGNT"
+                  }
+                ]
+              }
+            ],
+            "whoReference": 
+            {
+                "reference":"Organization/" + orgId
+            },
+            "onBehalfOfReference": 
+            {
+                "reference":"Practitioner/" + practitionerId
+            }
+          }
+        ]
+    }
+}

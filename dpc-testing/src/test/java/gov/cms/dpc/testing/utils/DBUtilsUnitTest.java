@@ -30,7 +30,7 @@ class DBUtilsUnitTest {
 
 	@Test
 	void test_truncateAllTables_will_not_run_in_prod_sbx() {
-		envVars.set("ENV", "prod-sbx");
+		envVars.set("ENV", "sandbox");
 
 		assertThrows(NotATestEnvironmentException.class, () -> {
 			DBUtils.truncateAllTables(context, "public");

@@ -2,12 +2,21 @@ name: DPC Load Test
 
 on:
   workflow_dispatch:
+    inputs:
+      test_type:
+        description: Load test script to run
+        required: true
+        type: choice
+        options:
+          - single-iteration
+          - average-load-test
+          - stress-test
+        default: single-iteration
 
 jobs:
   run-load-test:
     name: "Run DPC API Load Test"
     runs-on: self-hosted
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,23 +30,31 @@ jobs:
             -e NR_ACCOUNT_ID=${{ secrets.NEW_RELIC_ACCOUNT_ID }} \
             -e NR_API_KEY=${{ secrets.LOAD_TEST_NEW_RELIC_API_KEY }} \
             -p 8125:8125/udp \
-            newrelic/nri-statsd:latest
+            artifactory.cloud.cms.gov/docker/newrelic/nri-statsd:latest
 
       # StatsD integration is deprecated in current K6 version; need to build custom K6 build,
       # see https://grafana.com/docs/k6/latest/results-output/real-time/statsd/
       - name: Build K6 with xk6-output-statsd
         run: |
-          docker run --rm -i -u "$(id -u):$(id -g)" -v "${PWD}:/xk6" grafana/xk6 build \
+          docker run --rm -i -u "$(id -u):$(id -g)" -v "${PWD}:/xk6" \
+            artifactory.cloud.cms.gov/docker/grafana/xk6 build \
             --with github.com/LeonAdato/xk6-output-statsd
+
+      - name: Set env vars from AWS params
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            GOLDEN_MACAROON=/dpc/test/web/golden_macaroon
 
       - name: Run K6 with StatsD output
         env:
-          LOAD_TEST_ORGANIZATION_ID: ${{ secrets.LOAD_TEST_ORGANIZATION_ID }}
-          API_ADMIN_URL: ${{ secrets.API_ADMIN_URL }}
+          TEST_TYPE: ${{ inputs.test_type }}
         run: |
           ./k6 run \
             --out output-statsd=addr=localhost:8125,enableTags=true \
-            ./dpc-app/dpc-load-testing/script.js
+            ./dpc-app/dpc-load-testing/${{ inputs.test_type }}.js
 
       - name: Cleanup StatsD Container
         if: always()

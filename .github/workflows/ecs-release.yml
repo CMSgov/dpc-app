@@ -1,15 +1,6 @@
 name: 'DPC - Build and Deploy'
 
 on:
-  schedule:
-    - cron: '0 6 * * 1-5'
-  push:
-    branches:
-      - main
-    paths:
-      - dpc-**
-      - engines/**
-
   workflow_dispatch:
     inputs:
       env:
@@ -27,10 +18,32 @@ on:
         required: false
         type: 'string'
         default: 'main'
-      
+
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: 'string'
+        default: 'dev'
+      confirm_env:
+        description: Double check for environment
+        required: true
+        type: 'string'
+        default: ''
+      ops-ref:
+        description: Branch of dpc-ops to use
+        required: false
+        type: 'string'
+        default: 'main'
+
 concurrency:
   group: release-to-${{ inputs.env || 'dev' }}
   cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   set-parameters:

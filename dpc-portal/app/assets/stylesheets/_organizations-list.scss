@@ -1,0 +1,21 @@
+$visited-blue-link-color: #005ea2;
+
+.visited\:text-blue{
+  color: $visited-blue-link-color;
+
+  &:visited {
+    color: $visited-blue-link-color;
+  }
+}
+
+.truncate-text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-bg-transparent {
+  th, td {
+    background-color: transparent;
+  }
+}

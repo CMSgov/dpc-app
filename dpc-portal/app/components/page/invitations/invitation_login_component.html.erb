@@ -12,5 +12,5 @@
   Sign in with <span class="login-button__logo">Login.gov</span>
   <% end %>
   <%= render(Core::Navigation::SystemUseAgreementLinkComponent.new) %>
-  <div><%= link_to 'How to verify your identity', 'https://login.gov/help/verify-your-identity/how-to-verify-your-identity/' %> <%= link_to 'Login.gov FAQ', 'https://www.login.gov/help/', class: 'margin-left-2' %></div>
+  <div><%= link_to 'How to verify your identity', 'https://login.gov/help/verify-your-identity/how-to-verify-your-identity/', target: :_blank %> <%= link_to 'Login.gov help', 'https://www.login.gov/help/', target: :_blank, class: 'margin-left-2' %></div>
 </div>

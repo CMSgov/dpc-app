@@ -76,8 +76,7 @@ public class SeedProcessor {
                             .setInactive(false)
                             .setEntity(ref);
                     return member;
-                })
-                .collect(Collectors.toList());
+                }).toList();
 
         return group.setMember(members);
     }
@@ -97,10 +96,10 @@ public class SeedProcessor {
         // Add the Organization ID
         FHIRBuilders.addOrganizationTag(practitioner, organizationID);
 
-        bundle.addEntry().setResource(practitioner).setFullUrl("http://something.gov/" + practitioner.getIdentifierFirstRep().getValue());
-
+        // Generate bundle entries
+        List<Bundle.BundleEntryComponent> componentList = new ArrayList<>();
         entry.getValue()
-                .forEach((value) -> {
+                .forEach(value -> {
                     // Add some random values to the patient
                     final Patient patient = new Patient();
                     patient.addIdentifier().setValue(value.getRight()).setSystem(DPCIdentifierSystem.MBI.getSystem());
@@ -111,8 +110,19 @@ public class SeedProcessor {
                     final Bundle.BundleEntryComponent component = new Bundle.BundleEntryComponent();
                     component.setResource(patient);
                     component.setFullUrl("http://something.gov/" + patient.getIdentifierFirstRep().getValue());
-                    bundle.addEntry(component);
+                    componentList.add(component);
                 });
+
+        // Sort patients by ID to avoid test errors
+        componentList.sort(Comparator.comparing(component ->
+                ((Patient) component.getResource()).getIdentifierFirstRep().getValue()
+        ));
+        Bundle.BundleEntryComponent practitionerComponent = new Bundle.BundleEntryComponent()
+                .setResource(practitioner)
+                .setFullUrl("http://something.gov/" + practitioner.getIdentifierFirstRep().getValue());
+        componentList.add(0, practitionerComponent);
+        bundle.setEntry(componentList);
+
         return bundle;
     }
 
@@ -121,15 +131,15 @@ public class SeedProcessor {
         final CodeableConcept attributionConcept = new CodeableConcept();
         attributionConcept.addCoding().setCode("attributed-to");
 
-        final CodeableConcept NPIConcept = new CodeableConcept();
-        NPIConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(providerNPI);
+        final CodeableConcept npiConcept = new CodeableConcept();
+        npiConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(providerNPI);
         final Group rosterGroup = new Group();
         rosterGroup.setType(Group.GroupType.PERSON);
         rosterGroup.setActive(true);
         rosterGroup.addCharacteristic()
                 .setExclude(false)
                 .setCode(attributionConcept)
-                .setValue(NPIConcept);
+                .setValue(npiConcept);
         FHIRBuilders.addOrganizationTag(rosterGroup, UUID.fromString(organizationID));
 
         return rosterGroup;

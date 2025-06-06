@@ -29,6 +29,9 @@ jobs:
   deploy:
     name: 'Deploy Opt Out Import'
     uses: ./.github/workflows/deploy_go_lambda.yml
+    permissions:
+      id-token: write
+      contents: read
     with:
       env: ${{ inputs.env || 'dev' }}
       project: opt-out-import

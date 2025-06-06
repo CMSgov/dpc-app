@@ -1,0 +1,131 @@
+name: 'DPC - Smoke Test (Greenfield)'
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: AWS environment to check
+        required: true
+        type: 'string'
+        default: 'dev'
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to check
+        required: true
+        type: 'string'
+        default: 'dev'
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: smoke-test-${{ inputs.env }}
+  cancel-in-progress: false
+
+jobs:
+  smoke-test:
+    name: Smoke Test (Greenfield)
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    steps:
+      - uses: slackapi/slack-github-action@v2.0.0
+        name: Slack Starting
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            attachments:
+              - color: warning
+                text: "Smoke test of `${{ inputs.env }}` has started"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: "Set up JDK 17"
+        uses: actions/setup-java@v4
+        with:
+          distribution: "corretto"
+          java-version: "17"
+      - name: Clean maven
+        run: |
+          mvn -ntp -U clean
+      - name: AWS Credentials (non-prod)
+        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+      - name: AWS Credentials (prod)
+        if: ${{ inputs.env == 'sandbox' || inputs.env == 'prod' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+      - name: Fetch admin host
+        id: fetch-admin-host
+        run: |
+          admin_host=`aws elbv2 describe-load-balancers --names dpc-${{ inputs.env }}-frontend-internal --query="LoadBalancers[0].DNSName" --output text`
+          echo "admin_host=$admin_host" >> "$GITHUB_OUTPUT"
+          echo "ELB_URL=http://$admin_host:9900/tasks" >> "$GITHUB_OUTPUT"
+      - name: Determine host
+        id: determine-host
+        run: |
+          HOST="https://${{ inputs.env }}.dpc.cms.gov"
+          echo "HOST=$HOST" >> "$GITHUB_OUTPUT"
+          echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
+      - name: Run Smoke Test
+        id: run-smoke-test
+        env:
+          ELB_URL: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
+          HOST_URL: ${{ steps.determine-host.outputs.HOST_URL }}
+          PORTAL_HOST: ${{ steps.determine-host.outputs.HOST }}
+          WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
+          WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
+          PUBLIC_URL: ${{ steps.determine-host.outputs.HOST }}
+        run: |
+          if [ "${{ inputs.env }}" = 'prod' ]; then
+            make smoke/prod
+          elif [ "${{ inputs.env }}" = 'sandbox' ]; then
+            make smoke/sandbox
+          else
+            make smoke/remote
+          fi
+      - name: Upload bzt logs
+        if: ${{ failure() && steps.run-smoke-test.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: bzt-logs
+          path: ./bzt-out
+      - uses: slackapi/slack-github-action@v2.0.0
+        name: Slack Success
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            attachments:
+              - color: good
+                text: "Smoke test of `${{ inputs.env }}` has succeeded"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer
+      - uses: slackapi/slack-github-action@v2.0.0
+        name: Slack failure
+        if: ${{ failure() }}
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            attachments:
+              - color: danger
+                text: "Smoke test of `${{ inputs.env }}` has failed"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer

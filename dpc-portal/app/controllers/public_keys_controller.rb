@@ -23,8 +23,9 @@ class PublicKeysController < ApplicationController
     )
 
     if new_public_key[:response]
+      CheckConfigCompleteJob.perform_later(@organization.id) unless @organization.config_complete
       log_credential_action(:public_key, new_public_key.dig(:message, 'id'), :add)
-      flash[:notice] = 'Public key successfully created.'
+      flash[:success] = 'Public key created successfully.'
       redirect_to organization_path(@organization, credential_start: true)
     else
       @errors = new_public_key[:errors]
@@ -37,7 +38,7 @@ class PublicKeysController < ApplicationController
     manager = PublicKeyManager.new(@organization.dpc_api_organization_id)
     if manager.delete_public_key(params)
       log_credential_action(:public_key, params[:id], :remove)
-      flash[:notice] = 'Public key successfully deleted.'
+      flash[:success] = 'Public key deleted successfully.'
       redirect_to organization_path(@organization, credential_start: true)
     else
       flash[:alert] = 'Public key could not be deleted.'

@@ -1,4 +1,4 @@
-name: Api-Waf-Sync Deploy
+name: Api-Waf-Sync Deploy (Greenfield)
 
 on:
   workflow_call:
@@ -23,14 +23,17 @@ on:
     paths:
       - lambda/api-waf-sync/**
       - .github/workflows/api-waf-sync-deploy.yml
-      - .github/workflows/deploy_go_lambda.yml
+      - .github/workflows/deploy_go_lambda_gf.yml
 
 jobs:
   deploy:
     name: 'Deploy API WAF sync'
-    uses: ./.github/workflows/deploy_go_lambda.yml
+    uses: ./.github/workflows/deploy_go_lambda_gf.yml
+    permissions:
+      id-token: write
+      contents: read
     with:
-      env: dev # ${{ inputs.env || 'dev' }} currently only available on dev
+      env: ${{ inputs.env || 'dev' }}
       project: api-waf-sync
       go_files: "main.go db.go aws.go"
     secrets: inherit

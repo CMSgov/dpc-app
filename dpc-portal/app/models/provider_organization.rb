@@ -24,6 +24,11 @@ class ProviderOrganization < ApplicationRecord
     SyncOrganizationJob.perform_later(id) unless dpc_api_organization_id.present?
   end
 
+  def check_config_complete
+    self.config_complete = public_ips.present? && public_keys.present? && client_tokens.present?
+    save
+  end
+
   def public_keys
     @keys ||= []
     if dpc_api_organization_id.present?
@@ -57,6 +62,13 @@ class ProviderOrganization < ApplicationRecord
 
   def path_id
     id
+  end
+
+  def ao
+    user = User.joins(:ao_org_links).find_by(ao_org_links: { provider_organization: self, verification_status: true })
+    return '' if user.nil?
+
+    "#{user.given_name} #{user.family_name}"
   end
 
   private

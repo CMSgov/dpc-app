@@ -10,8 +10,8 @@ en:
     cd_accepted_text: If you meant to accept a different invite, check your inbox for the correct invitation. Otherwise you are approved to manage this organization.
     ao_expired_status:  Your registration link has expired.
     ao_expired_text: You've exceeded the 48-hour expiration period.
-    cd_expired_status: Your invite is no longer valid.
-    cd_expired_text: "Contact the Authorized Official (AO) who sent you the invite code at %{ao_email} to ask for a new one."
+    cd_expired_status: Your registration link has expired.
+    cd_expired_text: "Contact the designated Authorized Official (AO) at %{ao_email}. The AO will need to sign in to the DPC Portal and create a new invite."
     ao_renewed_status: You already requested a new invite.
     ao_renewed_text: Please check your email. We sent you a message which includes a new link.
     invalid_status: Your link is invalid.
@@ -36,6 +36,11 @@ en:
     server_error_text: We're experiencing a temporary outage due to an external system error. Please try again later. 
     manage_org: Manage your organization.
     tos_not_signed: You must sign DPC Terms of Service.
+    sign_tos: Sign terms of service
+    configuration_needed: Configuration needed
+    configuration_complete: Configuration complete
+    api_disabled: API disabled
+    access_denied: Access denied
   cd_access:
     no_approved_enrollment_status: This organization is not currently approved by Medicare.
     no_approved_enrollment_text: This organization must have an approved enrollment status with Medicare to access beneficiary claims data.
@@ -43,6 +48,11 @@ en:
     org_med_sanctions_text: This organization is listed as an excluded entity by the Office of Inspector General (OIG), which prohibits it from accessing beneficiary claims data.
     manage_org: Manage credentials.
     tos_not_signed: DPC Terms of Service not yet signed.
+    sign_tos: Sign terms of service
+    configuration_needed: Configuration needed
+    configuration_complete: Configuration complete
+    api_disabled: API disabled
+    access_denied: Access denied
   errors:
     attributes:
       base:

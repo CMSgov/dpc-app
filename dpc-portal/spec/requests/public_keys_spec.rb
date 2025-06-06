@@ -169,26 +169,40 @@ RSpec.describe 'PublicKeys', type: :request do
       let!(:user) { create(:user) }
       let(:org_api_id) { SecureRandom.uuid }
       let!(:org) { create(:provider_organization, terms_of_service_accepted_by:, dpc_api_organization_id: org_api_id) }
-
+      let(:success_params) do
+        { label: 'New Key',
+          public_key: file_fixture('stubbed_key.pem').read,
+          snippet_signature: 'test snippet signature' }
+      end
       before do
         create(:cd_org_link, provider_organization: org, user:)
         sign_in user
       end
 
       it 'succeeds with params' do
-        api_client = stub_api_client(message: :get_organization,
-                                     response: default_get_org_response(org_api_id))
         stub_self_returning_api_client(message: :create_public_key,
-                                       response: default_get_public_keys['entities'].first,
-                                       api_client:)
-        post "/organizations/#{org.id}/public_keys", params: {
-          label: 'New Key',
-          public_key: file_fixture('stubbed_key.pem').read,
-          snippet_signature: 'test snippet signature'
-        }
-        expect(flash[:notice]).to eq('Public key successfully created.')
+                                       response: default_get_public_keys['entities'].first)
+        post "/organizations/#{org.id}/public_keys", params: success_params
+        expect(flash[:success]).to eq('Public key created successfully.')
         expect(assigns(:organization)).to eq org
         expect(response).to redirect_to(organization_path(org, credential_start: true))
+      end
+
+      it 'checks if configuration complete on success' do
+        config_complete_checker = class_double('CheckConfigCompleteJob').as_stubbed_const
+        expect(config_complete_checker).to receive(:perform_later).with(org.id)
+        stub_self_returning_api_client(message: :create_public_key,
+                                       response: default_get_public_keys['entities'].first)
+        post "/organizations/#{org.id}/public_keys", params: success_params
+      end
+
+      it 'does not check configuration complete on success if already configured' do
+        config_complete_checker = class_double('CheckConfigCompleteJob').as_stubbed_const
+        expect(config_complete_checker).to_not receive(:perform_later).with(org.id)
+        org.update_attribute(:config_complete, true)
+        stub_self_returning_api_client(message: :create_public_key,
+                                       response: default_get_public_keys['entities'].first)
+        post "/organizations/#{org.id}/public_keys", params: success_params
       end
 
       it 'fails if missing params' do
@@ -198,6 +212,12 @@ RSpec.describe 'PublicKeys', type: :request do
                                        snippet_signature: "Signature snippet can't be blank.",
                                        label: "Label can't be blank.",
                                        root: "Fields can't be blank.")
+      end
+
+      it 'does not check for complete on failure' do
+        config_complete_checker = class_double('CheckConfigCompleteJob').as_stubbed_const
+        expect(config_complete_checker).to_not receive(:perform_later).with(org.id)
+        post "/organizations/#{org.id}/public_keys"
       end
 
       it 'fails if label over 25 characters' do
@@ -256,7 +276,7 @@ RSpec.describe 'PublicKeys', type: :request do
                                        with: [org_api_id, key_guid],
                                        api_client:)
         delete "/organizations/#{org.id}/public_keys/#{key_guid}"
-        expect(flash[:notice]).to eq('Public key successfully deleted.')
+        expect(flash[:success]).to eq('Public key deleted successfully.')
         expect(response).to redirect_to(organization_path(org, credential_start: true))
       end
 

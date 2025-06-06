@@ -1,0 +1,107 @@
+name: utility-deploy-go-lambda (Greenfield)
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: string
+      project:
+        description: Project name
+        required: true
+        type: string
+      go_files:
+        description: space-delimited go files
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    name: "Build and Deploy Lambda"
+    if: ${{ inputs.env != 'prod' }}
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    defaults:
+      run:
+        working-directory: ./lambda/${{ inputs.project }}
+    environment: ${{ inputs.env }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+      - name: Build ${{ inputs.project }} zip file
+        env:
+          CGO_ENABLED: 0
+        run: |
+          go build -o bootstrap ${{ inputs.go_files }}
+          zip function.zip bootstrap
+      - name: AWS Credentials (non-prod) # there are no go lambdas on sandbox, so do not need to worry about non-prod credentials for this step
+        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+      - name: retrieve s3 bucket
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            LAMBDA_BUCKET_NAME=/dpc/${{ inputs.env }}/dpc-${{ inputs.env }}-${{ inputs.project }}-bucket
+
+      - name: Upload and reload
+        env:
+          LABEL: ${{ inputs.env }}-${{ inputs.project }}
+        run: |
+          aws s3 cp --no-progress function.zip \
+          "s3://${LAMBDA_BUCKET_NAME}/function-${{ github.sha }}.zip"
+          aws lambda update-function-code --function-name "dpc-${LABEL}" \
+          --s3-bucket "$LAMBDA_BUCKET_NAME" --s3-key function-${{ github.sha }}.zip
+
+  promote:
+    name: "Promote to prod"
+    if: ${{ inputs.env == 'prod' }}
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: AWS Credentials (non-prod)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+      - name: retrieve test S3 bucket
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            TEST_LAMBDA_BUCKET_NAME=/dpc/test/dpc-test-${{ inputs.project }}-bucket
+      - name: Download lambda code from test
+        run: |
+          aws s3 cp --no-progress \
+            "s3://${TEST_LAMBDA_BUCKET_NAME}/function-${{ github.sha }}.zip" \
+            function.zip
+      - name: AWS Credentials (prod)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-github-actions
+      - name: retrieve prod S3 bucket
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            PROD_LAMBDA_BUCKET_NAME=/dpc/prod/dpc-prod-${{ inputs.project }}-bucket
+      - name: Promote lambda code to prod
+        run: |
+          aws s3 cp --no-progress \
+            function.zip \
+            "s3://${PROD_LAMBDA_BUCKET_NAME}/function-${{ github.sha }}.zip"
+          aws lambda update-function-code --function-name dpc-prod-${{ inputs.project }} \
+            --s3-bucket $PROD_LAMBDA_BUCKET_NAME --s3-key function-${{ github.sha }}.zip
