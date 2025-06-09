@@ -1,8 +1,5 @@
 package gov.cms.dpc.aggregation.service;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import jakarta.inject.Named;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Consent;
 
@@ -11,10 +8,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ConsentServiceImpl implements ConsentService {
-    private final IGenericClient consentClient;
 
-    public ConsentServiceImpl(@Named("consentClient") IGenericClient consentClient){
-        this.consentClient = consentClient;
+    public ConsentServiceImpl(){
     }
 
     @Override
@@ -41,16 +36,6 @@ public class ConsentServiceImpl implements ConsentService {
     }
 
     private Bundle doConsentSearch(List<String> mbis){
-        List<String> fullMbis = mbis.stream()
-                .map( mbi -> String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), mbi) )
-                .collect(Collectors.toList());
-
-        return consentClient
-            .search()
-            .forResource(Consent.class)
-            .encodedJson()
-            .returnBundle(Bundle.class)
-            .where(Consent.PATIENT.hasAnyOfIds(fullMbis))
-            .execute();
+        return new Bundle();
     }
 }

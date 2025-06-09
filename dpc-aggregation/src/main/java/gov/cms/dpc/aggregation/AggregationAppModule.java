@@ -1,8 +1,6 @@
 package gov.cms.dpc.aggregation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
@@ -14,7 +12,6 @@ import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
-import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import jakarta.inject.Named;
@@ -123,23 +120,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     }
 
     @Provides
-    @Singleton
-    @Named("consentClient")
-    public IGenericClient provideConsentClient(@Named("fhirContextConsentSTU3") FhirContext ctx) {
-        FHIRClientConfiguration clientConfiguration = configuration().getConsentClientConfiguration();
-        String serviceUrl = clientConfiguration.getServerBaseUrl();
-
-        logger.info("Connecting to consent server at {}.", serviceUrl);
-        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        ctx.getRestfulClientFactory().setSocketTimeout(clientConfiguration.getTimeouts().getSocketTimeout());
-        ctx.getRestfulClientFactory().setConnectTimeout(clientConfiguration.getTimeouts().getConnectionTimeout());
-        ctx.getRestfulClientFactory().setConnectionRequestTimeout(clientConfiguration.getTimeouts().getRequestTimeout());
-
-        return ctx.newRestfulGenericClient(serviceUrl);
-    }
-
-    @Provides
-    ConsentService provideConsentService(@Named("consentClient") IGenericClient consentClient) {
-        return new ConsentServiceImpl(consentClient);
+    ConsentService provideConsentService() {
+        return new ConsentServiceImpl();
     }
 }

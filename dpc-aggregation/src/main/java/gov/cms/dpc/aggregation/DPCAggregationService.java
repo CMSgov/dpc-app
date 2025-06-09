@@ -6,7 +6,6 @@ import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
-import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -14,7 +13,6 @@ import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.DataSourceFactory;
-import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 
@@ -72,9 +70,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
 
     @Override
     public void run(DPCAggregationConfiguration configuration, Environment environment) {
-        EnvironmentParser.getEnvironment("Aggregation");
 
         // Http healthchecks on dependent services
-        environment.healthChecks().register("dpc-consent", new HttpHealthCheck(configuration.getConsentHealthCheckURL()));
     }
 }
