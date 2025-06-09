@@ -41,7 +41,7 @@ jobs:
           echo "PATH=$PATH" >> $GITHUB_ENV
           if mvn -v; then echo "Maven already installed" && exit 0; else echo "Installing Maven"; fi
           tmpdir="$(mktemp -d)"
-          curl -LsS https://downloads.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz | tar xzf - -C "$tmpdir"
+          curl -LsS https://downloads.apache.org/maven/maven-3/3.9.10/binaries/apache-maven-3.9.10-bin.tar.gz | tar xzf - -C "$tmpdir"
           sudo rm -rf /opt/maven
           sudo mv "$tmpdir/apache-maven-3.9.9" /opt/maven
       - name: Clean maven
