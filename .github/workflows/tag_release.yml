@@ -21,8 +21,6 @@ on:
 jobs:
   tag_repo:
     name: Tag Repository
-    permissions:
-      contents: write
     runs-on: ${{ inputs.runner }}
     outputs:
       next_rev: ${{ steps.set_revs.outputs.next_rev }}
