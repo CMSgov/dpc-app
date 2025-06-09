@@ -17,7 +17,6 @@ on:
       tag:
         description: the release tag
         value: ${{ jobs.tag_repo.outputs.next_rev }}
-
 jobs:
   tag_repo:
     name: Tag Repository
