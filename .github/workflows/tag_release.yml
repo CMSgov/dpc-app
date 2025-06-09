@@ -17,6 +17,10 @@ on:
       tag:
         description: the release tag
         value: ${{ jobs.tag_repo.outputs.next_rev }}
+
+permissions:
+  contents: write
+
 jobs:
   tag_repo:
     name: Tag Repository
