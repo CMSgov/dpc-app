@@ -18,12 +18,11 @@ on:
         description: the release tag
         value: ${{ jobs.tag_repo.outputs.next_rev }}
 
-permissions:
-  contents: write
-
 jobs:
   tag_repo:
     name: Tag Repository
+    permissions:
+      contents: write
     runs-on: ${{ inputs.runner }}
     outputs:
       next_rev: ${{ steps.set_revs.outputs.next_rev }}
