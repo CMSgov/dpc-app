@@ -170,7 +170,7 @@
             <dependency>
                 <groupId>ru.vyarus</groupId>
                 <artifactId>dropwizard-guicey</artifactId>
-                <version>7.1.4</version>
+                <version>7.2.1</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.eclipse.jetty</groupId>
