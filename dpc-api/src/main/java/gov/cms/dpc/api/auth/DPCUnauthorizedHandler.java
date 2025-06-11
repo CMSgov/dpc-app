@@ -22,7 +22,7 @@ public class DPCUnauthorizedHandler implements UnauthorizedHandler {
         final var outcome = new OperationOutcome();
         final var coding = new Coding();
         final var concept = new CodeableConcept();
-        coding.setSystem("http://hl7.org/fhir/ValueSet/operation-outcome");
+        coding.setSystem("http://hl7.org/fhir/operation-outcome");
         coding.setCode("MSG_AUTH_REQUIRED");
         concept.addCoding(coding);
         concept.setText("HTTP 401 Unauthorized, Credentials are required to access this resource.");
