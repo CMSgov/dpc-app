@@ -107,10 +107,6 @@
             <artifactId>dropwizard-json-logging</artifactId>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback.access</groupId>
-            <artifactId>logback-access-common</artifactId>
-        </dependency>
-        <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-validation</artifactId>
             <version>${hapi.fhir.version}</version>
