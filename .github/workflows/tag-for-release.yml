@@ -13,6 +13,8 @@ on:
 jobs:
   tag-dpc-app:
     name: "Tag dpc-app"
+    permissions:
+      contents: write
     uses: ./.github/workflows/tag_release.yml
     with:
       repo_ref: ${{ inputs.repo_ref }}
