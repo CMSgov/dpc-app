@@ -11,17 +11,12 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	awsv2 "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	stscredsv2 "github.com/aws/aws-sdk-go-v2/credentials/stscreds"
+	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
-	s3v2 "github.com/aws/aws-sdk-go-v2/service/s3"
-	stsv2 "github.com/aws/aws-sdk-go-v2/service/sts"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/smithy-go/logging"
 
 	"github.com/ianlopshire/go-fixedwidth"
@@ -34,7 +29,7 @@ var createConnectionVar = createConnection
 // Used for dependency injection.  Allows us to easily mock these function in unit tests.
 type (
 	// s3manager.NewUploader.upload
-	S3Uploader func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error)
+	S3Uploader func(ctx context.Context, input *s3.PutObjectInput, opts ...func(*manager.Uploader)) (*manager.UploadOutput, error)
 
 	// fixedWidth.Marshal
 	FileMarshaler func(v interface{}) ([]byte, error)
@@ -185,7 +180,7 @@ func importResponseFile(bucket string, file string) (int, int, string, error) {
 		log.Warning("Failed to create session for uploading confirmation file")
 		return createdOptOutCount, createdOptInCount, confirmationFileName, err
 	} else {
-		if err = uploadConfirmationFile(bucket, confirmationFileName, s3manager.NewUploader(sess).Upload, confirmationFile); err != nil {
+		if err = uploadConfirmationFile(bucket, confirmationFileName, manager.NewUploader(s3.NewFromConfig(sess)).Upload, confirmationFile); err != nil {
 			log.Warning("Failed to write upload confirmation file")
 			return createdOptOutCount, createdOptInCount, confirmationFileName, err
 		}
@@ -194,92 +189,66 @@ func importResponseFile(bucket string, file string) (int, int, string, error) {
 	return createdOptOutCount, createdOptInCount, confirmationFileName, err
 }
 
-func createV2Cfg() (*awsv2.Config, error) {
-	// disable default logging from aws-sdk-go-v2
+var createSession = func() (aws.Config, error) {
+	if isTesting {
+		return config.LoadDefaultConfig(context.TODO(),
+			config.WithSharedConfigProfile("default"),
+			config.WithRegion("us-east-1"),
+			config.WithEndpointResolver(
+				aws.EndpointResolverFunc(func(service, region string) (aws.Endpoint, error) {
+					return aws.Endpoint{
+						PartitionID:   "aws",
+						URL:           "http://localstack:4566",
+						SigningRegion: "us-east-1",
+					}, nil
+				}),
+			),
+		)
+	}
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion("us-east-1"), config.WithLogger(logging.Nop{}))
 	if err != nil {
-		return nil, err
+		return cfg, err
 	}
 
 	assumeRoleArn, err := getAssumeRoleArn()
 	if err != nil {
-		return nil, err
+		return cfg, err
 	}
 
-	client := stsv2.NewFromConfig(cfg)
-	creds := stscredsv2.NewAssumeRoleProvider(client, assumeRoleArn)
-	cfg.Credentials = awsv2.NewCredentialsCache(creds)
-	return &cfg, nil
-}
-
-func createSession() (*session.Session, error) {
-	sess := session.Must(session.NewSession())
-	var err error
-	if isTesting {
-		sess, err = session.NewSessionWithOptions(session.Options{
-			Profile: "default",
-			Config: aws.Config{
-				Region:           aws.String("us-east-1"),
-				S3ForcePathStyle: aws.Bool(true),
-				Endpoint:         aws.String("http://localhost:4566"),
-			},
-		})
-	} else {
-		assumeRoleArn, err := getAssumeRoleArn()
-
-		if err == nil {
-			sess, err = session.NewSession(&aws.Config{
-				Region: aws.String("us-east-1"),
-				Credentials: stscreds.NewCredentials(
-					sess,
-					assumeRoleArn,
-				),
-			})
-		}
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	return sess, nil
+	client := sts.NewFromConfig(cfg)
+	creds := stscreds.NewAssumeRoleProvider(client, assumeRoleArn)
+	cfg.Credentials = aws.NewCredentialsCache(creds)
+	return cfg, nil
 }
 
 func downloadS3File(bucket string, file string) ([]byte, error) {
-	if os.Getenv("ENV") == "local" {
-		sess, err := createSession()
-		if err != nil {
-			return []byte{}, err
-		}
-		downloader := s3manager.NewDownloader(sess)
-		buff := &aws.WriteAtBuffer{}
-		numBytes, err := downloader.Download(buff, &s3.GetObjectInput{
-			Bucket: aws.String(bucket),
-			Key:    aws.String(file),
-		})
-		log.Printf("file downloaded: size=%d", numBytes)
-		byte_arr := buff.Bytes()
-
-		return byte_arr, err
-	} else {
-		cfg, err := createV2Cfg()
-		if err != nil {
-			return []byte{}, err
-		}
-
-		downloader := manager.NewDownloader(s3v2.NewFromConfig(*cfg))
-		buff := &aws.WriteAtBuffer{}
-		numBytes, err := downloader.Download(context.TODO(), buff, &s3v2.GetObjectInput{
-			Bucket: aws.String(bucket),
-			Key:    aws.String(file),
-		})
-
-		if err == nil {
-			log.Printf("file downloaded: size=%d", numBytes)
-		}
-
-		return buff.Bytes(), err
+	cfg, err := createSession()
+	if err != nil {
+		return []byte{}, err
 	}
+	client := s3.NewFromConfig(cfg)
+	ctx := context.TODO()
+	headObject, headErr := client.HeadObject(ctx, &s3.HeadObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(file),
+	})
+	if headErr != nil {
+		return []byte{}, headErr
+	}
+
+	downloader := manager.NewDownloader(client)
+	buff := make([]byte, int(headObject.ContentLength))
+	w := manager.NewWriteAtBuffer(buff)
+	numBytes, err := downloader.Download(context.TODO(), w, &s3.GetObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(file),
+	})
+
+	if err == nil {
+		log.Printf("file downloaded: size=%d", numBytes)
+	}
+
+	return buff.Bytes(), err
 }
 
 func generateConfirmationFile(successful bool, records []*OptOutRecord, marshaler FileMarshaler) ([]byte, error) {

@@ -1,17 +1,19 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"os"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
+	"github.com/aws/smithy-go/logging"
 )
 
 const (
@@ -25,20 +27,21 @@ func getConsentDbSecrets(dbuser string, dbpassword string) (map[string]string, e
 		secretsInfo[dbuser] = os.Getenv("DB_USER_DPC_CONSENT")
 		secretsInfo[dbpassword] = os.Getenv("DB_PASS_DPC_CONSENT")
 	} else {
-		var keynames []*string = make([]*string, 2)
-		keynames[0] = &dbuser
-		keynames[1] = &dbpassword
+		var keynames []string = make([]string, 2)
+		keynames[0] = dbuser
+		keynames[1] = dbpassword
 
-		sess, err := session.NewSession(&aws.Config{
-			Region: aws.String("us-east-1"),
-		})
+		cfg, err := config.LoadDefaultConfig(context.TODO(),
+			config.WithRegion("us-east-1"),
+			config.WithLogger(logging.Nop{}),
+		)
 		if err != nil {
 			return nil, fmt.Errorf("getConsentDbSecrets: Error creating AWS session: %w", err)
 		}
-		ssmsvc := ssm.New(sess)
+		ssmsvc := ssm.NewFromConfig(cfg)
 
 		withDecryption := true
-		params, err := ssmsvc.GetParameters(&ssm.GetParametersInput{
+		params, err := ssmsvc.GetParameters(context.TODO(), &ssm.GetParametersInput{
 			Names:          keynames,
 			WithDecryption: &withDecryption,
 		})
@@ -50,7 +53,7 @@ func getConsentDbSecrets(dbuser string, dbpassword string) (map[string]string, e
 		if len(params.InvalidParameters) > 0 {
 			invalidParamsStr := ""
 			for i := 0; i < len(params.InvalidParameters); i++ {
-				invalidParamsStr += fmt.Sprintf("%s,\n", *params.InvalidParameters[i])
+				invalidParamsStr += fmt.Sprintf("%s,\n", params.InvalidParameters[i])
 			}
 			return nil, fmt.Errorf("invalid parameters error: %s", invalidParamsStr)
 		}
@@ -78,18 +81,19 @@ func getAssumeRoleArn() (string, error) {
 	var keynames []*string = make([]*string, 1)
 	keynames[0] = &parameterName
 
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1"),
-	})
+	cfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithRegion("us-east-1"),
+		config.WithLogger(logging.Nop{}),
+	)
 
 	if err != nil {
 		return "", fmt.Errorf("getAssumeRoleArn: Error creating AWS session: %w", err)
 	}
 
-	ssmsvc := ssm.New(sess)
+	ssmsvc := ssm.NewFromConfig(cfg)
 
 	withDecryption := true
-	result, err := ssmsvc.GetParameter(&ssm.GetParameterInput{
+	result, err := ssmsvc.GetParameter(context.TODO(), &ssm.GetParameterInput{
 		Name:           &parameterName,
 		WithDecryption: &withDecryption,
 	})
