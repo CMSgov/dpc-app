@@ -1,10 +1,11 @@
 package main
 
 import (
+	"context"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/wafv2"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/wafv2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -54,13 +55,13 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 	for _, test := range tests {
 		sess, sessErr := createSession()
 		assert.Nil(t, sessErr)
-		wafsvc := wafv2.New(sess, &aws.Config{
-			Region: aws.String("us-east-1"),
+		wafsvc := wafv2.NewFromConfig(sess, func(o *wafv2.Options) {
+			o.Region = "us-east-1"
 		})
 
 		// Get current IP set and save existing addresses
 		dpcSetName := "dpc-test-api-customers"
-		ipSetList, listErr := wafsvc.ListIPSets(&wafv2.ListIPSetsInput{Scope: aws.String("REGIONAL")})
+		ipSetList, listErr := wafsvc.ListIPSets(context.TODO(), &wafv2.ListIPSetsInput{Scope: "REGIONAL"})
 		assert.Nil(t, listErr)
 		var ipSetId string
 		for _, set := range ipSetList.IPSets {
@@ -70,10 +71,10 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 			}
 		}
 		assert.NotNil(t, ipSetId)
-		ipSet, wafErr := wafsvc.GetIPSet(&wafv2.GetIPSetInput{
+		ipSet, wafErr := wafsvc.GetIPSet(context.TODO(), &wafv2.GetIPSetInput{
 			Id:    &ipSetId,
 			Name:  &dpcSetName,
-			Scope: aws.String("REGIONAL"),
+			Scope: "REGIONAL",
 		})
 		assert.Nil(t, wafErr)
 		oriIpAddresses := ipSet.IPSet.Addresses
@@ -85,25 +86,25 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 		assert.Nil(t, err)
 
 		// Reset original IP addresses and verify
-		ipSet, wafErr = wafsvc.GetIPSet(&wafv2.GetIPSetInput{
+		ipSet, wafErr = wafsvc.GetIPSet(context.TODO(), &wafv2.GetIPSetInput{
 			Id:    &ipSetId,
 			Name:  &dpcSetName,
-			Scope: aws.String("REGIONAL"),
+			Scope: "REGIONAL",
 		})
 		assert.Nil(t, wafErr)
-		_, updateErr := wafsvc.UpdateIPSet(&wafv2.UpdateIPSetInput{
+		_, updateErr := wafsvc.UpdateIPSet(context.TODO(), &wafv2.UpdateIPSetInput{
 			Id:          ipSet.IPSet.Id,
 			Name:        aws.String(dpcSetName),
-			Scope:       aws.String("REGIONAL"),
+			Scope:       "REGIONAL",
 			LockToken:   ipSet.LockToken,
 			Addresses:   oriIpAddresses,
 			Description: aws.String("IP ranges for customers of this API"),
 		})
 		assert.Nil(t, updateErr)
-		ipSet, wafErr = wafsvc.GetIPSet(&wafv2.GetIPSetInput{
+		ipSet, wafErr = wafsvc.GetIPSet(context.TODO(), &wafv2.GetIPSetInput{
 			Id:    &ipSetId,
 			Name:  &dpcSetName,
-			Scope: aws.String("REGIONAL"),
+			Scope: "REGIONAL",
 		})
 		assert.Nil(t, wafErr)
 		assert.Equal(t, ipSet.IPSet.Addresses, oriIpAddresses)
