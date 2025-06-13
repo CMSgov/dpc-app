@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/aws/aws-sdk-go-v2/service/wafv2"
 	log "github.com/sirupsen/logrus"
+	"github.com/aws/smithy-go/logging"
 )
 
 type Parameters struct {
@@ -21,10 +22,8 @@ type Parameters struct {
 }
 
 var createSession = func() (aws.Config, error) {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
-
 	if isTesting {
-		cfg, err = config.LoadDefaultConfig(context.TODO(),
+		return config.LoadDefaultConfig(context.TODO(),
 			config.WithSharedConfigProfile("default"),
 			config.WithRegion("us-east-1"),
 			config.WithEndpointResolver(
@@ -38,12 +37,7 @@ var createSession = func() (aws.Config, error) {
 			),
 		)
 	}
-
-	if err != nil {
-		return cfg, err
-	}
-
-	return cfg, nil
+	return config.LoadDefaultConfig(context.TODO(), config.WithLogger(logging.Nop{}))
 }
 
 var getAuthDbSecrets = func(dbUser string, dbPassword string) (map[string]string, error) {
