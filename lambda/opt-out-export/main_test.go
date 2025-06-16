@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"bufio"
+	"context"
 	"database/sql"
 	"fmt"
 	"os"
@@ -10,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/assert"
 	"opt-out-beneficiary-data-lambda/dpcaws"
 )
@@ -32,11 +33,11 @@ func TestIntegrationGenerateRequestFile(t *testing.T) {
 		{
 			err: nil,
 			mockFunc: func() {
-				getSecret = func(s *session.Session, keyname string) (string, error) {
+				getSecret = func(ctx context.Context, cfg aws.Config, keyname string) (string, error) {
 					return "fake_arn", nil
 				}
 
-				getSecrets = func(s *session.Session, keynames []*string) (map[string]string, error) {
+				getSecrets = func(ctx context.Context, cfg aws.Config, keynames []string) (map[string]string, error) {
 					return map[string]string{
 						"/dpc/dev/attribution/db_user_dpc_attribution": "db_user_dpc_attribution",
 						"/dpc/dev/attribution/db_pass_dpc_attribution": "db_pass_dpc_attribution",
@@ -81,15 +82,16 @@ func TestIntegrationGenerateRequestFile(t *testing.T) {
 		},
 	}
 
-	session, sessionErr := getAwsSession()
+	ctx := context.TODO()
+	session, sessionErr := getAwsSession(ctx)
 	assert.Nil(t, sessionErr)
 	for _, test := range tests {
 		test.mockFunc()
-		filename, err := generateRequestFile()
+		filename, err := generateRequestFile(ctx)
 		assert.NotEmpty(t, filename)
 		assert.Nil(t, err)
 
-		b, downloadErr := dpcaws.DownloadFileFromS3(session, os.Getenv("S3_UPLOAD_BUCKET"), fmt.Sprintf("%s/%s", os.Getenv("S3_UPLOAD_PATH"), filename))
+		b, downloadErr := dpcaws.DownloadFileFromS3(ctx, session, os.Getenv("S3_UPLOAD_BUCKET"), fmt.Sprintf("%s/%s", os.Getenv("S3_UPLOAD_PATH"), filename))
 		assert.Nil(t, downloadErr)
 		r := bytes.NewReader(b)
 		scanner := bufio.NewScanner(r)
@@ -169,19 +171,19 @@ func TestFormatFileData(t *testing.T) {
 
 func TestGetAwsSession(t *testing.T) {
 	tests := []struct {
-		expect          *session.Session
+		expect          aws.Config
 		err             error
-		newSession      func(roleArn string) (*session.Session, error)
-		newLocalSession func(endPoint string) (*session.Session, error)
+		newSession      func(ctx context.Context, roleArn string) (aws.Config, error)
+		newLocalSession func(ctx context.Context, endPoint string) (aws.Config, error)
 		setEnvironment  func()
 		isTesting       bool
 	}{
 		{
 			// Happy path, testing
-			expect:          nil,
+			expect:          aws.Config{},
 			err:             nil,
-			newSession:      func(roleArn string) (*session.Session, error) { return nil, nil },
-			newLocalSession: func(endPoint string) (*session.Session, error) { return nil, nil },
+			newSession:      func(ctx context.Context, roleArn string) (aws.Config, error) { return aws.Config{}, nil },
+			newLocalSession: func(ctx context.Context, endPoint string) (aws.Config, error) { return aws.Config{}, nil },
 			setEnvironment: func() {
 				t.Setenv("LOCAL_STACK_ENDPOINT", "endpoint")
 			},
@@ -189,10 +191,10 @@ func TestGetAwsSession(t *testing.T) {
 		},
 		{
 			// LOCAL_STACK_ENDPOINT not set, testing
-			expect:          nil,
+			expect:          aws.Config{},
 			err:             fmt.Errorf("LOCAL_STACK_ENDPOINT env variable not defined"),
-			newSession:      func(roleArn string) (*session.Session, error) { return nil, nil },
-			newLocalSession: func(endPoint string) (*session.Session, error) { return nil, nil },
+			newSession:      func(ctx context.Context, roleArn string) (aws.Config, error) { return aws.Config{}, nil },
+			newLocalSession: func(ctx context.Context, endPoint string) (aws.Config, error) { return aws.Config{}, nil },
 			setEnvironment: func() {
 				os.Unsetenv("LOCAL_STACK_ENDPOINT")
 			},
@@ -200,10 +202,10 @@ func TestGetAwsSession(t *testing.T) {
 		},
 		{
 			// Happy path, not testing
-			expect:          nil,
+			expect:          aws.Config{},
 			err:             nil,
-			newSession:      func(roleArn string) (*session.Session, error) { return nil, nil },
-			newLocalSession: func(endPoint string) (*session.Session, error) { return nil, nil },
+			newSession:      func(ctx context.Context, roleArn string) (aws.Config, error) { return aws.Config{}, nil },
+			newLocalSession: func(ctx context.Context, endPoint string) (aws.Config, error) { return aws.Config{}, nil },
 			setEnvironment:  func() {},
 			isTesting:       false,
 		},
@@ -215,7 +217,7 @@ func TestGetAwsSession(t *testing.T) {
 		isTesting = test.isTesting
 
 		test.setEnvironment()
-		s, err := getAwsSession()
+		s, err := getAwsSession(context.TODO())
 
 		assert.Equal(t, test.expect, s)
 		assert.Equal(t, test.err, err)
