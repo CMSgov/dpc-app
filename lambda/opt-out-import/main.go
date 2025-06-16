@@ -40,7 +40,7 @@ type (
 func main() {
 	if isTesting {
 		filename := "bfdeft01/dpc/in/T.NGD.DPC.RSP.D240123.T1122001.IN"
-		createdOptOutCount, createdOptInCount, confirmationFileName, err := importResponseFile("demo-bucket", filename)
+		createdOptOutCount, createdOptInCount, confirmationFileName, err := importResponseFile(context.TODO(), "demo-bucket", filename)
 		if err != nil {
 			log.Error(err)
 		} else {
@@ -69,7 +69,7 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 
 	for _, e := range s3Event.Records {
 		if e.EventName == "ObjectCreated:Put" {
-			createdOptOutCount, createdOptInCount, confirmationFileName, err := importResponseFile(e.S3.Bucket.Name, e.S3.Object.Key)
+			createdOptOutCount, createdOptInCount, confirmationFileName, err := importResponseFile(ctx, e.S3.Bucket.Name, e.S3.Object.Key)
 			logger := log.WithFields(log.Fields{
 				"response_filename":      e.S3.Object.Key,
 				"created_opt_outs_count": createdOptOutCount,
@@ -84,7 +84,7 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 
 			logger.Info("Successfully imported response file and uploaded confirmation file")
 
-			err = deleteS3File(e.S3.Bucket.Name, e.S3.Object.Key)
+			err = deleteS3File(ctx, e.S3.Bucket.Name, e.S3.Object.Key)
 			if err != nil {
 				logger.Errorf("Failed to delete response file after import: %s", err)
 			}
@@ -96,7 +96,7 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 	return "", nil
 }
 
-func importResponseFile(bucket string, file string) (int, int, string, error) {
+func importResponseFile(ctx context.Context, bucket string, file string) (int, int, string, error) {
 	log.Infof("Importing opt out file: %s (bucket: %s)", file, bucket)
 	metadata, err := ParseMetadata(bucket, file)
 	if err != nil {
@@ -106,7 +106,7 @@ func importResponseFile(bucket string, file string) (int, int, string, error) {
 
 	dbuser := fmt.Sprintf("/dpc/%s/consent/db_user_dpc_consent", os.Getenv("ENV"))
 	dbpassword := fmt.Sprintf("/dpc/%s/consent/db_pass_dpc_consent", os.Getenv("ENV"))
-	secrets, err := getConsentDbSecrets(dbuser, dbpassword)
+	secrets, err := getConsentDbSecrets(ctx, dbuser, dbpassword)
 	if err != nil {
 		log.Warningf("Failed to get DB secrets: %s", err)
 		return 0, 0, "", err
@@ -129,7 +129,7 @@ func importResponseFile(bucket string, file string) (int, int, string, error) {
 		return 0, 0, "", err
 	}
 
-	bytes, err := downloadS3File(bucket, file)
+	bytes, err := downloadS3File(ctx, bucket, file)
 	if err != nil {
 		log.Warningf("Failed to download opt out file from S3: %s", err)
 		if updateStatusErr := updateResponseFileImportStatus(db, optOutFileEntity.id, ImportFail); updateStatusErr != nil {
@@ -176,11 +176,11 @@ func importResponseFile(bucket string, file string) (int, int, string, error) {
 		return createdOptOutCount, createdOptInCount, confirmationFileName, err
 	}
 
-	if sess, err := createSession(); err != nil {
+	if sess, err := createSession(ctx); err != nil {
 		log.Warning("Failed to create session for uploading confirmation file")
 		return createdOptOutCount, createdOptInCount, confirmationFileName, err
 	} else {
-		if err = uploadConfirmationFile(bucket, confirmationFileName, manager.NewUploader(s3.NewFromConfig(sess)).Upload, confirmationFile); err != nil {
+		if err = uploadConfirmationFile(ctx, bucket, confirmationFileName, manager.NewUploader(s3.NewFromConfig(sess)).Upload, confirmationFile); err != nil {
 			log.Warning("Failed to write upload confirmation file")
 			return createdOptOutCount, createdOptInCount, confirmationFileName, err
 		}
@@ -189,9 +189,9 @@ func importResponseFile(bucket string, file string) (int, int, string, error) {
 	return createdOptOutCount, createdOptInCount, confirmationFileName, err
 }
 
-var createSession = func() (aws.Config, error) {
+var createSession = func(ctx context.Context) (aws.Config, error) {
 	if isTesting {
-		return config.LoadDefaultConfig(context.TODO(),
+		return config.LoadDefaultConfig(ctx,
 			config.WithSharedConfigProfile("default"),
 			config.WithRegion("us-east-1"),
 			config.WithEndpointResolver(
@@ -205,12 +205,12 @@ var createSession = func() (aws.Config, error) {
 			),
 		)
 	}
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion("us-east-1"), config.WithLogger(logging.Nop{}))
+	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion("us-east-1"), config.WithLogger(logging.Nop{}))
 	if err != nil {
 		return cfg, err
 	}
 
-	assumeRoleArn, err := getAssumeRoleArn()
+	assumeRoleArn, err := getAssumeRoleArn(ctx)
 	if err != nil {
 		return cfg, err
 	}
@@ -221,25 +221,15 @@ var createSession = func() (aws.Config, error) {
 	return cfg, nil
 }
 
-func downloadS3File(bucket string, file string) ([]byte, error) {
-	cfg, err := createSession()
+func downloadS3File(ctx context.Context, bucket string, file string) ([]byte, error) {
+	cfg, err := createSession(ctx)
 	if err != nil {
 		return []byte{}, err
 	}
 	client := s3.NewFromConfig(cfg)
-	ctx := context.TODO()
-	headObject, headErr := client.HeadObject(ctx, &s3.HeadObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(file),
-	})
-	if headErr != nil {
-		return []byte{}, headErr
-	}
-
 	downloader := manager.NewDownloader(client)
-	buff := make([]byte, int(headObject.ContentLength))
-	w := manager.NewWriteAtBuffer(buff)
-	numBytes, err := downloader.Download(context.TODO(), w, &s3.GetObjectInput{
+	buff := manager.NewWriteAtBuffer([]byte{})
+	numBytes, err := downloader.Download(ctx, buff, &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(file),
 	})
@@ -307,8 +297,8 @@ func generateConfirmationFile(successful bool, records []*OptOutRecord, marshale
 	return append(output, formattedTrailer...), nil
 }
 
-func uploadConfirmationFile(bucket string, file string, uploader S3Uploader, confirmationFile []byte) error {
-	_, err := uploader(&s3manager.UploadInput{
+func uploadConfirmationFile(ctx context.Context, bucket string, file string, uploader S3Uploader, confirmationFile []byte) error {
+	_, err := uploader(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(file),
 		Body:   bytes.NewReader(confirmationFile),
@@ -316,22 +306,22 @@ func uploadConfirmationFile(bucket string, file string, uploader S3Uploader, con
 	return err
 }
 
-func deleteS3File(bucket string, file string) error {
-	sess, err := createSession()
+func deleteS3File(ctx context.Context, bucket string, file string) error {
+	sess, err := createSession(ctx)
 	if err != nil {
 		return err
 	}
-	svc := s3.New(sess)
-	_, err = svc.DeleteObject(&s3.DeleteObjectInput{Bucket: aws.String(bucket), Key: aws.String(file)})
+	svc := s3.NewFromConfig(sess)
+	_, err = svc.DeleteObject(ctx, &s3.DeleteObjectInput{Bucket: aws.String(bucket), Key: aws.String(file)})
 	if err != nil {
 		log.Errorf("Unable to delete object: %v", err)
 		return err
 	}
 
-	err = svc.WaitUntilObjectNotExists(&s3.HeadObjectInput{
+	err = s3.NewObjectNotExistsWaiter(svc).Wait(ctx, &s3.HeadObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(file),
-	})
+	}, time.Minute)
 	if err != nil {
 		log.Warningf("Error occurred while waiting for object %q to be deleted, %v", file, err)
 		return err

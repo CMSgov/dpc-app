@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/google/uuid"
@@ -21,7 +20,7 @@ const (
 	Rejected = "Rejected"
 )
 
-func getConsentDbSecrets(dbuser string, dbpassword string) (map[string]string, error) {
+func getConsentDbSecrets(ctx context.Context, dbuser string, dbpassword string) (map[string]string, error) {
 	var secretsInfo map[string]string = make(map[string]string)
 	if isTesting {
 		secretsInfo[dbuser] = os.Getenv("DB_USER_DPC_CONSENT")
@@ -31,7 +30,7 @@ func getConsentDbSecrets(dbuser string, dbpassword string) (map[string]string, e
 		keynames[0] = dbuser
 		keynames[1] = dbpassword
 
-		cfg, err := config.LoadDefaultConfig(context.TODO(),
+		cfg, err := config.LoadDefaultConfig(ctx,
 			config.WithRegion("us-east-1"),
 			config.WithLogger(logging.Nop{}),
 		)
@@ -41,7 +40,7 @@ func getConsentDbSecrets(dbuser string, dbpassword string) (map[string]string, e
 		ssmsvc := ssm.NewFromConfig(cfg)
 
 		withDecryption := true
-		params, err := ssmsvc.GetParameters(context.TODO(), &ssm.GetParametersInput{
+		params, err := ssmsvc.GetParameters(ctx, &ssm.GetParametersInput{
 			Names:          keynames,
 			WithDecryption: &withDecryption,
 		})
@@ -66,7 +65,7 @@ func getConsentDbSecrets(dbuser string, dbpassword string) (map[string]string, e
 	return secretsInfo, nil
 }
 
-func getAssumeRoleArn() (string, error) {
+func getAssumeRoleArn(ctx context.Context) (string, error) {
 	if isTesting {
 		val := os.Getenv("AWS_ASSUME_ROLE_ARN")
 		if val == "" {
@@ -81,7 +80,7 @@ func getAssumeRoleArn() (string, error) {
 	var keynames []*string = make([]*string, 1)
 	keynames[0] = &parameterName
 
-	cfg, err := config.LoadDefaultConfig(context.TODO(),
+	cfg, err := config.LoadDefaultConfig(ctx,
 		config.WithRegion("us-east-1"),
 		config.WithLogger(logging.Nop{}),
 	)
@@ -93,7 +92,7 @@ func getAssumeRoleArn() (string, error) {
 	ssmsvc := ssm.NewFromConfig(cfg)
 
 	withDecryption := true
-	result, err := ssmsvc.GetParameter(context.TODO(), &ssm.GetParameterInput{
+	result, err := ssmsvc.GetParameter(ctx, &ssm.GetParameterInput{
 		Name:           &parameterName,
 		WithDecryption: &withDecryption,
 	})

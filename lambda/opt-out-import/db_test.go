@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql/driver"
 	"fmt"
 	"os"
@@ -44,7 +45,7 @@ func TestGetConsentDbSecrets(t *testing.T) {
 
 	for _, test := range tests {
 		fmt.Printf("~~~ %s test\n", test.name)
-		secretsInfo, err := getConsentDbSecrets(test.dbuser, test.dbpassword)
+		secretsInfo, err := getConsentDbSecrets(context.TODO(), test.dbuser, test.dbpassword)
 		assert.Equal(t, test.expect, secretsInfo)
 		if test.err != nil {
 			assert.ErrorContains(t, err, test.err.Error())
