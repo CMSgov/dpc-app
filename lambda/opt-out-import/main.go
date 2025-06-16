@@ -180,7 +180,8 @@ func importResponseFile(ctx context.Context, bucket string, file string) (int, i
 		log.Warning("Failed to create session for uploading confirmation file")
 		return createdOptOutCount, createdOptInCount, confirmationFileName, err
 	} else {
-		if err = uploadConfirmationFile(ctx, bucket, confirmationFileName, manager.NewUploader(s3.NewFromConfig(sess)).Upload, confirmationFile); err != nil {
+		client := s3.NewFromConfig(sess, func(o *s3.Options){ o.UsePathStyle = true })
+		if err = uploadConfirmationFile(ctx, bucket, confirmationFileName, manager.NewUploader(client).Upload, confirmationFile); err != nil {
 			log.Warning("Failed to write upload confirmation file")
 			return createdOptOutCount, createdOptInCount, confirmationFileName, err
 		}
@@ -198,7 +199,7 @@ var createSession = func(ctx context.Context) (aws.Config, error) {
 				aws.EndpointResolverFunc(func(service, region string) (aws.Endpoint, error) {
 					return aws.Endpoint{
 						PartitionID:   "aws",
-						URL:           "http://localstack:4566",
+						URL:           "http://localhost:4566",
 						SigningRegion: "us-east-1",
 					}, nil
 				}),
@@ -226,7 +227,7 @@ func downloadS3File(ctx context.Context, bucket string, file string) ([]byte, er
 	if err != nil {
 		return []byte{}, err
 	}
-	client := s3.NewFromConfig(cfg)
+	client := s3.NewFromConfig(cfg, func(o *s3.Options){ o.UsePathStyle = true })
 	downloader := manager.NewDownloader(client)
 	buff := manager.NewWriteAtBuffer([]byte{})
 	numBytes, err := downloader.Download(ctx, buff, &s3.GetObjectInput{
@@ -311,7 +312,7 @@ func deleteS3File(ctx context.Context, bucket string, file string) error {
 	if err != nil {
 		return err
 	}
-	svc := s3.NewFromConfig(sess)
+	svc := s3.NewFromConfig(sess, func(o *s3.Options){ o.UsePathStyle = true })
 	_, err = svc.DeleteObject(ctx, &s3.DeleteObjectInput{Bucket: aws.String(bucket), Key: aws.String(file)})
 	if err != nil {
 		log.Errorf("Unable to delete object: %v", err)
