@@ -34,7 +34,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <dropwizard.version>4.0.11</dropwizard.version>
+        <dropwizard.version>4.0.14</dropwizard.version>
         <junit.jupiter.version>5.12.1</junit.jupiter.version>
         <slf4j.version>2.0.17</slf4j.version>
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
@@ -263,11 +263,6 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.dropwizard</groupId>
-                <artifactId>dropwizard-json-logging</artifactId>
-                <version>${dropwizard.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>${hapi.fhir.groupID}</groupId>
                 <artifactId>hapi-fhir-base</artifactId>
                 <version>${hapi.fhir.version}</version>
@@ -301,6 +296,18 @@
                 <groupId>io.github.dropwizard-jobs</groupId>
                 <artifactId>dropwizard-jobs-guice</artifactId>
                 <version>6.0.1</version>
+            </dependency>
+            <!-- These logback dependencies are to prevent dropwizard-jobs from downgrading them -->
+            <!-- Dropwizard:4.0.14 pulls logback 1.5.18, dropwizard-jobs:6.0.1 tries to pull 1.4.14 -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-access</artifactId>
+                <version>1.5.18</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>1.5.18</version>
             </dependency>
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>
