@@ -21,9 +21,9 @@ type Parameters struct {
 	Addresses []string
 }
 
-var createSession = func() (aws.Config, error) {
+var createSession = func(ctx context.Context) (aws.Config, error) {
 	if isTesting {
-		return config.LoadDefaultConfig(context.TODO(),
+		return config.LoadDefaultConfig(ctx,
 			config.WithSharedConfigProfile("default"),
 			config.WithRegion("us-east-1"),
 			config.WithEndpointResolver(
@@ -37,17 +37,17 @@ var createSession = func() (aws.Config, error) {
 			),
 		)
 	}
-	return config.LoadDefaultConfig(context.TODO(), config.WithLogger(logging.Nop{}))
+	return config.LoadDefaultConfig(ctx, config.WithLogger(logging.Nop{}))
 }
 
-var getAuthDbSecrets = func(dbUser string, dbPassword string) (map[string]string, error) {
+var getAuthDbSecrets = func(ctx context.Context, dbUser string, dbPassword string) (map[string]string, error) {
 	secretsInfo := make(map[string]string)
 
 	if isTesting {
 		secretsInfo[dbUser] = os.Getenv("DB_USER_DPC_AUTH")
 		secretsInfo[dbPassword] = os.Getenv("DB_PASS_DPC_AUTH")
 	} else {
-		sess, sessErr := createSession()
+		sess, sessErr := createSession(ctx)
 		if sessErr != nil {
 			return nil, fmt.Errorf("failed to create session to update ip set, %v", sessErr)
 		}
@@ -59,7 +59,7 @@ var getAuthDbSecrets = func(dbUser string, dbPassword string) (map[string]string
 		})
 
 		withDecryption := true
-		params, err := ssmsvc.GetParameters(context.TODO(), &ssm.GetParametersInput{
+		params, err := ssmsvc.GetParameters(ctx, &ssm.GetParametersInput{
 			Names:          keynames,
 			WithDecryption: &withDecryption,
 		})
@@ -83,8 +83,8 @@ var getAuthDbSecrets = func(dbUser string, dbPassword string) (map[string]string
 	return secretsInfo, nil
 }
 
-var updateIpAddresses = func(ipSetName string, ipAddresses []string) ([]string, error) {
-	sess, sessErr := createSession()
+var updateIpAddresses = func(ctx context.Context, ipSetName string, ipAddresses []string) ([]string, error) {
+	sess, sessErr := createSession(ctx)
 	if sessErr != nil {
 		return nil, fmt.Errorf("failed to create session to update ip set, %v", sessErr)
 	}
@@ -96,7 +96,7 @@ var updateIpAddresses = func(ipSetName string, ipAddresses []string) ([]string, 
 	listParams := &wafv2.ListIPSetsInput{
 		Scope: "REGIONAL",
 	}
-	ipSetList, listErr := wafsvc.ListIPSets(context.TODO(), listParams)
+	ipSetList, listErr := wafsvc.ListIPSets(ctx, listParams)
 	if listErr != nil {
 		return nil, fmt.Errorf("failed to fetch ip address sets, %v", listErr)
 	}
@@ -112,7 +112,7 @@ var updateIpAddresses = func(ipSetName string, ipAddresses []string) ([]string, 
 			break
 		}
 	}
-	ipSet, getErr := wafsvc.GetIPSet(context.TODO(), getParams)
+	ipSet, getErr := wafsvc.GetIPSet(ctx, getParams)
 	if getErr != nil {
 		return nil, fmt.Errorf("failed to get expected ip address set, %v", getErr)
 	}
@@ -125,13 +125,13 @@ var updateIpAddresses = func(ipSetName string, ipAddresses []string) ([]string, 
 		Addresses:   ipAddresses,
 		Description: aws.String("IP ranges for customers of this API"),
 	}
-	_, updateErr := wafsvc.UpdateIPSet(context.TODO(), updateParams)
+	_, updateErr := wafsvc.UpdateIPSet(ctx, updateParams)
 	if updateErr != nil {
 		return nil, fmt.Errorf("failed to update ip address set, %v", updateErr)
 	}
 
 	addrs := []string{}
-	ipSet, getErr = wafsvc.GetIPSet(context.TODO(), getParams)
+	ipSet, getErr = wafsvc.GetIPSet(ctx, getParams)
 	if getErr != nil {
 		return nil, fmt.Errorf("failed to get expected ip address set, %v", getErr)
 	}

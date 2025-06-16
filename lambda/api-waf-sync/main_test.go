@@ -23,7 +23,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 		{
 			expected: []string{"127.0.0.1/32"},
 			mockFunc: func() {
-				getAuthDbSecrets = func(dbUser string, dbPassword string) (map[string]string, error) {
+				getAuthDbSecrets = func(ctx context.Context, dbUser string, dbPassword string) (map[string]string, error) {
 					return map[string]string{
 						"/dpc/dev/api/db_user_dpc_auth": "db_user_dpc_auth",
 						"/dpc/dev/api/db_pass_dpc_auth": "db_pass_dpc_auth",
@@ -38,7 +38,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 		{
 			expected: []string{"127.0.0.1/32", "127.0.0.2/32"},
 			mockFunc: func() {
-				getAuthDbSecrets = func(dbUser string, dbPassword string) (map[string]string, error) {
+				getAuthDbSecrets = func(ctx context.Context, dbUser string, dbPassword string) (map[string]string, error) {
 					return map[string]string{
 						"/dpc/dev/api/db_user_dpc_auth": "db_user_dpc_auth",
 						"/dpc/dev/api/db_pass_dpc_auth": "db_pass_dpc_auth",
@@ -53,7 +53,8 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		sess, sessErr := createSession()
+		ctx := context.TODO()
+		sess, sessErr := createSession(ctx)
 		assert.Nil(t, sessErr)
 		wafsvc := wafv2.NewFromConfig(sess, func(o *wafv2.Options) {
 			o.Region = "us-east-1"
@@ -61,7 +62,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 
 		// Get current IP set and save existing addresses
 		dpcSetName := "dpc-test-api-customers"
-		ipSetList, listErr := wafsvc.ListIPSets(context.TODO(), &wafv2.ListIPSetsInput{Scope: "REGIONAL"})
+		ipSetList, listErr := wafsvc.ListIPSets(ctx, &wafv2.ListIPSetsInput{Scope: "REGIONAL"})
 		assert.Nil(t, listErr)
 		var ipSetId string
 		for _, set := range ipSetList.IPSets {
@@ -71,7 +72,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 			}
 		}
 		assert.NotNil(t, ipSetId)
-		ipSet, wafErr := wafsvc.GetIPSet(context.TODO(), &wafv2.GetIPSetInput{
+		ipSet, wafErr := wafsvc.GetIPSet(ctx, &wafv2.GetIPSetInput{
 			Id:    &ipSetId,
 			Name:  &dpcSetName,
 			Scope: "REGIONAL",
@@ -81,18 +82,18 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 
 		// Update IP set with new addresses and verify
 		test.mockFunc()
-		addrs, err := updateIpSet()
+		addrs, err := updateIpSet(ctx)
 		assert.Equal(t, test.expected, addrs)
 		assert.Nil(t, err)
 
 		// Reset original IP addresses and verify
-		ipSet, wafErr = wafsvc.GetIPSet(context.TODO(), &wafv2.GetIPSetInput{
+		ipSet, wafErr = wafsvc.GetIPSet(ctx, &wafv2.GetIPSetInput{
 			Id:    &ipSetId,
 			Name:  &dpcSetName,
 			Scope: "REGIONAL",
 		})
 		assert.Nil(t, wafErr)
-		_, updateErr := wafsvc.UpdateIPSet(context.TODO(), &wafv2.UpdateIPSetInput{
+		_, updateErr := wafsvc.UpdateIPSet(ctx, &wafv2.UpdateIPSetInput{
 			Id:          ipSet.IPSet.Id,
 			Name:        aws.String(dpcSetName),
 			Scope:       "REGIONAL",
@@ -101,7 +102,7 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 			Description: aws.String("IP ranges for customers of this API"),
 		})
 		assert.Nil(t, updateErr)
-		ipSet, wafErr = wafsvc.GetIPSet(context.TODO(), &wafv2.GetIPSetInput{
+		ipSet, wafErr = wafsvc.GetIPSet(ctx, &wafv2.GetIPSetInput{
 			Id:    &ipSetId,
 			Name:  &dpcSetName,
 			Scope: "REGIONAL",
