@@ -39,7 +39,7 @@
         <slf4j.version>2.0.17</slf4j.version>
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
         <hapi.fhir.version>7.6.1</hapi.fhir.version>
-        <pgsql.version>42.7.5</pgsql.version>
+        <pgsql.version>42.7.7</pgsql.version>
         <java.version>17</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
         <timestamp>${maven.build.timestamp}</timestamp>
@@ -187,7 +187,7 @@
             <dependency>
                 <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>6.6.13.Final</version>
+                <version>6.6.15.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate.orm</groupId>
@@ -403,7 +403,7 @@
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>1.20.6</version>
+                <version>1.21.0</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
