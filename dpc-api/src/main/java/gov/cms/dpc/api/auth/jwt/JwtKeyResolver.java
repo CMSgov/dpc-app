@@ -7,9 +7,8 @@ import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.SigningKeyResolverAdapter;
+import io.jsonwebtoken.LocatorAdapter;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -23,7 +22,7 @@ import java.util.UUID;
 
 import static gov.cms.dpc.api.auth.MacaroonHelpers.ORGANIZATION_CAVEAT_KEY;
 
-public class JwtKeyResolver extends SigningKeyResolverAdapter {
+public class JwtKeyResolver extends LocatorAdapter<Key> {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtKeyResolver.class);
 
@@ -35,14 +34,15 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
     }
 
     @Override
-    public Key resolveSigningKey(JwsHeader header, Claims claims) {
+    public Key locate(JwsHeader header) {
         final String keyId = header.getKeyId();
         if (keyId == null) {
             logger.error("JWT KID field is missing");
             throw new WebApplicationException("JWT must have KID field", Response.Status.UNAUTHORIZED);
         }
 
-        final UUID organizationID = getOrganizationID(claims.getIssuer());
+        String issuer = header.get("iss").toString();
+        final UUID organizationID = getOrganizationID(issuer);
         // Set the MDC values here, since it's the first time we actually know what the organization ID is
         MDC.put(MDCConstants.ORGANIZATION_ID, organizationID.toString());
 

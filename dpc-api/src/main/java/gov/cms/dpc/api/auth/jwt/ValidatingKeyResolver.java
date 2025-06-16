@@ -2,47 +2,46 @@ package gov.cms.dpc.api.auth.jwt;
 
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
-import io.jsonwebtoken.*;
 import jakarta.annotation.Nullable;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.MalformedClaimException;
+import org.jose4j.jwt.consumer.JwtContext;
+import org.jose4j.jwx.Headers;
 
-import java.security.Key;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 /**
- * Implementation of {@link SigningKeyResolverAdapter} that simply verifies whether the required claims and values are present.
- * As far as I can tell, this is the only way to get access to the JWS claims without actually verifying the signature.
- * See: https://github.com/jwtk/jjwt/issues/205
- * <p>
- * The downside is that this method will always return a null {@link Key}, which means the {@link Jwts#parser()} method will always throw an {@link UnsupportedJwtException}, which we need to catch.
+ * Simply verifies whether the required claims and values are present.
  */
-public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
+public class ValidatingKeyResolver {
 
     private final IJTICache cache;
-    private final Set<String> audClaim;
+    private final List<String> audClaim;
 
-    public ValidatingKeyResolver(IJTICache cache, Set<String> audClaim) {
+    public ValidatingKeyResolver(IJTICache cache, List<String> audClaim) {
         this.cache = cache;
         this.audClaim = audClaim;
     }
 
-    @Override
-    public Key resolveSigningKey(JwsHeader header, Claims claims) {
-        validateHeader(header);
+    public void resolveSigningKey(JwtContext jwtContext) throws MalformedClaimException {
+        Headers headers = jwtContext.getJoseObjects().get(0).getHeaders();
+        JwtClaims claims = jwtContext.getJwtClaims();
+
+        validateHeader(headers);
         validateExpiration(claims);
         final String issuer = getClaimIfPresent("issuer", claims.getIssuer());
         validateClaims(issuer, claims);
         validateTokenFormat(issuer);
-        return null;
     }
 
-    void validateHeader(JwsHeader header) {
-        final String keyId = header.getKeyId();
+    void validateHeader(Headers headers) {
+        final String keyId = headers.getStringHeaderValue("kid");
         if (keyId == null) {
             throw new WebApplicationException("JWT header must have `kid` value", Response.Status.BAD_REQUEST);
         }
@@ -71,14 +70,14 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
         }
     }
 
-    void validateExpiration(Claims claims) {
+    void validateExpiration(JwtClaims claims) throws MalformedClaimException {
         // Verify not expired and not more than 5 minutes in the future
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         final OffsetDateTime expiration;
         try {
-            final Integer epochSeconds = getClaimIfPresent("expiration", claims.get("exp", Integer.class));
+            final int epochSeconds = Math.toIntExact(getClaimIfPresent("expiration", claims.getExpirationTime()).getValue());
             expiration = Instant.ofEpochSecond(epochSeconds).atOffset(ZoneOffset.UTC);
-        } catch (RequiredTypeException e) {
+        } catch (ArithmeticException e) {
             throw new WebApplicationException("Expiration time must be seconds since unix epoch", Response.Status.BAD_REQUEST);
         }
 
@@ -93,9 +92,9 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
         }
     }
 
-    void validateClaims(String issuer, Claims claims) {
+    void validateClaims(String issuer, JwtClaims claims) throws MalformedClaimException {
         // JTI must be present and have not been used in the past 5 minutes.
-        if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getId()), false)) {
+        if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getJwtId()), false)) {
             throw new WebApplicationException("Token ID cannot be re-used", Response.Status.BAD_REQUEST);
         }
 
@@ -107,7 +106,7 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
         }
 
         // Test correct aud claim
-        final Set<String> audience = getClaimIfPresent("audience", claims.getAudience());
+        final List<String> audience = getClaimIfPresent("audience", claims.getAudience());
         if (!audience.equals(this.audClaim)) {
             throw new WebApplicationException("Audience claim value is incorrect", Response.Status.BAD_REQUEST);
         }

@@ -35,13 +35,15 @@ import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
-import io.jsonwebtoken.SigningKeyResolverAdapter;
+import io.jsonwebtoken.LocatorAdapter;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
+
+import java.security.Key;
 
 public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
@@ -101,13 +103,13 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
-    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, SigningKeyResolverAdapter resolver, IJTICache cache, @APIV1 String publicURL) {
+    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, LocatorAdapter<Key> resolver, IJTICache cache, @APIV1 String publicURL) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(TokenResource.class,
                         new Class<?>[]{TokenDAO.class,
                                 MacaroonBakery.class,
                                 TokenPolicy.class,
-                                SigningKeyResolverAdapter.class,
+                                LocatorAdapter.class,
                                 IJTICache.class,
                                 String.class},
                         new Object[]{dao,
