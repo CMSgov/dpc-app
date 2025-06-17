@@ -23,7 +23,7 @@ jobs:
     uses: ./.github/workflows/load-test-unit-tests.yml
   opt-out-import-unit-tests:
     uses: ./.github/workflows/opt-out-import-unit.yml
-  tag-release:
-    uses: ./.github/workflows/tag-for-release.yml
-    with:
-      repo_ref: 'main'
+#  tag-release:
+#    uses: ./.github/workflows/tag-for-release.yml
+#    with:
+#      repo_ref: 'main'
