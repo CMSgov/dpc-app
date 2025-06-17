@@ -8,6 +8,13 @@ on:
         required: true
         default: 'main'
         type: 'string'
+  workflow_call:
+    inputs:
+      repo_ref:
+        description: 'Which branch or tag?'
+        required: true
+        default: 'main'
+        type: 'string'
 
 
 jobs:
