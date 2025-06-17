@@ -20,8 +20,6 @@ jobs:
       env: 'dev'
   load-test-unit-tests:
     uses: ./.github/workflows/load-test-unit-tests.yml
-    with:
-      env: 'single-iteration'
   opt-out-import-unit-tests:
     uses: ./.github/workflows/opt-out-import-unit.yml
   tag-release:
