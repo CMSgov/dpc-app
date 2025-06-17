@@ -51,6 +51,13 @@ jobs:
             artifactory.cloud.cms.gov/docker/grafana/xk6 build \
             --with github.com/LeonAdato/xk6-output-statsd
 
+      - name: AWS Credentials (non-prod)
+        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+
       - name: Set env vars from AWS params
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:

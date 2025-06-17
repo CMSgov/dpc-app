@@ -31,7 +31,10 @@ jobs:
       - name: Run unit tests
         run: yarn test
   test-macaroons:
-    runs-on: self-hosted
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - uses: actions/checkout@v4
       - name: Make test results directory
