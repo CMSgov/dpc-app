@@ -11,7 +11,6 @@ import (
 )
 
 // Makes these easily mockable
-//var osOpen = os.Open
 var newUploader = manager.NewUploader
 var upload = manager.Uploader.Upload
 

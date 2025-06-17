@@ -15,7 +15,6 @@ import (
 func TestUploadFileToS3(t *testing.T) {
 	tests := []struct {
 		err         error
-	//	 NewUploader(client UploadAPIClient, options ...func(*Uploader)) *Uploader
 		newUploader func(c manager.UploadAPIClient, options ...func(*manager.Uploader)) *manager.Uploader
 		upload      func(u manager.Uploader, ctx context.Context, input *s3.PutObjectInput, options ...func(*manager.Uploader)) (*manager.UploadOutput, error)
 	}{
