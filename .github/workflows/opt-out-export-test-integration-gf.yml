@@ -29,6 +29,7 @@ concurrency:
 jobs:
   # Deploy first if triggered by pull_request
   deploy:
+    if: ${{ github.event_name == 'pull_request' }}
     uses: ./.github/workflows/opt-out-export-deploy-gf.yml
     with:
       env: test

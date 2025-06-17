@@ -36,7 +36,7 @@ func handler(ctx context.Context, event events.S3Event) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Info("Successfully completed executing export lambda")
+	log.Info("Successfully completed executing api-waf-sync lambda")
 	return addrs, nil
 }
 
