@@ -6,6 +6,7 @@ on:
       - .github/workflows/load-test-unit-tests.yml
       - dpc-load-testing/**
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   test:
