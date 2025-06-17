@@ -1,6 +1,8 @@
 module opt-out-beneficiary-data-lambda
 
-go 1.18
+go 1.22
+
+toolchain go1.24.4
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2

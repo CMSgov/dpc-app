@@ -49,7 +49,8 @@ func TestIntegrationImportResponseFile(t *testing.T) {
 	}
 	today := time.Now().Format("20060102")
 
-	db, _ := createConnectionVar(os.Getenv("DB_USER_DPC_CONSENT"), os.Getenv("DB_PASS_DPC_CONSENT"))
+	db, dberr := createConnectionVar(os.Getenv("DB_USER_DPC_CONSENT"), os.Getenv("DB_PASS_DPC_CONSENT"))
+	assert.Nil(t, dberr)
 	defer db.Close()
 
 	ctx := context.TODO()
