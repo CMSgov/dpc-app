@@ -90,7 +90,7 @@ func TestGetParameters(t *testing.T) {
 
 	tests := []struct {
 		keys                 []string
-		parms                map[*string]*string
+		parms                map[string]string
 		err                  error
 		ssmNew              func(cfg aws.Config, optFns ...func(*ssm.Options)) *ssm.Client
 		ssmsvcGetParameters func(c *ssm.Client, ctx context.Context, input *ssm.GetParametersInput, optFns ...func(*ssm.Options)) (*ssm.GetParametersOutput, error)
@@ -98,7 +98,7 @@ func TestGetParameters(t *testing.T) {
 		{
 			// Happy path
 			keys:   []string{key1, key2},
-			parms:  map[*string]*string{&key1: &parm1, &key2: &parm2},
+			parms:  map[string]string{key1: parm1, key2: parm2},
 			err:    nil,
 			ssmNew: func(cfg aws.Config, optFns ...func(*ssm.Options)) *ssm.Client { return nil },
 			ssmsvcGetParameters: func(c *ssm.Client, ctx context.Context, input *ssm.GetParametersInput, optFns ...func(*ssm.Options)) (*ssm.GetParametersOutput, error) {
