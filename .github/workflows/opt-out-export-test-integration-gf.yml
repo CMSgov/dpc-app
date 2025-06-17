@@ -2,11 +2,6 @@ name: Opt-Out-Export Integration Tests (Greenfield)
 
 on:
   pull_request:
-    paths:
-      - .github/workflows/opt-out-export-test-integration.yml
-      - .github/workflows/opt-out-export-deploy.yml
-      - .github/workflows/deploy_go_lambda.yml
-      - lambda/opt-out-export/**
   workflow_dispatch:
     inputs:
       env:
