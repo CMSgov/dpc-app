@@ -16,7 +16,10 @@ on:
 jobs:
   run-load-test:
     name: "Run DPC API Load Test"
-    runs-on: self-hosted
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
