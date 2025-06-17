@@ -16,6 +16,9 @@ on:
         default: 'main'
         type: 'string'
 
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   tag-dpc-app:
