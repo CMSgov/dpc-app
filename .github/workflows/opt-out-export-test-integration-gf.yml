@@ -2,6 +2,11 @@ name: Opt-Out-Export Integration Tests (Greenfield)
 
 on:
   pull_request:
+    paths:
+      - .github/workflows/opt-out-export-test-integration.yml
+      - .github/workflows/opt-out-export-deploy.yml
+      - .github/workflows/deploy_go_lambda.yml
+      - lambda/opt-out-export/**
   workflow_dispatch:
     inputs:
       env:
@@ -24,7 +29,6 @@ concurrency:
 jobs:
   # Deploy first if triggered by pull_request
   deploy:
-    if: ${{ github.event_name == 'pull_request' }}
     uses: ./.github/workflows/opt-out-export-deploy-gf.yml
     with:
       env: test

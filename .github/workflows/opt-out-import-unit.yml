@@ -2,6 +2,9 @@ name: Opt-Out-Import Unit Tests
 
 on:
   pull_request:
+    paths:
+      - .github/workflows/opt-out-import-unit.yml
+      - lambda/opt-out-import/**
   workflow_dispatch:
 
 jobs:
