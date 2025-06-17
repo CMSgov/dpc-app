@@ -27,7 +27,7 @@ permissions:
 jobs:
   macaroon:
     name: "Get and load Golden Macaroon"
-    runs-on: self-hosted
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - name: AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4

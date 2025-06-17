@@ -1,0 +1,24 @@
+name: Post cutover workflow caller
+
+on:
+  push:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  trigger-load-test:
+    uses: ./.github/workflows/dpc-load-test.yml
+    with:
+      test_type: average-load-test
+  trigger-accessibility-test:
+    uses: ./.github/workflows/dpc-portal-accessibility-test.yml
+  trigger-macaroon:
+    uses: ./.github/workflows/generate-macaroon.yml
+  load-test-unit-tests:
+    uses: ./.github/workflows/load-test-unit-tests.yml
+  opt-out-import-unit-tests:
+    uses: ./.github/workflows/opt-out-import-unit.yml
+  tag-release:
+    uses: ./.github/workflows/tag-for-release.yml

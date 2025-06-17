@@ -9,7 +9,10 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     defaults:
       run:
         working-directory: ./lambda/opt-out-import
