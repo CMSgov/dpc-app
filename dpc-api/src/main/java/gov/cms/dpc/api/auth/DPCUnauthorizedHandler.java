@@ -21,12 +21,15 @@ public class DPCUnauthorizedHandler implements UnauthorizedHandler {
     public Response buildResponse(String prefix, String realm) {
         final var outcome = new OperationOutcome();
         final var coding = new Coding();
-        coding.setSystem("http://hl7.org/fhir/ValueSet/operation-outcome");
-        coding.setCode("HTTP 401 Unauthorized, Credentials are required to access this resource.");
+        final var concept = new CodeableConcept();
+        coding.setSystem("http://hl7.org/fhir/operation-outcome");
+        coding.setCode("MSG_AUTH_REQUIRED");
+        concept.addCoding(coding);
+        concept.setText("HTTP 401 Unauthorized, Credentials are required to access this resource.");
         outcome.addIssue()
                 .setSeverity(OperationOutcome.IssueSeverity.ERROR)
                 .setCode(OperationOutcome.IssueType.EXCEPTION)
-                .setDetails(new CodeableConcept().addCoding(coding));
+                .setDetails(concept);
 
         return Response.status(Status.UNAUTHORIZED)
                 .type(FHIR_JSON)
