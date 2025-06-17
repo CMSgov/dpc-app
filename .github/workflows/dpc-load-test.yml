@@ -52,7 +52,6 @@ jobs:
             --with github.com/LeonAdato/xk6-output-statsd
 
       - name: AWS Credentials (non-prod)
-        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
