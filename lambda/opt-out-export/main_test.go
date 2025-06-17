@@ -211,13 +211,14 @@ func TestGetAwsSession(t *testing.T) {
 		},
 	}
 
+	ctx := context.TODO()
 	for _, test := range tests {
 		newSession = test.newSession
 		newLocalSession = test.newLocalSession
 		isTesting = test.isTesting
 
 		test.setEnvironment()
-		s, err := getAwsSession(context.TODO())
+		s, err := getAwsSession(ctx)
 
 		assert.Equal(t, test.expect, s)
 		assert.Equal(t, test.err, err)

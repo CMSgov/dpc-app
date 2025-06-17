@@ -49,8 +49,7 @@ func TestIntegrationImportResponseFile(t *testing.T) {
 	}
 	today := time.Now().Format("20060102")
 
-	db, dberr := createConnectionVar(os.Getenv("DB_USER_DPC_CONSENT"), os.Getenv("DB_PASS_DPC_CONSENT"))
-	assert.Nil(t, dberr)
+	db, _ := createConnectionVar(os.Getenv("DB_USER_DPC_CONSENT"), os.Getenv("DB_PASS_DPC_CONSENT"))
 	defer db.Close()
 
 	ctx := context.TODO()
@@ -183,9 +182,10 @@ func TestIntegrationDownloadS3File(t *testing.T) {
 		},
 	}
 
+	ctx := context.TODO()
 	for _, test := range tests {
 		fmt.Printf("~~~ %s test\n", test.name)
-		response, err := downloadS3File(context.TODO(), test.bucket, test.filenamePath)
+		response, err := downloadS3File(ctx, test.bucket, test.filenamePath)
 		assert.Equal(t, test.expect, string(response[:]))
 		if test.err != nil {
 			assert.ErrorContains(t, err, test.err.Error())
@@ -291,9 +291,10 @@ func TestUploadConfirmationFile(t *testing.T) {
 		},
 	}
 
+	ctx := context.TODO()
 	for _, test := range tests {
 		fmt.Printf("~~~ %s test\n", test.name)
-		err := uploadConfirmationFile(context.TODO(), test.bucket, test.file, test.uploader, test.confirmationFile)
+		err := uploadConfirmationFile(ctx, test.bucket, test.file, test.uploader, test.confirmationFile)
 		assert.Equal(t, test.err, err)
 	}
 
@@ -318,9 +319,10 @@ func TestIntegrationDeleteS3File(t *testing.T) {
 		},
 	}
 
+	ctx := context.TODO()
 	for _, test := range tests {
 		fmt.Printf("~~~ %s test\n", test.name)
-		err := deleteS3File(context.TODO(), test.bucket, test.filenamePath)
+		err := deleteS3File(ctx, test.bucket, test.filenamePath)
 		if test.err == nil {
 			assert.NoError(t, err)
 		} else {

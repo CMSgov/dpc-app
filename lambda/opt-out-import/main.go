@@ -192,6 +192,7 @@ func importResponseFile(ctx context.Context, bucket string, file string) (int, i
 
 var createSession = func(ctx context.Context) (aws.Config, error) {
 	if isTesting {
+		// Return immediately
 		return config.LoadDefaultConfig(ctx,
 			config.WithSharedConfigProfile("default"),
 			config.WithRegion("us-east-1"),
@@ -206,6 +207,7 @@ var createSession = func(ctx context.Context) (aws.Config, error) {
 			),
 		)
 	}
+	
 	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion("us-east-1"), config.WithLogger(logging.Nop{}))
 	if err != nil {
 		return cfg, err

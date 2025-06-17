@@ -43,9 +43,10 @@ func TestGetConsentDbSecrets(t *testing.T) {
 		},
 	}
 
+	ctx := context.TODO()
 	for _, test := range tests {
 		fmt.Printf("~~~ %s test\n", test.name)
-		secretsInfo, err := getConsentDbSecrets(context.TODO(), test.dbuser, test.dbpassword)
+		secretsInfo, err := getConsentDbSecrets(ctx, test.dbuser, test.dbpassword)
 		assert.Equal(t, test.expect, secretsInfo)
 		if test.err != nil {
 			assert.ErrorContains(t, err, test.err.Error())
