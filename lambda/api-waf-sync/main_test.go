@@ -54,9 +54,9 @@ func TestIntegrationUpdateIpSet(t *testing.T) {
 
 	for _, test := range tests {
 		ctx := context.TODO()
-		sess, sessErr := createSession(ctx)
-		assert.Nil(t, sessErr)
-		wafsvc := wafv2.NewFromConfig(sess, func(o *wafv2.Options) {
+		cfg, cfgErr := createConfig(ctx)
+		assert.Nil(t, cfgErr)
+		wafsvc := wafv2.NewFromConfig(cfg, func(o *wafv2.Options) {
 			o.Region = "us-east-1"
 		})
 

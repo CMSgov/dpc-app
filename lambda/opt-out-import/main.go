@@ -176,11 +176,11 @@ func importResponseFile(ctx context.Context, bucket string, file string) (int, i
 		return createdOptOutCount, createdOptInCount, confirmationFileName, err
 	}
 
-	if sess, err := createSession(ctx); err != nil {
+	if cfg, err := createConfig(ctx); err != nil {
 		log.Warning("Failed to create session for uploading confirmation file")
 		return createdOptOutCount, createdOptInCount, confirmationFileName, err
 	} else {
-		client := s3.NewFromConfig(sess, func(o *s3.Options){ o.UsePathStyle = true })
+		client := s3.NewFromConfig(cfg, func(o *s3.Options){ o.UsePathStyle = true })
 		if err = uploadConfirmationFile(ctx, bucket, confirmationFileName, manager.NewUploader(client).Upload, confirmationFile); err != nil {
 			log.Warning("Failed to write upload confirmation file")
 			return createdOptOutCount, createdOptInCount, confirmationFileName, err
@@ -190,7 +190,7 @@ func importResponseFile(ctx context.Context, bucket string, file string) (int, i
 	return createdOptOutCount, createdOptInCount, confirmationFileName, err
 }
 
-var createSession = func(ctx context.Context) (aws.Config, error) {
+var createConfig = func(ctx context.Context) (aws.Config, error) {
 	if isTesting {
 		// Return immediately
 		return config.LoadDefaultConfig(ctx,
@@ -213,7 +213,7 @@ var createSession = func(ctx context.Context) (aws.Config, error) {
 		return cfg, err
 	}
 
-	assumeRoleArn, err := getAssumeRoleArn(ctx)
+	assumeRoleArn, err := getAssumeRoleArn(ctx, cfg)
 	if err != nil {
 		return cfg, err
 	}
@@ -225,7 +225,7 @@ var createSession = func(ctx context.Context) (aws.Config, error) {
 }
 
 func downloadS3File(ctx context.Context, bucket string, file string) ([]byte, error) {
-	cfg, err := createSession(ctx)
+	cfg, err := createConfig(ctx)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -310,11 +310,11 @@ func uploadConfirmationFile(ctx context.Context, bucket string, file string, upl
 }
 
 func deleteS3File(ctx context.Context, bucket string, file string) error {
-	sess, err := createSession(ctx)
+	cfg, err := createConfig(ctx)
 	if err != nil {
 		return err
 	}
-	svc := s3.NewFromConfig(sess, func(o *s3.Options){ o.UsePathStyle = true })
+	svc := s3.NewFromConfig(cfg, func(o *s3.Options){ o.UsePathStyle = true })
 	_, err = svc.DeleteObject(ctx, &s3.DeleteObjectInput{Bucket: aws.String(bucket), Key: aws.String(file)})
 	if err != nil {
 		log.Errorf("Unable to delete object: %v", err)

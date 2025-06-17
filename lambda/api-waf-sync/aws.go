@@ -21,7 +21,7 @@ type Parameters struct {
 	Addresses []string
 }
 
-var createSession = func(ctx context.Context) (aws.Config, error) {
+var createConfig = func(ctx context.Context) (aws.Config, error) {
 	if isTesting {
 		return config.LoadDefaultConfig(ctx,
 			config.WithSharedConfigProfile("default"),
@@ -47,14 +47,14 @@ var getAuthDbSecrets = func(ctx context.Context, dbUser string, dbPassword strin
 		secretsInfo[dbUser] = os.Getenv("DB_USER_DPC_AUTH")
 		secretsInfo[dbPassword] = os.Getenv("DB_PASS_DPC_AUTH")
 	} else {
-		sess, sessErr := createSession(ctx)
-		if sessErr != nil {
-			return nil, fmt.Errorf("failed to create session to update ip set, %v", sessErr)
+		cfg, cfgErr := createConfig(ctx)
+		if cfgErr != nil {
+			return nil, fmt.Errorf("failed to create session to update ip set, %v", cfgErr)
 		}
 		var keynames []string = make([]string, 2)
 		keynames[0] = dbUser
 		keynames[1] = dbPassword
-		ssmsvc := ssm.NewFromConfig(sess, func(o *ssm.Options) {
+		ssmsvc := ssm.NewFromConfig(cfg, func(o *ssm.Options) {
 			o.Region = "us-east-1"
 		})
 
@@ -84,12 +84,12 @@ var getAuthDbSecrets = func(ctx context.Context, dbUser string, dbPassword strin
 }
 
 var updateIpAddresses = func(ctx context.Context, ipSetName string, ipAddresses []string) ([]string, error) {
-	sess, sessErr := createSession(ctx)
-	if sessErr != nil {
-		return nil, fmt.Errorf("failed to create session to update ip set, %v", sessErr)
+	cfg, cfgErr := createConfig(ctx)
+	if cfgErr != nil {
+		return nil, fmt.Errorf("failed to create session to update ip set, %v", cfgErr)
 	}
 
-	wafsvc := wafv2.NewFromConfig(sess, func(o *wafv2.Options) {
+	wafsvc := wafv2.NewFromConfig(cfg, func(o *wafv2.Options) {
 		o.Region = "us-east-1"
 	})
 

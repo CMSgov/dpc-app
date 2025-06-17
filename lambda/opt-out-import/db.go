@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/google/uuid"
@@ -65,7 +66,7 @@ func getConsentDbSecrets(ctx context.Context, dbuser string, dbpassword string) 
 	return secretsInfo, nil
 }
 
-func getAssumeRoleArn(ctx context.Context) (string, error) {
+func getAssumeRoleArn(ctx context.Context, cfg aws.Config) (string, error) {
 	if isTesting {
 		val := os.Getenv("AWS_ASSUME_ROLE_ARN")
 		if val == "" {
@@ -79,15 +80,6 @@ func getAssumeRoleArn(ctx context.Context) (string, error) {
 
 	var keynames []*string = make([]*string, 1)
 	keynames[0] = &parameterName
-
-	cfg, err := config.LoadDefaultConfig(ctx,
-		config.WithRegion("us-east-1"),
-		config.WithLogger(logging.Nop{}),
-	)
-
-	if err != nil {
-		return "", fmt.Errorf("getAssumeRoleArn: Error creating AWS session: %w", err)
-	}
 
 	ssmsvc := ssm.NewFromConfig(cfg)
 
