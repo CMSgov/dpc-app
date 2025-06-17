@@ -12,12 +12,7 @@ import (
 
 var s3Region = "us-east-1"
 
-// Makes these easily mockable for testing
-//var newSession = config.LoadDefaultConfig
-//var newSessionWithOptions = session.NewSessionWithOptions
-
-// NewSession
-// Returns a new AWS session using the given roleArn
+// Returns a new AWS Config using the given roleArn
 func NewSession(ctx context.Context, roleArn string) (aws.Config, error) {
 	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(s3Region), config.WithLogger(logging.Nop{}))
 	if err != nil {
@@ -32,9 +27,7 @@ func NewSession(ctx context.Context, roleArn string) (aws.Config, error) {
 	return cfg, nil
 }
 
-// NewLocalSession
-// Returns a new AWS session by connecting to a remote endpoint.  Primarily used for connecting to a locally running AWS environment,
-// so we'll be using the default profile that can be pulled from CloudTamer.
+// Returns a new AWS Config by connecting to a remote endpoint.  Primarily used for connecting to a locally running AWS environment,
 func NewLocalSession(ctx context.Context, endPoint string) (aws.Config, error) {
 	return config.LoadDefaultConfig(ctx,
 		config.WithRegion(s3Region),
