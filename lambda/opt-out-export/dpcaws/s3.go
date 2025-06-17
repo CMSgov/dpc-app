@@ -13,16 +13,16 @@ import (
 // Makes these easily mockable
 //var osOpen = os.Open
 var newUploader = manager.NewUploader
-//var upload = s3manager.Uploader.Upload
+var upload = manager.Uploader.Upload
 
 // AddFileToS3
 // Uses the given sessions to upload the file to the given s3Bucket
 func UploadFileToS3(ctx context.Context, cfg aws.Config, fileName string, buff bytes.Buffer, s3Bucket string, s3Path string) error {
 	// Upload file to bucket
 	client := s3.NewFromConfig(cfg, func(o *s3.Options){ o.UsePathStyle = true })
-	uploader := manager.NewUploader(client)
+	uploader := newUploader(client)
 
-	_, s3Err := uploader.Upload(ctx, &s3.PutObjectInput{
+	_, s3Err := upload(*uploader, ctx, &s3.PutObjectInput{
 		Bucket: aws.String(s3Bucket),
 		Key:    aws.String(s3Path + "/" + fileName),
 		Body:   bytes.NewReader(buff.Bytes()),
