@@ -25,8 +25,8 @@ import gov.cms.dpc.macaroons.config.TokenPolicy;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.SecurityException;
+import io.jsonwebtoken.LocatorAdapter;
+import io.jsonwebtoken.MalformedJwtException;
 import io.swagger.annotations.*;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
@@ -39,16 +39,26 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.MalformedClaimException;
+import org.jose4j.jwt.NumericDate;
+import org.jose4j.jwt.consumer.InvalidJwtException;
+import org.jose4j.jwt.consumer.JwtConsumerBuilder;
+import org.jose4j.jwt.consumer.JwtContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.auth.MacaroonHelpers.ORGANIZATION_CAVEAT_KEY;
@@ -219,10 +229,10 @@ public class TokenResource extends AbstractTokenResource {
         // Validate JWT signature
         try {
             return handleJWT(jwtBody, scope);
-        } catch (SecurityException e) {
+        } catch (InvalidJwtException e) {
             logger.error("JWT has invalid signature", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
-        } catch (JwtException e) {
+        } catch (MalformedClaimException e) {
             logger.error("Malformed JWT", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
         }
@@ -243,14 +253,15 @@ public class TokenResource extends AbstractTokenResource {
     @Override
     public Response validateJWT(@NoHtml @NotEmpty(message = "Must submit JWT") String jwt) {
         try {
-            Jwts.parser()
-                    .requireAudience(this.authURL)
-                    .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
+            JwtContext jwtContext = new JwtConsumerBuilder()
+                    .setSkipAllValidators()
+                    .setDisableRequireSignature()
+                    .setSkipSignatureVerification()
                     .build()
-                    .parseSignedClaims(jwt);
-        } catch (IllegalArgumentException | UnsupportedJwtException e) {
-            // This is fine, we just want the body
-        } catch (MalformedJwtException e) {
+                    .process(jwt);
+            ValidatingKeyResolver validator = new ValidatingKeyResolver(this.cache, List.of(this.authURL));
+            validator.resolveSigningKey(jwtContext);
+        } catch (InvalidJwtException | MalformedJwtException | MalformedClaimException e) {
             throw new WebApplicationException("JWT is not formatted correctly", Response.Status.BAD_REQUEST);
         }
 
@@ -275,15 +286,18 @@ public class TokenResource extends AbstractTokenResource {
         }
     }
 
-    private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
-        final Jws<Claims> claims = Jwts.parser()
-                .keyLocator(this.resolver)
-                .requireAudience(this.authURL)
+    private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) throws InvalidJwtException, MalformedClaimException {
+        final JwtContext jwtContext = new JwtConsumerBuilder()
+                .setSkipAllValidators()
+                .setDisableRequireSignature()
                 .build()
-                .parseSignedClaims(jwtBody);
+                .process(jwtBody);
+        ValidatingKeyResolver validator = new ValidatingKeyResolver(this.cache, List.of(this.authURL));
+        validator.resolveSigningKey(jwtContext);
 
         // Extract the Client Macaroon from the subject field (which is the same as the issuer)
-        final String clientMacaroon = claims.getPayload().getSubject();
+        JwtClaims claims = jwtContext.getJwtClaims();
+        final String clientMacaroon = claims.getSubject();
         final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(clientMacaroon);
 
         // Get org id from macaroon caveats
@@ -352,23 +366,24 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     @SuppressWarnings("JdkObsolete") // Date class is used by Jwt
-    private void handleJWTClaims(UUID organizationID, Jws<Claims> claims) {
+    private void handleJWTClaims(UUID organizationID, JwtClaims claims) throws MalformedClaimException {
         // Issuer and Sub must be present and identical
-        final String issuer = getClaimIfPresent("issuer", claims.getPayload().getIssuer());
-        final String subject = getClaimIfPresent("subject", claims.getPayload().getSubject());
+        final String issuer = getClaimIfPresent("issuer", claims.getIssuer());
+        final String subject = getClaimIfPresent("subject", claims.getSubject());
         if (!issuer.equals(subject)) {
             throw new WebApplicationException("Issuer and Subject must be identical", Response.Status.BAD_REQUEST);
         }
 
         // JTI must be present and have not been used in the past 5 minutes.
-        if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getPayload().getId()), true)) {
+        if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getJwtId()), true)) {
             logger.warn("JWT being replayed for organization {}", organizationID);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
         }
 
         // Ensure the expiration time for the token is not more than 5 minutes in the future
-        final Date expiration = getClaimIfPresent("expiration", claims.getPayload().getExpiration());
-        if (OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(5).isBefore(expiration.toInstant().atOffset(ZoneOffset.UTC))) {
+        final NumericDate expiration = getClaimIfPresent("expiration", claims.getExpirationTime());
+        OffsetDateTime offsetExp = OffsetDateTime.ofInstant(Instant.ofEpochSecond(expiration.getValue()), ZoneOffset.UTC);
+        if (OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(5).isBefore(offsetExp)) {
             throw new WebApplicationException("Not authorized", Response.Status.UNAUTHORIZED);
         }
     }

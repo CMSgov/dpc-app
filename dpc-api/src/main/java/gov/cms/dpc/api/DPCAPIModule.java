@@ -43,6 +43,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
+import java.security.Key;
+
 public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(DPCAPIModule.class);
