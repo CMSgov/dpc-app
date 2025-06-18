@@ -26,6 +26,7 @@ import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.SecurityException;
 import io.swagger.annotations.*;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
@@ -222,10 +223,10 @@ public class TokenResource extends AbstractTokenResource {
         // Validate JWT signature
         try {
             return handleJWT(jwtBody, scope);
-        } catch (JwtException e) {
+        } catch (SecurityException e) {
             logger.error("JWT has invalid signature", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
-        } catch (IllegalArgumentException e) {
+        } catch (JwtException e) {
             logger.error("Malformed JWT", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
         }
