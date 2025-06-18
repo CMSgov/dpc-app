@@ -89,9 +89,9 @@ func TestGetParameters(t *testing.T) {
 	parm2 := "parm2"
 
 	tests := []struct {
-		keys                 []string
-		parms                map[string]string
-		err                  error
+		keys                []string
+		parms               map[string]string
+		err                 error
 		ssmNew              func(cfg aws.Config, optFns ...func(*ssm.Options)) *ssm.Client
 		ssmsvcGetParameters func(c *ssm.Client, ctx context.Context, input *ssm.GetParametersInput, optFns ...func(*ssm.Options)) (*ssm.GetParametersOutput, error)
 	}{

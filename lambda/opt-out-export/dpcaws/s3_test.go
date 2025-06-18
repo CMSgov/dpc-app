@@ -41,9 +41,9 @@ func TestUploadFileToS3(t *testing.T) {
 			},
 		},
 	}
+
 	ctx := context.TODO()
 	cfg := aws.Config{}
-
 	for _, test := range tests {
 		newUploader = test.newUploader
 		upload = test.upload
