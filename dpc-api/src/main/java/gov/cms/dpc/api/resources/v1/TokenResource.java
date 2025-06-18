@@ -220,10 +220,15 @@ public class TokenResource extends AbstractTokenResource {
         validateJWTQueryParams(grantType, clientAssertionType, scope, jwtBody);
 
         // Validate JWT signature
-        return handleJWT(jwtBody, scope);
-//        } catch (InvalidJwtException e) {
-//            logger.error("JWT has invalid signature", e);
-//            throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
+        try {
+            return handleJWT(jwtBody, scope);
+        } catch (JwtException e) {
+            logger.error("JWT has invalid signature", e);
+            throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
+        } catch (IllegalArgumentException e) {
+            logger.error("Malformed JWT", e);
+            throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
+        }
     }
 
     @POST
@@ -274,7 +279,7 @@ public class TokenResource extends AbstractTokenResource {
         }
     }
 
-    private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
+    private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) throws JwtException, IllegalArgumentException {
         final Jws<Claims> claims = Jwts.parser()
                 .keyLocator(this.resolver)
                 .requireAudience(this.authURL)
