@@ -187,17 +187,21 @@ func updateResponseFileImportStatus(db *sql.DB, optOutFileId string, status stri
 
 func createConnection(dbUser string, dbPassword string) (*sql.DB, error) {
 	var dbName string = "dpc_consent"
-	var dbHost string = os.Getenv("DB_HOST")
+	var dbHost string = "172.18.0.2"
 	var dbPort int = 5432
 	var sslmode string = "require"
 	if isTesting {
 		sslmode = "disable"
 	}
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", dbHost, dbPort, dbUser, dbPassword, dbName, sslmode)
-
+	psqlInfo := fmt.Sprintf("host='%s' port=%d user=%s password=%s dbname=%s sslmode=%s", dbHost, dbPort, dbUser, dbPassword, dbName, sslmode)
+	log.Info(psqlInfo)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		return db, fmt.Errorf("createConnection: %w", err)
+	}
+
+	if pingErr := db.Ping(); pingErr != nil {
+		log.Info(fmt.Errorf("fricking database: %w", pingErr))
 	}
 
 	return db, err
