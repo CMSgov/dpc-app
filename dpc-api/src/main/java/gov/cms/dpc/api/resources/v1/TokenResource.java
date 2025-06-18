@@ -249,13 +249,11 @@ public class TokenResource extends AbstractTokenResource {
         try {
             JwtContext jwtContext = new JwtConsumerBuilder()
                     .setSkipAllValidators()
-                    .setDisableRequireSignature()
-                    .setSkipSignatureVerification()
                     .build()
                     .process(jwt);
             ValidatingKeyResolver validator = new ValidatingKeyResolver(this.cache, List.of(this.authURL));
             validator.resolveSigningKey(jwtContext);
-        } catch (InvalidJwtException | MalformedJwtException | MalformedClaimException e) {
+        } catch (InvalidJwtException | MalformedClaimException e) {
             throw new WebApplicationException("JWT is not formatted correctly", Response.Status.BAD_REQUEST);
         }
 
