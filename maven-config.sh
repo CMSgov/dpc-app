@@ -5,11 +5,17 @@ mkdir -p ./.mvn
 : > ./.mvn/maven.config
 
 function process_line() {
+    # Don't process an empty line
+    if [ -z "$1" ]
+    then
+      return
+    fi
+
   KEY="$(echo "$1" | cut -d '=' -f1)"
   VALUE="$(echo "$1" | cut -d '=' -f2)"
 
   # Quoted values need special handling
-  # Before: Key="Value"
+  # Before: -DKey="Value"
   # After: "-DKey=Value"
   if [ "${VALUE:0:1}" == '"' ]
   then
