@@ -14,6 +14,8 @@ services:
       # Mount persistent volume to ensure data is not erased across containers.
       - pgdata16:/var/lib/postgresql/data
       - ./tmp:/var/tmp
+    ports:
+      - "5432:5432"
     healthcheck:
       test: "pg_isready -U $${POSTGRES_USER}"
       interval: 10s

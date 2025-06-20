@@ -10,7 +10,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 
@@ -37,7 +37,7 @@ var isTesting = os.Getenv("IS_TESTING") == "true"
 
 func main() {
 	if isTesting {
-		var filename, err = generateRequestFile()
+		var filename, err = generateRequestFile(context.TODO())
 		if err != nil {
 			log.Error(err)
 		} else {
@@ -53,7 +53,7 @@ func handler(ctx context.Context, event events.S3Event) (string, error) {
 		DisableHTMLEscape: true,
 		TimestampFormat:   time.RFC3339Nano,
 	})
-	var filename, err = generateRequestFile()
+	var filename, err = generateRequestFile(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -61,8 +61,8 @@ func handler(ctx context.Context, event events.S3Event) (string, error) {
 	return filename, nil
 }
 
-func generateRequestFile() (string, error) {
-	session, sessErr := getAwsSession()
+func generateRequestFile(ctx context.Context) (string, error) {
+	cfg, sessErr := getAwsSession(ctx)
 	if sessErr != nil {
 		return "", sessErr
 	}
@@ -73,13 +73,13 @@ func generateRequestFile() (string, error) {
 	attributionDbPassword := fmt.Sprintf("/dpc/%s/attribution/db_read_only_pass_dpc_attribution", os.Getenv("ENV"))
 	consentDbUser := fmt.Sprintf("/dpc/%s/consent/db_read_only_user_dpc_consent", os.Getenv("ENV"))
 	consentDbPassword := fmt.Sprintf("/dpc/%s/consent/db_read_only_pass_dpc_consent", os.Getenv("ENV"))
-	var keynames []*string = make([]*string, 4)
-	keynames[0] = &attributionDbUser
-	keynames[1] = &attributionDbPassword
-	keynames[2] = &consentDbUser
-	keynames[3] = &consentDbPassword
+	var keynames []string = make([]string, 4)
+	keynames[0] = attributionDbUser
+	keynames[1] = attributionDbPassword
+	keynames[2] = consentDbUser
+	keynames[3] = consentDbPassword
 
-	secretsInfo, pmErr := getSecrets(session, keynames)
+	secretsInfo, pmErr := getSecrets(ctx, cfg, keynames)
 	if pmErr != nil {
 		return "", pmErr
 	}
@@ -101,12 +101,12 @@ func generateRequestFile() (string, error) {
 		return "", fileErr
 	}
 
-	bfdSession, err := getAssumeRoleSession(session)
+	bfdSession, err := getAssumeRoleSession(ctx, cfg)
 	if err != nil {
 		return "", err
 	}
 
-	s3Err := uploadToS3(bfdSession, fileName, buff, os.Getenv("S3_UPLOAD_BUCKET"), os.Getenv("S3_UPLOAD_PATH"))
+	s3Err := uploadToS3(ctx, bfdSession, fileName, buff, os.Getenv("S3_UPLOAD_BUCKET"), os.Getenv("S3_UPLOAD_PATH"))
 	if s3Err != nil {
 		return "", s3Err
 	}
@@ -174,30 +174,30 @@ func generateRequestFileName(now time.Time) string {
 	return fmt.Sprintf(fileFormat, prefix, date, time)
 }
 
-func getAssumeRoleSession(session *session.Session) (*session.Session, error) {
+func getAssumeRoleSession(ctx context.Context, cfg aws.Config) (aws.Config, error) {
 	parameterName := fmt.Sprintf("/opt-out-import/dpc/%s/bfd-bucket-role-arn", os.Getenv("ENV"))
-	assumeRoleArn, err := getSecret(session, parameterName)
+	assumeRoleArn, err := getSecret(ctx, cfg, parameterName)
 
 	if err != nil {
-		return nil, fmt.Errorf("Failed to retrieve assume role arn: %w", err)
+		return cfg, fmt.Errorf("Failed to retrieve assume role arn: %w", err)
 	}
 
 	if isTesting {
-		return getAwsSession()
+		return getAwsSession(ctx)
 	} else {
-		return newSession(assumeRoleArn)
+		return newSession(ctx, assumeRoleArn)
 	}
 }
 
-func getAwsSession() (*session.Session, error) {
+func getAwsSession(ctx context.Context) (aws.Config, error) {
 	// If we're testing, connect to local stack.  If we're not, connect to the AWS environment.
 	if isTesting {
 		endPoint, found := os.LookupEnv("LOCAL_STACK_ENDPOINT")
 		if !found {
-			return nil, fmt.Errorf("LOCAL_STACK_ENDPOINT env variable not defined")
+			return aws.Config{}, fmt.Errorf("LOCAL_STACK_ENDPOINT env variable not defined")
 		}
-		return newLocalSession(endPoint)
+		return newLocalSession(ctx, endPoint)
 	} else {
-		return newSession("")
+		return newSession(ctx, "")
 	}
 }

@@ -1,8 +1,4 @@
 services:
-  db:
-    ports:
-      - "5432:5432"
-
   # Open up the debugger port on each service
   api:
     ports:

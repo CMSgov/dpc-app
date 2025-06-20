@@ -17,7 +17,8 @@ import (
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/ianlopshire/go-fixedwidth"
 	"github.com/stretchr/testify/assert"
 )
@@ -51,6 +52,7 @@ func TestIntegrationImportResponseFile(t *testing.T) {
 	db, _ := createConnectionVar(os.Getenv("DB_USER_DPC_CONSENT"), os.Getenv("DB_PASS_DPC_CONSENT"))
 	defer db.Close()
 
+	ctx := context.TODO()
 	// clear consent
 	deleteConsent := fmt.Sprintf("DELETE FROM consent WHERE effective_date = '%s'", today)
 	deleteOptOutFile := fmt.Sprintf("DELETE FROM opt_out_file WHERE created_at > '%s'", today)
@@ -59,14 +61,14 @@ func TestIntegrationImportResponseFile(t *testing.T) {
 	_, oofErr := db.Exec(deleteOptOutFile)
 	assert.Nil(t, oofErr)
 
-	createdOptOutCount, createdOptInCount, confirmationFileName, err := importResponseFile("demo-bucket", "bfdeft01/dpc/in/T.NGD.DPC.RSP.D240123.T1122001.IN")
+	createdOptOutCount, createdOptInCount, confirmationFileName, err := importResponseFile(ctx, "demo-bucket", "bfdeft01/dpc/in/T.NGD.DPC.RSP.D240123.T1122001.IN")
 	assert.Nil(t, err)
 	assert.Equal(t, 6, createdOptOutCount)
 	assert.Equal(t, 1, createdOptInCount)
 	assert.True(t, strings.Contains(confirmationFileName, "T#EFT.ON.DPC.NGD.CONF."))
 
 	// Test confirmation file correct
-	b, downloadErr := downloadS3File("demo-bucket", confirmationFileName)
+	b, downloadErr := downloadS3File(ctx, "demo-bucket", confirmationFileName)
 	assert.Nil(t, downloadErr)
 	r := bytes.NewReader(b)
 	scanner := bufio.NewScanner(r)
@@ -180,9 +182,10 @@ func TestIntegrationDownloadS3File(t *testing.T) {
 		},
 	}
 
+	ctx := context.TODO()
 	for _, test := range tests {
 		fmt.Printf("~~~ %s test\n", test.name)
-		response, err := downloadS3File(test.bucket, test.filenamePath)
+		response, err := downloadS3File(ctx, test.bucket, test.filenamePath)
 		assert.Equal(t, test.expect, string(response[:]))
 		if test.err != nil {
 			assert.ErrorContains(t, err, test.err.Error())
@@ -271,7 +274,8 @@ func TestUploadConfirmationFile(t *testing.T) {
 			file:             "fake-file",
 			err:              nil,
 			confirmationFile: []byte("test"),
-			uploader: func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
+			//ploader func(ctx context.Context, input *s3.PutObjectInput, opts ...func(*manager.Uploader)) (*manager.UploadOutput, error)
+			uploader: func(ctx context.Context, input *s3.PutObjectInput, opts ...func(*manager.Uploader)) (*manager.UploadOutput, error) {
 				return nil, nil
 			},
 		},
@@ -281,15 +285,16 @@ func TestUploadConfirmationFile(t *testing.T) {
 			file:             "fake-file",
 			err:              errors.New("upload failed"),
 			confirmationFile: []byte("test"),
-			uploader: func(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error) {
+			uploader: func(ctx context.Context, input *s3.PutObjectInput, opts ...func(*manager.Uploader)) (*manager.UploadOutput, error) {
 				return nil, errors.New("upload failed")
 			},
 		},
 	}
 
+	ctx := context.TODO()
 	for _, test := range tests {
 		fmt.Printf("~~~ %s test\n", test.name)
-		err := uploadConfirmationFile(test.bucket, test.file, test.uploader, test.confirmationFile)
+		err := uploadConfirmationFile(ctx, test.bucket, test.file, test.uploader, test.confirmationFile)
 		assert.Equal(t, test.err, err)
 	}
 
@@ -314,9 +319,10 @@ func TestIntegrationDeleteS3File(t *testing.T) {
 		},
 	}
 
+	ctx := context.TODO()
 	for _, test := range tests {
 		fmt.Printf("~~~ %s test\n", test.name)
-		err := deleteS3File(test.bucket, test.filenamePath)
+		err := deleteS3File(ctx, test.bucket, test.filenamePath)
 		if test.err == nil {
 			assert.NoError(t, err)
 		} else {

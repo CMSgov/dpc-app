@@ -2,27 +2,26 @@ package dpcaws
 
 import (
 	"bytes"
+	"context"
 	"fmt"
-	"os"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 // Makes these easily mockable
-var osOpen = os.Open
-var newUploader = s3manager.NewUploader
-var upload = s3manager.Uploader.Upload
+var newUploader = manager.NewUploader
+var upload = manager.Uploader.Upload
 
 // AddFileToS3
 // Uses the given sessions to upload the file to the given s3Bucket
-func UploadFileToS3(s *session.Session, fileName string, buff bytes.Buffer, s3Bucket string, s3Path string) error {
+func UploadFileToS3(ctx context.Context, cfg aws.Config, fileName string, buff bytes.Buffer, s3Bucket string, s3Path string) error {
 	// Upload file to bucket
-	uploader := newUploader(s)
+	client := s3.NewFromConfig(cfg, func(o *s3.Options){ o.UsePathStyle = true })
+	uploader := newUploader(client)
 
-	_, s3Err := upload(*uploader, &s3manager.UploadInput{
+	_, s3Err := upload(*uploader, ctx, &s3.PutObjectInput{
 		Bucket: aws.String(s3Bucket),
 		Key:    aws.String(s3Path + "/" + fileName),
 		Body:   bytes.NewReader(buff.Bytes()),
@@ -34,10 +33,11 @@ func UploadFileToS3(s *session.Session, fileName string, buff bytes.Buffer, s3Bu
 	return nil
 }
 
-func DownloadFileFromS3(s *session.Session, bucket string, file string) ([]byte, error) {
-	downloader := s3manager.NewDownloader(s)
-	buff := &aws.WriteAtBuffer{}
-	_, err := downloader.Download(buff, &s3.GetObjectInput{
+func DownloadFileFromS3(ctx context.Context, cfg aws.Config, bucket string, file string) ([]byte, error) {
+	client := s3.NewFromConfig(cfg, func(o *s3.Options){ o.UsePathStyle = true })
+	downloader := manager.NewDownloader(client)
+	buff := manager.NewWriteAtBuffer([]byte{})
+	_, err := downloader.Download(ctx, buff, &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(file),
 	})

@@ -1,22 +1,23 @@
 package dpcaws
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
 )
 
 // Makes this easier to mock and unit test
-var ssmNew = ssm.New
-var ssmsvcGetParameter = (*ssm.SSM).GetParameter
-var ssmsvcGetParameters = (*ssm.SSM).GetParameters
+var ssmNew = ssm.NewFromConfig
+var ssmsvcGetParameter = (*ssm.Client).GetParameter
+var ssmsvcGetParameters = (*ssm.Client).GetParameters
 
-func GetParameter(s *session.Session, keyname string) (string, error) {
-	ssmsvc := ssmNew(s)
+func GetParameter(ctx context.Context, cfg aws.Config, keyname string) (string, error) {
+	ssmsvc := ssmNew(cfg)
 
 	withDecryption := true
-	result, err := ssmsvcGetParameter(ssmsvc, &ssm.GetParameterInput{
+	result, err := ssmsvcGetParameter(ssmsvc, ctx, &ssm.GetParameterInput{
 		Name:           &keyname,
 		WithDecryption: &withDecryption,
 	})
@@ -35,12 +36,12 @@ func GetParameter(s *session.Session, keyname string) (string, error) {
 }
 
 // Returns a list of parameters from the SSM Parameter Store
-func GetParameters(s *session.Session, keynames []*string) (map[string]string, error) {
+func GetParameters(ctx context.Context, cfg aws.Config, keynames []string) (map[string]string, error) {
 	// Create an SSM client and pull down keys from the param store
-	ssmsvc := ssmNew(s)
+	ssmsvc := ssmNew(cfg)
 
 	withDecryption := true
-	params, err := ssmsvcGetParameters(ssmsvc, &ssm.GetParametersInput{
+	params, err := ssmsvcGetParameters(ssmsvc, ctx, &ssm.GetParametersInput{
 		Names:          keynames,
 		WithDecryption: &withDecryption,
 	})
@@ -52,7 +53,7 @@ func GetParameters(s *session.Session, keynames []*string) (map[string]string, e
 	if len(params.InvalidParameters) > 0 {
 		invalidParamsStr := ""
 		for i := 0; i < len(params.InvalidParameters); i++ {
-			invalidParamsStr += fmt.Sprintf("%s,\n", *params.InvalidParameters[i])
+			invalidParamsStr += fmt.Sprintf("%s,\n", params.InvalidParameters[i])
 		}
 		return nil, fmt.Errorf("invalid parameters error: %s", invalidParamsStr)
 	}
