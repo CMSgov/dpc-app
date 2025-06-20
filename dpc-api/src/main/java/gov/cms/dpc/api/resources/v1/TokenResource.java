@@ -39,10 +39,15 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.jose4j.jwt.MalformedClaimException;
+import org.jose4j.jwt.consumer.InvalidJwtException;
+import org.jose4j.jwt.consumer.JwtConsumerBuilder;
+import org.jose4j.jwt.consumer.JwtContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -67,7 +72,7 @@ public class TokenResource extends AbstractTokenResource {
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
-    private final SigningKeyResolverAdapter resolver;
+    private final LocatorAdapter<Key> resolver;
     private final IJTICache cache;
     private final String authURL;
 
@@ -75,7 +80,7 @@ public class TokenResource extends AbstractTokenResource {
     public TokenResource(TokenDAO dao,
                          MacaroonBakery bakery,
                          TokenPolicy policy,
-                         SigningKeyResolverAdapter resolver,
+                         LocatorAdapter<Key> resolver,
                          IJTICache cache,
                          @APIV1 String publicURL) {
         this.dao = dao;
@@ -242,14 +247,15 @@ public class TokenResource extends AbstractTokenResource {
     @Override
     public Response validateJWT(@NoHtml @NotEmpty(message = "Must submit JWT") String jwt) {
         try {
-            Jwts.parser()
-                    .requireAudience(this.authURL)
-                    .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
+            JwtContext jwtContext = new JwtConsumerBuilder()
+                    .setSkipAllValidators()
+                    .setDisableRequireSignature()
+                    .setSkipSignatureVerification()
                     .build()
-                    .parseSignedClaims(jwt);
-        } catch (IllegalArgumentException | UnsupportedJwtException e) {
-            // This is fine, we just want the body
-        } catch (MalformedJwtException e) {
+                    .process(jwt);
+            ValidatingKeyResolver validator = new ValidatingKeyResolver(this.cache, List.of(this.authURL));
+            validator.resolveSigningKey(jwtContext);
+        } catch (InvalidJwtException | MalformedJwtException | MalformedClaimException e) {
             throw new WebApplicationException("JWT is not formatted correctly", Response.Status.BAD_REQUEST);
         }
 
@@ -274,9 +280,9 @@ public class TokenResource extends AbstractTokenResource {
         }
     }
 
-    private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
+    private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) throws JwtException, IllegalArgumentException {
         final Jws<Claims> claims = Jwts.parser()
-                .setSigningKeyResolver(this.resolver)
+                .keyLocator(this.resolver)
                 .requireAudience(this.authURL)
                 .build()
                 .parseSignedClaims(jwtBody);

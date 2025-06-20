@@ -12,7 +12,7 @@ import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.config.TokenPolicy.ExpirationPolicy;
 import gov.cms.dpc.macaroons.config.TokenPolicy.VersionPolicy;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
-import io.jsonwebtoken.SigningKeyResolverAdapter;
+import io.jsonwebtoken.LocatorAdapter;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
+import java.security.Key;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -42,7 +43,7 @@ public class TokenResourceUnitTest {
     private static TokenPolicy policy;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private static Macaroon macaroon;
-    private static final SigningKeyResolverAdapter resolver = Mockito.mock(SigningKeyResolverAdapter.class);
+    private static final LocatorAdapter<Key> resolver = Mockito.mock(LocatorAdapter.class);
     private static final IJTICache cache = Mockito.mock(IJTICache.class);
     private static final String authURL = "auth_url";
     private TokenResource tokenResource;
