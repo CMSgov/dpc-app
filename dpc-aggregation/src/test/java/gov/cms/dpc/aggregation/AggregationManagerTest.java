@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation;
 
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
+import gov.cms.dpc.aggregation.engine.CurrentEngineState;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.verify;
 class AggregationManagerTest {
 
     private AggregationEngine engine;
+    private CurrentEngineState state;
 
     @BeforeEach
     void setup() {
@@ -23,7 +25,7 @@ class AggregationManagerTest {
 
     @Test
     void testShutdown() {
-        new AggregationManager(engine).stop();
+        new AggregationManager(engine, state).stop();
         verify(engine).stop();
     }
 }
