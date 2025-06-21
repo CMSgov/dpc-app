@@ -7,7 +7,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
-import gov.cms.dpc.aggregation.engine.CurrentEngineState;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.aggregation.health.AggregationEngineHealthCheck;
@@ -142,11 +141,5 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Provides
     ConsentService provideConsentService(@Named("consentClient") IGenericClient consentClient) {
         return new ConsentServiceImpl(consentClient);
-    }
-
-    @Provides
-    @Singleton
-    CurrentEngineState provideEngineState() {
-        return new CurrentEngineState();
     }
 }

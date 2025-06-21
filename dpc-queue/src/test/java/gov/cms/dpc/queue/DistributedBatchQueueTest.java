@@ -2,6 +2,7 @@ package gov.cms.dpc.queue;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
+import gov.cms.dpc.common.utils.CurrentEngineState;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
@@ -33,12 +34,13 @@ class DistributedBatchQueueTest {
     private final UUID aggregatorID = UUID.randomUUID();
     private SessionFactory sessionFactory;
     private DistributedBatchQueue queue;
+    private final CurrentEngineState state = new CurrentEngineState();
 
     @BeforeEach
     void setUp() {
         final Configuration conf = new Configuration();
         sessionFactory = conf.configure().buildSessionFactory();
-        queue = new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
+        queue = new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory, state), 100, new MetricRegistry());
     }
 
     @AfterEach

@@ -1,7 +1,7 @@
 package gov.cms.dpc.aggregation;
 
 import gov.cms.dpc.aggregation.engine.AggregationEngine;
-import gov.cms.dpc.aggregation.engine.CurrentEngineState;
+import gov.cms.dpc.common.utils.CurrentEngineState;
 import io.dropwizard.lifecycle.Managed;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
@@ -31,10 +31,24 @@ public class AggregationManager implements Managed {
     }
 
     @Override
-    public void stop() {
+    public void stop() throws InterruptedException {
         logger.debug("Stopping Aggregation thread");
-        System.out.println("Current state: " + engineState.getState());
-        // Wait for stopped status
+        engineState.setState(CurrentEngineState.States.STOPPING);
+
+        // Wait for the last batch to finish, then shut down.
+        logger.debug("Waiting for engine to stop");
+        synchronized (engineState) {
+            while(engineState.getState() != CurrentEngineState.States.STOPPED) {
+                try {
+                    System.out.println("Waiting for engine to stop");
+                    engineState.wait();
+                } catch (InterruptedException e) {
+                    System.out.println("Interrupt caught in manager");
+                    this.engine.stop();
+                    throw e;
+                }
+            }
+        }
         this.engine.stop();
     }
 }

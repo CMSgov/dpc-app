@@ -2,6 +2,7 @@ package gov.cms.dpc.queue;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
+import gov.cms.dpc.common.utils.CurrentEngineState;
 import gov.cms.dpc.queue.exceptions.JobQueueUnhealthy;
 import gov.cms.dpc.queue.health.JobQueueHealthCheck;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -24,7 +25,8 @@ public class QueueHealthTest {
 
     private Session session = mock(Session.class);
     private final SessionFactory factory = mock(SessionFactory.class);
-    private DPCQueueManagedSessionFactory managedSessionFactory = new DPCQueueManagedSessionFactory(factory);
+    private final CurrentEngineState state = new CurrentEngineState();
+    private DPCQueueManagedSessionFactory managedSessionFactory = new DPCQueueManagedSessionFactory(factory, state);
     private Query<Long> query = mock(Query.class);
     private MetricRegistry metrics = new MetricRegistry();
 

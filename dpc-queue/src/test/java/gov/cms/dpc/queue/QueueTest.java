@@ -5,6 +5,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Slf4jReporter;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
+import gov.cms.dpc.common.utils.CurrentEngineState;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
@@ -44,6 +45,7 @@ class QueueTest {
     private final String orgNPI = NPIUtil.generateNPI();
     private final String providerNPI = NPIUtil.generateNPI();
     private final List<String> patientMBIs = List.of("test-patient-1", "test-patient-2");
+    private final CurrentEngineState state = new CurrentEngineState();
 
     @TestFactory
     Stream<DynamicTest> testSource() {
@@ -58,7 +60,7 @@ class QueueTest {
                         // Create the session factory
                         final Configuration conf = new Configuration();
                         sessionFactory = conf.configure().buildSessionFactory();
-                        return new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
+                        return new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory, state), 100, new MetricRegistry());
                     } else if(queueName.equals("aws")) {
                         MetricRegistry metricRegistry = new MetricRegistry();
 
@@ -83,7 +85,7 @@ class QueueTest {
                         sessionFactory = conf.configure().buildSessionFactory();
 
                         return new AwsDistributedBatchQueue(
-                            new DPCQueueManagedSessionFactory(sessionFactory),
+                            new DPCQueueManagedSessionFactory(sessionFactory, state),
                             100,
                             metricRegistry,
                             reporter1,

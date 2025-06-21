@@ -1,8 +1,7 @@
-package gov.cms.dpc.aggregation.engine;
+package gov.cms.dpc.common.utils;
 
 /**
- * Defines the current state of the aggregation engine.  Used to communicate between the main aggregation and shutdown
- * hook threads.
+ * Defines the current state of the aggregation engine.  Used to orchestrate a graceful shutdown of dpc-aggregation.
  */
 public class CurrentEngineState {
 	public enum States {
@@ -29,7 +28,7 @@ public class CurrentEngineState {
 	}
 
 	/**
-	 * Gets the current state of the {@link AggregationEngine}.
+	 * Gets the current state of the dpc-aggregation aggregation engine.
 	 * @return {@link CurrentEngineState.States}
 	 */
 	public synchronized States getState() { return currentState; }
