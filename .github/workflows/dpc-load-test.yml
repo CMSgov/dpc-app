@@ -13,7 +13,6 @@ on:
           - stress-test
         default: single-iteration
 
-
 jobs:
   run-load-test:
     name: "Run DPC API Load Test"
