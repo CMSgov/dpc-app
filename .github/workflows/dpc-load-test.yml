@@ -16,7 +16,10 @@ on:
 jobs:
   run-load-test:
     name: "Run DPC API Load Test"
-    runs-on: self-hosted
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,7 +42,11 @@ jobs:
           docker run --rm -i -u "$(id -u):$(id -g)" -v "${PWD}:/xk6" \
             artifactory.cloud.cms.gov/docker/grafana/xk6 build \
             --with github.com/LeonAdato/xk6-output-statsd
-
+      - name: AWS Credentials (non-prod)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
       - name: Set env vars from AWS params
         uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:

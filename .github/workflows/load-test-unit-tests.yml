@@ -9,7 +9,7 @@ on:
 
 jobs:
   test:
-    runs-on: self-hosted
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     defaults:
       run:
         working-directory: ./dpc-load-testing
@@ -27,7 +27,7 @@ jobs:
       - name: Run unit tests
         run: yarn test
   test-macaroons:
-    runs-on: self-hosted
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - uses: actions/checkout@v4
       - name: Make test results directory
