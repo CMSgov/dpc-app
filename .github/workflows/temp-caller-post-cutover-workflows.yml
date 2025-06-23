@@ -15,11 +15,11 @@ jobs:
 #      test_type: average-load-test
 #  trigger-accessibility-test:
 #    uses: ./.github/workflows/dpc-portal-accessibility-test.yml
-  trigger-macaroon:
-    uses: ./.github/workflows/generate-macaroon.yml
-    with:
-      env: 'dev'
-    secrets: inherit
+#  trigger-macaroon:
+#    uses: ./.github/workflows/generate-macaroon.yml
+#    with:
+#      env: 'dev'
+#    secrets: inherit
 #  load-test-unit-tests:
 #    uses: ./.github/workflows/load-test-unit-tests.yml
   opt-out-import-unit-tests:
