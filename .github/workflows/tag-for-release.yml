@@ -18,6 +18,7 @@ jobs:
     name: "Tag dpc-app"
     permissions:
       contents: write
+      id-token: write
     uses: ./.github/workflows/tag_release.yml
     with:
       repo_ref: ${{ inputs.repo_ref }}
