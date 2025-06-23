@@ -16,7 +16,7 @@ var isTesting = os.Getenv("IS_TESTING") == "true"
 
 func main() {
 	if isTesting {
-		var addresses, err = updateIpSet()
+		var addresses, err = updateIpSet(context.TODO())
 		if err != nil {
 			log.Error(err)
 		} else {
@@ -32,20 +32,20 @@ func handler(ctx context.Context, event events.S3Event) ([]string, error) {
 		DisableHTMLEscape: true,
 		TimestampFormat:   time.RFC3339Nano,
 	})
-	var addrs, err = updateIpSet()
+	var addrs, err = updateIpSet(ctx)
 	if err != nil {
 		return nil, err
 	}
-	log.Info("Successfully completed executing export lambda")
+	log.Info("Successfully completed executing api-waf-sync lambda")
 	return addrs, nil
 }
 
-var updateIpSet = func() ([]string, error) {
+var updateIpSet = func(ctx context.Context) ([]string, error) {
 	ipSetName := fmt.Sprintf("dpc-%s-api-customers", os.Getenv("ENV"))
 
 	authDbUser := fmt.Sprintf("/dpc/%s/api/db_read_only_user_dpc_auth", os.Getenv("ENV"))
 	authDbPassword := fmt.Sprintf("/dpc/%s/api/db_read_only_pass_dpc_auth", os.Getenv("ENV"))
-	secretsInfo, secretErr := getAuthDbSecrets(authDbUser, authDbPassword)
+	secretsInfo, secretErr := getAuthDbSecrets(ctx, authDbUser, authDbPassword)
 	if secretErr != nil {
 		return nil, secretErr
 	}
@@ -55,7 +55,7 @@ var updateIpSet = func() ([]string, error) {
 		return nil, authDbErr
 	}
 
-	addresses, wafErr := updateIpAddresses(ipSetName, ipAddresses)
+	addresses, wafErr := updateIpAddresses(ctx, ipSetName, ipAddresses)
 	if wafErr != nil {
 		return nil, wafErr
 	}
