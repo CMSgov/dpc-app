@@ -8,7 +8,7 @@ export const options = {
     workflow: {
       executor: 'per-vu-iterations',
       vus: constants.maxVUs,
-      iterations: 5,
+      iterations: 1,
       exec: "workflow"
     }
   }
