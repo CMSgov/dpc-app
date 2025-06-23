@@ -8,7 +8,6 @@ import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.KeyType;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwsHeader;
 import jakarta.ws.rs.WebApplicationException;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -79,10 +78,9 @@ class JwtKeyResolverTests {
     @Test
     void testRSASigningKeyResolver() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        final Claims mockClaims = mock(Claims.class);
-        Mockito.when(mockClaims.getIssuer()).thenReturn(org1Macaroon);
+        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn(correctKeyID.toString());
-        final Key key = resolver.resolveSigningKey(headerMock, mockClaims);
+        final Key key = resolver.locate(headerMock);
 
         assertEquals(keyPair.getPublic(), key, "Keys should match");
     }
@@ -90,10 +88,9 @@ class JwtKeyResolverTests {
     @Test
     void testECCSigningKeyResolver() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        final Claims mockClaims = mock(Claims.class);
-        Mockito.when(mockClaims.getIssuer()).thenReturn(org1Macaroon);
+        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn(eccKeyID.toString());
-        final Key key = resolver.resolveSigningKey(headerMock, mockClaims);
+        final Key key = resolver.locate(headerMock);
 
         assertEquals(eccKeyPair.getPublic(), key, "Keys should match");
     }
@@ -101,11 +98,10 @@ class JwtKeyResolverTests {
     @Test
     void testMissingKIDField() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        final Claims mockClaims = mock(Claims.class);
-        Mockito.when(mockClaims.getIssuer()).thenReturn(org1Macaroon);
+        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn(null);
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.resolveSigningKey(headerMock, mockClaims));
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.locate(headerMock));
 
         assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus(), "Should be unauthorized"),
                 () -> assertEquals("JWT must have KID field", exception.getMessage(), "Should have KID message"));
@@ -116,11 +112,10 @@ class JwtKeyResolverTests {
     @Test
     void testMissingSigningKey() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        final Claims mockClaims = mock(Claims.class);
-        Mockito.when(mockClaims.getIssuer()).thenReturn(org1Macaroon);
+        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn(notRealKeyID.toString());
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.resolveSigningKey(headerMock, mockClaims));
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.locate(headerMock));
 
         assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus(), "Should be unauthorized"),
                 () -> assertTrue(exception.getMessage().contains("Cannot find public key with id:"), "Should have KID message"));
@@ -129,11 +124,10 @@ class JwtKeyResolverTests {
     @Test
     void testFailingKeyParsing() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        final Claims mockClaims = mock(Claims.class);
-        Mockito.when(mockClaims.getIssuer()).thenReturn(org1Macaroon);
+        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn(badKeyID.toString());
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.resolveSigningKey(headerMock, mockClaims));
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.locate(headerMock));
 
         assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, exception.getResponse().getStatus(), "Should be unauthorized"),
                 () -> assertEquals("Internal server error", exception.getMessage(), "Should have KID message"));
@@ -142,11 +136,10 @@ class JwtKeyResolverTests {
     @Test
     void testNonUUIDKeyID() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        final Claims mockClaims = mock(Claims.class);
-        Mockito.when(mockClaims.getIssuer()).thenReturn(org1Macaroon);
+        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn("This is not a real key id");
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.resolveSigningKey(headerMock, mockClaims));
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.locate(headerMock));
 
         assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus(), "Should be unauthorized"),
                 () -> assertEquals("Invalid Public Key ID", exception.getMessage(), "Should have non-UUID message"));
@@ -155,11 +148,10 @@ class JwtKeyResolverTests {
     @Test
     void testNoMacaroon() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        final Claims mockClaims = mock(Claims.class);
-        Mockito.when(mockClaims.getIssuer()).thenReturn(null);
+        Mockito.when(headerMock.get("iss")).thenReturn(null);
         Mockito.when(headerMock.getKeyId()).thenReturn("This is not a real key id");
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.resolveSigningKey(headerMock, mockClaims));
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.locate(headerMock));
 
         assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus(), "Should be unauthorized"),
                 () -> assertEquals("JWT must have client_id", exception.getMessage(), "Should have non-UUID message"));
@@ -168,11 +160,10 @@ class JwtKeyResolverTests {
     @Test
     void testMacaroonNoCaveat() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        final Claims mockClaims = mock(Claims.class);
-        Mockito.when(mockClaims.getIssuer()).thenReturn(makeMacaroon(null));
+        Mockito.when(headerMock.get("iss")).thenReturn(makeMacaroon(null));
         Mockito.when(headerMock.getKeyId()).thenReturn("This is not a real key id");
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.resolveSigningKey(headerMock, mockClaims));
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.locate(headerMock));
 
         assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus(), "Should be unauthorized"),
                 () -> assertEquals("JWT client token must have organization_id", exception.getMessage(), "Should have non-UUID message"));
@@ -181,11 +172,10 @@ class JwtKeyResolverTests {
     @Test
     void testMacaroonWrongOrg() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        final Claims mockClaims = mock(Claims.class);
-        Mockito.when(mockClaims.getIssuer()).thenReturn(org2Macaroon);
+        Mockito.when(headerMock.get("iss")).thenReturn(org2Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn("This is not a real key id");
 
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.resolveSigningKey(headerMock, mockClaims));
+        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> resolver.locate(headerMock));
 
         assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus(), "Should be unauthorized"),
                 () -> assertEquals("Invalid Public Key ID", exception.getMessage(), "Should have non-UUID message"));

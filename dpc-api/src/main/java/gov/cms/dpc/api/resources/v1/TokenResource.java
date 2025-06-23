@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -67,7 +68,7 @@ public class TokenResource extends AbstractTokenResource {
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
-    private final SigningKeyResolverAdapter resolver;
+    private final LocatorAdapter<Key> resolver;
     private final IJTICache cache;
     private final String authURL;
 
@@ -75,7 +76,7 @@ public class TokenResource extends AbstractTokenResource {
     public TokenResource(TokenDAO dao,
                          MacaroonBakery bakery,
                          TokenPolicy policy,
-                         SigningKeyResolverAdapter resolver,
+                         LocatorAdapter<Key> resolver,
                          IJTICache cache,
                          @APIV1 String publicURL) {
         this.dao = dao;
@@ -241,12 +242,15 @@ public class TokenResource extends AbstractTokenResource {
     @Public
     @Override
     public Response validateJWT(@NoHtml @NotEmpty(message = "Must submit JWT") String jwt) {
+        ValidatingKeyResolver locator = new ValidatingKeyResolver(this.cache, Set.of(this.authURL));
+        Jws<Claims> claims = null;
         try {
-            Jwts.parser()
+            claims = Jwts.parser()
                     .requireAudience(this.authURL)
-                    .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
+                    .keyLocator(locator)
                     .build()
                     .parseSignedClaims(jwt);
+            locator.validate(claims.getPayload());
         } catch (IllegalArgumentException | UnsupportedJwtException e) {
             // This is fine, we just want the body
         } catch (MalformedJwtException e) {
@@ -276,10 +280,13 @@ public class TokenResource extends AbstractTokenResource {
 
     private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
         final Jws<Claims> claims = Jwts.parser()
-                .setSigningKeyResolver(this.resolver)
+                .keyLocator(this.resolver)
                 .requireAudience(this.authURL)
                 .build()
                 .parseSignedClaims(jwtBody);
+
+        ValidatingKeyResolver locator = new ValidatingKeyResolver(this.cache, Set.of(this.authURL));
+        locator.validate(claims.getPayload());
 
         // Extract the Client Macaroon from the subject field (which is the same as the issuer)
         final String clientMacaroon = claims.getPayload().getSubject();

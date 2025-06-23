@@ -21,7 +21,7 @@ import java.util.UUID;
  * <p>
  * The downside is that this method will always return a null {@link Key}, which means the {@link Jwts#parser()} method will always throw an {@link UnsupportedJwtException}, which we need to catch.
  */
-public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
+public class ValidatingKeyResolver extends LocatorAdapter<Key> {
 
     private final IJTICache cache;
     private final Set<String> audClaim;
@@ -32,13 +32,16 @@ public class ValidatingKeyResolver extends SigningKeyResolverAdapter {
     }
 
     @Override
-    public Key resolveSigningKey(JwsHeader header, Claims claims) {
+    public Key locate(JwsHeader header) {
         validateHeader(header);
+        return null;
+    }
+
+    public void validate(Claims claims) {
         validateExpiration(claims);
         final String issuer = getClaimIfPresent("issuer", claims.getIssuer());
         validateClaims(issuer, claims);
         validateTokenFormat(issuer);
-        return null;
     }
 
     void validateHeader(JwsHeader header) {

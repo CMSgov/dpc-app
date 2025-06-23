@@ -106,7 +106,7 @@ public class APIAuthHelpers {
     public static AuthResponse jwtAuthFlow(String baseURL, String macaroon, UUID keyID, PrivateKey privateKey) throws IOException, URISyntaxException {
 
         final String jwt = Jwts.builder()
-                .header().add("kid", keyID.toString()).and()
+                .header().add("kid", keyID.toString()).add("iss", macaroon).and()
                 .audience().add(String.format("%s/Token/auth", baseURL)).and()
                 .issuer(macaroon)
                 .subject(macaroon)
