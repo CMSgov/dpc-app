@@ -6,7 +6,6 @@ on:
       - .github/workflows/opt-out-import-unit.yml
       - lambda/opt-out-import/**
   workflow_dispatch:
-  workflow_call:
 
 jobs:
   test:

@@ -12,13 +12,6 @@ on:
           - average-load-test
           - stress-test
         default: single-iteration
-  workflow_call:
-    inputs:
-      test_type:
-        description: Load test script to run
-        required: true
-        type: string
-        default: 'single-iteration'
 
 
 jobs:
