@@ -168,6 +168,10 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-json-logging</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+        </dependency>
         <!--Test resources-->
         <dependency>
             <groupId>io.dropwizard</groupId>
