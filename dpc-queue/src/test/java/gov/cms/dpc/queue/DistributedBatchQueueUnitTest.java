@@ -2,7 +2,6 @@ package gov.cms.dpc.queue;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
-import gov.cms.dpc.common.utils.CurrentEngineState;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.testing.AbstractMultipleDAOTest;
@@ -25,7 +24,6 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 
 	private DistributedBatchQueue queue;
 	private Session session;
-	private final CurrentEngineState state = new CurrentEngineState();
 
 	@BeforeEach
 	void setup() {

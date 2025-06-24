@@ -3,7 +3,6 @@ package gov.cms.dpc.queue;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
-import gov.cms.dpc.common.utils.CurrentEngineState;
 import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -31,7 +30,6 @@ class AwsDistributedBatchQueueUnitTest {
 			.setEnvironment("env")
 			.setAwsAgeReportingInterval(60)
 			.setAwsSizeReportingInterval(60);
-		CurrentEngineState state = new CurrentEngineState();
 
 		when(sessionFactory.openSession()).thenReturn(session);
 
