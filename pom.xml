@@ -47,7 +47,7 @@
         <jooq.version>3.19.19</jooq.version>
         <bouncey.version>1.80</bouncey.version>
         <pitest.version>1.5.1</pitest.version>
-        <newrelic.agent.version>8.20.0</newrelic.agent.version>
+        <newrelic.agent.version>8.21.0</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
         <h2.version>2.3.232</h2.version>
         <sonar.coverage.exclusions>**/MockBlueButton*.java</sonar.coverage.exclusions>
@@ -187,7 +187,7 @@
             <dependency>
                 <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>6.6.15.Final</version>
+                <version>6.6.17.Final</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate.orm</groupId>
