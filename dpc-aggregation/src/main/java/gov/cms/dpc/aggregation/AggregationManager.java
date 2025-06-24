@@ -32,23 +32,22 @@ public class AggregationManager implements Managed {
 
     @Override
     public void stop() throws InterruptedException {
-        logger.debug("Stopping Aggregation thread");
+        logger.info("Waiting to stop aggregation engine");
         engineState.setState(CurrentEngineState.States.STOPPING);
 
         // Wait for the last batch to finish, then shut down.
-        logger.debug("Waiting for engine to stop");
         synchronized (engineState) {
             while(engineState.getState() != CurrentEngineState.States.STOPPED) {
                 try {
-                    System.out.println("Waiting for engine to stop");
                     engineState.wait();
                 } catch (InterruptedException e) {
-                    System.out.println("Interrupt caught in manager");
+                    logger.info("Stopping aggregation engine");
                     this.engine.stop();
-                    throw e;
+                    Thread.currentThread().interrupt();
                 }
             }
         }
+        logger.info("Stopping aggregation engine");
         this.engine.stop();
     }
 }

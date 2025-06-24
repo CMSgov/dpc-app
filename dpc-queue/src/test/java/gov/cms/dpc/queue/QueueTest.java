@@ -60,7 +60,7 @@ class QueueTest {
                         // Create the session factory
                         final Configuration conf = new Configuration();
                         sessionFactory = conf.configure().buildSessionFactory();
-                        return new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory, state), 100, new MetricRegistry());
+                        return new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
                     } else if(queueName.equals("aws")) {
                         MetricRegistry metricRegistry = new MetricRegistry();
 
@@ -85,7 +85,7 @@ class QueueTest {
                         sessionFactory = conf.configure().buildSessionFactory();
 
                         return new AwsDistributedBatchQueue(
-                            new DPCQueueManagedSessionFactory(sessionFactory, state),
+                            new DPCQueueManagedSessionFactory(sessionFactory),
                             100,
                             metricRegistry,
                             reporter1,

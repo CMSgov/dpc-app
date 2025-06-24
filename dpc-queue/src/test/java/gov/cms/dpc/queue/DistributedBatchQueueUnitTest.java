@@ -29,7 +29,7 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 
 	@BeforeEach
 	void setup() {
-		DPCQueueManagedSessionFactory sessionFactory = new DPCQueueManagedSessionFactory(db.getSessionFactory(), state);
+		DPCQueueManagedSessionFactory sessionFactory = new DPCQueueManagedSessionFactory(db.getSessionFactory());
 		queue = new DistributedBatchQueue(sessionFactory, 100, new MetricRegistry());
 		session = sessionFactory.getSessionFactory().openSession();
 	}

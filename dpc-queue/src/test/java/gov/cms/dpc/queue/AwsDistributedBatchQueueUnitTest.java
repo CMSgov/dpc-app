@@ -36,7 +36,7 @@ class AwsDistributedBatchQueueUnitTest {
 		when(sessionFactory.openSession()).thenReturn(session);
 
 		queue = new AwsDistributedBatchQueue(
-			new DPCQueueManagedSessionFactory(sessionFactory, state),
+			new DPCQueueManagedSessionFactory(sessionFactory),
 			100,
 			metricRegistry,
 			ageReporter,

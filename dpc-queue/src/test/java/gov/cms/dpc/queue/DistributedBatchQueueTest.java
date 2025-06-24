@@ -40,7 +40,7 @@ class DistributedBatchQueueTest {
     void setUp() {
         final Configuration conf = new Configuration();
         sessionFactory = conf.configure().buildSessionFactory();
-        queue = new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory, state), 100, new MetricRegistry());
+        queue = new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
     }
 
     @AfterEach

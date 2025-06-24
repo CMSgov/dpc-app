@@ -4,8 +4,8 @@ import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
+import gov.cms.dpc.common.hibernate.queue.DPCQueueAggregationAwareHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
-import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
@@ -44,7 +44,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
 
         GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(new AggregationAppModule(),
-                        new DPCQueueHibernateModule<>(queueHibernateBundle),
+                        new DPCQueueAggregationAwareHibernateModule<>(queueHibernateBundle),
                         new DPCHibernateModule<>(hibernateBundle),
                         new JobQueueModule<DPCAggregationConfiguration>(),
                         new BlueButtonClientModule<DPCAggregationConfiguration>())

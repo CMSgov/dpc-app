@@ -26,7 +26,7 @@ public class QueueHealthTest {
     private Session session = mock(Session.class);
     private final SessionFactory factory = mock(SessionFactory.class);
     private final CurrentEngineState state = new CurrentEngineState();
-    private DPCQueueManagedSessionFactory managedSessionFactory = new DPCQueueManagedSessionFactory(factory, state);
+    private DPCQueueManagedSessionFactory managedSessionFactory = new DPCQueueManagedSessionFactory(factory);
     private Query<Long> query = mock(Query.class);
     private MetricRegistry metrics = new MetricRegistry();
 

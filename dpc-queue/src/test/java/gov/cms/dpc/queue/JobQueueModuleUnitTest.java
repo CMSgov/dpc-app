@@ -8,7 +8,6 @@ import com.google.inject.Provides;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
-import gov.cms.dpc.common.utils.CurrentEngineState;
 import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import gov.cms.dpc.queue.config.DPCQueueConfig;
 import io.dropwizard.core.Configuration;
@@ -140,7 +139,7 @@ class JobQueueModuleUnitTest {
 		@Singleton
 		DPCQueueManagedSessionFactory getSessionFactory() {
 			SessionFactory factory = mock(SessionFactory.class);
-			return new DPCQueueManagedSessionFactory(factory, new CurrentEngineState());
+			return new DPCQueueManagedSessionFactory(factory);
 		}
 	}
 }

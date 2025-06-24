@@ -31,7 +31,7 @@ class AggregationManagerTest {
 
         // Create a new thread that waits for the engine state to become STOPPING, then sets it to STOPPED.  This mimics
         // what happens when the aggregation engine finishes its last batch.
-        ExecutorService service = Executors.newFixedThreadPool(2);
+        ExecutorService service = Executors.newFixedThreadPool(1);
         service.execute(() -> {
             synchronized (state) {
                 while (state.getState() != CurrentEngineState.States.STOPPING) {
@@ -45,7 +45,7 @@ class AggregationManagerTest {
             }
         });
 
-        // Calling stop() sets status to STOPPING and waits for it to become STOPPED, then calles engine.stop()
+        // Calling stop() sets status to STOPPING and waits for it to become STOPPED, then calls engine.stop()
         new AggregationManager(engine, state).stop();
         verify(engine).stop();
     }
