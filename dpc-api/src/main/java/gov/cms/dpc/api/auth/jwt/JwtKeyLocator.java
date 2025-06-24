@@ -22,14 +22,14 @@ import java.util.UUID;
 
 import static gov.cms.dpc.api.auth.MacaroonHelpers.ORGANIZATION_CAVEAT_KEY;
 
-public class JwtKeyResolver extends LocatorAdapter<Key> {
+public class JwtKeyLocator extends LocatorAdapter<Key> {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtKeyResolver.class);
+    private static final Logger logger = LoggerFactory.getLogger(JwtKeyLocator.class);
 
     private final PublicKeyDAO dao;
 
     @Inject
-    public JwtKeyResolver(PublicKeyDAO dao) {
+    public JwtKeyLocator(PublicKeyDAO dao) {
         this.dao = dao;
     }
 

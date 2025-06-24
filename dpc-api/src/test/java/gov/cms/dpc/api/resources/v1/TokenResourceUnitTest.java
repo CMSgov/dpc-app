@@ -43,7 +43,7 @@ public class TokenResourceUnitTest {
     private static TokenPolicy policy;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private static Macaroon macaroon;
-    private static final LocatorAdapter<Key> resolver = Mockito.mock(LocatorAdapter.class);
+    private static final LocatorAdapter<Key> locator = Mockito.mock(LocatorAdapter.class);
     private static final IJTICache cache = Mockito.mock(IJTICache.class);
     private static final String authURL = "auth_url";
     private TokenResource tokenResource;
@@ -51,7 +51,7 @@ public class TokenResourceUnitTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        this.tokenResource = new TokenResource(mockTokenDao, bakery, policy, resolver, cache, authURL);
+        this.tokenResource = new TokenResource(mockTokenDao, bakery, policy, locator, cache, authURL);
     }
 
     @Test

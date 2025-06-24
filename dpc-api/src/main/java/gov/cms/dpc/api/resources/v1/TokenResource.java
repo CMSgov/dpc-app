@@ -11,7 +11,7 @@ import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
-import gov.cms.dpc.api.auth.jwt.ValidatingKeyResolver;
+import gov.cms.dpc.api.auth.jwt.TokenValidator;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
@@ -72,7 +72,7 @@ public class TokenResource extends AbstractTokenResource {
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
-    private final LocatorAdapter<Key> resolver;
+    private final LocatorAdapter<Key> locator;
     private final IJTICache cache;
     private final String authURL;
 
@@ -80,13 +80,13 @@ public class TokenResource extends AbstractTokenResource {
     public TokenResource(TokenDAO dao,
                          MacaroonBakery bakery,
                          TokenPolicy policy,
-                         LocatorAdapter<Key> resolver,
+                         LocatorAdapter<Key> locator,
                          IJTICache cache,
                          @APIV1 String publicURL) {
         this.dao = dao;
         this.bakery = bakery;
         this.policy = policy;
-        this.resolver = resolver;
+        this.locator = locator;
         this.cache = cache;
         this.authURL = String.format("%s/Token/auth", publicURL);
     }
@@ -246,12 +246,12 @@ public class TokenResource extends AbstractTokenResource {
     @Public
     @Override
     public Response validateJWT(@NoHtml @NotEmpty(message = "Must submit JWT") String jwt) {
-        ValidatingKeyResolver validator = new ValidatingKeyResolver(this.cache, List.of(this.authURL));
+        TokenValidator validator = new TokenValidator(this.cache, List.of(this.authURL));
         try {
             DecodedJWT decoded = JWT.decode(jwt);
             String decodedHeader = new String(Base64.getDecoder().decode(decoded.getHeader()), StandardCharsets.UTF_8);
             Map<String, String> headerMap = new Gson().fromJson(decodedHeader, Map.class);
-            validator.resolveSigningKey(headerMap, decoded.getClaims());
+            validator.validate(headerMap, decoded.getClaims());
         } catch (JWTDecodeException e) {
             throw new WebApplicationException("JWT is not formatted correctly", Response.Status.BAD_REQUEST);
         }
@@ -279,7 +279,7 @@ public class TokenResource extends AbstractTokenResource {
 
     private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
         final Jws<Claims> claims = Jwts.parser()
-                .keyLocator(this.resolver)
+                .keyLocator(this.locator)
                 .requireAudience(this.authURL)
                 .build()
                 .parseSignedClaims(jwtBody);

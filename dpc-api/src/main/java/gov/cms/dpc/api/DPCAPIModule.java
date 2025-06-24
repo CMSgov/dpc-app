@@ -101,7 +101,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
-    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, LocatorAdapter resolver, IJTICache cache, @APIV1 String publicURL) {
+    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, LocatorAdapter locator, IJTICache cache, @APIV1 String publicURL) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(TokenResource.class,
                         new Class<?>[]{TokenDAO.class,
@@ -113,8 +113,9 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
                         new Object[]{dao,
                                 bakery,
                                 this.configuration().getTokenPolicy(),
-                                resolver,
-                                cache, publicURL});
+                                locator,
+                                cache,
+                                publicURL});
     }
 
     @Provides

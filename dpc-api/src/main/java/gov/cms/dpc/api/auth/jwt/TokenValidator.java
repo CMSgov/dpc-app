@@ -3,14 +3,10 @@ package gov.cms.dpc.api.auth.jwt;
 import com.auth0.jwt.interfaces.Claim;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SigningKeyResolverAdapter;
-import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.annotation.Nullable;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
-import java.security.Key;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -20,23 +16,19 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Implementation of {@link SigningKeyResolverAdapter} that simply verifies whether the required claims and values are present.
- * As far as I can tell, this is the only way to get access to the JWS claims without actually verifying the signature.
- * See: https://github.com/jwtk/jjwt/issues/205
- * <p>
- * The downside is that this method will always return a null {@link Key}, which means the {@link Jwts#parser()} method will always throw an {@link UnsupportedJwtException}, which we need to catch.
+ * Verifies whether the required claims and values are present.
  */
-public class ValidatingKeyResolver {
+public class TokenValidator {
 
     private final IJTICache cache;
     private final List<String> audClaim;
 
-    public ValidatingKeyResolver(IJTICache cache, List<String> audClaim) {
+    public TokenValidator(IJTICache cache, List<String> audClaim) {
         this.cache = cache;
         this.audClaim = audClaim;
     }
 
-    public void resolveSigningKey(Map<String, String> header, Map<String, Claim> claims) {
+    public void validate(Map<String, String> header, Map<String, Claim> claims) {
         validateHeader(header);
         validateExpiration(claims);
         final String issuer = getClaimIfPresent("issuer", claims.get("iss")).asString();
