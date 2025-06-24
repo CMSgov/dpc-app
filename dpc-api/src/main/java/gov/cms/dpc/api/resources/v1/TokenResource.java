@@ -251,8 +251,6 @@ public class TokenResource extends AbstractTokenResource {
             DecodedJWT decoded = JWT.decode(jwt);
             String decodedHeader = new String(Base64.getDecoder().decode(decoded.getHeader()), StandardCharsets.UTF_8);
             Map<String, String> headerMap = new Gson().fromJson(decodedHeader, Map.class);
-            System.out.println("HEADER: " + headerMap);
-            System.out.println("CLAIMS: " + decoded.getClaims());
             validator.resolveSigningKey(headerMap, decoded.getClaims());
         } catch (JWTDecodeException e) {
             throw new WebApplicationException("JWT is not formatted correctly", Response.Status.BAD_REQUEST);

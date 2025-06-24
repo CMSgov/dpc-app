@@ -560,7 +560,6 @@ class JWTUnitTests {
                     .accept(MediaType.APPLICATION_JSON)
                     .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
 
-            System.out.println(response.readEntity(String.class));
             assertEquals(200, response.getStatus(), "Should be valid");
         }
 
@@ -708,7 +707,6 @@ class JWTUnitTests {
                     .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
 
             assertEquals(400, response.getStatus(), "Should not be valid");
-            System.out.println(response.readEntity(String.class));
             assertTrue(response.readEntity(String.class).contains("Expiration time must be seconds since unix epoch"), "Should have correct exception");
         }
     }
