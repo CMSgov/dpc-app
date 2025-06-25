@@ -208,12 +208,12 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: AWS Credentials (prod)
         if: ${{ inputs.env == 'sandbox' || inputs.env == 'prod' }}
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: Set env vars from AWS params
-        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@e6153f4d620a1e075cc584d8415719d439d8dbed
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
