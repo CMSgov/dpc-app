@@ -27,7 +27,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: "Set up JDK 17"
@@ -104,7 +104,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Install docker compose manually
@@ -134,7 +134,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Install docker compose manually
@@ -164,7 +164,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Install docker compose manually
@@ -194,7 +194,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: "DPC Client Build"
@@ -215,7 +215,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Download web code coverage
@@ -265,7 +265,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Download code coverage
@@ -311,7 +311,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Setup Java
