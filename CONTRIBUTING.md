@@ -1,4 +1,9 @@
-# Contribution expectations
+# Contributing
+
+## Getting Started
+Full instructions on how to build and test the project is available on the [README](./README.md).
+
+## Contribution expectations
 
 The following expectations apply to each PR:
 
@@ -13,3 +18,12 @@ The following expectations apply to each PR:
 5. The PR includes any required documentation changes, including `README` updates and changelog or release notes entries.
 6. All new and modified code is appropriately commented to make the what and why of its design reasonably clear, even to those unfamiliar with the project.
 7. Any incomplete work introduced by the PR is detailed in `TODO` comments which include a JIRA ticket ID for any items that require urgent attention.
+
+## Issues
+Please report any issues to [Issues](./issues).
+
+## Policies
+Contributions to this project must comply with [Section 508](https://www.section508.gov/) accessibility standards.
+
+## Public Domain
+This project is subject to the [Creative Commons Zero 1.0 International License](./LICENSE).

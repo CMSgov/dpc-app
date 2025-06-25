@@ -27,3 +27,7 @@ These principles guide our data, product, and process decisions, architecture, a
 ## Community Guidelines
 
 We want to ensure a welcoming environment for all of our projects. Our staff follow the [18F Code of Conduct](https://github.com/CDCgov/code-of-conduct/blob/master/code-of-conduct.md) and all contributors should do the same.
+
+## Acknowledgements
+
+We would like to acknowledge and thank the [United States Digital Service](https://usds.gov) and the [Justice40](https://thejustice40.com) open source [repository](https://github.com/usds/justice40-tool) for their previous work and their establishment of best practices.
