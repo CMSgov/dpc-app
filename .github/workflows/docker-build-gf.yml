@@ -188,7 +188,7 @@ jobs:
       #  \____|__  /\____/|___|  /         |____|     |__|   \____/\____ |
       #          \/            \/                                       \/
       - name: Configure non-prod AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
@@ -211,7 +211,7 @@ jobs:
       #   |____|     |__|   \____/\____ |____/  \___  >__| |__|\____/|___|  /
       #                                \/           \/                    \/
       - name: Configure prod AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-github-actions
