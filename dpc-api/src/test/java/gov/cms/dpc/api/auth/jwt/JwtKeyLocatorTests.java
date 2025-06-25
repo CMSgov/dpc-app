@@ -77,7 +77,6 @@ class JwtKeyLocatorTests {
     @Test
     void testRSATokenValidator() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn(correctKeyID.toString());
         final Key key = locator.locate(headerMock);
 
@@ -87,7 +86,6 @@ class JwtKeyLocatorTests {
     @Test
     void testECCTokenValidator() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn(eccKeyID.toString());
         final Key key = locator.locate(headerMock);
 
@@ -97,7 +95,6 @@ class JwtKeyLocatorTests {
     @Test
     void testMissingKIDField() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn(null);
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> locator.locate(headerMock));
@@ -111,7 +108,6 @@ class JwtKeyLocatorTests {
     @Test
     void testMissingSigningKey() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn(notRealKeyID.toString());
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> locator.locate(headerMock));
@@ -123,7 +119,6 @@ class JwtKeyLocatorTests {
     @Test
     void testFailingKeyParsing() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn(badKeyID.toString());
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> locator.locate(headerMock));
@@ -135,7 +130,6 @@ class JwtKeyLocatorTests {
     @Test
     void testNonUUIDKeyID() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn("This is not a real key id");
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> locator.locate(headerMock));
@@ -147,7 +141,6 @@ class JwtKeyLocatorTests {
     @Test
     void testNoMacaroon() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(null);
         Mockito.when(headerMock.getKeyId()).thenReturn("This is not a real key id");
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> locator.locate(headerMock));
@@ -159,7 +152,6 @@ class JwtKeyLocatorTests {
     @Test
     void testMacaroonNoCaveat() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(makeMacaroon(null));
         Mockito.when(headerMock.getKeyId()).thenReturn("This is not a real key id");
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> locator.locate(headerMock));
@@ -171,7 +163,6 @@ class JwtKeyLocatorTests {
     @Test
     void testMacaroonWrongOrg() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(org2Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn("This is not a real key id");
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> locator.locate(headerMock));

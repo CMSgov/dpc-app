@@ -249,7 +249,7 @@ class JWTUnitTests {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
             final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID().toString()).add("iss", "macaroon").and()
+                    .header().add("kid", UUID.randomUUID().toString()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
                     .issuer("macaroon")
                     .subject("macaroon")
@@ -277,7 +277,7 @@ class JWTUnitTests {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
             final String jwt = Jwts.builder()
-                    .header().add("kid", keyPair.getLeft()).add("iss", "macaroon").and()
+                    .header().add("kid", keyPair.getLeft()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
                     .issuer("macaroon")
                     .subject("macaroon")
@@ -305,7 +305,7 @@ class JWTUnitTests {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
             final String jwt = Jwts.builder()
-                    .header().add("kid", keyPair.getLeft()).add("iss", "macaroon").and()
+                    .header().add("kid", keyPair.getLeft()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
                     .issuer("macaroon")
                     .subject("macaroon")
@@ -335,7 +335,7 @@ class JWTUnitTests {
             String macaroon = buildMacaroon();
 
             final String jwt = Jwts.builder()
-                    .header().add("kid", keyPair.getLeft()).add("iss", macaroon).and()
+                    .header().add("kid", keyPair.getLeft()).and()
                     .audience().add(String.format("%sToken/auth", "localhost:3002/v1/")).and()
                     .issuer(macaroon)
                     .subject(macaroon)
