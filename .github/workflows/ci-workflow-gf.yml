@@ -219,11 +219,11 @@ jobs:
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Download web code coverage
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: code-coverage-report-dpc-web
       - name: Download admin code coverage
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: code-coverage-report-dpc-admin
       - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
@@ -269,7 +269,7 @@ jobs:
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Download code coverage
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: code-coverage-report-dpc-portal
       - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
@@ -344,7 +344,7 @@ jobs:
         run: |
           mvn clean compile -Perror-prone -B -V -ntp
       - name: Download code coverage
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: code-coverage-report-dpc-api
           path: jacoco-reports
