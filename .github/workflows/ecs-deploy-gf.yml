@@ -142,7 +142,7 @@ jobs:
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
           path: dpc-ops
       - name: Terraform install
-        uses: cmsgov/ab2d-bcda-dpc-platform/actions/setup-tfenv-terraform@main
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/setup-tfenv-terraform@80640055f0d88b399bc9223a9e956cc3682489e1
         with:
           directory: .
       - name: Verify persistent plan
