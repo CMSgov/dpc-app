@@ -56,8 +56,8 @@ jobs:
           echo "body<<EOF" >> "$GITHUB_OUTPUT"
           echo "$BODY" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
-#      - name: Release
-#        uses: softprops/action-gh-release@v2
-#        with:
-#          body: ${{ steps.set_body.outputs.body }}
-#          tag_name: ${{ steps.set_revs.outputs.next_rev }}
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ steps.set_body.outputs.body }}
+          tag_name: ${{ steps.set_revs.outputs.next_rev }}
