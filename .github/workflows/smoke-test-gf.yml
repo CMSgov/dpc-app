@@ -29,7 +29,7 @@ jobs:
     name: Smoke Test (Greenfield)
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
-      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52
+      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
         name: Slack Starting
         with:
           method: chat.postMessage
@@ -100,7 +100,7 @@ jobs:
         with:
           name: bzt-logs
           path: ./bzt-out
-      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52
+      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
         name: Slack Success
         with:
           method: chat.postMessage
@@ -114,7 +114,7 @@ jobs:
                 footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
                 mrkdown_in:
                   - footer
-      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52
+      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
         name: Slack failure
         if: ${{ failure() }}
         with:
