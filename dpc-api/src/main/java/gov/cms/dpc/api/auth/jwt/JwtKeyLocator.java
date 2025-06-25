@@ -47,7 +47,7 @@ public class JwtKeyLocator extends LocatorAdapter<Key> {
 
         final PublicKeyEntity keyEntity;
         try {
-            keyEntity = this.dao.fetchPublicKey(organizationID, UUID.fromString(keyId))
+            keyEntity = this.dao.fetchPublicKey(UUID.fromString(keyId))
                     .orElseThrow(() -> new WebApplicationException(String.format("Cannot find public key with id: %s", keyId), Response.Status.UNAUTHORIZED));
         } catch (IllegalArgumentException e) {
             logger.error("Cannot convert '{}' to UUID", keyId, e);

@@ -28,7 +28,7 @@ public class TokenValidator {
         this.audClaim = audClaim;
     }
 
-    public void validate(Map<String, String> header, Map<String, Claim> claims) {
+    public void validate(Map<String, Object> header, Map<String, Claim> claims) {
         validateHeader(header);
         validateExpiration(claims);
         final String issuer = getClaimIfPresent("issuer", claims.get("iss")).asString();
@@ -36,9 +36,11 @@ public class TokenValidator {
         validateTokenFormat(issuer);
     }
 
-    void validateHeader(Map<String, String> header) {
-        final String keyId = header.get("kid");
-        if (keyId == null) {
+    void validateHeader(Map<String, Object> header) {
+        final String keyId;
+        try {
+            keyId = header.get("kid").toString();
+        } catch (NullPointerException e) {
             throw new WebApplicationException("JWT header must have `kid` value", Response.Status.BAD_REQUEST);
         }
 

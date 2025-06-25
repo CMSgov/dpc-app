@@ -220,6 +220,8 @@ public class TokenResource extends AbstractTokenResource {
         // Actual scope implementation will come as part of DPC-747
         validateJWTQueryParams(grantType, clientAssertionType, scope, jwtBody);
 
+        // TODO: Add issuer to header for validation? -acw
+
         // Validate JWT signature
         try {
             return handleJWT(jwtBody, scope);
@@ -250,7 +252,7 @@ public class TokenResource extends AbstractTokenResource {
         try {
             DecodedJWT decoded = JWT.decode(jwt);
             String decodedHeader = new String(Base64.getDecoder().decode(decoded.getHeader()), StandardCharsets.UTF_8);
-            Map<String, String> headerMap = new Gson().fromJson(decodedHeader, Map.class);
+            Map<String, Object> headerMap = new Gson().fromJson(decodedHeader, Map.class);
             validator.validate(headerMap, decoded.getClaims());
         } catch (JWTDecodeException e) {
             throw new WebApplicationException("JWT is not formatted correctly", Response.Status.BAD_REQUEST);

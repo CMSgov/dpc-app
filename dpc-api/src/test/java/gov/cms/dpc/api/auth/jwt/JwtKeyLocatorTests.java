@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(BufferedLoggerHandler.class)
@@ -67,11 +66,11 @@ class JwtKeyLocatorTests {
         Mockito.when(goodECCEntity.getPublicKey()).thenAnswer(answer -> SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(eccKeyPair.getPublic().getEncoded())));
         Mockito.when(goodEntity.getPublicKey()).thenAnswer(answer -> SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(keyPair.getPublic().getEncoded())));
 
-        Mockito.when(dao.fetchPublicKey(organization1, badKeyID)).thenReturn(Optional.of(badEntity));
-        Mockito.when(dao.fetchPublicKey(organization1, correctKeyID)).thenReturn(Optional.of(goodEntity));
-        Mockito.when(dao.fetchPublicKey(organization1, eccKeyID)).thenReturn(Optional.of(goodECCEntity));
-        Mockito.when(dao.fetchPublicKey(organization1, notRealKeyID)).thenReturn(Optional.empty());
-        Mockito.when(dao.fetchPublicKey(eq(organization2), Mockito.any())).thenReturn(Optional.empty());
+        Mockito.when(dao.fetchPublicKey(badKeyID)).thenReturn(Optional.of(badEntity));
+        Mockito.when(dao.fetchPublicKey(correctKeyID)).thenReturn(Optional.of(goodEntity));
+        Mockito.when(dao.fetchPublicKey(eccKeyID)).thenReturn(Optional.of(goodECCEntity));
+        Mockito.when(dao.fetchPublicKey(notRealKeyID)).thenReturn(Optional.empty());
+//        Mockito.when(dao.fetchPublicKey(Mockito.any())).thenReturn(Optional.empty());
         locator = new JwtKeyLocator(dao);
     }
 
