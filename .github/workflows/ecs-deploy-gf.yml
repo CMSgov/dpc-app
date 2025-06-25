@@ -135,7 +135,7 @@ jobs:
                   - title: Image Tag
                     value: ${{ steps.image-tag.outputs.image_tag }}
       - name: "Checkout code"
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
         with:
           repository: 'CMSgov/dpc-ops'
           ref: ${{ inputs.ops-ref }}

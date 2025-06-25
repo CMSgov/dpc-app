@@ -28,7 +28,7 @@ jobs:
       docker_tag: ${{ steps.output_docker_tag.outputs.docker_tag }}
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
       - name: "Fetch git info"
         run: |
           git fetch --quiet
@@ -67,7 +67,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
 
@@ -94,7 +94,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: "Set up JDK 17"
