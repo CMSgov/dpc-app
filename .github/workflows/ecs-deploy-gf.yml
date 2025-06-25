@@ -117,7 +117,7 @@ jobs:
             echo "image_tag=$EXPLICIT_TAG" >> "$GITHUB_OUTPUT"
           fi
           echo $image_tag
-      - uses: slackapi/slack-github-action@v2.0.0
+      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52
         name: Slack Starting
         with:
           method: chat.postMessage
@@ -165,7 +165,7 @@ jobs:
         run: |
           cd dpc-ops/terraform/gf-${{ inputs.env }}
           terraform apply dpc-release-gf-${{ inputs.env }}.tfplan
-      - uses: slackapi/slack-github-action@v2.0.0
+      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52
         name: Slack failure
         if: ${{ failure() }}
         with:
@@ -242,7 +242,7 @@ jobs:
           echo "counter=$counter" >> "$GITHUB_OUTPUT"
       - name: Slack if nothing to New Relic
         if: ${{ failure() || steps.notify-new-relic.outputs.counter == 0 }}
-        uses: slackapi/slack-github-action@v2.0.0
+        uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -269,7 +269,7 @@ jobs:
       id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
-      - uses: slackapi/slack-github-action@v2.0.0
+      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52
         name: Slack Success
         if: ${{ needs.services-up.result == 'success' }}
         with:
@@ -287,7 +287,7 @@ jobs:
                 fields:
                   - title: Image Tag
                     value: ${{ needs.deploy.outputs.image_tag }}
-      - uses: slackapi/slack-github-action@v2.0.0
+      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52
         name: Slack failure
         if: ${{ needs.services-up.result != 'success' }}
         with:
