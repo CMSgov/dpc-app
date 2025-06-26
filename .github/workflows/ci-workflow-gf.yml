@@ -2,11 +2,22 @@ name: "DPC CI Workflow (Greenfield)"
 
 on:
   pull_request:
-    paths-ignore:
-      - .github/workflows/opt-out-*
-      - docs/**
-      - dpc-load-testing/**
-      - lambda/**
+    paths:
+      - .github/workflows/ci-workflow-gf.yml
+      - dpc-admin/**
+      - dpc-aggregation/**
+      - dpc-api/**
+      - dpc-attribution/**
+      - dpc-bluebutton/**
+      - dpc-common/**
+      - dpc-consent/**
+      - dpc-macaroons/**
+      - dpc-portal/**
+      - dpc-queue/**
+      - dpc-smoketest/**
+      - dpc-testing/**
+      - dpc-web/**
+      - engines/**
   workflow_dispatch: # Allow manual trigger
 
 permissions:
