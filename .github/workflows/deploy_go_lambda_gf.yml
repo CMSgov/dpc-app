@@ -68,7 +68,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: ubuntu-latest
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     environment: prod
     steps:
       - name: AWS Credentials (non-prod)
@@ -105,5 +105,3 @@ jobs:
           aws s3 cp --no-progress \
             function.zip \
             "s3://${PROD_LAMBDA_BUCKET_NAME}/function-${{ github.sha }}.zip"
-          aws lambda update-function-code --function-name dpc-prod-${{ inputs.project }} \
-            --s3-bucket $PROD_LAMBDA_BUCKET_NAME --s3-key function-${{ github.sha }}.zip
