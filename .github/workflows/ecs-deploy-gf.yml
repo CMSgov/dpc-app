@@ -147,24 +147,24 @@ jobs:
           directory: .
       - name: Verify persistent plan
         run: |
-          cd dpc-ops/terraform/gf-${{ inputs.env }}/persistent
+          cd dpc-ops/terraform/${{ inputs.env }}/persistent
           terraform init
-          terraform plan -out dpc-release-gf-${{ inputs.env }}.tfplan 2>&1
+          terraform plan -out dpc-release-${{ inputs.env }}.tfplan 2>&1
       - name: Apply persistent plan
         run: |
-          cd dpc-ops/terraform/gf-${{ inputs.env }}/persistent
-          terraform apply dpc-release-gf-${{ inputs.env }}.tfplan
+          cd dpc-ops/terraform/${{ inputs.env }}/persistent
+          terraform apply dpc-release-${{ inputs.env }}.tfplan
       - name: Verify main environment plan
         run: |
-          cd dpc-ops/terraform/gf-${{ inputs.env }}
+          cd dpc-ops/terraform/${{ inputs.env }}
           terraform init
           terraform plan -var 'release_version=${{ inputs.app-version}}' \
                          -var 'image_tag=${{ steps.image-tag.outputs.image_tag }}' \
-                         -out dpc-release-gf-${{ inputs.env }}.tfplan
+                         -out dpc-release-${{ inputs.env }}.tfplan
       - name: Apply main environment plan
         run: |
-          cd dpc-ops/terraform/gf-${{ inputs.env }}
-          terraform apply dpc-release-gf-${{ inputs.env }}.tfplan
+          cd dpc-ops/terraform/${{ inputs.env }}
+          terraform apply dpc-release-${{ inputs.env }}.tfplan
       - uses: slackapi/slack-github-action@v2.0.0
         name: Slack failure
         if: ${{ failure() }}
