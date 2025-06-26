@@ -1,0 +1,71 @@
+{
+  "name": "dpc-app",
+  "description": "DPC is an application programming interface (API) whose goal is to enable healthcare providers to deliver high quality care directly to Medicare beneficiaries.",
+  "longDescription": "DPC is an application programming interface (API) whose goal is to enable healthcare providers to deliver high quality care directly to Medicare beneficiaries.",
+  "status": "production",
+  "permissions": {
+    "licenses": [
+      {
+        "URL": "LICENSE.md",
+        "name": "CC0-1.0"
+      }
+    ],
+    "usageType": "openSource"
+  },
+  "organization": "Centers for Medicare & Medicaid Services",
+  "repositoryURL": "https://github.com/CMSGov/dpc-app",
+  "repositoryHost": "github.com/CMSgov",
+  "repositoryVisibility": "public",
+  "vcs": "git",
+  "laborHours": null,
+  "reuseFrequency": {
+    "forks": 0
+  },
+  "platforms": [
+    "web"
+  ],
+  "categories": [
+    "healthcare"
+  ],
+  "softwareType": "standalone/web",
+  "languages": [
+    "java", "ruby", "go"
+  ],
+  "maintenance": "contract",
+  "contractNumber": "0",
+  "date": {
+    "created": "2019-02-05T09:49:55-05:00",
+    "lastModified": "2025-06-24T14:33:33+0000",
+    "metadataLastUpdated": "2025-06-24T14:33:33+0000"
+  },
+  "tags": [
+    "dsacms-tier2"
+  ],
+  "contact": {
+    "email": "opensource@cms.hhs.gov",
+    "name": "CMS Open Source Program Office"
+  },
+  "feedbackMechanisms": [
+    "https://github.com/CMSGov/dpc-app/issues"
+  ],
+  "localisation": "false",
+  "repositoryType": "Package",
+  "userInput": "Yes",
+  "fismaLevel": "Low",
+  "group": "DASG",
+  "projects": [
+    "DPC"
+  ],
+  "systems": [],
+  "upstream": [],
+  "subsetInHealthcare": [
+    "Policy",
+    "Operational",
+    "Medicare",
+    "Medicaid"
+  ],
+  "userType": [
+    "Providers"
+  ],
+  "maturityModelTier": 2
+}
