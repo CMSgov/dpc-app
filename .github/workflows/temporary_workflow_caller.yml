@@ -12,16 +12,19 @@ jobs:
     uses: ./.github/workflows/check_healthy_gf.yml
     with:
       env: 'dev'
+    secrets: inherit
 
   call_release:
     uses: ./.github/workflows/ecs-release-gf.yml
     with:
       env: 'dev'
       confirm_env: 'dev'
+    secrets: inherit
 
   call_macaroon:
     uses: ./.github/workflows/generate-macaroon.yml
     with:
       env: 'dev'
+    secrets: inherit
 
 
