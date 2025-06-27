@@ -21,5 +21,7 @@ jobs:
 
   call_macaroon:
     uses: ./.github/workflows/generate-macaroon.yml
+    with:
+      env: 'dev'
 
 
