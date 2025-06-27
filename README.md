@@ -43,7 +43,8 @@ This document serves as a guide for running the Data at the Point of Care (DPC) 
   * [Debugging Integration Tests](#debugging-integration-tests)
   * [Other Notes](#other-notes)
     * [BFD transaction time details](#bfd-transaction-time-details)
-  * [Troubleshooting](#troubleshooting) 
+  * [Troubleshooting](#troubleshooting)
+  * [More about DPC](#more-about-dpc)
 <!-- TOC -->
 
 
@@ -494,3 +495,31 @@ Therefore, using a fake patient ID which is guaranteed not to match is an easy w
 ###### [`^`](#table-of-contents)
 
 Please see the [troublshooting document ](Troubleshooting.md) for more help.
+
+## More About DPC
+###### [`^`](#table-of-contents)
+### Project Vision
+The project vision is available at [https://dpc.cms.gov](https://dpc.cms.gov).
+
+### Agency Mission
+
+See [https://www.cms.gov](https://www.cms.gov) for this project's agency's mission.
+
+### Team Mission
+
+DPC operates under the [Data Analytics and Systems Group](https://www.cms.gov/research-statistics-data-and-systems/data-analytics-and-systems-group).
+
+### Core Team
+Team members are listed on our [community page](./COMMUNITY.md).
+
+### Contributing
+Contributions should follow [our policy](./CONTRIBUTING.md).
+
+### Community Guidelines
+See the [Code of Conduct](./CODE_OF_CONDUCT.md) for community guidelines.
+
+### Policies
+Contributions to this project must comply with [Section 508](https://www.section508.gov/) accessibility standards.
+
+### Public Domain
+This project is subject to the [Creative Commons Zero 1.0 International License](./LICENSE).

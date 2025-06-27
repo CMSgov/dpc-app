@@ -12,7 +12,7 @@ on:
 jobs:
   wait-for-services:
     name: Wait for services to be healthy
-    runs-on: self-hosted
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     strategy:
       matrix:
         include:
