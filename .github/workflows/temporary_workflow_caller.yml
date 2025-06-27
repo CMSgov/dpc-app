@@ -3,6 +3,10 @@ name: Temp caller
 on:
   push:
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   call_check_healthy:
     uses: ./.github/workflows/check_healthy_gf.yml
