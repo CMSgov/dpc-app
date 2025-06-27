@@ -18,6 +18,7 @@ on:
       - dpc-testing/**
       - dpc-web/**
       - engines/**
+      - dpc-test.sh
       - pom.xml
   workflow_dispatch: # Allow manual trigger
 
