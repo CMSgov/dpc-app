@@ -9,15 +9,6 @@ jobs:
     with:
       env: 'dev'
 
-  call_ci_workflow:
-    uses: ./.github/workflows/ci-workflow-gf.yml
-
-#  call_load_test:
-#    uses: ./.github/workflows/dpc-load-test.yml
-#
-#  call_accessibility_test:
-#    uses: ./.github/workflows/dpc-portal-accessibility-test.yml
-
   call_release:
     uses: ./.github/workflows/ecs-release-gf.yml
     with:
