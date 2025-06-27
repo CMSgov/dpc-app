@@ -13,7 +13,7 @@
     <name>DPC Java Job Queue</name>
 
     <properties>
-        <aws.java.sdk.version>2.29.20</aws.java.sdk.version>
+        <aws.java.sdk.version>2.31.71</aws.java.sdk.version>
     </properties>
 
     <dependencyManagement>
@@ -95,16 +95,6 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>cloudwatch</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-handler</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>netty-common</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.github.azagniotov</groupId>
