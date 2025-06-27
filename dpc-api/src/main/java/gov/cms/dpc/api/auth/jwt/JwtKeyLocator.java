@@ -4,18 +4,15 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
-import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.SigningKeyResolverAdapter;
+import io.jsonwebtoken.LocatorAdapter;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import java.security.Key;
 import java.util.List;
@@ -23,32 +20,28 @@ import java.util.UUID;
 
 import static gov.cms.dpc.api.auth.MacaroonHelpers.ORGANIZATION_CAVEAT_KEY;
 
-public class JwtKeyResolver extends SigningKeyResolverAdapter {
+public class JwtKeyLocator extends LocatorAdapter<Key> {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtKeyResolver.class);
+    private static final Logger logger = LoggerFactory.getLogger(JwtKeyLocator.class);
 
     private final PublicKeyDAO dao;
 
     @Inject
-    public JwtKeyResolver(PublicKeyDAO dao) {
+    public JwtKeyLocator(PublicKeyDAO dao) {
         this.dao = dao;
     }
 
     @Override
-    public Key resolveSigningKey(JwsHeader header, Claims claims) {
+    public Key locate(JwsHeader header) {
         final String keyId = header.getKeyId();
         if (keyId == null) {
             logger.error("JWT KID field is missing");
             throw new WebApplicationException("JWT must have KID field", Response.Status.UNAUTHORIZED);
         }
 
-        final UUID organizationID = getOrganizationID(claims.getIssuer());
-        // Set the MDC values here, since it's the first time we actually know what the organization ID is
-        MDC.put(MDCConstants.ORGANIZATION_ID, organizationID.toString());
-
         final PublicKeyEntity keyEntity;
         try {
-            keyEntity = this.dao.fetchPublicKey(organizationID, UUID.fromString(keyId))
+            keyEntity = this.dao.fetchPublicKey(UUID.fromString(keyId))
                     .orElseThrow(() -> new WebApplicationException(String.format("Cannot find public key with id: %s", keyId), Response.Status.UNAUTHORIZED));
         } catch (IllegalArgumentException e) {
             logger.error("Cannot convert '{}' to UUID", keyId, e);
@@ -63,11 +56,11 @@ public class JwtKeyResolver extends SigningKeyResolverAdapter {
         }
     }
 
-    protected UUID getOrganizationID(String macaroon) {
-        if (macaroon == null || macaroon.isEmpty()) {
+    protected UUID getOrganizationID(Object macaroon) {
+        if (macaroon == null || macaroon.toString().isEmpty()) {
             throw new WebApplicationException("JWT must have client_id", Response.Status.UNAUTHORIZED);
         }
-        final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(macaroon);
+        final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(macaroon.toString());
         if (macaroons.isEmpty()) {
             throw new WebApplicationException("JWT must have client_id", Response.Status.UNAUTHORIZED);
         }

@@ -1,13 +1,17 @@
 package gov.cms.dpc.api.resources.v1;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
+import com.google.gson.Gson;
 import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
-import gov.cms.dpc.api.auth.jwt.ValidatingKeyResolver;
+import gov.cms.dpc.api.auth.jwt.TokenValidator;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
@@ -43,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -67,7 +72,7 @@ public class TokenResource extends AbstractTokenResource {
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
-    private final SigningKeyResolverAdapter resolver;
+    private final LocatorAdapter<Key> locator;
     private final IJTICache cache;
     private final String authURL;
 
@@ -75,13 +80,13 @@ public class TokenResource extends AbstractTokenResource {
     public TokenResource(TokenDAO dao,
                          MacaroonBakery bakery,
                          TokenPolicy policy,
-                         SigningKeyResolverAdapter resolver,
+                         LocatorAdapter<Key> locator,
                          IJTICache cache,
                          @APIV1 String publicURL) {
         this.dao = dao;
         this.bakery = bakery;
         this.policy = policy;
-        this.resolver = resolver;
+        this.locator = locator;
         this.cache = cache;
         this.authURL = String.format("%s/Token/auth", publicURL);
     }
@@ -215,6 +220,8 @@ public class TokenResource extends AbstractTokenResource {
         // Actual scope implementation will come as part of DPC-747
         validateJWTQueryParams(grantType, clientAssertionType, scope, jwtBody);
 
+        // TODO: Add issuer to header for validation? -acw
+
         // Validate JWT signature
         try {
             return handleJWT(jwtBody, scope);
@@ -241,15 +248,13 @@ public class TokenResource extends AbstractTokenResource {
     @Public
     @Override
     public Response validateJWT(@NoHtml @NotEmpty(message = "Must submit JWT") String jwt) {
+        TokenValidator validator = new TokenValidator(this.cache, List.of(this.authURL));
         try {
-            Jwts.parser()
-                    .requireAudience(this.authURL)
-                    .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
-                    .build()
-                    .parseSignedClaims(jwt);
-        } catch (IllegalArgumentException | UnsupportedJwtException e) {
-            // This is fine, we just want the body
-        } catch (MalformedJwtException e) {
+            DecodedJWT decoded = JWT.decode(jwt);
+            String decodedHeader = new String(Base64.getDecoder().decode(decoded.getHeader()), StandardCharsets.UTF_8);
+            Map<String, Object> headerMap = new Gson().fromJson(decodedHeader, Map.class);
+            validator.validate(headerMap, decoded.getClaims());
+        } catch (JWTDecodeException e) {
             throw new WebApplicationException("JWT is not formatted correctly", Response.Status.BAD_REQUEST);
         }
 
@@ -276,7 +281,7 @@ public class TokenResource extends AbstractTokenResource {
 
     private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
         final Jws<Claims> claims = Jwts.parser()
-                .setSigningKeyResolver(this.resolver)
+                .keyLocator(this.locator)
                 .requireAudience(this.authURL)
                 .build()
                 .parseSignedClaims(jwtBody);
