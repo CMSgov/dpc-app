@@ -357,8 +357,7 @@ class JWTUnitTests {
                     .request()
                     .post(Entity.entity("", MediaType.APPLICATION_FORM_URLENCODED));
 
-//            TODO: debug -acw
-//            assertEquals(HttpStatus.OK_200, response.getStatus(), "Should get a good status on first request");
+            assertEquals(HttpStatus.OK_200, response.getStatus(), "Should get a good status on first request");
 
             // Try to submit again
             Response r2 = RESOURCE.target("/v1/Token/auth")
