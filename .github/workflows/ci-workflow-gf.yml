@@ -15,10 +15,10 @@ on:
       - dpc-portal/**
       - dpc-queue/**
       - dpc-smoketest/**
+      - dpc-test.sh
       - dpc-testing/**
       - dpc-web/**
       - engines/**
-      - dpc-test.sh
       - pom.xml
   workflow_dispatch: # Allow manual trigger
 
