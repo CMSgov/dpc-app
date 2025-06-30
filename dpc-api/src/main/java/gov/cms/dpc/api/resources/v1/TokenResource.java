@@ -30,7 +30,6 @@ import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.SecurityException;
 import io.swagger.annotations.*;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
@@ -220,18 +219,33 @@ public class TokenResource extends AbstractTokenResource {
         // Actual scope implementation will come as part of DPC-747
         validateJWTQueryParams(grantType, clientAssertionType, scope, jwtBody);
 
-        // TODO: Add issuer to header for validation? -acw
-
         // Validate JWT signature
         try {
-            return handleJWT(jwtBody, scope);
+            String updatedJWT = addIssuerToHeader(jwtBody);
+            return handleJWT(updatedJWT, scope);
         } catch (SecurityException e) {
             logger.error("JWT has invalid signature", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
-        } catch (JwtException e) {
+        } catch (JWTDecodeException | JwtException e) {
             logger.error("Malformed JWT", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
         }
+    }
+
+    private String addIssuerToHeader(String jwt) {
+        DecodedJWT decoded = JWT.decode(jwt);
+        String decodedHeader = new String(Base64.getDecoder().decode(decoded.getHeader()), StandardCharsets.UTF_8);
+        Map<String, Object> headerMap = new Gson().fromJson(decodedHeader, Map.class);
+        headerMap.put("iss", decoded.getClaims().get("iss").asString());
+        Map<String, String> claimsMap = new HashMap<>();
+        decoded.getClaims().forEach((k, v) -> claimsMap.put(k, v.asString()));
+        return Jwts.builder()
+                .header().add(headerMap).and()
+                .claims().add(claimsMap).and()
+                .audience().add(decoded.getAudience()).and()
+                .expiration(decoded.getExpiresAt())
+                .signWith(this.locator.locate(Jwts.header().add(headerMap).build()))
+                .compact();
     }
 
     @POST
@@ -298,7 +312,7 @@ public class TokenResource extends AbstractTokenResource {
 
         // Determine if claims are present and valid
         // Required claims are specified here: http://hl7.org/fhir/us/bulkdata/2019May/authorization/index.html#protocol-details
-        handleJWTClaims(orgId, claims);
+        handleJWTClaims(orgId, claims.getPayload());
 
         // Add the additional claims that we need
         // Currently, we need to set an expiration time, a set of scopes,
@@ -356,22 +370,22 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     @SuppressWarnings("JdkObsolete") // Date class is used by Jwt
-    private void handleJWTClaims(UUID organizationID, Jws<Claims> claims) {
+    private void handleJWTClaims(UUID organizationID, Claims claims) {
         // Issuer and Sub must be present and identical
-        final String issuer = getClaimIfPresent("issuer", claims.getPayload().getIssuer());
-        final String subject = getClaimIfPresent("subject", claims.getPayload().getSubject());
+        final String issuer = getClaimIfPresent("issuer", claims.getIssuer());
+        final String subject = getClaimIfPresent("subject", claims.getSubject());
         if (!issuer.equals(subject)) {
             throw new WebApplicationException("Issuer and Subject must be identical", Response.Status.BAD_REQUEST);
         }
 
         // JTI must be present and have not been used in the past 5 minutes.
-        if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getPayload().getId()), true)) {
+        if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getId()), true)) {
             logger.warn("JWT being replayed for organization {}", organizationID);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
         }
 
         // Ensure the expiration time for the token is not more than 5 minutes in the future
-        final Date expiration = getClaimIfPresent("expiration", claims.getPayload().getExpiration());
+        final Date expiration = getClaimIfPresent("expiration", claims.getExpiration());
         if (OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(5).isBefore(expiration.toInstant().atOffset(ZoneOffset.UTC))) {
             throw new WebApplicationException("Not authorized", Response.Status.UNAUTHORIZED);
         }

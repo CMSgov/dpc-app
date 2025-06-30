@@ -248,11 +248,13 @@ class JWTUnitTests {
             // Submit JWT with missing key
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
+            String macaroon = buildMacaroon();
+
             final String jwt = Jwts.builder()
                     .header().add("kid", UUID.randomUUID().toString()).and()
-                    .audience().add(String.format("%sToken/auth", "here")).and()
-                    .issuer("macaroon")
-                    .subject("macaroon")
+                    .audience().add("localhost:3002/v1/Token/auth").and()
+                    .issuer(macaroon)
+                    .subject(macaroon)
                     .id(UUID.randomUUID().toString())
                     .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
@@ -276,11 +278,13 @@ class JWTUnitTests {
         void testExpiredJWT(KeyType keyType) throws NoSuchAlgorithmException {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
+            String macaroon = buildMacaroon();
+
             final String jwt = Jwts.builder()
                     .header().add("kid", keyPair.getLeft()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
-                    .issuer("macaroon")
-                    .subject("macaroon")
+                    .issuer(macaroon)
+                    .subject(macaroon)
                     .id(UUID.randomUUID().toString())
                     .expiration(Date.from(Instant.now().minus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))

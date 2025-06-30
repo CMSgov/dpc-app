@@ -4,6 +4,7 @@ import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import io.jsonwebtoken.JwsHeader;
@@ -13,6 +14,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.security.Key;
 import java.util.List;
@@ -38,6 +40,10 @@ public class JwtKeyLocator extends LocatorAdapter<Key> {
             logger.error("JWT KID field is missing");
             throw new WebApplicationException("JWT must have KID field", Response.Status.UNAUTHORIZED);
         }
+
+        final UUID organizationID = getOrganizationID(header.get("iss"));
+        // Set the MDC values here, since it's the first time we actually know what the organization ID is
+        MDC.put(MDCConstants.ORGANIZATION_ID, organizationID.toString());
 
         final PublicKeyEntity keyEntity;
         try {
