@@ -20,6 +20,7 @@ on:
       - dpc-web/**
       - engines/**
       - pom.xml
+      - src/**
   workflow_dispatch: # Allow manual trigger
 
 permissions:
