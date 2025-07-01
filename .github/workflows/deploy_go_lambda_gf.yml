@@ -68,7 +68,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: ubuntu-latest
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     environment: prod
     steps:
       - name: AWS Credentials (non-prod)

@@ -94,12 +94,12 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-codec-socks</artifactId>
-            <version>4.2.1.Final</version>
+            <version>4.2.2.Final</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-handler-proxy</artifactId>
-            <version>4.2.1.Final</version>
+            <version>4.2.2.Final</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
