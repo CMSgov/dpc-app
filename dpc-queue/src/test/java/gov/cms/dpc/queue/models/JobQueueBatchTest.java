@@ -215,7 +215,6 @@ class JobQueueBatchTest {
     void testSetPausedStatus_AlreadyPaused() {
         final var job = Mockito.spy(createJobQueueBatch());
         job.setPausedStatus(aggregatorID);
-        //Mockito.reset(job);
 
         assertDoesNotThrow(() -> {
             job.setPausedStatus(aggregatorID);

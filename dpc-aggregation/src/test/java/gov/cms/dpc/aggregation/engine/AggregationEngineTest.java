@@ -372,7 +372,6 @@ class AggregationEngineTest {
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_TIME_OUT);
 
-        // Build a job with multiple resource types and add it to a real queue
         final var jobID = queue.createJob(
             orgID,
             TEST_ORG_NPI,
