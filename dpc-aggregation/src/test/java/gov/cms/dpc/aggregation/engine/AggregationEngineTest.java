@@ -49,7 +49,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static java.lang.Thread.sleep;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.platform.commons.support.ReflectionSupport.invokeMethod;
@@ -151,9 +150,7 @@ class AggregationEngineTest {
         engine.pollQueue();
 
         // Wait for the queue to finish processing before finishing the test
-        while (engine.isRunning()) {
-            sleep(100);
-        }
+        await().until(() -> !engine.isRunning());
 
         // The last mock doesn't get called because the engine gets stopped during the last call
         verify(queue, Mockito.times(10)).claimBatch(any(UUID.class));
@@ -198,9 +195,7 @@ class AggregationEngineTest {
         engine.pollQueue();
 
         // Wait for the queue to finish processing before finishing the test
-        while (engine.isRunning()) {
-            sleep(100);
-        }
+        await().until(() -> !engine.isRunning());
 
         verify(queue, Mockito.times(5)).claimBatch(any(UUID.class));
         assertMDCReset();
