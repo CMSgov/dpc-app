@@ -201,6 +201,7 @@ class JobQueueBatchTest {
     @Test
     void testSetPausedStatus_NotRunning() {
         final var job = Mockito.spy(createJobQueueBatch());
+        job.status = JobStatus.COMPLETED;
 
         try {
             job.setPausedStatus(aggregatorID);
@@ -208,6 +209,18 @@ class JobQueueBatchTest {
         } catch (JobQueueFailure e) {
             assertTrue(e.getMessage().contains("Cannot pause batch."));
         }
+    }
+
+    @Test
+    void testSetPausedStatus_AlreadyPaused() {
+        final var job = Mockito.spy(createJobQueueBatch());
+        job.setPausedStatus(aggregatorID);
+        //Mockito.reset(job);
+
+        assertDoesNotThrow(() -> {
+            job.setPausedStatus(aggregatorID);
+        });
+        assertEquals(JobStatus.QUEUED, job.getStatus());
     }
 
     @Test
