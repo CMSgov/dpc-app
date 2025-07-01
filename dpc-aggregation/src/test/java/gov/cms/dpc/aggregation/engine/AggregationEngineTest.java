@@ -49,6 +49,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.Thread.sleep;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.platform.commons.support.ReflectionSupport.invokeMethod;
 import static org.mockito.Mockito.*;
@@ -150,7 +152,7 @@ class AggregationEngineTest {
 
         // Wait for the queue to finish processing before finishing the test
         while (engine.isRunning()) {
-            Thread.sleep(100);
+            sleep(100);
         }
 
         // The last mock doesn't get called because the engine gets stopped during the last call
@@ -197,7 +199,7 @@ class AggregationEngineTest {
 
         // Wait for the queue to finish processing before finishing the test
         while (engine.isRunning()) {
-            Thread.sleep(100);
+            sleep(100);
         }
 
         verify(queue, Mockito.times(5)).claimBatch(any(UUID.class));
@@ -364,6 +366,40 @@ class AggregationEngineTest {
             assertTrue(Files.exists(Path.of(outputFilePath)));
         });
         assertMDCReset();
+    }
+
+    /**
+     * Test that stopping the engine while a long running batch is still processing pauses the batch.
+     */
+    @Test
+    void stopEngineDuringBatchProcessing() throws InterruptedException {
+        // Create a batch that will hang forever
+        final var orgID = UUID.randomUUID();
+        final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_TIME_OUT);
+
+        // Build a job with multiple resource types and add it to a real queue
+        final var jobID = queue.createJob(
+            orgID,
+            TEST_ORG_NPI,
+            TEST_PROVIDER_NPI,
+            mbis,
+            Collections.singletonList(DPCResourceType.Patient),
+            null,
+            MockBlueButtonClient.BFD_TRANSACTION_TIME,
+            null, null, true, false);
+
+        // Start an aggregation engine in a new thread and let it hang processing the batch
+        Thread thread = new Thread(this.engine);
+        thread.start();
+
+        // Wait for the engine to pick up the thread, set status to RUNNING and hang on getting the patient from BFD
+        JobQueueBatch batch = queue.getJobBatches(jobID).get(0);
+        await().atMost(5, TimeUnit.SECONDS).until(() -> batch.getStatus() == JobStatus.RUNNING);
+
+        // Stop the engine and make sure it pauses the batch
+        assertEquals(JobStatus.RUNNING, batch.getStatus());
+        engine.stop();
+        assertEquals(JobStatus.QUEUED, batch.getStatus());
     }
 
     /**

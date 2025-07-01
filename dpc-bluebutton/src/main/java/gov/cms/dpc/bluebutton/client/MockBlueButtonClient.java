@@ -22,6 +22,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class MockBlueButtonClient implements BlueButtonClient {
 
@@ -35,6 +36,11 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     // Synthetic patient only used by dpc-api to load transaction time from BFD
     public static final String TEST_PATIENT_FOR_API_TRANSACTION_TIME = "9S99EU8XY92";
+
+    // MBI that causes the MockBlueButtonClient to block indefinitely when submitted to requestPatientFromServerByMbi.
+    // Used to test stopping dpc-aggregation in the middle of processing a patient.
+    public static final String TEST_PATIENT_TIME_OUT = "9S99EU8XY92";
+
     public static final List<String> TEST_PATIENT_MBIS = List.of(
         "2SW4N00AA00",
         "4SP0P00AA00",
@@ -76,6 +82,15 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     @Override
     public Bundle requestPatientFromServerByMbi(String mbi, Map<String, String> headers) throws ResourceNotFoundException {
+        // If the TEST_PATIENT_TIME_OUT is requested, hang forever.  SonarQube will probably flag this, but since we're
+        // purposely trying to create a bad situation, we can ignore it.
+        if (Objects.equals(mbi, TEST_PATIENT_TIME_OUT)) {
+            try {
+                Thread.sleep(Long.MAX_VALUE);
+            } catch(InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
         return loadBundle(SAMPLE_PATIENT_PATH_PREFIX, MBI_BENE_ID_MAP.getOrDefault(mbi,""));
     }
 
