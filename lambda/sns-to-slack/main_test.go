@@ -1,6 +1,7 @@
 package sns_to_slack
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -13,9 +14,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestParseSQSRecord(t *testing.T) {
-	log.SetLevel(log.PanicLevel)
+func init() {
+	if os.Getenv("QUIET") == "true" {
+		log.SetLevel(log.PanicLevel)
+	}
+}
 
+func TestParseSQSRecord(t *testing.T) {
 	snsTemplate := "{\"Message\" : %s}"
 	alarmBody, _ := os.ReadFile("testdata/cloudWatchEvent.json")
 
@@ -68,7 +73,6 @@ func TestParseSQSRecord(t *testing.T) {
 }
 
 func TestProcessSQSRecord(t *testing.T) {
-	log.SetLevel(log.PanicLevel)
 	snsTemplate := "{\"Message\" : %s}"
 	alarmBody, _ := os.ReadFile("testdata/cloudWatchEvent.json")
 	okBody, _ := os.ReadFile("testdata/cloudWatchOkEvent.json")
@@ -116,4 +120,22 @@ func TestProcessSQSRecord(t *testing.T) {
 			assert.Equal(t, []byte{}, payload)
 		}
 	}
+}
+
+func TestHandler(t *testing.T) {
+	// just make sure it doesn't blow up
+	snsTemplate := "{\"Message\" : %s}"
+	alarmBody, _ := os.ReadFile("testdata/cloudWatchEvent.json")
+	body := fmt.Sprintf(snsTemplate, strconv.Quote(string(alarmBody)))
+
+	record := events.SQSMessage{
+		Body:      body,
+		MessageId: "Happy Path",
+	}
+
+	event := events.SQSEvent{
+		Records: []events.SQSMessage{record},
+	}
+	err := handler(context.TODO(), event)
+	assert.Nil(t, err)
 }
