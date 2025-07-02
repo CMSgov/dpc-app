@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -13,21 +12,16 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/ssm"
-	"github.com/aws/smithy-go/logging"
 	"github.com/pkg/errors"
 )
 
-var isTesting = os.Getenv("IS_TESTING") == "true"
+type SlackPayload struct {
+	events.CloudWatchAlarmSNSPayload
+	Emoji string `json:"Emoji"`
+}
 
-// Used for dependency injection.  Allows us to easily mock these function in unit tests.
 func main() {
-	if isTesting {
-		// test
-	} else {
-		lambda.Start(handler)
-	}
+	lambda.Start(handler)
 }
 
 func handler(ctx context.Context, event events.SQSEvent) error {
@@ -36,59 +30,69 @@ func handler(ctx context.Context, event events.SQSEvent) error {
 		TimestampFormat:   time.RFC3339Nano,
 	})
 
-	webhook, err := GetParameter(ctx, "/dpc/lambda/slack_webhook_url")
-	if err != nil {
-		log.Errorf("Unable to retrieve webook url: %v", err)
-		return err
-	}
-
+	webhook := os.Getenv("SLACK_WEBHOOK_URL")
 	for _, record := range event.Records {
-		err := processRecord(record)
+		messageId := record.MessageId
+		payload, err := processSQSRecord(record)
 		if err != nil {
-			log.Errorf("Unable to process SQS Record: %v", err)
-			return err
+			log.WithFields(log.Fields{
+				"MessageId": messageId,
+			}).Errorf("Unable to process SQS Record: %v", err)
 		}
-		sendMessageToSlack(webhook, []byte{})
+		if len(payload) > 0 {
+			if webhook != "" {
+				sendMessageToSlack(webhook, payload, messageId)
+			} else {
+				log.WithFields(log.Fields{
+					"MessageId": messageId,
+				}).Warn("Unable to send to slack as SLACK_WEBHOOK_URL not set")
+			}
+		}
 	}
-	log.Print("Successfully processed SQS Event")
 	return nil
 }
 
-func processRecord(record events.SQSMessage) error {
-	alarm, err := ParseSQSRecord(record)
+func processSQSRecord(record events.SQSMessage) ([]byte, error) {
+	alarm, err := parseSQSRecord(record)
 	if err != nil || alarm == nil {
-		return err
+		return []byte{}, err
+	}
+	log.WithFields(log.Fields{
+		"MessageId":       record.MessageId,
+		"AlarmName":       alarm.AlarmName,
+		"NewStateValue":   alarm.NewStateValue,
+		"OldStateValue":   alarm.OldStateValue,
+		"StateChangeTime": alarm.StateChangeTime,
+	}).Info("Received CloudWatch Alarm")
+	// return an empty payload if we are returning to an OK state
+
+	if alarm.NewStateValue == "OK" {
+		return []byte{}, nil
 	}
 
-	return nil
+	slackPayload := SlackPayload{
+		CloudWatchAlarmSNSPayload: *alarm,
+		Emoji:                     ":anger:",
+	}
+	return json.Marshal(slackPayload)
 }
 
-func sendMessageToSlack(webhook string, jsonStr []byte) error {
-	req, _ := http.NewRequest("POST", webhook, bytes.NewBuffer(jsonStr))
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Errorf("Unable to send message to slack: %v", err)
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		log.Errorf("Unsuccessful attempt to send message to slack: %s", resp.Status)
-	}
-	return nil
-}
-
-func ParseSQSRecord(record events.SQSMessage) (*events.CloudWatchAlarmSNSPayload, error) {
+func parseSQSRecord(record events.SQSMessage) (*events.CloudWatchAlarmSNSPayload, error) {
+	messageId := record.MessageId
 
 	var snsEntity events.SNSEntity
 	err := json.Unmarshal([]byte(record.Body), &snsEntity)
 	unmarshalTypeErr := new(json.UnmarshalTypeError)
 	syntaxErr := new(json.SyntaxError)
 	if errors.As(err, &unmarshalTypeErr) {
-		log.Warn("Skipping event due to unrecognized format for SnsEntity")
+		log.WithFields(log.Fields{
+			"MessageId": messageId,
+		}).Warn("Skipping event due to unrecognized format for SnsEntity")
 		return nil, nil
 	} else if errors.As(err, &syntaxErr) {
-		log.Warn("Skipping event due to SQS body not being json")
+		log.WithFields(log.Fields{
+			"MessageId": messageId,
+		}).Warn("Skipping event due to SQS body not being json")
 		return nil, nil
 	} else if err != nil {
 		return nil, err
@@ -97,10 +101,14 @@ func ParseSQSRecord(record events.SQSMessage) (*events.CloudWatchAlarmSNSPayload
 	var s3Event events.CloudWatchAlarmSNSPayload
 	err = json.Unmarshal([]byte(snsEntity.Message), &s3Event)
 	if errors.As(err, &unmarshalTypeErr) {
-		log.Warn("Skipping event due to unrecognized format for CloudWatchAlarmSNSPayload")
+		log.WithFields(log.Fields{
+			"MessageId": messageId,
+		}).Warn("Skipping event due to unrecognized format for CloudWatchAlarmSNSPayload")
 		return nil, nil
 	} else if errors.As(err, &syntaxErr) {
-		log.Warn("Skipping event due to message in SQS body not being json")
+		log.WithFields(log.Fields{
+			"MessageId": messageId,
+		}).Warn("Skipping event due to message in SQS body not being json")
 		return nil, nil
 	} else if err != nil {
 		return nil, err
@@ -109,32 +117,22 @@ func ParseSQSRecord(record events.SQSMessage) (*events.CloudWatchAlarmSNSPayload
 	return &s3Event, nil
 }
 
-func GetParameter(ctx context.Context, keyname string) (string, error) {
-	cfg, err := config.LoadDefaultConfig(ctx,
-		config.WithRegion("us-east-1"),
-		config.WithLogger(logging.Nop{}),
-	)
+func sendMessageToSlack(webhook string, jsonStr []byte, messageId string) {
+	// Not tested, nothing to return, as testing would just be testing stubs
+	req, _ := http.NewRequest("POST", webhook, bytes.NewBuffer(jsonStr))
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("Error creating AWS session: %v", err)
+		log.WithFields(log.Fields{
+			"MessageId": messageId,
+		}).Errorf("Unable to send message to slack: %v", err)
+		return
 	}
-
-	ssmsvc := ssm.NewFromConfig(cfg)
-
-	withDecryption := true
-	result, err := ssmsvc.GetParameter(ctx, &ssm.GetParameterInput{
-		Name:           &keyname,
-		WithDecryption: &withDecryption,
-	})
-
-	if err != nil {
-		return "", fmt.Errorf("Error retrieving parameter %s from parameter store: %w", keyname, err)
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		log.WithFields(log.Fields{
+			"MessageId": messageId,
+		}).Errorf("Unsuccessful attempt to send message to slack: %s", resp.Status)
+		return
 	}
-
-	val := *result.Parameter.Value
-
-	if val == "" {
-		return "", fmt.Errorf("No parameter store value found for %s", keyname)
-	}
-
-	return val, nil
 }
