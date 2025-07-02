@@ -56,13 +56,13 @@ jobs:
         run: |
           echo "This workflow is not allowed to run in the 'prod' environment."
           exit 1
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
         with:
           sparse-checkout: |
             lambda/opt-out-export
       - name: Configure non-prod AWS Credentials
         if: ${{ github.event_name == 'pull_request' || inputs.env == 'dev' || inputs.env == 'test' }}
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
@@ -82,7 +82,7 @@ jobs:
     steps:
       - name: Configure GHA non-prod AWS Credentials
         if: ${{ github.event_name == 'pull_request' ||  inputs.env == 'dev' || inputs.env == 'test' }}
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
@@ -100,13 +100,13 @@ jobs:
 
       - name: Configure import lambda non-prod AWS Credentials
         if: ${{ github.event_name == 'pull_request' || inputs.env == 'dev' || inputs.env == 'test' }}
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env || 'test' }}-opt-out-import-function
 
       - name: Configure BFD bucket credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ env.BFD_BUCKET_ROLE }}
