@@ -46,7 +46,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: retrieve s3 bucket
-        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@e6153f4d620a1e075cc584d8415719d439d8dbed
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
@@ -77,7 +77,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
       - name: retrieve test S3 bucket
-        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@e6153f4d620a1e075cc584d8415719d439d8dbed
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
@@ -94,7 +94,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-github-actions
       - name: retrieve prod S3 bucket
-        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@e6153f4d620a1e075cc584d8415719d439d8dbed
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:

@@ -91,7 +91,7 @@ jobs:
           echo "/opt-out-import/dpc/${{ inputs.env || 'test' }}/bfd-bucket-role-arn"
 
       - name: retrieve bfd bucket role
-        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@e6153f4d620a1e075cc584d8415719d439d8dbed
+        uses: cmsgov/ab2d-bcda-dpc-platform/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
