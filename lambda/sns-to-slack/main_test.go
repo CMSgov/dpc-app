@@ -1,4 +1,4 @@
-package main
+package sns_to_slack
 
 import (
 	"encoding/json"

@@ -1,9 +1,10 @@
-package main
+package sns_to_slack
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -32,13 +33,14 @@ func handler(ctx context.Context, event events.SQSEvent) error {
 
 	// This should be set in the platform repo
 	webhook := os.Getenv("SLACK_WEBHOOK_URL")
+
 	for _, record := range event.Records {
 		messageId := record.MessageId
 		payload, err := processSQSRecord(record)
 		if err != nil {
 			log.WithFields(log.Fields{
 				"MessageId": messageId,
-			}).Errorf("Unable to process SQS Record: %v", err)
+			}).Error(fmt.Sprintf("Unable to process SQS Record: %v", err))
 		}
 		if len(payload) > 0 {
 			if webhook != "" {
@@ -58,6 +60,7 @@ func processSQSRecord(record events.SQSMessage) ([]byte, error) {
 	if err != nil || alarm == nil {
 		return []byte{}, err
 	}
+
 	log.WithFields(log.Fields{
 		"MessageId":       record.MessageId,
 		"AlarmName":       alarm.AlarmName,
@@ -65,8 +68,8 @@ func processSQSRecord(record events.SQSMessage) ([]byte, error) {
 		"OldStateValue":   alarm.OldStateValue,
 		"StateChangeTime": alarm.StateChangeTime,
 	}).Info("Received CloudWatch Alarm")
-	// return an empty payload if we are returning to an OK state
 
+	// return an empty payload if we are returning to an OK state
 	if alarm.NewStateValue == "OK" {
 		return []byte{}, nil
 	}
@@ -83,39 +86,30 @@ func parseSQSRecord(record events.SQSMessage) (*events.CloudWatchAlarmSNSPayload
 
 	var snsEntity events.SNSEntity
 	err := json.Unmarshal([]byte(record.Body), &snsEntity)
-	unmarshalTypeErr := new(json.UnmarshalTypeError)
-	syntaxErr := new(json.SyntaxError)
-	if errors.As(err, &unmarshalTypeErr) {
-		log.WithFields(log.Fields{
-			"MessageId": messageId,
-		}).Warn("Skipping event due to unrecognized format for SnsEntity")
-		return nil, nil
-	} else if errors.As(err, &syntaxErr) {
-		log.WithFields(log.Fields{
-			"MessageId": messageId,
-		}).Warn("Skipping event due to SQS body not being json")
-		return nil, nil
-	} else if err != nil {
-		return nil, err
+	if err != nil {
+		return nil, handleParseError(err, messageId, "SNSEntity")
 	}
 
 	var s3Event events.CloudWatchAlarmSNSPayload
 	err = json.Unmarshal([]byte(snsEntity.Message), &s3Event)
-	if errors.As(err, &unmarshalTypeErr) {
-		log.WithFields(log.Fields{
-			"MessageId": messageId,
-		}).Warn("Skipping event due to unrecognized format for CloudWatchAlarmSNSPayload")
-		return nil, nil
-	} else if errors.As(err, &syntaxErr) {
-		log.WithFields(log.Fields{
-			"MessageId": messageId,
-		}).Warn("Skipping event due to message in SQS body not being json")
-		return nil, nil
-	} else if err != nil {
-		return nil, err
+	if err != nil {
+		return nil, handleParseError(err, messageId, "CloudWatchAlarmSNSPayload")
 	}
 
 	return &s3Event, nil
+}
+
+func handleParseError(err error, messageId string, entity string) error {
+	unmarshalTypeErr := new(json.UnmarshalTypeError)
+	syntaxErr := new(json.SyntaxError)
+
+	if errors.As(err, &unmarshalTypeErr) || errors.As(err, &syntaxErr) {
+		log.WithFields(log.Fields{
+			"MessageId": messageId,
+		}).Warn(fmt.Sprintf("Skipping event as cannot unmarshall %s", entity))
+		return nil
+	}
+	return err
 }
 
 func sendMessageToSlack(webhook string, jsonStr []byte, messageId string) {
@@ -126,14 +120,17 @@ func sendMessageToSlack(webhook string, jsonStr []byte, messageId string) {
 	if err != nil {
 		log.WithFields(log.Fields{
 			"MessageId": messageId,
-		}).Errorf("Unable to send message to slack: %v", err)
+		}).Error(fmt.Sprintf("Unsuccessful attempt to send message to slack: %v", err))
 		return
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
+	if resp.StatusCode == 200 {
 		log.WithFields(log.Fields{
 			"MessageId": messageId,
-		}).Errorf("Unsuccessful attempt to send message to slack: %s", resp.Status)
-		return
+		}).Info("Successfully sent message to Slack")
+	} else {
+		log.WithFields(log.Fields{
+			"MessageId": messageId,
+		}).Error(fmt.Sprintf("Unsuccessful attempt to send message to slack: %s", resp.Status))
 	}
 }
