@@ -30,6 +30,7 @@ func handler(ctx context.Context, event events.SQSEvent) error {
 		TimestampFormat:   time.RFC3339Nano,
 	})
 
+	// This should be set in the platform repo
 	webhook := os.Getenv("SLACK_WEBHOOK_URL")
 	for _, record := range event.Records {
 		messageId := record.MessageId
