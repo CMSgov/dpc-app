@@ -1,0 +1,39 @@
+name: Sns-To-Slack Deploy
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: string
+        default: "dev"
+
+  workflow_dispatch:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: string
+        default: "dev"
+
+  push:
+    branches:
+      - main
+    paths:
+      - lambda/sns-to-slack/**
+      - .github/workflows/sns-to-slack-deploy.yml
+      - .github/workflows/deploy_go_lambda_gf.yml
+
+jobs:
+  deploy:
+    name: 'Deploy SNS to Slack'
+    uses: ./.github/workflows/deploy_go_lambda_gf.yml
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      env: ${{ inputs.env || 'dev' }}
+      project: sns-to-slack
+      go_files: "main.go"
+    secrets: inherit

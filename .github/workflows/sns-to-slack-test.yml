@@ -1,0 +1,27 @@
+name: Sns-To-Slack Unit Tests
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/sns-to-slack-unit.yml
+      - lambda/sns-to-slack/**
+  workflow_dispatch:
+
+jobs:
+  test:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    defaults:
+      run:
+        working-directory: ./lambda/sns-to-slack
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.24.4'
+      - name: check go version
+        run: go version
+      - name: Run unit tests for sns-to-slack lambda
+        run: make test
