@@ -82,8 +82,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
     @Override
     public Bundle requestPatientFromServerByMbi(String mbi, Map<String, String> headers) throws ResourceNotFoundException {
-        // If the TEST_PATIENT_TIME_OUT is requested, hang forever.  SonarQube will probably flag this, but since we're
-        // purposely trying to create a bad situation, we can ignore it.
+        // If the TEST_PATIENT_TIME_OUT is requested, hang forever.
         if (Objects.equals(mbi, TEST_PATIENT_TIME_OUT)) {
             try {
                 Thread.sleep(Long.MAX_VALUE);

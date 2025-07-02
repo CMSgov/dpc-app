@@ -99,7 +99,7 @@ public class AggregationEngine implements Runnable {
         optionalBatch.ifPresent(jobQueueBatch -> this.queue.pauseBatch(jobQueueBatch, aggregatorID));
     }
 
-    public Boolean isRunning() {
+    public boolean isRunning() {
         return queueRunning.get();
     }
 
@@ -180,7 +180,7 @@ public class AggregationEngine implements Runnable {
             }
 
             // Finish processing the batch
-            if (Boolean.TRUE.equals(this.isRunning())) {
+            if (this.isRunning()) {
                 final String jobTime = SplunkTimestamp.getSplunkTimestamp();
                 // Calculate metadata for the file (length and checksum)
                 calculateFileMetadata(job);
