@@ -90,19 +90,28 @@ func parseSQSRecord(record events.SQSMessage) (*events.CloudWatchAlarmSNSPayload
 		return nil, handleParseError(err, messageId, "SNSEntity")
 	}
 
-	var s3Event events.CloudWatchAlarmSNSPayload
-	err = json.Unmarshal([]byte(snsEntity.Message), &s3Event)
+	var cloudWatchAlarm events.CloudWatchAlarmSNSPayload
+	err = json.Unmarshal([]byte(snsEntity.Message), &cloudWatchAlarm)
 	if err != nil {
 		return nil, handleParseError(err, messageId, "CloudWatchAlarmSNSPayload")
 	}
 
-	return &s3Event, nil
+	if cloudWatchAlarm.AlarmName == "" {
+		log.WithFields(log.Fields{
+			"MessageId": messageId,
+		}).Warn("Skipping as not a CloudWatchAlarmSNSPayload")
+		return nil, nil
+	}
+
+	return &cloudWatchAlarm, nil
 }
 
 func handleParseError(err error, messageId string, entity string) error {
 	unmarshalTypeErr := new(json.UnmarshalTypeError)
 	syntaxErr := new(json.SyntaxError)
 
+	// If we somehow receive an event that is not what we expect, (either not an SNS message or
+	// an SNS message that is not from CloudWatch), just ignore
 	if errors.As(err, &unmarshalTypeErr) || errors.As(err, &syntaxErr) {
 		log.WithFields(log.Fields{
 			"MessageId": messageId,

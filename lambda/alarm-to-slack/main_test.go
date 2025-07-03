@@ -15,7 +15,7 @@ import (
 )
 
 func init() {
-	if os.Getenv("QUIET") == "true" {
+	if os.Getenv("QUIET_LOGS") == "true" {
 		log.SetLevel(log.PanicLevel)
 	}
 }
@@ -23,6 +23,7 @@ func init() {
 func TestParseSQSRecord(t *testing.T) {
 	snsTemplate := "{\"Message\" : %s}"
 	alarmBody, _ := os.ReadFile("testdata/cloudWatchEvent.json")
+	s3Body, _ := os.ReadFile("testdata/s3Event.json")
 
 	tests := []struct {
 		alarm     bool
@@ -53,6 +54,11 @@ func TestParseSQSRecord(t *testing.T) {
 			alarm:     false,
 			body:      fmt.Sprintf(snsTemplate, strconv.Quote("{\"NewStateValue\":1}")),
 			messageId: "Bad type for CloudWatchAlarmSNSPayload NewStateValue",
+		},
+		{
+			alarm:     false,
+			body:      fmt.Sprintf(snsTemplate, strconv.Quote(string(s3Body))),
+			messageId: "Somehow an S3 PUT got in the queue",
 		},
 	}
 	for _, test := range tests {
@@ -90,7 +96,7 @@ func TestProcessSQSRecord(t *testing.T) {
 		{
 			alarm:     false,
 			body:      fmt.Sprintf(snsTemplate, strconv.Quote(string(okBody))),
-			messageId: "Return to Normal",
+			messageId: "New State is OK",
 		},
 		{
 			alarm:     false,
