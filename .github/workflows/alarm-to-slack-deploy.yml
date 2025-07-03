@@ -1,4 +1,4 @@
-name: Sns-To-Slack Deploy
+name: Alarm-To-Slack Deploy
 
 on:
   workflow_call:
@@ -21,19 +21,19 @@ on:
     branches:
       - main
     paths:
-      - lambda/sns-to-slack/**
-      - .github/workflows/sns-to-slack-deploy.yml
+      - lambda/alarm-to-slack/**
+      - .github/workflows/alarm-to-slack-deploy.yml
       - .github/workflows/deploy_go_lambda_gf.yml
 
 jobs:
   deploy:
-    name: 'Deploy SNS to Slack'
+    name: 'Deploy Alarm to Slack'
     uses: ./.github/workflows/deploy_go_lambda_gf.yml
     permissions:
       id-token: write
       contents: read
     with:
       env: ${{ inputs.env || 'dev' }}
-      project: sns-to-slack
+      project: alarm-to-slack
       go_files: "main.go"
     secrets: inherit

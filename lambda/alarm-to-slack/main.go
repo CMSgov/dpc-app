@@ -1,4 +1,4 @@
-package sns_to_slack
+package alarm_to_slack
 
 import (
 	"bytes"
