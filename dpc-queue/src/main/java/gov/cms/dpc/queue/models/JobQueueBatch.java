@@ -403,6 +403,11 @@ public class JobQueueBatch implements Serializable {
      * @param aggregatorID - the current aggregator working the job
      */
     public void setPausedStatus(UUID aggregatorID) {
+        // Job is already paused, do nothing.
+        if (this.status == JobStatus.QUEUED ) {
+            return;
+        }
+
         if (this.status != JobStatus.RUNNING) {
             throw new JobQueueFailure(jobID, batchID, String.format("Cannot pause batch. JobStatus: %s", this.status));
         }
