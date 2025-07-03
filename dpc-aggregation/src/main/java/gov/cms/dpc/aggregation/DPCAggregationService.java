@@ -42,9 +42,12 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
                 new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), substitutor);
         bootstrap.setConfigurationSourceProvider(provider);
 
+        // AggregationAppModule needs to be added after DPCQueueHibernateModule, because DropWizard shuts these down
+        // in reverse order, and we don't want the queue DB to be disconnected until after the aggregation engine stops
+        // running.
         GuiceBundle guiceBundle = GuiceBundle.builder()
-                .modules(new AggregationAppModule(),
-                        new DPCQueueHibernateModule<>(queueHibernateBundle),
+                .modules(new DPCQueueHibernateModule<>(queueHibernateBundle),
+                        new AggregationAppModule(),
                         new DPCHibernateModule<>(hibernateBundle),
                         new JobQueueModule<DPCAggregationConfiguration>(),
                         new BlueButtonClientModule<DPCAggregationConfiguration>())
