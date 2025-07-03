@@ -44,7 +44,7 @@ func handler(ctx context.Context, event events.SQSEvent) error {
 		}
 		if len(payload) > 0 {
 			if webhook != "" {
-				sendMessageToSlack(webhook, payload, messageId)
+				return sendMessageToSlack(webhook, payload, messageId)
 			} else {
 				log.WithFields(log.Fields{
 					"MessageId": messageId,
@@ -121,8 +121,8 @@ func handleParseError(err error, messageId string, entity string) error {
 	return err
 }
 
-func sendMessageToSlack(webhook string, jsonStr []byte, messageId string) {
-	// Not tested, nothing to return, as testing would just be testing stubs
+func sendMessageToSlack(webhook string, jsonStr []byte, messageId string) error {
+	// Not tested, as testing would just be testing stubs
 	req, _ := http.NewRequest("POST", webhook, bytes.NewBuffer(jsonStr))
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -130,16 +130,18 @@ func sendMessageToSlack(webhook string, jsonStr []byte, messageId string) {
 		log.WithFields(log.Fields{
 			"MessageId": messageId,
 		}).Error(fmt.Sprintf("Unsuccessful attempt to send message to slack: %v", err))
-		return
+		return err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == 200 {
 		log.WithFields(log.Fields{
 			"MessageId": messageId,
 		}).Info("Successfully sent message to Slack")
+		return nil
 	} else {
 		log.WithFields(log.Fields{
 			"MessageId": messageId,
 		}).Error(fmt.Sprintf("Unsuccessful attempt to send message to slack: %s", resp.Status))
+		return errors.New(fmt.Sprintf("Unsuccessful attempt to send message to slack: %s", resp.Status))
 	}
 }
