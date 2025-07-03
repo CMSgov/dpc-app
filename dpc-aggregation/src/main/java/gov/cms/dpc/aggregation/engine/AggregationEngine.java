@@ -1,8 +1,9 @@
 package gov.cms.dpc.aggregation.engine;
-import gov.cms.dpc.common.logging.SplunkTimestamp;
+
 import com.newrelic.api.agent.Trace;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.common.MDCConstants;
+import gov.cms.dpc.common.logging.SplunkTimestamp;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.annotations.AggregatorID;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The top level of the Aggregation Engine. {@link ResourceFetcher} does the fetching from
@@ -41,6 +43,7 @@ public class AggregationEngine implements Runnable {
     private final OperationsConfig operationsConfig;
     private final JobBatchProcessor jobBatchProcessor;
     private Disposable subscribe;
+    private final AtomicReference<Optional<JobQueueBatch>> currentBatch = new AtomicReference<>(Optional.empty());
 
     /**
      * The initial value is set to true so when the aggregation instance starts up,
@@ -79,17 +82,24 @@ public class AggregationEngine implements Runnable {
     }
 
     /**
-     * Stop the engine.
+     * Stop the engine.  This is usually called from the AggregationManager in a Jetty shutdown thread.  This means it
+     * can be called at the same time the main thread is either polling or processing a patient.
      */
     public void stop() {
-        logger.info("Shutting down aggregation engine");
+        logger.info("Shutting down aggregation engine from thread: {}", Thread.currentThread().getId());
+
+        // Stop and dispose of queue
         queueRunning.set(false);
         if (this.subscribe != null) {
             this.subscribe.dispose();
         }
+
+        // If a batch is currently running, mark it paused.
+        Optional<JobQueueBatch> optionalBatch = this.currentBatch.get();
+        optionalBatch.ifPresent(jobQueueBatch -> this.queue.pauseBatch(jobQueueBatch, aggregatorID));
     }
 
-    public Boolean isRunning() {
+    public boolean isRunning() {
         return queueRunning.get();
     }
 
@@ -98,6 +108,7 @@ public class AggregationEngine implements Runnable {
      */
     protected void pollQueue() {
         MDC.put(MDCConstants.AGGREGATOR_ID, this.aggregatorID.toString());
+        logger.info("Starting to poll queue on thread: {}", Thread.currentThread().getId());
 
         this.subscribe = this.createQueueObserver()
                 .repeatWhen(completed -> {
@@ -147,6 +158,8 @@ public class AggregationEngine implements Runnable {
      */
     @Trace
     protected void processJobBatch(JobQueueBatch job) {
+        this.currentBatch.set(Optional.of(job));
+
         final String queueCompleteTime = SplunkTimestamp.getSplunkTimestamp();
         try {
             MDC.put(MDCConstants.AGGREGATOR_ID, this.aggregatorID.toString());
@@ -183,8 +196,10 @@ public class AggregationEngine implements Runnable {
                 logger.info("dpcMetric=jobFail,completionResult={},jobID={},jobCompleteTime={},failureReason={}", "FAILED", job.getJobID(), jobTime, error.getMessage());
                 this.queue.failBatch(job, aggregatorID);
             } catch (Exception failedBatchException) {
-                logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 5 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);
+                logger.error("FAILED to mark job {} batch {} as failed. Batch will remain in the running state, and stuck job logic will retry this in 15 minutes...", job.getJobID(), job.getBatchID(), failedBatchException);
             }
+        } finally {
+            this.currentBatch.set(Optional.empty());
         }
 
         // Clear the MDC before the next batch

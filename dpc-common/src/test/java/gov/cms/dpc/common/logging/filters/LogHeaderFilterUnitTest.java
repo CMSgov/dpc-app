@@ -6,7 +6,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.UriInfo;
-import org.glassfish.jersey.server.internal.routing.UriRoutingContext;
 import org.junit.jupiter.api.*;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +62,30 @@ class LogHeaderFilterUnitTest {
 		assertEquals(Level.INFO, listAppender.list.get(0).getLevel());
 		assertEquals(headerValueLogged, listAppender.list.get(0).getFormattedMessage());
 	}
+
+    @Test
+    void testLogMessageSanitization() throws IOException {
+        final String headerValue = "fakeValue,fakervalue";
+        final String fakeHeaderValueAdded = headerKey + "=fakeValue\\,fakervalue";
+        final String fakeUriValueSanitized = "uri=" + "/api/v1/Group?user=attacker_admin=true";
+        final String expectedLogMessage = fakeHeaderValueAdded + ", " + fakeUriValueSanitized;
+
+
+        final URI fakeUri = mock(URI.class);
+        UriInfo uriInfo = mock(UriInfo.class);
+        when(fakeUri.toString()).thenReturn("/api/v1/Group?user=attacker\nadmin=true");
+        when(uriInfo.getRequestUri()).thenReturn(fakeUri);
+
+        ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
+        when(requestContext.getHeaderString(headerKey)).thenReturn(headerValue);
+        when(requestContext.getUriInfo()).thenReturn(uriInfo);
+
+        logHeaderFilter.filter(requestContext);
+
+        assertEquals(1, listAppender.list.size());
+        assertEquals(Level.INFO, listAppender.list.get(0).getLevel());
+        assertEquals(expectedLogMessage, listAppender.list.get(0).getFormattedMessage());
+    }
 
 	@Test
 	void testLogsNull() throws IOException {
