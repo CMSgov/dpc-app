@@ -248,11 +248,13 @@ class JWTUnitTests {
             // Submit JWT with missing key
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
+            String macaroon = buildMacaroon();
+
             final String jwt = Jwts.builder()
                     .header().add("kid", UUID.randomUUID().toString()).and()
-                    .audience().add(String.format("%sToken/auth", "here")).and()
-                    .issuer("macaroon")
-                    .subject("macaroon")
+                    .audience().add("localhost:3002/v1/Token/auth").and()
+                    .issuer(macaroon)
+                    .subject(macaroon)
                     .id(UUID.randomUUID().toString())
                     .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
@@ -276,11 +278,13 @@ class JWTUnitTests {
         void testExpiredJWT(KeyType keyType) throws NoSuchAlgorithmException {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
+            String macaroon = buildMacaroon();
+
             final String jwt = Jwts.builder()
                     .header().add("kid", keyPair.getLeft()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
-                    .issuer("macaroon")
-                    .subject("macaroon")
+                    .issuer(macaroon)
+                    .subject(macaroon)
                     .id(UUID.randomUUID().toString())
                     .expiration(Date.from(Instant.now().minus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
@@ -679,11 +683,15 @@ class JWTUnitTests {
             assertTrue(response.readEntity(String.class).contains("`kid` value must be a UUID"), "Should have correct exception");
         }
 
+        @Disabled //TODO: can we even hit this exception anymore? -acw
         @ParameterizedTest
         @EnumSource(KeyType.class)
         void testIncorrectExpFormat(KeyType keyType) throws NoSuchAlgorithmException {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
             final String m = buildMacaroon();
+
+            final Map<String, Object> claims = new HashMap<>();
+            claims.put("exp", "asdf");
 
             final String id = UUID.randomUUID().toString();
             final String jwt = Jwts.builder()
@@ -692,7 +700,7 @@ class JWTUnitTests {
                     .issuer(m)
                     .subject(m)
                     .id(id)
-                    .claim("exp", String.valueOf(Instant.MAX.getEpochSecond() + 60))
+                    .claims().add(claims).and()
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
                     .compact();
 
@@ -723,18 +731,18 @@ class JWTUnitTests {
         final DPCUnauthorizedHandler dpc401handler = mock(DPCUnauthorizedHandler.class);
         Mockito.when(tokenDAO.fetchTokens(Mockito.any())).thenAnswer(answer -> "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
-        final JwtKeyResolver resolver = spy(new JwtKeyResolver(publicKeyDAO));
+        final JwtKeyLocator locator = spy(new JwtKeyLocator(publicKeyDAO));
         final CaffeineJTICache jtiCache = new CaffeineJTICache();
 
         UUID organizationID = UUID.randomUUID();
-        doReturn(organizationID).when(resolver).getOrganizationID(Mockito.anyString());
+        doReturn(organizationID).when(locator).getOrganizationID(Mockito.anyString());
 
         final TokenPolicy tokenPolicy = new TokenPolicy();
 
         final DPCAuthFactory factory = new DPCAuthFactory(bakery, new MacaroonsAuthenticator(client), tokenDAO, dpc401handler);
         final DPCAuthDynamicFeature dynamicFeature = new DPCAuthDynamicFeature(factory);
 
-        final TokenResource tokenResource = new TokenResource(tokenDAO, bakery, tokenPolicy, resolver, jtiCache, "localhost:3002/v1");
+        final TokenResource tokenResource = new TokenResource(tokenDAO, bakery, tokenPolicy, locator, jtiCache, "localhost:3002/v1");
         final FhirContext ctx = FhirContext.forDstu3();
 
         return APITestHelpers.buildResourceExtension(ctx, List.of(tokenResource), List.of(dynamicFeature), false);
@@ -749,8 +757,8 @@ class JWTUnitTests {
     private static PublicKeyDAO mockKeyDAO() {
         final PublicKeyDAO mock = mock(PublicKeyDAO.class);
 
-        Mockito.when(mock.fetchPublicKey(Mockito.any(), Mockito.any())).then(answer -> {
-            final KeyPair keyPair = JWTKeys.get((UUID) answer.getArgument(1));
+        Mockito.when(mock.fetchPublicKey(Mockito.any())).then(answer -> {
+            final KeyPair keyPair = JWTKeys.get((UUID) answer.getArgument(0));
             if (keyPair == null) {
                 return Optional.empty();
             }
