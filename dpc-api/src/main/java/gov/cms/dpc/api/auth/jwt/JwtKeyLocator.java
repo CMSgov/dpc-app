@@ -33,6 +33,21 @@ public class JwtKeyLocator extends LocatorAdapter<Key> {
             throw new WebApplicationException("JWT must have KID field", Response.Status.UNAUTHORIZED);
         }
 
+        final PublicKeyEntity keyEntity = getPublicKeyEntity(keyId);
+
+        try {
+            return PublicKeyHandler.publicKeyFromEntity(keyEntity);
+        } catch (PublicKeyException e) {
+            logger.error("Cannot convert public key", e);
+            throw new WebApplicationException("Internal server error", Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public UUID getOrganizationFromKey(String keyId) {
+        return getPublicKeyEntity(keyId).getOrganization_id();
+    }
+
+    private PublicKeyEntity getPublicKeyEntity(String keyId) {
         final PublicKeyEntity keyEntity;
         try {
             keyEntity = this.dao.fetchPublicKey(UUID.fromString(keyId))
@@ -41,12 +56,6 @@ public class JwtKeyLocator extends LocatorAdapter<Key> {
             logger.error("Cannot convert '{}' to UUID", keyId, e);
             throw new WebApplicationException("Invalid Public Key ID", Response.Status.UNAUTHORIZED);
         }
-
-        try {
-            return PublicKeyHandler.publicKeyFromEntity(keyEntity);
-        } catch (PublicKeyException e) {
-            logger.error("Cannot convert public key", e);
-            throw new WebApplicationException("Internal server error", Response.Status.INTERNAL_SERVER_ERROR);
-        }
+        return keyEntity;
     }
 }

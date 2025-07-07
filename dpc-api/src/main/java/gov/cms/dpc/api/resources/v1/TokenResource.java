@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
+import gov.cms.dpc.api.auth.jwt.JwtKeyLocator;
 import gov.cms.dpc.api.auth.jwt.TokenValidator;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
@@ -29,7 +30,10 @@ import gov.cms.dpc.macaroons.config.TokenPolicy;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import io.swagger.annotations.*;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
@@ -47,7 +51,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -72,7 +75,7 @@ public class TokenResource extends AbstractTokenResource {
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
-    private final LocatorAdapter<Key> locator;
+    private final JwtKeyLocator locator;
     private final IJTICache cache;
     private final String authURL;
 
@@ -80,7 +83,7 @@ public class TokenResource extends AbstractTokenResource {
     public TokenResource(TokenDAO dao,
                          MacaroonBakery bakery,
                          TokenPolicy policy,
-                         LocatorAdapter<Key> locator,
+                         JwtKeyLocator locator,
                          IJTICache cache,
                          @APIV1 String publicURL) {
         this.dao = dao;
@@ -286,6 +289,15 @@ public class TokenResource extends AbstractTokenResource {
 
         // Get org id from macaroon caveats
         UUID orgId = getOrganizationID(clientMacaroon);
+
+        UUID keyOrgId = this.locator.getOrganizationFromKey(decoded.getKeyId());
+
+        System.out.println("FROM MACAROON: " + orgId);
+        System.out.println("FROM KEY: " + keyOrgId);
+
+        if (orgId != keyOrgId) {
+            throw new WebApplicationException(String.format("Cannot find public key with id: %s for org: %s", decoded.getKeyId(), orgId.toString()), Response.Status.UNAUTHORIZED);
+        }
 
         // Parse signed claims
         final Jws<Claims> claims = Jwts.parser()
