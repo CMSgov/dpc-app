@@ -1,8 +1,5 @@
 package gov.cms.dpc.api.auth.jwt;
 
-import com.github.nitram509.jmacaroons.Macaroon;
-import com.github.nitram509.jmacaroons.MacaroonVersion;
-import com.github.nitram509.jmacaroons.MacaroonsBuilder;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.testing.APIAuthHelpers;
@@ -41,11 +38,6 @@ class JwtKeyLocatorTests {
     private static final UUID correctKeyID = UUID.randomUUID();
     private static final UUID eccKeyID = UUID.randomUUID();
     private static final UUID notRealKeyID = UUID.randomUUID();
-    private static final UUID organization1 = UUID.randomUUID();
-    private static final UUID organization2 = UUID.randomUUID();
-
-    private static final String org1Macaroon = makeMacaroon(organization1);
-    private static final String org2Macaroon = makeMacaroon(organization2);
 
 
     @BeforeAll
@@ -70,14 +62,12 @@ class JwtKeyLocatorTests {
         Mockito.when(dao.fetchPublicKey(correctKeyID)).thenReturn(Optional.of(goodEntity));
         Mockito.when(dao.fetchPublicKey(eccKeyID)).thenReturn(Optional.of(goodECCEntity));
         Mockito.when(dao.fetchPublicKey(notRealKeyID)).thenReturn(Optional.empty());
-//        Mockito.when(dao.fetchPublicKey(Mockito.any())).thenReturn(Optional.empty());
         locator = new JwtKeyLocator(dao);
     }
 
     @Test
     void testRSATokenValidator() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn(correctKeyID.toString());
         final Key key = locator.locate(headerMock);
 
@@ -87,7 +77,6 @@ class JwtKeyLocatorTests {
     @Test
     void testECCTokenValidator() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn(eccKeyID.toString());
         final Key key = locator.locate(headerMock);
 
@@ -97,21 +86,17 @@ class JwtKeyLocatorTests {
     @Test
     void testMissingKIDField() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn(null);
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> locator.locate(headerMock));
 
         assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus(), "Should be unauthorized"),
                 () -> assertEquals("JWT must have KID field", exception.getMessage(), "Should have KID message"));
-
-
     }
 
     @Test
     void testMissingSigningKey() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn(notRealKeyID.toString());
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> locator.locate(headerMock));
@@ -123,7 +108,6 @@ class JwtKeyLocatorTests {
     @Test
     void testFailingKeyParsing() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn(badKeyID.toString());
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> locator.locate(headerMock));
@@ -135,62 +119,11 @@ class JwtKeyLocatorTests {
     @Test
     void testNonUUIDKeyID() {
         final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(org1Macaroon);
         Mockito.when(headerMock.getKeyId()).thenReturn("This is not a real key id");
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> locator.locate(headerMock));
 
         assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus(), "Should be unauthorized"),
                 () -> assertEquals("Invalid Public Key ID", exception.getMessage(), "Should have non-UUID message"));
-    }
-
-    @Test
-    void testNoMacaroon() {
-        final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(null);
-        Mockito.when(headerMock.getKeyId()).thenReturn(correctKeyID.toString());
-
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> locator.locate(headerMock));
-
-        assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus(), "Should be unauthorized"),
-                () -> assertEquals("JWT must have client_id", exception.getMessage(), "Should have non-UUID message"));
-    }
-
-    @Test
-    void testMacaroonNoCaveat() {
-        final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(makeMacaroon(null));
-        Mockito.when(headerMock.getKeyId()).thenReturn(correctKeyID.toString());
-
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> locator.locate(headerMock));
-
-        assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus(), "Should be unauthorized"),
-                () -> assertEquals("JWT client token must have organization_id", exception.getMessage(), "Should have non-UUID message"));
-    }
-
-    @Test
-    void testMacaroonWrongOrg() {
-        final JwsHeader headerMock = mock(JwsHeader.class);
-        Mockito.when(headerMock.get("iss")).thenReturn(org2Macaroon);
-        Mockito.when(headerMock.getKeyId()).thenReturn("This is not a real key id");
-
-        final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> locator.locate(headerMock));
-
-        assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus(), "Should be unauthorized"),
-                () -> assertEquals("Invalid Public Key ID", exception.getMessage(), "Should have non-UUID message"));
-    }
-
-    private static String makeMacaroon(UUID orgID) {
-        // Manually create a fake Macaroon with just the org id
-        final Macaroon m = MacaroonsBuilder.create("test.local", "fake key", "make id");
-        if (orgID != null) {
-            return MacaroonsBuilder.modify(m)
-                    .add_first_party_caveat(String.format("organization_id = %s", orgID))
-                    .getMacaroon()
-                    .serialize(MacaroonVersion.SerializationVersion.V1_BINARY);
-        }
-
-        return m.serialize(MacaroonVersion.SerializationVersion.V1_BINARY);
-
     }
 }

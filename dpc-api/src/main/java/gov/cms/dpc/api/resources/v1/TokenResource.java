@@ -226,7 +226,7 @@ public class TokenResource extends AbstractTokenResource {
         } catch (SecurityException e) {
             logger.error("JWT has invalid signature", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
-        } catch (JwtException e) {
+        } catch (JWTDecodeException | JwtException e) {
             logger.error("Malformed JWT", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
         }
