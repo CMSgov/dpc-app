@@ -33,10 +33,6 @@ public class JwtKeyLocator extends LocatorAdapter<Key> {
             throw new WebApplicationException("JWT must have KID field", Response.Status.UNAUTHORIZED);
         }
 
-//        final UUID organizationID = getOrganizationID(header.get("iss"));
-//        // Set the MDC values here, since it's the first time we actually know what the organization ID is
-//        MDC.put(MDCConstants.ORGANIZATION_ID, organizationID.toString());
-
         final PublicKeyEntity keyEntity;
         try {
             keyEntity = this.dao.fetchPublicKey(UUID.fromString(keyId))

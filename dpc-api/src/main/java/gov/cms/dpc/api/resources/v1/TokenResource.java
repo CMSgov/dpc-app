@@ -296,11 +296,6 @@ public class TokenResource extends AbstractTokenResource {
 
         final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(clientMacaroon);
 
-//        UUID orgId = MacaroonHelpers.extractOrgIDFromCaveats(macaroons).orElseThrow(() -> {
-//            logger.error("No organization found on macaroon");
-//            return new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
-//        });
-
         // Determine if claims are present and valid
         // Required claims are specified here: http://hl7.org/fhir/us/bulkdata/2019May/authorization/index.html#protocol-details
         handleJWTClaims(orgId, claims.getPayload());
