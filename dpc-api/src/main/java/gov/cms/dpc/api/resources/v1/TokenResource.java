@@ -222,31 +222,14 @@ public class TokenResource extends AbstractTokenResource {
 
         // Validate JWT signature
         try {
-            String updatedJWT = addIssuerToHeader(jwtBody);
-            return handleJWT(updatedJWT, scope);
+            return handleJWT(jwtBody, scope);
         } catch (SecurityException e) {
             logger.error("JWT has invalid signature", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
-        } catch (JWTDecodeException | JwtException e) {
+        } catch (JwtException e) {
             logger.error("Malformed JWT", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
         }
-    }
-
-    private String addIssuerToHeader(String jwt) {
-        DecodedJWT decoded = JWT.decode(jwt);
-        String decodedHeader = new String(Base64.getDecoder().decode(decoded.getHeader()), StandardCharsets.UTF_8);
-        Map<String, Object> headerMap = new Gson().fromJson(decodedHeader, Map.class);
-        headerMap.put("iss", decoded.getClaims().get("iss").asString());
-        Map<String, String> claimsMap = new HashMap<>();
-        decoded.getClaims().forEach((k, v) -> claimsMap.put(k, v.asString()));
-        return Jwts.builder()
-                .header().add(headerMap).and()
-                .claims().add(claimsMap).and()
-                .audience().add(decoded.getAudience()).and()
-                .expiration(decoded.getExpiresAt())
-                .signWith(this.locator.locate(Jwts.header().add(headerMap).build()))
-                .compact();
     }
 
     @POST
