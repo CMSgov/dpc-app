@@ -7,6 +7,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
+import gov.cms.dpc.api.auth.jwt.JwtKeyLocator;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
 import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
 import gov.cms.dpc.api.core.FileManager;
@@ -35,7 +36,6 @@ import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
-import io.jsonwebtoken.LocatorAdapter;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import org.hibernate.SessionFactory;
@@ -101,13 +101,13 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
-    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, LocatorAdapter locator, IJTICache cache, @APIV1 String publicURL) {
+    public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, JwtKeyLocator locator, IJTICache cache, @APIV1 String publicURL) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(TokenResource.class,
                         new Class<?>[]{TokenDAO.class,
                                 MacaroonBakery.class,
                                 TokenPolicy.class,
-                                LocatorAdapter.class,
+                                JwtKeyLocator.class,
                                 IJTICache.class,
                                 String.class},
                         new Object[]{dao,
