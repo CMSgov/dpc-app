@@ -7,7 +7,6 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
 import com.google.gson.Gson;
-import gov.cms.dpc.api.auth.MacaroonHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
@@ -18,6 +17,7 @@ import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateTokenRequest;
 import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.annotations.Public;
@@ -44,6 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -221,8 +222,8 @@ public class TokenResource extends AbstractTokenResource {
 
         // Validate JWT signature
         try {
-            String updatedJWT = addIssuerToHeader(jwtBody);
-            return handleJWT(updatedJWT, scope);
+//            String updatedJWT = addIssuerToHeader(jwtBody);
+            return handleJWT(jwtBody, scope);
         } catch (SecurityException e) {
             logger.error("JWT has invalid signature", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
@@ -244,7 +245,6 @@ public class TokenResource extends AbstractTokenResource {
                 .claims().add(claimsMap).and()
                 .audience().add(decoded.getAudience()).and()
                 .expiration(decoded.getExpiresAt())
-                .signWith(this.locator.locate(Jwts.header().add(headerMap).build()))
                 .compact();
     }
 
@@ -294,21 +294,28 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
+        // Parse the unverified claims to get organization ID
+        DecodedJWT decoded = JWT.decode(jwtBody);
+
+        // Extract the Client Macaroon from the subject field (which is the same as the issuer)
+        final String clientMacaroon = decoded.getSubject();
+
+        // Get org id from macaroon caveats
+        UUID orgId = getOrganizationID(clientMacaroon);
+
+        // Parse signed claims
         final Jws<Claims> claims = Jwts.parser()
                 .keyLocator(this.locator)
                 .requireAudience(this.authURL)
                 .build()
                 .parseSignedClaims(jwtBody);
 
-        // Extract the Client Macaroon from the subject field (which is the same as the issuer)
-        final String clientMacaroon = claims.getPayload().getSubject();
         final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(clientMacaroon);
 
-        // Get org id from macaroon caveats
-        UUID orgId = MacaroonHelpers.extractOrgIDFromCaveats(macaroons).orElseThrow(() -> {
-            logger.error("No organization found on macaroon");
-            return new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
-        });
+//        UUID orgId = MacaroonHelpers.extractOrgIDFromCaveats(macaroons).orElseThrow(() -> {
+//            logger.error("No organization found on macaroon");
+//            return new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
+//        });
 
         // Determine if claims are present and valid
         // Required claims are specified here: http://hl7.org/fhir/us/bulkdata/2019May/authorization/index.html#protocol-details
@@ -330,6 +337,28 @@ public class TokenResource extends AbstractTokenResource {
         response.setDischargedMacaroons(new String(this.bakery.serializeMacaroon(discharged, true), StandardCharsets.UTF_8));
 
         return response;
+    }
+
+    public UUID getOrganizationID(String macaroon) {
+        if (macaroon == null || macaroon.isEmpty()) {
+            throw new WebApplicationException("JWT must have client_id", Response.Status.UNAUTHORIZED);
+        }
+        final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(macaroon);
+        if (macaroons.isEmpty()) {
+            throw new WebApplicationException("JWT must have client_id", Response.Status.UNAUTHORIZED);
+        }
+
+        UUID orgID =  MacaroonBakery.getCaveats(macaroons.get(0))
+                .stream()
+                .map(MacaroonCaveat::getCondition)
+                .filter(cond -> cond.getKey().equals(ORGANIZATION_CAVEAT_KEY))
+                .map(condition -> UUID.fromString(condition.getValue()))
+                .findAny()
+                .orElseThrow(() -> new WebApplicationException("JWT client token must have organization_id", Response.Status.UNAUTHORIZED));
+
+        // Set the MDC value here, since it's the first time we actually know what the organization ID is
+        MDC.put(MDCConstants.ORGANIZATION_ID, orgID.toString());
+        return orgID;
     }
 
     private Macaroon generateMacaroon(TokenPolicy policy, UUID organizationID) {
