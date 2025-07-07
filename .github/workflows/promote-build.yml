@@ -1,4 +1,4 @@
-name: 'DPC - Promote Build (Greenfield)'
+name: 'DPC - Promote Build'
 
 on:
   workflow_dispatch:

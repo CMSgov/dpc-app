@@ -1,4 +1,4 @@
-name: Api-Waf-Sync Deploy (Greenfield)
+name: Api-Waf-Sync Deploy
 
 on:
   workflow_call:

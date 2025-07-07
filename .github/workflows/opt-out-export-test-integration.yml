@@ -1,4 +1,4 @@
-name: Opt-Out-Export Integration Tests (Greenfield)
+name: Opt-Out-Export Integration Tests
 
 on:
   pull_request:

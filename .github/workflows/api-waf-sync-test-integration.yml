@@ -1,4 +1,4 @@
-name: Api-Waf-Sync Integration Tests (Greenfield)
+name: Api-Waf-Sync Integration Tests
 
 on:
   pull_request:

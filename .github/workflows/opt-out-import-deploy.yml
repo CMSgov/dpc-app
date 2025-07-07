@@ -1,4 +1,4 @@
-name: Opt-Out-Import Deploy (Greenfield)
+name: Opt-Out-Import Deploy
 
 on:
   workflow_call:

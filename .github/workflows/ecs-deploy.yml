@@ -1,4 +1,4 @@
-name: 'DPC - ECS Deploy (Greenfield)'
+name: 'DPC - ECS Deploy'
 
 on:
   workflow_dispatch:

@@ -1,4 +1,4 @@
-name: "DPC CI Workflow (Greenfield)"
+name: "DPC CI Workflow"
 
 on:
   pull_request:
