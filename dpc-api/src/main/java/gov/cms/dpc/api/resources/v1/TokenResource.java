@@ -222,8 +222,8 @@ public class TokenResource extends AbstractTokenResource {
 
         // Validate JWT signature
         try {
-//            String updatedJWT = addIssuerToHeader(jwtBody);
-            return handleJWT(jwtBody, scope);
+            String updatedJWT = addIssuerToHeader(jwtBody);
+            return handleJWT(updatedJWT, scope);
         } catch (SecurityException e) {
             logger.error("JWT has invalid signature", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
@@ -245,6 +245,7 @@ public class TokenResource extends AbstractTokenResource {
                 .claims().add(claimsMap).and()
                 .audience().add(decoded.getAudience()).and()
                 .expiration(decoded.getExpiresAt())
+                .signWith(this.locator.locate(Jwts.header().add(headerMap).build()))
                 .compact();
     }
 
