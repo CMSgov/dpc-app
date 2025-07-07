@@ -287,15 +287,12 @@ public class TokenResource extends AbstractTokenResource {
         // Extract the Client Macaroon from the subject field (which is the same as the issuer)
         final String clientMacaroon = decoded.getSubject();
 
-        // Get org id from macaroon caveats
+        // Get org id from macaroon caveats and check against key
         UUID orgId = getOrganizationID(clientMacaroon);
 
         UUID keyOrgId = this.locator.getOrganizationFromKey(decoded.getKeyId());
 
-        System.out.println("FROM MACAROON: " + orgId);
-        System.out.println("FROM KEY: " + keyOrgId);
-
-        if (orgId != keyOrgId) {
+        if (!orgId.equals(keyOrgId)) {
             throw new WebApplicationException(String.format("Cannot find public key with id: %s for org: %s", decoded.getKeyId(), orgId.toString()), Response.Status.UNAUTHORIZED);
         }
 
