@@ -3,8 +3,8 @@ name: Api-Waf-Sync Integration Tests (Greenfield)
 on:
   pull_request:
     paths:
-      - .github/workflows/api-waf-sync-test-integration-gf.yml
-      - .github/workflows/api-waf-sync-deploy-gf.yml
+      - .github/workflows/api-waf-sync-test-integration.yml
+      - .github/workflows/api-waf-sync-deploy.yml
       - .github/workflows/deploy_go_lambda-gf.yml
       - lambda/api-waf-sync/**
   workflow_dispatch:
@@ -21,7 +21,7 @@ jobs:
   # Deploy first if triggered by pull_request
   deploy:
     if: ${{ github.event_name == 'pull_request' }}
-    uses: ./.github/workflows/api-waf-sync-deploy-gf.yml
+    uses: ./.github/workflows/api-waf-sync-deploy.yml
     with:
       env: dev
     secrets: inherit

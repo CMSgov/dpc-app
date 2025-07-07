@@ -3,7 +3,7 @@ name: "DPC CI Workflow (Greenfield)"
 on:
   pull_request:
     paths:
-      - .github/workflows/ci-workflow-gf.yml
+      - .github/workflows/ci-workflow.yml
       - dpc-admin/**
       - dpc-aggregation/**
       - dpc-api/**

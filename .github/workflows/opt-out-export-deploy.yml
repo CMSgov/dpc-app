@@ -23,12 +23,12 @@ on:
     paths:
       - lambda/opt-out-export/**
       - .github/workflows/opt-out-export-deploy.yml
-      - .github/workflows/deploy_go_lambda_gf.yml
+      - .github/workflows/deploy_go_lambda.yml
 
 jobs:
   deploy:
     name: 'Deploy Opt Out Export'
-    uses: ./.github/workflows/deploy_go_lambda_gf.yml
+    uses: ./.github/workflows/deploy_go_lambda.yml
     permissions:
       id-token: write
       contents: read

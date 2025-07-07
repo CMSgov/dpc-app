@@ -67,7 +67,7 @@ jobs:
 
   deploy:
     needs: set-parameters
-    uses: ./.github/workflows/ecs-deploy-gf.yml
+    uses: ./.github/workflows/ecs-deploy.yml
     with:
       env: ${{ inputs.to_env }}
       confirm_env: ${{ inputs.to_env }}
@@ -77,7 +77,7 @@ jobs:
       
   smoke-test:
     needs: deploy
-    uses: ./.github/workflows/smoke-test-gf.yml
+    uses: ./.github/workflows/smoke-test.yml
     with:
       env: ${{ inputs.to_env }}
     secrets: inherit
