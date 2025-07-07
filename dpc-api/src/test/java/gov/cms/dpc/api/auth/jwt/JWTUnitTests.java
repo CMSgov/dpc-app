@@ -240,7 +240,6 @@ class JWTUnitTests {
 
     @Nested
     @DisplayName("JWT Tests")
-    @Disabled //TODO: debug - figure out how to set public key org id to match macaroon's
     class JWTests {
 
         @ParameterizedTest
