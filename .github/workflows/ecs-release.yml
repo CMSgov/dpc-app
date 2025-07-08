@@ -1,4 +1,4 @@
-name: 'DPC - Build and Deploy (Greenfield)'
+name: 'DPC - Build and Deploy'
 
 on:
   schedule:
@@ -89,14 +89,14 @@ jobs:
     name: "Build Images"
     needs:
       - set-parameters
-    uses: ./.github/workflows/docker-build-gf.yml
+    uses: ./.github/workflows/docker-build.yml
     secrets: inherit
 
   deploy:
     needs:
       - set-parameters
       - build
-    uses: ./.github/workflows/ecs-deploy-gf.yml
+    uses: ./.github/workflows/ecs-deploy.yml
     with:
       env: ${{ inputs.env || 'dev'  }}
       confirm_env: ${{ inputs.env || 'dev'  }}
@@ -107,7 +107,7 @@ jobs:
 
   smoke-test:
      needs: deploy
-     uses: ./.github/workflows/smoke-test-gf.yml
+     uses: ./.github/workflows/smoke-test.yml
      with:
        env: ${{ inputs.env || 'dev' }}
      secrets: inherit

@@ -1,4 +1,4 @@
-name: Opt-Out-Export Deploy (Greenfield)
+name: Opt-Out-Import Deploy
 
 on:
   workflow_call:
@@ -21,19 +21,19 @@ on:
     branches:
       - main
     paths:
-      - lambda/opt-out-export/**
-      - .github/workflows/opt-out-export-deploy.yml
-      - .github/workflows/deploy_go_lambda_gf.yml
+      - lambda/opt-out-import/**
+      - .github/workflows/opt-out-import-deploy.yml
+      - .github/workflows/deploy_go_lambda.yml
 
 jobs:
   deploy:
-    name: 'Deploy Opt Out Export'
-    uses: ./.github/workflows/deploy_go_lambda_gf.yml
+    name: 'Deploy Opt Out Import'
+    uses: ./.github/workflows/deploy_go_lambda.yml
     permissions:
       id-token: write
       contents: read
     with:
       env: ${{ inputs.env || 'dev' }}
-      project: opt-out-export
-      go_files: "main.go db.go"
+      project: opt-out-import
+      go_files: "main.go parsers.go utils.go models.go db.go"
     secrets: inherit

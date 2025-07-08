@@ -1,4 +1,4 @@
-name: utility-deploy-go-lambda (Greenfield)
+name: utility-deploy-go-lambda
 
 on:
   workflow_call:

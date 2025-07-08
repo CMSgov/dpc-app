@@ -1,11 +1,11 @@
-name: Opt-Out-Import Integration Tests (Greenfield)
+name: Opt-Out-Import Integration Tests
 
 on:
   pull_request:
     paths:
-      - .github/workflows/opt-out-import-test-integration-gf.yml
-      - .github/workflows/opt-out-import-deploy-gf.yml
-      - .github/workflows/deploy_go_lambda_gf.yml
+      - .github/workflows/opt-out-import-test-integration.yml
+      - .github/workflows/opt-out-import-deploy.yml
+      - .github/workflows/deploy_go_lambda.yml
       - lambda/opt-out-import/**
   workflow_dispatch:
 
@@ -21,7 +21,7 @@ jobs:
   # Deploy first if triggered by pull_request
   deploy:
     if: ${{ github.event_name == 'pull_request' }}
-    uses: ./.github/workflows/opt-out-import-deploy-gf.yml
+    uses: ./.github/workflows/opt-out-import-deploy.yml
     with:
       env: test
     secrets: inherit
