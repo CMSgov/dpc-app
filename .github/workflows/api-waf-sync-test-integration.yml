@@ -5,7 +5,7 @@ on:
     paths:
       - .github/workflows/api-waf-sync-test-integration.yml
       - .github/workflows/api-waf-sync-deploy.yml
-      - .github/workflows/deploy_go_lambda-gf.yml
+      - .github/workflows/deploy_go_lambda.yml
       - lambda/api-waf-sync/**
   workflow_dispatch:
 
