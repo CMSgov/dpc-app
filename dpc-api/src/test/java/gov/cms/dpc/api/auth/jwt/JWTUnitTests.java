@@ -58,6 +58,7 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("InnerClassMayBeStatic")
 class JWTUnitTests {
 
+    private static final UUID ORG_ID = UUID.randomUUID();
     private static final ResourceExtension RESOURCE = buildResources();
     private static final Map<UUID, KeyPair> JWTKeys = new HashMap<>();
 
@@ -717,9 +718,8 @@ class JWTUnitTests {
 
     private static Pair<String, PrivateKey> generateKeypair(KeyType keyType) throws NoSuchAlgorithmException {
         final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
-        final UUID uuid = UUID.randomUUID();
-        JWTKeys.put(uuid, keyPair);
-        return Pair.of(uuid.toString(), keyPair.getPrivate());
+        JWTKeys.put(ORG_ID, keyPair);
+        return Pair.of(ORG_ID.toString(), keyPair.getPrivate());
 
     }
 
@@ -741,8 +741,7 @@ class JWTUnitTests {
 
         final TokenResource tokenResource = spy(new TokenResource(tokenDAO, bakery, tokenPolicy, locator, jtiCache, "localhost:3002/v1"));
 
-        UUID organizationID = UUID.randomUUID();
-        doReturn(organizationID).when(tokenResource).getOrganizationID(Mockito.anyString());
+        doReturn(ORG_ID).when(tokenResource).getOrganizationID(Mockito.anyString());
 
         final FhirContext ctx = FhirContext.forDstu3();
 
@@ -764,6 +763,7 @@ class JWTUnitTests {
                 return Optional.empty();
             }
             final PublicKeyEntity entity = new PublicKeyEntity();
+            entity.setOrganization_id(ORG_ID);
             entity.setPublicKey(SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded()));
             return Optional.of(entity);
         });
@@ -776,7 +776,7 @@ class JWTUnitTests {
         MacaroonCondition orgCondition = new MacaroonCondition(
                 MacaroonHelpers.ORGANIZATION_CAVEAT_KEY,
                 MacaroonCondition.Operator.EQ,
-                UUID.randomUUID().toString());
+                ORG_ID.toString());
         MacaroonCaveat orgCaveat = new MacaroonCaveat(orgCondition);
 
         return bakery.createMacaroon(List.of(orgCaveat))

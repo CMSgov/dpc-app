@@ -293,7 +293,7 @@ public class TokenResource extends AbstractTokenResource {
         UUID keyOrgId = this.locator.getOrganizationFromKey(decoded.getKeyId());
 
         if (!orgId.equals(keyOrgId)) {
-            throw new WebApplicationException(String.format("Cannot find public key with id: %s for org: %s", decoded.getKeyId(), orgId.toString()), Response.Status.UNAUTHORIZED);
+            throw new WebApplicationException(String.format("Cannot find public key with id: %s", decoded.getKeyId()), Response.Status.UNAUTHORIZED);
         }
 
         // Parse signed claims
