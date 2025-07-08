@@ -1,4 +1,4 @@
-name: 'DPC - ECS Deploy (Greenfield)'
+name: 'DPC - ECS Deploy'
 
 on:
   workflow_dispatch:
@@ -187,7 +187,7 @@ jobs:
   services-up:
     name: All Services Healthy
     needs: deploy
-    uses: ./.github/workflows/check_healthy_gf.yml
+    uses: ./.github/workflows/check_healthy.yml
     with:
       env: ${{ inputs.env }}
     secrets: inherit

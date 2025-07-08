@@ -1,4 +1,4 @@
-name: Opt-Out-Export Integration Tests (Greenfield)
+name: Opt-Out-Export Integration Tests
 
 on:
   pull_request:
@@ -30,7 +30,7 @@ jobs:
   # Deploy first if triggered by pull_request
   deploy:
     if: ${{ github.event_name == 'pull_request' }}
-    uses: ./.github/workflows/opt-out-export-deploy-gf.yml
+    uses: ./.github/workflows/opt-out-export-deploy.yml
     with:
       env: test
     permissions:
