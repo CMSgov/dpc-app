@@ -20,6 +20,8 @@ on:
       - dpc-web/**
       - engines/**
       - pom.xml
+      - '**/pom.xml'
+      - '**/Gemfile'
       - src/**
   workflow_dispatch: # Allow manual trigger
 
