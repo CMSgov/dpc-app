@@ -34,6 +34,8 @@ class JwtKeyLocatorTests {
     private static KeyPair keyPair;
     private static KeyPair eccKeyPair;
 
+    private static final UUID orgID = UUID.randomUUID();
+    private static final UUID otherOrgID = UUID.randomUUID();
     private static final UUID badKeyID = UUID.randomUUID();
     private static final UUID correctKeyID = UUID.randomUUID();
     private static final UUID eccKeyID = UUID.randomUUID();
@@ -51,12 +53,15 @@ class JwtKeyLocatorTests {
         Mockito.when(badInfo.getEncoded()).thenReturn("This is not a public key".getBytes());
         Mockito.when(badInfo.getAlgorithm()).thenAnswer(answer -> new AlgorithmIdentifier(new ASN1ObjectIdentifier("1.2.840.113549.1.1"))); // PKCS 1 RSA OID
         Mockito.when(badEntity.getPublicKey()).thenReturn(badInfo);
+        Mockito.when(badEntity.getOrganization_id()).thenReturn(otherOrgID);
 
         // Good entity with real key
         final PublicKeyEntity goodEntity = mock(PublicKeyEntity.class);
         final PublicKeyEntity goodECCEntity = mock(PublicKeyEntity.class);
         Mockito.when(goodECCEntity.getPublicKey()).thenAnswer(answer -> SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(eccKeyPair.getPublic().getEncoded())));
         Mockito.when(goodEntity.getPublicKey()).thenAnswer(answer -> SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(keyPair.getPublic().getEncoded())));
+        Mockito.when(goodEntity.getOrganization_id()).thenReturn(orgID);
+        Mockito.when(goodECCEntity.getOrganization_id()).thenReturn(orgID);
 
         Mockito.when(dao.fetchPublicKey(badKeyID)).thenReturn(Optional.of(badEntity));
         Mockito.when(dao.fetchPublicKey(correctKeyID)).thenReturn(Optional.of(goodEntity));
@@ -125,5 +130,14 @@ class JwtKeyLocatorTests {
 
         assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus(), "Should be unauthorized"),
                 () -> assertEquals("Invalid Public Key ID", exception.getMessage(), "Should have non-UUID message"));
+    }
+
+    @Test
+    void testGetOrganizationFromKey() {
+        assertAll(
+                () -> assertEquals(orgID, locator.getOrganizationFromKey(correctKeyID.toString())),
+                () -> assertEquals(orgID, locator.getOrganizationFromKey(eccKeyID.toString())),
+                () -> assertNotEquals(orgID, locator.getOrganizationFromKey(badKeyID.toString()))
+        );
     }
 }
