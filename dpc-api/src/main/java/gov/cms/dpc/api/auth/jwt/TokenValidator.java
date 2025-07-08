@@ -73,7 +73,7 @@ public class TokenValidator {
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         final OffsetDateTime expiration;
         try {
-            final Integer epochSeconds = getClaimIfPresent("expiration", claims.get("exp")).asInt();
+            final long epochSeconds = getClaimIfPresent("expiration", claims.get("exp")).asLong();
             expiration = Instant.ofEpochSecond(epochSeconds).atOffset(ZoneOffset.UTC);
         } catch (DateTimeException e) {
             throw new WebApplicationException("Expiration time must be seconds since unix epoch", Response.Status.BAD_REQUEST);

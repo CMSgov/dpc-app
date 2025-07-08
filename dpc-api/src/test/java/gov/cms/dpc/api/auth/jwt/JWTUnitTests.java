@@ -309,11 +309,13 @@ class JWTUnitTests {
         void testJWTWrongSigningKey(KeyType keyType) throws NoSuchAlgorithmException {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
+            String macaroon = buildMacaroon();
+
             final String jwt = Jwts.builder()
                     .header().add("kid", keyPair.getLeft()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
-                    .issuer("macaroon")
-                    .subject("macaroon")
+                    .issuer(macaroon)
+                    .subject(macaroon)
                     .id(UUID.randomUUID().toString())
                     .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
@@ -708,9 +710,7 @@ class JWTUnitTests {
         final DPCAuthFactory factory = new DPCAuthFactory(bakery, new MacaroonsAuthenticator(client), tokenDAO, dpc401handler);
         final DPCAuthDynamicFeature dynamicFeature = new DPCAuthDynamicFeature(factory);
 
-        final TokenResource tokenResource = spy(new TokenResource(tokenDAO, bakery, tokenPolicy, locator, jtiCache, "localhost:3002/v1"));
-
-        doReturn(ORG_ID).when(tokenResource).getOrganizationID(Mockito.anyString());
+        final TokenResource tokenResource = new TokenResource(tokenDAO, bakery, tokenPolicy, locator, jtiCache, "localhost:3002/v1");
 
         final FhirContext ctx = FhirContext.forDstu3();
 

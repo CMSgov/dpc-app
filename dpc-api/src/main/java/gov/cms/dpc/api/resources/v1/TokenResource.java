@@ -7,6 +7,7 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
@@ -253,7 +254,7 @@ public class TokenResource extends AbstractTokenResource {
         try {
             DecodedJWT decoded = JWT.decode(jwt);
             String decodedHeader = new String(Base64.getDecoder().decode(decoded.getHeader()), StandardCharsets.UTF_8);
-            Map<String, Object> headerMap = new Gson().fromJson(decodedHeader, Map.class);
+            Map<String, Object> headerMap = new Gson().fromJson(decodedHeader, new TypeToken<>() {});
             validator.validate(headerMap, decoded.getClaims());
         } catch (JWTDecodeException e) {
             throw new WebApplicationException("JWT is not formatted correctly", Response.Status.BAD_REQUEST);
@@ -327,7 +328,7 @@ public class TokenResource extends AbstractTokenResource {
         return response;
     }
 
-    public UUID getOrganizationID(String macaroon) {
+    private UUID getOrganizationID(String macaroon) {
         if (macaroon == null || macaroon.isEmpty()) {
             throw new WebApplicationException("JWT must have client_id", Response.Status.UNAUTHORIZED);
         }
