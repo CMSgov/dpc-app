@@ -1,4 +1,4 @@
-name: 'DPC - Docker Build (Greenfield)'
+name: 'DPC - Docker Build'
 
 on:
   workflow_dispatch:
@@ -28,7 +28,7 @@ jobs:
       docker_tag: ${{ steps.output_docker_tag.outputs.docker_tag }}
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
       - name: "Fetch git info"
         run: |
           git fetch --quiet
@@ -67,7 +67,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
 
@@ -77,7 +77,7 @@ jobs:
       - name: gzip the image
         run: docker save dpc-${{ matrix.ecr_repository }}:latest | gzip > ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
       - name: upload tar artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dpc-${{ matrix.ecr_repository }}
           path: ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
@@ -94,11 +94,11 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: "Set up JDK 17"
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
           java-version: "17"
           distribution: "corretto"
@@ -136,25 +136,25 @@ jobs:
         run: docker save dpc-consent:latest | gzip > ${{ runner.temp }}/dpc_consent_latest.tar.gz
 
       - name: upload tar artifact (1 of 4) - API
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dpc-api
           path: ${{ runner.temp }}/dpc_api_latest.tar.gz
           retention-days: 1
       - name: upload tar artifact (2 of 4) - Attribution
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dpc-attribution
           path: ${{ runner.temp }}/dpc_attribution_latest.tar.gz
           retention-days: 1
       - name: upload tar artifact (3 of 4) - Aggregation
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dpc-aggregation
           path: ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
           retention-days: 1
       - name: upload tar artifact (4 of 4) - Consent
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dpc-consent
           path: ${{ runner.temp }}/dpc_consent_latest.tar.gz
@@ -173,7 +173,7 @@ jobs:
     needs: [ docker_build_rails_apps, docker_build_java, generate_docker_tag ]
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: dpc-${{ matrix.ecr_repository }}
           path: ${{ runner.temp }}
@@ -188,13 +188,13 @@ jobs:
       #  \____|__  /\____/|___|  /         |____|     |__|   \____/\____ |
       #          \/            \/                                       \/
       - name: Configure non-prod AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: Login to Amazon ECR (non-prod)
         id: login-ecr-non-prod
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
       - name: Push image to registries for non-prod aws account
         env:
           IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
@@ -211,13 +211,13 @@ jobs:
       #   |____|     |__|   \____/\____ |____/  \___  >__| |__|\____/|___|  /
       #                                \/           \/                    \/
       - name: Configure prod AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-github-actions
       - name: Login to Amazon ECR (prod)
         id: login-ecr-prod
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
       - name: Push image to registries for prod aws account
         env:
           IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}

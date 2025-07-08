@@ -239,6 +239,8 @@ public class DistributedBatchQueue extends JobQueueCommon {
             } finally {
                 tx.commit();
             }
+        } catch(Exception e) {
+            logger.error("Error pausing batch: {} {}", job.getBatchID(), e.getMessage());
         }
     }
 

@@ -1,4 +1,4 @@
-name: utility-deploy-go-lambda (Greenfield)
+name: utility-deploy-go-lambda
 
 on:
   workflow_call:
@@ -29,8 +29,8 @@ jobs:
         working-directory: ./lambda/${{ inputs.project }}
     environment: ${{ inputs.env }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
           go-version: '1.24.x'
       - name: Build ${{ inputs.project }} zip file
@@ -41,7 +41,7 @@ jobs:
           zip function.zip bootstrap
       - name: AWS Credentials (non-prod) # there are no go lambdas on sandbox, so do not need to worry about non-prod credentials for this step
         if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
@@ -72,7 +72,7 @@ jobs:
     environment: prod
     steps:
       - name: AWS Credentials (non-prod)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
@@ -89,7 +89,7 @@ jobs:
             "s3://${TEST_LAMBDA_BUCKET_NAME}/function-${{ github.sha }}.zip" \
             function.zip
       - name: AWS Credentials (prod)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-github-actions

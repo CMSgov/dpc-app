@@ -1,4 +1,4 @@
-name: 'DPC - Build and Deploy (Greenfield)'
+name: 'DPC - Build and Deploy'
 
 on:
   schedule:
@@ -68,7 +68,7 @@ jobs:
           echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
           exit 1
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
       - name: "Fetch git info"
         run: |
           git fetch --quiet
@@ -89,14 +89,14 @@ jobs:
     name: "Build Images"
     needs:
       - set-parameters
-    uses: ./.github/workflows/docker-build-gf.yml
+    uses: ./.github/workflows/docker-build.yml
     secrets: inherit
 
   deploy:
     needs:
       - set-parameters
       - build
-    uses: ./.github/workflows/ecs-deploy-gf.yml
+    uses: ./.github/workflows/ecs-deploy.yml
     with:
       env: ${{ inputs.env || 'dev'  }}
       confirm_env: ${{ inputs.env || 'dev'  }}
@@ -107,7 +107,7 @@ jobs:
 
   smoke-test:
      needs: deploy
-     uses: ./.github/workflows/smoke-test-gf.yml
+     uses: ./.github/workflows/smoke-test.yml
      with:
        env: ${{ inputs.env || 'dev' }}
      secrets: inherit
