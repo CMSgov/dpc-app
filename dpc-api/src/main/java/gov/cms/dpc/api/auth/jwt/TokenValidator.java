@@ -1,6 +1,5 @@
 package gov.cms.dpc.api.auth.jwt;
 
-import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.Claim;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
@@ -105,16 +104,12 @@ public class TokenValidator {
         }
 
         // Test correct aud claim
-        Object audience;
-        Object audienceClaim;
-        try {
-            audience = getClaimIfPresent("audience", claims.get("aud")).asList(String.class);
-            audienceClaim = this.audClaim;
-        } catch (JWTDecodeException e) { // not a list
-            audience = getClaimIfPresent("audience", claims.get("aud")).asString();
-            audienceClaim = this.audClaim.get(0);
+        Claim claim = getClaimIfPresent("audience", claims.get("aud"));
+        List<String> audienceList = claim.asList(String.class);
+        if (audienceList == null) {
+            audienceList = List.of(claim.toString());
         }
-        if (!audience.equals(audienceClaim)) {
+        if (!this.audClaim.equals(audienceList)) {
             throw new WebApplicationException("Audience claim value is incorrect", Response.Status.BAD_REQUEST);
         }
     }
