@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -30,6 +31,7 @@ import org.mockito.Mock;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -125,7 +127,7 @@ public class PatientResourceUnitTest {
         Bundle bundle = new Bundle();
         for (int i = 0; i < numPatients; i++) {
             Patient patient = new Patient();
-            patient.setId(UUID.randomUUID().toString());
+            patient.setId("Patient/patient-" + i);
             patient.setManagingOrganizationTarget(organization);
             bundle.addEntry().setResource(patient);
         }
@@ -133,8 +135,42 @@ public class PatientResourceUnitTest {
     }
 
     @Test
+    public void testPageNumEqualsZero() {
+        int largePatientNum = 600;
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        Bundle heftyPatientBundle = createPatientBundle(largePatientNum, organization);
+
+        Bundle summaryBundle = new Bundle();
+        summaryBundle.setTotal(largePatientNum);
+        summaryBundle.setType(Bundle.BundleType.SEARCHSET);
+        summaryBundle.setEntry(new ArrayList<>());
+
+        @SuppressWarnings("unchecked")
+        IQuery<IBaseBundle> queryExec = mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        @SuppressWarnings("unchecked")
+        IQuery<Bundle> mockQuery = mock(IQuery.class);
+        when(attributionClient
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+        ).thenReturn(queryExec);
+        when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(mockQuery.execute()).thenReturn(heftyPatientBundle);
+        when(mockQuery.summaryMode(SummaryEnum.COUNT)).thenReturn(mockQuery);
+        when(mockQuery.execute()).thenReturn(summaryBundle);
+
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null, 0, 1);
+
+        assertEquals(largePatientNum, actualResponse.getTotal());
+        assertTrue(actualResponse.getEntry().isEmpty());
+    }
+
+    @Test
     public void testPatientSearchLargerRoster() {
-        int largePatientNum = 900;
+        int largePatientNum = 400;
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -191,7 +227,7 @@ public class PatientResourceUnitTest {
 
         Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null, 1);
         assertEquals(bundle, actualResponse);
-        assertEquals(PagingUtils.DEFAULT_LIMIT, bundle.getEntry().size());
+        assertEquals(PagingUtils.DEFAULT_COUNT, bundle.getEntry().size());
         assertEquals(bundle.getEntryFirstRep().getResource().getId(), "patient-1");
 
         String requestPath = "/v1/Patient?page=";
@@ -208,7 +244,7 @@ public class PatientResourceUnitTest {
 
         Bundle response2 = patientResource.patientSearch(organizationPrincipal, null, 2);
         assertEquals(bundle2, response2);
-        assertEquals(PagingUtils.DEFAULT_LIMIT, bundle2.getEntry().size());
+        assertEquals(PagingUtils.DEFAULT_COUNT, bundle2.getEntry().size());
         assertEquals(bundle2.getEntryFirstRep().getResource().getId(), "patient-2");
 
         assertEquals(bundle2.getLink("self").getUrl(), requestPath + "2");
@@ -225,7 +261,7 @@ public class PatientResourceUnitTest {
 
         Bundle response3 = patientResource.patientSearch(organizationPrincipal, null, 3);
         assertEquals(bundle3, response3);
-        assertEquals(PagingUtils.DEFAULT_LIMIT, bundle3.getEntry().size());
+        assertEquals(PagingUtils.DEFAULT_COUNT, bundle3.getEntry().size());
         assertEquals(bundle3.getEntryFirstRep().getResource().getId(), "patient-3");
 
         assertEquals(bundle3.getLink("self").getUrl(), requestPath + "3");

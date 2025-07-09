@@ -8,7 +8,7 @@ public final class PagingUtils {
         throw new UnsupportedOperationException("PagingUtils is a utility class and should not be instantiated");
     }
 
-    public static final int DEFAULT_LIMIT = 1;
+    public static final int DEFAULT_COUNT = 1;
 
     private static String formatURL(String url, int page) {
         return url + "?page=" + page;
