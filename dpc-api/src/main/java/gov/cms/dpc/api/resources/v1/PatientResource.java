@@ -90,7 +90,7 @@ public class PatientResource extends AbstractPatientResource {
                                 @ApiParam(value = "Patients per page")
                                 @QueryParam(value = "_limit") int limit,
                                 @ApiParam(value = "Page number")
-                                @QueryParam(value = "_page") int page) {
+                                @QueryParam(value = "_page") @DefaultValue("-1") int page) {
 
         var request = this.client
                 .search()
@@ -112,7 +112,12 @@ public class PatientResource extends AbstractPatientResource {
             request = request.where(Patient.IDENTIFIER.exactly().identifier(expandedMBI));
         }
 
-        return PagingUtils.handlePaging(request, limit, page, "/v1/Patient");
+        if (page >= 1) {
+            return PagingUtils.handlePaging(request, limit, page, "/v1/Patient");
+        }
+        else {
+            return request.execute(); // deprecated - legacy behavior for clients relying on full roster
+        }
     }
 
     public Bundle patientSearch(OrganizationPrincipal organization, String patientMBI, int page) {
