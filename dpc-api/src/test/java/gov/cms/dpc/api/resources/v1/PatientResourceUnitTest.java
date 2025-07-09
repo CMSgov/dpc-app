@@ -134,7 +134,7 @@ public class PatientResourceUnitTest {
 
     @Test
     public void testPatientSearchLargerRoster() {
-        int largePatientNum = 125;
+        int largePatientNum = 900;
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -191,7 +191,7 @@ public class PatientResourceUnitTest {
 
         Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null);
         assertEquals(bundle, actualResponse);
-        assertEquals(bundle.getEntry().size(), PagingUtils.defaultLimit);
+        assertEquals(bundle.getEntry().size(), PagingUtils.DEFAULT_LIMIT);
         assertEquals(bundle.getEntryFirstRep().getResource().getId(), "patient-1");
 
         String requestPath = "/v1/Patient?page=";
@@ -208,7 +208,7 @@ public class PatientResourceUnitTest {
 
         Bundle response2 = patientResource.patientSearch(organizationPrincipal, null, 2);
         assertEquals(bundle2, response2);
-        assertEquals(bundle2.getEntry().size(), PagingUtils.defaultLimit);
+        assertEquals(bundle2.getEntry().size(), PagingUtils.DEFAULT_LIMIT);
         assertEquals(bundle2.getEntryFirstRep().getResource().getId(), "patient-2");
 
         assertEquals(bundle2.getLink("self").getUrl(), requestPath + "2");
@@ -225,7 +225,7 @@ public class PatientResourceUnitTest {
 
         Bundle response3 = patientResource.patientSearch(organizationPrincipal, null, 3);
         assertEquals(bundle3, response3);
-        assertEquals(bundle3.getEntry().size(), PagingUtils.defaultLimit);
+        assertEquals(bundle3.getEntry().size(), PagingUtils.DEFAULT_LIMIT);
         assertEquals(bundle3.getEntryFirstRep().getResource().getId(), "patient-3");
 
         assertEquals(bundle3.getLink("self").getUrl(), requestPath + "3");

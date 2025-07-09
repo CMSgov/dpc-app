@@ -88,7 +88,7 @@ public class PatientResource extends AbstractPatientResource {
                                 @ApiParam(value = "Patient MBI")
                                 @QueryParam(value = Patient.SP_IDENTIFIER) @NoHtml String patientMBI,
                                 @ApiParam(value = "Patients per page")
-                                @QueryParam(value = "_limit") int limit,
+                                @QueryParam(value = "_count") int count,
                                 @ApiParam(value = "Page number")
                                 @QueryParam(value = "_page") @DefaultValue("-1") int page) {
 
@@ -113,7 +113,7 @@ public class PatientResource extends AbstractPatientResource {
         }
 
         if (page >= 1) {
-            return PagingUtils.handlePaging(request, limit, page, "/v1/Patient");
+            return PagingUtils.handlePaging(request, count, page, "/v1/Patient");
         }
         else {
             return request.execute(); // deprecated - legacy behavior for clients relying on full roster
@@ -121,11 +121,11 @@ public class PatientResource extends AbstractPatientResource {
     }
 
     public Bundle patientSearch(OrganizationPrincipal organization, String patientMBI, int page) {
-        return patientSearch(organization, patientMBI, PagingUtils.defaultLimit, page);
+        return patientSearch(organization, patientMBI, PagingUtils.DEFAULT_LIMIT, page);
     }
 
     public Bundle patientSearch(OrganizationPrincipal organization, String patientMBI) {
-        return patientSearch(organization, patientMBI, PagingUtils.defaultLimit, 1);
+        return patientSearch(organization, patientMBI, PagingUtils.DEFAULT_LIMIT, 1);
     }
 
     @FHIR
