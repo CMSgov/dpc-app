@@ -104,12 +104,13 @@ public class TokenValidator {
         }
 
         // Test correct aud claim
-        Claim claim = getClaimIfPresent("audience", claims.get("aud"));
-        List<String> audienceList = claim.asList(String.class);
-        if (audienceList == null) {
-            audienceList = List.of(claim.toString());
+        Object audience = getClaimIfPresent("audience", claims.get("aud")).asList(String.class);
+        Object audienceClaim = this.audClaim;
+        if (audience == null) {
+            audience = getClaimIfPresent("audience", claims.get("aud")).asString();
+            audienceClaim = this.audClaim.get(0);
         }
-        if (!this.audClaim.equals(audienceList)) {
+        if (!audienceClaim.equals(audience)) {
             throw new WebApplicationException("Audience claim value is incorrect", Response.Status.BAD_REQUEST);
         }
     }
