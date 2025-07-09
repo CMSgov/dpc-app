@@ -1,4 +1,4 @@
-name: Opt-Out-Import Deploy (Greenfield)
+name: Api-Waf-Sync Deploy
 
 on:
   workflow_call:
@@ -21,19 +21,19 @@ on:
     branches:
       - main
     paths:
-      - lambda/opt-out-import/**
-      - .github/workflows/opt-out-import-deploy.yml
-      - .github/workflows/deploy_go_lambda_gf.yml
+      - lambda/api-waf-sync/**
+      - .github/workflows/api-waf-sync-deploy.yml
+      - .github/workflows/deploy_go_lambda.yml
 
 jobs:
   deploy:
-    name: 'Deploy Opt Out Import'
-    uses: ./.github/workflows/deploy_go_lambda_gf.yml
+    name: 'Deploy API WAF sync'
+    uses: ./.github/workflows/deploy_go_lambda.yml
     permissions:
       id-token: write
       contents: read
     with:
       env: ${{ inputs.env || 'dev' }}
-      project: opt-out-import
-      go_files: "main.go parsers.go utils.go models.go db.go"
+      project: api-waf-sync
+      go_files: "main.go db.go aws.go"
     secrets: inherit

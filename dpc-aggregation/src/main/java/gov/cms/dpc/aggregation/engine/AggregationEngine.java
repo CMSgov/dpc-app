@@ -96,7 +96,10 @@ public class AggregationEngine implements Runnable {
 
         // If a batch is currently running, mark it paused.
         Optional<JobQueueBatch> optionalBatch = this.currentBatch.get();
-        optionalBatch.ifPresent(jobQueueBatch -> this.queue.pauseBatch(jobQueueBatch, aggregatorID));
+        optionalBatch.ifPresent(jobQueueBatch -> {
+            logger.info("Pausing batch: {}", jobQueueBatch.getBatchID());
+            this.queue.pauseBatch(jobQueueBatch, aggregatorID);
+        });
     }
 
     public boolean isRunning() {
