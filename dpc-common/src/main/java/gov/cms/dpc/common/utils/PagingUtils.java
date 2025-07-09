@@ -3,7 +3,7 @@ package gov.cms.dpc.common.utils;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import org.hl7.fhir.dstu3.model.Bundle;
 
-public class PagingUtils {
+public final class PagingUtils {
     private PagingUtils() {
         throw new UnsupportedOperationException("PagingUtils is a utility class and should not be instantiated");
     }

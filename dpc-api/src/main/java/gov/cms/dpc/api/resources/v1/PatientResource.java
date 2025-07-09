@@ -124,8 +124,9 @@ public class PatientResource extends AbstractPatientResource {
         return patientSearch(organization, patientMBI, PagingUtils.DEFAULT_LIMIT, page);
     }
 
+    // passing -1 means "do not paginate" for compatiblity reasons. See default value above
     public Bundle patientSearch(OrganizationPrincipal organization, String patientMBI) {
-        return patientSearch(organization, patientMBI, PagingUtils.DEFAULT_LIMIT, 1);
+        return patientSearch(organization, patientMBI, -1, -1);
     }
 
     @FHIR
