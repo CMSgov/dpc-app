@@ -546,6 +546,33 @@ class JWTUnitTests {
 
         @ParameterizedTest
         @EnumSource(KeyType.class)
+        void testEmptyAudClaim(KeyType keyType) throws NoSuchAlgorithmException {
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
+            final String m = buildMacaroon();
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .header().add("kid", UUID.randomUUID().toString()).and()
+                    .audience().and()
+                    .issuer(m)
+                    .subject(m)
+                    .id(id)
+                    .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("Claim `audience` must be present"), "Should have correct exception");
+        }
+
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
         void testSuccess(KeyType keyType) throws NoSuchAlgorithmException {
             final String m = buildMacaroon();
             final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);

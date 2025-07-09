@@ -111,7 +111,7 @@ public class TokenValidator {
     }
 
     private static <T> T getClaimIfPresent(String claimName, @Nullable T claim) {
-        if (claim == null) {
+        if (claim == null || (claim instanceof List<?> && ((List<?>) claim).isEmpty())) {
             throw new WebApplicationException(String.format("Claim `%s` must be present", claimName), Response.Status.BAD_REQUEST);
         }
         return claim;
