@@ -121,6 +121,43 @@ public class PatientResourceUnitTest {
         assertEquals(bundle, actualResponse);
     }
 
+    private Bundle createPatientBundle(int numPatients, Organization organization) {
+        Bundle bundle = new Bundle();
+        for (int i = 0; i < numPatients; i++) {
+            Patient patient = new Patient();
+            patient.setId(UUID.randomUUID().toString());
+            patient.setManagingOrganizationTarget(organization);
+            bundle.addEntry().setResource(patient);
+        }
+        return bundle;
+    }
+
+    @Test
+    public void testPatientSearchLargerRoster() {
+        int largePatientNum = 125;
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        Bundle largePatientBundle = createPatientBundle(largePatientNum, organization);
+
+        @SuppressWarnings("unchecked")
+        IQuery<IBaseBundle> queryExec = mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        @SuppressWarnings("unchecked")
+        IQuery<Bundle> mockQuery = mock(IQuery.class);
+        when(attributionClient
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+        ).thenReturn(queryExec);
+        when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(mockQuery.execute()).thenReturn(largePatientBundle);
+
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null);
+        assertEquals(largePatientBundle, actualResponse);
+        assertEquals(largePatientBundle.getEntry().size(), largePatientNum);
+    }
+
     @Test
     public void testPatientSearchPaging() {
         UUID orgId = UUID.randomUUID();
