@@ -60,7 +60,7 @@ jobs:
           TEST_TYPE: ${{ inputs.test_type }}
         run: |
           K6_STATSD_ENABLE_TAGS=true K6_STATSD_ADDR=localhost:8125 \
-          ./k6 run --out ./dpc-app/dpc-load-testing/${{ inputs.test_type }}.js
+          ./k6 run -o output-statsd ./dpc-app/dpc-load-testing/${{ inputs.test_type }}.js
 
       - name: Cleanup StatsD Container
         if: always()
