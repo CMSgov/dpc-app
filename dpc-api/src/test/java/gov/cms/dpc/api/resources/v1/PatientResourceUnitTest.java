@@ -13,7 +13,6 @@ import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
-import gov.cms.dpc.common.utils.PagingUtils;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.service.DataService;
@@ -196,6 +195,7 @@ public class PatientResourceUnitTest {
 
     @Test
     public void testPatientSearchPaging() {
+        int pageSize = 1;
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -225,9 +225,9 @@ public class PatientResourceUnitTest {
         when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(bundle);
 
-        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null, 1);
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null, pageSize, 1);
         assertEquals(bundle, actualResponse);
-        assertEquals(PagingUtils.DEFAULT_COUNT, bundle.getEntry().size());
+        assertEquals(pageSize, bundle.getEntry().size());
         assertEquals(bundle.getEntryFirstRep().getResource().getId(), "patient-1");
 
         String requestPath = "/v1/Patient?page=";
@@ -242,9 +242,9 @@ public class PatientResourceUnitTest {
 
         when(mockQuery.execute()).thenReturn(bundle2);
 
-        Bundle response2 = patientResource.patientSearch(organizationPrincipal, null, 2);
+        Bundle response2 = patientResource.patientSearch(organizationPrincipal, null, pageSize, 2);
         assertEquals(bundle2, response2);
-        assertEquals(PagingUtils.DEFAULT_COUNT, bundle2.getEntry().size());
+        assertEquals(pageSize, bundle2.getEntry().size());
         assertEquals(bundle2.getEntryFirstRep().getResource().getId(), "patient-2");
 
         assertEquals(bundle2.getLink("self").getUrl(), requestPath + "2");
@@ -259,9 +259,9 @@ public class PatientResourceUnitTest {
 
         when(mockQuery.execute()).thenReturn(bundle3);
 
-        Bundle response3 = patientResource.patientSearch(organizationPrincipal, null, 3);
+        Bundle response3 = patientResource.patientSearch(organizationPrincipal, null, pageSize, 3);
         assertEquals(bundle3, response3);
-        assertEquals(PagingUtils.DEFAULT_COUNT, bundle3.getEntry().size());
+        assertEquals(pageSize, bundle3.getEntry().size());
         assertEquals(bundle3.getEntryFirstRep().getResource().getId(), "patient-3");
 
         assertEquals(bundle3.getLink("self").getUrl(), requestPath + "3");
