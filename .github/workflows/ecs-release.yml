@@ -116,13 +116,15 @@ jobs:
     with:
       env: ${{ inputs.env || 'dev'  }}
       confirm_env: ${{ inputs.env || 'dev'  }}
-      ecr_image_tag: ${{ needs.build.outputs.ecr_image_tag }}
+      ecr_image_tag: ${{ needs.build.outputs.ecr_image_tag || 'latest'}}
       app-version: ${{ needs.set-parameters.outputs.version_tag }}
       ops-ref: ${{ inputs.ops-ref || 'main' }}
     secrets: inherit
 
   smoke-test:
      needs: deploy
+     if: |
+       !cancelled() && (needs.deploy.result == 'success')
      uses: ./.github/workflows/smoke-test.yml
      with:
        env: ${{ inputs.env || 'dev' }}
