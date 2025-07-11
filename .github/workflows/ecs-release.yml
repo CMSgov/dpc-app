@@ -105,9 +105,16 @@ jobs:
 
   debug:
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    needs:
+      - set-parameters
+      - build
+    if: ${{ true }}
     steps:
-      - run: |
-          echo "needs.build: $NEEDS.BUILD.RESULT"
+      - name: check results
+        run: |
+          echo 'build and set-parameters'
+          echo 'needs.build.result'
+          echo 'needs.set-parameters.result'
 
   deploy:
     # Run deploy even if build was skipped
