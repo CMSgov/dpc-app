@@ -92,6 +92,10 @@ public class AggregationServiceTest {
 
         // Stop aggregation and make sure it pauses the batch
         APPLICATION.after();
+        await().until(() -> {
+            JobQueueBatch batch = queue.getJobBatches(jobID).get(0);
+            return batch.getStatus() == JobStatus.QUEUED;
+        });
         assertEquals(JobStatus.QUEUED, queue.getJobBatches(jobID).get(0).getStatus());
     }
 }
