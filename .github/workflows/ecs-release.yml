@@ -103,19 +103,6 @@ jobs:
     uses: ./.github/workflows/docker-build.yml
     secrets: inherit
 
-  debug:
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    needs:
-      - set-parameters
-      - build
-    if: ${{ true }}
-    steps:
-      - name: check results
-        run: |
-          echo 'build and set-parameters'
-          echo 'needs.build.result'
-          echo 'needs.set-parameters.result'
-
   deploy:
     # Run deploy even if build was skipped
     needs:
