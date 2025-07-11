@@ -104,9 +104,12 @@ jobs:
     secrets: inherit
 
   deploy:
+    # Run deploy even if build was skipped
+    if: |
+      !cancelled() && 
+      (needs.build.result == 'skipped' || needs.build.result == 'success')
     needs:
       - set-parameters
-      - build
     uses: ./.github/workflows/ecs-deploy.yml
     with:
       env: ${{ inputs.env || 'dev'  }}
