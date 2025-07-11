@@ -1,0 +1,21 @@
+{
+  "AWSAccountId": "000000000000",
+  "AlarmDescription": "Example alarm description.",
+  "AlarmName": "Example alarm name",
+  "NewStateReason": "Threshold Crossed: 1 datapoint (10.0) was greater than or equal to the threshold (1.0).",
+  "NewStateValue": "OK",
+  "OldStateValue": "ALARM",
+  "Region": "EU - Ireland",
+  "StateChangeTime": "2017-01-12T16:30:42.236+0000",
+  "Trigger": {
+    "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+    "Dimensions": [],
+    "EvaluationPeriods": 1,
+    "MetricName": "DeliveryErrors",
+    "Namespace": "ExampleNamespace",
+    "Period": 300,
+    "Statistic": "SUM",
+    "Threshold": 1.0,
+    "Unit": null
+  }
+}

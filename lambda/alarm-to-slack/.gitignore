@@ -1,0 +1,3 @@
+alarm-to-slack
+bin/bootstrap
+coverage/**
