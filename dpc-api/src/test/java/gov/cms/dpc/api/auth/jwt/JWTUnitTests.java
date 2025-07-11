@@ -58,6 +58,7 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("InnerClassMayBeStatic")
 class JWTUnitTests {
 
+    private static final UUID ORG_ID = UUID.randomUUID();
     private static final ResourceExtension RESOURCE = buildResources();
     private static final Map<UUID, KeyPair> JWTKeys = new HashMap<>();
 
@@ -248,11 +249,13 @@ class JWTUnitTests {
             // Submit JWT with missing key
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
+            String macaroon = buildMacaroon();
+
             final String jwt = Jwts.builder()
                     .header().add("kid", UUID.randomUUID().toString()).and()
-                    .audience().add(String.format("%sToken/auth", "here")).and()
-                    .issuer("macaroon")
-                    .subject("macaroon")
+                    .audience().add("localhost:3002/v1/Token/auth").and()
+                    .issuer(macaroon)
+                    .subject(macaroon)
                     .id(UUID.randomUUID().toString())
                     .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
@@ -276,11 +279,13 @@ class JWTUnitTests {
         void testExpiredJWT(KeyType keyType) throws NoSuchAlgorithmException {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
+            String macaroon = buildMacaroon();
+
             final String jwt = Jwts.builder()
                     .header().add("kid", keyPair.getLeft()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
-                    .issuer("macaroon")
-                    .subject("macaroon")
+                    .issuer(macaroon)
+                    .subject(macaroon)
                     .id(UUID.randomUUID().toString())
                     .expiration(Date.from(Instant.now().minus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
@@ -304,11 +309,13 @@ class JWTUnitTests {
         void testJWTWrongSigningKey(KeyType keyType) throws NoSuchAlgorithmException {
             final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
 
+            String macaroon = buildMacaroon();
+
             final String jwt = Jwts.builder()
                     .header().add("kid", keyPair.getLeft()).and()
                     .audience().add(String.format("%sToken/auth", "here")).and()
-                    .issuer("macaroon")
-                    .subject("macaroon")
+                    .issuer(macaroon)
+                    .subject(macaroon)
                     .id(UUID.randomUUID().toString())
                     .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
                     .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
@@ -539,6 +546,33 @@ class JWTUnitTests {
 
         @ParameterizedTest
         @EnumSource(KeyType.class)
+        void testEmptyAudClaim(KeyType keyType) throws NoSuchAlgorithmException {
+            final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
+            final String m = buildMacaroon();
+
+            final String id = UUID.randomUUID().toString();
+            final String jwt = Jwts.builder()
+                    .header().add("kid", UUID.randomUUID().toString()).and()
+                    .audience().and()
+                    .issuer(m)
+                    .subject(m)
+                    .id(id)
+                    .expiration(Date.from(Instant.now().plus(5, ChronoUnit.MINUTES)))
+                    .signWith(keyPair.getPrivate(), APIAuthHelpers.getSigningAlgorithm(keyType))
+                    .compact();
+
+            // Submit the JWT
+            Response response = RESOURCE.target("/v1/Token/validate")
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
+
+            assertEquals(400, response.getStatus(), "Should not be valid");
+            assertTrue(response.readEntity(String.class).contains("Claim `audience` must be present"), "Should have correct exception");
+        }
+
+        @ParameterizedTest
+        @EnumSource(KeyType.class)
         void testSuccess(KeyType keyType) throws NoSuchAlgorithmException {
             final String m = buildMacaroon();
             final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
@@ -678,40 +712,12 @@ class JWTUnitTests {
             assertEquals(400, response.getStatus(), "Should not be valid");
             assertTrue(response.readEntity(String.class).contains("`kid` value must be a UUID"), "Should have correct exception");
         }
-
-        @ParameterizedTest
-        @EnumSource(KeyType.class)
-        void testIncorrectExpFormat(KeyType keyType) throws NoSuchAlgorithmException {
-            final Pair<String, PrivateKey> keyPair = generateKeypair(keyType);
-            final String m = buildMacaroon();
-
-            final String id = UUID.randomUUID().toString();
-            final String jwt = Jwts.builder()
-                    .header().add("kid", UUID.randomUUID().toString()).and()
-                    .audience().add("localhost:3002/v1/Token/auth").and()
-                    .issuer(m)
-                    .subject(m)
-                    .id(id)
-                    .claim("exp", String.valueOf(Instant.MAX.getEpochSecond() + 60))
-                    .signWith(keyPair.getRight(), APIAuthHelpers.getSigningAlgorithm(keyType))
-                    .compact();
-
-            // Submit the JWT
-            Response response = RESOURCE.target("/v1/Token/validate")
-                    .request()
-                    .accept(MediaType.APPLICATION_JSON)
-                    .post(Entity.entity(jwt, MediaType.TEXT_PLAIN));
-
-            assertEquals(400, response.getStatus(), "Should not be valid");
-            assertTrue(response.readEntity(String.class).contains("Expiration time must be seconds since unix epoch"), "Should have correct exception");
-        }
     }
 
     private static Pair<String, PrivateKey> generateKeypair(KeyType keyType) throws NoSuchAlgorithmException {
         final KeyPair keyPair = APIAuthHelpers.generateKeyPair(keyType);
-        final UUID uuid = UUID.randomUUID();
-        JWTKeys.put(uuid, keyPair);
-        return Pair.of(uuid.toString(), keyPair.getPrivate());
+        JWTKeys.put(ORG_ID, keyPair);
+        return Pair.of(ORG_ID.toString(), keyPair.getPrivate());
 
     }
 
@@ -723,18 +729,16 @@ class JWTUnitTests {
         final DPCUnauthorizedHandler dpc401handler = mock(DPCUnauthorizedHandler.class);
         Mockito.when(tokenDAO.fetchTokens(Mockito.any())).thenAnswer(answer -> "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0");
 
-        final JwtKeyResolver resolver = spy(new JwtKeyResolver(publicKeyDAO));
+        final JwtKeyLocator locator = spy(new JwtKeyLocator(publicKeyDAO));
         final CaffeineJTICache jtiCache = new CaffeineJTICache();
-
-        UUID organizationID = UUID.randomUUID();
-        doReturn(organizationID).when(resolver).getOrganizationID(Mockito.anyString());
 
         final TokenPolicy tokenPolicy = new TokenPolicy();
 
         final DPCAuthFactory factory = new DPCAuthFactory(bakery, new MacaroonsAuthenticator(client), tokenDAO, dpc401handler);
         final DPCAuthDynamicFeature dynamicFeature = new DPCAuthDynamicFeature(factory);
 
-        final TokenResource tokenResource = new TokenResource(tokenDAO, bakery, tokenPolicy, resolver, jtiCache, "localhost:3002/v1");
+        final TokenResource tokenResource = new TokenResource(tokenDAO, bakery, tokenPolicy, locator, jtiCache, "localhost:3002/v1");
+
         final FhirContext ctx = FhirContext.forDstu3();
 
         return APITestHelpers.buildResourceExtension(ctx, List.of(tokenResource), List.of(dynamicFeature), false);
@@ -749,12 +753,13 @@ class JWTUnitTests {
     private static PublicKeyDAO mockKeyDAO() {
         final PublicKeyDAO mock = mock(PublicKeyDAO.class);
 
-        Mockito.when(mock.fetchPublicKey(Mockito.any(), Mockito.any())).then(answer -> {
-            final KeyPair keyPair = JWTKeys.get((UUID) answer.getArgument(1));
+        Mockito.when(mock.fetchPublicKey(Mockito.any())).then(answer -> {
+            final KeyPair keyPair = JWTKeys.get((UUID) answer.getArgument(0));
             if (keyPair == null) {
                 return Optional.empty();
             }
             final PublicKeyEntity entity = new PublicKeyEntity();
+            entity.setOrganization_id(ORG_ID);
             entity.setPublicKey(SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded()));
             return Optional.of(entity);
         });
@@ -767,7 +772,7 @@ class JWTUnitTests {
         MacaroonCondition orgCondition = new MacaroonCondition(
                 MacaroonHelpers.ORGANIZATION_CAVEAT_KEY,
                 MacaroonCondition.Operator.EQ,
-                UUID.randomUUID().toString());
+                ORG_ID.toString());
         MacaroonCaveat orgCaveat = new MacaroonCaveat(orgCondition);
 
         return bakery.createMacaroon(List.of(orgCaveat))
