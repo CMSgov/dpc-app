@@ -28,6 +28,11 @@ on:
         required: false
         type: 'string'
         default: 'main'
+      build_docker:
+        description: Should we rebuild docker images
+        required: false
+        type: boolean
+        default: true
 
   workflow_call:
     inputs:
@@ -46,6 +51,11 @@ on:
         required: false
         type: 'string'
         default: 'main'
+      build_docker:
+        description: Should we rebuild docker images
+        required: false
+        type: boolean
+        default: true
 
 concurrency:
   group: release-to-${{ inputs.env || 'dev' }}
@@ -86,6 +96,7 @@ jobs:
           set -e
 
   build:
+    if: ${{ inputs.build_docker }}
     name: "Build Images"
     needs:
       - set-parameters
