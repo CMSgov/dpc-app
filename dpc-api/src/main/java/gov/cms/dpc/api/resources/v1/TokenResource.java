@@ -1,19 +1,25 @@
 package gov.cms.dpc.api.resources.v1;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.github.nitram509.jmacaroons.Macaroon;
-import gov.cms.dpc.api.auth.MacaroonHelpers;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
-import gov.cms.dpc.api.auth.jwt.ValidatingKeyResolver;
+import gov.cms.dpc.api.auth.jwt.JwtKeyLocator;
+import gov.cms.dpc.api.auth.jwt.TokenValidator;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateTokenRequest;
 import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.annotations.Public;
@@ -25,8 +31,10 @@ import gov.cms.dpc.macaroons.config.TokenPolicy;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.SecurityException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import io.swagger.annotations.*;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
@@ -41,6 +49,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -67,7 +76,7 @@ public class TokenResource extends AbstractTokenResource {
     private final TokenDAO dao;
     private final MacaroonBakery bakery;
     private final TokenPolicy policy;
-    private final SigningKeyResolverAdapter resolver;
+    private final JwtKeyLocator locator;
     private final IJTICache cache;
     private final String authURL;
 
@@ -75,13 +84,13 @@ public class TokenResource extends AbstractTokenResource {
     public TokenResource(TokenDAO dao,
                          MacaroonBakery bakery,
                          TokenPolicy policy,
-                         SigningKeyResolverAdapter resolver,
+                         JwtKeyLocator locator,
                          IJTICache cache,
                          @APIV1 String publicURL) {
         this.dao = dao;
         this.bakery = bakery;
         this.policy = policy;
-        this.resolver = resolver;
+        this.locator = locator;
         this.cache = cache;
         this.authURL = String.format("%s/Token/auth", publicURL);
     }
@@ -221,7 +230,7 @@ public class TokenResource extends AbstractTokenResource {
         } catch (SecurityException e) {
             logger.error("JWT has invalid signature", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
-        } catch (JwtException e) {
+        } catch (JWTDecodeException | JwtException e) {
             logger.error("Malformed JWT", e);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
         }
@@ -241,15 +250,13 @@ public class TokenResource extends AbstractTokenResource {
     @Public
     @Override
     public Response validateJWT(@NoHtml @NotEmpty(message = "Must submit JWT") String jwt) {
+        TokenValidator validator = new TokenValidator(this.cache, List.of(this.authURL));
         try {
-            Jwts.parser()
-                    .requireAudience(this.authURL)
-                    .setSigningKeyResolver(new ValidatingKeyResolver(this.cache, Set.of(this.authURL)))
-                    .build()
-                    .parseSignedClaims(jwt);
-        } catch (IllegalArgumentException | UnsupportedJwtException e) {
-            // This is fine, we just want the body
-        } catch (MalformedJwtException e) {
+            DecodedJWT decoded = JWT.decode(jwt);
+            String decodedHeader = new String(Base64.getDecoder().decode(decoded.getHeader()), StandardCharsets.UTF_8);
+            Map<String, Object> headerMap = new Gson().fromJson(decodedHeader, new TypeToken<>() {});
+            validator.validate(headerMap, decoded.getClaims());
+        } catch (JWTDecodeException e) {
             throw new WebApplicationException("JWT is not formatted correctly", Response.Status.BAD_REQUEST);
         }
 
@@ -275,25 +282,33 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     private JWTAuthResponse handleJWT(String jwtBody, String requestedScope) {
+        // Parse the unverified claims to get organization ID
+        DecodedJWT decoded = JWT.decode(jwtBody);
+
+        // Extract the Client Macaroon from the subject field (which is the same as the issuer)
+        final String clientMacaroon = decoded.getSubject();
+
+        // Get org id from macaroon caveats and check against key
+        UUID orgId = getOrganizationID(clientMacaroon);
+
+        UUID keyOrgId = this.locator.getOrganizationFromKey(decoded.getKeyId());
+
+        if (!orgId.equals(keyOrgId)) {
+            throw new WebApplicationException(String.format("Cannot find public key with id: %s", decoded.getKeyId()), Response.Status.UNAUTHORIZED);
+        }
+
+        // Parse signed claims
         final Jws<Claims> claims = Jwts.parser()
-                .setSigningKeyResolver(this.resolver)
+                .keyLocator(this.locator)
                 .requireAudience(this.authURL)
                 .build()
                 .parseSignedClaims(jwtBody);
 
-        // Extract the Client Macaroon from the subject field (which is the same as the issuer)
-        final String clientMacaroon = claims.getPayload().getSubject();
         final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(clientMacaroon);
-
-        // Get org id from macaroon caveats
-        UUID orgId = MacaroonHelpers.extractOrgIDFromCaveats(macaroons).orElseThrow(() -> {
-            logger.error("No organization found on macaroon");
-            return new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
-        });
 
         // Determine if claims are present and valid
         // Required claims are specified here: http://hl7.org/fhir/us/bulkdata/2019May/authorization/index.html#protocol-details
-        handleJWTClaims(orgId, claims);
+        handleJWTClaims(orgId, claims.getPayload());
 
         // Add the additional claims that we need
         // Currently, we need to set an expiration time, a set of scopes,
@@ -311,6 +326,28 @@ public class TokenResource extends AbstractTokenResource {
         response.setDischargedMacaroons(new String(this.bakery.serializeMacaroon(discharged, true), StandardCharsets.UTF_8));
 
         return response;
+    }
+
+    private UUID getOrganizationID(String macaroon) {
+        if (macaroon == null || macaroon.isEmpty()) {
+            throw new WebApplicationException("JWT must have client_id", Response.Status.UNAUTHORIZED);
+        }
+        final List<Macaroon> macaroons = MacaroonBakery.deserializeMacaroon(macaroon);
+        if (macaroons.isEmpty()) {
+            throw new WebApplicationException("JWT must have client_id", Response.Status.UNAUTHORIZED);
+        }
+
+        UUID orgID =  MacaroonBakery.getCaveats(macaroons.get(0))
+                .stream()
+                .map(MacaroonCaveat::getCondition)
+                .filter(cond -> cond.getKey().equals(ORGANIZATION_CAVEAT_KEY))
+                .map(condition -> UUID.fromString(condition.getValue()))
+                .findAny()
+                .orElseThrow(() -> new WebApplicationException("JWT client token must have organization_id", Response.Status.UNAUTHORIZED));
+
+        // Set the MDC value here, since it's the first time we actually know what the organization ID is
+        MDC.put(MDCConstants.ORGANIZATION_ID, orgID.toString());
+        return orgID;
     }
 
     private Macaroon generateMacaroon(TokenPolicy policy, UUID organizationID) {
@@ -351,22 +388,22 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     @SuppressWarnings("JdkObsolete") // Date class is used by Jwt
-    private void handleJWTClaims(UUID organizationID, Jws<Claims> claims) {
+    private void handleJWTClaims(UUID organizationID, Claims claims) {
         // Issuer and Sub must be present and identical
-        final String issuer = getClaimIfPresent("issuer", claims.getPayload().getIssuer());
-        final String subject = getClaimIfPresent("subject", claims.getPayload().getSubject());
+        final String issuer = getClaimIfPresent("issuer", claims.getIssuer());
+        final String subject = getClaimIfPresent("subject", claims.getSubject());
         if (!issuer.equals(subject)) {
             throw new WebApplicationException("Issuer and Subject must be identical", Response.Status.BAD_REQUEST);
         }
 
         // JTI must be present and have not been used in the past 5 minutes.
-        if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getPayload().getId()), true)) {
+        if (!this.cache.isJTIOk(getClaimIfPresent("id", claims.getId()), true)) {
             logger.warn("JWT being replayed for organization {}", organizationID);
             throw new WebApplicationException(INVALID_JWT_MSG, Response.Status.UNAUTHORIZED);
         }
 
         // Ensure the expiration time for the token is not more than 5 minutes in the future
-        final Date expiration = getClaimIfPresent("expiration", claims.getPayload().getExpiration());
+        final Date expiration = getClaimIfPresent("expiration", claims.getExpiration());
         if (OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(5).isBefore(expiration.toInstant().atOffset(ZoneOffset.UTC))) {
             throw new WebApplicationException("Not authorized", Response.Status.UNAUTHORIZED);
         }

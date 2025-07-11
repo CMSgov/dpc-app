@@ -3,6 +3,7 @@ package gov.cms.dpc.api.resources.v1;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
+import gov.cms.dpc.api.auth.jwt.JwtKeyLocator;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
@@ -12,7 +13,6 @@ import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.config.TokenPolicy.ExpirationPolicy;
 import gov.cms.dpc.macaroons.config.TokenPolicy.VersionPolicy;
 import io.dropwizard.jersey.jsr310.OffsetDateTimeParam;
-import io.jsonwebtoken.SigningKeyResolverAdapter;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -42,7 +42,7 @@ public class TokenResourceUnitTest {
     private static TokenPolicy policy;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private static Macaroon macaroon;
-    private static final SigningKeyResolverAdapter resolver = Mockito.mock(SigningKeyResolverAdapter.class);
+    private static final JwtKeyLocator locator = Mockito.mock(JwtKeyLocator.class);
     private static final IJTICache cache = Mockito.mock(IJTICache.class);
     private static final String authURL = "auth_url";
     private TokenResource tokenResource;
@@ -50,7 +50,7 @@ public class TokenResourceUnitTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        this.tokenResource = new TokenResource(mockTokenDao, bakery, policy, resolver, cache, authURL);
+        this.tokenResource = new TokenResource(mockTokenDao, bakery, policy, locator, cache, authURL);
     }
 
     @Test
