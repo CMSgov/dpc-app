@@ -29,7 +29,7 @@ on:
         type: 'string'
         default: 'main'
       build_docker:
-        description: Rebuild docker images
+        description: Build docker images
         required: false
         type: boolean
         default: true
@@ -52,7 +52,7 @@ on:
         type: 'string'
         default: 'main'
       build_docker:
-        description: Rebuild docker images
+        description: Build docker images
         required: false
         type: boolean
         default: true
