@@ -111,7 +111,7 @@ jobs:
     if: |
       !cancelled() && 
       (needs.build.result == 'skipped' || needs.build.result == 'success') &&
-      (needs.set-parameters.result == 'skipped' || needs.set-parameters.result == 'success')
+      (needs.set-parameters.result == 'success')
     uses: ./.github/workflows/ecs-deploy.yml
     with:
       env: ${{ inputs.env || 'dev'  }}
