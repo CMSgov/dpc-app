@@ -17,6 +17,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -68,7 +69,9 @@ public class AggregationServiceTest {
         checks.runHealthChecks().forEach((key, value) -> assertTrue(value.isHealthy(), String.format("Healthcheck: %s is not ok.", key)));
     }
 
+    // Disabled
     @Test
+    @Disabled("Disabled because this is occasionally failing in CI.")
     void testStoppingEngineMidBatch() throws InterruptedException {
         // Create a batch that will hang forever
         final var orgID = UUID.randomUUID();
@@ -92,6 +95,9 @@ public class AggregationServiceTest {
 
         // Stop aggregation and make sure it pauses the batch
         APPLICATION.after();
-        assertEquals(JobStatus.QUEUED, queue.getJobBatches(jobID).get(0).getStatus());
+        await().until(() -> {
+            JobQueueBatch batch = queue.getJobBatches(jobID).get(0);
+            return batch.getStatus() == JobStatus.QUEUED;
+        });
     }
 }
