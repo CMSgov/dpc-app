@@ -25,10 +25,10 @@ public final class PagingUtils {
 
         addRelationLink(resultBundle, "self", requestPath, page);
         addRelationLink(resultBundle, "first", requestPath, 1);
-        if (page > 1) addRelationLink(resultBundle, "previous", requestPath, page-1);
-
         int lastPage = (int) Math.ceil((float) resultBundle.getTotal() / count);
-        if (page + 1 <= lastPage) addRelationLink(resultBundle, "next", requestPath, page+1);
+        if (page > 1 && page <= lastPage) addRelationLink(resultBundle, "previous", requestPath, page-1);
+
+        if (page < lastPage) addRelationLink(resultBundle, "next", requestPath, page+1);
         addRelationLink(resultBundle, "last", requestPath, lastPage);
 
         return resultBundle;
