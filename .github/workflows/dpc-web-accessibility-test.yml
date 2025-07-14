@@ -2,6 +2,9 @@ name: Dpc-Web Accessibility Tests
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/dpc-web-accessibility-test.yml
 
 jobs:
   test:
