@@ -134,6 +134,38 @@ public class PatientResourceUnitTest {
     }
 
     @Test
+    public void testInvalidPageNumber() {
+        int pageSize = 1;
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        Bundle emptyBundle = new Bundle();
+        emptyBundle.setTotal(1); // for testing if we have 1 patient in the queryset, but out of range
+
+        @SuppressWarnings("unchecked")
+        IQuery<IBaseBundle> queryExec = mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        @SuppressWarnings("unchecked")
+        IQuery<Bundle> mockQuery = mock(IQuery.class);
+        when(attributionClient
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+        ).thenReturn(queryExec);
+        when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(mockQuery.execute()).thenReturn(emptyBundle);
+
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null, pageSize, 9999);
+
+        assertNull(emptyBundle.getLink("previous"));
+        assertNull(emptyBundle.getLink("next"));
+        assertNotNull(actualResponse);
+        assertTrue(actualResponse.getEntry().isEmpty(), "Expected no entries for an out-of-bounds page");
+
+        assertEquals(1, actualResponse.getTotal());
+    }
+
+    @Test
     public void testPageNumEqualsZero() {
         int largePatientNum = 600;
         UUID orgId = UUID.randomUUID();
@@ -262,7 +294,7 @@ public class PatientResourceUnitTest {
         Bundle response3 = patientResource.patientSearch(organizationPrincipal, null, pageSize, 3);
         assertEquals(bundle3, response3);
         assertEquals(pageSize, bundle3.getEntry().size());
-        assertEquals(bundle3.getEntryFirstRep().getResource().getId(), "patient-3");
+        assertEquals("patient-3", bundle3.getEntryFirstRep().getResource().getId());
 
         assertEquals(bundle3.getLink("self").getUrl(), requestPath + "3");
         assertEquals(bundle3.getLink("first").getUrl(), requestPath + "1");
