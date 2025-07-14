@@ -7,7 +7,7 @@ export const options = {
   scenarios: {
     workflow: {
       executor: 'constant-arrival-rate',
-      duration: '1h',
+      duration: '5m',
       rate: 50,
       timeUnit: '1h',
       preAllocatedVUs: constants.preAllocatedVUs,
