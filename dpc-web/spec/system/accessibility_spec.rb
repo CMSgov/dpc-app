@@ -8,12 +8,239 @@ RSpec.describe 'Accessibility', type: :system do
   before do
     driven_by(:selenium_headless)
   end
-  let(:dpc_api_organization_id) { 'some-gnarly-guid' }
-  context 'login' do
-    it 'shows login page ok' do
+  let(:api_id) { 'some-gnarly-guid' }
+  let(:axe_standard) { %w[best-practice wcag21aa] }
+  context 'login page' do
+    it 'should be axe clean on initial' do
       visit '/users/sign_in'
       expect(page).to have_text('Log in')
       expect(page).to be_axe_clean
     end
+    it 'should be axe clean on failure' do
+      visit '/users/sign_in'
+      page.find('#login-button').click
+      expect(page).to have_text('Invalid')
+      expect(page).to be_axe_clean
+    end
   end
+
+  context 'registration page' do
+    it 'should be axec clean on initial' do
+      visit '/users/sign_up'
+      expect(page).to have_text('Request access')
+      expect(page).to be_axe_clean
+    end
+    it 'should be axec clean with errors' do
+      visit '/users/sign_up'
+      expect(page).to have_text('Request access')
+      find('#sign-up').click
+      expect(page).to have_text("Email can't be blank")
+      expect(page).to be_axe_clean
+    end
+  end
+
+  context 'forgot password' do
+    it 'should be axec clean on initial' do
+      visit '/users/password/new'
+      expect(page).to have_text('Forgot')
+      expect(page).to be_axe_clean
+    end
+    it 'should be axec clean on submit' do
+      visit '/users/password/new'
+      expect(page).to have_text('Forgot')
+      fill_in 'user_email', with: 'faker@fake.com'
+      find('[data-test="submit"]').click
+      expect(page).to have_text('If your email')
+      expect(page).to be_axe_clean
+    end
+  end
+
+  context 'resend confirmation' do
+    it 'should be axec clean on initial' do
+      visit '/users/confirmation/new'
+      expect(page).to have_text('Resend')
+      expect(page).to be_axe_clean
+    end
+    it 'should be axec clean on submit' do
+      visit '/users/confirmation/new'
+      expect(page).to have_text('Resend')
+      fill_in 'user_email', with: 'faker@fake.com'
+      find('[data-test="submit"]').click
+      expect(page).to have_text('If your email')
+      expect(page).to be_axe_clean
+    end
+  end
+
+  context 'home page' do
+    context 'unassigned user' do
+      let!(:user) { create :user }
+      it 'should be axe clean' do
+        sign_in user, scope: :user
+        visit authenticated_root_path
+        expect(page).to have_text("We've received your access request.")
+        expect(page).to be_axe_clean
+      end
+    end
+
+    context 'assigned user' do
+      let!(:user) { create :user }
+      before(:each) do
+        organization = create(:organization, organization_type: 'urgent_care', npi: '3324567833')
+        stub_api_client(
+          message: :create_organization,
+          success: true,
+          response: default_org_creation_response
+        )
+        create(:registered_organization, organization:, api_id:, enabled: true)
+        user.organizations << organization
+        sign_in user
+      end
+      it 'should be axe clean without credentials' do
+        api_client = stub_empty_key_request
+        stub_empty_token_request(api_client)
+        visit authenticated_root_path
+        expect(page).to have_text('you must create a unique client token')
+        expect(page).to have_text('add your public keys')
+        expect(page).to be_axe_clean
+      end
+      it 'should be axe clean with credentials' do
+        api_client = stub_token_get_request
+        stub_key_get_request(api_client)
+        visit authenticated_root_path
+        expect(page).to_not have_text('you must create a unique client token')
+        expect(page).to_not have_text('add your public keys')
+        expect(page).to be_axe_clean
+      end
+    end
+  end
+
+  context 'credentials' do
+    let!(:user) { create :user }
+
+    before(:each) do
+      organization = create(:organization, organization_type: 'urgent_care', npi: '3324567833')
+      stub_api_client(
+        message: :create_organization,
+        success: true,
+        response: default_org_creation_response
+      )
+      create(:registered_organization, organization:, api_id:, enabled: true)
+      user.organizations << organization
+      api_client = stub_empty_key_request
+      stub_empty_token_request(api_client)
+      sign_in user
+    end
+
+    context 'token management' do
+      it 'should have axe clean new page' do
+        visit authenticated_root_path
+        find('[data-test="new-client-token"]').click
+        expect(page).to have_text('New token for')
+        expect(page).to be_axe_clean
+      end
+
+      it 'should have axe clean missing label page' do
+        visit authenticated_root_path
+        find('[data-test="new-client-token"]').click
+        expect(page).to have_text('New token for')
+        find('[data-test="form-submit"]').click
+        expect(page).to have_text('Label required')
+        expect(page).to be_axe_clean
+      end
+
+      it 'should have axe clean created token page' do
+        visit authenticated_root_path
+        find('[data-test="new-client-token"]').click
+        expect(page).to have_text('New token for')
+        fill_in 'label', with: 'Sandbox Token 1'
+        find('[data-test="form-submit"]').click
+        expect(page).to have_content('Sandbox Token 1')
+        expect(page).to be_axe_clean
+      end
+    end
+    context 'public key management' do
+      it 'should have axe clean new page' do
+        visit authenticated_root_path
+        find('[data-test="new-public-key"]').click
+        expect(page).to have_text('Upload Your Public Key')
+        expect(page).to be_axe_clean
+      end
+
+      it 'should have axe clean missing label page' do
+        visit authenticated_root_path
+        find('[data-test="new-public-key"]').click
+        expect(page).to have_text('Upload Your Public Key')
+        find('[data-test="form-submit"]').click
+        expect(page).to have_text('Required values missing')
+        expect(page).to be_axe_clean
+      end
+    end
+  end
+
+  context 'edit user' do
+    let!(:user) { create :user }
+
+    before(:each) do
+      sign_in user
+    end
+
+    it 'should have axe clean new page' do
+      visit '/users/edit'
+      expect(page).to have_text('Edit your info')
+      expect(page).to be_axe_clean
+    end
+  end
+end
+
+def stubbed_key
+  file_fixture('stubbed_key.pem').read
+end
+
+def stub_key_creation_request(api_client = nil)
+  stub_api_client(api_client:, message: :create_public_key, success: true, response: {
+    'label' => 'Sandbox Key 1',
+    'createdAt' => '2019-11-07T19:38:44.205Z',
+    'id' => '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+  })
+end
+
+def stub_empty_key_request(api_client = nil)
+  stub_api_client(api_client:, message: :get_public_keys, success: true, response: { 'entities' => [] })
+end
+
+def stub_empty_token_request(api_client = nil)
+  stub_api_client(api_client:, message: :get_client_tokens, success: true, response: { 'entities' => [] })
+end
+
+def stub_key_get_request(api_client = nil)
+  stub_api_client(api_client:, message: :get_public_keys, success: true, response: {
+    'entities' => [{
+      'id' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+      'publicKey' => '---PUBLIC KEY---......---END PUBLIC KEY---',
+      'createdAt' => '2019-11-14T19:47:44.574Z',
+      'label' => 'example public key'
+    }],
+    'count' => 1,
+    'created_at' => '2019-11-14T19:47:44.574Z'
+  })
+end
+
+def stub_token_creation_request(_api_client = nil)
+  stub_api_client(message: :create_client_token, success: true, response: {
+    'token' => '1234567890',
+    'label' => 'Sandbox Token 1',
+    'createdAt' => '2019-11-07T17:15:22.781Z'
+  })
+end
+
+def stub_token_get_request(api_client = nil)
+  stub_api_client(api_client:, message: :get_client_tokens, success: true, response: {
+    'entities' => [{
+      'id' => '456a4f7b-ttwe-494a-8ca4-7a685edalrep',
+      'tokenType' => 'MACAROON',
+      'label' => 'Sandbox Token 1',
+      'createdAt' => '2019-11-07T17:15:22.781Z',
+      'expiresAt' => '2019-11-07T17:15:22.781Z'
+    }]
+  })
 end

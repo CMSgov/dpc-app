@@ -35,10 +35,6 @@ RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
   config.include Rails.application.routes.url_helpers
 
-  config.before(:all, type: :request) do
-    WebMock.allow_net_connect!
-  end
-
   # Devise test helpers
   config.include Devise::Test::ControllerHelpers, type: :controller
   config.include Devise::Test::ControllerHelpers, type: :view
@@ -47,19 +43,9 @@ RSpec.configure do |config|
 
   Warden.test_mode!
 
-  config.use_transactional_fixtures = false
-  config.before(:suite) { DatabaseCleaner.clean_with(:truncation) }
-  config.before(:each) { DatabaseCleaner.strategy = :transaction }
-  config.before(:each, js: true) { DatabaseCleaner.strategy = :truncation }
-
-  config.before(:each) { DatabaseCleaner.start }
+  config.use_transactional_fixtures = true
 
   config.after(:each, type: :feature) { Warden.test_reset! }
-
-  # It's recommended to use append_after to ensure DatabaseCleaner.clean
-  # runs after the after-test cleanup capybara/rspec installs. Particularly
-  # on js tests.
-  config.append_after(:each) { DatabaseCleaner.clean }
 
   config.infer_spec_type_from_file_location!
   config.filter_rails_from_backtrace!
