@@ -136,6 +136,7 @@ public class PatientResourceUnitTest {
     @Test
     public void testInvalidPageNumber() {
         int pageSize = 1;
+        int hugePageNumber = 9999;
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -155,10 +156,12 @@ public class PatientResourceUnitTest {
         when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(emptyBundle);
 
-        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null, pageSize, 9999);
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null, pageSize, hugePageNumber);
+        String requestPath = "/v1/Patient?page=";
 
         assertNull(emptyBundle.getLink("previous"));
         assertNull(emptyBundle.getLink("next"));
+        assertEquals(emptyBundle.getLink("self").getUrl(), requestPath + hugePageNumber);
         assertNotNull(actualResponse);
         assertTrue(actualResponse.getEntry().isEmpty(), "Expected no entries for an out-of-bounds page");
 
