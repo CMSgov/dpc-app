@@ -31,6 +31,9 @@ Rails.application.configure do
   # Store uploaded files on the local file system in a temporary directory
   config.active_storage.service = :test
 
+  # Need to have this set up for capybara accessibility tests
+  config.action_controller.asset_host = "file://#{::Rails.root}/public" if ENV['ACCESSIBILITY'] == 'true'
+
   config.action_mailer.perform_caching = false
 
   # Tell Action Mailer not to deliver emails to the real world.
