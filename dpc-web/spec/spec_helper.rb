@@ -3,6 +3,9 @@
 require 'fakeredis/rspec'
 require 'simplecov'
 
+require 'axe-rspec'
+require 'capybara/rspec'
+
 SimpleCov.start 'rails' do
   track_files '**/{app,lib}/**/*.rb'
 
@@ -19,7 +22,11 @@ SimpleCov.start 'rails' do
   SimpleCov.minimum_coverage_by_file 80
 end
 
+require 'webmock/rspec'
+WebMock.disable_net_connect!(allow_localhost: true, allow: ['github.com', 'objects.githubusercontent.com'])
+
 RSpec.configure do |config|
+  config.filter_run_excluding type: :system
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
