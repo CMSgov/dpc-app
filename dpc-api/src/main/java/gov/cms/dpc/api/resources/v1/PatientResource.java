@@ -112,7 +112,7 @@ public class PatientResource extends AbstractPatientResource {
             request = request.where(Patient.IDENTIFIER.exactly().identifier(expandedMBI));
         }
 
-        if (page >= 1) {
+        if (page >= 0) {
             return PagingUtils.handlePaging(request, count, page, "/v1/Patient");
         }
         else {
@@ -124,7 +124,7 @@ public class PatientResource extends AbstractPatientResource {
         return patientSearch(organization, patientMBI, PagingUtils.DEFAULT_COUNT, page);
     }
 
-    // passing -1 means "do not paginate" for compatiblity reasons. See default value above
+    // passing -1 means "do not paginate" for compatibility reasons. See default value above
     public Bundle patientSearch(OrganizationPrincipal organization, String patientMBI) {
         return patientSearch(organization, patientMBI, -1, -1);
     }
