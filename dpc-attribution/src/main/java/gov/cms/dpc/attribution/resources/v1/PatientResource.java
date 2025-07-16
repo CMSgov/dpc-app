@@ -48,7 +48,9 @@ public class PatientResource extends AbstractPatientResource {
     public List<Patient> searchPatients(
             @QueryParam("_id") UUID resourceID,
             @QueryParam("identifier") String patientMBI,
-            @QueryParam("organization") String organizationReference) {
+            @QueryParam("organization") String organizationReference,
+            @QueryParam(value = "_count") int count,
+            @QueryParam(value = "_offset") int pageOffset) {
         if (patientMBI == null && organizationReference == null && resourceID == null) {
             throw new WebApplicationException("Must have one of Patient Identifier, Organization Resource ID, or Patient Resource ID", Response.Status.BAD_REQUEST);
         }
