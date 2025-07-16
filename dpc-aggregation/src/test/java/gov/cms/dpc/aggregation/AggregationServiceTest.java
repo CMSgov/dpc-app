@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
@@ -95,7 +96,7 @@ public class AggregationServiceTest {
 
         // Stop aggregation and make sure it pauses the batch
         APPLICATION.after();
-        await().until(() -> {
+        await().atMost(10, TimeUnit.SECONDS).until(() -> {
             JobQueueBatch batch = queue.getJobBatches(jobID).get(0);
             return batch.getStatus() == JobStatus.QUEUED;
         });
