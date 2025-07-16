@@ -10,12 +10,14 @@ RSpec.describe 'Accessibility', type: :system do
   end
   let(:api_id) { 'some-gnarly-guid' }
   let(:axe_standard) { %w[best-practice wcag21aa] }
+
   context 'login page' do
     it 'should be axe clean' do
       visit '/users/sign_in'
       expect(page).to have_text('Log in')
       expect(page).to be_axe_clean
     end
+
     it 'should be axe clean on failure' do
       visit '/users/sign_in'
       page.find('#login-button').click
@@ -30,6 +32,7 @@ RSpec.describe 'Accessibility', type: :system do
       expect(page).to have_text('Request access')
       expect(page).to be_axe_clean
     end
+
     it 'should be axe clean on failure' do
       visit '/users/sign_up'
       expect(page).to have_text('Request access')
@@ -45,6 +48,7 @@ RSpec.describe 'Accessibility', type: :system do
       expect(page).to have_text('Forgot')
       expect(page).to be_axe_clean
     end
+
     it 'should be axe clean on success' do
       visit '/users/password/new'
       expect(page).to have_text('Forgot')
@@ -61,6 +65,7 @@ RSpec.describe 'Accessibility', type: :system do
       expect(page).to have_text('Resend')
       expect(page).to be_axe_clean
     end
+
     it 'should be axe clean on success' do
       visit '/users/confirmation/new'
       expect(page).to have_text('Resend')
@@ -95,17 +100,31 @@ RSpec.describe 'Accessibility', type: :system do
         user.organizations << organization
         sign_in user
       end
+
       it 'should be axe clean without credentials' do
-        api_client = stub_empty_key_request
-        stub_empty_token_request(api_client)
+        stub_multiple_call_client(messages: %i[
+                                    get_public_keys
+                                    get_client_tokens
+                                  ],
+                                  responses: [
+                                    empty_response
+                                  ])
+
         visit authenticated_root_path
         expect(page).to have_text('you must create a unique client token')
         expect(page).to have_text('add your public keys')
         expect(page).to be_axe_clean
       end
+
       it 'should be axe clean with credentials' do
-        api_client = stub_token_get_request
-        stub_key_get_request(api_client)
+        stub_multiple_call_client(messages: %i[
+                                    get_public_keys
+                                    get_client_tokens
+                                  ],
+                                  responses: [
+                                    key_entities,
+                                    token_entities
+                                  ])
         visit authenticated_root_path
         expect(page).to_not have_text('you must create a unique client token')
         expect(page).to_not have_text('add your public keys')
@@ -126,8 +145,18 @@ RSpec.describe 'Accessibility', type: :system do
       )
       create(:registered_organization, organization:, api_id:, enabled: true)
       user.organizations << organization
-      api_client = stub_empty_key_request
-      stub_empty_token_request(api_client)
+      stub_multiple_call_client(messages: %i[
+                                  get_public_keys
+                                  get_client_tokens
+                                  create_client_token
+                                ],
+                                responses: [
+                                  empty_response,
+                                  empty_response,
+                                  empty_response,
+                                  empty_response,
+                                  create_token_response
+                                ])
       sign_in user
     end
 
@@ -154,7 +183,7 @@ RSpec.describe 'Accessibility', type: :system do
         expect(page).to have_text('New token for')
         fill_in 'label', with: 'Sandbox Token 1'
         find('[data-test="form-submit"]').click
-        expect(page).to have_content('Sandbox Token 1')
+        expect(page).to have_content('Success!')
         expect(page).to be_axe_clean
       end
     end
@@ -191,6 +220,7 @@ RSpec.describe 'Accessibility', type: :system do
       expect(page).to have_text('Edit:')
       expect(page).to be_axe_clean
     end
+
     it 'should be axe clean on failure' do
       visit authenticated_root_path
       find('[data-test="edit-link"]').click
@@ -214,6 +244,7 @@ RSpec.describe 'Accessibility', type: :system do
       expect(page).to have_text('Edit your info')
       expect(page).to be_axe_clean
     end
+
     it 'should be axe clean on failure' do
       visit '/users/edit'
       expect(page).to have_text('Edit your info')
@@ -228,24 +259,32 @@ def stubbed_key
   file_fixture('stubbed_key.pem').read
 end
 
-def stub_key_creation_request(api_client = nil)
-  stub_api_client(api_client:, message: :create_public_key, success: true, response: {
-    'label' => 'Sandbox Key 1',
-    'createdAt' => '2019-11-07T19:38:44.205Z',
-    'id' => '3fa85f64-5717-4562-b3fc-2c963f66afa6'
-  })
+def empty_response
+  { 'entities' => [] }
 end
 
-def stub_empty_key_request(api_client = nil)
-  stub_api_client(api_client:, message: :get_public_keys, success: true, response: { 'entities' => [] })
+def create_token_response
+  {
+    'token' => '1234567890',
+    'label' => 'Sandbox Token 1',
+    'createdAt' => '2019-11-07T17:15:22.781Z'
+  }
 end
 
-def stub_empty_token_request(api_client = nil)
-  stub_api_client(api_client:, message: :get_client_tokens, success: true, response: { 'entities' => [] })
+def token_entities
+  {
+    'entities' => [{
+      'id' => 'client-token-guid',
+      'tokenType' => 'MACAROON',
+      'label' => 'Sandbox Token 1',
+      'createdAt' => '2019-11-07T17:15:22.781Z',
+      'expiresAt' => '2019-11-07T17:15:22.781Z'
+    }]
+  }
 end
 
-def stub_key_get_request(api_client = nil)
-  stub_api_client(api_client:, message: :get_public_keys, success: true, response: {
+def key_entities
+  {
     'entities' => [{
       'id' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
       'publicKey' => '---PUBLIC KEY---......---END PUBLIC KEY---',
@@ -254,25 +293,5 @@ def stub_key_get_request(api_client = nil)
     }],
     'count' => 1,
     'created_at' => '2019-11-14T19:47:44.574Z'
-  })
-end
-
-def stub_token_creation_request(_api_client = nil)
-  stub_api_client(message: :create_client_token, success: true, response: {
-    'token' => '1234567890',
-    'label' => 'Sandbox Token 1',
-    'createdAt' => '2019-11-07T17:15:22.781Z'
-  })
-end
-
-def stub_token_get_request(api_client = nil)
-  stub_api_client(api_client:, message: :get_client_tokens, success: true, response: {
-    'entities' => [{
-      'id' => '456a4f7b-ttwe-494a-8ca4-7a685edalrep',
-      'tokenType' => 'MACAROON',
-      'label' => 'Sandbox Token 1',
-      'createdAt' => '2019-11-07T17:15:22.781Z',
-      'expiresAt' => '2019-11-07T17:15:22.781Z'
-    }]
-  })
+  }
 end
