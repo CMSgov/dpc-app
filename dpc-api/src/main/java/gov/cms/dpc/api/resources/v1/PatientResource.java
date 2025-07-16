@@ -88,7 +88,7 @@ public class PatientResource extends AbstractPatientResource {
                                 @ApiParam(value = "Patient MBI")
                                 @QueryParam(value = Patient.SP_IDENTIFIER) @NoHtml String patientMBI,
                                 @ApiParam(value = "Patients per page")
-                                @QueryParam(value = "_count") int count,
+                                @QueryParam(value = "_count") @DefaultValue("-1") int count,
                                 @ApiParam(value = "Page number")
                                 @QueryParam(value = "_page") @DefaultValue("-1") int page) {
 
@@ -112,7 +112,7 @@ public class PatientResource extends AbstractPatientResource {
             request = request.where(Patient.IDENTIFIER.exactly().identifier(expandedMBI));
         }
 
-        if (page >= 0) {
+        if (page >= 1 || count == 0) {
             return PagingUtils.handlePaging(request, count, page, "/v1/Patient");
         }
         else {

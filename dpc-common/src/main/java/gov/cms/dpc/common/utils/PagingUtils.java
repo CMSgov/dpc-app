@@ -19,9 +19,12 @@ public final class PagingUtils {
     }
 
     public static Bundle handlePaging(IQuery<Bundle> request, int count, int page, String requestPath) {
+        if (count == -1) {
+            count = DEFAULT_COUNT;
+        }
         request.offset(count*(page-1));
         request.count(count);
-        Bundle resultBundle = request.execute();
+        Bundle resultBundle = request.execute(); // this should call attribution
 
         addRelationLink(resultBundle, "self", requestPath, page);
         addRelationLink(resultBundle, "first", requestPath, 1);
