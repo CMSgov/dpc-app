@@ -5,6 +5,7 @@ import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import jakarta.inject.Inject;
+import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.apache.commons.collections4.ListUtils;
 
@@ -31,7 +32,8 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         return Optional.ofNullable(get(patientID));
     }
 
-    public List<PatientEntity> patientSearch(UUID resourceID, String patientMBI, UUID organizationID) {
+    public List<PatientEntity> patientSearch(PatientSearchQuery searchQuery) {
+        // UUID resourceID, String patientMBI, UUID organizationID
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
@@ -39,18 +41,26 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         query.select(root);
 
         List<Predicate> predicates = new ArrayList<>();
-        if (resourceID != null) {
-            predicates.add(builder.equal(root.get(PatientEntity_.id), resourceID));
+        if (searchQuery.getResourceID() != null) {
+            predicates.add(builder.equal(root.get(PatientEntity_.id), searchQuery.getResourceID()));
         }
-
-        if (patientMBI != null) {
-            predicates.add(builder.equal(root.get(PatientEntity_.beneficiaryID), patientMBI.toUpperCase()));
+        if (searchQuery.getPatientMBI() != null) {
+            predicates.add(builder.equal(root.get(PatientEntity_.beneficiaryID), searchQuery.getPatientMBI().toUpperCase()));
         }
-        if (organizationID != null) {
-            predicates.add(builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), organizationID));
+        if (searchQuery.getOrganizationID() != null) {
+            predicates.add(builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), searchQuery.getOrganizationID()));
         }
         if (predicates.isEmpty()) {
             throw new IllegalStateException("Must have at least one search predicate!");
+        }
+
+        TypedQuery<PatientEntity> typedQuery = currentSession().createQuery(query); // instantiate a mutable query
+        if (searchQuery.getCount() != null && searchQuery.getCount() > 0) {
+            // need to come back to count=0 for summary bundle
+            typedQuery.setMaxResults(searchQuery.getCount());
+            if (searchQuery.getPageOffset() != null && searchQuery.getPageOffset() > 0) {
+                typedQuery.setFirstResult(searchQuery.getPageOffset());
+            }
         }
 
         query.where(predicates.toArray(new Predicate[0]));
