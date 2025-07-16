@@ -107,5 +107,6 @@ public class AggregationServiceTest {
             System.err.println("Batch failed to reach queued status, current state of batch: " + batch.getStatus());
             fail("Failing test due to batch status not set to queued, current status: " + batch.getStatus());
         }
+        
     }
 }
