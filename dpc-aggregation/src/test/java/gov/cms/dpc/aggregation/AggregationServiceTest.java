@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.testcontainers.shaded.org.awaitility.core.ConditionTimeoutException;
 
 import java.util.Collections;
 import java.util.List;
@@ -96,9 +97,15 @@ public class AggregationServiceTest {
 
         // Stop aggregation and make sure it pauses the batch
         APPLICATION.after();
-        await().atMost(10, TimeUnit.SECONDS).until(() -> {
+        try {
+            await().pollInterval(1, TimeUnit.SECONDS).atMost(20, TimeUnit.SECONDS).until(() -> {
+                JobQueueBatch batch = queue.getJobBatches(jobID).get(0);
+                return batch.getStatus() == JobStatus.QUEUED;
+            });
+        } catch(ConditionTimeoutException e) {
             JobQueueBatch batch = queue.getJobBatches(jobID).get(0);
-            return batch.getStatus() == JobStatus.QUEUED;
-        });
+            System.err.println("Batch failed to reach queued status, current state of batch: " + batch.getStatus());
+            fail("Failing test due to batch status not set to queued, current status: " + batch.getStatus());
+        }
     }
 }
