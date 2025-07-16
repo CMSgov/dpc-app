@@ -112,7 +112,10 @@ public class PatientResource extends AbstractPatientResource {
             final Patient createdPatient;
 
             // Check to see if Patient already exists, if so, ignore it.
-            final List<PatientEntity> patientEntities = this.dao.patientSearch(null, patientMBI, organizationID);
+            PatientSearchQuery daoSearchQuery = new PatientSearchQuery();
+            daoSearchQuery.setPatientMBI(patientMBI);
+            daoSearchQuery.setOrganizationID(organizationID);
+            final List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery);
             if (!patientEntities.isEmpty()) {
                 status = Response.Status.OK;
                 createdPatient = this.converter.toFHIR(Patient.class, patientEntities.get(0));
