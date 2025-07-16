@@ -11,7 +11,7 @@ RSpec.describe 'Accessibility', type: :system do
   let(:api_id) { 'some-gnarly-guid' }
   let(:axe_standard) { %w[best-practice wcag21aa] }
   context 'login page' do
-    it 'should be axe clean on initial' do
+    it 'should be axe clean' do
       visit '/users/sign_in'
       expect(page).to have_text('Log in')
       expect(page).to be_axe_clean
@@ -25,12 +25,12 @@ RSpec.describe 'Accessibility', type: :system do
   end
 
   context 'registration page' do
-    it 'should be axec clean on initial' do
+    it 'should be axe clean' do
       visit '/users/sign_up'
       expect(page).to have_text('Request access')
       expect(page).to be_axe_clean
     end
-    it 'should be axec clean with errors' do
+    it 'should be axe clean on failure' do
       visit '/users/sign_up'
       expect(page).to have_text('Request access')
       find('#sign-up').click
@@ -40,12 +40,12 @@ RSpec.describe 'Accessibility', type: :system do
   end
 
   context 'forgot password' do
-    it 'should be axec clean on initial' do
+    it 'should be axe clean' do
       visit '/users/password/new'
       expect(page).to have_text('Forgot')
       expect(page).to be_axe_clean
     end
-    it 'should be axec clean on submit' do
+    it 'should be axe clean on success' do
       visit '/users/password/new'
       expect(page).to have_text('Forgot')
       fill_in 'user_email', with: 'faker@fake.com'
@@ -56,12 +56,12 @@ RSpec.describe 'Accessibility', type: :system do
   end
 
   context 'resend confirmation' do
-    it 'should be axec clean on initial' do
+    it 'should be axe clean' do
       visit '/users/confirmation/new'
       expect(page).to have_text('Resend')
       expect(page).to be_axe_clean
     end
-    it 'should be axec clean on submit' do
+    it 'should be axe clean on success' do
       visit '/users/confirmation/new'
       expect(page).to have_text('Resend')
       fill_in 'user_email', with: 'faker@fake.com'
@@ -131,15 +131,15 @@ RSpec.describe 'Accessibility', type: :system do
       sign_in user
     end
 
-    context 'token management' do
-      it 'should have axe clean new page' do
+    context 'create token' do
+      it 'should be axe clean' do
         visit authenticated_root_path
         find('[data-test="new-client-token"]').click
         expect(page).to have_text('New token for')
         expect(page).to be_axe_clean
       end
 
-      it 'should have axe clean missing label page' do
+      it 'should be axe clean on failure' do
         visit authenticated_root_path
         find('[data-test="new-client-token"]').click
         expect(page).to have_text('New token for')
@@ -148,7 +148,7 @@ RSpec.describe 'Accessibility', type: :system do
         expect(page).to be_axe_clean
       end
 
-      it 'should have axe clean created token page' do
+      it 'should be axe clean on success' do
         visit authenticated_root_path
         find('[data-test="new-client-token"]').click
         expect(page).to have_text('New token for')
@@ -158,15 +158,16 @@ RSpec.describe 'Accessibility', type: :system do
         expect(page).to be_axe_clean
       end
     end
-    context 'public key management' do
-      it 'should have axe clean new page' do
+
+    context 'create public key' do
+      it 'should be axe clean' do
         visit authenticated_root_path
         find('[data-test="new-public-key"]').click
         expect(page).to have_text('Upload Your Public Key')
         expect(page).to be_axe_clean
       end
 
-      it 'should have axe clean missing label page' do
+      it 'should be axe clean on failure' do
         visit authenticated_root_path
         find('[data-test="new-public-key"]').click
         expect(page).to have_text('Upload Your Public Key')
@@ -177,6 +178,30 @@ RSpec.describe 'Accessibility', type: :system do
     end
   end
 
+  context 'edit organization' do
+    let!(:user) { create :user, :assigned }
+
+    before(:each) do
+      sign_in user, scope: :user
+    end
+
+    it 'should be axe clean' do
+      visit authenticated_root_path
+      find('[data-test="edit-link"]').click
+      expect(page).to have_text('Edit:')
+      expect(page).to be_axe_clean
+    end
+    it 'should be axe clean on failure' do
+      visit authenticated_root_path
+      find('[data-test="edit-link"]').click
+      expect(page).to have_text('Edit:')
+      fill_in 'organization_npi', with: :invalidnpi
+      find('[data-test="form-submit"]').click
+      expect(page).to have_text('Npi must be valid')
+      expect(page).to be_axe_clean
+    end
+  end
+
   context 'edit user' do
     let!(:user) { create :user }
 
@@ -184,9 +209,16 @@ RSpec.describe 'Accessibility', type: :system do
       sign_in user
     end
 
-    it 'should have axe clean new page' do
+    it 'should be axe clean' do
       visit '/users/edit'
       expect(page).to have_text('Edit your info')
+      expect(page).to be_axe_clean
+    end
+    it 'should be axe clean on failure' do
+      visit '/users/edit'
+      expect(page).to have_text('Edit your info')
+      find('input[value="Update"]').click
+      expect(page).to have_text("Current password can't be blank")
       expect(page).to be_axe_clean
     end
   end
