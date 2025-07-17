@@ -1,5 +1,6 @@
 package gov.cms.dpc.api;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.*;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
@@ -16,6 +17,7 @@ import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.queue.service.DataService;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.AuthValueFactoryProvider;
@@ -58,6 +60,7 @@ class FHIRSubmissionTest {
     private static final String TEST_BASE_URL = "http://localhost:3002/v1";
     private static final UUID AGGREGATOR_ID = UUID.randomUUID();
     private static final IJobQueue queue = spy(MemoryBatchQueue.class);
+    private static final DataService dataService = new DataService(queue, FhirContext.forDstu3(), "/tmp", 1);
     private static final IGenericClient client = mock(IGenericClient.class);
     private static final BlueButtonClient bfdClient = mock(BlueButtonClient.class);
     private static final IRead mockRead = mock(IRead.class);
@@ -72,7 +75,7 @@ class FHIRSubmissionTest {
     private static final List<String> testBeneficiaries = List.of("0Z00Z00ZZ01", "0Z00Z00ZZ02", "0Z00Z00ZZ03", "0Z00Z00ZZ04");
 
     private final ResourceExtension groupResource = ResourceExtension.builder()
-            .addResource(new GroupResource(queue, client, TEST_BASE_URL, bfdClient, new DPCAPIConfiguration()))
+            .addResource(new GroupResource(dataService, client, TEST_BASE_URL, bfdClient, new DPCAPIConfiguration()))
             .addResource(new JobResource(queue, TEST_BASE_URL))
             .setTestContainerFactory(testContainer)
             .addProvider(staticFilter)

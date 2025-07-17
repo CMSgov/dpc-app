@@ -164,13 +164,13 @@ class DataServiceTest {
             orgNPI,
             providerNPI,
             List.of("mbi"),
+            List.of(DPCResourceType.Patient),
             now,
             now,
             "ip",
             "url",
             false,
-            false,
-            DPCResourceType.Patient
+            false
         );
 
         List<JobQueueBatch> batches = queue.getJobBatches(jobId);

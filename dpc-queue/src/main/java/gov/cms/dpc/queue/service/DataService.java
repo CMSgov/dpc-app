@@ -72,7 +72,7 @@ public class DataService {
                                  OffsetDateTime since,
                                  OffsetDateTime transactionTime,
                                  String requestingIP, String requestUrl, DPCResourceType... resourceTypes) {
-        UUID jobID = this.createJob(organizationID, orgNPI, providerNPI, patientMBIs, since, transactionTime, requestingIP, requestUrl, false, false, resourceTypes);
+        UUID jobID = this.createJob(organizationID, orgNPI, providerNPI, patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP, requestUrl, false, false);
         LOGGER.info("Patient everything export job created with job_id={} _since={} from requestUrl={}", jobID, since, requestUrl);
         final String eventTime = SplunkTimestamp.getSplunkTimestamp();
         LOGGER.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},queueSubmitTime={}", "/Patient/$everything", jobID ,eventTime);
@@ -123,19 +123,19 @@ public class DataService {
                           String orgNPI,
                           String providerNPI,
                           List<String> patientMBIs,
+                          List<DPCResourceType> resourceTypes,
                           OffsetDateTime since,
                           OffsetDateTime transactionTime,
                           String requestingIP,
                           String requestUrl,
                           boolean isBulk,
-                          boolean isSmoke,
-                          DPCResourceType... resourceTypes) {
+                          boolean isSmoke) {
         return this.queue.createJob(
             organizationID,
             orgNPI,
             providerNPI,
             patientMBIs,
-            List.of(resourceTypes),
+            resourceTypes,
             since,
             transactionTime,
             requestingIP,

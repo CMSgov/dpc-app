@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -10,6 +11,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.IJobQueue;
+import gov.cms.dpc.queue.service.DataService;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.hl7.fhir.dstu3.model.*;
@@ -45,9 +47,10 @@ public class AttestationUnitTests {
         logger.addAppender(listAppender);
         // Do all the things
         final IJobQueue mockQueue = Mockito.mock(IJobQueue.class);
+        final DataService dataService = new DataService(mockQueue, FhirContext.forDstu3(), "/", 1);
         final IGenericClient mockClient = Mockito.mock(IGenericClient.class);
         final BlueButtonClient mockBfdClient = Mockito.mock(BlueButtonClient.class);
-        groupResource = new GroupResource(mockQueue, mockClient, "http://local.test", mockBfdClient, new DPCAPIConfiguration());
+        groupResource = new GroupResource(dataService, mockClient, "http://local.test", mockBfdClient, new DPCAPIConfiguration());
     }
 
     @BeforeEach

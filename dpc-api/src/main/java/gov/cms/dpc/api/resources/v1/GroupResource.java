@@ -22,8 +22,8 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
-import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import jakarta.inject.Inject;
@@ -59,15 +59,15 @@ public class GroupResource extends AbstractGroupResource {
     // The delimiter for the '_types' list query param.
     static final String LIST_DELIMITER = ",";
 
-    private final IJobQueue queue;
     private final IGenericClient client;
     private final String baseURL;
     private final BlueButtonClient bfdClient;
     private final DPCAPIConfiguration config;
+    private final DataService dataService;
 
     @Inject
-    public GroupResource(IJobQueue queue, @Named("attribution") IGenericClient client, @APIV1 String baseURL, BlueButtonClient bfdClient, DPCAPIConfiguration config) {
-        this.queue = queue;
+    public GroupResource(DataService dataService, @Named("attribution") IGenericClient client, @APIV1 String baseURL, BlueButtonClient bfdClient, DPCAPIConfiguration config) {
+        this.dataService = dataService;
         this.client = client;
         this.baseURL = baseURL;
         this.bfdClient = bfdClient;
@@ -314,8 +314,8 @@ public class GroupResource extends AbstractGroupResource {
         final String requestUrl = APIHelpers.fetchRequestUrl(request);
 
         final boolean isSmoke = config.getLookBackExemptOrgs().contains(orgID.toString());
-        final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true, isSmoke);
-        final int totalPatients = attributedPatients.size();
+        final UUID jobID = this.dataService.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true, isSmoke);
+                final int totalPatients = attributedPatients.size();
         final String resourcesRequested = resources.stream().map(DPCResourceType::getPath).collect(Collectors.joining(";"));
         logger.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},orgId={},totalPatients={},resourcesRequested={},queueSubmitTime={}", "/Group/$export",jobID, orgID, totalPatients, resourcesRequested, eventTime);
         return Response.status(Response.Status.ACCEPTED)
