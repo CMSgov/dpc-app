@@ -89,9 +89,8 @@ public class PatientResource extends AbstractPatientResource {
                                 @QueryParam(value = Patient.SP_IDENTIFIER) @NoHtml String patientMBI,
                                 @ApiParam(value = "Patients per page")
                                 @QueryParam(value = "_count") @DefaultValue("-1") int count,
-                                @ApiParam(value = "Page number")
+                                @ApiParam(value = "Page number") // -1 means "do not paginate" for compatibility reasons
                                 @QueryParam(value = "_page") @DefaultValue("-1") int page) {
-
         var request = this.client
                 .search()
                 .forResource(Patient.class)
@@ -118,15 +117,6 @@ public class PatientResource extends AbstractPatientResource {
         else {
             return request.execute(); // deprecated - legacy behavior for clients relying on full roster
         }
-    }
-
-    public Bundle patientSearch(OrganizationPrincipal organization, String patientMBI, int page) {
-        return patientSearch(organization, patientMBI, PagingUtils.DEFAULT_COUNT, page);
-    }
-
-    // passing -1 means "do not paginate" for compatibility reasons. See default value above
-    public Bundle patientSearch(OrganizationPrincipal organization, String patientMBI) {
-        return patientSearch(organization, patientMBI, -1, -1);
     }
 
     @FHIR

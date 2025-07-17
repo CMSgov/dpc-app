@@ -41,6 +41,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
+
 public class PatientResourceUnitTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -91,7 +92,7 @@ public class PatientResourceUnitTest {
         when(mockQuery.where(any(ICriterion.class))).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(bundle);
 
-        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, patientMbi);
+        Bundle actualResponse = patientSearch(organizationPrincipal, patientMbi);
         assertEquals(bundle, actualResponse);
     }
 
@@ -118,7 +119,7 @@ public class PatientResourceUnitTest {
         when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(bundle);
 
-        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null);
+        Bundle actualResponse = patientSearch(organizationPrincipal, null);
         assertEquals(bundle, actualResponse);
     }
 
@@ -133,8 +134,12 @@ public class PatientResourceUnitTest {
         return bundle;
     }
 
+    private Bundle patientSearch(OrganizationPrincipal organization, String patientMBI) {
+        return patientResource.patientSearch(organization, patientMBI, -1, -1);
+    }
+
     @Test
-    public void testInvalidPageNumber() {
+    void testInvalidPageNumber() {
         int pageSize = 1;
         int hugePageNumber = 9999;
         UUID orgId = UUID.randomUUID();
@@ -169,7 +174,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testPageNumEqualsZero() {
+    void testPageNumEqualsZero() {
         int largePatientNum = 600;
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -203,7 +208,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testPatientSearchLargerRoster() {
+    void testPatientSearchLargerRoster() {
         int largePatientNum = 400;
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -223,13 +228,13 @@ public class PatientResourceUnitTest {
         when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(largePatientBundle);
 
-        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null);
+        Bundle actualResponse = patientSearch(organizationPrincipal, null);
         assertEquals(largePatientBundle, actualResponse);
         assertEquals(largePatientBundle.getEntry().size(), largePatientNum);
     }
 
     @Test
-    public void testPatientSearchPaging() {
+    void testPatientSearchPaging() {
         int pageSize = 1;
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -263,7 +268,7 @@ public class PatientResourceUnitTest {
         Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null, pageSize, 1);
         assertEquals(bundle, actualResponse);
         assertEquals(pageSize, bundle.getEntry().size());
-        assertEquals(bundle.getEntryFirstRep().getResource().getId(), "patient-1");
+        assertEquals("patient-1", bundle.getEntryFirstRep().getResource().getId());
 
         String requestPath = "/v1/Patient?page=";
         assertEquals(bundle.getLink("self").getUrl(), requestPath + "1");
@@ -280,7 +285,7 @@ public class PatientResourceUnitTest {
         Bundle response2 = patientResource.patientSearch(organizationPrincipal, null, pageSize, 2);
         assertEquals(bundle2, response2);
         assertEquals(pageSize, bundle2.getEntry().size());
-        assertEquals(bundle2.getEntryFirstRep().getResource().getId(), "patient-2");
+        assertEquals("patient-2", bundle2.getEntryFirstRep().getResource().getId());
 
         assertEquals(bundle2.getLink("self").getUrl(), requestPath + "2");
         assertEquals(bundle2.getLink("first").getUrl(), requestPath + "1");
