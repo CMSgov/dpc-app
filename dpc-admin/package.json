@@ -17,8 +17,5 @@
   },
   "scripts": {
     "test": "jest"
-  },
-  "overrides": {
-    "elliptic": "^6.6.1"
   }
 }
