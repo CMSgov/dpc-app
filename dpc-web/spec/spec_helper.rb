@@ -6,20 +6,23 @@ require 'simplecov'
 require 'axe-rspec'
 require 'capybara/rspec'
 
-SimpleCov.start 'rails' do
-  track_files '**/{app,lib}/**/*.rb'
+# Accessibility tests are run separately and should not be subject to simplecov constraints
+unless ENV['ACCESSIBILITY'] == 'true'
+  SimpleCov.start 'rails' do
+    track_files '**/{app,lib}/**/*.rb'
 
-  add_group 'Serializers', 'app/serializers'
-  add_group 'Services', 'app/services'
-  add_group 'Validators', 'app/validators'
+    add_group 'Serializers', 'app/serializers'
+    add_group 'Services', 'app/services'
+    add_group 'Validators', 'app/validators'
 
-  add_filter 'app/jobs/application_job.rb'
-  add_filter 'app/channels/application_cable/connection.rb'
-  add_filter 'app/controllers/pages_controller.rb' # loads static content
-  add_filter 'vendor'
+    add_filter 'app/jobs/application_job.rb'
+    add_filter 'app/channels/application_cable/connection.rb'
+    add_filter 'app/controllers/pages_controller.rb' # loads static content
+    add_filter 'vendor'
 
-  SimpleCov.minimum_coverage 90
-  SimpleCov.minimum_coverage_by_file 80
+    SimpleCov.minimum_coverage 90
+    SimpleCov.minimum_coverage_by_file 80
+  end
 end
 
 require 'webmock/rspec'
