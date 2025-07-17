@@ -72,7 +72,7 @@ public class DataService {
                                  OffsetDateTime since,
                                  OffsetDateTime transactionTime,
                                  String requestingIP, String requestUrl, DPCResourceType... resourceTypes) {
-        UUID jobID = this.queue.createJob(organizationID, orgNPI, providerNPI, patientMBIs, List.of(resourceTypes), since, transactionTime, requestingIP, requestUrl, false, false);
+        UUID jobID = this.createJob(organizationID, orgNPI, providerNPI, patientMBIs, since, transactionTime, requestingIP, requestUrl, false, false, resourceTypes);
         LOGGER.info("Patient everything export job created with job_id={} _since={} from requestUrl={}", jobID, since, requestUrl);
         final String eventTime = SplunkTimestamp.getSplunkTimestamp();
         LOGGER.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},queueSubmitTime={}", "/Patient/$everything", jobID ,eventTime);
@@ -101,6 +101,48 @@ public class DataService {
         LOGGER.error("No data returned from queue for job, jobID: {}; jobTimeout: {}", jobID, jobTimeoutInSeconds);
         // These Exceptions are not just thrown in the application - the message is also sent in the Response payload
         throw new DataRetrievalException("Failed to retrieve data");
+    }
+
+    /**
+     * Creates a new job on the queue.
+     *
+     * @param organizationID  UUID of organization
+     * @param orgNPI          NPI of organization
+     * @param providerNPI     NPI of provider
+     * @param patientMBIs     List of patient String MBIs
+     * @param since           Retrieve data since this date
+     * @param transactionTime BFD Transaction Time
+     * @param requestingIP    IP Address of request
+     * @param requestUrl      URL of original request
+     * @param resourceTypes   List of DPCResourceType data to retrieve
+     * @param isBulk          Is this a bulk job
+     * @param isSmoke         Is this part of a smoke test (smoke tests ignore lookback checks)
+     * @return {@link UUID} of the job created
+     */
+    public UUID createJob(UUID organizationID,
+                          String orgNPI,
+                          String providerNPI,
+                          List<String> patientMBIs,
+                          OffsetDateTime since,
+                          OffsetDateTime transactionTime,
+                          String requestingIP,
+                          String requestUrl,
+                          boolean isBulk,
+                          boolean isSmoke,
+                          DPCResourceType... resourceTypes) {
+        return this.queue.createJob(
+            organizationID,
+            orgNPI,
+            providerNPI,
+            patientMBIs,
+            List.of(resourceTypes),
+            since,
+            transactionTime,
+            requestingIP,
+            requestUrl,
+            isBulk,
+            isSmoke
+        );
     }
 
     private Optional<List<JobQueueBatch>> waitForJobToComplete(UUID jobID, UUID organizationID, IJobQueue queue) {
