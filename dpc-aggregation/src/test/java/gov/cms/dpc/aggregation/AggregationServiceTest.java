@@ -104,8 +104,9 @@ public class AggregationServiceTest {
             });
         } catch(ConditionTimeoutException e) {
             JobQueueBatch batch = queue.getJobBatches(jobID).get(0);
-            System.err.println("Batch failed to reach queued status, current state of batch: " + batch.getStatus());
-            fail();
+            String errorMsg = "Batch failed to reach queued status, current state of batch: " + batch.getStatus();
+            System.err.println(errorMsg);   // Print to stderr so the tree runner picks this up when running on GHA
+            fail(errorMsg);
         }
     }
 }
