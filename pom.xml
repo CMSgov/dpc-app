@@ -44,7 +44,7 @@
         <jib.container.appRoot>/app</jib.container.appRoot>
         <timestamp>${maven.build.timestamp}</timestamp>
         <jacoco.version>0.8.12</jacoco.version>
-        <jooq.version>3.19.19</jooq.version>
+        <jooq.version>3.20.5</jooq.version>
         <bouncey.version>1.81</bouncey.version>
         <pitest.version>1.5.1</pitest.version>
         <newrelic.agent.version>8.21.0</newrelic.agent.version>
