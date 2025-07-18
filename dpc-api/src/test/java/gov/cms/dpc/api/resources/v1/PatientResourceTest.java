@@ -30,10 +30,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,8 +76,13 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(PatientResourceTest.class);
 
+    @BeforeEach
+    void resetApplication() throws Exception {
+        // Wipe the DB and restart dpc-api between tests
+        setup();
+    }
+
     @Test
-    @Order(1)
     public void testCreatePatientReturnsAppropriateHeaders() {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         Patient patient = APITestHelpers.createPatientResource("4S41C00AA00", APITestHelpers.ORGANIZATION_ID);
@@ -102,15 +104,9 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .execute();
 
         assertEquals(patient.getIdentifierFirstRep().getValue(), foundPatient.getIdentifierFirstRep().getValue());
-
-        client.delete()
-                .resource(foundPatient)
-                .encodedJson()
-                .execute();
     }
 
     @Test
-    @Order(2)
     void ensurePatientsExist() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
@@ -169,12 +165,12 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Order(3)
     void testPatientRemoval() throws IOException, URISyntaxException, GeneralSecurityException {
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
         final String keyLabel = "patient-deletion-key";
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
+        APITestHelpers.setupPatientTest(client, parser);
 
         final Bundle patients = fetchPatients(client);
 
@@ -208,16 +204,16 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Order(4)
     void testPatientUpdating() throws IOException, URISyntaxException, GeneralSecurityException {
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
         final String keyLabel = "patient-update-key";
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
         final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
+        APITestHelpers.setupPatientTest(client, parser);
 
         final Bundle patients = fetchPatients(client);
 
-        assertEquals(100, patients.getTotal(), "Should have correct number of patients");
+        assertEquals(101, patients.getTotal(), "Should have correct number of patients");
 
         // Try to update one
         final Patient patient = (Patient) patients.getEntry().get(patients.getTotal() - 2).getResource();
@@ -247,7 +243,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Order(5)
     void testCreateInvalidPatient() throws IOException, URISyntaxException {
         URL url = new URL(getBaseURL() + "/Patient");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -278,10 +273,10 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Order(6)
     void testPatientEverythingWithoutGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
         APITestHelpers.setupPractitionerTest(client, parser);
+        APITestHelpers.setupPatientTest(client, parser);
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
         Patient patient = fetchPatient(client, mbi);
@@ -353,9 +348,10 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Order(7)
     void testPatientEverythingWithGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
+        APITestHelpers.setupPractitionerTest(client, parser);
+        APITestHelpers.setupPatientTest(client, parser);
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
         Patient patient = fetchPatient(client, mbi);
@@ -439,9 +435,10 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Order(8)
     void testPatientEverything_CanHandlePatientWithMultipleMBIs() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
+        APITestHelpers.setupPractitionerTest(client, parser);
+        APITestHelpers.setupPatientTest(client, parser);
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(6);
         Patient patient = fetchPatient(client, mbi);
@@ -472,9 +469,10 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Order(9)
     void testPatientEverythingForOptedOutPatient() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
+        APITestHelpers.setupPractitionerTest(client, parser);
+        APITestHelpers.setupPatientTest(client, parser);
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
         Patient patient = fetchPatient(client, mbi);
@@ -500,9 +498,10 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    @Order(10)
     void testPatientEverythingForOptedOutPatientOnMultipleMbis() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
+        APITestHelpers.setupPractitionerTest(client, parser);
+        APITestHelpers.setupPatientTest(client, parser);
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(6);
         String historicMbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(7);
@@ -532,6 +531,8 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     @Test
     public void testOptInPatient() throws GeneralSecurityException, IOException, URISyntaxException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
+        APITestHelpers.setupPractitionerTest(client, parser);
+        APITestHelpers.setupPatientTest(client, parser);
 
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
         Patient patient = fetchPatient(client, mbi);
@@ -707,7 +708,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     private IGenericClient generateClient(String orgNPI, String keyLabel) throws IOException, URISyntaxException, GeneralSecurityException {
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, APITestHelpers.ORGANIZATION_ID, orgNPI, getAdminURL());
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, APITestHelpers.ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
-        return APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight(), false, true);
+        return APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight(), false, true, false);
     }
 
     private String generateProvenance(String orgID, String practitionerID) {

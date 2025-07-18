@@ -72,23 +72,29 @@ public class APIAuthHelpers {
     }
 
     public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID, PrivateKey privateKey, boolean disableSSLCheck, boolean enableRequestLog) {
+        return buildAuthenticatedClient(ctx, baseURL, macaroon, keyID, privateKey, disableSSLCheck, enableRequestLog, false);
+    }
+
+    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID, PrivateKey privateKey, boolean disableSSLCheck, boolean enableRequestLog, boolean addPreferAsync) {
         final IGenericClient client = createBaseFHIRClient(ctx, baseURL, disableSSLCheck, enableRequestLog);
         client.registerInterceptor(new HAPISmartInterceptor(baseURL, macaroon, keyID, privateKey));
 
-        // Add the async header the hard way
-        final var addPreferInterceptor = new IClientInterceptor() {
-            @Override
-            public void interceptRequest(IHttpRequest iHttpRequest) {
-                // Manually set these values, rather than pulling a dependency on dpc-common, where the constants are defined
-                iHttpRequest.addHeader("Prefer", "respond-async");
-            }
+        if (addPreferAsync) {
+            // Add the async header the hard way
+            final var addPreferInterceptor = new IClientInterceptor() {
+                @Override
+                public void interceptRequest(IHttpRequest iHttpRequest) {
+                    // Manually set these values, rather than pulling a dependency on dpc-common, where the constants are defined
+                    iHttpRequest.addHeader("Prefer", "respond-async");
+                }
 
-            @Override
-            public void interceptResponse(IHttpResponse iHttpResponse) {
-                // Not used
-            }
-        };
-        client.registerInterceptor(addPreferInterceptor);
+                @Override
+                public void interceptResponse(IHttpResponse iHttpResponse) {
+                    // Not used
+                }
+            };
+            client.registerInterceptor(addPreferInterceptor);
+        }
 
         return client;
     }

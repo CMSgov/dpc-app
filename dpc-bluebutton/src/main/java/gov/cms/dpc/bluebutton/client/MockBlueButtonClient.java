@@ -177,7 +177,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
             // bundles to make sure the bundle was created after the last data load.  At some point in the past, BFD had
             // an issue with transaction time regression, and this was how it was dealt with.
             Date lastUpdated = beneId.equals(MBI_BENE_ID_MAP.get(TEST_PATIENT_FOR_API_TRANSACTION_TIME)) ?
-                Date.from(BFD_TRANSACTION_TIME.toInstant().minusSeconds(300)) :
+                Date.from(BFD_TRANSACTION_TIME.toInstant().minus(24, ChronoUnit.HOURS)) :
                 Date.from(BFD_TRANSACTION_TIME.toInstant());
 
             bundle.getMeta().setLastUpdated(lastUpdated);
