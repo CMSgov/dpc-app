@@ -131,6 +131,7 @@ public class AttributionTestHelpers {
         patientEntity.setDob(LocalDate.of(1980, 7, 14));
         patientEntity.setGender(Enumerations.AdministrativeGender.MALE);
         patientEntity.setOrganization(org);
+        patientEntity.setID(UUID.randomUUID());
 
         return patientEntity;
     }

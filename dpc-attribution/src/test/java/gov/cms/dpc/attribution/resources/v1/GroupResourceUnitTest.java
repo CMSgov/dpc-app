@@ -88,6 +88,7 @@ class GroupResourceUnitTest {
         assertEquals(patientBank.keySet().size(),((Group) response.getEntity()).getMember().size(), "Patients count should be the same as submitted");
     }
 
+    // DUPLICATED - TODO move to util file
     private ArgumentMatcher<PatientSearchQuery> queryMatches(UUID resourceId, UUID orgId) {
         return query ->
                 query != null &&
