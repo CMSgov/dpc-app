@@ -18,7 +18,7 @@ public abstract class AbstractPatientResource {
     }
 
     @GET
-    public abstract List<Patient> searchPatients(UUID resourceID, String patientMBI, String organizationReference);
+    public abstract List<Patient> searchPatients(UUID resourceID, String patientMBI, String organizationReference, int count, int page);
 
     @POST
     public abstract Response createPatient(Patient patient);

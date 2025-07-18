@@ -2,6 +2,7 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import com.google.inject.name.Named;
 import gov.cms.dpc.attribution.jdbi.PatientDAO;
+import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
 import gov.cms.dpc.attribution.resources.AbstractPatientResource;
 import gov.cms.dpc.attribution.utils.RESTUtils;
 import gov.cms.dpc.common.entities.PatientEntity;
@@ -48,26 +49,38 @@ public class PatientResource extends AbstractPatientResource {
     public List<Patient> searchPatients(
             @QueryParam("_id") UUID resourceID,
             @QueryParam("identifier") String patientMBI,
-            @QueryParam("organization") String organizationReference) {
+            @QueryParam("organization") String organizationReference,
+            @QueryParam(value = "_count") int count,
+            @QueryParam(value = "_offset") int pageOffset) {
         if (patientMBI == null && organizationReference == null && resourceID == null) {
             throw new WebApplicationException("Must have one of Patient Identifier, Organization Resource ID, or Patient Resource ID", Response.Status.BAD_REQUEST);
         }
 
-        final String idValue;
+        PatientSearchQuery daoSearchQuery = new PatientSearchQuery();
+        daoSearchQuery.setOrganizationID(FHIRExtractors.getEntityUUID(organizationReference));
 
-        // Extract the Patient MBI from the query param
+        if (resourceID != null) {
+            daoSearchQuery.setResourceID(resourceID);
+        }
         if (patientMBI != null) {
             final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(patientMBI);
             if (!patientIdentifier.getSystem().equals(DPCIdentifierSystem.MBI.getSystem())) {
                 throw new WebApplicationException("Must have MBI identifier", Response.Status.BAD_REQUEST);
             }
-            idValue = patientIdentifier.getValue();
-        } else {
-            idValue = null;
+            daoSearchQuery.setPatientMBI(patientIdentifier.getValue());
+        }
+        if (count >= 0) {
+            daoSearchQuery.setCount(count);
+        }
+        if (pageOffset >= 0) {
+            daoSearchQuery.setPageOffset(pageOffset);
         }
 
-        final UUID organizationID = FHIRExtractors.getEntityUUID(organizationReference);
-        return this.dao.patientSearch(resourceID, idValue, organizationID)
+        // for {{baseUrl}}/api/v1/Patient?_count=4&_page=300
+        // resourceID = null
+        // idValue = null
+        // organizationID = 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0
+        return this.dao.patientSearch(daoSearchQuery)
                 .stream()
                 .map(p -> this.converter.toFHIR(Patient.class, p))
                 .collect(Collectors.toList());
@@ -99,7 +112,10 @@ public class PatientResource extends AbstractPatientResource {
             final Patient createdPatient;
 
             // Check to see if Patient already exists, if so, ignore it.
-            final List<PatientEntity> patientEntities = this.dao.patientSearch(null, patientMBI, organizationID);
+            PatientSearchQuery daoSearchQuery = new PatientSearchQuery();
+            daoSearchQuery.setPatientMBI(patientMBI);
+            daoSearchQuery.setOrganizationID(organizationID);
+            final List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery);
             if (!patientEntities.isEmpty()) {
                 status = Response.Status.OK;
                 createdPatient = this.converter.toFHIR(Patient.class, patientEntities.get(0));
