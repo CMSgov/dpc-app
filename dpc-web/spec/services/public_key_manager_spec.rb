@@ -66,6 +66,18 @@ RSpec.describe PublicKeyManager do
 
         expect(new_public_key[:response]).to eq(false)
       end
+
+      it 'return false when key is duplicate' do
+        registered_org = build(:registered_organization)
+        manager = PublicKeyManager.new(registered_organization: registered_org)
+        manager.create_public_key(**@public_key_params)
+
+        new_public_key = manager.create_public_key(**@public_key_params)
+
+        puts new_public_key[:response]
+        expect(new_public_key[:response]).to eq(false)
+        expect false
+      end
     end
   end
 
@@ -137,16 +149,6 @@ RSpec.describe PublicKeyManager do
         manager = PublicKeyManager.new(registered_organization: registered_org)
 
         new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read, snippet_signature: 'stubbed_sign_txt_signature')
-
-        expect(new_public_key[:response]).to eq(false)
-      end
-
-      it 'return false when key is duplicate' do
-        registered_org = build(:registered_organization)
-        manager = PublicKeyManager.new(registered_organization: registered_org)
-        manager.create_public_key(**@public_key_params)
-
-        new_public_key = manager.create_public_key(**@public_key_params)
 
         expect(new_public_key[:response]).to eq(false)
       end
