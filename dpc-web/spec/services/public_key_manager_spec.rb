@@ -74,9 +74,7 @@ RSpec.describe PublicKeyManager do
 
         new_public_key = manager.create_public_key(**@public_key_params)
 
-        puts new_public_key[:response]
         expect(new_public_key[:response]).to eq(false)
-        expect false
       end
     end
   end
