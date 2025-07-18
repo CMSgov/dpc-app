@@ -54,8 +54,9 @@ en:
     api_disabled: API disabled
     access_denied: Access denied
   errors:
-    attributes:
-      base:
-        duplicate_cd:
-          status: User is already a Credential Delegate (CD).
-          text: A user with this name or email has already been invited to manage credentials for this organization.
+    duplicate_cd:
+      status: User is already a Credential Delegate (CD).
+      text: A user with this name or email has already been invited to manage credentials for this organization.
+    duplicate_key: # TODO: update with real text -acw
+      status: Duplicate key
+      text: This public key is already associated with another organization.

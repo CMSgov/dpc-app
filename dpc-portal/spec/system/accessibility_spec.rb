@@ -310,7 +310,7 @@ RSpec.describe 'Accessibility', type: :system do
               page.find('.usa-button', text: 'Send invite').click
               page.find_button(value: 'Yes, I acknowledge').click
               expect(page).to_not have_text("can't be blank")
-              expect(page).to have_text(I18n.t('errors.attributes.base.duplicate_cd.status'))
+              expect(page).to have_text(I18n.t('errors.duplicate_cd.status'))
               expect(page).to be_axe_clean.according_to axe_standard
             end
           end
