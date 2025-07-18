@@ -39,7 +39,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-public class PatientResourceUnitTest {
+class PatientResourceUnitTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     IGenericClient attributionClient;
@@ -58,13 +58,13 @@ public class PatientResourceUnitTest {
     FhirContext ctx = FhirContext.forDstu3();
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         openMocks(this);
-        patientResource = new PatientResource(attributionClient, fhirValidator, dataService, bfdClient);
+        patientResource = new PatientResource(attributionClient, fhirValidator, dataService, bfdClient, "");
     }
 
     @Test
-    public void testPatientSearch() {
+    void testPatientSearch() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -94,7 +94,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testPatientSearchNoIdentifier() {
+    void testPatientSearchNoIdentifier() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -121,7 +121,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testSubmitPatient() {
+    void testSubmitPatient() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -143,7 +143,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testBulkSubmitPatients() {
+    void testBulkSubmitPatients() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -169,7 +169,7 @@ public class PatientResourceUnitTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testGetPatient() {
+    void testGetPatient() {
         IReadExecutable<Patient> readExec = mock(IReadExecutable.class);
 
         UUID patientId = UUID.randomUUID();
@@ -186,7 +186,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testEverything() {
+    void testEverything() {
         UUID practitionerId = UUID.randomUUID();
         Practitioner practitioner = new Practitioner();
         practitioner.setId(practitionerId.toString());
@@ -249,7 +249,8 @@ public class PatientResourceUnitTest {
                 bfdClient.requestPatientFromServer(anyString(), any(), any())
         ).thenReturn(bundle);
 
-        Bundle actualResponse = patientResource.everything(organizationPrincipal, provenance, patientId, since, request);
+        Response httpResponse = patientResource.everything(organizationPrincipal, provenance, patientId, since, request, "");
+        Bundle actualResponse = (Bundle) httpResponse.getEntity();
         assertEquals(bundle, actualResponse);
     }
 
@@ -326,7 +327,7 @@ public class PatientResourceUnitTest {
         ).thenReturn(bundle);
 
         ForbiddenOperationException exception = assertThrows(ForbiddenOperationException.class, () -> {
-            patientResource.everything(organizationPrincipal, provenance, patientId, since, request);
+            patientResource.everything(organizationPrincipal, provenance, patientId, since, request, "");
         });
 
         assertEquals(HttpStatus.FORBIDDEN_403, exception.getStatusCode());
@@ -335,7 +336,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testEverythingNoPractitioner() {
+    void testEverythingNoPractitioner() {
         UUID practitionerId = UUID.randomUUID();
         UUID patientId = UUID.randomUUID();
         UUID orgId = UUID.randomUUID();
@@ -356,7 +357,7 @@ public class PatientResourceUnitTest {
         when(pracExec.execute()).thenReturn(null);
 
         try {
-            patientResource.everything(organizationPrincipal, provenance, patientId, since, request);
+            patientResource.everything(organizationPrincipal, provenance, patientId, since, request, null);
             fail("This call is supposed to fail.");
         } catch (WebApplicationException exc) {
             assertEquals(HttpStatus.UNAUTHORIZED_401, exc.getResponse().getStatus());
@@ -364,7 +365,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testDeletePatient() {
+    void testDeletePatient() {
         UUID patientId = UUID.randomUUID();
 
         IDeleteTyped delResp = mock(IDeleteTyped.class);
@@ -379,7 +380,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testUpdatePatient() {
+    void testUpdatePatient() {
         UUID patientId = UUID.randomUUID();
         Patient patient = new Patient();
         patient.setId(patientId.toString());
@@ -401,7 +402,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testUpdatePatientNoResource() {
+    void testUpdatePatientNoResource() {
         UUID patientId = UUID.randomUUID();
         Patient patient = new Patient();
         patient.setId(patientId.toString());
@@ -426,7 +427,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testValidatePatient() {
+    void testValidatePatient() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());

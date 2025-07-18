@@ -12,6 +12,7 @@ import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractGroupResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.logging.SplunkTimestamp;
@@ -282,13 +283,13 @@ public class GroupResource extends AbstractGroupResource {
                            @DefaultValue(FHIR_NDJSON) @QueryParam("_outputFormat") @NoHtml String outputFormat,
                            @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time (e.g. if Resource.meta.lastUpdated is later than the supplied _since time).")
                            @QueryParam("_since") @NoHtml String sinceParam,
-                           @ApiParam(hidden = true) @HeaderParam("Prefer") @Valid String Prefer,
+                           @ApiParam(hidden = true) @HeaderParam(Constants.PREFER_HEADER) @Valid String prefer,
                            @Context HttpServletRequest request) {
         logger.info("Exporting data for provider: {} _since: {}", rosterID, sinceParam);
 
         final String eventTime = SplunkTimestamp.getSplunkTimestamp();
         // Check the parameters
-        checkExportRequest(outputFormat, Prefer);
+        checkExportRequest(outputFormat, prefer);
 
         final Group group = fetchGroup(new IdType("Group", rosterID));
 
@@ -373,7 +374,7 @@ public class GroupResource extends AbstractGroupResource {
         if (headerPrefer == null || StringUtils.isEmpty(headerPrefer)) {
             throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
         }
-        if (StringUtils.isNotEmpty(headerPrefer) && !headerPrefer.equals("respond-async")) {
+        if (StringUtils.isNotEmpty(headerPrefer) && !headerPrefer.equals(Constants.PREFER_ASYNC)) {
             throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
         }
 
