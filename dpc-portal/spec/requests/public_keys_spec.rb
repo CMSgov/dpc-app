@@ -196,12 +196,12 @@ RSpec.describe 'PublicKeys', type: :request do
 
         stub_self_returning_api_client(message: :create_public_key,
                                        success: false,
-                                       response: "error: duplicate key value violates unique constraint",
-                                       api_client: )
+                                       response: 'error: duplicate key value violates unique constraint',
+                                       api_client:)
         post "/organizations/#{org.id}/public_keys", params: success_params
         expect(flash[:alert]).to eq('Invalid public key.')
-        expect(assigns(:errors)).to eq(public_key: "Duplicate key",
-                                       root: "Invalid public key.")
+        expect(assigns(:errors)).to eq(public_key: 'Duplicate key',
+                                       root: 'Invalid public key.')
       end
 
       it 'checks if configuration complete on success' do
