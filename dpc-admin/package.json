@@ -6,7 +6,7 @@
     "@cmsgov/design-system-layout": "^3.7.0",
     "@rails/activestorage": "^6.1.4",
     "@rails/ujs": "^6.1.4",
-    "jsrsasign": "^10.7.0",
+    "jsrsasign": "^11.0.0",
     "jsrsasign-util": "^1.0.5",
     "jwt-decode": "^2.2.0",
     "normalize.css": "^8.0.1",
