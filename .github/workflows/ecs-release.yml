@@ -58,7 +58,9 @@ permissions:
 jobs:
   set-parameters:
     name: "Set Parameters"
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: 
+      - codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+      - instance-size:large
     outputs:
       version_tag: ${{ steps.get-version-tag.outputs.version_tag }}
     steps:
