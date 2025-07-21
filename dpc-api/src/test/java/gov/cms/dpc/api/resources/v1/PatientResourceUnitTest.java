@@ -13,6 +13,7 @@ import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
+import gov.cms.dpc.common.utils.PagingService;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.service.DataService;
@@ -63,7 +64,7 @@ public class PatientResourceUnitTest {
     @BeforeEach
     public void setUp() {
         openMocks(this);
-        patientResource = new PatientResource(attributionClient, fhirValidator, dataService, bfdClient);
+        patientResource = new PatientResource(attributionClient, fhirValidator, dataService, bfdClient, new PagingService(100));
     }
 
     @Test

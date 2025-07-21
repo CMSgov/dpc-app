@@ -16,7 +16,7 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.annotations.NoHtml;
-import gov.cms.dpc.common.utils.PagingUtils;
+import gov.cms.dpc.common.utils.PagingService;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -63,16 +63,19 @@ public class PatientResource extends AbstractPatientResource {
     private final FhirValidator validator;
     private final DataService dataService;
     private final BlueButtonClient bfdClient;
+    private final PagingService pagingService;
 
     @Inject
     public PatientResource(@Named("attribution") IGenericClient client,
                            FhirValidator validator,
                            DataService dataService,
-                           BlueButtonClient bfdClient) {
+                           BlueButtonClient bfdClient,
+                           PagingService pagingService) {
         this.client = client;
         this.validator = validator;
         this.dataService = dataService;
         this.bfdClient = bfdClient;
+        this.pagingService = pagingService;
     }
 
     @GET
@@ -112,7 +115,7 @@ public class PatientResource extends AbstractPatientResource {
         }
 
         if (page >= 1 || count == 0) {
-            return PagingUtils.handlePaging(request, count, page, "/v1/Patient");
+            return pagingService.handlePaging(request, count, page, "/v1/Patient");
         }
         else {
             return request.execute(); // deprecated - legacy behavior for clients relying on full roster

@@ -3,24 +3,24 @@ package gov.cms.dpc.common.utils;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import org.hl7.fhir.dstu3.model.Bundle;
 
-public final class PagingUtils {
-    private PagingUtils() {
-        throw new UnsupportedOperationException("PagingUtils is a utility class and should not be instantiated");
+public class PagingService {
+    private final int defaultCount;
+
+    public PagingService(int defaultCount) {
+        this.defaultCount = defaultCount;
     }
 
-    public static final int DEFAULT_COUNT = 100;
-
-    private static String formatURL(String url, int page) {
+    private String formatURL(String url, int page) {
         return url + "?page=" + page;
     }
 
-    private static void addRelationLink(Bundle bundle, String name, String path, int page) {
+    private void addRelationLink(Bundle bundle, String name, String path, int page) {
         bundle.addLink().setRelation(name).setUrl(formatURL(path, page));
     }
 
-    public static Bundle handlePaging(IQuery<Bundle> request, int count, int page, String requestPath) {
+    public Bundle handlePaging(IQuery<Bundle> request, int count, int page, String requestPath) {
         if (count == -1) {
-            count = DEFAULT_COUNT;
+            count = defaultCount;
         }
         request.offset(count*(page-1));
         request.count(count);

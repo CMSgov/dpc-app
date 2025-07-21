@@ -80,6 +80,7 @@ publicServerURL: "https://dpc.cms.gov"
 fhir:
   validation:
     enabled: false
+  defaultPageSize: 100
 
 patientLimit: ${PATIENT_LIMIT:--1}
 providerLimit: ${PROVIDER_LIMIT:--1}
