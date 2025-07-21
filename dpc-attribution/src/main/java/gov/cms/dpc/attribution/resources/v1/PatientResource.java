@@ -37,7 +37,7 @@ public class PatientResource extends AbstractPatientResource {
     private final int defaultPageSize;
 
     @Inject
-    PatientResource(FHIREntityConverter converter, PatientDAO dao, @Named("DbBatchSize") int dbBatchSize, int defaultPageSize) {
+    PatientResource(FHIREntityConverter converter, PatientDAO dao, @Named("DbBatchSize") int dbBatchSize, @Named("defaultPageSize") int defaultPageSize) {
         this.dao = dao;
         this.converter = converter;
         this.dbBatchSize = dbBatchSize;
