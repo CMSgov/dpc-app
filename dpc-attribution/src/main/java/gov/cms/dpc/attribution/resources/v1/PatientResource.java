@@ -34,12 +34,14 @@ public class PatientResource extends AbstractPatientResource {
     private final FHIREntityConverter converter;
     private final PatientDAO dao;
     private final int dbBatchSize;
+    private final int defaultPageSize;
 
     @Inject
-    PatientResource(FHIREntityConverter converter, PatientDAO dao, @Named("DbBatchSize") int dbBatchSize) {
+    PatientResource(FHIREntityConverter converter, PatientDAO dao, @Named("DbBatchSize") int dbBatchSize, int defaultPageSize) {
         this.dao = dao;
         this.converter = converter;
         this.dbBatchSize = dbBatchSize;
+        this.defaultPageSize = defaultPageSize;
     }
 
     @GET
@@ -50,8 +52,8 @@ public class PatientResource extends AbstractPatientResource {
             @QueryParam("_id") UUID resourceID,
             @QueryParam("identifier") String patientMBI,
             @QueryParam("organization") String organizationReference,
-            @QueryParam(value = "_count") int count,
-            @QueryParam(value = "_offset") int pageOffset) {
+            @QueryParam(value = "_count") @DefaultValue("-1") int count,
+            @QueryParam(value = "_offset") @DefaultValue("-1") int pageOffset) {
         if (patientMBI == null && organizationReference == null && resourceID == null) {
             throw new WebApplicationException("Must have one of Patient Identifier, Organization Resource ID, or Patient Resource ID", Response.Status.BAD_REQUEST);
         }
@@ -74,6 +76,9 @@ public class PatientResource extends AbstractPatientResource {
         }
         if (pageOffset >= 0) {
             daoSearchQuery.setPageOffset(pageOffset);
+            if (count == -1) {
+                daoSearchQuery.setCount(defaultPageSize);
+            }
         }
 
         // for {{baseUrl}}/api/v1/Patient?_count=4&_page=300

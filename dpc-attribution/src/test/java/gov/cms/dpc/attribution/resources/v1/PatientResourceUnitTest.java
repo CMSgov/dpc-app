@@ -32,7 +32,7 @@ class PatientResourceUnitTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        patientResource = new PatientResource(converter, patientDAO, 9999);
+        patientResource = new PatientResource(converter, patientDAO, 9999, 100);
     }
 
     @Test

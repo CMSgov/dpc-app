@@ -1,11 +1,13 @@
 package gov.cms.dpc.common.utils;
 
 import ca.uhn.fhir.rest.gclient.IQuery;
+import jakarta.inject.Inject;
 import org.hl7.fhir.dstu3.model.Bundle;
 
 public class PagingService {
     private final int defaultCount;
 
+    @Inject
     public PagingService(int defaultCount) {
         this.defaultCount = defaultCount;
     }
