@@ -5,28 +5,31 @@ require 'simplecov'
 require 'axe-rspec'
 require 'capybara/rspec'
 
-SimpleCov.start 'rails' do
-  add_group 'Serializers', 'app/serializers'
-  add_group 'Services', 'app/services'
-  add_group 'Validators', 'app/validators'
-  add_group 'Components', 'app/components'
+# Accessibility tests are run separately and should not be subject to simplecov constraints
+unless ENV['ACCESSIBILITY'] == 'true'
+  SimpleCov.start 'rails' do
+    add_group 'Serializers', 'app/serializers'
+    add_group 'Services', 'app/services'
+    add_group 'Validators', 'app/validators'
+    add_group 'Components', 'app/components'
 
-  # Abstract Classes: can be removed after implementation
-  add_filter 'app/jobs/application_job.rb'
-  add_filter 'app/mailers/application_mailer.rb'
-  add_filter 'app/models/application_record.rb'
+    # Abstract Classes: can be removed after implementation
+    add_filter 'app/jobs/application_job.rb'
+    add_filter 'app/mailers/application_mailer.rb'
+    add_filter 'app/models/application_record.rb'
 
-  # Filter out ViewComponent / Lookbook previews
-  add_filter %r{app/components/.*/.*preview.rb}
+    # Filter out ViewComponent / Lookbook previews
+    add_filter %r{app/components/.*/.*preview.rb}
 
-  # Filter out utility tasks
-  add_filter 'lib/tasks/dpc.rake'
+    # Filter out utility tasks
+    add_filter 'lib/tasks/dpc.rake'
 
-  # Gems added already tested
+    # Gems added already tested
 
-  add_filter 'vendor'
-  SimpleCov.minimum_coverage 90
-  SimpleCov.minimum_coverage_by_file 0
+    add_filter 'vendor'
+    SimpleCov.minimum_coverage 90
+    SimpleCov.minimum_coverage_by_file 0
+  end
 end
 
 require 'webmock/rspec'

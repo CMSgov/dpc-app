@@ -20,11 +20,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.testcontainers.shaded.org.awaitility.core.ConditionTimeoutException;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
@@ -95,9 +97,16 @@ public class AggregationServiceTest {
 
         // Stop aggregation and make sure it pauses the batch
         APPLICATION.after();
-        await().until(() -> {
+        try {
+            await().pollInterval(1, TimeUnit.SECONDS).atMost(20, TimeUnit.SECONDS).until(() -> {
+                JobQueueBatch batch = queue.getJobBatches(jobID).get(0);
+                return batch.getStatus() == JobStatus.QUEUED;
+            });
+        } catch(ConditionTimeoutException e) {
             JobQueueBatch batch = queue.getJobBatches(jobID).get(0);
-            return batch.getStatus() == JobStatus.QUEUED;
-        });
+            String errorMsg = "Batch failed to reach queued status, current state of batch: " + batch.getStatus();
+            System.err.println(errorMsg);   // Print to stderr so the tree runner picks this up when running on GHA
+            fail(errorMsg);
+        }
     }
 }

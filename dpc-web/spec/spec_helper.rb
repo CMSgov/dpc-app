@@ -3,23 +3,33 @@
 require 'fakeredis/rspec'
 require 'simplecov'
 
-SimpleCov.start 'rails' do
-  track_files '**/{app,lib}/**/*.rb'
+require 'axe-rspec'
+require 'capybara/rspec'
 
-  add_group 'Serializers', 'app/serializers'
-  add_group 'Services', 'app/services'
-  add_group 'Validators', 'app/validators'
+# Accessibility tests are run separately and should not be subject to simplecov constraints
+unless ENV['ACCESSIBILITY'] == 'true'
+  SimpleCov.start 'rails' do
+    track_files '**/{app,lib}/**/*.rb'
 
-  add_filter 'app/jobs/application_job.rb'
-  add_filter 'app/channels/application_cable/connection.rb'
-  add_filter 'app/controllers/pages_controller.rb' # loads static content
-  add_filter 'vendor'
+    add_group 'Serializers', 'app/serializers'
+    add_group 'Services', 'app/services'
+    add_group 'Validators', 'app/validators'
 
-  SimpleCov.minimum_coverage 90
-  SimpleCov.minimum_coverage_by_file 80
+    add_filter 'app/jobs/application_job.rb'
+    add_filter 'app/channels/application_cable/connection.rb'
+    add_filter 'app/controllers/pages_controller.rb' # loads static content
+    add_filter 'vendor'
+
+    SimpleCov.minimum_coverage 90
+    SimpleCov.minimum_coverage_by_file 80
+  end
 end
 
+require 'webmock/rspec'
+WebMock.disable_net_connect!(allow_localhost: true, allow: ['github.com', 'objects.githubusercontent.com'])
+
 RSpec.configure do |config|
+  config.filter_run_excluding type: :system
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
