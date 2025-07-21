@@ -146,10 +146,6 @@ GEM
       rexml
     crass (1.0.6)
     csv (3.3.0)
-    database_cleaner-active_record (2.2.0)
-      activerecord (>= 5.a)
-      database_cleaner-core (~> 2.0.0)
-    database_cleaner-core (2.0.1)
     date (3.4.1)
     date_time_precision (0.8.1)
     descendants_tracker (0.0.4)
@@ -502,7 +498,6 @@ DEPENDENCIES
   climate_control
   coffee-rails (~> 5.0, >= 5.0.0)
   csv
-  database_cleaner-active_record (~> 2.2)
   devise (>= 4.9.3)
   devise-async (>= 1.0.0)
   devise-security (>= 0.17.0)
