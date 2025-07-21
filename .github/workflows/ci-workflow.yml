@@ -4,23 +4,23 @@ on:
   pull_request:
     paths:
       - .github/workflows/ci-workflow.yml
-      - dpc-admin/**
-      - dpc-aggregation/**
-      - dpc-api/**
-      - dpc-attribution/**
-      - dpc-bluebutton/**
-      - dpc-common/**
-      - dpc-consent/**
-      - dpc-macaroons/**
-      - dpc-portal/**
-      - dpc-queue/**
-      - dpc-smoketest/**
-      - dpc-test.sh
-      - dpc-testing/**
-      - dpc-web/**
-      - engines/**
-      - pom.xml
-      - src/**
+      - 'dpc-admin/**'
+      - 'dpc-aggregation/**'
+      - 'dpc-api/**'
+      - 'dpc-attribution/**'
+      - 'dpc-bluebutton/**'
+      - 'dpc-common/**'
+      - 'dpc-consent/**'
+      - 'dpc-macaroons/**'
+      - 'dpc-portal/**'
+      - 'dpc-queue/**'
+      - 'dpc-smoketest/**'
+      - 'dpc-test.sh'
+      - 'dpc-testing/**'
+      - 'dpc-web/**'
+      - 'engines/**'
+      - './pom.xml'
+      - 'src/**'
   workflow_dispatch: # Allow manual trigger
 
 permissions:
