@@ -84,7 +84,7 @@ public class AggregationEngineHealthCheckTest {
                 Collections.singletonList("1"),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
@@ -112,7 +112,7 @@ public class AggregationEngineHealthCheckTest {
                 Collections.singletonList("1"),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
@@ -138,7 +138,7 @@ public class AggregationEngineHealthCheckTest {
                 Collections.singletonList("1"),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         Mockito.doThrow(new RuntimeException("Error")).when(queue).claimBatch(Mockito.any(UUID.class));
@@ -167,7 +167,7 @@ public class AggregationEngineHealthCheckTest {
                 Collections.singletonList("1"),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);

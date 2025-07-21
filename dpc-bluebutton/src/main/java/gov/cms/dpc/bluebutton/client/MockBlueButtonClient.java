@@ -65,7 +65,6 @@ public class MockBlueButtonClient implements BlueButtonClient {
             );
 
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
-    public static final OffsetDateTime BFD_TRANSACTION_TIME = OffsetDateTime.ofInstant(Instant.now().truncatedTo(ChronoUnit.MILLIS), ZoneOffset.UTC);
     public static final OffsetDateTime TEST_LAST_UPDATED = OffsetDateTime.parse("2020-01-01T00:00:00-05:00");
 
     private static final String JSON = ".json";
@@ -127,7 +126,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
         try(InputStream sampleData = MockBlueButtonClient.class.getClassLoader().getResourceAsStream(path)) {
             final var nextBundle = parseResource(Bundle.class, sampleData, XML);
-            nextBundle.getMeta().setLastUpdated(Date.from(BFD_TRANSACTION_TIME.toInstant()));
+            nextBundle.getMeta().setLastUpdated(Date.from(getBfdTransactionTime().toInstant()));
             return nextBundle;
         } catch(IOException ex) {
             throw new ResourceNotFoundException("Missing next bundle");
@@ -177,8 +176,8 @@ public class MockBlueButtonClient implements BlueButtonClient {
             // bundles to make sure the bundle was created after the last data load.  At some point in the past, BFD had
             // an issue with transaction time regression, and this was how it was dealt with.
             Date lastUpdated = beneId.equals(MBI_BENE_ID_MAP.get(TEST_PATIENT_FOR_API_TRANSACTION_TIME)) ?
-                Date.from(BFD_TRANSACTION_TIME.toInstant().minus(24, ChronoUnit.HOURS)) :
-                Date.from(BFD_TRANSACTION_TIME.toInstant());
+                Date.from(getBfdTransactionTime().toInstant().minus(24, ChronoUnit.HOURS)) :
+                Date.from(getBfdTransactionTime().toInstant());
 
             bundle.getMeta().setLastUpdated(lastUpdated);
             return bundle;
@@ -221,7 +220,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
     private Bundle loadEmptyBundle() {
         try(InputStream sampleData = MockBlueButtonClient.class.getClassLoader().getResourceAsStream(SAMPLE_EMPTY_BUNDLE + JSON)) {
             final var bundle = parseResource(Bundle.class, sampleData, JSON);
-            bundle.getMeta().setLastUpdated(Date.from(BFD_TRANSACTION_TIME.toInstant()));
+            bundle.getMeta().setLastUpdated(Date.from(getBfdTransactionTime().toInstant()));
             return bundle;
         } catch(IOException ex) {
             throw formNoPatientException(null);
@@ -265,5 +264,13 @@ public class MockBlueButtonClient implements BlueButtonClient {
         } else {
             throw new IllegalArgumentException("Resource: " + resourceName + " not found");
         }
+    }
+
+    /**
+     * Gets the mock BFD transaction time.
+     * @return {@link OffsetDateTime}
+     */
+    static public OffsetDateTime getBfdTransactionTime() {
+        return OffsetDateTime.ofInstant(Instant.now().truncatedTo(ChronoUnit.MILLIS), ZoneOffset.UTC);
     }
 }

@@ -84,7 +84,7 @@ public class AggregationServiceTest {
             mbis,
             Collections.singletonList(DPCResourceType.Patient),
             null,
-            MockBlueButtonClient.BFD_TRANSACTION_TIME,
+            MockBlueButtonClient.getBfdTransactionTime(),
             null, null, true, false);
 
         // Wait for dpc-aggregation to pick up the batch, set status to RUNNING and hang on getting the patient from BFD
