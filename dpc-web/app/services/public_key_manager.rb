@@ -23,6 +23,11 @@ class PublicKeyManager
                                  params: { label:, public_key:,
                                            snippet_signature: })
 
+    if duplicate_key?(api_client.response_body)
+      return { response: false,
+               message: I18n.t('errors.duplicate_key.status') }
+    end
+
     { response: api_client.response_successful?,
       message: api_client.response_body }
   end
@@ -60,5 +65,9 @@ class PublicKeyManager
 
   def strip_carriage_returns(str)
     str.gsub("\r", '')
+  end
+
+  def duplicate_key?(msg)
+    msg&.include?('duplicate key value violates unique constraint')
   end
 end
