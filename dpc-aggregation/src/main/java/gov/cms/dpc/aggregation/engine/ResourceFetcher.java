@@ -9,10 +9,8 @@ import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
-import io.reactivex.Flowable;
 import org.apache.commons.lang3.time.StopWatch;
 import org.hl7.fhir.dstu3.model.*;
-import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -71,8 +69,8 @@ class ResourceFetcher {
      * @param headers headers
      * @return a flow with all the resources for specific patient
      */
-    Flowable<List<Resource>> fetchResources(Patient patient, Map<String, String> headers) {
-        return Flowable.fromCallable(() -> {
+    List<Resource> fetchResources(Patient patient, Map<String, String> headers) {
+        try {
             StopWatch stopWatch = StopWatch.createStarted();
 
             String fetchId = UUID.randomUUID().toString();
@@ -84,8 +82,11 @@ class ResourceFetcher {
             logFetchDuration(stopWatch.getDuration(), bundles.size(), fetchId);
 
             return bundles;
-        })
-                .onErrorResumeNext((Throwable error) -> handleError(patient, error));
+        } catch (JobQueueFailure jqf) {
+            throw jqf;
+        } catch (Exception e) {
+            return handleError(patient, e);
+        }
     }
 
     /**
@@ -119,16 +120,12 @@ class ResourceFetcher {
      * @param error the error
      * @return a Flowable of list of resources
      */
-    private Publisher<List<Resource>> handleError(Patient patient, Throwable error) {
-        if (error instanceof JobQueueFailure) {
-            // JobQueueFailure is an internal error. Just pass it along as an error.
-            return Flowable.error(error);
-        }
+    private List<Resource> handleError(Patient patient, Throwable error) {
 
         // Other errors should be turned into OperationOutcome and just recorded.
         logger.error("Turning error into OperationOutcome.", error);
         final var operationOutcome = formOperationOutcome(getPatientMBI(patient), error);
-        return Flowable.just(List.of(operationOutcome));
+        return List.of(operationOutcome);
     }
 
     /**
