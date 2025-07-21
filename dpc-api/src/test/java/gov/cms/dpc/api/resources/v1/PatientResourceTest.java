@@ -2,7 +2,11 @@ package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
@@ -11,16 +15,20 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.aggregation.service.ConsentResult;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.TestOrganizationContext;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
+import gov.cms.dpc.queue.DistributedBatchQueue;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.factories.BundleFactory;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
@@ -29,8 +37,13 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 import org.hl7.fhir.dstu3.model.*;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +96,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testCreatePatientReturnsAppropriateHeaders() {
+    void testCreatePatientReturnsAppropriateHeaders() {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         Patient patient = APITestHelpers.createPatientResource("4S41C00AA00", APITestHelpers.ORGANIZATION_ID);
 
@@ -529,7 +542,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testOptInPatient() throws GeneralSecurityException, IOException, URISyntaxException {
+    void testOptInPatient() throws GeneralSecurityException, IOException, URISyntaxException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
         APITestHelpers.setupPractitionerTest(client, parser);
         APITestHelpers.setupPatientTest(client, parser);
@@ -561,7 +574,69 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testGetPatientByUUID() throws GeneralSecurityException, IOException, URISyntaxException {
+    void testGetPatientEverythingAsync() throws GeneralSecurityException, IOException, URISyntaxException {
+        IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25), true);
+        LoggingInterceptor interceptor = null;
+
+        APITestHelpers.setupPractitionerTest(client, parser);
+        APITestHelpers.setupPatientTest(client, parser);
+
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
+        Patient patient = fetchPatient(client, mbi);
+        Practitioner practitioner = fetchPractitionerByNPI(client);
+        final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
+
+        // This is some seriously hacky stuff to get around the HAPI client not being able to return response headers.
+        // Unfortunately for us, the job ID we're about to create is only returned in the Content-Location header, and
+        // this seemed like the least terrible way to get it ¯\_(ツ)_/¯.
+        final String[] headers = new String[1];
+        client.registerInterceptor(new IClientInterceptor() {
+            @Override
+            public void interceptRequest(IHttpRequest theRequest) { }
+
+            @Override
+            public void interceptResponse(IHttpResponse theResponse) throws IOException {
+                headers[0] = theResponse.getHeaders(HttpHeaders.CONTENT_LOCATION).get(0);
+            }
+        });
+
+        // Submit job to the queue and allow interceptor to return the jobId.
+        client
+            .operation()
+            .onInstance(new IdType("Patient", patientId))
+            .named("$everything")
+            .withNoParameters(Parameters.class)
+            .useHttpGet()
+            .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
+            .execute();
+
+        // Extract the jobId from the headers returned from the client interceptor
+        String contentLocation = headers[0];
+        UUID jobId = UUID.fromString(contentLocation.substring( contentLocation.lastIndexOf("/")+1 ));
+
+        // Connect to our queue DB
+        final org.hibernate.cfg.Configuration conf = new Configuration();
+        SessionFactory sessionFactory = conf.configure().buildSessionFactory();
+        DistributedBatchQueue queue = new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
+
+        // Verify our job was submitted correctly
+        List<JobQueueBatch> batches = queue.getJobBatches(jobId);
+        assertEquals(1, batches.size());
+
+        JobQueueBatch batch = batches.get(0);
+        assertEquals(jobId, batch.getJobID());
+        assertEquals(ORGANIZATION_NPI, batch.getOrgNPI());
+        assertEquals(practitioner.getIdentifierFirstRep().getValue(), batch.getProviderNPI());
+        assertEquals(3, batch.getResourceTypes().size());
+        assertTrue(batch.getResourceTypes().containsAll( List.of(DPCResourceType.Patient, DPCResourceType.Coverage, DPCResourceType.ExplanationOfBenefit) ));
+
+        assertEquals(1, batch.getPatients().size());
+        String mbiFromJob = batch.getPatients().get(0);
+        assertEquals(mbi, mbiFromJob);
+    }
+
+    @Test
+    void testGetPatientByUUID() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -579,7 +654,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testDeletePatient() throws GeneralSecurityException, IOException, URISyntaxException {
+    void testDeletePatient() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -593,7 +668,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testPatientPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException {
+    void testPatientPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -706,9 +781,13 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     private IGenericClient generateClient(String orgNPI, String keyLabel) throws IOException, URISyntaxException, GeneralSecurityException {
+        return generateClient(orgNPI, keyLabel, false);
+    }
+
+    private IGenericClient generateClient(String orgNPI, String keyLabel, boolean async) throws IOException, GeneralSecurityException, URISyntaxException {
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, APITestHelpers.ORGANIZATION_ID, orgNPI, getAdminURL());
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, APITestHelpers.ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
-        return APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight(), false, true, false);
+        return APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight(), false, true, async);
     }
 
     private String generateProvenance(String orgID, String practitionerID) {
