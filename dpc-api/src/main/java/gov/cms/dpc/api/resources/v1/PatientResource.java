@@ -15,12 +15,12 @@ import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
-import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.FHIRHeaders;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
@@ -201,7 +201,7 @@ public class PatientResource extends AbstractPatientResource {
                              @ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientId,
                              @QueryParam("_since") @NoHtml String sinceParam,
                              @Context HttpServletRequest request,
-                             @HeaderParam(Constants.PREFER_HEADER) @DefaultValue("") String preferHeader) {
+                             @HeaderParam(FHIRHeaders.PREFER_HEADER) @DefaultValue("") String preferHeader) {
         final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
         final UUID practitionerId = FHIRExtractors.getEntityUUID(performer.getOnBehalfOfReference().getReference());
         Practitioner practitioner = this.client
@@ -232,7 +232,7 @@ public class PatientResource extends AbstractPatientResource {
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
         final String requestUrl = APIHelpers.fetchRequestUrl(request);
 
-        if(preferHeader.equals(Constants.PREFER_ASYNC)) {
+        if(preferHeader.equals(FHIRHeaders.PREFER_RESPOND_ASYNC)) {
             // Submit asynchronous job
             final UUID jobID = this.dataService.createJob(
                 orgId,
@@ -244,7 +244,7 @@ public class PatientResource extends AbstractPatientResource {
                 APIHelpers.fetchTransactionTime(bfdClient),
                 requestingIP,
                 requestUrl,
-                true,
+                false,
                 false
             );
             return Response.status(Response.Status.ACCEPTED).contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
