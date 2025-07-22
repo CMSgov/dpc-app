@@ -23,6 +23,7 @@ services:
       - "./dpc-web/coverage:/dpc-web/coverage"
       - ./tmp/letter_opener/web:/dpc-web/tmp/letter_opener
       - "./dpc-web/Gemfile.lock:/dpc-web/Gemfile.lock"
+      - "./dpc-web/package-lock.json:/dpc-web/package-lock.json"
       - "./dpc-web/app:/dpc-web/app"
       - "./dpc-web/db:/dpc-web/db"
       - "./dpc-web/spec:/dpc-web/spec"
@@ -98,6 +99,7 @@ services:
       - "./dpc-admin/coverage:/dpc-admin/coverage"
       - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
       - "./dpc-admin/Gemfile.lock:/dpc-admin/Gemfile.lock"
+      - "./dpc-admin/package-lock.json:/dpc-admin/package-lock.json"
     environment:
       - REDIS_URL=redis://redis
       - GOLDEN_MACAROON=${GOLDEN_MACAROON}
@@ -180,6 +182,7 @@ services:
       - "./dpc-portal/package-lock.json:/dpc-portal/package-lock.json"
       - "./dpc-portal/Gemfile:/dpc-portal/Gemfile"
       - "./dpc-portal/Gemfile.lock:/dpc-portal/Gemfile.lock"
+      - "./dpc-portal/package-lock.json:/dpc-portal/package-lock.json"
 
       # Mount coverage and utility files
       - "./dpc-portal/coverage:/dpc-portal/coverage"
