@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
-import io.reactivex.Flowable;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -45,8 +44,7 @@ class ResourceFetcherUnitTest {
                 MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
-        Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
-        List<Resource> resources = results.flatMap(Flowable::fromIterable).toList().blockingGet();
+       List<Resource> resources = fetcher.fetchResources(testPatient, Map.of());
 
         assertEquals(1, resources.size());
         assertEquals(testPatient.getId(), resources.get(0).getId());
@@ -60,8 +58,7 @@ class ResourceFetcherUnitTest {
                 MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
-        Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
-        List<Resource> resources = results.flatMap(Flowable::fromIterable).toList().blockingGet();
+        List<Resource> resources = fetcher.fetchResources(testPatient, Map.of());
 
         assertEquals(32, resources.size());
         assertTrue(resources.get(0).getId().contains("carrier-20587716665"));
@@ -75,8 +72,7 @@ class ResourceFetcherUnitTest {
                 MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
-        Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
-        List<Resource> resources = results.flatMap(Flowable::fromIterable).toList().blockingGet();
+        List<Resource> resources = fetcher.fetchResources(testPatient, Map.of());
 
         assertEquals(3, resources.size());
         assertTrue(resources.get(0).getId().contains("part-a-20140000008325"));
@@ -90,8 +86,7 @@ class ResourceFetcherUnitTest {
                 MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
-        Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
-        List<Resource> resources = results.flatMap(Flowable::fromIterable).toList().blockingGet();
+        List<Resource> resources = fetcher.fetchResources(testPatient, Map.of());
 
         assertEquals(1, resources.size());
         assertEquals(testPatient.getId(), resources.get(0).getId());
@@ -105,8 +100,7 @@ class ResourceFetcherUnitTest {
                 MockBlueButtonClient.BFD_TRANSACTION_TIME.plusDays(1)
         );
 
-        Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
-        JobQueueFailure exception = assertThrows(JobQueueFailure.class, () -> results.flatMap(Flowable::fromIterable).toList().blockingGet());
+        JobQueueFailure exception = assertThrows(JobQueueFailure.class, () -> fetcher.fetchResources(testPatient, Map.of()));
 
         assertEquals("BFD's transaction time regression", exception.getMessage());
     }
@@ -124,9 +118,7 @@ class ResourceFetcherUnitTest {
         Mockito.doThrow(new ResourceNotFoundException("test exception"))
                 .when(fetcher).fetchFirst(eq(testPatient), any());
 
-        Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
-        List<Resource> errors = results.flatMap(Flowable::fromIterable).toList().blockingGet();
-
+        List<Resource> errors = fetcher.fetchResources(testPatient, Map.of());
         assertEquals(1, errors.size());
         OperationOutcome outcome = (OperationOutcome) errors.get(0);
         assertEquals(String.format("Patient resource not found in Blue Button for id: %s", testPatientMbi), outcome.getIssueFirstRep().getDetails().getText());
@@ -145,8 +137,7 @@ class ResourceFetcherUnitTest {
         Mockito.doThrow(new FhirClientConnectionException("fhir client exception"))
                 .when(fetcher).fetchFirst(eq(testPatient), any());
 
-        Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
-        List<Resource> errors = results.flatMap(Flowable::fromIterable).toList().blockingGet();
+        List<Resource> errors = fetcher.fetchResources(testPatient, Map.of());
 
         assertEquals(1, errors.size());
         OperationOutcome outcome = (OperationOutcome) errors.get(0);
@@ -167,8 +158,7 @@ class ResourceFetcherUnitTest {
         Mockito.doThrow(new IllegalStateException(exceptionMsg))
                 .when(fetcher).fetchFirst(eq(testPatient), any());
 
-        Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
-        List<Resource> errors = results.flatMap(Flowable::fromIterable).toList().blockingGet();
+        List<Resource> errors = fetcher.fetchResources(testPatient, Map.of());
 
         assertEquals(1, errors.size());
         OperationOutcome outcome = (OperationOutcome) errors.get(0);
@@ -194,8 +184,7 @@ class ResourceFetcherUnitTest {
         );
         Mockito.doReturn(bundle).when(fetcher).fetchFirst(eq(testPatient), any());
 
-        Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
-        List<Resource> errors = results.flatMap(Flowable::fromIterable).toList().blockingGet();
+        List<Resource> errors = fetcher.fetchResources(testPatient, Map.of());
 
         assertEquals(1, errors.size());
         OperationOutcome outcome = (OperationOutcome) errors.get(0);
@@ -210,9 +199,8 @@ class ResourceFetcherUnitTest {
                 MockBlueButtonClient.BFD_TRANSACTION_TIME
         );
 
-        Flowable<List<Resource>> results = fetcher.fetchResources(testPatient, Map.of());
 
-        JobQueueFailure exception = assertThrows(JobQueueFailure.class, () -> results.flatMap(Flowable::fromIterable).toList().blockingGet());
+        JobQueueFailure exception = assertThrows(JobQueueFailure.class, () -> fetcher.fetchResources(testPatient, Map.of()));
 
         assertTrue(exception.getMessage().contains("Unexpected resource type: Practitioner"));
     }
