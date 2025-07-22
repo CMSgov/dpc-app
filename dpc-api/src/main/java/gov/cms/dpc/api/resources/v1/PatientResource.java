@@ -1,7 +1,9 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -41,6 +43,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -78,6 +81,33 @@ public class PatientResource extends AbstractPatientResource {
         this.pagingService = pagingService;
     }
 
+    private IQuery<Bundle> buildPatientSearchQuery(String orgId, @Nullable String patientMBI) {
+        IQuery<Bundle> query = this.client
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+                .where(Patient.ORGANIZATION.hasId(orgId))
+                .returnBundle(Bundle.class);
+        if (patientMBI != null && !patientMBI.isEmpty()) {
+            // Handle MBI parsing
+            // This should come out as part of DPC-432
+            final String expandedMBI;
+            if (IDENTIFIER_PATTERN.matcher(patientMBI).matches()) {
+                expandedMBI = patientMBI;
+            } else {
+                expandedMBI = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientMBI);
+            }
+            query = query.where(Patient.IDENTIFIER.exactly().identifier(expandedMBI));
+        }
+
+        return query;
+    }
+    private Bundle generateSummaryBundle(IQuery<Bundle> query) {
+        return query.summaryMode(SummaryEnum.COUNT)
+                .count(0)
+                .execute();
+    }
+
     @GET
     @FHIR
     @Timed
@@ -94,27 +124,12 @@ public class PatientResource extends AbstractPatientResource {
                                 @QueryParam(value = "_count") @DefaultValue("-1") int count,
                                 @ApiParam(value = "Page number") // -1 means "do not paginate" for compatibility reasons
                                 @QueryParam(value = "_page") @DefaultValue("-1") int page) {
-        var request = this.client
-                .search()
-                .forResource(Patient.class)
-                .encodedJson()
-                .where(Patient.ORGANIZATION.hasId(organization.getOrganization().getId()))
-                .returnBundle(Bundle.class);
+        var request = this.buildPatientSearchQuery(organization.getOrganization().getId(), patientMBI);
 
-        if (patientMBI != null && !patientMBI.isEmpty()) {
-
-            // Handle MBI parsing
-            // This should come out as part of DPC-432
-            final String expandedMBI;
-            if (IDENTIFIER_PATTERN.matcher(patientMBI).matches()) {
-                expandedMBI = patientMBI;
-            } else {
-                expandedMBI = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientMBI);
-            }
-            request = request.where(Patient.IDENTIFIER.exactly().identifier(expandedMBI));
+        if (count == 0) {
+            return generateSummaryBundle(request);
         }
-
-        if (page >= 1 || count == 0) {
+        else if (page >= 1) {
             return pagingService.handlePaging(request, count, page, "/v1/Patient");
         }
         else {
