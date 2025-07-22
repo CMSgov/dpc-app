@@ -166,7 +166,6 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
     }
 
     private void removeAttributionRelationships(PatientEntity patientEntity) {
-
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaDelete<AttributionRelationship> criteriaDelete = builder.createCriteriaDelete(AttributionRelationship.class);
         final Root<AttributionRelationship> root = criteriaDelete.from(AttributionRelationship.class);

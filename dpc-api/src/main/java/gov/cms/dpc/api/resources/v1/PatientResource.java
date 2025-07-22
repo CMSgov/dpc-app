@@ -18,7 +18,6 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.annotations.NoHtml;
-import gov.cms.dpc.common.utils.PagingService;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -66,19 +65,19 @@ public class PatientResource extends AbstractPatientResource {
     private final FhirValidator validator;
     private final DataService dataService;
     private final BlueButtonClient bfdClient;
-    private final PagingService pagingService;
+    private final int defaultPageSize;
 
     @Inject
     public PatientResource(@Named("attribution") IGenericClient client,
                            FhirValidator validator,
                            DataService dataService,
                            BlueButtonClient bfdClient,
-                           PagingService pagingService) {
+                           @Named("defaultPageSize") int defaultPageSize) {
         this.client = client;
         this.validator = validator;
         this.dataService = dataService;
         this.bfdClient = bfdClient;
-        this.pagingService = pagingService;
+        this.defaultPageSize = defaultPageSize;
     }
 
     private IQuery<Bundle> buildPatientSearchQuery(String orgId, @Nullable String patientMBI) {
@@ -130,11 +129,14 @@ public class PatientResource extends AbstractPatientResource {
             return generateSummaryBundle(request);
         }
         else if (page >= 1) {
-            return pagingService.handlePaging(request, count, page, "/v1/Patient");
+            if (count == -1) {
+                count = this.defaultPageSize;
+            }
+
+            request.offset(count*(page-1));
+            request.count(count);
         }
-        else {
-            return request.execute(); // deprecated - legacy behavior for clients relying on full roster
-        }
+        return request.execute(); // this should call attribution
     }
 
     @FHIR

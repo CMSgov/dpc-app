@@ -3,7 +3,9 @@ package gov.cms.dpc.attribution.resources.v1;
 import gov.cms.dpc.attribution.jdbi.*;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.PatientEntity;
+import gov.cms.dpc.common.utils.PagingService;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +34,7 @@ class PatientResourceUnitTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        patientResource = new PatientResource(converter, patientDAO, 9999, 100);
+        patientResource = new PatientResource(converter, patientDAO, 9999, 100, new PagingService());
     }
 
     @Test
@@ -56,13 +58,15 @@ class PatientResourceUnitTest {
                 .thenReturn(pagedEntities);
 
         // this is the droid you are looking for
-        List<Patient> results = patientResource.searchPatients(
+//        List<Patient> results = patientResource.searchPatients(
+        List<Bundle.BundleEntryComponent> results = patientResource.searchPatients(
                 null,
                 null,
                 orgRef,
                 10,
                 30
-        );
+        ).getEntry();
+
 
         assertEquals(10, results.size());
         for (int i = 0; i < results.size(); i++) {

@@ -1,16 +1,15 @@
 package gov.cms.dpc.common.utils;
 
-import ca.uhn.fhir.rest.gclient.IQuery;
+import gov.cms.dpc.common.entities.PatientEntity;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import org.hl7.fhir.dstu3.model.Bundle;
+import java.util.List;
 
 public class PagingService {
-    private final int defaultCount;
 
     @Inject
-    public PagingService(@Named("defaultPageSize") int defaultCount) {
-        this.defaultCount = defaultCount;
+    public PagingService() {
+        // TODO document why this constructor is empty
     }
 
     private String formatURL(String url, int page) {
@@ -21,24 +20,29 @@ public class PagingService {
         bundle.addLink().setRelation(name).setUrl(formatURL(path, page));
     }
 
-    public Bundle handlePaging(IQuery<Bundle> request, int count, int page, String requestPath) {
-        if (count == -1) {
-            count = defaultCount;
-        }
+    public Bundle handlePaging(List<PatientEntity> patientEntityList, int page, String requestPath) {
+//        Bundle bundle = new Bundle();
+        Bundle bundle = (Bundle) patientEntityList;
+//        bundle.setType(Bundle.BundleType.SEARCHSET);
 
-        request.offset(count*(page-1));
-        request.count(count);
-        Bundle resultBundle = request.execute(); // this should call attribution
+        addRelationLink(bundle, "self", requestPath, page);
+        addRelationLink(bundle, "first", requestPath, 1);
+        if (page > 1) addRelationLink(bundle, "previous", requestPath, page-1);
 
-        addRelationLink(resultBundle, "self", requestPath, page);
-        addRelationLink(resultBundle, "first", requestPath, 1);
-        if (page > 1) addRelationLink(resultBundle, "previous", requestPath, page-1);
+        // TODO add a hasNext check - can't always include a "next" link
+        addRelationLink(bundle, "next", requestPath, page+1);
 
-        // need to see if I can pull this from attribution - can't always include a "next" link
-        addRelationLink(resultBundle, "next", requestPath, page+1);
-//        if (page < lastPage) addRelationLink(resultBundle, "next", requestPath, page+1);
-//        addRelationLink(resultBundle, "last", requestPath, lastPage);
+//        // Add patient resources as Bundle entries
+//        for (Patient patient : patients) {
+//            Bundle.BundleEntryComponent entry = new Bundle.BundleEntryComponent();
+//            entry.setResource(patient);
+//            bundle.addEntry(entry);
+//        }
 
-        return resultBundle;
+        return bundle;
+//        return this.dao.patientSearch(daoSearchQuery)
+//                .stream()
+//                .map(p -> this.converter.toFHIR(Patient.class, p))
+//                .collect(Collectors.toList());
     }
 }
