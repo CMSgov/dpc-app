@@ -374,7 +374,7 @@ public class GroupResource extends AbstractGroupResource {
         if (headerPrefer == null || StringUtils.isEmpty(headerPrefer)) {
             throw new BadRequestException("The 'Prefer' header must be '" + FHIRHeaders.PREFER_RESPOND_ASYNC + "'");
         }
-        if (StringUtils.isNotEmpty(headerPrefer) && !headerPrefer.equals(FHIRHeaders.PREFER_RESPOND_ASYNC)) {
+        if (!headerPrefer.equals(FHIRHeaders.PREFER_RESPOND_ASYNC)) {
             throw new BadRequestException("The 'Prefer' header must be '" + FHIRHeaders.PREFER_RESPOND_ASYNC + "'");
         }
 

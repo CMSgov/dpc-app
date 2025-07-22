@@ -393,6 +393,36 @@ public class GroupResourceUnitTest {
     }
 
     @Test
+    void testExportWithNullPreferHeader() {
+        Organization organization = new Organization();
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "fakeId", null, FHIRMediaTypes.NDJSON, "fakeSince", null, request);
+        });
+    }
+
+    @Test
+    void testExportWithEmptyPreferHeader() {
+        Organization organization = new Organization();
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "fakeId", null, FHIRMediaTypes.NDJSON, "fakeSince", "", request);
+        });
+    }
+
+    @Test
+    void testExportWithBadPreferHeader() {
+        Organization organization = new Organization();
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "fakeId", null, FHIRMediaTypes.NDJSON, "fakeSince", "badPrefer", request);
+        });
+    }
+
+    @Test
     public void testOutputFormatSetting() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
