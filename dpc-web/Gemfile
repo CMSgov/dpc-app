@@ -49,7 +49,7 @@ gem 'rack', '>= 3.1.14'
 gem 'rack-session', '>= 2.1.1'
 gem 'redis-namespace'
 gem 'bootstrap-table-rails'
-gem 'nokogiri', '>= 1.18.3'
+gem 'nokogiri', '>= 1.18.9'
 gem 'net-imap', '>= 0.5.8'
 
 gem 'api_client', path: 'vendor/api_client'
