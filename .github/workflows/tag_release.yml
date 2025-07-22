@@ -3,11 +3,6 @@ name: utility-tag-repo
 on:
   workflow_call:
     inputs:
-      runner:
-        description: Which runner to use
-        required: false
-        default: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-        type: 'string'
       repo_ref:
         description: Which branch or tag
         required: true
@@ -24,7 +19,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
-    runs-on: ${{ inputs.runner }}
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     outputs:
       next_rev: ${{ steps.set_revs.outputs.next_rev }}
     steps:
