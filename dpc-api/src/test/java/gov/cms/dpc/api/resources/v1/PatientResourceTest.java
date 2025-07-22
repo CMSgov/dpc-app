@@ -629,6 +629,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(practitioner.getIdentifierFirstRep().getValue(), batch.getProviderNPI());
         assertEquals(3, batch.getResourceTypes().size());
         assertTrue(batch.getResourceTypes().containsAll( List.of(DPCResourceType.Patient, DPCResourceType.Coverage, DPCResourceType.ExplanationOfBenefit) ));
+        assertFalse(batch.isBulk());
 
         assertEquals(1, batch.getPatients().size());
         String mbiFromJob = batch.getPatients().get(0);
