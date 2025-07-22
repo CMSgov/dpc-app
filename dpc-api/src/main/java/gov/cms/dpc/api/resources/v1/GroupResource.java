@@ -316,7 +316,7 @@ public class GroupResource extends AbstractGroupResource {
 
         final boolean isSmoke = config.getLookBackExemptOrgs().contains(orgID.toString());
         final UUID jobID = this.dataService.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true, isSmoke);
-                final int totalPatients = attributedPatients.size();
+        final int totalPatients = attributedPatients.size();
         final String resourcesRequested = resources.stream().map(DPCResourceType::getPath).collect(Collectors.joining(";"));
         logger.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},orgId={},totalPatients={},resourcesRequested={},queueSubmitTime={}", "/Group/$export",jobID, orgID, totalPatients, resourcesRequested, eventTime);
         return Response.status(Response.Status.ACCEPTED)
@@ -369,13 +369,13 @@ public class GroupResource extends AbstractGroupResource {
     private static void checkExportRequest(String outputFormat, String headerPrefer) {
         // _outputFormat only supports FHIR_NDJSON, APPLICATION_NDJSON, NDJSON
         if (!StringUtils.equalsAnyIgnoreCase(outputFormat, FHIR_NDJSON, APPLICATION_NDJSON, NDJSON)) {
-            throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson', 'application/ndjson', or 'ndjson' ");
+            throw new BadRequestException("'_outputFormat' query parameter must be '" + FHIR_NDJSON + "', '" + APPLICATION_NDJSON + "', or '" + NDJSON +"' ");
         }
         if (headerPrefer == null || StringUtils.isEmpty(headerPrefer)) {
-            throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
+            throw new BadRequestException("The 'Prefer' header must be '" + FHIRHeaders.PREFER_RESPOND_ASYNC + "'");
         }
         if (StringUtils.isNotEmpty(headerPrefer) && !headerPrefer.equals(FHIRHeaders.PREFER_RESPOND_ASYNC)) {
-            throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
+            throw new BadRequestException("The 'Prefer' header must be '" + FHIRHeaders.PREFER_RESPOND_ASYNC + "'");
         }
 
     }

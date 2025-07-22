@@ -248,7 +248,7 @@ class PatientResourceUnitTest {
                 bfdClient.requestPatientFromServer(anyString(), any(), any())
         ).thenReturn(bundle);
 
-        Response httpResponse = patientResource.everything(organizationPrincipal, provenance, patientId, since, request, "");
+        Response httpResponse = patientResource.everything(organizationPrincipal, provenance, patientId, since, request, baseUrl);
         Bundle actualResponse = (Bundle) httpResponse.getEntity();
         assertEquals(bundle, actualResponse);
     }
@@ -304,7 +304,7 @@ class PatientResourceUnitTest {
         String since = "2000-01-01T12:00+00:00";
         OffsetDateTime sinceTime = OffsetDateTime.parse(since, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         HttpServletRequest request = mock(HttpServletRequest.class);
-        String requestUrl = "http://localhost:3000/v1/Patient/12345/everything";
+        String requestUrl = "http://localhost:3000/v1/Patient/12345/$everything";
         String requestIp = "200.0.200.200";
         when(request.getRequestURL()).thenReturn(new StringBuffer(requestUrl));
         when(request.getHeader(HttpHeaders.X_FORWARDED_FOR)).thenReturn(requestIp);
@@ -399,7 +399,7 @@ class PatientResourceUnitTest {
         ).thenReturn(bundle);
 
         ForbiddenOperationException exception = assertThrows(ForbiddenOperationException.class, () -> {
-            patientResource.everything(organizationPrincipal, provenance, patientId, since, request, "");
+            patientResource.everything(organizationPrincipal, provenance, patientId, since, request, baseUrl);
         });
 
         assertEquals(HttpStatus.FORBIDDEN_403, exception.getStatusCode());
