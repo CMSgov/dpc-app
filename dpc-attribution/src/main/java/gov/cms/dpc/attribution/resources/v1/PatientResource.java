@@ -92,14 +92,12 @@ public class PatientResource extends AbstractPatientResource {
         List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery);
         Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.SEARCHSET);
+        List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).collect(Collectors.toList());
         if (count == -1) {
-            return (Bundle) patientEntities
-                    .stream()
-                    .map(p -> this.converter.toFHIR(Patient.class, p))
-                    .collect(Collectors.toList());
+            return this.pagingService.convertToBundle(patients);
         }
         int page = pageOffset/count + 1;
-        return this.pagingService.handlePaging(patientEntities, page, "/v1/Patient");
+        return this.pagingService.handlePaging(patients, page, "/v1/Patient");
     }
 
     @GET

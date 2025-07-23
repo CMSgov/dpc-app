@@ -6,7 +6,6 @@ import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.utils.PagingService;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
@@ -58,21 +57,21 @@ class PatientResourceUnitTest {
                 .thenReturn(pagedEntities);
 
         // this is the droid you are looking for
-//        List<Patient> results = patientResource.searchPatients(
-        List<Bundle.BundleEntryComponent> results = patientResource.searchPatients(
+        Bundle resultBundle = patientResource.searchPatients(
                 null,
                 null,
                 orgRef,
                 10,
                 30
-        ).getEntry();
+        );
+        List<Bundle.BundleEntryComponent> results = resultBundle.getEntry();
 
 
         assertEquals(10, results.size());
         for (int i = 0; i < results.size(); i++) {
-            Patient expected = new Patient();
-            expected.setId(pagedEntities.get(i).getID().toString());
-            assertEquals(expected.getId(), results.get(i).getId());
+            String expectedId = pagedEntities.get(i).getID().toString();
+            String actualId = results.get(i).getResource().getId();
+            assertEquals(expectedId, actualId);
         }
     }
 
