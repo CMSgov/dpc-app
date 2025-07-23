@@ -126,19 +126,18 @@ public class PatientResource extends AbstractPatientResource {
                                 @ApiParam(value = "Patient MBI")
                                 @QueryParam(value = Patient.SP_IDENTIFIER) @NoHtml String patientMBI,
                                 @ApiParam(value = "Patients per page")
-                                @QueryParam(value = "_count") @DefaultValue("-1") int count,
-                                @ApiParam(value = "Page number") // -1 means "do not paginate" for compatibility reasons
-                                @QueryParam(value = "_page") @DefaultValue("-1") int page) {
+                                @QueryParam(value = "_count") Integer count,
+                                @ApiParam(value = "Page number") // null means "do not paginate" for compatibility reasons
+                                @QueryParam(value = "_page") Integer page) {
         var request = this.buildPatientSearchQuery(organization.getOrganization().getId(), patientMBI);
+        if (count == null) {
+            count = this.defaultPageSize;
+        }
 
         if (count == 0) {
             return generateSummaryBundle(request);
         }
-        else if (page >= 1) {
-            if (count == -1) {
-                count = this.defaultPageSize;
-            }
-
+        else if (page != null && page >= 1) {
             request.offset(count*(page-1));
             request.count(count);
         }
