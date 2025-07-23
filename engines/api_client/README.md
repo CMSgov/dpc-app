@@ -33,7 +33,7 @@ Run the tests until they pass
 $ make test
 ```
 
-Jumb into the docker shell for iterative development
+Jump into the docker shell for iterative development
 ```
 make run
 ```
