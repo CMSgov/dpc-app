@@ -86,7 +86,7 @@ public class PatientResource extends AbstractPatientResource {
         this.defaultPageSize = defaultPageSize;
     }
 
-    private IQuery<Bundle> buildPatientSearchQuery(String orgId, @Nullable String patientMBI) {
+    IQuery<Bundle> buildPatientSearchQuery(String orgId, @Nullable String patientMBI) {
         IQuery<Bundle> query = this.client
                 .search()
                 .forResource(Patient.class)
