@@ -16,13 +16,13 @@ import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.*;
 
+import static gov.cms.dpc.attribution.AttributionTestHelpers.queryMatches;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 
@@ -88,19 +88,6 @@ class GroupResourceUnitTest {
         assertEquals(patientBank.keySet().size(),((Group) response.getEntity()).getMember().size(), "Patients count should be the same as submitted");
     }
 
-    // DUPLICATED - TODO move to util file
-    private ArgumentMatcher<PatientSearchQuery> queryMatches(UUID resourceId, UUID orgId) {
-        return query ->
-                query != null &&
-                Objects.equals(query.getResourceID(), resourceId) &&
-                        Objects.equals(query.getOrganizationID(), orgId) &&
-                        query.getPatientMBI() == null &&
-                        query.getCount() == null &&
-                        query.getPageOffset() == null
-        ;
-    }
-
-
     @Test
     void testCreateRosterWithInvalidPatient(){
         //Arrange
@@ -125,11 +112,11 @@ class GroupResourceUnitTest {
         Mockito.when(providerDAO.getProviders(isNull(),eq(providerNpi), eq(orgId))).thenReturn(List.of(new ProviderEntity()));
 
         for (UUID patientId : patientBank.keySet()) {
-            Mockito.when(patientDAO.patientSearch(argThat(queryMatches(patientId, orgId))))
+            Mockito.when(patientDAO.patientSearch(argThat(queryMatches(patientId, orgId, null, null))))
                     .thenReturn(List.of(new PatientEntity()));
         }
 
-        Mockito.when(patientDAO.patientSearch(argThat(queryMatches(badPatientUUID, orgId)))).thenReturn(List.of());
+        Mockito.when(patientDAO.patientSearch(argThat(queryMatches(badPatientUUID, orgId, null, null)))).thenReturn(List.of());
         Mockito.when(rosterDAO.persistEntity(any(RosterEntity.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
 
         //Act & Assert

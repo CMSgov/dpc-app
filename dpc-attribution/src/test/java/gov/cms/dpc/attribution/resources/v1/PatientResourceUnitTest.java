@@ -8,15 +8,13 @@ import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.*;
 
-import static gov.cms.dpc.attribution.AttributionTestHelpers.createOrganizationEntity;
-import static gov.cms.dpc.attribution.AttributionTestHelpers.createPatientEntity;
+import static gov.cms.dpc.attribution.AttributionTestHelpers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 
@@ -73,17 +71,5 @@ class PatientResourceUnitTest {
             String actualId = results.get(i).getResource().getId();
             assertEquals(expectedId, actualId);
         }
-    }
-
-    // DUPLICATED - TODO move to util file
-    private ArgumentMatcher<PatientSearchQuery> queryMatches(UUID resourceId, UUID orgId, int count, int pageOffset) {
-        return query ->
-                query != null &&
-                        Objects.equals(query.getResourceID(), resourceId) &&
-                        Objects.equals(query.getOrganizationID(), orgId) &&
-                        query.getPatientMBI() == null &&
-                        query.getCount() == count &&
-                        query.getPageOffset() == pageOffset
-                ;
     }
 }
