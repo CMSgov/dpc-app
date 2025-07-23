@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreate;
@@ -16,6 +17,7 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.queue.IJobQueue;
+import gov.cms.dpc.queue.service.DataService;
 import gov.cms.dpc.testing.factories.FHIRGroupBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.BadRequestException;
@@ -57,6 +59,8 @@ public class GroupResourceUnitTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     IJobQueue mockQueue;
 
+    DataService dataService;
+
     DPCAPIConfiguration config = new DPCAPIConfiguration();
 
     @Mock
@@ -68,7 +72,8 @@ public class GroupResourceUnitTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         config.setLookBackExemptOrgs(new LinkedList<>());
-        resource = new GroupResource(mockQueue, attributionClient, "http://localhost:3002/v1", mockBfdClient, config);
+        dataService = new DataService(mockQueue, FhirContext.forDstu3(), "/", 1);
+        resource = new GroupResource(dataService, attributionClient, "http://localhost:3002/v1", mockBfdClient, config);
     }
 
     @Test
@@ -385,6 +390,36 @@ public class GroupResourceUnitTest {
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), exception.getResponse().getStatus());
 
         verifyNoInteractions(request);
+    }
+
+    @Test
+    void testExportWithNullPreferHeader() {
+        Organization organization = new Organization();
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "fakeId", null, FHIRMediaTypes.NDJSON, "fakeSince", null, request);
+        });
+    }
+
+    @Test
+    void testExportWithEmptyPreferHeader() {
+        Organization organization = new Organization();
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "fakeId", null, FHIRMediaTypes.NDJSON, "fakeSince", "", request);
+        });
+    }
+
+    @Test
+    void testExportWithBadPreferHeader() {
+        Organization organization = new Organization();
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            resource.export(organizationPrincipal, "fakeId", null, FHIRMediaTypes.NDJSON, "fakeSince", "badPrefer", request);
+        });
     }
 
     @Test

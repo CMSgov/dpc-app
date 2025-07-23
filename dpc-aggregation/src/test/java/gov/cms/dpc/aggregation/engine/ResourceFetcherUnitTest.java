@@ -41,7 +41,7 @@ class ResourceFetcherUnitTest {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Patient,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
+                MockBlueButtonClient.getBfdTransactionTime()
         );
 
        List<Resource> resources = fetcher.fetchResources(testPatient, Map.of());
@@ -55,7 +55,7 @@ class ResourceFetcherUnitTest {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.ExplanationOfBenefit,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
+                MockBlueButtonClient.getBfdTransactionTime()
         );
 
         List<Resource> resources = fetcher.fetchResources(testPatient, Map.of());
@@ -69,7 +69,7 @@ class ResourceFetcherUnitTest {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Coverage,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
+                MockBlueButtonClient.getBfdTransactionTime()
         );
 
         List<Resource> resources = fetcher.fetchResources(testPatient, Map.of());
@@ -83,7 +83,7 @@ class ResourceFetcherUnitTest {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Patient,
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
+                MockBlueButtonClient.getBfdTransactionTime()
         );
 
         List<Resource> resources = fetcher.fetchResources(testPatient, Map.of());
@@ -97,7 +97,7 @@ class ResourceFetcherUnitTest {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Patient,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME.plusDays(1)
+                MockBlueButtonClient.getBfdTransactionTime().plusDays(1)
         );
 
         JobQueueFailure exception = assertThrows(JobQueueFailure.class, () -> fetcher.fetchResources(testPatient, Map.of()));
@@ -111,7 +111,7 @@ class ResourceFetcherUnitTest {
                 getResourceFetcher(
                     DPCResourceType.Patient,
                     MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
-                    MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                    MockBlueButtonClient.getBfdTransactionTime(),
                     bbClient
                 )
         );
@@ -130,7 +130,7 @@ class ResourceFetcherUnitTest {
                 getResourceFetcher(
                     DPCResourceType.Patient,
                     MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
-                    MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                    MockBlueButtonClient.getBfdTransactionTime(),
                     bbClient
             )
         );
@@ -150,7 +150,7 @@ class ResourceFetcherUnitTest {
                 getResourceFetcher(
                     DPCResourceType.Patient,
                     MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
-                    MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                    MockBlueButtonClient.getBfdTransactionTime(),
                     bbClient
             )
         );
@@ -178,7 +178,7 @@ class ResourceFetcherUnitTest {
                 getResourceFetcher(
                     DPCResourceType.Patient,
                     MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
-                    MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                    MockBlueButtonClient.getBfdTransactionTime(),
                     bbClient
                 )
         );
@@ -196,7 +196,7 @@ class ResourceFetcherUnitTest {
         ResourceFetcher fetcher = getResourceFetcher(
                 DPCResourceType.Practitioner,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusDays(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME
+                MockBlueButtonClient.getBfdTransactionTime()
         );
 
 
