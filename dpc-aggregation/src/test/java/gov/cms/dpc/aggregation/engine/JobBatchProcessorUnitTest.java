@@ -98,7 +98,7 @@ class JobBatchProcessorUnitTest {
                 Collections.singletonList(mbi),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false
         );
         List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
@@ -131,7 +131,7 @@ class JobBatchProcessorUnitTest {
                 Collections.singletonList(mbi),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false
         );
         List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
@@ -181,7 +181,7 @@ class JobBatchProcessorUnitTest {
                 mbis,
                 List.of(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false
         );
         List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
@@ -246,7 +246,7 @@ class JobBatchProcessorUnitTest {
                 Collections.singletonList(mbi),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false
         );
         List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
@@ -281,7 +281,7 @@ class JobBatchProcessorUnitTest {
                 Collections.singletonList(mbi),
                 List.of(DPCResourceType.Patient, DPCResourceType.Coverage, DPCResourceType.ExplanationOfBenefit),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false
         );
         List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
@@ -318,7 +318,7 @@ class JobBatchProcessorUnitTest {
                 Collections.singletonList(mbi),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false
         );
         List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
@@ -357,7 +357,7 @@ class JobBatchProcessorUnitTest {
                 Collections.singletonList(mbi),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false
         );
         List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
@@ -390,7 +390,7 @@ class JobBatchProcessorUnitTest {
                 Collections.singletonList(mbi),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false
         );
         List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
@@ -425,7 +425,7 @@ class JobBatchProcessorUnitTest {
                 Collections.singletonList(mbi),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false
         );
         List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
@@ -464,7 +464,7 @@ class JobBatchProcessorUnitTest {
                 Collections.singletonList(mbi),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false
         );
         List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
@@ -499,7 +499,7 @@ class JobBatchProcessorUnitTest {
                 Collections.singletonList(mbi),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false
         );
         List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
@@ -541,7 +541,7 @@ class JobBatchProcessorUnitTest {
                 Collections.singletonList(mbi),
                 List.of(DPCResourceType.Patient, DPCResourceType.Coverage),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false
         );
         List<JobQueueBatch> jobs = queue.getJobBatches(jobID);

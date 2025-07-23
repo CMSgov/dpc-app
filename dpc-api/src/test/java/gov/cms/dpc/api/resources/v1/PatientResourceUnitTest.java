@@ -1,6 +1,5 @@
 package gov.cms.dpc.api.resources.v1;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.*;
@@ -14,6 +13,7 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
+import gov.cms.dpc.fhir.FHIRHeaders;
 import gov.cms.dpc.queue.service.DataService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-public class PatientResourceUnitTest {
+class PatientResourceUnitTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     IGenericClient attributionClient;
@@ -53,18 +53,17 @@ public class PatientResourceUnitTest {
     @Mock
     BlueButtonClient bfdClient;
 
+    String baseUrl = "";
     PatientResource patientResource;
 
-    FhirContext ctx = FhirContext.forDstu3();
-
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         openMocks(this);
-        patientResource = new PatientResource(attributionClient, fhirValidator, dataService, bfdClient);
+        patientResource = new PatientResource(attributionClient, fhirValidator, dataService, bfdClient, baseUrl);
     }
 
     @Test
-    public void testPatientSearch() {
+    void testPatientSearch() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -94,7 +93,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testPatientSearchNoIdentifier() {
+    void testPatientSearchNoIdentifier() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -121,7 +120,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testSubmitPatient() {
+    void testSubmitPatient() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -143,7 +142,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testBulkSubmitPatients() {
+    void testBulkSubmitPatients() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
@@ -169,7 +168,7 @@ public class PatientResourceUnitTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testGetPatient() {
+    void testGetPatient() {
         IReadExecutable<Patient> readExec = mock(IReadExecutable.class);
 
         UUID patientId = UUID.randomUUID();
@@ -186,7 +185,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testEverything() {
+    void testEverything() {
         UUID practitionerId = UUID.randomUUID();
         Practitioner practitioner = new Practitioner();
         practitioner.setId(practitionerId.toString());
@@ -249,8 +248,82 @@ public class PatientResourceUnitTest {
                 bfdClient.requestPatientFromServer(anyString(), any(), any())
         ).thenReturn(bundle);
 
-        Bundle actualResponse = patientResource.everything(organizationPrincipal, provenance, patientId, since, request);
+        Response httpResponse = patientResource.everything(organizationPrincipal, provenance, patientId, since, request, baseUrl);
+        Bundle actualResponse = (Bundle) httpResponse.getEntity();
         assertEquals(bundle, actualResponse);
+    }
+
+    @Test
+    void testEverythingAsync() {
+        UUID practitionerId = UUID.randomUUID();
+        Practitioner practitioner = new Practitioner();
+        practitioner.setId(practitionerId.toString());
+        String pracNpi = NPIUtil.generateNPI();
+        practitioner.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(pracNpi);
+        @SuppressWarnings("unchecked")
+        IReadExecutable<Practitioner> pracExec = mock(IReadExecutable.class);
+        when(
+            attributionClient.read().resource(Practitioner.class).withId(practitionerId.toString()).encodedJson()
+        ).thenReturn(pracExec);
+        when(pracExec.execute()).thenReturn(practitioner);
+
+        UUID patientId = UUID.randomUUID();
+        Patient patient = new Patient();
+        patient.setId(patientId.toString());
+        String patientMbi = "3aa0C00aA00";
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(patientMbi);
+        @SuppressWarnings("unchecked")
+        IReadExecutable<Patient> patExec = mock(IReadExecutable.class);
+        when(
+            attributionClient.read().resource(Patient.class).withId(patientId.toString()).encodedJson()
+        ).thenReturn(patExec);
+        when(patExec.execute()).thenReturn(patient);
+
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        String orgNpi = NPIUtil.generateNPI();
+        organization.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(orgNpi);
+        @SuppressWarnings("unchecked")
+        IReadExecutable<Organization> orgExec = mock(IReadExecutable.class);
+        when(attributionClient
+            .read()
+            .resource(Organization.class)
+            .withId(orgId.toString())
+            .encodedJson()
+        ).thenReturn(orgExec);
+        when(orgExec.execute()).thenReturn(organization);
+
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(patient);
+        Provenance provenance = createProvenance(
+            orgId.toString(), practitionerId.toString(), List.of(patientId.toString())
+        );
+
+        String since = "2000-01-01T12:00+00:00";
+        OffsetDateTime sinceTime = OffsetDateTime.parse(since, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        String requestUrl = "http://localhost:3000/v1/Patient/12345/$everything";
+        String requestIp = "200.0.200.200";
+        when(request.getRequestURL()).thenReturn(new StringBuffer(requestUrl));
+        when(request.getHeader(HttpHeaders.X_FORWARDED_FOR)).thenReturn(requestIp);
+
+        UUID jobId = UUID.randomUUID();
+        when(dataService.createJob(
+            eq(orgId), eq(orgNpi), eq(pracNpi), eq(List.of(patientMbi)),
+            eq(List.of(DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Coverage)),
+            eq(sinceTime), any(), eq(requestIp), eq(requestUrl), eq(false), eq(false)
+        )).thenReturn(jobId);
+        when(
+            bfdClient.requestPatientFromServer(anyString(), any(), any())
+        ).thenReturn(bundle);
+
+        Response httpResponse = patientResource.everything(organizationPrincipal, provenance, patientId, since, request, FHIRHeaders.PREFER_RESPOND_ASYNC);
+        assertEquals(Response.Status.ACCEPTED.getStatusCode(), httpResponse.getStatus());
+
+        String contentLocation = httpResponse.getHeaderString("Content-Location");
+        assertEquals(baseUrl + "/Jobs/" + jobId, contentLocation);
     }
 
     @Test
@@ -326,7 +399,7 @@ public class PatientResourceUnitTest {
         ).thenReturn(bundle);
 
         ForbiddenOperationException exception = assertThrows(ForbiddenOperationException.class, () -> {
-            patientResource.everything(organizationPrincipal, provenance, patientId, since, request);
+            patientResource.everything(organizationPrincipal, provenance, patientId, since, request, baseUrl);
         });
 
         assertEquals(HttpStatus.FORBIDDEN_403, exception.getStatusCode());
@@ -335,7 +408,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testEverythingNoPractitioner() {
+    void testEverythingNoPractitioner() {
         UUID practitionerId = UUID.randomUUID();
         UUID patientId = UUID.randomUUID();
         UUID orgId = UUID.randomUUID();
@@ -356,7 +429,7 @@ public class PatientResourceUnitTest {
         when(pracExec.execute()).thenReturn(null);
 
         try {
-            patientResource.everything(organizationPrincipal, provenance, patientId, since, request);
+            patientResource.everything(organizationPrincipal, provenance, patientId, since, request, null);
             fail("This call is supposed to fail.");
         } catch (WebApplicationException exc) {
             assertEquals(HttpStatus.UNAUTHORIZED_401, exc.getResponse().getStatus());
@@ -364,7 +437,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testDeletePatient() {
+    void testDeletePatient() {
         UUID patientId = UUID.randomUUID();
 
         IDeleteTyped delResp = mock(IDeleteTyped.class);
@@ -379,7 +452,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testUpdatePatient() {
+    void testUpdatePatient() {
         UUID patientId = UUID.randomUUID();
         Patient patient = new Patient();
         patient.setId(patientId.toString());
@@ -401,7 +474,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testUpdatePatientNoResource() {
+    void testUpdatePatientNoResource() {
         UUID patientId = UUID.randomUUID();
         Patient patient = new Patient();
         patient.setId(patientId.toString());
@@ -426,7 +499,7 @@ public class PatientResourceUnitTest {
     }
 
     @Test
-    public void testValidatePatient() {
+    void testValidatePatient() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());

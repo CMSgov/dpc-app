@@ -18,12 +18,13 @@ import gov.cms.dpc.common.logging.SplunkTimestamp;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.FHIRHeaders;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
-import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import jakarta.inject.Inject;
@@ -59,15 +60,15 @@ public class GroupResource extends AbstractGroupResource {
     // The delimiter for the '_types' list query param.
     static final String LIST_DELIMITER = ",";
 
-    private final IJobQueue queue;
     private final IGenericClient client;
     private final String baseURL;
     private final BlueButtonClient bfdClient;
     private final DPCAPIConfiguration config;
+    private final DataService dataService;
 
     @Inject
-    public GroupResource(IJobQueue queue, @Named("attribution") IGenericClient client, @APIV1 String baseURL, BlueButtonClient bfdClient, DPCAPIConfiguration config) {
-        this.queue = queue;
+    public GroupResource(DataService dataService, @Named("attribution") IGenericClient client, @APIV1 String baseURL, BlueButtonClient bfdClient, DPCAPIConfiguration config) {
+        this.dataService = dataService;
         this.client = client;
         this.baseURL = baseURL;
         this.bfdClient = bfdClient;
@@ -282,13 +283,13 @@ public class GroupResource extends AbstractGroupResource {
                            @DefaultValue(FHIR_NDJSON) @QueryParam("_outputFormat") @NoHtml String outputFormat,
                            @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time (e.g. if Resource.meta.lastUpdated is later than the supplied _since time).")
                            @QueryParam("_since") @NoHtml String sinceParam,
-                           @ApiParam(hidden = true) @HeaderParam("Prefer") @Valid String Prefer,
+                           @ApiParam(hidden = true) @HeaderParam(FHIRHeaders.PREFER_HEADER) @Valid String prefer,
                            @Context HttpServletRequest request) {
         logger.info("Exporting data for provider: {} _since: {}", rosterID, sinceParam);
 
         final String eventTime = SplunkTimestamp.getSplunkTimestamp();
         // Check the parameters
-        checkExportRequest(outputFormat, Prefer);
+        checkExportRequest(outputFormat, prefer);
 
         final Group group = fetchGroup(new IdType("Group", rosterID));
 
@@ -314,7 +315,7 @@ public class GroupResource extends AbstractGroupResource {
         final String requestUrl = APIHelpers.fetchRequestUrl(request);
 
         final boolean isSmoke = config.getLookBackExemptOrgs().contains(orgID.toString());
-        final UUID jobID = this.queue.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true, isSmoke);
+        final UUID jobID = this.dataService.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true, isSmoke);
         final int totalPatients = attributedPatients.size();
         final String resourcesRequested = resources.stream().map(DPCResourceType::getPath).collect(Collectors.joining(";"));
         logger.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},orgId={},totalPatients={},resourcesRequested={},queueSubmitTime={}", "/Group/$export",jobID, orgID, totalPatients, resourcesRequested, eventTime);
@@ -368,13 +369,13 @@ public class GroupResource extends AbstractGroupResource {
     private static void checkExportRequest(String outputFormat, String headerPrefer) {
         // _outputFormat only supports FHIR_NDJSON, APPLICATION_NDJSON, NDJSON
         if (!StringUtils.equalsAnyIgnoreCase(outputFormat, FHIR_NDJSON, APPLICATION_NDJSON, NDJSON)) {
-            throw new BadRequestException("'_outputFormat' query parameter must be 'application/fhir+ndjson', 'application/ndjson', or 'ndjson' ");
+            throw new BadRequestException("'_outputFormat' query parameter must be '" + FHIR_NDJSON + "', '" + APPLICATION_NDJSON + "', or '" + NDJSON +"' ");
         }
         if (headerPrefer == null || StringUtils.isEmpty(headerPrefer)) {
-            throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
+            throw new BadRequestException("The 'Prefer' header must be '" + FHIRHeaders.PREFER_RESPOND_ASYNC + "'");
         }
-        if (StringUtils.isNotEmpty(headerPrefer) && !headerPrefer.equals("respond-async")) {
-            throw new BadRequestException("The 'Prefer' header must be 'respond-async'");
+        if (!headerPrefer.equals(FHIRHeaders.PREFER_RESPOND_ASYNC)) {
+            throw new BadRequestException("The 'Prefer' header must be '" + FHIRHeaders.PREFER_RESPOND_ASYNC + "'");
         }
 
     }

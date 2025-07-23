@@ -125,7 +125,7 @@ class AggregationEngineTest {
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Throw a failure on the first poll, then be successful
@@ -216,7 +216,7 @@ class AggregationEngineTest {
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Work the batch
@@ -248,8 +248,8 @@ class AggregationEngineTest {
                 TEST_PROVIDER_NPI,
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(DPCResourceType.Patient),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Work the batch
@@ -282,7 +282,7 @@ class AggregationEngineTest {
                 mbis,
                 JobQueueBatch.validResourceTypes,
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Work the batch
@@ -314,7 +314,7 @@ class AggregationEngineTest {
                 Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"),
                 JobQueueBatch.validResourceTypes,
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Assert the queue size
@@ -338,7 +338,7 @@ class AggregationEngineTest {
                 mbis,
                 JobQueueBatch.validResourceTypes,
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Work the batch
@@ -379,7 +379,7 @@ class AggregationEngineTest {
             mbis,
             Collections.singletonList(DPCResourceType.Patient),
             null,
-            MockBlueButtonClient.BFD_TRANSACTION_TIME,
+            MockBlueButtonClient.getBfdTransactionTime(),
             null, null, true, false);
 
         // Start an aggregation engine in a new thread and let it hang processing the batch
@@ -412,7 +412,7 @@ class AggregationEngineTest {
                 mbis,
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Work the batch
@@ -450,7 +450,7 @@ class AggregationEngineTest {
                 List.of(),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Work the batch
@@ -485,7 +485,7 @@ class AggregationEngineTest {
                 mbis,
                 Collections.singletonList(DPCResourceType.Schedule),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Work the batch
@@ -514,7 +514,7 @@ class AggregationEngineTest {
                 mbis,
                 Collections.singletonList(DPCResourceType.Schedule),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Throw an exception when failing the batch
@@ -550,7 +550,7 @@ class AggregationEngineTest {
                 mbis,
                 List.of(DPCResourceType.ExplanationOfBenefit, DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Work the batch
@@ -595,7 +595,7 @@ class AggregationEngineTest {
                 mbis,
                 List.of(DPCResourceType.ExplanationOfBenefit, DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         queue.claimBatch(engine.getAggregatorID())
@@ -639,7 +639,7 @@ class AggregationEngineTest {
                 Collections.singletonList("1"),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null,  true, false);
 
         AggregationEngineHealthCheck healthCheck = new AggregationEngineHealthCheck(engine);
@@ -673,7 +673,7 @@ class AggregationEngineTest {
                 Collections.singletonList("1"),
                 Collections.singletonList(DPCResourceType.Patient),
                 null,
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Work the batch

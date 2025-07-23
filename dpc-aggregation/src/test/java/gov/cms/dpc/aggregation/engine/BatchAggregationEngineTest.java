@@ -106,7 +106,7 @@ class BatchAggregationEngineTest {
                 Collections.singletonList(MockBlueButtonClient.TEST_PATIENT_MBIS.get(0)),
                 Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Do the job
@@ -143,7 +143,7 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_MBIS,
                 JobQueueBatch.validResourceTypes,
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Do the job
@@ -183,7 +183,7 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_WITH_BAD_IDS,
                 Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Do the job
@@ -222,7 +222,7 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
                 Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Do the job
@@ -265,7 +265,7 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
                 Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Do the job
@@ -308,7 +308,7 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
                 Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Do the job
@@ -351,7 +351,7 @@ class BatchAggregationEngineTest {
                 MockBlueButtonClient.TEST_PATIENT_MBIS.subList(0,1),
                 Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
                 MockBlueButtonClient.TEST_LAST_UPDATED.minusSeconds(1),
-                MockBlueButtonClient.BFD_TRANSACTION_TIME,
+                MockBlueButtonClient.getBfdTransactionTime(),
                 null, null, true, false);
 
         // Do the job
