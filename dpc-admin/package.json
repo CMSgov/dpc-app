@@ -13,7 +13,7 @@
     "svg4everybody": "^2.1.9"
   },
   "devDependencies": {
-    "jest": "^26.4.0"
+    "jest": "^30.0.5"
   },
   "scripts": {
     "test": "jest"

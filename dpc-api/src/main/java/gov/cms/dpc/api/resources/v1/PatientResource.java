@@ -17,10 +17,12 @@ import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
+import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.FHIRHeaders;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
@@ -43,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -65,6 +68,7 @@ public class PatientResource extends AbstractPatientResource {
     private final FhirValidator validator;
     private final DataService dataService;
     private final BlueButtonClient bfdClient;
+    private final String baseURL;
     private final int defaultPageSize;
 
     @Inject
@@ -72,11 +76,13 @@ public class PatientResource extends AbstractPatientResource {
                            FhirValidator validator,
                            DataService dataService,
                            BlueButtonClient bfdClient,
+                           @APIV1 String baseURL,
                            @Named("defaultPageSize") int defaultPageSize) {
         this.client = client;
         this.validator = validator;
         this.dataService = dataService;
         this.bfdClient = bfdClient;
+        this.baseURL = baseURL;
         this.defaultPageSize = defaultPageSize;
     }
 
@@ -217,11 +223,12 @@ public class PatientResource extends AbstractPatientResource {
             @ApiResponse(code = 500, message = "A system error occurred", response = OperationOutcome.class)
     })
     @Override
-    public Bundle everything(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
+    public Response everything(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
                              @Valid @Profiled @ProvenanceHeader Provenance provenance,
                              @ApiParam(value = "Patient resource ID", required = true) @PathParam("patientID") UUID patientId,
                              @QueryParam("_since") @NoHtml String sinceParam,
-                             @Context HttpServletRequest request) {
+                             @Context HttpServletRequest request,
+                             @HeaderParam(FHIRHeaders.PREFER_HEADER) @DefaultValue("") String preferHeader) {
         final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
         final UUID practitionerId = FHIRExtractors.getEntityUUID(performer.getOnBehalfOfReference().getReference());
         Practitioner practitioner = this.client
@@ -251,16 +258,36 @@ public class PatientResource extends AbstractPatientResource {
 
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
         final String requestUrl = APIHelpers.fetchRequestUrl(request);
-        Resource result = dataService.retrieveData(orgId, orgNPI, practitionerNPI, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
+
+        if(preferHeader.equals(FHIRHeaders.PREFER_RESPOND_ASYNC)) {
+            // Submit asynchronous job
+            final UUID jobID = this.dataService.createJob(
+                orgId,
+                orgNPI,
+                practitionerNPI,
+                List.of(patientMbi),
+                List.of(DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Coverage),
+                since,
+                APIHelpers.fetchTransactionTime(bfdClient),
+                requestingIP,
+                requestUrl,
+                false,
+                false
+            );
+            return Response.status(Response.Status.ACCEPTED).contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
+        } else {
+            // Submit synchronous job
+            Resource result = dataService.retrieveData(orgId, orgNPI, practitionerNPI, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
                 requestingIP, requestUrl, DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Coverage);
-        if (DPCResourceType.Bundle.getPath().equals(result.getResourceType().getPath())) {
-            // A Bundle containing patient data was returned
-            return (Bundle) result;
-        }
-        if (DPCResourceType.OperationOutcome.getPath().equals(result.getResourceType().getPath())) {
-            // An OperationOutcome (ERROR) was returned
-            OperationOutcome operationOutcome = (OperationOutcome) result;
-            throw new ForbiddenOperationException(operationOutcome.getIssueFirstRep().getDetails().getText(), operationOutcome);
+            if (DPCResourceType.Bundle.getPath().equals(result.getResourceType().getPath())) {
+                // A Bundle containing patient data was returned
+                return Response.status(Response.Status.OK).entity(result).build();
+            }
+            if (DPCResourceType.OperationOutcome.getPath().equals(result.getResourceType().getPath())) {
+                // An OperationOutcome (ERROR) was returned
+                OperationOutcome operationOutcome = (OperationOutcome) result;
+                throw new ForbiddenOperationException(operationOutcome.getIssueFirstRep().getDetails().getText(), operationOutcome);
+            }
         }
 
         throw new WebApplicationException(HttpStatus.INTERNAL_SERVER_ERROR_500);

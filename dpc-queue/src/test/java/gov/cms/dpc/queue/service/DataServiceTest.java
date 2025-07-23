@@ -3,6 +3,7 @@ package gov.cms.dpc.queue.service;
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
+import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.exceptions.DataRetrievalException;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -20,6 +21,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import java.io.File;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -152,5 +154,30 @@ class DataServiceTest {
             }
             return List.of(workBatch.get());
         }).when(queue).getJobBatches(Mockito.any());
+    }
+
+    @Test
+    void createJobPutsJobOnQueue() {
+        OffsetDateTime now = OffsetDateTime.now();
+        UUID jobId = dataService.createJob(
+            orgID,
+            orgNPI,
+            providerNPI,
+            List.of("mbi"),
+            List.of(DPCResourceType.Patient),
+            now,
+            now,
+            "ip",
+            "url",
+            false,
+            false
+        );
+
+        List<JobQueueBatch> batches = queue.getJobBatches(jobId);
+        JobQueueBatch batch = batches.get(0);
+
+        assertEquals(1, batches.size());
+        assertEquals(jobId, batch.getJobID());
+        assertEquals(JobStatus.QUEUED, batch.getStatus());
     }
 }

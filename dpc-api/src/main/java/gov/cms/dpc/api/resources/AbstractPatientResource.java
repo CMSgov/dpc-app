@@ -38,11 +38,12 @@ public abstract class AbstractPatientResource extends AbstractResourceWithSince 
 
     @GET
     @Path("/{patientID}/$everything")
-    public abstract Resource everything(OrganizationPrincipal organization,
+    public abstract Response everything(OrganizationPrincipal organization,
                                         @Valid @Profiled Provenance attestation,
                                         UUID patientId,
                                         @QueryParam("_since") @NoHtml String since,
-                                        HttpServletRequest request);
+                                        HttpServletRequest request,
+                                        String preferHeader);
 
     @DELETE
     @Path("/{patientID}")
