@@ -24,6 +24,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -57,7 +58,8 @@ public class PatientResource extends AbstractPatientResource {
             @QueryParam("identifier") String patientMBI,
             @QueryParam("organization") String organizationReference,
             @QueryParam(value = "_count") Integer count,
-            @QueryParam(value = "_offset") Integer pageOffset) {
+            @QueryParam(value = "_offset") Integer pageOffset,
+            @QueryParam(value = "_summary") String summary) {
         if (patientMBI == null && organizationReference == null && resourceID == null) {
             throw new WebApplicationException("Must have one of Patient Identifier, Organization Resource ID, or Patient Resource ID", Response.Status.BAD_REQUEST);
         }
@@ -76,12 +78,10 @@ public class PatientResource extends AbstractPatientResource {
             daoSearchQuery.setPatientMBI(patientIdentifier.getValue());
         }
 
-        if (count != null && count == 0) {
-            // Summary bundle
+        if (Objects.equals(summary, "count")) {
             daoSearchQuery.setCount(0);
-            List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery);
-            List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).collect(Collectors.toList());
-            return this.pagingService.convertToBundle(patients);
+            int totalPatients = this.dao.countMatchingPatients(daoSearchQuery);
+            return this.pagingService.convertToSummaryBundle(totalPatients);
         }
         if (pageOffset == null) {
             // Legacy behavior - before _page parameter was introduced

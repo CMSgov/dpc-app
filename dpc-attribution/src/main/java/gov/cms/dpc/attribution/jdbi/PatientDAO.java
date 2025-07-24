@@ -32,14 +32,7 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         return Optional.ofNullable(get(patientID));
     }
 
-    public List<PatientEntity> patientSearch(PatientSearchQuery searchQuery) {
-        // UUID resourceID, String patientMBI, UUID organizationID
-        // Build a selection query to get records from the database
-        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
-        final Root<PatientEntity> root = query.from(PatientEntity.class);
-        query.select(root);
-
+    private List<Predicate> buildPredicates(CriteriaBuilder builder, Root<PatientEntity> root, PatientSearchQuery searchQuery) {
         List<Predicate> predicates = new ArrayList<>();
         if (searchQuery.getResourceID() != null) {
             predicates.add(builder.equal(root.get(PatientEntity_.id), searchQuery.getResourceID()));
@@ -53,12 +46,35 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         if (predicates.isEmpty()) {
             throw new IllegalStateException("Must have at least one search predicate!");
         }
+        return predicates;
+    }
+
+    public int countMatchingPatients(PatientSearchQuery searchQuery) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
+        final Root<PatientEntity> root = countQuery.from(PatientEntity.class);
+
+        List<Predicate> predicates = buildPredicates(builder, root, searchQuery);
+        countQuery.select(builder.count(root));
+        countQuery.where(predicates.toArray(new Predicate[0]));
+
+        return currentSession().createQuery(countQuery).getSingleResult().intValue();
+    }
+
+    public List<PatientEntity> patientSearch(PatientSearchQuery searchQuery) {
+        // UUID resourceID, String patientMBI, UUID organizationID
+        // Build a selection query to get records from the database
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
+        final Root<PatientEntity> root = query.from(PatientEntity.class);
+        query.select(root);
+
+        List<Predicate> predicates = buildPredicates(builder, root, searchQuery);
         query.where(predicates.toArray(new Predicate[0]));
 
         // build a TypedQuery and apply pagination logic
         TypedQuery<PatientEntity> typedQuery = currentSession().createQuery(query); // instantiate a mutable query
         if (searchQuery.getCount() != null && searchQuery.getCount() > 0) {
-            // need to come back to count=0 for summary bundle
             typedQuery.setMaxResults(searchQuery.getCount());
             if (searchQuery.getPageOffset() != null && searchQuery.getPageOffset() > 0) {
                 typedQuery.setFirstResult(searchQuery.getPageOffset());

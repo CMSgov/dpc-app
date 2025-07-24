@@ -19,7 +19,7 @@ public abstract class AbstractPatientResource {
     }
 
     @GET
-    public abstract Bundle searchPatients(UUID resourceID, String patientMBI, String organizationReference, Integer count, Integer page);
+    public abstract Bundle searchPatients(UUID resourceID, String patientMBI, String organizationReference, Integer count, Integer pageOffset, String summary);
 
     @POST
     public abstract Response createPatient(Patient patient);

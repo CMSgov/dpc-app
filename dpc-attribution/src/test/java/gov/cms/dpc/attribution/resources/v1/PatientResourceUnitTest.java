@@ -60,7 +60,8 @@ class PatientResourceUnitTest {
                 null,
                 orgRef,
                 10,
-                30
+                30,
+                null
         );
         List<Bundle.BundleEntryComponent> results = resultBundle.getEntry();
 

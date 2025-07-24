@@ -1,16 +1,11 @@
 package gov.cms.dpc.common.utils;
 
-import jakarta.inject.Inject;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 
 import java.util.List;
 
 public class PagingService {
-
-    @Inject
-    public PagingService() {
-    }
 
     private String formatURL(String url, int page) {
         return url + "?page=" + page;
@@ -27,6 +22,13 @@ public class PagingService {
             bundle.addEntry(new Bundle.BundleEntryComponent().setResource(patient));
         }
 
+        return bundle;
+    }
+
+    public Bundle convertToSummaryBundle(int total) {
+        Bundle bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.SEARCHSET);
+        bundle.setTotal(total);
         return bundle;
     }
 

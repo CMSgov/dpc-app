@@ -107,11 +107,6 @@ public class PatientResource extends AbstractPatientResource {
 
         return query;
     }
-    private Bundle generateSummaryBundle(IQuery<Bundle> query) {
-        return query.summaryMode(SummaryEnum.COUNT)
-                .count(0)
-                .execute();
-    }
 
     @GET
     @FHIR
@@ -135,7 +130,8 @@ public class PatientResource extends AbstractPatientResource {
         }
 
         if (count == 0) {
-            return generateSummaryBundle(request);
+            request.count(0).summaryMode(SummaryEnum.COUNT); // count gets omitted in request
+            return request.execute();
         }
         else if (page != null && page >= 1) {
             request.offset(count*(page-1));
