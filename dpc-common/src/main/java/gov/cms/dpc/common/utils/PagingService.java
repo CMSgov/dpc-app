@@ -30,7 +30,7 @@ public class PagingService {
         return bundle;
     }
 
-    public Bundle handlePaging(List<Patient> patients, int page, String requestPath) {
+    public Bundle handlePagingLinks(List<Patient> patients, int page, String requestPath) {
         Bundle bundle = convertToBundle(patients);
         addRelationLink(bundle, "self", requestPath, page);
         addRelationLink(bundle, "first", requestPath, 1);

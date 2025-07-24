@@ -53,7 +53,9 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         if (predicates.isEmpty()) {
             throw new IllegalStateException("Must have at least one search predicate!");
         }
+        query.where(predicates.toArray(new Predicate[0]));
 
+        // build a TypedQuery and apply pagination logic
         TypedQuery<PatientEntity> typedQuery = currentSession().createQuery(query); // instantiate a mutable query
         if (searchQuery.getCount() != null && searchQuery.getCount() > 0) {
             // need to come back to count=0 for summary bundle
@@ -63,8 +65,7 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
             }
         }
 
-        query.where(predicates.toArray(new Predicate[0]));
-        return list(query);
+        return typedQuery.getResultList();
     }
 
     /**

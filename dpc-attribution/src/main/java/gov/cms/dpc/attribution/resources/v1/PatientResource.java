@@ -75,29 +75,30 @@ public class PatientResource extends AbstractPatientResource {
             }
             daoSearchQuery.setPatientMBI(patientIdentifier.getValue());
         }
-        if (count >= 0) {
-            daoSearchQuery.setCount(count);
-        }
-        if (pageOffset >= 0) {
-            daoSearchQuery.setPageOffset(pageOffset);
-            if (count == -1) {
-                daoSearchQuery.setCount(defaultPageSize);
-            }
-        }
 
-        // for {{baseUrl}}/api/v1/Patient?_count=4&_page=300
-        // resourceID = null
-        // idValue = null
-        // organizationID = 46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0
-        List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery);
-        Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-        List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).collect(Collectors.toList());
-        if (count == -1) {
+        if (count != null && count == 0) {
+            // Summary bundle
+            daoSearchQuery.setCount(0);
+            List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery);
+            List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).collect(Collectors.toList());
             return this.pagingService.convertToBundle(patients);
         }
+        if (pageOffset == null) {
+            // Legacy behavior - before _page parameter was introduced
+            List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery);
+            List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).collect(Collectors.toList());
+            return this.pagingService.convertToBundle(patients);
+        }
+
+        if (count == null) {
+            count = defaultPageSize;
+        }
+        daoSearchQuery.setCount(count);
+        daoSearchQuery.setPageOffset(pageOffset);
+        List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery);
+        List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).collect(Collectors.toList());
         int page = pageOffset/count + 1;
-        return this.pagingService.handlePaging(patients, page, "/v1/Patient");
+        return this.pagingService.handlePagingLinks(patients, page, "/v1/Patient");
     }
 
     @GET
