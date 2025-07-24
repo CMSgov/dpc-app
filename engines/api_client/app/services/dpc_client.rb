@@ -7,7 +7,7 @@ class DpcClient
   def initialize
     @base_url = ENV.fetch('API_METADATA_URL')
     @admin_url = ENV.fetch('API_ADMIN_URL')
-    @allow_invalid_ssl_cert = ActiveModel::Type::Boolean.new.cast(ENV.fetch('ALLOW_INVALID_SSL_CERT'))
+    @allow_invalid_ssl_cert = ActiveModel::Type::Boolean.new.cast(ENV.fetch('ALLOW_INVALID_SSL_CERT', 'false'))
   end
 
   def json_content
