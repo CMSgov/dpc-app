@@ -10,7 +10,7 @@
   "version": "0.1.0",
   "devDependencies": {
     "sass": "^1.86.3",
-    "watch": "^1.0.2",
+    "watch": "^0.13.0",
     "webpack-dev-server": "^5.0.4"
   },
   "scripts": {
