@@ -17,11 +17,14 @@ import java.util.stream.Collectors;
 
 public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
     private final int queryChunkSize;
+    private final int defaultPatientPageSize;
+
 
     @Inject
-    public PatientDAO(DPCManagedSessionFactory factory, @Named("queryChunkSize") int queryChunkSize) {
+    public PatientDAO(DPCManagedSessionFactory factory, @Named("queryChunkSize") int queryChunkSize, @Named("defaultPageSize") int defaultPatientPageSize) {
         super(factory.getSessionFactory());
         this.queryChunkSize = queryChunkSize;
+        this.defaultPatientPageSize = defaultPatientPageSize;
     }
 
     public PatientEntity persistPatient(PatientEntity patient) {
@@ -30,6 +33,18 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
 
     public Optional<PatientEntity> getPatient(UUID patientID) {
         return Optional.ofNullable(get(patientID));
+    }
+
+    public int countMatchingPatients(PatientSearchQuery searchQuery) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
+        final Root<PatientEntity> root = countQuery.from(PatientEntity.class);
+
+        List<Predicate> predicates = buildPredicates(builder, root, searchQuery);
+        countQuery.select(builder.count(root));
+        countQuery.where(predicates.toArray(new Predicate[0]));
+
+        return currentSession().createQuery(countQuery).getSingleResult().intValue();
     }
 
     private List<Predicate> buildPredicates(CriteriaBuilder builder, Root<PatientEntity> root, PatientSearchQuery searchQuery) {
@@ -49,19 +64,7 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         return predicates;
     }
 
-    public int countMatchingPatients(PatientSearchQuery searchQuery) {
-        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
-        final Root<PatientEntity> root = countQuery.from(PatientEntity.class);
-
-        List<Predicate> predicates = buildPredicates(builder, root, searchQuery);
-        countQuery.select(builder.count(root));
-        countQuery.where(predicates.toArray(new Predicate[0]));
-
-        return currentSession().createQuery(countQuery).getSingleResult().intValue();
-    }
-
-    public List<PatientEntity> patientSearch(PatientSearchQuery searchQuery) {
+    public PageResult<PatientEntity> patientSearch(PatientSearchQuery searchQuery) {
         // UUID resourceID, String patientMBI, UUID organizationID
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
@@ -69,19 +72,31 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         final Root<PatientEntity> root = query.from(PatientEntity.class);
         query.select(root);
 
-        List<Predicate> predicates = buildPredicates(builder, root, searchQuery);
+        final List<Predicate> predicates = buildPredicates(builder, root, searchQuery);
         query.where(predicates.toArray(new Predicate[0]));
+        TypedQuery<PatientEntity> typedQuery = currentSession().createQuery(query);
 
-        // build a TypedQuery and apply pagination logic
-        TypedQuery<PatientEntity> typedQuery = currentSession().createQuery(query); // instantiate a mutable query
-        if (searchQuery.getCount() != null && searchQuery.getCount() > 0) {
-            typedQuery.setMaxResults(searchQuery.getCount());
-            if (searchQuery.getPageOffset() != null && searchQuery.getPageOffset() > 0) {
-                typedQuery.setFirstResult(searchQuery.getPageOffset());
-            }
+        // Legacy compatibility for request without pagination
+        if (searchQuery.getPageOffset() == null) {
+            return new PageResult<>(typedQuery.getResultList(), false);
         }
 
-        return typedQuery.getResultList();
+        Integer count = searchQuery.getCount();
+        final int pageSize = (count != null && count > 0) ? count : this.defaultPatientPageSize;
+        final int fetchSize = pageSize + 1;
+        typedQuery.setMaxResults(fetchSize);
+        typedQuery.setFirstResult(searchQuery.getPageOffset());
+        final List<PatientEntity> fetched = typedQuery.getResultList();
+        final boolean hasNext = fetched.size() > pageSize;
+        List<PatientEntity> pageResults = fetched;
+        if (hasNext) {
+            pageResults = fetched.subList(0, pageSize);
+        }
+
+        return new PageResult<>(
+                pageResults,
+                hasNext
+        );
     }
 
     /**

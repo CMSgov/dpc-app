@@ -51,8 +51,12 @@ class PatientResourceUnitTest {
         // Stub DAO to return paged subset of PatientEntity's
         // if offset=30, count=10 should get patients from index 30-39
         List<PatientEntity> pagedEntities = patientEntities.subList(pageOffset, pageOffset + count);
+        PageResult mockedPage = new PageResult<>(
+                pagedEntities,
+                true
+        );
         Mockito.when(patientDAO.patientSearch(argThat(queryMatches(null, orgId, count, pageOffset))))
-                .thenReturn(pagedEntities);
+                .thenReturn(mockedPage);
 
         // this is the droid you are looking for
         Bundle resultBundle = patientResource.searchPatients(

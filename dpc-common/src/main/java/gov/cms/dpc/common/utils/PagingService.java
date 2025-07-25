@@ -32,14 +32,12 @@ public class PagingService {
         return bundle;
     }
 
-    public Bundle handlePagingLinks(List<Patient> patients, int page, String requestPath) {
+    public Bundle handlePagingLinks(List<Patient> patients, int page, String requestPath, boolean hasNext) {
         Bundle bundle = convertToBundle(patients);
         addRelationLink(bundle, "self", requestPath, page);
         addRelationLink(bundle, "first", requestPath, 1);
         if (page > 1) addRelationLink(bundle, "previous", requestPath, page-1);
-
-        // TODO add a hasNext check - can't always include a "next" link
-        addRelationLink(bundle, "next", requestPath, page+1);
+        if (hasNext) addRelationLink(bundle, "next", requestPath, page+1);
 
 
         return bundle;

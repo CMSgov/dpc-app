@@ -113,10 +113,13 @@ class GroupResourceUnitTest {
 
         for (UUID patientId : patientBank.keySet()) {
             Mockito.when(patientDAO.patientSearch(argThat(queryMatches(patientId, orgId, null, null))))
-                    .thenReturn(List.of(new PatientEntity()));
+                    .thenReturn(new PageResult<> (
+                            List.of(new PatientEntity()),
+                            false
+                    ));
         }
 
-        Mockito.when(patientDAO.patientSearch(argThat(queryMatches(badPatientUUID, orgId, null, null)))).thenReturn(List.of());
+        Mockito.when(patientDAO.patientSearch(argThat(queryMatches(badPatientUUID, orgId, null, null)))).thenReturn(new PageResult<> (List.of(), false));
         Mockito.when(rosterDAO.persistEntity(any(RosterEntity.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
 
         //Act & Assert

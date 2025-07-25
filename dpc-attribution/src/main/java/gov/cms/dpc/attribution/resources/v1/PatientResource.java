@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.resources.v1;
 
 import com.google.inject.name.Named;
+import gov.cms.dpc.attribution.jdbi.PageResult;
 import gov.cms.dpc.attribution.jdbi.PatientDAO;
 import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
 import gov.cms.dpc.attribution.resources.AbstractPatientResource;
@@ -85,7 +86,7 @@ public class PatientResource extends AbstractPatientResource {
         }
         if (pageOffset == null) {
             // Legacy behavior - before _page parameter was introduced
-            List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery);
+            List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery).getResults();
             List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).collect(Collectors.toList());
             return this.pagingService.convertToBundle(patients);
         }
@@ -95,10 +96,12 @@ public class PatientResource extends AbstractPatientResource {
         }
         daoSearchQuery.setCount(count);
         daoSearchQuery.setPageOffset(pageOffset);
-        List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery);
+        PageResult<PatientEntity> pageResult = this.dao.patientSearch(daoSearchQuery);
+        List<PatientEntity> patientEntities = pageResult.getResults();
+
         List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).collect(Collectors.toList());
         int page = pageOffset/count + 1;
-        return this.pagingService.handlePagingLinks(patients, page, "/v1/Patient");
+        return this.pagingService.handlePagingLinks(patients, page, "/v1/Patient", pageResult.hasNext());
     }
 
     @GET
@@ -130,7 +133,7 @@ public class PatientResource extends AbstractPatientResource {
             PatientSearchQuery daoSearchQuery = new PatientSearchQuery();
             daoSearchQuery.setPatientMBI(patientMBI);
             daoSearchQuery.setOrganizationID(organizationID);
-            final List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery);
+            final List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery).getResults();
             if (!patientEntities.isEmpty()) {
                 status = Response.Status.OK;
                 createdPatient = this.converter.toFHIR(Patient.class, patientEntities.get(0));
