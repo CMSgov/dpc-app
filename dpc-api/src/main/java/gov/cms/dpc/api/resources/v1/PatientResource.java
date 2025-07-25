@@ -1,7 +1,9 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -42,6 +44,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -66,18 +69,43 @@ public class PatientResource extends AbstractPatientResource {
     private final DataService dataService;
     private final BlueButtonClient bfdClient;
     private final String baseURL;
+    private final int defaultPageSize;
 
     @Inject
     public PatientResource(@Named("attribution") IGenericClient client,
                            FhirValidator validator,
                            DataService dataService,
                            BlueButtonClient bfdClient,
-                           @APIV1 String baseURL) {
+                           @APIV1 String baseURL,
+                           @Named("defaultPageSize") int defaultPageSize) {
         this.client = client;
         this.validator = validator;
         this.dataService = dataService;
         this.bfdClient = bfdClient;
         this.baseURL = baseURL;
+        this.defaultPageSize = defaultPageSize;
+    }
+
+    IQuery<Bundle> buildPatientSearchQuery(String orgId, @Nullable String patientMBI) {
+        IQuery<Bundle> query = this.client
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+                .where(Patient.ORGANIZATION.hasId(orgId))
+                .returnBundle(Bundle.class);
+        if (patientMBI != null && !patientMBI.isEmpty()) {
+            // Handle MBI parsing
+            // This should come out as part of DPC-432
+            final String expandedMBI;
+            if (IDENTIFIER_PATTERN.matcher(patientMBI).matches()) {
+                expandedMBI = patientMBI;
+            } else {
+                expandedMBI = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientMBI);
+            }
+            query = query.where(Patient.IDENTIFIER.exactly().identifier(expandedMBI));
+        }
+
+        return query;
     }
 
     @GET
@@ -91,31 +119,25 @@ public class PatientResource extends AbstractPatientResource {
     public Bundle patientSearch(@ApiParam(hidden = true)
                                 @Auth OrganizationPrincipal organization,
                                 @ApiParam(value = "Patient MBI")
-                                @QueryParam(value = Patient.SP_IDENTIFIER) @NoHtml String patientMBI) {
-
-        final var request = this.client
-                .search()
-                .forResource(Patient.class)
-                .encodedJson()
-                .where(Patient.ORGANIZATION.hasId(organization.getOrganization().getId()))
-                .returnBundle(Bundle.class);
-
-        if (patientMBI != null && !patientMBI.equals("")) {
-
-            // Handle MBI parsing
-            // This should come out as part of DPC-432
-            final String expandedMBI;
-            if (IDENTIFIER_PATTERN.matcher(patientMBI).matches()) {
-                expandedMBI = patientMBI;
-            } else {
-                expandedMBI = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientMBI);
-            }
-            return request
-                    .where(Patient.IDENTIFIER.exactly().identifier(expandedMBI))
-                    .execute();
+                                @QueryParam(value = Patient.SP_IDENTIFIER) @NoHtml String patientMBI,
+                                @ApiParam(value = "Patients per page")
+                                @QueryParam(value = "_count") Integer count,
+                                @ApiParam(value = "Page number") // null means "do not paginate" for compatibility reasons
+                                @QueryParam(value = "_page") Integer page) {
+        var request = this.buildPatientSearchQuery(organization.getOrganization().getId(), patientMBI);
+        if (count == null) {
+            count = this.defaultPageSize;
         }
 
-        return request.execute();
+        if (count == 0) {
+            request.count(0).summaryMode(SummaryEnum.COUNT); // count gets omitted in request
+            return request.execute();
+        }
+        else if (page != null && page >= 1) {
+            request.offset(count*(page-1));
+            request.count(count);
+        }
+        return request.execute(); // this should call attribution
     }
 
     @FHIR

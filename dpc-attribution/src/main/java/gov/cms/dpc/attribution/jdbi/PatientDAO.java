@@ -5,6 +5,7 @@ import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import jakarta.inject.Inject;
+import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import org.apache.commons.collections4.ListUtils;
 
@@ -16,11 +17,14 @@ import java.util.stream.Collectors;
 
 public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
     private final int queryChunkSize;
+    private final int defaultPatientPageSize;
+
 
     @Inject
-    public PatientDAO(DPCManagedSessionFactory factory, @Named("queryChunkSize") int queryChunkSize) {
+    public PatientDAO(DPCManagedSessionFactory factory, @Named("queryChunkSize") int queryChunkSize, @Named("defaultPageSize") int defaultPatientPageSize) {
         super(factory.getSessionFactory());
         this.queryChunkSize = queryChunkSize;
+        this.defaultPatientPageSize = defaultPatientPageSize;
     }
 
     public PatientEntity persistPatient(PatientEntity patient) {
@@ -31,30 +35,68 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         return Optional.ofNullable(get(patientID));
     }
 
-    public List<PatientEntity> patientSearch(UUID resourceID, String patientMBI, UUID organizationID) {
+    public int countMatchingPatients(PatientSearchQuery searchQuery) {
+        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaQuery<Long> countQuery = builder.createQuery(Long.class);
+        final Root<PatientEntity> root = countQuery.from(PatientEntity.class);
+
+        List<Predicate> predicates = buildPredicates(builder, root, searchQuery);
+        countQuery.select(builder.count(root));
+        countQuery.where(predicates.toArray(new Predicate[0]));
+
+        return currentSession().createQuery(countQuery).getSingleResult().intValue();
+    }
+
+    private List<Predicate> buildPredicates(CriteriaBuilder builder, Root<PatientEntity> root, PatientSearchQuery searchQuery) {
+        List<Predicate> predicates = new ArrayList<>();
+        if (searchQuery.getResourceID() != null) {
+            predicates.add(builder.equal(root.get(PatientEntity_.id), searchQuery.getResourceID()));
+        }
+        if (searchQuery.getPatientMBI() != null) {
+            predicates.add(builder.equal(root.get(PatientEntity_.beneficiaryID), searchQuery.getPatientMBI().toUpperCase()));
+        }
+        if (searchQuery.getOrganizationID() != null) {
+            predicates.add(builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), searchQuery.getOrganizationID()));
+        }
+        if (predicates.isEmpty()) {
+            throw new IllegalStateException("Must have at least one search predicate!");
+        }
+        return predicates;
+    }
+
+    public PageResult<PatientEntity> patientSearch(PatientSearchQuery searchQuery) {
+        // UUID resourceID, String patientMBI, UUID organizationID
         // Build a selection query to get records from the database
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
         final Root<PatientEntity> root = query.from(PatientEntity.class);
         query.select(root);
 
-        List<Predicate> predicates = new ArrayList<>();
-        if (resourceID != null) {
-            predicates.add(builder.equal(root.get(PatientEntity_.id), resourceID));
-        }
-
-        if (patientMBI != null) {
-            predicates.add(builder.equal(root.get(PatientEntity_.beneficiaryID), patientMBI.toUpperCase()));
-        }
-        if (organizationID != null) {
-            predicates.add(builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), organizationID));
-        }
-        if (predicates.isEmpty()) {
-            throw new IllegalStateException("Must have at least one search predicate!");
-        }
-
+        final List<Predicate> predicates = buildPredicates(builder, root, searchQuery);
         query.where(predicates.toArray(new Predicate[0]));
-        return list(query);
+        TypedQuery<PatientEntity> typedQuery = this.currentSession().createQuery(query);
+
+        // Legacy compatibility for request without pagination
+        if (searchQuery.getPageOffset() == null) {
+            return new PageResult<>(typedQuery.getResultList(), false);
+        }
+
+        Integer count = searchQuery.getCount();
+        final int pageSize = (count != null && count > 0) ? count : this.defaultPatientPageSize;
+        final int fetchSize = pageSize + 1;
+        typedQuery.setMaxResults(fetchSize);
+        typedQuery.setFirstResult(searchQuery.getPageOffset());
+        final List<PatientEntity> fetched = typedQuery.getResultList();
+        final boolean hasNext = fetched.size() > pageSize;
+        List<PatientEntity> pageResults = fetched;
+        if (hasNext) {
+            pageResults = fetched.subList(0, pageSize);
+        }
+
+        return new PageResult<>(
+                pageResults,
+                hasNext
+        );
     }
 
     /**
@@ -156,7 +198,6 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
     }
 
     private void removeAttributionRelationships(PatientEntity patientEntity) {
-
         final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         final CriteriaDelete<AttributionRelationship> criteriaDelete = builder.createCriteriaDelete(AttributionRelationship.class);
         final Root<AttributionRelationship> root = criteriaDelete.from(AttributionRelationship.class);

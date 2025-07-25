@@ -25,7 +25,7 @@ class OrganizationDAOUnitTest extends AbstractAttributionDAOTest {
 	void setup() {
 		dpcManagedSessionFactory = new DPCManagedSessionFactory(db.getSessionFactory());
 		relationshipDAO = new RelationshipDAO(dpcManagedSessionFactory);
-		patientDAO = new PatientDAO(dpcManagedSessionFactory, 1);
+		patientDAO = new PatientDAO(dpcManagedSessionFactory, 1, 100);
 		organizationDAO = new OrganizationDAO(dpcManagedSessionFactory);
 		rosterDAO = new RosterDAO(dpcManagedSessionFactory);
 		providerDAO = new ProviderDAO(dpcManagedSessionFactory);
