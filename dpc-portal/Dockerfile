@@ -39,6 +39,9 @@ RUN rm -rf /bin/yarn
 RUN npm run build:css
 RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
 
+# Install foreman
+RUN gem install foreman
+
 # Clean up from the build
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
     find /usr/local/bundle/gems/ -name "*.c" -delete && \
@@ -48,6 +51,7 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
 # Add Federal Common Policy CA G2 root certificate for SMTP
 COPY certs/fcpcag2.crt /usr/local/share/ca-certificates/fcpcag2.crt
 RUN cat /usr/local/share/ca-certificates/fcpcag2.crt >> /etc/ssl/certs/ca-certificates.crt
+
 
 # Declare the entrypoint shell script
 ENTRYPOINT ["./docker/entrypoint.sh"]
