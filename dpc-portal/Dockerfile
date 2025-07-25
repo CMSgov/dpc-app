@@ -29,6 +29,9 @@ RUN gem install bundler --no-document && \
     bundle install && \
     npm install
 
+# Install foreman
+RUN gem install foreman
+
 # Run bundler audit
 RUN bundle exec bundle audit update && bundle exec bundle audit check
 
@@ -38,9 +41,6 @@ COPY /dpc-portal /dpc-portal
 RUN rm -rf /bin/yarn
 RUN npm run build:css
 RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
-
-# Install foreman
-RUN gem install foreman
 
 # Clean up from the build
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
