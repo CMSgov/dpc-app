@@ -29,6 +29,9 @@ RUN gem install bundler --no-document && \
     bundle install && \
     npm install
 
+# Install foreman
+RUN gem install foreman
+
 # Run bundler audit
 RUN bundle exec bundle audit update && bundle exec bundle audit check
 
@@ -48,6 +51,7 @@ RUN rm -rf /usr/local/bundle/cache/*.gem && \
 # Add Federal Common Policy CA G2 root certificate for SMTP
 COPY certs/fcpcag2.crt /usr/local/share/ca-certificates/fcpcag2.crt
 RUN cat /usr/local/share/ca-certificates/fcpcag2.crt >> /etc/ssl/certs/ca-certificates.crt
+
 
 # Declare the entrypoint shell script
 ENTRYPOINT ["./docker/entrypoint.sh"]
