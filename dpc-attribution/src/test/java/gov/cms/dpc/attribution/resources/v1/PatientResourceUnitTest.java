@@ -45,7 +45,9 @@ class PatientResourceUnitTest {
         OrganizationEntity org = createOrganizationEntity();
         List<PatientEntity> patientEntities = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
-            patientEntities.add(createPatientEntity(org));
+            PatientEntity patientEntity = createPatientEntity(org);
+            patientEntity.setID(UUID.randomUUID());
+            patientEntities.add(patientEntity);
         }
 
         // Stub DAO to return paged subset of PatientEntity's

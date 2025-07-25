@@ -74,7 +74,7 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
 
         final List<Predicate> predicates = buildPredicates(builder, root, searchQuery);
         query.where(predicates.toArray(new Predicate[0]));
-        TypedQuery<PatientEntity> typedQuery = currentSession().createQuery(query);
+        TypedQuery<PatientEntity> typedQuery = this.currentSession().createQuery(query);
 
         // Legacy compatibility for request without pagination
         if (searchQuery.getPageOffset() == null) {
