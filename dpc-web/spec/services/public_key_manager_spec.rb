@@ -38,8 +38,7 @@ RSpec.describe PublicKeyManager do
 
           expect(new_public_key[:response]).to eq(false)
           expect(new_public_key[:message]).to eq(response)
-          expect(new_public_key[:errors]).to eq({ root: PublicKeyManager::SERVER_ERROR_MSG })
-
+          expect(new_public_key[:errors]).to eq(root: PublicKeyManager::SERVER_ERROR_MSG)
         end
       end
     end
@@ -66,13 +65,15 @@ RSpec.describe PublicKeyManager do
       it 'return false when key is duplicate' do
         response = { 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' }
         stub_self_returning_api_client(message: :create_public_key,
-                                       response: ,
+                                       response:,
                                        with: [api_id, { params: @public_key_params }])
 
         new_public_key = manager.create_public_key(**@public_key_params)
+
         expect(new_public_key[:response]).to eq(true)
 
         duplicate_key = manager.create_public_key(**@public_key_params)
+
         expect(duplicate_key[:response]).to eq(false)
         expect(duplicate_key[:message]).to eq(I18n.t('errors.duplicate_key.text'))
       end
@@ -81,50 +82,42 @@ RSpec.describe PublicKeyManager do
 
   describe '#delete_public_key' do
     context 'with valid key' do
+      let(:key_guid) { SecureRandom.uuid }
       context 'successful API request' do
         it 'responds true' do
-          allow(@api_client).to receive(:delete_public_key)
-            .with(@registered_org.api_id, '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3')
-            .and_return(true)
-          allow(@api_client).to receive(:create_public_key).and_return(@api_client)
-          allow(@api_client).to receive(:response_successful?).and_return(true)
-          allow(@api_client).to receive(:response_body).and_return('id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3')
+          stub_self_returning_api_client(message: :delete_public_key,
+                                         with: [api_id, key_guid])
 
-          manager.create_public_key(**@public_key_params)
-          new_public_key = manager.delete_public_key({ id: '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' })
+          response = manager.delete_public_key(id: key_guid)
 
-          expect(new_public_key).to eq(true)
+          expect(response).to be true
         end
       end
 
       context 'failed API request' do
         it 'responds false' do
-          allow(@api_client).to receive(:delete_public_key)
-            .with(@registered_org.api_id, '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3')
-            .and_return(false)
-          allow(@api_client).to receive(:create_public_key)
-            .with(@registered_org.api_id, params: @public_key_params)
-            .and_return(@api_client)
-          allow(@api_client).to receive(:response_body).and_return('id' => 'none')
-          allow(@api_client).to receive(:response_successful?).and_return(false)
+          stub_self_returning_api_client(message: :delete_public_key,
+                                         success: false,
+                                         with: [api_id, key_guid])
 
-          manager.create_public_key(**@public_key_params)
-          new_public_key = manager.delete_public_key({ id: '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' })
+          response = manager.delete_public_key(id: key_guid)
 
-          expect(new_public_key).to eq(false)
+          expect(response).to be false
         end
       end
     end
 
     context 'with invalid key' do
       it 'returns false when key is private' do
-        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('private_key.pem').read, snippet_signature: 'stubbed_sign_txt_signature')
+        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('private_key.pem').read,
+                                                   snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
       end
 
       it 'returns false when key is not in pem format' do
-        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read, snippet_signature: 'stubbed_sign_txt_signature')
+        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read,
+                                                   snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
       end
@@ -134,23 +127,25 @@ RSpec.describe PublicKeyManager do
   describe '#public_keys' do
     context 'successful API request' do
       it 'returns array of public keys' do
-        allow(@api_client).to receive(:get_public_keys)
-          .with(@registered_org.api_id).and_return(@api_client)
-        allow(@api_client).to receive(:response_successful?).and_return(true)
-        allow(@api_client).to receive(:response_body).and_return('entities' => ['id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3'])
+        keys = [{ 'id' => SecureRandom.uuid }]
+        stub_self_returning_api_client(message: :get_public_keys,
+                                       response: { 'entities' => keys },
+                                       with: [api_id])
 
-        expect(manager.public_keys).to eq(['id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3'])
+        expect(manager.public_keys).to eq(keys)
       end
     end
 
     context 'failed API request' do
       it 'returns empty array' do
-        allow(@api_client).to receive(:get_public_keys)
-          .with(@registered_org.api_id).and_return(@api_client)
-        allow(@api_client).to receive(:response_successful?).and_return(false)
-        allow(@api_client).to receive(:response_body).and_return('error' => 'Bad request')
+        response = { error: 'Bad request' }
+        stub_self_returning_api_client(message: :get_public_keys,
+                                       success: false,
+                                       response:,
+                                       with: [api_id])
 
         expect(manager.public_keys).to eq([])
+        expect(manager.errors).to eq(response)
       end
     end
   end
