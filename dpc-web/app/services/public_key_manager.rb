@@ -25,7 +25,7 @@ class PublicKeyManager
 
     if duplicate_key?(api_client.response_body)
       return { response: false,
-               message: I18n.t('errors.duplicate_key.status') }
+               message: I18n.t('errors.duplicate_key.text') }
     end
 
     { response: api_client.response_successful?,

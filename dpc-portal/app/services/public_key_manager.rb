@@ -73,7 +73,7 @@ class PublicKeyManager
       @errors[:public_key] = 'Must be a valid public key.'
       @errors[:root] = INVALID_KEY
     elsif error_msg&.include?('duplicate key value violates unique constraint')
-      @errors[:public_key] = I18n.t('errors.duplicate_key.status')
+      @errors[:public_key] = I18n.t('errors.duplicate_key.text')
       @errors[:root] = INVALID_KEY
     else
       @errors[:root] = SERVER_ERROR_MSG

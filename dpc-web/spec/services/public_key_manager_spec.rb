@@ -3,69 +3,78 @@
 require 'rails_helper'
 
 RSpec.describe PublicKeyManager do
+  let(:api_id) { SecureRandom.uuid }
+  let(:manager) { PublicKeyManager.new(api_id) }
   before(:each) do
-    @public_key_params = { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read, snippet_signature: 'stubbed_sign_txt_signature' }
-    @registered_org = build(:registered_organization)
-    @manager = PublicKeyManager.new(registered_organization: @registered_org)
-    @api_client = instance_double(DpcClient)
-    allow(DpcClient).to receive(:new).and_return(@api_client)
+    @public_key_params = { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read,
+                           snippet_signature: 'stubbed_sign_txt_signature' }
   end
 
   describe '#create_public_key' do
     context 'with valid key' do
       context 'successful API request' do
         it 'responds true' do
-          allow(@api_client).to receive(:create_public_key).and_return(@api_client)
-          allow(@api_client).to receive(:response_successful?).and_return(true)
-          allow(@api_client).to receive(:response_body).and_return('id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3')
+          response = { 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' }
+          stub_self_returning_api_client(message: :create_public_key,
+                                         response:,
+                                         with: [api_id, { params: @public_key_params }])
 
-          new_public_key = @manager.create_public_key(**@public_key_params)
+          new_public_key = manager.create_public_key(**@public_key_params)
 
           expect(new_public_key[:response]).to eq(true)
+          expect(new_public_key[:message]).to eq(response)
         end
       end
 
       context 'failed API request' do
         it 'responds false' do
-          allow(@api_client).to receive(:create_public_key)
-            .with(@registered_org.api_id, params: @public_key_params)
-            .and_return(@api_client)
-          allow(@api_client).to receive(:response_body).and_return('id' => 'none')
-          allow(@api_client).to receive(:response_successful?).and_return(false)
+          response = { 'id' => nil }
+          stub_self_returning_api_client(message: :create_public_key,
+                                         success: false,
+                                         response:,
+                                         with: [api_id, { params: @public_key_params }])
 
-          new_public_key = @manager.create_public_key(**@public_key_params)
+          new_public_key = manager.create_public_key(**@public_key_params)
 
           expect(new_public_key[:response]).to eq(false)
+          expect(new_public_key[:message]).to eq(response)
+          expect(new_public_key[:errors]).to eq({ root: PublicKeyManager::SERVER_ERROR_MSG })
+
         end
       end
     end
 
     context 'with invalid key' do
       it 'returns false when key is private' do
-        new_public_key = @manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('private_key.pem').read, snippet_signature: 'stubbed_sign_txt_signature')
+        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('private_key.pem').read,
+                                                   snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
+        expect(new_public_key[:errors]).to eq(public_key: 'Must be a public key (not a private key).',
+                                              root: PublicKeyManager::INVALID_KEY)
       end
 
       it 'returns false when key is not in pem format' do
-        new_public_key = @manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read, snippet_signature: 'stubbed_sign_txt_signature')
+        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read,
+                                                   snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
+        expect(new_public_key[:errors]).to eq(public_key: 'Must be a valid public key.',
+                                              root: PublicKeyManager::INVALID_KEY)
       end
 
       it 'return false when key is duplicate' do
-        allow(@api_client).to receive(:create_public_key).and_return(@api_client)
-        allow(@api_client).to receive(:response_successful?).and_return(true)
-        allow(@api_client).to receive(:response_body).and_return('id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3')
+        response = { 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' }
+        stub_self_returning_api_client(message: :create_public_key,
+                                       response: ,
+                                       with: [api_id, { params: @public_key_params }])
 
-        first_create = @manager.create_public_key(**@public_key_params)
-        expect(first_create[:response]).to eq(true)
+        new_public_key = manager.create_public_key(**@public_key_params)
+        expect(new_public_key[:response]).to eq(true)
 
-        allow(@api_client).to receive(:response_body).and_return('error' => 'duplicate key value violates unique constraint')
-        allow(@api_client).to receive(:response_successful?).and_return(false)
-
-        second_create = @manager.create_public_key(**@public_key_params)
-        expect(second_create[:response]).to eq(false)
+        duplicate_key = manager.create_public_key(**@public_key_params)
+        expect(duplicate_key[:response]).to eq(false)
+        expect(duplicate_key[:message]).to eq(I18n.t('errors.duplicate_key.text'))
       end
     end
   end
@@ -81,8 +90,8 @@ RSpec.describe PublicKeyManager do
           allow(@api_client).to receive(:response_successful?).and_return(true)
           allow(@api_client).to receive(:response_body).and_return('id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3')
 
-          @manager.create_public_key(**@public_key_params)
-          new_public_key = @manager.delete_public_key({ id: '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' })
+          manager.create_public_key(**@public_key_params)
+          new_public_key = manager.delete_public_key({ id: '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' })
 
           expect(new_public_key).to eq(true)
         end
@@ -99,8 +108,8 @@ RSpec.describe PublicKeyManager do
           allow(@api_client).to receive(:response_body).and_return('id' => 'none')
           allow(@api_client).to receive(:response_successful?).and_return(false)
 
-          @manager.create_public_key(**@public_key_params)
-          new_public_key = @manager.delete_public_key({ id: '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' })
+          manager.create_public_key(**@public_key_params)
+          new_public_key = manager.delete_public_key({ id: '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' })
 
           expect(new_public_key).to eq(false)
         end
@@ -109,13 +118,13 @@ RSpec.describe PublicKeyManager do
 
     context 'with invalid key' do
       it 'returns false when key is private' do
-        new_public_key = @manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('private_key.pem').read, snippet_signature: 'stubbed_sign_txt_signature')
+        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('private_key.pem').read, snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
       end
 
       it 'returns false when key is not in pem format' do
-        new_public_key = @manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read, snippet_signature: 'stubbed_sign_txt_signature')
+        new_public_key = manager.create_public_key(label: 'Test Key 1', public_key: file_fixture('bad_cert.pub').read, snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
       end
@@ -130,7 +139,7 @@ RSpec.describe PublicKeyManager do
         allow(@api_client).to receive(:response_successful?).and_return(true)
         allow(@api_client).to receive(:response_body).and_return('entities' => ['id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3'])
 
-        expect(@manager.public_keys).to eq(['id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3'])
+        expect(manager.public_keys).to eq(['id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3'])
       end
     end
 
@@ -141,7 +150,7 @@ RSpec.describe PublicKeyManager do
         allow(@api_client).to receive(:response_successful?).and_return(false)
         allow(@api_client).to receive(:response_body).and_return('error' => 'Bad request')
 
-        expect(@manager.public_keys).to eq([])
+        expect(manager.public_keys).to eq([])
       end
     end
   end

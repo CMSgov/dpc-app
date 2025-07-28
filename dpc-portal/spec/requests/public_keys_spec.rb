@@ -200,8 +200,8 @@ RSpec.describe 'PublicKeys', type: :request do
                                        api_client:)
         post "/organizations/#{org.id}/public_keys", params: success_params
         expect(flash[:alert]).to eq('Invalid public key.')
-        expect(assigns(:errors)).to eq(public_key: 'Duplicate key',
-                                       root: 'Invalid public key.')
+        expect(assigns(:errors)).to eq(public_key: I18n.t('errors.duplicate_key.text'),
+                                       root: PublicKeyManager::INVALID_KEY)
       end
 
       it 'checks if configuration complete on success' do
