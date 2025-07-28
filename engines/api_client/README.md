@@ -25,11 +25,15 @@ Build the docker image
 
 In the api_client directory
 ```bash
-$ docker build . -t api_client
+$ make build
 ```
 
 Run the tests until they pass
 ```
-$ docker run --rm -v ${PWD}:/api-client -w /api-client api_client bundle exec rspec
-$ docker run --rm -v ${PWD}:/api-client -w /api-client api_client bundle exec rubocop
+$ make test
+```
+
+Jump into the docker shell for iterative development
+```
+make run
 ```
