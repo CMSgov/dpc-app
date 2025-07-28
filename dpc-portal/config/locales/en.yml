@@ -55,7 +55,6 @@ en:
     access_denied: Access denied
   errors:
     duplicate_key: # TODO: update with real text -acw
-      status: Duplicate key
       text: This public key is already associated with another organization.
     attributes:
       base:
