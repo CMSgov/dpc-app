@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.*;
 class PatientResourceUnitTest {
 
     private PatientResource patientResource;
+    private int pageSize;
 
     @Mock
     PatientDAO patientDAO;
@@ -31,7 +32,8 @@ class PatientResourceUnitTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        patientResource = new PatientResource(converter, patientDAO, 9999, 100, new PagingService());
+        this.pageSize = 100;
+        patientResource = new PatientResource(converter, patientDAO, 9999, this.pageSize, new PagingService());
     }
 
     @Test
@@ -78,5 +80,36 @@ class PatientResourceUnitTest {
             String actualId = results.get(i).getResource().getId();
             assertEquals(expectedId, actualId);
         }
+    }
+
+    @Test
+    void testInvalidPageNumber() {
+        int hugePageNumber = 9999;
+        int pageOffset = (hugePageNumber - 1) * this.pageSize;
+        String requestPath = "/v1/Patient?page=";
+        UUID orgId = UUID.randomUUID();
+        String orgRef = "Organization/" + orgId;
+
+        List<PatientEntity> patientEntities = new ArrayList<>();
+        PageResult mockedPage = new PageResult<>(
+                patientEntities,
+                false
+        );
+        Mockito.when(patientDAO.patientSearch(argThat(queryMatches(null, orgId, this.pageSize, pageOffset))))
+                .thenReturn(mockedPage);
+        Bundle resultBundle = patientResource.searchPatients(
+                null,
+                null,
+                orgRef,
+                null,
+                pageOffset,
+                null
+        );
+
+        assertNull(resultBundle.getLink("previous"));
+        assertNull(resultBundle.getLink("next"));
+        assertEquals(resultBundle.getLink("first").getUrl(), requestPath + 1);
+        assertEquals(resultBundle.getLink("self").getUrl(), requestPath + hugePageNumber);
+        assertTrue(resultBundle.getEntry().isEmpty(), "Expected no entries for an out-of-bounds page");
     }
 }

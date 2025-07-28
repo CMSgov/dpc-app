@@ -36,7 +36,7 @@ public class PagingService {
         Bundle bundle = convertToBundle(patients);
         addRelationLink(bundle, "self", requestPath, page);
         addRelationLink(bundle, "first", requestPath, 1);
-        if (page > 1) addRelationLink(bundle, "previous", requestPath, page-1);
+        if (page > 1 && !patients.isEmpty()) addRelationLink(bundle, "previous", requestPath, page-1);
         if (hasNext) addRelationLink(bundle, "next", requestPath, page+1);
 
 
