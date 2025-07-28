@@ -199,7 +199,7 @@ RSpec.describe 'PublicKeys', type: :request do
                                        response: 'error: duplicate key value violates unique constraint',
                                        api_client:)
         post "/organizations/#{org.id}/public_keys", params: success_params
-        expect(flash[:alert]).to eq('Invalid public key.')
+        expect(flash[:alert]).to eq(PublicKeyManager::INVALID_KEY)
         expect(assigns(:errors)).to eq(public_key: I18n.t('errors.duplicate_key.text'),
                                        root: PublicKeyManager::INVALID_KEY)
       end
