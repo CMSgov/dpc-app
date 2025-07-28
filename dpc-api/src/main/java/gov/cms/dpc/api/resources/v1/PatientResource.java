@@ -125,15 +125,15 @@ public class PatientResource extends AbstractPatientResource {
                                 @ApiParam(value = "Page number") // null means "do not paginate" for compatibility reasons
                                 @QueryParam(value = "_page") Integer page) {
         var request = this.buildPatientSearchQuery(organization.getOrganization().getId(), patientMBI);
-        if (count == null) {
+        if (count == null && page != null) {
             count = this.defaultPageSize;
         }
 
-        if (count == 0) {
+        if (count != null && count == 0) {
             request.count(0).summaryMode(SummaryEnum.COUNT); // count gets omitted in request
             return request.execute();
         }
-        else if (page != null && page >= 1) {
+        else if (count !=null && page != null && page >= 1) {
             request.offset(count*(page-1));
             request.count(count);
         }
