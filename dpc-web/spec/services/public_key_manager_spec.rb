@@ -89,7 +89,6 @@ RSpec.describe PublicKeyManager do
           response = manager.delete_public_key(id: key_guid)
 
           expect(response).to be true
-
         end
       end
 
