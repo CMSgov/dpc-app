@@ -86,28 +86,6 @@ public class PatientResource extends AbstractPatientResource {
         this.defaultPageSize = defaultPageSize;
     }
 
-    IQuery<Bundle> buildPatientSearchQuery(String orgId, @Nullable String patientMBI) {
-        IQuery<Bundle> query = this.client
-                .search()
-                .forResource(Patient.class)
-                .encodedJson()
-                .where(Patient.ORGANIZATION.hasId(orgId))
-                .returnBundle(Bundle.class);
-        if (patientMBI != null && !patientMBI.isEmpty()) {
-            // Handle MBI parsing
-            // This should come out as part of DPC-432
-            final String expandedMBI;
-            if (IDENTIFIER_PATTERN.matcher(patientMBI).matches()) {
-                expandedMBI = patientMBI;
-            } else {
-                expandedMBI = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientMBI);
-            }
-            query = query.where(Patient.IDENTIFIER.exactly().identifier(expandedMBI));
-        }
-
-        return query;
-    }
-
     @GET
     @FHIR
     @Timed
@@ -357,5 +335,27 @@ public class PatientResource extends AbstractPatientResource {
         } else {
             return Optional.empty();
         }
+    }
+
+    IQuery<Bundle> buildPatientSearchQuery(String orgId, @Nullable String patientMBI) {
+        IQuery<Bundle> query = this.client
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+                .where(Patient.ORGANIZATION.hasId(orgId))
+                .returnBundle(Bundle.class);
+        if (patientMBI != null && !patientMBI.isEmpty()) {
+            // Handle MBI parsing
+            // This should come out as part of DPC-432
+            final String expandedMBI;
+            if (IDENTIFIER_PATTERN.matcher(patientMBI).matches()) {
+                expandedMBI = patientMBI;
+            } else {
+                expandedMBI = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientMBI);
+            }
+            query = query.where(Patient.IDENTIFIER.exactly().identifier(expandedMBI));
+        }
+
+        return query;
     }
 }

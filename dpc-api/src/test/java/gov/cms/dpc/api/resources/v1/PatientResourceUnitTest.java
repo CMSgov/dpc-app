@@ -92,7 +92,7 @@ class PatientResourceUnitTest {
         when(mockQuery.where(any(ICriterion.class))).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(bundle);
 
-        Bundle actualResponse = patientSearch(organizationPrincipal, patientMbi);
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, patientMbi, null, null);
         assertEquals(bundle, actualResponse);
     }
 
@@ -119,23 +119,8 @@ class PatientResourceUnitTest {
         when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(bundle);
 
-        Bundle actualResponse = patientSearch(organizationPrincipal, null);
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null, null, null);
         assertEquals(bundle, actualResponse);
-    }
-
-    private Bundle createPatientBundle(int numPatients, Organization organization) {
-        Bundle bundle = new Bundle();
-        for (int i = 0; i < numPatients; i++) {
-            Patient patient = new Patient();
-            patient.setId("Patient/patient-" + i);
-            patient.setManagingOrganizationTarget(organization);
-            bundle.addEntry().setResource(patient);
-        }
-        return bundle;
-    }
-
-    private Bundle patientSearch(OrganizationPrincipal organization, String patientMBI) {
-        return patientResource.patientSearch(organization, patientMBI, -1, -1);
     }
 
     @Test
@@ -221,7 +206,7 @@ class PatientResourceUnitTest {
         when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(largePatientBundle);
 
-        Bundle actualResponse = patientSearch(organizationPrincipal, null);
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null, null, null);
         assertEquals(largePatientBundle, actualResponse);
         assertEquals(largePatientBundle.getEntry().size(), largePatientNum);
     }
@@ -624,5 +609,16 @@ class PatientResourceUnitTest {
         IBaseOperationOutcome actualResponse = patientResource.validatePatient(organizationPrincipal, params);
 
         assertNotNull(actualResponse);
+    }
+
+    private Bundle createPatientBundle(int numPatients, Organization organization) {
+        Bundle bundle = new Bundle();
+        for (int i = 0; i < numPatients; i++) {
+            Patient patient = new Patient();
+            patient.setId("Patient/patient-" + i);
+            patient.setManagingOrganizationTarget(organization);
+            bundle.addEntry().setResource(patient);
+        }
+        return bundle;
     }
 }
