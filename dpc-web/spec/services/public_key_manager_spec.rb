@@ -88,9 +88,9 @@ RSpec.describe PublicKeyManager do
 
           manager = PublicKeyManager.new(registered_organization: registered_org)
           manager.create_public_key(**@public_key_params)
-          delete_public_key = manager.delete_public_key(key_guid)
+          response = manager.delete_public_key(key_guid)
 
-          expect(delete_public_key[:response]).to eq(true)
+          expect(response).to eq(true)
         end
       end
 
@@ -104,9 +104,9 @@ RSpec.describe PublicKeyManager do
 
           manager = PublicKeyManager.new(registered_organization: registered_org)
           manager.create_public_key(**@public_key_params)
-          delete_public_key = manager.delete_public_key(key_guid)
+          response = manager.delete_public_key(key_guid)
 
-          expect(delete_public_key[:response]).to eq(false)
+          expect(response).to eq(false)
         end
       end
     end
