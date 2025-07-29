@@ -14,7 +14,7 @@ RSpec.describe PublicKeyManager do
     context 'with valid key' do
       context 'successful API request' do
         it 'responds true' do
-          registered_org = build(:registered_organisation)
+          registered_org = build(:registered_organization)
 
           response = { 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' }
           stub_api_client(message: :create_public_key, success: true, response:)
@@ -54,7 +54,7 @@ RSpec.describe PublicKeyManager do
 
         expect(new_public_key[:response]).to eq(false)
         expect(new_public_key[:errors]).to eq(public_key: 'Must be a public key (not a private key).',
-                                              root: PublicKeyManager::INVALID_KEY)
+                                              root: 'Invalid public key.')
       end
 
       it 'returns false when key is not in pem format' do
@@ -66,11 +66,11 @@ RSpec.describe PublicKeyManager do
 
         expect(new_public_key[:response]).to eq(false)
         expect(new_public_key[:errors]).to eq(public_key: 'Must be a valid public key.',
-                                              root: PublicKeyManager::INVALID_KEY)
+                                              root: 'Invalid public key.')
       end
 
       it 'return false when key is duplicate' do
-        registered_org = build(:registered_organisation)
+        registered_org = build(:registered_organization)
         manager = PublicKeyManager.new(registered_organization: registered_org)
 
         response = 'duplicate key value violates unique constraint'
@@ -137,7 +137,7 @@ RSpec.describe PublicKeyManager do
         manager = PublicKeyManager.new(registered_organization: registered_org)
 
         expect(manager.public_keys).to eq([])
-        expect(manager.errors).to eq(response)
+        expect(manager.errors).to eq([response])
       end
     end
   end
