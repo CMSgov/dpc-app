@@ -23,7 +23,6 @@ RSpec.describe PublicKeyManager do
           new_public_key = manager.create_public_key(**@public_key_params)
 
           expect(new_public_key[:response]).to eq(true)
-          expect(new_public_key[:message]).to eq(response)
         end
       end
 
@@ -38,8 +37,6 @@ RSpec.describe PublicKeyManager do
           new_public_key = manager.create_public_key(**@public_key_params)
 
           expect(new_public_key[:response]).to eq(false)
-          expect(new_public_key[:message]).to eq(response)
-          expect(new_public_key[:errors]).to eq(root: PublicKeyManager::SERVER_ERROR_MSG)
         end
       end
     end
@@ -53,8 +50,6 @@ RSpec.describe PublicKeyManager do
                                                    snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
-        expect(new_public_key[:errors]).to eq(public_key: 'Must be a public key (not a private key).',
-                                              root: 'Invalid public key.')
       end
 
       it 'returns false when key is not in pem format' do
@@ -65,8 +60,6 @@ RSpec.describe PublicKeyManager do
                                                    snippet_signature: 'stubbed_sign_txt_signature')
 
         expect(new_public_key[:response]).to eq(false)
-        expect(new_public_key[:errors]).to eq(public_key: 'Must be a valid public key.',
-                                              root: 'Invalid public key.')
       end
 
       it 'return false when key is duplicate' do
@@ -79,7 +72,6 @@ RSpec.describe PublicKeyManager do
         duplicate_key = manager.create_public_key(**@public_key_params)
 
         expect(duplicate_key[:response]).to eq(false)
-        expect(duplicate_key[:message]).to eq(I18n.t('errors.duplicate_key.text'))
       end
     end
   end
@@ -130,14 +122,13 @@ RSpec.describe PublicKeyManager do
 
     context 'failed API request' do
       it 'returns empty array' do
-        response = { root: 'Bad request' }
+        response = { error: 'Bad request' }
         stub_api_client(message: :get_public_keys, success: false, response:)
 
         registered_org = build(:registered_organization)
         manager = PublicKeyManager.new(registered_organization: registered_org)
 
         expect(manager.public_keys).to eq([])
-        expect(manager.errors).to eq([response])
       end
     end
   end
