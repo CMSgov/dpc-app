@@ -78,30 +78,35 @@ RSpec.describe PublicKeyManager do
 
   describe '#delete_public_key' do
     context 'with valid key' do
-      let(:key_guid) { SecureRandom.uuid }
       context 'successful API request' do
         it 'responds true' do
-          stub_api_client(message: :delete_public_key, success: true)
-
           registered_org = build(:registered_organization)
+
+          key_guid = { 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' }
+          api_client = stub_api_client(message: :create_public_key, success: true, response: key_guid)
+          stub_api_client(message: :delete_public_key, success: true, api_client:)
+
           manager = PublicKeyManager.new(registered_organization: registered_org)
+          manager.create_public_key(**@public_key_params)
+          response = manager.delete_public_key(key_guid)
 
-          response = manager.delete_public_key(id: key_guid)
-
-          expect(response).to be true
+          expect(response).to eq(true)
         end
       end
 
       context 'failed API request' do
         it 'responds false' do
-          stub_api_client(message: :delete_public_key, success: false)
-
           registered_org = build(:registered_organization)
+
+          key_guid = { 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' }
+          api_client = stub_api_client(message: :create_public_key, success: true, response: key_guid)
+          stub_api_client(message: :delete_public_key, success: false, response: { 'id' => nil }, api_client:)
+
           manager = PublicKeyManager.new(registered_organization: registered_org)
+          manager.create_public_key(**@public_key_params)
+          response = manager.delete_public_key(key_guid)
 
-          response = manager.delete_public_key(id: key_guid)
-
-          expect(response).to be false
+          expect(response).to eq(false)
         end
       end
     end
