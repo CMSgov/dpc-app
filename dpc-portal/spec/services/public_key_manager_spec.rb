@@ -122,6 +122,12 @@ RSpec.describe PublicKeyManager do
         new_public_key = manager.create_public_key(**@public_key_params)
         expect(new_public_key[:response]).to eq(true)
 
+        response = 'duplicate key value violates unique constraint'
+        stub_self_returning_api_client(message: :create_public_key,
+                                       success: false,
+                                       response:,
+                                       with: [api_id, { params: @public_key_params }])
+
         duplicate_key = manager.create_public_key(**@public_key_params)
         expect(duplicate_key[:response]).to eq(false)
         expect(duplicate_key[:errors]).to eq(public_key: I18n.t('errors.duplicate_key.text'),
