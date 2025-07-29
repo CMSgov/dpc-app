@@ -78,7 +78,7 @@ public class PatientResource extends AbstractPatientResource {
             daoSearchQuery.setPatientMBI(patientIdentifier.getValue());
         }
 
-        if (summary.equals("count")) {
+        if (summary.equals("count") {
             daoSearchQuery.setCount(0);
             int totalPatients = this.dao.countMatchingPatients(daoSearchQuery);
             return this.pagingService.convertToSummaryBundle(totalPatients);
