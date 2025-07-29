@@ -86,9 +86,9 @@ RSpec.describe PublicKeyManager do
           stub_api_client(message: :delete_public_key, success: true)
 
           manager = PublicKeyManager.new(registered_organization: registered_org)
-          response = manager.delete_public_key(id: key_guid)
+          api_client = manager.delete_public_key(id: key_guid)
 
-          expect(response).to be true
+          expect(api_client.response_successful?).to be true
         end
       end
 
@@ -100,9 +100,9 @@ RSpec.describe PublicKeyManager do
           stub_api_client(message: :delete_public_key, success: false)
 
           manager = PublicKeyManager.new(registered_organization: registered_org)
-          response = manager.delete_public_key(id: key_guid)
+          api_client = manager.delete_public_key(id: key_guid)
 
-          expect(response).to be false
+          expect(api_client.response_successful?).to be false
         end
       end
     end
