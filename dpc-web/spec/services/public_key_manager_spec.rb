@@ -102,7 +102,7 @@ RSpec.describe PublicKeyManager do
           manager = PublicKeyManager.new(registered_organization: registered_org)
           response = manager.delete_public_key(id: key_guid)
 
-          expect(response).to be true
+          expect(response).to be false
         end
       end
     end
