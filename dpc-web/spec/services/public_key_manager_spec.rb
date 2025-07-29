@@ -15,9 +15,7 @@ RSpec.describe PublicKeyManager do
       context 'successful API request' do
         it 'responds true' do
           response = { 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' }
-          stub_self_returning_api_client(message: :create_public_key,
-                                         response:,
-                                         with: [api_id, { params: @public_key_params }])
+          stub_api_client(message: :create_public_key, success: true, response:)
 
           new_public_key = manager.create_public_key(**@public_key_params)
 
@@ -29,10 +27,7 @@ RSpec.describe PublicKeyManager do
       context 'failed API request' do
         it 'responds false' do
           response = { 'id' => nil }
-          stub_self_returning_api_client(message: :create_public_key,
-                                         success: false,
-                                         response:,
-                                         with: [api_id, { params: @public_key_params }])
+          stub_api_client(message: :create_public_key, success: false, response:)
 
           new_public_key = manager.create_public_key(**@public_key_params)
 
@@ -64,13 +59,14 @@ RSpec.describe PublicKeyManager do
 
       it 'return false when key is duplicate' do
         response = { 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' }
-        stub_self_returning_api_client(message: :create_public_key,
-                                       response:,
-                                       with: [api_id, { params: @public_key_params }])
+        stub_api_client(message: :create_public_key, success: true, response:)
 
         new_public_key = manager.create_public_key(**@public_key_params)
 
         expect(new_public_key[:response]).to eq(true)
+
+        response = 'duplicate key value violates unique constraint'
+        stub_api_client(message: :create_public_key, success: false, response:)
 
         duplicate_key = manager.create_public_key(**@public_key_params)
 
@@ -85,8 +81,7 @@ RSpec.describe PublicKeyManager do
       let(:key_guid) { SecureRandom.uuid }
       context 'successful API request' do
         it 'responds true' do
-          stub_self_returning_api_client(message: :delete_public_key,
-                                         with: [api_id, key_guid])
+          stub_api_client(message: :delete_public_key, success: true)
 
           response = manager.delete_public_key(id: key_guid)
 
@@ -96,9 +91,7 @@ RSpec.describe PublicKeyManager do
 
       context 'failed API request' do
         it 'responds false' do
-          stub_self_returning_api_client(message: :delete_public_key,
-                                         success: false,
-                                         with: [api_id, key_guid])
+          stub_api_client(message: :delete_public_key, success: false)
 
           response = manager.delete_public_key(id: key_guid)
 
@@ -127,10 +120,8 @@ RSpec.describe PublicKeyManager do
   describe '#public_keys' do
     context 'successful API request' do
       it 'returns array of public keys' do
-        keys = [{ 'id' => SecureRandom.uuid }]
-        stub_self_returning_api_client(message: :get_public_keys,
-                                       response: { 'entities' => keys },
-                                       with: [api_id])
+        response = [{ 'id' => SecureRandom.uuid }]
+        stub_api_client(message: :get_public_keys, success: true, response:)
 
         expect(manager.public_keys).to eq(keys)
       end
@@ -139,10 +130,7 @@ RSpec.describe PublicKeyManager do
     context 'failed API request' do
       it 'returns empty array' do
         response = { error: 'Bad request' }
-        stub_self_returning_api_client(message: :get_public_keys,
-                                       success: false,
-                                       response:,
-                                       with: [api_id])
+        stub_api_client(message: :get_public_keys, success: false, response:)
 
         expect(manager.public_keys).to eq([])
         expect(manager.errors).to eq(response)
