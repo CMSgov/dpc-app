@@ -38,6 +38,7 @@ class PatientResourceUnitTest {
 
     @Test
     void testSearchPatientsPaginated() {
+        String requestPath = "/v1/Patient?page=";
         UUID orgId = UUID.randomUUID();
         String orgRef = "Organization/" + orgId;
         int pageOffset = 30;
@@ -80,6 +81,12 @@ class PatientResourceUnitTest {
             String actualId = results.get(i).getResource().getId();
             assertEquals(expectedId, actualId);
         }
+        int currentPage = pageOffset/count + 1;
+        assertEquals(requestPath + (currentPage - 1), resultBundle.getLink("previous").getUrl());
+        assertEquals(requestPath + (currentPage + 1), resultBundle.getLink("next").getUrl());
+        assertEquals(requestPath + 1, resultBundle.getLink("first").getUrl());
+        assertEquals(requestPath + currentPage, resultBundle.getLink("self").getUrl());
+        assertEquals(count, resultBundle.getEntry().size());
     }
 
     @Test
