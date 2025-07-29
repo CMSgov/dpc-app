@@ -49,7 +49,6 @@ public class PatientResource extends AbstractPatientResource {
         this.pagingService = pagingService;
     }
 
-//public List<Patient> searchPatients(
     @GET
     @FHIR
     @UnitOfWork
