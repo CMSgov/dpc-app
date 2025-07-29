@@ -89,6 +89,9 @@ RSpec.describe PublicKeyManager do
         it 'responds true' do
           stub_api_client(message: :delete_public_key, success: true)
 
+          registered_org = build(:registered_organization)
+          manager = PublicKeyManager.new(registered_organization: registered_org)
+
           response = manager.delete_public_key(id: key_guid)
 
           expect(response).to be true
@@ -98,6 +101,9 @@ RSpec.describe PublicKeyManager do
       context 'failed API request' do
         it 'responds false' do
           stub_api_client(message: :delete_public_key, success: false)
+
+          registered_org = build(:registered_organization)
+          manager = PublicKeyManager.new(registered_organization: registered_org)
 
           response = manager.delete_public_key(id: key_guid)
 
