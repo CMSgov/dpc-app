@@ -130,7 +130,7 @@ RSpec.describe PublicKeyManager do
 
     context 'failed API request' do
       it 'returns empty array' do
-        response = { error: 'Bad request' }
+        response = { root: 'Bad request' }
         stub_api_client(message: :get_public_keys, success: false, response:)
 
         registered_org = build(:registered_organization)
