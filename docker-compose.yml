@@ -2,7 +2,7 @@ services:
 
   db:
     image: artifactory.cloud.cms.gov/docker/postgres:16.4
-    command: postgres -c 'max_connections=250'
+    command: postgres -p 5435 -c 'max_connections=250'
     environment:
       - POSTGRES_MULTIPLE_DATABASES=dpc_attribution,dpc_queue,dpc_auth,dpc_consent,dpc-website_development,bcda,dpc-portal_development
       - POSTGRES_USER=postgres
@@ -15,9 +15,9 @@ services:
       - pgdata16:/var/lib/postgresql/data
       - ./tmp:/var/tmp
     ports:
-      - "5432:5432"
+      - "5435:5435"
     healthcheck:
-      test: "pg_isready -U $${POSTGRES_USER}"
+      test: "pg_isready -U $${POSTGRES_USER} -p 5435"
       interval: 10s
       timeout: 5s
       start_period: 30s

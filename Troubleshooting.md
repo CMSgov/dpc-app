@@ -17,19 +17,12 @@ Below are some issues and solutions that may arise while setting up your local e
 |                        | Interacting with the API                 | Produces:  <br/>`InvalidAuthenticityToken` errors                                                                                                                                                                                                                                                                                         | Run the  `docker exec -it ${container_id}} rails dec:cache` command to turn on caching                                                                                          |                                                   |
 |                        |                                          | Produces:  <br/>`401` authentication errors from the API                                                                                                                                                                                                                                                                                  | Ensure you’ve turned off authentication in the API by setting the environment variable `AUTH_DISABLED` to `true` inside the **docker-compose.yml** file              |                                                   |
 |                        |                                          | Produces an error where the API seems to reject all <br/>FHIR resources and returns a blanket `500`error                                                                                                                                                                                                                                       | Tail the Attribution Service docker logs by running `docker logs -f container_id`. If you see the following error, you need to seed your local database by running make seed-db. |                                                   |
-|                        | Connecting to PostGresql Database        | Service unavailable on port 5432                                                                                                                                                                                                                                                                                                          | Ensure that this code snippet is included in your **docker-compose.portals.yml** file:                                                                                          | [docker-compose.portals snippet](#docker-compose)  |
-| | Issue accessing the Web Portals | Using the generated Golden Macaroon may produce an ```Invalid Base64``` error |    This is due to an additional ```%``` character added to the Macaroon in the console . This seems to be a MacOs issue, as it doesn't happen in Windows' WSL2 environment, not clear as to why. To address this, simply copy the Macaroon __without__ the last ```%``` character.    
+| Issue accessing the Web Portals | Using the generated Golden Macaroon may produce an ```Invalid Base64``` error |    This is due to an additional ```%``` character added to the Macaroon in the console . This seems to be a MacOs issue, as it doesn't happen in Windows' WSL2 environment, not clear as to why. To address this, simply copy the Macaroon __without__ the last ```%``` character.    
 
 
 
 ### Code Snippets
 
-### docker compose
-```yaml
-db:
-   ports:
-     - "5432:5432"
-```
 ### pom xml profile node
 ```xml
 

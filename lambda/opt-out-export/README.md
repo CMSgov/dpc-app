@@ -1,6 +1,6 @@
 # How to run locally
 - Make sure your local db is running.
-    - In dpc-app docker-compose.yml, make sure port 5432 is open in the db service.
+    - In dpc-app docker-compose.yml, make sure port 5435 is open in the db service.
     - In the main dpc-app directory, run `make start-db`.
     - Check to make sure that the `patients` table in `dpc-attribution` and the `consent` table in `dpc-consent` have data.
     - If they don't, the easiest way to fill them is to run the dpc-api PatientResourceTest integration tests.

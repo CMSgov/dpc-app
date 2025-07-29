@@ -1,7 +1,7 @@
 # application.yml with changes to relative paths, urls, and logging for testing purposes
 consentdb:
   driverClass: org.postgresql.Driver
-  url: "jdbc:postgresql://localhost:5432/dpc_consent"
+  url: "jdbc:postgresql://localhost:5435/dpc_consent"
   user: postgres
   password: dpc-safe
   initialSize: 5

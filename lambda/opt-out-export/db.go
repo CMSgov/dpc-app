@@ -10,7 +10,7 @@ import (
 
 var createConnection = func(dbName string, dbUser string, dbPassword string) (*sql.DB, error) {
 	var dbHost string = os.Getenv("DB_HOST")
-	var dbPort int = 5432
+	var dbPort int = 5435
 	var sslmode string = "require"
 	if isTesting {
 		sslmode = "disable"

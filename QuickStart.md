@@ -30,22 +30,8 @@ CONFIGURE
 
 ### Edit the `docker-compose.yml` file
 
-#### Ports
-When running locally, you'll need to update the docker-compse.yml file by adding:
-```yaml
-ports: 
-  - "5432:5432"
-```
-
-in the `db` service. E.g.:
-```yaml
-db: 
-  image: postgres:16
-  ports: 
-    - "5432:5432"
-```
 #### JVM Authentication
-Set authentication_disabled for JVM set to **[true]** in the `api` service in the same file.
+Set authentication_disabled for JVM set to **[true]** in the `api` service in the docker-compose.yml file.
 
 `AUTH_DISABLED=true`
 
