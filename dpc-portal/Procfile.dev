@@ -1,3 +1,2 @@
 web: bundle exec rails server -b 0.0.0.0 -p 3100
-css: npm run build:css:watch
 cpigw: env PORT=4567 ruby spec/support/fake_cpi_gateway.rb
