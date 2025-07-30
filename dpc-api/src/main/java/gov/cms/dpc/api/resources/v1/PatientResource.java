@@ -95,9 +95,9 @@ public class PatientResource extends AbstractPatientResource {
                                 @Auth OrganizationPrincipal organization,
                                 @ApiParam(value = "Patient MBI")
                                 @QueryParam(value = Patient.SP_IDENTIFIER) @NoHtml String patientMBI,
-                                @ApiParam(value = "Patients per page")
+                                @ApiParam(value = "Patients per page") // used to determine if pagination logic should be used
                                 @QueryParam(value = "_count") Integer count,
-                                @ApiParam(value = "Page number") // null means "do not paginate" for compatibility reasons
+                                @ApiParam(value = "Page offset")
                                 @QueryParam(value = "_offset") Integer offset) {
         if (count != null && count < 0) {
             throw new WebApplicationException("Parameter _count must be >= 0", Response.Status.BAD_REQUEST);
@@ -115,7 +115,7 @@ public class PatientResource extends AbstractPatientResource {
                 request.summaryMode(SummaryEnum.COUNT); // count gets omitted in request
             }
         }
-        if (offset !=null) {
+        if (offset != null) {
             request.offset(offset);
         }
         return request.execute(); // this should call attribution

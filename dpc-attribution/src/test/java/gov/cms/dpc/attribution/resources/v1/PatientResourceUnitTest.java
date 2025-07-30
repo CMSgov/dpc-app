@@ -79,10 +79,10 @@ class PatientResourceUnitTest {
             String actualId = results.get(i).getResource().getId();
             assertEquals(expectedId, actualId);
         }
-        String expectedPrevUrl = requestPath + "?_count=10&offset=20";
-        String expectedNextUrl = requestPath + "?_count=10&offset=40";
-        String expectedFirstUrl = requestPath + "?_count=0&offset=0";
-        String expectedSelfUrl = requestPath + "?_count=10&offset=30";
+        String expectedPrevUrl = requestPath + "?_count=10&_offset=20";
+        String expectedNextUrl = requestPath + "?_count=10&_offset=40";
+        String expectedFirstUrl = requestPath + "?_count=0&_offset=0";
+        String expectedSelfUrl = requestPath + "?_count=10&_offset=30";
         assertEquals(expectedPrevUrl, resultBundle.getLink("previous").getUrl());
         assertEquals(expectedNextUrl, resultBundle.getLink("next").getUrl());
         assertEquals(expectedFirstUrl, resultBundle.getLink("first").getUrl());
