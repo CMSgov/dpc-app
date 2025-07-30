@@ -15,6 +15,7 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.converters.exceptions.FHIRConverterException;
 import io.dropwizard.hibernate.UnitOfWork;
+import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
@@ -54,9 +55,9 @@ public class PatientResource extends AbstractPatientResource {
             @QueryParam("_id") UUID resourceID,
             @QueryParam("identifier") String patientMBI,
             @QueryParam("organization") String organizationReference,
-            @QueryParam(value = "_count") Integer count,
-            @QueryParam(value = "_offset") Integer pageOffset,
-            @QueryParam(value = "_summary") String summary) {
+            @QueryParam(value = "_count") @Nullable Integer count,
+            @QueryParam(value = "_offset") @Nullable Integer pageOffset,
+            @QueryParam(value = "_summary") @Nullable String summary) {
         if (patientMBI == null && organizationReference == null && resourceID == null) {
             throw new WebApplicationException("Must have one of Patient Identifier, Organization Resource ID, or Patient Resource ID", Response.Status.BAD_REQUEST);
         }
@@ -75,7 +76,7 @@ public class PatientResource extends AbstractPatientResource {
             daoSearchQuery.setPatientMBI(patientIdentifier.getValue());
         }
 
-        if (summary.equals("count")) {
+        if (summary != null && summary.equals("count")) {
             daoSearchQuery.setCount(0);
             int totalPatients = this.dao.countMatchingPatients(daoSearchQuery);
             return this.pagingService.convertToSummaryBundle(totalPatients);
@@ -90,7 +91,9 @@ public class PatientResource extends AbstractPatientResource {
         }
 
         daoSearchQuery.setCount(count);
-        daoSearchQuery.setPageOffset(pageOffset);
+        if (pageOffset != null) {
+            daoSearchQuery.setPageOffset(pageOffset);
+        }
         PageResult<PatientEntity> pageResult = this.dao.patientSearch(daoSearchQuery);
         List<PatientEntity> patientEntities = pageResult.getResults();
 

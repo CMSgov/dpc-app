@@ -62,7 +62,9 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -655,6 +657,31 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
+    void fetchPatientPaginated() throws IOException {
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        APITestHelpers.setupPatientTest(client, parser);
+        Map<String, List<String>> params = new HashMap<>();
+        params.put("_count", List.of("10"));
+        params.put("_offset", List.of("10"));
+
+        final Bundle patientPage = APITestHelpers.resourceSearch(client, DPCResourceType.Patient, params);
+        assertEquals(10, patientPage.getEntry().size());
+    }
+
+    @Test
+    void fetchPatientInvalidParams() throws IOException {
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        APITestHelpers.setupPatientTest(client, parser);
+        Map<String, List<String>> invalidCountParams = new HashMap<>();
+        invalidCountParams.put("_count", List.of("-1"));
+        Map<String, List<String>> invalidOffsetParams = new HashMap<>();
+        invalidOffsetParams.put("_offset", List.of("-200"));
+
+        assertThrows(InvalidRequestException.class, () -> APITestHelpers.resourceSearch(client, DPCResourceType.Patient, invalidCountParams));
+        assertThrows(InvalidRequestException.class, () -> APITestHelpers.resourceSearch(client, DPCResourceType.Patient, invalidOffsetParams));
+    }
+
+    @Test
     void testDeletePatient() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
@@ -796,7 +823,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     private Bundle fetchPatients(IGenericClient client) {
-        return APITestHelpers.resourceSearch(client,DPCResourceType.Patient);
+        return APITestHelpers.resourceSearch(client, DPCResourceType.Patient);
     }
 
     private Patient fetchPatient(IGenericClient client, String mbi) {
