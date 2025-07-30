@@ -109,7 +109,9 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         try {
             String clientToken = registerOrg(organizationID, smokeTestSampler);
             Pair<UUID, PrivateKey> keyTuple = generateAndUploadKey(smokeTestSampler);
-            final IGenericClient exportClient = APIAuthHelpers.buildAuthenticatedClient(fhirContext, apiHost, clientToken, keyTuple.getLeft(), keyTuple.getRight(), true, true);
+
+            // Adding "Prefer: respond-async" to all requests
+            final IGenericClient exportClient = APIAuthHelpers.buildAuthenticatedClient(fhirContext, apiHost, clientToken, keyTuple.getLeft(), keyTuple.getRight(), true, true, true);
 
             Bundle providerBundle = submitPractitionerBundle(exportClient, smokeTestSampler);
             Map<String, Reference> patientReferences = submitPatientBundle(exportClient, smokeTestSampler);
