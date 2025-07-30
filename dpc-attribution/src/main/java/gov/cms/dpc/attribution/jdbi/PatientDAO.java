@@ -17,14 +17,12 @@ import java.util.stream.Collectors;
 
 public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
     private final int queryChunkSize;
-    private final int defaultPatientPageSize;
 
 
     @Inject
-    public PatientDAO(DPCManagedSessionFactory factory, @Named("queryChunkSize") int queryChunkSize, @Named("defaultPageSize") int defaultPatientPageSize) {
+    public PatientDAO(DPCManagedSessionFactory factory, @Named("queryChunkSize") int queryChunkSize) {
         super(factory.getSessionFactory());
         this.queryChunkSize = queryChunkSize;
-        this.defaultPatientPageSize = defaultPatientPageSize;
     }
 
     public PatientEntity persistPatient(PatientEntity patient) {
@@ -77,20 +75,21 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         TypedQuery<PatientEntity> typedQuery = this.currentSession().createQuery(query);
 
         // Legacy compatibility for request without pagination
-        if (searchQuery.getPageOffset() == null) {
+        if (searchQuery.getCount() == null) {
             return new PageResult<>(typedQuery.getResultList(), false);
         }
 
         Integer count = searchQuery.getCount();
-        final int pageSize = (count != null && count > 0) ? count : this.defaultPatientPageSize;
-        final int fetchSize = pageSize + 1;
+        final int fetchSize = count + 1;
         typedQuery.setMaxResults(fetchSize);
-        typedQuery.setFirstResult(searchQuery.getPageOffset());
+        if (searchQuery.getPageOffset() != null && searchQuery.getPageOffset() > 0) {
+            typedQuery.setFirstResult(searchQuery.getPageOffset());
+        }
         final List<PatientEntity> fetched = typedQuery.getResultList();
-        final boolean hasNext = fetched.size() > pageSize;
+        final boolean hasNext = fetched.size() > count;
         List<PatientEntity> pageResults = fetched;
         if (hasNext) {
-            pageResults = fetched.subList(0, pageSize);
+            pageResults = fetched.subList(0, count);
         }
 
         return new PageResult<>(

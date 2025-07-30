@@ -7,12 +7,12 @@ import java.util.List;
 
 public class PagingService {
 
-    private String formatURL(String url, int page) {
-        return url + "?page=" + page;
+    private String formatURL(String url, int count, int offset) {
+        return url + "?_count=" + count + "&_offset=" + offset;
     }
 
-    private void addRelationLink(Bundle bundle, String name, String path, int page) {
-        bundle.addLink().setRelation(name).setUrl(formatURL(path, page));
+    private void addRelationLink(Bundle bundle, String name, String path, int count, int offset) {
+        bundle.addLink().setRelation(name).setUrl(formatURL(path, count, offset));
     }
 
     public Bundle convertToBundle(List<Patient> patients) {
@@ -32,12 +32,12 @@ public class PagingService {
         return bundle;
     }
 
-    public Bundle handlePagingLinks(List<Patient> patients, int page, String requestPath, boolean hasNext) {
+    public Bundle handlePagingLinks(List<Patient> patients, int count, int offset, String requestPath, boolean hasNext) {
         Bundle bundle = convertToBundle(patients);
-        addRelationLink(bundle, "self", requestPath, page);
-        addRelationLink(bundle, "first", requestPath, 1);
-        if (page > 1 && !patients.isEmpty()) addRelationLink(bundle, "previous", requestPath, page-1);
-        if (hasNext) addRelationLink(bundle, "next", requestPath, page+1);
+        addRelationLink(bundle, "self", requestPath, count, offset);
+        addRelationLink(bundle, "first", requestPath, count, 0);
+        if (offset > count && !patients.isEmpty()) addRelationLink(bundle, "previous", requestPath, count, offset-count);
+        if (hasNext) addRelationLink(bundle, "next", requestPath, count, offset+count);
 
 
         return bundle;

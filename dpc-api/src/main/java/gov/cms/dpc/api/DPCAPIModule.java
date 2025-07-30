@@ -212,9 +212,4 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     public int provideJobTimeoutInSeconds() {
         return configuration().getJobTimeoutInSeconds();
     }
-
-    @Provides
-    @Singleton
-    @Named("defaultPageSize")
-    int provideDefaultPageSize() { return configuration().getFHIRConfiguration().getDefaultPageSize(); }
 }

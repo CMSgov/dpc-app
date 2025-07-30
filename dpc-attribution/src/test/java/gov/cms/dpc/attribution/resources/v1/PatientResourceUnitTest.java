@@ -21,7 +21,6 @@ import static org.mockito.ArgumentMatchers.*;
 class PatientResourceUnitTest {
 
     private PatientResource patientResource;
-    private int pageSize;
 
     @Mock
     PatientDAO patientDAO;
@@ -32,13 +31,12 @@ class PatientResourceUnitTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        this.pageSize = 100;
-        patientResource = new PatientResource(converter, patientDAO, 9999, this.pageSize, new PagingService());
+        patientResource = new PatientResource(converter, patientDAO, 9999, new PagingService());
     }
 
     @Test
     void testSearchPatientsPaginated() {
-        String requestPath = "/v1/Patient?page=";
+        String requestPath = "/v1/Patient";
         UUID orgId = UUID.randomUUID();
         String orgRef = "Organization/" + orgId;
         int pageOffset = 30;
@@ -70,7 +68,7 @@ class PatientResourceUnitTest {
                 orgRef,
                 10,
                 30,
-                null
+                ""
         );
         List<Bundle.BundleEntryComponent> results = resultBundle.getEntry();
 
@@ -81,19 +79,22 @@ class PatientResourceUnitTest {
             String actualId = results.get(i).getResource().getId();
             assertEquals(expectedId, actualId);
         }
-        int currentPage = pageOffset/count + 1;
-        assertEquals(requestPath + (currentPage - 1), resultBundle.getLink("previous").getUrl());
-        assertEquals(requestPath + (currentPage + 1), resultBundle.getLink("next").getUrl());
-        assertEquals(requestPath + 1, resultBundle.getLink("first").getUrl());
-        assertEquals(requestPath + currentPage, resultBundle.getLink("self").getUrl());
+        String expectedPrevUrl = requestPath + "?_count=10&offset=20";
+        String expectedNextUrl = requestPath + "?_count=10&offset=40";
+        String expectedFirstUrl = requestPath + "?_count=0&offset=0";
+        String expectedSelfUrl = requestPath + "?_count=10&offset=30";
+        assertEquals(expectedPrevUrl, resultBundle.getLink("previous").getUrl());
+        assertEquals(expectedNextUrl, resultBundle.getLink("next").getUrl());
+        assertEquals(expectedFirstUrl, resultBundle.getLink("first").getUrl());
+        assertEquals(expectedSelfUrl, resultBundle.getLink("self").getUrl());
         assertEquals(count, resultBundle.getEntry().size());
     }
 
     @Test
     void testInvalidPageNumber() {
-        int hugePageNumber = 9999;
-        int pageOffset = (hugePageNumber - 1) * this.pageSize;
-        String requestPath = "/v1/Patient?page=";
+        int count = 100;
+        int pageOffset = 999900;
+        String requestPath = "/v1/Patient";
         UUID orgId = UUID.randomUUID();
         String orgRef = "Organization/" + orgId;
 
@@ -102,21 +103,21 @@ class PatientResourceUnitTest {
                 patientEntities,
                 false
         );
-        Mockito.when(patientDAO.patientSearch(argThat(queryMatches(null, orgId, this.pageSize, pageOffset))))
+        Mockito.when(patientDAO.patientSearch(argThat(queryMatches(null, orgId, count, pageOffset))))
                 .thenReturn(mockedPage);
         Bundle resultBundle = patientResource.searchPatients(
                 null,
                 null,
                 orgRef,
-                null,
+                count,
                 pageOffset,
-                null
+                ""
         );
 
         assertNull(resultBundle.getLink("previous"));
         assertNull(resultBundle.getLink("next"));
-        assertEquals(resultBundle.getLink("first").getUrl(), requestPath + 1);
-        assertEquals(resultBundle.getLink("self").getUrl(), requestPath + hugePageNumber);
+        assertEquals(resultBundle.getLink("first").getUrl(), requestPath + "?_count=100&_offset=0");
+        assertEquals(resultBundle.getLink("self").getUrl(), requestPath + "?_count=" + count + "&_offset=" + pageOffset);
         assertTrue(resultBundle.getEntry().isEmpty(), "Expected no entries for an out-of-bounds page");
     }
 }

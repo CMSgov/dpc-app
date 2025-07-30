@@ -72,9 +72,4 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Singleton
     @Named("DbBatchSize")
     int provideDbBatchSize() { return configuration().getDbBatchSize(); }
-
-    @Provides
-    @Singleton
-    @Named("defaultPageSize")
-    int provideDefaultPageSize() { return configuration().getFHIRConfiguration().getDefaultPageSize(); }
 }

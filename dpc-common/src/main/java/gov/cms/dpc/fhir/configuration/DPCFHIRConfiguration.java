@@ -7,9 +7,6 @@ public class DPCFHIRConfiguration {
     @JsonProperty("validation")
     private FHIRValidationConfiguration validation;
 
-    @JsonProperty("defaultPageSize")
-    private int defaultPageSize;
-
     public DPCFHIRConfiguration() {
         // Jackson required
     }
@@ -20,14 +17,6 @@ public class DPCFHIRConfiguration {
 
     public void setValidation(FHIRValidationConfiguration validation) {
         this.validation = validation;
-    }
-
-    public int getDefaultPageSize() {
-        return defaultPageSize;
-    }
-
-    public void setDefaultPageSize(int pageSize) {
-        this.defaultPageSize = pageSize;
     }
 
     public static class FHIRValidationConfiguration {

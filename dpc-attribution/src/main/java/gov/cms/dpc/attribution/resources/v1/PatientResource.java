@@ -25,7 +25,6 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,15 +36,13 @@ public class PatientResource extends AbstractPatientResource {
     private final FHIREntityConverter converter;
     private final PatientDAO dao;
     private final int dbBatchSize;
-    private final int defaultPageSize;
     private final PagingService pagingService;
 
     @Inject
-    PatientResource(FHIREntityConverter converter, PatientDAO dao, @Named("DbBatchSize") int dbBatchSize, @Named("defaultPageSize") int defaultPageSize, PagingService pagingService) {
+    PatientResource(FHIREntityConverter converter, PatientDAO dao, @Named("DbBatchSize") int dbBatchSize, PagingService pagingService) {
         this.dao = dao;
         this.converter = converter;
         this.dbBatchSize = dbBatchSize;
-        this.defaultPageSize = defaultPageSize;
         this.pagingService = pagingService;
     }
 
@@ -78,12 +75,12 @@ public class PatientResource extends AbstractPatientResource {
             daoSearchQuery.setPatientMBI(patientIdentifier.getValue());
         }
 
-        if (summary.equals("count") {
+        if (summary.equals("count")) {
             daoSearchQuery.setCount(0);
             int totalPatients = this.dao.countMatchingPatients(daoSearchQuery);
             return this.pagingService.convertToSummaryBundle(totalPatients);
         }
-        if (pageOffset == null) {
+        if (count == null) {
             // Legacy behavior - before _page parameter was introduced
             List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery).getResults();
             List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).collect(Collectors.toList());
@@ -92,17 +89,13 @@ public class PatientResource extends AbstractPatientResource {
             return legacyBundleWithTotal;
         }
 
-        if (count == null) {
-            count = defaultPageSize;
-        }
         daoSearchQuery.setCount(count);
         daoSearchQuery.setPageOffset(pageOffset);
         PageResult<PatientEntity> pageResult = this.dao.patientSearch(daoSearchQuery);
         List<PatientEntity> patientEntities = pageResult.getResults();
 
         List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).collect(Collectors.toList());
-        int page = pageOffset/count + 1;
-        return this.pagingService.handlePagingLinks(patients, page, "/v1/Patient", pageResult.hasNext());
+        return this.pagingService.handlePagingLinks(patients, count, pageOffset, "/v1/Patient", pageResult.hasNext());
     }
 
     @GET

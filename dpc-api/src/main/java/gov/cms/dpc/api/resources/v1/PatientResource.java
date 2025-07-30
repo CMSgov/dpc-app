@@ -69,21 +69,18 @@ public class PatientResource extends AbstractPatientResource {
     private final DataService dataService;
     private final BlueButtonClient bfdClient;
     private final String baseURL;
-    private final int defaultPageSize;
 
     @Inject
     public PatientResource(@Named("attribution") IGenericClient client,
                            FhirValidator validator,
                            DataService dataService,
                            BlueButtonClient bfdClient,
-                           @APIV1 String baseURL,
-                           @Named("defaultPageSize") int defaultPageSize) {
+                           @APIV1 String baseURL) {
         this.client = client;
         this.validator = validator;
         this.dataService = dataService;
         this.bfdClient = bfdClient;
         this.baseURL = baseURL;
-        this.defaultPageSize = defaultPageSize;
     }
 
     @GET
@@ -101,19 +98,25 @@ public class PatientResource extends AbstractPatientResource {
                                 @ApiParam(value = "Patients per page")
                                 @QueryParam(value = "_count") Integer count,
                                 @ApiParam(value = "Page number") // null means "do not paginate" for compatibility reasons
-                                @QueryParam(value = "_page") Integer page) {
-        var request = this.buildPatientSearchQuery(organization.getOrganization().getId(), patientMBI);
-        if (count == null && page != null) {
-            count = this.defaultPageSize;
+                                @QueryParam(value = "_offset") Integer offset) {
+        if (count != null && count < 0) {
+            throw new WebApplicationException("Parameter _count must be >= 0", Response.Status.BAD_REQUEST);
+        }
+        if (offset != null && offset < 0) {
+            throw new WebApplicationException("Parameter _offset must be >= 0", Response.Status.BAD_REQUEST);
         }
 
-        if (count != null && count == 0) {
-            request.count(0).summaryMode(SummaryEnum.COUNT); // count gets omitted in request
-            return request.execute();
-        }
-        else if (count !=null && page != null && page >= 1) {
-            request.offset(count*(page-1));
+        var request = this.buildPatientSearchQuery(organization.getOrganization().getId(), patientMBI);
+
+
+        if (count != null) {
             request.count(count);
+            if (count == 0) {
+                request.summaryMode(SummaryEnum.COUNT); // count gets omitted in request
+            }
+        }
+        if (offset !=null) {
+            request.offset(offset);
         }
         return request.execute(); // this should call attribution
     }

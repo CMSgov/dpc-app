@@ -128,7 +128,6 @@ fhir:
     enabled: true
     schemaValidation: false
     schematronValidation: false
-  defaultPageSize: 100
 
 tokens:
   versionPolicy:

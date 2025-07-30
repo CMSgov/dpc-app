@@ -42,8 +42,6 @@ import static org.mockito.MockitoAnnotations.openMocks;
 
 
 class PatientResourceUnitTest {
-    private int defaultAttributionPatientPageSize;
-
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     IGenericClient attributionClient;
 
@@ -62,8 +60,7 @@ class PatientResourceUnitTest {
     @BeforeEach
     void setUp() {
         openMocks(this);
-        this.defaultAttributionPatientPageSize = 100;
-        patientResource = new PatientResource(attributionClient, fhirValidator, dataService, bfdClient, baseUrl, this.defaultAttributionPatientPageSize);
+        patientResource = new PatientResource(attributionClient, fhirValidator, dataService, bfdClient, baseUrl);
     }
 
     @Test
@@ -124,30 +121,21 @@ class PatientResourceUnitTest {
     }
 
     @Test
-    void testDefaultPageSize() {
-        int page =4;
+    void testCountInvalid() {
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgId.toString());
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        assertThrows(WebApplicationException.class, () -> patientResource.patientSearch(organizationPrincipal, null, -4, null));
+    }
 
-        @SuppressWarnings("unchecked")
-        IQuery<Bundle> mockQuery = mock(IQuery.class, RETURNS_DEEP_STUBS);
-        Bundle expectedBundle = new Bundle();
-
-        when(mockQuery.execute()).thenReturn(expectedBundle);
-        when(mockQuery.count(anyInt())).thenReturn(mockQuery);
-        when(mockQuery.offset(anyInt())).thenReturn(mockQuery);
-
-        // Assuming you have a spy or injectable hook into buildPatientSearchQuery()
-        PatientResource resource = spy(patientResource); // If it's not injectable
-        doReturn(mockQuery).when(resource).buildPatientSearchQuery(eq(orgId.toString()), isNull());
-
-        Bundle result = resource.patientSearch(organizationPrincipal, null, null, page);
-
-        verify(mockQuery).count(this.defaultAttributionPatientPageSize);
-        verify(mockQuery).offset(this.defaultAttributionPatientPageSize * (page - 1));
-        assertSame(expectedBundle, result);
+    @Test
+    void testPageInvalid() {
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        assertThrows(WebApplicationException.class, () -> patientResource.patientSearch(organizationPrincipal, null, null, -5));
     }
 
     @Test
