@@ -31,7 +31,7 @@ class PatientResourceUnitTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        patientResource = new PatientResource(converter, patientDAO, 9999, new PagingService());
+        patientResource = new PatientResource(converter, patientDAO, 9999, new PagingService("http://localhost:3002"));
     }
 
     @Test

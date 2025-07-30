@@ -91,7 +91,10 @@ public class PatientResource extends AbstractPatientResource {
         }
 
         daoSearchQuery.setCount(count);
-        if (pageOffset != null) {
+        if (pageOffset == null) {
+            pageOffset = 0;
+        }
+        else {
             daoSearchQuery.setPageOffset(pageOffset);
         }
         PageResult<PatientEntity> pageResult = this.dao.patientSearch(daoSearchQuery);

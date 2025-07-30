@@ -657,7 +657,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void fetchPatientPaginated() throws IOException {
+    void fetchPatientRandomPage() throws IOException {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
         Map<String, List<String>> params = new HashMap<>();
@@ -666,6 +666,28 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         final Bundle patientPage = APITestHelpers.resourceSearch(client, DPCResourceType.Patient, params);
         assertEquals(10, patientPage.getEntry().size());
+    }
+
+    @Test
+    void fetchPatientFollowLinksHappyPath() throws IOException {
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        APITestHelpers.setupPatientTest(client, parser);
+        Map<String, List<String>> params = new HashMap<>();
+        params.put("_count", List.of("50"));
+        final Bundle firstPage = APITestHelpers.resourceSearch(client, DPCResourceType.Patient, params);
+
+
+        String expectedSecondLinkUrl = "http://localhost:3002/v1/Patient?_count=50&_offset=50";
+        String secondLink = firstPage.getLink(Bundle.LINK_NEXT).getUrl();
+        assertEquals(expectedSecondLinkUrl, secondLink);
+        Bundle secondPage = client.loadPage().next(firstPage).execute();
+
+        String expectedThirdLinkUrl = "http://localhost:3002/v1/Patient?_count=50&_offset=100";
+        String thirdLink = secondPage.getLink(Bundle.LINK_NEXT).getUrl();
+        assertEquals(expectedThirdLinkUrl, thirdLink);
+        Bundle thirdPage = client.loadPage().next(secondPage).execute();
+
+        assertEquals(1, thirdPage.getEntry().size(), "should only contain the 101st patient");
     }
 
     @Test
