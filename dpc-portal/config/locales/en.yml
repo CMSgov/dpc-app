@@ -54,8 +54,8 @@ en:
     api_disabled: API disabled
     access_denied: Access denied
   errors:
-    duplicate_key: # TODO: update with real text -acw
-      text: This public key is already associated with another organization.
+    duplicate_key:
+      text: This public key is already in use. Choose a new public key.
     attributes:
       base:
         duplicate_cd:
