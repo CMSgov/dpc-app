@@ -188,7 +188,7 @@ RSpec.describe 'PublicKeys', type: :request do
         expect(response).to redirect_to(organization_path(org, credential_start: true))
       end
 
-      it 'fails on duplicated key' do
+      it 'fails on duplicate key' do
         stub_self_returning_api_client(message: :create_public_key,
                                        success: false,
                                        response: 'error: duplicate key value violates unique constraint')

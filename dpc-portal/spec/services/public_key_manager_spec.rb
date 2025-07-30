@@ -113,7 +113,7 @@ RSpec.describe PublicKeyManager do
         expect(manager.errors[:root]).to eq 'Invalid public key.'
       end
 
-      it 'returns false when key is already in use' do
+      it 'returns false when key is duplicate' do
         response = 'duplicate key value violates unique constraint'
         stub_self_returning_api_client(message: :create_public_key,
                                        success: false,
