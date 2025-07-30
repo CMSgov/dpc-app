@@ -5,9 +5,8 @@ require 'rails_helper'
 RSpec.describe PublicKeyManager do
   include DpcClientSupport
 
-  before(:each) do
-    @public_key_params = { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read,
-                           snippet_signature: 'stubbed_sign_txt_signature' }
+  let(:public_key_params) do
+    { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read, snippet_signature: 'stubbed_sign_txt_signature' }
   end
 
   describe '#create_public_key' do
@@ -20,7 +19,7 @@ RSpec.describe PublicKeyManager do
           stub_api_client(message: :create_public_key, success: true, response:)
 
           manager = PublicKeyManager.new(registered_organization: registered_org)
-          new_public_key = manager.create_public_key(**@public_key_params)
+          new_public_key = manager.create_public_key(**public_key_params)
 
           expect(new_public_key[:response]).to eq(true)
         end
@@ -34,7 +33,7 @@ RSpec.describe PublicKeyManager do
           stub_api_client(message: :create_public_key, success: false, response:)
 
           manager = PublicKeyManager.new(registered_organization: registered_org)
-          new_public_key = manager.create_public_key(**@public_key_params)
+          new_public_key = manager.create_public_key(**public_key_params)
 
           expect(new_public_key[:response]).to eq(false)
         end
@@ -69,9 +68,10 @@ RSpec.describe PublicKeyManager do
         response = 'duplicate key value violates unique constraint'
         stub_api_client(message: :create_public_key, success: false, response:)
 
-        duplicate_key = manager.create_public_key(**@public_key_params)
+        duplicate_key = manager.create_public_key(**public_key_params)
 
         expect(duplicate_key[:response]).to eq(false)
+        expect(duplicate_key[:message]).to eq(I18n.t('errors.duplicate_key.text'))
       end
     end
   end

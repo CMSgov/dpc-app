@@ -114,14 +114,6 @@ RSpec.describe PublicKeyManager do
       end
 
       it 'returns false when key is already in use' do
-        response = { 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' }
-        stub_self_returning_api_client(message: :create_public_key,
-                                       response:,
-                                       with: [api_id, { params: @public_key_params }])
-
-        new_public_key = manager.create_public_key(**@public_key_params)
-        expect(new_public_key[:response]).to eq(true)
-
         response = 'duplicate key value violates unique constraint'
         stub_self_returning_api_client(message: :create_public_key,
                                        success: false,
