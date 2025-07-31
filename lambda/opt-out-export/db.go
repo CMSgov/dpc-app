@@ -24,9 +24,9 @@ var createConnection = func(ctx context.Context, cfg aws.Config, dbName string) 
 	} else {
 		sslmode = "require"
 		dbUser = fmt.Sprintf("%s-%s-role", os.Getenv("ENV"), dbName)
-		dbPassword, err = token(ctx, cfg, dbHost, dbPort, dbUser)
+		dbPassword, err = buildToken(ctx, cfg, dbHost, dbPort, dbUser)
 		if err != nil {
-			log.Warning("Error retrieving IAM token")
+			log.Warning("Error building IAM token")
 			return nil, err
 		}
 	}
@@ -48,7 +48,7 @@ var createConnection = func(ctx context.Context, cfg aws.Config, dbName string) 
 	return db, nil
 }
 
-func token(ctx context.Context, cfg aws.Config, dbHost string, dbPort int, dbUser string) (string, error) {
+var buildToken = func(ctx context.Context, cfg aws.Config, dbHost string, dbPort int, dbUser string) (string, error) {
 	return auth.BuildAuthToken(
 		ctx,
 		fmt.Sprintf("%s:%d", dbHost, dbPort),
