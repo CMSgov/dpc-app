@@ -2,22 +2,27 @@ database:
   driverClass: org.postgresql.Driver
   url: ${DATABASE_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}
   user: "${ATTRIBUTION_DB_USER:-postgres}"
-  password: "${ATTRIBUTION_DB_PASS:-dpc-safe}"
+  password: "${ATTRIBUTION_DB_PASS:-dpc-safe}"  # Ignored in AWS, needed to run locally
   initialSize: 5
   minSize: 5
   maxSize: 10
   properties:
     charSet: UTF-8
     hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+    wrapperPlugins: "${AWS_DB_WRAPPER_PLUGINS}"
+    user: "${ATTRIBUTION_DB_USER}"  # Used by AWS wrapper to get an IAM token
 
 queuedb:
   driverClass: org.postgresql.Driver
   url: ${QUEUE_DB_URL:-"jdbc:postgresql://db:5432/dpc_queue"}
   user: "${QUEUE_DB_USER:-postgres}"
-  password: "${QUEUE_DB_PASS:-dpc-safe}"
+  password: "${QUEUE_DB_PASS:-dpc-safe}"  # Ignored in AWS, needed to run locally
   initialSize: 5
   minSize: 5
   maxSize: 10
+  properties:
+    wrapperPlugins: "${AWS_DB_WRAPPER_PLUGINS}"
+    user: "${ATTRIBUTION_DB_USER}"  # Used by AWS wrapper to get an IAM token
 
 server:
   enableThreadNameFilter: false
