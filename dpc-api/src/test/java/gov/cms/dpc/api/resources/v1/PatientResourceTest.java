@@ -40,6 +40,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -657,7 +658,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void fetchPatientRandomPage() throws IOException {
+    void testFetchPatientRandomPage() throws IOException {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
         Map<String, List<String>> params = new HashMap<>();
@@ -669,7 +670,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void fetchPatientSummaryBundle() throws IOException {
+    void testFetchPatientSummaryBundle() throws IOException {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
         Map<String, List<String>> params = new HashMap<>();
@@ -681,7 +682,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
 
     @Test
-    void fetchPatientFollowLinksHappyPath() throws IOException {
+    void testFetchPatientFollowLinksHappyPath() throws IOException {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
         Map<String, List<String>> params = new HashMap<>();
@@ -703,7 +704,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void fetchPatientInvalidParams() throws IOException {
+    void testFetchPatientInvalidParams() throws IOException {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
         Map<String, List<String>> invalidCountParams = new HashMap<>();
@@ -716,7 +717,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void fetchPatientHighCountNumber() throws IOException {
+    void testFetchPatientHighCountNumber() throws IOException {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
         Map<String, List<String>> params = new HashMap<>();
@@ -728,6 +729,32 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         params.put("_count", List.of("9001"));
         Bundle patientBundleFromBigCountParam = APITestHelpers.resourceSearch(client, DPCResourceType.Patient, bigCountParams);
         assertEquals(101, patientBundleFromBigCountParam.getEntry().size());
+    }
+
+    @Test
+    void testUpdatePatientDataDuringPagination() {
+        final int FIRST_PATIENT_COUNT = 95;
+        final int ADDITIONAL_PATIENT_COUNT = 10;
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+
+        // create 95 patients
+        submitPatients(client, APITestHelpers.ORGANIZATION_ID, FIRST_PATIENT_COUNT);
+
+        Map<String, List<String>> params = new HashMap<>();
+        params.put("_count", List.of("50"));
+        Bundle firstPage = APITestHelpers.resourceSearch(client, DPCResourceType.Patient, params);
+        Bundle secondPagePartialPage = client.loadPage().next(firstPage).execute();
+        assertNull(secondPagePartialPage.getLink(IBaseBundle.LINK_NEXT));
+        assertEquals(45, secondPagePartialPage.getEntry().size());
+
+        // create 10 more patients, totally to 105
+        submitPatients(client, APITestHelpers.ORGANIZATION_ID, ADDITIONAL_PATIENT_COUNT);
+
+        Bundle secondPageFullPage = client.loadPage().next(firstPage).execute();
+        assertNotNull(secondPageFullPage.getLink(IBaseBundle.LINK_NEXT));
+        assertEquals(50, secondPageFullPage.getEntry().size());
+        Bundle thirdPage = client.loadPage().next(secondPageFullPage).execute();
+        assertEquals(5, thirdPage.getEntry().size());
     }
 
     @Test
@@ -930,6 +957,25 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         consentClient
                 .create()
                 .resource(consent)
+                .encodedJson()
+                .execute();
+    }
+
+    private Bundle submitPatients(IGenericClient client, String orgId, int numPatients) {
+        List<Patient> patients = APITestHelpers.createPatientResources(orgId, numPatients);
+
+        Bundle patientBundle = BundleFactory.createBundle(
+                patients.stream().map(Resource.class::cast).toArray(Resource[] ::new)
+        );
+        Parameters params = new Parameters();
+        params.addParameter().setResource(patientBundle);
+
+        return client
+                .operation()
+                .onType(Patient.class)
+                .named("submit")
+                .withParameters(params)
+                .returnResourceType(Bundle.class)
                 .encodedJson()
                 .execute();
     }
