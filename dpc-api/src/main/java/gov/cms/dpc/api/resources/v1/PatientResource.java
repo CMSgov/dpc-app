@@ -340,7 +340,7 @@ public class PatientResource extends AbstractPatientResource {
         }
     }
 
-    IQuery<Bundle> buildPatientSearchQuery(String orgId, @Nullable String patientMBI) {
+    private IQuery<Bundle> buildPatientSearchQuery(String orgId, @Nullable String patientMBI) {
         IQuery<Bundle> query = this.client
                 .search()
                 .forResource(Patient.class)
