@@ -121,4 +121,30 @@ class PatientResourceUnitTest {
         assertEquals(resultBundle.getLink(IBaseBundle.LINK_SELF).getUrl(), requestUrl + "?_count=" + count + "&_offset=" + pageOffset);
         assertTrue(resultBundle.getEntry().isEmpty(), "Expected no entries for an out-of-bounds page");
     }
+
+    @Test
+    void testSummaryBundle() {
+        UUID orgId = UUID.randomUUID();
+        String orgRef = "Organization/" + orgId;
+        PatientSearchQuery expectedQuery = new PatientSearchQuery();
+        expectedQuery.setOrganizationID(orgId);
+        expectedQuery.setCount(0); // because summary="count"
+
+        Mockito.when(patientDAO.countMatchingPatients(argThat(query ->
+                query.getOrganizationID().equals(expectedQuery.getOrganizationID()) &&
+                        query.getCount() == 0
+        ))).thenReturn(99);
+
+        Bundle summaryBundle = patientResource.searchPatients(
+                null,
+                null,
+                orgRef,
+                0,
+                0,
+                "count"
+        );
+
+        assertEquals(99, summaryBundle.getTotal());
+        assertTrue(summaryBundle.getEntry().isEmpty());
+    }
 }
