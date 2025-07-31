@@ -171,4 +171,42 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
         int patientCount = patientDAO.countMatchingPatients(daoSearchQuery);
         assertEquals(5, patientCount);
     }
+
+    @Test
+    void test_patientSearch() {
+        OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+        String orgRef = "Organization/" + org.getId();
+        PatientEntity patient1 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient2 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient3 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient4 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient5 = AttributionTestHelpers.createPatientEntity(org);
+
+        db.inTransaction(() -> {
+            organizationDAO.registerOrganization(org);
+            patientDAO.persistPatient(patient1);
+            patientDAO.persistPatient(patient2);
+            patientDAO.persistPatient(patient3);
+            patientDAO.persistPatient(patient4);
+            patientDAO.persistPatient(patient5);
+        });
+        PatientSearchQuery daoSearchQuery = new PatientSearchQuery();
+        daoSearchQuery.setOrganizationID(FHIRExtractors.getEntityUUID(orgRef));
+
+        daoSearchQuery.setCount(2);
+        daoSearchQuery.setPageOffset(0);
+        PageResult<PatientEntity> firstPageResults = patientDAO.patientSearch(daoSearchQuery);
+        assertEquals(2, firstPageResults.getResults().size());
+        assertTrue(firstPageResults.hasNext());
+
+        daoSearchQuery.setPageOffset(2);
+        PageResult<PatientEntity> secondPageResults = patientDAO.patientSearch(daoSearchQuery);
+        assertEquals(2, secondPageResults.getResults().size());
+        assertTrue(secondPageResults.hasNext());
+
+        daoSearchQuery.setPageOffset(4);
+        PageResult<PatientEntity> thirdPageResults = patientDAO.patientSearch(daoSearchQuery);
+        assertEquals(1, thirdPageResults.getResults().size());
+        assertFalse(thirdPageResults.hasNext());
+    }
 }
