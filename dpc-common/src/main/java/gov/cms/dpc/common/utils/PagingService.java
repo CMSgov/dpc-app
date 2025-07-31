@@ -4,6 +4,7 @@ import com.google.inject.name.Named;
 import jakarta.inject.Inject;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 import java.util.List;
 
@@ -43,10 +44,10 @@ public class PagingService {
 
     public Bundle handlePagingLinks(List<Patient> patients, int count, int offset, String requestPath, boolean hasNext) {
         Bundle bundle = convertToBundle(patients);
-        addRelationLink(bundle, "self", requestPath, count, offset);
+        addRelationLink(bundle, IBaseBundle.LINK_SELF, requestPath, count, offset);
         addRelationLink(bundle, "first", requestPath, count, 0);
-        if (offset > count && !patients.isEmpty()) addRelationLink(bundle, "previous", requestPath, count, offset-count);
-        if (hasNext) addRelationLink(bundle, "next", requestPath, count, offset+count);
+        if (offset > count && !patients.isEmpty()) addRelationLink(bundle, IBaseBundle.LINK_PREV, requestPath, count, offset-count);
+        if (hasNext) addRelationLink(bundle, IBaseBundle.LINK_NEXT, requestPath, count, offset+count);
 
 
         return bundle;
