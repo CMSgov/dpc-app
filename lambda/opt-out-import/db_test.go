@@ -23,37 +23,6 @@ func (a AnyString) Match(v driver.Value) bool {
 	return ok
 }
 
-func TestGetConsentDbSecrets(t *testing.T) {
-	tests := []struct {
-		name       string
-		dbuser     string
-		dbpassword string
-		expect     map[string]string
-		err        error
-	}{
-		{
-			name:       "happy path",
-			dbuser:     "dpc/local/consent/db_user_dpc_consent",
-			dbpassword: "dpc/local/consent/db_password_dpc_consent",
-			expect: map[string]string{
-				"dpc/local/consent/db_user_dpc_consent":     envDbuser,
-				"dpc/local/consent/db_password_dpc_consent": envDbpassword,
-			},
-			err: nil,
-		},
-	}
-
-	ctx := context.TODO()
-	for _, test := range tests {
-		fmt.Printf("~~~ %s test\n", test.name)
-		secretsInfo, err := getConsentDbSecrets(ctx, test.dbuser, test.dbpassword)
-		assert.Equal(t, test.expect, secretsInfo)
-		if test.err != nil {
-			assert.ErrorContains(t, err, test.err.Error())
-		}
-	}
-}
-
 func TestInsertResponseFileMetadata(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -357,4 +326,10 @@ func TestUpdateResponseFileImportStatus(t *testing.T) {
 		err := updateResponseFileImportStatus(db, id, test.importStatus)
 		assert.Equal(t, test.err, err)
 	}
+}
+
+func TestIntegrationToken(t *testing.T) {
+	password, err := token(context.TODO(), "postgres-host", 5432, "local-dpc_consent-role")
+	assert.Nil(t, err)
+	assert.Contains(t, password, "postgres-host:5432?Action=connect&DBUser=local-dpc_consent-role")
 }
