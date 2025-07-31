@@ -669,6 +669,18 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
+    void fetchPatientSummaryBundle() throws IOException {
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        APITestHelpers.setupPatientTest(client, parser);
+        Map<String, List<String>> params = new HashMap<>();
+        params.put("_count", List.of("0"));
+        final Bundle summaryBundle = APITestHelpers.resourceSearch(client, DPCResourceType.Patient, params);
+        assertTrue(summaryBundle.getEntry().isEmpty());
+        assertEquals(101, summaryBundle.getTotal());
+    }
+
+
+    @Test
     void fetchPatientFollowLinksHappyPath() throws IOException {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
@@ -701,6 +713,21 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         assertThrows(InvalidRequestException.class, () -> APITestHelpers.resourceSearch(client, DPCResourceType.Patient, invalidCountParams));
         assertThrows(InvalidRequestException.class, () -> APITestHelpers.resourceSearch(client, DPCResourceType.Patient, invalidOffsetParams));
+    }
+
+    @Test
+    void fetchPatientHighCountNumber() throws IOException {
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        APITestHelpers.setupPatientTest(client, parser);
+        Map<String, List<String>> params = new HashMap<>();
+        params.put("_count", List.of("101"));
+        Bundle countMatchingPatientNumBundle = APITestHelpers.resourceSearch(client, DPCResourceType.Patient, params);
+        assertEquals(101, countMatchingPatientNumBundle.getEntry().size());
+
+        Map<String, List<String>> bigCountParams = new HashMap<>();
+        params.put("_count", List.of("9001"));
+        Bundle patientBundleFromBigCountParam = APITestHelpers.resourceSearch(client, DPCResourceType.Patient, bigCountParams);
+        assertEquals(101, patientBundleFromBigCountParam.getEntry().size());
     }
 
     @Test
