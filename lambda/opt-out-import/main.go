@@ -140,6 +140,10 @@ func importResponseFile(ctx context.Context, bucket string, file string) (int, i
 	}
 
 	createdRecords, err := insertConsentRecords(db, optOutFileEntity.id, records)
+	if err != nil {
+		log.Warningf("Failed to insert consent records: %s", err)
+		return 0, 0, "", err
+	}
 
 	createdOptOutCount := 0
 	createdOptInCount := 0
