@@ -28,7 +28,6 @@ type PatientInfo struct {
 
 // Allow these to be switched out during unit tests
 var getSecret = dpcaws.GetParameter
-var getSecrets = dpcaws.GetParameters
 var uploadToS3 = dpcaws.UploadFileToS3
 var newLocalSession = dpcaws.NewLocalSession
 var newSession = dpcaws.NewSession
@@ -69,27 +68,12 @@ func generateRequestFile(ctx context.Context) (string, error) {
 
 	patientInfos := make(map[string]PatientInfo)
 
-	attributionDbUser := fmt.Sprintf("/dpc/%s/attribution/db_read_only_user_dpc_attribution", os.Getenv("ENV"))
-	attributionDbPassword := fmt.Sprintf("/dpc/%s/attribution/db_read_only_pass_dpc_attribution", os.Getenv("ENV"))
-	consentDbUser := fmt.Sprintf("/dpc/%s/consent/db_read_only_user_dpc_consent", os.Getenv("ENV"))
-	consentDbPassword := fmt.Sprintf("/dpc/%s/consent/db_read_only_pass_dpc_consent", os.Getenv("ENV"))
-	var keynames []string = make([]string, 4)
-	keynames[0] = attributionDbUser
-	keynames[1] = attributionDbPassword
-	keynames[2] = consentDbUser
-	keynames[3] = consentDbPassword
-
-	secretsInfo, pmErr := getSecrets(ctx, cfg, keynames)
-	if pmErr != nil {
-		return "", pmErr
-	}
-
-	attributionDbErr := getAttributionData(secretsInfo[attributionDbUser], secretsInfo[attributionDbPassword], patientInfos)
+	attributionDbErr := getAttributionData(ctx, cfg, patientInfos)
 	if attributionDbErr != nil {
 		return "", attributionDbErr
 	}
 
-	consentDbErr := getConsentData(secretsInfo[consentDbUser], secretsInfo[consentDbPassword], patientInfos)
+	consentDbErr := getConsentData(ctx, cfg, patientInfos)
 	if consentDbErr != nil {
 		return "", consentDbErr
 	}

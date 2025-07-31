@@ -1,7 +1,6 @@
 services:
   localstack:
     image: artifactory.cloud.cms.gov/docker/localstack/localstack:2.2.0
-    container_name: opt-out-s3
     environment:
       - AWS_DEFAULT_REGION=us-east-1
       - GATEWAY_LISTEN=0.0.0.0:4566
