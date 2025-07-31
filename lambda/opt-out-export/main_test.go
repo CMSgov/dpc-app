@@ -22,7 +22,6 @@ func TestIntegrationGenerateRequestFile(t *testing.T) {
 		t.Skip("Skipping integration test.")
 	}
 	oriGetSecret := getSecret
-	oriGetSecrets := getSecrets
 	oriCreateConnection := createConnection
 	oriGetAttributionData := getAttributionData
 	oriGetConsentData := getConsentData
@@ -38,20 +37,11 @@ func TestIntegrationGenerateRequestFile(t *testing.T) {
 					return "fake_arn", nil
 				}
 
-				getSecrets = func(ctx context.Context, cfg aws.Config, keynames []string) (map[string]string, error) {
-					return map[string]string{
-						"/dpc/dev/attribution/db_user_dpc_attribution": "db_user_dpc_attribution",
-						"/dpc/dev/attribution/db_pass_dpc_attribution": "db_pass_dpc_attribution",
-						"/dpc/dev/consent/db_user_dpc_consent":         "db_user_dpc_consent",
-						"/dpc/dev/consent/db_pass_dpc_consent":         "db_pass_dpc_consent",
-					}, nil
-				}
-
-				getAttributionData = func(dbUser string, dbPassword string, patientInfos map[string]PatientInfo) error {
+				getAttributionData = func(ctx context.Context, cfg aws.Config, patientInfos map[string]PatientInfo) error {
 					return nil
 				}
 
-				getConsentData = func(dbUser string, dbPassword string, patientInfos map[string]PatientInfo) error {
+				getConsentData = func(ctx context.Context, cfg aws.Config, patientInfos map[string]PatientInfo) error {
 					patientInfos["optout"] = PatientInfo{
 						beneficiary_id: "optout",
 						first_name:     sql.NullString{String: "fname", Valid: true},
@@ -104,7 +94,6 @@ func TestIntegrationGenerateRequestFile(t *testing.T) {
 	}
 
 	getSecret = oriGetSecret
-	getSecrets = oriGetSecrets
 	createConnection = oriCreateConnection
 	getAttributionData = oriGetAttributionData
 	getConsentData = oriGetConsentData

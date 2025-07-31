@@ -1,14 +1,16 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"testing"
 	"time"
-
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 )
 
+var ctx = context.TODO()
 func TestGetAttributionData(t *testing.T) {
 	patientColumns := []string{"beneficiary_id", "first_name", "last_name", "dob"}
 	patientQuery := "SELECT (.+) FROM patients"
@@ -43,7 +45,7 @@ func TestGetAttributionData(t *testing.T) {
 		mock.ExpectQuery(patientQuery).
 			WillReturnRows(test.patientQueryResult)
 		patientInfos := make(map[string]PatientInfo)
-		err = getAttributionData("user", "pass", patientInfos)
+		err = getAttributionData(ctx, aws.Config{}, patientInfos)
 		assert.Equal(t, test.expectedPatientInfos, patientInfos)
 		assert.Equal(t, test.err, err)
 	}
@@ -89,15 +91,27 @@ func TestGetConsentData(t *testing.T) {
 			beneficiary_id: "4SH0A00AA00",
 			dob:            time.Date(2018, 11, 20, 0, 0, 0, 0, time.UTC),
 		}
-		err = getConsentData("user", "pass", patientInfos)
+		err = getConsentData(ctx, aws.Config{}, patientInfos)
 		assert.Equal(t, test.expectedPatientInfos, patientInfos)
 		assert.Equal(t, test.err, err)
 	}
 	createConnection = oricreateConnection
 }
 
+
+func TestIntegrationBuildToken(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test.")
+	}
+	cfg, err := getAwsSession(ctx)
+	assert.Nil(t, err)
+	password, err := buildToken(ctx, cfg, "postgres-host", 5432, "local-dpc_consent-role")
+	assert.Nil(t, err)
+	assert.Contains(t, password, "postgres-host:5432?Action=connect&DBUser=local-dpc_consent-role")
+}
+
 func mockCreateConnection(db *sql.DB) {
-	createConnection = func(dbName string, dbUser string, dbPassword string) (*sql.DB, error) {
+	createConnection = func(ctx context.Context, cfg aws.Config, dbName string) (*sql.DB, error) {
 		return db, nil
 	}
 }
