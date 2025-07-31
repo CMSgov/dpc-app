@@ -5,6 +5,7 @@ import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -144,4 +145,30 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 		assertEquals(1, patients.size());
 		assertTrue(patients.contains(patientEntity));
 	}
+
+    @Test
+    void test_countPatients() {
+        OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+        String orgRef = "Organization/" + org.getId();
+        PatientEntity patient1 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient2 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient3 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient4 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient5 = AttributionTestHelpers.createPatientEntity(org);
+
+        db.inTransaction(() -> {
+            organizationDAO.registerOrganization(org);
+            patientDAO.persistPatient(patient1);
+            patientDAO.persistPatient(patient2);
+            patientDAO.persistPatient(patient3);
+            patientDAO.persistPatient(patient4);
+            patientDAO.persistPatient(patient5);
+        });
+
+        PatientSearchQuery daoSearchQuery = new PatientSearchQuery();
+        daoSearchQuery.setOrganizationID(FHIRExtractors.getEntityUUID(orgRef));
+        daoSearchQuery.setCount(0);
+        int patientCount = patientDAO.countMatchingPatients(daoSearchQuery);
+        assertEquals(5, patientCount);
+    }
 }
