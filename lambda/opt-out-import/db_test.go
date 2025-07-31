@@ -329,6 +329,9 @@ func TestUpdateResponseFileImportStatus(t *testing.T) {
 }
 
 func TestIntegrationToken(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test.")
+	}
 	password, err := token(context.TODO(), "postgres-host", 5432, "local-dpc_consent-role")
 	assert.Nil(t, err)
 	assert.Contains(t, password, "postgres-host:5432?Action=connect&DBUser=local-dpc_consent-role")
