@@ -188,6 +188,16 @@ RSpec.describe 'PublicKeys', type: :request do
         expect(response).to redirect_to(organization_path(org, credential_start: true))
       end
 
+      it 'fails on duplicate key' do
+        stub_self_returning_api_client(message: :create_public_key,
+                                       success: false,
+                                       response: 'error: duplicate key value violates unique constraint')
+        post "/organizations/#{org.id}/public_keys", params: success_params
+        expect(flash[:alert]).to eq(PublicKeyManager::INVALID_KEY)
+        expect(assigns(:errors)).to eq(public_key: I18n.t('errors.duplicate_key.text'),
+                                       root: PublicKeyManager::INVALID_KEY)
+      end
+
       it 'checks if configuration complete on success' do
         config_complete_checker = class_double('CheckConfigCompleteJob').as_stubbed_const
         expect(config_complete_checker).to receive(:perform_later).with(org.id)

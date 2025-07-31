@@ -31,3 +31,6 @@
 
 en:
   hello: "Hello world"
+  errors:
+    duplicate_key:
+      text: This public key is already in use. Choose a new public key.
