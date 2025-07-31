@@ -1,5 +1,5 @@
 database:
-  driverClass: software.amazon.jdbc.Driver
+  driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
   url: ${DATABASE_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}
   user: "${ATTRIBUTION_DB_USER:-postgres}"
   password: "${ATTRIBUTION_DB_PASS:-dpc-safe}"  # Ignored in AWS, needed to run locally
@@ -9,10 +9,10 @@ database:
   properties:
     charSet: UTF-8
     hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
-    wrapperPlugins: "${AWS_DB_WRAPPER_PLUGINS}"
+    wrapperPlugins: iam,failover,efm2 # Ignored running locally, only used in AWS
 
 queuedb:
-  driverClass: software.amazon.jdbc.Driver
+  driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
   url: ${QUEUE_DB_URL:-"jdbc:postgresql://db:5432/dpc_queue"}
   user: "${QUEUE_DB_USER:-postgres}"
   password: "${QUEUE_DB_PASS:-dpc-safe}"  # Ignored in AWS, needed to run locally
@@ -20,7 +20,7 @@ queuedb:
   minSize: 5
   maxSize: 10
   properties:
-    wrapperPlugins: "${AWS_DB_WRAPPER_PLUGINS}"
+    wrapperPlugins: iam,failover,efm2   # Ignored running locally, only used in AWS
 
 server:
   enableThreadNameFilter: false
