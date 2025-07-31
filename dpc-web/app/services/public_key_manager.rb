@@ -24,12 +24,12 @@ class PublicKeyManager
                                            snippet_signature: })
 
     if duplicate_key?(api_client.response_body)
-      return { response: false,
-               message: I18n.t('errors.duplicate_key.text') }
+      { response: false,
+        message: I18n.t('errors.duplicate_key.text') }
+    else
+      { response: api_client.response_successful?,
+        message: api_client.response_body }
     end
-
-    { response: api_client.response_successful?,
-      message: api_client.response_body }
   end
 
   def invalid_encoding?(key_string)
