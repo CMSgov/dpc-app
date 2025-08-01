@@ -94,3 +94,5 @@ production:
   port: 5432
   database: dpc_portal
   aws_rds_iam_auth_token_generator: default
+  sslmode: verify-full
+  sslrootcert: <%= "#{Rails.root}/config/global-bundle.pem" %>
