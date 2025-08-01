@@ -15,13 +15,18 @@ database:
     iamHost: ${DB_HOST}
 
 queuedb:
-  driverClass: org.postgresql.Driver
+  driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
   url: ${QUEUE_DB_URL:-"jdbc:postgresql://db:5432/dpc_queue"}
   user: "${QUEUE_DB_USER:-postgres}"
   password: "${QUEUE_DB_PASS:-dpc-safe}"
   initialSize: 5
   minSize: 5
   maxSize: 10
+  properties:
+    # Ignored running locally, only used in AWS
+    wrapperPlugins: iam,failover,efm2
+    iamRegion: us-east-1
+    iamHost: ${DB_HOST}
 
 server:
   enableThreadNameFilter: false
