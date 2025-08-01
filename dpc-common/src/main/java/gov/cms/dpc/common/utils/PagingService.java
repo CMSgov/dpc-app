@@ -1,7 +1,5 @@
 package gov.cms.dpc.common.utils;
 
-import com.google.inject.name.Named;
-import jakarta.inject.Inject;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -9,16 +7,8 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import java.util.List;
 
 public class PagingService {
-    private final String publicURL;
-
-    @Inject
-    public PagingService(@Named("publicURL") String publicURL) {
-        this.publicURL = publicURL;
-    }
-
-    private String formatURL(String url, int count, int offset) {
-        String dpcApiBaseUrl = this.publicURL;
-        return dpcApiBaseUrl + url + "?_count=" + count + "&_offset=" + offset;
+    private String formatURL(String requestPath, int count, int offset) {
+        return  requestPath + "?_count=" + count + "&_offset=" + offset;
     }
 
     private void addRelationLink(Bundle bundle, String name, String path, int count, int offset) {

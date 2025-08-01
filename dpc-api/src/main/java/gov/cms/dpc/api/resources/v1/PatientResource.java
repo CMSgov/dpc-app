@@ -40,6 +40,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,7 @@ import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -63,6 +65,8 @@ public class PatientResource extends AbstractPatientResource {
     // TODO: This should be moved into a helper class, in DPC-432.
     // This checks to see if the Identifier is fully specified or not.
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9]+://.*$");
+    private static final Set<String> VALID_BUNDLE_LINK_NAMES = Set.of("first", IBaseBundle.LINK_PREV, IBaseBundle.LINK_NEXT, IBaseBundle.LINK_SELF);
+
 
     private final IGenericClient client;
     private final FhirValidator validator;
@@ -118,7 +122,9 @@ public class PatientResource extends AbstractPatientResource {
         if (offset != null) {
             request.offset(offset);
         }
-        return request.execute(); // this should call attribution
+        Bundle bundle = request.execute(); // this should call attribution
+        handlePagingLinkPathing(bundle);
+        return bundle;
     }
 
     @FHIR
@@ -360,5 +366,27 @@ public class PatientResource extends AbstractPatientResource {
         }
 
         return query;
+    }
+
+    private void handlePagingLinkPathing(Bundle bundle) {
+        if (bundle == null || bundle.getLink() == null) {
+            return;
+        }
+
+        for (Bundle.BundleLinkComponent link : bundle.getLink()) {
+            String relation = link.getRelation();
+            if (relation == null) {
+                continue;
+            }
+
+            if (VALID_BUNDLE_LINK_NAMES.contains(relation)) {
+                String url = link.getUrl();
+                if (url != null && url.startsWith("/")) {
+                    if (url.startsWith("/v1")) url = url.substring(3);
+                    link.setUrl(this.baseURL + url);
+                }
+            }
+        }
+
     }
 }

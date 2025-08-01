@@ -32,12 +32,12 @@ class PatientResourceUnitTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        patientResource = new PatientResource(converter, patientDAO, 9999, new PagingService("http://localhost:3002"));
+        patientResource = new PatientResource(converter, patientDAO, 9999, new PagingService());
     }
 
     @Test
     void testSearchPatientsPaginated() {
-        String requestUrl = "http://localhost:3002/v1/Patient";
+        String requestUrl = "/v1/Patient";
         UUID orgId = UUID.randomUUID();
         String orgRef = "Organization/" + orgId;
         int pageOffset = 30;
@@ -95,7 +95,7 @@ class PatientResourceUnitTest {
     void testInvalidPageNumber() {
         int count = 100;
         int pageOffset = 999900;
-        String requestUrl = "http://localhost:3002/v1/Patient";
+        String requestUrl = "/v1/Patient";
         UUID orgId = UUID.randomUUID();
         String orgRef = "Organization/" + orgId;
 

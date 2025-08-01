@@ -54,7 +54,7 @@ class PatientResourceUnitTest {
     @Mock
     BlueButtonClient bfdClient;
 
-    String baseUrl = "";
+    String baseUrl = "http://localhost:3002/api/v1";
     PatientResource patientResource;
 
     @BeforeEach
@@ -139,7 +139,7 @@ class PatientResourceUnitTest {
     }
 
     @Test
-    void testPageNumEqualsZero() {
+    void testCountEqualsZero() {
         int largePatientNum = 600;
         UUID orgId = UUID.randomUUID();
         Organization organization = new Organization();
@@ -171,6 +171,51 @@ class PatientResourceUnitTest {
 
         assertEquals(largePatientNum, actualResponse.getTotal());
         assertTrue(actualResponse.getEntry().isEmpty());
+    }
+
+    @Test
+    void testPagingLinksHaveAbsoluteUrls() {
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+
+        String baseURL = "http://localhost:3002/api";
+        String selfURL = "/v1/Patient?_count=10&_offset=10";
+        String prevURL = "/v1/Patient?_count=10&_offset=0";
+        String nextURL = "/v1/Patient?_count=10&_offset=20";
+        String firstURL = "/v1/Patient?_count=10&_offset=0";
+
+        // Construct a Bundle with relative links
+        Bundle mockBundleForPaginationLinks = createPatientBundle(100, organization);
+        mockBundleForPaginationLinks.addLink().setRelation(IBaseBundle.LINK_SELF).setUrl(selfURL);
+        mockBundleForPaginationLinks.addLink().setRelation(IBaseBundle.LINK_PREV).setUrl(prevURL);
+        mockBundleForPaginationLinks.addLink().setRelation(IBaseBundle.LINK_NEXT).setUrl(nextURL);
+        mockBundleForPaginationLinks.addLink().setRelation("first").setUrl(firstURL);
+        @SuppressWarnings("unchecked")
+        IQuery<IBaseBundle> queryExec = mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        @SuppressWarnings("unchecked")
+        IQuery<Bundle> mockQuery = mock(IQuery.class);
+        when(attributionClient
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+        ).thenReturn(queryExec);
+        when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(mockQuery.count(10)).thenReturn(mockQuery);
+        when(mockQuery.offset(10)).thenReturn(mockQuery);
+        when(mockQuery.execute()).thenReturn(mockBundleForPaginationLinks);
+
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null, 10, 10);
+
+        // Base URL should be prepended, and /v1 stripped out of link URLs
+        List<Bundle.BundleLinkComponent> links = actualResponse.getLink();
+        assertEquals(4, links.size());
+
+        assertEquals(baseURL + selfURL, actualResponse.getLink(IBaseBundle.LINK_SELF).getUrl());
+        assertEquals(baseURL + prevURL, actualResponse.getLink(IBaseBundle.LINK_PREV).getUrl());
+        assertEquals(baseURL + nextURL, actualResponse.getLink(IBaseBundle.LINK_NEXT).getUrl());
+        assertEquals(baseURL + firstURL, actualResponse.getLink("first").getUrl());
     }
 
     @Test
