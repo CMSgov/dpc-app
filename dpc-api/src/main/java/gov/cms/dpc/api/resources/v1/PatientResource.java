@@ -62,7 +62,6 @@ import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 public class PatientResource extends AbstractPatientResource {
     private static final Logger logger = LoggerFactory.getLogger(PatientResource.class);
 
-    // TODO: This should be moved into a helper class, in DPC-432.
     // This checks to see if the Identifier is fully specified or not.
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9]+://.*$");
     private static final Set<String> VALID_BUNDLE_LINK_NAMES = Set.of("first", IBaseBundle.LINK_PREV, IBaseBundle.LINK_NEXT, IBaseBundle.LINK_SELF);
@@ -354,8 +353,6 @@ public class PatientResource extends AbstractPatientResource {
                 .where(Patient.ORGANIZATION.hasId(orgId))
                 .returnBundle(Bundle.class);
         if (patientMBI != null && !patientMBI.isEmpty()) {
-            // Handle MBI parsing
-            // This should come out as part of DPC-432
             final String expandedMBI;
             if (IDENTIFIER_PATTERN.matcher(patientMBI).matches()) {
                 expandedMBI = patientMBI;

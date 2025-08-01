@@ -82,7 +82,7 @@ public class PatientResource extends AbstractPatientResource {
             return this.pagingService.convertToSummaryBundle(totalPatients);
         }
         if (count == null) {
-            // Legacy behavior - before _page parameter was introduced
+            // Legacy behavior - before _count parameter was introduced
             List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery).getResults();
             List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).collect(Collectors.toList());
             Bundle legacyBundleWithTotal = this.pagingService.convertToBundle(patients);
