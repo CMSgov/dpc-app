@@ -9,7 +9,9 @@ database:
   properties:
     charSet: UTF-8
     hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
-    wrapperPlugins: iam,failover,efm2 # Ignored running locally, only used in AWS
+    # Ignored running locally, only used in AWS
+    wrapperPlugins: iam,failover,efm2
+    iamRegion: us-east-1
 
 queuedb:
   driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
@@ -20,7 +22,9 @@ queuedb:
   minSize: 5
   maxSize: 10
   properties:
-    wrapperPlugins: iam,failover,efm2   # Ignored running locally, only used in AWS
+    # Ignored running locally, only used in AWS
+    wrapperPlugins: iam,failover,efm2
+    iamRegion: us-east-1
 
 server:
   enableThreadNameFilter: false
