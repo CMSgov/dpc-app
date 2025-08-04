@@ -1,9 +1,6 @@
 name: 'DPC - Quick Deploy'
 
 on:
-  push:
-    branches:
-      - 'me/dpc-4817-use-iam-for-db-access'
   workflow_dispatch:
     inputs:
       env:
