@@ -7,6 +7,11 @@ if [ -f tmp/pids/server.pid ]; then
   rm tmp/pids/server.pid
 fi
 
+# wget bundle for db verification if prod
+if [[ "$RAILS_ENV" == "production" ]]; then
+    wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+fi
+
 if [ "$1" == "web" ]; then
   # Run the database migrations
   echo "Migrating the database..."

@@ -88,4 +88,4 @@ test:
 production:
   <<: *default
   sslmode: verify-full
-  sslrootcert: <%= "#{Rails.root}/docker/global-bundle.pem" %>
+  sslrootcert: <%= "#{Rails.root}/global-bundle.pem" %>
