@@ -69,6 +69,7 @@ jobs:
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - run: |
+          echo "event name: '${{ github.event_name }}'"
           echo "env: '${{ inputs.env }}'"
           echo "ops-ref: '${{ inputs.ops-ref }}'"
           echo "group: 'release-to-${{ inputs.env || 'test' }}'"

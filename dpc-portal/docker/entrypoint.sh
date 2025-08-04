@@ -9,7 +9,7 @@ fi
 
 # wget bundle for db verification if prod
 if [[ "$RAILS_ENV" == "production" ]]; then
-    wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+    wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -O config/bundle.pem
 fi
 
 if [ "$1" == "portal" ]; then
