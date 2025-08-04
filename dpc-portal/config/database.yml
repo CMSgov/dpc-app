@@ -86,13 +86,6 @@ test:
 #     url: <%= ENV['DATABASE_URL'] %>
 #
 production:
-  adapter: postgresql
-  encoding: unicode
-  pool: 5
-  username: test-dpc_portal-role
-  host: dpc-test-aurora.cluster-cx2o6o4o45ut.us-east-1.rds.amazonaws.com
-  port: 5432
-  database: dpc_portal
-  aws_rds_iam_auth_token_generator: default
+  <<: *default
   sslmode: verify-full
   sslrootcert: <%= "#{Rails.root}/config/global-bundle.pem" %>
