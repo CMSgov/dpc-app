@@ -279,7 +279,7 @@ jobs:
   deploy:
     needs:
       - set-parameters
-      - build
+      - docker_push_all_apps
     uses: ./.github/workflows/ecs-deploy.yml
     with:
       env: ${{ inputs.env || 'dev'  }}
