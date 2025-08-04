@@ -1,0 +1,253 @@
+name: 'DPC - Quick Deploy'
+
+on:
+  push:
+    branches:
+      - 'me/dpc-4817-use-iam-for-db-access'
+  workflow_dispatch:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: 'string'
+        default: 'test'
+      confirm_env:
+        description: Double check for environment
+        required: true
+        type: 'string'
+        default: ''
+      ops-ref:
+        description: Branch of dpc-ops to use
+        required: false
+        type: 'string'
+        default: 'main'
+
+concurrency:
+  group: release-to-${{ inputs.env || 'test' }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  set-parameters:
+    name: "Set Parameters"
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    outputs:
+      version_tag: ${{ steps.get-version-tag.outputs.version_tag }}
+    steps:
+      - name: "Validate Environment"
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.env != inputs.confirm_env }}
+        run: |
+          echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
+          exit 1
+      - name: "Only dev or test"
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.env != 'dev' && inputs.env != 'test' }}
+        run: |
+          echo "Can only quick deploy to dev or test."
+          exit 1
+      - name: "Checkout code"
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - name: "Fetch git info"
+        run: |
+          git fetch --quiet
+      - name: "Get Version Tag"
+        id: get-version-tag
+        run: |
+          set +e
+          VERSION_TAG=`git describe --tags --exact-match`
+          if [ $? -ne 0 ]; then
+            BRANCH_HASH=`git show -s --format='%h'`
+            VERSION_TAG="commit_${BRANCH_HASH}"
+          fi
+          echo $VERSION_TAG
+          echo "version_tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
+          set -e
+  echo-inputs:
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    steps:
+      - run: |
+          echo "event name: '${{ github.event_name }}'"
+          echo "env: '${{ inputs.env }}'"
+          echo "ops-ref: '${{ inputs.ops-ref }}'"
+          echo "group: 'release-to-${{ inputs.env || 'test' }}'"
+
+  generate_docker_tag:
+    needs: set-parameters
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    outputs:
+      docker_tag: ${{ steps.output_docker_tag.outputs.docker_tag }}
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - name: "Fetch git info"
+        run: |
+          git fetch --quiet
+      - name: "Get Version Tag"
+        id: get-version-tag
+        run: |
+          set +e
+          VERSION_TAG=`git describe --tags --exact-match`
+          if [ $? -ne 0 ]; then
+            BRANCH_HASH=`git show -s --format='%h'`
+            VERSION_TAG="commit_${BRANCH_HASH}"
+          fi
+          echo "version_tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
+          set -e
+      - name: generate a tag with UTC date and GitHub run_id
+        id: output_docker_tag
+        run: |
+          DOCKER_TAG="rls-${{ steps.get-version-tag.outputs.version_tag }}-$(date -u +'%Y%m%d%H%M')-${{ github.run_id }}"
+          echo "docker_tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
+  docker_build_rails_apps:
+    needs: set-parameters
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    strategy:
+      matrix:
+        ecr_repository: [ web-portal, web-admin, web ]
+        include:
+          - ecr_repository: web-portal
+            make_command: make portal
+          - ecr_repository: web-admin
+            make_command: make admin
+          - ecr_repository: web
+            make_command: make website
+    steps:
+      - name: Assert Ownership
+        run: sudo chmod -R 777 .
+      - name: "Checkout code"
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - name: Cleanup Runner
+        run: ./scripts/cleanup-docker.sh
+
+      - name: Build specified app
+        run: ${{ matrix.make_command }}
+
+      - name: gzip the image
+        run: docker save dpc-${{ matrix.ecr_repository }}:latest | gzip > ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
+      - name: upload tar artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dpc-${{ matrix.ecr_repository }}
+          path: ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
+          retention-days: 1
+
+  docker_build_java: # builds dpc-api, dpc-attribution, dpc-aggregation, and dpc-consent
+    needs: set-parameters
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    steps:
+      - name: Assert Ownership
+        run: sudo chmod -R 777 .
+      - name: "Checkout code"
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - name: Cleanup Runner
+        run: ./scripts/cleanup-docker.sh
+      - name: "Set up JDK 17"
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          java-version: "17"
+          distribution: "corretto"
+          cache: maven
+      - name: Clean maven
+        run: mvn -ntp -U clean
+      - name: Build ci app
+        id: api-build
+        run: |
+          export PATH=$PATH:~/.local/bin
+          make docker-base
+          make api
+      # add extra commands to log docker containers during failure
+      - name: gzip image (1 of 4) - API
+        run: docker save dpc-api:latest | gzip > ${{ runner.temp }}/dpc_api_latest.tar.gz
+      - name: gzip image (2 of 4) - Attribution
+        run: docker save dpc-attribution:latest | gzip > ${{ runner.temp }}/dpc_attribution_latest.tar.gz
+      - name: gzip image (3 of 4) - Aggregation
+        run: docker save dpc-aggregation:latest | gzip > ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
+      - name: gzip image (4 of 4) - Consent
+        run: docker save dpc-consent:latest | gzip > ${{ runner.temp }}/dpc_consent_latest.tar.gz
+
+      - name: upload tar artifact (1 of 4) - API
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dpc-api
+          path: ${{ runner.temp }}/dpc_api_latest.tar.gz
+          retention-days: 1
+      - name: upload tar artifact (2 of 4) - Attribution
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dpc-attribution
+          path: ${{ runner.temp }}/dpc_attribution_latest.tar.gz
+          retention-days: 1
+      - name: upload tar artifact (3 of 4) - Aggregation
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dpc-aggregation
+          path: ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
+          retention-days: 1
+      - name: upload tar artifact (4 of 4) - Consent
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dpc-consent
+          path: ${{ runner.temp }}/dpc_consent_latest.tar.gz
+          retention-days: 1
+
+  docker_push_all_apps:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    strategy:
+      matrix:
+        ecr_repository: [ web-portal, web-admin, web, api, attribution, aggregation, consent ]
+    env:
+      ECR_REPOSITORY: ${{ matrix.ecr_repository }}
+    needs: [ docker_build_rails_apps, docker_build_java, generate_docker_tag ]
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: dpc-${{ matrix.ecr_repository }}
+          path: ${{ runner.temp }}
+      - name: Load docker image from artifact download
+        run: |
+          docker load --input ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
+          docker image ls -a
+      - name: Configure non-prod AWS Credentials
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Login to Amazon ECR (non-prod)
+        id: login-ecr-non-prod
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
+      - name: Push image to registries for non-prod aws account
+        env:
+          IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
+          REGISTRY: ${{ steps.login-ecr-non-prod.outputs.registry }}
+        run: |
+          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
+          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
+  deploy:
+    needs:
+      - set-parameters
+      - docker_push_all_apps
+    uses: ./.github/workflows/ecs-deploy.yml
+    with:
+      env: ${{ inputs.env || 'test' }}
+      confirm_env: ${{ inputs.env || 'test' }}
+      ecr_image_tag: ${{ needs.build.outputs.ecr_image_tag }}
+      app-version: ${{ needs.set-parameters.outputs.version_tag }}
+      ops-ref: ${{ inputs.ops-ref || 'jd/dpc-5816-portals-iam' }}
+    secrets: inherit
