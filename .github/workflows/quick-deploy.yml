@@ -39,7 +39,7 @@ on:
         default: 'main'
 
 concurrency:
-  group: release-to-${{ inputs.env || 'dev' }}
+  group: release-to-${{ inputs.env }}
   cancel-in-progress: false
 
 permissions:
@@ -148,6 +148,7 @@ jobs:
           retention-days: 1
 
   docker_build_java: # builds dpc-api, dpc-attribution, dpc-aggregation, and dpc-consent
+    needs: set-parameters
     permissions:
       contents: read
       id-token: write
@@ -229,12 +230,6 @@ jobs:
         run: |
           docker load --input ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
           docker image ls -a
-      #   _______                         __________                   .___
-      #   \      \   ____   ____          \______   \_______  ____   __| _/
-      #   /   |   \ /  _ \ /    \   ______ |     ___/\_  __ \/  _ \ / __ |
-      #  /    |    (  <_> )   |  \ /_____/ |    |     |  | \(  <_> ) /_/ |
-      #  \____|__  /\____/|___|  /         |____|     |__|   \____/\____ |
-      #          \/            \/                                       \/
       - name: Configure non-prod AWS Credentials
         uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
@@ -252,29 +247,6 @@ jobs:
           docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
           docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
-      #  __________                   .___             __  .__
-      #  \______   \_______  ____   __| _/_ __   _____/  |_|__| ____   ____
-      #   |     ___/\_  __ \/  _ \ / __ |  |  \_/ ___\   __\  |/  _ \ /    \
-      #   |    |     |  | \(  <_> ) /_/ |  |  /\  \___|  | |  (  <_> )   |  \
-      #   |____|     |__|   \____/\____ |____/  \___  >__| |__|\____/|___|  /
-      #                                \/           \/                    \/
-      - name: Configure prod AWS Credentials
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-github-actions
-      - name: Login to Amazon ECR (prod)
-        id: login-ecr-prod
-        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
-      - name: Push image to registries for prod aws account
-        env:
-          IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
-          REGISTRY: ${{ steps.login-ecr-prod.outputs.registry }}
-        run: |
-          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
-          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
 
   deploy:
     needs:
@@ -282,9 +254,9 @@ jobs:
       - docker_push_all_apps
     uses: ./.github/workflows/ecs-deploy.yml
     with:
-      env: ${{ inputs.env || 'dev'  }}
-      confirm_env: ${{ inputs.env || 'dev'  }}
+      env: ${{ inputs.env }}
+      confirm_env: ${{ inputs.env }}
       ecr_image_tag: ${{ needs.build.outputs.ecr_image_tag }}
       app-version: ${{ needs.set-parameters.outputs.version_tag }}
-      ops-ref: ${{ inputs.ops-ref || 'main' }}
+      ops-ref: ${{ inputs.ops-ref }}
     secrets: inherit
