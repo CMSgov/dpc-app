@@ -26,17 +26,17 @@ on:
         description: AWS environment to deploy to
         required: true
         type: 'string'
-        default: 'dev'
+        default: 'test'
       confirm_env:
         description: Double check for environment
         required: true
         type: 'string'
-        default: ''
+        default: test''
       ops-ref:
         description: Branch of dpc-ops to use
         required: false
         type: 'string'
-        default: 'main'
+        default: 'me/dpc-4817-add-env-vars-for-iam-auth'
 
 concurrency:
   group: release-to-${{ inputs.env || 'dev' }}
