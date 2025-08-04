@@ -23,13 +23,13 @@ class PublicKeyManager
                                  params: { label:, public_key:,
                                            snippet_signature: })
 
-    if duplicate_key?(api_client.response_body)
-      { response: false,
-        message: I18n.t('errors.duplicate_key.text') }
-    else
-      { response: api_client.response_successful?,
-        message: api_client.response_body }
-    end
+    message = if duplicate_key?(api_client.response_body)
+                I18n.t('errors.duplicate_key.text')
+              else
+                api_client.response_body
+              end
+    { response: api_client.response_successful?,
+      message: }
   end
 
   def invalid_encoding?(key_string)
