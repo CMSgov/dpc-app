@@ -1,6 +1,6 @@
 database:
-  driverClass: org.postgresql.Driver
-  url: ${DATABASE_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}
+  driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
+  url: ${ATTRIBUTION_DB_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}
   user: "${ATTRIBUTION_DB_USER:-postgres}"
   password: "${ATTRIBUTION_DB_PASS:-dpc-safe}"
   initialSize: 5
@@ -16,6 +16,10 @@ database:
     hibernate.show_sql: false
     hibernate.generate_statistics: true
     queryChunkSize: 1000
+    # Ignored running locally, only used in AWS
+    wrapperPlugins: iam,failover,efm2
+    iamRegion: us-east-1
+    iamHost: ${DB_HOST:-""}
 
 server:
   enableThreadNameFilter: false

@@ -1,6 +1,6 @@
 database:
   driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
-  url: ${ATTRIBUTION_DATABASE_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}
+  url: ${ATTRIBUTION_DB_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}
   user: "${ATTRIBUTION_DB_USER:-postgres}"
   password: "${ATTRIBUTION_DB_PASS:-dpc-safe}"  # Ignored in AWS, needed to run locally
   initialSize: 5
