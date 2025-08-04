@@ -4,22 +4,6 @@ on:
   push:
     branches:
       - 'jd/dpc-5816-portals-iam'
-    inputs:
-      env:
-        description: AWS environment to deploy to
-        required: true
-        type: 'string'
-        default: 'test'
-      confirm_env:
-        description: Double check for environment
-        required: true
-        type: 'string'
-        default: 'test'
-      ops-ref:
-        description: Branch of dpc-ops to use
-        required: false
-        type: 'string'
-        default: 'jd/dpc-5816-portals-iam'
   workflow_dispatch:
     inputs:
       env:
@@ -39,7 +23,7 @@ on:
         default: 'main'
 
 concurrency:
-  group: release-to-${{ inputs.env }}
+  group: release-to-${{ inputs.env || 'test' }}
   cancel-in-progress: false
 
 permissions:
@@ -59,7 +43,7 @@ jobs:
           echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
           exit 1
       - name: "Only dev or test"
-        if: ${{ inputs.env != 'dev' && inputs.env != 'test' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.env != 'dev' && inputs.env != 'test' }}
         run: |
           echo "Can only quick deploy to dev or test."
           exit 1
@@ -254,9 +238,9 @@ jobs:
       - docker_push_all_apps
     uses: ./.github/workflows/ecs-deploy.yml
     with:
-      env: ${{ inputs.env }}
-      confirm_env: ${{ inputs.env }}
+      env: ${{ inputs.env || 'test' }}
+      confirm_env: ${{ inputs.env || 'test' }}
       ecr_image_tag: ${{ needs.build.outputs.ecr_image_tag }}
       app-version: ${{ needs.set-parameters.outputs.version_tag }}
-      ops-ref: ${{ inputs.ops-ref }}
+      ops-ref: ${{ inputs.ops-ref || 'jd/dpc-5816-portals-iam' }}
     secrets: inherit
