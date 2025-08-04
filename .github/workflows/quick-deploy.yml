@@ -68,10 +68,10 @@ jobs:
   echo-inputs:
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
-      run: |
-        echo "env: '${{ inputs.env }}'"
-        echo "ops-ref: '${{ inputs.ops-ref }}'"
-        echo "group: 'release-to-${{ inputs.env || 'test' }}'"
+      - run: |
+          echo "env: '${{ inputs.env }}'"
+          echo "ops-ref: '${{ inputs.ops-ref }}'"
+          echo "group: 'release-to-${{ inputs.env || 'test' }}'"
         
   generate_docker_tag:
     needs: set-parameters
