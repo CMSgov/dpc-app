@@ -4,22 +4,6 @@ on:
   push:
     branches:
       - 'me/dpc-4817-use-iam-for-db-access'
-    inputs:
-      env:
-        description: AWS environment to deploy to
-        required: true
-        type: 'string'
-        default: 'test'
-      confirm_env:
-        description: Double check for environment
-        required: true
-        type: 'string'
-        default: 'test'
-      ops-ref:
-        description: Branch of dpc-ops to use
-        required: false
-        type: 'string'
-        default: 'me/dpc-4817-add-env-vars-for-iam-auth'
   workflow_dispatch:
     inputs:
       env:
