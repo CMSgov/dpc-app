@@ -1,9 +1,6 @@
 name: 'DPC - Quick Deploy'
 
 on:
-  push:
-    branches:
-      - 'jd/dpc-5816-portals-iam'
   workflow_dispatch:
     inputs:
       env:
@@ -23,7 +20,7 @@ on:
         default: 'main'
 
 concurrency:
-  group: release-to-${{ inputs.env || 'test' }}
+  group: release-to-${{ inputs.env }}
   cancel-in-progress: false
 
 permissions:
@@ -64,15 +61,6 @@ jobs:
           echo $VERSION_TAG
           echo "version_tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
           set -e
-
-  echo-inputs:
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    steps:
-      - run: |
-          echo "event name: '${{ github.event_name }}'"
-          echo "env: '${{ inputs.env }}'"
-          echo "ops-ref: '${{ inputs.ops-ref }}'"
-          echo "group: 'release-to-${{ inputs.env || 'test' }}'"
         
   generate_docker_tag:
     needs: set-parameters
@@ -104,6 +92,7 @@ jobs:
         run: |
           DOCKER_TAG="rls-${{ steps.get-version-tag.outputs.version_tag }}-$(date -u +'%Y%m%d%H%M')-${{ github.run_id }}"
           echo "docker_tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
+
   docker_build_rails_apps:
     needs: set-parameters
     permissions:
@@ -130,7 +119,7 @@ jobs:
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
-      - name: wget amazon global pem bundle
+      - name: wget amazon pem bundle
         run: |
           wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -O ${{ matrix.app_dir }}/config/bundle.pem
       - name: Build specified app
@@ -252,9 +241,9 @@ jobs:
       - docker_push_all_apps
     uses: ./.github/workflows/ecs-deploy.yml
     with:
-      env: ${{ inputs.env || 'test' }}
-      confirm_env: ${{ inputs.env || 'test' }}
+      env: ${{ inputs.env }}
+      confirm_env: ${{ inputs.env }}
       ecr_image_tag: ${{ needs.generate_docker_tag.outputs.docker_tag }}
       app-version: ${{ needs.set-parameters.outputs.version_tag }}
-      ops-ref: ${{ inputs.ops-ref || 'jd/dpc-5816-portals-iam' }}
+      ops-ref: ${{ inputs.ops-ref }}
     secrets: inherit
