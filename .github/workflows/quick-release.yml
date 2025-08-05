@@ -48,7 +48,8 @@ jobs:
       - name: "Get Version Tag"
         id: get-version-tag
         run: |
-          VERSION_TAG="commit_${{ github.sha }}"
+          SHA='${{ github.sha }}'
+          VERSION_TAG="commit_${SHA,0,8}"
           echo $VERSION_TAG
           echo "version_tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
           set -e
