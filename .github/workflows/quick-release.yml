@@ -1,7 +1,7 @@
 name: 'DPC - Quick Release'
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       env:
         description: AWS environment to deploy to
@@ -35,12 +35,12 @@ jobs:
       version_tag: ${{ steps.get-version-tag.outputs.version_tag }}
     steps:
       - name: "Validate Environment"
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.env != inputs.confirm_env }}
+        if: ${{ inputs.env != inputs.confirm_env }}
         run: |
           echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
           exit 1
       - name: "Only dev or test"
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.env != 'dev' && inputs.env != 'test' }}
+        if: ${{ inputs.env != 'dev' && inputs.env != 'test' }}
         run: |
           echo "Can only quick deploy to dev or test."
           exit 1
@@ -220,7 +220,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
       - name: Login to Amazon ECR (non-prod)
         id: login-ecr-non-prod
         uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1

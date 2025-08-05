@@ -11,6 +11,10 @@ permissions:
 jobs:
   launch-quick-deploy:
     uses: ./.github/workflows/quick-release.yml
+    with:
+      env: 'dev'
+      confirm_env: 'dev'
+      ops-ref: 'main'
     secrets: inherit
 
       
