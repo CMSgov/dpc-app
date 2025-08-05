@@ -57,6 +57,7 @@ jobs:
         id: output_docker_tag
         run: |
           DOCKER_TAG="rls-${{ steps.get-version-tag.outputs.version_tag }}-$(date -u +'%Y%m%d%H%M')-${{ github.run_id }}"
+          echo $DOCKER_TAG
           echo "docker_tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
 
   docker_build_rails_apps:
