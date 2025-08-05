@@ -1,4 +1,4 @@
-name: 'DPC - Quick Deploy'
+name: 'DPC - Quick Release'
 
 on:
   workflow_dispatch:
