@@ -1,5 +1,5 @@
 name: 'DPC - Quick Deploy'
-
+on:
   push:
     branches:
       - jd/quick-release
