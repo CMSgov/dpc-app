@@ -247,13 +247,13 @@ jobs:
 
   deploy:
     needs:
-      - set-parameters
+      - generate_docker_tag
       - docker_push_all_apps
     uses: ./.github/workflows/ecs-deploy.yml
     with:
       env: ${{ inputs.env || 'test' }}
       confirm_env: ${{ inputs.env || 'test' }}
-      ecr_image_tag: ${{ needs.build.outputs.ecr_image_tag }}
+      ecr_image_tag: ${{ needs.generate_docker_tag.outputs.docker_tag }}
       app-version: ${{ needs.set-parameters.outputs.version_tag }}
       ops-ref: ${{ inputs.ops-ref || 'jd/dpc-5816-portals-iam' }}
     secrets: inherit
