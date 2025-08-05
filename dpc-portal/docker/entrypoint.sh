@@ -12,7 +12,7 @@ if [ "$1" == "portal" ]; then
   echo "Starting Rails server..."
 
   echo "Migrating the database..."
-  bundle exec rails db:migrate --trace
+  bundle exec rails db:migrate
 
   if [[ "$ENV" == "production" ]]; then
     echo "Starting in production"
