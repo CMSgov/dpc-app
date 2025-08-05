@@ -1,7 +1,7 @@
-name: 'DPC - Quick Build and Deploy'
+name: 'DPC - Quick Release'
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       env:
         description: AWS environment to deploy to
