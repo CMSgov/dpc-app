@@ -12,8 +12,8 @@ jobs:
   launch-quick-deploy:
     uses: ./.github/workflows/quick-release.yml
     with:
-      env: 'sandbox'
-      confirm_env: 'sandbox'
+      env: 'dev'
+      confirm_env: 'dev'
       ops-ref: 'main'
     secrets: inherit
 
