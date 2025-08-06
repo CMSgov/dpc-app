@@ -20,4 +20,14 @@ namespace :dpc do
   rescue AoInvitationServiceError => e
     puts "Unable to create invitation: #{e.message}"
   end
+
+  desc <<~DESC
+    Creates an organization, uploads a private key, and retrieves a client token.
+    Made to address need to onboard organizations before portal released.
+    Requires name, npi, public key, and signature snippet
+    e.g. rails dpc:onboard NAME="Health Hut" NPI="55555" PUBLIC_KEY="--- blah blah ---" SNIPPET="base 64 thing"
+  DESC
+  task onboard: :environment do
+    puts 'Make Worky'
+  end
 end

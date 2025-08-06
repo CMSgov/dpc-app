@@ -12,9 +12,13 @@ module DpcClientSupport
   def stub_self_returning_api_client(message:, success: true, response: {}, api_client: nil, with: nil)
     doubled_client = api_client || instance_double(DpcClient)
     allow(DpcClient).to receive(:new).and_return(doubled_client)
-    if with
+    if with.is_a?(Array)
       allow(doubled_client).to receive(message)
         .with(*with)
+        .and_return(doubled_client)
+    elsif with
+      allow(doubled_client).to receive(message)
+        .with(have_attributes(with))
         .and_return(doubled_client)
     else
       allow(doubled_client).to receive(message).and_return(doubled_client)
@@ -60,5 +64,42 @@ koPuyOLZ4oalcqVMGJFeYpcCAwEAAQ==
            'ipAddress' => '136.226.19.87',
            'createdAt' => '2020-09-10T02:30:27.526+00:00',
            'label' => 'IP address for organization 4b15098b-d53f-432d-a2f3-416a9483527b.' }] }
+  end
+end
+
+class MockFHIRResponse
+  attr_reader :entry
+
+  def initialize(entries_count: 0)
+    @entry = entries_count.times.map { MockEntry.new }
+  end
+end
+
+class MockEntry
+  attr_reader :resource
+
+  def initialize
+    @resource = MockResource.new
+  end
+end
+
+class MockResource
+  attr_reader :id
+
+  def initialize
+    @id = rand(0..9)
+  end
+end
+
+class MockOrgResponse
+  attr_reader :response_body
+
+  def initialize(response_successful: true, response_body: {})
+    @response_successful = response_successful
+    @response_body = response_body
+  end
+
+  def response_successful?
+    @response_successful
   end
 end
