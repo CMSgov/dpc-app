@@ -4,6 +4,8 @@
 class PublicKeyManager
   include CredentialManager
 
+  INVALID_KEY = 'Invalid public key.'
+
   def create_public_key(public_key:, label:, snippet_signature:)
     public_key = strip_carriage_returns(public_key)
     snippet_signature = strip_carriage_returns(snippet_signature)
@@ -56,11 +58,11 @@ class PublicKeyManager
     key = OpenSSL::PKey::RSA.new(key_string)
     if key.private?
       @errors[:public_key] = 'Must be a public key (not a private key).'
-      @root_errors << 'Invalid public key.'
+      @root_errors << INVALID_KEY
     end
   rescue OpenSSL::PKey::RSAError
     @errors[:public_key] = 'Must be a valid public key.'
-    @root_errors << 'Invalid public key.'
+    @root_errors << INVALID_KEY
   end
 
   def parse_errors(error_msg)
@@ -69,7 +71,10 @@ class PublicKeyManager
       @errors[:root] = 'Invalid signature snippet.'
     elsif error_msg&.include?('Public key is not valid')
       @errors[:public_key] = 'Must be a valid public key.'
-      @errors[:root] = 'Invalid public key.'
+      @errors[:root] = INVALID_KEY
+    elsif error_msg&.include?('duplicate key value violates unique constraint')
+      @errors[:public_key] = I18n.t('errors.duplicate_key.text')
+      @errors[:root] = INVALID_KEY
     else
       @errors[:root] = SERVER_ERROR_MSG
     end
