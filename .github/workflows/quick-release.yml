@@ -69,6 +69,7 @@ jobs:
           zip credentials.zip organization.txt key64.txt iv64.txt token64.txt
       - name: Upload
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
           name: credentials-for-${{ inputs.name }}
           path: credentials.zip
           retention-days: 1
