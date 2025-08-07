@@ -65,7 +65,8 @@ jobs:
           -e API_METADATA_URL="https://${{ inputs.env }}.dpc.cms.gov/api/v1" \
           --entrypoint 'bundle exec rails dpc:onboard NAME="${{ inputs.name} }} NPI="${{ inputs.npi }}" PUBLIC_KEY="${{ inputs.public_key }}" SNIPPET="${{ inputs.snippet }}"' dpc_portal
       - name: Zip files
-        run: zip credentials.zip organization.txt key64.txt iv64.txt token64.txt
+        run: |
+          zip credentials.zip organization.txt key64.txt iv64.txt token64.txt
       - name: Upload
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
           name: credentials-for-${{ inputs.name }}
