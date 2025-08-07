@@ -60,15 +60,15 @@ class OnboardService
   def encrypted_token
     return unless cipher_key && cipher_iv
 
-    cipher.update(client_token) + cipher.final
+    Base64.encode64(cipher.update(client_token) + cipher.final)
   end
 
   def cipher_key
-    @cipher_key ||= cipher.random_key
+    @cipher_key ||= cipher.random_key.unpack('H*').first
   end
 
   def cipher_iv
-    @cipher_iv ||= cipher.random_iv
+    @cipher_iv ||= cipher.random_iv.unpack('H*').first
   end
 
   private

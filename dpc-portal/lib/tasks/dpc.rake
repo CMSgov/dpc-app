@@ -28,6 +28,32 @@ namespace :dpc do
     e.g. rails dpc:onboard NAME="Health Hut" NPI="55555" PUBLIC_KEY="--- blah blah ---" SNIPPET="base 64 thing"
   DESC
   task onboard: :environment do
-    puts 'Make Worky'
+    name = ENV.fetch('NAME', nil)
+    npi = ENV.fetch('NPI', nil)
+    public_key = ENV.fetch('PUBLIC_KEY', nil)
+    snippet_signature = ENV.fetch('SNIPPET', nil)
+    service = OnboardService.new(name,
+                                 npi,
+                                 public_key,
+                                 snippet_signature)
+    service.create_organization
+    service.upload_key
+    File.open('organization.txt', 'w') do |file|
+      file.write("Organization id: \n")
+      file.write(service.organization_id)
+      file.write("\n\nPublic Key ID:\n")
+      file.write(service.public_key_id)
+      file.write("\n")
+    end
+    service.retrieve_client_token
+    File.open('key64.txt', 'w') do |file|
+      file.write(service.encrypted(service.cipher_key))
+    end
+    File.open('iv64.txt', 'w') do |file|
+      file.write(service.encrypted(service.cipher_iv))
+    end
+    File.open('token64.txt', 'w') do |file|
+      file.write(service.encrypted_token)
+    end
   end
 end
