@@ -38,7 +38,7 @@ namespace :dpc do
                                  snippet_signature)
     service.create_organization
     service.upload_key
-    File.open('organization.txt', 'w') do |file|
+    File.open('tmp/organization.txt', 'w') do |file|
       file.write("Organization id: \n")
       file.write(service.organization_id)
       file.write("\n\nPublic Key ID:\n")
@@ -46,13 +46,13 @@ namespace :dpc do
       file.write("\n")
     end
     service.retrieve_client_token
-    File.open('key64.txt', 'w') do |file|
+    File.open('tmp/key64.txt', 'w') do |file|
       file.write(service.encrypted(service.cipher_key))
     end
-    File.open('iv64.txt', 'w') do |file|
+    File.open('tmp/iv64.txt', 'w') do |file|
       file.write(service.encrypted(service.cipher_iv))
     end
-    File.open('token64.txt', 'w') do |file|
+    File.open('tmp/token64.txt', 'w') do |file|
       file.write(service.encrypted_token)
     end
   end
