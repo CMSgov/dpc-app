@@ -53,6 +53,8 @@ jobs:
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
+      - name: "Set up Ansible"
+        run: pip install ansible
       - uses: cmsgov/cdap/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
@@ -61,6 +63,7 @@ jobs:
             GOLDEN_MACAROON=/dpc/${{ inputs.env }}/web/golden_macaroon
       - name: Onboard
         run: |
+          make secure-envs
           docker compose -f docker-compose.yml -f docker-compose.portals.yml run \
           -e API_METADATA_URL="https://${{ inputs.env }}.dpc.cms.gov/api/v1" \
           --entrypoint 'bundle exec rails dpc:onboard NAME="${{ inputs.name }}" NPI="${{ inputs.npi }}" PUBLIC_KEY="${{ inputs.public_key }}" SNIPPET="${{ inputs.snippet }}"' dpc_portal
