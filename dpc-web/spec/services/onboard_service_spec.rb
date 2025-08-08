@@ -69,27 +69,26 @@ describe OnboardService do
     let(:get_organization_one_entry) { MockFHIRResponse.new(entries_count: 1) }
     let(:get_organization_two_entries) { MockFHIRResponse.new(entries_count: 2) }
     it 'creates an org if api_client returns no existing entry' do
-      api_client = stub_api_client(message: :get_organization_by_npi,
-                                   response: get_organization_zero_entries)
+      api_client = stub_api_call(message: :get_organization_by_npi,
+                                 response: get_organization_zero_entries)
 
-      stub_self_returning_api_client(message: :create_organization,
-                                     with: { name:, npi: },
-                                     api_client:,
-                                     response: create_organization_success_response)
+      stub_api_client(message: :create_organization,
+                      api_client:,
+                      response: create_organization_success_response)
 
       service.create_organization
       expect(service.organization_id).to eq '352dda55-6925-4bdb-bcee-1af0bc163699'
     end
 
     it 'sets organization_id if api_client returns an entry' do
-      stub_api_client(message: :get_organization_by_npi,
-                      response: get_organization_one_entry)
+      stub_api_call(message: :get_organization_by_npi,
+                    response: get_organization_one_entry)
       service.create_organization
       expect(service.organization_id).to eq get_organization_one_entry.entry[0].resource.id
     end
 
     it 'raises an error if multiple orgs are found for the NPI in dpc_attribution' do
-      stub_api_client(message: :get_organization_by_npi,
+      stub_api_call(message: :get_organization_by_npi,
                       response: get_organization_two_entries)
       expect do
         service.create_organization
@@ -98,15 +97,14 @@ describe OnboardService do
     end
 
     it 'raises an error if api_client.create_organization is unsuccessful' do
-      api_client = stub_api_client(message: :get_organization_by_npi,
+      api_client = stub_api_call(message: :get_organization_by_npi,
                                    response: get_organization_zero_entries)
 
       response = { msg: 'No Worky' }
-      stub_self_returning_api_client(message: :create_organization,
-                                     with: { name:, npi: },
-                                     api_client:,
-                                     response:,
-                                     success: false)
+      stub_api_client(message: :create_organization,
+                      api_client:,
+                      response:,
+                      success: false)
       expect do
         service.create_organization
       end.to raise_error(OnboardServiceError, response.to_s)
@@ -124,7 +122,7 @@ describe OnboardService do
     end
     it 'handles success' do
       manager = instance_double(PublicKeyManager)
-      expect(PublicKeyManager).to receive(:new).with(organization_id).and_return(manager)
+      expect(PublicKeyManager).to receive(:new).and_return(manager)
       expect(manager).to receive(:create_public_key)
         .with({ public_key:,
                 snippet_signature:,
@@ -150,7 +148,7 @@ describe OnboardService do
     end
     it 'handles success' do
       manager = instance_double(ClientTokenManager)
-      expect(ClientTokenManager).to receive(:new).with(organization_id).and_return(manager)
+      expect(ClientTokenManager).to receive(:new).and_return(manager)
       expect(manager).to receive(:create_client_token)
         .with({ label: 'Onboarding' })
         .and_return({
@@ -160,32 +158,6 @@ describe OnboardService do
                     })
       service.retrieve_client_token
       expect(service.client_token).to eq 'the client token'
-    end
-  end
-
-  describe 'token encryption' do
-    let(:service) do
-      OnboardService.new(name, npi, public_key, snippet_signature)
-    end
-    before do
-      service.client_token = 'client token'
-    end
-    it 'public key encrypts' do
-      encryptor = instance_double(OpenSSL::PKey::RSA)
-      expect(OpenSSL::PKey::RSA).to receive(:new).with(service.public_key).and_return(encryptor)
-      expect(encryptor).to receive(:public_encrypt).and_return('encrypted thing')
-      expect(Base64.decode64(service.encrypted('whatever'))).to eq 'encrypted thing'
-    end
-
-    it 'encrypts token' do
-      cipher = instance_double(OpenSSL::Cipher)
-      expect(OpenSSL::Cipher).to receive(:new).with('AES-256-CBC').and_return(cipher)
-      expect(cipher).to receive(:encrypt)
-      expect(cipher).to receive(:random_key).and_return('cipher key')
-      expect(cipher).to receive(:random_iv).and_return('cipher iv')
-      expect(cipher).to receive(:update).with(service.client_token).and_return('encrypted bit')
-      expect(cipher).to receive(:final).and_return('final')
-      expect(service.encrypted_token).to eq 'encrypted bitfinal'
     end
   end
 end

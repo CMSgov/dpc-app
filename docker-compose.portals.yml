@@ -25,6 +25,7 @@ services:
       - "./dpc-web/Gemfile.lock:/dpc-web/Gemfile.lock"
       - "./dpc-web/package-lock.json:/dpc-web/package-lock.json"
       - "./dpc-web/app:/dpc-web/app"
+      - "./dpc-web/lib:/dpc-web/lib"
       - "./dpc-web/db:/dpc-web/db"
       - "./dpc-web/spec:/dpc-web/spec"
 

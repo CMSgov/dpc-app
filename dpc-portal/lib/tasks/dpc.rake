@@ -20,40 +20,4 @@ namespace :dpc do
   rescue AoInvitationServiceError => e
     puts "Unable to create invitation: #{e.message}"
   end
-
-  desc <<~DESC
-    Creates an organization, uploads a private key, and retrieves a client token.
-    Made to address need to onboard organizations before portal released.
-    Requires name, npi, public key, and signature snippet
-    e.g. rails dpc:onboard NAME="Health Hut" NPI="55555" PUBLIC_KEY="--- blah blah ---" SNIPPET="base 64 thing"
-  DESC
-  task onboard: :environment do
-    name = ENV.fetch('NAME', nil)
-    npi = ENV.fetch('NPI', nil)
-    public_key = ENV.fetch('PUBLIC_KEY', nil)
-    snippet_signature = ENV.fetch('SNIPPET', nil)
-    service = OnboardService.new(name,
-                                 npi,
-                                 public_key,
-                                 snippet_signature)
-    service.create_organization
-    service.upload_key
-    File.open('tmp/organization.txt', 'w') do |file|
-      file.write("Organization id: \n")
-      file.write(service.organization_id)
-      file.write("\n\nPublic Key ID:\n")
-      file.write(service.public_key_id)
-      file.write("\n")
-    end
-    service.retrieve_client_token
-    File.open('tmp/key64.txt', 'w') do |file|
-      file.write(service.encrypted(service.cipher_key))
-    end
-    File.open('tmp/iv64.txt', 'w') do |file|
-      file.write(service.encrypted(service.cipher_iv))
-    end
-    File.open('tmp/token64.txt', 'w') do |file|
-      file.write(service.encrypted_token)
-    end
-  end
 end
