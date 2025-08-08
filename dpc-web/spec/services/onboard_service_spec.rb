@@ -8,8 +8,8 @@ describe OnboardService do
 
   let(:name) { 'Health Hut' }
   let(:npi) { '3624913885' }
-  let(:public_key) { file_fixture('stubbed_key.pem').read }
-  let(:snippet_signature) { 'stubbed_sign_txt_signature' }
+  let(:public_key) { 'public key block' }
+  let(:snippet_signature) { 'stubbed_signature' }
   let(:ip_addresses) { 'a,b' }
 
   describe 'new' do
@@ -25,24 +25,7 @@ describe OnboardService do
       expect(service.snippet_signature).to eq snippet_signature
       expect(service.ip_addresses).to eq ['a', 'b']
     end
-    it 'formats public key' do
-      pk = public_key.tr("\n", ' ')
-      service = OnboardService.new(name,
-                                   npi,
-                                   pk,
-                                   snippet_signature,
-                                   ip_addresses)
-      expect(service.public_key).to eq public_key
-    end
-    it 'formats signature' do
-      spacey_sig = ' signature with spaces '
-      service = OnboardService.new(name,
-                                   npi,
-                                   public_key,
-                                   spacey_sig,
-                                   ip_addresses)
-      expect(service.snippet_signature).to eq 'signaturewithspaces'
-    end
+
     it 'verifies no blanks' do
       [
         [' ', npi, public_key, snippet_signature, ip_addresses],
@@ -140,6 +123,60 @@ describe OnboardService do
         })
       service.upload_key
       expect(service.public_key_id).to eq 'some-id'
+    end
+    it 'checks for key if duplicate' do
+      manager = instance_double(PublicKeyManager)
+      expect(PublicKeyManager).to receive(:new).and_return(manager)
+      expect(manager).to receive(:create_public_key)
+        .with({ public_key:,
+                snippet_signature:,
+                label: 'Onboarding' })
+        .and_return({
+          response: false,
+          message: I18n.t('errors.duplicate_key.text')
+        })
+      expect(manager).to receive(:public_keys)
+        .and_return(
+          [{ 'id' => 'some-id',
+             'publicKey' => public_key }]
+        )
+      service.upload_key
+      expect(service.public_key_id).to eq 'some-id'
+    end
+    it 'fails if duplicate belongs to other org' do
+      manager = instance_double(PublicKeyManager)
+      expect(PublicKeyManager).to receive(:new).and_return(manager)
+      expect(manager).to receive(:create_public_key)
+        .with({ public_key:,
+                snippet_signature:,
+                label: 'Onboarding' })
+        .and_return({
+          response: false,
+          message: I18n.t('errors.duplicate_key.text')
+        })
+      expect(manager).to receive(:public_keys)
+        .and_return(
+          [{ 'id' => 'some-id',
+             'publicKey' => 'other key' }]
+        )
+      expect do
+        service.upload_key
+      end.to raise_error(OnboardServiceError, 'public key used by other org')
+    end
+    it 'fails on other error' do
+      manager = instance_double(PublicKeyManager)
+      expect(PublicKeyManager).to receive(:new).and_return(manager)
+      expect(manager).to receive(:create_public_key)
+        .with({ public_key:,
+                snippet_signature:,
+                label: 'Onboarding' })
+        .and_return({
+          response: false,
+          message: 'some other, terrible error'
+        })
+      expect do
+        service.upload_key
+      end.to raise_error(OnboardServiceError, 'some other, terrible error')
     end
   end
 

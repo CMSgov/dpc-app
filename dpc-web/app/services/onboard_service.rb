@@ -10,8 +10,8 @@ class OnboardService
 
     @name = name
     @npi = npi
-    @public_key = format_key(public_key)
-    @snippet_signature = snippet_signature.delete(' ')
+    @public_key = public_key
+    @snippet_signature = snippet_signature
     @ip_addresses = ip_addresses.split(',')
   end
 
@@ -35,6 +35,11 @@ class OnboardService
   def upload_key
     manager = PublicKeyManager.new(registered_organization:)
     response = manager.create_public_key(label:, public_key:, snippet_signature:)
+    if response[:message] == I18n.t('errors.duplicate_key.text')
+      @public_key_id = existing_public_key_id(manager)
+      return
+    end
+
     raise OnboardServiceError, response[:message]&.to_s unless response[:response]
 
     @public_key_id = response.dig(:message, 'id')
@@ -65,14 +70,11 @@ class OnboardService
 
   private
 
-  # the expectation is that the public key will be added in gha, which replaces \n with ' '
-  # this method undoes that
-  def format_key(public_key)
-    if public_key.include?('- ')
-      bits = /(-+[^-]+-+)([^-]+)(-+[^-]+-+)/.match(public_key)
-      return "#{bits[1]}#{bits[2].tr(' ', "\n")}#{bits[3]}" if bits
+  def existing_public_key_id(manager)
+    manager.public_keys.each do |entity|
+      return entity['id'] if entity['publicKey'] == public_key
     end
-    public_key
+    raise OnboardServiceError, 'public key used by other org'
   end
 
   def api_client
