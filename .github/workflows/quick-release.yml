@@ -1,19 +1,18 @@
 name: 'DPC - Quick Release'
 
 on:
-  push:
   workflow_dispatch:
     inputs:
       env:
         description: AWS environment to deploy to
         required: true
         type: 'string'
-        default: 'test'
+        default: 'dev'
       confirm_env:
         description: Double check for environment
         required: true
         type: 'string'
-        default: 'test'
+        default: ''
       ops-ref:
         description: Branch of dpc-ops to use
         required: false
