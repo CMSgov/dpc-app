@@ -22,6 +22,7 @@ services:
       - "./dpc-web/certs:/dpc-web/certs"
       - "./dpc-web/coverage:/dpc-web/coverage"
       - ./tmp/letter_opener/web:/dpc-web/tmp/letter_opener
+      - "./dpc-web/Gemfile:/dpc-web/Gemfile"
       - "./dpc-web/Gemfile.lock:/dpc-web/Gemfile.lock"
       - "./dpc-web/package-lock.json:/dpc-web/package-lock.json"
       - "./dpc-web/app:/dpc-web/app"

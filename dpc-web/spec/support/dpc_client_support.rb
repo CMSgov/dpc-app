@@ -21,7 +21,7 @@ module DpcClientSupport
     doubled_client
   end
 
-  def stub_api_call(message:, success: true, response: {}, api_client: nil)
+  def stub_api_call(message:, response: {}, api_client: nil)
     doubled_client = api_client || instance_double(DpcClient)
     allow(DpcClient).to receive(:new).and_return(doubled_client)
     allow(doubled_client).to receive(message).and_return(response)
@@ -39,7 +39,7 @@ class MockFHIRResponse
   attr_reader :entry
 
   def initialize(entries_count: 0)
-    @entry = entries_count.times.map { MockEntry.new }
+    @entry = Array.new(entries_count) { MockEntry.new }
   end
 end
 
