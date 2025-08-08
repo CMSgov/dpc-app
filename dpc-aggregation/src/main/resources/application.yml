@@ -13,6 +13,8 @@ database:
     wrapperPlugins: iam,failover,efm2
     iamRegion: us-east-1
     iamHost: ${DB_HOST:-""}
+    ssl: true
+    sslmode: verify-full
 
 queuedb:
   driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
@@ -27,6 +29,8 @@ queuedb:
     wrapperPlugins: iam,failover,efm2
     iamRegion: us-east-1
     iamHost: ${DB_HOST:-""}
+    ssl: true
+    sslmode: verify-full
 
 server:
   enableThreadNameFilter: false
