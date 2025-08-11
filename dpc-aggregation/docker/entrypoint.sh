@@ -9,9 +9,6 @@ bootstrap_config() {
   # Sync the aws bucket
   bucket=$(aws ssm get-parameter --name /dpc/"$ENV"/config_bucket --query Parameter.Value --output text)
   aws s3 sync "s3://$bucket" config/
-
-  # Download AWS RDS cert bundle
-  wget -P /config https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
 }
 
 if [ -n "$JACOCO" ]; then
