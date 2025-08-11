@@ -9,10 +9,10 @@ database:
   properties:
     charSet: UTF-8
     hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
-    # Ignored running locally, only used in AWS
     wrapperPlugins: iam,failover,efm2
     iamRegion: us-east-1
-    iamHost: ${DB_HOST:-""}
+    sslmode: ${DB_SSL_MODE:-"disable"}
+    sslrootcert: /awscert/global-bundle.pem
 
 queuedb:
   driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
@@ -23,10 +23,10 @@ queuedb:
   minSize: 5
   maxSize: 10
   properties:
-    # Ignored running locally, only used in AWS
     wrapperPlugins: iam,failover,efm2
     iamRegion: us-east-1
-    iamHost: ${DB_HOST:-""}
+    sslmode: ${DB_SSL_MODE:-"disable"}
+    sslrootcert: /awscert/global-bundle.pem
 
 authdb:
   driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
@@ -37,10 +37,10 @@ authdb:
   minSize: 5
   maxSize: 10
   properties:
-    # Ignored running locally, only used in AWS
     wrapperPlugins: iam,failover,efm2
     iamRegion: us-east-1
-    iamHost: ${DB_HOST:-""}
+    sslmode: ${DB_SSL_MODE:-"disable"}
+    sslrootcert: /awscert/global-bundle.pem
 
 server:
   enableThreadNameFilter: false

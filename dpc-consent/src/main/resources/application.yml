@@ -7,10 +7,10 @@ consentdb:
   minSize: 5
   maxSize: 10
   properties:
-    # Ignored running locally, only used in AWS
     wrapperPlugins: iam,failover,efm2
     iamRegion: us-east-1
-    iamHost: ${DB_HOST:-""}
+    sslmode: ${DB_SSL_MODE:-"disable"}
+    sslrootcert: /awscert/global-bundle.pem
 
 server:
   enableThreadNameFilter: false
