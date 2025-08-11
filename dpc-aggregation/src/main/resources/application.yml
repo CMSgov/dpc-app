@@ -15,9 +15,7 @@ database:
     iamHost: ${DB_HOST:-""}
     ssl: true
     sslmode: verify-full
-    trustStorePath: /awscerts/aws-rds-jdbc.jks
-    trustStorePassword: postgres
-    trustStoreType: JKS
+    sslrootcert: ../awscerts/global-bundle.pem
 
 queuedb:
   driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
@@ -34,9 +32,7 @@ queuedb:
     iamHost: ${DB_HOST:-""}
     ssl: true
     sslmode: verify-full
-    trustStorePath: /awscerts/aws-rds-jdbc.jks
-    trustStorePassword: postgres
-    trustStoreType: JKS
+    sslrootcert: ../awscerts/global-bundle.pem
 
 server:
   enableThreadNameFilter: false
