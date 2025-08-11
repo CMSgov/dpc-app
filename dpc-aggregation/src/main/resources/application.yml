@@ -15,7 +15,7 @@ database:
     iamHost: ${DB_HOST:-""}
     ssl: true
     sslmode: verify-full
-    sslrootcert: global-bundle.pem
+    sslrootcert: /config/global-bundle.pem
 
 queuedb:
   driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
@@ -32,7 +32,7 @@ queuedb:
     iamHost: ${DB_HOST:-""}
     ssl: true
     sslmode: verify-full
-    sslrootcert: global-bundle.pem
+    sslrootcert: /config/global-bundle.pem
 
 server:
   enableThreadNameFilter: false
