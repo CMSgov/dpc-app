@@ -13,7 +13,7 @@ database:
     wrapperPlugins: iam,failover,efm2
     iamRegion: us-east-1
     iamHost: ${DB_HOST:-""}
-    ssl: true
+    ssl: ${DB_SSL:-"false"}
     sslmode: verify-full
     sslrootcert: /awscert/global-bundle.pem
 
@@ -30,7 +30,7 @@ queuedb:
     wrapperPlugins: iam,failover,efm2
     iamRegion: us-east-1
     iamHost: ${DB_HOST:-""}
-    ssl: true
+    ssl: ${DB_SSL:-"false"}
     sslmode: verify-full
     sslrootcert: /awscert/global-bundle.pem
 
