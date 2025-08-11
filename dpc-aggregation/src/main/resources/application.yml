@@ -13,6 +13,11 @@ database:
     wrapperPlugins: iam,failover,efm2
     iamRegion: us-east-1
     iamHost: ${DB_HOST:-""}
+    ssl: true
+    sslmode: verify-full
+    trustStorePath: /awscerts/aws-rds-jdbc.jks
+    trustStorePassword: postgres
+    trustStoreType: JKS
 
 queuedb:
   driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
@@ -27,6 +32,11 @@ queuedb:
     wrapperPlugins: iam,failover,efm2
     iamRegion: us-east-1
     iamHost: ${DB_HOST:-""}
+    ssl: true
+    sslmode: verify-full
+    trustStorePath: /awscerts/aws-rds-jdbc.jks
+    trustStorePassword: postgres
+    trustStoreType: JKS
 
 server:
   enableThreadNameFilter: false
