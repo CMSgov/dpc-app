@@ -11,7 +11,7 @@ bootstrap_config() {
   aws s3 sync "s3://$bucket" config/
 
   # Download AWS RDS cert bundle
-  wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+  wget -P /config https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
 }
 
 if [ -n "$JACOCO" ]; then
