@@ -18,7 +18,7 @@ database:
     queryChunkSize: 1000
     wrapperPlugins: iam,failover,efm2
     iamRegion: us-east-1
-    sslmode: ${DB_SSL_MODE:-"disable"}
+    sslmode: ${DB_SSL_MODE:-"prefer"}
     sslrootcert: /awscert/global-bundle.pem
 
 server:
