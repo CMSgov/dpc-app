@@ -62,13 +62,24 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
-            public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration dpcAggregationConfiguration) {
-                return dpcAggregationConfiguration.getQueueDatabase();
+            public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration configuration) {
+                return configuration.getQueueDatabase();
             }
 
             @Override
             public String getMigrationsFileName() {
                 return "migrations/queue.migrations.xml";
+            }
+        });
+        bootstrap.addBundle(new MigrationsBundle<>() {
+            @Override
+            public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration configuration) {
+                return configuration.getConsentDatabase();
+            }
+
+            @Override
+            public String getMigrationsFileName() {
+                return "migrations/consent.migrations.xml";
             }
         });
     }

@@ -34,6 +34,11 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
 
     @Valid
     @NotNull
+    @JsonProperty("consentdb")
+    private DataSourceFactory consentDatabase = new DataSourceFactory();
+
+    @Valid
+    @NotNull
     @JsonProperty("bbclient")
     private final BBClientConfiguration clientConfiguration = new BBClientConfiguration();
 
@@ -84,6 +89,9 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     @NotNull
     private final YearMonth lookBackDate = YearMonth.now(ZoneId.systemDefault());
 
+    @NotEmpty
+    private String fhirReferenceURL;
+
     @Override
     public DataSourceFactory getDatabase() {
         return this.database;
@@ -92,6 +100,10 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     @Override
     public DataSourceFactory getQueueDatabase() {
         return queueDatabase;
+    }
+
+    public DataSourceFactory getConsentDatabase() {
+        return consentDatabase;
     }
 
     public String getExportPath() {
@@ -155,5 +167,13 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
 
     public int getFetchWarnThresholdSeconds() {
         return fetchWarnThresholdSeconds;
+    }
+
+    public String getFhirReferenceURL() {
+        return fhirReferenceURL;
+    }
+
+    public void setFhirReferenceURL(String fhirReferenceURL) {
+        this.fhirReferenceURL = fhirReferenceURL;
     }
 }
