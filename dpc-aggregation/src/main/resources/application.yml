@@ -1,23 +1,32 @@
 database:
-  driverClass: org.postgresql.Driver
-  url: ${DATABASE_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}
+  driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
+  url: ${ATTRIBUTION_DB_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}
   user: "${ATTRIBUTION_DB_USER:-postgres}"
-  password: "${ATTRIBUTION_DB_PASS:-dpc-safe}"
+  password: "${ATTRIBUTION_DB_PASS:-dpc-safe}"  # Ignored in AWS, needed to run locally
   initialSize: 5
   minSize: 5
   maxSize: 10
   properties:
     charSet: UTF-8
     hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+    wrapperPlugins: iam,failover,efm2
+    iamRegion: us-east-1
+    sslmode: ${DB_SSL_MODE:-"prefer"}
+    sslrootcert: /awscert/global-bundle.pem
 
 queuedb:
-  driverClass: org.postgresql.Driver
+  driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
   url: ${QUEUE_DB_URL:-"jdbc:postgresql://db:5432/dpc_queue"}
   user: "${QUEUE_DB_USER:-postgres}"
-  password: "${QUEUE_DB_PASS:-dpc-safe}"
+  password: "${QUEUE_DB_PASS:-dpc-safe}"  # Ignored in AWS, needed to run locally
   initialSize: 5
   minSize: 5
   maxSize: 10
+  properties:
+    wrapperPlugins: iam,failover,efm2
+    iamRegion: us-east-1
+    sslmode: ${DB_SSL_MODE:-"prefer"}
+    sslrootcert: /awscert/global-bundle.pem
 
 consentdb:
   driverClass: org.postgresql.Driver
@@ -60,6 +69,7 @@ logging:
     "gov.cms.dpc.api.auth": INFO
     "gov.cms.dpc.common.logging.filters": INFO
     "metrics": INFO
+    "software.amazon.jdbc": DEBUG
   appenders:
     - type: console
       filterFactories:
