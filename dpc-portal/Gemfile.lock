@@ -107,6 +107,9 @@ GEM
       aws-partitions (~> 1, >= 1.651.0)
       aws-sigv4 (~> 1.9)
       jmespath (~> 1, >= 1.6.1)
+    aws-sdk-rds (1.253.0)
+      aws-sdk-core (~> 3, >= 3.207.0)
+      aws-sigv4 (~> 1.5)
     aws-sigv4 (1.10.0)
       aws-eventstream (~> 1, >= 1.0.2)
     axe-core-api (4.10.1)
@@ -362,6 +365,9 @@ GEM
       ast (~> 2.4.1)
       racc
     pg (1.5.7)
+    pg-aws_rds_iam (0.7.0)
+      aws-sdk-rds (~> 1.0)
+      pg (~> 1.1)
     pry (0.14.2)
       coderay (~> 1.1)
       method_source (~> 1.0)
@@ -632,6 +638,7 @@ DEPENDENCIES
   omniauth-rails_csrf_protection
   omniauth_openid_connect
   pg (>= 0.18, < 2.0)
+  pg-aws_rds_iam
   pry
   pry-nav
   puma (~> 6.4.3)
