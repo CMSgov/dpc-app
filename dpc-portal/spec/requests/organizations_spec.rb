@@ -19,6 +19,11 @@ RSpec.describe 'Organizations', type: :request do
       let!(:org) { create(:provider_organization) }
       before { sign_in user }
 
+      it 'sets cache control to no-store' do
+        get '/organizations'
+        expect(response.headers['cache-control']).to eq 'no-store'
+      end
+
       it 'returns success if no orgs associated with user' do
         get '/organizations'
         expect(assigns(:links)).to be_empty

@@ -100,6 +100,8 @@ services:
       - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
       - "./dpc-admin/Gemfile.lock:/dpc-admin/Gemfile.lock"
       - "./dpc-admin/package-lock.json:/dpc-admin/package-lock.json"
+      - "./dpc-admin/app:/dpc-admin/app"
+      - "./dpc-admin/spec:/dpc-admin/spec"
     environment:
       - REDIS_URL=redis://redis
       - GOLDEN_MACAROON=${GOLDEN_MACAROON}
