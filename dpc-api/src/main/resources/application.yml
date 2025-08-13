@@ -1,23 +1,46 @@
 database:
-  driverClass: org.postgresql.Driver
-  url: ${DATABASE_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}
+  driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
+  url: ${ATTRIBUTION_DB_URL:-"jdbc:postgresql://db:5432/dpc_attribution"}
   user: "${ATTRIBUTION_DB_USER:-postgres}"
-  password: "${ATTRIBUTION_DB_PASS:-dpc-safe}"
+  password: "${ATTRIBUTION_DB_PASS:-dpc-safe}"  # Ignored in AWS, needed to run locally
   initialSize: 5
   minSize: 5
   maxSize: 10
   properties:
     charSet: UTF-8
     hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+    wrapperPlugins: iam,failover,efm2
+    iamRegion: us-east-1
+    sslmode: ${DB_SSL_MODE:-"prefer"}
+    sslrootcert: /awscert/global-bundle.pem
 
 queuedb:
-  driverClass: org.postgresql.Driver
+  driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
   url: ${QUEUE_DB_URL:-"jdbc:postgresql://db:5432/dpc_queue"}
   user: "${QUEUE_DB_USER:-postgres}"
-  password: "${QUEUE_DB_PASS:-dpc-safe}"
+  password: "${QUEUE_DB_PASS:-dpc-safe}"  # Ignored in AWS, needed to run locally
   initialSize: 5
   minSize: 5
   maxSize: 10
+  properties:
+    wrapperPlugins: iam,failover,efm2
+    iamRegion: us-east-1
+    sslmode: ${DB_SSL_MODE:-"prefer"}
+    sslrootcert: /awscert/global-bundle.pem
+
+authdb:
+  driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
+  url: ${AUTH_DB_URL:-"jdbc:postgresql://db:5432/dpc_auth"}
+  user: "${AUTH_DB_USER:-postgres}"
+  password: "${AUTH_DB_PASS:-dpc-safe}"
+  initialSize: 5
+  minSize: 5
+  maxSize: 10
+  properties:
+    wrapperPlugins: iam,failover,efm2
+    iamRegion: us-east-1
+    sslmode: ${DB_SSL_MODE:-"prefer"}
+    sslrootcert: /awscert/global-bundle.pem
 
 server:
   enableThreadNameFilter: false
@@ -80,15 +103,6 @@ jobTimeoutInSeconds: ${JOB_TIMEOUT_IN_SECONDS:-60}
 
 # The root URL at which the application is accessible, if necessary, include the port, do not include the application version
 publicURL: ${PUBLIC_URL:-"http://localhost:3002"}
-
-authdb:
-  driverClass: org.postgresql.Driver
-  url: ${AUTH_DB_URL:-"jdbc:postgresql://db:5432/dpc_auth"}
-  user: "${AUTH_DB_USER:-postgres}"
-  password: "${AUTH_DB_PASS:-dpc-safe}"
-  initialSize: 5
-  minSize: 5
-  maxSize: 10
 
 lookBackExemptOrgs: ${LOOK_BACK_EXEMPT_ORGS:-["0ab352f1-2bf1-44c4-aa7a-3004a1ffef12","69c0d4d4-9c07-4fa8-9053-e10fb1608b48","c7f5247b-4c41-478c-84eb-a6e801bdb145"]}
 
