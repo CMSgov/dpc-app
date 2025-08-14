@@ -20,7 +20,7 @@ RSpec.describe 'Application', type: :request do
 
   it 'logs user_id to new relic' do
     expect(NewRelic::Agent).to receive(:add_custom_attributes).with({ user_id: user.id })
-    get '/organizations'
+    get '/test'
   end
 
   describe 'timed out' do
