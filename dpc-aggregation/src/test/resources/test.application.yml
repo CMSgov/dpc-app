@@ -90,8 +90,6 @@ consentClient:
     socketTimeout: 20000 # ms
     requestTimeout: 20000 # ms
 
-consentHealthCheckURL: ${CONSENT_HEALTHCHECK_URL:-"http://localhost:9904/healthcheck"}
-
 awsQueue:
   emitAwsMetrics: ${EMIT_AWS_METRICS:-false}
   queueSizeMetricName: ${QUEUE_SIZE_METRIC_NAME:-"JobQueueBatchCount"}
