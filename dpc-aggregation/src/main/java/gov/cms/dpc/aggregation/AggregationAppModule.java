@@ -13,6 +13,7 @@ import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import jakarta.inject.Named;
@@ -33,6 +34,8 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         binder.bind(AggregationManager.class).asEagerSingleton();
         binder.bind(JobBatchProcessor.class);
         binder.bind(AggregationEngineHealthCheck.class);
+
+        binder.bind(ConsentDAO.class);
 
         // Healthchecks
         // Additional health-checks can be added here
@@ -119,6 +122,12 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Provides
     @Named("fhirReferenceURL")
     public String provideFhirReferenceURL() { return configuration().getFhirReferenceURL(); }
+
+    @Provides
+    @Named("consentDAO")
+    public ConsentDAO provideConsentDAO(DPCConsentManagedSessionFactory sessionFactory) {
+        return new ConsentDAO(sessionFactory);
+    }
 
     @Provides
     ConsentService provideConsentService(@Named("consentDAO") ConsentDAO consentDAO, @Named("fhirReferenceURL") String fhirReferenceURL) {
