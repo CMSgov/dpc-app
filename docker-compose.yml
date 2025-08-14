@@ -38,8 +38,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      consent:
-        condition: service_healthy
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-aggregation:/jacoco-report

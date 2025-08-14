@@ -14,7 +14,6 @@ import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.DataSourceFactory;
-import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 
@@ -62,13 +61,34 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
-            public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration dpcAggregationConfiguration) {
-                return dpcAggregationConfiguration.getQueueDatabase();
+            public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration configuration) {
+                return configuration.getQueueDatabase();
             }
 
             @Override
             public String getMigrationsFileName() {
                 return "migrations/queue.migrations.xml";
+            }
+
+            @Override
+            public String name() {
+                return "queuedb";
+            }
+        });
+        bootstrap.addBundle(new MigrationsBundle<>() {
+            @Override
+            public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration configuration) {
+                return configuration.getConsentDatabase();
+            }
+
+            @Override
+            public String getMigrationsFileName() {
+                return "migrations/consent.migrations.xml";
+            }
+
+            @Override
+            public String name() {
+                return "consentdb";
             }
         });
     }
@@ -76,8 +96,5 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
     @Override
     public void run(DPCAggregationConfiguration configuration, Environment environment) {
         EnvironmentParser.getEnvironment("Aggregation");
-
-        // Http healthchecks on dependent services
-        environment.healthChecks().register("dpc-consent", new HttpHealthCheck(configuration.getConsentHealthCheckURL()));
     }
 }
