@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
+import gov.cms.dpc.common.hibernate.consent.IDPCConsentDatabase;
 import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
-import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import gov.cms.dpc.queue.config.DPCQueueConfig;
 import io.dropwizard.core.Configuration;
@@ -20,7 +20,7 @@ import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.List;
 
-public class DPCAggregationConfiguration extends Configuration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig {
+public class DPCAggregationConfiguration extends Configuration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCQueueDatabase, IDPCConsentDatabase, DPCQueueConfig {
 
     @Valid
     @NotNull
@@ -42,18 +42,9 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     @JsonProperty("bbclient")
     private final BBClientConfiguration clientConfiguration = new BBClientConfiguration();
 
-    @Valid
-    @NotNull
-    @JsonProperty("consentClient")
-    private final FHIRClientConfiguration consentClientConfiguration = new FHIRClientConfiguration();
-
     @NotNull
     @JsonProperty("awsQueue")
     private final DPCAwsQueueConfiguration dpcAwsQueueConfiguration = new DPCAwsQueueConfiguration();
-
-    @NotEmpty
-    @NotNull
-    private String consentHealthCheckURL;
 
     // The path to the folder that will contain the output files
     @NotEmpty
@@ -102,6 +93,7 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
         return queueDatabase;
     }
 
+    @Override
     public DataSourceFactory getConsentDatabase() {
         return consentDatabase;
     }
@@ -132,8 +124,6 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
         return this.clientConfiguration;
     }
 
-    public FHIRClientConfiguration getConsentClientConfiguration() { return this.consentClientConfiguration; }
-
     @Override
     public int getPollingFrequency() {
         return pollingFrequency;
@@ -154,8 +144,6 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     public List<String> getLookBackExemptOrgs() {
         return lookBackExemptOrgs;
     }
-
-    public String getConsentHealthCheckURL() { return consentHealthCheckURL; }
 
     @SuppressWarnings("unused")
     public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {

@@ -121,7 +121,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     public String provideFhirReferenceURL() { return configuration().getFhirReferenceURL(); }
 
     @Provides
-    ConsentService provideConsentService(ConsentDAO consentDAO) {
-        return new ConsentServiceImpl(consentDAO, provideFhirReferenceURL());
+    ConsentService provideConsentService(@Named("consentDAO") ConsentDAO consentDAO, @Named("fhirReferenceURL") String fhirReferenceURL) {
+        return new ConsentServiceImpl(consentDAO, fhirReferenceURL);
     }
 }
