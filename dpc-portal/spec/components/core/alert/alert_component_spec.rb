@@ -77,7 +77,7 @@ RSpec.describe Core::Alert::Component, type: :component do
     end
 
     context 'when the status is :notice' do
-      subject(:component) { described_class.new status: :notice }
+      subject(:component) { described_class.new status: 'notice' }
 
       it 'is an info alert' do
         render_component
@@ -86,7 +86,7 @@ RSpec.describe Core::Alert::Component, type: :component do
     end
 
     context 'when the status is :alert' do
-      subject(:component) { described_class.new status: :alert }
+      subject(:component) { described_class.new status: 'alert' }
 
       it 'is an error alert' do
         render_component

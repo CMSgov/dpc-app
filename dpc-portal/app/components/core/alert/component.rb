@@ -10,9 +10,9 @@ module Core
         super
 
         @status = case status
-                  when '', :notice
+                  when '', 'notice'
                     :info
-                  when :alert
+                  when 'alert'
                     :error
                   else
                     status
