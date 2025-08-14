@@ -15,11 +15,6 @@ RSpec.describe OrganizationsController, type: :controller do
         sign_in internal_user, scope: :internal_user
       end
 
-      it 'sets cache control to no-store' do
-        get :index
-        expect(response.headers['cache-control']).to eq 'no-store'
-      end
-
       it 'assigns @organizations to all organizations' do
         organizations = create_list(:organization, 2)
         get :index

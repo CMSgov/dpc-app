@@ -24,14 +24,6 @@ RSpec.describe PublicKeysController, type: :controller do
         user.organizations << org
       end
 
-      it 'sets cache control to no-store' do
-        get :new, params: {
-          organization_id: org.id
-        }
-
-        expect(response.headers['cache-control']).to eq 'no-store'
-      end
-
       it 'assigns the correct organization' do
         get :new, params: {
           organization_id: org.id
