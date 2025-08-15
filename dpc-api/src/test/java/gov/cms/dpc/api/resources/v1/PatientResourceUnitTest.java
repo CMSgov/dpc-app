@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -29,18 +30,18 @@ import org.mockito.Mock;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.createProvenance;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-class PatientResourceUnitTest {
 
+class PatientResourceUnitTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     IGenericClient attributionClient;
 
@@ -53,7 +54,7 @@ class PatientResourceUnitTest {
     @Mock
     BlueButtonClient bfdClient;
 
-    String baseUrl = "";
+    String baseUrl = "http://localhost:3002/api/v1";
     PatientResource patientResource;
 
     @BeforeEach
@@ -88,7 +89,7 @@ class PatientResourceUnitTest {
         when(mockQuery.where(any(ICriterion.class))).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(bundle);
 
-        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, patientMbi);
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, patientMbi, null, null);
         assertEquals(bundle, actualResponse);
     }
 
@@ -115,8 +116,132 @@ class PatientResourceUnitTest {
         when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
         when(mockQuery.execute()).thenReturn(bundle);
 
-        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null);
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null, null, null);
         assertEquals(bundle, actualResponse);
+    }
+
+    @Test
+    void testCountInvalid() {
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        assertThrows(WebApplicationException.class, () -> patientResource.patientSearch(organizationPrincipal, null, -4, null));
+    }
+
+    @Test
+    void testPageInvalid() {
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        assertThrows(WebApplicationException.class, () -> patientResource.patientSearch(organizationPrincipal, null, null, -5));
+    }
+
+    @Test
+    void testCountEqualsZero() {
+        int largePatientNum = 600;
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        Bundle heftyPatientBundle = createPatientBundle(largePatientNum, organization);
+
+        Bundle summaryBundle = new Bundle();
+        summaryBundle.setTotal(largePatientNum);
+        summaryBundle.setType(Bundle.BundleType.SEARCHSET);
+        summaryBundle.setEntry(new ArrayList<>());
+
+        @SuppressWarnings("unchecked")
+        IQuery<IBaseBundle> queryExec = mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        @SuppressWarnings("unchecked")
+        IQuery<Bundle> mockQuery = mock(IQuery.class);
+        when(attributionClient
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+        ).thenReturn(queryExec);
+        when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(mockQuery.execute()).thenReturn(heftyPatientBundle);
+        when(mockQuery.summaryMode(SummaryEnum.COUNT)).thenReturn(mockQuery);
+        when(mockQuery.count(0)).thenReturn(mockQuery);
+        when(mockQuery.execute()).thenReturn(summaryBundle);
+
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null, 0, 1);
+
+        assertEquals(largePatientNum, actualResponse.getTotal());
+        assertTrue(actualResponse.getEntry().isEmpty());
+    }
+
+    @Test
+    void testPagingLinksHaveAbsoluteUrls() {
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+
+        String baseURL = "http://localhost:3002/api";
+        String selfURL = "/v1/Patient?_count=10&_offset=10";
+        String prevURL = "/v1/Patient?_count=10&_offset=0";
+        String nextURL = "/v1/Patient?_count=10&_offset=20";
+        String firstURL = "/v1/Patient?_count=10&_offset=0";
+
+        // Construct a Bundle with relative links
+        Bundle mockBundleForPaginationLinks = createPatientBundle(100, organization);
+        mockBundleForPaginationLinks.addLink().setRelation(IBaseBundle.LINK_SELF).setUrl(selfURL);
+        mockBundleForPaginationLinks.addLink().setRelation(IBaseBundle.LINK_PREV).setUrl(prevURL);
+        mockBundleForPaginationLinks.addLink().setRelation(IBaseBundle.LINK_NEXT).setUrl(nextURL);
+        mockBundleForPaginationLinks.addLink().setRelation("first").setUrl(firstURL);
+        @SuppressWarnings("unchecked")
+        IQuery<IBaseBundle> queryExec = mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        @SuppressWarnings("unchecked")
+        IQuery<Bundle> mockQuery = mock(IQuery.class);
+        when(attributionClient
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+        ).thenReturn(queryExec);
+        when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(mockQuery.count(10)).thenReturn(mockQuery);
+        when(mockQuery.offset(10)).thenReturn(mockQuery);
+        when(mockQuery.execute()).thenReturn(mockBundleForPaginationLinks);
+
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null, 10, 10);
+
+        // Base URL should be prepended, and /v1 stripped out of link URLs
+        List<Bundle.BundleLinkComponent> links = actualResponse.getLink();
+        assertEquals(4, links.size());
+
+        assertEquals(baseURL + selfURL, actualResponse.getLink(IBaseBundle.LINK_SELF).getUrl());
+        assertEquals(baseURL + prevURL, actualResponse.getLink(IBaseBundle.LINK_PREV).getUrl());
+        assertEquals(baseURL + nextURL, actualResponse.getLink(IBaseBundle.LINK_NEXT).getUrl());
+        assertEquals(baseURL + firstURL, actualResponse.getLink("first").getUrl());
+    }
+
+    @Test
+    void testPatientSearchLargerRoster() {
+        int largePatientNum = 400;
+        UUID orgId = UUID.randomUUID();
+        Organization organization = new Organization();
+        organization.setId(orgId.toString());
+        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
+        Bundle largePatientBundle = createPatientBundle(largePatientNum, organization);
+
+        @SuppressWarnings("unchecked")
+        IQuery<IBaseBundle> queryExec = mock(IQuery.class, Answers.RETURNS_DEEP_STUBS);
+        @SuppressWarnings("unchecked")
+        IQuery<Bundle> mockQuery = mock(IQuery.class);
+        when(attributionClient
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+        ).thenReturn(queryExec);
+        when(queryExec.where(any(ICriterion.class)).returnBundle(Bundle.class)).thenReturn(mockQuery);
+        when(mockQuery.execute()).thenReturn(largePatientBundle);
+
+        Bundle actualResponse = patientResource.patientSearch(organizationPrincipal, null, null, null);
+        assertEquals(largePatientBundle, actualResponse);
+        assertEquals(largePatientBundle.getEntry().size(), largePatientNum);
     }
 
     @Test
@@ -517,5 +642,16 @@ class PatientResourceUnitTest {
         IBaseOperationOutcome actualResponse = patientResource.validatePatient(organizationPrincipal, params);
 
         assertNotNull(actualResponse);
+    }
+
+    private Bundle createPatientBundle(int numPatients, Organization organization) {
+        Bundle bundle = new Bundle();
+        for (int i = 0; i < numPatients; i++) {
+            Patient patient = new Patient();
+            patient.setId("Patient/patient-" + i);
+            patient.setManagingOrganizationTarget(organization);
+            bundle.addEntry().setResource(patient);
+        }
+        return bundle;
     }
 }
