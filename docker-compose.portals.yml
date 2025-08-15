@@ -61,6 +61,7 @@ services:
   web_sidekiq:
     volumes:
       - ./tmp/letter_opener/web:/dpc-web/tmp/letter_opener
+      - "./dpc-web/coverage:/dpc-web/coverage"
     build:
       context: .
       dockerfile: dpc-web/Dockerfile
@@ -133,6 +134,7 @@ services:
   admin_sidekiq:
     volumes:
       - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
+      - "./dpc-admin/coverage:/dpc-admin/coverage"
     build:
       context: .
       dockerfile: dpc-admin/Dockerfile
@@ -230,6 +232,7 @@ services:
   portal_sidekiq:
     volumes:
       - ./tmp/letter_opener/portal:/dpc-portal/tmp/letter_opener
+      - "./dpc-portal/coverage:/dpc-portal/coverage"
       - "./dpc-portal/app:/dpc-portal/app"
     build:
       context: .
