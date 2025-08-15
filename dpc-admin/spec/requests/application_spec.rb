@@ -12,6 +12,7 @@ RSpec.describe 'Application', type: :request do
 
   it 'sets cache control to no-store' do
     get '/test'
+    expect(response.body).to eq('foo')
     expect(response.headers['cache-control']).to eq 'no-store'
   end
 end

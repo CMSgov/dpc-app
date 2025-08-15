@@ -15,12 +15,14 @@ RSpec.describe 'Application', type: :request do
 
   it 'sets cache control to no-store' do
     get '/test'
+    expect(response.body).to eq('foo')
     expect(response.headers['cache-control']).to eq 'no-store'
   end
 
   it 'logs user_id to new relic' do
     expect(NewRelic::Agent).to receive(:add_custom_attributes).with({ user_id: user.id })
     get '/test'
+    expect(response.body).to eq('foo')
   end
 
   describe 'timed out' do
