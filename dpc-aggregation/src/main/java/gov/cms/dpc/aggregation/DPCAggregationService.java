@@ -4,6 +4,8 @@ import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
@@ -19,6 +21,7 @@ import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 public class DPCAggregationService extends Application<DPCAggregationConfiguration> {
 
+    private final DPCConsentHibernateBundle<DPCAggregationConfiguration> consentHibernateBundle = new DPCConsentHibernateBundle<>();
     private final DPCQueueHibernateBundle<DPCAggregationConfiguration> queueHibernateBundle = new DPCQueueHibernateBundle<>();
     private final DPCHibernateBundle<DPCAggregationConfiguration> hibernateBundle = new DPCHibernateBundle<>();
 
@@ -47,6 +50,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(new DPCQueueHibernateModule<>(queueHibernateBundle),
                         new AggregationAppModule(),
+                        new DPCConsentHibernateModule<>(consentHibernateBundle),
                         new DPCHibernateModule<>(hibernateBundle),
                         new JobQueueModule<DPCAggregationConfiguration>(),
                         new BlueButtonClientModule<DPCAggregationConfiguration>())
@@ -55,6 +59,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         // The Hibernate bundle must be initialized before Guice.
         // The Hibernate Guice module requires an initialized SessionFactory,
         // so Dropwizard needs to initialize the HibernateBundle first to create the SessionFactory.
+        bootstrap.addBundle(consentHibernateBundle);
         bootstrap.addBundle(queueHibernateBundle);
         bootstrap.addBundle(hibernateBundle);
 
