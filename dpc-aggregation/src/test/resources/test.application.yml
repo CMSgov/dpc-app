@@ -113,3 +113,6 @@ lookBackExemptOrgs: ${LOOK_BACK_EXEMPT_ORGS:-["0ab352f1-2bf1-44c4-aa7a-3004a1ffe
 
 # The date to start looking back from
 lookBackDate: ${LOOK_BACK_DATE:-2000-01}
+
+# base URL for FHIR references to DPC resources (Patients, Organizations, etc) embedded in a Consent resource
+fhirReferenceURL: "http://localhost:3200/api/v1"
