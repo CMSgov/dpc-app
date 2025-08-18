@@ -20,6 +20,15 @@ queuedb:
   minSize: 5
   maxSize: 10
 
+consentdb:
+  driverClass: org.postgresql.Driver
+  url: ${CONSENT_DB_URL:-"jdbc:postgresql://localhost:5432/dpc_consent"}
+  user: "${CONSENT_DB_USER:-postgres}"
+  password: "${CONSENT_DB_PASS:-dpc-safe}"
+  initialSize: 5
+  minSize: 5
+  maxSize: 10
+
 server:
   enableThreadNameFilter: false
   registerDefaultExceptionMappers: false
@@ -82,13 +91,6 @@ bbclient:
   resourcesCount: 100 # Max number of resource that a request to BB will return before using another request
 
   useBfdMock: ${USE_BFD_MOCK:-true}
-
-consentClient:
-  serverBaseUrl: ${CONSENT_SERVICE_URL:-"http://consent:3600/v1/"}
-  timeouts:
-    connectionTimeout: 20000 # ms
-    socketTimeout: 20000 # ms
-    requestTimeout: 20000 # ms
 
 awsQueue:
   emitAwsMetrics: ${EMIT_AWS_METRICS:-false}
