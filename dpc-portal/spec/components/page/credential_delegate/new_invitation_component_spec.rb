@@ -47,7 +47,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         first_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_given_name">First or given name</label>
-            <p class="usa-hint" id="invited_given_name-hint">For example, Jose, Darren, or Mai</p>
+            <p class="usa-hint">For example, Jose, Darren, or Mai</p>
             <input type="text" name="invited_given_name" id="invited_given_name" maxlength="25" required="required" class="usa-input" />
           </div>
         HTML
@@ -58,7 +58,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         invited_family_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_family_name">Last or family name</label>
-            <p class="usa-hint" id="invited_family_name-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
+            <p class="usa-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
             <input type="text" name="invited_family_name" id="invited_family_name" maxlength="25" required="required" class="usa-input" />
           </div>
         HTML
@@ -79,7 +79,6 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         email_confirmation = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_email_confirmation">Confirm email</label>
-            <p class="usa-hint" id="invited_email_confirmation-hint">Must match email</p>
             <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" required="required" class="usa-input" />
           </div>
         HTML
@@ -136,7 +135,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         first_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_given_name">First or given name</label>
-            <p class="usa-hint" id="invited_given_name-hint">For example, Jose, Darren, or Mai</p>
+            <p class="usa-hint">For example, Jose, Darren, or Mai</p>
             <p style="color: #b50909;">can't be blank</p>
             <input type="text" name="invited_given_name" id="invited_given_name" maxlength="25" required="required" class="usa-input usa-input--error" />
           </div>
@@ -148,7 +147,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         invited_family_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_family_name">Last or family name</label>
-            <p class="usa-hint" id="invited_family_name-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
+            <p class="usa-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
             <p style="color: #b50909;">can't be blank</p>
             <input type="text" name="invited_family_name" id="invited_family_name" maxlength="25" required="required" class="usa-input usa-input--error" />
           </div>
@@ -171,7 +170,6 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         email_confirmation = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_email_confirmation">Confirm email</label>
-            <p class="usa-hint" id="invited_email_confirmation-hint">Must match email</p>
             <p style="color: #b50909;">can't be blank</p>
             <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" required="required" class="usa-input usa-input--error" />
           </div>
@@ -191,7 +189,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         first_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_given_name">First or given name</label>
-            <p class="usa-hint" id="invited_given_name-hint">For example, Jose, Darren, or Mai</p>
+            <p class="usa-hint">For example, Jose, Darren, or Mai</p>
             <input type="text" name="invited_given_name" id="invited_given_name" value="Bob" maxlength="25" required="required" class="usa-input" />
           </div>
         HTML
@@ -202,7 +200,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         invited_family_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_family_name">Last or family name</label>
-            <p class="usa-hint" id="invited_family_name-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
+            <p class="usa-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
             <input type="text" name="invited_family_name" id="invited_family_name" value="Hodges" maxlength="25" required="required" class="usa-input" />
           </div>
         HTML
@@ -223,7 +221,6 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         email_confirmation = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_email_confirmation">Confirm email</label>
-            <p class="usa-hint" id="invited_email_confirmation-hint">Must match email</p>
             <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" value="bob@example.com" required="required" class="usa-input" />
           </div>
         HTML

@@ -38,19 +38,14 @@
           input_options: { required: :required })) %>
       <%= render(Core::Form::TextInputComponent.new(label: 'Confirm email',
           attribute: :invited_email_confirmation,
-	  hint: 'Must match email',
           error_msg: cd_invite.errors[:invited_email_confirmation]&.first,
           default: cd_invite.invited_email_confirmation,
           input_options: { required: :required })) %>
       <%= link_to 'Go Back', organization_path(organization.path_id), class: ['usa-button', 'usa-button--outline'] %>
       <%= submit_tag('Send invite', class: "usa-button") %>
     <% end %>
-    <a id="modal-opener" href="#verify-modal" aria-controls="verify-modal" class="display-none" data-open-modal>Send invite</a><button
-    id="my-button"
-    class="display-none"
-    aria-controls="example-modal-1"
-    data-open-modal
-    >Open default modal</button>    <%= render(Core::Modal::ModalComponent.new(
+    <a id="modal-opener" href="#verify-modal" aria-controls="verify-modal" class="display-none" data-open-modal>Send invite</a>
+    <%= render(Core::Modal::ModalComponent.new(
         'Acknowledgement',
         "<p>By assigning this user as a delegate, you are providing them with access to private health information. This means you assume responsibility for their compliance with the Health Insurance Portability and Accountability Act (HIPAA).</p>
         <p>Do you acknowledge your responsibility for your delegate's compliance with HIPAA regulations?</p>
@@ -62,20 +57,24 @@
 </div>
 
 <%= javascript_tag do %>
-  document.getElementById('cd-form').addEventListener('submit', (event) => {
-if (event.submitter == document.getElementById('modal-submitter')) {
-return true;
-}
-event.preventDefault()
-const confirmField = document.getElementById("invited_email_confirmation");
-if (confirmField.value == document.getElementById("invited_email").value) {
-    const modalOpener = document.getElementById("modal-opener");
-    modalOpener.click();
-} else {
-const hint = document.getElementById("invited_email_confirmation-hint");
-hint.style.color = "#b50909";
-hint.style.fontWeight = "bold";
-confirmField.focus();
-confirmField.classList.add("usa-input--error");
-}})
+document.getElementById('cd-form').addEventListener('submit', (event) => {
+  if (event.submitter == document.getElementById('modal-submitter')) {
+    return true;
+  }
+  event.preventDefault()
+  const confirmField = document.getElementById("invited_email_confirmation");
+  if (confirmField.value == document.getElementById("invited_email").value) {
+    document.getElementById("modal-opener").click();
+  } else {
+    var errorMsg = document.getElementById("confirmErrorMsg");
+    if (!errorMsg) {
+      errorMsg = document.createElement("p");
+      errorMsg.classList.add("usa-error-message");
+      errorMsg.textContent = "doesn't match invited email";
+      errorMsg.id = "confirmErrorMsg";
+      confirmField.insertAdjacentElement("beforebegin", errorMsg);
+    }
+    confirmField.focus();
+    confirmField.classList.add("usa-input--error");
+  }})
 <% end %>

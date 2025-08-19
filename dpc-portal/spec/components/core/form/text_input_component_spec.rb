@@ -31,7 +31,7 @@ RSpec.describe Core::Form::TextInputComponent, type: :component do
         <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="attr">Some Label</label>
-            <p class="usa-hint" id="attr-hint">Hint</p>
+            <p class="usa-hint">Hint</p>
             <input type="text" name="attr" id="attr" value="" class="usa-input" />
            </div>
         HTML
