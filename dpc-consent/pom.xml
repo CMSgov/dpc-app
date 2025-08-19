@@ -129,6 +129,10 @@
             <version>1.6.16</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.jdbc</groupId>
+            <artifactId>aws-advanced-jdbc-wrapper</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
