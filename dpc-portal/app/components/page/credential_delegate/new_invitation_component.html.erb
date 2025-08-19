@@ -24,32 +24,58 @@
           hint: 'For example, Jose, Darren, or Mai',
           default: cd_invite.invited_given_name,
           error_msg: cd_invite.errors[:invited_given_name]&.first,
-          input_options: { maxlength: 25 })) %>
+          input_options: { maxlength: 25, required: :required })) %>
       <%= render(Core::Form::TextInputComponent.new(label: 'Last or family name',
           attribute: :invited_family_name,
           hint: 'For example, Martinez Gonzalez, Gu, or Smith',
           default: cd_invite.invited_family_name,
           error_msg: cd_invite.errors[:invited_family_name]&.first,
-          input_options: { maxlength: 25 })) %>
-      <%= render(Core::Form::TextInputComponent.new(label: 'Email',
+          input_options: { maxlength: 25, required: :required })) %>
+      <%= render(Core::Form::EmailInputComponent.new(label: 'Email',
           attribute: :invited_email,
           error_msg: cd_invite.errors[:invited_email]&.first,
-          default: cd_invite.invited_email)) %>
+          default: cd_invite.invited_email,
+          input_options: { required: :required })) %>
       <%= render(Core::Form::TextInputComponent.new(label: 'Confirm email',
           attribute: :invited_email_confirmation,
+	  hint: 'Must match email',
           error_msg: cd_invite.errors[:invited_email_confirmation]&.first,
-          default: cd_invite.invited_email_confirmation)) %>
+          default: cd_invite.invited_email_confirmation,
+          input_options: { required: :required })) %>
+      <%= link_to 'Go Back', organization_path(organization.path_id), class: ['usa-button', 'usa-button--outline'] %>
+      <%= submit_tag('Send invite', class: "usa-button") %>
     <% end %>
-    <%= link_to 'Go Back', organization_path(organization.path_id), class: ['usa-button', 'usa-button--outline'] %>
-    <a href="#verify-modal" aria-controls="verify-modal" class="usa-button" data-open-modal>Send invite</a>
-    <%= render(Core::Modal::ModalComponent.new(
+    <a id="modal-opener" href="#verify-modal" aria-controls="verify-modal" class="display-none" data-open-modal>Send invite</a><button
+    id="my-button"
+    class="display-none"
+    aria-controls="example-modal-1"
+    data-open-modal
+    >Open default modal</button>    <%= render(Core::Modal::ModalComponent.new(
         'Acknowledgement',
         "<p>By assigning this user as a delegate, you are providing them with access to private health information. This means you assume responsibility for their compliance with the Health Insurance Portability and Accountability Act (HIPAA).</p>
         <p>Do you acknowledge your responsibility for your delegate's compliance with HIPAA regulations?</p>
         <p>Upon your acknowledgement they will receive an invitation to sign up for access to the DPC Portal. This invitation will expire in 48 hours.</p>",
-        submit_tag("Yes, I acknowledge", class: "usa-button", form: "cd-form"),
+        submit_tag("Yes, I acknowledge", class: "usa-button", form: "cd-form", id: 'modal-submitter'),
         'Cancel',
         'verify-modal')) %>
   </div>
 </div>
 
+<%= javascript_tag do %>
+  document.getElementById('cd-form').addEventListener('submit', (event) => {
+if (event.submitter == document.getElementById('modal-submitter')) {
+return true;
+}
+event.preventDefault()
+const confirmField = document.getElementById("invited_email_confirmation");
+if (confirmField.value == document.getElementById("invited_email").value) {
+    const modalOpener = document.getElementById("modal-opener");
+    modalOpener.click();
+} else {
+const hint = document.getElementById("invited_email_confirmation-hint");
+hint.style.color = "#b50909";
+hint.style.fontWeight = "bold";
+confirmField.focus();
+confirmField.classList.add("usa-input--error");
+}})
+<% end %>

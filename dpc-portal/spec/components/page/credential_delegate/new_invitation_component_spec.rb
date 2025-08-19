@@ -47,8 +47,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         first_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_given_name">First or given name</label>
-            <p class="usa-hint">For example, Jose, Darren, or Mai</p>
-            <input type="text" name="invited_given_name" id="invited_given_name" maxlength="25" class="usa-input" />
+            <p class="usa-hint" id="invited_given_name-hint">For example, Jose, Darren, or Mai</p>
+            <input type="text" name="invited_given_name" id="invited_given_name" maxlength="25" required="required" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(first_name))
@@ -58,8 +58,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         invited_family_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_family_name">Last or family name</label>
-            <p class="usa-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
-            <input type="text" name="invited_family_name" id="invited_family_name" maxlength="25" class="usa-input" />
+            <p class="usa-hint" id="invited_family_name-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
+            <input type="text" name="invited_family_name" id="invited_family_name" maxlength="25" required="required" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(invited_family_name))
@@ -69,7 +69,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         email = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_email">Email</label>
-            <input type="text" name="invited_email" id="invited_email" class="usa-input" />
+            <input type="email" name="invited_email" id="invited_email" required="required" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(email))
@@ -79,15 +79,16 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         email_confirmation = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_email_confirmation">Confirm email</label>
-            <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" class="usa-input" />
+            <p class="usa-hint" id="invited_email_confirmation-hint">Must match email</p>
+            <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" required="required" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(email_confirmation))
       end
 
       it 'should have modal prompt' do
-        modal_prompt = ['<a href="#verify-modal" aria-controls="verify-modal" ',
-                        'class="usa-button" data-open-modal>',
+        modal_prompt = ['<a id="modal-opener" href="#verify-modal" aria-controls="verify-modal" ',
+                        'class="display-none" data-open-modal>',
                         'Send invite',
                         '</a>'].join
         is_expected.to include(modal_prompt)
@@ -109,7 +110,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
                   <div class="usa-modal__footer">
                       <ul class="usa-button-group">
                           <li class="usa-button-group__item">
-                              <input type="submit" name="commit" value="Yes, I acknowledge" class="usa-button" form="cd-form" data-disable-with="Yes, I acknowledge" />
+                              <input type="submit" name="commit" value="Yes, I acknowledge" class="usa-button" form="cd-form" id="modal-submitter" data-disable-with="Yes, I acknowledge" />
                           </li>
                           <li class="usa-button-group__item">
                               <button type="button" class="usa-button usa-button--unstyled padding-105 text-center" data-close-modal>Cancel</button>
@@ -135,9 +136,9 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         first_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_given_name">First or given name</label>
-            <p class="usa-hint">For example, Jose, Darren, or Mai</p>
+            <p class="usa-hint" id="invited_given_name-hint">For example, Jose, Darren, or Mai</p>
             <p style="color: #b50909;">can't be blank</p>
-            <input type="text" name="invited_given_name" id="invited_given_name" maxlength="25" class="usa-input usa-input--error" />
+            <input type="text" name="invited_given_name" id="invited_given_name" maxlength="25" required="required" class="usa-input usa-input--error" />
           </div>
         HTML
         is_expected.to include(normalize_space(first_name))
@@ -147,9 +148,9 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         invited_family_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_family_name">Last or family name</label>
-            <p class="usa-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
+            <p class="usa-hint" id="invited_family_name-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
             <p style="color: #b50909;">can't be blank</p>
-            <input type="text" name="invited_family_name" id="invited_family_name" maxlength="25" class="usa-input usa-input--error" />
+            <input type="text" name="invited_family_name" id="invited_family_name" maxlength="25" required="required" class="usa-input usa-input--error" />
           </div>
         HTML
         is_expected.to include(normalize_space(invited_family_name))
@@ -160,7 +161,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_email">Email</label>
             <p style="color: #b50909;">can't be blank</p>
-            <input type="text" name="invited_email" id="invited_email" class="usa-input usa-input--error" />
+            <input type="email" name="invited_email" id="invited_email" required="required" class="usa-input usa-input--error" />
           </div>
         HTML
         is_expected.to include(normalize_space(email))
@@ -170,8 +171,9 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         email_confirmation = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_email_confirmation">Confirm email</label>
+            <p class="usa-hint" id="invited_email_confirmation-hint">Must match email</p>
             <p style="color: #b50909;">can't be blank</p>
-            <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" class="usa-input usa-input--error" />
+            <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" required="required" class="usa-input usa-input--error" />
           </div>
         HTML
         is_expected.to include(normalize_space(email_confirmation))
@@ -189,8 +191,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         first_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_given_name">First or given name</label>
-            <p class="usa-hint">For example, Jose, Darren, or Mai</p>
-            <input type="text" name="invited_given_name" id="invited_given_name" value="Bob" maxlength="25" class="usa-input" />
+            <p class="usa-hint" id="invited_given_name-hint">For example, Jose, Darren, or Mai</p>
+            <input type="text" name="invited_given_name" id="invited_given_name" value="Bob" maxlength="25" required="required" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(first_name))
@@ -200,8 +202,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         invited_family_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_family_name">Last or family name</label>
-            <p class="usa-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
-            <input type="text" name="invited_family_name" id="invited_family_name" value="Hodges" maxlength="25" class="usa-input" />
+            <p class="usa-hint" id="invited_family_name-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
+            <input type="text" name="invited_family_name" id="invited_family_name" value="Hodges" maxlength="25" required="required" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(invited_family_name))
@@ -211,7 +213,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         email = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_email">Email</label>
-            <input type="text" name="invited_email" id="invited_email" value="bob@example.com" class="usa-input" />
+            <input type="email" name="invited_email" id="invited_email" value="bob@example.com" required="required" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(email))
@@ -221,7 +223,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         email_confirmation = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_email_confirmation">Confirm email</label>
-            <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" value="bob@example.com" class="usa-input" />
+            <p class="usa-hint" id="invited_email_confirmation-hint">Must match email</p>
+            <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" value="bob@example.com" required="required" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(email_confirmation))

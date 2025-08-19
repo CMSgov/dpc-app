@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Core::Form::TextInputComponent, type: :component do
+RSpec.describe Core::Form::EmailInputComponent, type: :component do
   describe 'html' do
     subject(:html) do
       render_inline(component)
@@ -14,7 +14,7 @@ RSpec.describe Core::Form::TextInputComponent, type: :component do
       <<~HTML
         <div class="margin-bottom-4">
           <label class="usa-label" for="attr">Some Label</label>
-          <input type="text" name="attr" id="attr" value="" class="usa-input" />
+          <input type="email" name="attr" id="attr" value="" class="usa-input" />
          </div>
       HTML
     end
@@ -31,8 +31,8 @@ RSpec.describe Core::Form::TextInputComponent, type: :component do
         <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="attr">Some Label</label>
-            <p class="usa-hint" id="attr-hint">Hint</p>
-            <input type="text" name="attr" id="attr" value="" class="usa-input" />
+            <p class="usa-hint">Hint</p>
+            <input type="email" name="attr" id="attr" value="" class="usa-input" />
            </div>
         HTML
       end
@@ -46,7 +46,7 @@ RSpec.describe Core::Form::TextInputComponent, type: :component do
         <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="attr">Some Label</label>
-            <input type="text" name="attr" id="attr" value="" class="custom-class usa-input" />
+            <input type="email" name="attr" id="attr" value="" class="custom-class usa-input" />
            </div>
         HTML
       end
@@ -60,7 +60,7 @@ RSpec.describe Core::Form::TextInputComponent, type: :component do
         <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="attr">Some Label</label>
-            <input type="text" name="attr" id="attr" value="" class="usa-input" maxlength="25" />
+            <input type="email" name="attr" id="attr" value="" class="usa-input" maxlength="25" />
            </div>
         HTML
       end
@@ -74,7 +74,7 @@ RSpec.describe Core::Form::TextInputComponent, type: :component do
           <div class="margin-bottom-4">
             <label class="usa-label" for="attr">Some Label</label>
             <p style="color: #b50909;">Bad Input</p>
-            <input type="text" name="attr" id="attr" value="" class="usa-input usa-input--error" />
+            <input type="email" name="attr" id="attr" value="" class="usa-input usa-input--error" />
            </div>
         HTML
       end

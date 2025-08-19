@@ -29,7 +29,7 @@ RSpec.describe Page::PublicKey::NewKeyComponent, type: :component do
                 <form action="/portal/organizations/#{org.path_id}/public_keys" accept-charset="UTF-8" method="post">
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="label">Label</label>
-                    <p class="usa-hint">Choose a descriptive name to make your key easily identifiable to you.</p>
+                    <p class="usa-hint" id="label-hint">Choose a descriptive name to make your key easily identifiable to you.</p>
                     <input type="text" name="label" id="label" maxlength="25" class="usa-input">
                   </div>
                   <div class="margin-bottom-4">
