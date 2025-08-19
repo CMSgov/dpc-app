@@ -12,10 +12,9 @@ export const options = {
       preAllocatedVUs: constants.preAllocatedVUs,
       maxVUs: constants.maxVUs,
       stages: [
-        { target: 50, duration: '30m' },
-        { target: 100, duration: '30m' },
-        { target: 150, duration: '30m' },
-        { target: 250, duration: '30m' },
+        { target: 50, duration: '30m' },    // Average load for 30 minutes
+        { target: 1500, duration: '30m' },  // Ramp up to 30x load over 30 minutes
+        { target: 1500, duration: '60m' }   // Stay at 30x load for 60 minutes
       ],
       exec: "workflow"
     }
