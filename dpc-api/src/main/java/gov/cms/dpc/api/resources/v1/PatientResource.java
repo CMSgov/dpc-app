@@ -366,17 +366,12 @@ public class PatientResource extends AbstractPatientResource {
     }
 
     private void handlePagingLinkPathing(Bundle bundle) {
-        if (bundle == null || bundle.getLink() == null) {
+        if (bundle == null || !bundle.hasLink()) {
             return;
         }
 
         for (Bundle.BundleLinkComponent link : bundle.getLink()) {
-            String relation = link.getRelation();
-            if (relation == null) {
-                continue;
-            }
-
-            if (VALID_BUNDLE_LINK_NAMES.contains(relation)) {
+            if (link.hasRelation() && VALID_BUNDLE_LINK_NAMES.contains(link.getRelation())) {
                 String url = link.getUrl();
                 if (url != null && url.startsWith("/")) {
                     if (url.startsWith("/v1")) url = url.substring(3);

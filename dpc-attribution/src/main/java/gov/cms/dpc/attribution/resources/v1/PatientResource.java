@@ -84,7 +84,7 @@ public class PatientResource extends AbstractPatientResource {
         if (count == null) {
             // Legacy behavior - before _count parameter was introduced
             List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery).getResults();
-            List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).collect(Collectors.toList());
+            List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).toList();
             Bundle legacyBundleWithTotal = this.pagingService.convertToBundle(patients);
             legacyBundleWithTotal.setTotal(patients.size());
             return legacyBundleWithTotal;
@@ -100,7 +100,7 @@ public class PatientResource extends AbstractPatientResource {
         PageResult<PatientEntity> pageResult = this.dao.patientSearch(daoSearchQuery);
         List<PatientEntity> patientEntities = pageResult.getResults();
 
-        List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).collect(Collectors.toList());
+        List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).toList();
         return this.pagingService.handlePagingLinks(patients, count, pageOffset, "/v1/Patient", pageResult.hasNext());
     }
 
