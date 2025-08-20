@@ -79,7 +79,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         email_confirmation = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_email_confirmation">Confirm email</label>
-            <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" required="required" class="usa-input" />
+            <input type="email" name="invited_email_confirmation" id="invited_email_confirmation" required="required" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(email_confirmation))
@@ -171,7 +171,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_email_confirmation">Confirm email</label>
             <p style="color: #b50909;">can't be blank</p>
-            <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" required="required" class="usa-input usa-input--error" />
+            <input type="email" name="invited_email_confirmation" id="invited_email_confirmation" required="required" class="usa-input usa-input--error" />
           </div>
         HTML
         is_expected.to include(normalize_space(email_confirmation))
@@ -221,7 +221,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         email_confirmation = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_email_confirmation">Confirm email</label>
-            <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" value="bob@example.com" required="required" class="usa-input" />
+            <input type="email" name="invited_email_confirmation" id="invited_email_confirmation" value="bob@example.com" required="required" class="usa-input" />
           </div>
         HTML
         is_expected.to include(normalize_space(email_confirmation))

@@ -36,7 +36,7 @@
           error_msg: cd_invite.errors[:invited_email]&.first,
           default: cd_invite.invited_email,
           input_options: { required: :required })) %>
-      <%= render(Core::Form::TextInputComponent.new(label: 'Confirm email',
+      <%= render(Core::Form::EmailInputComponent.new(label: 'Confirm email',
           attribute: :invited_email_confirmation,
           error_msg: cd_invite.errors[:invited_email_confirmation]&.first,
           default: cd_invite.invited_email_confirmation,
