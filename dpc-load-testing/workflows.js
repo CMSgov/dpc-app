@@ -93,8 +93,14 @@ export function workflow(data) {
 
   // POST practitioner
   const practitionerResponse = createPractitioner(token, npiGenerator.iterate());
-  if (practitionerResponse.status != 201) {
-    fail('failed to create practitioner');
+  switch (practitionerResponse.status) {
+    case 200:   // Already existed, but we can still use it
+      console.warn('Attempted to create practitioner with duplicate NPI')
+      break;
+    case 201:   // Practitioner created
+      break;
+    default:
+      fail('failed to create practitioner');
   }
   // There's only 1 identifier in our synthetic practitioner, so we don't have to search for npi
   const practitionerNpi = practitionerResponse.json().identifier[0].value;
@@ -104,13 +110,17 @@ export function workflow(data) {
   const patientResponses = createPatients(token, requestCounts.createPatient, mbiGenerator);
   const patients = [];
   patientResponses.forEach((res) => {
-    if (res.status != 201) {
-      console.error('failed to create patient');
-    } else {
-      const json = res.json();
-      const patientId = json.id;
-      const patientMbi = json.identifier[0].value;
-      patients.push({ patientId, patientMbi });
+    switch (res.status) {
+      case 200: // Already existed, but we can still use it
+        console.warn('Attempted to create patient with duplicate mbi');
+      case 201: // Patient created
+        const json = res.json();
+        const patientId = json.id;
+        const patientMbi = json.identifier[0].value;
+        patients.push({ patientId, patientMbi });
+        break;
+      default:
+        console.error('failed to create patient');
     }
   });
 
