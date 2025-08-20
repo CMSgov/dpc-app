@@ -33,9 +33,6 @@ public class DPCAttributionConfiguration extends JobConfiguration implements IDP
     @NotEmpty
     private String publicServerURL; // hardcoded to dpc.cms.gov
 
-    @NotEmpty
-    private String publicURL; // pulls from environment variable
-
     @Valid
     @NotNull
     @JsonProperty("fhir")
@@ -135,12 +132,5 @@ public class DPCAttributionConfiguration extends JobConfiguration implements IDP
     public int getDbBatchSize() {
         Map<String,String> properties = database.getProperties();
         return Integer.parseInt(properties.get("hibernate.jdbc.batch_size"));
-    }
-
-    public String getPublicURL() {
-        return publicURL;
-    }
-    public void setPublicURL(String publicURL) {
-        this.publicURL = publicURL;
     }
 }

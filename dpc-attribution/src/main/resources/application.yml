@@ -38,9 +38,6 @@ server:
             version: ${APP_VERSION:-"unknown_version"}
             application: ${APPLICATION:-"dpc-attribution"}
 
-# The root URL at which the application is accessible, if necessary, include the port, do not include the application version
-publicURL: ${PUBLIC_URL:-"http://localhost:3002"}
-
 logging:
   level: WARN
   appenders:

@@ -72,10 +72,4 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Singleton
     @Named("DbBatchSize")
     int provideDbBatchSize() { return configuration().getDbBatchSize(); }
-
-    @Provides
-    @Named("publicURL")
-    public String provideBaseURL() {
-        return configuration().getPublicURL();
-    }
 }
