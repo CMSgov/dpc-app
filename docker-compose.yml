@@ -98,6 +98,9 @@ services:
 
   consent:
     image: dpc-consent:latest
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE:-false}
