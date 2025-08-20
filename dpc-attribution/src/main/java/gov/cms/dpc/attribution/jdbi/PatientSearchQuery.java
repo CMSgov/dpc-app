@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.jdbi;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class PatientSearchQuery {
@@ -17,37 +18,37 @@ public class PatientSearchQuery {
         this.resourceID = resourceID;
     }
 
-    public UUID getResourceID() {
-        return this.resourceID;
+    public Optional<UUID> getResourceID() {
+        return Optional.ofNullable(this.resourceID);
     }
 
     public void setPatientMBI(String patientMBI) {
         this.patientMBI = patientMBI;
     }
 
-    public String getPatientMBI() {
-        return this.patientMBI;
+    public Optional<String> getPatientMBI() {
+        return Optional.ofNullable(this.patientMBI);
     }
 
     public void setOrganizationID(UUID organizationID) {
         this.organizationID = organizationID;
     }
 
-    public UUID getOrganizationID() {
-        return this.organizationID;
+    public Optional<UUID> getOrganizationID() {
+        return Optional.ofNullable(this.organizationID);
     }
 
     public void setPageOffset(int pageOffset) { this.pageOffset = pageOffset; }
 
-    public Integer getPageOffset() {
-        return this.pageOffset;
+    public Optional<Integer> getPageOffset() {
+        return Optional.ofNullable(this.pageOffset);
     }
 
     public void setCount(int count) {
         this.count = count;
     }
 
-    public Integer getCount() {
-        return this.count;
+    public Optional<Integer> getCount() {
+        return Optional.ofNullable(this.count);
     }
 }

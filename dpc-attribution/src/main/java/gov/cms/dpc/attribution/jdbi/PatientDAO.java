@@ -47,15 +47,10 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
 
     private List<Predicate> buildPredicates(CriteriaBuilder builder, Root<PatientEntity> root, PatientSearchQuery searchQuery) {
         List<Predicate> predicates = new ArrayList<>();
-        if (searchQuery.getResourceID() != null) {
-            predicates.add(builder.equal(root.get(PatientEntity_.id), searchQuery.getResourceID()));
-        }
-        if (searchQuery.getPatientMBI() != null) {
-            predicates.add(builder.equal(root.get(PatientEntity_.beneficiaryID), searchQuery.getPatientMBI().toUpperCase()));
-        }
-        if (searchQuery.getOrganizationID() != null) {
-            predicates.add(builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), searchQuery.getOrganizationID()));
-        }
+        searchQuery.getResourceID().ifPresent(id -> predicates.add(builder.equal(root.get(PatientEntity_.id), id)));
+        searchQuery.getPatientMBI().ifPresent(mbi -> predicates.add(builder.equal(root.get(PatientEntity_.beneficiaryID), mbi)));
+        searchQuery.getOrganizationID().ifPresent(orgId -> predicates.add(builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), orgId)));
+
         if (predicates.isEmpty()) {
             throw new IllegalStateException("Must have at least one search predicate!");
         }
@@ -76,16 +71,16 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         TypedQuery<PatientEntity> typedQuery = this.currentSession().createQuery(query);
 
         // Legacy compatibility for request without pagination
-        if (searchQuery.getCount() == null) {
+        if (searchQuery.getCount().isEmpty()) {
             return new PageResult<>(typedQuery.getResultList(), false);
         }
 
-        Integer count = searchQuery.getCount();
+        final int count = searchQuery.getCount().orElseThrow();
         final int fetchSize = count + 1;
         typedQuery.setMaxResults(fetchSize);
-        if (searchQuery.getPageOffset() != null && searchQuery.getPageOffset() > 0) {
-            typedQuery.setFirstResult(searchQuery.getPageOffset());
-        }
+        final int offset = searchQuery.getPageOffset().orElse(0);
+        typedQuery.setFirstResult(offset);
+
         final List<PatientEntity> fetched = typedQuery.getResultList();
         final boolean hasNext = fetched.size() > count;
         List<PatientEntity> pageResults = fetched;

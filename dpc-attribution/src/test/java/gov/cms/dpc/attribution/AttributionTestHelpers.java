@@ -170,11 +170,11 @@ public class AttributionTestHelpers {
     public static ArgumentMatcher<PatientSearchQuery> queryMatches(UUID resourceId, UUID orgId, @Nullable Integer count, @Nullable Integer pageOffset) {
         return query ->
                 query != null &&
-                        Objects.equals(query.getResourceID(), resourceId) &&
-                        Objects.equals(query.getOrganizationID(), orgId) &&
-                        query.getPatientMBI() == null &&
-                        Objects.equals(query.getCount(), count) &&
-                        Objects.equals(query.getPageOffset(), pageOffset)
+                        Objects.equals(query.getResourceID().orElse(null), resourceId) &&
+                        Objects.equals(query.getOrganizationID().orElse(null), orgId) &&
+                        query.getPatientMBI().orElse(null) == null &&
+                        Objects.equals(query.getCount().orElse(null), count) &&
+                        Objects.equals(query.getPageOffset().orElse(null), pageOffset)
                 ;
     }
 }

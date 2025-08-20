@@ -132,7 +132,7 @@ class PatientResourceUnitTest {
 
         Mockito.when(patientDAO.countMatchingPatients(argThat(query ->
                 query.getOrganizationID().equals(expectedQuery.getOrganizationID()) &&
-                        query.getCount() == 0
+                        query.getCount().orElseThrow() == 0
         ))).thenReturn(99);
 
         Bundle summaryBundle = patientResource.searchPatients(
