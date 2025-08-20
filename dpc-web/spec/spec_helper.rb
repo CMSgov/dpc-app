@@ -26,7 +26,7 @@ unless ENV['ACCESSIBILITY'] == 'true'
 end
 
 require 'webmock/rspec'
-WebMock.disable_net_connect!(allow_localhost: true, allow: ['github.com', 'objects.githubusercontent.com'])
+WebMock.disable_net_connect!(allow_localhost: true, allow: ['github.com', 'release-assets.githubusercontent.com'])
 
 RSpec.configure do |config|
   config.filter_run_excluding type: :system
