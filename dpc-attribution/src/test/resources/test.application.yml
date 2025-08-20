@@ -71,7 +71,6 @@ expirationThreshold: 90 # In days
 migrationEnabled: true
 
 publicServerURL: "https://dpc.cms.gov"
-publicURL: "http://localhost:3002"
 
 # Disable FHIR validation
 fhir:
