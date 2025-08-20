@@ -10,6 +10,7 @@ import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.aggregation.health.AggregationEngineHealthCheck;
 import gov.cms.dpc.aggregation.jdbi.ConsentDAO;
 import gov.cms.dpc.aggregation.service.*;
+import gov.cms.dpc.aggregation.tasks.TruncateDatabase;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
@@ -36,6 +37,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         binder.bind(AggregationEngineHealthCheck.class);
 
         binder.bind(ConsentDAO.class);
+        binder.bind(TruncateDatabase.class);
 
         // Healthchecks
         // Additional health-checks can be added here

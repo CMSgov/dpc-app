@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
@@ -63,13 +62,10 @@ public class APITestHelpers {
     private static final String CONSENT_URL = "http://localhost:3600/v1";
     public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
-    private static final String CONSENT_TRUNCATE_TASK = "http://localhost:9904/tasks/truncate";
-    public static String BASE_URL = "https://dpc.cms.gov/api";
+    private static final String CONSENT_TRUNCATE_TASK = "http://localhost:9901/tasks/truncate";
     public static String ORGANIZATION_NPI = "1111111112";
 
     private static final String configPath = "src/test/resources/test.application.yml";
-
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     private APITestHelpers() {
         // Not used
