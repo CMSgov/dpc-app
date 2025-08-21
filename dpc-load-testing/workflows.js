@@ -96,11 +96,13 @@ export function workflow(data) {
   switch (practitionerResponse.status) {
     case 200:   // Already existed, but we can still use it
       console.warn('Attempted to create practitioner with duplicate NPI')
-      break;
     case 201:   // Practitioner created
       break;
+    case 0:
+      console.error('Failed to create practitioner: ' + practitionerResponse.error);
+      break;
     default:
-      fail('failed to create practitioner');
+      fail('failed to create practitioner, status: ' + practitionerResponse.status);
   }
   // There's only 1 identifier in our synthetic practitioner, so we don't have to search for npi
   const practitionerNpi = practitionerResponse.json().identifier[0].value;
@@ -119,8 +121,11 @@ export function workflow(data) {
         const patientMbi = json.identifier[0].value;
         patients.push({ patientId, patientMbi });
         break;
+      case 0:
+        console.error('Failed to create patient: ' + res.error);
+        break;
       default:
-        console.error('failed to create patient');
+        console.error('failed to create patient, status: ' + res.status);
     }
   });
 
