@@ -719,6 +719,7 @@
 									"",
 									"if (pm.response.headers.get(\"Content-Location\")) {",
 									"  pm.environment.set(\"content_location\", pm.response.headers.get(\"Content-Location\"));",
+                  "  console.log(\"Content-Location: \", pm.environment.get(\"content_location\");",
 									"} else {",
 									"  // Fail the test, no content location.",
 									"  pm.execution.setNextRequest(null);",
