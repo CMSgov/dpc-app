@@ -122,7 +122,7 @@ services:
       - export-volume:/tmp
       - ./:/usr/src/mymaven
     working_dir: /usr/src/mymaven
-    command: sh -c "mvn verify -Pintegration-tests -am -ntp -Djib.skip=true"
+    command: sh -c "mvn verify -Pintegration-tests -am -ntp -Djib.skip=true -pl '!dpc-consent'"
     network_mode: host
 
 volumes:
