@@ -20,7 +20,7 @@ import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.List;
 
-public class DPCAggregationConfiguration extends Configuration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCQueueDatabase, IDPCConsentDatabase, DPCQueueConfig {
+public class DPCAggregationConfiguration extends Configuration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCConsentDatabase, IDPCQueueDatabase, DPCQueueConfig {
 
     @Valid
     @NotNull
