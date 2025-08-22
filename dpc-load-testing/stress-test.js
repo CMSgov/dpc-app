@@ -7,6 +7,8 @@ import { constants } from "./constants.js";
 // Before running this, ensure the org provider cap is removed in your environment.  If you don't, the workflows
 // will start failing since they create a new provider at the start of every iteration.  Your response times will
 // look very fast all of the sudden and your results will be very, very skewed.
+// Also make sure to remove the rate limit on the WAF in whatever environment you're testing in.  If not, you'll get
+// lots of Http 429 failures.
 export const options = {
   scenarios: {
     workflow: {
