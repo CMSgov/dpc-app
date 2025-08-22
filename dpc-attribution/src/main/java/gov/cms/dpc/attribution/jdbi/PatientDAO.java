@@ -48,7 +48,7 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
     private List<Predicate> buildPredicates(CriteriaBuilder builder, Root<PatientEntity> root, PatientSearchQuery searchQuery) {
         List<Predicate> predicates = new ArrayList<>();
         searchQuery.getResourceID().ifPresent(id -> predicates.add(builder.equal(root.get(PatientEntity_.id), id)));
-        searchQuery.getPatientMBI().ifPresent(mbi -> predicates.add(builder.equal(root.get(PatientEntity_.beneficiaryID), mbi)));
+        searchQuery.getPatientMBI().ifPresent(mbi -> predicates.add(builder.equal(root.get(PatientEntity_.beneficiaryID), mbi.toUpperCase())));
         searchQuery.getOrganizationID().ifPresent(orgId -> predicates.add(builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), orgId)));
 
         if (predicates.isEmpty()) {
@@ -76,10 +76,15 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
         }
 
         final int count = searchQuery.getCount().orElseThrow();
+        if (count < 0) {
+            throw new IllegalArgumentException("_count must be >= 0");
+        }
         final int fetchSize = count + 1;
         typedQuery.setMaxResults(fetchSize);
         final int offset = searchQuery.getPageOffset().orElse(0);
-        typedQuery.setFirstResult(offset);
+        if (offset > 0) {
+            typedQuery.setFirstResult(offset);
+        }
 
         final List<PatientEntity> fetched = typedQuery.getResultList();
         final boolean hasNext = fetched.size() > count;
