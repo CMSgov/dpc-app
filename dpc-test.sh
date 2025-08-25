@@ -64,7 +64,7 @@ docker compose -p start-v1-app down
 
 echo "Starting api server for Postman tests"
 # Start the API server
-USE_BFD_MOCK=true AUTH_DISABLED=true docker compose -p start-v1-app up db attribution aggregation api --wait
+USE_BFD_MOCK=true AUTH_DISABLED=true docker compose -p start-v1-app up db attribution aggregation consent api --wait
 
 echo "Starting Postman tests"
 # Run the Postman tests
