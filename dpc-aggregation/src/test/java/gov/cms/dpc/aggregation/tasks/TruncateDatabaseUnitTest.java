@@ -1,6 +1,6 @@
-package gov.cms.dpc.consent.tasks;
+package gov.cms.dpc.aggregation.tasks;
 
-import gov.cms.dpc.consent.DPCConsentConfiguration;
+import gov.cms.dpc.aggregation.DPCAggregationConfiguration;
 import gov.cms.dpc.testing.utils.DBUtils;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.db.ManagedDataSource;
@@ -23,7 +23,7 @@ import static org.mockito.MockitoAnnotations.openMocks;
 
 class TruncateDatabaseUnitTest {
 	@Mock
-	private DPCConsentConfiguration config;
+	private DPCAggregationConfiguration config;
 
 	@Mock
 	private DataSourceFactory dataSourceFactory;
