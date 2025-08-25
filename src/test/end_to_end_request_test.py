@@ -4,6 +4,7 @@ Runs end-to-end test of API
 """
 
 from datetime import datetime, UTC
+import hashlib
 import json
 import sys
 import time
@@ -47,7 +48,7 @@ def fhir_headers(org_id=None, attestation=None):
 
     return headers
 
-def get(url, headers, response_test):
+def get(url, headers, response_test, error_test=None):
     req = request.Request(url)
     for key, value in headers.items():
         req.add_header(key, value)
@@ -56,7 +57,10 @@ def get(url, headers, response_test):
             body = resp.read().decode('utf-8')
             return response_test(resp, body)
     except URLError as e:
-        raise ExpectationException('No error', e)
+        if error_test:
+            error_test(e)
+        else:
+            raise ExpectationException('No error', e)
 
 def delete(url, headers):
     req = request.Request(url, method='DELETE')
@@ -154,7 +158,7 @@ def find_patient_by_mbi(org_id):
         match_eq(dig(patient, 'type'),'searchset')
         match_eq(dig(patient, 'total'), 1)
         return dig(patient, 'entry', 0, 'resource', 'id')
-        
+
     return get(url, fhir_headers(org_id), response_test)
 
 def find_roster_by_npi(org_id, roster_id):
@@ -165,7 +169,7 @@ def find_roster_by_npi(org_id, roster_id):
         match_eq(dig(roster, 'type'),'searchset')
         match_eq(dig(roster, 'total'), 1)
         match_eq(dig(roster, 'entry', 0, 'resource', 'id'), roster_id)
-        
+
     get(url, fhir_headers(org_id), response_test)
 
 def remove_patient_from_roster(org_id, roster_id, provider_id, patient_id):
@@ -190,7 +194,7 @@ def add_unknown_patient_to_roster(org_id, roster_id, provider_id):
         match_eq(e.headers['content-type'], FHIR_TYPE)
         message = json.loads(e.fp.read().decode('utf-8'))
         match_eq(dig(message, 'issue', 0, 'details', 'text',), 'All patients in group must exist. Cannot find 1 patient(s).')
-        
+
     post(url, headers, data, None, error_test)
 
 def bulk_export(org_id, roster_id):
@@ -204,6 +208,39 @@ def bulk_export(org_id, roster_id):
     return get(url, headers, response_test)
 
 def job_result(org_id, url):
+    class JobResults:
+        def __init__(self, data):
+            self.outputs = {}
+            for output in data['output']:
+                self.outputs[output['type']] = output
+            match_eq(self.outputs.keys(), {'Patient', 'Coverage', 'ExplanationOfBenefit'})
+            self.coverage = self.outputs['Coverage']
+            self.patient = self.outputs['Patient']
+            self.eob = self.outputs['ExplanationOfBenefit']
+            self.operation_outcome = dig(data, 'error', 0)
+        @property
+        def patient_url(self):
+            return self.patient['url']
+        @property
+        def eob_url(self):
+            return self.eob['url']
+        @property
+        def coverage_url(self):
+            return self.coverage['url']
+        @property
+        def operation_outcome_url(self):
+            return self.operation_outcome['url']
+        @property
+        def patient_sha(self):
+            return dig(self.patient, 'extension', 0, 'valueString')
+        @property
+        def coverage_sha(self):
+            return dig(self.coverage, 'extension', 0, 'valueString')
+        @property
+        def operation_outcome_sha(self):
+            return dig(self.operation_outcome, 'extension', 0, 'valueString')
+            
+
     headers = {}
     def response_test(resp, body):
         if resp.status == 202:
@@ -224,11 +261,8 @@ def job_result(org_id, url):
         data = json.loads(body)
         match_eq(len(data['error']), 1)
         match_eq(len(data['output']), 3)
-        outputs = {}
-        for output in data['output']:
-            outputs[output['type']] = output
-        match_eq(outputs.keys(), {'Patient', 'Coverage', 'ExplanationOfBenefit'})
-        patient = outputs['Patient']
+        job_results = JobResults(data)
+        patient = job_results.patient
         match_eq(patient['count'], 3)
         match_eq(len(patient['extension']), 2)
         match_eq(len(dig(patient, 'extension', 0)), 2)
@@ -237,7 +271,7 @@ def job_result(org_id, url):
         match_eq(len(dig(patient, 'extension', 1)), 2)
         match_eq(dig(patient, 'extension', 1, 'url'), 'https://dpc.cms.gov/file_length')
         match_ne(dig(patient, 'extension', 1, 'valueDecimal'), None)
-        coverage = outputs['Coverage']
+        coverage = job_results.coverage
         match_eq(coverage['count'], 12)
         match_eq(len(coverage['extension']), 2)
         match_eq(len(dig(coverage, 'extension', 0)), 2)
@@ -246,7 +280,7 @@ def job_result(org_id, url):
         match_eq(len(dig(coverage, 'extension', 1)), 2)
         match_eq(dig(coverage, 'extension', 1, 'url'), 'https://dpc.cms.gov/file_length')
         match_ne(dig(coverage, 'extension', 1, 'valueDecimal'), None)
-        eob = outputs['ExplanationOfBenefit']
+        eob = job_results.eob
         if not eob['count'] > 100:
             raise ExpectationException('eob count > 100', eob['count'])
         match_eq(len(eob['extension']), 2)
@@ -256,31 +290,34 @@ def job_result(org_id, url):
         match_eq(len(dig(eob, 'extension', 1)), 2)
         match_eq(dig(eob, 'extension', 1, 'url'), 'https://dpc.cms.gov/file_length')
         match_ne(dig(eob, 'extension', 1, 'valueDecimal'), None)
-        operationOutcome = dig(data, 'error', 0)
-        match_eq(operationOutcome['count'], 1)
-        match_eq(len(operationOutcome['extension']), 2)
-        match_eq(len(dig(operationOutcome, 'extension', 0)), 2)
-        match_eq(dig(operationOutcome, 'extension', 0, 'url'), 'https://dpc.cms.gov/checksum')
-        match_ne(dig(operationOutcome, 'extension', 0, 'valueString'), None)
-        match_eq(len(dig(operationOutcome, 'extension', 1)), 2)
-        match_eq(dig(operationOutcome, 'extension', 1, 'url'), 'https://dpc.cms.gov/file_length')
-        match_ne(dig(operationOutcome, 'extension', 1, 'valueDecimal'), None)
-        return patient['url'], eob['url'], coverage['url'], operationOutcome['url']
+        operation_outcome = job_results.operation_outcome
+        match_eq(operation_outcome['count'], 1)
+        match_eq(len(operation_outcome['extension']), 2)
+        match_eq(len(dig(operation_outcome, 'extension', 0)), 2)
+        match_eq(dig(operation_outcome, 'extension', 0, 'url'), 'https://dpc.cms.gov/checksum')
+        match_ne(dig(operation_outcome, 'extension', 0, 'valueString'), None)
+        match_eq(len(dig(operation_outcome, 'extension', 1)), 2)
+        match_eq(dig(operation_outcome, 'extension', 1, 'url'), 'https://dpc.cms.gov/file_length')
+        match_ne(dig(operation_outcome, 'extension', 1, 'valueDecimal'), None)
+        return job_results
     return get(url, headers, response_test)
 
-def patient_data(org_id, url):
+def patient_data(org_id, url, sha):
     def response_test(resp, body):
         match_eq(resp.status, 200)
         match_eq(resp.headers['content-type'], 'application/ndjson')
         lines = [l for l in body.split('\n') if l]
         match_eq(len(lines), 3)
+        m = hashlib.sha256()
+        m.update(body.encode('utf-8'))
+        match_eq(f'sha256:{m.hexdigest()}', sha)
         for line in lines:
             data = json.loads(line)
             match_eq(dig(data, 'resourceType'), 'Patient')
             mbi_stanzas = [stanza for stanza in data['identifier'] if stanza['system'] == 'http://hl7.org/fhir/sid/us-mbi']
             match_eq(len(mbi_stanzas), 1)
     get(url, {}, response_test)
-    
+
 def eob_data(org_id, url):
     def response_test(resp, body):
         match_eq(resp.status, 200)
@@ -293,25 +330,31 @@ def eob_data(org_id, url):
             match_eq(dig(data, 'resourceType'), 'ExplanationOfBenefit')
         return resp.headers['last-modified']
     return get(url, {}, response_test)
-    
-def coverage_data(org_id, url):
+
+def coverage_data(org_id, url, sha):
     def response_test(resp, body):
         match_eq(resp.status, 200)
         match_eq(resp.headers['content-type'], 'application/ndjson')
         lines = [l for l in body.split('\n') if l]
         match_eq(len(lines), 12)
+        m = hashlib.sha256()
+        m.update(body.encode('utf-8'))
+        match_eq(f'sha256:{m.hexdigest()}', sha)
         for line in lines:
             data = json.loads(line)
             match_eq(dig(data, 'resourceType'), 'Coverage')
 
     get(url, {}, response_test)
-    
-def operation_outcome_data(org_id, url):
+
+def operation_outcome_data(org_id, url, sha):
     def response_test(resp, body):
         match_eq(resp.status, 200)
         match_eq(resp.headers['content-type'], 'application/ndjson')
         lines = [l for l in body.split('\n') if l]
         match_eq(len(lines), 1)
+        m = hashlib.sha256()
+        m.update(body.encode('utf-8'))
+        match_eq(f'sha256:{m.hexdigest()}', sha)
         for line in lines:
             data = json.loads(line)
             match_eq(dig(data, 'resourceType'), 'OperationOutcome')
@@ -321,9 +364,45 @@ def operation_outcome_data(org_id, url):
             if not '0S80C00AA00' in location:
                 raise ExpectationException('0S80C00AA00 in location', location)
     get(url, {}, response_test)
+
+def request_partial_range(org_id, url):
+    requested_bytecount = 10240
+    def response_test(resp, body):
+        if not 'content-range' in resp.headers:
+            raise ExpectationException('Content-range in headers', 'Not in headers')
+        match_eq(len(body), requested_bytecount)
+    get(url, {'Range': f'bytes=0-{requested_bytecount}'}, response_test)
+
+def request_modified_since(org_id, url, file_timestamp):
+    def error_test(e):
+        match_eq(e.code, 304)
+    get(url, {'If-Modified-Since': file_timestamp}, None, error_test)
+
+def bulk_export_with_since(org_id, roster_id):
+    url = API_BASE + f'Group/{roster_id}/$export?_since={datetime.now(UTC).isoformat()[:23]}Z'
+    headers = fhir_headers(org_id)
+    headers['Prefer'] = 'respond-async'
+    def response_test(resp, body):
+        match_eq(resp.status, 202)
+        match_ne(resp.headers['content-location'], None)
+        return resp.headers['content-location']
+    return get(url, headers, response_test)
+def job_result_with_since(org_id, url):
+    headers = {}
+    def response_test(resp, body):
+        if resp.status == 202:
+            time.sleep(1)
+            return job_result_with_since(org_id, url)
+        match_eq(resp.status, 200)
+        match_eq(resp.headers['content-type'], 'application/json')
+        data = json.loads(body)
+        match_eq(len(data['error']), 0)
+        match_eq(len(data['output']), 0)
+    return get(url, headers, response_test)
     
 def run():
-    roster_id = '6ddb51c7-acd1-420e-85c9-6303c92aa8d1'
+    roster_id = '6e999722-dc04-4c8f-902a-bcf6ef6325f2'
+
     try:
         org_id = create_organization()
         print('Successfully created organization')
@@ -332,7 +411,7 @@ def run():
         print('Failed to create organization')
         print(f'  {e}')
         sys.exit(1)
-    try: 
+    try:
         provider_ids = register_providers(org_id)
         providers = True
         print('Successfully registered providers')
@@ -341,7 +420,7 @@ def run():
         providers = False
         print('Failed to register providers')
         print(f'  {e}')
-    try: 
+    try:
         patient_ids = register_patients(org_id)
         patients = True
         print('Successfully registered patients')
@@ -398,41 +477,68 @@ def run():
             print(f'  {e}')
         if location:
             try:
-                patient_url, eob_url, coverage_url, operation_outcome_url = job_result(org_id, location)
+                job_results = job_result(org_id, location)
                 print('Successful job report')
             except ExpectationException as e:
-                patient_url = eob_url = coverage_url = operation_outcome_url = None
+                job_results = None
                 print('Failed job report')
                 print(f'  {e}')
-            if patient_url:
+            if job_results:
                 try:
-                    patient_data(org_id, patient_url)
+                    patient_data(org_id, job_results.patient_url, job_results.patient_sha)
                     print('Successfully retrieved patient data')
                 except ExpectationException as e:
                     print('Failed to retrieve patient data')
                     print(f'  {e}')
-            if eob_url:
+
                 try:
-                    last_modified = eob_data(org_id, eob_url)
+                    last_modified = eob_data(org_id, job_results.eob_url)
                     print('Successfully retrieved eob data')
                 except ExpectationException as e:
                     last_modified = False
                     print('Failed to retrieve eob data')
                     print(f'  {e}')
-            if coverage_url:
+                if last_modified:
+                    try:
+                        request_partial_range(org_id, job_results.eob_url)
+                        print('Successfully retrieved partial eob data')
+                    except ExpectationException as e:
+                        print('Failed to retrieve partial eob data')
+                        print(f'  {e}')
+                    try:
+                        request_modified_since(org_id, job_results.eob_url, last_modified)
+                        print('Successfully requested modified since')
+                    except ExpectationException as e:
+                        print('Failed to request modified since')
+                        print(f'  {e}')
                 try:
-                    coverage_data(org_id, coverage_url)
+                    coverage_data(org_id, job_results.coverage_url, job_results.coverage_sha)
                     print('Successfully retrieved coverage data')
                 except ExpectationException as e:
                     print('Failed to retrieve coverage data')
                     print(f'  {e}')
-            if operation_outcome_url:
+
                 try:
-                    operation_outcome_data(org_id, operation_outcome_url)
+                    operation_outcome_data(org_id, job_results.operation_outcome_url, job_results.operation_outcome_sha)
                     print('Successfully retrieved operation outcome data')
                 except ExpectationException as e:
                     print('Failed to retrieve operation outcome data')
                     print(f'  {e}')
-            
+        
+        try:
+            since_location = bulk_export_with_since(org_id, roster_id)
+            print('Successfully bulk exported with since')
+        except ExpectationException as e:
+            since_location = False
+            print('Failed to bulk export with since')
+            print(f'  {e}')
+        if since_location:
+            try:
+                job_result_with_since(org_id, since_location)
+                print('Successful job report')
+            except ExpectationException as e:
+                print('Failed job report')
+                print(f'  {e}')
+
 if __name__ == '__main__':
     run()
