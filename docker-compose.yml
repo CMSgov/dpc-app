@@ -38,6 +38,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      consent:
+        condition: service_healthy
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-aggregation:/jacoco-report
@@ -98,6 +100,9 @@ services:
 
   consent:
     image: dpc-consent:latest
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE:-false}

@@ -98,6 +98,8 @@ jobs:
           sudo cp ./dpc-attribution/target/site/jacoco/jacoco.xml jacoco-reports/dpc-attribution-jacoco.xml
           sudo cp ./dpc-bluebutton/target/site/jacoco/jacoco.xml jacoco-reports/dpc-bluebutton-jacoco.xml
           sudo cp ./dpc-common/target/site/jacoco/jacoco.xml jacoco-reports/dpc-common-jacoco.xml
+          sudo cp ./dpc-consent/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-consent-it-jacoco.xml
+          sudo cp ./dpc-consent/target/site/jacoco/jacoco.xml jacoco-reports/dpc-consent-jacoco.xml
           sudo cp ./dpc-macaroons/target/site/jacoco/jacoco.xml jacoco-reports/dpc-macaroons-jacoco.xml
           sudo cp ./dpc-queue/target/site/jacoco/jacoco.xml jacoco-reports/dpc-queue-jacoco.xml
       - name: Upload jacoco reports

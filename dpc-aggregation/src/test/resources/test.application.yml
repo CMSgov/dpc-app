@@ -92,6 +92,8 @@ bbclient:
 
   useBfdMock: ${USE_BFD_MOCK:-true}
 
+consentHealthCheckURL: ${CONSENT_HEALTHCHECK_URL:-"http://localhost:9904/healthcheck"}
+
 awsQueue:
   emitAwsMetrics: ${EMIT_AWS_METRICS:-false}
   queueSizeMetricName: ${QUEUE_SIZE_METRIC_NAME:-"JobQueueBatchCount"}
