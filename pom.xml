@@ -493,9 +493,6 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <skip>true</skip>
-                            <excludes>
-                                <exclude>**/dpc-consent/*</exclude>
-                            </excludes>
                         </configuration>
                     </plugin>
                 </plugins>
