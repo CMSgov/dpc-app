@@ -49,7 +49,7 @@ func TestIntegrationImportResponseFile(t *testing.T) {
 	}
 	today := time.Now().Format("20060102")
 
-	db, _ := createConnectionVar(os.Getenv("DB_USER_DPC_CONSENT"), os.Getenv("DB_PASS_DPC_CONSENT"))
+	db, _ := createConnectionVar(context.TODO())
 	defer db.Close()
 
 	ctx := context.TODO()
@@ -140,7 +140,7 @@ func TestIntegrationImportResponseFile(t *testing.T) {
 func TestHandlerDatabaseTimeoutError(t *testing.T) {
 	//test timeout error is propragated to lambda
 	ofn := createConnectionVar
-	createConnectionVar = func(string, string) (*sql.DB, error) { return nil, errors.New("Connection attempt timed out") }
+	createConnectionVar = func(ctx context.Context) (*sql.DB, error) { return nil, errors.New("Connection attempt timed out") }
 	defer func() { createConnectionVar = ofn }()
 
 	event := getSQSEvent("demo-bucket", "T.NGD.DPC.RSP.D240123.T1122001.IN")

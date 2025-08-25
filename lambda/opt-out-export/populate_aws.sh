@@ -3,35 +3,11 @@
 # Populate all of our ssm parameters
 # If you run this more than once the puts will fail, but the next section will still find them and output the params to the screen.
 aws --endpoint-url=http://localhost:4566 ssm put-parameter \
-    --name "/dpc/local/attribution/db_read_only_user_dpc_attribution" \
-    --value "postgres" \
-    --type "String"
-
-aws --endpoint-url=http://localhost:4566 ssm put-parameter \
-    --name "/dpc/local/consent/db_read_only_user_dpc_consent" \
-    --value "postgres" \
-    --type "String"
-
-aws --endpoint-url=http://localhost:4566 ssm put-parameter \
-    --name "/dpc/local/attribution/db_read_only_pass_dpc_attribution" \
-    --value "dpc-safe" \
-    --type "String"
-
-aws --endpoint-url=http://localhost:4566 ssm put-parameter \
-    --name "/dpc/local/consent/db_read_only_pass_dpc_consent" \
-    --value "dpc-safe" \
-    --type "String"
-
-aws --endpoint-url=http://localhost:4566 ssm put-parameter \
     --name "/opt-out-import/dpc/local/bfd-bucket-role-arn" \
     --value "assume_role_arn_123456789" \
     --type "String"
 
 # Output all of our parameters
-aws --endpoint-url=http://localhost:4566 ssm get-parameter --name "/dpc/local/attribution/db_read_only_user_dpc_attribution"
-aws --endpoint-url=http://localhost:4566 ssm get-parameter --name "/dpc/local/consent/db_read_only_user_dpc_consent"
-aws --endpoint-url=http://localhost:4566 ssm get-parameter --name "/dpc/local/attribution/db_read_only_pass_dpc_attribution"
-aws --endpoint-url=http://localhost:4566 ssm get-parameter --name "/dpc/local/consent/db_read_only_pass_dpc_consent"
 aws --endpoint-url=http://localhost:4566 ssm get-parameter --name "/opt-out-import/dpc/local/bfd-bucket-role-arn"
 
 # Create the S3 bucket we're going to upload to
