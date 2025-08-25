@@ -62,15 +62,14 @@ USE_BFD_MOCK=true docker compose -p start-v1-app up --exit-code-from tests tests
 
 docker compose -p start-v1-app down
 
-# TODO: Postman tests disabled to determine if needed
-#echo "Starting api server for Postman tests"
-## Start the API server
-#USE_BFD_MOCK=true AUTH_DISABLED=true docker compose -p start-v1-app up db attribution aggregation api --wait
-#
-#echo "Starting Postman tests"
-## Run the Postman tests
-#npm install
-#npm run test
+echo "Starting api server for Postman tests"
+# Start the API server
+USE_BFD_MOCK=true AUTH_DISABLED=true docker compose -p start-v1-app up db attribution aggregation api --wait
+
+echo "Starting Postman tests"
+# Run the Postman tests
+npm install
+npm run test
 
 # Wait for Jacoco to finish writing the output files
 docker compose -p start-v1-app down -t 60

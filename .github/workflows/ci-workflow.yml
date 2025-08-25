@@ -92,6 +92,7 @@ jobs:
           sudo mkdir jacoco-reports
           sudo cp ./dpc-aggregation/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-aggregation-it-jacoco.xml
           sudo cp ./dpc-aggregation/target/site/jacoco/jacoco.xml jacoco-reports/dpc-aggregation-jacoco.xml
+          sudo cp ./dpc-api/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-api-it-jacoco.xml
           sudo cp ./dpc-api/target/site/jacoco/jacoco.xml jacoco-reports/dpc-api-jacoco.xml
           sudo cp ./dpc-attribution/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-attribution-it-jacoco.xml
           sudo cp ./dpc-attribution/target/site/jacoco/jacoco.xml jacoco-reports/dpc-attribution-jacoco.xml
