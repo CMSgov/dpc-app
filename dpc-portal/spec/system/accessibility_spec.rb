@@ -283,9 +283,9 @@ RSpec.describe 'Accessibility', type: :system do
             end
             it 'should show error page' do
               visit "/organizations/#{org.id}/credential_delegate_invitations/new"
-              page.find('.usa-button', text: 'Send invite').click
-              page.find_button(value: 'Yes, I acknowledge').click
-              expect(page).to have_text("can't be blank")
+              page.find_button(value: 'Send invite').click
+              attribute_message = page.find('#invited_given_name').native.attribute('validationMessage')
+              expect(attribute_message).to eq 'Please fill out this field.'
               expect(page).to be_axe_clean.according_to axe_standard
             end
             it 'should show success page' do
@@ -294,7 +294,7 @@ RSpec.describe 'Accessibility', type: :system do
               page.fill_in 'invited_family_name', with: 'Lennon'
               page.fill_in 'invited_email', with: 'john@beatles.com'
               page.fill_in 'invited_email_confirmation', with: 'john@beatles.com'
-              page.find('.usa-button', text: 'Send invite').click
+              page.find_button(value: 'Send invite').click
               page.find_button(value: 'Yes, I acknowledge').click
               expect(page).to_not have_text("can't be blank")
               expect(page).to have_text('Credential Delegate invited successfully')
@@ -307,7 +307,7 @@ RSpec.describe 'Accessibility', type: :system do
               page.fill_in 'invited_family_name', with: invitation.invited_family_name
               page.fill_in 'invited_email', with: invitation.invited_email
               page.fill_in 'invited_email_confirmation', with: invitation.invited_email
-              page.find('.usa-button', text: 'Send invite').click
+              page.find_button(value: 'Send invite').click
               page.find_button(value: 'Yes, I acknowledge').click
               expect(page).to_not have_text("can't be blank")
               expect(page).to have_text(I18n.t('errors.attributes.base.duplicate_cd.status'))
