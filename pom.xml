@@ -11,7 +11,7 @@
         <module>dpc-aggregation</module>
         <module>dpc-attribution</module>
         <module>dpc-common</module>
-<!--        <module>dpc-consent</module>-->
+        <module>dpc-consent</module>
         <module>dpc-bluebutton</module>
         <module>dpc-macaroons</module>
         <module>dpc-smoketest</module>
@@ -493,6 +493,9 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <skip>true</skip>
+                            <excludes>
+                                <exclude>**/dpc-consent/*</exclude>
+                            </excludes>
                         </configuration>
                     </plugin>
                 </plugins>
