@@ -1,7 +1,9 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -38,13 +40,16 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -57,9 +62,10 @@ import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 public class PatientResource extends AbstractPatientResource {
     private static final Logger logger = LoggerFactory.getLogger(PatientResource.class);
 
-    // TODO: This should be moved into a helper class, in DPC-432.
     // This checks to see if the Identifier is fully specified or not.
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9]+://.*$");
+    private static final Set<String> VALID_BUNDLE_LINK_NAMES = Set.of("first", IBaseBundle.LINK_PREV, IBaseBundle.LINK_NEXT, IBaseBundle.LINK_SELF);
+
 
     private final IGenericClient client;
     private final FhirValidator validator;
@@ -91,31 +97,33 @@ public class PatientResource extends AbstractPatientResource {
     public Bundle patientSearch(@ApiParam(hidden = true)
                                 @Auth OrganizationPrincipal organization,
                                 @ApiParam(value = "Patient MBI")
-                                @QueryParam(value = Patient.SP_IDENTIFIER) @NoHtml String patientMBI) {
-
-        final var request = this.client
-                .search()
-                .forResource(Patient.class)
-                .encodedJson()
-                .where(Patient.ORGANIZATION.hasId(organization.getOrganization().getId()))
-                .returnBundle(Bundle.class);
-
-        if (patientMBI != null && !patientMBI.equals("")) {
-
-            // Handle MBI parsing
-            // This should come out as part of DPC-432
-            final String expandedMBI;
-            if (IDENTIFIER_PATTERN.matcher(patientMBI).matches()) {
-                expandedMBI = patientMBI;
-            } else {
-                expandedMBI = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientMBI);
-            }
-            return request
-                    .where(Patient.IDENTIFIER.exactly().identifier(expandedMBI))
-                    .execute();
+                                @QueryParam(value = Patient.SP_IDENTIFIER) @NoHtml String patientMBI,
+                                @ApiParam(value = "Patients per page") // used to determine if pagination logic should be used
+                                @QueryParam(value = "_count") Integer count,
+                                @ApiParam(value = "Page offset")
+                                @QueryParam(value = "_offset") Integer offset) {
+        if (count != null && count < 0) {
+            throw new WebApplicationException("Parameter _count must be >= 0", Response.Status.BAD_REQUEST);
+        }
+        if (offset != null && offset < 0) {
+            throw new WebApplicationException("Parameter _offset must be >= 0", Response.Status.BAD_REQUEST);
         }
 
-        return request.execute();
+        var request = this.buildPatientSearchQuery(organization.getOrganization().getId(), patientMBI);
+
+
+        if (count != null) {
+            request.count(count);
+            if (count == 0) {
+                request.summaryMode(SummaryEnum.COUNT); // count gets omitted in request
+            }
+        }
+        if (offset != null) {
+            request.offset(offset);
+        }
+        Bundle bundle = request.execute(); // this should call attribution
+        handlePagingLinkPathing(bundle);
+        return bundle;
     }
 
     @FHIR
@@ -335,5 +343,42 @@ public class PatientResource extends AbstractPatientResource {
         } else {
             return Optional.empty();
         }
+    }
+
+    private IQuery<Bundle> buildPatientSearchQuery(String orgId, @Nullable String patientMBI) {
+        IQuery<Bundle> query = this.client
+                .search()
+                .forResource(Patient.class)
+                .encodedJson()
+                .where(Patient.ORGANIZATION.hasId(orgId))
+                .returnBundle(Bundle.class);
+        if (patientMBI != null && !patientMBI.isEmpty()) {
+            final String expandedMBI;
+            if (IDENTIFIER_PATTERN.matcher(patientMBI).matches()) {
+                expandedMBI = patientMBI;
+            } else {
+                expandedMBI = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), patientMBI);
+            }
+            query = query.where(Patient.IDENTIFIER.exactly().identifier(expandedMBI));
+        }
+
+        return query;
+    }
+
+    private void handlePagingLinkPathing(Bundle bundle) {
+        if (bundle == null || !bundle.hasLink()) {
+            return;
+        }
+
+        for (Bundle.BundleLinkComponent link : bundle.getLink()) {
+            if (link.hasRelation() && VALID_BUNDLE_LINK_NAMES.contains(link.getRelation())) {
+                String url = link.getUrl();
+                if (url != null && url.startsWith("/")) {
+                    if (url.startsWith("/v1")) url = url.substring(3);
+                    link.setUrl(this.baseURL + url);
+                }
+            }
+        }
+
     }
 }

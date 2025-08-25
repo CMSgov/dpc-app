@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.resources;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 
@@ -18,7 +19,7 @@ public abstract class AbstractPatientResource {
     }
 
     @GET
-    public abstract List<Patient> searchPatients(UUID resourceID, String patientMBI, String organizationReference);
+    public abstract Bundle searchPatients(UUID resourceID, String patientMBI, String organizationReference, Integer count, Integer pageOffset, String summary);
 
     @POST
     public abstract Response createPatient(Patient patient);

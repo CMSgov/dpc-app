@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
 import gov.cms.dpc.common.entities.OrganizationEntity;
 import gov.cms.dpc.common.entities.AddressEntity;
 import gov.cms.dpc.common.entities.NameEntity;
@@ -15,13 +16,16 @@ import gov.cms.dpc.common.entities.AttributionRelationship;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.testing.utils.MBIUtil;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.dstu3.model.*;
+import org.mockito.ArgumentMatcher;
 
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class AttributionTestHelpers {
@@ -161,5 +165,16 @@ public class AttributionTestHelpers {
         attributionRelationship.setPeriodEnd(OffsetDateTime.now().minusMonths(1));
 
         return attributionRelationship;
+    }
+
+    public static ArgumentMatcher<PatientSearchQuery> queryMatches(UUID resourceId, UUID orgId, @Nullable Integer count, @Nullable Integer pageOffset) {
+        return query ->
+                query != null &&
+                        Objects.equals(query.getResourceID().orElse(null), resourceId) &&
+                        Objects.equals(query.getOrganizationID().orElse(null), orgId) &&
+                        query.getPatientMBI().orElse(null) == null &&
+                        Objects.equals(query.getCount().orElse(null), count) &&
+                        Objects.equals(query.getPageOffset().orElse(null), pageOffset)
+                ;
     }
 }
