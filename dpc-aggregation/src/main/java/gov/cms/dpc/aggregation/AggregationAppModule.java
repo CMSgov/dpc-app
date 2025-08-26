@@ -19,6 +19,7 @@ import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
+import org.hibernate.SessionFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
@@ -124,6 +125,13 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     @Provides
     @Named("fhirReferenceURL")
     public String provideFhirReferenceURL() { return configuration().getFhirReferenceURL(); }
+
+    @Provides
+    // We can suppress this because the SessionFactory is managed
+    @SuppressWarnings("CloseableProvides")
+    SessionFactory provideSessionFactory(DPCConsentManagedSessionFactory factory) {
+        return factory.getSessionFactory();
+    }
 
     @Provides
     @Named("consentDAO")
