@@ -1,19 +1,34 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"os"
-
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/rds/auth"
 	log "github.com/sirupsen/logrus"
 )
 
-var createConnection = func(dbName string, dbUser string, dbPassword string) (*sql.DB, error) {
+var createConnection = func(ctx context.Context, cfg aws.Config, dbName string) (*sql.DB, error) {
 	var dbHost string = os.Getenv("DB_HOST")
 	var dbPort int = 5432
-	var sslmode string = "require"
+	var sslmode string
+	var dbUser string
+	var dbPassword string
+	var err error
 	if isTesting {
 		sslmode = "disable"
+		dbUser = "postgres"
+		dbPassword = "dpc-safe"
+	} else {
+		sslmode = "require"
+		dbUser = fmt.Sprintf("%s-%s-role", os.Getenv("ENV"), dbName)
+		dbPassword, err = buildToken(ctx, cfg, dbHost, dbPort, dbUser)
+		if err != nil {
+			log.Warning("Error building IAM token")
+			return nil, err
+		}
 	}
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", dbHost, dbPort, dbUser, dbPassword, dbName, sslmode)
 
@@ -33,8 +48,18 @@ var createConnection = func(dbName string, dbUser string, dbPassword string) (*s
 	return db, nil
 }
 
-var getAttributionData = func(dbUser string, dbPassword string, patientInfos map[string]PatientInfo) error {
-	db, attributionConnErr := createConnection("dpc_attribution", dbUser, dbPassword)
+var buildToken = func(ctx context.Context, cfg aws.Config, dbHost string, dbPort int, dbUser string) (string, error) {
+	return auth.BuildAuthToken(
+		ctx,
+		fmt.Sprintf("%s:%d", dbHost, dbPort),
+		"us-east-1",
+		dbUser,
+		cfg.Credentials,
+	)
+}
+
+var getAttributionData = func(ctx context.Context, cfg aws.Config, patientInfos map[string]PatientInfo) error {
+	db, attributionConnErr := createConnection(ctx, cfg, "dpc_attribution")
 	if attributionConnErr != nil {
 		return attributionConnErr
 	}
@@ -67,8 +92,8 @@ var getAttributionData = func(dbUser string, dbPassword string, patientInfos map
 	return nil
 }
 
-var getConsentData = func(dbUser string, dbPassword string, patientInfos map[string]PatientInfo) error {
-	db, consentConnErr := createConnection("dpc_consent", dbUser, dbPassword)
+var getConsentData = func(ctx context.Context, cfg aws.Config, patientInfos map[string]PatientInfo) error {
+	db, consentConnErr := createConnection(ctx, cfg, "dpc_consent")
 	if consentConnErr != nil {
 		return consentConnErr
 	}

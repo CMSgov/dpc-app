@@ -104,15 +104,7 @@ func importResponseFile(ctx context.Context, bucket string, file string) (int, i
 		return 0, 0, "", err
 	}
 
-	dbuser := fmt.Sprintf("/dpc/%s/consent/db_user_dpc_consent", os.Getenv("ENV"))
-	dbpassword := fmt.Sprintf("/dpc/%s/consent/db_pass_dpc_consent", os.Getenv("ENV"))
-	secrets, err := getConsentDbSecrets(ctx, dbuser, dbpassword)
-	if err != nil {
-		log.Warningf("Failed to get DB secrets: %s", err)
-		return 0, 0, "", err
-	}
-
-	db, err := createConnectionVar(secrets[dbuser], secrets[dbpassword])
+	db, err := createConnectionVar(ctx)
 	if err != nil {
 		log.Warningf("Failed to create db connection: %s", err)
 		return 0, 0, "", err
@@ -148,6 +140,10 @@ func importResponseFile(ctx context.Context, bucket string, file string) (int, i
 	}
 
 	createdRecords, err := insertConsentRecords(db, optOutFileEntity.id, records)
+	if err != nil {
+		log.Warningf("Failed to insert consent records: %s", err)
+		return 0, 0, "", err
+	}
 
 	createdOptOutCount := 0
 	createdOptInCount := 0
@@ -176,11 +172,11 @@ func importResponseFile(ctx context.Context, bucket string, file string) (int, i
 		return createdOptOutCount, createdOptInCount, confirmationFileName, err
 	}
 
-	if cfg, err := createConfig(ctx); err != nil {
+	if cfg, err := createConfig(ctx, true); err != nil {
 		log.Warning("Failed to create session for uploading confirmation file")
 		return createdOptOutCount, createdOptInCount, confirmationFileName, err
 	} else {
-		client := s3.NewFromConfig(cfg, func(o *s3.Options){ o.UsePathStyle = true })
+		client := s3.NewFromConfig(cfg, func(o *s3.Options) { o.UsePathStyle = true })
 		if err = uploadConfirmationFile(ctx, bucket, confirmationFileName, manager.NewUploader(client).Upload, confirmationFile); err != nil {
 			log.Warning("Failed to write upload confirmation file")
 			return createdOptOutCount, createdOptInCount, confirmationFileName, err
@@ -190,7 +186,7 @@ func importResponseFile(ctx context.Context, bucket string, file string) (int, i
 	return createdOptOutCount, createdOptInCount, confirmationFileName, err
 }
 
-var createConfig = func(ctx context.Context) (aws.Config, error) {
+var createConfig = func(ctx context.Context, assumeRole bool) (aws.Config, error) {
 	if isTesting {
 		// Return immediately
 		return config.LoadDefaultConfig(ctx,
@@ -207,29 +203,31 @@ var createConfig = func(ctx context.Context) (aws.Config, error) {
 			),
 		)
 	}
-	
+
 	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion("us-east-1"), config.WithLogger(logging.Nop{}))
 	if err != nil {
 		return cfg, err
 	}
 
-	assumeRoleArn, err := getAssumeRoleArn(ctx, cfg)
-	if err != nil {
-		return cfg, err
-	}
+	if assumeRole {
+		assumeRoleArn, err := getAssumeRoleArn(ctx, cfg)
+		if err != nil {
+			return cfg, err
+		}
 
-	client := sts.NewFromConfig(cfg)
-	creds := stscreds.NewAssumeRoleProvider(client, assumeRoleArn)
-	cfg.Credentials = aws.NewCredentialsCache(creds)
+		client := sts.NewFromConfig(cfg)
+		creds := stscreds.NewAssumeRoleProvider(client, assumeRoleArn)
+		cfg.Credentials = aws.NewCredentialsCache(creds)
+	}
 	return cfg, nil
 }
 
 func downloadS3File(ctx context.Context, bucket string, file string) ([]byte, error) {
-	cfg, err := createConfig(ctx)
+	cfg, err := createConfig(ctx, true)
 	if err != nil {
 		return []byte{}, err
 	}
-	client := s3.NewFromConfig(cfg, func(o *s3.Options){ o.UsePathStyle = true })
+	client := s3.NewFromConfig(cfg, func(o *s3.Options) { o.UsePathStyle = true })
 	downloader := manager.NewDownloader(client)
 	buff := manager.NewWriteAtBuffer([]byte{})
 	numBytes, err := downloader.Download(ctx, buff, &s3.GetObjectInput{
@@ -310,11 +308,11 @@ func uploadConfirmationFile(ctx context.Context, bucket string, file string, upl
 }
 
 func deleteS3File(ctx context.Context, bucket string, file string) error {
-	cfg, err := createConfig(ctx)
+	cfg, err := createConfig(ctx, true)
 	if err != nil {
 		return err
 	}
-	svc := s3.NewFromConfig(cfg, func(o *s3.Options){ o.UsePathStyle = true })
+	svc := s3.NewFromConfig(cfg, func(o *s3.Options) { o.UsePathStyle = true })
 	_, err = svc.DeleteObject(ctx, &s3.DeleteObjectInput{Bucket: aws.String(bucket), Key: aws.String(file)})
 	if err != nil {
 		log.Errorf("Unable to delete object: %v", err)
