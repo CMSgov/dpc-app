@@ -102,55 +102,71 @@ jobs:
           exit 1
 
   verify-db-changes:
-    if: ${{ always() && needs.trigger.result == 'success' }}
-    needs: trigger
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    env:
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
-    steps:
-      - uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
-      - name: Get database credentials
-        uses: cmsgov/cdap/actions/aws-params-env-action@main
-        env:
-          AWS_REGION: ${{ vars.AWS_REGION }}
-        with:
-          params: |
-            DB_USER=/dpc/test/consent/db_read_only_user_dpc_consent
-            DB_PASSWORD=/dpc/test/consent/db_read_only_pass_dpc_consent
-            HOST=/dpc/test/db/url
-      - name: Stop old db container if exists
-        run: |
-          docker stop dpc-app-db-1 || echo 'noop, not running'
-      - name: Remove old db container if exists
-        run: |
-          docker rm dpc-app-db-1 || echo 'noop, not exists'
-      - name: Run db container
-        run: |
-          docker run --rm --name dpc-app-db-1 -e POSTGRES_PASSWORD="$DB_PASSWORD" -e PGPASSWORD="$DB_PASSWORD" -d postgres:16.4
-      - name: Verify response file was ingested
-        env:
-          FILENAME: ${{needs.trigger.outputs.filename}}
-        # CAUTION: if changing the script below, validate that sensitive information is not printed in the workflow
-        run: |
-          RESPONSE_FILE_ID=$(docker exec dpc-app-db-1 psql --csv -t -U $DB_USER -h $HOST -d dpc_consent -c "SELECT id FROM opt_out_file WHERE name = '$FILENAME' LIMIT 1" 2>&1)
-          
-          # ---- ADDED DEBUG LOGGING ----
-          echo "DEBUG: RESPONSE_FILE_ID='$RESPONSE_FILE_ID'"
-          
-          if [[ $? -ne 0 || -z "$RESPONSE_FILE_ID" ]]; then
-            echo "input file id query returned zero results or command failed"
-            exit 1
-          else
-            CONSENTS=$(docker exec dpc-app-db-1 psql --csv -t -U $DB_USER -h $HOST -d dpc_consent -c "SELECT COUNT(mbi) FROM consent WHERE opt_out_file_id = '$RESPONSE_FILE_ID'" 2>&1)
-            
-            # ---- ADDED DEBUG LOGGING ----
-            echo "DEBUG: CONSENTS='$CONSENTS'"
-
-            if [[ $? -ne 0 || -z "$CONSENTS" ]]; then
-              echo "consents query returned zero results or command failed"
-              exit 1
-            fi
-          fi
+            if: ${{ always() && needs.trigger.result == 'success' }}
+            needs: trigger
+            runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+            env:
+              ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
+            steps:
+              - uses: aws-actions/configure-aws-credentials@v4
+                with:
+                  aws-region: ${{ vars.AWS_REGION }}
+                  role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+              - name: Get database credentials
+                uses: cmsgov/cdap/actions/aws-params-env-action@main
+                env:
+                  AWS_REGION: ${{ vars.AWS_REGION }}
+                with:
+                  params: |
+                    DB_USER=/dpc/test/consent/db_read_only_user_dpc_consent
+                    DB_PASSWORD=/dpc/test/consent/db_read_only_pass_dpc_consent
+                    HOST=/dpc/test/db/url
+              - name: Stop old db container if exists
+                run: |
+                  docker stop dpc-app-db-1 || echo 'noop, not running'
+              - name: Remove old db container if exists
+                run: |
+                  docker rm dpc-app-db-1 || echo 'noop, not exists'
+              - name: Run db container
+                run: |
+                  docker run --rm --name dpc-app-db-1 -e POSTGRES_PASSWORD="$DB_PASSWORD" -e PGPASSWORD="$DB_PASSWORD" -d postgres:16.4
+              - name: Verify response file was ingested
+                env:
+                  FILENAME: ${{needs.trigger.outputs.filename}}
+                run: |
+                  # ---- ADDED DATABASE POLLING LOOP ----
+                  MAX_RETRIES=10
+                  SLEEP_TIME=10
+                  RETRY_COUNT=0
+                  RESPONSE_FILE_ID=""
+        
+                  while [[ $RETRY_COUNT -lt $MAX_RETRIES ]]; do
+                    RESPONSE_FILE_ID=$(docker exec dpc-app-db-1 psql --csv -t -U $DB_USER -h $HOST -d dpc_consent \
+                      -c "SELECT id FROM opt_out_file WHERE name = '$FILENAME' LIMIT 1" 2>&1)
+        
+                    # ---- ADDED DEBUG LOGGING ----
+                    echo "DEBUG: Attempt $((RETRY_COUNT+1)) - RESPONSE_FILE_ID='$RESPONSE_FILE_ID'"
+        
+                    if [[ ! -z "$RESPONSE_FILE_ID" ]]; then
+                      echo "Row found in opt_out_file table."
+                      break
+                    fi
+        
+                    echo "Row not found yet. Waiting $SLEEP_TIME seconds before retrying..."
+                    sleep $SLEEP_TIME
+                    RETRY_COUNT=$((RETRY_COUNT+1))
+                  done
+        
+                  if [[ -z "$RESPONSE_FILE_ID" ]]; then
+                    echo "ERROR: Response file ID still not found after $MAX_RETRIES attempts."
+                    exit 1
+                  fi
+        
+                  # Original consent check after polling
+                  CONSENTS=$(docker exec dpc-app-db-1 psql --csv -t -U $DB_USER -h $HOST -d dpc_consent \
+                    -c "SELECT COUNT(mbi) FROM consent WHERE opt_out_file_id = '$RESPONSE_FILE_ID'" 2>&1)
+                  echo "DEBUG: CONSENTS='$CONSENTS'"
+                  if [[ $? -ne 0 || -z "$CONSENTS" ]]; then
+                    echo "consents query returned zero results or command failed"
+                    exit 1
+        
