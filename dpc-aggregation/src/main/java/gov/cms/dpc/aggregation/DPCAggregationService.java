@@ -49,9 +49,10 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         // in reverse order, and we don't want the queue DB to be disconnected until after the aggregation engine stops
         // running.
         GuiceBundle guiceBundle = GuiceBundle.builder()
-                .modules(new DPCQueueHibernateModule<>(queueHibernateBundle),
-                        new AggregationAppModule(),
+                .modules(
                         new DPCConsentHibernateModule<>(consentHibernateBundle),
+                        new DPCQueueHibernateModule<>(queueHibernateBundle),
+                        new AggregationAppModule(),
                         new DPCHibernateModule<>(hibernateBundle),
                         new JobQueueModule<DPCAggregationConfiguration>(),
                         new BlueButtonClientModule<DPCAggregationConfiguration>())
