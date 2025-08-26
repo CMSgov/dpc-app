@@ -1,0 +1,37 @@
+{
+  "address": [
+    {
+      "city": "Chestnut Hill",
+      "country": "US",
+      "line": [
+        "200 Boylston Street, 4th Floor",
+        "Suite 66"
+      ],
+      "postalCode": "02467",
+      "state": "MA",
+      "type": "both",
+      "use": "work"
+    }
+  ],
+  "id": "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0",
+  "identifier": [
+    {
+      "system": "http://hl7.org/fhir/sid/us-npi",
+      "value": "3609811336"
+    }
+  ],
+  "name": "Beth Israel Deaconess HealthCare - Chestnut Hill",
+  "resourceType": "Organization",
+  "type": [
+    {
+      "coding": [
+        {
+          "code": "prov",
+          "display": "Healthcare Provider",
+          "system": "http://hl7.org/fhir/organization-type"
+        }
+      ],
+      "text": "Healthcare Provider"
+    }
+  ]
+}

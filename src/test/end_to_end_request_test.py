@@ -33,18 +33,20 @@ def dig(_dict, *keys):
     except (KeyError, IndexError):
         return None
 
-def fhir_headers(org_id=None, attestation=None):
+def attestation(org_id, provider_id):
+    return json.dumps({ "resourceType":"Provenance",
+                        "meta":{ "profile":[ "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attestation" ] },
+                        "recorded": datetime.now(UTC).isoformat(),
+                        "reason":[ { "system":"http://hl7.org/fhir/v3/ActReason", "code":"TREAT" } ],
+                        "agent":[ { "role":[ { "coding":[ { "system":"http://hl7.org/fhir/v3/RoleClass", "code":"AGNT" } ] } ],
+                                    "whoReference":{ "reference":f"Organization/{org_id}" },
+                                    "onBehalfOfReference":{ "reference":f"Practitioner/{provider_id}" } } ] })    
+def fhir_headers(org_id=None, provider_id=None):
     headers = FHIR_HEADERS.copy()
     if org_id:
         headers['Organization'] = org_id
-    if attestation:
-        headers['X-Provenance'] = json.dumps({ "resourceType":"Provenance",
-             "meta":{ "profile":[ "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attestation" ] },
-             "recorded": datetime.now(UTC).isoformat(),
-             "reason":[ { "system":"http://hl7.org/fhir/v3/ActReason", "code":"TREAT" } ],
-             "agent":[ { "role":[ { "coding":[ { "system":"http://hl7.org/fhir/v3/RoleClass", "code":"AGNT" } ] } ],
-                         "whoReference":{ "reference":f"Organization/{org_id}" },
-                         "onBehalfOfReference":{ "reference":f"Practitioner/{attestation}" } } ] })
+    if provider_id:
+        headers['X-Provenance'] = attestation(org_id, provider_id)
 
     return headers
 
@@ -62,20 +64,18 @@ def get(url, headers, response_test, error_test=None):
         else:
             raise ExpectationException('No error', e)
 
-def delete(url, headers):
+def delete(url):
     req = request.Request(url, method='DELETE')
-    for key, value in headers.items():
-        req.add_header(key, value)
     try:
         with request.urlopen(req) as resp:
             return resp
     except URLError as e:
         raise ExpectationException('No error', e)
 
-def post(url, headers, message, response_test, error_test=None):
+def post(url, headers, message, response_test, error_test=None, method='POST'):
     jsondata = json.dumps(message)
     jsondataasbytes = jsondata.encode('utf-8')
-    req = request.Request(url)
+    req = request.Request(url, method=method)
     for key, value in headers.items():
         req.add_header(key, value)
     try:
@@ -399,14 +399,88 @@ def job_result_with_since(org_id, url):
         match_eq(len(data['error']), 0)
         match_eq(len(data['output']), 0)
     return get(url, headers, response_test)
+
+def patient_everything(org_id, provider_id, patient_id):
+    url = API_BASE + f'Patient/{patient_id}/$everything'
+    headers = { 'X-Provenance': attestation(org_id, provider_id) }
+    def response_test(resp, body):
+        match_eq(resp.status, 200)
+        data = json.loads(body)
+        match_eq(data['resourceType'], 'Bundle')
+        resources = [entry['resource'] for entry in data['entry']]
+        match_eq(len(resources), 15)
+        patients = [resource for resource in resources if resource['resourceType'] == 'Patient']
+        coverages = [resource for resource in resources if resource['resourceType'] == 'Coverage']
+        eobs = [resource for resource in resources if resource['resourceType'] == 'ExplanationOfBenefit']
+        match_eq(len(patients), 1)
+        match_eq(len(coverages), 4)
+        match_eq(len(eobs), 10)
+    get(url, headers, response_test)
+
+def update_invalid_content_type(org_id):
+    url = API_BASE + f'Organization/{org_id}'
+    headers = { 'Content-Type': 'application/fire+json' }
+    def error_test(e):
+        match_eq(e.code, 415)
+        body = json.loads(e.fp.read().decode('utf-8'))
+        match_eq(dig(body, 'issue', 0, 'details', 'text',), '`Content-Type:` header must specify valid FHIR content type')
+    org_bundle = bundle('organization_update')
+    return post(url, headers, org_bundle, None, error_test, 'PUT')
+
+
+def update_organization(org_id):
+    url = API_BASE + f'Organization/{org_id}'
+    org_bundle = bundle('organization_update')
+    def response_test(resp, body):
+        basic_test(resp, body)
+        data = json.loads(body)
+        match_eq(data['name'], org_bundle['name'])
+        match_eq(data['address'], org_bundle['address'])
+    return post(url, FHIR_HEADERS, org_bundle, response_test, None, 'PUT')
+
+def find_practitioner_by_npi():
+    url = API_BASE + 'Practitioner?identifier=2459425221'
+    def response_test(resp, body):
+        basic_test(resp, body)
+        data = json.loads(body)
+        match_eq(data['type'], 'searchset')
+        match_eq(data['total'], 1)
+        provider_id = dig(data, 'entry', 0, 'resource', 'id')
+        match_ne(provider_id, None)
+        return provider_id
+    return get(url, {}, response_test)    
+
+def patient_missing_after_delete(patient_id, patient_ids, roster_id):
+    delete(API_BASE + f'Patient/{patient_id}')
+    
+    def response_test(resp, body):
+        basic_test(resp, body)
+        data = json.loads(body)
+        match_eq(len(data['member']), len(patient_ids) - 1)
+        for existing_patient in data['member']:
+            existing_id = dig(existing_patient, 'entity', 'reference').replace('Patient/', '')
+            if not existing_id in patient_ids:
+                raise ExpectationException(f'{existing_id} in patients', 'was not')
+            match_ne(existing_id, patient_id)
+    url = API_BASE + f'Group/{roster_id}'
+    get(url, {}, response_test)
+
+def roster_missing_after_practitioner_delete(practitioner_id):
+    delete(API_BASE + f'Practitioner/{practitioner_id}')
+    url = API_BASE + 'Group?characteristic-value=attributed-to$2459425221'
+    def response_test(resp, body):
+        match_eq(resp.status, 200)
+        data = json.loads(body)
+        match_eq(data['type'], 'searchset')
+        match_eq(data['total'], 0)
+    get(url, {}, response_test)
     
 def run():
-    roster_id = '6e999722-dc04-4c8f-902a-bcf6ef6325f2'
+    roster_id = None
 
     try:
         org_id = create_organization()
         print('Successfully created organization')
-        print(f"    org_id = '{org_id}'")
     except ExpectationException as e:
         print('Failed to create organization')
         print(f'  {e}')
@@ -415,7 +489,6 @@ def run():
         provider_ids = register_providers(org_id)
         providers = True
         print('Successfully registered providers')
-        print(f"    provider_ids = {provider_ids}")
     except ExpectationException as e:
         providers = False
         print('Failed to register providers')
@@ -424,7 +497,6 @@ def run():
         patient_ids = register_patients(org_id)
         patients = True
         print('Successfully registered patients')
-        print(f"    patient_ids = {patient_ids}")
     except ExpectationException as e:
         patients = False
         print('Failed to register patients')
@@ -539,6 +611,49 @@ def run():
             except ExpectationException as e:
                 print('Failed job report')
                 print(f'  {e}')
+    if patient_id:
+        try:
+            patient_everything(org_id, provider_ids[0], patient_id)
+            print('Successful patient everyting')
+        except ExpectationException as e:
+            print('Failed patient everything')
+            print(f'  {e}')
+    try:
+        update_invalid_content_type(org_id)
+        print('Successfully checked update invalid content type')
+    except ExpectationException as e:
+        print('Failed check for invalid content type')
+        print(f'  {e}')
+    try:
+        update_organization(org_id)
+        print('Successful organization update')
+    except ExpectationException as e:
+        print('Failed organization update')
+        print(f'  {e}')
+    if providers:
+        try:
+            provider_id = find_practitioner_by_npi()
+            print('Successfully found practitioner by npi')
+        except ExpectationException as e:
+            provider_id = None
+            print('Failed to find practitioner by npi')
+            print(f'  {e}')
+    if patient_id:
+        try:
+            patient_missing_after_delete(patient_id, patient_ids, roster_id)
+            print('Successfully deleted patient')
+        except ExpectationException as e:
+            provider_id = None
+            print('Failed to delete patient')
+            print(f'  {e}')
+    if provider_id:
+        try:
+            roster_missing_after_practitioner_delete(provider_id)
+            print('Successfully deleted practitioner')
+        except ExpectationException as e:
+            provider_id = None
+            print('Failed to delete practitioner')
+            print(f'  {e}')
 
 if __name__ == '__main__':
     run()
