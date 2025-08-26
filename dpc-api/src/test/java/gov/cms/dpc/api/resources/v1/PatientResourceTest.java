@@ -40,6 +40,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
