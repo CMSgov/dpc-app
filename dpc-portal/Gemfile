@@ -62,6 +62,10 @@ gem 'yard', '>= 0.9.36'
 
 gem 'api_client', path: 'vendor/api_client'
 
+group :production do
+  gem 'pg-aws_rds_iam'
+end
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'bundler-audit'

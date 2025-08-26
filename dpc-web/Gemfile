@@ -54,6 +54,10 @@ gem 'net-imap', '>= 0.5.8'
 
 gem 'api_client', path: 'vendor/api_client'
 
+group :production do
+  gem 'pg-aws_rds_iam'
+end
+
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   gem 'pry'
