@@ -31,7 +31,7 @@ public class DPCAttributionConfiguration extends JobConfiguration implements IDP
     private DataSourceFactory database = new DataSourceFactory();
 
     @NotEmpty
-    private String publicServerURL;
+    private String publicServerURL; // hardcoded to dpc.cms.gov
 
     @Valid
     @NotNull
