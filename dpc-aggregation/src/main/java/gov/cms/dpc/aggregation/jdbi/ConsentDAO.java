@@ -10,6 +10,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +41,8 @@ public class ConsentDAO extends AbstractDAO<ConsentEntity> {
 
             query.from(ConsentEntity.class);
 
-            return list(query);
+            final Query<ConsentEntity> results = session.createQuery(query);
+            return results.getResultList();
         }
     }
 
@@ -52,7 +54,8 @@ public class ConsentDAO extends AbstractDAO<ConsentEntity> {
 
             query.select(root).where(builder.equal(root.get(field), value));
 
-            return list(query);
+            final Query<ConsentEntity> results = session.createQuery(query);
+            return results.getResultList();
         }
     }
 
@@ -64,7 +67,8 @@ public class ConsentDAO extends AbstractDAO<ConsentEntity> {
 
             query.select(root).where(root.get(ConsentEntity_.MBI).in(mbis));
 
-            return list(query);
+            final Query<ConsentEntity> results = session.createQuery(query);
+            return results.getResultList();
         }
     }
 }
