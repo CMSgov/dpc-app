@@ -150,6 +150,15 @@ def match_sha(body, sha):
     match_eq(f'sha256:{m.hexdigest()}', sha)
 
 def match_valid_extension(obj):
+    """ From EndToEndRequestTest (patient example)
+    pm.expect(Object.keys(patient.extension[0]).length).to.equal(2);
+    pm.expect(patient.extension[0].url).to.equal("https://dpc.cms.gov/checksum");
+    pm.expect(patient.extension[0].valueString).to.exist;
+    pm.expect(Object.keys(patient.extension[1]).length).to.equal(2);
+    pm.expect(patient.extension[1].url).to.equal("https://dpc.cms.gov/file_length");
+    pm.expect(patient.extension[1].valueDecimal).to.exist;
+    pm.environment.set("patient", patient);
+    """
     match_eq(len(obj['extension']), 2)
     match_eq(len(dig(obj, 'extension', 0)), 2)
     match_eq(dig(obj, 'extension', 0, 'url'), 'https://dpc.cms.gov/checksum')
@@ -169,6 +178,18 @@ def check_for_roster():
 
 # TESTS
 def create_organization():
+    """ From EndToEndRequestTest
+    pm.test("Status is 201", function () {
+        pm.response.to.have.status(201);
+    });
+
+    // Response should have FHIR Content-Type
+    pm.test("Content-type is application/fhir+json", function() {
+        pm.response.to.have.header("Content-Type", "application/fhir+json");
+    });
+
+    pm.globals.set("organization_id", pm.response.json().id);
+    """
     url = API_BASE + 'Organization/$submit'
     org_bundle = bundle('organization')
     def response_test(resp, body):
@@ -178,6 +199,26 @@ def create_organization():
     return post(url, org_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
 def register_providers():
+    """ From EndToEndRequestTest
+    pm.test("Status is 200", function () {
+        pm.response.to.have.status(200);
+    });
+
+    // Response should have FHIR Content-Type
+    pm.test("Content-type is application/fhir+json", function() {
+       pm.response.to.have.header("Content-Type", "application/fhir+json");
+    });
+
+    // Parse the Bundle and get a list of practitioner ids
+    pm.test("Practitioner bundle correct", function() {
+        pm.response.to.be.ok;
+        var responseOutput = pm.response.json();
+        pm.expect(responseOutput.entry.length).to.equal(1);
+        pm.expect(responseOutput.entry[0].resource.identifier[0].system).to.equal("http://hl7.org/fhir/sid/us-npi");
+        pm.environment.set("provider_npi", responseOutput.entry[0].resource.identifier[0].value);
+        pm.environment.set("provider_id", responseOutput.entry[0].resource.id)
+    });
+    """
     url = API_BASE + 'Practitioner/$submit'
     providers_bundle = bundle('providers')
     def response_test(resp, body):
@@ -187,6 +228,29 @@ def register_providers():
     return post(url, providers_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
 def register_patients():
+    """ From EndToEndRequestTest
+    // Status should be 200
+    pm.test("Status is 200", function () {
+        pm.response.to.have.status(200);
+    });
+
+    // Response should have FHIR Content-Type
+    pm.test("Content-type is application/fhir+json", function() {
+       pm.response.to.have.header("Content-Type", "application/fhir+json");
+    });
+
+    // Parse the Bundle and get a list of practitioner ids
+    pm.test("Patient bundle correct", function() {
+        pm.response.to.be.ok;
+        var responseOutput = pm.response.json();
+        pm.expect(responseOutput.entry.length).to.equal(5);
+
+        var patientIDs = [];
+        responseOutput.entry.forEach(function (entry) {patientIDs.push("Patient/" + entry.resource.id)});
+        console.log(patientIDs);
+        pm.globals.set("patient_ids", JSON.stringify(patientIDs));
+    });
+    """
     url = API_BASE + 'Patient/$submit'
     patients_bundle = bundle('patients')
     def response_test(resp, body):
@@ -197,6 +261,34 @@ def register_patients():
     return post(url, patients_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
 def submit_roster(org_id, provider_id, patient_ids):
+    """ From EndToEndRequestTest
+    // Status should be 201
+    pm.test("Status is 201", function () {
+        pm.response.to.have.status(201);
+    });
+
+    // Response should have FHIR Content-Type
+    pm.test("Content-type is application/fhir+json", function() {
+       pm.response.to.have.header("Content-Type", "application/fhir+json");
+    });
+
+    pm.test("Response Body is correct", () => {
+        console.log("Body correct?");
+        // Check to ensure that each member id matches what we previously had
+        var response = pm.response.json();
+
+        // Ensure that the Patient IDs haven't changed.
+        pm.expect(response.member.length).to.equal(5);
+        var ids = new Set(JSON.parse(pm.globals.get("patient_ids")));
+        response.member.forEach(member => {
+            pm.expect(ids.has(member.entity.reference)).to.be.true;
+            // Ensure that the period temporals are not the same
+            pm.expect(member.period.start).to.not.equal(member.period.end);
+        });
+
+        pm.globals.set("attribution_group_id", response.id);
+    })
+    """
     url = API_BASE + 'Group'
     headers = fhir_headers_with_attestation(org_id, provider_id)
     data = bundle('roster')
@@ -215,6 +307,32 @@ def submit_roster(org_id, provider_id, patient_ids):
     return post(url, data, headers=headers, response_test=response_test)
 
 def find_patient_by_mbi():
+    """ From EndToEndRequestTest
+    // Status should be 200
+    pm.test("Status is 200", function () {
+        pm.response.to.have.status(200);
+    });
+
+    // Response should have FHIR Content-Type
+    pm.test("Content-type is application/fhir+json", function() {
+       pm.response.to.have.header("Content-Type", "application/fhir+json");
+    });
+
+    pm.test("Bundle should have a single entry", function() {
+        var response = pm.response.json();
+
+        // Should be a search set with 1 entry
+        pm.expect(response.type).to.equal("searchset")
+        pm.expect(response.total).to.equal(1);
+
+        pm.globals.set("single_patient_id", "Patient/" + response.entry[0].resource.id);
+    })
+    pm.test("Result should have MBI as uppercase", function() {
+        var response = pm.response.json();
+        var mbiIdentifier = response.entry[0].resource.identifier.filter(identifier => identifier.system == "http://hl7.org/fhir/sid/us-mbi")[0]
+        pm.expect(mbiIdentifier.value).to.equal("1SQ3F00AA00");
+    })
+    """
     url = API_BASE + 'Patient?identifier=1SQ3F00AA00'
     def response_test(resp, body):
         match_fhir_ok(resp)
@@ -226,6 +344,29 @@ def find_patient_by_mbi():
     return get(url, headers=FHIR_HEADERS, response_test=response_test)
 
 def find_roster_by_npi(roster_id):
+    """ From EndToEndRequestTest
+    // Status should be 200
+    pm.test("Status is 200", function () {
+        pm.response.to.have.status(200);
+    });
+
+    // Response should have FHIR Content-Type
+    pm.test("Content-type is application/fhir+json", function() {
+       pm.response.to.have.header("Content-Type", "application/fhir+json");
+    });
+
+    pm.test("Bundle should have a single entry", function() {
+        var response = pm.response.json();
+
+        // Should be a search set with 1 entry
+        pm.expect(response.type).to.equal("searchset")
+        pm.expect(response.total).to.equal(1);
+
+        console.log("Entry:", response.entry[0]);
+        console.log("Stringed: ", JSON.stringify(response));
+        pm.globals.set("attribution_group", JSON.stringify(response.entry[0].resource));
+    })
+    """
     url = API_BASE + 'Group?characteristic-value=attributed-to$2459425221'
     def response_test(resp, body):
         match_fhir_ok(resp)
@@ -237,6 +378,7 @@ def find_roster_by_npi(roster_id):
     get(url, headers=FHIR_HEADERS, response_test=response_test)
 
 def add_patient_to_roster(org_id, roster_id, provider_id, patient_id):
+    """ not in From EndToEndRequestTest, but needed for robustness """
     url = API_BASE + f'Group/{roster_id}/$add'
     headers = fhir_headers_with_attestation(org_id, provider_id)
     data = bundle('roster')
@@ -251,6 +393,26 @@ def add_patient_to_roster(org_id, roster_id, provider_id, patient_id):
     post(url, data, headers=headers, response_test=response_test)
 
 def remove_patient_from_roster(org_id, roster_id, provider_id, patient_id):
+    """ From EndToEndRequestTest
+    // Status should be 200
+    pm.test("Status is 200", function () {
+        pm.response.to.have.status(200);
+    });
+
+    // Response should have FHIR Content-Type
+    pm.test("Content-type is application/fhir+json", function() {
+       pm.response.to.have.header("Content-Type", "application/fhir+json");
+    });
+
+    pm.test("Group should have one inactive member", function() {
+        var response = pm.response.json();
+
+        // Should be a search set with one less entry
+        console.debug(response.member);
+        pm.expect(response.member.filter(member => member.inactive === false)).to.have.lengthOf(4);
+        pm.expect(response.member.filter(member => member.inactive === true)).to.have.lengthOf(1);
+    });
+    """
     url = API_BASE + f'Group/{roster_id}/$remove'
     headers = fhir_headers_with_attestation(org_id, provider_id)
     data = bundle('roster')
@@ -263,6 +425,25 @@ def remove_patient_from_roster(org_id, roster_id, provider_id, patient_id):
     post(url, data, headers=headers, response_test=response_test)
 
 def add_unknown_patient_to_roster(org_id, roster_id, provider_id):
+    """ From EndToEndRequestTest
+    // Status should be 400
+    pm.test("Status is 400", function () {
+        pm.response.to.have.status(400);
+    });
+
+    // Response should have FHIR Content-Type
+    pm.test("Content-type is application/fhir+json", function() {
+       pm.response.to.have.header("Content-Type", "application/fhir+json");
+    });
+
+    pm.test("Outcome has a useful error message", function() {
+        var response = pm.response.json();
+
+        // Should be a search set with one less entry
+        pm.expect(response.issue).to.have.length(1);
+        pm.expect(response.issue[0].details.text).to.have.string('All patients in group must exist. Cannot find 1 patient(s).');
+    });
+    """
     url = API_BASE + f'Group/{roster_id}/$add'
     headers = fhir_headers_with_attestation(org_id, provider_id)
     data = bundle('roster')
@@ -275,6 +456,24 @@ def add_unknown_patient_to_roster(org_id, roster_id, provider_id):
     post(url, data, headers=headers, error_test=error_test)
 
 def bulk_export(roster_id):
+    """ From EndToEndRequestTest
+    // Status should be 202
+    pm.test("Status is 202", function () {
+        pm.response.to.have.status(202);
+    });
+
+    // Url for job response should be in content-location header.
+    pm.test("Content-Location header is present", function () {
+        pm.response.to.have.header("Content-Location");
+    });
+
+    if (pm.response.headers.get("Content-Location")) {
+      pm.environment.set("content_location", pm.response.headers.get("Content-Location"));
+    } else {
+      // Fail the test, no content location.
+      pm.execution.setNextRequest(null);
+    }
+    """
     url = API_BASE + f'Group/{roster_id}/$export'
     headers = async_fhir_headers()
 
@@ -285,6 +484,84 @@ def bulk_export(roster_id):
     return get(url, headers=headers, response_test=response_test)
 
 def job_result(org_id, url):
+    """ From EndToEndRequestTest
+    if (pm.response.code == 200) {
+        // Response should have FHIR Content-Type
+        pm.test("Content-type is application/json", function() {
+           pm.response.to.have.header("Content-Type", "application/json");
+        });
+
+        // If response code is 200, check the response and load the urls.
+        pm.test("Patient, EOB, and Coverage resources; one error file", function() {
+            pm.expect(pm.response.json().error).to.have.lengthOf(1);
+            pm.expect(pm.response.json().output).to.have.lengthOf(3);
+
+            // Order of the output types is not guaranteed
+            var outputTypes = pm.response.json().output.map((elem) => elem.type);
+            pm.expect(outputTypes).to.include("Patient");
+            pm.expect(outputTypes).to.include("Coverage");
+            pm.expect(outputTypes).to.include("ExplanationOfBenefit");
+
+            // Patient
+            var patient = pm.response.json().output.filter((elem) => elem.type == "Patient")[0];
+            console.log("patient: ", patient);
+            pm.expect(patient.count).to.equal(3);
+            pm.expect(Object.keys(patient.extension[0]).length).to.equal(2);
+            pm.expect(patient.extension[0].url).to.equal("https://dpc.cms.gov/checksum");
+            pm.expect(patient.extension[0].valueString).to.exist;
+            pm.expect(Object.keys(patient.extension[1]).length).to.equal(2);
+            pm.expect(patient.extension[1].url).to.equal("https://dpc.cms.gov/file_length");
+            pm.expect(patient.extension[1].valueDecimal).to.exist;
+            pm.environment.set("patient", patient);
+
+            // EOB
+            var eob = pm.response.json().output.filter((elem) => elem.type == "ExplanationOfBenefit")[0];
+            console.log("eob: ", eob);
+            pm.expect(eob.count).to.be.above(100);
+            pm.expect(Object.keys(eob.extension[0]).length).to.equal(2);
+            pm.expect(eob.extension[0].url).to.equal("https://dpc.cms.gov/checksum");
+            pm.expect(eob.extension[0].valueString).to.exist;
+            pm.expect(Object.keys(eob.extension[1]).length).to.equal(2);
+            pm.expect(eob.extension[1].url).to.equal("https://dpc.cms.gov/file_length");
+            pm.expect(eob.extension[1].valueDecimal).to.exist;
+            pm.environment.set("eob", eob);
+
+            // Coverage
+            var coverage = pm.response.json().output.filter((elem) => elem.type == "Coverage")[0];
+            pm.expect(coverage.count).to.equal(12);
+            pm.expect(Object.keys(coverage.extension[0]).length).to.equal(2);
+            pm.expect(coverage.extension[0].url).to.equal("https://dpc.cms.gov/checksum");
+            pm.expect(coverage.extension[0].valueString).to.exist;
+            pm.expect(Object.keys(coverage.extension[1]).length).to.equal(2);
+            pm.expect(coverage.extension[1].url).to.equal("https://dpc.cms.gov/file_length");
+            pm.expect(coverage.extension[1].valueDecimal).to.exist;
+            pm.environment.set("coverage", coverage);
+
+            // OperationOutcome
+            var operationOutcome = pm.response.json().error.filter((elem) => elem.type == "OperationOutcome")[0];
+            pm.expect(operationOutcome.count).to.equal(1);
+            pm.expect(Object.keys(operationOutcome.extension[0]).length).to.equal(2);
+            pm.expect(operationOutcome.extension[0].url).to.equal("https://dpc.cms.gov/checksum");
+            pm.expect(operationOutcome.extension[0].valueString).to.exist;
+            pm.expect(Object.keys(operationOutcome.extension[1]).length).to.equal(2);
+            pm.expect(operationOutcome.extension[1].url).to.equal("https://dpc.cms.gov/file_length");
+            pm.expect(operationOutcome.extension[1].valueDecimal).to.exist;
+            pm.environment.set("operationOutcome", operationOutcome);
+
+            var expiresHeader = pm.response.headers.get("Expires");
+            pm.expect(expiresHeader).to.exist;
+            var expiresInHrs = (Date.parse(expiresHeader) - Date.now())/3600000;
+            pm.expect(expiresInHrs).to.be.above(23);
+            pm.expect(expiresInHrs).to.be.below(24);
+        });
+    } else {
+        // If response code is not 200, it should be 202. Assert that, and retry.
+        pm.test("Status code is 202", function () {
+            pm.response.to.have.status(202);
+        });
+        pm.execution.setNextRequest("Job response");
+    }
+    """
     class JobResults:
         def __init__(self, data):
             self.outputs = {}
@@ -362,6 +639,34 @@ def job_result(org_id, url):
     return get(url, response_test=response_test)
 
 def patient_data(url, sha):
+    """ From EndToEndRequestTest
+    // Response should have FHIR Content-Type
+    pm.test("Content-type is application/ndjson", function() {
+       pm.response.to.have.header("Content-Type", "application/ndjson");
+    });
+
+    // There should be 2 patients.
+    pm.test("Patient data correct", function() {
+        var responseOutput = pm.response.text();
+        var responseLines = responseOutput.trim().split('\\n');
+        pm.expect(responseLines).to.have.lengthOf(3);
+        for (var line of responseLines) {
+            var lineData = JSON.parse(line);
+            pm.expect(lineData.resourceType).to.equal("Patient");
+            var mbi = lineData.identifier.find(i => i.system === "http://hl7.org/fhir/sid/us-mbi");
+            pm.expect(mbi).not.eq(undefined);
+        }
+    });
+
+    // Verify sha256 checksums
+    pm.test("Checksums should match", function() {
+        var output = pm.environment.get("patient")
+        var responseOutput = pm.response.text();
+
+        var checksum  = CryptoJS.SHA256(responseOutput);
+        pm.expect("sha256:" + checksum).to.equal(output.extension[0].valueString)
+    })
+    """
     def response_test(resp, body):
         match_ndjson_ok(resp)
         lines = [l for l in body.split('\n') if l]
@@ -375,6 +680,24 @@ def patient_data(url, sha):
     get(url, response_test=response_test)
 
 def eob_data(url):
+    """ From EndToEndRequestTest
+    // Response should have FHIR Content-Type
+    pm.test("Content-type is application/ndjson", function() {
+       pm.response.to.have.header("Content-Type", "application/ndjson");
+       pm.environment.set("file_timestamp", pm.response.headers.get("Last-Modified"))
+    });
+
+    // There should be 86 Explanations of Benefits.
+    pm.test("Explanation of Benefits data correct", function() {
+        var responseOutput = pm.response.text();
+        var responseLines = responseOutput.trim().split('\\n');
+        pm.expect(responseLines.length).to.be.above(100);
+        for (var line of responseLines) {
+            var lineData = JSON.parse(line);
+            pm.expect(lineData.resourceType).to.equal("ExplanationOfBenefit");
+        }
+    });
+    """
     def response_test(resp, body):
         match_ndjson_ok(resp)
         lines = [l for l in body.split('\n') if l]
@@ -387,6 +710,33 @@ def eob_data(url):
     return get(url, response_test=response_test)
 
 def coverage_data(url, sha):
+    """ From EndToEndRequestTest
+    // Response should have FHIR Content-Type
+    pm.test("Content-type is application/ndjson", function() {
+       pm.response.to.have.header("Content-Type", "application/ndjson");
+    });
+
+    // There should be 8 coverage.
+    pm.test("Coverage data correct", function() {
+        var responseOutput = pm.response.text();
+        var responseLines = responseOutput.trim().split('\\n');
+        pm.expect(responseLines).to.have.lengthOf(12);
+        for (var line of responseLines) {
+            var lineData = JSON.parse(line);
+            pm.expect(lineData.resourceType).to.equal("Coverage");
+        }
+    });
+
+    // Verify sha256 checksum
+    pm.test("Checksum should match", function() {
+        var output = pm.environment.get("coverage")
+        var responseOutput = pm.response.text();
+
+        var checksum  = CryptoJS.SHA256(responseOutput);
+        pm.expect("sha256:" + checksum).to.equal(output.extension[0].valueString)
+
+    })
+    """
     def response_test(resp, body):
         match_ndjson_ok(resp)
         lines = [l for l in body.split('\n') if l]
@@ -399,6 +749,35 @@ def coverage_data(url, sha):
     get(url, response_test=response_test)
 
 def operation_outcome_data(url, sha):
+    """ From EndToEndRequestTest
+    // Response should have FHIR Content-Type
+    pm.test("Content-type is application/ndjson", function() {
+       pm.response.to.have.header("Content-Type", "application/ndjson");
+    });
+
+    // There should be 1 operation outcome.
+    pm.test("OperationOutcome data correct", function() {
+        var responseOutput = pm.response.text();
+        var responseLines = responseOutput.trim().split('\\n');
+        pm.expect(responseLines).to.have.lengthOf(1);
+        var operationOutcomeItem = JSON.parse(responseLines[0]);
+        pm.expect(operationOutcomeItem.resourceType).to.equal("OperationOutcome");
+        pm.expect(operationOutcomeItem.issue).to.have.lengthOf(1);
+        var issue = operationOutcomeItem.issue[0];
+        pm.expect(issue.details.text).to.equal("Unable to retrieve patient data due to internal error");
+        pm.expect(issue.location).to.include('0S80C00AA00');
+    });
+
+    // Verify sha256 checksum
+    pm.test("Checksum should match", function() {
+        var output = pm.environment.get("operationOutcome")
+        var responseOutput = pm.response.text();
+
+        var checksum  = CryptoJS.SHA256(responseOutput);
+        pm.expect("sha256:" + checksum).to.equal(output.extension[0].valueString)
+
+    })
+    """
     def response_test(resp, body):
         match_ndjson_ok(resp)
         lines = [l for l in body.split('\n') if l]
@@ -415,6 +794,21 @@ def operation_outcome_data(url, sha):
     get(url, response_test=response_test)
 
 def request_partial_range(url):
+    """ From EndToEndRequestTest
+    // Response should have FHIR Content-Type
+    pm.test("Content-type is application/ndjson", function() {
+       pm.response.to.have.header("Content-Range");
+    });
+
+    // Should be 10kb total
+    pm.test('Should have 10kb of data', function() {
+        pm.expect(pm.response.text().length).to.be.above(10000);
+    })
+
+    pm.test('Content should be gzipped', function() {
+        pm.response.to.have.header("Content-Encoding", "gzip");
+    })
+    """
     requested_byte_count = 10240
     headers = {'Range': f'bytes=0-{requested_byte_count}'}
     def response_test(resp, body):
@@ -424,12 +818,36 @@ def request_partial_range(url):
     get(url, headers=headers, response_test=response_test)
 
 def request_modified_since(url, file_timestamp):
+    """ From EndToEndRequestTest
+    // Response should be 304
+    pm.test('Response should be not-modified', function() {
+        pm.response.to.have.status(304);
+    })
+    """
     headers = {'If-Modified-Since': file_timestamp}
     def error_test(e):
         match_eq(e.code, 304)
     get(url, headers=headers, error_test=error_test)
 
 def bulk_export_since(roster_id):
+    """ From EndToEndRequestTest
+    // Status should be 202
+    pm.test("Status is 202", function () {
+        pm.response.to.have.status(202);
+    });
+
+    // Url for job response should be in content-location header.
+    pm.test("Content-Location header is present", function () {
+        pm.response.to.have.header("Content-Location");
+    });
+
+    if (pm.response.headers.get("Content-Location")) {
+      pm.environment.set("since_content_location", pm.response.headers.get("Content-Location"));
+    } else {
+      // Fail the test, no content location.
+      pm.execution.setNextRequest(null);
+    }
+    """
     url = API_BASE + f'Group/{roster_id}/$export?_since={datetime.now(UTC).isoformat()[:23]}Z'
 
     def response_test(resp, _):
@@ -439,6 +857,26 @@ def bulk_export_since(roster_id):
     return get(url, headers=async_fhir_headers(), response_test=response_test)
 
 def job_result_with_since(org_id, url):
+    """ From EndToEndRequestTest
+    if (pm.response.code == 200) {
+        // Response should have FHIR Content-Type
+        pm.test("Content-type is application/json", function() {
+           pm.response.to.have.header("Content-Type", "application/json");
+        });
+
+        // If response code is 200, check the response and load the urls.
+        pm.test("Empty output and no errors", function() {
+            pm.expect(pm.response.json().error).to.have.lengthOf(0);
+            pm.expect(pm.response.json().output).to.have.lengthOf(0);
+        });
+    } else {
+        // If response code is not 200, it should be 202. Assert that, and retry.
+        pm.test("Status code is 202", function () {
+            pm.response.to.have.status(202);
+        });
+        pm.execution.setNextRequest("_since job response");
+    }
+    """
     def response_test(resp, body):
         if resp.status == 202:
             time.sleep(1)
@@ -452,6 +890,23 @@ def job_result_with_since(org_id, url):
     return get(url, response_test=response_test)
 
 def patient_everything(org_id, provider_id, patient_id):
+    """ From EndToEndRequestTest
+    pm.test("Status code should be 200", function () {
+        pm.response.to.have.status(200);
+    });
+
+    pm.test("Response should be a Bundle", function() {
+        var response = pm.response.json();
+        pm.expect(response.resourceType).to.equal("Bundle");
+        var entries = response.entry;
+        var patients = entries.filter(e => e.resource.resourceType === "Patient");
+        pm.expect(patients.length).to.equal(1);
+        var coverage = entries.filter(e => e.resource.resourceType === "Coverage");
+        pm.expect(coverage.length).to.equal(4);
+        var eob = entries.filter(e => e.resource.resourceType === "ExplanationOfBenefit");
+        pm.expect(eob.length).to.equal(10);
+    });
+    """
     url = API_BASE + f'Patient/{patient_id}/$everything'
     headers = { 'X-Provenance': attestation(org_id, provider_id) }
     def response_test(resp, body):
@@ -473,6 +928,17 @@ def patient_everything(org_id, provider_id, patient_id):
     get(url, headers=headers, response_test=response_test)
 
 def update_invalid_content_type(org_id):
+    """ From EndToEndRequestTest
+    pm.test("Status is 415", function () {
+        pm.response.to.have.status(415);
+    });
+
+    pm.test("Body matches expected response", function() {
+        var respJson = pm.response.json();
+        pm.expect(respJson.issue).to.have.length(1)
+        pm.expect(respJson.issue[0].details.text).to.be.equal("`Content-Type:` header must specify valid FHIR content type")
+    });
+    """
     url = API_BASE + f'Organization/{org_id}'
     headers = { 'Content-Type': 'application/fire+json' }
     def error_test(e):
@@ -483,6 +949,22 @@ def update_invalid_content_type(org_id):
     return put(url, org_bundle, headers=headers, error_test=error_test)
 
 def update_organization(org_id):
+    """ From EndToEndRequestTest
+    pm.test("Status is OK", function () {
+        pm.response.to.be.ok;
+    });
+
+    pm.test("Body matches expected response", function() {
+        var respJson = pm.response.json();
+        pm.expect(respJson.name).equals("Beth Israel Deaconess HealthCare - Chestnut Hill");
+
+        var address = respJson.address[0];
+        pm.expect(address.line[0]).equals("200 Boylston Street, 4th Floor");
+        pm.expect(address.city).equals("Chestnut Hill");
+        pm.expect(address.state).equals("MA");
+        pm.expect(address.postalCode).equals("02467");
+    });
+    """
     url = API_BASE + f'Organization/{org_id}'
     org_bundle = bundle('organization_update')
     def response_test(resp, body):
@@ -493,6 +975,27 @@ def update_organization(org_id):
     return put(url, org_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
 def find_practitioner_by_npi():
+    """ From EndToEndRequestTest
+    // Status should be 200
+    pm.test("Status is 200", function () {
+        pm.response.to.have.status(200);
+    });
+
+    // Response should have FHIR Content-Type
+    pm.test("Content-type is application/fhir+json", function() {
+       pm.response.to.have.header("Content-Type", "application/fhir+json");
+    });
+
+    pm.test("Bundle should have a single entry", function() {
+        var response = pm.response.json();
+
+        // Should be a search set with 1 entry
+        pm.expect(response.type).to.equal("searchset")
+        pm.expect(response.total).to.equal(1);
+
+        pm.globals.set("single_practitioner_id", response.entry[0].resource.id);
+    })
+    """
     url = API_BASE + 'Practitioner?identifier=2459425221'
     def response_test(resp, body):
         match_fhir_ok(resp)
@@ -505,6 +1008,37 @@ def find_practitioner_by_npi():
     return get(url, response_test=response_test)
 
 def patient_missing_after_delete(patient_id, patient_ids, roster_id):
+    """ From EndToEndRequestTest
+    // Status should be 200
+    pm.test("Status is 200", function () {
+        pm.response.to.have.status(200);
+    });
+
+    // Response should have FHIR Content-Type
+    pm.test("Content-type is application/fhir+json", function() {
+       pm.response.to.have.header("Content-Type", "application/fhir+json");
+    });
+
+    pm.test("Response Body is correct", () => {
+        console.log("Body correct?");
+        const patient_id = pm.globals.get("single_patient_id")
+        // Check to ensure that each member id matches what we previously had
+        var response = pm.response.json();
+
+        // Ensure that the Patient IDs is less than the original submission number
+        pm.expect(response.member.length).to.equal(4);
+        var ids = new Set(JSON.parse(pm.globals.get("patient_ids")));
+        const matchingPatient = response.member.filter(member => {
+            pm.expect(ids.has(member.entity.reference)).to.be.true;
+            return member.entity.referenced === patient_id
+        });
+        pm.expect(matchingPatient).to.be.empty;
+
+        pm.globals.set("attribution_group_id", response.id);
+    })
+
+    """
+    # Note: there is no test for deletion
     delete(API_BASE + f'Patient/{patient_id}')
 
     def response_test(resp, body):
@@ -520,6 +1054,16 @@ def patient_missing_after_delete(patient_id, patient_ids, roster_id):
     get(url, response_test=response_test)
 
 def roster_missing_after_practitioner_delete(practitioner_id):
+    """ From EndToEndRequestTest
+    pm.test("Bundle should be empty", function() {
+        var response = pm.response.json();
+
+        // Should be a search set with 0 entries
+        pm.expect(response.type).to.equal("searchset")
+        pm.expect(response.total).to.equal(0);
+    })
+    """
+    # Note: there is no test for deletion
     delete(API_BASE + f'Practitioner/{practitioner_id}')
 
     url = API_BASE + 'Group?characteristic-value=attributed-to$2459425221'
