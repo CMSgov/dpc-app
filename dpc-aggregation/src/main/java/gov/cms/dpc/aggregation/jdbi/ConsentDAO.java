@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import java.util.List;
@@ -21,7 +22,6 @@ public class ConsentDAO extends AbstractDAO<ConsentEntity> {
     @Inject
     public ConsentDAO(DPCConsentManagedSessionFactory factory) {
         super(factory.getSessionFactory());
-
         this.sessionFactory = factory.getSessionFactory();
     }
 
@@ -34,29 +34,37 @@ public class ConsentDAO extends AbstractDAO<ConsentEntity> {
     }
 
     public final List<ConsentEntity> list() {
-        final CriteriaBuilder builder = this.sessionFactory.getCurrentSession().getCriteriaBuilder();
-        final CriteriaQuery<ConsentEntity> query = builder.createQuery(ConsentEntity.class);
-        query.from(ConsentEntity.class);
-        return list(query);
+        try (Session session = this.sessionFactory.openSession()) {
+            final CriteriaBuilder builder = session.getCriteriaBuilder();
+            final CriteriaQuery<ConsentEntity> query = builder.createQuery(ConsentEntity.class);
+
+            query.from(ConsentEntity.class);
+
+            return list(query);
+        }
     }
 
     public final List<ConsentEntity> findBy(String field, String value) {
-        final CriteriaBuilder builder = this.sessionFactory.getCurrentSession().getCriteriaBuilder();
-        final CriteriaQuery<ConsentEntity> query = builder.createQuery(ConsentEntity.class);
-        final Root<ConsentEntity> root = query.from(ConsentEntity.class);
+        try (Session session = this.sessionFactory.openSession()) {
+            final CriteriaBuilder builder = session.getCriteriaBuilder();
+            final CriteriaQuery<ConsentEntity> query = builder.createQuery(ConsentEntity.class);
+            final Root<ConsentEntity> root = query.from(ConsentEntity.class);
 
-        query.select(root).where(builder.equal(root.get(field), value));
+            query.select(root).where(builder.equal(root.get(field), value));
 
-        return list(query);
+            return list(query);
+        }
     }
 
     public final List<ConsentEntity> findByMbis(List<String> mbis) {
-        final CriteriaBuilder builder = this.sessionFactory.getCurrentSession().getCriteriaBuilder();
-        final CriteriaQuery<ConsentEntity> query = builder.createQuery(ConsentEntity.class);
-        final Root<ConsentEntity> root = query.from(ConsentEntity.class);
+        try (Session session = this.sessionFactory.openSession()) {
+            final CriteriaBuilder builder = session.getCriteriaBuilder();
+            final CriteriaQuery<ConsentEntity> query = builder.createQuery(ConsentEntity.class);
+            final Root<ConsentEntity> root = query.from(ConsentEntity.class);
 
-        query.select(root).where(root.get(ConsentEntity_.MBI).in(mbis));
+            query.select(root).where(root.get(ConsentEntity_.MBI).in(mbis));
 
-        return list(query);
+            return list(query);
+        }
     }
 }
