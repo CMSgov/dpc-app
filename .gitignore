@@ -2,6 +2,7 @@
 .vscode/
 *.iml
 .DS_Store
+__pycache__
 
 application.local.conf
 target/

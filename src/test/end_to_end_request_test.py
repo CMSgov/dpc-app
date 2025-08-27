@@ -121,7 +121,7 @@ def put(url, request_body, **kwargs):
     return post(url, request_body, method='PUT', **kwargs)
 
 def bundle(name):
-    with open(f'{WORKING_DIR}/bundles/{name}_bundle.json') as f:
+    with open(f'{WORKING_DIR}/resources/e-2-e-bundles/{name}_bundle.json') as f:
         return json.load(f)
 
 def match_fhir_ok(resp):
@@ -317,7 +317,6 @@ def job_result(org_id, url):
         def operation_outcome_sha(self):
             return dig(self.operation_outcome, 'extension', 0, 'valueString')
 
-    headers = {}
     def response_test(resp, body):
         if resp.status == 202:
             time.sleep(1)
@@ -360,7 +359,7 @@ def job_result(org_id, url):
         match_valid_extension(operation_outcome)
 
         return job_results
-    return get(url, headers=headers, response_test=response_test)
+    return get(url, response_test=response_test)
 
 def patient_data(url, sha):
     def response_test(resp, body):
@@ -417,16 +416,18 @@ def operation_outcome_data(url, sha):
 
 def request_partial_range(url):
     requested_byte_count = 10240
+    headers = {'Range': f'bytes=0-{requested_byte_count}'}
     def response_test(resp, body):
         if not 'content-range' in resp.headers:
             raise ExpectationException('Content-range in headers', 'Not in headers')
         match_eq(len(body), requested_byte_count)
-    get(url, headers={'Range': f'bytes=0-{requested_byte_count}'}, response_test=response_test)
+    get(url, headers=headers, response_test=response_test)
 
 def request_modified_since(url, file_timestamp):
+    headers = {'If-Modified-Since': file_timestamp}
     def error_test(e):
         match_eq(e.code, 304)
-    get(url, headers={'If-Modified-Since': file_timestamp}, error_test=error_test)
+    get(url, headers=headers, error_test=error_test)
 
 def bulk_export_since(roster_id):
     url = API_BASE + f'Group/{roster_id}/$export?_since={datetime.now(UTC).isoformat()[:23]}Z'
