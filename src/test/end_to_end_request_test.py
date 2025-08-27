@@ -6,17 +6,18 @@ Runs end-to-end test of API
 from datetime import datetime, UTC
 import hashlib
 import json
+import pathlib
 import sys
 import time
 from urllib import request
 from urllib.error import URLError
 
-import pathlib
 WORKING_DIR = pathlib.Path(__file__).parent.resolve()
 
 API_BASE = 'http://localhost:3002/api/v1/'
 
 FHIR_TYPE = 'application/fhir+json'
+
 FHIR_HEADERS = {'Accept': FHIR_TYPE, 'Content-Type': FHIR_TYPE}
 
 class ExpectationException(Exception):
@@ -59,45 +60,65 @@ def async_fhir_headers():
 
     return headers
 
-def get(url, headers, response_test, error_test=None):
-    req = request.Request(url)
-    for key, value in headers.items():
+def get(url, **kwargs):
+    """
+    keyword args:
+    headers
+    response_test
+    error_test
+    method
+    """
+    method = kwargs.get('method', 'GET')
+    req = request.Request(url, method=method)
+    for key, value in kwargs.get('headers', {}).items():
         req.add_header(key, value)
     try:
         with request.urlopen(req) as resp:
             body = resp.read().decode('utf-8')
-            if response_test:
-                return response_test(resp, body)
+            return kwargs['response_test'](resp, body)
+    except KeyError as ke:
+        if 'error_test' in kwargs:
+            raise ExpectationException('Bad HTTP status', resp.status) from ke
+        raise ke
     except URLError as e:
-        if error_test:
-            return error_test(e)
+        if 'error_test' in kwargs:
+            return kwargs['error_test'](e)
         raise ExpectationException('No error', e) from e
     return None
 
 def delete(url):
-    req = request.Request(url, method='DELETE')
-    try:
-        with request.urlopen(req) as resp:
-            return resp
-    except URLError as e:
-        raise ExpectationException('No error', e) from e
-    return None
+    return get(url, method='DELETE', response_test=lambda x,y: None)
 
-def post(url, headers, message, response_test, error_test=None, method='POST'):
-    jsondata = json.dumps(message)
+def post(url, request_body, **kwargs):
+    """
+    keyword args:
+    headers
+    response_test
+    error_test
+    method
+    """
+    jsondata = json.dumps(request_body)
     jsondataasbytes = jsondata.encode('utf-8')
+    method = kwargs.get('method', 'POST')
     req = request.Request(url, method=method)
-    for key, value in headers.items():
+    for key, value in kwargs.get('headers', {}).items():
         req.add_header(key, value)
     try:
         with request.urlopen(req, jsondataasbytes) as resp:
             body = resp.read().decode('utf-8')
-            return response_test(resp, body)
+            return kwargs['response_test'](resp, body)
+    except KeyError as ke:
+        if 'error_test' in kwargs:
+            raise ExpectationException('Bad HTTP status', resp.status) from ke
+        raise ke
     except URLError as e:
-        if error_test:
-            return error_test(e)
+        if 'error_test' in kwargs:
+            return kwargs['error_test'](e)
         raise ExpectationException('No error', e) from e
     return None
+
+def put(url, request_body, **kwargs):
+    return post(url, request_body, method='PUT', **kwargs)
 
 def bundle(name):
     with open(f'{WORKING_DIR}/bundles/{name}_bundle.json') as f:
@@ -144,8 +165,7 @@ def check_for_roster():
         roster = json.loads(body)
         return dig(roster, 'entry', 0, 'resource', 'id')
 
-    return get(url, FHIR_HEADERS, response_test)
-
+    return get(url, headers=FHIR_HEADERS, response_test=response_test)
 
 # TESTS
 def create_organization():
@@ -155,7 +175,7 @@ def create_organization():
         match_fhir_ok(resp)
         org = json.loads(body)
         return org['id']
-    return post(url, FHIR_HEADERS, org_bundle, response_test)
+    return post(url, org_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
 def register_providers():
     url = API_BASE + 'Practitioner/$submit'
@@ -164,7 +184,7 @@ def register_providers():
         match_fhir_ok(resp)
         providers = json.loads(body)
         return [entry['resource']['id'] for entry in providers['entry']]
-    return post(url, FHIR_HEADERS, providers_bundle, response_test)
+    return post(url, providers_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
 def register_patients():
     url = API_BASE + 'Patient/$submit'
@@ -174,7 +194,7 @@ def register_patients():
         patients = json.loads(body)
         match_eq(len(dig(patients, 'entry') or []), 5)
         return [dig(patient, 'resource', 'id') for patient in dig(patients, 'entry')]
-    return post(url, FHIR_HEADERS, patients_bundle, response_test)
+    return post(url, patients_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
 def submit_roster(org_id, provider_id, patient_ids):
     url = API_BASE + 'Group'
@@ -192,7 +212,7 @@ def submit_roster(org_id, provider_id, patient_ids):
             match_truth(dig(patient, 'entity', 'reference'), 'patient entity reference')
             match_ne(dig(patient, 'period', 'start'), dig(patient, 'period', 'end'))
         return roster['id']
-    return post(url, headers, data, response_test)
+    return post(url, data, headers=headers, response_test=response_test)
 
 def find_patient_by_mbi():
     url = API_BASE + 'Patient?identifier=1SQ3F00AA00'
@@ -203,7 +223,7 @@ def find_patient_by_mbi():
         match_eq(dig(patient, 'total'), 1)
         return dig(patient, 'entry', 0, 'resource', 'id')
 
-    return get(url, FHIR_HEADERS, response_test)
+    return get(url, headers=FHIR_HEADERS, response_test=response_test)
 
 def find_roster_by_npi(roster_id):
     url = API_BASE + 'Group?characteristic-value=attributed-to$2459425221'
@@ -214,7 +234,7 @@ def find_roster_by_npi(roster_id):
         match_eq(dig(roster, 'total'), 1)
         match_eq(dig(roster, 'entry', 0, 'resource', 'id'), roster_id)
 
-    get(url, FHIR_HEADERS, response_test)
+    get(url, headers=FHIR_HEADERS, response_test=response_test)
 
 def add_patient_to_roster(org_id, roster_id, provider_id, patient_id):
     url = API_BASE + f'Group/{roster_id}/$add'
@@ -228,7 +248,7 @@ def add_patient_to_roster(org_id, roster_id, provider_id, patient_id):
         present = [m for m in members if dig(m, 'entity', 'reference') == f'Patient/{patient_id}']
         match_truth(present, 'added patient')
 
-    post(url, headers, data, response_test)
+    post(url, data, headers=headers, response_test=response_test)
 
 def remove_patient_from_roster(org_id, roster_id, provider_id, patient_id):
     url = API_BASE + f'Group/{roster_id}/$remove'
@@ -240,7 +260,7 @@ def remove_patient_from_roster(org_id, roster_id, provider_id, patient_id):
         members = dig(json.loads(body), 'member')
         match_eq(len([member for member in members if member['inactive']]), 1)
         match_eq(len([member for member in members if not member['inactive']]), 4)
-    post(url, headers, data, response_test)
+    post(url, data, headers=headers, response_test=response_test)
 
 def add_unknown_patient_to_roster(org_id, roster_id, provider_id):
     url = API_BASE + f'Group/{roster_id}/$add'
@@ -252,7 +272,7 @@ def add_unknown_patient_to_roster(org_id, roster_id, provider_id):
         match_eq(e.headers['content-type'], FHIR_TYPE)
         message = json.loads(e.fp.read().decode('utf-8'))
         match_eq(dig(message, 'issue', 0, 'details', 'text',), 'All patients in group must exist. Cannot find 1 patient(s).')
-    post(url, headers, data, None, error_test)
+    post(url, data, headers=headers, error_test=error_test)
 
 def bulk_export(roster_id):
     url = API_BASE + f'Group/{roster_id}/$export'
@@ -262,7 +282,7 @@ def bulk_export(roster_id):
         match_eq(resp.status, 202)
         match_truth(resp.headers['content-location'], 'content-location')
         return resp.headers['content-location']
-    return get(url, headers, response_test)
+    return get(url, headers=headers, response_test=response_test)
 
 def job_result(org_id, url):
     class JobResults:
@@ -340,7 +360,7 @@ def job_result(org_id, url):
         match_valid_extension(operation_outcome)
 
         return job_results
-    return get(url, headers, response_test)
+    return get(url, headers=headers, response_test=response_test)
 
 def patient_data(url, sha):
     def response_test(resp, body):
@@ -353,7 +373,7 @@ def patient_data(url, sha):
             match_eq(dig(data, 'resourceType'), 'Patient')
             mbi_stanzas = [stanza for stanza in data['identifier'] if stanza['system'] == 'http://hl7.org/fhir/sid/us-mbi']
             match_eq(len(mbi_stanzas), 1)
-    get(url, {}, response_test)
+    get(url, response_test=response_test)
 
 def eob_data(url):
     def response_test(resp, body):
@@ -365,7 +385,7 @@ def eob_data(url):
             data = json.loads(line)
             match_eq(dig(data, 'resourceType'), 'ExplanationOfBenefit')
         return resp.headers['last-modified']
-    return get(url, {}, response_test)
+    return get(url, response_test=response_test)
 
 def coverage_data(url, sha):
     def response_test(resp, body):
@@ -377,7 +397,7 @@ def coverage_data(url, sha):
             data = json.loads(line)
             match_eq(dig(data, 'resourceType'), 'Coverage')
 
-    get(url, {}, response_test)
+    get(url, response_test=response_test)
 
 def operation_outcome_data(url, sha):
     def response_test(resp, body):
@@ -393,7 +413,7 @@ def operation_outcome_data(url, sha):
             location = dig(data, 'issue', 0, 'location')
             if not '0S80C00AA00' in location:
                 raise ExpectationException('0S80C00AA00 in location', location)
-    get(url, {}, response_test)
+    get(url, response_test=response_test)
 
 def request_partial_range(url):
     requested_byte_count = 10240
@@ -401,12 +421,12 @@ def request_partial_range(url):
         if not 'content-range' in resp.headers:
             raise ExpectationException('Content-range in headers', 'Not in headers')
         match_eq(len(body), requested_byte_count)
-    get(url, {'Range': f'bytes=0-{requested_byte_count}'}, response_test)
+    get(url, headers={'Range': f'bytes=0-{requested_byte_count}'}, response_test=response_test)
 
 def request_modified_since(url, file_timestamp):
     def error_test(e):
         match_eq(e.code, 304)
-    get(url, {'If-Modified-Since': file_timestamp}, None, error_test)
+    get(url, headers={'If-Modified-Since': file_timestamp}, error_test=error_test)
 
 def bulk_export_since(roster_id):
     url = API_BASE + f'Group/{roster_id}/$export?_since={datetime.now(UTC).isoformat()[:23]}Z'
@@ -415,7 +435,7 @@ def bulk_export_since(roster_id):
         match_eq(resp.status, 202)
         match_truth(resp.headers['content-location'], 'content-location')
         return resp.headers['content-location']
-    return get(url, async_fhir_headers(), response_test)
+    return get(url, headers=async_fhir_headers(), response_test=response_test)
 
 def job_result_with_since(org_id, url):
     def response_test(resp, body):
@@ -428,7 +448,7 @@ def job_result_with_since(org_id, url):
         match_eq(len(data['error']), 0, 'Error')
         match_eq(len(data['output']), 0, 'Output')
         return data
-    return get(url, {}, response_test)
+    return get(url, response_test=response_test)
 
 def patient_everything(org_id, provider_id, patient_id):
     url = API_BASE + f'Patient/{patient_id}/$everything'
@@ -449,7 +469,7 @@ def patient_everything(org_id, provider_id, patient_id):
 
         eobs = [resource for resource in resources if resource['resourceType'] == 'ExplanationOfBenefit']
         match_eq(len(eobs), 10)
-    get(url, headers, response_test)
+    get(url, headers=headers, response_test=response_test)
 
 def update_invalid_content_type(org_id):
     url = API_BASE + f'Organization/{org_id}'
@@ -459,7 +479,7 @@ def update_invalid_content_type(org_id):
         body = json.loads(e.fp.read().decode('utf-8'))
         match_eq(dig(body, 'issue', 0, 'details', 'text',), '`Content-Type:` header must specify valid FHIR content type')
     org_bundle = bundle('organization_update')
-    return post(url, headers, org_bundle, None, error_test, 'PUT')
+    return put(url, org_bundle, headers=headers, error_test=error_test)
 
 def update_organization(org_id):
     url = API_BASE + f'Organization/{org_id}'
@@ -469,7 +489,7 @@ def update_organization(org_id):
         data = json.loads(body)
         match_eq(data['name'], org_bundle['name'])
         match_eq(data['address'], org_bundle['address'])
-    return post(url, FHIR_HEADERS, org_bundle, response_test, None, 'PUT')
+    return put(url, org_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
 def find_practitioner_by_npi():
     url = API_BASE + 'Practitioner?identifier=2459425221'
@@ -481,7 +501,7 @@ def find_practitioner_by_npi():
         provider_id = dig(data, 'entry', 0, 'resource', 'id')
         match_truth(provider_id, 'provider id')
         return provider_id
-    return get(url, {}, response_test)
+    return get(url, response_test=response_test)
 
 def patient_missing_after_delete(patient_id, patient_ids, roster_id):
     delete(API_BASE + f'Patient/{patient_id}')
@@ -496,7 +516,7 @@ def patient_missing_after_delete(patient_id, patient_ids, roster_id):
                 raise ExpectationException(f'{existing_id} in patients', 'was not')
             match_ne(existing_id, patient_id)
     url = API_BASE + f'Group/{roster_id}'
-    get(url, {}, response_test)
+    get(url, response_test=response_test)
 
 def roster_missing_after_practitioner_delete(practitioner_id):
     delete(API_BASE + f'Practitioner/{practitioner_id}')
@@ -507,7 +527,7 @@ def roster_missing_after_practitioner_delete(practitioner_id):
         data = json.loads(body)
         match_eq(data['type'], 'searchset')
         match_eq(data['total'], 0)
-    get(url, {}, response_test)
+    get(url, response_test=response_test)
 
 class TestRunner:
     def __init__(self):
@@ -534,6 +554,34 @@ class TestRunner:
             for name, exception in self.failures:
                 print(f'{name:40}: {exception}')
             sys.exit(1)
+
+def export_tests(tr, org_id, roster_id, provider_id, patient_id):
+    tr.run_test('Find roster by npi', find_roster_by_npi, roster_id)
+
+    if patient_id:
+        tr.run_test('Add patient to roster', add_patient_to_roster, org_id, roster_id, provider_id, patient_id)
+        tr.run_test('Remove patient from roster', remove_patient_from_roster, org_id, roster_id, provider_id, patient_id)
+        tr.run_test('Add unknown patient to roster', add_unknown_patient_to_roster, org_id, roster_id, provider_id)
+
+    location = tr.run_test('Bulk export', bulk_export, roster_id)
+    if location:
+        job_results = tr.run_test('Job result', job_result, org_id, location)
+        if job_results:
+            tr.run_test('Patient data', patient_data, job_results.patient_url, job_results.patient_sha)
+
+            last_modified = tr.run_test('Eob data', eob_data, job_results.eob_url)
+            if last_modified:
+                tr.run_test('Request partial range', request_partial_range, job_results.eob_url)
+                tr.run_test('Request modified since', request_modified_since, job_results.eob_url, last_modified)
+
+            tr.run_test('Coverage data', coverage_data, job_results.coverage_url, job_results.coverage_sha)
+
+            tr.run_test('Operation outcome data', operation_outcome_data, job_results.operation_outcome_url,
+                        job_results.operation_outcome_sha)
+
+    since_location = tr.run_test('Bulk export with since', bulk_export_since, roster_id)
+    if since_location:
+        tr.run_test('Job result with since', job_result_with_since, org_id, since_location)
 
 def run():
     """
@@ -564,31 +612,7 @@ def run():
         patient_id = None
 
     if roster_id:
-        tr.run_test('Find roster by npi', find_roster_by_npi, roster_id)
-
-        if patient_id:
-            tr.run_test('Add patient to roster', add_patient_to_roster, org_id, roster_id, provider_id, patient_id)
-            tr.run_test('Remove patient from roster', remove_patient_from_roster, org_id, roster_id, provider_id, patient_id)
-            tr.run_test('Add unknown patient to roster', add_unknown_patient_to_roster, org_id, roster_id, provider_id)
-
-        location = tr.run_test('Bulk export', bulk_export, roster_id)
-        if location:
-            job_results = tr.run_test('Job result', job_result, org_id, location)
-            if job_results:
-                tr.run_test('Patient data', patient_data, job_results.patient_url, job_results.patient_sha)
-
-                last_modified = tr.run_test('Eob data', eob_data, job_results.eob_url)
-                if last_modified:
-                    tr.run_test('Request partial range', request_partial_range, job_results.eob_url)
-                    tr.run_test('Request modified since', request_modified_since, job_results.eob_url, last_modified)
-
-                tr.run_test('Coverage data', coverage_data, job_results.coverage_url, job_results.coverage_sha)
-
-                tr.run_test('Operation outcome data', operation_outcome_data, job_results.operation_outcome_url, job_results.operation_outcome_sha)
-
-        since_location = tr.run_test('Bulk export with since', bulk_export_since, roster_id)
-        if since_location:
-            tr.run_test('Job result with since', job_result_with_since, org_id, since_location)
+        export_tests(tr, org_id, roster_id, provider_id, patient_id)
 
     if patient_id and provider_id:
         tr.run_test('Patient everything', patient_everything, org_id, provider_id, patient_id)
