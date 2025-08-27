@@ -142,7 +142,7 @@ def match_ne(actual, expect):
 
 def match_truth(actual, obj):
     if not actual:
-        raise ExpectationException(f'{obj} to be truthy', f'was not {actual}')
+        raise ExpectationException(f'{obj} to be truthy', f'was {actual}')
 
 def match_sha(body, sha):
     m = hashlib.sha256()
@@ -195,6 +195,7 @@ def create_organization():
     def response_test(resp, body):
         match_fhir_ok(resp)
         org = json.loads(body)
+        match_truth(dig(org, 'id'), 'org id')
         return org['id']
     return post(url, org_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
@@ -224,7 +225,8 @@ def register_providers():
     def response_test(resp, body):
         match_fhir_ok(resp)
         providers = json.loads(body)
-        return [entry['resource']['id'] for entry in providers['entry']]
+        match_truth(dig(providers, 'entry'), 'providers entry')
+        return [dig(entry, 'resource','id') for entry in providers['entry']]
     return post(url, providers_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
 def register_patients():
@@ -303,6 +305,7 @@ def submit_roster(org_id, provider_id, patient_ids):
         for patient in patients:
             match_truth(dig(patient, 'entity', 'reference'), 'patient entity reference')
             match_ne(dig(patient, 'period', 'start'), dig(patient, 'period', 'end'))
+        match_truth(dig(roster, 'id'), 'roster id')
         return roster['id']
     return post(url, data, headers=headers, response_test=response_test)
 
@@ -339,7 +342,9 @@ def find_patient_by_mbi():
         patient = json.loads(body)
         match_eq(dig(patient, 'type'), 'searchset')
         match_eq(dig(patient, 'total'), 1)
-        return dig(patient, 'entry', 0, 'resource', 'id')
+        patient_id = dig(patient, 'entry', 0, 'resource', 'id')
+        match_truth(patient_id, 'patient id')
+        return patient_id
 
     return get(url, headers=FHIR_HEADERS, response_test=response_test)
 
@@ -602,15 +607,15 @@ def job_result(org_id, url):
         match_eq(resp.status, 200)
         match_eq(resp.headers['content-type'], 'application/json')
 
+        fmt = '%a, %d %b %Y %H:%M:%S GMT'
         try:
-            fmt = '%a, %d %b %Y %H:%M:%S GMT'
             expires = datetime.strptime(resp.headers['expires'], fmt).replace(tzinfo=UTC)
             expires_in = expires - datetime.now(UTC)
             if not 23*60*60 < expires_in.seconds < 24*60*60:
                 hours = expires_in.seconds/3600
                 raise ExpectationException('Expires between 23 and 24 hours', f'Expires in {hours:.2f} hour(s)')
         except ValueError as e:
-            raise ExpectationException('Expires parseable', 'Expires not parseable') from e
+            raise ExpectationException(f'Expires matches "{fmt}"', resp.headers['expires']) from e
 
         data = json.loads(body)
         match_eq(len(data['error']), 1)
@@ -706,6 +711,7 @@ def eob_data(url):
         for line in lines:
             data = json.loads(line)
             match_eq(dig(data, 'resourceType'), 'ExplanationOfBenefit')
+        match_truth(resp.headers['last-modified'], 'last-modified')
         return resp.headers['last-modified']
     return get(url, response_test=response_test)
 
@@ -946,7 +952,7 @@ def update_invalid_content_type(org_id):
         body = json.loads(e.fp.read().decode('utf-8'))
         match_eq(dig(body, 'issue', 0, 'details', 'text',), '`Content-Type:` header must specify valid FHIR content type')
     org_bundle = bundle('organization_update')
-    return put(url, org_bundle, headers=headers, error_test=error_test)
+    put(url, org_bundle, headers=headers, error_test=error_test)
 
 def update_organization(org_id):
     """ From EndToEndRequestTest
@@ -972,7 +978,7 @@ def update_organization(org_id):
         data = json.loads(body)
         match_eq(data['name'], org_bundle['name'])
         match_eq(data['address'], org_bundle['address'])
-    return put(url, org_bundle, headers=FHIR_HEADERS, response_test=response_test)
+    put(url, org_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
 def find_practitioner_by_npi():
     """ From EndToEndRequestTest
@@ -1090,7 +1096,7 @@ class TestRunner:
             self.success_count += 1
             return result
         except ExpectationException as e:
-            self.fail_msg(f'{name} failure')
+            self._fail_msg(f'{name} failure')
             self.failures.append((name, e,))
             self._fail_msg(f'  {e}')
             return None
