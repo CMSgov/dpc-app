@@ -55,18 +55,6 @@ public class DPCConsentService extends Application<DPCConsentConfiguration> {
 
         bootstrap.addBundle(hibernateBundle);
         bootstrap.addBundle(guiceBundle);
-//        bootstrap.addBundle(new MigrationsBundle<>() {
-//            @Override
-//            public PooledDataSourceFactory getDataSourceFactory(DPCConsentConfiguration configuration) {
-//                logger.debug("Connecting to database {} at {}", configuration.getConsentDatabase().getDriverClass(), configuration.getConsentDatabase().getUrl());
-//                return configuration.getConsentDatabase();
-//            }
-//
-//            @Override
-//            public String getMigrationsFileName() {
-//                return "consent.migrations.xml";
-//            }
-//        });
         bootstrap.addBundle(new SwaggerBundle<>() {
             @Override
             protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(DPCConsentConfiguration configuration) {

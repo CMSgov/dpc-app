@@ -145,10 +145,12 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
         return lookBackDate;
     }
 
-    public String getConsentHealthCheckURL() { return consentHealthCheckURL; }
-
     public List<String> getLookBackExemptOrgs() {
         return lookBackExemptOrgs;
+    }
+
+    public String getConsentHealthCheckURL() {
+        return consentHealthCheckURL;
     }
 
     @SuppressWarnings("unused")
@@ -165,9 +167,5 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
 
     public String getFhirReferenceURL() {
         return fhirReferenceURL;
-    }
-
-    public void setFhirReferenceURL(String fhirReferenceURL) {
-        this.fhirReferenceURL = fhirReferenceURL;
     }
 }

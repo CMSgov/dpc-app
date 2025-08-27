@@ -4,6 +4,7 @@ import gov.cms.dpc.aggregation.jdbi.ConsentDAO;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
+import jakarta.inject.Named;
 import org.hl7.fhir.dstu3.model.Consent;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public class ConsentServiceImpl implements ConsentService {
     private final ConsentDAO consentDAO;
     private final String fhirReferenceURL;
 
-    public ConsentServiceImpl(ConsentDAO consentDAO, String fhirReferenceURL) {
+    public ConsentServiceImpl(@Named("consentDAO") ConsentDAO consentDAO, @Named("fhirReferenceURL") String fhirReferenceURL) {
         this.consentDAO = consentDAO;
         this.fhirReferenceURL = fhirReferenceURL;
     }
@@ -38,10 +39,6 @@ public class ConsentServiceImpl implements ConsentService {
                 return consentResult;
             }).toList()
         );
-    }
-
-    public ConsentDAO getConsentDAO() {
-        return this.consentDAO;
     }
 
     private List<ConsentEntity> doConsentSearch(List<String> mbis) {

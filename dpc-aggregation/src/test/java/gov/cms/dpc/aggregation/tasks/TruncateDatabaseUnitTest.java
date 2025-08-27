@@ -15,7 +15,6 @@ import org.mockito.MockedStatic;
 
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.*;
@@ -40,21 +39,19 @@ class TruncateDatabaseUnitTest {
 	@Mock
 	private PrintWriter printWriter;
 
-	private Map<String, List<String>> map = Map.of();
-
 	MockedStatic<DSL> mockedDsl;
 	MockedStatic<DBUtils> mockedDBUtils;
 
 
 	@BeforeEach
-	public void before() {
+    void before() {
 		openMocks(this);
 		mockedDsl = mockStatic(DSL.class);
 		mockedDBUtils = mockStatic(DBUtils.class);
 	}
 
 	@AfterEach
-	public void tearDown() {
+    void tearDown() {
 		mockedDsl.close();
 		mockedDBUtils.close();
 	}
@@ -68,7 +65,7 @@ class TruncateDatabaseUnitTest {
 		mockedDsl.when(() -> DSL.using(any(Connection.class), any(Settings.class))).thenReturn(dslContext);
 
 		TruncateDatabase truncateDatabase = new TruncateDatabase(config);
-		truncateDatabase.execute(map, printWriter);
+		truncateDatabase.execute(Map.of(), printWriter);
 
 		// Make sure we call truncate tables
 		mockedDBUtils.verify(() -> DBUtils.truncateAllTables(dslContext, "public"));

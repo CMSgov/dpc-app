@@ -29,9 +29,7 @@ class ConsentDAOUnitTest extends AbstractMultipleDAOTest {
 	void test_ConsentDAO_writes_consent() {
 		ConsentEntity consentEntity = createConsentEntity();
 
-		db.inTransaction(() -> {
-			consentDAO.persistConsent(consentEntity);
-		});
+		db.inTransaction(() -> consentDAO.persistConsent(consentEntity));
 
 		ConsentEntity returnedConsent = consentDAO.getConsent(consentEntity.getId()).get();
 		assertEquals(consentEntity.getMbi(), returnedConsent.getMbi());
