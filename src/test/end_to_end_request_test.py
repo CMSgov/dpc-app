@@ -533,16 +533,21 @@ class TestRunner:
     def __init__(self):
         self.success_count = 0
         self.failures = []
+    def _success_msg(self, msg):
+        print(f'\033[92m {msg}\033[00m')
+
+    def _fail_msg(self, msg):
+        print(f'\033[91m {msg}\033[00m')
     def run_test(self, name, function, *args):
         try:
             result = function(*args)
-            print(f'{name} success')
+            self._success_msg(f'{name} success')
             self.success_count += 1
             return result
         except ExpectationException as e:
-            print(f'{name} failure')
+            self.fail_msg(f'{name} failure')
             self.failures.append((name, e,))
-            print(f'  {e}')
+            self._fail_msg(f'  {e}')
             return None
     def finish(self):
         print(f'{self.success_count} SUCCESSFUL TESTS')
