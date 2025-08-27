@@ -225,6 +225,8 @@ def register_providers():
     def response_test(resp, body):
         match_fhir_ok(resp)
         providers = json.loads(body)
+        match_eq(len(dig(providers, 'entry')), 1)
+        match_eq(dig(providers, 'entry', 0, 'resource', 'identifier', 0, 'system'), 'http://hl7.org/fhir/sid/us-npi')
         match_truth(dig(providers, 'entry'), 'providers entry')
         return [dig(entry, 'resource','id') for entry in providers['entry']]
     return post(url, providers_bundle, headers=FHIR_HEADERS, response_test=response_test)
@@ -258,7 +260,8 @@ def register_patients():
     def response_test(resp, body):
         match_fhir_ok(resp)
         patients = json.loads(body)
-        match_eq(len(dig(patients, 'entry') or []), 5)
+        match_truth(dig(patients, 'entry'), 'patients entry')
+        match_eq(len(dig(patients, 'entry')), 5)
         return [dig(patient, 'resource', 'id') for patient in dig(patients, 'entry')]
     return post(url, patients_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
@@ -383,7 +386,7 @@ def find_roster_by_npi(roster_id):
     get(url, headers=FHIR_HEADERS, response_test=response_test)
 
 def add_patient_to_roster(org_id, roster_id, provider_id, patient_id):
-    """ not in From EndToEndRequestTest, but needed for robustness """
+    """ not in From EndToEndRequestTest, but needed for replayability after failed test """
     url = API_BASE + f'Group/{roster_id}/$add'
     headers = fhir_headers_with_attestation(org_id, provider_id)
     data = bundle('roster')
@@ -425,6 +428,7 @@ def remove_patient_from_roster(org_id, roster_id, provider_id, patient_id):
     def response_test(resp, body):
         match_fhir_ok(resp)
         members = dig(json.loads(body), 'member')
+        match_truth(members, 'members')
         match_eq(len([member for member in members if member['inactive']]), 1)
         match_eq(len([member for member in members if not member['inactive']]), 4)
     post(url, data, headers=headers, response_test=response_test)
@@ -457,6 +461,8 @@ def add_unknown_patient_to_roster(org_id, roster_id, provider_id):
         match_eq(e.code, 400)
         match_eq(e.headers['content-type'], FHIR_TYPE)
         message = json.loads(e.fp.read().decode('utf-8'))
+        match_truth(dig(message, 'issue'), 'message issue')
+        match_eq(len(dig(message, 'issue')), 1)
         match_eq(dig(message, 'issue', 0, 'details', 'text',), 'All patients in group must exist. Cannot find 1 patient(s).')
     post(url, data, headers=headers, error_test=error_test)
 
@@ -607,16 +613,6 @@ def job_result(org_id, url):
         match_eq(resp.status, 200)
         match_eq(resp.headers['content-type'], 'application/json')
 
-        fmt = '%a, %d %b %Y %H:%M:%S GMT'
-        try:
-            expires = datetime.strptime(resp.headers['expires'], fmt).replace(tzinfo=UTC)
-            expires_in = expires - datetime.now(UTC)
-            if not 23*60*60 < expires_in.seconds < 24*60*60:
-                hours = expires_in.seconds/3600
-                raise ExpectationException('Expires between 23 and 24 hours', f'Expires in {hours:.2f} hour(s)')
-        except ValueError as e:
-            raise ExpectationException(f'Expires matches "{fmt}"', resp.headers['expires']) from e
-
         data = json.loads(body)
         match_eq(len(data['error']), 1)
         match_eq(len(data['output']), 3)
@@ -627,18 +623,28 @@ def job_result(org_id, url):
         match_eq(patient['count'], 3)
         match_valid_extension(patient)
 
-        coverage = job_results.coverage
-        match_eq(coverage['count'], 12)
-        match_valid_extension(coverage)
-
         eob = job_results.eob
         if not eob['count'] > 100:
             raise ExpectationException('eob count > 100', eob['count'])
         match_valid_extension(eob)
 
+        coverage = job_results.coverage
+        match_eq(coverage['count'], 12)
+        match_valid_extension(coverage)
+
         operation_outcome = job_results.operation_outcome
         match_eq(operation_outcome['count'], 1)
         match_valid_extension(operation_outcome)
+
+        fmt = '%a, %d %b %Y %H:%M:%S GMT'
+        try:
+            expires = datetime.strptime(resp.headers['expires'], fmt).replace(tzinfo=UTC)
+            expires_in = expires - datetime.now(UTC)
+            if not 23*60*60 < expires_in.seconds < 24*60*60:
+                hours = expires_in.seconds/3600
+                raise ExpectationException('Expires between 23 and 24 hours', f'Expires in {hours:.2f} hour(s)')
+        except ValueError as e:
+            raise ExpectationException(f'Expires matches "{fmt}"', resp.headers['expires']) from e
 
         return job_results
     return get(url, response_test=response_test)
@@ -676,14 +682,15 @@ def patient_data(url, sha):
         match_ndjson_ok(resp)
         lines = [l for l in body.split('\n') if l]
         match_eq(len(lines), 3)
-        match_sha(body, sha)
         for line in lines:
             data = json.loads(line)
             match_eq(dig(data, 'resourceType'), 'Patient')
             mbi_stanzas = [stanza for stanza in data['identifier'] if stanza['system'] == 'http://hl7.org/fhir/sid/us-mbi']
             match_eq(len(mbi_stanzas), 1)
+        match_sha(body, sha)
     get(url, response_test=response_test)
 
+# TODO: Start validation here    
 def eob_data(url):
     """ From EndToEndRequestTest
     // Response should have FHIR Content-Type
