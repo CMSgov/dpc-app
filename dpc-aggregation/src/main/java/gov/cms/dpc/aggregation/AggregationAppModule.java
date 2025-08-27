@@ -134,13 +134,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     }
 
     @Provides
-    @Named("consentDAO")
-    public ConsentDAO provideConsentDAO(DPCConsentManagedSessionFactory sessionFactory) {
-        return new ConsentDAO(sessionFactory);
-    }
-
-    @Provides
-    ConsentService provideConsentService(@Named("consentDAO") ConsentDAO consentDAO, @Named("fhirReferenceURL") String fhirReferenceURL) {
-        return new ConsentServiceImpl(consentDAO, fhirReferenceURL);
+    ConsentService provideConsentService(DPCConsentManagedSessionFactory managedSessionFactory, @Named("fhirReferenceURL") String fhirReferenceURL) {
+        return new ConsentServiceImpl(managedSessionFactory, fhirReferenceURL);
     }
 }
