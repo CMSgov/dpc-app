@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import org.hibernate.SessionFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,9 +16,13 @@ import java.util.UUID;
 
 public class ConsentDAO extends AbstractDAO<ConsentEntity> {
 
+    private final SessionFactory sessionFactory;
+
     @Inject
     public ConsentDAO(DPCConsentManagedSessionFactory factory) {
         super(factory.getSessionFactory());
+
+        this.sessionFactory = factory.getSessionFactory();
     }
 
     public final void persistConsent(ConsentEntity consentEntity) {
@@ -29,14 +34,14 @@ public class ConsentDAO extends AbstractDAO<ConsentEntity> {
     }
 
     public final List<ConsentEntity> list() {
-        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaBuilder builder = this.sessionFactory.getCurrentSession().getCriteriaBuilder();
         final CriteriaQuery<ConsentEntity> query = builder.createQuery(ConsentEntity.class);
         query.from(ConsentEntity.class);
         return list(query);
     }
 
     public final List<ConsentEntity> findBy(String field, String value) {
-        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaBuilder builder = this.sessionFactory.getCurrentSession().getCriteriaBuilder();
         final CriteriaQuery<ConsentEntity> query = builder.createQuery(ConsentEntity.class);
         final Root<ConsentEntity> root = query.from(ConsentEntity.class);
 
@@ -46,7 +51,7 @@ public class ConsentDAO extends AbstractDAO<ConsentEntity> {
     }
 
     public final List<ConsentEntity> findByMbis(List<String> mbis) {
-        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+        final CriteriaBuilder builder = this.sessionFactory.getCurrentSession().getCriteriaBuilder();
         final CriteriaQuery<ConsentEntity> query = builder.createQuery(ConsentEntity.class);
         final Root<ConsentEntity> root = query.from(ConsentEntity.class);
 
