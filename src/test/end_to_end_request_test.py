@@ -119,20 +119,23 @@ def match_ne(actual, expect):
     if actual == expect:
         raise ExpectationException(f'{actual} != {expect}', 'equality')
 
+def match_truth(actual, obj):
+    if not actual:
+        raise ExpectationException(f'{obj} to be truthy', f'was not {actual}')
+
 def match_sha(body, sha):
     m = hashlib.sha256()
     m.update(body.encode('utf-8'))
     match_eq(f'sha256:{m.hexdigest()}', sha)
 
-
-def valid_extension(obj):
+def match_valid_extension(obj):
     match_eq(len(obj['extension']), 2)
     match_eq(len(dig(obj, 'extension', 0)), 2)
     match_eq(dig(obj, 'extension', 0, 'url'), 'https://dpc.cms.gov/checksum')
-    match_ne(dig(obj, 'extension', 0, 'valueString'), None)
+    match_truth(dig(obj, 'extension', 0, 'valueString'), 'extension valueString')
     match_eq(len(dig(obj, 'extension', 1)), 2)
     match_eq(dig(obj, 'extension', 1, 'url'), 'https://dpc.cms.gov/file_length')
-    match_ne(dig(obj, 'extension', 1, 'valueDecimal'), None)
+    match_truth(dig(obj, 'extension', 1, 'valueDecimal'), 'extension valueDecimal')
 
 def check_for_roster():
     url = API_BASE + 'Group?characteristic-value=attributed-to$2459425221'
@@ -186,7 +189,7 @@ def submit_roster(org_id, provider_id, patient_ids):
         patients = roster['member']
         match_eq(len(patients), 5)
         for patient in patients:
-            match_ne(dig(patient, 'entity', 'reference'), None)
+            match_truth(dig(patient, 'entity', 'reference'), 'patient entity reference')
             match_ne(dig(patient, 'period', 'start'), dig(patient, 'period', 'end'))
         return roster['id']
     return post(url, headers, data, response_test)
@@ -221,9 +224,9 @@ def add_patient_to_roster(org_id, roster_id, provider_id, patient_id):
     def response_test(resp, body):
         match_fhir_ok(resp)
         members = dig(json.loads(body), 'member')
-        match_ne(members, None)
-        present = [m for m in members if dig(m, 'entity', 'reference') == 'Patient/{patient_id}']
-        match_ne(present, None)
+        match_truth(members, 'members')
+        present = [m for m in members if dig(m, 'entity', 'reference') == f'Patient/{patient_id}']
+        match_truth(present, 'added patient')
 
     post(url, headers, data, response_test)
 
@@ -257,7 +260,7 @@ def bulk_export(roster_id):
 
     def response_test(resp, _):
         match_eq(resp.status, 202)
-        match_ne(resp.headers['content-location'], None)
+        match_truth(resp.headers['content-location'], 'content-location')
         return resp.headers['content-location']
     return get(url, headers, response_test)
 
@@ -321,20 +324,20 @@ def job_result(org_id, url):
 
         patient = job_results.patient
         match_eq(patient['count'], 3)
-        valid_extension(patient)
+        match_valid_extension(patient)
 
         coverage = job_results.coverage
         match_eq(coverage['count'], 12)
-        valid_extension(coverage)
+        match_valid_extension(coverage)
 
         eob = job_results.eob
         if not eob['count'] > 100:
             raise ExpectationException('eob count > 100', eob['count'])
-        valid_extension(eob)
+        match_valid_extension(eob)
 
         operation_outcome = job_results.operation_outcome
         match_eq(operation_outcome['count'], 1)
-        valid_extension(operation_outcome)
+        match_valid_extension(operation_outcome)
 
         return job_results
     return get(url, headers, response_test)
@@ -410,7 +413,7 @@ def bulk_export_since(roster_id):
 
     def response_test(resp, _):
         match_eq(resp.status, 202)
-        match_ne(resp.headers['content-location'], None)
+        match_truth(resp.headers['content-location'], 'content-location')
         return resp.headers['content-location']
     return get(url, async_fhir_headers(), response_test)
 
@@ -476,7 +479,7 @@ def find_practitioner_by_npi():
         match_eq(data['type'], 'searchset')
         match_eq(data['total'], 1)
         provider_id = dig(data, 'entry', 0, 'resource', 'id')
-        match_ne(provider_id, None)
+        match_truth(provider_id, 'provider id')
         return provider_id
     return get(url, {}, response_test)
 
