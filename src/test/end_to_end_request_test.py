@@ -89,6 +89,12 @@ def bundle(name):
     with open(f'{WORKING_DIR}/resources/e-2-e-bundles/{name}_bundle.json') as f:
         return json.load(f)
 
+def error_message(e):
+    try:
+        return json.loads(e.fp.read().decode('utf-8'))
+    except Exception as thrown:
+        raise ExpectationException('Can decode error message', thrown) from thrown
+
 # HTTP Verbs
 def get(url, **kwargs):
     """
@@ -222,13 +228,13 @@ def create_organization():
     pm.globals.set("organization_id", pm.response.json().id);
     """
     url = API_BASE + 'Organization/$submit'
-    org_bundle = bundle('organization')
+    data = bundle('organization')
     def response_test(resp, body):
         assert_fhir_ok(resp)
         org = json.loads(body)
         assert_truth(dig(org, 'id'), 'org id')
         return org['id']
-    return post(url, org_bundle, headers=FHIR_HEADERS, response_test=response_test)
+    return post(url, data, headers=FHIR_HEADERS, response_test=response_test)
 
 def register_providers():
     """ From EndToEndRequestTest
@@ -252,7 +258,7 @@ def register_providers():
     });
     """
     url = API_BASE + 'Practitioner/$submit'
-    providers_bundle = bundle('providers')
+    data = bundle('providers')
     def response_test(resp, body):
         assert_fhir_ok(resp)
         providers = json.loads(body)
@@ -260,7 +266,7 @@ def register_providers():
         assert_eq(dig(providers, 'entry', 0, 'resource', 'identifier', 0, 'system'), 'http://hl7.org/fhir/sid/us-npi')
         assert_truth(dig(providers, 'entry'), 'providers entry')
         return [dig(entry, 'resource','id') for entry in providers['entry']]
-    return post(url, providers_bundle, headers=FHIR_HEADERS, response_test=response_test)
+    return post(url, data, headers=FHIR_HEADERS, response_test=response_test)
 
 def register_patients():
     """ From EndToEndRequestTest
@@ -287,14 +293,14 @@ def register_patients():
     });
     """
     url = API_BASE + 'Patient/$submit'
-    patients_bundle = bundle('patients')
+    data = bundle('patients')
     def response_test(resp, body):
         assert_fhir_ok(resp)
         patients = json.loads(body)
         assert_truth(dig(patients, 'entry'), 'patients entry')
         assert_eq(len(dig(patients, 'entry')), 5)
         return [dig(patient, 'resource', 'id') for patient in dig(patients, 'entry')]
-    return post(url, patients_bundle, headers=FHIR_HEADERS, response_test=response_test)
+    return post(url, data, headers=FHIR_HEADERS, response_test=response_test)
 
 def check_for_roster():
     """ not in From EndToEndRequestTest, but needed for replayability after failed test """
@@ -501,7 +507,7 @@ def add_unknown_patient_to_roster(org_id, roster_id, provider_id):
     def error_test(e):
         assert_eq(e.code, 400)
         assert_eq(e.headers['content-type'], FHIR_TYPE)
-        message = json.loads(e.fp.read().decode('utf-8'))
+        message = error_message(e)
         assert_truth(dig(message, 'issue'), 'message issue')
         assert_eq(len(dig(message, 'issue')), 1)
         assert_eq(dig(message, 'issue', 0, 'details', 'text',), 'All patients in group must exist. Cannot find 1 patient(s).')
@@ -996,11 +1002,11 @@ def update_invalid_content_type(org_id):
     """
     url = API_BASE + f'Organization/{org_id}'
     headers = { 'Content-Type': 'application/fire+json' }
+    org_bundle = bundle('organization_update')
     def error_test(e):
         assert_eq(e.code, 415)
-        body = json.loads(e.fp.read().decode('utf-8'))
-        assert_eq(dig(body, 'issue', 0, 'details', 'text',), '`Content-Type:` header must specify valid FHIR content type')
-    org_bundle = bundle('organization_update')
+        message = error_message(e)
+        assert_eq(dig(message, 'issue', 0, 'details', 'text',), '`Content-Type:` header must specify valid FHIR content type')
     put(url, org_bundle, headers=headers, error_test=error_test)
 
 def update_organization(org_id):
