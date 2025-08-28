@@ -4,7 +4,7 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Splitter;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
-import gov.cms.dpc.consent.jdbi.ConsentDAO;
+import gov.cms.dpc.common.jdbi.ConsentDAO;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;

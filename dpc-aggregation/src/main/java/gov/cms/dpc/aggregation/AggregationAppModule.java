@@ -8,7 +8,7 @@ import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.aggregation.health.AggregationEngineHealthCheck;
-import gov.cms.dpc.aggregation.jdbi.ConsentDAO;
+import gov.cms.dpc.common.jdbi.ConsentDAO;
 import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.aggregation.tasks.TruncateDatabase;
 import gov.cms.dpc.common.annotations.ExportPath;

@@ -1,4 +1,4 @@
-package gov.cms.dpc.aggregation.jdbi;
+package gov.cms.dpc.common.jdbi;
 
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.common.consent.entities.ConsentEntity_;
@@ -26,8 +26,8 @@ public class ConsentDAO extends AbstractDAO<ConsentEntity> {
         this.sessionFactory = factory.getSessionFactory();
     }
 
-    public final void persistConsent(ConsentEntity consentEntity) {
-        this.persist(consentEntity);
+    public final ConsentEntity persistConsent(ConsentEntity consentEntity) {
+        return this.persist(consentEntity);
     }
 
     public final Optional<ConsentEntity> getConsent(UUID consentID) {

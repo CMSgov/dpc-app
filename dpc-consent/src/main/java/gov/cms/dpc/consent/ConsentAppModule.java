@@ -2,7 +2,7 @@ package gov.cms.dpc.consent;
 
 import com.google.inject.Binder;
 import com.google.inject.Provides;
-import gov.cms.dpc.consent.jdbi.ConsentDAO;
+import gov.cms.dpc.common.jdbi.ConsentDAO;
 import gov.cms.dpc.consent.resources.BaseResource;
 import gov.cms.dpc.consent.resources.ConsentResource;
 import jakarta.inject.Named;

@@ -1,6 +1,6 @@
 package gov.cms.dpc.aggregation.service;
 
-import gov.cms.dpc.aggregation.jdbi.ConsentDAO;
+import gov.cms.dpc.common.jdbi.ConsentDAO;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
