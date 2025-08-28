@@ -96,6 +96,7 @@ export function workflow(data) {
   switch (practitionerResponse.status) {
     case 200:   // Already existed, but we can still use it
       console.warn('Attempted to create practitioner with duplicate NPI')
+      break;
     case 201:   // Practitioner created
       break;
     case 0:
