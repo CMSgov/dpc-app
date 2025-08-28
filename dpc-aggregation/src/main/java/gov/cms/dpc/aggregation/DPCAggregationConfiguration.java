@@ -46,10 +46,6 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     @JsonProperty("awsQueue")
     private final DPCAwsQueueConfiguration dpcAwsQueueConfiguration = new DPCAwsQueueConfiguration();
 
-    @NotEmpty
-    @NotNull
-    private String consentHealthCheckURL;
-
     // The path to the folder that will contain the output files
     @NotEmpty
     private String exportPath;
@@ -147,10 +143,6 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
 
     public List<String> getLookBackExemptOrgs() {
         return lookBackExemptOrgs;
-    }
-
-    public String getConsentHealthCheckURL() {
-        return consentHealthCheckURL;
     }
 
     @SuppressWarnings("unused")
