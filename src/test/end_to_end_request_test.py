@@ -1,6 +1,41 @@
 #!/usr/bin/env python
 """
-Runs end-to-end test of API
+Runs end-to-end test of the API
+
+Tests are run by the TestRunner class, which also keeps a tally of successes and failures.
+
+The code is broken into several sections:
+# Utilities
+These functions just DRY up the code
+
+# HTTP Verbs
+get, post, put, and delete
+
+The parameters for these functions include things necessary to call the API
+ - url
+ - request body for post and put
+ - additional headers (optional kwarg)
+
+They also include either a response or error test as a kwarg. These functions run make a series of
+test statements to validate the response. If the function needs to return values from the response
+to be used in later tests, the response_test must return them.
+
+A test statement verifies something about the response. If the statement fails, it throws an ExpectationException.
+The TestRunner captures the exception and adds the failed test to the tally. If the test statement fails,
+no further test statements within the test function are run.
+
+response_test handles requests that should have a status code in the 200 range. It takes resp and body parameters.
+error_test handles requests greater than 299. It takes the URLError as the parameter.
+
+# Assertions
+These functions DRY up the code, so that common validations (e.g. x == y) can simply use an assertion.
+
+# Tests
+Each test builds its own test (response or error) and makes at least one call to the api. They return values
+if these values are necessary for later tests.
+
+# Test Execution
+The TestRunner and the run function that calls all the tests
 """
 
 from datetime import datetime, UTC
@@ -20,17 +55,7 @@ FHIR_TYPE = 'application/fhir+json'
 
 FHIR_HEADERS = {'Accept': FHIR_TYPE, 'Content-Type': FHIR_TYPE}
 
-class ExpectationException(Exception):
-    def __init__(self, expected, actual, msg=None):
-        self.expected = expected
-        self.actual = actual
-        self.msg = msg
-        if msg:
-            prefix = f'{msg}: '
-        else:
-            prefix = ''
-        super().__init__(f'{prefix}Expected {expected} | Actual {actual}')
-
+# Utilities
 def dig(_dict, *keys):
     try:
         for key in keys:
@@ -60,6 +85,11 @@ def async_fhir_headers():
 
     return headers
 
+def bundle(name):
+    with open(f'{WORKING_DIR}/resources/e-2-e-bundles/{name}_bundle.json') as f:
+        return json.load(f)
+
+# HTTP Verbs
 def get(url, **kwargs):
     """
     keyword args:
@@ -122,36 +152,45 @@ def post(url, request_body, **kwargs):
 def put(url, request_body, **kwargs):
     return post(url, request_body, method='PUT', **kwargs)
 
-def bundle(name):
-    with open(f'{WORKING_DIR}/resources/e-2-e-bundles/{name}_bundle.json') as f:
-        return json.load(f)
 
-def match_fhir_ok(resp):
-    match_eq(resp.status, 200)
-    match_eq(resp.headers['content-type'], FHIR_TYPE)
+class ExpectationException(Exception):
+    def __init__(self, expected, actual, msg=None):
+        self.expected = expected
+        self.actual = actual
+        self.msg = msg
+        if msg:
+            prefix = f'{msg}: '
+        else:
+            prefix = ''
+        super().__init__(f'{prefix}Expected {expected} | Actual {actual}')
 
-def match_ndjson_ok(resp):
-    match_eq(resp.status, 200)
-    match_eq(resp.headers['content-type'], 'application/ndjson')
+# Assertions
+def assert_fhir_ok(resp):
+    assert_eq(resp.status, 200)
+    assert_eq(resp.headers['content-type'], FHIR_TYPE)
 
-def match_eq(actual, expect, msg=None):
+def assert_ndjson_ok(resp):
+    assert_eq(resp.status, 200)
+    assert_eq(resp.headers['content-type'], 'application/ndjson')
+
+def assert_eq(actual, expect, msg=None):
     if actual != expect:
         raise ExpectationException(expect, actual, msg)
 
-def match_ne(actual, expect):
+def assert_ne(actual, expect):
     if actual == expect:
         raise ExpectationException(f'{actual} != {expect}', 'equality')
 
-def match_truth(actual, obj):
+def assert_truth(actual, expect_s):
     if not actual:
-        raise ExpectationException(f'{obj} to be truthy', f'was {actual}')
+        raise ExpectationException(f'{expect_s} to be truthy', f'was {actual}')
 
-def match_sha(body, sha):
+def assert_sha_eq(body, sha):
     m = hashlib.sha256()
     m.update(body.encode('utf-8'))
-    match_eq(f'sha256:{m.hexdigest()}', sha)
+    assert_eq(f'sha256:{m.hexdigest()}', sha)
 
-def match_valid_extension(obj):
+def assert_valid_extension(obj):
     """ From EndToEndRequestTest (patient example)
     pm.expect(Object.keys(patient.extension[0]).length).to.equal(2);
     pm.expect(patient.extension[0].url).to.equal("https://dpc.cms.gov/checksum");
@@ -161,22 +200,13 @@ def match_valid_extension(obj):
     pm.expect(patient.extension[1].valueDecimal).to.exist;
     pm.environment.set("patient", patient);
     """
-    match_eq(len(obj['extension']), 2)
-    match_eq(len(dig(obj, 'extension', 0)), 2)
-    match_eq(dig(obj, 'extension', 0, 'url'), 'https://dpc.cms.gov/checksum')
-    match_truth(dig(obj, 'extension', 0, 'valueString'), 'extension valueString')
-    match_eq(len(dig(obj, 'extension', 1)), 2)
-    match_eq(dig(obj, 'extension', 1, 'url'), 'https://dpc.cms.gov/file_length')
-    match_truth(dig(obj, 'extension', 1, 'valueDecimal'), 'extension valueDecimal')
-
-def check_for_roster():
-    url = API_BASE + 'Group?characteristic-value=attributed-to$2459425221'
-    def response_test(resp, body):
-        match_fhir_ok(resp)
-        roster = json.loads(body)
-        return dig(roster, 'entry', 0, 'resource', 'id')
-
-    return get(url, headers=FHIR_HEADERS, response_test=response_test)
+    assert_eq(len(obj['extension']), 2)
+    assert_eq(len(dig(obj, 'extension', 0)), 2)
+    assert_eq(dig(obj, 'extension', 0, 'url'), 'https://dpc.cms.gov/checksum')
+    assert_truth(dig(obj, 'extension', 0, 'valueString'), 'extension valueString')
+    assert_eq(len(dig(obj, 'extension', 1)), 2)
+    assert_eq(dig(obj, 'extension', 1, 'url'), 'https://dpc.cms.gov/file_length')
+    assert_truth(dig(obj, 'extension', 1, 'valueDecimal'), 'extension valueDecimal')
 
 # TESTS
 def create_organization():
@@ -195,9 +225,9 @@ def create_organization():
     url = API_BASE + 'Organization/$submit'
     org_bundle = bundle('organization')
     def response_test(resp, body):
-        match_fhir_ok(resp)
+        assert_fhir_ok(resp)
         org = json.loads(body)
-        match_truth(dig(org, 'id'), 'org id')
+        assert_truth(dig(org, 'id'), 'org id')
         return org['id']
     return post(url, org_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
@@ -225,11 +255,11 @@ def register_providers():
     url = API_BASE + 'Practitioner/$submit'
     providers_bundle = bundle('providers')
     def response_test(resp, body):
-        match_fhir_ok(resp)
+        assert_fhir_ok(resp)
         providers = json.loads(body)
-        match_eq(len(dig(providers, 'entry')), 1)
-        match_eq(dig(providers, 'entry', 0, 'resource', 'identifier', 0, 'system'), 'http://hl7.org/fhir/sid/us-npi')
-        match_truth(dig(providers, 'entry'), 'providers entry')
+        assert_eq(len(dig(providers, 'entry')), 1)
+        assert_eq(dig(providers, 'entry', 0, 'resource', 'identifier', 0, 'system'), 'http://hl7.org/fhir/sid/us-npi')
+        assert_truth(dig(providers, 'entry'), 'providers entry')
         return [dig(entry, 'resource','id') for entry in providers['entry']]
     return post(url, providers_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
@@ -260,12 +290,21 @@ def register_patients():
     url = API_BASE + 'Patient/$submit'
     patients_bundle = bundle('patients')
     def response_test(resp, body):
-        match_fhir_ok(resp)
+        assert_fhir_ok(resp)
         patients = json.loads(body)
-        match_truth(dig(patients, 'entry'), 'patients entry')
-        match_eq(len(dig(patients, 'entry')), 5)
+        assert_truth(dig(patients, 'entry'), 'patients entry')
+        assert_eq(len(dig(patients, 'entry')), 5)
         return [dig(patient, 'resource', 'id') for patient in dig(patients, 'entry')]
     return post(url, patients_bundle, headers=FHIR_HEADERS, response_test=response_test)
+
+def check_for_roster():
+    url = API_BASE + 'Group?characteristic-value=attributed-to$2459425221'
+    def response_test(resp, body):
+        assert_fhir_ok(resp)
+        roster = json.loads(body)
+        return dig(roster, 'entry', 0, 'resource', 'id')
+
+    return get(url, headers=FHIR_HEADERS, response_test=response_test)
 
 def submit_roster(org_id, provider_id, patient_ids):
     """ From EndToEndRequestTest
@@ -302,15 +341,15 @@ def submit_roster(org_id, provider_id, patient_ids):
     data['member'] = [{'entity': { 'reference': f'Patient/{patient_id}' } } for patient_id in patient_ids]
 
     def response_test(resp, body):
-        match_eq(resp.status, 201)
-        match_eq(resp.headers['content-type'], FHIR_TYPE)
+        assert_eq(resp.status, 201)
+        assert_eq(resp.headers['content-type'], FHIR_TYPE)
         roster = json.loads(body)
         patients = roster['member']
-        match_eq(len(patients), 5)
+        assert_eq(len(patients), 5)
         for patient in patients:
-            match_truth(dig(patient, 'entity', 'reference'), 'patient entity reference')
-            match_ne(dig(patient, 'period', 'start'), dig(patient, 'period', 'end'))
-        match_truth(dig(roster, 'id'), 'roster id')
+            assert_truth(dig(patient, 'entity', 'reference'), 'patient entity reference')
+            assert_ne(dig(patient, 'period', 'start'), dig(patient, 'period', 'end'))
+        assert_truth(dig(roster, 'id'), 'roster id')
         return roster['id']
     return post(url, data, headers=headers, response_test=response_test)
 
@@ -343,12 +382,12 @@ def find_patient_by_mbi():
     """
     url = API_BASE + 'Patient?identifier=1SQ3F00AA00'
     def response_test(resp, body):
-        match_fhir_ok(resp)
+        assert_fhir_ok(resp)
         patient = json.loads(body)
-        match_eq(dig(patient, 'type'), 'searchset')
-        match_eq(dig(patient, 'total'), 1)
+        assert_eq(dig(patient, 'type'), 'searchset')
+        assert_eq(dig(patient, 'total'), 1)
         patient_id = dig(patient, 'entry', 0, 'resource', 'id')
-        match_truth(patient_id, 'patient id')
+        assert_truth(patient_id, 'patient id')
         return patient_id
 
     return get(url, headers=FHIR_HEADERS, response_test=response_test)
@@ -379,11 +418,11 @@ def find_roster_by_npi(roster_id):
     """
     url = API_BASE + 'Group?characteristic-value=attributed-to$2459425221'
     def response_test(resp, body):
-        match_fhir_ok(resp)
+        assert_fhir_ok(resp)
         roster = json.loads(body)
-        match_eq(dig(roster, 'type'),'searchset')
-        match_eq(dig(roster, 'total'), 1)
-        match_eq(dig(roster, 'entry', 0, 'resource', 'id'), roster_id)
+        assert_eq(dig(roster, 'type'),'searchset')
+        assert_eq(dig(roster, 'total'), 1)
+        assert_eq(dig(roster, 'entry', 0, 'resource', 'id'), roster_id)
 
     get(url, headers=FHIR_HEADERS, response_test=response_test)
 
@@ -394,11 +433,11 @@ def add_patient_to_roster(org_id, roster_id, provider_id, patient_id):
     data = bundle('roster')
     data['member'] = [{'entity': { 'reference': f'Patient/{patient_id}' } }]
     def response_test(resp, body):
-        match_fhir_ok(resp)
+        assert_fhir_ok(resp)
         members = dig(json.loads(body), 'member')
-        match_truth(members, 'members')
+        assert_truth(members, 'members')
         present = [m for m in members if dig(m, 'entity', 'reference') == f'Patient/{patient_id}']
-        match_truth(present, 'added patient')
+        assert_truth(present, 'added patient')
 
     post(url, data, headers=headers, response_test=response_test)
 
@@ -428,11 +467,11 @@ def remove_patient_from_roster(org_id, roster_id, provider_id, patient_id):
     data = bundle('roster')
     data['member'] = [{'entity': { 'reference': f'Patient/{patient_id}' } }]
     def response_test(resp, body):
-        match_fhir_ok(resp)
+        assert_fhir_ok(resp)
         members = dig(json.loads(body), 'member')
-        match_truth(members, 'members')
-        match_eq(len([member for member in members if member['inactive']]), 1)
-        match_eq(len([member for member in members if not member['inactive']]), 4)
+        assert_truth(members, 'members')
+        assert_eq(len([member for member in members if member['inactive']]), 1)
+        assert_eq(len([member for member in members if not member['inactive']]), 4)
     post(url, data, headers=headers, response_test=response_test)
 
 def add_unknown_patient_to_roster(org_id, roster_id, provider_id):
@@ -460,12 +499,12 @@ def add_unknown_patient_to_roster(org_id, roster_id, provider_id):
     data = bundle('roster')
     data['member'] = [{'entity': { 'reference': 'Patient/c22044f0-3b8e-488c-bcd4-fcbc630d9c19' } }]
     def error_test(e):
-        match_eq(e.code, 400)
-        match_eq(e.headers['content-type'], FHIR_TYPE)
+        assert_eq(e.code, 400)
+        assert_eq(e.headers['content-type'], FHIR_TYPE)
         message = json.loads(e.fp.read().decode('utf-8'))
-        match_truth(dig(message, 'issue'), 'message issue')
-        match_eq(len(dig(message, 'issue')), 1)
-        match_eq(dig(message, 'issue', 0, 'details', 'text',), 'All patients in group must exist. Cannot find 1 patient(s).')
+        assert_truth(dig(message, 'issue'), 'message issue')
+        assert_eq(len(dig(message, 'issue')), 1)
+        assert_eq(dig(message, 'issue', 0, 'details', 'text',), 'All patients in group must exist. Cannot find 1 patient(s).')
     post(url, data, headers=headers, error_test=error_test)
 
 def bulk_export(roster_id):
@@ -491,8 +530,8 @@ def bulk_export(roster_id):
     headers = async_fhir_headers()
 
     def response_test(resp, _):
-        match_eq(resp.status, 202)
-        match_truth(resp.headers['content-location'], 'content-location')
+        assert_eq(resp.status, 202)
+        assert_truth(resp.headers['content-location'], 'content-location')
         return resp.headers['content-location']
     return get(url, headers=headers, response_test=response_test)
 
@@ -580,7 +619,7 @@ def job_result(org_id, url):
             self.outputs = {}
             for output in data['output']:
                 self.outputs[output['type']] = output
-            match_eq(self.outputs.keys(), {'Patient', 'Coverage', 'ExplanationOfBenefit'})
+            assert_eq(self.outputs.keys(), {'Patient', 'Coverage', 'ExplanationOfBenefit'})
             self.coverage = self.outputs['Coverage']
             self.patient = self.outputs['Patient']
             self.eob = self.outputs['ExplanationOfBenefit']
@@ -612,31 +651,31 @@ def job_result(org_id, url):
             time.sleep(1)
             return job_result(org_id, url)
 
-        match_eq(resp.status, 200)
-        match_eq(resp.headers['content-type'], 'application/json')
+        assert_eq(resp.status, 200)
+        assert_eq(resp.headers['content-type'], 'application/json')
 
         data = json.loads(body)
-        match_eq(len(data['error']), 1)
-        match_eq(len(data['output']), 3)
+        assert_eq(len(data['error']), 1)
+        assert_eq(len(data['output']), 3)
 
         job_results = JobResults(data)
 
         patient = job_results.patient
-        match_eq(patient['count'], 3)
-        match_valid_extension(patient)
+        assert_eq(patient['count'], 3)
+        assert_valid_extension(patient)
 
         eob = job_results.eob
         if not eob['count'] > 100:
             raise ExpectationException('eob count > 100', eob['count'])
-        match_valid_extension(eob)
+        assert_valid_extension(eob)
 
         coverage = job_results.coverage
-        match_eq(coverage['count'], 12)
-        match_valid_extension(coverage)
+        assert_eq(coverage['count'], 12)
+        assert_valid_extension(coverage)
 
         operation_outcome = job_results.operation_outcome
-        match_eq(operation_outcome['count'], 1)
-        match_valid_extension(operation_outcome)
+        assert_eq(operation_outcome['count'], 1)
+        assert_valid_extension(operation_outcome)
 
         fmt = '%a, %d %b %Y %H:%M:%S GMT'
         try:
@@ -681,15 +720,15 @@ def patient_data(url, sha):
     })
     """
     def response_test(resp, body):
-        match_ndjson_ok(resp)
+        assert_ndjson_ok(resp)
         lines = [l for l in body.split('\n') if l]
-        match_eq(len(lines), 3)
+        assert_eq(len(lines), 3)
         for line in lines:
             data = json.loads(line)
-            match_eq(dig(data, 'resourceType'), 'Patient')
+            assert_eq(dig(data, 'resourceType'), 'Patient')
             mbi_stanzas = [stanza for stanza in data['identifier'] if stanza['system'] == 'http://hl7.org/fhir/sid/us-mbi']
-            match_eq(len(mbi_stanzas), 1)
-        match_sha(body, sha)
+            assert_eq(len(mbi_stanzas), 1)
+        assert_sha_eq(body, sha)
     get(url, response_test=response_test)
 
 def eob_data(url):
@@ -712,14 +751,14 @@ def eob_data(url):
     });
     """
     def response_test(resp, body):
-        match_ndjson_ok(resp)
+        assert_ndjson_ok(resp)
         lines = [l for l in body.split('\n') if l]
         if not len(lines) > 100:
             raise ExpectationException('eob count > 100', len(lines))
         for line in lines:
             data = json.loads(line)
-            match_eq(dig(data, 'resourceType'), 'ExplanationOfBenefit')
-        match_truth(resp.headers['last-modified'], 'last-modified')
+            assert_eq(dig(data, 'resourceType'), 'ExplanationOfBenefit')
+        assert_truth(resp.headers['last-modified'], 'last-modified')
         return resp.headers['last-modified']
     return get(url, response_test=response_test)
 
@@ -752,13 +791,13 @@ def coverage_data(url, sha):
     })
     """
     def response_test(resp, body):
-        match_ndjson_ok(resp)
+        assert_ndjson_ok(resp)
         lines = [l for l in body.split('\n') if l]
-        match_eq(len(lines), 12)
-        match_sha(body, sha)
+        assert_eq(len(lines), 12)
+        assert_sha_eq(body, sha)
         for line in lines:
             data = json.loads(line)
-            match_eq(dig(data, 'resourceType'), 'Coverage')
+            assert_eq(dig(data, 'resourceType'), 'Coverage')
 
     get(url, response_test=response_test)
 
@@ -793,19 +832,19 @@ def operation_outcome_data(url, sha):
     })
     """
     def response_test(resp, body):
-        match_ndjson_ok(resp)
+        assert_ndjson_ok(resp)
         lines = [l for l in body.split('\n') if l]
-        match_eq(len(lines), 1)
+        assert_eq(len(lines), 1)
         for line in lines:
             data = json.loads(line)
-            match_eq(dig(data, 'resourceType'), 'OperationOutcome')
-            match_eq(len(data['issue']), 1)
-            match_eq(dig(data, 'issue', 0, 'details', 'text'), 'Unable to retrieve patient data due to internal error')
+            assert_eq(dig(data, 'resourceType'), 'OperationOutcome')
+            assert_eq(len(data['issue']), 1)
+            assert_eq(dig(data, 'issue', 0, 'details', 'text'), 'Unable to retrieve patient data due to internal error')
             location = dig(data, 'issue', 0, 'location')
-            match_truth(location, 'location')
+            assert_truth(location, 'location')
             if not '0S80C00AA00' in location:
                 raise ExpectationException('0S80C00AA00 in location', location)
-        match_sha(body, sha)
+        assert_sha_eq(body, sha)
     get(url, response_test=response_test)
 
 def request_partial_range(url):
@@ -820,6 +859,7 @@ def request_partial_range(url):
         pm.expect(pm.response.text().length).to.be.above(10000);
     })
 
+    -- THIS IS TESTED IN gzips_org --
     pm.test('Content should be gzipped', function() {
         pm.response.to.have.header("Content-Encoding", "gzip");
     })
@@ -829,7 +869,7 @@ def request_partial_range(url):
     def response_test(resp, body):
         if not 'content-range' in resp.headers:
             raise ExpectationException('Content-range in headers', 'Not in headers')
-        match_eq(len(body), requested_byte_count)
+        assert_eq(len(body), requested_byte_count)
     get(url, headers=headers, response_test=response_test)
 
 def request_modified_since(url, file_timestamp):
@@ -841,7 +881,7 @@ def request_modified_since(url, file_timestamp):
     """
     headers = {'If-Modified-Since': file_timestamp}
     def error_test(e):
-        match_eq(e.code, 304)
+        assert_eq(e.code, 304)
     get(url, headers=headers, error_test=error_test)
 
 def bulk_export_since(roster_id):
@@ -866,8 +906,8 @@ def bulk_export_since(roster_id):
     url = API_BASE + f'Group/{roster_id}/$export?_since={datetime.now(UTC).isoformat()[:23]}Z'
 
     def response_test(resp, _):
-        match_eq(resp.status, 202)
-        match_truth(resp.headers['content-location'], 'content-location')
+        assert_eq(resp.status, 202)
+        assert_truth(resp.headers['content-location'], 'content-location')
         return resp.headers['content-location']
     return get(url, headers=async_fhir_headers(), response_test=response_test)
 
@@ -896,11 +936,11 @@ def job_result_with_since(org_id, url):
         if resp.status == 202:
             time.sleep(1)
             return job_result_with_since(org_id, url)
-        match_eq(resp.status, 200)
-        match_eq(resp.headers['content-type'], 'application/json')
+        assert_eq(resp.status, 200)
+        assert_eq(resp.headers['content-type'], 'application/json')
         data = json.loads(body)
-        match_eq(len(data['error']), 0, 'Error')
-        match_eq(len(data['output']), 0, 'Output')
+        assert_eq(len(data['error']), 0, 'Error')
+        assert_eq(len(data['output']), 0, 'Output')
         return data
     return get(url, response_test=response_test)
 
@@ -925,21 +965,21 @@ def patient_everything(org_id, provider_id, patient_id):
     url = API_BASE + f'Patient/{patient_id}/$everything'
     headers = { 'X-Provenance': attestation(org_id, provider_id) }
     def response_test(resp, body):
-        match_eq(resp.status, 200)
+        assert_eq(resp.status, 200)
         data = json.loads(body)
-        match_eq(data['resourceType'], 'Bundle')
+        assert_eq(data['resourceType'], 'Bundle')
 
         resources = [entry['resource'] for entry in data['entry']]
-        match_eq(len(resources), 15)
+        assert_eq(len(resources), 15)
 
         patients = [resource for resource in resources if resource['resourceType'] == 'Patient']
-        match_eq(len(patients), 1)
+        assert_eq(len(patients), 1)
 
         coverages = [resource for resource in resources if resource['resourceType'] == 'Coverage']
-        match_eq(len(coverages), 4)
+        assert_eq(len(coverages), 4)
 
         eobs = [resource for resource in resources if resource['resourceType'] == 'ExplanationOfBenefit']
-        match_eq(len(eobs), 10)
+        assert_eq(len(eobs), 10)
     get(url, headers=headers, response_test=response_test)
 
 def update_invalid_content_type(org_id):
@@ -957,9 +997,9 @@ def update_invalid_content_type(org_id):
     url = API_BASE + f'Organization/{org_id}'
     headers = { 'Content-Type': 'application/fire+json' }
     def error_test(e):
-        match_eq(e.code, 415)
+        assert_eq(e.code, 415)
         body = json.loads(e.fp.read().decode('utf-8'))
-        match_eq(dig(body, 'issue', 0, 'details', 'text',), '`Content-Type:` header must specify valid FHIR content type')
+        assert_eq(dig(body, 'issue', 0, 'details', 'text',), '`Content-Type:` header must specify valid FHIR content type')
     org_bundle = bundle('organization_update')
     put(url, org_bundle, headers=headers, error_test=error_test)
 
@@ -983,10 +1023,10 @@ def update_organization(org_id):
     url = API_BASE + f'Organization/{org_id}'
     org_bundle = bundle('organization_update')
     def response_test(resp, body):
-        match_fhir_ok(resp)
+        assert_fhir_ok(resp)
         data = json.loads(body)
-        match_eq(data['name'], org_bundle['name'])
-        match_eq(data['address'], org_bundle['address'])
+        assert_eq(data['name'], org_bundle['name'])
+        assert_eq(data['address'], org_bundle['address'])
     put(url, org_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
 def find_practitioner_by_npi():
@@ -1013,12 +1053,12 @@ def find_practitioner_by_npi():
     """
     url = API_BASE + 'Practitioner?identifier=2459425221'
     def response_test(resp, body):
-        match_fhir_ok(resp)
+        assert_fhir_ok(resp)
         data = json.loads(body)
-        match_eq(data['type'], 'searchset')
-        match_eq(data['total'], 1)
+        assert_eq(data['type'], 'searchset')
+        assert_eq(data['total'], 1)
         provider_id = dig(data, 'entry', 0, 'resource', 'id')
-        match_truth(provider_id, 'provider id')
+        assert_truth(provider_id, 'provider id')
         return provider_id
     return get(url, response_test=response_test)
 
@@ -1057,14 +1097,14 @@ def patient_missing_after_delete(patient_id, patient_ids, roster_id):
     delete(API_BASE + f'Patient/{patient_id}')
 
     def response_test(resp, body):
-        match_fhir_ok(resp)
+        assert_fhir_ok(resp)
         data = json.loads(body)
-        match_eq(len(data['member']), len(patient_ids) - 1)
+        assert_eq(len(data['member']), len(patient_ids) - 1)
         for existing_patient in data['member']:
             existing_id = dig(existing_patient, 'entity', 'reference').replace('Patient/', '')
             if not existing_id in patient_ids:
                 raise ExpectationException(f'{existing_id} in patients', 'was not')
-            match_ne(existing_id, patient_id)
+            assert_ne(existing_id, patient_id)
     url = API_BASE + f'Group/{roster_id}'
     get(url, response_test=response_test)
 
@@ -1083,25 +1123,26 @@ def roster_missing_after_practitioner_delete(practitioner_id):
 
     url = API_BASE + 'Group?characteristic-value=attributed-to$2459425221'
     def response_test(resp, body):
-        match_eq(resp.status, 200)
+        assert_eq(resp.status, 200)
         data = json.loads(body)
-        match_eq(data['type'], 'searchset')
-        match_eq(data['total'], 0)
+        assert_eq(data['type'], 'searchset')
+        assert_eq(data['total'], 0)
     get(url, response_test=response_test)
 
 def gzips_org():
     """ Tests gzip, which is handled in EndToEndRequestTest in Request Partial Range """
     url = API_BASE + 'Organization'
     def response_test(resp, body):
-        match_fhir_ok(resp)
-        match_eq(resp.headers['content-encoding'], 'gzip')
+        assert_fhir_ok(resp)
+        assert_eq(resp.headers['content-encoding'], 'gzip')
         # Tests for gzip
-        match_eq(type(body), bytes)
-        match_eq(body[:2], b'\x1f\x8b')
+        assert_eq(type(body), bytes)
+        assert_eq(body[:2], b'\x1f\x8b')
 
     headers = {'Accept-Encoding': 'gzip, deflate'}
     get(url, response_test=response_test, headers=headers)
 
+# Test Execution
 class TestRunner:
     def __init__(self):
         self.success_count = 0
