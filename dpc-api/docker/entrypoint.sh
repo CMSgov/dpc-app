@@ -41,6 +41,11 @@ set +o allexport
 
 CONF_FILE="/app/resources/application.yml"
 
+if [ $DB_MIGRATION -eq 1 ]; then
+  echo "Migrating the database"
+  eval "java ${CONF_FLAGS} ${JAVA_CLASSES} db migrate ${CONF_FILE}"
+fi
+
 if [ "$DEBUG_MODE" = "true" ]; then
   echo "Setting debug mode"
   DEBUG_FLAGS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
