@@ -21,8 +21,8 @@ import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 public class DPCAggregationService extends Application<DPCAggregationConfiguration> {
 
-    private final DPCConsentHibernateBundle<DPCAggregationConfiguration> consentHibernateBundle = new DPCConsentHibernateBundle<>();
     private final DPCQueueHibernateBundle<DPCAggregationConfiguration> queueHibernateBundle = new DPCQueueHibernateBundle<>();
+    private final DPCConsentHibernateBundle<DPCAggregationConfiguration> consentHibernateBundle = new DPCConsentHibernateBundle<>();
     private final DPCHibernateBundle<DPCAggregationConfiguration> hibernateBundle = new DPCHibernateBundle<>();
 
     public static void main(final String[] args) throws Exception {
@@ -48,9 +48,8 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         // in reverse order, and we don't want the queue DB to be disconnected until after the aggregation engine stops
         // running.
         GuiceBundle guiceBundle = GuiceBundle.builder()
-                .modules(
+                .modules(new DPCQueueHibernateModule<>(queueHibernateBundle),
                         new DPCConsentHibernateModule<>(consentHibernateBundle),
-                        new DPCQueueHibernateModule<>(queueHibernateBundle),
                         new AggregationAppModule(),
                         new DPCHibernateModule<>(hibernateBundle),
                         new JobQueueModule<DPCAggregationConfiguration>(),
@@ -60,8 +59,8 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         // The Hibernate bundle must be initialized before Guice.
         // The Hibernate Guice module requires an initialized SessionFactory,
         // so Dropwizard needs to initialize the HibernateBundle first to create the SessionFactory.
-        bootstrap.addBundle(consentHibernateBundle);
         bootstrap.addBundle(queueHibernateBundle);
+        bootstrap.addBundle(consentHibernateBundle);
         bootstrap.addBundle(hibernateBundle);
 
         bootstrap.addBundle(guiceBundle);
