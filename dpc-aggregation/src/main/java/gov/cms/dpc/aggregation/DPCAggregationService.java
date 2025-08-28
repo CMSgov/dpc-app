@@ -4,6 +4,8 @@ import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.utils.EnvironmentParser;
@@ -14,13 +16,13 @@ import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.DataSourceFactory;
-import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 
 public class DPCAggregationService extends Application<DPCAggregationConfiguration> {
 
     private final DPCQueueHibernateBundle<DPCAggregationConfiguration> queueHibernateBundle = new DPCQueueHibernateBundle<>();
+    private final DPCConsentHibernateBundle<DPCAggregationConfiguration> consentHibernateBundle = new DPCConsentHibernateBundle<>();
     private final DPCHibernateBundle<DPCAggregationConfiguration> hibernateBundle = new DPCHibernateBundle<>();
 
     public static void main(final String[] args) throws Exception {
@@ -47,6 +49,7 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         // running.
         GuiceBundle guiceBundle = GuiceBundle.builder()
                 .modules(new DPCQueueHibernateModule<>(queueHibernateBundle),
+                        new DPCConsentHibernateModule<>(consentHibernateBundle),
                         new AggregationAppModule(),
                         new DPCHibernateModule<>(hibernateBundle),
                         new JobQueueModule<DPCAggregationConfiguration>(),
@@ -57,18 +60,40 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         // The Hibernate Guice module requires an initialized SessionFactory,
         // so Dropwizard needs to initialize the HibernateBundle first to create the SessionFactory.
         bootstrap.addBundle(queueHibernateBundle);
+        bootstrap.addBundle(consentHibernateBundle);
         bootstrap.addBundle(hibernateBundle);
 
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
-            public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration dpcAggregationConfiguration) {
-                return dpcAggregationConfiguration.getQueueDatabase();
+            public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration configuration) {
+                return configuration.getQueueDatabase();
             }
 
             @Override
             public String getMigrationsFileName() {
                 return "migrations/queue.migrations.xml";
+            }
+
+            @Override
+            public String name() {
+                return "queuedb";
+            }
+        });
+        bootstrap.addBundle(new MigrationsBundle<>() {
+            @Override
+            public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration configuration) {
+                return configuration.getConsentDatabase();
+            }
+
+            @Override
+            public String getMigrationsFileName() {
+                return "migrations/consent.migrations.xml";
+            }
+
+            @Override
+            public String name() {
+                return "consentdb";
             }
         });
     }
@@ -76,8 +101,5 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
     @Override
     public void run(DPCAggregationConfiguration configuration, Environment environment) {
         EnvironmentParser.getEnvironment("Aggregation");
-
-        // Http healthchecks on dependent services
-        environment.healthChecks().register("dpc-consent", new HttpHealthCheck(configuration.getConsentHealthCheckURL()));
     }
 }
