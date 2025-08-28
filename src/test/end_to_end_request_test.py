@@ -152,7 +152,6 @@ def post(url, request_body, **kwargs):
 def put(url, request_body, **kwargs):
     return post(url, request_body, method='PUT', **kwargs)
 
-
 class ExpectationException(Exception):
     def __init__(self, expected, actual, msg=None):
         self.expected = expected
@@ -165,14 +164,6 @@ class ExpectationException(Exception):
         super().__init__(f'{prefix}Expected {expected} | Actual {actual}')
 
 # Assertions
-def assert_fhir_ok(resp):
-    assert_eq(resp.status, 200)
-    assert_eq(resp.headers['content-type'], FHIR_TYPE)
-
-def assert_ndjson_ok(resp):
-    assert_eq(resp.status, 200)
-    assert_eq(resp.headers['content-type'], 'application/ndjson')
-
 def assert_eq(actual, expect, msg=None):
     if actual != expect:
         raise ExpectationException(expect, actual, msg)
@@ -184,6 +175,14 @@ def assert_ne(actual, expect):
 def assert_truth(actual, expect_s):
     if not actual:
         raise ExpectationException(f'{expect_s} to be truthy', f'was {actual}')
+
+def assert_fhir_ok(resp):
+    assert_eq(resp.status, 200)
+    assert_eq(resp.headers['content-type'], FHIR_TYPE)
+
+def assert_ndjson_ok(resp):
+    assert_eq(resp.status, 200)
+    assert_eq(resp.headers['content-type'], 'application/ndjson')
 
 def assert_sha_eq(body, sha):
     m = hashlib.sha256()
@@ -298,6 +297,7 @@ def register_patients():
     return post(url, patients_bundle, headers=FHIR_HEADERS, response_test=response_test)
 
 def check_for_roster():
+    """ not in From EndToEndRequestTest, but needed for replayability after failed test """
     url = API_BASE + 'Group?characteristic-value=attributed-to$2459425221'
     def response_test(resp, body):
         assert_fhir_ok(resp)
