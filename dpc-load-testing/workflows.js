@@ -116,12 +116,14 @@ export function workflow(data) {
     switch (res.status) {
       case 200: // Already existed, but we can still use it
         console.warn('Attempted to create patient with duplicate mbi');
-      case 201: // Patient created
+        // falls through
+      case 201: { // Patient created
         const json = res.json();
         const patientId = json.id;
         const patientMbi = json.identifier[0].value;
         patients.push({ patientId, patientMbi });
         break;
+      }
       case 0:
         console.error('Failed to create patient: ' + res.error);
         break;
