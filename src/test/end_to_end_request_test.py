@@ -74,7 +74,9 @@ def get(url, **kwargs):
         req.add_header(key, value)
     try:
         with request.urlopen(req) as resp:
-            body = resp.read().decode('utf-8')
+            body = resp.read()
+            if resp.headers['content-encoding'] != 'gzip':
+                body = body.decode('utf-8')
             return kwargs['response_test'](resp, body)
     except KeyError as ke:
         if 'error_test' in kwargs:
@@ -690,7 +692,6 @@ def patient_data(url, sha):
         match_sha(body, sha)
     get(url, response_test=response_test)
 
-# TODO: Start validation here    
 def eob_data(url):
     """ From EndToEndRequestTest
     // Response should have FHIR Content-Type
@@ -795,15 +796,16 @@ def operation_outcome_data(url, sha):
         match_ndjson_ok(resp)
         lines = [l for l in body.split('\n') if l]
         match_eq(len(lines), 1)
-        match_sha(body, sha)
         for line in lines:
             data = json.loads(line)
             match_eq(dig(data, 'resourceType'), 'OperationOutcome')
             match_eq(len(data['issue']), 1)
             match_eq(dig(data, 'issue', 0, 'details', 'text'), 'Unable to retrieve patient data due to internal error')
             location = dig(data, 'issue', 0, 'location')
+            match_truth(location, 'location')
             if not '0S80C00AA00' in location:
                 raise ExpectationException('0S80C00AA00 in location', location)
+        match_sha(body, sha)
     get(url, response_test=response_test)
 
 def request_partial_range(url):
@@ -1087,6 +1089,19 @@ def roster_missing_after_practitioner_delete(practitioner_id):
         match_eq(data['total'], 0)
     get(url, response_test=response_test)
 
+def gzips_org():
+    """ Tests gzip, which is handled in EndToEndRequestTest in Request Partial Range """
+    url = API_BASE + 'Organization'
+    def response_test(resp, body):
+        match_fhir_ok(resp)
+        match_eq(resp.headers['content-encoding'], 'gzip')
+        # Tests for gzip
+        match_eq(type(body), bytes)
+        match_eq(body[:2], b'\x1f\x8b')
+
+    headers = {'Accept-Encoding': 'gzip, deflate'}
+    get(url, response_test=response_test, headers=headers)
+
 class TestRunner:
     def __init__(self):
         self.success_count = 0
@@ -1192,6 +1207,8 @@ def run():
 
     if provider_id and roster_id:
         tr.run_test('Roster missing after practitioner delete', roster_missing_after_practitioner_delete, provider_id)
+
+    tr.run_test('Supports gzip', gzips_org)
 
     tr.finish()
 
