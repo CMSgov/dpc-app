@@ -20,11 +20,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
+import static gov.cms.dpc.attribution.AttributionTestHelpers.queryMatches;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 
@@ -112,10 +110,16 @@ class GroupResourceUnitTest {
         configuration.setExpirationThreshold(10);
         Mockito.when(rosterDAO.findEntities(isNull(),eq(orgId), eq(providerNpi), isNull())).thenReturn(List.of());
         Mockito.when(providerDAO.getProviders(isNull(),eq(providerNpi), eq(orgId))).thenReturn(List.of(new ProviderEntity()));
-        patientBank.keySet().forEach(patientId ->
-                Mockito.when(patientDAO.patientSearch(eq(patientId), isNull(),eq(orgId))).thenReturn(List.of(new PatientEntity())));
 
-        Mockito.when(patientDAO.patientSearch(eq(badPatientUUID), isNull(),eq(orgId))).thenReturn(List.of());
+        for (UUID patientId : patientBank.keySet()) {
+            Mockito.when(patientDAO.patientSearch(argThat(queryMatches(patientId, orgId, null, null))))
+                    .thenReturn(new PageResult<> (
+                            List.of(new PatientEntity()),
+                            false
+                    ));
+        }
+
+        Mockito.when(patientDAO.patientSearch(argThat(queryMatches(badPatientUUID, orgId, null, null)))).thenReturn(new PageResult<> (List.of(), false));
         Mockito.when(rosterDAO.persistEntity(any(RosterEntity.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
 
         //Act & Assert

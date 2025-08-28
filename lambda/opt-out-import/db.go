@@ -8,63 +8,17 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/rds/auth"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
-	"github.com/aws/smithy-go/logging"
 )
 
 const (
 	Accepted = "Accepted"
 	Rejected = "Rejected"
 )
-
-func getConsentDbSecrets(ctx context.Context, dbuser string, dbpassword string) (map[string]string, error) {
-	var secretsInfo map[string]string = make(map[string]string)
-	if isTesting {
-		secretsInfo[dbuser] = os.Getenv("DB_USER_DPC_CONSENT")
-		secretsInfo[dbpassword] = os.Getenv("DB_PASS_DPC_CONSENT")
-	} else {
-		var keynames []string = make([]string, 2)
-		keynames[0] = dbuser
-		keynames[1] = dbpassword
-
-		cfg, err := config.LoadDefaultConfig(ctx,
-			config.WithRegion("us-east-1"),
-			config.WithLogger(logging.Nop{}),
-		)
-		if err != nil {
-			return nil, fmt.Errorf("getConsentDbSecrets: Error creating AWS session: %w", err)
-		}
-		ssmsvc := ssm.NewFromConfig(cfg)
-
-		withDecryption := true
-		params, err := ssmsvc.GetParameters(ctx, &ssm.GetParametersInput{
-			Names:          keynames,
-			WithDecryption: &withDecryption,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("getConsentDbSecrets: Error connecting to parameter store: %w", err)
-		}
-
-		// Unknown keys will come back as invalid, make sure we error on them
-		if len(params.InvalidParameters) > 0 {
-			invalidParamsStr := ""
-			for i := 0; i < len(params.InvalidParameters); i++ {
-				invalidParamsStr += fmt.Sprintf("%s,\n", params.InvalidParameters[i])
-			}
-			return nil, fmt.Errorf("invalid parameters error: %s", invalidParamsStr)
-		}
-
-		for _, item := range params.Parameters {
-			secretsInfo[*item.Name] = *item.Value
-		}
-	}
-
-	return secretsInfo, nil
-}
 
 func getAssumeRoleArn(ctx context.Context, cfg aws.Config) (string, error) {
 	if isTesting {
@@ -185,20 +139,52 @@ func updateResponseFileImportStatus(db *sql.DB, optOutFileId string, status stri
 	return nil
 }
 
-func createConnection(dbUser string, dbPassword string) (*sql.DB, error) {
+func token(ctx context.Context, dbHost string, dbPort int, dbUser string) (string, error) {
+	cfg, err := createConfig(ctx, false)
+	if err != nil {
+		return "", err
+	}
+
+	return auth.BuildAuthToken(
+		ctx,
+		fmt.Sprintf("%s:%d", dbHost, dbPort),
+		"us-east-1",
+		dbUser,
+		cfg.Credentials,
+	)
+}
+
+func createConnection(ctx context.Context) (*sql.DB, error) {
 	var dbName string = "dpc_consent"
 	var dbHost string = os.Getenv("DB_HOST")
 	var dbPort int = 5432
-	var sslmode string = "require"
+	var dbUser string
+	var sslmode string
+	var dbPassword string
+	var err error
 	if isTesting {
 		sslmode = "disable"
+		dbUser = os.Getenv("DB_USER_DPC_CONSENT")
+		dbPassword = os.Getenv("DB_PASS_DPC_CONSENT")
+	} else {
+		sslmode = "require"
+		dbUser = fmt.Sprintf("%s-dpc_consent-role", os.Getenv("ENV"))
+		dbPassword, err = token(ctx, dbHost, dbPort, dbUser)
+		if err != nil {
+			return nil, err
+		}
 	}
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", dbHost, dbPort, dbUser, dbPassword, dbName, sslmode)
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		return db, fmt.Errorf("createConnection: %w", err)
+		return db, err
 	}
 
+	// Call db.Ping() to check the connection
+	pingErr := db.Ping()
+	if pingErr != nil {
+		return db, pingErr
+	}
 	return db, err
 }

@@ -1,10 +1,13 @@
 package gov.cms.dpc.attribution.resources.v1;
 
 import com.google.inject.name.Named;
+import gov.cms.dpc.attribution.jdbi.PageResult;
 import gov.cms.dpc.attribution.jdbi.PatientDAO;
+import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
 import gov.cms.dpc.attribution.resources.AbstractPatientResource;
 import gov.cms.dpc.attribution.utils.RESTUtils;
 import gov.cms.dpc.common.entities.PatientEntity;
+import gov.cms.dpc.common.utils.PagingService;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
@@ -12,6 +15,7 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.converters.exceptions.FHIRConverterException;
 import io.dropwizard.hibernate.UnitOfWork;
+import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
@@ -33,44 +37,71 @@ public class PatientResource extends AbstractPatientResource {
     private final FHIREntityConverter converter;
     private final PatientDAO dao;
     private final int dbBatchSize;
+    private final PagingService pagingService;
 
     @Inject
-    PatientResource(FHIREntityConverter converter, PatientDAO dao, @Named("DbBatchSize") int dbBatchSize) {
+    PatientResource(FHIREntityConverter converter, PatientDAO dao, @Named("DbBatchSize") int dbBatchSize, PagingService pagingService) {
         this.dao = dao;
         this.converter = converter;
         this.dbBatchSize = dbBatchSize;
+        this.pagingService = pagingService;
     }
 
     @GET
     @FHIR
     @UnitOfWork
     @Override
-    public List<Patient> searchPatients(
+    public Bundle searchPatients(
             @QueryParam("_id") UUID resourceID,
             @QueryParam("identifier") String patientMBI,
-            @QueryParam("organization") String organizationReference) {
+            @QueryParam("organization") String organizationReference,
+            @QueryParam(value = "_count") @Nullable Integer count,
+            @QueryParam(value = "_offset") @Nullable Integer pageOffset,
+            @QueryParam(value = "_summary") @Nullable String summary) {
         if (patientMBI == null && organizationReference == null && resourceID == null) {
             throw new WebApplicationException("Must have one of Patient Identifier, Organization Resource ID, or Patient Resource ID", Response.Status.BAD_REQUEST);
         }
 
-        final String idValue;
+        PatientSearchQuery daoSearchQuery = new PatientSearchQuery();
+        daoSearchQuery.setOrganizationID(FHIRExtractors.getEntityUUID(organizationReference));
 
-        // Extract the Patient MBI from the query param
+        if (resourceID != null) {
+            daoSearchQuery.setResourceID(resourceID);
+        }
         if (patientMBI != null) {
             final Identifier patientIdentifier = FHIRExtractors.parseIDFromQueryParam(patientMBI);
             if (!patientIdentifier.getSystem().equals(DPCIdentifierSystem.MBI.getSystem())) {
                 throw new WebApplicationException("Must have MBI identifier", Response.Status.BAD_REQUEST);
             }
-            idValue = patientIdentifier.getValue();
-        } else {
-            idValue = null;
+            daoSearchQuery.setPatientMBI(patientIdentifier.getValue());
         }
 
-        final UUID organizationID = FHIRExtractors.getEntityUUID(organizationReference);
-        return this.dao.patientSearch(resourceID, idValue, organizationID)
-                .stream()
-                .map(p -> this.converter.toFHIR(Patient.class, p))
-                .collect(Collectors.toList());
+        if (summary != null && summary.equals("count")) {
+            daoSearchQuery.setCount(0);
+            int totalPatients = this.dao.countMatchingPatients(daoSearchQuery);
+            return this.pagingService.convertToSummaryBundle(totalPatients);
+        }
+        if (count == null) {
+            // Legacy behavior - before _count parameter was introduced
+            List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery).getResults();
+            List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).toList();
+            Bundle legacyBundleWithTotal = this.pagingService.convertToBundle(patients);
+            legacyBundleWithTotal.setTotal(patients.size());
+            return legacyBundleWithTotal;
+        }
+
+        daoSearchQuery.setCount(count);
+        if (pageOffset == null) {
+            pageOffset = 0;
+        }
+        else {
+            daoSearchQuery.setPageOffset(pageOffset);
+        }
+        PageResult<PatientEntity> pageResult = this.dao.patientSearch(daoSearchQuery);
+        List<PatientEntity> patientEntities = pageResult.getResults();
+
+        List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).toList();
+        return this.pagingService.handlePagingLinks(patients, count, pageOffset, "/v1/Patient", pageResult.hasNext());
     }
 
     @GET
@@ -99,7 +130,10 @@ public class PatientResource extends AbstractPatientResource {
             final Patient createdPatient;
 
             // Check to see if Patient already exists, if so, ignore it.
-            final List<PatientEntity> patientEntities = this.dao.patientSearch(null, patientMBI, organizationID);
+            PatientSearchQuery daoSearchQuery = new PatientSearchQuery();
+            daoSearchQuery.setPatientMBI(patientMBI);
+            daoSearchQuery.setOrganizationID(organizationID);
+            final List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery).getResults();
             if (!patientEntities.isEmpty()) {
                 status = Response.Status.OK;
                 createdPatient = this.converter.toFHIR(Patient.class, patientEntities.get(0));
