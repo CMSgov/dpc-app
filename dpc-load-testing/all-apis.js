@@ -19,6 +19,7 @@ import {
   findPatientByMbi,
   addPatientsToGroup,
   authorizedGet,
+  patientEverything,
 } from './dpc-api-client.js';
 import NPIGeneratorCache from './utils/npi-generator.js';
 import MBIGeneratorCache from './utils/mbi-generator.js';
@@ -42,7 +43,6 @@ export const options = {
   }
 };
 
-// Sets up two test organizations
 export function setup() {
   const goldenMacaroon = fetchGoldenMacaroon();
   const orgIds = Array();
@@ -92,18 +92,18 @@ export function setup() {
 }
 
 export function workflow(data) {
-  const npiGenerator = npiGeneratorCache.getGenerator(exec.vu.idInInstance);
+  // hard-coded to ensure proper data retrieval
   const mbis = ['1SQ3F00AA00', '5S58A00AA00', '4S58A00AA00', '3S58A00AA00', '0S80C00AA00']
   const orgId = data.orgIds[exec.vu.idInInstance];
   if (!orgId) {
     fail('error indexing VU ID against orgIds array');
   }
 
-
   const token = generateDPCToken(orgId, data.goldenMacaroon);
 
   // POST practitioner
-  const practitionerResponse = createPractitioners(token, '2459425221');
+  const practitionerNpi = '2459425221' // hard-coded for lookback tests
+  const practitionerResponse = createPractitioners(token, practitionerNpi);
   const checkPractitionerResponse = check(
     practitionerResponse,
     {
@@ -112,10 +112,9 @@ export function workflow(data) {
     }
   );
 
-  var practitionerNpi, practitionerId;
+  var practitionerId;
   if(checkPractitionerResponse) {
     // There's only 1 identifier in our synthetic practitioner, so we don't have to search for npi
-    practitionerNpi = practitionerResponse.json().entry[0].resource.identifier[0].value;
     practitionerId = practitionerResponse.json().entry[0].resource.id;
   } else {
     console.error('failed to create practitioners');
@@ -137,6 +136,7 @@ export function workflow(data) {
     console.error('failed to create patients');
   }
 
+  // GET patient by MBI
   const patientByMbiRequest = findPatientByMbi(token, mbis[0]);
   const checkPatientByMbiRequest = check(
     patientByMbiRequest,
@@ -147,6 +147,13 @@ export function workflow(data) {
       'system is mbi': res => res.json().entry[0].resource.identifier[0].system === 'http://hl7.org/fhir/sid/us-mbi',
     }
   )
+
+  var patientId;
+  if (checkPatientByMbiRequest) {
+    patientId = patientByMbiRequest.json().entry[0].resource.id;
+  } else {
+    console.error('Unable to find patient by mbi');
+  }
 
   // POST group for practitioner
 
@@ -182,13 +189,6 @@ export function workflow(data) {
     console.error('Could not create group');
   }
 
-  var patientId;
-  if (checkPatientByMbiRequest) {
-    patientId = patientByMbiRequest.json().entry[0].resource.id;
-  } else {
-    console.error('Unable to find patient by mbi');
-  }
-
   const getGroupResponse = findGroupByPractitionerNpi(token, practitionerNpi);
   const checkGetGroupResponse = check(
     getGroupResponse,
@@ -199,6 +199,7 @@ export function workflow(data) {
     }
   );
 
+  // PUT Remove Patient
   const removePatientResponse = removePatientFromGroup(token, orgId, practitionerId, practitionerNpi, groupId, patientId);
   const checkRemovePatientResponse = check(
     removePatientResponse,
@@ -209,6 +210,7 @@ export function workflow(data) {
     }
   );
 
+  // PUT Add Bad Patient
   const badPatient = { 'patientId': 'c22044f0-3b8e-488c-bcd4-fcbc630d9c19' };
   const badPatientErrorMessage = 'All patients in group must exist. Cannot find 1 patient(s).'
   const addBadPatient = addPatientsToGroup(token, orgId, groupId, [badPatient], practitionerId, practitionerNpi)[0];
@@ -224,17 +226,17 @@ export function workflow(data) {
   );
 
   // GET group export
-  const findJobUrls = []
   const getGroupExportResponse = exportGroup(token, groupId);
   const checkGetGroupExportResponse = check(
     getGroupExportResponse,
     {
       'response code was 202': res => res.status === 202,
-      'has content-location header': res => res.headers['Content-Length'],
+      'has content-location header': res => res.headers['Content-Location'],
     },
   );
 
   if (checkGetGroupExportResponse) {
+    // GET job response
     let jobUrl = getGroupExportResponse.headers['Content-Location'];
     let jobResponse = authorizedGet(token, jobUrl);
     while(jobResponse.status === 202){
@@ -271,6 +273,8 @@ export function workflow(data) {
     );
 
     if (checkJobResponse) {
+
+      // GET patient data
       const patient = jobResponse.json().output.filter((elem) => elem.type == "Patient")[0];
       const patientChecksum = patient.extension[0].valueString;
       const patientDataResponse = authorizedGet(token, patient.url);
@@ -298,6 +302,7 @@ export function workflow(data) {
 	}
       );
 
+      // GET eob data
       const eob = jobResponse.json().output.filter((elem) => elem.type == "ExplanationOfBenefit")[0];
 
       const eobDataResponse = authorizedGet(token, eob.url);
@@ -319,8 +324,21 @@ export function workflow(data) {
 	  'has correct eob data': res => verifyEobData(res.body),
 	}
       );
-      
-      
+
+      // Get partial eob data
+      const requestedByteCount = 10240;
+      const partialRequestHeaders = {'Range': `bytes=0-${requestedByteCount}`};
+
+      const partialEobDataResponse = authorizedGet(token, eob.url, partialRequestHeaders);
+      const checkPartialEobDataResponse = check(
+	partialEobDataResponse,
+	{
+	  'expect content length header to be requested': res => res.headers['Content-Length'] == requestedByteCount,
+	  'expect body length to be requested': res => res.body.length === requestedByteCount,
+	}
+      )
+
+      // Get coverage data
       const coverage = jobResponse.json().output.filter((elem) => elem.type == "Coverage")[0];
       const coverageChecksum = coverage.extension[0].valueString;
       const coverageDataResponse = authorizedGet(token, coverage.url);
@@ -345,7 +363,8 @@ export function workflow(data) {
 	  'has correct coverage data': res => verifyCoverageData(res.body),
 	}
       );
-      
+
+      // GET operation outcome data
       const operationOutcome = jobResponse.json().error[0];
       const operationOutcomeChecksum = operationOutcome.extension[0].valueString;
       const operationOutcomeDataResponse = authorizedGet(token, operationOutcome.url);
@@ -376,11 +395,66 @@ export function workflow(data) {
 	}
       );
     }  else {
-      console.log('Failed job response check; skipping data checks');
+      console.error('Failed job response check; skipping data checks');
     }
   } else {
     console.error('Failed export; skipping job check');
   }
+
+
+  // GET group export with _since
+  const sinceDate = new Date().toISOString();
+
+  const getGroupExportResponseWithSince = exportGroup(token, groupId, `_since=${sinceDate}`);
+  const checkGetGroupExportResponseWithSince = check(
+    getGroupExportResponseWithSince,
+    {
+      'response code was 202': res => res.status === 202,
+      'has content-location header': res => res.headers['Content-Location'],
+    },
+  );
+
+  if (checkGetGroupExportResponseWithSince) {
+    // GET job response
+    let jobUrl = getGroupExportResponseWithSince.headers['Content-Location'];
+    let jobResponse = authorizedGet(token, jobUrl);
+    while(jobResponse.status === 202){
+      sleep(1);
+      jobResponse = authorizedGet(token, jobUrl);
+    }
+
+    const checkJobResponseWithSince = check(
+      jobResponse,
+      {
+	'response code was 200': res => res.status === 200,
+	'0 errors': res => res.json().error.length === 0,
+	'0 outputs': res => res.json().output.length === 0,
+      }
+    );
+  } else {
+    console.error('Failed export with since; skipping job check');
+  }
+
+  // GET patient everything
+  const patientEverythingResponse = patientEverything(token, orgId, practitionerId, patientId);
+  console.log(patientEverythingResponse.json().entry.filter(e => e.resource.resourceType === 'Patient'))
+  const checPatientEverythingResponse = check(
+    patientEverythingResponse,
+    {
+      'response code was 200': res => res.status === 200,
+      'response type bundle': res => res.json().resourceType === 'Bundle',
+      'one patient': res => res.json().entry.filter(e => e.resource.resourceType === 'Patient').length === 1,
+      '4 coverages': res => res.json().entry.filter(e => e.resource.resourceType === 'Coverage').length === 4,
+      '10 eobs': res => res.json().entry.filter(e => e.resource.resourceType === 'ExplanationOfBenefit').length === 10,
+    }
+  );
+    
+  // PUT Organization with bad content type
+  // PUT Organization
+  // GET Practitioner by NPI
+  // DELETE Patient
+  // DELETE Practitioner
+  
 }
 
 export function teardown(data) {

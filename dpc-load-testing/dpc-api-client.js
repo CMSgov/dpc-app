@@ -107,6 +107,13 @@ export function findPatientsByMbi(token, mbis) {
   return res;
 }
 
+export function patientEverything(token, orgId, practitionerId, patientId) {
+  const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
+  return http.get(`${urlRoot}/Patient/${patientId}/$everything`,
+		  createHeaderParam(token, {'X-Provenance': JSON.stringify(provenanceBody)})
+		 );
+}
+
 export function removePatientFromGroup(token, orgId, practitionerId, practitionerNpi, groupId, patientId) {
   const groupBody = generateGroupResourceBody(practitionerNpi);
   groupBody['member'] = [{'entity': {'reference': `Patient/${patientId}`}}];
@@ -195,8 +202,8 @@ export function addPatientsToGroup(token, orgId, groupId, patients, practitioner
   return res;
 }
 
-export function exportGroup(token, groupId) {
-    const res = http.get(`${urlRoot}/Group/${groupId}/$export`,
+export function exportGroup(token, groupId, getParams='') {
+    const res = http.get(`${urlRoot}/Group/${groupId}/$export?${getParams}`,
       createHeaderParam(token, {'Prefer': 'respond-async'})
     );
 
@@ -221,9 +228,10 @@ export function findJobs(token, urls) {
   return res;
 }
 
-export function authorizedGet(token, url) {
+export function authorizedGet(token, url, headers = {}) {
+  headers['Authorization'] = `Bearer ${token}`;
   return http.get(url.replace('localhost', 'host.docker.internal'),
-		  { 'headers': { 'Authorization': `Bearer ${token}` } });
+		  { 'headers': headers });
 }
 
 
