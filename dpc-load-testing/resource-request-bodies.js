@@ -97,6 +97,22 @@ export function generateProviderResourceBody (npi) {
   }
 }
 
+export function generateBundle(entries) {
+  return {
+    "resourceType": "Parameters",
+    "parameter": [
+      {
+	"name": "resource",
+	"resource": {
+          "resourceType": "Bundle",
+          "type": "collection",
+          "entry": entries,
+	}
+      }
+    ]
+  }
+}
+
 export function generatePatientResourceBody(mbi) {
   return {
     "birthDate": "1972-11-11",
@@ -116,6 +132,22 @@ export function generatePatientResourceBody(mbi) {
       }
     ],
     "resourceType": "Patient"
+  }
+}
+
+export function generatePatientsResourceBody(entries) {
+  return {
+    "resourceType": "Parameters",
+    "parameter": [
+      {
+	"name": "resource",
+	"resource": {
+          "resourceType": "Bundle",
+          "type": "collection",
+          "entry": entries,
+	}
+      }
+    ]
   }
 }
 

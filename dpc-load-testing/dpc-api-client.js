@@ -1,8 +1,10 @@
 import http from 'k6/http';
 import {
+  generateBundle,
   generateOrganizationResourceBody,
   generateProviderResourceBody,
   generatePatientResourceBody,
+  generatePatientsResourceBody,
   generateGroupResourceBody,
   generateProvenanceResourceBody
 } from "./resource-request-bodies.js"
@@ -42,6 +44,13 @@ export function createPractitioner(token, npi) {
   return res;
 }
 
+export function createPractitioners(token, npi) {
+  const body = generateBundle([{"resource": generateProviderResourceBody(npi)}]);
+  const res = http.post(`${urlRoot}/Practitioner/$submit`, JSON.stringify(body), createHeaderParam(token));
+
+  return res;
+}
+
 export function findPractitionerByNpi(token, npi) {
   return http.get(`${urlRoot}/Practitioner?identifier=${npi}`, createHeaderParam(token));
 }
@@ -72,6 +81,15 @@ export function createPatients(token, number, mbiGenerator) {
   return res;
 }
 
+export function createPatientsBatch(token, mbis) {
+  const entries = [];
+  mbis.forEach((mbi) => entries.push({'resource': generatePatientResourceBody(mbi)}));
+  const body = generatePatientsResourceBody(entries);
+  const res = http.post(`${urlRoot}/Patient/$submit`, JSON.stringify(body), createHeaderParam(token));
+
+  return res;
+}
+
 export function findPatientByMbi(token, mbi) {
   return http.get(`${urlRoot}/Patient?identifier=${mbi}`, createHeaderParam(token));
 }
@@ -86,6 +104,17 @@ export function findPatientsByMbi(token, mbis) {
   });
   
   const res = http.batch(batchRequests);
+  return res;
+}
+
+export function removePatientFromGroup(token, orgId, practitionerId, practitionerNpi, groupId, patientId) {
+  const groupBody = generateGroupResourceBody(practitionerNpi);
+  groupBody['member'] = [{'entity': {'reference': `Patient/${patientId}`}}];
+  const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
+  const res = http.post(`${urlRoot}/Group/${groupId}/$remove`, JSON.stringify(groupBody),
+			createHeaderParam(token, {'X-Provenance': JSON.stringify(provenanceBody)})
+		       );
+
   return res;
 }
 
@@ -109,6 +138,19 @@ export function createGroup(token, orgId, practitionerId, practitionerNpi) {
     );
 
     return res;
+}
+
+export function createGroupWithPatients(token, orgId, practitionerId, practitionerNpi, patients) {
+  const groupBody = generateGroupResourceBody(practitionerNpi);
+  const members = [];
+  patients.forEach((patient) => members.push({'entity': {'reference': `Patient/${patient}`}}));
+  groupBody['member'] = members;
+  const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
+  const res = http.post(`${urlRoot}/Group`, JSON.stringify(groupBody),
+			createHeaderParam(token, {'X-Provenance': JSON.stringify(provenanceBody)})
+		       );
+
+  return res;
 }
 
 export function getGroup(token, groupId) {
@@ -178,6 +220,12 @@ export function findJobs(token, urls) {
   const res = http.batch(batchRequests);
   return res;
 }
+
+export function authorizedGet(token, url) {
+  return http.get(url.replace('localhost', 'host.docker.internal'),
+		  { 'headers': { 'Authorization': `Bearer ${token}` } });
+}
+
 
 /**
  * Returns a Parameters object with the default headers we use for every request, along with any additional
