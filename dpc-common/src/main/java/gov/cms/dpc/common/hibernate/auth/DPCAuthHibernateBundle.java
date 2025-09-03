@@ -23,6 +23,7 @@ import static gov.cms.dpc.common.hibernate.EntityScanner.applicationEntities;
 public class DPCAuthHibernateBundle<T extends Configuration & IDPCAuthDatabase> extends HibernateBundle<T> implements ConfiguredBundle<T> {
 
     public static final String PREFIX_STRING = "gov.cms.dpc.api.entities";
+    public static final String BUNDLE_NAME = "hibernate.auth";
 
     @Inject
     public DPCAuthHibernateBundle() {
@@ -40,6 +41,6 @@ public class DPCAuthHibernateBundle<T extends Configuration & IDPCAuthDatabase> 
 
     @Override
     protected String name() {
-        return "hibernate.auth";
+        return BUNDLE_NAME;
     }
 }
