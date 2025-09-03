@@ -105,7 +105,6 @@ If you want to build applications locally, you'll need the following tools:
 In addition, it's helpful to have the following installed for more specific scenarios:
 
 - Running [smoke tests](#smoke-tests): Python 3 (includes `pip`)
-- Running [postman tests](#postman-collection): Node.js (includes `npm`)
 
 ### Recommended tools
 
