@@ -3,19 +3,26 @@ import { constants } from "./constants.js";
 
 // See https://grafana.com/docs/k6/latest/using-k6/k6-options/reference for
 // details on this configuration object.
+
+// Before running this, ensure the org provider cap is removed in your environment.  If you don't, the workflows
+// will start failing since they create a new provider at the start of every iteration.  Your response times will
+// look very fast all of the sudden and your results will be very, very skewed.
+// Also make sure to remove the rate limit on the WAF in whatever environment you're testing in.  If not, you'll get
+// lots of Http 429 failures.
+const AVERAGE_USERS_PER_HOUR = 50;
+
 export const options = {
   scenarios: {
     workflow: {
       executor: 'ramping-arrival-rate',
-      startRate: 50,
+      startRate: AVERAGE_USERS_PER_HOUR,
       timeUnit: '1h',
       preAllocatedVUs: constants.preAllocatedVUs,
       maxVUs: constants.maxVUs,
       stages: [
-        { target: 50, duration: '30m' },
-        { target: 100, duration: '30m' },
-        { target: 150, duration: '30m' },
-        { target: 250, duration: '30m' },
+        { target: AVERAGE_USERS_PER_HOUR, duration: '30m' },       // Average load for 30 minutes
+        { target: 30 * AVERAGE_USERS_PER_HOUR, duration: '30m' },  // Ramp up to 30x load over 30 minutes
+        { target: 30 * AVERAGE_USERS_PER_HOUR, duration: '60m' }   // Stay at 30x load for 60 minutes
       ],
       exec: "workflow"
     }
