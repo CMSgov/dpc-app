@@ -22,6 +22,7 @@ import static gov.cms.dpc.common.hibernate.EntityScanner.applicationEntities;
 public class DPCConsentHibernateBundle<T extends Configuration & IDPCConsentDatabase> extends HibernateBundle<T> implements ConfiguredBundle<T> {
 
     public static final String PREFIX_STRING = "gov.cms.dpc.common.consent.entities";
+    public static final String BUNDLE_NAME = "hibernate.consent";
 
     @Inject
     public DPCConsentHibernateBundle() {
@@ -35,6 +36,6 @@ public class DPCConsentHibernateBundle<T extends Configuration & IDPCConsentData
 
     @Override
     protected String name() {
-        return "hibernate.consent";
+        return BUNDLE_NAME;
     }
 }
