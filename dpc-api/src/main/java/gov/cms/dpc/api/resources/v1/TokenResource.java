@@ -23,6 +23,7 @@ import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.annotations.Public;
+import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.macaroons.CaveatSupplier;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
@@ -97,7 +98,7 @@ public class TokenResource extends AbstractTokenResource {
 
     @Override
     @GET
-    @UnitOfWork
+    @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME)
     @Timed
     @ExceptionMetered
     @Authorizer
@@ -110,7 +111,7 @@ public class TokenResource extends AbstractTokenResource {
 
     @GET
     @Path("/{tokenID}")
-    @UnitOfWork
+    @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME)
     @Timed
     @ExceptionMetered
     @Authorizer
@@ -129,7 +130,7 @@ public class TokenResource extends AbstractTokenResource {
     }
 
     @POST
-    @UnitOfWork
+    @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME)
     @Timed
     @ExceptionMetered
     @Authorizer
@@ -182,7 +183,7 @@ public class TokenResource extends AbstractTokenResource {
     @Override
     @DELETE
     @Path("/{tokenID}")
-    @UnitOfWork
+    @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME)
     @Timed
     @ExceptionMetered
     @Authorizer
@@ -201,7 +202,7 @@ public class TokenResource extends AbstractTokenResource {
 
     @POST
     @Path("/auth")
-    @UnitOfWork
+    @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME)
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Request API access token", notes = "Request access token for API access")
@@ -238,7 +239,7 @@ public class TokenResource extends AbstractTokenResource {
 
     @POST
     @Path("/validate")
-    @UnitOfWork
+    @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME)
     @Timed
     @ExceptionMetered
     @ApiOperation(value = "Validate API token request", notes = "Validates a given JWT to ensure the required claims and values are set correctly.", authorizations = @Authorization(value = ""))

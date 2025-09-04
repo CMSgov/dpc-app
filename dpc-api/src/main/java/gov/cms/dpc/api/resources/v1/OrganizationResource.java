@@ -12,6 +12,7 @@ import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.AbstractOrganizationResource;
 import gov.cms.dpc.common.MDCConstants;
+import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
@@ -135,7 +136,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Timed
     @ExceptionMetered
     @AdminOperation
-    @UnitOfWork
+    @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME)
     @ApiOperation(value = "Delete Organization",
             notes = "FHIR endpoint which removes the organization currently registered with the application.\n" +
                     "This also removes all associated resources",

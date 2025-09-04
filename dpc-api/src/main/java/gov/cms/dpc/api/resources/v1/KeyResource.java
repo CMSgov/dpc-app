@@ -13,6 +13,7 @@ import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.resources.AbstractKeyResource;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.entities.OrganizationEntity;
+import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
@@ -52,7 +53,7 @@ public class KeyResource extends AbstractKeyResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @UnitOfWork
+    @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME)
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Fetch public keys for Organization",
             notes = "This endpoint returns all the public keys currently associated with the organization." +
@@ -67,7 +68,7 @@ public class KeyResource extends AbstractKeyResource {
     @Timed
     @ExceptionMetered
     @Path("/{keyID}")
-    @UnitOfWork
+    @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME)
     @Authorizer
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Fetch public key for Organization",
@@ -87,7 +88,7 @@ public class KeyResource extends AbstractKeyResource {
     @Timed
     @ExceptionMetered
     @Path("/{keyID}")
-    @UnitOfWork
+    @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME)
     @Produces(MediaType.APPLICATION_JSON)
     @Authorizer
     @ApiOperation(value = "Delete public key for Organization",
@@ -121,7 +122,7 @@ public class KeyResource extends AbstractKeyResource {
                     "- secp256r1" +
                     "- secp384r1")
     @ApiResponses(@ApiResponse(code = 400, message = "Public key is not valid."))
-    @UnitOfWork
+    @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME)
     @Override
     public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                      @ApiParam KeySignature keySignature,
