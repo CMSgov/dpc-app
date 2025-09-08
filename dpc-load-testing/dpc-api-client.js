@@ -37,6 +37,17 @@ export function createOrganization(npi, name, goldenMacaroon) {
   return res;
 }
 
+export function updateOrganization(token, organization, contentTypeHeader=null) {
+  const headers = createHeaderParam(token);
+  if (contentTypeHeader) {
+    headers['headers']['Content-Type'] = contentTypeHeader;
+  }
+  const orgId = organization.id;
+  const res = http.put(`${urlRoot}/Organization/${orgId}`, JSON.stringify(organization), headers);
+
+  return res;
+}
+
 export function createPractitioner(token, npi) {
   const body = generateProviderResourceBody(npi);
   const res = http.post(`${urlRoot}/Practitioner`, JSON.stringify(body), createHeaderParam(token));
@@ -49,6 +60,10 @@ export function createPractitioners(token, npi) {
   const res = http.post(`${urlRoot}/Practitioner/$submit`, JSON.stringify(body), createHeaderParam(token));
 
   return res;
+}
+
+export function deletePractitioner(token, practitionerId) {
+  return http.del(`${urlRoot}/Practitioner/${practitionerId}`, null, createHeaderParam(token));  
 }
 
 export function findPractitionerByNpi(token, npi) {
@@ -90,6 +105,10 @@ export function createPatientsBatch(token, mbis) {
   return res;
 }
 
+export function deletePatient(token, patientId) {
+  return http.del(`${urlRoot}/Patient/${patientId}`, null, createHeaderParam(token));  
+}
+
 export function findPatientByMbi(token, mbi) {
   return http.get(`${urlRoot}/Patient?identifier=${mbi}`, createHeaderParam(token));
 }
@@ -125,8 +144,12 @@ export function removePatientFromGroup(token, orgId, practitionerId, practitione
   return res;
 }
 
-export function getOrganization(token) {
-  const res = http.get(`${urlRoot}/Organization`, createHeaderParam(token));
+export function getOrganization(token, gzipped=null) {
+  const headers = createHeaderParam(token);
+  if (gzipped) {
+    headers['headers']['Accept-Encoding'] = 'gzip';
+  }
+  const res = http.get(`${urlRoot}/Organization`, headers);
 
   return res;
 }

@@ -6,20 +6,26 @@ import crypto from 'k6/crypto';
 import exec from 'k6/execution'
 import { fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
 import {
+  addPatientsToGroup,
+  authorizedGet,
   createGroup,
   createGroupWithPatients,
   createOrganization,
+  createPatientsBatch,
   createPractitioners,
   deleteOrganization,
+  deletePatient,
+  deletePractitioner,
   exportGroup,
-  findOrganizationByNpi,
   findGroupByPractitionerNpi,
-  createPatientsBatch,
-  removePatientFromGroup,
+  findOrganizationByNpi,
   findPatientByMbi,
-  addPatientsToGroup,
-  authorizedGet,
+  findPractitionerByNpi,
+  getGroup,
+  getOrganization,
   patientEverything,
+  removePatientFromGroup,
+  updateOrganization,
 } from './dpc-api-client.js';
 import NPIGeneratorCache from './utils/npi-generator.js';
 import MBIGeneratorCache from './utils/mbi-generator.js';
@@ -33,6 +39,9 @@ const fhirOK = function(res) {
 };
 
 export const options = {
+  thresholds: {
+    checks: ['rate===1'],
+  },
   scenarios: {
     workflow: {
       executor: 'per-vu-iterations',
@@ -199,6 +208,10 @@ export function workflow(data) {
     }
   );
 
+  if (!checkGetGroupResponse) {
+    console.error('Could not get group by NPI');
+  }
+
   // PUT Remove Patient
   const removePatientResponse = removePatientFromGroup(token, orgId, practitionerId, practitionerNpi, groupId, patientId);
   const checkRemovePatientResponse = check(
@@ -209,6 +222,9 @@ export function workflow(data) {
       'four active member': res => res.json().member.filter(member => member.inactive === false).length === mbis.length - 1,
     }
   );
+  if (!checkRemovePatientResponse){
+    console.error('Could not remove patient');
+  }
 
   // PUT Add Bad Patient
   const badPatient = { 'patientId': 'c22044f0-3b8e-488c-bcd4-fcbc630d9c19' };
@@ -224,6 +240,9 @@ export function workflow(data) {
       'correct error message': res => res.json().issue[0].details.text === badPatientErrorMessage,
     }
   );
+  if (!checkAddBadPatient){
+    console.error('Add bad patient check failure');
+  }
 
   // GET group export
   const getGroupExportResponse = exportGroup(token, groupId);
@@ -301,6 +320,9 @@ export function workflow(data) {
 	  'has correct patient data': res => verifyPatientData(res.body),
 	}
       );
+      if (!checkPatientDataResponse){
+	console.error('Patient data response failure');
+      }
 
       // GET eob data
       const eob = jobResponse.json().output.filter((elem) => elem.type == "ExplanationOfBenefit")[0];
@@ -324,12 +346,15 @@ export function workflow(data) {
 	  'has correct eob data': res => verifyEobData(res.body),
 	}
       );
-
+      if (!checkEobDataResponse){
+	console.error('ExplanationOfBenefits data response failure');
+      }
       // Get partial eob data
       const requestedByteCount = 10240;
       const partialRequestHeaders = {'Range': `bytes=0-${requestedByteCount}`};
 
       const partialEobDataResponse = authorizedGet(token, eob.url, partialRequestHeaders);
+
       const checkPartialEobDataResponse = check(
 	partialEobDataResponse,
 	{
@@ -337,6 +362,9 @@ export function workflow(data) {
 	  'expect body length to be requested': res => res.body.length === requestedByteCount,
 	}
       )
+      if (!checkPartialEobDataResponse){
+	console.error('Parital ExplanationOfBenefits data response failure');
+      }
 
       // Get coverage data
       const coverage = jobResponse.json().output.filter((elem) => elem.type == "Coverage")[0];
@@ -363,7 +391,10 @@ export function workflow(data) {
 	  'has correct coverage data': res => verifyCoverageData(res.body),
 	}
       );
-
+      if (!checkCoverageDataResponse){
+	console.error('Coverage data response failure');
+      }
+      
       // GET operation outcome data
       const operationOutcome = jobResponse.json().error[0];
       const operationOutcomeChecksum = operationOutcome.extension[0].valueString;
@@ -394,6 +425,9 @@ export function workflow(data) {
 	  'has correct operationOutcome data': res => verifyOperationOutcomeData(res.body),
 	}
       );
+      if (!checkOperationOutcomeDataResponse){
+	console.error('OperationOutcome data response failure');
+      }
     }  else {
       console.error('Failed job response check; skipping data checks');
     }
@@ -431,14 +465,17 @@ export function workflow(data) {
 	'0 outputs': res => res.json().output.length === 0,
       }
     );
+    if (!checkJobResponseWithSince){
+      console.error('Job with since failure');
+    }
   } else {
     console.error('Failed export with since; skipping job check');
   }
 
   // GET patient everything
   const patientEverythingResponse = patientEverything(token, orgId, practitionerId, patientId);
-  console.log(patientEverythingResponse.json().entry.filter(e => e.resource.resourceType === 'Patient'))
-  const checPatientEverythingResponse = check(
+
+  const checkPatientEverythingResponse = check(
     patientEverythingResponse,
     {
       'response code was 200': res => res.status === 200,
@@ -448,13 +485,171 @@ export function workflow(data) {
       '10 eobs': res => res.json().entry.filter(e => e.resource.resourceType === 'ExplanationOfBenefit').length === 10,
     }
   );
-    
-  // PUT Organization with bad content type
-  // PUT Organization
-  // GET Practitioner by NPI
-  // DELETE Patient
-  // DELETE Practitioner
+  if (!checkPatientEverythingResponse){
+    console.error('Patient everything failure');
+  }
   
+  // GET Organization
+  const getOrganizationResponse = getOrganization(token);
+  const checkGetOrganizationResponse = check(
+    getOrganizationResponse,
+    {
+      'status OK and fhir header': fhirOK,
+    }
+  );
+  if (!checkGetOrganizationResponse){
+    console.error('Get organization for update failure');
+  }
+  const organization = getOrganizationResponse.json().entry[0].resource;
+
+  
+  // PUT Organization Tests
+  const newName = 'New Name';
+  organization['name'] = newName;
+  const newAddress = [
+    {
+      "city": "Chestnut Hill",
+      "country": "US",
+      "line": [
+        "200 Boylston Street, 4th Floor",
+        "Suite 66"
+      ],
+      "postalCode": "02467",
+      "state": "MA",
+      "type": "both",
+      "use": "work"
+    }
+  ];
+  organization['address'] = newAddress;
+
+  // PUT Organization with bad content type
+  const updateOrganizationResponseBadCT = updateOrganization(token, organization, 'application/fire+json');
+  const expectedIssueText = '`Content-Type:` header must specify valid FHIR content type'
+
+  const checkUpdateOrganizationResponseBadCT = check(
+    updateOrganizationResponseBadCT,
+    {
+      'response code was 415': res => res.status === 415,
+      'one issue': res => res.json().issue.length === 1,
+      'issue text matches': res => res.json().issue[0].details.text === expectedIssueText,
+    }
+  );
+  if (!checkUpdateOrganizationResponseBadCT){
+    console.error('Bad content type check failure');
+  }
+
+  // PUT Organization with good content type
+  const updateOrganizationResponse = updateOrganization(token, organization);
+  const checkUpdateOrganizationResponse = check(
+    updateOrganizationResponse,
+    {
+      'response code was 200': res => res.status === 200,
+      'name updated': res => res.json().name === newName,
+      'street updated': res => res.json().address[0].line[0] === "200 Boylston Street, 4th Floor",
+      'city updated': res => res.json().address[0].city === "Chestnut Hill",
+      'state updated': res => res.json().address[0].state === "MA",
+      'zip updated':  res => res.json().address[0].postalCode === "02467",
+    }
+  );
+  if (!checkUpdateOrganizationResponse){
+    console.error('Organization update failure');
+  }
+
+  // GET Practitioner by NPI
+  const practitionerByNpiResponse = findPractitionerByNpi(token, practitionerNpi);
+  const checkPractitionerByNpiResponse = check(
+    practitionerByNpiResponse,
+    {
+      'status OK and fhir header': fhirOK,
+      'type is searchset': res => res.json().type === 'searchset',
+      'one practitioner': res => res.json().total === 1,
+    }
+  );
+  if (!checkPractitionerByNpiResponse){
+    console.error('Get practitioner by NPI failure');
+  }
+
+  // DELETE Patient
+  const deletePatientResponse = deletePatient(token, patientId);
+  const checkDeletePatientResponse = check(
+    deletePatientResponse,
+    {
+      'response code was 200': res => res.status === 200,      
+    }
+  );
+  if (!checkDeletePatientResponse){
+    console.error('Delete patient failure');
+  }
+
+  // GET Roster (make sure patient removed)
+  const verifyPatientMissing = function(body) {
+    if (body.member.length != mbis.length - 1){
+      console.error(`Should have ${mbis.length - 1} but have ${body.member.length}`);
+      return false;
+    }
+    var pass = true;
+    body.member.forEach((member) => {
+      if (!member.entity.reference) {
+	console.error('Missing entity reference');
+	pass = false;
+      }
+      if (member.entity.reference === `Patient/${patientId}`) {
+	console.error('Patient still present in group');
+	pass = false;
+      }
+    });
+    return pass;
+  }
+
+  const getRosterAfterDeletionResponse = getGroup(token, groupId);
+  const checkGetRosterAfterDeletionResponse = check(
+    getRosterAfterDeletionResponse,
+    {
+      'status OK and fhir header': fhirOK,
+      'patient missing': res => verifyPatientMissing(res.json()),
+      
+    }
+  );
+  if (!checkGetRosterAfterDeletionResponse){
+    console.error('Roster after patient delete failure');
+  }
+  
+  // DELETE Practitioner
+  const deletePractitionerResponse = deletePractitioner(token, practitionerId);
+  const checkDeletePractitionerResponse = check(
+    deletePractitionerResponse,
+    {
+      'response code was 200': res => res.status === 200,      
+    }
+  );
+  if (!checkDeletePractitionerResponse){
+    console.error('Delete practitioner failure');
+  }
+
+  const getGroupAfterPractitionerDeleteResponse = findGroupByPractitionerNpi(token, practitionerNpi);
+  const checkGetGroupAfterPractitionerDeleteResponseetGroupResponse = check(
+    getGroupAfterPractitionerDeleteResponse,
+    {
+      'status OK and fhir header': fhirOK,
+      'is searchset': res => res.json().type === 'searchset',
+      'one in searchset': res => res.json().total === 0,
+    }
+  );
+  if (!checkGetGroupAfterPractitionerDeleteResponseetGroupResponse){
+    console.error('Check for roster after practitioner delete failure');
+  }
+
+  // GET Organization gzipped
+  const getOrganizationGzippedResponse = getOrganization(token, true);
+  const checkGetOrganizationGzippedResponse = check(
+    getOrganizationGzippedResponse,
+    {
+      'status OK and fhir header': fhirOK,
+      'content encoding has gzip': res => res.headers['Content-Encoding'] === 'gzip',
+    }
+  );if (!getOrganizationGzippedResponse){
+    console.error('Gzipped organization failure');
+  }
 }
 
 export function teardown(data) {
