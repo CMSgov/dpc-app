@@ -23,6 +23,8 @@ default: &default
 
   url: <%= ENV['DATABASE_URL'] %>
   username: <%= ENV['DB_USER'] %>
+  password: '<%= ENV['DB_PASS'] %>'
+
 
 development: &development
   <<: *default
@@ -85,5 +87,3 @@ test:
 #
 production:
   <<: *default
-  sslmode: verify-full
-  sslrootcert: <%= "#{Rails.root}/config/bundle.pem" %>
