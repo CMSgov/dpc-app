@@ -9,6 +9,7 @@ import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
 import gov.cms.dpc.api.resources.AbstractIpAddressResource;
+import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.hypersistence.utils.hibernate.type.basic.Inet;
@@ -42,7 +43,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @UnitOfWork
+    @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME)
     @ApiOperation(
         value = "Fetch Ip addresses for an organization",
         authorizations = @Authorization(value = "access_token")
@@ -58,7 +59,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @UnitOfWork
+    @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME)
     @ApiOperation(
             value = "Submits an Ip address for an organization",
             notes = "Organizations are currently limited to 8 Ip addresses.  If you attempt to submit more a 400 will be returned.",
@@ -96,7 +97,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
     @Timed
     @ExceptionMetered
     @Authorizer
-    @UnitOfWork
+    @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME)
     @ApiOperation(
             value = "Deletes an Ip address for an organization",
             authorizations = @Authorization(value = "access_token")
