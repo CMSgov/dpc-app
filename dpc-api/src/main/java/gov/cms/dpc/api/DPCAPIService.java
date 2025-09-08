@@ -12,8 +12,6 @@ import gov.cms.dpc.api.cli.organizations.OrganizationCommand;
 import gov.cms.dpc.api.cli.tokens.TokenCommand;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
-import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
-import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
@@ -45,7 +43,6 @@ import java.util.Optional;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
 
-    private final DPCHibernateBundle<DPCAPIConfiguration> hibernateBundle = new DPCHibernateBundle<>();
     private final DPCQueueHibernateBundle<DPCAPIConfiguration> hibernateQueueBundle = new DPCQueueHibernateBundle<>();
     private final DPCAuthHibernateBundle<DPCAPIConfiguration> hibernateAuthBundle = new DPCAuthHibernateBundle<>(List.of(
             "gov.cms.dpc.macaroons.store.hibernate.entities"));
@@ -74,7 +71,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         // The Hibernate bundle must be initialized before Guice.
         // The Hibernate Guice module requires an initialized SessionFactory,
         // so Dropwizard needs to initialize the HibernateBundle first to create the SessionFactory.
-        bootstrap.addBundle(hibernateBundle);
         bootstrap.addBundle(hibernateQueueBundle);
         bootstrap.addBundle(hibernateAuthBundle);
 
@@ -119,7 +115,6 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         JerseyGuiceUtils.reset();
         return GuiceBundle.builder()
                 .modules(
-                        new DPCHibernateModule<>(hibernateBundle),
                         new DPCQueueHibernateModule<>(hibernateQueueBundle),
                         new DPCAuthHibernateModule<>(hibernateAuthBundle),
                         new AuthModule(),
