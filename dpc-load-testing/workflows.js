@@ -180,9 +180,6 @@ export function workflow(data) {
       if (!findJobUrl) {
         console.error('failed to get a location to query the export job');
       } else {
-        if (__ENV.ENVIRONMENT === 'local') {
-          findJobUrl = findJobUrl.replace('localhost', 'host.docker.internal');
-        }
         findJobUrls.push(findJobUrl);
       }
     }
