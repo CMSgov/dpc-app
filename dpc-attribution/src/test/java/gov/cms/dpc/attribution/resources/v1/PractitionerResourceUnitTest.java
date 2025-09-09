@@ -58,7 +58,7 @@ class PractitionerResourceUnitTest {
         // mock fhir converter to return test data
         when(converter.fromFHIR(ProviderEntity.class, practitioner1)).thenReturn(AttributionTestHelpers.createProviderEntity(org));
         // mock DAO calls so we already have 5 results
-        when(providerDAO.getProvidersCount(null, null, org.getId())).thenReturn((long) PROVIDER_LIMIT);
+        when(providerDAO.getProvidersCount(null, null, org.getId())).thenReturn((long) maxProviders);
         when(providerDAO.getProviders(null, "1111111112", org.getId()))
                 .thenReturn(existingProviders);
 
