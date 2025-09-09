@@ -21,6 +21,8 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +32,8 @@ import java.util.stream.Stream;
 
 @FHIR
 public class PractitionerResource extends AbstractPractitionerResource {
+
+    private static final Logger logger = LoggerFactory.getLogger(PractitionerResource.class);
 
     private final ProviderDAO dao;
     private final FHIREntityConverter converter;
@@ -72,6 +76,11 @@ public class PractitionerResource extends AbstractPractitionerResource {
         final List<ProviderEntity> existingProvidersByNPI = this.dao.getProviders(null, entity.getProviderNPI(), entity.getOrganization().getId());
 
         if (providerLimit != null && providerLimit != -1 && totalExistingProviders >= providerLimit) {
+            logger.warn("Provider limit reached for submitProvider() operation: providerLimit={} orgId={} currentCount={} providerNPI={}",
+                    providerLimit,
+                    entity.getOrganization().getId(),
+                    totalExistingProviders,
+                    entity.getProviderNPI());
             OperationOutcome outcomeWithProviderLimitMessage = new OperationOutcome();
             outcomeWithProviderLimitMessage.addIssue()
                     .setSeverity(OperationOutcome.IssueSeverity.ERROR)
