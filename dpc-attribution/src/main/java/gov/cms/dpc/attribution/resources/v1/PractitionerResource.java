@@ -18,6 +18,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
 
@@ -71,7 +72,16 @@ public class PractitionerResource extends AbstractPractitionerResource {
         final List<ProviderEntity> existingProvidersByNPI = this.dao.getProviders(null, entity.getProviderNPI(), entity.getOrganization().getId());
 
         if (providerLimit != null && providerLimit != -1 && totalExistingProviders >= providerLimit) {
-            return Response.status(422).entity(this.converter.toFHIR(Practitioner.class, entity)).build();
+            OperationOutcome outcomeWithProviderLimitMessage = new OperationOutcome();
+            outcomeWithProviderLimitMessage.addIssue()
+                    .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                    .setCode(OperationOutcome.IssueType.BUSINESSRULE)
+                    .setDiagnostics("Provider limit reached");
+
+            return Response.status(422)
+                    .entity(outcomeWithProviderLimitMessage)
+                    .type("application/fhir+json")
+                    .build();
         }
 
         if (existingProvidersByNPI.isEmpty()) {
