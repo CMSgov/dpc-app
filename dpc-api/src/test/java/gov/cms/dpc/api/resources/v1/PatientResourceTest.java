@@ -15,7 +15,6 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.dpc.aggregation.service.ConsentResult;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.TestOrganizationContext;
@@ -481,7 +480,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals("9V99EU8XY91", FHIRExtractors.getPatientMBI(patientResource));
     }
 
-    @Disabled("Disabled until call to /Consent removed")
     @Test
     void testPatientEverythingForOptedOutPatient() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -511,7 +509,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
             "Incorrect or missing operation outcome in response body.");
     }
 
-    @Disabled("Disabled until call to /Consent removed")
     @Test
     void testPatientEverythingForOptedOutPatientOnMultipleMbis() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -543,7 +540,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
             "Incorrect or missing operation outcome in response body.");
     }
 
-    @Disabled("Disabled until call to /Consent removed")
     @Test
     void testOptInPatient() throws GeneralSecurityException, IOException, URISyntaxException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -594,7 +590,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         final String[] headers = new String[1];
         client.registerInterceptor(new IClientInterceptor() {
             @Override
-            public void interceptRequest(IHttpRequest theRequest) { }   // Not needed
+            public void interceptRequest(IHttpRequest theRequest) { /* Not used */ }
 
             @Override
             public void interceptResponse(IHttpResponse theResponse) throws IOException {
@@ -927,11 +923,11 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     private void optOutPatient(String mbi, LocalDate date){
-        sendConsent(mbi, ConsentResult.PolicyType.OPT_OUT.getValue(), date);
+        sendConsent(mbi, ConsentEntity.OPT_OUT, date);
     }
 
     private void optInPatient(String mbi, LocalDate date){
-        sendConsent(mbi, ConsentResult.PolicyType.OPT_IN.getValue(), date);
+        sendConsent(mbi, ConsentEntity.OPT_IN, date);
     }
 
     private void sendConsent(String mbi, String policyUrl, LocalDate date) {
@@ -941,7 +937,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         ConsentEntity consentEntity = new ConsentEntity();
         consentEntity.setLoincCode("64292-6");
-        consentEntity.setMbi(mbi);
+        consentEntity.setMbi( String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), mbi));
         consentEntity.setEffectiveDate(date);
         consentEntity.setPolicyCode(policyUrl);
 
