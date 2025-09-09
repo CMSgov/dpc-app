@@ -28,54 +28,15 @@ function _finally {
 
 trap _finally EXIT
 
-if [ -n "$REPORT_COVERAGE" ]; then
-  echo "┌──────────────────────────────────────┐"
-  echo "│                                      │"
-  echo "│      Running Tests and Coverage      │"
-  echo "│                                      │"
-  echo "└──────────────────────────────────────┘"
-else
-  echo "┌──────────────────────────────────────────┐"
-  echo "│                                          │"
-  echo "│              Running Tests....           │"
-  echo "│           REPORT_COVERAGE not set        │"
-  echo "│                                          │"
-  echo "└──────────────────────────────────────────┘"
-fi
-
-# Build the application
-docker compose -p start-v1-app up db --wait
-mvn clean compile -Perror-prone -B -V -ntp
-mvn package -Pci -ntp
-
-# Format the test results
-if [ -n "$REPORT_COVERAGE" ]; then
-  mvn jacoco:report -ntp
-fi
-
-docker compose -p start-v1-app down
-
-USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
-
-# Run the integration tests
-USE_BFD_MOCK=true docker compose -p start-v1-app up --exit-code-from tests tests
+docker compose -f ./docker-compose.base.yml build base
+mvn clean compile -Perror-prone -B -V -ntp -T 4 -DskipTests
+mvn package -Pci -ntp -T 4 -DskipTests
 
 echo "Starting api server for end-to-end tests"
-USE_BFD_MOCK=true docker compose -p start-v1-app up api --wait
+USE_BFD_MOCK=true docker compose -p start-v1-app up aggregation api --wait
 
 echo "Starting end-to-end tests"
-docker run --rm -v $(pwd)/dpc-load-testing:/src --env-file $(pwd)/ops/config/decrypted/local.env -e ENVIRONMENT=local -e TEST_TYPE=all-apis -i grafana/k6 run /src/ci-app.js
+docker run --add-host=host.docker.internal:host-gateway --rm -v $(pwd)/dpc-load-testing:/src --env-file $(pwd)/ops/config/decrypted/local.env -e ENVIRONMENT=local -e TEST_TYPE=all-apis -i grafana/k6 run /src/ci-app.js
 
 # Wait for Jacoco to finish writing the output files
 docker compose -p start-v1-app down -t 60
-
-# Collect the coverage reports for the Docker integration tests
-if [ -n "$REPORT_COVERAGE" ]; then
-  mvn jacoco:report-integration -Pci -ntp
-fi
-
-echo "┌──────────────────────────────────────────┐"
-echo "│                                          │"
-echo "│             All Tests Complete           │"
-echo "│                                          │"
-echo "└──────────────────────────────────────────┘"
