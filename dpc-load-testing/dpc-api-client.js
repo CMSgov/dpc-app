@@ -4,7 +4,6 @@ import {
   generateOrganizationResourceBody,
   generateProviderResourceBody,
   generatePatientResourceBody,
-  generatePatientsResourceBody,
   generateGroupResourceBody,
   generateProvenanceResourceBody
 } from "./resource-request-bodies.js"
@@ -63,7 +62,7 @@ export function createPractitioners(token, npi) {
 }
 
 export function deletePractitioner(token, practitionerId) {
-  return http.del(`${urlRoot}/Practitioner/${practitionerId}`, null, createHeaderParam(token));  
+  return http.del(`${urlRoot}/Practitioner/${practitionerId}`, null, createHeaderParam(token));
 }
 
 export function findPractitionerByNpi(token, npi) {
@@ -99,14 +98,14 @@ export function createPatients(token, number, mbiGenerator) {
 export function createPatientsBatch(token, mbis) {
   const entries = [];
   mbis.forEach((mbi) => entries.push({'resource': generatePatientResourceBody(mbi)}));
-  const body = generatePatientsResourceBody(entries);
+  const body = generateBundle(entries);
   const res = http.post(`${urlRoot}/Patient/$submit`, JSON.stringify(body), createHeaderParam(token));
 
   return res;
 }
 
 export function deletePatient(token, patientId) {
-  return http.del(`${urlRoot}/Patient/${patientId}`, null, createHeaderParam(token));  
+  return http.del(`${urlRoot}/Patient/${patientId}`, null, createHeaderParam(token));
 }
 
 export function findPatientByMbi(token, mbi) {
@@ -121,7 +120,7 @@ export function findPatientsByMbi(token, mbis) {
       params: createHeaderParam(token)
     }
   });
-  
+
   const res = http.batch(batchRequests);
   return res;
 }

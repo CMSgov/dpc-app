@@ -8,7 +8,6 @@ import { fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
 import {
   addPatientsToGroup,
   authorizedGet,
-  createGroup,
   createGroupWithPatients,
   createOrganization,
   createPatientsBatch,
@@ -28,11 +27,9 @@ import {
   updateOrganization,
 } from './dpc-api-client.js';
 import NPIGeneratorCache from './utils/npi-generator.js';
-import MBIGeneratorCache from './utils/mbi-generator.js';
 import { constants } from './constants.js';
 
 const npiGeneratorCache = new NPIGeneratorCache();
-const mbiGeneratorCache = new MBIGeneratorCache();
 const fhirType = 'application/fhir+json';
 const fhirOK = function(res) {
   return res.status === 200 && res.headers['Content-Type'] === fhirType;
@@ -81,7 +78,7 @@ export function setup() {
 
     const org = createOrganization(npi, `Test Org ${i}`, goldenMacaroon);
 
-    const checkOutput = check(
+    const checkCreateOrganization = check(
       org,
       {
         'response code was 200': res => res.status === 200,
@@ -91,7 +88,7 @@ export function setup() {
       }
     );
 
-    if (!checkOutput) {
+    if (!checkCreateOrganization) {
       exec.test.abort('failed to create organizations on setup')
     }
 
@@ -121,7 +118,7 @@ export function workflow(data) {
     }
   );
 
-  var practitionerId;
+  let practitionerId;
   if(checkPractitionerResponse) {
     // There's only 1 identifier in our synthetic practitioner, so we don't have to search for npi
     practitionerId = practitionerResponse.json().entry[0].resource.id;
@@ -157,7 +154,7 @@ export function workflow(data) {
     }
   )
 
-  var patientId;
+  let patientId;
   if (checkPatientByMbiRequest) {
     patientId = patientByMbiRequest.json().entry[0].resource.id;
   } else {
@@ -169,7 +166,7 @@ export function workflow(data) {
   const createGroupResponse = createGroupWithPatients(token, orgId, practitionerId, practitionerNpi, patients);
 
   const memberContentVerified = function(res) {
-    var pass = true;
+    let pass = true;
     res.json().member.forEach((patient) => {
       if (!patients.includes(patient.entity.reference.slice(8))){
 	pass = false;
@@ -191,7 +188,7 @@ export function workflow(data) {
     }
   );
 
-  var groupId;
+  let groupId;
   if (checkCreateGroupResponse) {
     groupId = createGroupResponse.json().id;
   } else {
@@ -301,7 +298,7 @@ export function workflow(data) {
       const verifyPatientData = function(body) {
 	const patientBlocks = body.trim().split('\n');
 	if (patientBlocks.length != 3) return false;
-	var pass = true;
+	let pass = true;
 	patientBlocks.forEach((block) => {
 	  const blockData = JSON.parse(block);
 	  if (blockData.resourceType != 'Patient') pass = false;
@@ -331,7 +328,7 @@ export function workflow(data) {
       const verifyEobData = function(body) {
 	const eobBlocks = body.trim().split('\n');
 	if (eobBlocks.length < 100) return false;
-	var pass = true;
+	let pass = true;
 	eobBlocks.forEach((block) => {
 	  const blockData = JSON.parse(block);
 	  if (blockData.resourceType != 'ExplanationOfBenefit') pass = false;
@@ -374,7 +371,7 @@ export function workflow(data) {
       const verifyCoverageData = function(body) {
 	const coverageBlocks = body.trim().split('\n');
 	if (coverageBlocks.length != 12) return false;
-	var pass = true;
+	let pass = true;
 	coverageBlocks.forEach((block) => {
 	  const blockData = JSON.parse(block);
 	  if (blockData.resourceType != 'Coverage') pass = false;
@@ -394,7 +391,7 @@ export function workflow(data) {
       if (!checkCoverageDataResponse){
 	console.error('Coverage data response failure');
       }
-      
+
       // GET operation outcome data
       const operationOutcome = jobResponse.json().error[0];
       const operationOutcomeChecksum = operationOutcome.extension[0].valueString;
@@ -403,7 +400,7 @@ export function workflow(data) {
       const verifyOperationOutcomeData = function(body) {
 	const operationOutcomeBlocks = body.trim().split('\n');
 	if (operationOutcomeBlocks.length != 1) return false;
-	var pass = true;
+	let pass = true;
 	operationOutcomeBlocks.forEach((block) => {
 	  const blockData = JSON.parse(block);
 	  if (blockData.resourceType != 'OperationOutcome') pass = false;
@@ -488,7 +485,7 @@ export function workflow(data) {
   if (!checkPatientEverythingResponse){
     console.error('Patient everything failure');
   }
-  
+
   // GET Organization
   const getOrganizationResponse = getOrganization(token);
   const checkGetOrganizationResponse = check(
@@ -502,7 +499,7 @@ export function workflow(data) {
   }
   const organization = getOrganizationResponse.json().entry[0].resource;
 
-  
+
   // PUT Organization Tests
   const newName = 'New Name';
   organization['name'] = newName;
@@ -574,20 +571,20 @@ export function workflow(data) {
   const checkDeletePatientResponse = check(
     deletePatientResponse,
     {
-      'response code was 200': res => res.status === 200,      
+      'response code was 200': res => res.status === 200,
     }
   );
   if (!checkDeletePatientResponse){
     console.error('Delete patient failure');
   }
 
-  // GET Roster (make sure patient removed)
+  // GET Group (make sure patient removed)
   const verifyPatientMissing = function(body) {
     if (body.member.length != mbis.length - 1){
       console.error(`Should have ${mbis.length - 1} but have ${body.member.length}`);
       return false;
     }
-    var pass = true;
+    let pass = true;
     body.member.forEach((member) => {
       if (!member.entity.reference) {
 	console.error('Missing entity reference');
@@ -601,25 +598,25 @@ export function workflow(data) {
     return pass;
   }
 
-  const getRosterAfterDeletionResponse = getGroup(token, groupId);
-  const checkGetRosterAfterDeletionResponse = check(
-    getRosterAfterDeletionResponse,
+  const getGroupAfterDeletionResponse = getGroup(token, groupId);
+  const checkGetGroupAfterDeletionResponse = check(
+    getGroupAfterDeletionResponse,
     {
       'status OK and fhir header': fhirOK,
       'patient missing': res => verifyPatientMissing(res.json()),
-      
+
     }
   );
-  if (!checkGetRosterAfterDeletionResponse){
-    console.error('Roster after patient delete failure');
+  if (!checkGetGroupAfterDeletionResponse){
+    console.error('Group after patient delete failure');
   }
-  
+
   // DELETE Practitioner
   const deletePractitionerResponse = deletePractitioner(token, practitionerId);
   const checkDeletePractitionerResponse = check(
     deletePractitionerResponse,
     {
-      'response code was 200': res => res.status === 200,      
+      'response code was 200': res => res.status === 200,
     }
   );
   if (!checkDeletePractitionerResponse){
@@ -632,11 +629,11 @@ export function workflow(data) {
     {
       'status OK and fhir header': fhirOK,
       'is searchset': res => res.json().type === 'searchset',
-      'one in searchset': res => res.json().total === 0,
+      'none in searchset': res => res.json().total === 0,
     }
   );
   if (!checkGetGroupAfterPractitionerDeleteResponseetGroupResponse){
-    console.error('Check for roster after practitioner delete failure');
+    console.error('Check for group after practitioner delete failure');
   }
 
   // GET Organization gzipped
@@ -647,7 +644,7 @@ export function workflow(data) {
       'status OK and fhir header': fhirOK,
       'content encoding has gzip': res => res.headers['Content-Encoding'] === 'gzip',
     }
-  );if (!getOrganizationGzippedResponse){
+  );if (!checkGetOrganizationGzippedResponse){
     console.error('Gzipped organization failure');
   }
 }
