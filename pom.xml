@@ -50,6 +50,7 @@
         <newrelic.agent.version>8.21.0</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
         <h2.version>2.3.232</h2.version>
+        <aws.java.sdk.version>2.31.71</aws.java.sdk.version>
         <sonar.coverage.exclusions>**/MockBlueButton*.java</sonar.coverage.exclusions>
     </properties>
 
@@ -154,6 +155,13 @@
                 <groupId>ru.vyarus.guicey</groupId>
                 <artifactId>guicey-bom</artifactId>
                 <version>7.1.4</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${aws.java.sdk.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
