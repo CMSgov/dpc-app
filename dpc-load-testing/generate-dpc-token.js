@@ -2,7 +2,7 @@ import http from 'k6/http';
 import encoding from 'k6/encoding';
 import { hmac } from 'k6/crypto'
 
-const adminUrl = __ENV.ENVIRONMENT == 'local' ? 'http://localhost:9903' : __ENV.API_ADMIN_URL;
+const adminUrl = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:9903' : __ENV.API_ADMIN_URL;
 
 const fetchGoldenMacaroonURL = `${adminUrl}/tasks/generate-token`
 
