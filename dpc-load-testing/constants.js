@@ -3,7 +3,7 @@ function getVUsCount() {
     return 3;
   } else if (__ENV.TEST_TYPE === 'stress-test') {
     return 5; 
-  } else if (__ENV.TEST_TYPE === 'all-apis') {
+  } else if (__ENV.TEST_TYPE === 'ci-app') {
     return 1;
   }
 }
