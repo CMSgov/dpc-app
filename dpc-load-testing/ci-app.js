@@ -1,7 +1,7 @@
 /*global console*/
 /* eslint no-console: "off" */
 
-import { check, fail, sleep } from 'k6';
+import { check, sleep } from 'k6';
 import crypto from 'k6/crypto';
 import exec from 'k6/execution'
 import { fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
@@ -27,7 +27,6 @@ import {
   updateOrganization,
 } from './dpc-api-client.js';
 import NPIGeneratorCache from './utils/npi-generator.js';
-import { constants } from './constants.js';
 
 const npiGeneratorCache = new NPIGeneratorCache();
 const fhirType = 'application/fhir+json';
@@ -42,7 +41,7 @@ export const options = {
   scenarios: {
     workflow: {
       executor: 'per-vu-iterations',
-      vus: constants.maxVUs,
+      vus: 1,
       iterations: 1,
       exec: "workflow"
     }
@@ -51,59 +50,51 @@ export const options = {
 
 export function setup() {
   const goldenMacaroon = fetchGoldenMacaroon();
-  const orgIds = Array();
   const npiGenerator = npiGeneratorCache.getGenerator(0);
-  // array returned from setup distributes its members starting from the 1 index
-  for (let i = 1; i <= constants.maxVUs; i++) {
-    const npi = npiGenerator.iterate();
-    // check if org with npi exists
-    const existingOrgResponse = findOrganizationByNpi(npi, goldenMacaroon);
-    const checkFindOutput = check(
-      existingOrgResponse,
-      {
-	'status OK and fhir header': fhirOK,
-      }
-    );
-
-    if (!checkFindOutput) {
-      exec.test.abort('failed to check for existing orgs');
+  const npi = npiGenerator.iterate();
+  // check if org with npi exists
+  const existingOrgResponse = findOrganizationByNpi(npi, goldenMacaroon);
+  const checkFindOutput = check(
+    existingOrgResponse,
+    {
+      'status OK and fhir header': fhirOK,
     }
-    // delete if org exists with npi
-    const existingOrgs =  existingOrgResponse.json();
-    if ( existingOrgs.total ) {
-      for ( const entry of existingOrgs.entry ) {
-        deleteOrganization(entry.resource.id, goldenMacaroon);
-      }
-    }
+  );
 
-    const org = createOrganization(npi, `Test Org ${i}`, goldenMacaroon);
-
-    const checkCreateOrganization = check(
-      org,
-      {
-        'response code was 200': res => res.status === 200,
-	'accept header fhir type': res => res.headers['Content-Type'] === fhirType,
-        'response has id field': res => res.json().id != undefined,
-        'id field is not null': res => res.json().id != null
-      }
-    );
-
-    if (!checkCreateOrganization) {
-      exec.test.abort('failed to create organizations on setup')
-    }
-
-    orgIds[i] = org.json().id;
+  if (!checkFindOutput) {
+    exec.test.abort('failed to check for existing orgs');
   }
-  return { orgIds: orgIds, goldenMacaroon: goldenMacaroon };
+  // delete if org exists with npi
+  const existingOrgs =  existingOrgResponse.json();
+  if ( existingOrgs.total ) {
+    for ( const entry of existingOrgs.entry ) {
+      deleteOrganization(entry.resource.id, goldenMacaroon);
+    }
+  }
+
+  const org = createOrganization(npi, `Test Org`, goldenMacaroon);
+
+  const checkCreateOrganization = check(
+    org,
+    {
+      'response code was 200': res => res.status === 200,
+      'accept header fhir type': res => res.headers['Content-Type'] === fhirType,
+      'response has id field': res => res.json().id != undefined,
+      'id field is not null': res => res.json().id != null
+    }
+  );
+
+  if (!checkCreateOrganization) {
+    exec.test.abort('failed to create organizations on setup')
+  }
+
+  return { orgId: org.json().id, goldenMacaroon: goldenMacaroon };
 }
 
 export function workflow(data) {
   // hard-coded to ensure proper data retrieval
   const mbis = ['1SQ3F00AA00', '5S58A00AA00', '4S58A00AA00', '3S58A00AA00', '0S80C00AA00']
-  const orgId = data.orgIds[exec.vu.idInInstance];
-  if (!orgId) {
-    fail('error indexing VU ID against orgIds array');
-  }
+  const orgId = data.orgId;
 
   const token = generateDPCToken(orgId, data.goldenMacaroon);
 
@@ -169,10 +160,10 @@ export function workflow(data) {
     let pass = true;
     res.json().member.forEach((patient) => {
       if (!patients.includes(patient.entity.reference.slice(8))){
-	pass = false;
+        pass = false;
       }
       if (!patient.period.start || patient.period.start === patient.period.end) {
-	pass = false;
+        pass = false;
       }
     });
     return pass;
@@ -262,29 +253,29 @@ export function workflow(data) {
 
     const checkExtension = function(obj) {
       return obj.extension.length === 2 &&
-	obj.extension[0].url === 'https://dpc.cms.gov/checksum' &&
-	obj.extension[0].valueString  &&
-	obj.extension[1].url === 'https://dpc.cms.gov/file_length' &&
-	obj.extension[1].valueDecimal;
+        obj.extension[0].url === 'https://dpc.cms.gov/checksum' &&
+        obj.extension[0].valueString  &&
+        obj.extension[1].url === 'https://dpc.cms.gov/file_length' &&
+        obj.extension[1].valueDecimal;
     };
 
     const checkJobResponse = check(
       jobResponse,
       {
-	'response code was 200': res => res.status === 200,
-	'one error': res => res.json().error.length === 1,
-	'three outputs': res => res.json().output.length === 3,
-	'three patients': res => res.json().output.filter((elem) => elem.type == "Patient")[0].count === 3,
-	'patient extention': res => checkExtension(res.json().output.filter((elem) => elem.type == "Patient")[0]),
-	'more than 100 eobs': res => res.json().output.filter((elem) => elem.type == "ExplanationOfBenefit")[0].count > 100,
-	'eob extention': res => checkExtension(res.json().output.filter((elem) => elem.type == "ExplanationOfBenefit")[0]),
-	'twelve coverages': res => res.json().output.filter((elem) => elem.type == "Coverage")[0].count === 12,
-	'coverage extention': res => checkExtension(res.json().output.filter((elem) => elem.type == "Coverage")[0]),
-	'one operation outcome': res => res.json().error.filter((elem) => elem.type == "OperationOutcome")[0].count === 1,
-	'operation outcome extention': res => checkExtension(res.json().error.filter((elem) => elem.type == "OperationOutcome")[0]),
-	'has expires header': res => Date.parse(res.headers.Expires),
-	'does not expire early': res => (Date.parse(res.headers.Expires) - Date.now())/3600000 > 23,
-	'does not expire late': res => (Date.parse(res.headers.Expires) - Date.now())/3600000 < 24,
+        'response code was 200': res => res.status === 200,
+        'one error': res => res.json().error.length === 1,
+        'three outputs': res => res.json().output.length === 3,
+        'three patients': res => res.json().output.filter((elem) => elem.type == "Patient")[0].count === 3,
+        'patient extention': res => checkExtension(res.json().output.filter((elem) => elem.type == "Patient")[0]),
+        'more than 100 eobs': res => res.json().output.filter((elem) => elem.type == "ExplanationOfBenefit")[0].count > 100,
+        'eob extention': res => checkExtension(res.json().output.filter((elem) => elem.type == "ExplanationOfBenefit")[0]),
+        'twelve coverages': res => res.json().output.filter((elem) => elem.type == "Coverage")[0].count === 12,
+        'coverage extention': res => checkExtension(res.json().output.filter((elem) => elem.type == "Coverage")[0]),
+        'one operation outcome': res => res.json().error.filter((elem) => elem.type == "OperationOutcome")[0].count === 1,
+        'operation outcome extention': res => checkExtension(res.json().error.filter((elem) => elem.type == "OperationOutcome")[0]),
+        'has expires header': res => Date.parse(res.headers.Expires),
+        'does not expire early': res => (Date.parse(res.headers.Expires) - Date.now())/3600000 > 23,
+        'does not expire late': res => (Date.parse(res.headers.Expires) - Date.now())/3600000 < 24,
       }
     );
 
@@ -296,29 +287,29 @@ export function workflow(data) {
       const patientDataResponse = authorizedGet(token, patient.url);
 
       const verifyPatientData = function(body) {
-	const patientBlocks = body.trim().split('\n');
-	if (patientBlocks.length != 3) return false;
-	let pass = true;
-	patientBlocks.forEach((block) => {
-	  const blockData = JSON.parse(block);
-	  if (blockData.resourceType != 'Patient') pass = false;
-	  const mbiStanza = blockData.identifier.find(i => i.system === "http://hl7.org/fhir/sid/us-mbi");
-	  if (mbiStanza === undefined) pass = false;
-	});
-	const checksum  = crypto.sha256(body, 'hex');
-	if (`sha256:${checksum}` != patientChecksum) pass = false;
-	return pass;
+        const patientBlocks = body.trim().split('\n');
+        if (patientBlocks.length != 3) return false;
+        let pass = true;
+        patientBlocks.forEach((block) => {
+          const blockData = JSON.parse(block);
+          if (blockData.resourceType != 'Patient') pass = false;
+          const mbiStanza = blockData.identifier.find(i => i.system === "http://hl7.org/fhir/sid/us-mbi");
+          if (mbiStanza === undefined) pass = false;
+        });
+        const checksum  = crypto.sha256(body, 'hex');
+        if (`sha256:${checksum}` != patientChecksum) pass = false;
+        return pass;
       }
       const checkPatientDataResponse = check(
-	patientDataResponse,
-	{
-	  'response code was 200': res => res.status === 200,
-	  'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
-	  'has correct patient data': res => verifyPatientData(res.body),
-	}
+        patientDataResponse,
+        {
+          'response code was 200': res => res.status === 200,
+          'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
+          'has correct patient data': res => verifyPatientData(res.body),
+        }
       );
       if (!checkPatientDataResponse){
-	console.error('Patient data response failure');
+        console.error('Patient data response failure');
       }
 
       // GET eob data
@@ -326,25 +317,25 @@ export function workflow(data) {
 
       const eobDataResponse = authorizedGet(token, eob.url);
       const verifyEobData = function(body) {
-	const eobBlocks = body.trim().split('\n');
-	if (eobBlocks.length < 100) return false;
-	let pass = true;
-	eobBlocks.forEach((block) => {
-	  const blockData = JSON.parse(block);
-	  if (blockData.resourceType != 'ExplanationOfBenefit') pass = false;
-	});
-	return pass;
+        const eobBlocks = body.trim().split('\n');
+        if (eobBlocks.length < 100) return false;
+        let pass = true;
+        eobBlocks.forEach((block) => {
+          const blockData = JSON.parse(block);
+          if (blockData.resourceType != 'ExplanationOfBenefit') pass = false;
+        });
+        return pass;
       }
       const checkEobDataResponse = check(
-	eobDataResponse,
-	{
-	  'response code was 200': res => res.status === 200,
-	  'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
-	  'has correct eob data': res => verifyEobData(res.body),
-	}
+        eobDataResponse,
+        {
+          'response code was 200': res => res.status === 200,
+          'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
+          'has correct eob data': res => verifyEobData(res.body),
+        }
       );
       if (!checkEobDataResponse){
-	console.error('ExplanationOfBenefits data response failure');
+        console.error('ExplanationOfBenefits data response failure');
       }
       // Get partial eob data
       const requestedByteCount = 10240;
@@ -353,14 +344,14 @@ export function workflow(data) {
       const partialEobDataResponse = authorizedGet(token, eob.url, partialRequestHeaders);
 
       const checkPartialEobDataResponse = check(
-	partialEobDataResponse,
-	{
-	  'expect content length header to be requested': res => res.headers['Content-Length'] == requestedByteCount,
-	  'expect body length to be requested': res => res.body.length === requestedByteCount,
-	}
+        partialEobDataResponse,
+        {
+          'expect content length header to be requested': res => res.headers['Content-Length'] == requestedByteCount,
+          'expect body length to be requested': res => res.body.length === requestedByteCount,
+        }
       )
       if (!checkPartialEobDataResponse){
-	console.error('Parital ExplanationOfBenefits data response failure');
+        console.error('Parital ExplanationOfBenefits data response failure');
       }
 
       // Get coverage data
@@ -369,27 +360,27 @@ export function workflow(data) {
       const coverageDataResponse = authorizedGet(token, coverage.url);
 
       const verifyCoverageData = function(body) {
-	const coverageBlocks = body.trim().split('\n');
-	if (coverageBlocks.length != 12) return false;
-	let pass = true;
-	coverageBlocks.forEach((block) => {
-	  const blockData = JSON.parse(block);
-	  if (blockData.resourceType != 'Coverage') pass = false;
-	});
-	const checksum  = crypto.sha256(body, 'hex');
-	if (`sha256:${checksum}` != coverageChecksum) pass = false;
-	return pass;
+        const coverageBlocks = body.trim().split('\n');
+        if (coverageBlocks.length != 12) return false;
+        let pass = true;
+        coverageBlocks.forEach((block) => {
+          const blockData = JSON.parse(block);
+          if (blockData.resourceType != 'Coverage') pass = false;
+        });
+        const checksum  = crypto.sha256(body, 'hex');
+        if (`sha256:${checksum}` != coverageChecksum) pass = false;
+        return pass;
       }
       const checkCoverageDataResponse = check(
-	coverageDataResponse,
-	{
-	  'response code was 200': res => res.status === 200,
-	  'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
-	  'has correct coverage data': res => verifyCoverageData(res.body),
-	}
+        coverageDataResponse,
+        {
+          'response code was 200': res => res.status === 200,
+          'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
+          'has correct coverage data': res => verifyCoverageData(res.body),
+        }
       );
       if (!checkCoverageDataResponse){
-	console.error('Coverage data response failure');
+        console.error('Coverage data response failure');
       }
 
       // GET operation outcome data
@@ -398,32 +389,32 @@ export function workflow(data) {
       const operationOutcomeDataResponse = authorizedGet(token, operationOutcome.url);
 
       const verifyOperationOutcomeData = function(body) {
-	const operationOutcomeBlocks = body.trim().split('\n');
-	if (operationOutcomeBlocks.length != 1) return false;
-	let pass = true;
-	operationOutcomeBlocks.forEach((block) => {
-	  const blockData = JSON.parse(block);
-	  if (blockData.resourceType != 'OperationOutcome') pass = false;
-	  const issue = blockData.issue[0];
-	  if (issue.details.text != 'Unable to retrieve patient data due to internal error') {
-	    pass = false;
-	  }
-	  if (!issue.location.includes('0S80C00AA00')) pass = false;
-	});
-	const checksum  = crypto.sha256(body, 'hex');
-	if (`sha256:${checksum}` != operationOutcomeChecksum) pass = false;
-	return pass;
+        const operationOutcomeBlocks = body.trim().split('\n');
+        if (operationOutcomeBlocks.length != 1) return false;
+        let pass = true;
+        operationOutcomeBlocks.forEach((block) => {
+          const blockData = JSON.parse(block);
+          if (blockData.resourceType != 'OperationOutcome') pass = false;
+          const issue = blockData.issue[0];
+          if (issue.details.text != 'Unable to retrieve patient data due to internal error') {
+            pass = false;
+          }
+          if (!issue.location.includes('0S80C00AA00')) pass = false;
+        });
+        const checksum  = crypto.sha256(body, 'hex');
+        if (`sha256:${checksum}` != operationOutcomeChecksum) pass = false;
+        return pass;
       }
       const checkOperationOutcomeDataResponse = check(
-	operationOutcomeDataResponse,
-	{
-	  'response code was 200': res => res.status === 200,
-	  'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
-	  'has correct operationOutcome data': res => verifyOperationOutcomeData(res.body),
-	}
+        operationOutcomeDataResponse,
+        {
+          'response code was 200': res => res.status === 200,
+          'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
+          'has correct operationOutcome data': res => verifyOperationOutcomeData(res.body),
+        }
       );
       if (!checkOperationOutcomeDataResponse){
-	console.error('OperationOutcome data response failure');
+        console.error('OperationOutcome data response failure');
       }
     }  else {
       console.error('Failed job response check; skipping data checks');
@@ -431,7 +422,6 @@ export function workflow(data) {
   } else {
     console.error('Failed export; skipping job check');
   }
-
 
   // GET group export with _since
   const sinceDate = new Date().toISOString();
@@ -457,9 +447,9 @@ export function workflow(data) {
     const checkJobResponseWithSince = check(
       jobResponse,
       {
-	'response code was 200': res => res.status === 200,
-	'0 errors': res => res.json().error.length === 0,
-	'0 outputs': res => res.json().output.length === 0,
+        'response code was 200': res => res.status === 200,
+        '0 errors': res => res.json().error.length === 0,
+        '0 outputs': res => res.json().output.length === 0,
       }
     );
     if (!checkJobResponseWithSince){
@@ -498,7 +488,6 @@ export function workflow(data) {
     console.error('Get organization for update failure');
   }
   const organization = getOrganizationResponse.json().entry[0].resource;
-
 
   // PUT Organization Tests
   const newName = 'New Name';
@@ -587,12 +576,12 @@ export function workflow(data) {
     let pass = true;
     body.member.forEach((member) => {
       if (!member.entity.reference) {
-	console.error('Missing entity reference');
-	pass = false;
+        console.error('Missing entity reference');
+        pass = false;
       }
       if (member.entity.reference === `Patient/${patientId}`) {
-	console.error('Patient still present in group');
-	pass = false;
+        console.error('Patient still present in group');
+        pass = false;
       }
     });
     return pass;
@@ -644,15 +633,12 @@ export function workflow(data) {
       'status OK and fhir header': fhirOK,
       'content encoding has gzip': res => res.headers['Content-Encoding'] === 'gzip',
     }
-  );if (!checkGetOrganizationGzippedResponse){
+  );
+  if (!checkGetOrganizationGzippedResponse){
     console.error('Gzipped organization failure');
   }
 }
 
 export function teardown(data) {
-  for (const orgId of data.orgIds) {
-    if (orgId) {
-      deleteOrganization(orgId, data.goldenMacaroon);
-    }
-  }
+  deleteOrganization(data.orgId, data.goldenMacaroon);
 }
