@@ -5,7 +5,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
 
     <changeSet id="queue-v2-design" author="ronaldheft-usds">
-        <preConditions onFail="WARN">
+        <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="JOB_QUEUE_BATCH"/>
             </not>
