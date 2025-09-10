@@ -97,6 +97,22 @@ export function generateProviderResourceBody (npi) {
   }
 }
 
+export function generateBundle(entries) {
+  return {
+    "resourceType": "Parameters",
+    "parameter": [
+      {
+	"name": "resource",
+	"resource": {
+          "resourceType": "Bundle",
+          "type": "collection",
+          "entry": entries,
+	}
+      }
+    ]
+  }
+}
+
 export function generatePatientResourceBody(mbi) {
   return {
     "birthDate": "1972-11-11",
@@ -120,7 +136,7 @@ export function generatePatientResourceBody(mbi) {
 }
 
 export function generateGroupResourceBody(practitionerNpi, patientId) {
-  const groupResource = 
+  const groupResource =
   {
     "resourceType": "Group",
     "type": "person",
@@ -156,7 +172,7 @@ export function generateGroupResourceBody(practitionerNpi, patientId) {
       }
     ];
   };
-  
+
   return groupResource;
 }
 
@@ -188,11 +204,11 @@ export function generateProvenanceResourceBody(orgId, practitionerId) {
                 ]
               }
             ],
-            "whoReference": 
+            "whoReference":
             {
                 "reference":"Organization/" + orgId
             },
-            "onBehalfOfReference": 
+            "onBehalfOfReference":
             {
                 "reference":"Practitioner/" + practitionerId
             }
