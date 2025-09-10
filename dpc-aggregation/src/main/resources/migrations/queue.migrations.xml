@@ -5,6 +5,11 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
 
     <changeSet id="queue-v2-design" author="ronaldheft-usds">
+        <preConditions onFail="WARN">
+            <not>
+                <tableExists tableName="JOB_QUEUE_BATCH"/>
+            </not>
+        </preConditions>
         <createTable tableName="JOB_QUEUE_BATCH">
             <column name="batch_id" type="UUID">
                 <constraints nullable="false" primaryKey="true"/>
@@ -29,19 +34,19 @@
         </createTable>
 
         <createIndex tableName="JOB_QUEUE_BATCH" indexName="job_queue_batch_job_id">
-            <column name="job_id"></column>
+            <column name="job_id"/>
         </createIndex>
 
         <createIndex tableName="JOB_QUEUE_BATCH" indexName="job_queue_batch_queue_next_item">
-            <column name="status"></column>
-            <column name="priority"></column>
-            <column name="submit_time"></column>
+            <column name="status"/>
+            <column name="priority"/>
+            <column name="submit_time"/>
         </createIndex>
 
         <createIndex tableName="JOB_QUEUE_BATCH" indexName="job_queue_batch_aggregator">
-            <column name="status"></column>
-            <column name="aggregator_id"></column>
-            <column name="update_time"></column>
+            <column name="status"/>
+            <column name="aggregator_id"/>
+            <column name="update_time"/>
         </createIndex>
 
         <createTable tableName="JOB_QUEUE_BATCH_FILE">
@@ -61,7 +66,7 @@
                        columnNames="batch_id, resource_type, sequence"/>
 
         <createIndex tableName="JOB_QUEUE_BATCH_FILE" indexName="job_queue_batch_file_job_id">
-            <column name="job_id"></column>
+            <column name="job_id"/>
         </createIndex>
 
         <addForeignKeyConstraint baseTableName="JOB_QUEUE_BATCH_FILE" baseColumnNames="batch_id" constraintName="fk_job_batch_id_file"
