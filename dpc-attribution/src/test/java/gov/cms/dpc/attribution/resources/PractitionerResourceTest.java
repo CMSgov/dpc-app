@@ -271,7 +271,10 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         final ICreateTyped creation2 = submitPractitioner(practitioner2);
         practitionersToCleanUp.add(practitioner2);
 
-        assertThrows(UnprocessableEntityException.class, creation2::execute, "Should not modify");
+        UnprocessableEntityException ex = assertThrows(UnprocessableEntityException.class, creation2::execute, "Should not modify");
+        assertEquals(422, ex.getStatusCode());
+        OperationOutcome opOutcome = (OperationOutcome) ex.getOperationOutcome();
+        assertEquals("Provider limit reached", opOutcome.getIssueFirstRep().getDiagnostics());
     }
 
     private ICreateTyped submitPractitioner(Practitioner practitioner) {
