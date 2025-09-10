@@ -1,6 +1,6 @@
-package gov.cms.dpc.consent.tasks;
+package gov.cms.dpc.aggregation.tasks;
 
-import gov.cms.dpc.consent.DPCConsentConfiguration;
+import gov.cms.dpc.aggregation.DPCAggregationConfiguration;
 import gov.cms.dpc.testing.utils.DBUtils;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.db.PooledDataSourceFactory;
@@ -24,10 +24,10 @@ import java.util.Map;
 @Singleton
 public class TruncateDatabase extends Task {
 
-	private final DPCConsentConfiguration configuration;
+	private final DPCAggregationConfiguration configuration;
 
 	@Inject
-	public TruncateDatabase(DPCConsentConfiguration config) {
+	public TruncateDatabase(DPCAggregationConfiguration config) {
 		super("truncate");
 		this.configuration = config;
 	}
