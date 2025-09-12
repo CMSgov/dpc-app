@@ -3,10 +3,19 @@ name: 'DPC - Docker Build'
 on:
   workflow_dispatch:
   workflow_call:
+    inputs:
+      block_release_tag:
+        description: Whether should block marking build as release
+        type: boolean
+        default: false
+        required: false
     outputs:
       ecr_image_tag:
         description: "Tag for associated docker images"
         value: ${{ jobs.generate_docker_tag.outputs.docker_tag }}
+      version_tag:
+        description: "Tag for app version"
+        value: ${{ jobs.generate_docker_tag.outputs.version_tag }}
 
 permissions:
   id-token: write
@@ -25,6 +34,7 @@ jobs:
       id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     outputs:
+      version_tag: ${{ steps.get-version-tag.outputs.version_tag }}
       docker_tag: ${{ steps.output_docker_tag.outputs.docker_tag }}
     steps:
       - name: "Checkout code"
@@ -37,10 +47,11 @@ jobs:
         run: |
           set +e
           VERSION_TAG=`git describe --tags --exact-match`
-          if [ $? -ne 0 ]; then
+          if [ "${{ inputs.block_release_tag }}" = true -o $? -ne 0 ]; then
             BRANCH_HASH=`git show -s --format='%h'`
             VERSION_TAG="commit_${BRANCH_HASH}"
           fi
+          echo $VERSION_TAG
           echo "version_tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
           set -e
       - name: generate a tag with UTC date and GitHub run_id
@@ -48,6 +59,7 @@ jobs:
         run: |
           DOCKER_TAG="rls-${{ steps.get-version-tag.outputs.version_tag }}-$(date -u +'%Y%m%d%H%M')-${{ github.run_id }}"
           echo "docker_tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
+
   docker_build_rails_apps:
     permissions:
       contents: read
