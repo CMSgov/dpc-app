@@ -53,6 +53,7 @@ jobs:
             BRANCH_HASH=`git show -s --format='%h'`
             VERSION_TAG="commit_${BRANCH_HASH}"
           fi
+          echo $VERSION_TAG
           echo "version_tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
           set -e
       - name: generate a tag with UTC date and GitHub run_id
