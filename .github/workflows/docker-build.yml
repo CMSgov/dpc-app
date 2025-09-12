@@ -2,12 +2,6 @@ name: 'DPC - Docker Build'
 
 on:
   workflow_dispatch:
-    inputs:
-      block_release_tag:
-        description: Whether should block marking build as release
-        type: boolean
-        default: false
-        required: false
   workflow_call:
     inputs:
       block_release_tag:
@@ -16,12 +10,12 @@ on:
         default: false
         required: false
     outputs:
-      version_tag:
-        description: "Tag for app version"
-        value: ${{ jobs.generate_docker_tag.outputs.version_tag }}
       ecr_image_tag:
         description: "Tag for associated docker images"
         value: ${{ jobs.generate_docker_tag.outputs.docker_tag }}
+      version_tag:
+        description: "Tag for app version"
+        value: ${{ jobs.generate_docker_tag.outputs.version_tag }}
 
 permissions:
   id-token: write
@@ -52,7 +46,7 @@ jobs:
         id: get-version-tag
         run: |
           set +e
-          VERSION_TAG="NOT BLOCKED"
+          VERSION_TAG=`git describe --tags --exact-match`
           if [ "${{ inputs.block_release_tag }}" = true -o $? = 0 ]; then
             BRANCH_HASH=`git show -s --format='%h'`
             VERSION_TAG="commit_${BRANCH_HASH}"
@@ -65,3 +59,190 @@ jobs:
         run: |
           DOCKER_TAG="rls-${{ steps.get-version-tag.outputs.version_tag }}-$(date -u +'%Y%m%d%H%M')-${{ github.run_id }}"
           echo "docker_tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
+
+  docker_build_rails_apps:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    strategy:
+      matrix:
+        app_dir: [ dpc-portal, dpc-admin, dpc-web ]
+        include:
+          - app_dir: dpc-portal
+            ecr_repository: web-portal
+            make_command: make ci-portal
+          - app_dir: dpc-admin
+            ecr_repository: web-admin
+            make_command: make ci-admin-portal
+          - app_dir: dpc-web
+            ecr_repository: web
+            make_command: make ci-web-portal
+    steps:
+      - name: Assert Ownership
+        run: sudo chmod -R 777 .
+      - name: "Checkout code"
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - name: Cleanup Runner
+        run: ./scripts/cleanup-docker.sh
+
+      - name: wget amazon pem bundle
+        run: |
+          wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -O ${{ matrix.app_dir }}/config/bundle.pem
+
+      - name: Build specified app
+        run: ${{ matrix.make_command }}
+
+      - name: gzip the image
+        run: docker save dpc-${{ matrix.ecr_repository }}:latest | gzip > ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
+      - name: upload tar artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dpc-${{ matrix.ecr_repository }}
+          path: ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
+          retention-days: 1
+
+  docker_build_java: # builds dpc-api, dpc-attribution, dpc-aggregation, and dpc-consent
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    steps:
+      - name: "Set up Ansible"
+        run: pip install ansible
+      - name: Assert Ownership
+        run: sudo chmod -R 777 .
+      - name: "Checkout code"
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - name: Cleanup Runner
+        run: ./scripts/cleanup-docker.sh
+      - name: "Set up JDK 17"
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          java-version: "17"
+          distribution: "corretto"
+          cache: maven
+      - name: Clean maven
+        run: mvn -ntp -U clean
+
+      - name: Build ci app
+        id: api-build
+        run: |
+          export PATH=$PATH:~/.local/bin
+          make ci-app
+      # add extra commands to log docker containers during failure
+      - name: Consent Logs
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
+        run: docker logs start-v1-app-consent-1
+      - name: Attribution Logs
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
+        run: docker logs start-v1-app-attribution-1
+      - name: Aggregation Logs
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
+        run: docker logs start-v1-app-aggregation-1
+      - name: Api Logs
+        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
+        run: docker logs start-v1-app-api-1
+
+
+      - name: gzip image (1 of 4) - API
+        run: docker save dpc-api:latest | gzip > ${{ runner.temp }}/dpc_api_latest.tar.gz
+      - name: gzip image (2 of 4) - Attribution
+        run: docker save dpc-attribution:latest | gzip > ${{ runner.temp }}/dpc_attribution_latest.tar.gz
+      - name: gzip image (3 of 4) - Aggregation
+        run: docker save dpc-aggregation:latest | gzip > ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
+      - name: gzip image (4 of 4) - Consent
+        run: docker save dpc-consent:latest | gzip > ${{ runner.temp }}/dpc_consent_latest.tar.gz
+
+      - name: upload tar artifact (1 of 4) - API
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dpc-api
+          path: ${{ runner.temp }}/dpc_api_latest.tar.gz
+          retention-days: 1
+      - name: upload tar artifact (2 of 4) - Attribution
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dpc-attribution
+          path: ${{ runner.temp }}/dpc_attribution_latest.tar.gz
+          retention-days: 1
+      - name: upload tar artifact (3 of 4) - Aggregation
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dpc-aggregation
+          path: ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
+          retention-days: 1
+      - name: upload tar artifact (4 of 4) - Consent
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dpc-consent
+          path: ${{ runner.temp }}/dpc_consent_latest.tar.gz
+          retention-days: 1
+
+  docker_push_all_apps:
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    strategy:
+      matrix:
+        ecr_repository: [ web-portal, web-admin, web, api, attribution, aggregation, consent ]
+    env:
+      ECR_REPOSITORY: ${{ matrix.ecr_repository }}
+    needs: [ docker_build_rails_apps, docker_build_java, generate_docker_tag ]
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: dpc-${{ matrix.ecr_repository }}
+          path: ${{ runner.temp }}
+      - name: Load docker image from artifact download
+        run: |
+          docker load --input ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
+          docker image ls -a
+      #   _______                         __________                   .___
+      #   \      \   ____   ____          \______   \_______  ____   __| _/
+      #   /   |   \ /  _ \ /    \   ______ |     ___/\_  __ \/  _ \ / __ |
+      #  /    |    (  <_> )   |  \ /_____/ |    |     |  | \(  <_> ) /_/ |
+      #  \____|__  /\____/|___|  /         |____|     |__|   \____/\____ |
+      #          \/            \/                                       \/
+      - name: Configure non-prod AWS Credentials
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
+      - name: Login to Amazon ECR (non-prod)
+        id: login-ecr-non-prod
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
+      - name: Push image to registries for non-prod aws account
+        env:
+          IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
+          REGISTRY: ${{ steps.login-ecr-non-prod.outputs.registry }}
+        run: |
+          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
+          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest
+      #  __________                   .___             __  .__
+      #  \______   \_______  ____   __| _/_ __   _____/  |_|__| ____   ____
+      #   |     ___/\_  __ \/  _ \ / __ |  |  \_/ ___\   __\  |/  _ \ /    \
+      #   |    |     |  | \(  <_> ) /_/ |  |  /\  \___|  | |  (  <_> )   |  \
+      #   |____|     |__|   \____/\____ |____/  \___  >__| |__|\____/|___|  /
+      #                                \/           \/                    \/
+      - name: Configure prod AWS Credentials
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-prod-github-actions
+      - name: Login to Amazon ECR (prod)
+        id: login-ecr-prod
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
+      - name: Push image to registries for prod aws account
+        env:
+          IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
+          REGISTRY: ${{ steps.login-ecr-prod.outputs.registry }}
+        run: |
+          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:latest
+          docker tag dpc-$ECR_REPOSITORY:latest $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $REGISTRY/dpc-$ECR_REPOSITORY:latest

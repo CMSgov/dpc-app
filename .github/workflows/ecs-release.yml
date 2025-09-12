@@ -56,9 +56,11 @@ permissions:
   contents: read
 
 jobs:
-  set-parameters:
-    name: "Set Parameters"
+  validate-parameters:
+    name: "Validate Parameters"
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    outputs:
+      version_tag: ${{ steps.get-version-tag.outputs.version_tag }}
     steps:
       - name: "Validate Environment"
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.env != inputs.confirm_env }}
@@ -69,20 +71,27 @@ jobs:
   build:
     name: "Build Images"
     needs:
-      - set-parameters
+      - validate-parameters
     uses: ./.github/workflows/docker-build.yml
-    with:
-      block_release_tag: ${{ github.event_name != 'workflow_dispatch' }}
+      with:
+        block_release_tag: ${{ github.event_name != 'workflow_dispatch' }}
     secrets: inherit
-
 
   deploy:
     needs:
-      - set-parameters
       - build
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    steps:
-      - name: 'Echo outputs'
-        run: |
-          echo "${{ needs.build.outputs.ecr_image_tag }}"
-          echo "${{ needs.build.outputs.version_tag }}"
+    uses: ./.github/workflows/ecs-deploy.yml
+    with:
+      env: ${{ inputs.env || 'dev'  }}
+      confirm_env: ${{ inputs.env || 'dev'  }}
+      ecr_image_tag: ${{ needs.build.outputs.ecr_image_tag }}
+      app-version: ${{ needs.build.outputs.version_tag }}
+      ops-ref: ${{ inputs.ops-ref || 'main' }}
+    secrets: inherit
+
+  smoke-test:
+     needs: deploy
+     uses: ./.github/workflows/smoke-test.yml
+     with:
+       env: ${{ inputs.env || 'dev' }}
+     secrets: inherit
