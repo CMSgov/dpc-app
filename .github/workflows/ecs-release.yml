@@ -72,7 +72,7 @@ jobs:
       - set-parameters
     uses: ./.github/workflows/docker-build.yml
     with:
-      block_release_tag: ${{ github.event_name == 'workflow_dispatch' }}
+      block_release_tag: ${{ github.event_name != 'workflow_dispatch' }}
     secrets: inherit
 
 
