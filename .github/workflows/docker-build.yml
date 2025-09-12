@@ -16,6 +16,9 @@ on:
         default: false
         required: false
     outputs:
+      version_tag:
+        description: "Tag for app version"
+        value: ${{ jobs.generate_docker_tag.outputs.version_tag }}
       ecr_image_tag:
         description: "Tag for associated docker images"
         value: ${{ jobs.generate_docker_tag.outputs.docker_tag }}
@@ -37,6 +40,7 @@ jobs:
       id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     outputs:
+      version_tag: ${{ steps.get-version-tag.outputs.version_tag }}
       docker_tag: ${{ steps.output_docker_tag.outputs.docker_tag }}
     steps:
       - name: "Checkout code"

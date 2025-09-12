@@ -59,55 +59,29 @@ jobs:
   set-parameters:
     name: "Set Parameters"
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    outputs:
-      version_tag: ${{ steps.get-version-tag.outputs.version_tag }}
     steps:
       - name: "Validate Environment"
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.env != inputs.confirm_env }}
         run: |
           echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
           exit 1
-      - name: "Checkout code"
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
-      - name: "Fetch git info"
-        run: |
-          git fetch --quiet
-      - name: "Get Version Tag"
-        id: get-version-tag
-        run: |
-          set +e
-          VERSION_TAG=`git describe --tags --exact-match`
-          if [ $? -ne 0 ]; then
-            BRANCH_HASH=`git show -s --format='%h'`
-            VERSION_TAG="commit_${BRANCH_HASH}"
-          fi
-          echo $VERSION_TAG
-          echo "version_tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
-          set -e
 
   build:
     name: "Build Images"
     needs:
       - set-parameters
     uses: ./.github/workflows/docker-build.yml
+    with:
+      block_release_tag: github.event_name == 'workflow_dispatch'
     secrets: inherit
+
 
   deploy:
     needs:
       - set-parameters
       - build
-    uses: ./.github/workflows/ecs-deploy.yml
-    with:
-      env: ${{ inputs.env || 'dev'  }}
-      confirm_env: ${{ inputs.env || 'dev'  }}
-      ecr_image_tag: ${{ needs.build.outputs.ecr_image_tag }}
-      app-version: ${{ needs.set-parameters.outputs.version_tag }}
-      ops-ref: ${{ inputs.ops-ref || 'main' }}
-    secrets: inherit
-
-  smoke-test:
-     needs: deploy
-     uses: ./.github/workflows/smoke-test.yml
-     with:
-       env: ${{ inputs.env || 'dev' }}
-     secrets: inherit
+    steps:
+      - name: 'Echo outputs'
+        run: |
+          echo "${{ needs.build.outputs.ecr_image_tag }}"
+          echo "${{ needs.build.outputs.version_tag }}"
