@@ -47,7 +47,7 @@ jobs:
         run: |
           set +e
           VERSION_TAG=`git describe --tags --exact-match`
-          if [ "${{ inputs.block_release_tag }}" = true -o $? = 0 ]; then
+          if [ "${{ inputs.block_release_tag }}" = true -o $? -ne 0 ]; then
             BRANCH_HASH=`git show -s --format='%h'`
             VERSION_TAG="commit_${BRANCH_HASH}"
           fi
