@@ -80,6 +80,7 @@ jobs:
     needs:
       - set-parameters
       - build
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - name: 'Echo outputs'
         run: |
