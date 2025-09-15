@@ -8,6 +8,7 @@
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="JOB_QUEUE_BATCH"/>
+                <tableExists tableName="JOB_QUEUE_BATCH_FILE"/>
             </not>
         </preConditions>
         <createTable tableName="JOB_QUEUE_BATCH">
@@ -74,11 +75,6 @@
     </changeSet>
 
     <changeSet id="add-checksum-file-length" author="nickrobison-usds">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="JOB_QUEUE_BATCH_FILE"/>
-            </not>
-        </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH_FILE">
             <column name="checksum" type="BYTEA"/>
             <column name="file_length" type="BIGINT"/>
@@ -86,11 +82,6 @@
     </changeSet>
 
     <changeSet id="since-support" author="rickhawesusds">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="JOB_QUEUE_BATCH"/>
-            </not>
-        </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column name="since" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="true"/>
@@ -102,11 +93,6 @@
     </changeSet>
 
     <changeSet id="add-requesting-ip" author="hkxb">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="JOB_QUEUE_BATCH"/>
-            </not>
-        </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column name="requesting_ip" type="VARCHAR(255)">
                 <constraints nullable="true"/>
@@ -115,11 +101,6 @@
     </changeSet>
 
     <changeSet id="add-bulk-indicator" author="hkxb">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="JOB_QUEUE_BATCH"/>
-            </not>
-        </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column defaultValueBoolean="false"
                     name="is_bulk"
@@ -128,11 +109,6 @@
     </changeSet>
 
     <changeSet id="add-org-and-provider-npi" author="jonfulk">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="JOB_QUEUE_BATCH"/>
-            </not>
-        </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column name="organization_npi" type="VARCHAR(50)"/>
             <column name="provider_npi" type="VARCHAR(50)"/>
@@ -140,11 +116,6 @@
     </changeSet>
 
     <changeSet id="add-request-url" author="jonfulk">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="JOB_QUEUE_BATCH"/>
-            </not>
-        </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column name="request_url" type="VARCHAR(255)"/>
         </addColumn>
