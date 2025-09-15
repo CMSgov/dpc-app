@@ -5,12 +5,6 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
 
     <changeSet id="queue-v2-design" author="ronaldheft-usds">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="JOB_QUEUE_BATCH"/>
-                <tableExists tableName="JOB_QUEUE_BATCH_FILE"/>
-            </not>
-        </preConditions>
         <createTable tableName="JOB_QUEUE_BATCH">
             <column name="batch_id" type="UUID">
                 <constraints nullable="false" primaryKey="true"/>
