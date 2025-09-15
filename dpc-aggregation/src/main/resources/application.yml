@@ -31,8 +31,8 @@ queuedb:
 consentdb:
   driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
   url: ${CONSENT_DB_URL:-"jdbc:postgresql://db:5432/dpc_consent"}
-  user: ${CONSENT_DB_USER:-postgres}
-  password: ${CONSENT_DB_PASS:-dpc-safe}
+  user: "${CONSENT_DB_USER:-postgres}"
+  password: "${CONSENT_DB_PASS:-dpc-safe}"
   initialSize: 5
   minSize: 5
   maxSize: 10
@@ -86,6 +86,7 @@ logging:
             - BFD_HASH_PEPPER
             - QUEUE_DB_PASS
             - NEW_RELIC_LICENSE_KEY
+            - CONSENT_DB_PASS
       timeZone: UTC
       layout:
         type: json-dpc
