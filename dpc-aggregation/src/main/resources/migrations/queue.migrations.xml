@@ -75,7 +75,9 @@
 
     <changeSet id="add-checksum-file-length" author="nickrobison-usds">
         <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="queue-v2-design" author="ronaldheft-usds" changeLogFile="queue.migrations.xml"/>
+            <changeSetExecuted id="queue-v2-design"
+                               author="ronaldheft-usds"
+                               changeLogFile="app/resources/migrations/queue.migrations.xml"/>
         </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH_FILE">
             <column name="checksum" type="BYTEA"/>
@@ -85,7 +87,9 @@
 
     <changeSet id="since-support" author="rickhawesusds">
         <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="queue-v2-design" author="ronaldheft-usds" changeLogFile="queue.migrations.xml"/>
+            <changeSetExecuted id="queue-v2-design"
+                               author="ronaldheft-usds"
+                               changeLogFile="app/resources/migrations/queue.migrations.xml"/>
         </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column name="since" type="TIMESTAMP WITH TIME ZONE">
@@ -99,7 +103,9 @@
 
     <changeSet id="add-requesting-ip" author="hkxb">
         <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="queue-v2-design" author="ronaldheft-usds" changeLogFile="queue.migrations.xml"/>
+            <changeSetExecuted id="queue-v2-design"
+                               author="ronaldheft-usds"
+                               changeLogFile="app/resources/migrations/queue.migrations.xml"/>
         </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column name="requesting_ip" type="VARCHAR(255)">
@@ -110,7 +116,9 @@
 
     <changeSet id="add-bulk-indicator" author="hkxb">
         <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="queue-v2-design" author="ronaldheft-usds" changeLogFile="queue.migrations.xml"/>
+            <changeSetExecuted id="queue-v2-design"
+                               author="ronaldheft-usds"
+                               changeLogFile="app/resources/migrations/queue.migrations.xml"/>
         </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column defaultValueBoolean="false"
@@ -121,7 +129,9 @@
 
     <changeSet id="add-org-and-provider-npi" author="jonfulk">
         <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="queue-v2-design" author="ronaldheft-usds" changeLogFile="queue.migrations.xml"/>
+            <changeSetExecuted id="queue-v2-design"
+                               author="ronaldheft-usds"
+                               changeLogFile="app/resources/migrations/queue.migrations.xml"/>
         </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column name="organization_npi" type="VARCHAR(50)"/>
@@ -131,7 +141,9 @@
 
     <changeSet id="add-request-url" author="jonfulk">
         <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="queue-v2-design" author="ronaldheft-usds" changeLogFile="queue.migrations.xml"/>
+            <changeSetExecuted id="queue-v2-design"
+                               author="ronaldheft-usds"
+                               changeLogFile="app/resources/migrations/queue.migrations.xml"/>
         </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column name="request_url" type="VARCHAR(255)"/>

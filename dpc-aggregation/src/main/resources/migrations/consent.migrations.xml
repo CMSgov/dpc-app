@@ -32,7 +32,9 @@
     </changeSet>
     <changeSet id="add-consent-bfd-patient-id" author="embh">
         <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="create-consent-table" author="embh" changeLogFile="consent.migrations.xml"/>
+            <changeSetExecuted id="create-consent-table"
+                               author="embh"
+                               changeLogFile="app/resources/migrations/consent.migrations.xml"/>
         </preConditions>
         <addColumn tableName="CONSENT">
             <column name="bfd_patient_id" type="VARCHAR" />
@@ -40,7 +42,9 @@
     </changeSet>
     <changeSet id="change-type-consent-effective-date" author="embh">
         <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="create-consent-table" author="embh" changeLogFile="consent.migrations.xml"/>
+            <changeSetExecuted id="create-consent-table"
+                               author="embh"
+                               changeLogFile="app/resources/migrations/consent.migrations.xml"/>
         </preConditions>
         <dropColumn tableName="CONSENT" columnName="effective_date"/>
         <addColumn tableName="CONSENT">
@@ -51,7 +55,9 @@
     </changeSet>
     <changeSet id="nullable-hicn" author="deirdre">
         <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="create-consent-table" author="embh" changeLogFile="consent.migrations.xml"/>
+            <changeSetExecuted id="create-consent-table"
+                               author="embh"
+                               changeLogFile="app/resources/migrations/consent.migrations.xml"/>
         </preConditions>
         <dropNotNullConstraint
                 tableName="CONSENT"
@@ -60,7 +66,9 @@
     </changeSet>
     <changeSet id="add-custodian-and-source-code" author="deirdre">
         <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="create-consent-table" author="embh" changeLogFile="consent.migrations.xml"/>
+            <changeSetExecuted id="create-consent-table"
+                               author="embh"
+                               changeLogFile="app/resources/migrations/consent.migrations.xml"/>
         </preConditions>
         <addColumn tableName="CONSENT">
             <column name="custodian" type="UUID"/>
@@ -69,7 +77,9 @@
     </changeSet>
     <changeSet id="add-opt-out-file" author="rswv">
         <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="create-consent-table" author="embh" changeLogFile="consent.migrations.xml"/>
+            <changeSetExecuted id="create-consent-table"
+                               author="embh"
+                               changeLogFile="app/resources/migrations/consent.migrations.xml"/>
         </preConditions>
         <createTable tableName="OPT_OUT_FILE">
             <column name="id" type="UUID">
