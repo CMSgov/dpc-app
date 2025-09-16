@@ -31,7 +31,6 @@ import java.util.concurrent.TimeUnit;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled("for DB schema debugging")
 @IntegrationTest
 @ExtendWith(BufferedLoggerHandler.class)
 public class AggregationServiceTest {

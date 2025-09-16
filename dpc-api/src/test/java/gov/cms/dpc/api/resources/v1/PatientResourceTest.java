@@ -579,7 +579,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(MockBlueButtonClient.TEST_PATIENT_MBIS.get(2), resultMbi );
     }
 
-    @Disabled("for DB schema debugging")
     @Test
     void testGetPatientEverythingAsync() throws GeneralSecurityException, IOException, URISyntaxException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25), true);
