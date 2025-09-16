@@ -6,6 +6,11 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <changeSet id="create-consent-table" author="embh">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="CONSENT"/>
+            </not>
+        </preConditions>
         <createTable tableName="CONSENT">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
@@ -26,11 +31,21 @@
         </createTable>
     </changeSet>
     <changeSet id="add-consent-bfd-patient-id" author="embh">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="CONSENT"/>
+            </not>
+        </preConditions>
         <addColumn tableName="CONSENT">
             <column name="bfd_patient_id" type="VARCHAR" />
         </addColumn>
     </changeSet>
     <changeSet id="change-type-consent-effective-date" author="embh">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="CONSENT"/>
+            </not>
+        </preConditions>
         <dropColumn tableName="CONSENT" columnName="effective_date"/>
         <addColumn tableName="CONSENT">
             <column name="effective_date" type="DATE">
@@ -39,18 +54,33 @@
         </addColumn>
     </changeSet>
     <changeSet id="nullable-hicn" author="deirdre">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="CONSENT"/>
+            </not>
+        </preConditions>
         <dropNotNullConstraint
                 tableName="CONSENT"
                 columnName="hicn"
         />
     </changeSet>
     <changeSet id="add-custodian-and-source-code" author="deirdre">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="CONSENT"/>
+            </not>
+        </preConditions>
         <addColumn tableName="CONSENT">
             <column name="custodian" type="UUID"/>
             <column name="source_code" type="VARCHAR"/>
         </addColumn>
     </changeSet>
     <changeSet id="add-opt-out-file" author="rswv">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="CONSENT"/>
+            </not>
+        </preConditions>
         <createTable tableName="OPT_OUT_FILE">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
