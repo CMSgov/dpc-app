@@ -6,7 +6,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <changeSet id="create-consent-table" author="embh">
-        <preConditions onFail="CONTINUE">
+        <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="CONSENT"/>
             </not>
@@ -32,19 +32,17 @@
     </changeSet>
     <changeSet id="add-consent-bfd-patient-id" author="embh">
         <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="create-consent-table"
-                               author="embh"
-                               changeLogFile="app/resources/migrations/consent.migrations.xml"/>
+            <not>
+                <columnExists tableName="CONSENT" columnName="bfd_patient_id"/>
+            </not>
         </preConditions>
         <addColumn tableName="CONSENT">
             <column name="bfd_patient_id" type="VARCHAR" />
         </addColumn>
     </changeSet>
     <changeSet id="change-type-consent-effective-date" author="embh">
-        <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="create-consent-table"
-                               author="embh"
-                               changeLogFile="app/resources/migrations/consent.migrations.xml"/>
+        <preConditions>
+            <columnExists tableName="CONSENT" columnName="effective_date"/>
         </preConditions>
         <dropColumn tableName="CONSENT" columnName="effective_date"/>
         <addColumn tableName="CONSENT">
@@ -55,9 +53,7 @@
     </changeSet>
     <changeSet id="nullable-hicn" author="deirdre">
         <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="create-consent-table"
-                               author="embh"
-                               changeLogFile="app/resources/migrations/consent.migrations.xml"/>
+            <columnExists tableName="CONSENT" columnName="hicn"/>
         </preConditions>
         <dropNotNullConstraint
                 tableName="CONSENT"
@@ -66,9 +62,10 @@
     </changeSet>
     <changeSet id="add-custodian-and-source-code" author="deirdre">
         <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="create-consent-table"
-                               author="embh"
-                               changeLogFile="app/resources/migrations/consent.migrations.xml"/>
+            <not>
+                <columnExists tableName="CONSENT" columnName="custodian"/>
+                <columnExists tableName="CONSENT" columnName="source_code"/>
+            </not>
         </preConditions>
         <addColumn tableName="CONSENT">
             <column name="custodian" type="UUID"/>
@@ -77,9 +74,10 @@
     </changeSet>
     <changeSet id="add-opt-out-file" author="rswv">
         <preConditions onFail="MARK_RAN">
-            <changeSetExecuted id="create-consent-table"
-                               author="embh"
-                               changeLogFile="app/resources/migrations/consent.migrations.xml"/>
+            <not>
+                <tableExists tableName="OPT_OUT_FILE"/>
+                <columnExists tableName="CONSENT" columnName="opt_out_file_id"/>
+            </not>
         </preConditions>
         <createTable tableName="OPT_OUT_FILE">
             <column name="id" type="UUID">
