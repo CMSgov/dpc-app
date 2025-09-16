@@ -74,7 +74,7 @@
     </changeSet>
 
     <changeSet id="add-checksum-file-length" author="nickrobison-usds">
-        <preConditions onFail="CONTINUE">
+        <preConditions onFail="MARK_RAN">
             <changeSetExecuted id="queue-v2-design" author="ronaldheft-usds" changeLogFile="queue.migrations.xml"/>
         </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH_FILE">
@@ -84,7 +84,7 @@
     </changeSet>
 
     <changeSet id="since-support" author="rickhawesusds">
-        <preConditions onFail="CONTINUE">
+        <preConditions onFail="MARK_RAN">
             <changeSetExecuted id="queue-v2-design" author="ronaldheft-usds" changeLogFile="queue.migrations.xml"/>
         </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
@@ -98,7 +98,7 @@
     </changeSet>
 
     <changeSet id="add-requesting-ip" author="hkxb">
-        <preConditions onFail="CONTINUE">
+        <preConditions onFail="MARK_RAN">
             <changeSetExecuted id="queue-v2-design" author="ronaldheft-usds" changeLogFile="queue.migrations.xml"/>
         </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
@@ -109,7 +109,7 @@
     </changeSet>
 
     <changeSet id="add-bulk-indicator" author="hkxb">
-        <preConditions onFail="CONTINUE">
+        <preConditions onFail="MARK_RAN">
             <changeSetExecuted id="queue-v2-design" author="ronaldheft-usds" changeLogFile="queue.migrations.xml"/>
         </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
@@ -120,7 +120,7 @@
     </changeSet>
 
     <changeSet id="add-org-and-provider-npi" author="jonfulk">
-        <preConditions onFail="CONTINUE">
+        <preConditions onFail="MARK_RAN">
             <changeSetExecuted id="queue-v2-design" author="ronaldheft-usds" changeLogFile="queue.migrations.xml"/>
         </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
@@ -130,7 +130,7 @@
     </changeSet>
 
     <changeSet id="add-request-url" author="jonfulk">
-        <preConditions onFail="CONTINUE">
+        <preConditions onFail="MARK_RAN">
             <changeSetExecuted id="queue-v2-design" author="ronaldheft-usds" changeLogFile="queue.migrations.xml"/>
         </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
