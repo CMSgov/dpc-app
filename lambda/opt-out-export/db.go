@@ -12,7 +12,7 @@ import (
 
 var createConnection = func(ctx context.Context, cfg aws.Config, dbName string) (*sql.DB, error) {
 	var dbHost string = os.Getenv("DB_HOST")
-	var dbPort int = 5432
+	var dbPort int = 5431
 	var sslmode string
 	var dbUser string
 	var dbPassword string

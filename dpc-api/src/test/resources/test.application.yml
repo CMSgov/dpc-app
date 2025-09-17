@@ -1,7 +1,7 @@
 # application.yml with changes to relative paths, urls, and logging for testing purposes
 queuedb:
   driverClass: org.postgresql.Driver
-  url: ${QUEUE_DB_URL:-"jdbc:postgresql://localhost:5432/dpc_queue"}
+  url: ${QUEUE_DB_URL:-"jdbc:postgresql://localhost:5431/dpc_queue"}
   user: "${QUEUE_DB_USER:-postgres}"
   password: "${QUEUE_DB_PASS:-dpc-safe}"
   initialSize: 5
@@ -62,7 +62,7 @@ publicURL: ${PUBLIC_URL:-"http://localhost:3002"}
 
 authdb:
   driverClass: org.postgresql.Driver
-  url: "jdbc:postgresql://localhost:5432/dpc_auth"
+  url: "jdbc:postgresql://localhost:5431/dpc_auth"
   user: ${AUTH_DB_USER:-postgres}
   password: ${AUTH_DB_PASS:-dpc-safe}
   initialSize: 5

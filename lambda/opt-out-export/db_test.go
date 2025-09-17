@@ -105,9 +105,9 @@ func TestIntegrationBuildToken(t *testing.T) {
 	}
 	cfg, err := getAwsSession(ctx)
 	assert.Nil(t, err)
-	password, err := buildToken(ctx, cfg, "postgres-host", 5432, "local-dpc_consent-role")
+	password, err := buildToken(ctx, cfg, "postgres-host", 5431, "local-dpc_consent-role")
 	assert.Nil(t, err)
-	assert.Contains(t, password, "postgres-host:5432?Action=connect&DBUser=local-dpc_consent-role")
+	assert.Contains(t, password, "postgres-host:5431?Action=connect&DBUser=local-dpc_consent-role")
 }
 
 func mockCreateConnection(db *sql.DB) {

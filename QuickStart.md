@@ -28,22 +28,6 @@ CONFIGURE
 - Run the `make start-app` command.
 - Verify successful launch by running the command `curl -H "Accept: application/fhir+json" http://localhost:3002/v1/metadata`. You should view the server's response if all goes well.
 
-### Edit the `docker-compose.yml` file
-
-#### Ports
-When running locally, you'll need to update the docker-compse.yml file by adding:
-```yaml
-ports: 
-  - "5432:5432"
-```
-
-in the `db` service. E.g.:
-```yaml
-db: 
-  image: postgres:16
-  ports: 
-    - "5432:5432"
-```
 #### JVM Authentication
 Set authentication_disabled for JVM set to **[true]** in the `api` service in the same file.
 

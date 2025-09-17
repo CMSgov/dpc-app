@@ -157,7 +157,7 @@ func token(ctx context.Context, dbHost string, dbPort int, dbUser string) (strin
 func createConnection(ctx context.Context) (*sql.DB, error) {
 	var dbName string = "dpc_consent"
 	var dbHost string = os.Getenv("DB_HOST")
-	var dbPort int = 5432
+	var dbPort int = 5431
 	var dbUser string
 	var sslmode string
 	var dbPassword string

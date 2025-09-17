@@ -1,6 +1,6 @@
 queuedb:
   driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
-  url: ${QUEUE_DB_URL:-"jdbc:postgresql://db:5432/dpc_queue"}
+  url: ${QUEUE_DB_URL:-"jdbc:postgresql://db:5431/dpc_queue"}
   user: "${QUEUE_DB_USER:-postgres}"
   password: "${QUEUE_DB_PASS:-dpc-safe}"  # Ignored in AWS, needed to run locally
   initialSize: 5
@@ -14,7 +14,7 @@ queuedb:
 
 authdb:
   driverClass: ${DB_DRIVER_CLASS:-"org.postgresql.Driver"}
-  url: ${AUTH_DB_URL:-"jdbc:postgresql://db:5432/dpc_auth"}
+  url: ${AUTH_DB_URL:-"jdbc:postgresql://db:5431/dpc_auth"}
   user: "${AUTH_DB_USER:-postgres}"
   password: "${AUTH_DB_PASS:-dpc-safe}"
   initialSize: 5

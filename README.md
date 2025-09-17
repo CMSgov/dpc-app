@@ -196,7 +196,7 @@ For example, modifying the `dpc-attribution` configuration:
 ```yaml
 database:
   driverClass: org.postgresql.Driver
-  url: "jdbc:postgresql://localhost:5432/dpc-dev"
+  url: "jdbc:postgresql://localhost:5431/dpc-dev"
   user: postgres
 ```
 
@@ -242,19 +242,6 @@ docker compose up {db,aggregation,attribution,api}
 By default, the Docker containers start with minimal authentication enabled, meaning that some functionality (such as extracting the organization_id from the access token) will not work as expected and always returns the same value.
 This can be overridden during startup by setting the `AUTH_DISABLED=false` environment variable. 
 
-When running locally, you'll need to update the docker-compse.yml file by adding:
-```yaml
-ports: 
-  - "5432:5432"
-```
-
-in the `db` node e.g.
-```yaml
-db: 
-  image: postgres:16 
-  ports: 
-    - "5432:5432"
-```
 ### Generating a golden macaroon
 
 Golden macaroons are automatically generated and configured upon startup for the frontend applications. To generate your own for use, run the command below:
