@@ -45,7 +45,7 @@
             <sqlCheck expectedResult="YES">
                 SELECT is_nullable
                 FROM information_schema.columns
-                WHERE table_name = 'CONSENT'
+                WHERE table_name = 'consent'
                 AND column_name = 'effective_date'
             </sqlCheck>
         </preConditions>
@@ -61,7 +61,7 @@
             <sqlCheck expectedResult="NO">
                 SELECT is_nullable
                 FROM information_schema.columns
-                WHERE table_name = 'CONSENT'
+                WHERE table_name = 'consent'
                 AND column_name = 'hicn'
             </sqlCheck>
         </preConditions>
