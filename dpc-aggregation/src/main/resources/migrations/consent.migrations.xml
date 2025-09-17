@@ -41,8 +41,13 @@
         </addColumn>
     </changeSet>
     <changeSet id="change-type-consent-effective-date" author="embh">
-        <preConditions>
-            <columnExists tableName="CONSENT" columnName="effective_date"/>
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="YES">
+                SELECT is_nullable
+                FROM information_schema.columns
+                WHERE table_name = 'CONSENT'
+                AND column_name = 'effective_date'
+            </sqlCheck>
         </preConditions>
         <dropColumn tableName="CONSENT" columnName="effective_date"/>
         <addColumn tableName="CONSENT">
@@ -53,7 +58,12 @@
     </changeSet>
     <changeSet id="nullable-hicn" author="deirdre">
         <preConditions onFail="MARK_RAN">
-            <columnExists tableName="CONSENT" columnName="hicn"/>
+            <sqlCheck expectedResult="NO">
+                SELECT is_nullable
+                FROM information_schema.columns
+                WHERE table_name = 'CONSENT'
+                AND column_name = 'hicn'
+            </sqlCheck>
         </preConditions>
         <dropNotNullConstraint
                 tableName="CONSENT"
