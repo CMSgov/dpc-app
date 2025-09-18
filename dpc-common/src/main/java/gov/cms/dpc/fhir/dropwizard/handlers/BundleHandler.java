@@ -13,6 +13,7 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 import jakarta.ws.rs.ext.Provider;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Resource;
 
 import java.io.IOException;
@@ -81,6 +82,22 @@ public class BundleHandler implements MessageBodyWriter<Collection<Resource>> {
             bundle.setTotal(entryCount);
         }
 
+        return bundle;
+    }
+
+    public static <T extends DomainResource> Bundle convertToBundle(Collection<T> resources) {
+        final Bundle bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.SEARCHSET);
+        resources.forEach(r ->
+                bundle.addEntry(new Bundle.BundleEntryComponent().setResource(r))
+        );
+        return bundle;
+    }
+
+    public static Bundle convertToSummaryBundle(int total) {
+        Bundle bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.SEARCHSET);
+        bundle.setTotal(total);
         return bundle;
     }
 }

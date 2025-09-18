@@ -1,5 +1,6 @@
 package gov.cms.dpc.common.utils;
 
+import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -15,25 +16,8 @@ public class PagingService {
         bundle.addLink().setRelation(name).setUrl(formatURL(path, count, offset));
     }
 
-    public Bundle convertToBundle(List<Patient> patients) {
-        Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-        for (Patient patient : patients) {
-            bundle.addEntry(new Bundle.BundleEntryComponent().setResource(patient));
-        }
-
-        return bundle;
-    }
-
-    public Bundle convertToSummaryBundle(int total) {
-        Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-        bundle.setTotal(total);
-        return bundle;
-    }
-
     public Bundle handlePagingLinks(List<Patient> patients, int count, int offset, String requestPath, boolean hasNext) {
-        Bundle bundle = convertToBundle(patients);
+        Bundle bundle = BundleHandler.convertToBundle(patients);
         addRelationLink(bundle, IBaseBundle.LINK_SELF, requestPath, count, offset);
         addRelationLink(bundle, "first", requestPath, count, 0);
         if (offset > count-1 && !patients.isEmpty()) addRelationLink(bundle, IBaseBundle.LINK_PREV, requestPath, count, offset-count);
