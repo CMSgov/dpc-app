@@ -5,6 +5,12 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
 
     <changeSet id="queue-v2-design" author="ronaldheft-usds">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="JOB_QUEUE_BATCH"/>
+                <tableExists tableName="JOB_QUEUE_BATCH_FILE"/>
+            </not>
+        </preConditions>
         <createTable tableName="JOB_QUEUE_BATCH">
             <column name="batch_id" type="UUID">
                 <constraints nullable="false" primaryKey="true"/>
@@ -69,6 +75,12 @@
     </changeSet>
 
     <changeSet id="add-checksum-file-length" author="nickrobison-usds">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="JOB_QUEUE_BATCH_FILE" columnName="checksum"/>
+                <columnExists tableName="JOB_QUEUE_BATCH_FILE" columnName="file_length"/>
+            </not>
+        </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH_FILE">
             <column name="checksum" type="BYTEA"/>
             <column name="file_length" type="BIGINT"/>
@@ -76,6 +88,12 @@
     </changeSet>
 
     <changeSet id="since-support" author="rickhawesusds">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="JOB_QUEUE_BATCH" columnName="since"/>
+                <columnExists tableName="JOB_QUEUE_BATCH" columnName="transaction_time"/>
+            </not>
+        </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column name="since" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="true"/>
@@ -87,6 +105,11 @@
     </changeSet>
 
     <changeSet id="add-requesting-ip" author="hkxb">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="JOB_QUEUE_BATCH" columnName="requesting_ip"/>
+            </not>
+        </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column name="requesting_ip" type="VARCHAR(255)">
                 <constraints nullable="true"/>
@@ -95,6 +118,11 @@
     </changeSet>
 
     <changeSet id="add-bulk-indicator" author="hkxb">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="JOB_QUEUE_BATCH" columnName="is_bulk"/>
+            </not>
+        </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column defaultValueBoolean="false"
                     name="is_bulk"
@@ -103,6 +131,12 @@
     </changeSet>
 
     <changeSet id="add-org-and-provider-npi" author="jonfulk">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="JOB_QUEUE_BATCH" columnName="organization_npi"/>
+                <columnExists tableName="JOB_QUEUE_BATCH" columnName="provider_npi"/>
+            </not>
+        </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column name="organization_npi" type="VARCHAR(50)"/>
             <column name="provider_npi" type="VARCHAR(50)"/>
@@ -110,6 +144,11 @@
     </changeSet>
 
     <changeSet id="add-request-url" author="jonfulk">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="JOB_QUEUE_BATCH" columnName="request_url"/>
+            </not>
+        </preConditions>
         <addColumn tableName="JOB_QUEUE_BATCH">
             <column name="request_url" type="VARCHAR(255)"/>
         </addColumn>
