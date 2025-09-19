@@ -14,6 +14,7 @@ import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.converters.exceptions.FHIRConverterException;
+import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
 import io.dropwizard.hibernate.UnitOfWork;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
@@ -79,13 +80,13 @@ public class PatientResource extends AbstractPatientResource {
         if (summary != null && summary.equals("count")) {
             daoSearchQuery.setCount(0);
             int totalPatients = this.dao.countMatchingPatients(daoSearchQuery);
-            return this.pagingService.convertToSummaryBundle(totalPatients);
+            return BundleHandler.convertToSummaryBundle(totalPatients);
         }
         if (count == null) {
             // Legacy behavior - before _count parameter was introduced
             List<PatientEntity> patientEntities = this.dao.patientSearch(daoSearchQuery).getResults();
             List<Patient> patients = patientEntities.stream().map(p -> this.converter.toFHIR(Patient.class, p)).toList();
-            Bundle legacyBundleWithTotal = this.pagingService.convertToBundle(patients);
+            Bundle legacyBundleWithTotal = BundleHandler.convertToBundle(patients);
             legacyBundleWithTotal.setTotal(patients.size());
             return legacyBundleWithTotal;
         }
