@@ -284,7 +284,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         conn.disconnect();
     }
 
-    @Disabled("Disabled until call to /Consent removed")
     @Test
     void testPatientEverythingWithoutGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -360,7 +359,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(0, resultValidSince.getTotal(), "Should have 0 entries in Bundle");
     }
 
-    @Disabled("Disabled until call to /Consent removed")
     @Test
     void testPatientEverythingWithGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -448,7 +446,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(0, resultValidSince.getTotal(), "Should have 0 entries in Bundle");
     }
 
-    @Disabled("Disabled until call to /Consent removed")
     @Test
     void testPatientEverything_CanHandlePatientWithMultipleMBIs() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -483,7 +480,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals("9V99EU8XY91", FHIRExtractors.getPatientMBI(patientResource));
     }
 
-    @Disabled("Disabled until call to /Consent removed")
     @Test
     void testPatientEverythingForOptedOutPatient() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -513,7 +509,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
             "Incorrect or missing operation outcome in response body.");
     }
 
-    @Disabled("Disabled until call to /Consent removed")
     @Test
     void testPatientEverythingForOptedOutPatientOnMultipleMbis() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -545,7 +540,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
             "Incorrect or missing operation outcome in response body.");
     }
 
-    @Disabled("Disabled until call to /Consent removed")
     @Test
     void testOptInPatient() throws GeneralSecurityException, IOException, URISyntaxException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -772,7 +766,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Patient, orgBPatient.getIdElement().getIdPart());
     }
 
-    @Disabled("to remove call to /Consent")
     @Test
     void testPatientPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
@@ -849,7 +842,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(COUNT_TEST_PATIENTS, resultPatientBundle.getEntry().size());
     }
 
-    @Disabled("to remove call to /Consent")
     @Test
     void testPatientEverythingWithFailedLookBack() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
