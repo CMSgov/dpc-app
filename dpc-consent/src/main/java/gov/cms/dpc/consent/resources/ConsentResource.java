@@ -4,7 +4,8 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Splitter;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
-import gov.cms.dpc.consent.jdbi.ConsentDAO;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
+import gov.cms.dpc.common.jdbi.ConsentDAO;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
@@ -43,7 +44,7 @@ public class ConsentResource {
 
     @POST
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(value = DPCConsentHibernateBundle.BUNDLE_NAME)
     @ApiOperation(value = "Create a Consent resource")
     @ApiResponses(value = { @ApiResponse(code = 201, message = "Consent resource was created"),
             @ApiResponse(code = 400, message = "Consent resource was not created due to bad request") })
@@ -59,7 +60,7 @@ public class ConsentResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @UnitOfWork
+    @UnitOfWork(value = DPCConsentHibernateBundle.BUNDLE_NAME)
     @ApiOperation(value = "Search for Consent Entries", notes = "Search for Consent records. " +
             "<p>Must provide ONE OF Consent ID as an _id or identifier, or a patient MBI or HICN to search for.", response = Bundle.class)
     @ApiResponses(@ApiResponse(code = 400, message = "Must provide Consent or Patient id"))
@@ -101,7 +102,7 @@ public class ConsentResource {
     @FHIR
     @Timed
     @ExceptionMetered
-    @UnitOfWork
+    @UnitOfWork(value = DPCConsentHibernateBundle.BUNDLE_NAME)
     @ApiOperation(value = "Locate a Consent entry by id")
     @ApiResponses(@ApiResponse(code = 400, message = "invalid id value. Must have a consent resource id"))
     public Consent getConsent(@ApiParam(value = "Consent resource ID", required = true) @PathParam("consentId") UUID consentId) {
@@ -116,7 +117,7 @@ public class ConsentResource {
     @PUT
     @Path("/{consentId}")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(value = DPCConsentHibernateBundle.BUNDLE_NAME)
     @ApiOperation(value = "Update a Consent resource")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Consent resource was updated"),
             @ApiResponse(code = 400, message = "Consent resource was not updated due to bad request") })

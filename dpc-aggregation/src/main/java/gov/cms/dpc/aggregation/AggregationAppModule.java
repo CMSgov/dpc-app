@@ -1,8 +1,6 @@
 package gov.cms.dpc.aggregation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
@@ -10,22 +8,21 @@ import gov.cms.dpc.aggregation.engine.AggregationEngine;
 import gov.cms.dpc.aggregation.engine.JobBatchProcessor;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
 import gov.cms.dpc.aggregation.health.AggregationEngineHealthCheck;
+import gov.cms.dpc.common.jdbi.ConsentDAO;
 import gov.cms.dpc.aggregation.service.*;
+import gov.cms.dpc.aggregation.tasks.TruncateDatabase;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
-import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.hibernate.SessionFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationConfiguration> {
-
-    private static final Logger logger = LoggerFactory.getLogger(AggregationAppModule.class);
 
 
     AggregationAppModule() {
@@ -39,6 +36,9 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
         binder.bind(AggregationManager.class).asEagerSingleton();
         binder.bind(JobBatchProcessor.class);
         binder.bind(AggregationEngineHealthCheck.class);
+
+        binder.bind(ConsentDAO.class);
+        binder.bind(TruncateDatabase.class);
 
         // Healthchecks
         // Additional health-checks can be added here
@@ -123,23 +123,24 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     }
 
     @Provides
-    @Singleton
-    @Named("consentClient")
-    public IGenericClient provideConsentClient(@Named("fhirContextConsentSTU3") FhirContext ctx) {
-        FHIRClientConfiguration clientConfiguration = configuration().getConsentClientConfiguration();
-        String serviceUrl = clientConfiguration.getServerBaseUrl();
+    @Named("fhirReferenceURL")
+    public String provideFhirReferenceURL() { return configuration().getFhirReferenceURL(); }
 
-        logger.info("Connecting to consent server at {}.", serviceUrl);
-        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        ctx.getRestfulClientFactory().setSocketTimeout(clientConfiguration.getTimeouts().getSocketTimeout());
-        ctx.getRestfulClientFactory().setConnectTimeout(clientConfiguration.getTimeouts().getConnectionTimeout());
-        ctx.getRestfulClientFactory().setConnectionRequestTimeout(clientConfiguration.getTimeouts().getRequestTimeout());
-
-        return ctx.newRestfulGenericClient(serviceUrl);
+    @Provides
+    // We can suppress this because the SessionFactory is managed
+    @SuppressWarnings("CloseableProvides")
+    SessionFactory provideSessionFactory(DPCConsentManagedSessionFactory factory) {
+        return factory.getSessionFactory();
     }
 
     @Provides
-    ConsentService provideConsentService(@Named("consentClient") IGenericClient consentClient) {
-        return new ConsentServiceImpl(consentClient);
+    @Named("consentDAO")
+    ConsentDAO provideConsentDAO(SessionFactory factory) {
+        return new ConsentDAO(new DPCConsentManagedSessionFactory(factory));
+    }
+
+    @Provides
+    ConsentService provideConsentService(@Named("consentDAO") ConsentDAO consentDAO, @Named("fhirReferenceURL") String fhirReferenceURL) {
+        return new ConsentServiceImpl(consentDAO, fhirReferenceURL);
     }
 }

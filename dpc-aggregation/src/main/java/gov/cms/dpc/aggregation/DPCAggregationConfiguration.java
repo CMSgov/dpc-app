@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
+import gov.cms.dpc.common.hibernate.consent.IDPCConsentDatabase;
 import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
-import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import gov.cms.dpc.queue.config.DPCQueueConfig;
 import io.dropwizard.core.Configuration;
@@ -20,7 +20,7 @@ import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.List;
 
-public class DPCAggregationConfiguration extends Configuration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCQueueDatabase, DPCQueueConfig {
+public class DPCAggregationConfiguration extends Configuration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCConsentDatabase, IDPCQueueDatabase, DPCQueueConfig {
 
     @Valid
     @NotNull
@@ -34,21 +34,17 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
 
     @Valid
     @NotNull
-    @JsonProperty("bbclient")
-    private final BBClientConfiguration clientConfiguration = new BBClientConfiguration();
+    @JsonProperty("consentdb")
+    private DataSourceFactory consentDatabase = new DataSourceFactory();
 
     @Valid
     @NotNull
-    @JsonProperty("consentClient")
-    private final FHIRClientConfiguration consentClientConfiguration = new FHIRClientConfiguration();
+    @JsonProperty("bbclient")
+    private final BBClientConfiguration clientConfiguration = new BBClientConfiguration();
 
     @NotNull
     @JsonProperty("awsQueue")
     private final DPCAwsQueueConfiguration dpcAwsQueueConfiguration = new DPCAwsQueueConfiguration();
-
-    @NotEmpty
-    @NotNull
-    private String consentHealthCheckURL;
 
     // The path to the folder that will contain the output files
     @NotEmpty
@@ -84,6 +80,9 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     @NotNull
     private final YearMonth lookBackDate = YearMonth.now(ZoneId.systemDefault());
 
+    @NotEmpty
+    private String fhirReferenceURL;
+
     @Override
     public DataSourceFactory getDatabase() {
         return this.database;
@@ -92,6 +91,11 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     @Override
     public DataSourceFactory getQueueDatabase() {
         return queueDatabase;
+    }
+
+    @Override
+    public DataSourceFactory getConsentDatabase() {
+        return consentDatabase;
     }
 
     public String getExportPath() {
@@ -120,8 +124,6 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
         return this.clientConfiguration;
     }
 
-    public FHIRClientConfiguration getConsentClientConfiguration() { return this.consentClientConfiguration; }
-
     @Override
     public int getPollingFrequency() {
         return pollingFrequency;
@@ -143,8 +145,6 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
         return lookBackExemptOrgs;
     }
 
-    public String getConsentHealthCheckURL() { return consentHealthCheckURL; }
-
     @SuppressWarnings("unused")
     public void setLookBackExemptOrgs(List<String> lookBackExemptOrgs) {
         this.lookBackExemptOrgs = lookBackExemptOrgs;
@@ -155,5 +155,9 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
 
     public int getFetchWarnThresholdSeconds() {
         return fetchWarnThresholdSeconds;
+    }
+
+    public String getFhirReferenceURL() {
+        return fhirReferenceURL;
     }
 }

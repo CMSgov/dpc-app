@@ -2,7 +2,7 @@ package gov.cms.dpc.consent.resources;
 
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
-import gov.cms.dpc.consent.jdbi.ConsentDAO;
+import gov.cms.dpc.common.jdbi.ConsentDAO;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import jakarta.ws.rs.core.Response;
