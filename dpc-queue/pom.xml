@@ -12,22 +12,6 @@
     <artifactId>dpc-queue</artifactId>
     <name>DPC Java Job Queue</name>
 
-    <properties>
-        <aws.java.sdk.version>2.31.71</aws.java.sdk.version>
-    </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>software.amazon.awssdk</groupId>
-                <artifactId>bom</artifactId>
-                <version>${aws.java.sdk.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>io.dropwizard</groupId>

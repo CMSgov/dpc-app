@@ -60,16 +60,11 @@ USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation -
 # Run the integration tests
 USE_BFD_MOCK=true docker compose -p start-v1-app up --exit-code-from tests tests
 
-docker compose -p start-v1-app down
+echo "Starting api server for end-to-end tests"
+USE_BFD_MOCK=true docker compose -p start-v1-app up api --wait
 
-echo "Starting api server for Postman tests"
-# Start the API server
-USE_BFD_MOCK=true AUTH_DISABLED=true docker compose -p start-v1-app up db attribution aggregation consent api --wait
-
-echo "Starting Postman tests"
-# Run the Postman tests
-npm install
-npm run test
+echo "Starting end-to-end tests"
+docker run --rm -v $(pwd)/dpc-load-testing:/src --env-file $(pwd)/ops/config/decrypted/local.env --add-host host.docker.internal=host-gateway -e ENVIRONMENT=local -i grafana/k6 run /src/ci-app.js
 
 # Wait for Jacoco to finish writing the output files
 docker compose -p start-v1-app down -t 60
