@@ -50,23 +50,7 @@ public class BundleHandler implements MessageBodyWriter<Collection<Resource>> {
         return COLLECTION_TYPE_TOKEN.isSupertypeOf(typeToken);
     }
 
-    @Override
-    public void writeTo(Collection<Resource> baseResources, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
-        final Bundle bundle = generateBaseBundle(annotations, baseResources.size());
-        final List<Bundle.BundleEntryComponent> entries = baseResources
-                .stream()
-                .map(resource -> {
-                    final Bundle.BundleEntryComponent bundleEntryComponent = new Bundle.BundleEntryComponent();
-                    bundleEntryComponent.setResource(resource);
-                    return bundleEntryComponent;
-                })
-                .collect(Collectors.toList());
-
-        bundle.setEntry(entries);
-        this.handler.writeTo(bundle, type, genericType, annotations, mediaType, httpHeaders, entityStream);
-    }
-
-    private Bundle generateBaseBundle(Annotation[] annotations, int entryCount) {
+    private static Bundle generateBaseBundle(Annotation[] annotations, Integer entryCount) {
         final Optional<BundleReturnProperties> maybeAnnotation = Arrays.stream(annotations)
                 .filter(a -> a.annotationType().equals(BundleReturnProperties.class))
                 .map(a -> (BundleReturnProperties) a)
@@ -77,10 +61,40 @@ public class BundleHandler implements MessageBodyWriter<Collection<Resource>> {
         final Bundle bundle = new Bundle();
         bundle.setType(bundleType);
 
-        if (bundleType.equals(Bundle.BundleType.SEARCHSET)) {
+        if (bundleType.equals(Bundle.BundleType.SEARCHSET) && entryCount != null) {
             bundle.setTotal(entryCount);
         }
 
         return bundle;
+    }
+
+    private static <T extends Resource> void setBundleEntry(Bundle baseBundle, Collection<T> resources) {
+        final List<Bundle.BundleEntryComponent> entries = resources
+                .stream()
+                .map(resource -> {
+                    final Bundle.BundleEntryComponent bundleEntryComponent = new Bundle.BundleEntryComponent();
+                    bundleEntryComponent.setResource(resource);
+                    return bundleEntryComponent;
+                })
+                .collect(Collectors.toList());
+
+        baseBundle.setEntry(entries);
+    }
+
+    @Override
+    public void writeTo(Collection<Resource> baseResources, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
+        final Bundle bundle = generateBaseBundle(annotations, baseResources.size());
+        setBundleEntry(bundle, baseResources);
+        this.handler.writeTo(bundle, type, genericType, annotations, mediaType, httpHeaders, entityStream);
+    }
+
+    public static <T extends Resource> Bundle convertToBundle(Collection<T> resources) {
+        final Bundle bundle = generateBaseBundle(new Annotation[0], null);
+        setBundleEntry(bundle, resources);
+        return bundle;
+    }
+
+    public static Bundle convertToSummaryBundle(int total) {
+        return generateBaseBundle(new Annotation[0], total);
     }
 }
