@@ -38,8 +38,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      consent:
-        condition: service_healthy
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-aggregation:/jacoco-report
@@ -93,27 +91,6 @@ services:
       - ./jacocoReport/dpc-api:/jacoco-report
     healthcheck:
       test: curl --fail http://localhost:9900/healthcheck || exit 1
-      interval: 10s
-      timeout: 5s
-      start_period: 30s
-      retries: 10
-
-  consent:
-    image: dpc-consent:latest
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      - ENV=local
-      - JACOCO=${REPORT_COVERAGE:-false}
-      - DEBUG_MODE=${DEBUG_MODE:-false}
-    ports:
-      - "3600:3600"
-      - "9904:9904"
-    volumes:
-      - ./jacocoReport/dpc-consent:/jacoco-report
-    healthcheck:
-      test: curl --fail http://localhost:9904/healthcheck || exit 1
       interval: 10s
       timeout: 5s
       start_period: 30s

@@ -9,6 +9,3 @@ services:
   attribution:
     ports:
       - "5007:5005"
-  consent:
-    ports:
-      - "5008:5005"

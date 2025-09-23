@@ -10,7 +10,6 @@ on:
       - dpc-attribution/**
       - dpc-bluebutton/**
       - dpc-common/**
-      - dpc-consent/**
       - dpc-macaroons/**
       - dpc-portal/**
       - dpc-queue/**
@@ -70,9 +69,6 @@ jobs:
       - name: "Debug db"
         if: ${{ failure() && steps.ci-app.outcome == 'failure' }}
         run: docker logs start-v1-app-db-1
-      - name: "Debug consent"
-        if: ${{ failure() && steps.ci-app.outcome == 'failure' }}
-        run: docker logs start-v1-app-consent-1
       - name: "Debug attribution"
         if: ${{ failure() && steps.ci-app.outcome == 'failure' }}
         run: docker logs start-v1-app-attribution-1
@@ -93,8 +89,6 @@ jobs:
           sudo cp ./dpc-attribution/target/site/jacoco/jacoco.xml jacoco-reports/dpc-attribution-jacoco.xml
           sudo cp ./dpc-bluebutton/target/site/jacoco/jacoco.xml jacoco-reports/dpc-bluebutton-jacoco.xml
           sudo cp ./dpc-common/target/site/jacoco/jacoco.xml jacoco-reports/dpc-common-jacoco.xml
-          sudo cp ./dpc-consent/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-consent-it-jacoco.xml
-          sudo cp ./dpc-consent/target/site/jacoco/jacoco.xml jacoco-reports/dpc-consent-jacoco.xml
           sudo cp ./dpc-macaroons/target/site/jacoco/jacoco.xml jacoco-reports/dpc-macaroons-jacoco.xml
           sudo cp ./dpc-queue/target/site/jacoco/jacoco.xml jacoco-reports/dpc-queue-jacoco.xml
       - name: Upload jacoco reports
