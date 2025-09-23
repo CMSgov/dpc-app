@@ -40,7 +40,7 @@ COPY /dpc-portal /dpc-portal
 
 RUN rm -rf /bin/yarn
 RUN npm run build:css
-RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:compile --trace
+RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile --trace
 
 # Clean up from the build
 RUN rm -rf /usr/local/bundle/cache/*.gem && \

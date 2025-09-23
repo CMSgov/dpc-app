@@ -32,7 +32,7 @@ RUN bundle exec bundle audit update && bundle exec bundle audit check
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-web /dpc-web
 
-#RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
+RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
 
 # Clean up from the build
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
