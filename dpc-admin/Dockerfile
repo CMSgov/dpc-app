@@ -35,7 +35,7 @@ COPY /dpc-admin /dpc-admin
 
 RUN rm -rf /bin/yarn
 
-RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
+#RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
 
 # Clean up from the build
 RUN rm -rf /usr/local/bundle/cache/*.gem && \
