@@ -24,8 +24,3 @@ if [ "$1" == "admin" ]; then
   echo "Starting Rails server..."
   bundle exec rails server -b 0.0.0.0 -p 3000
 fi
-
-if [ "$1" == "sidekiq" ]; then
-  # Start Sidekiq job processing
-  bundle exec sidekiq -q admin
-fi
