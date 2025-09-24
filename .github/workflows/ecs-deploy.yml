@@ -74,8 +74,6 @@ jobs:
       contents: read
       id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    container:
-      image: alpine:latest
     outputs:
       image_tag: ${{ steps.image-tag.outputs.image_tag }}
     steps:
@@ -84,17 +82,6 @@ jobs:
         run: |
           echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
           exit 1
-      - name: Install Dependencies
-        run: |
-          apk update
-          apk upgrade --no-cache
-          apk add git --no-cache
-          apk add openssh --no-cache
-          apk add npm --no-cache
-          apk add aws-cli --no-cache
-          apk add curl --no-cache # for using setup-tenv-terraform action
-          apk add bash --no-cache
-          apk add perl-utils --no-cache
 
       - name: AWS Credentials (non-prod)
         if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
@@ -151,17 +138,6 @@ jobs:
   
       - name: Install Tofu
         uses: cmsgov/cdap/actions/setup-tenv@8343fb96563ce4b74c4dececee9b268f42bd4a40
-
-      - name: Add tenv to PATH
-        run: echo "$HOME/.tenv/bin" >> $GITHUB_PATH
-
-      - name: Install and Configure OpenTofu Binary
-        run: |
-          tenv install tofu
-          TOFU_DIR=$(dirname "$(tenv which tofu)")
-          echo "$TOFU_DIR" >> $GITHUB_PATH
-          tofu version 
-        shell: bash
 
       - name: Verify persistent plan
         run: |
