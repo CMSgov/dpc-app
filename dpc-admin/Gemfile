@@ -19,7 +19,6 @@ gem 'railties', '~> 8.0.2.1'
 gem 'bundler', '>= 1.15.0'
 gem 'dotenv-rails', groups: [:development, :test]
 gem 'puma', '~> 6.4.3'
-gem 'redis', '~> 4.0'
 gem 'luhnacy', '~> 0.2.1'
 gem 'omniauth-rails_csrf_protection', '~> 1.0'
 gem 'solid_queue', '~> 1.2'
@@ -40,7 +39,6 @@ gem 'octokit' # can be removed once we move past github omniauth
 gem 'fhir_models'
 gem 'rack', '>= 3.1.14'
 gem 'rack-session', '>= 2.1.1'
-gem 'redis-namespace'
 gem 'kaminari'
 gem 'active_model_serializers'
 gem 'lograge'
@@ -94,7 +92,6 @@ group :test do
   gem 'rails-controller-testing'
   gem 'selenium-webdriver'
   gem 'fakefs', require: 'fakefs/safe'
-  gem 'fakeredis'
   # Easy installation and use of web drivers to run system tests with browsers
   gem 'webdrivers'
 end
