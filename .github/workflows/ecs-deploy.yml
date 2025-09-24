@@ -152,6 +152,9 @@ jobs:
       - name: Install Tofu
         uses: cmsgov/cdap/actions/setup-tenv@8343fb96563ce4b74c4dececee9b268f42bd4a40
 
+      - name: Add tenv to PATH
+        run: echo "$HOME/.tenv/bin" >> $GITHUB_PATH
+
       - name: Install and Configure OpenTofu Binary
         run: |
           tenv install tofu
