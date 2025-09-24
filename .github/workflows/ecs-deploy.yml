@@ -94,6 +94,7 @@ jobs:
           apk add aws-cli --no-cache
           apk add curl --no-cache # for using setup-tenv-terraform action
           apk add bash --no-cache
+          apk add perl-utils --no-cache
 
       - name: AWS Credentials (non-prod)
         if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
