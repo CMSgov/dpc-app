@@ -155,7 +155,9 @@ jobs:
       - name: Add Tofu to PATH
         run: |
          echo "$HOME/.tenv/bin" >> $GITHUB_PATH
-         tofu version 
+         
+      - name: Verify Tofu installed
+        run: tofu version
 
       - name: Verify persistent plan
         run: |
