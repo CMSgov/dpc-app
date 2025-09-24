@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
@@ -16,12 +15,14 @@ import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.dpc.aggregation.service.ConsentResult;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.TestOrganizationContext;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.common.consent.entities.ConsentEntity;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
+import gov.cms.dpc.common.jdbi.ConsentDAO;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
@@ -37,7 +38,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -54,12 +57,9 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.sql.Date;
+import java.time.*;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,10 +70,10 @@ import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestMethodOrder(MethodOrderer.Random.class)
 class PatientResourceTest extends AbstractSecureApplicationTest {
-    final java.util.Date dateYesterday = Date.from(Instant.now().minus(1, ChronoUnit.DAYS));
-    final java.util.Date dateToday = Date.from(Instant.now());
+    final LocalDate dateToday = LocalDate.now();
+    final LocalDate dateYesterday = dateToday.minusDays(1);
 
     final RandomStringUtils randomStringUtils = RandomStringUtils.secure();
 
@@ -85,7 +85,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     final IParser parser = ctx.newJsonParser();
     final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
-    final IGenericClient consentClient = APITestHelpers.buildConsentClient(ctx);
 
     private static final Logger logger = LoggerFactory.getLogger(PatientResourceTest.class);
 
@@ -285,7 +284,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         conn.disconnect();
     }
 
-    @Disabled("Disabled until call to /Consent removed")
     @Test
     void testPatientEverythingWithoutGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -361,7 +359,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(0, resultValidSince.getTotal(), "Should have 0 entries in Bundle");
     }
 
-    @Disabled("Disabled until call to /Consent removed")
     @Test
     void testPatientEverythingWithGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -449,7 +446,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(0, resultValidSince.getTotal(), "Should have 0 entries in Bundle");
     }
 
-    @Disabled("Disabled until call to /Consent removed")
     @Test
     void testPatientEverything_CanHandlePatientWithMultipleMBIs() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -484,7 +480,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals("9V99EU8XY91", FHIRExtractors.getPatientMBI(patientResource));
     }
 
-    @Disabled("Disabled until call to /Consent removed")
     @Test
     void testPatientEverythingForOptedOutPatient() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -514,7 +509,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
             "Incorrect or missing operation outcome in response body.");
     }
 
-    @Disabled("Disabled until call to /Consent removed")
     @Test
     void testPatientEverythingForOptedOutPatientOnMultipleMbis() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -546,7 +540,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
             "Incorrect or missing operation outcome in response body.");
     }
 
-    @Disabled("Disabled until call to /Consent removed")
     @Test
     void testOptInPatient() throws GeneralSecurityException, IOException, URISyntaxException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -582,7 +575,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     @Test
     void testGetPatientEverythingAsync() throws GeneralSecurityException, IOException, URISyntaxException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25), true);
-        LoggingInterceptor interceptor = null;
 
         APITestHelpers.setupPractitionerTest(client, parser);
         APITestHelpers.setupPatientTest(client, parser);
@@ -598,7 +590,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         final String[] headers = new String[1];
         client.registerInterceptor(new IClientInterceptor() {
             @Override
-            public void interceptRequest(IHttpRequest theRequest) { }
+            public void interceptRequest(IHttpRequest theRequest) { /* Not used */ }
 
             @Override
             public void interceptResponse(IHttpResponse theResponse) throws IOException {
@@ -621,8 +613,8 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         UUID jobId = UUID.fromString(contentLocation.substring( contentLocation.lastIndexOf("/")+1 ));
 
         // Connect to our queue DB
-        final org.hibernate.cfg.Configuration conf = new Configuration();
-        SessionFactory sessionFactory = conf.configure().buildSessionFactory();
+        final org.hibernate.cfg.Configuration conf = new Configuration().configure("hibernate-queue.cfg.xml");
+        SessionFactory sessionFactory = conf.buildSessionFactory();
         DistributedBatchQueue queue = new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
 
         // Verify our job was submitted correctly
@@ -774,7 +766,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Patient, orgBPatient.getIdElement().getIdPart());
     }
 
-    @Disabled("to remove call to /Consent")
     @Test
     void testPatientPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
@@ -851,7 +842,6 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(COUNT_TEST_PATIENTS, resultPatientBundle.getEntry().size());
     }
 
-    @Disabled("to remove call to /Consent")
     @Test
     void testPatientEverythingWithFailedLookBack() throws IOException, URISyntaxException, GeneralSecurityException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
@@ -932,38 +922,32 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         return (Practitioner) practSearch.getEntry().get(0).getResource();
     }
 
-    private void optOutPatient(String mbi, java.util.Date date){
-        sendConsent(mbi, ConsentResult.PolicyType.OPT_OUT.getValue(), date);
+    private void optOutPatient(String mbi, LocalDate date){
+        sendConsent(mbi, ConsentEntity.OPT_OUT, date);
     }
 
-    private void optInPatient(String mbi, java.util.Date date){
-        sendConsent(mbi, ConsentResult.PolicyType.OPT_IN.getValue(), date);
+    private void optInPatient(String mbi, LocalDate date){
+        sendConsent(mbi, ConsentEntity.OPT_IN, date);
     }
 
-    private void sendConsent(String mbi, String policyUrl, java.util.Date date) {
-        Consent consent = new Consent();
-        consent.setStatus(Consent.ConsentState.ACTIVE);
+    private void sendConsent(String mbi, String policyUrl, LocalDate date) {
+        final org.hibernate.cfg.Configuration conf = new Configuration().configure("hibernate-consent.cfg.xml");
+        SessionFactory sessionFactory = conf.buildSessionFactory();
+        ConsentDAO consentDAO = new ConsentDAO(new DPCConsentManagedSessionFactory(sessionFactory));
 
-        Coding categoryCoding = new Coding("http://loinc.org","64292-6", null);
-        CodeableConcept category = new CodeableConcept();
-        category.setCoding(List.of(categoryCoding));
-        consent.setCategory(List.of(category));
+        ConsentEntity consentEntity = new ConsentEntity();
+        consentEntity.setLoincCode("64292-6");
+        consentEntity.setMbi( String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), mbi));
+        consentEntity.setEffectiveDate(date);
+        consentEntity.setPolicyCode(policyUrl);
 
-        String patientRefPath = "/Patient?identity=|"+mbi;
-        consent.setPatient(new Reference("http://api.url" + patientRefPath));
-
-        consent.setDateTime(date);
-
-        Reference orgRef = new Reference("Organization/" + UUID.randomUUID());
-        consent.setOrganization(List.of(orgRef));
-
-        consent.setPolicyRule(policyUrl);
-
-        consentClient
-                .create()
-                .resource(consent)
-                .encodedJson()
-                .execute();
+        try(Session currentSession = sessionFactory.getCurrentSession()) {
+            Transaction tx = currentSession.beginTransaction();
+            consentDAO.persistConsent(consentEntity);
+            tx.commit();
+        } catch (Exception e) {
+            fail("Could not sent consent to DB");
+        }
     }
 
     private Bundle submitPatients(IGenericClient client, String orgId, int numPatients) {
