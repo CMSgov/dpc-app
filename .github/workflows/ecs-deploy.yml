@@ -71,8 +71,6 @@ jobs:
       contents: read
       id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    container:
-      image: alpine:latest
     outputs:
       image_tag: ${{ steps.image-tag.outputs.image_tag }}
     steps:
@@ -81,16 +79,6 @@ jobs:
         run: |
           echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
           exit 1
-      - name: Install Dependencies
-        run: |
-          apk update
-          apk add git --no-cache
-          apk add openssh --no-cache
-          apk add npm --no-cache
-          apk add aws-cli --no-cache
-          apk add curl --no-cache # for using setup-tfenv-terraform action
-          apk add bash --no-cache
-
       - name: AWS Credentials (non-prod)
         if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
         uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
