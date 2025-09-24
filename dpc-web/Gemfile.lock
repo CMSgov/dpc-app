@@ -197,8 +197,6 @@ GEM
     fakefs (2.5.0)
     faker (3.3.1)
       i18n (>= 1.8.11, < 2)
-    fakeredis (0.9.2)
-      redis (~> 4.8)
     faraday (2.13.4)
       faraday-net_http (>= 2.0, < 3.5)
       json
@@ -382,9 +380,6 @@ GEM
     rdoc (6.14.2)
       erb
       psych (>= 4.0.0)
-    redis (4.8.1)
-    redis-namespace (1.11.0)
-      redis (>= 4)
     regexp_parser (2.9.3)
     reline (0.6.2)
       io-console (~> 0.5)
@@ -542,7 +537,6 @@ DEPENDENCIES
   factory_bot_rails (>= 6.2.0)
   fakefs
   faker
-  fakeredis
   fhir_models
   health_check (>= 3.1.0)
   kaminari (>= 1.2.2)
@@ -565,8 +559,6 @@ DEPENDENCIES
   rack-session (>= 2.1.1)
   rails-controller-testing (>= 1.0.5)
   railties (~> 8.0.2.1)
-  redis (~> 4.0)
-  redis-namespace
   rexml (>= 3.4.2)
   rspec-rails (>= 5.1.2)
   rubocop

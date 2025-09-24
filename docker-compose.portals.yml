@@ -27,6 +27,7 @@ services:
       - "./dpc-web/package-lock.json:/dpc-web/package-lock.json"
       - "./dpc-web/app:/dpc-web/app"
       - "./dpc-web/db:/dpc-web/db"
+      - "./dpc-web/lib:/dpc-web/lib"
       - "./dpc-web/spec:/dpc-web/spec"
 
     environment:
