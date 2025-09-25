@@ -2,7 +2,7 @@
 
 # Logs AO Invitation creation
 # Actions activated by rake tasks on AWS servers are not logging to CloudWatch, so we need
-# to have sidekiq do the logging, since its logs go through
+# to have a job do the logging, since its logs go through
 class LogAoInviteJob < ApplicationJob
   queue_as :portal
 

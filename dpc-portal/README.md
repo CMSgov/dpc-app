@@ -75,10 +75,6 @@ We utilize the [ViewComponent](https://viewcomponent.org/) library to create cus
 
 Emails are not viewable in lookbook, but can be found [here](http://localhost:3100/portal/rails/mailers/).
 
-### Sidekiq (Background Jobs)
-
-You can check the status of any jobs by going to the [Sidekiq dashboard](http://localhost:3100/portal/sidekiq).
-
 ## Accessing the VAL CPI API Gateway from Local Dev
 
 By default, the local portal is connected to a mock CPI API Gateway server with preset responses. To connect with the VAL CPI API Gateway environment, you'll need to:

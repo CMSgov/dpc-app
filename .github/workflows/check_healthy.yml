@@ -26,16 +26,10 @@ jobs:
             script_params: consent consent consent backend v9
           - service: web
             script_params: web-v2-1 web web frontend v9
-          - service: sidekiq-web
-            script_params: sidekiq sidekiq sidekiq frontend v9
           - service: admin
             script_params: web-admin-1 web-admin web-admin frontend v9
-          - service: sidekiq-admin
-            script_params: sidekiq-admin sidekiq-admin sidekiq-admin frontend v9
           - service: portal
             script_params: web-portal-1 dpc-portal web-portal frontend v9
-          - service: sidekiq-portal
-            script_params: sidekiq-portal sidekiq-portal sidekiq-portal frontend v9
     steps:
       - name: "Checkout code"
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
