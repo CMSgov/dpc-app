@@ -14,14 +14,17 @@ import gov.cms.dpc.common.Constants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import jakarta.inject.Named;
+import jakarta.ws.rs.core.UriBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.SocketTimeoutException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -68,7 +71,7 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     @Override
     public Bundle requestPatientFromServer(String patientId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
         logger.debug("Attempting to fetch patient ID {} from baseURL: {}", patientId, client.getServerBase());
-        ICriterion<ReferenceClientParam> criterion = new ReferenceClientParam(Patient.SP_RES_ID).hasId(patientId);
+        ICriterion<ReferenceClientParam> criterion = new ReferenceClientParam(IAnyResource.SP_RES_ID).hasId(patientId);
         return instrumentCall(REQUEST_PATIENT_METRIC, () ->
                 fetchBundle(Patient.class, Collections.singletonList(criterion), patientId, lastUpdated, headers));
     }
@@ -88,8 +91,8 @@ public class BlueButtonClientImpl implements BlueButtonClient {
                 .forResource(Patient.class)
                 .where(Patient.IDENTIFIER.exactly().systemAndIdentifier(DPCIdentifierSystem.MBI.getSystem(), mbi))
                 .usingStyle(SearchStyleEnum.POST);
-            addBFDHeaders(query, headers);
-            return query
+
+            return addBFDHeaders(query, headers)
                 .returnBundle(Bundle.class)
                 .execute();
         });
@@ -161,15 +164,39 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     @Override
     public Bundle requestNextBundleFromServer(Bundle bundle, Map<String, String> headers) throws ResourceNotFoundException {
         return instrumentCall(REQUEST_NEXT_METRIC, () -> {
-            var nextURL = bundle.getLink(Bundle.LINK_NEXT).getUrl();
+            var nextURL = bundle.getLink(IBaseBundle.LINK_NEXT).getUrl();
             logger.debug("Attempting to fetch next bundle from url: {}", nextURL);
 
-            IGetPageTyped<Bundle> iQuery = client.loadPage().next(bundle);
+            int count = config.getMaxResourcesCount();
+            Bundle nextBundle = null;
 
-            return client
-                    .loadPage()
-                    .next(bundle)
-                    .execute();
+            while( nextBundle == null ) {
+                try {
+                    nextBundle = client
+                        .loadPage()
+                        .next(bundle)
+                        .execute();
+                } catch (FhirClientConnectionException e) {
+                    // If we timed out, lower count and try again
+                    if (e.getCause() instanceof SocketTimeoutException) {
+                        logger.warn("Timed out fetching next bundle from BFD with count: {}.  Lowering count and trying again.", count);
+
+                        // Get the new count.
+                        // If it drops below our minimum we can't complete the call, so rethrow the exception.
+                        count = reduceCountOnTimeout(count);
+                        if (count < config.getMinResourcesCount()) {
+                            throw e;
+                        }
+
+                        // Update count in next link for the next try
+                        updateNextCount(bundle, count);
+                    } else {
+                        // Exception not caused by timeout.  Rethrow and let the caller handle.
+                        throw e;
+                    }
+                }
+            }
+            return nextBundle;
         });
     }
 
@@ -207,9 +234,9 @@ public class BlueButtonClientImpl implements BlueButtonClient {
             } catch (FhirClientConnectionException e) {
                 // If we timed out, lower count and try again
                 if (e.getCause() instanceof SocketTimeoutException) {
-                    logger.warn("Timed out fetching %s bundle from BFD with count: %d.  Lowering count and trying again.".formatted(
+                    logger.warn("Timed out fetching {} bundle from BFD with count: {}.  Lowering count and trying again.",
                         resourceClass.getName(), count
-                    ));
+                    );
 
                     // Get the new count.
                     // If it drops below our minimum we can't complete the call, so rethrow the exception.
@@ -218,6 +245,10 @@ public class BlueButtonClientImpl implements BlueButtonClient {
                         throw e;
                     }
                     iQuery = buildBundleQuery(resourceClass, criteria, lastUpdated, headers, count);
+                }
+                else {
+                    // Not caused by a timeout.  Rethrow and let the caller handle it.
+                    throw e;
                 }
             }
         }
@@ -250,14 +281,14 @@ public class BlueButtonClientImpl implements BlueButtonClient {
         }
     }
 
-    private void addBFDHeaders(IQuery<?> query, Map<String, String> headers) {
+    private IQuery<?> addBFDHeaders(IQuery<?> query, Map<String, String> headers) {
         query.withAdditionalHeader(Constants.INCLUDE_IDENTIFIERS_HEADER, "mbi");
         if (headers != null) {
             headers.entrySet().stream()
                     .filter(e -> StringUtils.isNotBlank(e.getValue()))
                     .forEach(e -> query.withAdditionalHeader(e.getKey(), e.getValue()));
         }
-
+        return query;
     }
 
     // If a request times out, cut the count parm in half and try again
@@ -279,13 +310,27 @@ public class BlueButtonClientImpl implements BlueButtonClient {
             query = query.and(criterion);
         }
 
-        IQuery<Bundle> iQuery = query
+        return addBFDHeaders(query, headers)
             .count(count)
             .lastUpdated(lastUpdated)
             .returnBundle(Bundle.class);
-
-        addBFDHeaders(query, headers);
-
-        return iQuery;
     }
+
+    // Updates the next link of the bundle to use the new count parameter.
+    private void updateNextCount(Bundle bundle, int count) {
+        Bundle.BundleLinkComponent link = bundle.getLink(IBaseBundle.LINK_NEXT);
+
+        // Get the old URI and swap _count
+        UriBuilder uriBuilder = UriBuilder.fromUri(URI.create(link.getUrl()));
+        uriBuilder.replaceQueryParam("_count", count);
+        URI newUri = uriBuilder.build();
+
+        // Assign a new list of links with our new URI
+        bundle.setLink(List.of(
+            new Bundle.BundleLinkComponent(
+                new StringType(IBaseBundle.LINK_NEXT),
+                new UriType(newUri.toString())
+            )
+        ));
+	}
 }
