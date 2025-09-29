@@ -2,6 +2,7 @@ package gov.cms.dpc.bluebutton.client;
 
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -20,6 +21,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +44,6 @@ public class BlueButtonClientImpl implements BlueButtonClient {
     private final BBClientConfiguration config;
     private final Map<String, Timer> timers;
     private final Map<String, Meter> exceptionMeters;
-    private static final String HASH_ALGORITHM = "PBKDF2WithHmacSHA256";
 
     private static String formBeneficiaryID(String fromPatientID) {
         return "Patient/" + fromPatientID;
@@ -162,6 +163,9 @@ public class BlueButtonClientImpl implements BlueButtonClient {
         return instrumentCall(REQUEST_NEXT_METRIC, () -> {
             var nextURL = bundle.getLink(Bundle.LINK_NEXT).getUrl();
             logger.debug("Attempting to fetch next bundle from url: {}", nextURL);
+
+            IGetPageTyped<Bundle> iQuery = client.loadPage().next(bundle);
+
             return client
                     .loadPage()
                     .next(bundle)
@@ -191,21 +195,32 @@ public class BlueButtonClientImpl implements BlueButtonClient {
                                                          String patientID,
                                                          DateRangeParam lastUpdated,
                                                          Map<String, String> headers) {
-        IQuery<IBaseBundle> query = client.search()
-                .forResource(resourceClass)
-                .where(criteria.get(0));
 
-        for (ICriterion<? extends IParam> criterion : criteria.subList(1, criteria.size())) {
-            query = query.and(criterion);
+        int count = config.getMaxResourcesCount();
+        IQuery<Bundle> iQuery = buildBundleQuery(resourceClass, criteria, lastUpdated, headers, count);
+
+        // At the end of this block, we either have a bundle or we've thrown an exception
+        Bundle bundle = null;
+        while( bundle == null ) {
+            try {
+                bundle = iQuery.execute();
+            } catch (FhirClientConnectionException e) {
+                // If we timed out, lower count and try again
+                if (e.getCause() instanceof SocketTimeoutException) {
+                    logger.warn("Timed out fetching %s bundle from BFD with count: %d.  Lowering count and trying again.".formatted(
+                        resourceClass.getName(), count
+                    ));
+
+                    // Get the new count.
+                    // If it drops below our minimum we can't complete the call, so rethrow the exception.
+                    count = reduceCountOnTimeout(count);
+                    if(count < config.getMinResourcesCount()) {
+                        throw e;
+                    }
+                    iQuery = buildBundleQuery(resourceClass, criteria, lastUpdated, headers, count);
+                }
+            }
         }
-
-        IQuery<Bundle> iQuery = query
-                .count(config.getMinResourcesCount())
-                .lastUpdated(lastUpdated)
-                .returnBundle(Bundle.class);
-        addBFDHeaders(query, headers);
-
-        final Bundle bundle = iQuery.execute();
 
         // Case where patientID does not exist at all
         if(!bundle.hasEntry() && lastUpdated == null) {
@@ -243,5 +258,34 @@ public class BlueButtonClientImpl implements BlueButtonClient {
                     .forEach(e -> query.withAdditionalHeader(e.getKey(), e.getValue()));
         }
 
+    }
+
+    // If a request times out, cut the count parm in half and try again
+    private int reduceCountOnTimeout(int count) {
+        return count / 2;
+    }
+
+    // Creates a query to fetch a bundle
+    private <T extends IBaseResource> IQuery<Bundle> buildBundleQuery(Class<T> resourceClass,
+                                            List<ICriterion<? extends IParam>> criteria,
+                                            DateRangeParam lastUpdated,
+                                            Map<String, String> headers,
+                                            int count) {
+        IQuery<IBaseBundle> query = client.search()
+            .forResource(resourceClass)
+            .where(criteria.get(0));
+
+        for (ICriterion<? extends IParam> criterion : criteria.subList(1, criteria.size())) {
+            query = query.and(criterion);
+        }
+
+        IQuery<Bundle> iQuery = query
+            .count(count)
+            .lastUpdated(lastUpdated)
+            .returnBundle(Bundle.class);
+
+        addBFDHeaders(query, headers);
+
+        return iQuery;
     }
 }

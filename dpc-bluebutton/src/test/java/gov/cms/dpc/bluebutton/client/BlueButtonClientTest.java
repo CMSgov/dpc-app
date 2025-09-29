@@ -1,5 +1,6 @@
 package gov.cms.dpc.bluebutton.client;
 
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,6 +50,10 @@ class BlueButtonClientTest {
     private static final String TEST_SINGLE_EOB_PATIENT_ID = "-20140000009893";
     // A patient id that should not exist in bluebutton
     private static final String TEST_NONEXISTENT_PATIENT_ID = "31337";
+    // Times out on all counts
+    private static final String TEST_EOB_TIMEOUT_ALL_COUNTS_PATIENT_ID = "11111";
+    // Times out on count=10, passes the rest
+    private static final String TEST_EOB_TIMEOUT_10_COUNT_PATIENT_ID = "-20140000008326";   // Times out on count=10, passes the rest
 
     // Paths to test resources
     private static final String METADATA_PATH = "bb-test-data/meta.xml";
@@ -127,7 +132,7 @@ class BlueButtonClientTest {
         );
 
         // Create mocks for pages of the results
-        for(String startIndex: List.of("10", "20", "30")) {
+        for(String startIndex: List.of("10")) {
             createMockServerExpectation(
                 "/v1/fhir/ExplanationOfBenefit",
                 HttpStatus.OK_200,
@@ -137,6 +142,54 @@ class BlueButtonClientTest {
                         Parameter.param("excludeSAMHSA", "true"))
             );
         }
+
+        // Create mocks for the EoB that should timeout
+        createMockServerExpectation(
+            "/v1/fhir/ExplanationOfBenefit",
+            HttpStatus.OK_200,
+            "Not needed",
+            List.of(
+                Parameter.param("patient", TEST_EOB_TIMEOUT_ALL_COUNTS_PATIENT_ID),
+                Parameter.param("_count", "10"),
+                Parameter.param("excludeSAMHSA", "true")
+            ),
+            10
+        );
+        createMockServerExpectation(
+            "/v1/fhir/ExplanationOfBenefit",
+            HttpStatus.OK_200,
+            "Not needed",
+            List.of(
+                Parameter.param("patient", TEST_EOB_TIMEOUT_ALL_COUNTS_PATIENT_ID),
+                Parameter.param("_count", "5"),
+                Parameter.param("excludeSAMHSA", "true")
+            ),
+            10
+        );
+
+        // Create mocks for the EoB that should timeout once, then complete
+        createMockServerExpectation(
+            "/v1/fhir/ExplanationOfBenefit",
+            HttpStatus.OK_200,
+            "Not needed",
+            List.of(
+                Parameter.param("patient", TEST_EOB_TIMEOUT_10_COUNT_PATIENT_ID),
+                Parameter.param("_count", "10"),
+                Parameter.param("excludeSAMHSA", "true")
+            ),
+            10
+        );
+        createMockServerExpectation(
+            "/v1/fhir/ExplanationOfBenefit",
+            HttpStatus.OK_200,
+            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_EOB_TIMEOUT_10_COUNT_PATIENT_ID + ".xml"),
+            List.of(
+                Parameter.param("patient", TEST_EOB_TIMEOUT_10_COUNT_PATIENT_ID),
+                Parameter.param("_count", "5"),
+                Parameter.param("excludeSAMHSA", "true")
+            ),
+            1
+        );
     }
 
     @AfterAll
@@ -259,6 +312,21 @@ class BlueButtonClientTest {
         );
     }
 
+    @Test
+    void shouldThrowOnMultipleTimeoutsGettingResource() {
+        assertThrows(
+            FhirClientConnectionException.class,
+            () -> bbc.requestEOBFromServer(TEST_EOB_TIMEOUT_ALL_COUNTS_PATIENT_ID, null, null),
+            "BlueButton client should throw exception when request times out on all counts"
+        );
+    }
+
+    @Test
+    void shouldReturnOnSingleTimeoutGettingResource() {
+        final Bundle response = bbc.requestEOBFromServer(TEST_EOB_TIMEOUT_10_COUNT_PATIENT_ID, TEST_LAST_UPDATED, null);
+        assertEquals(10, response.getEntry().size(), "This demo patient should have exactly 10 EOBs");
+    }
+
     /**
      * Helper method that configures the mock server to respond to a given GET request
      *
@@ -268,23 +336,36 @@ class BlueButtonClientTest {
      * @param qStringParams The query string parameters that must be present to generate this response
      */
     private static void createMockServerExpectation(String path, int respCode, String payload, List<Parameter> qStringParams) {
+        createMockServerExpectation(path, respCode, payload, qStringParams, 1);
+    }
+
+    /**
+     * Helper method that configures the mock server to respond to a given GET request
+     *
+     * @param path          The path segment of the URL that would be received by BlueButton
+     * @param respCode      The desired HTTP response code
+     * @param payload       The data that the mock server should return in response to this GET request
+     * @param qStringParams The query string parameters that must be present to generate this response
+     * @param delay         How long the server should wait to respond.  Useful for testing a timeout.
+     */
+    private static void createMockServerExpectation(String path, int respCode, String payload, List<Parameter> qStringParams, int delay) {
         new MockServerClient("localhost", 8083)
-                .when(
-                        HttpRequest.request()
-                                .withMethod("GET")
-                                .withPath(path)
-                                .withQueryStringParameters(qStringParams),
-                        Times.unlimited()
-                )
-                .respond(
-                        org.mockserver.model.HttpResponse.response()
-                                .withStatusCode(respCode)
-                                .withHeader(
-                                        new Header("Content-Type", "application/fhir+xml;charset=UTF-8")
-                                )
-                                .withBody(payload)
-                                .withDelay(TimeUnit.SECONDS, 1)
-                );
+            .when(
+                HttpRequest.request()
+                    .withMethod("GET")
+                    .withPath(path)
+                    .withQueryStringParameters(qStringParams),
+                Times.unlimited()
+            )
+            .respond(
+                org.mockserver.model.HttpResponse.response()
+                    .withStatusCode(respCode)
+                    .withHeader(
+                        new Header("Content-Type", "application/fhir+xml;charset=UTF-8")
+                    )
+                    .withBody(payload)
+                    .withDelay(TimeUnit.SECONDS, delay)
+            );
     }
 
     private static BBClientConfiguration getClientConfig() {

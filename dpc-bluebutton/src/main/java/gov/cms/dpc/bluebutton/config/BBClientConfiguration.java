@@ -21,6 +21,8 @@ public class BBClientConfiguration extends FHIRClientConfiguration {
     @Max(1000)
     private int maxResourcesCount = 1000;
 
+    @Min(10)
+    @Max(1000)
     private int minResourcesCount = 100;
 
     @Valid
