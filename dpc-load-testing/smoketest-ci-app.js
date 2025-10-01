@@ -1,6 +1,6 @@
 import http from 'k6/http';
 import { check } from 'k6';
-import { fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
+import { generateDPCToken } from './generate-dpc-token.js';
 import {
   createPatientsBatch,
   createPractitioners,
@@ -8,7 +8,6 @@ import {
 import { setup as integrationTestSetup } from './ci-app.js';
 
 export function setup() {
-  // const adminUrl = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:9903' : __ENV.API_ADMIN_URL;
   return integrationTestSetup();
 }
 
@@ -25,7 +24,6 @@ export const options = {
     }
   }
 };
-//export { setup };
 
 const fhirType = 'application/fhir+json';
 const fhirOK = function(res) {
@@ -91,9 +89,9 @@ function handleJmxSmoketests(data) {
     }
   );
   // 3 of 4 (submitRosters)
-  //...
+  // tbd
   // 4 of 4 (exportData)
-  //...
+  // tbd
 }
 
 export function workflow(data) {
