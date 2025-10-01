@@ -19,22 +19,22 @@ smoke/local: export USE_BFD_MOCK=false
 smoke/local: export AUTH_DISABLED=false
 smoke/local: venv smoke start-dpc
 	@echo "Running Smoke Tests against Local env"
-	. venv/bin/activate; pip install -Ur requirements.txt; bzt --verbose src/test/local.smoke_test.yml
+	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/local.smoke_test.yml
 
 .PHONY: smoke/remote
 smoke/remote: venv smoke
 	@echo "Running Smoke Tests against ${HOST_URL}"
-	. venv/bin/activate; pip install -Ur requirements.txt; bzt --verbose src/test/remote.smoke_test.yml
+	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/remote.smoke_test.yml
 
 .PHONY: smoke/sandbox
 smoke/sandbox: venv smoke
 	@echo "Running Smoke Tests against ${HOST_URL}"
-	. venv/bin/activate; pip install -Ur requirements.txt; bzt --verbose src/test/sandbox.smoke_test.yml
+	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/sandbox.smoke_test.yml
 
 .PHONY: smoke/prod
 smoke/prod: venv smoke
 	@echo "Running Smoke Tests against ${HOST_URL}"
-	. venv/bin/activate; pip install -Ur requirements.txt; bzt --verbose src/test/prod.smoke_test.yml
+	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/prod.smoke_test.yml
 
 
 # Build commands
