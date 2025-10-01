@@ -101,7 +101,8 @@ bbclient:
     socketTimeout: 5000 # ms
     requestTimeout: 5000 # ms
   serverBaseUrl: ${BFD_URL}
-  resourcesCount: 100 # Max number of resource that a request to BB will return before using another request
+  maxResourcesCount: 1000 # Max number of resources that a request to BFD will return before using another request
+  minResourcesCount: 100 # Minimum number of resources we'll try to download from BFD before giving up
   useBfdMock: ${USE_BFD_MOCK:-false}
 
 attributionClient:

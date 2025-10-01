@@ -19,7 +19,11 @@ public class BBClientConfiguration extends FHIRClientConfiguration {
 
     @Min(10)
     @Max(1000)
-    private int resourcesCount = 100;
+    private int maxResourcesCount = 1000;
+
+    @Min(10)
+    @Max(1000)
+    private int minResourcesCount = 100;
 
     @Valid
     @NotNull
@@ -28,8 +32,11 @@ public class BBClientConfiguration extends FHIRClientConfiguration {
 
     private boolean useBfdMock = false;
 
-    public int getResourcesCount() {
-        return resourcesCount;
+    public int getMaxResourcesCount() {
+        return maxResourcesCount;
+    }
+    public int getMinResourcesCount() {
+        return minResourcesCount;
     }
 
     public KeystoreConfiguration getKeystore() {
