@@ -1,3 +1,6 @@
+/*global console*/
+/* eslint no-console: "off" */
+
 import http from 'k6/http';
 import { check } from 'k6';
 import { generateDPCToken } from './generate-dpc-token.js';
@@ -74,6 +77,7 @@ function handleJmxSmoketests(data) {
   if(checkPractitionerResponse) {
     // There's only 1 identifier in our synthetic practitioner, so we don't have to search for npi
     practitionerId = practitionerResponse.json().entry[0].resource.id;
+    console.log(practitionerId);
   } else {
     console.error('failed to create practitioners');
   }
@@ -88,6 +92,7 @@ function handleJmxSmoketests(data) {
       'created patients': res => res.json().entry.length === mbis.length,
     }
   );
+  console.log(checkPatientsResponse);
   // 3 of 4 (submitRosters)
   // tbd
   // 4 of 4 (exportData)
