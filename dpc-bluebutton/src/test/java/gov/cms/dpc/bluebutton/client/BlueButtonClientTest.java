@@ -62,40 +62,23 @@ class BlueButtonClientTest {
     private static BlueButtonClient bbc;
     private static ClientAndServer mockServer;
 
+    private static int timeoutDelay;
+    private static int maxCount;
+    private static String maxCountStr;
+
     @BeforeAll
     static void setupBlueButtonClient() {
-        final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule<>(getClientConfig()));
+        final BBClientConfiguration config = getClientConfig();
+
+        // Delay necessary in mock server response to force a client timeout
+        timeoutDelay = config.getTimeouts().getSocketTimeout() * 2;
+        maxCount = config.getMaxResourcesCount();
+        maxCountStr = Integer.toString(maxCount);
+
+        final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule<>(config));
         bbc = injector.getInstance(BlueButtonClient.class);
 
         mockServer = ClientAndServer.startClientAndServer(8083);
-
-        // Create mocks for the next link that should timeout
-        createMockServerExpectation(
-            "/v1/fhir/ExplanationOfBenefit",
-            HttpStatus.OK_200,
-            "Not needed",
-            List.of(
-                Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
-                Parameter.param("_count", "10"),
-                Parameter.param("startIndex", "10"),
-                Parameter.param("excludeSAMHSA", "true")
-            ),
-            10
-        );
-        createMockServerExpectation(
-            "/v1/fhir/ExplanationOfBenefit",
-            HttpStatus.OK_200,
-            "Not needed",
-            List.of(
-                Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
-                Parameter.param("_count", "5"),
-                Parameter.param("startIndex", "10"),
-                Parameter.param("excludeSAMHSA", "true")
-            ),
-            10
-        );
-
-
     }
 
     @AfterAll
@@ -273,7 +256,7 @@ class BlueButtonClientTest {
         createNextBundleTimeOutAndRecoverScenario();
 
         Bundle response = bbc.requestNextBundleFromServer(
-            buildBundleWithNextEoB(TEST_EOB_TIMEOUT_PATIENT_ID, 10, 10),
+            buildBundleWithNextEoB(TEST_EOB_TIMEOUT_PATIENT_ID, maxCount, maxCount),
             null
         );
         assertEquals(10, response.getEntry().size(), "This demo patient should have exactly 10 EOBs");
@@ -288,7 +271,7 @@ class BlueButtonClientTest {
      * @param qStringParams The query string parameters that must be present to generate this response
      */
     private static void createMockServerExpectation(String path, int respCode, String payload, List<Parameter> qStringParams) {
-        createMockServerExpectation(path, respCode, payload, qStringParams, 1);
+        createMockServerExpectation(path, respCode, payload, qStringParams, false);
     }
 
     /**
@@ -298,9 +281,11 @@ class BlueButtonClientTest {
      * @param respCode      The desired HTTP response code
      * @param payload       The data that the mock server should return in response to this GET request
      * @param qStringParams The query string parameters that must be present to generate this response
-     * @param delay         How long the server should wait to respond.  Useful for testing a timeout.
+     * @param timeout         Should the server wait long enough to timeout?
      */
-    private static void createMockServerExpectation(String path, int respCode, String payload, List<Parameter> qStringParams, int delay) {
+    private static void createMockServerExpectation(String path, int respCode, String payload, List<Parameter> qStringParams, boolean timeout) {
+        int delay = timeout ? timeoutDelay : 1;
+
         new MockServerClient("localhost", 8083)
             .when(
                 HttpRequest.request()
@@ -316,7 +301,7 @@ class BlueButtonClientTest {
                         new Header("Content-Type", "application/fhir+xml;charset=UTF-8")
                     )
                     .withBody(payload)
-                    .withDelay(TimeUnit.SECONDS, delay)
+                    .withDelay(TimeUnit.MILLISECONDS, delay)
             );
     }
 
@@ -406,7 +391,7 @@ class BlueButtonClientTest {
             HttpStatus.OK_200,
             getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_PATIENT_ID + "_10.xml"),
             List.of(Parameter.param("patient", TEST_PATIENT_ID),
-                Parameter.param("startIndex", "10"),
+                Parameter.param("startIndex", maxCountStr),
                 Parameter.param("excludeSAMHSA", "true"))
         );
     }
@@ -419,9 +404,9 @@ class BlueButtonClientTest {
         createMockServerExpectation(
             "/v1/fhir/ExplanationOfBenefit",
             HttpStatus.OK_200,
-            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_PATIENT_ID + "_10.xml"),
+            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_PATIENT_ID + "_" + maxCountStr + ".xml"),
             List.of(Parameter.param("patient", TEST_PATIENT_ID),
-                Parameter.param("startIndex", "10"),
+                Parameter.param("startIndex", maxCountStr),
                 Parameter.param("excludeSAMHSA", "true"))
         );
     }
@@ -435,10 +420,10 @@ class BlueButtonClientTest {
             "Not needed",
             List.of(
                 Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
-                Parameter.param("_count", "10"),
+                Parameter.param("_count", maxCountStr),
                 Parameter.param("excludeSAMHSA", "true")
             ),
-            10
+            true
         );
 
         createMockServerExpectation(
@@ -447,10 +432,10 @@ class BlueButtonClientTest {
             "Not needed",
             List.of(
                 Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
-                Parameter.param("_count", "5"),
+                Parameter.param("_count", Integer.toString(maxCount /2)),
                 Parameter.param("excludeSAMHSA", "true")
             ),
-            10
+            true
         );
     }
 
@@ -463,10 +448,10 @@ class BlueButtonClientTest {
             "Not needed",
             List.of(
                 Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
-                Parameter.param("_count", "10"),
+                Parameter.param("_count", maxCountStr),
                 Parameter.param("excludeSAMHSA", "true")
             ),
-            10
+            true
         );
 
         createMockServerExpectation(
@@ -475,10 +460,9 @@ class BlueButtonClientTest {
             getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_EOB_TIMEOUT_PATIENT_ID + ".xml"),
             List.of(
                 Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
-                Parameter.param("_count", "5"),
+                Parameter.param("_count", Integer.toString(maxCount /2)),
                 Parameter.param("excludeSAMHSA", "true")
-            ),
-            1
+            )
         );
     }
 
@@ -490,11 +474,11 @@ class BlueButtonClientTest {
             "Not needed",
             List.of(
                 Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
-                Parameter.param("_count", "10"),
-                Parameter.param("startIndex", "10"),
+                Parameter.param("_count", maxCountStr),
+                Parameter.param("startIndex", maxCountStr),
                 Parameter.param("excludeSAMHSA", "true")
             ),
-            10
+            true
         );
 
         createMockServerExpectation(
@@ -503,11 +487,11 @@ class BlueButtonClientTest {
             "Not needed",
             List.of(
                 Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
-                Parameter.param("_count", "5"),
-                Parameter.param("startIndex", "10"),
+                Parameter.param("_count", Integer.toString(maxCount /2)),
+                Parameter.param("startIndex", maxCountStr),
                 Parameter.param("excludeSAMHSA", "true")
             ),
-            10
+            true
         );
     }
 
@@ -519,11 +503,11 @@ class BlueButtonClientTest {
             "Not needed",
             List.of(
                 Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
-                Parameter.param("_count", "10"),
-                Parameter.param("startIndex", "10"),
+                Parameter.param("_count", maxCountStr),
+                Parameter.param("startIndex", maxCountStr),
                 Parameter.param("excludeSAMHSA", "true")
             ),
-            10
+            true
         );
 
         createMockServerExpectation(
@@ -532,11 +516,10 @@ class BlueButtonClientTest {
             getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_EOB_TIMEOUT_PATIENT_ID + "_10.xml"),
             List.of(
                 Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
-                Parameter.param("_count", "5"),
-                Parameter.param("startIndex", "10"),
+                Parameter.param("_count", Integer.toString(maxCount /2)),
+                Parameter.param("startIndex", maxCountStr),
                 Parameter.param("excludeSAMHSA", "true")
-            ),
-            1
+            )
         );
     }
 }
