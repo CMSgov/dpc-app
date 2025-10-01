@@ -243,3 +243,7 @@ unit-tests:
 
 .PHONY: load-tests
 load-tests: start-api-load-tests start-load-tests down-dpc-load-tests
+
+.PHONY: smoketest-local
+smoketest-local:
+	@bash ./smoketest-local.sh
