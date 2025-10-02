@@ -35,6 +35,8 @@ import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
 import jakarta.validation.ValidatorFactory;
 import org.apache.http.HttpHeaders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 
@@ -42,6 +44,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
+
+    private static final Logger logger = LoggerFactory.getLogger(DPCAPIService.class);
 
     private final DPCQueueHibernateBundle<DPCAPIConfiguration> hibernateQueueBundle = new DPCQueueHibernateBundle<>();
     private final DPCAuthHibernateBundle<DPCAPIConfiguration> hibernateAuthBundle = new DPCAuthHibernateBundle<>(List.of(
@@ -135,8 +139,9 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     private void setupCustomBundles(final Bootstrap<DPCAPIConfiguration> bootstrap) {
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
-            public DataSourceFactory getDataSourceFactory(DPCAPIConfiguration dpcAPIConfiguration) {
-                return dpcAPIConfiguration.getAuthDatabase();
+            public DataSourceFactory getDataSourceFactory(DPCAPIConfiguration configuration) {
+                logger.debug("Connecting to auth database {} at {}", configuration.getAuthDatabase().getDriverClass(), configuration.getAuthDatabase().getUrl());
+                return configuration.getAuthDatabase();
             }
 
             @Override
