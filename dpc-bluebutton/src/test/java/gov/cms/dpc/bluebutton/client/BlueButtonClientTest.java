@@ -1,5 +1,6 @@
 package gov.cms.dpc.bluebutton.client;
 
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,16 +12,13 @@ import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigRenderOptions;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
-import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.CapabilityStatement;
-import org.hl7.fhir.dstu3.model.Enumerations;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.client.MockServerClient;
@@ -44,11 +42,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class BlueButtonClientTest {
     // A random example patient (Jane Doe)
     private static final String TEST_PATIENT_ID = "-20140000008325";
-    private static final String TEST_PATIENT_MBI_HASH = "6a288931dd0a911809e977093b1257e344fb29df3f5eacb622aadade8adcc581";
     // A patient that only has a single EOB record in bluebutton
     private static final String TEST_SINGLE_EOB_PATIENT_ID = "-20140000009893";
     // A patient id that should not exist in bluebutton
     private static final String TEST_NONEXISTENT_PATIENT_ID = "31337";
+    private static final String TEST_EOB_TIMEOUT_PATIENT_ID = "-20140000008326";
 
     // Paths to test resources
     private static final String METADATA_PATH = "bb-test-data/meta.xml";
@@ -64,79 +62,23 @@ class BlueButtonClientTest {
     private static BlueButtonClient bbc;
     private static ClientAndServer mockServer;
 
+    private static int timeoutDelay;
+    private static int maxCount;
+    private static String maxCountStr;
+
     @BeforeAll
-    static void setupBlueButtonClient() throws IOException {
-        final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule<>(getClientConfig()));
+    static void setupBlueButtonClient() {
+        final BBClientConfiguration config = getClientConfig();
+
+        // Delay necessary in mock server response to force a client timeout
+        timeoutDelay = config.getTimeouts().getSocketTimeout() * 2;
+        maxCount = config.getMaxResourcesCount();
+        maxCountStr = Integer.toString(maxCount);
+
+        final Injector injector = Guice.createInjector(Stage.DEVELOPMENT, new TestModule(), new BlueButtonClientModule<>(config));
         bbc = injector.getInstance(BlueButtonClient.class);
 
         mockServer = ClientAndServer.startClientAndServer(8083);
-        createMockServerExpectation("/v1/fhir/metadata", HttpStatus.OK_200, getRawXML(METADATA_PATH), List.of());
-
-        for (String patientId : TEST_PATIENT_IDS) {
-            createMockServerExpectation(
-                    "/v1/fhir/Patient",
-                    HttpStatus.OK_200,
-                    getRawXML(SAMPLE_PATIENT_PATH_PREFIX + patientId + ".xml"),
-                    List.of(
-                            Parameter.param("_id", patientId),
-                            Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
-            );
-
-            createMockServerExpectation(
-                    "/v1/fhir/Patient",
-                    HttpStatus.OK_200,
-                    getRawXML(SAMPLE_PATIENT_PATH_PREFIX + patientId + ".xml"),
-                    Collections.singletonList(Parameter.param("_id", patientId))
-            );
-
-            createMockServerExpectation(
-                    "/v1/fhir/ExplanationOfBenefit",
-                    HttpStatus.OK_200,
-                    getRawXML(SAMPLE_EOB_PATH_PREFIX + patientId + ".xml"),
-                    List.of(
-                            Parameter.param("patient", patientId),
-                            Parameter.param("excludeSAMHSA", "true"),
-                            Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
-            );
-
-            createMockServerExpectation(
-                    "/v1/fhir/Coverage",
-                    HttpStatus.OK_200,
-                    getRawXML(SAMPLE_COVERAGE_PATH_PREFIX + patientId + ".xml"),
-                    List.of(
-                            Parameter.param("beneficiary", "Patient/" + patientId),
-                            Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
-            );
-        }
-
-        createMockServerExpectation(
-                "/v1/fhir/Patient",
-                HttpStatus.OK_200,
-                getRawXML(SAMPLE_PATIENT_PATH_PREFIX + TEST_PATIENT_ID + ".xml"),
-                Collections.singletonList(Parameter.param("identifier", DPCIdentifierSystem.MBI_HASH.getSystem() + "|" + TEST_PATIENT_MBI_HASH))
-        );
-
-        createMockServerExpectation(
-            "/v1/fhir/ExplanationOfBenefit",
-            HttpStatus.OK_200,
-            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_SINGLE_EOB_PATIENT_ID + ".xml"),
-            List.of(
-                    Parameter.param("patient", TEST_SINGLE_EOB_PATIENT_ID),
-                    Parameter.param("excludeSAMHSA", "true"),
-                    Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
-        );
-
-        // Create mocks for pages of the results
-        for(String startIndex: List.of("10", "20", "30")) {
-            createMockServerExpectation(
-                "/v1/fhir/ExplanationOfBenefit",
-                HttpStatus.OK_200,
-                getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_PATIENT_ID + "_" + startIndex + ".xml"),
-                List.of(Parameter.param("patient", TEST_PATIENT_ID),
-                        Parameter.param("startIndex", startIndex),
-                        Parameter.param("excludeSAMHSA", "true"))
-            );
-        }
     }
 
     @AfterAll
@@ -144,8 +86,17 @@ class BlueButtonClientTest {
         mockServer.stop();
     }
 
+    @BeforeEach
+    void resetExpectations() {
+        // Reset mocks and mock capability statement
+        new MockServerClient("localhost", 8083).reset();
+        createMockServerExpectation("/v1/fhir/metadata", HttpStatus.OK_200, getRawXML(METADATA_PATH), List.of());
+    }
+
     @Test
     void shouldGetFHIRFromPatientID() {
+        createBasicScenario();
+
         Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
         // Verify that the bundle has one
         assertNotNull(ret, "The demo Patient object returned from BlueButtonClient should not be null");
@@ -164,6 +115,8 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetFHIRFromPatientIDWithoutLastUpdated() {
+        createBasicScenario();
+
         Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, null, null);
         // Verify that the bundle has one
         assertNotNull(ret, "The demo Patient object returned from BlueButtonClient should not be null");
@@ -174,6 +127,8 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetFHIRFromPatientIDWithLastUpdated() {
+        createBasicScenario();
+
         Bundle ret = bbc.requestPatientFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
         // Verify that the bundle has one
         assertNotNull(ret, "The demo Patient object returned from BlueButtonClient should not be null");
@@ -184,16 +139,18 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetEOBFromPatientID() {
-        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
+        createBasicScenario();
 
+        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
         assertNotNull(response, "The demo patient should have a non-null EOB bundle");
         assertEquals(10, response.getEntry().size(), "The demo patient's first bundle should have exactly 10 EOBs");
     }
 
     @Test
     void shouldNotHaveNextBundle() {
-        Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID, TEST_LAST_UPDATED, null);
+        createBasicScenario();
 
+        Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID, TEST_LAST_UPDATED, null);
         assertNotNull(response, "The demo patient should have a non-null EOB bundle");
         assertEquals(1, response.getEntry().size(), "The demo patient should have exactly 1 EOBs");
         assertNull(response.getLink(Bundle.LINK_NEXT), "Should have no next link since all the resources are in the bundle");
@@ -201,8 +158,9 @@ class BlueButtonClientTest {
 
     @Test
     void shouldHaveNextBundle() {
-        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
+        createNextScenario();
 
+        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
         assertNotNull(response, "The demo patient should have a non-null EOB bundle");
         assertNotNull(response.getLink(Bundle.LINK_NEXT), "Should have no next link since all the resources are in the bundle");
         Bundle nextResponse = bbc.requestNextBundleFromServer(response, null);
@@ -212,8 +170,9 @@ class BlueButtonClientTest {
 
     @Test
     void shouldReturnBundleContainingOnlyEOBs() {
-        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
+        createBasicScenario();
 
+        Bundle response = bbc.requestEOBFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
         response.getEntry().forEach(entry -> assertEquals(
                 entry.getResource().getResourceType().getPath(),
                 DPCResourceType.ExplanationOfBenefit.getPath(),
@@ -223,8 +182,9 @@ class BlueButtonClientTest {
 
     @Test
     void shouldGetCoverageFromPatientID() {
-        final Bundle response = bbc.requestCoverageFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
+        createBasicScenario();
 
+        final Bundle response = bbc.requestCoverageFromServer(TEST_PATIENT_ID, TEST_LAST_UPDATED, null);
         assertNotNull(response, "The demo patient should have a non-null Coverage bundle");
         assertEquals(3, response.getEntry().size(), "The demo patient should have exactly 3 Coverage");
     }
@@ -232,7 +192,6 @@ class BlueButtonClientTest {
     @Test
     void shouldReturnCapabilitiesStatement() {
         final CapabilityStatement statement = bbc.requestCapabilityStatement();
-
         assertNotNull(statement, "Should be able to request capabilities statement.");
         // We just need a simple test to verify that the statement is returned correctly.
         assertEquals(Enumerations.PublicationStatus.ACTIVE, statement.getStatus(), "Should have ACTIVE status from test metadata");
@@ -240,6 +199,8 @@ class BlueButtonClientTest {
 
     @Test
     void shouldHandlePatientsWithOnlyOneEOB() {
+        createBasicScenario();
+
         final Bundle response = bbc.requestEOBFromServer(TEST_SINGLE_EOB_PATIENT_ID, TEST_LAST_UPDATED, null);
         assertEquals(1, response.getEntry().size(), "This demo patient should have exactly 1 EOB");
     }
@@ -259,6 +220,48 @@ class BlueButtonClientTest {
         );
     }
 
+    @Test
+    void shouldThrowOnMultipleTimeoutsGettingResource() {
+        createFetchBundleTimeOutScenario();
+
+        assertThrows(
+            FhirClientConnectionException.class,
+            () -> bbc.requestEOBFromServer(TEST_EOB_TIMEOUT_PATIENT_ID, null, null),
+            "BlueButton client should throw exception when request times out on all counts"
+        );
+    }
+
+    @Test
+    void shouldReturnOnSingleTimeoutGettingResource() {
+        createFetchBundleTimeOutAndRecoverScenario();
+
+        final Bundle response = bbc.requestEOBFromServer(TEST_EOB_TIMEOUT_PATIENT_ID, TEST_LAST_UPDATED, null);
+        assertEquals(10, response.getEntry().size(), "This demo patient should have exactly 10 EOBs");
+    }
+
+    @Test
+    void shouldThrowOnMultipleTimeoutsGettingNext() {
+        createNextBundleTimeOutScenario();
+
+        Bundle bundle = buildBundleWithNextEoB(TEST_EOB_TIMEOUT_PATIENT_ID, 10, 10);
+        assertThrows(
+            FhirClientConnectionException.class,
+            () -> bbc.requestNextBundleFromServer(bundle, null),
+            "BlueButton client should throw exception when request times out on all counts getting next bundle"
+        );
+    }
+
+    @Test
+    void shouldReturnOnSingleTimeoutGettingNext() {
+        createNextBundleTimeOutAndRecoverScenario();
+
+        Bundle response = bbc.requestNextBundleFromServer(
+            buildBundleWithNextEoB(TEST_EOB_TIMEOUT_PATIENT_ID, maxCount, maxCount),
+            null
+        );
+        assertEquals(10, response.getEntry().size(), "This demo patient should have exactly 10 EOBs");
+    }
+
     /**
      * Helper method that configures the mock server to respond to a given GET request
      *
@@ -268,23 +271,38 @@ class BlueButtonClientTest {
      * @param qStringParams The query string parameters that must be present to generate this response
      */
     private static void createMockServerExpectation(String path, int respCode, String payload, List<Parameter> qStringParams) {
+        createMockServerExpectation(path, respCode, payload, qStringParams, false);
+    }
+
+    /**
+     * Helper method that configures the mock server to respond to a given GET request
+     *
+     * @param path          The path segment of the URL that would be received by BlueButton
+     * @param respCode      The desired HTTP response code
+     * @param payload       The data that the mock server should return in response to this GET request
+     * @param qStringParams The query string parameters that must be present to generate this response
+     * @param timeout         Should the server wait long enough to timeout?
+     */
+    private static void createMockServerExpectation(String path, int respCode, String payload, List<Parameter> qStringParams, boolean timeout) {
+        int delay = timeout ? timeoutDelay : 1;
+
         new MockServerClient("localhost", 8083)
-                .when(
-                        HttpRequest.request()
-                                .withMethod("GET")
-                                .withPath(path)
-                                .withQueryStringParameters(qStringParams),
-                        Times.unlimited()
-                )
-                .respond(
-                        org.mockserver.model.HttpResponse.response()
-                                .withStatusCode(respCode)
-                                .withHeader(
-                                        new Header("Content-Type", "application/fhir+xml;charset=UTF-8")
-                                )
-                                .withBody(payload)
-                                .withDelay(TimeUnit.SECONDS, 1)
-                );
+            .when(
+                HttpRequest.request()
+                    .withMethod("GET")
+                    .withPath(path)
+                    .withQueryStringParameters(qStringParams),
+                Times.unlimited()
+            )
+            .respond(
+                org.mockserver.model.HttpResponse.response()
+                    .withStatusCode(respCode)
+                    .withHeader(
+                        new Header("Content-Type", "application/fhir+xml;charset=UTF-8")
+                    )
+                    .withBody(payload)
+                    .withDelay(TimeUnit.MILLISECONDS, delay)
+            );
     }
 
     private static BBClientConfiguration getClientConfig() {
@@ -301,13 +319,207 @@ class BlueButtonClientTest {
         return ConfigFactory.load("test.application.conf");
     }
 
-    private static String getRawXML(String path) throws IOException {
-        InputStream sampleData = BlueButtonClientTest.class.getClassLoader().getResourceAsStream(path);
+    private static String getRawXML(String path) {
+        try(InputStream sampleData = BlueButtonClientTest.class.getClassLoader().getResourceAsStream(path)) {
+            if (sampleData == null) {
+                throw new MissingResourceException("Cannot find sample requests", BlueButtonClientTest.class.getName(), path);
+            }
 
-        if (sampleData == null) {
-            throw new MissingResourceException("Cannot find sample requests", BlueButtonClientTest.class.getName(), path);
+            return new String(sampleData.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            fail("Failed opening path: %s".formatted(path));
+            return "";
+        }
+    }
+
+    // Creates a test bundle with a next link so we don't have to rely on pre-created test data
+    private static Bundle buildBundleWithNextEoB(String patientId, int count, int startIndex) {
+        String nextUrl = "http://localhost:8083/v1/fhir/ExplanationOfBenefit?patient=%s&_count=%d&startIndex=%d&excludeSAMHSA=true"
+            .formatted(patientId, count, startIndex);
+
+        return new Bundle()
+            .addLink(
+                new Bundle.BundleLinkComponent(
+                    new StringType(Bundle.LINK_NEXT),
+                    new UriType(nextUrl)
+                )
+            );
+    }
+
+    // Sets up basic Patient, EoB and Coverage mocks for our test patients
+    private void createBasicScenario() {
+        for (String patientId : TEST_PATIENT_IDS) {
+            createMockServerExpectation(
+                "/v1/fhir/Patient",
+                HttpStatus.OK_200,
+                getRawXML(SAMPLE_PATIENT_PATH_PREFIX + patientId + ".xml"),
+                List.of(
+                    Parameter.param("_id", patientId),
+                    Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
+            );
+
+            createMockServerExpectation(
+                "/v1/fhir/Patient",
+                HttpStatus.OK_200,
+                getRawXML(SAMPLE_PATIENT_PATH_PREFIX + patientId + ".xml"),
+                Collections.singletonList(Parameter.param("_id", patientId))
+            );
+
+            createMockServerExpectation(
+                "/v1/fhir/ExplanationOfBenefit",
+                HttpStatus.OK_200,
+                getRawXML(SAMPLE_EOB_PATH_PREFIX + patientId + ".xml"),
+                List.of(
+                    Parameter.param("patient", patientId),
+                    Parameter.param("excludeSAMHSA", "true"),
+                    Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
+            );
+
+            createMockServerExpectation(
+                "/v1/fhir/Coverage",
+                HttpStatus.OK_200,
+                getRawXML(SAMPLE_COVERAGE_PATH_PREFIX + patientId + ".xml"),
+                List.of(
+                    Parameter.param("beneficiary", "Patient/" + patientId),
+                    Parameter.param("_lastUpdated", TEST_LAST_UPDATED_STRING))
+            );
         }
 
-        return new String(sampleData.readAllBytes(), StandardCharsets.UTF_8);
+        // Create bundle for next link of default test patient
+        createMockServerExpectation(
+            "/v1/fhir/ExplanationOfBenefit",
+            HttpStatus.OK_200,
+            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_PATIENT_ID + "_10.xml"),
+            List.of(Parameter.param("patient", TEST_PATIENT_ID),
+                Parameter.param("startIndex", maxCountStr),
+                Parameter.param("excludeSAMHSA", "true"))
+        );
+    }
+
+    // Includes the default scenario, and then adds a mock for the "next" bundle of the default patient
+    void createNextScenario() {
+        createBasicScenario();
+
+        // Create bundle for next link of default test patient
+        createMockServerExpectation(
+            "/v1/fhir/ExplanationOfBenefit",
+            HttpStatus.OK_200,
+            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_PATIENT_ID + "_" + maxCountStr + ".xml"),
+            List.of(Parameter.param("patient", TEST_PATIENT_ID),
+                Parameter.param("startIndex", maxCountStr),
+                Parameter.param("excludeSAMHSA", "true"))
+        );
+    }
+
+    // Create mock scenario for EoB requests that should time out
+    void createFetchBundleTimeOutScenario() {
+        // All should timeout
+        createMockServerExpectation(
+            "/v1/fhir/ExplanationOfBenefit",
+            HttpStatus.OK_200,
+            "Not needed",
+            List.of(
+                Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
+                Parameter.param("_count", maxCountStr),
+                Parameter.param("excludeSAMHSA", "true")
+            ),
+            true
+        );
+
+        createMockServerExpectation(
+            "/v1/fhir/ExplanationOfBenefit",
+            HttpStatus.OK_200,
+            "Not needed",
+            List.of(
+                Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
+                Parameter.param("_count", Integer.toString(maxCount /2)),
+                Parameter.param("excludeSAMHSA", "true")
+            ),
+            true
+        );
+    }
+
+    // Create mock scenario for EoB requests that should time out and recover
+    void createFetchBundleTimeOutAndRecoverScenario() {
+        // First should timeout
+        createMockServerExpectation(
+            "/v1/fhir/ExplanationOfBenefit",
+            HttpStatus.OK_200,
+            "Not needed",
+            List.of(
+                Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
+                Parameter.param("_count", maxCountStr),
+                Parameter.param("excludeSAMHSA", "true")
+            ),
+            true
+        );
+
+        createMockServerExpectation(
+            "/v1/fhir/ExplanationOfBenefit",
+            HttpStatus.OK_200,
+            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_EOB_TIMEOUT_PATIENT_ID + ".xml"),
+            List.of(
+                Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
+                Parameter.param("_count", Integer.toString(maxCount /2)),
+                Parameter.param("excludeSAMHSA", "true")
+            )
+        );
+    }
+
+    // Mock scenario for EoB next link that should time out for all counts
+    void createNextBundleTimeOutScenario() {
+        createMockServerExpectation(
+            "/v1/fhir/ExplanationOfBenefit",
+            HttpStatus.OK_200,
+            "Not needed",
+            List.of(
+                Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
+                Parameter.param("_count", maxCountStr),
+                Parameter.param("startIndex", maxCountStr),
+                Parameter.param("excludeSAMHSA", "true")
+            ),
+            true
+        );
+
+        createMockServerExpectation(
+            "/v1/fhir/ExplanationOfBenefit",
+            HttpStatus.OK_200,
+            "Not needed",
+            List.of(
+                Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
+                Parameter.param("_count", Integer.toString(maxCount /2)),
+                Parameter.param("startIndex", maxCountStr),
+                Parameter.param("excludeSAMHSA", "true")
+            ),
+            true
+        );
+    }
+
+    // Mock scenario for EoB next link that should time out for first request and recover on second
+    void createNextBundleTimeOutAndRecoverScenario() {
+        createMockServerExpectation(
+            "/v1/fhir/ExplanationOfBenefit",
+            HttpStatus.OK_200,
+            "Not needed",
+            List.of(
+                Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
+                Parameter.param("_count", maxCountStr),
+                Parameter.param("startIndex", maxCountStr),
+                Parameter.param("excludeSAMHSA", "true")
+            ),
+            true
+        );
+
+        createMockServerExpectation(
+            "/v1/fhir/ExplanationOfBenefit",
+            HttpStatus.OK_200,
+            getRawXML(SAMPLE_EOB_PATH_PREFIX + TEST_EOB_TIMEOUT_PATIENT_ID + "_10.xml"),
+            List.of(
+                Parameter.param("patient", TEST_EOB_TIMEOUT_PATIENT_ID),
+                Parameter.param("_count", Integer.toString(maxCount /2)),
+                Parameter.param("startIndex", maxCountStr),
+                Parameter.param("excludeSAMHSA", "true")
+            )
+        );
     }
 }

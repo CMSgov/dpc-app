@@ -64,6 +64,9 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  TENV_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   deploy:
     name: Deploy
@@ -71,8 +74,6 @@ jobs:
       contents: read
       id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    container:
-      image: alpine:latest
     outputs:
       image_tag: ${{ steps.image-tag.outputs.image_tag }}
     steps:
@@ -81,15 +82,6 @@ jobs:
         run: |
           echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
           exit 1
-      - name: Install Dependencies
-        run: |
-          apk update
-          apk add git --no-cache
-          apk add openssh --no-cache
-          apk add npm --no-cache
-          apk add aws-cli --no-cache
-          apk add curl --no-cache # for using setup-tfenv-terraform action
-          apk add bash --no-cache
 
       - name: AWS Credentials (non-prod)
         if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
@@ -141,30 +133,32 @@ jobs:
           ref: ${{ inputs.ops-ref }}
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
           path: dpc-ops
-      - name: Terraform install
-        uses: cmsgov/cdap/actions/setup-tfenv-terraform@main
-        with:
-          directory: .
+      - name: Install Cosign to verify tenv and tofu installs
+        uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159  # v3.9.2
+  
+      - name: Install Tofu
+        uses: cmsgov/cdap/actions/setup-tenv@8343fb96563ce4b74c4dececee9b268f42bd4a40
+
       - name: Verify persistent plan
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}/persistent
-          terraform init
-          terraform plan -out dpc-release-${{ inputs.env }}.tfplan 2>&1
+          tofu init
+          tofu plan -out dpc-release-${{ inputs.env }}.tfplan 2>&1
       - name: Apply persistent plan
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}/persistent
-          terraform apply dpc-release-${{ inputs.env }}.tfplan
+          tofu apply dpc-release-${{ inputs.env }}.tfplan
       - name: Verify main environment plan
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
-          terraform init
-          terraform plan -var 'release_version=${{ inputs.app-version}}' \
+          tofu init
+          tofu plan -var 'release_version=${{ inputs.app-version}}' \
                          -var 'image_tag=${{ steps.image-tag.outputs.image_tag }}' \
                          -out dpc-release-${{ inputs.env }}.tfplan
       - name: Apply main environment plan
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
-          terraform apply dpc-release-${{ inputs.env }}.tfplan
+          tofu apply dpc-release-${{ inputs.env }}.tfplan
       - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
         name: Slack failure
         if: ${{ failure() }}
