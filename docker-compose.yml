@@ -86,6 +86,8 @@ services:
     depends_on:
       attribution:
         condition: service_healthy
+      aggregation:
+        condition: service_healthy
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-api:/jacoco-report
