@@ -39,9 +39,11 @@ jobs:
       # see https://grafana.com/docs/k6/latest/results-output/real-time/statsd/
       - name: Build K6 with xk6-output-statsd
         run: |
-          docker run --rm -i -u "$(id -u):$(id -g)" -v "${PWD}:/xk6" \
-            artifactory.cloud.cms.gov/docker/grafana/xk6 build \
-            --with github.com/LeonAdato/xk6-output-statsd
+          # Install xk6
+          go install go.k6.io/xk6/cmd/xk6@v1.1.5
+
+          # Build the k6 binary
+          xk6 build --with github.com/LeonAdato/xk6-output-statsd@v0.2.1
       - name: AWS Credentials (non-prod)
         uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
