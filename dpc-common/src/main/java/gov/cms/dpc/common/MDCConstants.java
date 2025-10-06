@@ -20,4 +20,8 @@ public final class MDCConstants {
     // This is the id of the patient's FHIR resource
     public static final String PATIENT_FHIR_ID = "patientFhirId";
     public static final String AGGREGATOR_ID = "aggregatorId";
+
+    // Query parameters
+    public static final String TYPE = "_type";
+    public static final String SINCE = "_since";
 }
