@@ -23,17 +23,17 @@ class LogQueryFilterUnitTest {
 	}
 
 	@Test
-	void canParseSingleParameter() {
+	void parsesSingleParameter() {
 		LogQueryFilter logQueryFilter = new LogQueryFilter(List.of("_type"));
-		logQueryFilter.filter(createRequest("/endpoint?_type=patient"));
+		logQueryFilter.filter(createRequest("/endpoint?_type=patient,coverage"));
 
 		Map<String, String> mdcMap = MDC.getCopyOfContextMap();
 		assertEquals(1, mdcMap.size());
-		assertEquals("patient", mdcMap.get("_type"));
+		assertEquals("patient,coverage", mdcMap.get("_type"));
 	}
 
 	@Test
-	void canParseMultipleParameters() {
+	void parsesMultipleParameters() {
 		LogQueryFilter logQueryFilter = new LogQueryFilter(List.of("_type", "_since"));
 		logQueryFilter.filter(createRequest("/endpoint?_type=patient&_since=01-01-2025"));
 
@@ -44,7 +44,7 @@ class LogQueryFilterUnitTest {
 	}
 
 	@Test
-	void canHandleNoParametersInUrl() {
+	void handlesNoParametersInUrl() {
 		LogQueryFilter logQueryFilter = new LogQueryFilter(List.of("_type", "_since"));
 		logQueryFilter.filter(createRequest("/endpoint"));
 
@@ -67,6 +67,16 @@ class LogQueryFilterUnitTest {
 		logQueryFilter.filter(createRequest("/endpoint?_type=patient&_since=01-01-2025"));
 
 		assertNull(MDC.getCopyOfContextMap());
+	}
+
+	@Test
+	void handlesDuplicateParameters() {
+		LogQueryFilter logQueryFilter = new LogQueryFilter(List.of("_type"));
+		logQueryFilter.filter(createRequest("/endpoint?_type=patient&_type=eob"));
+
+		Map<String, String> mdcMap = MDC.getCopyOfContextMap();
+		assertEquals(1, mdcMap.size());
+		assertEquals("patient,eob", mdcMap.get("_type"));
 	}
 
 	/**
