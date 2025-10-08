@@ -100,8 +100,13 @@ function handleJmxSmoketests(data) {
 }
 
 export function workflow(data) {
-  // // port from src/test/portal_test.yml
-   checkLoginPage(__ENV.PORTAL_HOST, ["/portal", "/portal/organizations"], "Sign in");
+//  HOST: ${HOST_URL}
+//  PORTAL_HOST: ${PORTAL_HOST}
+//  WEB_HOST: ${WEB_HOST}
+//  WEB_ADMIN_HOST: ${WEB_ADMIN_HOST}
+//  ADMIN_URL: ${ELB_URL}
+  // port from src/test/portal_test.yml
+  checkLoginPage(__ENV.PORTAL_HOST, ["/portal", "/portal/organizations"], "Sign in");
   // // port from src/test/web_test.yml
    checkLoginPage(__ENV.WEB_HOST, ["/users/sign_in", "/"], "Log in");
   // // port from src/test/web_admin_test.yml

@@ -189,7 +189,7 @@ public class SmokeTest extends AbstractJavaSamplerClient {
         }
     }
 
-    private Map<String, Reference>  submitPatientBundle(IGenericClient client, SampleResult parentSampler){
+    private Map<String, Reference> submitPatientBundle(IGenericClient client, SampleResult parentSampler){
         logger.debug("Submitting patients");
         final SampleResult patientSample = new SampleResult();
         patientSample.setSampleLabel("Patient Submission");
