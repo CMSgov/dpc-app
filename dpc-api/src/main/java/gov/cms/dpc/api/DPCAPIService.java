@@ -12,12 +12,14 @@ import gov.cms.dpc.api.cli.organizations.OrganizationCommand;
 import gov.cms.dpc.api.cli.tokens.TokenCommand;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
 import gov.cms.dpc.common.logging.filters.LogHeaderFilter;
+import gov.cms.dpc.common.logging.filters.LogQueryFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.common.utils.UrlGenerator;
@@ -98,6 +100,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         environment.jersey().register(new GenerateRequestIdFilter(false));
         environment.jersey().register(new LogResponseFilter());
         environment.jersey().register(new LogHeaderFilter(HttpHeaders.ACCEPT_ENCODING));
+        environment.jersey().register(new LogQueryFilter(List.of(MDCConstants.TYPE, MDCConstants.SINCE)));
 
         // Find Guice-aware validator and swap in for Dropwizard's default hk2 validator.
         Optional<Injector> injector = InjectorLookup.getInjector(this);
