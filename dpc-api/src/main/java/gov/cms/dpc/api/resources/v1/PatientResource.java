@@ -210,6 +210,8 @@ public class PatientResource extends AbstractPatientResource {
                              @QueryParam("_since") @NoHtml String sinceParam,
                              @Context HttpServletRequest request,
                              @HeaderParam(FHIRHeaders.PREFER_HEADER) @DefaultValue("") String preferHeader) {
+        logger.info("Exporting data for patient: {}", patientId);
+
         final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
         final UUID practitionerId = FHIRExtractors.getEntityUUID(performer.getOnBehalfOfReference().getReference());
         Practitioner practitioner = this.client
