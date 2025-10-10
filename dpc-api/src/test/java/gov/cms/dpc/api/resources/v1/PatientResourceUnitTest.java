@@ -9,6 +9,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.net.HttpHeaders;
+import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
@@ -37,7 +38,8 @@ import java.util.UUID;
 import static gov.cms.dpc.api.APITestHelpers.createProvenance;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 
@@ -56,11 +58,13 @@ class PatientResourceUnitTest {
 
     String baseUrl = "http://localhost:3002/api/v1";
     PatientResource patientResource;
+    DPCAPIConfiguration config = new DPCAPIConfiguration();
 
     @BeforeEach
     void setUp() {
         openMocks(this);
-        patientResource = new PatientResource(attributionClient, fhirValidator, dataService, bfdClient, baseUrl);
+        config.setLookBackExemptOrgs(List.of());
+        patientResource = new PatientResource(attributionClient, fhirValidator, dataService, bfdClient, baseUrl, config);
     }
 
     @Test

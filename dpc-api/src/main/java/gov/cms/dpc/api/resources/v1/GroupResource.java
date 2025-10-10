@@ -23,7 +23,6 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
-import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
@@ -35,7 +34,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
@@ -57,10 +55,6 @@ public class GroupResource extends AbstractGroupResource {
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
     static final String SYNTHETIC_BENE_ID = "-19990000000001";
 
-    // The delimiter for the '_types' list query param.
-    static final String LIST_DELIMITER = ",";
-
-    private final IGenericClient client;
     private final String baseURL;
     private final BlueButtonClient bfdClient;
     private final DPCAPIConfiguration config;
@@ -68,8 +62,8 @@ public class GroupResource extends AbstractGroupResource {
 
     @Inject
     public GroupResource(DataService dataService, @Named("attribution") IGenericClient client, @APIV1 String baseURL, BlueButtonClient bfdClient, DPCAPIConfiguration config) {
+        super(client);
         this.dataService = dataService;
-        this.client = client;
         this.baseURL = baseURL;
         this.bfdClient = bfdClient;
         this.config = config;
@@ -303,7 +297,7 @@ public class GroupResource extends AbstractGroupResource {
         final UUID orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
 
         // Grab org and provider NPIs
-        final String orgNPI = fetchOrganizationNPI(new IdType("Organization", orgID.toString()));
+        final String orgNPI = getOrgNPI(organizationPrincipal);
         final String providerNPI = FHIRExtractors.getAttributedNPI(group);
 
         // Handle the _type and since query parameters
@@ -336,50 +330,6 @@ public class GroupResource extends AbstractGroupResource {
                 .execute();
     }
 
-    /**
-     * Convert the '_types' {@link QueryParam} to a list of resources to add to the job. Handle the empty case,
-     * by returning all valid resource types.
-     *
-     * @param resourcesListParam - {@link String} of comma separated values corresponding to FHIR {@link DPCResourceType}s
-     * @return - A list of {@link DPCResourceType} to return for this request.
-     */
-    private List<DPCResourceType> handleTypeQueryParam(String resourcesListParam) {
-        // If the query param is omitted, the FHIR spec states that all resources should be returned
-        if (resourcesListParam == null || resourcesListParam.isEmpty()) {
-            return JobQueueBatch.validResourceTypes;
-        }
-
-        final var resources = new ArrayList<DPCResourceType>();
-        for (String queryResource : resourcesListParam.split(LIST_DELIMITER, -1)) {
-            final var foundResourceType = matchResourceType(queryResource);
-            if (foundResourceType.isEmpty()) {
-                throw new BadRequestException(String.format("Unsupported resource name in the '_type' query parameter: %s", queryResource));
-            }
-            resources.add(foundResourceType.get());
-        }
-        return resources;
-    }
-
-    /**
-     * Check the query parameters of the request. If valid, return empty. If not valid,
-     * return an error response with an {@link OperationOutcome} in the body.
-     *
-     * @param outputFormat param to check
-     */
-    private static void checkExportRequest(String outputFormat, String headerPrefer) {
-        // _outputFormat only supports FHIR_NDJSON, APPLICATION_NDJSON, NDJSON
-        if (!StringUtils.equalsAnyIgnoreCase(outputFormat, FHIR_NDJSON, APPLICATION_NDJSON, NDJSON)) {
-            throw new BadRequestException("'_outputFormat' query parameter must be '" + FHIR_NDJSON + "', '" + APPLICATION_NDJSON + "', or '" + NDJSON +"' ");
-        }
-        if (headerPrefer == null || StringUtils.isEmpty(headerPrefer)) {
-            throw new BadRequestException("The 'Prefer' header must be '" + FHIRHeaders.PREFER_RESPOND_ASYNC + "'");
-        }
-        if (!headerPrefer.equals(FHIRHeaders.PREFER_RESPOND_ASYNC)) {
-            throw new BadRequestException("The 'Prefer' header must be '" + FHIRHeaders.PREFER_RESPOND_ASYNC + "'");
-        }
-
-    }
-
     private List<String> fetchPatientMBIs(Group group) {
         if (group.getMember().isEmpty()) {
             throw new WebApplicationException("Cannot perform export with no beneficiaries", Response.Status.NOT_ACCEPTABLE);
@@ -405,16 +355,6 @@ public class GroupResource extends AbstractGroupResource {
                 .map(entry -> (Patient) entry.getResource())
                 .map(FHIRExtractors::getPatientMBI)
                 .collect(Collectors.toList());
-    }
-
-    private String fetchOrganizationNPI(IdType orgID) {
-        Organization organization = this.client
-                .read()
-                .resource(Organization.class)
-                .withId(orgID)
-                .encodedJson()
-                .execute();
-        return FHIRExtractors.findMatchingIdentifier(organization.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
     }
 
     private Group fetchGroup(IdType groupID) {
@@ -481,19 +421,5 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException("Could not find provider defined in provenance header", HttpStatus.SC_UNPROCESSABLE_ENTITY);
         }
 
-    }
-
-    /**
-     * Convert a single resource type in a query param into a {@link DPCResourceType}.
-     *
-     * @param queryResourceType - The text from the query param
-     * @return If match is found a {@link DPCResourceType}
-     */
-    private static Optional<DPCResourceType> matchResourceType(String queryResourceType) {
-        final var canonical = queryResourceType.trim().toUpperCase();
-        // Implementation Note: resourceTypeMap is a small list <3 so hashing isn't faster
-        return JobQueueBatch.validResourceTypes.stream()
-                .filter(validResource -> validResource.toString().equalsIgnoreCase(canonical))
-                .findFirst();
     }
 }

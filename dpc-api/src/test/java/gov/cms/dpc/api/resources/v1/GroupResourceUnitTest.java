@@ -265,7 +265,7 @@ public class GroupResourceUnitTest {
         when(readExec.execute()).thenReturn(group);
 
         IReadExecutable<Organization> readExec2 = mock(IReadExecutable.class);
-        when(attributionClient.read().resource(Organization.class).withId(new IdType("Organization", orgId.toString())).encodedJson()).thenReturn(readExec2);
+        when(attributionClient.read().resource(Organization.class).withId(orgId.toString()).encodedJson()).thenReturn(readExec2);
         when(readExec2.execute()).thenReturn(organization);
 
         //Mock get bundle
@@ -339,7 +339,7 @@ public class GroupResourceUnitTest {
         when(readExec.execute()).thenReturn(group);
 
         IReadExecutable<Organization> readExec2 = mock(IReadExecutable.class);
-        when(attributionClient.read().resource(Organization.class).withId(new IdType("Organization", orgId.toString())).encodedJson()).thenReturn(readExec2);
+        when(attributionClient.read().resource(Organization.class).withId(orgId.toString()).encodedJson()).thenReturn(readExec2);
         when(readExec2.execute()).thenReturn(organization);
 
         //Mock fetching request Url
@@ -450,7 +450,7 @@ public class GroupResourceUnitTest {
                 .thenReturn(fakeGroup);
 
         IReadExecutable<Organization> readExec2 = mock(IReadExecutable.class);
-        when(attributionClient.read().resource(Organization.class).withId(new IdType("Organization", orgId.toString())).encodedJson()).thenReturn(readExec2);
+        when(attributionClient.read().resource(Organization.class).withId(orgId.toString()).encodedJson()).thenReturn(readExec2);
         when(readExec2.execute()).thenReturn(organization);
 
         IOperationUntypedWithInput<Bundle> operationInput = mock(IOperationUntypedWithInput.class);

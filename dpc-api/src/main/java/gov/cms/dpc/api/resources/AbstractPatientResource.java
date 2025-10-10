@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.annotations.FHIR;
@@ -16,10 +17,10 @@ import java.util.UUID;
 
 @Path("/Patient")
 @FHIR
-public abstract class AbstractPatientResource extends AbstractResourceWithSince {
+public abstract class AbstractPatientResource extends AbstractResourceWithExport {
 
-    protected AbstractPatientResource() {
-        // Not used
+    protected AbstractPatientResource(IGenericClient client) {
+        super(client);
     }
 
     @GET
@@ -44,6 +45,17 @@ public abstract class AbstractPatientResource extends AbstractResourceWithSince 
                                         @QueryParam("_since") @NoHtml String since,
                                         HttpServletRequest request,
                                         String preferHeader);
+
+    @GET
+    @Path("/{patientID}/export")
+    public abstract Response export(OrganizationPrincipal organization,
+                                    @Valid @Profiled Provenance attestation,
+                                    UUID patientId,
+                                    @QueryParam("_since") @NoHtml String since,
+                                    HttpServletRequest request,
+                                    String preferHeader,
+                                    @QueryParam("_type") @NoHtml String resourceTypes,
+                                    @QueryParam("_outputFormat") @NoHtml String outputFormat);
 
     @DELETE
     @Path("/{patientID}")
