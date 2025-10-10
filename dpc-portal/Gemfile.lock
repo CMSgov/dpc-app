@@ -385,7 +385,7 @@ GEM
       nio4r (~> 2.0)
     raabro (1.4.0)
     racc (1.8.1)
-    rack (3.1.16)
+    rack (3.2.2)
     rack-oauth2 (2.2.1)
       activesupport
       attr_required
@@ -640,7 +640,7 @@ DEPENDENCIES
   pry
   pry-nav
   puma (~> 6.4.3)
-  rack (>= 3.1.14)
+  rack (>= 3.2.2)
   rack-session (>= 2.1.1)
   rails-controller-testing
   railties (~> 8.0.2.1)
