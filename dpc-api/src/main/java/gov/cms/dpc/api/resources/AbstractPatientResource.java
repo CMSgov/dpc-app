@@ -47,7 +47,7 @@ public abstract class AbstractPatientResource extends AbstractResourceWithExport
                                         String preferHeader);
 
     @GET
-    @Path("/{patientID}/export")
+    @Path("/{patientID}/$export")
     public abstract Response export(OrganizationPrincipal organization,
                                     @Valid @Profiled Provenance attestation,
                                     UUID patientId,

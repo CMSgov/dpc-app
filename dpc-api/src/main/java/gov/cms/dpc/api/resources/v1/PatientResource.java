@@ -262,7 +262,7 @@ public class PatientResource extends AbstractPatientResource {
 
     @GET
     @FHIR
-    @Path("/{patientID}/$everything")
+    @Path("/{patientID}/$export")
     @PathAuthorizer(type = DPCResourceType.Patient, pathParam = "patientID")
     @Timed
     @ExceptionMetered
@@ -270,10 +270,10 @@ public class PatientResource extends AbstractPatientResource {
         notes = "FHIR export operation which initiates a bulk data export for the given Patient")
     public Response export(OrganizationPrincipal organization,
                            @Valid @Profiled @ProvenanceHeader Provenance provenance,
-                           UUID patientId,
+                           @PathParam("patientID") UUID patientId,
                            @QueryParam("_since") @NoHtml String sinceParam,
-                           HttpServletRequest request,
-                           String preferHeader,
+                           @Context HttpServletRequest request,
+                           @HeaderParam(FHIRHeaders.PREFER_HEADER) String preferHeader,
                            @QueryParam("_type") @NoHtml String resourceTypes,
                            @QueryParam("_outputFormat") @NoHtml String outputFormat
     ) {
