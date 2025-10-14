@@ -704,6 +704,93 @@ class PatientResourceUnitTest {
         assertEquals(jobId.toString(), returnedJobId);
     }
 
+    @Test
+    void testExportHandlesMissingPerformer() {
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+        String practitionerNPI = NPIUtil.generateNPI();
+        Practitioner practitioner = APITestHelpers.createPractitionerResource(practitionerNPI, APITestHelpers.ORGANIZATION_ID);
+        String mbi = MBIUtil.generateMBI();
+        Patient patient = APITestHelpers.createPatientResource(mbi, APITestHelpers.ORGANIZATION_ID);
+        Provenance provenance = APITestHelpers.createProvenance(APITestHelpers.ORGANIZATION_ID, practitioner.getId(), List.of(patient.getId()));
+
+        String url = "http://localhost/fake";
+        String ip = "127.0.0.1";
+        HttpServletRequest httpServletRequest = mockHttpServletRequest(url, ip);
+
+        // Performer search should return null
+        IReadExecutable<Practitioner> readExec = mock(IReadExecutable.class);
+        when(attributionClient.read().resource(Practitioner.class).withId(practitioner.getId()).encodedJson()).thenReturn(readExec);
+        when(readExec.execute()).thenReturn(null);
+
+        WebApplicationException exception = assertThrows(WebApplicationException.class, () -> {
+            patientResource.export(
+                organizationPrincipal,
+                provenance,
+                UUID.fromString(patient.getId()),
+                null,
+                httpServletRequest,
+                FHIRHeaders.PREFER_RESPOND_ASYNC,
+                null,
+                FHIRMediaTypes.FHIR_NDJSON
+            );
+        });
+        assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus());
+    }
+
+    @Test
+    void testExportHandlesSmokeTest() {
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+        String practitionerNPI = NPIUtil.generateNPI();
+        Practitioner practitioner = APITestHelpers.createPractitionerResource(practitionerNPI, APITestHelpers.ORGANIZATION_ID);
+        String mbi = MBIUtil.generateMBI();
+        Patient patient = APITestHelpers.createPatientResource(mbi, APITestHelpers.ORGANIZATION_ID);
+        Provenance provenance = APITestHelpers.createProvenance(APITestHelpers.ORGANIZATION_ID, practitioner.getId(), List.of(patient.getId()));
+
+        String url = "http://localhost/fake";
+        String ip = "127.0.0.1";
+        HttpServletRequest httpServletRequest = mockHttpServletRequest(url, ip);
+        mockPractitionerRead(practitioner);
+        mockPatientRead(patient);
+        mockOrgRead(organizationPrincipal.getOrganization());
+        mockBFDClientTransactionTime();
+
+        // Make our org lookback exempt
+        config.setLookBackExemptOrgs(List.of(APITestHelpers.ORGANIZATION_ID));
+
+        // Finish mocking
+        UUID jobId = UUID.randomUUID();
+        when(dataService.createJob(
+            eq(UUID.fromString(APITestHelpers.ORGANIZATION_ID)),
+            eq(APITestHelpers.ORGANIZATION_NPI),
+            eq(practitionerNPI),
+            eq(List.of(mbi)),
+            eq(JobQueueBatch.validResourceTypes),
+            eq(null),
+            any(),
+            eq(ip),
+            eq(url),
+            eq(false),
+            eq(true)
+        )).thenReturn(jobId);
+
+        Response response = patientResource.export(
+            organizationPrincipal,
+            provenance,
+            UUID.fromString(patient.getId()),
+            null,
+            httpServletRequest,
+            FHIRHeaders.PREFER_RESPOND_ASYNC,
+            null,
+            FHIRMediaTypes.FHIR_NDJSON
+        );
+
+        URI contentLocation = (URI) response.getHeaders().getFirst(HttpHeaders.CONTENT_LOCATION);
+        String[] pathTokens = contentLocation.getPath().split("/");
+        String returnedJobId = pathTokens[pathTokens.length-1];
+
+        assertEquals(jobId.toString(), returnedJobId);
+    }
+
     private void mockPractitionerRead(Practitioner practitioner) {
         IReadExecutable<Practitioner> readExec = mock(IReadExecutable.class);
         when(attributionClient.read().resource(Practitioner.class).withId(practitioner.getId()).encodedJson()).thenReturn(readExec);
