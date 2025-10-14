@@ -88,7 +88,6 @@ public abstract class AbstractResourceWithExport {
         if (!headerPrefer.equals(FHIRHeaders.PREFER_RESPOND_ASYNC)) {
             throw new BadRequestException("The 'Prefer' header must be '" + FHIRHeaders.PREFER_RESPOND_ASYNC + "'");
         }
-
     }
 
     /**
