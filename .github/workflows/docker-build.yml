@@ -102,7 +102,7 @@ jobs:
           path: ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
           retention-days: 1
 
-  docker_build_java: # builds dpc-api, dpc-attribution, dpc-aggregation, and dpc-consent
+  docker_build_java: # builds dpc-api, dpc-attribution, and dpc-aggregation
     permissions:
       contents: read
       id-token: write
@@ -131,9 +131,6 @@ jobs:
           export PATH=$PATH:~/.local/bin
           make ci-app
       # add extra commands to log docker containers during failure
-      - name: Consent Logs
-        if: ${{ failure() && steps.api-build.outcome == 'failure' }}
-        run: docker logs start-v1-app-consent-1
       - name: Attribution Logs
         if: ${{ failure() && steps.api-build.outcome == 'failure' }}
         run: docker logs start-v1-app-attribution-1
@@ -145,38 +142,30 @@ jobs:
         run: docker logs start-v1-app-api-1
 
 
-      - name: gzip image (1 of 4) - API
+      - name: gzip image (1 of 3) - API
         run: docker save dpc-api:latest | gzip > ${{ runner.temp }}/dpc_api_latest.tar.gz
-      - name: gzip image (2 of 4) - Attribution
+      - name: gzip image (2 of 3) - Attribution
         run: docker save dpc-attribution:latest | gzip > ${{ runner.temp }}/dpc_attribution_latest.tar.gz
-      - name: gzip image (3 of 4) - Aggregation
+      - name: gzip image (3 of 3) - Aggregation
         run: docker save dpc-aggregation:latest | gzip > ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
-      - name: gzip image (4 of 4) - Consent
-        run: docker save dpc-consent:latest | gzip > ${{ runner.temp }}/dpc_consent_latest.tar.gz
 
-      - name: upload tar artifact (1 of 4) - API
+      - name: upload tar artifact (1 of 3) - API
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dpc-api
           path: ${{ runner.temp }}/dpc_api_latest.tar.gz
           retention-days: 1
-      - name: upload tar artifact (2 of 4) - Attribution
+      - name: upload tar artifact (2 of 3) - Attribution
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dpc-attribution
           path: ${{ runner.temp }}/dpc_attribution_latest.tar.gz
           retention-days: 1
-      - name: upload tar artifact (3 of 4) - Aggregation
+      - name: upload tar artifact (3 of 3) - Aggregation
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dpc-aggregation
           path: ${{ runner.temp }}/dpc_aggregation_latest.tar.gz
-          retention-days: 1
-      - name: upload tar artifact (4 of 4) - Consent
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: dpc-consent
-          path: ${{ runner.temp }}/dpc_consent_latest.tar.gz
           retention-days: 1
 
   docker_push_all_apps:
@@ -186,7 +175,7 @@ jobs:
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     strategy:
       matrix:
-        ecr_repository: [ web-portal, web-admin, web, api, attribution, aggregation, consent ]
+        ecr_repository: [ web-portal, web-admin, web, api, attribution, aggregation ]
     env:
       ECR_REPOSITORY: ${{ matrix.ecr_repository }}
     needs: [ docker_build_rails_apps, docker_build_java, generate_docker_tag ]
