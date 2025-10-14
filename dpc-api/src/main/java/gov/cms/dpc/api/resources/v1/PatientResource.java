@@ -268,7 +268,7 @@ public class PatientResource extends AbstractPatientResource {
     @ExceptionMetered
     @ApiOperation(value = "Begin Patient export request", tags = {"Patient", "Bulk Data"},
         notes = "FHIR export operation which initiates a bulk data export for the given Patient")
-    public Response export(OrganizationPrincipal organization,
+    public Response export(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
                            @Valid @Profiled @ProvenanceHeader Provenance provenance,
                            @PathParam("patientID") UUID patientId,
                            @QueryParam("_since") @NoHtml String sinceParam,
