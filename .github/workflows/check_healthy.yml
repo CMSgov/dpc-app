@@ -22,8 +22,6 @@ jobs:
             script_params: attribution attribution attribution backend v9
           - service: aggregation
             script_params: aggregation aggregation aggregation backend v9
-          - service: consent
-            script_params: consent consent consent backend v9
           - service: web
             script_params: web-v2-1 web web frontend v9
           - service: admin
