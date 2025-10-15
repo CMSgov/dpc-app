@@ -38,7 +38,7 @@ gem 'omniauth-github', '~> 2.0.0'
 gem 'octokit' # can be removed once we move past github omniauth
 gem 'fhir_models'
 gem 'sidekiq_alive', '~> 2.4'
-gem 'rack', '>= 3.2.2'
+gem 'rack', '>= 3.2.3'
 gem 'rack-session', '>= 2.1.1'
 gem 'kaminari'
 gem 'active_model_serializers'
