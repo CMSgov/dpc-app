@@ -311,7 +311,7 @@ GEM
     multi_json (1.15.0)
     multi_xml (0.7.1)
       bigdecimal (~> 3.1)
-    mustermann (3.0.3)
+    mustermann (3.0.4)
       ruby2_keywords (~> 0.0.1)
     net-http (0.4.1)
       uri
@@ -385,7 +385,7 @@ GEM
       nio4r (~> 2.0)
     raabro (1.4.0)
     racc (1.8.1)
-    rack (3.2.2)
+    rack (3.2.3)
     rack-oauth2 (2.2.1)
       activesupport
       attr_required
@@ -393,7 +393,7 @@ GEM
       faraday-follow_redirects
       json-jwt (>= 1.11.0)
       rack (>= 2.1.0)
-    rack-protection (4.1.0)
+    rack-protection (4.2.1)
       base64 (>= 0.1.0)
       logger (>= 1.6.0)
       rack (>= 3.0.0, < 4)
@@ -503,11 +503,11 @@ GEM
       simplecov-html (~> 0.10.0)
     simplecov-html (0.10.2)
     simpleidn (0.2.3)
-    sinatra (4.1.0)
+    sinatra (4.2.1)
       logger (>= 1.6.0)
       mustermann (~> 3.0)
       rack (>= 3.0.0, < 4)
-      rack-protection (= 4.1.0)
+      rack-protection (= 4.2.1)
       rack-session (>= 2.0.0, < 3)
       tilt (~> 2.0)
     snaky_hash (2.0.1)
@@ -640,7 +640,7 @@ DEPENDENCIES
   pry
   pry-nav
   puma (~> 6.4.3)
-  rack (>= 3.2.2)
+  rack (>= 3.2.3)
   rack-session (>= 2.1.1)
   rails-controller-testing
   railties (~> 8.0.2.1)
@@ -655,7 +655,7 @@ DEPENDENCIES
   sassc-rails (>= 2.1.2)
   selenium-webdriver
   simplecov (<= 0.17)
-  sinatra (~> 4)
+  sinatra (>= 4.2.0)
   solid_queue (~> 1.2)
   spring
   spring-watcher-listen (~> 2.1.0)
