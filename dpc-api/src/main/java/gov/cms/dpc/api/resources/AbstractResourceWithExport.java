@@ -95,7 +95,7 @@ public abstract class AbstractResourceWithExport {
      * @param organizationPrincipal Passed in the request.
      * @return NPI
      */
-    protected String getOrgNPI(OrganizationPrincipal organizationPrincipal) {
+    protected String getOrganizationNPI(OrganizationPrincipal organizationPrincipal) {
         final UUID orgId = organizationPrincipal.getID();
         final Organization org = this.client
             .read()

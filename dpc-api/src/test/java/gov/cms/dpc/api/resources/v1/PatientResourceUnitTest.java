@@ -566,7 +566,7 @@ class PatientResourceUnitTest {
             patientResource.everything(organizationPrincipal, provenance, patientId, since, request, null);
             fail("This call is supposed to fail.");
         } catch (WebApplicationException exc) {
-            assertEquals(HttpStatus.UNAUTHORIZED_401, exc.getResponse().getStatus());
+            assertEquals(HttpStatus.BAD_REQUEST_400, exc.getResponse().getStatus());
         }
     }
 
@@ -734,7 +734,7 @@ class PatientResourceUnitTest {
                 FHIRMediaTypes.FHIR_NDJSON
             );
         });
-        assertEquals(HttpStatus.UNAUTHORIZED_401, exception.getResponse().getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus());
     }
 
     @Test

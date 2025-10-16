@@ -99,7 +99,7 @@ class AbstractResourceWithExportUnitTest {
 	}
 
 	@Test
-	void getOrgNPI_works() {
+	void getOrganizationNPI_works() {
 		OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
 		Organization org = organizationPrincipal.getOrganization();
 
@@ -107,7 +107,7 @@ class AbstractResourceWithExportUnitTest {
 		when(client.read().resource(Organization.class).withId(org.getId()).encodedJson()).thenReturn(readExec);
 		when(readExec.execute()).thenReturn(org);
 
-		assertEquals(APITestHelpers.ORGANIZATION_NPI, resourceWithExport.getOrgNPI(organizationPrincipal));
+		assertEquals(APITestHelpers.ORGANIZATION_NPI, resourceWithExport.getOrganizationNPI(organizationPrincipal));
 	}
 
 	/**

@@ -217,11 +217,11 @@ public class PatientResource extends AbstractPatientResource {
                              @HeaderParam(FHIRHeaders.PREFER_HEADER) @DefaultValue("") String preferHeader) {
         logger.info("Exporting data for patient: {}", patientId);
 
-        final String practitionerNPI = getOnBehalfOfNPI(provenance);
+        final String providerNPI = getOnBehalfOfNPI(provenance);
         final String patientMbi = getMBI(patientId);
         final OffsetDateTime since = handleSinceQueryParam(sinceParam);
         final UUID orgId = organization.getID();
-        final String orgNPI = getOrgNPI(organization);
+        final String orgNPI = getOrganizationNPI(organization);
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
         final String requestUrl = APIHelpers.fetchRequestUrl(request);
 
@@ -231,7 +231,7 @@ public class PatientResource extends AbstractPatientResource {
             final UUID jobID = this.dataService.createJob(
                 orgId,
                 orgNPI,
-                practitionerNPI,
+                providerNPI,
                 List.of(patientMbi),
                 List.of(DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Coverage),
                 since,
@@ -244,7 +244,7 @@ public class PatientResource extends AbstractPatientResource {
             return Response.status(Response.Status.ACCEPTED).contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
         } else {
             // Submit synchronous job
-            Resource result = dataService.retrieveData(orgId, orgNPI, practitionerNPI, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
+            Resource result = dataService.retrieveData(orgId, orgNPI, providerNPI, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
                 requestingIP, requestUrl, DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Coverage);
             if (DPCResourceType.Bundle.getPath().equals(result.getResourceType().getPath())) {
                 // A Bundle containing patient data was returned
@@ -279,14 +279,14 @@ public class PatientResource extends AbstractPatientResource {
     ) {
         final String eventTime = SplunkTimestamp.getSplunkTimestamp();
 
-        final String practitionerNPI = getOnBehalfOfNPI(provenance);
+        final String providerNPI = getOnBehalfOfNPI(provenance);
         final String mbi = getMBI(patientId);
         final OffsetDateTime since = handleSinceQueryParam(sinceParam);
         final UUID orgID = organization.getID();
-        final String orgNPI = getOrgNPI(organization);
+        final String orgNPI = getOrganizationNPI(organization);
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
         final String requestUrl = APIHelpers.fetchRequestUrl(request);
-        final List<DPCResourceType> resources = handleTypeQueryParam(resourceTypes);
+        final List<DPCResourceType> resourceTypesList = handleTypeQueryParam(resourceTypes);
         final boolean isSmoke = config.getLookBackExemptOrgs().contains(orgID.toString());
 
         checkExportRequest(outputFormat, preferHeader);
@@ -294,9 +294,9 @@ public class PatientResource extends AbstractPatientResource {
         final UUID jobID = this.dataService.createJob(
             orgID,
             orgNPI,
-            practitionerNPI,
+            providerNPI,
             List.of(mbi),
-            resources,
+            resourceTypesList,
             since,
             APIHelpers.fetchTransactionTime(bfdClient),
             requestingIP,
@@ -305,7 +305,7 @@ public class PatientResource extends AbstractPatientResource {
             isSmoke
         );
 
-        final String resourcesRequested = resources.stream().map(DPCResourceType::getPath).collect(Collectors.joining(";"));
+        final String resourcesRequested = resourceTypesList.stream().map(DPCResourceType::getPath).collect(Collectors.joining(";"));
         logger.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},orgId={},patientId={},resourcesRequested={},queueSubmitTime={}",
             "/Patient/$export",jobID, orgID, patientId, resourcesRequested, eventTime);
         return Response.status(Response.Status.ACCEPTED).contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
@@ -437,7 +437,7 @@ public class PatientResource extends AbstractPatientResource {
 
         if (practitioner == null) {
             // Is this the best code to be throwing here?
-            throw new WebApplicationException(HttpStatus.UNAUTHORIZED_401);
+            throw new WebApplicationException("Provider not found.", HttpStatus.BAD_REQUEST_400);
         }
 
         return FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
