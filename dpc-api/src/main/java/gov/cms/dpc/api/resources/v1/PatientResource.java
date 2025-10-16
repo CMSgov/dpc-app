@@ -436,7 +436,6 @@ public class PatientResource extends AbstractPatientResource {
             .execute();
 
         if (practitioner == null) {
-            // Is this the best code to be throwing here?
             throw new WebApplicationException("Provider not found.", HttpStatus.BAD_REQUEST_400);
         }
 
