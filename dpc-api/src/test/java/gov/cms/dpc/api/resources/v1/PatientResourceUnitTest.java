@@ -9,13 +9,18 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.net.HttpHeaders;
+import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRHeaders;
+import gov.cms.dpc.fhir.FHIRMediaTypes;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.service.DataService;
+import gov.cms.dpc.testing.utils.MBIUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -28,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
 
+import java.net.URI;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -37,7 +43,8 @@ import java.util.UUID;
 import static gov.cms.dpc.api.APITestHelpers.createProvenance;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 
@@ -56,11 +63,13 @@ class PatientResourceUnitTest {
 
     String baseUrl = "http://localhost:3002/api/v1";
     PatientResource patientResource;
+    DPCAPIConfiguration config = new DPCAPIConfiguration();
 
     @BeforeEach
     void setUp() {
         openMocks(this);
-        patientResource = new PatientResource(attributionClient, fhirValidator, dataService, bfdClient, baseUrl);
+        config.setLookBackExemptOrgs(List.of());
+        patientResource = new PatientResource(attributionClient, fhirValidator, dataService, bfdClient, baseUrl, config);
     }
 
     @Test
@@ -557,7 +566,7 @@ class PatientResourceUnitTest {
             patientResource.everything(organizationPrincipal, provenance, patientId, since, request, null);
             fail("This call is supposed to fail.");
         } catch (WebApplicationException exc) {
-            assertEquals(HttpStatus.UNAUTHORIZED_401, exc.getResponse().getStatus());
+            assertEquals(HttpStatus.BAD_REQUEST_400, exc.getResponse().getStatus());
         }
     }
 
@@ -642,6 +651,180 @@ class PatientResourceUnitTest {
         IBaseOperationOutcome actualResponse = patientResource.validatePatient(organizationPrincipal, params);
 
         assertNotNull(actualResponse);
+    }
+
+    @Test
+    void testExport() {
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+        String practitionerNPI = NPIUtil.generateNPI();
+        Practitioner practitioner = APITestHelpers.createPractitionerResource(practitionerNPI, APITestHelpers.ORGANIZATION_ID);
+        String mbi = MBIUtil.generateMBI();
+        Patient patient = APITestHelpers.createPatientResource(mbi, APITestHelpers.ORGANIZATION_ID);
+        Provenance provenance = APITestHelpers.createProvenance(APITestHelpers.ORGANIZATION_ID, practitioner.getId(), List.of(patient.getId()));
+
+        String url = "http://localhost/fake";
+        String ip = "127.0.0.1";
+        HttpServletRequest httpServletRequest = mockHttpServletRequest(url, ip);
+        mockPractitionerRead(practitioner);
+        mockPatientRead(patient);
+        mockOrgRead(organizationPrincipal.getOrganization());
+        mockBFDClientTransactionTime();
+
+        // Finish mocking
+        UUID jobId = UUID.randomUUID();
+        when(dataService.createJob(
+            eq(UUID.fromString(APITestHelpers.ORGANIZATION_ID)),
+            eq(APITestHelpers.ORGANIZATION_NPI),
+            eq(practitionerNPI),
+            eq(List.of(mbi)),
+            eq(JobQueueBatch.validResourceTypes),
+            eq(null),
+            any(),
+            eq(ip),
+            eq(url),
+            eq(false),
+            eq(false)
+        )).thenReturn(jobId);
+
+        Response response = patientResource.export(
+            organizationPrincipal,
+            provenance,
+            UUID.fromString(patient.getId()),
+            null,
+            httpServletRequest,
+            FHIRHeaders.PREFER_RESPOND_ASYNC,
+            null,
+            FHIRMediaTypes.FHIR_NDJSON
+        );
+
+        URI contentLocation = (URI) response.getHeaders().getFirst(HttpHeaders.CONTENT_LOCATION);
+        String[] pathTokens = contentLocation.getPath().split("/");
+        String returnedJobId = pathTokens[pathTokens.length-1];
+
+        assertEquals(jobId.toString(), returnedJobId);
+    }
+
+    @Test
+    void testExportHandlesMissingPerformer() {
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+        String practitionerNPI = NPIUtil.generateNPI();
+        Practitioner practitioner = APITestHelpers.createPractitionerResource(practitionerNPI, APITestHelpers.ORGANIZATION_ID);
+        String mbi = MBIUtil.generateMBI();
+        Patient patient = APITestHelpers.createPatientResource(mbi, APITestHelpers.ORGANIZATION_ID);
+        Provenance provenance = APITestHelpers.createProvenance(APITestHelpers.ORGANIZATION_ID, practitioner.getId(), List.of(patient.getId()));
+
+        String url = "http://localhost/fake";
+        String ip = "127.0.0.1";
+        HttpServletRequest httpServletRequest = mockHttpServletRequest(url, ip);
+
+        // Performer search should return null
+        IReadExecutable<Practitioner> readExec = mock(IReadExecutable.class);
+        when(attributionClient.read().resource(Practitioner.class).withId(practitioner.getId()).encodedJson()).thenReturn(readExec);
+        when(readExec.execute()).thenReturn(null);
+
+        WebApplicationException exception = assertThrows(WebApplicationException.class, () -> {
+            patientResource.export(
+                organizationPrincipal,
+                provenance,
+                UUID.fromString(patient.getId()),
+                null,
+                httpServletRequest,
+                FHIRHeaders.PREFER_RESPOND_ASYNC,
+                null,
+                FHIRMediaTypes.FHIR_NDJSON
+            );
+        });
+        assertEquals(HttpStatus.BAD_REQUEST_400, exception.getResponse().getStatus());
+    }
+
+    @Test
+    void testExportHandlesSmokeTest() {
+        OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+        String practitionerNPI = NPIUtil.generateNPI();
+        Practitioner practitioner = APITestHelpers.createPractitionerResource(practitionerNPI, APITestHelpers.ORGANIZATION_ID);
+        String mbi = MBIUtil.generateMBI();
+        Patient patient = APITestHelpers.createPatientResource(mbi, APITestHelpers.ORGANIZATION_ID);
+        Provenance provenance = APITestHelpers.createProvenance(APITestHelpers.ORGANIZATION_ID, practitioner.getId(), List.of(patient.getId()));
+
+        String url = "http://localhost/fake";
+        String ip = "127.0.0.1";
+        HttpServletRequest httpServletRequest = mockHttpServletRequest(url, ip);
+        mockPractitionerRead(practitioner);
+        mockPatientRead(patient);
+        mockOrgRead(organizationPrincipal.getOrganization());
+        mockBFDClientTransactionTime();
+
+        // Make our org lookback exempt
+        config.setLookBackExemptOrgs(List.of(APITestHelpers.ORGANIZATION_ID));
+
+        // Finish mocking
+        UUID jobId = UUID.randomUUID();
+        when(dataService.createJob(
+            eq(UUID.fromString(APITestHelpers.ORGANIZATION_ID)),
+            eq(APITestHelpers.ORGANIZATION_NPI),
+            eq(practitionerNPI),
+            eq(List.of(mbi)),
+            eq(JobQueueBatch.validResourceTypes),
+            eq(null),
+            any(),
+            eq(ip),
+            eq(url),
+            eq(false),
+            eq(true)
+        )).thenReturn(jobId);
+
+        Response response = patientResource.export(
+            organizationPrincipal,
+            provenance,
+            UUID.fromString(patient.getId()),
+            null,
+            httpServletRequest,
+            FHIRHeaders.PREFER_RESPOND_ASYNC,
+            null,
+            FHIRMediaTypes.FHIR_NDJSON
+        );
+
+        URI contentLocation = (URI) response.getHeaders().getFirst(HttpHeaders.CONTENT_LOCATION);
+        String[] pathTokens = contentLocation.getPath().split("/");
+        String returnedJobId = pathTokens[pathTokens.length-1];
+
+        assertEquals(jobId.toString(), returnedJobId);
+    }
+
+    private void mockPractitionerRead(Practitioner practitioner) {
+        IReadExecutable<Practitioner> readExec = mock(IReadExecutable.class);
+        when(attributionClient.read().resource(Practitioner.class).withId(practitioner.getId()).encodedJson()).thenReturn(readExec);
+        when(readExec.execute()).thenReturn(practitioner);
+    }
+
+    private void mockPatientRead(Patient patient) {
+        IReadExecutable<Patient> readExec = mock(IReadExecutable.class);
+        when(attributionClient.read().resource(Patient.class).withId(patient.getId()).encodedJson()).thenReturn(readExec);
+        when(readExec.execute()).thenReturn(patient);
+    }
+
+    private void mockOrgRead(Organization organization) {
+        IReadExecutable<Organization> readExec = mock(IReadExecutable.class);
+        when(attributionClient.read().resource(Organization.class).withId(organization.getId()).encodedJson()).thenReturn(readExec);
+        when(readExec.execute()).thenReturn(organization);
+    }
+
+    private HttpServletRequest mockHttpServletRequest(String url, String ip) {
+        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+        when(httpServletRequest.getRequestURL()).thenReturn(new StringBuffer(url));
+        when(httpServletRequest.getRemoteAddr()).thenReturn(ip);
+        return httpServletRequest;
+    }
+
+    private void mockBFDClientTransactionTime() {
+        // Mock the patient we search for to get the BFD transaction time
+        Patient patient = APITestHelpers.createPatientResource( "3aa0C00aA00", UUID.randomUUID().toString());
+        Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(patient);
+
+        when(
+            bfdClient.requestPatientFromServer(anyString(), any(), any())
+        ).thenReturn(bundle);
     }
 
     private Bundle createPatientBundle(int numPatients, Organization organization) {
