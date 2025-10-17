@@ -17,7 +17,7 @@
         </div>
       </div>
 
-      <% if organization.prod_sbx? %>
+      <% if organization.sandbox? %>
         <div>
           <div>
           <span class="ds-u-color--muted"><strong>NPI:</strong> (auto-generated) <%= organization.npi %></span>
@@ -208,7 +208,7 @@
           <h3 class="box__heading"><%= organization.name %> is almost ready!</h3>
         </div>
         <p class="ds-text--lead ds-u-measure--wide">
-        <% if organization.prod_sbx? %>
+        <% if organization.sandbox? %>
           Before this organization can add credentials for sandbox testing, a CMS admin must enable sandbox access.
         <% elsif organization.npi.present? %>
           Before this organization can add credentials, a CMS admin must enable access.
