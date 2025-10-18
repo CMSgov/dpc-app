@@ -217,6 +217,7 @@
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-netty-no-dependencies</artifactId>
             <version>${mockserverVersion}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
