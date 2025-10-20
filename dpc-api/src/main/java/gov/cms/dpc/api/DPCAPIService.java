@@ -12,12 +12,14 @@ import gov.cms.dpc.api.cli.organizations.OrganizationCommand;
 import gov.cms.dpc.api.cli.tokens.TokenCommand;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
+import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
 import gov.cms.dpc.common.logging.filters.LogHeaderFilter;
+import gov.cms.dpc.common.logging.filters.LogQueryFilter;
 import gov.cms.dpc.common.logging.filters.LogResponseFilter;
 import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.common.utils.UrlGenerator;
@@ -35,6 +37,8 @@ import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
 import jakarta.validation.ValidatorFactory;
 import org.apache.http.HttpHeaders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup;
 
@@ -42,6 +46,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class DPCAPIService extends Application<DPCAPIConfiguration> {
+
+    private static final Logger logger = LoggerFactory.getLogger(DPCAPIService.class);
 
     private final DPCQueueHibernateBundle<DPCAPIConfiguration> hibernateQueueBundle = new DPCQueueHibernateBundle<>();
     private final DPCAuthHibernateBundle<DPCAPIConfiguration> hibernateAuthBundle = new DPCAuthHibernateBundle<>(List.of(
@@ -94,6 +100,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         environment.jersey().register(new GenerateRequestIdFilter(false));
         environment.jersey().register(new LogResponseFilter());
         environment.jersey().register(new LogHeaderFilter(HttpHeaders.ACCEPT_ENCODING));
+        environment.jersey().register(new LogQueryFilter(List.of(MDCConstants.TYPE, MDCConstants.SINCE)));
 
         // Find Guice-aware validator and swap in for Dropwizard's default hk2 validator.
         Optional<Injector> injector = InjectorLookup.getInjector(this);
@@ -135,8 +142,9 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     private void setupCustomBundles(final Bootstrap<DPCAPIConfiguration> bootstrap) {
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
-            public DataSourceFactory getDataSourceFactory(DPCAPIConfiguration dpcAPIConfiguration) {
-                return dpcAPIConfiguration.getAuthDatabase();
+            public DataSourceFactory getDataSourceFactory(DPCAPIConfiguration configuration) {
+                logger.debug("Connecting to auth database {} at {}", configuration.getAuthDatabase().getDriverClass(), configuration.getAuthDatabase().getUrl());
+                return configuration.getAuthDatabase();
             }
 
             @Override

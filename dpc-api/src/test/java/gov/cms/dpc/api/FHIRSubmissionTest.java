@@ -275,6 +275,7 @@ class FHIRSubmissionTest {
 
     private static void mockReadResource(Class clazz) {
         Mockito.when(mockTypedRead.withId(Mockito.any(IdType.class))).thenReturn(mockExecutable);
+        Mockito.when(mockTypedRead.withId(Mockito.any(String.class))).thenReturn(mockExecutable);
         Mockito.when(mockExecutable.encodedJson()).thenReturn(mockExecutable);
         Mockito.when(mockExecutable.execute()).thenAnswer(answer -> {
             if (clazz.equals(Organization.class)) {

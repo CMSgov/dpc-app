@@ -12,6 +12,7 @@ import ca.uhn.fhir.validation.ValidationResult;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.APIHelpers;
+import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
@@ -19,6 +20,7 @@ import gov.cms.dpc.api.resources.AbstractPatientResource;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.common.logging.SplunkTimestamp;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -47,12 +49,14 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.net.URI;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APIHelpers.bulkResourceClient;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
@@ -66,24 +70,25 @@ public class PatientResource extends AbstractPatientResource {
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9]+://.*$");
     private static final Set<String> VALID_BUNDLE_LINK_NAMES = Set.of("first", IBaseBundle.LINK_PREV, IBaseBundle.LINK_NEXT, IBaseBundle.LINK_SELF);
 
-
-    private final IGenericClient client;
     private final FhirValidator validator;
     private final DataService dataService;
     private final BlueButtonClient bfdClient;
     private final String baseURL;
+    private final DPCAPIConfiguration config;
 
     @Inject
     public PatientResource(@Named("attribution") IGenericClient client,
                            FhirValidator validator,
                            DataService dataService,
                            BlueButtonClient bfdClient,
-                           @APIV1 String baseURL) {
-        this.client = client;
+                           @APIV1 String baseURL,
+                           DPCAPIConfiguration config) {
+        super(client);
         this.validator = validator;
         this.dataService = dataService;
         this.bfdClient = bfdClient;
         this.baseURL = baseURL;
+        this.config = config;
     }
 
     @GET
@@ -210,42 +215,23 @@ public class PatientResource extends AbstractPatientResource {
                              @QueryParam("_since") @NoHtml String sinceParam,
                              @Context HttpServletRequest request,
                              @HeaderParam(FHIRHeaders.PREFER_HEADER) @DefaultValue("") String preferHeader) {
-        final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
-        final UUID practitionerId = FHIRExtractors.getEntityUUID(performer.getOnBehalfOfReference().getReference());
-        Practitioner practitioner = this.client
-                .read()
-                .resource(Practitioner.class)
-                .withId(practitionerId.toString())
-                .encodedJson()
-                .execute();
+        logger.info("Exporting data for patient: {}", patientId);
 
-        if (practitioner == null) {
-            // Is this the best code to be throwing here?
-            throw new WebApplicationException(HttpStatus.UNAUTHORIZED_401);
-        }
-
-        final Patient patient = getPatient(patientId);
-        final var since = handleSinceQueryParam(sinceParam);
-        final String patientMbi = FHIRExtractors.getPatientMBI(patient);
+        final String providerNPI = getOnBehalfOfNPI(provenance);
+        final String patientMbi = getMBI(patientId);
+        final OffsetDateTime since = handleSinceQueryParam(sinceParam);
         final UUID orgId = organization.getID();
-        final Organization org = this.client
-                .read()
-                .resource(Organization.class)
-                .withId(orgId.toString())
-                .encodedJson()
-                .execute();
-        final String orgNPI = FHIRExtractors.findMatchingIdentifier(org.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
-        final String practitionerNPI = FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
-
+        final String orgNPI = getOrganizationNPI(organization);
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
         final String requestUrl = APIHelpers.fetchRequestUrl(request);
 
+        // TODO: Remove async option once we get approval
         if(preferHeader.equals(FHIRHeaders.PREFER_RESPOND_ASYNC)) {
             // Submit asynchronous job
             final UUID jobID = this.dataService.createJob(
                 orgId,
                 orgNPI,
-                practitionerNPI,
+                providerNPI,
                 List.of(patientMbi),
                 List.of(DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Coverage),
                 since,
@@ -258,7 +244,7 @@ public class PatientResource extends AbstractPatientResource {
             return Response.status(Response.Status.ACCEPTED).contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
         } else {
             // Submit synchronous job
-            Resource result = dataService.retrieveData(orgId, orgNPI, practitionerNPI, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
+            Resource result = dataService.retrieveData(orgId, orgNPI, providerNPI, List.of(patientMbi), since, APIHelpers.fetchTransactionTime(bfdClient),
                 requestingIP, requestUrl, DPCResourceType.Patient, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Coverage);
             if (DPCResourceType.Bundle.getPath().equals(result.getResourceType().getPath())) {
                 // A Bundle containing patient data was returned
@@ -272,6 +258,57 @@ public class PatientResource extends AbstractPatientResource {
         }
 
         throw new WebApplicationException(HttpStatus.INTERNAL_SERVER_ERROR_500);
+    }
+
+    @GET
+    @FHIR
+    @Path("/{patientID}/$export")
+    @PathAuthorizer(type = DPCResourceType.Patient, pathParam = "patientID")
+    @Timed
+    @ExceptionMetered
+    @ApiOperation(value = "Begin Patient export request", tags = {"Patient", "Bulk Data"},
+        notes = "FHIR export operation which initiates a bulk data export for the given Patient")
+    public Response export(@ApiParam(hidden = true) @Auth OrganizationPrincipal organization,
+                           @Valid @Profiled @ProvenanceHeader Provenance provenance,
+                           @PathParam("patientID") UUID patientId,
+                           @QueryParam("_since") @NoHtml String sinceParam,
+                           @Context HttpServletRequest request,
+                           @HeaderParam(FHIRHeaders.PREFER_HEADER) String preferHeader,
+                           @QueryParam("_type") @NoHtml String resourceTypes,
+                           @QueryParam("_outputFormat") @NoHtml String outputFormat
+    ) {
+        final String eventTime = SplunkTimestamp.getSplunkTimestamp();
+
+        final String providerNPI = getOnBehalfOfNPI(provenance);
+        final String mbi = getMBI(patientId);
+        final OffsetDateTime since = handleSinceQueryParam(sinceParam);
+        final UUID orgID = organization.getID();
+        final String orgNPI = getOrganizationNPI(organization);
+        final String requestingIP = APIHelpers.fetchRequestingIP(request);
+        final String requestUrl = APIHelpers.fetchRequestUrl(request);
+        final List<DPCResourceType> resourceTypesList = handleTypeQueryParam(resourceTypes);
+        final boolean isSmoke = config.getLookBackExemptOrgs().contains(orgID.toString());
+
+        checkExportRequest(outputFormat, preferHeader);
+
+        final UUID jobID = this.dataService.createJob(
+            orgID,
+            orgNPI,
+            providerNPI,
+            List.of(mbi),
+            resourceTypesList,
+            since,
+            APIHelpers.fetchTransactionTime(bfdClient),
+            requestingIP,
+            requestUrl,
+            false,
+            isSmoke
+        );
+
+        final String resourcesRequested = resourceTypesList.stream().map(DPCResourceType::getPath).collect(Collectors.joining(";"));
+        logger.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},orgId={},patientId={},resourcesRequested={},queueSubmitTime={}",
+            "/Patient/$export",jobID, orgID, patientId, resourcesRequested, eventTime);
+        return Response.status(Response.Status.ACCEPTED).contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
     }
 
     @DELETE
@@ -380,5 +417,37 @@ public class PatientResource extends AbstractPatientResource {
             }
         }
 
+    }
+
+    /**
+     * Parses the {@link Provenance} and gets the practitioner's NPI who the request is being made on behalf of.
+     * @param provenance Provenance resource to parse.
+     * @throws WebApplicationException If the practitioner can't be found.
+     * @return NPI
+     */
+    private String getOnBehalfOfNPI(Provenance provenance) {
+        final Provenance.ProvenanceAgentComponent performer = FHIRExtractors.getProvenancePerformer(provenance);
+        final UUID practitionerId = FHIRExtractors.getEntityUUID(performer.getOnBehalfOfReference().getReference());
+        Practitioner practitioner = this.client
+            .read()
+            .resource(Practitioner.class)
+            .withId(practitionerId.toString())
+            .encodedJson()
+            .execute();
+
+        if (practitioner == null) {
+            throw new WebApplicationException("Provider not found.", HttpStatus.BAD_REQUEST_400);
+        }
+
+        return FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
+    }
+
+    /**
+     * Gets the patients MBI
+     * @param patientId Id of the patient
+     * @return MBI
+     */
+    private String getMBI(UUID patientId) {
+        return FHIRExtractors.getPatientMBI(getPatient(patientId));
     }
 }
