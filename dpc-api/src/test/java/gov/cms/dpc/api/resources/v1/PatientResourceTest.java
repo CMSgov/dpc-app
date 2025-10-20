@@ -27,6 +27,7 @@ import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.queue.DistributedBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -604,6 +605,65 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
             .onInstance(new IdType("Patient", patientId))
             .named("$everything")
             .withNoParameters(Parameters.class)
+            .useHttpGet()
+            .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
+            .execute();
+
+        // Extract the jobId from the headers returned from the client interceptor
+        String contentLocation = headers[0];
+        UUID jobId = UUID.fromString(contentLocation.substring( contentLocation.lastIndexOf("/")+1 ));
+
+        // Connect to our queue DB
+        final org.hibernate.cfg.Configuration conf = new Configuration().configure("hibernate-queue.cfg.xml");
+        SessionFactory sessionFactory = conf.buildSessionFactory();
+        DistributedBatchQueue queue = new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
+
+        // Verify our job was submitted correctly
+        List<JobQueueBatch> batches = queue.getJobBatches(jobId);
+        assertEquals(1, batches.size());
+
+        JobQueueBatch batch = batches.get(0);
+        assertEquals(jobId, batch.getJobID());
+        assertEquals(ORGANIZATION_NPI, batch.getOrgNPI());
+        assertEquals(practitioner.getIdentifierFirstRep().getValue(), batch.getProviderNPI());
+        assertEquals(3, batch.getResourceTypes().size());
+        assertTrue(batch.getResourceTypes().containsAll( List.of(DPCResourceType.Patient, DPCResourceType.Coverage, DPCResourceType.ExplanationOfBenefit) ));
+        assertFalse(batch.isBulk());
+
+        assertEquals(1, batch.getPatients().size());
+        String mbiFromJob = batch.getPatients().get(0);
+        assertEquals(mbi, mbiFromJob);
+    }
+
+    @Test
+    void testGetPatientExport() throws GeneralSecurityException, IOException, URISyntaxException {
+        IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25), true);
+
+        APITestHelpers.setupPractitionerTest(client, parser);
+        APITestHelpers.setupPatientTest(client, parser);
+
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(2);
+        Patient patient = fetchPatient(client, mbi);
+        Practitioner practitioner = fetchPractitionerByNPI(client);
+        final String patientId = FHIRExtractors.getEntityUUID(patient.getId()).toString();
+
+        final String[] headers = new String[1];
+        client.registerInterceptor(new IClientInterceptor() {
+            @Override
+            public void interceptRequest(IHttpRequest theRequest) { /* Not used */ }
+
+            @Override
+            public void interceptResponse(IHttpResponse theResponse) throws IOException {
+                headers[0] = theResponse.getHeaders(HttpHeaders.CONTENT_LOCATION).get(0);
+            }
+        });
+
+        // Submit job to the queue and allow interceptor to return the jobId.
+        client
+            .operation()
+            .onInstance(new IdType("Patient", patientId))
+            .named("$export")
+            .withSearchParameter(Parameters.class, "_outputFormat", new StringParam(FHIRMediaTypes.FHIR_NDJSON))
             .useHttpGet()
             .withAdditionalHeader("X-Provenance", generateProvenance(ORGANIZATION_ID, practitioner.getId()))
             .execute();

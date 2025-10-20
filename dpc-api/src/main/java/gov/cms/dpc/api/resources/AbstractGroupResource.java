@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.annotations.FHIR;
@@ -16,10 +17,10 @@ import java.util.UUID;
 
 @FHIR
 @Path("/Group")
-public abstract class AbstractGroupResource extends AbstractResourceWithSince {
+public abstract class AbstractGroupResource extends AbstractResourceWithExport {
 
-    protected AbstractGroupResource() {
-        // Not used
+    protected AbstractGroupResource(IGenericClient client) {
+        super(client);
     }
 
     @POST
