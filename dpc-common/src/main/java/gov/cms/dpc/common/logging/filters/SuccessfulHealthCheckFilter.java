@@ -11,7 +11,7 @@ public class SuccessfulHealthCheckFilter implements FilterFactory<IAccessEvent> 
     private static final String HEALTHCHECK_URI = "/healthcheck";
     @Override
     public Filter<IAccessEvent> build() {
-        return new Filter<IAccessEvent>() {
+        return new Filter<>() {
             @Override
             public FilterReply decide(IAccessEvent iAccessEvent) {
                 if (iAccessEvent.getRequestURI().equals(HEALTHCHECK_URI) && iAccessEvent.getResponse().getStatus() == 200) {
