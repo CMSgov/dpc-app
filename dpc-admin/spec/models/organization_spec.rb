@@ -46,9 +46,9 @@ RSpec.describe Organization, type: :model do
         end
       end
     end
-    describe '#ENV=prod-sbx' do
+    describe '#ENV=sandbox' do
       before(:each) do
-        allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
+        allow(ENV).to receive(:[]).with('ENV').and_return('sandbox')
       end
 
       describe '#fake_npi' do
