@@ -2,6 +2,8 @@ package gov.cms.dpc.testing.factories;
 
 import org.hl7.fhir.dstu3.model.*;
 
+import java.util.UUID;
+
 public class FHIRPractitionerBuilder {
 
     //This constant is found in DPCIdentifierSystem; but I did not want to introduce a circular dependency.
@@ -33,8 +35,18 @@ public class FHIRPractitionerBuilder {
         thePractitioner.addName().setFamily(last).addGiven(first);
         return this;
     }
+
     public FHIRPractitionerBuilder withOrgTag(String orgID){
         thePractitioner.getMeta().addTag(DPC_SYSTEM, orgID, "OrganizationID");
         return this;
+    }
+
+    public FHIRPractitionerBuilder withId(String id){
+        thePractitioner.setId(id);
+        return this;
+    }
+
+    public FHIRPractitionerBuilder withId(UUID id){
+        return withId(id.toString());
     }
 }

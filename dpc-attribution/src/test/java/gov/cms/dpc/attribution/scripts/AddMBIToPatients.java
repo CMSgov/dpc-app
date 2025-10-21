@@ -22,7 +22,7 @@ import java.util.function.Function;
 @Disabled
 public class AddMBIToPatients {
 
-    static final String MBI_CSV = "prod_sbx_bene_ids.csv";
+    static final String MBI_CSV = "sandbox_bene_ids.csv";
 
     private static Map<String, PatientMBI> patientMap = new HashMap<>();
     private static FhirContext ctx = FhirContext.forDstu3();

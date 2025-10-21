@@ -4,7 +4,7 @@ class RegisteredOrganization < ApplicationRecord
   belongs_to :organization
 
   before_create :create_api_organization
-  after_create :notify_users_of_sandbox_access, if: -> { prod_sbx? }
+  after_create :notify_users_of_sandbox_access, if: -> { sandbox? }
   before_update :update_api_organization
 
   validates :organization, presence: true
@@ -48,8 +48,8 @@ class RegisteredOrganization < ApplicationRecord
     organization.notify_users_of_sandbox_access
   end
 
-  def prod_sbx?
-    ENV['ENV'] == 'prod-sbx' || ENV['ENV'] == 'sandbox'
+  def sandbox?
+    ENV['ENV'] == 'sandbox'
   end
 
   private

@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import com.google.common.collect.Maps;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
@@ -72,14 +73,17 @@ public class APITestHelpers {
     }
 
     public static OrganizationPrincipal makeOrganizationPrincipal() {
-        Organization org = new Organization();
-        org.setId(ORGANIZATION_ID);
-        return new OrganizationPrincipal(org);
+        return makeOrganizationPrincipal(ORGANIZATION_ID);
     }
 
     public static OrganizationPrincipal makeOrganizationPrincipal(String id) {
         Organization org = new Organization();
         org.setId(id);
+        org.addIdentifier(
+            new Identifier()
+                .setSystem(DPCIdentifierSystem.NPPES.getSystem())
+                .setValue(ORGANIZATION_NPI)
+        );
         return new OrganizationPrincipal(org);
     }
 
@@ -230,7 +234,12 @@ public class APITestHelpers {
                 .withNpi(npi)
                 .withOrgTag(orgID)
                 .withName("Test", "Practitioner")
+                .withId(UUID.randomUUID())
                 .build();
+    }
+
+    public static Patient createPatientResource(String organizationID) {
+        return createPatientResource(MBIUtil.generateMBI(), organizationID);
     }
 
     public static Patient createPatientResource(String mbi, String organizationID) {
@@ -240,6 +249,7 @@ public class APITestHelpers {
                 .withName("Test", "Patient")
                 .withGender(Enumerations.AdministrativeGender.OTHER)
                 .managedBy(organizationID)
+                .withId(UUID.randomUUID())
                 .build();
     }
 

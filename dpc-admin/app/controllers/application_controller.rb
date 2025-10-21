@@ -13,8 +13,8 @@ class ApplicationController < ActionController::Base
     params.require(:id)
   end
 
-  def prod_sbx?
-    ENV['ENV'] == 'prod-sbx' || ENV['ENV'] == 'sandbox'
+  def sandbox?
+    ENV['ENV'] == 'sandbox'
   end
-  helper_method :prod_sbx?
+  helper_method :sandbox?
 end
