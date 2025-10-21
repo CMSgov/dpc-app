@@ -29,10 +29,10 @@ RSpec.describe RegisteredOrganizationsController, type: :controller do
       end
     end
 
-    context 'successful prod-sbx API organization new' do
-      it 'renders the blank registerd org fields with the org for prod-sbx' do
+    context 'successful sandbox API organization new' do
+      it 'renders the blank registerd org fields with the org for sandbox' do
         allow(ENV).to receive(:[]).and_call_original
-        allow(ENV).to receive(:[]).with('ENV').and_return('prod-sbx')
+        allow(ENV).to receive(:[]).with('ENV').and_return('sandbox')
 
         get :new, params: {
           organization_id: organization.id

@@ -12,7 +12,7 @@ class OrganizationUserAssignment < ApplicationRecord
   after_create :send_organization_sandbox_email
 
   def send_organization_sandbox_email
-    return unless organization.prod_sbx? && organization.registered_organization.present?
+    return unless organization.sandbox? && organization.registered_organization.present?
 
     mail_throttle_store = RedisStore::MailThrottleStore.new
 

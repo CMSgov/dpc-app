@@ -29,7 +29,7 @@ class DBUtilsUnitTest {
 	}
 
 	@Test
-	void test_truncateAllTables_will_not_run_in_prod_sbx() {
+	void test_truncateAllTables_will_not_run_in_sandbox() {
 		envVars.set("ENV", "sandbox");
 
 		assertThrows(NotATestEnvironmentException.class, () -> {
