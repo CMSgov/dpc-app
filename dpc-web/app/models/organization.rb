@@ -23,7 +23,7 @@ class Organization < ApplicationRecord
   delegate :street, :street_2, :city, :state, :zip, to: :address, allow_nil: true, prefix: true
   accepts_nested_attributes_for :address, reject_if: :all_blank
 
-  before_save :assign_id, if: -> { prod_sbx? }
+  before_save :assign_id, if: -> { sandbox? }
   before_save :npi_valid?
 
   after_update :update_registered_organization
@@ -68,8 +68,8 @@ class Organization < ApplicationRecord
     validate_npi
   end
 
-  def prod_sbx?
-    ENV['ENV'] == 'prod-sbx' || ENV['ENV'] == 'sandbox'
+  def sandbox?
+    ENV['ENV'] == 'sandbox'
   end
 
   def update_registered_organization
