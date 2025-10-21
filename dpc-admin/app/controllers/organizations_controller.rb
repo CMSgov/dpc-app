@@ -41,7 +41,7 @@ class OrganizationsController < ApplicationController
         return
       end
 
-      if prod_sbx?
+      if sandbox?
         redirect_to new_organization_registered_organization_path(organization_id: @organization.id)
       else
         redirect_to organization_path(@organization)
