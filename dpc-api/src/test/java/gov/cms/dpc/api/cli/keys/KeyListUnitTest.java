@@ -11,7 +11,7 @@ import gov.cms.dpc.testing.exceptions.SystemExitException;
 import io.dropwizard.core.cli.Cli;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,7 +73,7 @@ class KeyListUnitTest {
         publicKeyEntity.setId(UUID.randomUUID());
         publicKeyEntity.setLabel("test public key");
         publicKeyEntity.setCreatedAt(OffsetDateTime.now());
-        CollectionResponse collectionResponse = new CollectionResponse(List.of(publicKeyEntity));
+        CollectionResponse<PublicKeyEntity> collectionResponse = new CollectionResponse<>(List.of(publicKeyEntity));
 
         ObjectMapper mapper = new ObjectMapper();
         String payload = mapper.writeValueAsString(collectionResponse);
@@ -99,7 +99,7 @@ class KeyListUnitTest {
     }
 
     @Test
-    public void testListKeys_badResponse() throws IOException {
+    public void testListKeys_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()

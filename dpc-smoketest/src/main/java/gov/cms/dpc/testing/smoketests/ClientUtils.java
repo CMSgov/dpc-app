@@ -16,10 +16,11 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
@@ -74,9 +75,7 @@ public class ClientUtils {
                         throw new IllegalStateException("Export job completed, but with errors");
                     }
                 })
-                .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> {
-                    jobResponseHandler(httpClient, entry);
-                }));
+                .forEach(jobResponse -> jobResponse.getOutput().forEach(entry -> jobResponseHandler(httpClient, entry)));
     }
 
     /**
@@ -150,14 +149,14 @@ public class ClientUtils {
      * @throws IOException          - throws if the HTTP request fails
      * @throws InterruptedException - throws if the thread is interrupted
      */
-    private static JobCompletionModel awaitExportResponse(String jobLocation, String statusMessage, CloseableHttpClient client, String overrideURL) throws IOException, InterruptedException {
+    private static JobCompletionModel awaitExportResponse(String jobLocation, String statusMessage, CloseableHttpClient client, String overrideURL) throws IOException, InterruptedException, ParseException {
         // Use the traditional HTTP Client to check the job status
         JobCompletionModel jobResponse = null;
         // TODO When DNS is set for prod, revert this workaround code; see TODO at the top of this class
         String jobLocationURL = jobLocation;
         if (jobLocation.startsWith("https://prod.dpc.cms.gov/api/v1")) {
             jobLocationURL = overrideURL.substring(0, overrideURL.indexOf("/api/v1")) + jobLocation.substring("https://prod.dpc.cms.gov".length());
-            logger.info("patched job url " + jobLocationURL);
+            logger.info("patched job url {}", jobLocationURL);
         }
         final HttpGet jobGet = new HttpGet(jobLocationURL);
         boolean done = false;
@@ -167,7 +166,7 @@ public class ClientUtils {
             Thread.sleep(20000);
             logger.debug(statusMessage);
             try (CloseableHttpResponse response = client.execute(jobGet)) {
-                final int statusCode = response.getStatusLine().getStatusCode();
+                final int statusCode = response.getCode();
                 done = statusCode == HttpStatus.OK_200 || statusCode > 300;
                 if (done) {
                     final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
@@ -223,7 +222,7 @@ public class ClientUtils {
      * @throws IOException          - throws if something bad happens
      * @throws InterruptedException - throws if someone cuts in line
      */
-    private static JobCompletionModel monitorExportRequest(IOperationUntypedWithInput<Parameters> exportOperation, CloseableHttpClient client, String overrideURL) throws IOException, InterruptedException {
+    private static JobCompletionModel monitorExportRequest(IOperationUntypedWithInput<Parameters> exportOperation, CloseableHttpClient client, String overrideURL) throws IOException, InterruptedException, ParseException {
         System.out.println("Retrying export request");
 
         // Return a MethodOutcome in order to get the response headers.
@@ -255,7 +254,7 @@ public class ClientUtils {
         System.out.println(entry.getUrl());
         try {
             final File file = fetchExportedFiles(entry.getUrl(), client);
-            System.out.println(String.format("Downloaded file to: %s", file.getPath()));
+            System.out.printf("Downloaded file to: %s%n", file.getPath());
             if(file.length() == 0){
                 throw new IllegalStateException(String.format("Downloaded file was empty. file path:  %s", file.getPath()));
             }
@@ -263,12 +262,12 @@ public class ClientUtils {
             throw new RuntimeException("Cannot output file", e);
         }
     }
-    
+
     private static JobCompletionModel jobCompletionLambda(IGenericClient exportClient, CloseableHttpClient client, Group group, String overrideURL) {
         final IOperationUntypedWithInput<Parameters> exportOperation = createExportOperation(exportClient, group.getId());
         try {
             return monitorExportRequest(exportOperation, client, overrideURL);
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | ParseException e) {
             throw new RuntimeException(String.format("Error monitoring export groupID: %s", group.getId()), e);
         }
     }
@@ -332,8 +331,8 @@ public class ClientUtils {
         List<String> returnedIdentifiers = providerBundle.getEntry().stream().map(provider -> {
             Practitioner practitioner = (Practitioner) provider.getResource();
             return practitioner.getIdentifierFirstRep().getValue();
-        }).collect(Collectors.toList());
-        logger.info("Practitioners submitted and returned: {}", returnedIdentifiers.toString());
+        }).toList();
+        logger.info("Practitioners submitted and returned: {}", returnedIdentifiers);
 
         return providerBundle;
     }

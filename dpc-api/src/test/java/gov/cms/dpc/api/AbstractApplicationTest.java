@@ -10,10 +10,10 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.DropwizardTestSupport;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -28,7 +28,7 @@ import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Default application setup the runs the {@link DPCAPIService} with authentication disabled. (e.g. using the {@link StaticAuthFilter}
+ * Default application setup that runs the {@link DPCAPIService} with authentication disabled. (e.g. using the {@link StaticAuthFilter}
  */
 @IntegrationTest
 @ExtendWith(BufferedLoggerHandler.class)
@@ -88,8 +88,8 @@ public class AbstractApplicationTest {
             try (CloseableHttpResponse response = client.execute(metricsGet)) {
                 final JsonNode metricsNode = mapper.reader().readTree(response.getEntity().getContent());
                 metricsNode.get("gauges")
-                        .fields()
-                        .forEachRemaining(gauge -> {
+                        .properties()
+                        .forEach(gauge -> {
                             if (gauge.getKey().matches("io.dropwizard.db.ManagedPooledDataSource\\..*\\.active")) {
                                 final int activeConnections = gauge.getValue().asInt();
                                 assertEquals(0, activeConnections, String.format("RESOURCE LEAK IN: %s. %d connections left open", gauge.getKey(), activeConnections));

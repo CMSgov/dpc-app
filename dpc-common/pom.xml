@@ -110,6 +110,12 @@
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-validation</artifactId>
             <version>${hapi.fhir.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--        Validations use the R4 validator, even for STU3 resources-->
         <dependency>
@@ -124,8 +130,13 @@
         </dependency>
         <!--        We need the HTTP Client for the helper class, but it can be provided-->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.core5</groupId>
+            <artifactId>httpcore5</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -168,6 +179,11 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>gov.cms.dpc</groupId>
+            <artifactId>dpc-macaroons</artifactId>
+            <version>0.4.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

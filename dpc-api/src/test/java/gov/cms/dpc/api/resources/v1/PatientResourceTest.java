@@ -37,7 +37,7 @@ import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
 import jakarta.ws.rs.HttpMethod;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -45,7 +45,10 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,14 +61,13 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.sql.Date;
-import java.time.*;
 import java.time.Duration;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
@@ -396,7 +398,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(64, resultNoSince.getTotal(), "Should have 64 entries in Bundle");
         for (Bundle.BundleEntryComponent bec : resultNoSince.getEntry()) {
             List<DPCResourceType> resourceTypes = List.of(DPCResourceType.Coverage, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Patient);
-            assertTrue(resourceTypes.stream().map(Enum::toString).collect(Collectors.toList()).contains(bec.getResource().getResourceType().toString()), "Resource type should be Coverage, EOB, or Patient");
+            assertTrue(resourceTypes.stream().map(Enum::toString).toList().contains(bec.getResource().getResourceType().toString()), "Resource type should be Coverage, EOB, or Patient");
         }
 
         Bundle resultEmptySince = client
@@ -594,7 +596,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
             public void interceptRequest(IHttpRequest theRequest) { /* Not used */ }
 
             @Override
-            public void interceptResponse(IHttpResponse theResponse) throws IOException {
+            public void interceptResponse(IHttpResponse theResponse) {
                 headers[0] = theResponse.getHeaders(HttpHeaders.CONTENT_LOCATION).get(0);
             }
         });
@@ -653,7 +655,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
             public void interceptRequest(IHttpRequest theRequest) { /* Not used */ }
 
             @Override
-            public void interceptResponse(IHttpResponse theResponse) throws IOException {
+            public void interceptResponse(IHttpResponse theResponse) {
                 headers[0] = theResponse.getHeaders(HttpHeaders.CONTENT_LOCATION).get(0);
             }
         });

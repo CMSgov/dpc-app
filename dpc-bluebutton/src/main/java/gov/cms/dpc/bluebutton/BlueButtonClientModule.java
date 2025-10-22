@@ -15,11 +15,14 @@ import gov.cms.dpc.bluebutton.health.BlueButtonHealthCheck;
 import gov.cms.dpc.fhir.configuration.TimeoutConfiguration;
 import io.dropwizard.core.Configuration;
 import jakarta.inject.Named;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContexts;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
+import org.apache.hc.client5.http.ssl.TrustSelfSignedStrategy;
+import org.apache.hc.core5.ssl.SSLContexts;
+import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
@@ -122,11 +125,11 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
             }
         } else {
             final String keyStorePath = this.bbClientConfiguration.getKeystore().getLocation();
-            logger.debug("Opening keystream from location: " + keyStorePath);
+            logger.debug("Opening keystream from location: {}", keyStorePath);
             try {
                 keyStoreStream = new FileInputStream(keyStorePath);
             } catch (FileNotFoundException e) {
-                logger.error("Could not find keystore at location: " + Paths.get(keyStorePath).toAbsolutePath());
+                logger.error("Could not find keystore at location: {}", Paths.get(keyStorePath).toAbsolutePath());
                 throw new BlueButtonClientSetupException("Unable to find keystore", e);
             }
         }
@@ -159,14 +162,16 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
         // Configure the socket timeout for the connection, incl. ssl tunneling
         final TimeoutConfiguration timeouts = this.bbClientConfiguration.getTimeouts();
         RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(timeouts.getConnectionTimeout())
-                .setConnectionRequestTimeout(timeouts.getRequestTimeout())
-                .setSocketTimeout(timeouts.getSocketTimeout())
+                .setConnectTimeout(Timeout.ofSeconds(timeouts.getConnectionTimeout()))
+                .setConnectionRequestTimeout(Timeout.ofSeconds(timeouts.getRequestTimeout()))
+                .setResponseTimeout(Timeout.ofSeconds(timeouts.getSocketTimeout()))
                 .build();
 
         return HttpClients.custom()
                 .setDefaultRequestConfig(requestConfig)
-                .setSSLContext(sslContext)
+                .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+                        .setTlsSocketStrategy(new DefaultClientTlsStrategy(sslContext))
+                        .build())
                 .build();
     }
 }

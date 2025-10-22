@@ -8,7 +8,7 @@ import gov.cms.dpc.testing.exceptions.SystemExitException;
 import io.dropwizard.core.cli.Cli;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,6 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.Parameter;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -87,7 +86,7 @@ class KeyDeleteUnitTest {
     }
 
     @Test
-    public void testDeleteKeys_badResponse() throws IOException {
+    public void testDeleteKeys_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()

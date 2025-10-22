@@ -8,11 +8,11 @@ import gov.cms.dpc.api.models.CollectionResponse;
 import io.dropwizard.core.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.net.URIBuilder;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.IdType;
 
@@ -41,10 +41,10 @@ public class TokenList extends AbstractAdminCommand {
     public void run(Bootstrap<?> bootstrap, Namespace namespace) throws IOException, URISyntaxException {
         // Get the reference
         final String orgReference = namespace.getString("org-reference");
-        System.out.println(String.format("Listing tokens for organization: %s.", orgReference));
+        System.out.printf("Listing tokens for organization: %s.%n", orgReference);
 
         final String apiService = namespace.getString(API_HOSTNAME);
-        System.out.println(String.format("Connecting to API service at: %s", apiService));
+        System.out.printf("Connecting to API service at: %s%n", apiService);
 
         listTokens(apiService, orgReference);
     }
@@ -57,12 +57,12 @@ public class TokenList extends AbstractAdminCommand {
             final HttpPost tokenPost = new HttpPost(builder.build());
 
             try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
-                if (!HttpStatus.isSuccess(response.getStatusLine().getStatusCode())) {
-                    System.err.println("Error fetching organization: " + response.getStatusLine().getReasonPhrase());
+                if (!HttpStatus.isSuccess(response.getCode())) {
+                    System.err.println("Error fetching organization: " + response.getReasonPhrase());
                     System.exit(1);
                 }
 
-                CollectionResponse<TokenEntity> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<CollectionResponse<TokenEntity>>() {
+                CollectionResponse<TokenEntity> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {
                 });
                 generateTable(new ArrayList<>(tokens.getEntities()));
             }
