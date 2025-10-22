@@ -86,25 +86,6 @@ const fhirOK = function(res) {
   return res.status === 200 && res.headers['Content-Type'] === fhirType;
 };
 
-function checkLoginPage(baseUrl, paths, loginText) {
-  if (!baseUrl) {
-    throw new Error(`${baseUrl} environment variable is not set`)
-  }
-
-  paths.forEach(path => {
-    const fullUrl = baseUrl + path;
-    const res = http.get(fullUrl);
-    console.log('checking url: ', fullUrl);
-    console.log("res.status: ", res.status);
-
-    check(res, {
-      "is status 200": (r) => r.status === 200,
-      "verify homepage text": (r) => r.body.includes("Data at the Point of Care"),
-      "verify login text": (r) => r.body.includes(loginText)
-    });
-  })
-}
-
 function handleJmxSmoketests(data) {
   console.log('handle jmx tests...')
   // COPIED from dpc-load-testing/ci-app.js
@@ -203,18 +184,6 @@ function monitorExportJob(jobLocationUrl, groupId) {
 }
 
 export function workflow(data) {
-  console.log('running workflow!!!');
-  console.log('running workflow!!!');
-  console.log('running workflow!!!');
-  console.log('running workflow!!!');
-  console.log('from workflow... __ENV.API_ADMIN_URL:', __ENV.API_ADMIN_URL);
-  // // // port from src/test/portal_test.yml
-  //  checkLoginPage(__ENV.PORTAL_HOST, ["/portal", "/portal/organizations"], "Sign in");
-  // // // port from src/test/web_test.yml
-  //  checkLoginPage(__ENV.WEB_HOST, ["/users/sign_in", "/"], "Log in");
-  // // // port from src/test/web_admin_test.yml
-  //  checkLoginPage(__ENV.WEB_ADMIN_HOST, ["/admin/internal/sign_in", "/admin/organizations"], "Log in");
-
   // port from src/test/smoke_test.yml + src/main/resources/SmokeTest.jmx + src/main/java/gov/cms/dpc/testing/smoketests/SmokeTest.java
   handleJmxSmoketests(data);
 }
