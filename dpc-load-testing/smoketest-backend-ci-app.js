@@ -13,6 +13,7 @@ import {
   createPatientsBatch,
   createPractitioners,
   deleteOrganization,
+  exportGroup,
   findOrganizationByNpi,
 
 } from './dpc-api-client.js';
@@ -139,8 +140,6 @@ function handleJmxSmoketests(data) {
 //export function createGroupWithPatients(token, orgId, practitionerId, practitionerNpi, patients) {
   // tbd
   // 4 of 4 (exportData)
-  // tbd
-  // exportGroup
   handleExportJob(token, groupId)
 }
 function handleExportJob(token, groupId) {
@@ -149,7 +148,14 @@ function handleExportJob(token, groupId) {
 //  final Map<String, List<String>> headers = outcome.getResponseHeaders();
 //  // Get the headers and check the status
 //  final String exportURL = headers.get("content-location").get(0);
+  console.log('status code: ', getGroupExportResponseWithSince.status);
+  check(getGroupExportResponseWithSince, {
+    'kickoff 202': r => r.status === 202,
+    'has Content-Location': r => !!r.headers['Content-Location'],
+  });
+  console.log('full res', getGroupExportResponseWithSince);
   console.log('look at export url headers: ', getGroupExportResponseWithSince.headers);
+  console.log('content-location: ', getGroupExportResponseWithSince.headers["content-location"]);
   let exportJobURL = getGroupExportResponseWithSince.headers["content-location"][0];
   monitorExportJob(exportJobURL, 'asdf');
 }
@@ -157,30 +163,32 @@ function handleExportJob(token, groupId) {
 const EXPORT_POLL_INTERVAL = 20000;
 const EXPORT_POLL_TIMEOUT = 300000;
 function monitorExportJob(jobLocationUrl, groupId) {
-    const start = Date.now() / 1000;
+  const start = Date.now() / 1000;
 
-    while (true) {
-      //  move to dpc-api-client
-      jobResponse = http.get(jobLocationUrl, authHeaders());
-      statusCode = jobResponse.status;
+  while (true) {
+    //  move to dpc-api-client
+    jobResponse = http.get(jobLocationUrl, authHeaders());
+    statusCode = jobResponse.status;
 
-      // Typically 202 while running, 200 with JSON body when done.
-      if (statusCode > 300) {
-        throw new Error(`Export for ${group.id} failed with status code: ${statusCode}`);
-      }
-      else if (statusCode === 200) {
-        // "done"
-        return
-      }
-      check(statusRes, { 'still running or ok': r => r.status === 202 || r.status === 200 });
-
-      const elapsed = (Date.now() - start) / 1000;
-      if (elapsed > EXPORT_POLL_TIMEOUT) {
-        throw new Error(`Export for ${group.id} timed out after ${EXPORT_POLL_TIMEOUT}s`);
-      }
-
-      sleep(EXPORT_POLL_INTERVAL / 1000);
+    // Typically 202 while running, 200 with JSON body when done.
+    if (statusCode > 300) {
+      throw new Error(`Export for ${group.id} failed with status code: ${statusCode}`);
     }
+    else if (statusCode === 200) {
+      // "done"
+      check(res, {
+        'job completed (200 code)': r => r.status === 200,
+      });
+      break;
+    }
+
+    const elapsed = (Date.now() - start) / 1000;
+    if (elapsed > EXPORT_POLL_TIMEOUT) {
+      throw new Error(`Export for ${group.id} timed out after ${EXPORT_POLL_TIMEOUT}s`);
+    }
+
+    sleep(EXPORT_POLL_INTERVAL / 1000);
+  }
 }
 
 export function workflow(data) {

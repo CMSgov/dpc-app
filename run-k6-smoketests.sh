@@ -12,6 +12,6 @@ docker run --rm -v $(pwd)/dpc-load-testing:/src --env-file $(pwd)/ops/config/dec
   -e WEB_ADMIN_HOST=http://localhost:3000 \
   -e WEB_HOST=http://localhost:3900 \
   -e API_ADMIN_URL=http://localhost:9903 \
-  -e ENVIRONMENT=local -i grafana/k6 run /src/smoketest-ci-app.js
+  -e ENVIRONMENT=local -i grafana/k6 run /src/smoketest-backend-ci-app.js
 
 echo "Done!"
