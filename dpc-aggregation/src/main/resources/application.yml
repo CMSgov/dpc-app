@@ -62,6 +62,8 @@ server:
             environment: ${ENV:-"unknown_env"}
             version: ${APP_VERSION:-"unknown_version"}
             application: ${APPLICATION:-"dpc-aggregation"}
+        filterFactories:
+          - type: successful-healthcheck
 
 logging:
   level: WARN

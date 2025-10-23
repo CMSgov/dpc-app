@@ -47,6 +47,11 @@ server:
             environment: ${ENV:-"unknown_env"}
             version: ${APP_VERSION:-"unknown_version"}
             application: ${APPLICATION:-"dpc-api"}
+        filterFactories:
+          - type: uri
+            uris:
+              - "/api/v1/version"
+          - type: successful-healthcheck
 
 logging:
   level: WARN
@@ -70,6 +75,9 @@ logging:
             - BB_KEYSTORE_PASS
             - BFD_HASH_PEPPER
             - NEW_RELIC_LICENSE_KEY
+        - type: uri
+          uris:
+            - "/api/v1/version"
       timeZone: UTC
       layout:
         type: json-dpc
