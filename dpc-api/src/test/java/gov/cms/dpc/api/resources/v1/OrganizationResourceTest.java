@@ -163,7 +163,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testUpdateOrganization() throws IOException, URISyntaxException, GeneralSecurityException {
+    void testUpdateOrganization() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         final String orgID = UUID.randomUUID().toString();
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
@@ -205,7 +205,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testOrganizationDeletion() throws IOException, URISyntaxException, GeneralSecurityException {
+    void testOrganizationDeletion() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
 //        // Generate a golden macaroon
         final UUID orgDeletionID = UUID.randomUUID();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);

@@ -1,6 +1,7 @@
 package gov.cms.dpc.bluebutton;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.apache.ApacheHttp5RestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
@@ -81,6 +82,7 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
     @Provides
     @Named("bbclient")
     public IGenericClient provideFhirRestClient(FhirContext fhirContext, HttpClient httpClient) {
+        fhirContext.setRestfulClientFactory(new ApacheHttp5RestfulClientFactory(fhirContext));
         fhirContext.getRestfulClientFactory().setHttpClient(httpClient);
 
         return fhirContext.newRestfulGenericClient(this.bbClientConfiguration.getServerBaseUrl());

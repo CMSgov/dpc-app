@@ -15,6 +15,7 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ParseException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -55,12 +56,12 @@ public class AbstractSecureApplicationTest {
         //not used
     }
 
-    protected TestOrganizationContext registerAndSetupNewOrg() throws IOException, GeneralSecurityException, URISyntaxException {
+    protected TestOrganizationContext registerAndSetupNewOrg() throws IOException, GeneralSecurityException, URISyntaxException, ParseException {
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         final String orgId = UUID.randomUUID().toString();
         final String npi = NPIUtil.generateNPI();
         final String clientToken = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), orgId,  npi, TASK_URL);
-        final Pair<UUID, PrivateKey> newKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", orgId, GOLDEN_MACAROON, "http://localhost:3002/v1/");
+        final Pair<UUID, PrivateKey> newKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", orgId, GOLDEN_MACAROON, "http://localhost:3002/v1");
         return new TestOrganizationContext(clientToken,npi,orgId,newKeyPair.getLeft().toString(),newKeyPair.getRight());
     }
 
@@ -87,7 +88,7 @@ public class AbstractSecureApplicationTest {
         ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, ORGANIZATION_NPI, TASK_URL);
 
         // Register Public key
-        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", ORGANIZATION_ID, GOLDEN_MACAROON, "http://localhost:3002/v1/");
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", ORGANIZATION_ID, GOLDEN_MACAROON, "http://localhost:3002/v1");
         PRIVATE_KEY = uuidPrivateKeyPair.getRight();
         PUBLIC_KEY_ID = uuidPrivateKeyPair.getLeft();
     }

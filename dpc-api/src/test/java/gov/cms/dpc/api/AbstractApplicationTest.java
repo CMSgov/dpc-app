@@ -14,6 +14,7 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ParseException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -57,7 +58,7 @@ public class AbstractApplicationTest {
     }
 
     @BeforeEach
-    public void eachSetup() throws IOException {
+    public void eachSetup() throws IOException, ParseException {
         ctx = FhirContext.forDstu3();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         FHIRHelpers.registerOrganization(attrClient,

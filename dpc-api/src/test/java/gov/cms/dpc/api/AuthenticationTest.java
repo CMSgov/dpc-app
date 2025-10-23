@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
+import org.apache.hc.core5.http.ParseException;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +28,7 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testBasicAuthentication() throws IOException, URISyntaxException {
+    void testBasicAuthentication() throws IOException, URISyntaxException, ParseException {
         // Manually setup the required org functions
         final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
 

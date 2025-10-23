@@ -19,6 +19,7 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -307,7 +308,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testTokenSigning() throws IOException, URISyntaxException {
+    void testTokenSigning() throws IOException, URISyntaxException, ParseException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         // Create a new org and make sure it has no providers
