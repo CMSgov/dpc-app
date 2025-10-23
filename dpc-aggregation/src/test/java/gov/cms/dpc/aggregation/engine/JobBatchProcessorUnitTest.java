@@ -651,7 +651,7 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
-    void testSinceWithRecentSince() {
+    void testRecentSince() {
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
         OperationsConfig operationsConfig = getOperationsConfig();
         JobBatchProcessor jobBatchProcessor = getJobBatchProcessor(bbClient, operationsConfig, new EveryoneGetsDataLookBackServiceImpl(), consentService);
@@ -695,7 +695,7 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
-    void testSinceWithDistantSince() {
+    void testOldSince() {
         String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
         OperationsConfig operationsConfig = getOperationsConfig();
         JobBatchProcessor jobBatchProcessor = getJobBatchProcessor(bbClient, operationsConfig, new EveryoneGetsDataLookBackServiceImpl(), consentService);
