@@ -6,12 +6,11 @@ import gov.cms.dpc.api.DPCAPIService;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.testing.APIAuthHelpers;
-import gov.cms.dpc.testing.NoExitSecurityManager;
 import gov.cms.dpc.testing.exceptions.SystemExitException;
 import io.dropwizard.core.cli.Cli;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,7 +72,7 @@ class KeyListUnitTest {
         publicKeyEntity.setId(UUID.randomUUID());
         publicKeyEntity.setLabel("test public key");
         publicKeyEntity.setCreatedAt(OffsetDateTime.now());
-        CollectionResponse collectionResponse = new CollectionResponse(List.of(publicKeyEntity));
+        CollectionResponse<PublicKeyEntity> collectionResponse = new CollectionResponse<>(List.of(publicKeyEntity));
 
         ObjectMapper mapper = new ObjectMapper();
         String payload = mapper.writeValueAsString(collectionResponse);
@@ -99,7 +98,7 @@ class KeyListUnitTest {
     }
 
     @Test
-    public void testListKeys_badResponse() throws IOException {
+    public void testListKeys_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()
@@ -114,8 +113,8 @@ class KeyListUnitTest {
 
         // This is kind of kludgey and isn't guaranteed to work for all versions of Java, but it allows us to test error
         // cases that call System.exit()
-        SecurityManager originalSecurityManager = System.getSecurityManager();
-        System.setSecurityManager(new NoExitSecurityManager());
+//        SecurityManager originalSecurityManager = System.getSecurityManager();
+//        System.setSecurityManager(new NoExitSecurityManager());
 
         Optional<Throwable> errors = cli.run("list", "org_id");
         assertFalse(errors.isEmpty());
@@ -124,7 +123,7 @@ class KeyListUnitTest {
         assertInstanceOf(SystemExitException.class, throwable);
         assertEquals("1", throwable.getMessage());
 
-        System.setSecurityManager(originalSecurityManager);
+//        System.setSecurityManager(originalSecurityManager);
         assertFalse(stdErr.toString().isEmpty());
     }
 }

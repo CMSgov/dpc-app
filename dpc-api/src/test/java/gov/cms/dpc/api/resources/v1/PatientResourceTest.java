@@ -37,7 +37,8 @@ import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
 import jakarta.ws.rs.HttpMethod;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.ParseException;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -45,7 +46,10 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,14 +62,13 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.sql.Date;
-import java.time.*;
 import java.time.Duration;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
@@ -120,7 +123,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void ensurePatientsExist() throws IOException, URISyntaxException, GeneralSecurityException {
+    void ensurePatientsExist() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
 
@@ -178,7 +181,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientRemoval() throws IOException, URISyntaxException, GeneralSecurityException {
+    void testPatientRemoval() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
         final String keyLabel = "patient-deletion-key";
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
@@ -217,7 +220,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientUpdating() throws IOException, URISyntaxException, GeneralSecurityException {
+    void testPatientUpdating() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
         final String keyLabel = "patient-update-key";
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
@@ -286,7 +289,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientEverythingWithoutGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
+    void testPatientEverythingWithoutGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
         APITestHelpers.setupPractitionerTest(client, parser);
         APITestHelpers.setupPatientTest(client, parser);
@@ -361,7 +364,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientEverythingWithGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException {
+    void testPatientEverythingWithGroupFetchesData() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
         APITestHelpers.setupPractitionerTest(client, parser);
         APITestHelpers.setupPatientTest(client, parser);
@@ -396,7 +399,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertEquals(64, resultNoSince.getTotal(), "Should have 64 entries in Bundle");
         for (Bundle.BundleEntryComponent bec : resultNoSince.getEntry()) {
             List<DPCResourceType> resourceTypes = List.of(DPCResourceType.Coverage, DPCResourceType.ExplanationOfBenefit, DPCResourceType.Patient);
-            assertTrue(resourceTypes.stream().map(Enum::toString).collect(Collectors.toList()).contains(bec.getResource().getResourceType().toString()), "Resource type should be Coverage, EOB, or Patient");
+            assertTrue(resourceTypes.stream().map(Enum::toString).toList().contains(bec.getResource().getResourceType().toString()), "Resource type should be Coverage, EOB, or Patient");
         }
 
         Bundle resultEmptySince = client
@@ -448,7 +451,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientEverything_CanHandlePatientWithMultipleMBIs() throws IOException, URISyntaxException, GeneralSecurityException {
+    void testPatientEverything_CanHandlePatientWithMultipleMBIs() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
         APITestHelpers.setupPractitionerTest(client, parser);
         APITestHelpers.setupPatientTest(client, parser);
@@ -482,7 +485,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientEverythingForOptedOutPatient() throws IOException, URISyntaxException, GeneralSecurityException {
+    void testPatientEverythingForOptedOutPatient() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
         APITestHelpers.setupPractitionerTest(client, parser);
         APITestHelpers.setupPatientTest(client, parser);
@@ -511,7 +514,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientEverythingForOptedOutPatientOnMultipleMbis() throws IOException, URISyntaxException, GeneralSecurityException {
+    void testPatientEverythingForOptedOutPatientOnMultipleMbis() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
         APITestHelpers.setupPractitionerTest(client, parser);
         APITestHelpers.setupPatientTest(client, parser);
@@ -542,7 +545,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testOptInPatient() throws GeneralSecurityException, IOException, URISyntaxException {
+    void testOptInPatient() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
         APITestHelpers.setupPractitionerTest(client, parser);
         APITestHelpers.setupPatientTest(client, parser);
@@ -574,7 +577,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testGetPatientEverythingAsync() throws GeneralSecurityException, IOException, URISyntaxException {
+    void testGetPatientEverythingAsync() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25), true);
 
         APITestHelpers.setupPractitionerTest(client, parser);
@@ -594,7 +597,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
             public void interceptRequest(IHttpRequest theRequest) { /* Not used */ }
 
             @Override
-            public void interceptResponse(IHttpResponse theResponse) throws IOException {
+            public void interceptResponse(IHttpResponse theResponse) {
                 headers[0] = theResponse.getHeaders(HttpHeaders.CONTENT_LOCATION).get(0);
             }
         });
@@ -636,7 +639,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testGetPatientExport() throws GeneralSecurityException, IOException, URISyntaxException {
+    void testGetPatientExport() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25), true);
 
         APITestHelpers.setupPractitionerTest(client, parser);
@@ -653,7 +656,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
             public void interceptRequest(IHttpRequest theRequest) { /* Not used */ }
 
             @Override
-            public void interceptResponse(IHttpResponse theResponse) throws IOException {
+            public void interceptResponse(IHttpResponse theResponse) {
                 headers[0] = theResponse.getHeaders(HttpHeaders.CONTENT_LOCATION).get(0);
             }
         });
@@ -695,7 +698,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testGetPatientByUUID() throws GeneralSecurityException, IOException, URISyntaxException {
+    void testGetPatientByUUID() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -813,7 +816,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testDeletePatient() throws GeneralSecurityException, IOException, URISyntaxException {
+    void testDeletePatient() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -827,7 +830,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException {
+    void testPatientPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -870,7 +873,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testBatchSubmit() throws GeneralSecurityException, IOException, URISyntaxException {
+    void testBatchSubmit() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final int COUNT_TEST_PATIENTS = 500;
 
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
@@ -903,7 +906,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testPatientEverythingWithFailedLookBack() throws IOException, URISyntaxException, GeneralSecurityException {
+    void testPatientEverythingWithFailedLookBack() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         IGenericClient client = generateClient(ORGANIZATION_NPI, randomStringUtils.nextAlphabetic(25));
 
         // Register a patient with no EoB resources
@@ -939,11 +942,11 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         );
     }
 
-    private IGenericClient generateClient(String orgNPI, String keyLabel) throws IOException, URISyntaxException, GeneralSecurityException {
+    private IGenericClient generateClient(String orgNPI, String keyLabel) throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         return generateClient(orgNPI, keyLabel, false);
     }
 
-    private IGenericClient generateClient(String orgNPI, String keyLabel, boolean async) throws IOException, GeneralSecurityException, URISyntaxException {
+    private IGenericClient generateClient(String orgNPI, String keyLabel, boolean async) throws IOException, GeneralSecurityException, URISyntaxException, ParseException {
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, APITestHelpers.ORGANIZATION_ID, orgNPI, getAdminURL());
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, APITestHelpers.ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
         return APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight(), false, true, async);

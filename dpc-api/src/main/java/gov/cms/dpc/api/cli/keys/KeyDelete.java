@@ -4,11 +4,11 @@ import gov.cms.dpc.api.cli.AbstractAdminCommand;
 import io.dropwizard.core.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.net.URIBuilder;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.IdType;
 
@@ -40,10 +40,10 @@ public class KeyDelete extends AbstractAdminCommand {
         // Get the reference
         final String orgReference = namespace.getString(ORG_REFERENCE);
         final String keyID = namespace.getString(KEY_ID);
-        System.out.println(String.format("Deleting public key %s for organization %s", keyID, orgReference));
+        System.out.printf("Deleting public key %s for organization %s%n", keyID, orgReference);
 
         final String apiService = namespace.getString(API_HOSTNAME);
-        System.out.println(String.format("Connecting to API service at: %s", apiService));
+        System.out.printf("Connecting to API service at: %s%n", apiService);
 
         // Delete the token
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
@@ -53,8 +53,8 @@ public class KeyDelete extends AbstractAdminCommand {
             final HttpPost keyDelete = new HttpPost(builder.build());
 
             try (CloseableHttpResponse response = httpClient.execute(keyDelete)) {
-                if (!HttpStatus.isSuccess(response.getStatusLine().getStatusCode())) {
-                    System.err.println("Error deleting key: " + response.getStatusLine().getReasonPhrase());
+                if (!HttpStatus.isSuccess(response.getCode())) {
+                    System.err.println("Error deleting key: " + response.getReasonPhrase());
                     System.exit(1);
                 }
             }

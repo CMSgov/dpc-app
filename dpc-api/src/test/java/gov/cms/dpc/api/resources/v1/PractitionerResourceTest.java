@@ -18,7 +18,8 @@ import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
 import jakarta.ws.rs.HttpMethod;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.ParseException;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -41,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
     @Test
-    void ensurePractitionersExist() throws IOException, URISyntaxException, GeneralSecurityException {
+    void ensurePractitionersExist() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
@@ -210,7 +211,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
 
     @Test
-    public void testPractitionerPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException {
+    public void testPractitionerPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -259,7 +260,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testRequestBodyForgery() throws GeneralSecurityException, IOException, URISyntaxException {
+    public void testRequestBodyForgery() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -283,7 +284,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testRequestBodyForgeryOnMultipleSubmit() throws GeneralSecurityException, IOException, URISyntaxException {
+    public void testRequestBodyForgeryOnMultipleSubmit() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
