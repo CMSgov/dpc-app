@@ -184,21 +184,22 @@ public class JobBatchProcessor {
      * If the look back check passes, a pair of a Flowable of {@link ExplanationOfBenefit} as Resource objects and a null OutcomeReason.
      */
     private Pair<Flowable<Resource>, OutcomeReason> checkLookBack(Patient patient, JobQueueBatch job) {
-        // If the org is exempt from lookback and they're not asking for EoBs, we don't have to do anything
-        if (isLookBackExempt(job.getOrgID()) && !job.getResourceTypes().contains(DPCResourceType.ExplanationOfBenefit)) {
-            logger.info("Skipping lookBack and EoB for org: {}", job.getOrgID());
+        if (isLookBackExempt(job.getOrgID()) ) {
+            logger.info("Skipping lookBack for org: {}", job.getOrgID());
             MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
-            return Pair.of(Flowable.empty(), null);
+
+            // If the org is exempt from lookback and they're not asking for EoBs, we don't have to do anything
+            if (!job.getResourceTypes().contains(DPCResourceType.ExplanationOfBenefit)) {
+                return Pair.of(Flowable.empty(), null);
+            }
         }
 
         Pair<List<LookBackAnswer>, Flowable<Resource>> lookBackPair = getLookBackAnswers(job, patient);
         List<LookBackAnswer> answers = lookBackPair.getLeft();
         Flowable<Resource> eobs = lookBackPair.getRight();
 
-        if (isLookBackExempt(job.getOrgID())) {
-            logger.info("Skipping lookBack for org: {}", job.getOrgID());
-            MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
-        } else {
+        // If the org isn't exempt, check if they pass lookback
+        if (!isLookBackExempt(job.getOrgID())) {
             if (!passesLookBack(answers)) {
                 OutcomeReason failReason = LookBackAnalyzer.analyze(answers);
                 return Pair.of(
