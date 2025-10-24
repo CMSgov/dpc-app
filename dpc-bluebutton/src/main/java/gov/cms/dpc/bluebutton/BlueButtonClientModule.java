@@ -164,9 +164,9 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
         // Configure the socket timeout for the connection, incl. ssl tunneling
         final TimeoutConfiguration timeouts = this.bbClientConfiguration.getTimeouts();
         RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(Timeout.ofSeconds(timeouts.getConnectionTimeout()))
-                .setConnectionRequestTimeout(Timeout.ofSeconds(timeouts.getRequestTimeout()))
-                .setResponseTimeout(Timeout.ofSeconds(timeouts.getSocketTimeout()))
+                .setConnectTimeout(Timeout.ofMilliseconds(timeouts.getConnectionTimeout()))
+                .setConnectionRequestTimeout(Timeout.ofMilliseconds(timeouts.getRequestTimeout()))
+                .setResponseTimeout(Timeout.ofMilliseconds(timeouts.getSocketTimeout()))
                 .build();
 
         return HttpClients.custom()

@@ -6,6 +6,7 @@ import gov.cms.dpc.api.DPCAPIService;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.testing.APIAuthHelpers;
+import gov.cms.dpc.testing.NoExitSecurityManager;
 import gov.cms.dpc.testing.exceptions.SystemExitException;
 import io.dropwizard.core.cli.Cli;
 import io.dropwizard.core.setup.Bootstrap;
@@ -113,8 +114,8 @@ class KeyListUnitTest {
 
         // This is kind of kludgey and isn't guaranteed to work for all versions of Java, but it allows us to test error
         // cases that call System.exit()
-//        SecurityManager originalSecurityManager = System.getSecurityManager();
-//        System.setSecurityManager(new NoExitSecurityManager());
+        SecurityManager originalSecurityManager = System.getSecurityManager();
+        System.setSecurityManager(new NoExitSecurityManager());
 
         Optional<Throwable> errors = cli.run("list", "org_id");
         assertFalse(errors.isEmpty());
@@ -123,7 +124,7 @@ class KeyListUnitTest {
         assertInstanceOf(SystemExitException.class, throwable);
         assertEquals("1", throwable.getMessage());
 
-//        System.setSecurityManager(originalSecurityManager);
+        System.setSecurityManager(originalSecurityManager);
         assertFalse(stdErr.toString().isEmpty());
     }
 }
