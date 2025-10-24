@@ -42,6 +42,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 
@@ -740,6 +741,39 @@ class JobBatchProcessorUnitTest {
         assertEquals(expectedLowerBound, actualLowerBound);
     }
 
+    @Test
+    void testLookbackExemptAndNoEob() {
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
+        UUID orgId = UUID.randomUUID();
+        OperationsConfig operationsConfig = getOperationsConfig(List.of(orgId.toString()));
+        JobBatchProcessor jobBatchProcessor = getJobBatchProcessor(bbClient, operationsConfig, new EveryoneGetsDataLookBackServiceImpl(), consentService);
+
+        YearMonth lookBackDate = operationsConfig.getLookBackDate();
+
+        IJobQueue queue = new MemoryBatchQueue();
+        final var jobID = queue.createJob(
+            orgId,
+            TEST_ORG_NPI,
+            TEST_PROVIDER_NPI,
+            Collections.singletonList(mbi),
+            Collections.singletonList(DPCResourceType.Patient),
+            convertToOffsetDateTime(lookBackDate.minusMonths(1)),
+            MockBlueButtonClient.getBfdTransactionTime(),
+            null, null, true, false
+        );
+        List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
+
+        Mockito.when(consentService.getConsent(List.of(mbi))).thenReturn(Optional.of(List.of(optIn)));
+        jobBatchProcessor.processJobBatchPartial(
+            UUID.randomUUID(),
+            queue,
+            jobs.get(0),
+            mbi
+        );
+
+        verify(bbClient, times(0)).requestEOBFromServer(any(), any(), any());
+    }
+
     private OffsetDateTime convertToOffsetDateTime(YearMonth yearMonth) {
         return yearMonth
             .atDay(1)
@@ -761,14 +795,18 @@ class JobBatchProcessorUnitTest {
 
     // Creates a generic config
     private OperationsConfig getOperationsConfig() {
+        return getOperationsConfig(List.of());
+    }
+
+    private OperationsConfig getOperationsConfig(List<String> orgIds) {
         return new OperationsConfig(
-                1000,
-                exportPath,
-                3,
-                500,
-                18,
-                YearMonth.of(2014, 3),
-                List.of(),
+            1000,
+            exportPath,
+            3,
+            500,
+            18,
+            YearMonth.of(2014, 3),
+            orgIds,
             30
         );
     }
