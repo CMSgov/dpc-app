@@ -853,9 +853,7 @@
                         </goals>
                         <configuration>
                             <!--Exclude generated sources, such as Jooq-->
-                            <excludePackageNames>gov.cms.dpc.attribution.dao;gov.cms.dpc.attribution.dao.*;
-                                gov.cms.dpc.consent.dao;gov.cms.dpc.consent.dao.*
-                            </excludePackageNames>
+                            <excludePackageNames>gov.cms.dpc.attribution.dao;gov.cms.dpc.attribution.dao.*;</excludePackageNames>
                             <!--Log only errors during the build-->
                             <quiet>true</quiet>
                             <!--Ignore missing comment warnings-->
@@ -895,7 +893,6 @@
                         <exclude>**/*_.class</exclude>
                         <!--Exclude auto-generated JOOQ classes-->
                         <exclude>gov/cms/dpc/attribution/dao/**/*</exclude>
-                        <exclude>gov/cms/dpc/consent/dao/**/*</exclude>
                         <!-- Exclude HL7 parsers, because they're too big-->
                         <exclude>org/hl7/fhir/r4/formats/*</exclude>
                         <exclude>org/hl7/fhir/r5/formats/*</exclude>
