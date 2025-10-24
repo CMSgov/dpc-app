@@ -12,6 +12,7 @@ import {
   createOrganization,
   createPatientsBatch,
   createPractitioners,
+  deletePractitioner,
   deleteOrganization,
   exportGroup,
   findOrganizationByNpi,
@@ -22,15 +23,10 @@ const npiGeneratorCache = new NPIGeneratorCache();
 
 export function setup() {
   const goldenMacaroon = fetchGoldenMacaroon();
-  console.log("goldenMacaroon: ", goldenMacaroon);
   const npiGenerator = npiGeneratorCache.getGenerator(0);
   const npi = npiGenerator.iterate();
-  console.log('npi: ', npi);
   // check if org with npi exists
   const existingOrgResponse = findOrganizationByNpi(npi, goldenMacaroon);
-  console.log('existingOrgResponse:', existingOrgResponse);
-  console.log('existingOrgResponse.status:', existingOrgResponse.status);
-  console.log('existingOrgResponse.headers["Content-Type"]:', existingOrgResponse.headers["Content-Type"]);
   const checkFindOutput = check(
     existingOrgResponse,
     {
@@ -137,10 +133,33 @@ function handleJmxSmoketests(data) {
   // 3 of 4 (submitRosters)
   const groupResponse = createGroupWithPatients(token, orgId, practitionerId, practitionerNpi, patients);
   const groupId = groupResponse.json().id;
+  const memberContentVerified = function(res) {
+    let pass = true;
+    res.json().member.forEach((patient) => {
+      if (!patients.includes(patient.entity.reference.slice(8))){
+        pass = false;
+      }
+      if (!patient.period.start || patient.period.start === patient.period.end) {
+        pass = false;
+      }
+    });
+    return pass;
+  }
+  console.log('groupResponse.json(): ', groupResponse.json());
+
+  check(
+    groupResponse,
+    {
+      'response code was 201': res => res.status === 201,
+      'accept header fhir type': res => res.headers['Content-Type'] === fhirType,
+      'correct number of patients': res => res.json().member.length === mbis.length,
+      'member content verified': memberContentVerified,
+    }
+  );
 //export function createGroupWithPatients(token, orgId, practitionerId, practitionerNpi, patients) {
   // tbd
   // 4 of 4 (exportData)
-  handleExportJob(token, groupId)
+  handleExportJob(token, groupId);
 }
 function handleExportJob(token, groupId) {
 //  const getGroupExportResponseWithSince = exportGroup(token, groupId, `_since=${sinceDate}`);
@@ -155,8 +174,8 @@ function handleExportJob(token, groupId) {
   });
   console.log('full res', getGroupExportResponseWithSince);
   console.log('look at export url headers: ', getGroupExportResponseWithSince.headers);
-  console.log('content-location: ', getGroupExportResponseWithSince.headers["content-location"]);
-  let exportJobURL = getGroupExportResponseWithSince.headers["content-location"][0];
+  console.log('content-location: ', getGroupExportResponseWithSince.headers.json()["content-location"]);
+  let exportJobURL = getGroupExportResponseWithSince.headers.json()["content-location"];
   monitorExportJob(exportJobURL, 'asdf');
 }
 
@@ -194,4 +213,8 @@ function monitorExportJob(jobLocationUrl, groupId) {
 export function workflow(data) {
   // port from src/test/smoke_test.yml + src/main/resources/SmokeTest.jmx + src/main/java/gov/cms/dpc/testing/smoketests/SmokeTest.java
   handleJmxSmoketests(data);
+}
+
+export function teardown(data) {
+  deleteOrganization(data.orgId, data.goldenMacaroon);
 }
