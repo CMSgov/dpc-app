@@ -1,6 +1,7 @@
 package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import com.codahale.metrics.MetricRegistry;
@@ -21,6 +22,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
@@ -32,12 +34,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.time.YearMonth;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -520,7 +526,7 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
-    public void loggerOutputContainsAllStructuredFields() {
+    void loggerOutputContainsAllStructuredFields() {
         // Setup test logger
         TestLoggerAppender testLogger = new TestLoggerAppender();
         ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(JobBatchProcessor.class);
@@ -567,6 +573,214 @@ class JobBatchProcessorUnitTest {
         logger.detachAppender(testLogger);
     }
 
+    @Test
+    void testSinceWithoutEob() {
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
+        OperationsConfig operationsConfig = getOperationsConfig();
+        JobBatchProcessor jobBatchProcessor = getJobBatchProcessor(bbClient, operationsConfig, new EveryoneGetsDataLookBackServiceImpl(), consentService);
+
+        YearMonth lookBackDate = operationsConfig.getLookBackDate();
+        int lookBackMonths = operationsConfig.getLookBackMonths();
+
+        IJobQueue queue = new MemoryBatchQueue();
+        final var jobID = queue.createJob(
+            UUID.randomUUID(),
+            TEST_ORG_NPI,
+            TEST_PROVIDER_NPI,
+            Collections.singletonList(mbi),
+            Collections.singletonList(DPCResourceType.Patient),
+            convertToOffsetDateTime(lookBackDate.minusMonths(1)),
+            MockBlueButtonClient.getBfdTransactionTime(),
+            null, null, true, false
+        );
+        List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
+
+        Mockito.when(consentService.getConsent(List.of(mbi))).thenReturn(Optional.of(List.of(optIn)));
+        jobBatchProcessor.processJobBatchPartial(
+            UUID.randomUUID(),
+            queue,
+            jobs.get(0),
+            mbi
+        );
+
+        String patientId = MockBlueButtonClient.MBI_BENE_ID_MAP.get(mbi);
+        ArgumentCaptor<DateRangeParam> dateRangeCaptor = ArgumentCaptor.forClass(DateRangeParam.class);
+        verify(bbClient).requestEOBFromServer(eq(patientId), dateRangeCaptor.capture(), any());
+
+        // Get the lower bound of the _lastUpdated parameter that was sent to BFD
+        DateRangeParam lastUpdated = dateRangeCaptor.getValue();
+        Instant actualLowerBound = lastUpdated.getLowerBoundAsInstant().toInstant();
+
+        // This is the lower bound we expect.  Note, lower bound is exclusive, so HAPI adds 1ms to the value.
+        Instant expectedLowerBound = convertToOffsetDateTime(lookBackDate.minusMonths(lookBackMonths)).toInstant().plusMillis(1);
+
+        assertEquals(expectedLowerBound, actualLowerBound);
+    }
+
+    @Test
+    void testSinceWithAllEobs() {
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
+        OperationsConfig operationsConfig = getOperationsConfig();
+        JobBatchProcessor jobBatchProcessor = getJobBatchProcessor(bbClient, operationsConfig, new EveryoneGetsDataLookBackServiceImpl(), consentService);
+
+        IJobQueue queue = new MemoryBatchQueue();
+        final var jobID = queue.createJob(
+            UUID.randomUUID(),
+            TEST_ORG_NPI,
+            TEST_PROVIDER_NPI,
+            Collections.singletonList(mbi),
+            Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
+            null,
+            MockBlueButtonClient.getBfdTransactionTime(),
+            null, null, true, false
+        );
+        List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
+
+        Mockito.when(consentService.getConsent(List.of(mbi))).thenReturn(Optional.of(List.of(optIn)));
+        jobBatchProcessor.processJobBatchPartial(
+            UUID.randomUUID(),
+            queue,
+            jobs.get(0),
+            mbi
+        );
+
+        String patientId = MockBlueButtonClient.MBI_BENE_ID_MAP.get(mbi);
+        ArgumentCaptor<DateRangeParam> dateRangeCaptor = ArgumentCaptor.forClass(DateRangeParam.class);
+        verify(bbClient).requestEOBFromServer(eq(patientId), dateRangeCaptor.capture(), any());
+
+        // We shouldn't send a lower bound in this case
+        // Get the lower bound of the _lastUpdated parameter that was sent to BFD
+        DateRangeParam lastUpdated = dateRangeCaptor.getValue();
+        assertNull(lastUpdated.getLowerBound());
+    }
+
+    @Test
+    void testRecentSince() {
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
+        OperationsConfig operationsConfig = getOperationsConfig();
+        JobBatchProcessor jobBatchProcessor = getJobBatchProcessor(bbClient, operationsConfig, new EveryoneGetsDataLookBackServiceImpl(), consentService);
+
+        YearMonth lookBackDate = operationsConfig.getLookBackDate();
+        int lookBackMonths = operationsConfig.getLookBackMonths();
+
+        IJobQueue queue = new MemoryBatchQueue();
+        final var jobID = queue.createJob(
+            UUID.randomUUID(),
+            TEST_ORG_NPI,
+            TEST_PROVIDER_NPI,
+            Collections.singletonList(mbi),
+            Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
+            convertToOffsetDateTime(lookBackDate.minusMonths(1)),
+            MockBlueButtonClient.getBfdTransactionTime(),
+            null, null, true, false
+        );
+        List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
+
+        Mockito.when(consentService.getConsent(List.of(mbi))).thenReturn(Optional.of(List.of(optIn)));
+        jobBatchProcessor.processJobBatchPartial(
+            UUID.randomUUID(),
+            queue,
+            jobs.get(0),
+            mbi
+        );
+
+        String patientId = MockBlueButtonClient.MBI_BENE_ID_MAP.get(mbi);
+        ArgumentCaptor<DateRangeParam> dateRangeCaptor = ArgumentCaptor.forClass(DateRangeParam.class);
+        verify(bbClient).requestEOBFromServer(eq(patientId), dateRangeCaptor.capture(), any());
+
+        // Get the lower bound of the _lastUpdated parameter that was sent to BFD
+        DateRangeParam lastUpdated = dateRangeCaptor.getValue();
+        Instant actualLowerBound = lastUpdated.getLowerBoundAsInstant().toInstant();
+
+        // This is the lower bound we expect.  Note, lower bound is exclusive, so HAPI adds 1ms to the value.
+        Instant expectedLowerBound = convertToOffsetDateTime(lookBackDate.minusMonths(lookBackMonths)).toInstant().plusMillis(1);
+
+        assertEquals(expectedLowerBound, actualLowerBound);
+    }
+
+    @Test
+    void testOldSince() {
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
+        OperationsConfig operationsConfig = getOperationsConfig();
+        JobBatchProcessor jobBatchProcessor = getJobBatchProcessor(bbClient, operationsConfig, new EveryoneGetsDataLookBackServiceImpl(), consentService);
+
+        YearMonth lookBackDate = operationsConfig.getLookBackDate();
+
+        IJobQueue queue = new MemoryBatchQueue();
+        final var jobID = queue.createJob(
+            UUID.randomUUID(),
+            TEST_ORG_NPI,
+            TEST_PROVIDER_NPI,
+            Collections.singletonList(mbi),
+            Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
+            convertToOffsetDateTime(lookBackDate.minusYears(10)),
+            MockBlueButtonClient.getBfdTransactionTime(),
+            null, null, true, false
+        );
+        List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
+
+        Mockito.when(consentService.getConsent(List.of(mbi))).thenReturn(Optional.of(List.of(optIn)));
+        jobBatchProcessor.processJobBatchPartial(
+            UUID.randomUUID(),
+            queue,
+            jobs.get(0),
+            mbi
+        );
+
+        String patientId = MockBlueButtonClient.MBI_BENE_ID_MAP.get(mbi);
+        ArgumentCaptor<DateRangeParam> dateRangeCaptor = ArgumentCaptor.forClass(DateRangeParam.class);
+        verify(bbClient).requestEOBFromServer(eq(patientId), dateRangeCaptor.capture(), any());
+
+        // Get the lower bound of the _lastUpdated parameter that was sent to BFD
+        DateRangeParam lastUpdated = dateRangeCaptor.getValue();
+        Instant actualLowerBound = lastUpdated.getLowerBoundAsInstant().toInstant();
+
+        // This is the lower bound we expect.  Note, lower bound is exclusive, so HAPI adds 1ms to the value.
+        Instant expectedLowerBound = convertToOffsetDateTime(lookBackDate.minusYears(10)).toInstant().plusMillis(1);
+
+        assertEquals(expectedLowerBound, actualLowerBound);
+    }
+
+    @Test
+    void testLookbackExemptAndNoEob() {
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
+        UUID orgId = UUID.randomUUID();
+        OperationsConfig operationsConfig = getOperationsConfig(List.of(orgId.toString()));
+        JobBatchProcessor jobBatchProcessor = getJobBatchProcessor(bbClient, operationsConfig, new EveryoneGetsDataLookBackServiceImpl(), consentService);
+
+        YearMonth lookBackDate = operationsConfig.getLookBackDate();
+
+        IJobQueue queue = new MemoryBatchQueue();
+        final var jobID = queue.createJob(
+            orgId,
+            TEST_ORG_NPI,
+            TEST_PROVIDER_NPI,
+            Collections.singletonList(mbi),
+            Collections.singletonList(DPCResourceType.Patient),
+            convertToOffsetDateTime(lookBackDate.minusMonths(1)),
+            MockBlueButtonClient.getBfdTransactionTime(),
+            null, null, true, false
+        );
+        List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
+
+        Mockito.when(consentService.getConsent(List.of(mbi))).thenReturn(Optional.of(List.of(optIn)));
+        jobBatchProcessor.processJobBatchPartial(
+            UUID.randomUUID(),
+            queue,
+            jobs.get(0),
+            mbi
+        );
+
+        verify(bbClient, times(0)).requestEOBFromServer(any(), any(), any());
+    }
+
+    private OffsetDateTime convertToOffsetDateTime(YearMonth yearMonth) {
+        return yearMonth
+            .atDay(1)
+            .atStartOfDay()
+            .atZone(ZoneId.systemDefault())
+            .toOffsetDateTime();
+    }
 
     private JobBatchProcessor getJobBatchProcessor(BlueButtonClient bbClient, OperationsConfig config, LookBackService lookBackSrvc, ConsentService consentSrvc) {
         return new JobBatchProcessor(
@@ -581,11 +795,19 @@ class JobBatchProcessorUnitTest {
 
     // Creates a generic config
     private OperationsConfig getOperationsConfig() {
+        return getOperationsConfig(List.of());
+    }
+
+    private OperationsConfig getOperationsConfig(List<String> orgIds) {
         return new OperationsConfig(
-                1000,
-                exportPath,
-                500,
-                YearMonth.of(2014, 3)
+            1000,
+            exportPath,
+            3,
+            500,
+            18,
+            YearMonth.of(2014, 3),
+            orgIds,
+            30
         );
     }
 
