@@ -77,9 +77,6 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     @Min(0)
     private int fetchWarnThresholdSeconds;
 
-    @NotNull
-    private final YearMonth lookBackDate = YearMonth.now(ZoneId.systemDefault());
-
     @NotEmpty
     private String fhirReferenceURL;
 
