@@ -138,7 +138,7 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     }
 
     public YearMonth getLookBackDate() {
-        return lookBackDate;
+        return YearMonth.now(ZoneId.systemDefault());
     }
 
     public List<String> getLookBackExemptOrgs() {

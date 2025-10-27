@@ -4,13 +4,15 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * To be clear, {@link MockBlueButtonClient} is itself only used for testing and probably doesn't need its own set of
@@ -59,6 +61,7 @@ class MockBlueButtonClientUnitTest {
 		Bundle resultBundle = client.requestEOBFromServer(id, dateRangeParam, Map.of());
 		assertEquals("c20130ee-5bf9-4c5a-b71b-70e814b67fc0", resultBundle.getIdPart());
 	}
+
 	@Test
 	void testRequestEobFromServerOutOfRange() {
 		DateRangeParam dateRangeParam = new DateRangeParam()
@@ -66,6 +69,25 @@ class MockBlueButtonClientUnitTest {
 			.setUpperBound("2100-01-01");
 		Bundle resultBundle = client.requestEOBFromServer(id, dateRangeParam, Map.of());
 		assertEquals(0, resultBundle.getTotal());
+	}
+
+	@Test
+	void testRequestEobFromPassesLookback() {
+		DateRangeParam dateRangeParam = new DateRangeParam()
+			.setLowerBound("2000-12-31")
+			.setUpperBound("2100-01-01");
+		Bundle resultBundle = client.requestEOBFromServer(MockBlueButtonClient.BENE_IDS_PASS_LOOKBACK.get(0), dateRangeParam, Map.of());
+
+		// Pull out the end date of the billable period for each EoB
+		List<Date> endDates = resultBundle.getEntry().stream()
+			.map(entry -> (ExplanationOfBenefit) entry.getResource())
+			.map(eob -> eob.getBillablePeriod().getEnd())
+			.toList();
+
+		// Make sure the dates are all within the last minute
+		endDates.forEach(date -> {
+			assertTrue(date.getTime() >= System.currentTimeMillis() - 60000);
+		});
 	}
 
 	@Test

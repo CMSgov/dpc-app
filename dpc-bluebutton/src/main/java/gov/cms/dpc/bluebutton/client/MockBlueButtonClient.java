@@ -5,9 +5,12 @@ import ca.uhn.fhir.context.PerformanceOptionsEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.dpc.fhir.DPCResourceType;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
+import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -53,16 +56,22 @@ public class MockBlueButtonClient implements BlueButtonClient {
     );
 
     public static final Map<String, String> MBI_BENE_ID_MAP = Map.of(
-            TEST_PATIENT_MBIS.get(0), "-20140000008325",
-            TEST_PATIENT_MBIS.get(1), "-20140000009893",
-            TEST_PATIENT_MBIS.get(2), "-19990000002208",
-            TEST_PATIENT_MBIS.get(3), "-19990000002209",
-            TEST_PATIENT_MBIS.get(4), "-19990000002210",
-            TEST_PATIENT_MBIS.get(5), "-20000000001809",
-            TEST_PATIENT_MBIS.get(6), "-10000010288391",
-            TEST_PATIENT_MBIS.get(7), "-10000010288391",
-            TEST_PATIENT_FOR_API_TRANSACTION_TIME, "-19990000000001"
-            );
+        TEST_PATIENT_MBIS.get(0), "-20140000008325",
+        TEST_PATIENT_MBIS.get(1), "-20140000009893",
+        TEST_PATIENT_MBIS.get(2), "-19990000002208",
+        TEST_PATIENT_MBIS.get(3), "-19990000002209",
+        TEST_PATIENT_MBIS.get(4), "-19990000002210",
+        TEST_PATIENT_MBIS.get(5), "-20000000001809",
+        TEST_PATIENT_MBIS.get(6), "-10000010288391",
+        TEST_PATIENT_MBIS.get(7), "-10000010288391",
+        TEST_PATIENT_FOR_API_TRANSACTION_TIME, "-19990000000001"
+    );
+
+    public static final List<String> BENE_IDS_PASS_LOOKBACK = List.of(
+        MBI_BENE_ID_MAP.get(TEST_PATIENT_MBIS.get(0)),
+        MBI_BENE_ID_MAP.get(TEST_PATIENT_MBIS.get(2)),
+        MBI_BENE_ID_MAP.get(TEST_PATIENT_MBIS.get(6))
+    );
 
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
     public static final OffsetDateTime TEST_LAST_UPDATED = OffsetDateTime.parse("2020-01-01T00:00:00-05:00");
@@ -102,7 +111,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
     @Override
     public Bundle requestEOBFromServer(String beneId, DateRangeParam lastUpdated, Map<String, String> headers) throws ResourceNotFoundException {
         return isInDateRange(lastUpdated) ?
-                loadBundle(SAMPLE_EOB_PATH_PREFIX, beneId) :
+                updateEobBillPeriod(loadBundle(SAMPLE_EOB_PATH_PREFIX, beneId), beneId) :
                 loadEmptyBundle();
     }
 
@@ -125,7 +134,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
         var path = SAMPLE_EOB_PATH_PREFIX + patient + "_" + startIndex + XML;
 
         try(InputStream sampleData = MockBlueButtonClient.class.getClassLoader().getResourceAsStream(path)) {
-            final var nextBundle = parseResource(Bundle.class, sampleData, XML);
+            final var nextBundle = updateEobBillPeriod(parseResource(Bundle.class, sampleData, XML), patient);
             nextBundle.getMeta().setLastUpdated(Date.from(getBfdTransactionTime().toInstant()));
             return nextBundle;
         } catch(IOException ex) {
@@ -264,6 +273,22 @@ public class MockBlueButtonClient implements BlueButtonClient {
         } else {
             throw new IllegalArgumentException("Resource: " + resourceName + " not found");
         }
+    }
+
+    private Bundle updateEobBillPeriod(Bundle bundle, String beneId) {
+        if (BENE_IDS_PASS_LOOKBACK.contains(beneId)) {
+            List<Bundle.BundleEntryComponent> entries = bundle.getEntry().stream()
+                .filter(Bundle.BundleEntryComponent::hasResource)
+                .map(Bundle.BundleEntryComponent::getResource)
+                .filter(resource -> resource.getResourceType().getPath().equals(DPCResourceType.ExplanationOfBenefit.getPath()) )
+                .map(ExplanationOfBenefit.class::cast)
+                .map(eob -> eob.setBillablePeriod( new Period().setStart(new Date()).setEnd(new Date()) ))
+                .map(eob -> new Bundle.BundleEntryComponent().setResource(eob))
+                .toList();
+
+            bundle.setEntry(entries);
+        }
+        return bundle;
     }
 
     /**
