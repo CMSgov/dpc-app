@@ -284,7 +284,7 @@ public class JobBatchProcessor {
             eobs = flowable.filter(resource -> Objects.requireNonNull(DPCResourceType.ExplanationOfBenefit.getPath()).equals(resource.getResourceType().getPath()));
             result = eobs
                     .map(ExplanationOfBenefit.class::cast)
-                    .map(resource -> lookBackService.getLookBackAnswer(resource, organizationNPI, practitionerNPI, operationsConfig.getLookBackMonths()))
+                    .map(resource -> lookBackService.getLookBackAnswer(resource, organizationNPI, practitionerNPI))
                     .toList()
                     .doOnError(e -> new ArrayList<>())
                     .blockingGet();

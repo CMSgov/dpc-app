@@ -13,7 +13,7 @@ import java.util.List;
 public class EveryoneGetsDataLookBackServiceImpl implements LookBackService {
 
     @Override
-    public LookBackAnswer getLookBackAnswer(ExplanationOfBenefit explanationOfBenefit, String organizationNPI, String practitionerNPI, long withinMonth) {
+    public LookBackAnswer getLookBackAnswer(ExplanationOfBenefit explanationOfBenefit, String organizationNPI, String practitionerNPI) {
         String npi = NPIUtil.generateNPI();
         return new LookBackAnswer(npi, npi, 1, YearMonth.now(ZoneId.systemDefault()))
                 .addEobBillingPeriod(YearMonth.now(ZoneId.systemDefault()))

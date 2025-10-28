@@ -31,7 +31,6 @@ import org.slf4j.MDC;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
-import java.time.YearMonth;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -144,7 +143,6 @@ class JobBatchProcessorUnitTest {
             1,
             500,
             120,
-            YearMonth.of(2014, 3),
             List.of(job.getOrgID().toString()),
             30
         );
@@ -194,7 +192,6 @@ class JobBatchProcessorUnitTest {
             1,
             500,
             120,
-            YearMonth.of(2014, 3),
             List.of(job.getOrgID().toString()),
             30
         );
@@ -520,7 +517,7 @@ class JobBatchProcessorUnitTest {
     }
 
     @Test
-    public void loggerOutputContainsAllStructuredFields() {
+    void loggerOutputContainsAllStructuredFields() {
         // Setup test logger
         TestLoggerAppender testLogger = new TestLoggerAppender();
         ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(JobBatchProcessor.class);
@@ -584,8 +581,7 @@ class JobBatchProcessorUnitTest {
         return new OperationsConfig(
                 1000,
                 exportPath,
-                500,
-                YearMonth.of(2014, 3)
+                500
         );
     }
 

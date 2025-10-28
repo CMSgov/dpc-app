@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
-import java.time.YearMonth;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -65,7 +64,7 @@ public class AggregationEngineHealthCheckTest {
     void setupEach() {
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        var operationalConfig = new OperationsConfig(1000, exportPath, 500, YearMonth.of(2015, 3));
+        var operationalConfig = new OperationsConfig(1000, exportPath, 500);
         LookBackServiceImpl lookBackService = Mockito.spy(new LookBackServiceImpl(operationalConfig));
         JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService, consentService));
         engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, jobBatchProcessor));
