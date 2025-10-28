@@ -117,17 +117,6 @@ You will need to add a `STATIC_SITE_URL` variable to your `.env` file:
 STATIC_SITE_URL=http://localhost:4001
 ```
 
-#### Background job processing
-In order to process background jobs such as sending email, you need to make sure [Sidekiq](https://github.com/mperham/sidekiq) is running:
-
-Open a new terminal window and execute the following in the root `/dpc-web` folder.
-
-```
-bundle exec sidekiq
-```
-
-This command starts Sidekiq in the current terminal. To stop Sidekiq: `ctrl-c`, and it will shutdown the worker.
-
 # Running via Docker
 
 The DPC website can also be run via docker. Follow the below steps to build and run the website into a Docker container.

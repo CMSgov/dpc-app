@@ -47,12 +47,6 @@ Rails.application.routes.draw do
   match '/download_snippet', to: 'public_keys#download_snippet', as: 'download_snippet', via: :post
   get 'system-use-agreement', to: 'static_pages#system_use_agreement'
 
-  if Rails.env.development?
-    require 'sidekiq/web'
-    require 'sidekiq/cron/web'
-    mount Sidekiq::Web, at: '/sidekiq'
-  end
-
   if Rails.env.development? || ENV["ENV"] == "dev"
     mount Lookbook::Engine, at: "lookbook"
   end

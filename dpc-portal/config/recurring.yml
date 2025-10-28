@@ -1,0 +1,42 @@
+# examples:
+#   periodic_cleanup:
+#     class: CleanSoftDeletedRecordsJob
+#     queue: background
+#     args: [ 1000, { batch_size: 500 } ]
+#     schedule: every hour
+#   periodic_cleanup_with_command:
+#     command: "SoftDeletedRecord.due.delete_all"
+#     priority: 2
+#     schedule: at 5am every day
+
+production:
+  clear_solid_queue_finished_jobs:
+    command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
+    schedule: every hour at minute 12
+
+  verify_ao_job:
+    schedule: "0 1 * * 0"
+    class: "VerifyAoJob"
+    queue: portal
+
+  verify_dpc_health_job:
+    schedule: "*/1 * * * *"
+    class: "VerifyResourceHealthJob"
+    queue: portal
+    args: [ { check_dpc: true, check_cpi: false, check_idp: false } ]
+
+  verify_non_dpc_health_job:
+    schedule: "0 * * * *"
+    class: "VerifyResourceHealthJob"
+    queue: portal
+    args: [ { check_dpc: false, check_cpi: true, check_idp: true } ]
+
+  log_organizations_api_credential_status_job:
+    schedule: "0 0 * * *"
+    class: "LogOrganizationsApiCredentialStatusJob"
+    queue: portal
+
+  check_config_complete_job:
+    schedule: "0 2 * * 0"
+    class: "CheckConfigCompleteJob"
+    queue: portal
