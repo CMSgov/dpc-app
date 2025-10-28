@@ -68,9 +68,12 @@ public class MockBlueButtonClient implements BlueButtonClient {
     );
 
     public static final List<String> BENE_IDS_PASS_LOOKBACK = List.of(
-        MBI_BENE_ID_MAP.get(TEST_PATIENT_MBIS.get(0)),
-        MBI_BENE_ID_MAP.get(TEST_PATIENT_MBIS.get(2)),
-        MBI_BENE_ID_MAP.get(TEST_PATIENT_MBIS.get(6))
+        MBI_BENE_ID_MAP.get(TEST_PATIENT_MBIS.get(0)),  // Used in patient ITs
+        MBI_BENE_ID_MAP.get(TEST_PATIENT_MBIS.get(2)),  // Used in smoke tests and patient ITs
+        MBI_BENE_ID_MAP.get(TEST_PATIENT_MBIS.get(3)),  // Used in smoke tests
+        MBI_BENE_ID_MAP.get(TEST_PATIENT_MBIS.get(4)),  // Used in smoke tests
+        MBI_BENE_ID_MAP.get(TEST_PATIENT_MBIS.get(5)),  // Used in smoke tests
+        MBI_BENE_ID_MAP.get(TEST_PATIENT_MBIS.get(6))   // Used in patient ITs
     );
 
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
@@ -295,7 +298,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
      * Gets the mock BFD transaction time.
      * @return {@link OffsetDateTime}
      */
-    static public OffsetDateTime getBfdTransactionTime() {
+    public static OffsetDateTime getBfdTransactionTime() {
         return OffsetDateTime.ofInstant(Instant.now().truncatedTo(ChronoUnit.MILLIS), ZoneOffset.UTC);
     }
 }
