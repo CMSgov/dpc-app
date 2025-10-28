@@ -159,6 +159,14 @@ export function deleteOrganization(orgId, goldenMacaroon) {
   return res;
 }
 
+export function deleteGroup(token, groupId) {
+  const res = http.del(`${urlRoot}/Group/${groupId}`,
+	  createHeaderParam(token)
+	);
+
+  return res;
+}
+
 export function createGroup(token, orgId, practitionerId, practitionerNpi) {
     const groupBody = generateGroupResourceBody(practitionerNpi);
     const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
@@ -264,7 +272,7 @@ export function authorizedGet(token, url, headers = {}) {
  * @param {*} headers Additional headers that should be included.
  * @returns Headers wrapped in a Parameters object.
  */
-function createHeaderParam(token, headers) {
+export function createHeaderParam(token, headers) {
   const defaultHeaders = {
     'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/fhir+json',

@@ -9,14 +9,16 @@ import { fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
 import NPIGeneratorCache from './utils/npi-generator.js';
 import {
   createGroupWithPatients,
+  createHeaderParam,
   createOrganization,
   createPatientsBatch,
   createPractitioners,
   deletePractitioner,
   deleteOrganization,
   exportGroup,
+  findGroupByPractitionerNpi,
+  findJobById,
   findOrganizationByNpi,
-
 } from './dpc-api-client.js';
 
 const npiGeneratorCache = new NPIGeneratorCache();
@@ -61,7 +63,9 @@ export function setup() {
     exec.test.abort('failed to create organizations on setup')
   }
 
-  return { orgId: org.json().id, goldenMacaroon: goldenMacaroon };
+  const practitionerNpi = '2459425221' // hard-coded for lookback tests
+
+  return { orgId: org.json().id, goldenMacaroon: goldenMacaroon, practitionerNpi: practitionerNpi };
 }
 
 export const options = {
@@ -91,11 +95,13 @@ function handleJmxSmoketests(data) {
   const mbis = ['1SQ3F00AA00', '5S58A00AA00', '4S58A00AA00', '3S58A00AA00', '0S80C00AA00']
   const orgId = data.orgId;
 
+  console.log('running jmx smoketests for organization: ', orgId);
   const token = generateDPCToken(orgId, data.goldenMacaroon);
 
   // 1 of 4 (submitPractitioners)
   const practitionerNpi = '2459425221' // hard-coded for lookback tests
   const practitionerResponse = createPractitioners(token, practitionerNpi);
+  console.log('practitionerResponse.json(): ', practitionerResponse.json());
   const checkPractitionerResponse = check(
     practitionerResponse,
     {
@@ -145,6 +151,7 @@ function handleJmxSmoketests(data) {
     });
     return pass;
   }
+  console.log('groupId: ', groupId);
   console.log('groupResponse.json(): ', groupResponse.json());
 
   check(
@@ -173,25 +180,32 @@ function handleExportJob(token, groupId) {
     'has Content-Location': r => !!r.headers['Content-Location'],
   });
   console.log('full res', getGroupExportResponseWithSince);
-  console.log('look at export url headers: ', getGroupExportResponseWithSince.headers);
-  console.log('content-location: ', getGroupExportResponseWithSince.headers.json()["content-location"]);
-  let exportJobURL = getGroupExportResponseWithSince.headers.json()["content-location"];
-  monitorExportJob(exportJobURL, 'asdf');
+  let exportJobURL = getGroupExportResponseWithSince.headers["Content-Location"];
+  // e.g. http://localhost:3002/api/v1/Jobs/4c5ac919-bd2b-4194-9013-233b26363af9
+  console.log('exportJobURL: ', exportJobURL);
+  monitorExportJob(token, groupId, exportJobURL);
 }
+
+const getUuidFromUrl = (s) => {
+  const m = s.match(/\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b(?=\/?$)/i);
+  return m ? m[0] : null;
+};
 
 const EXPORT_POLL_INTERVAL = 20000;
 const EXPORT_POLL_TIMEOUT = 300000;
-function monitorExportJob(jobLocationUrl, groupId) {
+function monitorExportJob(token, groupId, jobLocationUrl) {
+  const jobId = getUuidFromUrl(jobLocationUrl);
+  console.log('handling jobId: ', jobId);
   const start = Date.now() / 1000;
 
   while (true) {
-    //  move to dpc-api-client
-    jobResponse = http.get(jobLocationUrl, authHeaders());
-    statusCode = jobResponse.status;
+    const headers = createHeaderParam(token);
+    const jobResponse = findJobById(jobId);
+    const statusCode = jobResponse.status;
 
     // Typically 202 while running, 200 with JSON body when done.
     if (statusCode > 300) {
-      throw new Error(`Export for ${group.id} failed with status code: ${statusCode}`);
+      throw new Error(`Export for ${groupId} failed with status code: ${statusCode}`);
     }
     else if (statusCode === 200) {
       // "done"
@@ -203,7 +217,7 @@ function monitorExportJob(jobLocationUrl, groupId) {
 
     const elapsed = (Date.now() - start) / 1000;
     if (elapsed > EXPORT_POLL_TIMEOUT) {
-      throw new Error(`Export for ${group.id} timed out after ${EXPORT_POLL_TIMEOUT}s`);
+      throw new Error(`Export for ${groupId} timed out after ${EXPORT_POLL_TIMEOUT}s`);
     }
 
     sleep(EXPORT_POLL_INTERVAL / 1000);
@@ -216,5 +230,17 @@ export function workflow(data) {
 }
 
 export function teardown(data) {
+  console.log('deleting organization: ', data.orgId);
   deleteOrganization(data.orgId, data.goldenMacaroon);
+  console.log('organization deleted!');
+  console.log('deleting practitioner: ', '751febad-4c59-4f04-ad10-af51f7b26cb6');
+  deletePractitioner('751febad-4c59-4f04-ad10-af51f7b26cb6', data.goldenMacaroon)
+  console.log('deleted practitioner');
+//  const groupResponse = findGroupByPractitionerNpi(data.practitionerNpi);
+//  const groupId = groupResponse.json().id;
+//  console.log('groupResponse:', groupResponse.json());
+
+//  console.log('deleting group:', groupId);
+//  deleteGroup(token, groupId);
+//  console.log('group deleted!');
 }
