@@ -2,8 +2,7 @@
 /* eslint no-console: "off" */
 
 import http from 'k6/http';
-import { check } from 'k6';
-import { sleep } from 'k6';
+import { check, fail, sleep } from 'k6';
 import exec from 'k6/execution'
 import { fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
 import NPIGeneratorCache from './utils/npi-generator.js';
@@ -136,6 +135,7 @@ function handleJmxSmoketests(data) {
     console.error('failed to create patients');
   }
   console.log(checkPatientsResponse);
+
   // 3 of 4 (submitRosters)
   const groupResponse = createGroupWithPatients(token, orgId, practitionerId, practitionerNpi, patients);
   const groupId = groupResponse.json().id;
@@ -151,8 +151,6 @@ function handleJmxSmoketests(data) {
     });
     return pass;
   }
-  console.log('groupId: ', groupId);
-  console.log('groupResponse.json(): ', groupResponse.json());
 
   check(
     groupResponse,
@@ -163,26 +161,17 @@ function handleJmxSmoketests(data) {
       'member content verified': memberContentVerified,
     }
   );
-//export function createGroupWithPatients(token, orgId, practitionerId, practitionerNpi, patients) {
-  // tbd
   // 4 of 4 (exportData)
   handleExportJob(token, groupId);
 }
 function handleExportJob(token, groupId) {
-//  const getGroupExportResponseWithSince = exportGroup(token, groupId, `_since=${sinceDate}`);
   const getGroupExportResponseWithSince = exportGroup(token, groupId);
-//  final Map<String, List<String>> headers = outcome.getResponseHeaders();
-//  // Get the headers and check the status
-//  final String exportURL = headers.get("content-location").get(0);
-  console.log('status code: ', getGroupExportResponseWithSince.status);
   check(getGroupExportResponseWithSince, {
     'kickoff 202': r => r.status === 202,
     'has Content-Location': r => !!r.headers['Content-Location'],
   });
   console.log('full res', getGroupExportResponseWithSince);
   let exportJobURL = getGroupExportResponseWithSince.headers["Content-Location"];
-  // e.g. http://localhost:3002/api/v1/Jobs/4c5ac919-bd2b-4194-9013-233b26363af9
-  console.log('exportJobURL: ', exportJobURL);
   monitorExportJob(token, groupId, exportJobURL);
 }
 
@@ -191,36 +180,36 @@ const getUuidFromUrl = (s) => {
   return m ? m[0] : null;
 };
 
-const EXPORT_POLL_INTERVAL = 20000;
-const EXPORT_POLL_TIMEOUT = 300000;
+const EXPORT_POLL_INTERVAL_SEC = 15;
+const EXPORT_POLL_TIMEOUT_SEC = 600;
+// ported from ClientUtils.awaitExportResponse
 function monitorExportJob(token, groupId, jobLocationUrl) {
   const jobId = getUuidFromUrl(jobLocationUrl);
   console.log('handling jobId: ', jobId);
-  const start = Date.now() / 1000;
+  const start = Date.now();
 
   while (true) {
     const headers = createHeaderParam(token);
-    const jobResponse = findJobById(jobId);
+    const jobResponse = findJobById(token, jobId);
     const statusCode = jobResponse.status;
 
-    // Typically 202 while running, 200 with JSON body when done.
     if (statusCode > 300) {
-      throw new Error(`Export for ${groupId} failed with status code: ${statusCode}`);
+      fail(`Export for ${groupId} failed with status code: ${statusCode}`);
     }
     else if (statusCode === 200) {
-      // "done"
-      check(res, {
+      check(jobResponse, {
         'job completed (200 code)': r => r.status === 200,
       });
       break;
     }
 
-    const elapsed = (Date.now() - start) / 1000;
-    if (elapsed > EXPORT_POLL_TIMEOUT) {
-      throw new Error(`Export for ${groupId} timed out after ${EXPORT_POLL_TIMEOUT}s`);
+    const elapsed = (Date.now() - start);
+    if (elapsed > EXPORT_POLL_TIMEOUT_SEC) {
+      console.log('reached poll timeout');
+      fail('status code was *not* 200');
     }
 
-    sleep(EXPORT_POLL_INTERVAL / 1000);
+    sleep(EXPORT_POLL_INTERVAL_SEC);
   }
 }
 
@@ -230,17 +219,5 @@ export function workflow(data) {
 }
 
 export function teardown(data) {
-  console.log('deleting organization: ', data.orgId);
   deleteOrganization(data.orgId, data.goldenMacaroon);
-  console.log('organization deleted!');
-  console.log('deleting practitioner: ', '751febad-4c59-4f04-ad10-af51f7b26cb6');
-  deletePractitioner('751febad-4c59-4f04-ad10-af51f7b26cb6', data.goldenMacaroon)
-  console.log('deleted practitioner');
-//  const groupResponse = findGroupByPractitionerNpi(data.practitionerNpi);
-//  const groupId = groupResponse.json().id;
-//  console.log('groupResponse:', groupResponse.json());
-
-//  console.log('deleting group:', groupId);
-//  deleteGroup(token, groupId);
-//  console.log('group deleted!');
 }
