@@ -5,7 +5,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import jakarta.ws.rs.WebApplicationException;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;

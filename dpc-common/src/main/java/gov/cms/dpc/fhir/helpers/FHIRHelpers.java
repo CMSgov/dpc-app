@@ -5,12 +5,13 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.net.URIBuilder;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -41,7 +42,7 @@ public class FHIRHelpers {
      * @return - {@link String} Access token generated for the {@link Organization}
      * @throws IOException - Throws if HTTP client fails
      */
-    public static String registerOrganization(IGenericClient client, IParser parser, String organizationID, String organizationNPI, String adminURL) throws IOException {
+    public static String registerOrganization(IGenericClient client, IParser parser, String organizationID, String organizationNPI, String adminURL) throws IOException, ParseException {
         // Random number generator for Org NPI
         // Register an organization, and a token
         // Read in the test file
@@ -76,8 +77,8 @@ public class FHIRHelpers {
                 final HttpPost tokenPost = new HttpPost(uriBuilder.build());
 
                 try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
-                    if (response.getStatusLine().getStatusCode() != HttpStatus.OK_200) {
-                        throw new IllegalStateException(String.format("Unable to generate token: %s", response.getStatusLine().getReasonPhrase()));
+                    if (response.getCode() != HttpStatus.OK_200) {
+                        throw new IllegalStateException(String.format("Unable to generate token: %s", response.getReasonPhrase()));
                     }
                     macaroon = EntityUtils.toString(response.getEntity());
                 }

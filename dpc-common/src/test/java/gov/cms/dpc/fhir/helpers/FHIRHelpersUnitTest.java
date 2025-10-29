@@ -8,12 +8,12 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -60,7 +60,7 @@ class FHIRHelpersUnitTest {
         MockedStatic<HttpClients> mockedHttpClients = mockStatic(HttpClients.class);
         mockedHttpClients.when(HttpClients::createDefault).thenReturn(httpClient);
         CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class, RETURNS_DEEP_STUBS);
-        when(httpResponse.getStatusLine().getStatusCode()).thenReturn(HttpStatus.SC_OK);
+        when(httpResponse.getCode()).thenReturn(HttpStatus.SC_OK);
         when(httpClient.execute(any(HttpPost.class))).thenReturn(httpResponse);
         HttpEntity httpEntity = mock(HttpEntity.class);
         InputStream inputStream = IOUtils.toInputStream(MACAROON, "UTF-8");
@@ -72,11 +72,11 @@ class FHIRHelpersUnitTest {
         assertEquals(MACAROON, response);
 
         // Token generation error
-        when(httpResponse.getStatusLine().getStatusCode()).thenReturn(HttpStatus.SC_BAD_REQUEST);
-        when(httpResponse.getStatusLine().getReasonPhrase()).thenReturn("Bad request");
+        when(httpResponse.getCode()).thenReturn(HttpStatus.SC_BAD_REQUEST);
+        when(httpResponse.getReasonPhrase()).thenReturn("Bad request");
         IllegalStateException stateException = assertThrows(IllegalStateException.class, () ->
                 FHIRHelpers.registerOrganization(client, parser, orgID.toString(), orgNPI, ADMIN_URL));
-        assertEquals("Unable to generate token: " + httpResponse.getStatusLine().getReasonPhrase(), stateException.getMessage());
+        assertEquals("Unable to generate token: " + httpResponse.getReasonPhrase(), stateException.getMessage());
     }
 
     @Test

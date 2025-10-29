@@ -8,7 +8,7 @@ import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

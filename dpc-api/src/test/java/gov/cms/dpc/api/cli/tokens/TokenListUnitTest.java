@@ -12,7 +12,7 @@ import gov.cms.dpc.testing.exceptions.SystemExitException;
 import io.dropwizard.core.cli.Cli;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -76,7 +76,7 @@ public class TokenListUnitTest {
         tokenEntity.setCreatedAt(OffsetDateTime.now());
         tokenEntity.setExpiresAt(OffsetDateTime.now());
         tokenEntity.setToken("token");
-        CollectionResponse collectionResponse = new CollectionResponse(List.of(tokenEntity));
+        CollectionResponse<TokenEntity> collectionResponse = new CollectionResponse<>(List.of(tokenEntity));
 
         ObjectMapper mapper = new ObjectMapper();
         String payload = mapper.writeValueAsString(collectionResponse);
@@ -102,7 +102,7 @@ public class TokenListUnitTest {
     }
 
     @Test
-    public void testListTokens_badResponse() throws IOException {
+    public void testListTokens_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()

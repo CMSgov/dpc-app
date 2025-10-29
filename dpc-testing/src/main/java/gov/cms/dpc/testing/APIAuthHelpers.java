@@ -17,20 +17,20 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.SignatureAlgorithm;
 import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
+import org.apache.hc.core5.http.*;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.net.URIBuilder;
 import org.eclipse.jetty.http.HttpStatus;
 
 import javax.net.ssl.SSLContext;
@@ -129,7 +129,7 @@ public class APIAuthHelpers {
             post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
 
             try (CloseableHttpResponse response = client.execute(post)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token validation should have succeeded");
+                assertEquals(HttpStatus.OK_200, response.getCode(), "Token validation should have succeeded");
             }
         }
 
@@ -149,7 +149,7 @@ public class APIAuthHelpers {
             post.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
 
             try (CloseableHttpResponse response = client.execute(post)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token request should have succeeded");
+                assertEquals(HttpStatus.OK_200, response.getCode(), "Token request should have succeeded");
                 authResponse = mapper.readValue(response.getEntity().getContent(), AuthResponse.class);
                 assertNotEquals(macaroon, authResponse.accessToken, "New Macaroon should not be identical");
                 assertEquals(300, authResponse.expiresIn, "Should expire in 300 seconds");
@@ -158,17 +158,17 @@ public class APIAuthHelpers {
         return authResponse;
     }
 
-    public static String createGoldenMacaroon() throws IOException {
+    public static String createGoldenMacaroon() throws IOException, ParseException {
         return createGoldenMacaroon(TASK_URL);
     }
 
-    public static String createGoldenMacaroon(String taskURL) throws IOException {
+    public static String createGoldenMacaroon(String taskURL) throws IOException, ParseException {
 
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost post = new HttpPost(String.format("%s/generate-token", taskURL));
 
             try (CloseableHttpResponse execute = client.execute(post)) {
-                assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Generated macaroon");
+                assertEquals(HttpStatus.OK_200, execute.getCode(), "Generated macaroon");
                 return EntityUtils.toString(execute.getEntity());
             }
         }
@@ -234,7 +234,7 @@ public class APIAuthHelpers {
         try (CloseableHttpClient client = createCustomHttpClient().trusting().build()) {
             try (CloseableHttpResponse response = client.execute(post)) {
                 keyEntity = mapper.readValue(response.getEntity().getContent(), KeyView.class);
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Key should be valid");
+                assertEquals(HttpStatus.OK_200, response.getCode(), "Key should be valid");
             }
         }
 
@@ -257,8 +257,11 @@ public class APIAuthHelpers {
         final HttpClientBuilder clientBuilder = HttpClients.custom();
         if (disableSSLCheck) {
             try {
-                clientBuilder.setSSLContext(createTrustingSSLContext());
-                clientBuilder.setSSLHostnameVerifier((s, sslSession) -> s.equalsIgnoreCase(sslSession.getPeerHost()));
+                clientBuilder.setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+                        .setTlsSocketStrategy(new DefaultClientTlsStrategy(
+                                createTrustingSSLContext(),
+                                (s, sslSession) -> s.equalsIgnoreCase(sslSession.getPeerHost())
+                        )).build());
             } catch (NoSuchAlgorithmException | KeyManagementException e) {
                 throw new RuntimeException("Cannot create custom SSL context", e);
             }
@@ -443,7 +446,7 @@ public class APIAuthHelpers {
         }
 
         @Override
-        public void process(HttpRequest request, HttpContext context) {
+        public void process(HttpRequest request, EntityDetails details, HttpContext context) {
             if (OffsetDateTime.now(ZoneOffset.UTC).isAfter(this.shouldRefreshToken)) {
                 refreshAuthToken();
             }
@@ -465,7 +468,7 @@ public class APIAuthHelpers {
 
     public static class CustomHttpBuilder {
 
-        private final org.apache.http.impl.client.HttpClientBuilder builder;
+        private final HttpClientBuilder builder;
 
         CustomHttpBuilder() {
             this.builder = HttpClients.custom();
@@ -474,9 +477,11 @@ public class APIAuthHelpers {
 
         public CustomHttpBuilder trusting() {
             try {
-                builder
-                        .setSSLContext(createTrustingSSLContext())
-                        .setSSLHostnameVerifier((s, sslSession) -> s.equalsIgnoreCase(sslSession.getPeerHost()));
+                builder.setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+                        .setTlsSocketStrategy(new DefaultClientTlsStrategy(
+                                createTrustingSSLContext(),
+                                (s, sslSession) -> s.equalsIgnoreCase(sslSession.getPeerHost())
+                        )).build());
             } catch (KeyManagementException | NoSuchAlgorithmException e) {
                 throw new IllegalStateException("Cannot create trusting http context");
             }
@@ -485,7 +490,7 @@ public class APIAuthHelpers {
         }
 
         public CustomHttpBuilder isAuthed(String baseURL, String clientToken, UUID keyID, PrivateKey privateKey) {
-            this.builder.addInterceptorFirst(new HttpClientAuthInterceptor(baseURL, clientToken, keyID, privateKey));
+            this.builder.addRequestInterceptorFirst(new HttpClientAuthInterceptor(baseURL, clientToken, keyID, privateKey));
             return this;
         }
 
