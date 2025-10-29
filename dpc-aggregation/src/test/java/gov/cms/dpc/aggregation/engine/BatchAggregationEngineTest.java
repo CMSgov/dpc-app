@@ -56,7 +56,15 @@ class BatchAggregationEngineTest {
     static void setupAll() {
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         fhirContextR4.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
-        operationsConfig = new OperationsConfig(10, exportPath, 3);
+        operationsConfig = new OperationsConfig(
+            10,
+            exportPath,
+            3,
+            500,
+            18,
+            List.of(),
+            30
+        );
         AggregationEngine.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
         ContextUtils.prefetchResourceModels(fhirContextR4, JobQueueBatch.validResourceTypes);

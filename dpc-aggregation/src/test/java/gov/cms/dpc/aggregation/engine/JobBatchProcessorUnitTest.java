@@ -33,6 +33,10 @@ import org.slf4j.MDC;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -794,9 +798,13 @@ class JobBatchProcessorUnitTest {
 
     private OperationsConfig getOperationsConfig(List<String> orgIds) {
         return new OperationsConfig(
-                1000,
-                exportPath,
-                500
+            1000,
+            exportPath,
+            3,
+            500,
+            18,
+            orgIds,
+            30
         );
     }
 

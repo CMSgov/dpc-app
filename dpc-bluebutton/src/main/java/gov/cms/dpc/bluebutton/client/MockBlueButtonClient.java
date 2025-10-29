@@ -7,10 +7,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.fhir.DPCResourceType;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.CapabilityStatement;
-import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
-import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -77,7 +74,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
     );
 
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
-    public static final OffsetDateTime TEST_LAST_UPDATED = OffsetDateTime.parse("2020-01-01T00:00:00-05:00");
+    public static final OffsetDateTime TEST_LAST_UPDATED = OffsetDateTime.now();
 
     private static final String JSON = ".json";
     private static final String XML = ".xml";
@@ -137,7 +134,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
         var path = SAMPLE_EOB_PATH_PREFIX + patient + "_" + startIndex + XML;
 
         try(InputStream sampleData = MockBlueButtonClient.class.getClassLoader().getResourceAsStream(path)) {
-            final var nextBundle = updateEobBillPeriod(parseResource(Bundle.class, sampleData, XML), patient);
+            final var nextBundle = updateLastUpdated(updateEobBillPeriod(parseResource(Bundle.class, sampleData, XML), patient));
             nextBundle.getMeta().setLastUpdated(Date.from(getBfdTransactionTime().toInstant()));
             return nextBundle;
         } catch(IOException ex) {
@@ -192,7 +189,7 @@ public class MockBlueButtonClient implements BlueButtonClient {
                 Date.from(getBfdTransactionTime().toInstant());
 
             bundle.getMeta().setLastUpdated(lastUpdated);
-            return bundle;
+            return updateLastUpdated(bundle);
         } catch(IOException ex) {
             throw formNoPatientException(beneId);
         }
@@ -291,6 +288,25 @@ public class MockBlueButtonClient implements BlueButtonClient {
 
             bundle.setEntry(entries);
         }
+        return bundle;
+    }
+
+    private Bundle updateLastUpdated(Bundle bundle) {
+        List<Bundle.BundleEntryComponent> entries = bundle.getEntry().stream()
+            .filter(Bundle.BundleEntryComponent::hasResource)
+            .map(Bundle.BundleEntryComponent::getResource)
+            .map(resource -> {
+                if (resource.hasMeta() && resource.getMeta().hasLastUpdated() ) {
+                    Meta meta = resource.getMeta();
+                    meta.setLastUpdated(Date.from(TEST_LAST_UPDATED.toInstant()));
+                    resource.setMeta(meta);
+                }
+                return resource;
+            } )
+            .map(resource -> new Bundle.BundleEntryComponent().setResource(resource))
+            .toList();
+
+        bundle.setEntry(entries);
         return bundle;
     }
 
