@@ -84,7 +84,8 @@ class MockBlueButtonClientUnitTest {
 			.map(eob -> eob.getBillablePeriod().getEnd())
 			.toList();
 
-		// Make sure the dates are all within the last minute
+		// Make sure the dates are all within the last minute, and that we have some values
+		assertFalse(endDates.isEmpty());
 		endDates.forEach(date -> {
 			assertTrue(date.getTime() >= System.currentTimeMillis() - 60000);
 		});
