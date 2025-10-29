@@ -163,6 +163,16 @@ function handleJmxSmoketests(data) {
   );
   // 4 of 4 (exportData)
   handleExportJob(token, groupId);
+
+  // using "real" practitioner endpoint instead of .json file
+  // needs to be cleaned up before tearDown()
+  const deletePractitionerResponse = deletePractitioner(token, practitionerId);
+  check(
+    deletePractitionerResponse,
+    {
+      'delete practitioner response code was 200': res => res.status === 200,
+    }
+  );
 }
 function handleExportJob(token, groupId) {
   const getGroupExportResponseWithSince = exportGroup(token, groupId);
