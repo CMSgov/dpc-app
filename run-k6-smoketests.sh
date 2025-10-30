@@ -2,18 +2,12 @@
 set -Ee
 
 if [[ "$*" == *"--k6-env=local"* ]]; then
-  echo "running local!!!"
   PORTAL_HOST="http://localhost:3100"
   WEB_ADMIN_HOST="http://localhost:3000"
   WEB_HOST="http://localhost:3900"
   API_ADMIN_URL="http://localhost:9903"
   K6_ENVIRONMENT="local"
 else
-  # Uses ELB_URL if exported; otherwise the literal fallback "ELB_URL"
-  echo "running remote setup!!!"
-  echo "running remote setup!!!"
-  echo "running remote setup!!!"
-  echo "running remote setup!!!"
   API_ADMIN_URL=ELB_URL
   K6_ENVIRONMENT="prod"
 fi

@@ -77,6 +77,17 @@ jobs:
           HOST="https://${{ inputs.env }}.dpc.cms.gov"
           echo "HOST=$HOST" >> "$GITHUB_OUTPUT"
           echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
+      - name: run k6 smoketest script
+        id: run-smoke-test-k6
+        env:
+          ELB_URL: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
+          HOST_URL: ${{ steps.determine-host.outputs.HOST_URL }}
+          PORTAL_HOST: ${{ steps.determine-host.outputs.HOST }}
+          WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
+          WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
+          PUBLIC_URL: ${{ steps.determine-host.outputs.HOST }}
+        run:
+          make smoketest-k6-remote
       - name: Run Smoke Test
         id: run-smoke-test
         env:
