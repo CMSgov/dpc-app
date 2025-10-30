@@ -8,7 +8,7 @@ if [[ "$*" == *"--k6-env=local"* ]]; then
   API_ADMIN_URL="http://localhost:9903"
   K6_ENVIRONMENT="local"
 else
-  API_ADMIN_URL=ELB_URL
+  API_ADMIN_URL=${ELB_URL}
   K6_ENVIRONMENT="prod"
 fi
 
