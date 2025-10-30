@@ -14,10 +14,12 @@ fi
 
 echo "starting k6"
 echo "running k6 frontend tests"
-k6 run dpc-load-testing/smoketest-frontend-ci-app.js \
+docker run --rm -v $(pwd)/dpc-load-testing:/src --env-file $(pwd)/ops/config/decrypted/local.env \
+  --network host \
   -e PORTAL_HOST=${PORTAL_HOST} \
   -e WEB_ADMIN_HOST=${WEB_ADMIN_HOST} \
   -e WEB_HOST=${WEB_HOST} \
+  -i grafana/k6 run /src/smoketest-frontend-ci-app.js
 
 echo "running (authenticated) backend tests in docker"
 docker run --rm -v $(pwd)/dpc-load-testing:/src --env-file $(pwd)/ops/config/decrypted/local.env \

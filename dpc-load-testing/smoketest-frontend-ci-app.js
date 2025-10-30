@@ -28,7 +28,6 @@ function checkLoginPage(baseUrl, paths, loginText) {
 }
 
 export default function workflow(data) {
-  console.log('from workflow... __ENV.API_ADMIN_URL:', __ENV.API_ADMIN_URL);
   // port from src/test/portal_test.yml
   checkLoginPage(__ENV.PORTAL_HOST, ["/portal", "/portal/organizations"], "Sign in");
   // port from src/test/web_test.yml
