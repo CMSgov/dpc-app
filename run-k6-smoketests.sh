@@ -23,7 +23,7 @@ docker run --rm -v $(pwd)/dpc-load-testing:/src --env-file $(pwd)/ops/config/dec
 
 echo "running (authenticated) backend tests in docker"
 docker run --rm -v $(pwd)/dpc-load-testing:/src --env-file $(pwd)/ops/config/decrypted/local.env \
-  --add-host host.docker.internal=host-gateway \
+  --network host \
   -e PORTAL_HOST=${PORTAL_HOST} \
   -e WEB_ADMIN_HOST=${WEB_ADMIN_HOST} \
   -e WEB_HOST=${WEB_HOST} \
