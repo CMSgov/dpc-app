@@ -11,8 +11,7 @@ public interface LookBackService {
      * @param explanationOfBenefit The EoB
      * @param organizationNPI      The organizationNPI
      * @param practitionerNPI      The providerNPI
-     * @param withinMonth          The limit of months to qualify for having a claim
      * @return true or false if the EoB matches the organizationID and providerID and has a claim within certain months
      */
-    LookBackAnswer getLookBackAnswer(ExplanationOfBenefit explanationOfBenefit, String organizationNPI, String practitionerNPI, long withinMonth);
+    LookBackAnswer getLookBackAnswer(ExplanationOfBenefit explanationOfBenefit, String organizationNPI, String practitionerNPI);
 }
