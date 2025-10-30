@@ -74,7 +74,9 @@ public class MockBlueButtonClient implements BlueButtonClient {
     );
 
     public static final List<String> TEST_PATIENT_WITH_BAD_IDS = List.of("-1", "-2", TEST_PATIENT_MBIS.get(0), TEST_PATIENT_MBIS.get(1), "-3");
-    public static final OffsetDateTime TEST_LAST_UPDATED = OffsetDateTime.now();
+
+    // Make sure this is further back than the BFD transaction time returned in loadBundle
+    public static final OffsetDateTime TEST_LAST_UPDATED = OffsetDateTime.now().minusDays(3);
 
     private static final String JSON = ".json";
     private static final String XML = ".xml";
