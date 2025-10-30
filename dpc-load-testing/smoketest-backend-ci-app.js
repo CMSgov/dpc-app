@@ -63,6 +63,7 @@ export function setup() {
   }
 
   const practitionerNpi = '2459425221' // hard-coded for lookback tests
+  console.log('orgId: ', org.json().id);
 
   return { orgId: org.json().id, goldenMacaroon: goldenMacaroon, practitionerNpi: practitionerNpi };
 }
