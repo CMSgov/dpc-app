@@ -26,30 +26,31 @@ export function setup() {
   const goldenMacaroon = fetchGoldenMacaroon();
   const npiGenerator = npiGeneratorCache.getGenerator(0);
   const npi = npiGenerator.iterate();
-  // check if org with npi exists
-  const existingOrgResponse = findOrganizationByNpi(npi, goldenMacaroon);
-  console.log('existingOrgResponse status: ', existingOrgResponse.status);
-  console.log('existingOrgResponse.json(): ', existingOrgResponse.json());
-  console.log('existingOrgResponse headers content type: ', existingOrgResponse.headers['Content-Type']);
-  const checkFindOutput = check(
-    existingOrgResponse,
-    {
-      'status OK and fhir header 1': fhirOK,
-    }
-  );
-
-  if (!checkFindOutput) {
-    exec.test.abort('failed to check for existing orgs');
-  }
-  // delete if org exists with npi
-  const existingOrgs =  existingOrgResponse.json();
-  if ( existingOrgs.total ) {
-    for ( const entry of existingOrgs.entry ) {
-      deleteOrganization(entry.resource.id, goldenMacaroon);
-    }
-  }
+//  // check if org with npi exists
+//  const existingOrgResponse = findOrganizationByNpi(npi, goldenMacaroon);
+//  console.log('existingOrgResponse status: ', existingOrgResponse.status);
+//  console.log('existingOrgResponse.json(): ', existingOrgResponse.json());
+//  console.log('existingOrgResponse headers content type: ', existingOrgResponse.headers['Content-Type']);
+//  const checkFindOutput = check(
+//    existingOrgResponse,
+//    {
+//      'status OK and fhir header 1': fhirOK,
+//    }
+//  );
+//
+//  if (!checkFindOutput) {
+//    exec.test.abort('failed to check for existing orgs');
+//  }
+//  // delete if org exists with npi
+//  const existingOrgs =  existingOrgResponse.json();
+//  if ( existingOrgs.total ) {
+//    for ( const entry of existingOrgs.entry ) {
+//      deleteOrganization(entry.resource.id, goldenMacaroon);
+//    }
+//  }
 
   const org = createOrganization(npi, `Test Org`, goldenMacaroon);
+  console.log('createOrganization response status: ', org.status);
 
   const checkCreateOrganization = check(
     org,
@@ -65,10 +66,8 @@ export function setup() {
     exec.test.abort('failed to create organizations on setup')
   }
 
-  const practitionerNpi = '2459425221' // hard-coded for lookback tests
-  console.log('orgId: ', org.json().id);
 
-  return { orgId: org.json().id, goldenMacaroon: goldenMacaroon, practitionerNpi: practitionerNpi };
+  return { orgId: org.json().id, goldenMacaroon: goldenMacaroon };
 }
 
 export const options = {
