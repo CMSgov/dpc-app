@@ -15,6 +15,12 @@ scenarios:
         - Log in
         subject: body
         regexp: false
+    - url: /assets/application.css
+      assert: # checks stylesheet includes compile mixins
+        - contains:
+            - .ds-c-usa-banner__header
+            - .ds-c-usa-banner__button
+            - .ds-c-usa-banner
   web_root_page:
     default-address: ${WEB_HOST}
     requests:
