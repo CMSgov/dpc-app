@@ -77,6 +77,12 @@ jobs:
           HOST="https://${{ inputs.env }}.dpc.cms.gov"
           echo "HOST=$HOST" >> "$GITHUB_OUTPUT"
           echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
+      - name: Build K6 with xk6-output-statsd
+        run: |
+          # Install xk6
+          go install go.k6.io/xk6/cmd/xk6@v1.1.5
+          # Build the k6 binary
+          xk6 build --with github.com/LeonAdato/xk6-output-statsd@v0.2.1
       - name: run k6 smoketest script
         id: run-smoke-test-k6
         env:
