@@ -19,7 +19,7 @@ smoke/local: export USE_BFD_MOCK=false
 smoke/local: export AUTH_DISABLED=false
 smoke/local: venv smoke start-dpc
 	@echo "Running Smoke Tests against Local env"
-	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/local.smoke_test.yml
+	. venv/bin/activate; pip instaoll -Ur requirements.txt; bzt src/test/local.smoke_test.yml
 
 .PHONY: smoke/remote
 smoke/remote: venv smoke
@@ -121,6 +121,10 @@ start-stress-test: secure-envs
 start-macaroon-tests: ## Test load-test macaroons
 start-macaroon-tests:
 	@docker run --rm -v ./dpc-load-testing:/src -e ENVIRONMENT=local -i grafana/k6 run /src/macaroonTests.js
+
+start-jwt-tests: ## Test load-test jwt
+start-jwt-tests:
+	@docker run --rm -v ./dpc-load-testing:/src -e ENVIRONMENT=local -i grafana/k6 run /src/jwtTests.js
 
 
 # Debug commands

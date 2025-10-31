@@ -4,6 +4,9 @@ import { Macaroon, packetize, packetizeSignature, arrayBuffer2String } from './g
 
 
 export const options = {
+  thresholds: {
+    checks: ['rate===1'],
+  },
   scenarios: {
     testSerialization: { executor: 'per-vu-iterations', vus: 1, iterations: 1, exec: "testSerialization" },
     testDeserialization: { executor: 'per-vu-iterations', vus: 1, iterations: 1, exec: "testDeserialization" },
@@ -120,11 +123,7 @@ export function testPacketizers() {
 export function handleSummary(data) {
   const fails = data.root_group.checks.map(x => x.fails).reduce((mem, x) => { return mem + x }, 0);
   console.log('Fails:', fails);
-  if (__ENV.ENVIRONMENT == 'local') {
-    return { stdout: `Number of failed tests: ${fails.toString()}` };
-  } else {
-    return { '/test-results/macaroons-fail-count.txt': fails.toString() };
-  }
+  return { stdout: `Number of failed tests: ${fails.toString()}` };
 }
 
 function builtMacaroon() {
