@@ -36,6 +36,9 @@ smoke/prod: venv smoke
 	@echo "Running Smoke Tests against ${HOST_URL}"
 	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/prod.smoke_test.yml
 
+.PHONY: smoke/k6
+smoke/k6:
+	docker run --rm -v $(shell pwd)/dpc-load-testing:/src --env-file $(shell pwd)/ops/config/decrypted/local.env -e ENVIRONMENT=local -i grafana/k6 run /src/smoke-test-auth.js
 
 # Build commands
 #
@@ -121,6 +124,10 @@ start-stress-test: secure-envs
 start-macaroon-tests: ## Test load-test macaroons
 start-macaroon-tests:
 	@docker run --rm -v ./dpc-load-testing:/src -e ENVIRONMENT=local -i grafana/k6 run /src/macaroonTests.js
+
+start-jwt-tests: ## Test load-test jwt
+start-jwt-tests:
+	@docker run --rm -v ./dpc-load-testing:/src -e ENVIRONMENT=local -i grafana/k6 run /src/jwtTests.js
 
 
 # Debug commands

@@ -1,56 +1,112 @@
 export function generateOrganizationResourceBody (npi, name) {
-	return {
-		"resourceType": "Parameters",
-		"parameter": [
-			{
-				"name": "resource",
-				"resource": {
-					"resourceType": "Bundle",
-					"type": "collection",
-					"entry": [
-						{
-							"resource": {
-								"address": [
-									{
-										"use": "work",
-										"type": "postal",
-										"city": "New York",
-										"country": "US",
-										"line": [
-											"101 1st Avenue",
-											"Suite 1"
-										],
-										"postalCode": "11103",
-										"state": "NY"
-									}
-								],
-								"identifier": [
-									{
-										"system": "http://hl7.org/fhir/sid/us-npi",
-										"value": npi
-									}
-								],
-								"name": name,
-								"resourceType": "Organization",
-								"type": [
-									{
-										"coding": [
-											{
-												"code": "prov",
-												"display": "Healthcare Provider",
-												"system": "http://hl7.org/fhir/organization-type"
-											}
-										],
-										"text": "Healthcare Provider"
-									}
-								]
-							}
-						}
-					]
-				}
-			}
+  return {
+    "resourceType": "Parameters",
+    "parameter": [
+      {
+	"name": "resource",
+	"resource": {
+	  "resourceType": "Bundle",
+	  "type": "collection",
+	  "entry": [
+	    {
+	      "resource": {
+		"address": [
+		  {
+		    "use": "work",
+		    "type": "postal",
+		    "city": "New York",
+		    "country": "US",
+		    "line": [
+		      "101 1st Avenue",
+		      "Suite 1"
+		    ],
+		    "postalCode": "11103",
+		    "state": "NY"
+		  }
+		],
+		"identifier": [
+		  {
+		    "system": "http://hl7.org/fhir/sid/us-npi",
+		    "value": npi
+		  }
+		],
+		"name": name,
+		"resourceType": "Organization",
+		"type": [
+		  {
+		    "coding": [
+		      {
+			"code": "prov",
+			"display": "Healthcare Provider",
+			"system": "http://hl7.org/fhir/organization-type"
+		      }
+		    ],
+		    "text": "Healthcare Provider"
+		  }
 		]
+	      }
+	    }
+	  ]
 	}
+      }
+    ]
+  }
+}
+
+export function generateSmokeTestOrganizationResourceBody (orgId, npi, name) {
+  return {
+    "resourceType": "Parameters",
+    "parameter": [
+      {
+	"name": "resource",
+	"resource": {
+	  "resourceType": "Bundle",
+	  "type": "collection",
+	  "entry": [
+	    {
+	      "resource": {
+		"address": [
+		  {
+		    "use": "work",
+		    "type": "postal",
+		    "city": "New York",
+		    "country": "US",
+		    "line": [
+		      "101 1st Avenue",
+		      "Suite 1"
+		    ],
+		    "postalCode": "11103",
+		    "state": "NY"
+		  }
+		],
+		"id": orgId,
+		"identifier": [
+		  {
+		    "system": "http://hl7.org/fhir/sid/us-npi",
+		    "value": npi
+		  }
+		],
+		"name": name,
+		"resourceType": "Organization",
+		"type": [
+		  {
+		    "coding": [
+		      {
+			"code": "prov",
+			"display": "Healthcare Provider",
+			"system": "http://hl7.org/fhir/organization-type"
+		      }
+		    ],
+		    "text": "Healthcare Provider"
+		  }
+		]
+	      }
+	    }
+	  ]
+	}
+      }
+    ]
+  }
 }
 
 export function generateProviderResourceBody (npi) {
@@ -137,31 +193,31 @@ export function generatePatientResourceBody(mbi) {
 
 export function generateGroupResourceBody(practitionerNpi, patientId) {
   const groupResource =
-  {
-    "resourceType": "Group",
-    "type": "person",
-    "actual": true,
-    "active": true,
-    "characteristic": [
-      {
-        "code": {
-          "coding": [
-            {
-                "code": "attributed-to"
-            }
-          ]
-        },
-        "valueCodeableConcept": {
-          "coding": [
-            {
-                "system": "http://hl7.org/fhir/sid/us-npi",
-                "code": practitionerNpi
-            }
-          ]
-        }
-      }
-    ]
-  }
+	{
+	  "resourceType": "Group",
+	  "type": "person",
+	  "actual": true,
+	  "active": true,
+	  "characteristic": [
+	    {
+              "code": {
+		"coding": [
+		  {
+                    "code": "attributed-to"
+		  }
+		]
+              },
+              "valueCodeableConcept": {
+		"coding": [
+		  {
+                    "system": "http://hl7.org/fhir/sid/us-npi",
+                    "code": practitionerNpi
+		  }
+		]
+              }
+	    }
+	  ]
+	}
 
   if (patientId != undefined) {
     groupResource["member"] = [
@@ -177,42 +233,42 @@ export function generateGroupResourceBody(practitionerNpi, patientId) {
 }
 
 export function generateProvenanceResourceBody(orgId, practitionerId) {
-    return {
-      "resourceType":"Provenance",
-      "meta":
-        {
-        "profile": [
-            "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attestation"
-        ]
-        },
-        "recorded":"2024-10-25T18:39:41.042Z",
-        "reason": [
-        {
-            "system":"http://hl7.org/fhir/v3/ActReason",
-            "code": "TREAT"
-        }
-        ],
-        "agent": [
+  return {
+    "resourceType":"Provenance",
+    "meta":
+    {
+      "profile": [
+        "https://dpc.cms.gov/api/v1/StructureDefinition/dpc-profile-attestation"
+      ]
+    },
+    "recorded":"2024-10-25T18:39:41.042Z",
+    "reason": [
+      {
+        "system":"http://hl7.org/fhir/v3/ActReason",
+        "code": "TREAT"
+      }
+    ],
+    "agent": [
+      {
+        "role": [
           {
-            "role": [
+            "coding": [
               {
-                "coding": [
-                  {
-                    "system": "http://hl7.org/fhir/v3/RoleClass",
-                    "code": "AGNT"
-                  }
-                ]
+                "system": "http://hl7.org/fhir/v3/RoleClass",
+                "code": "AGNT"
               }
-            ],
-            "whoReference":
-            {
-                "reference":"Organization/" + orgId
-            },
-            "onBehalfOfReference":
-            {
-                "reference":"Practitioner/" + practitionerId
-            }
+            ]
           }
-        ]
-    }
+        ],
+        "whoReference":
+        {
+          "reference":"Organization/" + orgId
+        },
+        "onBehalfOfReference":
+        {
+          "reference":"Practitioner/" + practitionerId
+        }
+      }
+    ]
+  }
 }

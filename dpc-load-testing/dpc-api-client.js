@@ -2,6 +2,7 @@ import http from 'k6/http';
 import {
   generateBundle,
   generateOrganizationResourceBody,
+  generateSmokeTestOrganizationResourceBody,
   generateProviderResourceBody,
   generatePatientResourceBody,
   generateGroupResourceBody,
@@ -32,6 +33,26 @@ export function createOrganization(npi, name, goldenMacaroon) {
       'Accept': 'application/fhir+json'
     }
   });
+
+  return res;
+}
+
+export function createSmokeTestOrganization(npi, orgId, goldenMacaroon) {
+  const body = generateSmokeTestOrganizationResourceBody(orgId, npi, 'Smoke Test ${orgId}');
+  const res = http.post(`${urlRoot}/Organization/$submit`, JSON.stringify(body), {
+    headers: {
+      'Authorization': `Bearer ${goldenMacaroon}`,
+      'Content-Type': 'application/fhir+json',
+      'Accept': 'application/fhir+json'
+    }
+  });
+
+  return res;
+}
+
+export function getOrganizationById(token, orgId) {
+  const headers = createHeaderParam(token);
+  const res = http.get(`${urlRoot}/Organization/${orgId}`, headers);
 
   return res;
 }
@@ -247,6 +268,16 @@ export function findJobs(token, urls) {
   });
 
   const res = http.batch(batchRequests);
+  return res;
+}
+
+export function createClientToken(token, label) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Authorization': `Bearer ${token}`
+  };
+  const res = http.post(`${urlRoot}/Token`, `{ "label": "${label}" }`, { 'headers': headers });
   return res;
 }
 
