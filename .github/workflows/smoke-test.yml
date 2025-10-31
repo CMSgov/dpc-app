@@ -90,6 +90,13 @@ jobs:
           mkdir -p "$HOME/.local/bin"
           install -m 0755 ./k6 "$HOME/.local/bin/k6"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Set env vars from AWS params
+        uses: cmsgov/cdap/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            GOLDEN_MACAROON=/dpc/test/web/golden_macaroon
       - name: run k6 smoketest script
         id: run-smoke-test-k6
         env:
