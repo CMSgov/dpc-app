@@ -19,7 +19,7 @@ smoke/local: export USE_BFD_MOCK=false
 smoke/local: export AUTH_DISABLED=false
 smoke/local: venv smoke start-dpc
 	@echo "Running Smoke Tests against Local env"
-	. venv/bin/activate; pip instaoll -Ur requirements.txt; bzt src/test/local.smoke_test.yml
+	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/local.smoke_test.yml
 
 .PHONY: smoke/remote
 smoke/remote: venv smoke
