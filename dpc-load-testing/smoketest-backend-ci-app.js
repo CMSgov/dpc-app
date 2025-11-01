@@ -6,6 +6,7 @@ import { check, fail, sleep } from 'k6';
 import exec from 'k6/execution'
 import { fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
 import NPIGeneratorCache from './utils/npi-generator.js';
+import { fhirType, fhirOK, getHeader, getUuidFromUrl } from './utils/test-utils.js'
 import {
   createGroupWithPatients,
   createHeaderParam,
@@ -20,7 +21,23 @@ import {
   findOrganizationByNpi,
 } from './dpc-api-client.js';
 
+const EXPORT_POLL_INTERVAL_SEC = 15;
+const EXPORT_POLL_TIMEOUT_SEC = 600;
+
 const npiGeneratorCache = new NPIGeneratorCache();
+export const options = {
+  thresholds: {
+    checks: ['rate===1'],
+  },
+  scenarios: {
+    workflow: {
+      executor: 'per-vu-iterations',
+      vus: 1,
+      iterations: 1,
+      exec: "workflow"
+    }
+  }
+};
 
 export function setup() {
   const goldenMacaroon = fetchGoldenMacaroon();
@@ -28,9 +45,6 @@ export function setup() {
   const npi = npiGenerator.iterate();
   // check if org with npi exists
   const existingOrgResponse = findOrganizationByNpi(npi, goldenMacaroon);
-  console.log('existingOrgResponse status: ', existingOrgResponse.status);
-  console.log('existingOrgResponse.json(): ', existingOrgResponse.json());
-  console.log('existingOrgResponse headers content type: ', existingOrgResponse.headers['Content-Type']);
   const checkFindOutput = check(
     existingOrgResponse,
     {
@@ -54,8 +68,7 @@ export function setup() {
   const checkCreateOrganization = check(
     org,
     {
-      'response code was 200': res => res.status === 200,
-      'accept header fhir type': res => res.headers['Content-Type'] === fhirType,
+      'status OK and fhir header': fhirOK,
       'response has id field': res => res.json().id != undefined,
       'id field is not null': res => res.json().id != null
     }
@@ -65,28 +78,8 @@ export function setup() {
     exec.test.abort('failed to create organizations on setup')
   }
 
-
   return { orgId: org.json().id, goldenMacaroon: goldenMacaroon };
 }
-
-export const options = {
-  thresholds: {
-    checks: ['rate===1'],
-  },
-  scenarios: {
-    workflow: {
-      executor: 'per-vu-iterations',
-      vus: 1,
-      iterations: 1,
-      exec: "workflow"
-    }
-  }
-};
-
-const fhirType = 'application/fhir+json';
-const fhirOK = function(res) {
-  return res.status === 200 && res.headers['Content-Type'] === fhirType;
-};
 
 function handleJmxSmoketests(data) {
   console.log('handle jmx tests...')
@@ -106,7 +99,7 @@ function handleJmxSmoketests(data) {
   const checkPractitionerResponse = check(
     practitionerResponse,
     {
-      'status OK and fhir header 2': fhirOK,
+      'status OK and fhir header': fhirOK,
       'practitioner id an npi': res => res.json().entry[0].resource.identifier[0].system === 'http://hl7.org/fhir/sid/us-npi',
     }
   );
@@ -157,8 +150,7 @@ function handleJmxSmoketests(data) {
   check(
     groupResponse,
     {
-      'response code was 201': res => res.status === 201,
-      'accept header fhir type': res => res.headers['Content-Type'] === fhirType,
+      'status OK and fhir header': fhirOK,
       'correct number of patients': res => res.json().member.length === mbis.length,
       'member content verified': memberContentVerified,
     }
@@ -187,13 +179,7 @@ function handleExportJob(token, groupId) {
   monitorExportJob(token, groupId, exportJobURL);
 }
 
-const getUuidFromUrl = (s) => {
-  const m = s.match(/\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b(?=\/?$)/i);
-  return m ? m[0] : null;
-};
 
-const EXPORT_POLL_INTERVAL_SEC = 15;
-const EXPORT_POLL_TIMEOUT_SEC = 600;
 // ported from ClientUtils.awaitExportResponse
 function monitorExportJob(token, groupId, jobLocationUrl) {
   const jobId = getUuidFromUrl(jobLocationUrl);
@@ -215,8 +201,8 @@ function monitorExportJob(token, groupId, jobLocationUrl) {
       break;
     }
 
-    const elapsed = (Date.now() - start);
-    if (elapsed > EXPORT_POLL_TIMEOUT_SEC) {
+    const elapsed_sec = (Date.now() - start) / 1000;
+    if (elapsed_sec > EXPORT_POLL_TIMEOUT_SEC) {
       console.log('reached poll timeout');
       fail('status code was *not* 200');
     }

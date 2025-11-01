@@ -5,9 +5,14 @@ import http from 'k6/http';
 import { check } from 'k6';
 import exec from 'k6/execution'
 
-//export function setup() {
-//}
-//
+function getEnvVar(varName) {
+  const value = __ENV[varName];
+  if (!value) {
+    fail(`Failed to retrieve environment variable: ${varName}`)
+  }
+  return value
+}
+
 function checkLoginPage(baseUrl, paths, loginText) {
   if (!baseUrl) {
     throw new Error(`${baseUrl} environment variable is not set`)
@@ -29,9 +34,9 @@ function checkLoginPage(baseUrl, paths, loginText) {
 
 export default function workflow(data) {
   // port from src/test/portal_test.yml
-  checkLoginPage(__ENV.PORTAL_HOST, ["/portal", "/portal/organizations"], "Sign in");
+  checkLoginPage(getEnvVar("PORTAL_HOST"), ["/portal", "/portal/organizations"], "Sign in");
   // port from src/test/web_test.yml
-  checkLoginPage(__ENV.WEB_HOST, ["/users/sign_in", "/"], "Log in");
+  checkLoginPage(getEnvVar("WEB_HOST"), ["/users/sign_in", "/"], "Log in");
   // port from src/test/web_admin_test.yml
-  checkLoginPage(__ENV.WEB_ADMIN_HOST, ["/admin/internal/sign_in", "/admin/organizations"], "Log in");
+  checkLoginPage(getEnvVar("WEB_ADMIN_HOST"), ["/admin/internal/sign_in", "/admin/organizations"], "Log in");
 }

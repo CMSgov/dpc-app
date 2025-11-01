@@ -11,7 +11,6 @@ import {
 const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/api/v1' : 'https://test.dpc.cms.gov/api/v1';
 
 export function findOrganizationByNpi(npi, goldenMacaroon) {
-  console.log('calling this endpoint: ', `${urlRoot}/Admin/Organization?npis=npi|${npi}`);
   const res = http.get(`${urlRoot}/Admin/Organization?npis=npi|${npi}`, {
     headers: {
       'Authorization': `Bearer ${goldenMacaroon}`,
