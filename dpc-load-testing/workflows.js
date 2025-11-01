@@ -41,6 +41,9 @@ export function setup() {
     const npi = npiGenerator.iterate();
     // check if org with npi exists
     const existingOrgResponse = findOrganizationByNpi(npi, goldenMacaroon);
+    console.log('existingOrgResponse status: ', existingOrgResponse.status);
+    console.log('existingOrgResponse.json(): ', existingOrgResponse.json());
+    console.log('existingOrgResponse headers content type: ', existingOrgResponse.headers['Content-Type']);
     const checkFindOutput = check(
       existingOrgResponse,
       {

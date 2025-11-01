@@ -155,6 +155,7 @@ export function workflow(data) {
   // POST group for practitioner
 
   const createGroupResponse = createGroupWithPatients(token, orgId, practitionerId, practitionerNpi, patients);
+  console.log('groupResponse.json(): ', createGroupResponse.json());
 
   const memberContentVerified = function(res) {
     let pass = true;

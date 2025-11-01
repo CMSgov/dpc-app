@@ -77,6 +77,37 @@ jobs:
           HOST="https://${{ inputs.env }}.dpc.cms.gov"
           echo "HOST=$HOST" >> "$GITHUB_OUTPUT"
           echo "HOST_URL=$HOST/api/v1" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version: '1.24.x'
+      - name: Build K6 with xk6-output-statsd and add to PATH
+        run: |
+          # Install xk6
+          go install go.k6.io/xk6/cmd/xk6@v1.1.5
+          # Build the k6 binary
+          xk6 build --with github.com/LeonAdato/xk6-output-statsd@v0.2.1
+          # Add to path
+          mkdir -p "$HOME/.local/bin"
+          install -m 0755 ./k6 "$HOME/.local/bin/k6"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Set env vars from AWS params
+        uses: cmsgov/cdap/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            GOLDEN_MACAROON=/dpc/test/web/golden_macaroon
+      - name: run k6 smoketest script
+        id: run-smoke-test-k6
+        env:
+          ELB_URL: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
+          HOST_URL: ${{ steps.determine-host.outputs.HOST_URL }}
+          PORTAL_HOST: ${{ steps.determine-host.outputs.HOST }}
+          WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
+          WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
+          PUBLIC_URL: ${{ steps.determine-host.outputs.HOST }}
+        run:
+          make smoketest-k6-remote
       - name: Run Smoke Test
         id: run-smoke-test
         env:

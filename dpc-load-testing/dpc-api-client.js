@@ -159,6 +159,14 @@ export function deleteOrganization(orgId, goldenMacaroon) {
   return res;
 }
 
+export function deleteGroup(token, groupId) {
+  const res = http.del(`${urlRoot}/Group/${groupId}`,
+	  createHeaderParam(token)
+	);
+
+  return res;
+}
+
 export function createGroup(token, orgId, practitionerId, practitionerNpi) {
     const groupBody = generateGroupResourceBody(practitionerNpi);
     const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
@@ -225,6 +233,7 @@ export function addPatientsToGroup(token, orgId, groupId, patients, practitioner
 }
 
 export function exportGroup(token, groupId, getParams='') {
+    console.log('url: ', `${urlRoot}/Group/${groupId}/$export?${getParams}`);
     const res = http.get(`${urlRoot}/Group/${groupId}/$export?${getParams}`,
       createHeaderParam(token, {'Prefer': 'respond-async'})
     );
@@ -264,7 +273,7 @@ export function authorizedGet(token, url, headers = {}) {
  * @param {*} headers Additional headers that should be included.
  * @returns Headers wrapped in a Parameters object.
  */
-function createHeaderParam(token, headers) {
+export function createHeaderParam(token, headers) {
   const defaultHeaders = {
     'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/fhir+json',
