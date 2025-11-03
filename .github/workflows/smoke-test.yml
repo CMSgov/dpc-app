@@ -66,5 +66,7 @@ jobs:
 
       - name: Run Smoke Test
         id: run-smoke-test
+        env:
+          ENVIRONMENT: ${{ inputs.env }}
         run: |
-          k6 run -e ENVIRONMENT=${{ inputs.env }} ./smoke-test-auth.js
+          k6 run ./smoke-test-auth.js
