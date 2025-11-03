@@ -101,7 +101,6 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
             config.getRetryCount(),
             config.getPollingFrequency(),
             config.getLookBackMonths(),
-            config.getLookBackDate(),
             config.getLookBackExemptOrgs(),
             config.getFetchWarnThresholdSeconds()
         );

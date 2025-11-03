@@ -16,8 +16,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.YearMonth;
-import java.time.ZoneId;
 import java.util.List;
 
 public class DPCAggregationConfiguration extends Configuration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCConsentDatabase, IDPCQueueDatabase, DPCQueueConfig {
@@ -77,9 +75,6 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
     @Min(0)
     private int fetchWarnThresholdSeconds;
 
-    @NotNull
-    private final YearMonth lookBackDate = YearMonth.now(ZoneId.systemDefault());
-
     @NotEmpty
     private String fhirReferenceURL;
 
@@ -135,10 +130,6 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
 
     public int getLookBackMonths() {
         return lookBackMonths;
-    }
-
-    public YearMonth getLookBackDate() {
-        return lookBackDate;
     }
 
     public List<String> getLookBackExemptOrgs() {
