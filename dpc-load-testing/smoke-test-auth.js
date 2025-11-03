@@ -66,7 +66,8 @@ export function setup() {
     );
     
     if (!checkGetOrgOutput) {
-	exec.test.abort('failed find org by id');
+      console.error(existingOrgResponse.body);
+      exec.test.abort('failed find org by id');
     }
 
     if (existingOrgResponse == 200) {
@@ -86,6 +87,7 @@ export function setup() {
       );
 
       if (!checkFindOutput) {
+	console.error(existingNpiResponse.body);
 	exec.test.abort('failed find org by npi');
       }
       
@@ -105,6 +107,7 @@ export function setup() {
     );
 
     if (!checkOutput) {
+      console.error(org.body);
       exec.test.abort('failed to create organizations on setup')
     }
 
