@@ -233,7 +233,6 @@ export function addPatientsToGroup(token, orgId, groupId, patients, practitioner
 }
 
 export function exportGroup(token, groupId, getParams='') {
-    console.log('url: ', `${urlRoot}/Group/${groupId}/$export?${getParams}`);
     const res = http.get(`${urlRoot}/Group/${groupId}/$export?${getParams}`,
       createHeaderParam(token, {'Prefer': 'respond-async'})
     );

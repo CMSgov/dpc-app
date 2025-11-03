@@ -2,8 +2,7 @@
 /* eslint no-console: "off" */
 
 import http from 'k6/http';
-import { check } from 'k6';
-import exec from 'k6/execution'
+import { check, fail } from 'k6';
 
 function getEnvVar(varName) {
   const value = __ENV[varName];
@@ -32,7 +31,7 @@ function checkLoginPage(baseUrl, paths, loginText) {
   })
 }
 
-export default function workflow(data) {
+export default function workflow() {
   // port from src/test/portal_test.yml
   checkLoginPage(getEnvVar("PORTAL_HOST"), ["/portal", "/portal/organizations"], "Sign in");
   // port from src/test/web_test.yml

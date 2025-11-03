@@ -1,12 +1,11 @@
 /*global console*/
 /* eslint no-console: "off" */
 
-import http from 'k6/http';
 import { check, fail, sleep } from 'k6';
 import exec from 'k6/execution'
 import { fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
 import NPIGeneratorCache from './utils/npi-generator.js';
-import { fhirType, fhirOK, getHeader, getUuidFromUrl } from './utils/test-utils.js'
+import { fhirOK, getUuidFromUrl } from './utils/test-utils.js'
 import {
   createGroupWithPatients,
   createHeaderParam,
@@ -16,7 +15,6 @@ import {
   deletePractitioner,
   deleteOrganization,
   exportGroup,
-  findGroupByPractitionerNpi,
   findJobById,
   findOrganizationByNpi,
 } from './dpc-api-client.js';
@@ -187,7 +185,6 @@ function monitorExportJob(token, groupId, jobLocationUrl) {
   const start = Date.now();
 
   while (true) {
-    const headers = createHeaderParam(token);
     const jobResponse = findJobById(token, jobId);
     const statusCode = jobResponse.status;
 

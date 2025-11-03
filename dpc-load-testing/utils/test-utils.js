@@ -14,7 +14,7 @@ export function getHeader(res, headerName) {
     return '';
   }
   for (const name in res.headers) {
-    if (name.toLowerCase() === name.toLowerCase()) return res.headers[name];
+    if (name.toLowerCase() === headerName.toLowerCase()) return res.headers[name];
   }
   return '';
 }
