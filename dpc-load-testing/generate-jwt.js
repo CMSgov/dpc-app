@@ -1,6 +1,7 @@
 import { string2Uint8Array } from './generate-dpc-token.js';
 import encoding from 'k6/encoding';
 import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
+import { urlRoot } from './dpc-api-client.js';
 
 const algorithm = {
   name: 'RSASSA-PKCS1-v1_5',
@@ -17,14 +18,23 @@ export function jwtHeader(publicKeyId) {
   }
 }
 
-export function jwtPayload(urlRoot, clientToken, exp, jti) {
+export function jwtPayload(urlPrefix, clientToken, exp, jti) {
   return {
     "iss": clientToken,
     "sub": clientToken,
-    "aud": urlRoot + "/Token/auth",
-    "exp": exp || Math.round(new Date().getTime()/1000) + 300,
+    "aud": urlPrefix + "/Token/auth",
+    "exp": exp || Math.round(new Date().getTime()/1000) + 299,
     "jti": jti || uuidv4()
   }
+}
+
+
+export async function makeJwt(clientToken, publicKeyId, key) {
+  
+  const headerData = jwtHeader(publicKeyId);
+  const payloadData = jwtPayload(urlRoot.replace('host.docker.internal', 'localhost'), clientToken);
+  const jwt = await buildJwt(payloadData, key, headerData);
+  return jwt;
 }
 
 export async function buildJwt(payloadData, key, headerData ) {
@@ -50,7 +60,7 @@ export async function importKey(keyData){
 export async function signatureSnippet(privateKey) {
   const snippet = string2Uint8Array("This is the snippet used to verify a key pair in DPC.")
   const signature = await crypto.subtle.sign(algorithm, privateKey, snippet);
-  return encoding.b64encode(signature, "rawurl");
+  return encoding.b64encode(signature);
 }
 export async function generateKey() {
   const key = await crypto.subtle.generateKey(
