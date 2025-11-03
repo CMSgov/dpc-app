@@ -66,7 +66,7 @@ jobs:
         run: |
           ./k6 run \
             --out output-statsd=addr=localhost:8125,enableTags=true \
-            -e API_METADATA_URL=http://host.docker.internal:3002/api/v1' : 'https://test.dpc.cms.gov/api/v1 \
+            -e API_METADATA_URL=https://test.dpc.cms.gov/api/v1 \
             ./dpc-app/dpc-load-testing/${{ inputs.test_type }}.js
 
       - name: Cleanup StatsD Container
