@@ -33,9 +33,9 @@ import org.slf4j.MDC;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
-import java.time.YearMonth;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -150,7 +150,6 @@ class JobBatchProcessorUnitTest {
             1,
             500,
             120,
-            YearMonth.of(2014, 3),
             List.of(job.getOrgID().toString()),
             30
         );
@@ -200,7 +199,6 @@ class JobBatchProcessorUnitTest {
             1,
             500,
             120,
-            YearMonth.of(2014, 3),
             List.of(job.getOrgID().toString()),
             30
         );
@@ -805,7 +803,6 @@ class JobBatchProcessorUnitTest {
             3,
             500,
             18,
-            YearMonth.of(2014, 3),
             orgIds,
             30
         );
