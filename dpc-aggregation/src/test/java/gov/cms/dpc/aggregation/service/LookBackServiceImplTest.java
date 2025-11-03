@@ -14,9 +14,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockitoAnnotations;
 
 import java.time.OffsetDateTime;
-import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @ExtendWith(BufferedLoggerHandler.class)
@@ -35,7 +35,7 @@ public class LookBackServiceImplTest {
     public void beforeEach() {
         MockitoAnnotations.openMocks(this);
         String exportPath = "/tmp";
-        OperationsConfig operationsConfig = new OperationsConfig(10, exportPath, 3, YearMonth.now());
+        OperationsConfig operationsConfig = new OperationsConfig(10, exportPath, 3, 1, 1, List.of(), 30);
         lookBackService = new LookBackServiceImpl(operationsConfig);
         eob = new ExplanationOfBenefit();
         eob.setBillablePeriod(new Period());
@@ -55,19 +55,19 @@ public class LookBackServiceImplTest {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        LookBackAnswer result = lookBackService.getLookBackAnswer(eob, orgNPI, providerNPI, 1);
+        LookBackAnswer result = lookBackService.getLookBackAnswer(eob, orgNPI, providerNPI);
         Assertions.assertTrue(result.matchDateCriteria());
 
         dateTime = OffsetDateTime.now(ZoneOffset.UTC).minusMonths(1);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        result = lookBackService.getLookBackAnswer(eob, orgNPI, providerNPI, 1);
+        result = lookBackService.getLookBackAnswer(eob, orgNPI, providerNPI);
         Assertions.assertFalse(result.matchDateCriteria());
 
         dateTime = OffsetDateTime.now(ZoneOffset.UTC).plusMonths(1);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        result = lookBackService.getLookBackAnswer(eob, orgNPI, providerNPI, 1);
+        result = lookBackService.getLookBackAnswer(eob, orgNPI, providerNPI);
         Assertions.assertTrue(result.matchDateCriteria());
     }
 
@@ -76,10 +76,10 @@ public class LookBackServiceImplTest {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        LookBackAnswer result = lookBackService.getLookBackAnswer(eob, orgNPI, NPIUtil.generateNPI(), 1);
+        LookBackAnswer result = lookBackService.getLookBackAnswer(eob, orgNPI, NPIUtil.generateNPI());
         Assertions.assertTrue(result.orgNPIMatchAnyEobNPIs());
 
-        result = lookBackService.getLookBackAnswer(eob, NPIUtil.generateNPI(), NPIUtil.generateNPI(), 1);
+        result = lookBackService.getLookBackAnswer(eob, NPIUtil.generateNPI(), NPIUtil.generateNPI());
         Assertions.assertFalse(result.orgNPIMatchAnyEobNPIs());
     }
 
@@ -88,10 +88,10 @@ public class LookBackServiceImplTest {
         OffsetDateTime dateTime = OffsetDateTime.now(ZoneOffset.UTC);
         eob.getBillablePeriod().setEnd(Date.from(dateTime.toInstant()));
 
-        LookBackAnswer result = lookBackService.getLookBackAnswer(eob, NPIUtil.generateNPI(), providerNPI, 1);
+        LookBackAnswer result = lookBackService.getLookBackAnswer(eob, NPIUtil.generateNPI(), providerNPI);
         Assertions.assertTrue(result.practitionerNPIMatchAnyEobNPIs());
 
-        result = lookBackService.getLookBackAnswer(eob, NPIUtil.generateNPI(), NPIUtil.generateNPI(), 1);
+        result = lookBackService.getLookBackAnswer(eob, NPIUtil.generateNPI(), NPIUtil.generateNPI());
         Assertions.assertFalse(result.orgNPIMatchAnyEobNPIs());
     }
 }

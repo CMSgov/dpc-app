@@ -37,7 +37,7 @@ public class LookBackServiceImpl implements LookBackService {
     @Override
     @UnitOfWork(readOnly = true)
     @SuppressWarnings("JdkObsolete") // Date class used by FHIR stu3 Period model
-    public LookBackAnswer getLookBackAnswer(ExplanationOfBenefit explanationOfBenefit, String organizationNPI, String practitionerNPI, long withinMonth) {
+    public LookBackAnswer getLookBackAnswer(ExplanationOfBenefit explanationOfBenefit, String organizationNPI, String practitionerNPI) {
         MDC.put(EOB_ID, explanationOfBenefit.getId());
         YearMonth billingPeriod = Optional.of(explanationOfBenefit)
                 .map(ExplanationOfBenefit::getBillablePeriod)
@@ -56,12 +56,13 @@ public class LookBackServiceImpl implements LookBackService {
         Set<String> allNPIs = new HashSet<>(npis.getRight());
         allNPIs.add(npis.getLeft());
 
-        LookBackAnswer lookBackAnswer = new LookBackAnswer(practitionerNPI, organizationNPI, withinMonth, operationsConfig.getLookBackDate())
+        YearMonth lookBackDate = operationsConfig.getLookBackDate();
+        LookBackAnswer lookBackAnswer = new LookBackAnswer(practitionerNPI, organizationNPI, operationsConfig.getLookBackMonths(), lookBackDate)
                 .addEobBillingPeriod(billingPeriod)
                 .addEobOrganization(eobOrganizationNPI)
                 .addEobProviders(allNPIs);
         LOGGER.trace("billingPeriodDate={}, lookBackDate={}, monthsDifference={}, eobProvider={}, eobCareTeamProviders={}, jobProvider={}, eobOrganization={}, jobOrganization={}, withinLimit={}, eobProviderMatch={}, eobOrganizationMatch={}",
-                billingPeriod, operationsConfig.getLookBackDate(), lookBackAnswer.calculatedMonthDifference(), npis.getLeft(), Joiner.on(";").join(npis.getRight()), practitionerNPI, eobOrganizationNPI,
+                billingPeriod, lookBackDate, lookBackAnswer.calculatedMonthDifference(), npis.getLeft(), Joiner.on(";").join(npis.getRight()), practitionerNPI, eobOrganizationNPI,
                 organizationNPI, lookBackAnswer.matchDateCriteria(), lookBackAnswer.practitionerMatchEob(), lookBackAnswer.orgMatchEob());
 
         MDC.remove(EOB_ID);
