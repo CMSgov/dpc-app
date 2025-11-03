@@ -49,7 +49,7 @@ jobs:
       - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
           go-version: '1.24.x'
-      - name: Build K6 with xk6-output-statsd
+      - name: Build K6
         run: |
           # Install xk6
           go install go.k6.io/xk6/cmd/xk6@v1.1.5
@@ -69,4 +69,4 @@ jobs:
         env:
           ENVIRONMENT: ${{ inputs.env }}
         run: |
-          k6 run ./smoke-test-auth.js
+          ./k6 run ./smoke-test-auth.js
