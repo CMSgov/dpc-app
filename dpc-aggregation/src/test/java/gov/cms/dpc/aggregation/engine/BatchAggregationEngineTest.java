@@ -56,7 +56,15 @@ class BatchAggregationEngineTest {
     static void setupAll() {
         fhirContext.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
         fhirContextR4.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
-        operationsConfig = new OperationsConfig(10, exportPath, 3, YearMonth.of(2015, 3));
+        operationsConfig = new OperationsConfig(
+            10,
+            exportPath,
+            3,
+            500,
+            18,
+            List.of(),
+            30
+        );
         AggregationEngine.setGlobalErrorHandler();
         ContextUtils.prefetchResourceModels(fhirContext, JobQueueBatch.validResourceTypes);
         ContextUtils.prefetchResourceModels(fhirContextR4, JobQueueBatch.validResourceTypes);
@@ -212,7 +220,7 @@ class BatchAggregationEngineTest {
         Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
                 .addEobBillingPeriod(YearMonth.now().minusYears(1))
                 .addEobOrganization(npi)
-                .addEobProviders(List.of(npi))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+                .addEobProviders(List.of(npi))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString());
 
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
@@ -255,7 +263,7 @@ class BatchAggregationEngineTest {
         Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
                 .addEobBillingPeriod(YearMonth.now().minusYears(1))
                 .addEobOrganization(NPIUtil.generateNPI())
-                .addEobProviders(List.of(NPIUtil.generateNPI()))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+                .addEobProviders(List.of(NPIUtil.generateNPI()))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString());
 
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
@@ -298,7 +306,7 @@ class BatchAggregationEngineTest {
         Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
                 .addEobBillingPeriod(YearMonth.now())
                 .addEobOrganization(NPIUtil.generateNPI())
-                .addEobProviders(List.of(NPIUtil.generateNPI()))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+                .addEobProviders(List.of(NPIUtil.generateNPI()))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString());
 
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
@@ -341,7 +349,7 @@ class BatchAggregationEngineTest {
         Mockito.doReturn(new LookBackAnswer(npi, npi, 1, YearMonth.now())
                 .addEobBillingPeriod(YearMonth.now())
                 .addEobOrganization(npi)
-                .addEobProviders(List.of(NPIUtil.generateNPI()))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+                .addEobProviders(List.of(NPIUtil.generateNPI()))).when(lookBackService).getLookBackAnswer(Mockito.any(), Mockito.any(), Mockito.anyString());
 
         // Make a simple job with one resource type
         final var jobID = queue.createJob(
