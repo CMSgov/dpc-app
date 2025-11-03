@@ -18,6 +18,11 @@ public class FHIRClientConfiguration {
 	@JsonProperty("timeouts")
 	private TimeoutConfiguration timeouts = new TimeoutConfiguration();
 
+	@Valid
+	@NotNull
+	@JsonProperty("connectionPool")
+	private ConnectionPoolConfiguration connectionPoolConfiguration = new ConnectionPoolConfiguration();
+
 	public TimeoutConfiguration getTimeouts() {
 		return timeouts;
 	}
@@ -26,5 +31,10 @@ public class FHIRClientConfiguration {
 	public String getServerBaseUrl() { return serverBaseUrl; }
 	public void setServerBaseUrl(String serverBaseUrl) {
 		this.serverBaseUrl = serverBaseUrl;
+	}
+
+	public ConnectionPoolConfiguration connectionPoolConfiguration() { return connectionPoolConfiguration; }
+	public void setConnectionPoolConfiguration(ConnectionPoolConfiguration connectionPoolConfiguration) {
+		this.connectionPoolConfiguration = connectionPoolConfiguration;
 	}
 }
