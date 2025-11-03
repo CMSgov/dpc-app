@@ -8,7 +8,6 @@ import NPIGeneratorCache from './utils/npi-generator.js';
 import { fhirOK, getUuidFromUrl } from './utils/test-utils.js'
 import {
   createGroupWithPatients,
-  createHeaderParam,
   createOrganization,
   createPatientsBatch,
   createPractitioners,
