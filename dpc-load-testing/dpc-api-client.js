@@ -10,7 +10,7 @@ import {
   generateProvenanceResourceBody
 } from "./resource-request-bodies.js"
 
-export const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/api/v1' : 'https://test.dpc.cms.gov/api/v1';
+export const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/api/v1' : `https://${__ENV.ENVIRONMENT}.dpc.cms.gov/api/v1`;
 
 export function findOrganizationByNpi(npi, goldenMacaroon) {
   const res = http.get(`${urlRoot}/Admin/Organization?npis=npi|${npi}`, {

@@ -123,11 +123,11 @@ start-stress-test: secure-envs
 
 start-macaroon-tests: ## Test load-test macaroons
 start-macaroon-tests:
-	@docker run --rm -v ./dpc-load-testing:/src -e ENVIRONMENT=local -i grafana/k6 run /src/macaroonTests.js
+	@docker run --rm -v ./dpc-load-testing:/src -i grafana/k6 run /src/macaroonTests.js
 
 start-jwt-tests: ## Test load-test jwt
 start-jwt-tests:
-	@docker run --rm -v ./dpc-load-testing:/src -e ENVIRONMENT=local -i grafana/k6 run /src/jwtTests.js
+	@docker run --rm -v ./dpc-load-testing:/src -i grafana/k6 run /src/jwtTests.js
 
 
 # Debug commands
