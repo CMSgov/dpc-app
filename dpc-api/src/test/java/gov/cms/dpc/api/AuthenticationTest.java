@@ -11,7 +11,6 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -28,8 +27,8 @@ class AuthenticationTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testBasicAuthentication() throws IOException, URISyntaxException, ParseException {
-        // Manually setup the required org functions
+    void testBasicAuthentication() throws IOException, ParseException {
+        // Manually set up the required org functions
         final String macaroon = FHIRHelpers.registerOrganization(APITestHelpers.buildAttributionClient(ctx), ctx.newJsonParser(), ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
 
         // Now, try to read the organization, which should succeed

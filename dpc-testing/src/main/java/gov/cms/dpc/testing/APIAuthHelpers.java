@@ -1,6 +1,7 @@
 package gov.cms.dpc.testing;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.apache.ApacheHttp5RestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -165,7 +166,8 @@ public class APIAuthHelpers {
     public static String createGoldenMacaroon(String taskURL) throws IOException, ParseException {
 
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost post = new HttpPost(String.format("%s/generate-token", taskURL));
+//            final HttpPost post = new HttpPost(String.format("%s/generate-token", taskURL));
+            final HttpPost post = new HttpPost(taskURL + "generate-token");
 
             try (CloseableHttpResponse execute = client.execute(post)) {
                 assertEquals(HttpStatus.OK_200, execute.getCode(), "Generated macaroon");
@@ -267,7 +269,10 @@ public class APIAuthHelpers {
             }
         }
 
-        ctx.getRestfulClientFactory().setHttpClient(clientBuilder.build());
+        ApacheHttp5RestfulClientFactory factory = new ApacheHttp5RestfulClientFactory(ctx);
+        factory.setHttpClient(clientBuilder.build());
+        ctx.setRestfulClientFactory(factory);
+//        ctx.getRestfulClientFactory().setHttpClient(clientBuilder.build());
 
         IGenericClient client = ctx.newRestfulGenericClient(baseURL);
 
