@@ -3,7 +3,6 @@ import http from 'k6/http';
 import {
   generateBundle,
   generateOrganizationResourceBody,
-  generateSmokeTestOrganizationResourceBody,
   generateProviderResourceBody,
   generatePatientResourceBody,
   generateGroupResourceBody,
@@ -39,7 +38,7 @@ export function createOrganization(npi, name, goldenMacaroon) {
 }
 
 export function createSmokeTestOrganization(npi, orgId, goldenMacaroon) {
-  const body = generateSmokeTestOrganizationResourceBody(orgId, npi, 'Smoke Test ${orgId}');
+  const body = generateOrganizationResourceBody(npi, `SmokeTest ${orgId}`, orgId);
   const res = http.post(`${urlRoot}/Organization/$submit`, JSON.stringify(body), {
     headers: {
       'Authorization': `Bearer ${goldenMacaroon}`,
