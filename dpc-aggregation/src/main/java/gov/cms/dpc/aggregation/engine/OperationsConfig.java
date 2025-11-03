@@ -35,6 +35,7 @@ public class OperationsConfig {
         this.fetchWarnThresholdSeconds = fetchWarnThresholdSeconds;
     }
 
+    // This constructor is only used in testing, so set sensible defaults for members that aren't provided.
     public OperationsConfig(
             int resourcesPerFileCount,
             String exportPath,
@@ -45,6 +46,7 @@ public class OperationsConfig {
         this.exportPath = exportPath;
         this.pollingFrequency = pollingFrequency;
         this.fetchWarnThresholdSeconds = 30;
+        this.lookBackMonths = 18;
     }
 
     @SuppressWarnings("unused")
