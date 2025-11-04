@@ -33,7 +33,7 @@ public class FHIRClientConfiguration {
 		this.serverBaseUrl = serverBaseUrl;
 	}
 
-	public ConnectionPoolConfiguration connectionPoolConfiguration() { return connectionPoolConfiguration; }
+	public ConnectionPoolConfiguration getConnectionPoolConfiguration() { return connectionPoolConfiguration; }
 	public void setConnectionPoolConfiguration(ConnectionPoolConfiguration connectionPoolConfiguration) {
 		this.connectionPoolConfiguration = connectionPoolConfiguration;
 	}
