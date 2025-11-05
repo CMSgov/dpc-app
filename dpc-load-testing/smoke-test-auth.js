@@ -33,7 +33,7 @@ export const options = {
   scenarios: {
     checkAuthWorkflow: {
       executor: 'per-vu-iterations',
-      vus: 1,
+      vus: 3,
       iterations: 1,
       exec: "checkAuthWorkflow"
     }
@@ -44,8 +44,8 @@ export const options = {
 export function setup() {
   const goldenMacaroon = fetchGoldenMacaroon();
   const orgIds = [
-    // '0ab352f1-2bf1-44c4-aa7a-3004a1ffef12',
-    // '69c0d4d4-9c07-4fa8-9053-e10fb1608b48',
+    '0ab352f1-2bf1-44c4-aa7a-3004a1ffef12',
+    '69c0d4d4-9c07-4fa8-9053-e10fb1608b48',
     'c7f5247b-4c41-478c-84eb-a6e801bdb145'
   ];
   const tokens = Array();
