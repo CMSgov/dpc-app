@@ -36,6 +36,26 @@ export function createOrganization(npi, name, goldenMacaroon) {
   return res;
 }
 
+export function createSmokeTestOrganization(npi, orgId, goldenMacaroon) {
+  const body = generateOrganizationResourceBody(npi, `SmokeTest ${orgId}`, orgId);
+  const res = http.post(`${urlRoot}/Organization/$submit`, JSON.stringify(body), {
+    headers: {
+      'Authorization': `Bearer ${goldenMacaroon}`,
+      'Content-Type': 'application/fhir+json',
+      'Accept': 'application/fhir+json'
+    }
+  });
+
+  return res;
+}
+
+export function getOrganizationById(token, orgId) {
+  const headers = createHeaderParam(token);
+  const res = http.get(`${urlRoot}/Organization/${orgId}`, headers);
+
+  return res;
+}
+
 export function updateOrganization(token, organization, contentTypeHeader=null) {
   const headers = createHeaderParam(token);
   if (contentTypeHeader) {
