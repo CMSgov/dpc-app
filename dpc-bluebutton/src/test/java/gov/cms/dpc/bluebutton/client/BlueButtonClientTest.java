@@ -35,7 +35,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled("debug -acw")
 @ExtendWith(BufferedLoggerHandler.class)
 class BlueButtonClientTest {
     // A random example patient (Jane Doe)

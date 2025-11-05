@@ -22,6 +22,9 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.client5.http.ssl.TrustSelfSignedStrategy;
+import org.apache.hc.core5.http.*;
+import org.apache.hc.core5.http.io.entity.BufferedHttpEntity;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
@@ -169,11 +172,21 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
                 .setResponseTimeout(Timeout.ofMilliseconds(timeouts.getSocketTimeout()))
                 .build();
 
+        HttpResponseInterceptor interceptor = (HttpResponse response, EntityDetails details, HttpContext ctx) -> {
+            if (response instanceof final HttpEntityContainer container) {
+                final HttpEntity entity = container.getEntity();
+                if (entity != null && !entity.isRepeatable()) {
+                    container.setEntity(new BufferedHttpEntity(entity)); // consumes & makes repeatable
+                }
+            }
+        };
+
         return HttpClients.custom()
                 .setDefaultRequestConfig(requestConfig)
                 .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
                         .setTlsSocketStrategy(new DefaultClientTlsStrategy(sslContext))
                         .build())
+                .addResponseInterceptorFirst(interceptor)
                 .build();
     }
 }

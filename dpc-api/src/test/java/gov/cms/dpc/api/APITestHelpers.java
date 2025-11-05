@@ -21,12 +21,10 @@ import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionHandl
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandler;
-import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
-import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
 import gov.cms.dpc.testing.utils.MBIUtil;
@@ -98,12 +96,6 @@ public class APITestHelpers {
         client.registerInterceptor(loggingInterceptor);
 
         return client;
-    }
-
-    public static IGenericClient buildConsentClient(FhirContext ctx){
-        ContextUtils.prefetchResourceModels(ctx, JobQueueBatch.validResourceTypes);
-        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        return ctx.newRestfulGenericClient(CONSENT_URL);
     }
 
     public static void setupPractitionerTest(IGenericClient client, IParser parser) throws IOException {

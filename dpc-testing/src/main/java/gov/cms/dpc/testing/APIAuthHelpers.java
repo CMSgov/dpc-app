@@ -27,6 +27,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.core5.http.*;
+import org.apache.hc.core5.http.io.entity.BufferedHttpEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
@@ -269,10 +270,17 @@ public class APIAuthHelpers {
             }
         }
 
-        ApacheHttp5RestfulClientFactory factory = new ApacheHttp5RestfulClientFactory(ctx);
-        factory.setHttpClient(clientBuilder.build());
-        ctx.setRestfulClientFactory(factory);
-//        ctx.getRestfulClientFactory().setHttpClient(clientBuilder.build());
+        clientBuilder.addResponseInterceptorFirst((final HttpResponse response, final EntityDetails details, final HttpContext httpCtx) -> {
+            if (response instanceof final HttpEntityContainer container) {
+                final HttpEntity entity = container.getEntity();
+                if (entity != null && !entity.isRepeatable()) {
+                    container.setEntity(new BufferedHttpEntity(entity)); // consumes & makes repeatable
+                }
+            }
+        });
+
+        ctx.setRestfulClientFactory(new ApacheHttp5RestfulClientFactory(ctx));
+        ctx.getRestfulClientFactory().setHttpClient(clientBuilder.build());
 
         IGenericClient client = ctx.newRestfulGenericClient(baseURL);
 
@@ -471,12 +479,26 @@ public class APIAuthHelpers {
         }
     }
 
+    public static class RepeatableResponseInterceptor implements HttpResponseInterceptor {
+
+        @Override
+        public void process(HttpResponse httpResponse, EntityDetails entityDetails, HttpContext httpContext) throws HttpException, IOException {
+            if (httpResponse instanceof final HttpEntityContainer container) {
+                final HttpEntity entity = container.getEntity();
+                if (entity != null && !entity.isRepeatable()) {
+                    container.setEntity(new BufferedHttpEntity(entity)); // consumes & makes repeatable
+                }
+            }
+        }
+    }
+
     public static class CustomHttpBuilder {
 
         private final HttpClientBuilder builder;
 
         CustomHttpBuilder() {
             this.builder = HttpClients.custom();
+            this.builder.addResponseInterceptorFirst(new RepeatableResponseInterceptor());
         }
 
 
