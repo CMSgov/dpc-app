@@ -70,7 +70,7 @@ public class AbstractSecureApplicationTest {
     }
 
     protected String getAdminURL() {
-        return String.format("http://localhost:%d/tasks/", APPLICATION.getAdminPort());
+        return String.format("http://localhost:%d/tasks", APPLICATION.getAdminPort());
     }
 
     protected String getAdminResourceURL() {

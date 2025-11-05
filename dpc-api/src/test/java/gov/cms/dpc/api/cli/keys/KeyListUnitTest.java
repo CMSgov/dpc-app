@@ -82,7 +82,7 @@ class KeyListUnitTest {
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "list-keys")
+                    .withPath(taskUri.getPath() + "/list-keys")
                     .withQueryStringParameters(List.of(Parameter.param("organization", "org_id")))
             )
             .respond(
@@ -104,7 +104,7 @@ class KeyListUnitTest {
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "list-keys")
+                    .withPath(taskUri.getPath() + "/list-keys")
                     .withQueryStringParameters(List.of(Parameter.param("organization", "org_id")))
             )
             .respond(

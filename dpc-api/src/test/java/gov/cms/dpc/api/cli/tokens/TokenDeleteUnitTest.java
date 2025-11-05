@@ -67,7 +67,7 @@ public class TokenDeleteUnitTest {
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "delete-token")
+                    .withPath(taskUri.getPath() + "/delete-token")
                     .withQueryStringParameters(List.of(
                         Parameter.param("organization", "org_id"),
                         Parameter.param("token", "token_id")
@@ -91,7 +91,7 @@ public class TokenDeleteUnitTest {
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "delete-token")
+                    .withPath(taskUri.getPath() + "/delete-token")
                     .withQueryStringParameters(List.of(
                         Parameter.param("organization", "org_id"),
                         Parameter.param("token", "token_id")

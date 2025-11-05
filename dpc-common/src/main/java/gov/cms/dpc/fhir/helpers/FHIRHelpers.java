@@ -71,7 +71,7 @@ public class FHIRHelpers {
                     .execute();
 
             try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-                final URIBuilder uriBuilder = new URIBuilder(adminURL + "generate-token");
+                final URIBuilder uriBuilder = new URIBuilder(String.format("%s/generate-token", adminURL));
                 uriBuilder.setParameter("organization", organizationID);
                 // Now, create a Macaroon
                 final HttpPost tokenPost = new HttpPost(uriBuilder.build());

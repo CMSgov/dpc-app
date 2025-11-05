@@ -85,7 +85,7 @@ public class TokenCreateUnitTest {
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "generate-token")
+                    .withPath(taskUri.getPath() + "/generate-token")
                     .withQueryStringParameters(List.of(
                         Parameter.param("organization", org_id.toString()),
                         Parameter.param("label", tokenEntity.getLabel())
@@ -110,7 +110,7 @@ public class TokenCreateUnitTest {
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "generate-token")
+                    .withPath(taskUri.getPath() + "/generate-token")
                     .withQueryStringParameters(List.of(
                         Parameter.param("organization", "org_id"),
                         Parameter.param("label", "token_label")

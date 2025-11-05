@@ -85,7 +85,7 @@ public class TokenListUnitTest {
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "list-tokens")
+                    .withPath(taskUri.getPath() + "/list-tokens")
                     .withQueryStringParameters(List.of(Parameter.param("organization", org_id.toString())))
             )
             .respond(
@@ -107,7 +107,7 @@ public class TokenListUnitTest {
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "list-tokens")
+                    .withPath(taskUri.getPath() + "/list-tokens")
                     .withQueryStringParameters(List.of(Parameter.param("organization", "org_id")))
             )
             .respond(

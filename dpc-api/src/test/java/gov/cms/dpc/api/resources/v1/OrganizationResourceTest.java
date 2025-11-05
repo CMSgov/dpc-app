@@ -212,7 +212,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), orgDeletionID.toString(), "1111121111", TASK_URL);
 
         // Register Public key
-        APIAuthHelpers.generateAndUploadKey("org-deletion-key", orgDeletionID.toString(), GOLDEN_MACAROON, "http://localhost:3002/v1/");
+        APIAuthHelpers.generateAndUploadKey("org-deletion-key", orgDeletionID.toString(), GOLDEN_MACAROON, "http://localhost:3002/v1");
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), GOLDEN_MACAROON, false);
 
         // Delegate the Macaroon

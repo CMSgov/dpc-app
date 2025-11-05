@@ -67,7 +67,7 @@ class KeyDeleteUnitTest {
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "delete-key")
+                    .withPath(taskUri.getPath() + "/delete-key")
                     .withQueryStringParameters(List.of(
                         Parameter.param("organization", "org_id"),
                         Parameter.param("key", "key_id")
@@ -91,7 +91,7 @@ class KeyDeleteUnitTest {
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "delete-key")
+                    .withPath(taskUri.getPath() + "/delete-key")
                     .withQueryStringParameters(List.of(
                         Parameter.param("organization", "org_id"),
                         Parameter.param("key", "key_id")

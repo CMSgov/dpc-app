@@ -72,7 +72,7 @@ class KeyUploadUnitTest {
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "upload-key")
+                    .withPath(taskUri.getPath() + "/upload-key")
                     .withQueryStringParameters(List.of(
                         Parameter.param("organization", "org_id"),
                         Parameter.param("label", "label")
@@ -103,7 +103,7 @@ class KeyUploadUnitTest {
                 .when(
                         HttpRequest.request()
                                 .withMethod("POST")
-                                .withPath(taskUri.getPath() + "upload-key")
+                                .withPath(taskUri.getPath() + "/upload-key")
                                 .withQueryStringParameters(List.of(
                                         Parameter.param("organization", "org_id"),
                                         Parameter.param("label", "label")
