@@ -3,19 +3,15 @@
 
 import { check, fail, sleep } from 'k6';
 import http from 'k6/http';
-import { fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
 import { fhirOK, getUuidFromUrl } from './utils/test-utils.js';
 import { setupSmokeTests, tearDownSmokeTests } from './utils/smoketest-utils.js';
 import {
   createGroupWithPatients,
-  createOrganization,
   createPatientsBatch,
   createPractitioners,
   deletePractitioner,
-  deleteOrganization,
   exportGroup,
   findJobById,
-  findOrganizationByNpi,
 } from './dpc-api-client.js';
 
 const EXPORT_POLL_INTERVAL_SEC = 15;
@@ -47,7 +43,6 @@ export function setup() {
 
 function handleJmxSmoketests(data) {
   console.log('handle jmx tests...')
-  // COPIED from dpc-load-testing/ci-app.js
   data.orgIds.forEach((orgId, index) => {
     const token = data.tokens[index];
     const mbis = ['1SQ3F00AA00', '5S58A00AA00', '4S58A00AA00', '3S58A00AA00', '0S80C00AA00'];
