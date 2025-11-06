@@ -1,4 +1,8 @@
+/*global console*/
+/* eslint no-console: "off" */
+
 import { check  } from 'k6';
+import exec from 'k6/execution'
 import { fetchGoldenMacaroon, generateDPCToken } from '../generate-dpc-token.js';
 import {
   deleteOrganization,

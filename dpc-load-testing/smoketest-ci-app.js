@@ -3,7 +3,6 @@
 
 import { check, fail, sleep } from 'k6';
 import http from 'k6/http';
-import exec from 'k6/execution'
 import { fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
 import { fhirOK, getUuidFromUrl } from './utils/test-utils.js';
 import { setupSmokeTests, tearDownSmokeTests } from './utils/smoketest-utils.js';
