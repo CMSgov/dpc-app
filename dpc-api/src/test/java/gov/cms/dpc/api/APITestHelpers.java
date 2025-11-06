@@ -25,6 +25,7 @@ import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
 import gov.cms.dpc.testing.utils.MBIUtil;
@@ -93,6 +94,9 @@ public class APITestHelpers {
         loggingInterceptor.setLogRequestSummary(false);
         loggingInterceptor.setLogResponseSummary(false);
         client.registerInterceptor(loggingInterceptor);
+
+        // Make responses repeatable
+        client.registerInterceptor(new APIAuthHelpers.RepeatableResponseInterceptor());
 
         return client;
     }

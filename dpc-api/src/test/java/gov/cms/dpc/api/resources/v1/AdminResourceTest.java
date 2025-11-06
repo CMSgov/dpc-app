@@ -10,7 +10,6 @@ import org.apache.hc.core5.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -40,7 +39,6 @@ public class AdminResourceTest extends AbstractSecureApplicationTest{
         conn.disconnect();
     }
 
-    @Disabled("debug -acw")
     @Test
     void testSearchByNpi() {
         IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getAdminResourceURL(), GOLDEN_MACAROON, false);

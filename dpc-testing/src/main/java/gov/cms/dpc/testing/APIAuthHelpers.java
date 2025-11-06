@@ -269,14 +269,7 @@ public class APIAuthHelpers {
             }
         }
 
-        clientBuilder.addResponseInterceptorFirst((final HttpResponse response, final EntityDetails details, final HttpContext httpCtx) -> {
-            if (response instanceof final HttpEntityContainer container) {
-                final HttpEntity entity = container.getEntity();
-                if (entity != null && !entity.isRepeatable()) {
-                    container.setEntity(new BufferedHttpEntity(entity)); // consumes & makes repeatable
-                }
-            }
-        });
+        clientBuilder.addResponseInterceptorFirst(new RepeatableResponseInterceptor());
 
         ctx.setRestfulClientFactory(new ApacheHttp5RestfulClientFactory(ctx));
         ctx.getRestfulClientFactory().setHttpClient(clientBuilder.build());
