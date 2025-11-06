@@ -248,7 +248,7 @@ jobs:
             SONAR_HOST_URL=/sonarqube/url
             SONAR_TOKEN=/sonarqube/token
       - name: Run quality gate scan
-        uses: sonarsource/sonarqube-scan-action@vfd88b7d7ccbaefd23d8f36f73b59db7a3d246602
+        uses: sonarsource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
         with:
           args:
             -Dsonar.projectKey=bcda-dpc-web
@@ -296,7 +296,7 @@ jobs:
             SONAR_HOST_URL=/sonarqube/url
             SONAR_TOKEN=/sonarqube/token
       - name: Run quality gate scan
-        uses: sonarsource/sonarqube-scan-action@vfd88b7d7ccbaefd23d8f36f73b59db7a3d246602
+        uses: sonarsource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
         with:
           args:
             -Dsonar.projectKey=bcda-dpc-portal
