@@ -101,11 +101,11 @@ jobs:
         id: run-smoke-test-k6
         env:
           ELB_URL: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
-          HOST_URL: ${{ steps.determine-host.outputs.HOST_URL }}
           PORTAL_HOST: ${{ steps.determine-host.outputs.HOST }}
           WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
-          WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
+          WEB_ADMIN_HOST: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
           PUBLIC_URL: ${{ steps.determine-host.outputs.HOST }}
+          API_METADATA_URL: ${{ steps.determine-host.outputs.HOST_URL }}
         run:
           make smoketest-k6-remote
       - name: Run Smoke Test
