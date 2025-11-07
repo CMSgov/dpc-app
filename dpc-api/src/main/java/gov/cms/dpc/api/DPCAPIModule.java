@@ -2,6 +2,7 @@ package gov.cms.dpc.api;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
@@ -28,7 +29,9 @@ import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.annotations.ServiceBaseURL;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthManagedSessionFactory;
+import gov.cms.dpc.fhir.configuration.ConnectionPoolConfiguration;
 import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
+import gov.cms.dpc.fhir.configuration.TimeoutConfiguration;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.annotations.PublicURL;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
@@ -197,10 +200,18 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
         String attributionUrl = fhirClientConfiguration.getServerBaseUrl();
         logger.info("Connecting to attribution server at {}.", attributionUrl);
-        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        ctx.getRestfulClientFactory().setSocketTimeout(fhirClientConfiguration.getTimeouts().getSocketTimeout());
-        ctx.getRestfulClientFactory().setConnectTimeout(fhirClientConfiguration.getTimeouts().getConnectionTimeout());
-        ctx.getRestfulClientFactory().setConnectionRequestTimeout(fhirClientConfiguration.getTimeouts().getRequestTimeout());
+
+        IRestfulClientFactory iRestfulClientFactory = ctx.getRestfulClientFactory();
+        iRestfulClientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
+
+        TimeoutConfiguration timeoutConfiguration = fhirClientConfiguration.getTimeouts();
+        iRestfulClientFactory.setSocketTimeout(timeoutConfiguration.getSocketTimeout());
+        iRestfulClientFactory.setConnectTimeout(timeoutConfiguration.getConnectionTimeout());
+        iRestfulClientFactory.setConnectionRequestTimeout(timeoutConfiguration.getRequestTimeout());
+
+        ConnectionPoolConfiguration connectionPoolConfiguration = fhirClientConfiguration.getConnectionPoolConfiguration();
+        iRestfulClientFactory.setPoolMaxPerRoute(connectionPoolConfiguration.getPoolMaxPerRoute());
+        iRestfulClientFactory.setPoolMaxTotal(connectionPoolConfiguration.getPoolMaxTotal());
 
         IGenericClient client = ctx.newRestfulGenericClient(attributionUrl);
         client.registerInterceptor(new RequestIdHeaderInterceptor());

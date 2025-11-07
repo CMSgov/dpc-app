@@ -2,6 +2,7 @@ package gov.cms.dpc.bluebutton;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
@@ -12,11 +13,11 @@ import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
 import gov.cms.dpc.bluebutton.health.BlueButtonHealthCheck;
+import gov.cms.dpc.fhir.configuration.ConnectionPoolConfiguration;
 import gov.cms.dpc.fhir.configuration.TimeoutConfiguration;
 import io.dropwizard.core.Configuration;
 import jakarta.inject.Named;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
@@ -78,7 +79,16 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
     @Provides
     @Named("bbclient")
     public IGenericClient provideFhirRestClient(FhirContext fhirContext, HttpClient httpClient) {
-        fhirContext.getRestfulClientFactory().setHttpClient(httpClient);
+        IRestfulClientFactory iRestfulClientFactory = fhirContext.getRestfulClientFactory();
+        ConnectionPoolConfiguration connectionPoolConfiguration = this.bbClientConfiguration.getConnectionPoolConfiguration();
+        TimeoutConfiguration timeoutConfiguration = this.bbClientConfiguration.getTimeouts();
+
+        iRestfulClientFactory.setHttpClient(httpClient);
+        iRestfulClientFactory.setPoolMaxPerRoute(connectionPoolConfiguration.getPoolMaxPerRoute());
+        iRestfulClientFactory.setPoolMaxTotal(connectionPoolConfiguration.getPoolMaxTotal());
+        iRestfulClientFactory.setConnectTimeout(timeoutConfiguration.getConnectionTimeout());
+        iRestfulClientFactory.setSocketTimeout(timeoutConfiguration.getSocketTimeout());
+        iRestfulClientFactory.setConnectionRequestTimeout(timeoutConfiguration.getRequestTimeout());
 
         return fhirContext.newRestfulGenericClient(this.bbClientConfiguration.getServerBaseUrl());
     }
@@ -156,16 +166,7 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
             throw new BlueButtonClientSetupException(ex.getMessage(), ex);
         }
 
-        // Configure the socket timeout for the connection, incl. ssl tunneling
-        final TimeoutConfiguration timeouts = this.bbClientConfiguration.getTimeouts();
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(timeouts.getConnectionTimeout())
-                .setConnectionRequestTimeout(timeouts.getRequestTimeout())
-                .setSocketTimeout(timeouts.getSocketTimeout())
-                .build();
-
         return HttpClients.custom()
-                .setDefaultRequestConfig(requestConfig)
                 .setSSLContext(sslContext)
                 .build();
     }
