@@ -2,7 +2,6 @@ package gov.cms.dpc.bluebutton;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
@@ -13,12 +12,15 @@ import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
 import gov.cms.dpc.bluebutton.health.BlueButtonHealthCheck;
+import gov.cms.dpc.fhir.configuration.ConnectionPoolConfiguration;
 import gov.cms.dpc.fhir.configuration.TimeoutConfiguration;
 import io.dropwizard.core.Configuration;
 import jakarta.inject.Named;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,17 +80,7 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
     @Provides
     @Named("bbclient")
     public IGenericClient provideFhirRestClient(FhirContext fhirContext, HttpClient httpClient) {
-        IRestfulClientFactory iRestfulClientFactory = fhirContext.getRestfulClientFactory();
-        //ConnectionPoolConfiguration connectionPoolConfiguration = this.bbClientConfiguration.getConnectionPoolConfiguration();
-        TimeoutConfiguration timeoutConfiguration = this.bbClientConfiguration.getTimeouts();
-
-        iRestfulClientFactory.setHttpClient(httpClient);
-        //iRestfulClientFactory.setPoolMaxPerRoute(connectionPoolConfiguration.getPoolMaxPerRoute());
-        //iRestfulClientFactory.setPoolMaxTotal(connectionPoolConfiguration.getPoolMaxTotal());
-        iRestfulClientFactory.setConnectTimeout(timeoutConfiguration.getConnectionTimeout());
-        iRestfulClientFactory.setSocketTimeout(timeoutConfiguration.getSocketTimeout());
-        iRestfulClientFactory.setConnectionRequestTimeout(timeoutConfiguration.getRequestTimeout());
-
+        fhirContext.getRestfulClientFactory().setHttpClient(httpClient);
         return fhirContext.newRestfulGenericClient(this.bbClientConfiguration.getServerBaseUrl());
     }
 
@@ -165,8 +157,26 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
             throw new BlueButtonClientSetupException(ex.getMessage(), ex);
         }
 
+        // Configure the socket timeout for the connection, incl. ssl tunneling
+        final TimeoutConfiguration timeouts = this.bbClientConfiguration.getTimeouts();
+
+        RequestConfig requestConfig = RequestConfig.custom()
+            .setConnectTimeout(timeouts.getConnectionTimeout())
+            .setConnectionRequestTimeout(timeouts.getRequestTimeout())
+            .setSocketTimeout(timeouts.getSocketTimeout())
+            .build();
+
+        // Configure the connection pool
+        final ConnectionPoolConfiguration connectionPools = this.bbClientConfiguration.getConnectionPoolConfiguration();
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+        connectionManager.setMaxTotal(connectionPools.getPoolMaxTotal());
+        connectionManager.setDefaultMaxPerRoute(connectionPools.getPoolMaxPerRoute());
+
         return HttpClients.custom()
-                .setSSLContext(sslContext)
-                .build();
+            .setSSLContext(sslContext)
+            .setDefaultRequestConfig(requestConfig)
+            .setConnectionManager(connectionManager)
+            .setConnectionManagerShared(true)   // When multi-threaded, make sure the connection manager is shared between clients
+            .build();
     }
 }
