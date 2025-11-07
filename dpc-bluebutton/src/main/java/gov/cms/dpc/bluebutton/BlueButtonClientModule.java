@@ -13,7 +13,6 @@ import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.bluebutton.exceptions.BlueButtonClientSetupException;
 import gov.cms.dpc.bluebutton.health.BlueButtonHealthCheck;
-import gov.cms.dpc.fhir.configuration.ConnectionPoolConfiguration;
 import gov.cms.dpc.fhir.configuration.TimeoutConfiguration;
 import io.dropwizard.core.Configuration;
 import jakarta.inject.Named;
@@ -80,12 +79,12 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
     @Named("bbclient")
     public IGenericClient provideFhirRestClient(FhirContext fhirContext, HttpClient httpClient) {
         IRestfulClientFactory iRestfulClientFactory = fhirContext.getRestfulClientFactory();
-        ConnectionPoolConfiguration connectionPoolConfiguration = this.bbClientConfiguration.getConnectionPoolConfiguration();
+        //ConnectionPoolConfiguration connectionPoolConfiguration = this.bbClientConfiguration.getConnectionPoolConfiguration();
         TimeoutConfiguration timeoutConfiguration = this.bbClientConfiguration.getTimeouts();
 
         iRestfulClientFactory.setHttpClient(httpClient);
-        iRestfulClientFactory.setPoolMaxPerRoute(connectionPoolConfiguration.getPoolMaxPerRoute());
-        iRestfulClientFactory.setPoolMaxTotal(connectionPoolConfiguration.getPoolMaxTotal());
+        //iRestfulClientFactory.setPoolMaxPerRoute(connectionPoolConfiguration.getPoolMaxPerRoute());
+        //iRestfulClientFactory.setPoolMaxTotal(connectionPoolConfiguration.getPoolMaxTotal());
         iRestfulClientFactory.setConnectTimeout(timeoutConfiguration.getConnectionTimeout());
         iRestfulClientFactory.setSocketTimeout(timeoutConfiguration.getSocketTimeout());
         iRestfulClientFactory.setConnectionRequestTimeout(timeoutConfiguration.getRequestTimeout());
