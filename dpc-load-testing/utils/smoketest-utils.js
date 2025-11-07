@@ -40,7 +40,7 @@ export function setupSmokeTests() {
 
     if (!checkGetOrgOutput) {
       console.error(existingOrgResponse.body);
-      exec.test.abort('failed find org by id');
+      exec.test.abort(`failed find org by id: ${orgId}`);
     }
 
     if (existingOrgResponse == 200) {
