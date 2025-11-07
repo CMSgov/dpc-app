@@ -18,6 +18,11 @@ import io.dropwizard.core.Configuration;
 import jakarta.inject.Named;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -143,40 +148,45 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
      * @return {@link HttpClient} compatible with HAPI FHIR TLS client
      */
     private HttpClient buildMutualTlsClient(KeyStore keyStore, char[] keyStorePass) {
-        final SSLContext sslContext;
-
-        try {
-            // BlueButton FHIR servers have a self-signed cert and require a client cert
-            sslContext = SSLContexts.custom()
-                    .loadKeyMaterial(keyStore, keyStorePass)
-                    .loadTrustMaterial(keyStore, new TrustSelfSignedStrategy())
-                    .build();
-
-        } catch (KeyManagementException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException ex) {
-            logger.error(ex.getMessage());
-            throw new BlueButtonClientSetupException(ex.getMessage(), ex);
-        }
-
-        // Configure the socket timeout for the connection, incl. ssl tunneling
+        // Configure the socket timeout for the connection
         final TimeoutConfiguration timeouts = this.bbClientConfiguration.getTimeouts();
-
         RequestConfig requestConfig = RequestConfig.custom()
             .setConnectTimeout(timeouts.getConnectionTimeout())
             .setConnectionRequestTimeout(timeouts.getRequestTimeout())
             .setSocketTimeout(timeouts.getSocketTimeout())
             .build();
 
+        // Configure the SSL context
+        final SSLContext sslContext;
+        try {
+            // BlueButton FHIR servers have a self-signed cert and require a client cert
+            sslContext = SSLContexts.custom()
+                    .loadKeyMaterial(keyStore, keyStorePass)
+                    .loadTrustMaterial(keyStore, new TrustSelfSignedStrategy())
+                    .build();
+        } catch (KeyManagementException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException ex) {
+            logger.error(ex.getMessage());
+            throw new BlueButtonClientSetupException(ex.getMessage(), ex);
+        }
+
         // Configure the connection pool
+        SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext);
+        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
+            .register("http", PlainConnectionSocketFactory.getSocketFactory())
+            .register("https", sslConnectionSocketFactory)
+            .build();
+
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(registry);
         final ConnectionPoolConfiguration connectionPools = this.bbClientConfiguration.getConnectionPoolConfiguration();
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
         connectionManager.setMaxTotal(connectionPools.getPoolMaxTotal());
         connectionManager.setDefaultMaxPerRoute(connectionPools.getPoolMaxPerRoute());
 
+        // Finally build the http client
         return HttpClients.custom()
             .setSSLContext(sslContext)
             .setDefaultRequestConfig(requestConfig)
             .setConnectionManager(connectionManager)
-            .setConnectionManagerShared(true)   // When multi-threaded, make sure the connection manager is shared between clients
+            .setConnectionManagerShared(true)   // When multithreaded, make sure the connection manager is shared between clients
             .build();
     }
 }
