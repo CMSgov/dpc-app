@@ -33,7 +33,7 @@ function checkLoginPage(baseUrl, paths, loginText) {
 
 export default function workflow() {
   // port from src/test/portal_test.yml
-  if (getEnvVar("ENV") !== "sandbox") {
+  if (getEnvVar("ENVIRONMENT") !== "sandbox") {
     checkLoginPage(getEnvVar("PORTAL_HOST"), ["/portal", "/portal/organizations"], "Sign in");
   }
   // port from src/test/web_test.yml

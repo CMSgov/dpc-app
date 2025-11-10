@@ -96,7 +96,7 @@ jobs:
           PORTAL_HOST: ${{ steps.determine-host.outputs.HOST }}
           WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
           WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
-          ENV: ${{ inputs.env }}
+          ENVIRONMENT: ${{ inputs.env }}
         run: |
           make smoketest-k6-frontend-remote
       - name: Run Smoke Test
