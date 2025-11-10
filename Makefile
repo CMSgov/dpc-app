@@ -29,16 +29,16 @@ smoke/prod: venv smoke
 	@echo "Running JMeter Smoke Tests against ${HOST_URL}"
 	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/prod.smoke_test.yml
 
-.PHONY: smoketest-k6-local
-smoketest-k6-local: secure-envs
+.PHONY: smoketest-k6-backend-local
+smoketest-k6-backend-local: secure-envs
 	@echo "Running K6 smoketests locally..."
-	@./run-k6-smoketests.sh --k6-env=local
+	@./run-k6-backend-smoketests.sh --k6-env=local
 
 # for use w/ dev, test, sandbox, and prod
-.PHONY: smoketest-k6-remote
-smoketest-k6-remote: secure-envs
+.PHONY: smoketest-k6-backend-remote
+smoketest-k6-backend-remote: secure-envs
 	@echo "Running K6 smoketests against ${HOST_URL}..."
-	@./run-k6-smoketests.sh
+	@./run-k6-backend-smoketests.sh
 
 # Build commands
 #

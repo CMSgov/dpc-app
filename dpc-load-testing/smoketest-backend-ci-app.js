@@ -28,12 +28,6 @@ export const options = {
       iterations: 1,
       exec: "backendWorkflow"
     },
-    frontendWorkflow: {
-      executor: 'per-vu-iterations',
-      vus: 1,
-      iterations: 1,
-      exec: "frontendWorkflow"
-    }
   }
 };
 
@@ -170,42 +164,6 @@ function monitorExportJob(token, groupId, jobLocationUrl) {
 export function backendWorkflow(data) {
   // port from src/test/smoke_test.yml + src/main/resources/SmokeTest.jmx + src/main/java/gov/cms/dpc/testing/smoketests/SmokeTest.java
   handleJmxSmoketests(data);
-}
-
-function getEnvVar(varName) {
-  const value = __ENV[varName];
-  if (!value) {
-    fail(`Failed to retrieve environment variable: ${varName}`)
-  }
-  return value
-}
-
-function checkLoginPage(baseUrl, paths, loginText) {
-  if (!baseUrl) {
-    throw new Error(`${baseUrl} environment variable is not set`)
-  }
-
-  paths.forEach(path => {
-    const fullUrl = baseUrl + path;
-    const res = http.get(fullUrl);
-    console.log('checking url: ', fullUrl);
-    console.log("res.status: ", res.status);
-
-    check(res, {
-      "is status 200": (r) => r.status === 200,
-      "verify homepage text": (r) => r.body.includes("Data at the Point of Care"),
-      "verify login text": (r) => r.body.includes(loginText)
-    });
-  })
-}
-
-export function frontendWorkflow() {
-  // port from src/test/portal_test.yml
-  checkLoginPage(getEnvVar("PORTAL_HOST"), ["/portal", "/portal/organizations"], "Sign in");
-  // port from src/test/web_test.yml
-  checkLoginPage(getEnvVar("WEB_HOST"), ["/users/sign_in", "/"], "Log in");
-  // port from src/test/web_admin_test.yml
-  checkLoginPage(getEnvVar("WEB_ADMIN_HOST"), ["/admin/internal/sign_in", "/admin/organizations"], "Log in");
 }
 
 export function teardown(data) {
