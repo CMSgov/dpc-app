@@ -101,9 +101,9 @@ jobs:
         id: run-smoke-test-k6
         env:
           API_METADATA_URL: ${{ steps.determine-host.outputs.HOST_URL }}
-          API_ADMIN_URL: ${{ steps.fetch-admin-host.outputs.ELB_URL }}
+          API_ADMIN_URL: ${{ steps.fetch-admin-host.outputs.admin_host }}
           HOST_URL: ${{ steps.determine-host.outputs.HOST_URL }}
-          ENV: ${{ inputs.env }}
+          ENVIRONMENT: ${{ inputs.env }}
         run:
           make smoketest-k6-backend-remote
       - name: Run Smoke Test
