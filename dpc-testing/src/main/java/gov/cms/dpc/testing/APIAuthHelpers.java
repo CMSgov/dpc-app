@@ -2,10 +2,7 @@ package gov.cms.dpc.testing;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.apache.ApacheHttp5RestfulClientFactory;
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -272,6 +269,7 @@ public class APIAuthHelpers {
         clientBuilder.addResponseInterceptorFirst(new RepeatableResponseInterceptor());
 
         ApacheHttp5RestfulClientFactory factory = new ApacheHttp5RestfulClientFactory(ctx);
+        factory.setServerValidationMode(ServerValidationModeEnum.NEVER);
         factory.setHttpClient(clientBuilder.build());
         ctx.setRestfulClientFactory(factory);
 
