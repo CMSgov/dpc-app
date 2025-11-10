@@ -26,13 +26,10 @@ import {
   removePatientFromGroup,
   updateOrganization,
 } from './dpc-api-client.js';
+import { fhirOK, fhirType } from './utils/test-utils.js';
 import NPIGeneratorCache from './utils/npi-generator.js';
 
 const npiGeneratorCache = new NPIGeneratorCache();
-const fhirType = 'application/fhir+json';
-const fhirOK = function(res) {
-  return res.status === 200 && res.headers['Content-Type'] === fhirType;
-};
 
 export const options = {
   thresholds: {
@@ -155,7 +152,6 @@ export function workflow(data) {
   // POST group for practitioner
 
   const createGroupResponse = createGroupWithPatients(token, orgId, practitionerId, practitionerNpi, patients);
-  console.log('groupResponse.json(): ', createGroupResponse.json());
 
   const memberContentVerified = function(res) {
     let pass = true;

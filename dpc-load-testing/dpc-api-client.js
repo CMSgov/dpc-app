@@ -10,6 +10,7 @@ import {
 
 const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/api/v1' : __ENV.API_METADATA_URL;
 
+
 export function findOrganizationByNpi(npi, goldenMacaroon) {
   const res = http.get(`${urlRoot}/Admin/Organization?npis=npi|${npi}`, {
     headers: {
@@ -179,14 +180,6 @@ export function deleteOrganization(orgId, goldenMacaroon) {
   return res;
 }
 
-export function deleteGroup(token, groupId) {
-  const res = http.del(`${urlRoot}/Group/${groupId}`,
-	  createHeaderParam(token)
-	);
-
-  return res;
-}
-
 export function createGroup(token, orgId, practitionerId, practitionerNpi) {
     const groupBody = generateGroupResourceBody(practitionerNpi);
     const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
@@ -292,7 +285,7 @@ export function authorizedGet(token, url, headers = {}) {
  * @param {*} headers Additional headers that should be included.
  * @returns Headers wrapped in a Parameters object.
  */
-export function createHeaderParam(token, headers) {
+function createHeaderParam(token, headers) {
   const defaultHeaders = {
     'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/fhir+json',
