@@ -148,28 +148,56 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
      * @return {@link HttpClient} compatible with HAPI FHIR TLS client
      */
     private HttpClient buildMutualTlsClient(KeyStore keyStore, char[] keyStorePass) {
-        // Configure the socket timeout for the connection
+        final RequestConfig requestConfig = getClientRequestConfig();
+        final SSLContext sslContext = getSSLContext(keyStore, keyStorePass);
+        final PoolingHttpClientConnectionManager connectionManager = getConnectionManager(sslContext);
+
+        return HttpClients.custom()
+            .setSSLContext(sslContext)
+            .setDefaultRequestConfig(requestConfig)
+            .setConnectionManager(connectionManager)
+            .setConnectionManagerShared(true)   // When multithreaded, make sure the connection manager is shared between clients
+            .build();
+    }
+
+    /**
+     * Builds a {@link RequestConfig} with the appropriate time outs for our BFD client.
+     * @return {@link RequestConfig}
+     */
+    private RequestConfig getClientRequestConfig() {
         final TimeoutConfiguration timeouts = this.bbClientConfiguration.getTimeouts();
-        RequestConfig requestConfig = RequestConfig.custom()
+        return RequestConfig.custom()
             .setConnectTimeout(timeouts.getConnectionTimeout())
             .setConnectionRequestTimeout(timeouts.getRequestTimeout())
             .setSocketTimeout(timeouts.getSocketTimeout())
             .build();
+    }
 
-        // Configure the SSL context
-        final SSLContext sslContext;
+    /**
+     * Builds an {@link SSLContext} for connecting to BFD.
+     * @param keyStore the keystore
+     * @param keyStorePass password for the SSL keystore
+     * @return {@link SSLContext}
+     */
+    private SSLContext getSSLContext(KeyStore keyStore, char[] keyStorePass) {
         try {
             // BlueButton FHIR servers have a self-signed cert and require a client cert
-            sslContext = SSLContexts.custom()
-                    .loadKeyMaterial(keyStore, keyStorePass)
-                    .loadTrustMaterial(keyStore, new TrustSelfSignedStrategy())
-                    .build();
+            return SSLContexts.custom()
+                .loadKeyMaterial(keyStore, keyStorePass)
+                .loadTrustMaterial(keyStore, new TrustSelfSignedStrategy())
+                .build();
         } catch (KeyManagementException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException ex) {
             logger.error(ex.getMessage());
             throw new BlueButtonClientSetupException(ex.getMessage(), ex);
         }
+    }
 
-        // Configure the connection pool
+    /**
+     * Builds a {@link PoolingHttpClientConnectionManager} for use with our BFD client.
+     * @param sslContext for setting up an SSL connection
+     * @return {@link PoolingHttpClientConnectionManager} configured for SSL.
+     */
+    private PoolingHttpClientConnectionManager getConnectionManager(SSLContext sslContext) {
         SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext);
         Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
             .register("http", PlainConnectionSocketFactory.getSocketFactory())
@@ -181,12 +209,6 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
         connectionManager.setMaxTotal(connectionPools.getPoolMaxTotal());
         connectionManager.setDefaultMaxPerRoute(connectionPools.getPoolMaxPerRoute());
 
-        // Finally build the http client
-        return HttpClients.custom()
-            .setSSLContext(sslContext)
-            .setDefaultRequestConfig(requestConfig)
-            .setConnectionManager(connectionManager)
-            .setConnectionManagerShared(true)   // When multithreaded, make sure the connection manager is shared between clients
-            .build();
+        return connectionManager;
     }
 }
