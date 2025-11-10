@@ -36,7 +36,6 @@ export async function testSnippet() {
   )
   if (!checkSnippet) {
     console.log("Snippet signature doesn't match");
-    return;
   }
 }
 
