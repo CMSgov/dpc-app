@@ -271,8 +271,9 @@ public class APIAuthHelpers {
 
         clientBuilder.addResponseInterceptorFirst(new RepeatableResponseInterceptor());
 
-        ctx.setRestfulClientFactory(new ApacheHttp5RestfulClientFactory(ctx));
-        ctx.getRestfulClientFactory().setHttpClient(clientBuilder.build());
+        ApacheHttp5RestfulClientFactory factory = new ApacheHttp5RestfulClientFactory(ctx);
+        factory.setHttpClient(clientBuilder.build());
+        ctx.setRestfulClientFactory(factory);
 
         IGenericClient client = ctx.newRestfulGenericClient(baseURL);
 
