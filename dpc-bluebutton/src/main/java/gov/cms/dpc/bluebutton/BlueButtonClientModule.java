@@ -25,8 +25,11 @@ import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
 import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.TrustSelfSignedStrategy;
+import org.apache.hc.core5.http.*;
 import org.apache.hc.core5.http.config.Registry;
 import org.apache.hc.core5.http.config.RegistryBuilder;
+import org.apache.hc.core5.http.io.entity.BufferedHttpEntity;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
@@ -42,7 +45,6 @@ import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.MissingResourceException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Guice module for building and injecting the {@link BlueButtonClient}.
@@ -157,15 +159,25 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
         final SSLContext sslContext = getSSLContext(keyStore, keyStorePass);
         final PoolingHttpClientConnectionManager connectionManager = getConnectionManager(sslContext);
 
+        HttpResponseInterceptor interceptor = (HttpResponse response, EntityDetails details, HttpContext ctx) -> {
+            if (response instanceof final HttpEntityContainer container) {
+                final HttpEntity entity = container.getEntity();
+                if (entity != null && !entity.isRepeatable()) {
+                    container.setEntity(new BufferedHttpEntity(entity)); // consumes & makes repeatable
+                }
+            }
+        };
+
         return HttpClients.custom()
             .setDefaultRequestConfig(requestConfig)
             .setConnectionManager(connectionManager)
             .setConnectionManagerShared(true)   // When multithreaded, make sure the connection manager is shared between clients
+            .addResponseInterceptorFirst(interceptor)
             .build();
     }
 
     /**
-     * Builds a {@link RequestConfig} with the appropriate time outs for our BFD client.
+     * Builds a {@link RequestConfig} with the appropriate time-outs for our BFD client.
      * @return {@link RequestConfig}
      */
     private RequestConfig getClientRequestConfig() {
@@ -196,32 +208,6 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
         }
     }
 
-//<<<<<<< HEAD
-//        // Configure the socket timeout for the connection, incl. ssl tunneling
-//        final TimeoutConfiguration timeouts = this.bbClientConfiguration.getTimeouts();
-//        RequestConfig requestConfig = RequestConfig.custom()
-//                .setConnectTimeout(Timeout.ofMilliseconds(timeouts.getConnectionTimeout()))
-//                .setConnectionRequestTimeout(Timeout.ofMilliseconds(timeouts.getRequestTimeout()))
-//                .setResponseTimeout(Timeout.ofMilliseconds(timeouts.getSocketTimeout()))
-//                .build();
-//
-//        HttpResponseInterceptor interceptor = (HttpResponse response, EntityDetails details, HttpContext ctx) -> {
-//            if (response instanceof final HttpEntityContainer container) {
-//                final HttpEntity entity = container.getEntity();
-//                if (entity != null && !entity.isRepeatable()) {
-//                    container.setEntity(new BufferedHttpEntity(entity)); // consumes & makes repeatable
-//                }
-//            }
-//        };
-//
-//        return HttpClients.custom()
-//                .setDefaultRequestConfig(requestConfig)
-//                .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
-//                        .setTlsSocketStrategy(new DefaultClientTlsStrategy(sslContext))
-//                        .build())
-//                .addResponseInterceptorFirst(interceptor)
-//                .build();
-//=======
     /**
      * Builds a {@link PoolingHttpClientConnectionManager} for use with our BFD client.
      * @param sslContext for setting up an SSL connection
