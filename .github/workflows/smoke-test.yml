@@ -85,7 +85,7 @@ jobs:
           WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
           ENV: ${{ inputs.env }}
         run: |
-          make smoketest-k6-frontend
+          make smoketest-k6-frontend-remote
       - name: Run Smoke Test
         id: run-smoke-test
         env:
