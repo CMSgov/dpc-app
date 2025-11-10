@@ -2,7 +2,6 @@
 /* eslint no-console: "off" */
 
 import { check, fail, sleep } from 'k6';
-import http from 'k6/http';
 import { fhirOK, getUuidFromUrl } from './utils/test-utils.js';
 import { setupSmokeTests, tearDownSmokeTests } from './utils/smoketest-utils.js';
 import {
