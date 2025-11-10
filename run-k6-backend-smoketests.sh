@@ -14,7 +14,7 @@ else
   k6 run \
     -e API_ADMIN_URL=${API_ADMIN_URL} \
     -e API_METADATA_URL=${API_METADATA_URL} \
-    e ENV=${ENV} \
+    -e ENV=${ENV} \
     ./dpc-load-testing/smoketest-backend-ci-app.js
 fi
 
