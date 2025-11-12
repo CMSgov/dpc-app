@@ -23,7 +23,7 @@ module Admin
     # -- all .rb files in that directory are automatically loaded after loading
     # the framework and any gems in your application.
 
-    config.active_job.queue_adapter = :sidekiq
+    config.active_job.queue_adapter = :solid_queue
 
     # Sending mail with`DeliveryJob` has been deprecated. Work has been moved to `MailDeliveryJob`
     config.action_mailer.delivery_job = 'ActionMailer::MailDeliveryJob'

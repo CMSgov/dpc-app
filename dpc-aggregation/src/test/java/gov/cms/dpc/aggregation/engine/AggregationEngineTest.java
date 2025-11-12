@@ -767,7 +767,7 @@ class AggregationEngineTest {
 
         private static List<String> getLogMessages() {
             boolean success = false;
-            int count = 0, maxTries = 50;
+            int count = 0, maxTries =100;
             List<String> logMessages = new ArrayList<>();
 
             // These tests throw non-stochastic ConcurrentModificationExceptions, this is a rough way to ignore them
