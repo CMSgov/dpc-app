@@ -43,7 +43,6 @@ function handleJmxSmoketests(data) {
     // 1 of 4 (submitPractitioners)
     const practitionerNpi = '2459425221' // hard-coded for lookback tests
     const practitionerResponse = createPractitioners(token, practitionerNpi);
-    console.log('practitionerResponse.json(): ', practitionerResponse.json());
     const checkPractitionerResponse = check(
       practitionerResponse,
       {
@@ -67,7 +66,7 @@ function handleJmxSmoketests(data) {
     const checkPatientsResponse = check(
       patientsResponse,
       {
-        'status OK and fhir header 3': fhirOK,
+        'status OK and fhir header': fhirOK,
         'created patients': res => res.json().entry.length === mbis.length,
       }
     );

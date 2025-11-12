@@ -21,6 +21,7 @@ export function setupSmokeTests() {
     '69c0d4d4-9c07-4fa8-9053-e10fb1608b48',
     'c7f5247b-4c41-478c-84eb-a6e801bdb145'
   ];
+
   const tokens = Array();
   const npiGenerator = npiGeneratorCache.getGenerator(0);
   // array returned from setup distributes its members starting from the 1 index

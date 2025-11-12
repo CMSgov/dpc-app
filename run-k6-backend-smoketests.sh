@@ -12,7 +12,7 @@ if [[ "$*" == *"--k6-env=local"* ]]; then
   -e ENVIRONMENT=local \
   -i grafana/k6 run /src/smoketest-backend-ci-app.js
 else
-    echo "running backed smoketests against ${API_ADMIN_URL} and ${API_METADATA_URL}"
+  echo "running backed smoketests against ${API_ADMIN_URL} and ${API_METADATA_URL}"
   k6 run \
     -e API_ADMIN_URL=${API_ADMIN_URL} \
     -e API_METADATA_URL=${API_METADATA_URL} \
