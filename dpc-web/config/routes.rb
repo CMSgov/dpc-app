@@ -34,8 +34,6 @@ Rails.application.routes.draw do
   match '/terms-of-service', to: redirect("#{ENV['STATIC_SITE_URL']}/terms-of-service.html"), via: :get
 
   if Rails.env.development?
-    require 'sidekiq/web'
-    mount Sidekiq::Web, at: '/sidekiq'
     mount LetterOpenerWeb::Engine, at: "/letter_opener"
   end
 end
