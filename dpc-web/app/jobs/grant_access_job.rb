@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class GrantAccessJob < ApplicationJob
+  queue_as :web
+
   def perform(user_id)
     user = User.find user_id
 
