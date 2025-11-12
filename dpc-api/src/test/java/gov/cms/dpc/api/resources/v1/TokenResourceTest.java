@@ -332,8 +332,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
-                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {
-                });
+                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
             }
         }
     }

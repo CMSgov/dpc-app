@@ -71,7 +71,7 @@ public class TokenCreate extends AbstractAdminCommand {
 
             try (CloseableHttpResponse response = httpClient.execute(post)) {
                 if (!HttpStatus.isSuccess(response.getCode())) {
-                    System.err.println("Error fetching organization: " + response.getReasonPhrase());
+                    System.err.printf("Error fetching organization: %s%n", response.getReasonPhrase());
                     System.exit(1);
                 }
                 final String token = EntityUtils.toString(response.getEntity());

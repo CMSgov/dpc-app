@@ -58,12 +58,11 @@ public class TokenList extends AbstractAdminCommand {
 
             try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
                 if (!HttpStatus.isSuccess(response.getCode())) {
-                    System.err.println("Error fetching organization: " + response.getReasonPhrase());
+                    System.err.printf("Error fetching organization: %s%n", response.getReasonPhrase());
                     System.exit(1);
                 }
 
-                CollectionResponse<TokenEntity> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {
-                });
+                CollectionResponse<TokenEntity> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
                 generateTable(new ArrayList<>(tokens.getEntities()));
             }
         }

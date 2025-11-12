@@ -52,7 +52,7 @@ public class TokenDelete extends AbstractAdminCommand {
 
             try (CloseableHttpResponse response = httpClient.execute(tokenDelete)) {
                 if (!HttpStatus.isSuccess(response.getCode())) {
-                    System.err.println("Error deleting token: " + response.getReasonPhrase());
+                    System.err.printf("Error deleting token: %s%n", response.getReasonPhrase());
                     System.exit(1);
                 }
             }

@@ -56,12 +56,11 @@ public class KeyList extends AbstractAdminCommand {
 
             try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
                 if (!HttpStatus.isSuccess(response.getCode())) {
-                    System.err.println("Error fetching organization: " + response.getReasonPhrase());
+                    System.err.printf("Error fetching organization: %s%n", response.getReasonPhrase());
                     System.exit(1);
                 }
 
-                CollectionResponse<PublicKeyEntity> keys = mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {
-                });
+                CollectionResponse<PublicKeyEntity> keys = mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
                 generateTable(new ArrayList<>(keys.getEntities()));
             }
         }
