@@ -34,7 +34,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
-public class TokenCreateUnitTest {
+class TokenCreateUnitTest {
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
 
@@ -69,7 +69,7 @@ public class TokenCreateUnitTest {
     }
 
     @Test
-    public void testCreateToken_happyPath() throws IOException {
+    void testCreateToken_happyPath() throws IOException {
         UUID org_id = UUID.randomUUID();
         TokenEntity tokenEntity = new TokenEntity("tokenID", org_id, TokenType.OAUTH);
         tokenEntity.setLabel("test create token");
@@ -105,7 +105,7 @@ public class TokenCreateUnitTest {
     }
 
     @Test
-    public void testCreateToken_badResponse() {
+    void testCreateToken_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()

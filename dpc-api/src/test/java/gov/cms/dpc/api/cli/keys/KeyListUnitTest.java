@@ -68,7 +68,7 @@ class KeyListUnitTest {
     }
 
     @Test
-    public void testListKeys_happyPath() throws IOException {
+    void testListKeys_happyPath() throws IOException {
         PublicKeyEntity publicKeyEntity = new PublicKeyEntity();
         publicKeyEntity.setId(UUID.randomUUID());
         publicKeyEntity.setLabel("test public key");
@@ -99,7 +99,7 @@ class KeyListUnitTest {
     }
 
     @Test
-    public void testListKeys_badResponse() {
+    void testListKeys_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()

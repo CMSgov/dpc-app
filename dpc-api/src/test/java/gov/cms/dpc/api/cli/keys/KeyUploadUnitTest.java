@@ -67,7 +67,7 @@ class KeyUploadUnitTest {
     }
 
     @Test
-    public void testDeleteKeys_happyPath() {
+    void testDeleteKeys_happyPath() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()
@@ -98,7 +98,7 @@ class KeyUploadUnitTest {
     }
 
     @Test
-    public void testDeleteKeys_badResponse() {
+    void testDeleteKeys_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
                 .when(
                         HttpRequest.request()

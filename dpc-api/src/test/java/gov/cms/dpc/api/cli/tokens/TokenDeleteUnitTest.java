@@ -27,7 +27,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
-public class TokenDeleteUnitTest {
+class TokenDeleteUnitTest {
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
 
@@ -62,7 +62,7 @@ public class TokenDeleteUnitTest {
     }
 
     @Test
-    public void testDeleteToken_happyPath() {
+    void testDeleteToken_happyPath() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()
@@ -86,7 +86,7 @@ public class TokenDeleteUnitTest {
     }
 
     @Test
-    public void testDeleteToken_badResponse() {
+    void testDeleteToken_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()
