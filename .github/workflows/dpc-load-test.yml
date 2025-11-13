@@ -66,7 +66,7 @@ jobs:
           ENVIRONMENT: 'test'
         run: |
           ./k6 run \
-            -e ENVIRONMENT=${{ ENVIRONMENT }} \
+            -e ENVIRONMENT=$ENVIRONMENT \
             --out output-statsd=addr=localhost:8125,enableTags=true \
             ./dpc-app/dpc-load-testing/${{ inputs.test_type }}.js
 
