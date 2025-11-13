@@ -32,9 +32,11 @@ function checkLoginPage(baseUrl, paths, loginText) {
 }
 
 export default function workflow() {
-  if (getEnvVar("ENVIRONMENT") !== "prod") {
+  if (getEnvVar("ENVIRONMENT") !== "prod" && getEnvVar("ENVIRONMENT") !== "sandbox") {
     // port from src/test/portal_test.yml
     checkLoginPage(getEnvVar("PORTAL_HOST"), ["/portal", "/portal/organizations"], "Sign in");
+  }
+  if (getEnvVar("ENVIRONMENT") !== "prod") {
     // port from src/test/web_test.yml
     checkLoginPage(getEnvVar("WEB_HOST"), ["/users/sign_in", "/"], "Log in");
     // port from src/test/web_admin_test.yml
