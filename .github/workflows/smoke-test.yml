@@ -91,7 +91,7 @@ jobs:
           install -m 0755 ./k6 "$HOME/.local/bin/k6"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Run K6 Frontend Smoketest
-        id: run-k6-smoke-test-fronend
+        id: run-k6-smoke-test-frontend
         env:
           PORTAL_HOST: ${{ steps.determine-host.outputs.HOST }}
           WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
