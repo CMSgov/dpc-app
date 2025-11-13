@@ -119,31 +119,28 @@ function handleExportJob(token, groupId) {
 // ported from ClientUtils.awaitExportResponse
 function monitorExportJob(token, groupId, jobLocationUrl) {
   const jobId = getUuidFromUrl(jobLocationUrl);
-  console.log('handling jobId: ', jobId);
   const start = Date.now();
+  let elapsed_sec = 0;
 
-  while (true) {
+  while (elapsed_sec < EXPORT_POLL_TIMEOUT_SEC) {
     const jobResponse = findJobById(token, jobId);
     const statusCode = jobResponse.status;
 
-    if (statusCode > 300) {
+    if (statusCode >= 300) {
       fail(`Export for ${groupId} failed with status code: ${statusCode}`);
     }
     else if (statusCode === 200) {
       check(jobResponse, {
         'job completed (200 code)': r => r.status === 200,
       });
-      break;
-    }
-
-    const elapsed_sec = (Date.now() - start) / 1000;
-    if (elapsed_sec > EXPORT_POLL_TIMEOUT_SEC) {
-      console.log('reached poll timeout');
-      fail('status code was *not* 200');
+      return;
     }
 
     sleep(EXPORT_POLL_INTERVAL_SEC);
+    elapsed_sec = (Date.now() - start) / 1000;
   }
+  console.log('reached poll timeout');
+  fail('Failed to receive 200 status code from findJobById()');
 }
 
 export function backendWorkflow(data) {
