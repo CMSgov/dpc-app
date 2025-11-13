@@ -2,7 +2,7 @@
 /* eslint no-console: "off" */
 
 import { check, fail, sleep } from 'k6';
-import { fhirOK, getUuidFromUrl } from './utils/test-utils.js';
+import { fhirOK, getUuidFromUrl, memberContentVerified } from './utils/test-utils.js';
 import { setupSmokeTests, tearDownSmokeTests } from './utils/smoketest-utils.js';
 import {
   createGroupWithPatients,
@@ -36,9 +36,9 @@ export function setup() {
 
 function handleJmxSmoketests(data) {
   console.log('handle jmx tests...')
+  const mbis = ['1SQ3F00AA00', '5S58A00AA00', '4S58A00AA00', '3S58A00AA00', '0S80C00AA00'];
   data.orgIds.forEach((orgId, index) => {
     const token = data.tokens[index];
-    const mbis = ['1SQ3F00AA00', '5S58A00AA00', '4S58A00AA00', '3S58A00AA00', '0S80C00AA00'];
 
     // 1 of 4 (submitPractitioners)
     const practitionerNpi = '2459425221' // hard-coded for lookback tests
@@ -60,8 +60,7 @@ function handleJmxSmoketests(data) {
       console.error('failed to create practitioners');
     }
 
-    // 2 of 4 (submitPractitioners)
-    // POST patients
+    // 2 of 4 (submitPatients)
     const patientsResponse = createPatientsBatch(token, mbis);
     const checkPatientsResponse = check(
       patientsResponse,
@@ -81,25 +80,13 @@ function handleJmxSmoketests(data) {
     // 3 of 4 (submitRosters)
     const groupResponse = createGroupWithPatients(token, orgId, practitionerId, practitionerNpi, patients);
     const groupId = groupResponse.json().id;
-    const memberContentVerified = function(res) {
-      let pass = true;
-      res.json().member.forEach((patient) => {
-        if (!patients.includes(patient.entity.reference.slice(8))){
-          pass = false;
-        }
-        if (!patient.period.start || patient.period.start === patient.period.end) {
-          pass = false;
-        }
-      });
-      return pass;
-    }
 
     check(
       groupResponse,
       {
         'status OK and fhir header': fhirOK,
         'correct number of patients': res => res.json().member.length === mbis.length,
-        'member content verified': memberContentVerified,
+        'member content verified': res => memberContentVerified(res, patients),
       }
     );
     // 4 of 4 (exportData)

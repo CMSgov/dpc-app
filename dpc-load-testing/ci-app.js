@@ -26,7 +26,7 @@ import {
   removePatientFromGroup,
   updateOrganization,
 } from './dpc-api-client.js';
-import { fhirOK, fhirType } from './utils/test-utils.js';
+import { fhirOK, fhirType, memberContentVerified } from './utils/test-utils.js';
 import NPIGeneratorCache from './utils/npi-generator.js';
 
 const npiGeneratorCache = new NPIGeneratorCache();
@@ -172,7 +172,7 @@ export function workflow(data) {
       'response code was 201': res => res.status === 201,
       'accept header fhir type': res => res.headers['Content-Type'] === fhirType,
       'correct number of patients': res => res.json().member.length === mbis.length,
-      'member content verified': memberContentVerified,
+      'member content verified': res => memberContentVerified(res, patients),
     }
   );
 
