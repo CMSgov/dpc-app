@@ -63,8 +63,10 @@ jobs:
       - name: Run K6 with StatsD output
         env:
           TEST_TYPE: ${{ inputs.test_type }}
+          ENVIRONMENT: 'test'
         run: |
           ./k6 run \
+            -e ENVIRONMENT=${{ ENVIRONMENT }} \
             --out output-statsd=addr=localhost:8125,enableTags=true \
             ./dpc-app/dpc-load-testing/${{ inputs.test_type }}.js
 
