@@ -1,7 +1,7 @@
 /*global console*/
 /* eslint no-console: "off" */
 
-import { check  } from 'k6';
+import { check, fail  } from 'k6';
 import exec from 'k6/execution'
 import { fetchGoldenMacaroon, generateDPCToken } from '../generate-dpc-token.js';
 import {
@@ -14,6 +14,42 @@ import NPIGeneratorCache from './npi-generator.js';
 
 const npiGeneratorCache = new NPIGeneratorCache();
 
+function generateNpiForSmoketestOrganization(goldenMacaroon) {
+  const npiGenerator = npiGeneratorCache.getGenerator(0);
+  const MAX_NPI_ATTEMPTS = 200;
+  let npi;
+
+  for (let attempt = 0; attempt < MAX_NPI_ATTEMPTS; attempt++) {
+    const npiAttempt = npiGenerator.iterate();
+    // check if org with npi exists
+    const existingNpiResponse = findOrganizationByNpi(npiAttempt, goldenMacaroon);
+
+    const checkFindOutput = check(
+    existingNpiResponse,
+      {
+        'find org by npi response code was 200': res => res.status === 200,
+      }
+    );
+
+    if (!checkFindOutput) {
+      console.error(existingNpiResponse.body);
+      exec.test.abort('failed find org by npi');
+    }
+
+    const existingOrgs = existingNpiResponse.json();
+
+    if ( existingOrgs.total == 0) {
+      console.log(`generated npi for smoketest organization in ${attempt} attempts.`)
+      npi = npiAttempt;
+      break;
+    }
+  }
+  if (!npi) {
+    fail(`failed to generate npi within ${MAX_NPI_ATTEMPTS} attempts`);
+  }
+  return npi;
+}
+
 export function setupSmokeTests() {
   const goldenMacaroon = fetchGoldenMacaroon();
   const orgIds = [
@@ -23,7 +59,6 @@ export function setupSmokeTests() {
   ];
 
   const tokens = Array();
-  const npiGenerator = npiGeneratorCache.getGenerator(0);
   // array returned from setup distributes its members starting from the 1 index
   for (let i = 0; i < orgIds.length; i++) {
     // delete smoke test org if present
@@ -47,29 +82,9 @@ export function setupSmokeTests() {
     if (existingOrgResponse == 200) {
       deleteOrganization(orgId, goldenMacaroon);
     }
-    var npi;
-    while(true) {
-      npi = npiGenerator.iterate();
-      // check if org with npi exists
-      const existingNpiResponse = findOrganizationByNpi(npi, goldenMacaroon);
 
-      const checkFindOutput = check(
-	existingNpiResponse,
-	{
-          'find org by npi response code was 200': res => res.status === 200,
-	}
-      );
 
-      if (!checkFindOutput) {
-	console.error(existingNpiResponse.body);
-	exec.test.abort('failed find org by npi');
-      }
-
-      const existingOrgs =  existingNpiResponse.json();
-
-      if ( existingOrgs.total == 0) break;
-    }
-
+    const npi = generateNpiForSmoketestOrganization(goldenMacaroon);
     const org = createSmokeTestOrganization(npi, orgId, goldenMacaroon);
 
     const checkOutput = check(

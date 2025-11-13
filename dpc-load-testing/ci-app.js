@@ -153,19 +153,6 @@ export function workflow(data) {
 
   const createGroupResponse = createGroupWithPatients(token, orgId, practitionerId, practitionerNpi, patients);
 
-  const memberContentVerified = function(res) {
-    let pass = true;
-    res.json().member.forEach((patient) => {
-      if (!patients.includes(patient.entity.reference.slice(8))){
-        pass = false;
-      }
-      if (!patient.period.start || patient.period.start === patient.period.end) {
-        pass = false;
-      }
-    });
-    return pass;
-  }
-
   const checkCreateGroupResponse = check(
     createGroupResponse,
     {
