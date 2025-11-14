@@ -1,5 +1,0 @@
-#!/usr/bin/env sh
-
-echo "Starting Procfile.nonprod"
-export EVERYTHING_AFTER_PIPE_REGEX='s/[^|]*|//'
-exec foreman start -f Procfile.sidekiq-nonprod "$@" | sed $EVERYTHING_AFTER_PIPE_REGEX
