@@ -1,6 +1,7 @@
 package gov.cms.dpc.bluebutton;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.apache.ApacheHttp5RestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.Binder;
@@ -16,17 +17,21 @@ import gov.cms.dpc.fhir.configuration.ConnectionPoolConfiguration;
 import gov.cms.dpc.fhir.configuration.TimeoutConfiguration;
 import io.dropwizard.core.Configuration;
 import jakarta.inject.Named;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.ssl.SSLContexts;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.TrustSelfSignedStrategy;
+import org.apache.hc.core5.http.*;
+import org.apache.hc.core5.http.config.Registry;
+import org.apache.hc.core5.http.config.RegistryBuilder;
+import org.apache.hc.core5.http.io.entity.BufferedHttpEntity;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.ssl.SSLContexts;
+import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
@@ -85,7 +90,9 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
     @Provides
     @Named("bbclient")
     public IGenericClient provideFhirRestClient(FhirContext fhirContext, HttpClient httpClient) {
-        fhirContext.getRestfulClientFactory().setHttpClient(httpClient);
+        ApacheHttp5RestfulClientFactory factory = new ApacheHttp5RestfulClientFactory(fhirContext);
+        factory.setHttpClient(httpClient);
+        fhirContext.setRestfulClientFactory(factory);
         return fhirContext.newRestfulGenericClient(this.bbClientConfiguration.getServerBaseUrl());
     }
 
@@ -128,11 +135,11 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
             }
         } else {
             final String keyStorePath = this.bbClientConfiguration.getKeystore().getLocation();
-            logger.debug("Opening keystream from location: " + keyStorePath);
+            logger.debug("Opening keystream from location: {}", keyStorePath);
             try {
                 keyStoreStream = new FileInputStream(keyStorePath);
             } catch (FileNotFoundException e) {
-                logger.error("Could not find keystore at location: " + Paths.get(keyStorePath).toAbsolutePath());
+                logger.error("Could not find keystore at location: {}", Paths.get(keyStorePath).toAbsolutePath());
                 throw new BlueButtonClientSetupException("Unable to find keystore", e);
             }
         }
@@ -152,24 +159,33 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
         final SSLContext sslContext = getSSLContext(keyStore, keyStorePass);
         final PoolingHttpClientConnectionManager connectionManager = getConnectionManager(sslContext);
 
+        HttpResponseInterceptor interceptor = (HttpResponse response, EntityDetails details, HttpContext ctx) -> {
+            if (response instanceof final HttpEntityContainer container) {
+                final HttpEntity entity = container.getEntity();
+                if (entity != null && !entity.isRepeatable()) {
+                    container.setEntity(new BufferedHttpEntity(entity)); // consumes & makes repeatable
+                }
+            }
+        };
+
         return HttpClients.custom()
-            .setSSLContext(sslContext)
             .setDefaultRequestConfig(requestConfig)
             .setConnectionManager(connectionManager)
             .setConnectionManagerShared(true)   // When multithreaded, make sure the connection manager is shared between clients
+            .addResponseInterceptorFirst(interceptor)
             .build();
     }
 
     /**
-     * Builds a {@link RequestConfig} with the appropriate time outs for our BFD client.
+     * Builds a {@link RequestConfig} with the appropriate time-outs for our BFD client.
      * @return {@link RequestConfig}
      */
     private RequestConfig getClientRequestConfig() {
         final TimeoutConfiguration timeouts = this.bbClientConfiguration.getTimeouts();
         return RequestConfig.custom()
-            .setConnectTimeout(timeouts.getConnectionTimeout())
-            .setConnectionRequestTimeout(timeouts.getRequestTimeout())
-            .setSocketTimeout(timeouts.getSocketTimeout())
+            .setConnectTimeout(Timeout.ofMilliseconds(timeouts.getConnectionTimeout()))
+            .setConnectionRequestTimeout(Timeout.ofMilliseconds(timeouts.getRequestTimeout()))
+            .setResponseTimeout(Timeout.ofMilliseconds(timeouts.getSocketTimeout()))
             .build();
     }
 

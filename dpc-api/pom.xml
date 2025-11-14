@@ -50,8 +50,8 @@
             <artifactId>jackson-datatype-hibernate6</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -95,7 +95,7 @@
         </dependency>
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-client</artifactId>
+            <artifactId>hapi-fhir-client-apache-http5</artifactId>
         </dependency>
         <dependency>
             <groupId>com.jakewharton.fliptables</groupId>

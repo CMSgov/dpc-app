@@ -6,7 +6,7 @@ import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import jakarta.ws.rs.HttpMethod;
-import org.apache.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;

@@ -36,7 +36,7 @@ import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.health.check.http.HttpHealthCheck;
 import io.dropwizard.migrations.MigrationsBundle;
 import jakarta.validation.ValidatorFactory;
-import org.apache.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;

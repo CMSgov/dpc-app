@@ -19,7 +19,7 @@ import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
