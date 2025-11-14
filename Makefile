@@ -36,6 +36,16 @@ smoke/prod: venv smoke
 	@echo "Running Smoke Tests against ${HOST_URL}"
 	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/prod.smoke_test.yml
 
+.PHONY: smoketest-k6-frontend-local
+smoketest-k6-frontend-local: secure-envs
+	@echo "Running K6 smoketests locally..."
+	@./run-k6-frontend-smoketests.sh --k6-env=local
+
+# for use w/ dev, test, sandbox, and prod
+.PHONY: smoketest-k6-frontend-remote
+smoketest-k6-frontend-remote: secure-envs
+	@echo "Running K6 smoketests against ${HOST_URL}..."
+	@./run-k6-frontend-smoketests.sh
 
 # Build commands
 #
