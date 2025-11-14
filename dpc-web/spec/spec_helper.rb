@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'fakeredis/rspec'
 require 'simplecov'
 
 require 'axe-rspec'

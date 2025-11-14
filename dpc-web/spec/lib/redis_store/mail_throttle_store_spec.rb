@@ -11,6 +11,7 @@ describe RedisStore::MailThrottleStore do
   around(:each) do |spec|
     default_limit = Rails.configuration.x.mail_throttle.limit
     default_expiration = Rails.configuration.x.mail_throttle.expiration
+    Rails.cache.clear
     Rails.configuration.x.mail_throttle.limit = limit
     Rails.configuration.x.mail_throttle.expiration = expiration
     spec.run

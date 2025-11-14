@@ -79,6 +79,6 @@ Port mappings can be changed in:\
 `docker-compose.portals.yml`
 
 Helpful make commands:\
-`make start-portals` : Starts Web,Admin,Impl,Redis,and db\
-`make stop-portals` : Stops Web,Admin,Impl,Redis,and db\
-`make down-portals` : Removes Web,Admin,Impl,Redis,db and docker network.
+`make start-portals` : Starts Web,Admin,Portal and db\
+`make stop-portals` : Stops Web,Admin,Portal and db\
+`make down-portals` : Removes Web,Admin,Portal, db and docker network.
