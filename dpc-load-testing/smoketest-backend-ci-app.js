@@ -3,7 +3,12 @@
 
 import { check, fail, sleep } from 'k6';
 import { fhirOK, getUuidFromUrl, memberContentVerified } from './utils/test-utils.js';
-import { setupSmokeTests, tearDownSmokeTests } from './utils/smoketest-utils.js';
+import {
+  setupSmokeTests,
+  tearDownSmokeTests,
+  getSmoketestNonprodMBIs,
+  getSmoketestProdMBIs,
+ } from './utils/smoketest-utils.js';
 import {
   createGroupWithPatients,
   createPatientsBatch,
@@ -36,7 +41,7 @@ export function setup() {
 
 function handleJmxSmoketests(data) {
   console.log('handle jmx tests...')
-  const mbis = ['1SQ3F00AA00', '5S58A00AA00', '4S58A00AA00', '3S58A00AA00', '0S80C00AA00'];
+  const mbis = __ENV.ENVIRONMENT === 'prod' ? getSmoketestProdMBIs() : getSmoketestNonprodMBIs();
   data.orgIds.forEach((orgId, index) => {
     const token = data.tokens[index];
 
