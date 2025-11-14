@@ -31,3 +31,20 @@ A workaround for Node.js libraries is to pull them directly from a CDN, e.g. `im
 Many utilities are provided by K6. See: https://jslib.k6.io/. In addition, K6 provides a [JavaScript API](https://grafana.com/docs/k6/latest/javascript-api/) with utilities including HTTP requests, various cryptographic functions, and more.
 
 When importing local files, you'll need to include the file extension, e.g. `import generateDPCToken from './generate-dpc-token.js';`
+
+### Smoke Tests
+#### Smoketests for validating backends
+
+Ensure all services are running
+```dtd
+make api
+make start-app
+make website
+make admin
+make portal
+make start-portals
+```
+Run make command for backend tests
+```dtd
+make smoketest-k6-backend-local
+```
