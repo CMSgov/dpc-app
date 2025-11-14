@@ -1,4 +1,4 @@
-export function generateOrganizationResourceBody (npi, name) {
+export function generateOrganizationResourceBody (npi, name, orgId) {
 	return {
 		"resourceType": "Parameters",
 		"parameter": [
@@ -24,6 +24,7 @@ export function generateOrganizationResourceBody (npi, name) {
 										"state": "NY"
 									}
 								],
+								"id": orgId,
 								"identifier": [
 									{
 										"system": "http://hl7.org/fhir/sid/us-npi",
