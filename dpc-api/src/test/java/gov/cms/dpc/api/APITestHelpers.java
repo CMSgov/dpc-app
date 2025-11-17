@@ -21,12 +21,11 @@ import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionHandl
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandler;
-import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
-import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
 import gov.cms.dpc.testing.utils.MBIUtil;
@@ -35,11 +34,11 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.eclipse.jetty.http.HttpStatus;
 import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
@@ -60,7 +59,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class APITestHelpers {
     private static final String ATTRIBUTION_URL = "http://localhost:3500/v1";
-    private static final String CONSENT_URL = "http://localhost:3600/v1";
     public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
     private static final String CONSENT_TRUNCATE_TASK = "http://localhost:9901/tasks/truncate";
@@ -97,13 +95,10 @@ public class APITestHelpers {
         loggingInterceptor.setLogResponseSummary(false);
         client.registerInterceptor(loggingInterceptor);
 
-        return client;
-    }
+        // Make responses repeatable
+        client.registerInterceptor(new APIAuthHelpers.RepeatableResponseInterceptor());
 
-    public static IGenericClient buildConsentClient(FhirContext ctx){
-        ContextUtils.prefetchResourceModels(ctx, JobQueueBatch.validResourceTypes);
-        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        return ctx.newRestfulGenericClient(CONSENT_URL);
+        return client;
     }
 
     public static void setupPractitionerTest(IGenericClient client, IParser parser) throws IOException {
@@ -204,7 +199,7 @@ public class APITestHelpers {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             for(String url : taskUrls) {
                 try (CloseableHttpResponse execute = client.execute(new HttpPost(url))) {
-                    assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should have truncated DB at " + url);
+                    assertEquals(HttpStatus.OK_200, execute.getCode(), "Should have truncated DB at " + url);
                 }
             }
         }
@@ -218,7 +213,7 @@ public class APITestHelpers {
             final HttpGet healthCheck = new HttpGet(healthURI);
 
             try (CloseableHttpResponse execute = client.execute(healthCheck)) {
-                assertEquals(HttpStatus.OK_200, execute.getStatusLine().getStatusCode(), "Should be healthy");
+                assertEquals(HttpStatus.OK_200, execute.getCode(), "Should be healthy");
             }
         }
     }

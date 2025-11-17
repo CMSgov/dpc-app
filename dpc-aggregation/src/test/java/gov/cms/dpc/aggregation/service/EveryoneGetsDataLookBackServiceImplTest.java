@@ -10,7 +10,7 @@ public class EveryoneGetsDataLookBackServiceImplTest {
 
     @Test
     public void alwaysReturnTrueFromHasClaimWithin() {
-        LookBackAnswer result = lookBackService.getLookBackAnswer(null, NPIUtil.generateNPI(), NPIUtil.generateNPI(), 0L);
+        LookBackAnswer result = lookBackService.getLookBackAnswer(null, NPIUtil.generateNPI(), NPIUtil.generateNPI());
         Assertions.assertTrue(result.orgNPIMatchAnyEobNPIs());
         Assertions.assertTrue(result.practitionerMatchEob());
         Assertions.assertTrue(result.practitionerNPIMatchAnyEobNPIs());

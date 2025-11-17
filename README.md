@@ -67,7 +67,6 @@ The DPC application is split into multiple services.
 | [dpc-portal](/dpc-portal)           |Public Portal| Portal for managing organizations                                                      |Ruby on Rails|
 | [dpc-api](/dpc-api)                 |Public API| Asynchronous FHIR API for managing organizations and requesting or retrieving data     |Java (Dropwizard)|
 | [dpc-attribution](/dpc-attribution) |Internal API| Provides and updates data about attribution                                            |Java (Dropwizard)|
-| [dpc-consent](/dpc-consent)         |Internal API| Provides and updates information about data-sharing consent for individuals            |Java (Dropwizard)|
 | [dpc-aggregation](/dpc-aggregation) |Internal Worker Service| Polls for job batches and exports data for singular batches                            |Java (Dropwizard + RxJava)|
 
 #### Shared Modules
@@ -376,6 +375,9 @@ In order to run the tests, you'll need to ensure that `virtualenv` is installed.
 ```bash
 pip3 install virtualenv
 ```
+
+> Note: JMETER smoketests are scheduled for removal. See instructions for smoketesting via K6 [HERE](dpc-load-testing/README.md).
+> 
 ## Generating the Source Code Documentation via JavaDoc 
 ###### [`^`](#table-of-contents)
 
@@ -428,7 +430,7 @@ Once the development environment is up and running, you should now be able to ru
 
 If you're running locally through Docker and you want to use your debugger there are two steps.
 - Open up port 5005 on whichever service you want to debug
-  - Add the following to docker-compose.yml under api, aggregation, attribution or consent.
+  - Add the following to docker-compose.yml under api, aggregation, or attribution.
     ```    
     ports:
         - "5005:5005"
@@ -447,7 +449,7 @@ If you want to run and debug integration tests through IntelliJ there are a few 
   - Click Edit Configuration Templates and select JUnit
   - At the bottom, add a new .env file and point it to `ops/config/decrypted/local.env`
 - We need to start our dependent services, so run `make start-it-debug`
-  - This will recompile dpc with debug extensions included and start containers for dpc-attribution, dpc-aggregation, dpc-consent and a db.
+  - This will recompile dpc with debug extensions included and start containers for dpc-attribution, dpc-aggregation, and a db.
 - Now you should be able to run any of the integration tests under dpc-api by clicking on the little green arrow next to their implementation.
   - Need to debug a test?  Right click on the triangle and select debug.
   - If running ExpirationJobTest results in a port collision error, you can stop the attribution service in Docker and try running the test again. 

@@ -26,10 +26,11 @@ import org.slf4j.MDC;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
 
 import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBI;
 import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBIs;
@@ -183,14 +184,22 @@ public class JobBatchProcessor {
      * If the look back check passes, a pair of a Flowable of {@link ExplanationOfBenefit} as Resource objects and a null OutcomeReason.
      */
     private Pair<Flowable<Resource>, OutcomeReason> checkLookBack(Patient patient, JobQueueBatch job) {
+        if (isLookBackExempt(job.getOrgID()) ) {
+            logger.info("Skipping lookBack for org: {}", job.getOrgID());
+            MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
+
+            // If the org is exempt from lookback and they're not asking for EoBs, we don't have to do anything
+            if (!job.getResourceTypes().contains(DPCResourceType.ExplanationOfBenefit)) {
+                return Pair.of(Flowable.empty(), null);
+            }
+        }
+
         Pair<List<LookBackAnswer>, Flowable<Resource>> lookBackPair = getLookBackAnswers(job, patient);
         List<LookBackAnswer> answers = lookBackPair.getLeft();
         Flowable<Resource> eobs = lookBackPair.getRight();
 
-        if (isLookBackExempt(job.getOrgID())) {
-            logger.info("Skipping lookBack for org: {}", job.getOrgID());
-            MDC.put(MDCConstants.IS_SMOKE_TEST_ORG, "true");
-        } else {
+        // If the org isn't exempt, check if they pass lookback
+        if (!isLookBackExempt(job.getOrgID())) {
             if (!passesLookBack(answers)) {
                 OutcomeReason failReason = LookBackAnalyzer.analyze(answers);
                 return Pair.of(
@@ -280,11 +289,11 @@ public class JobBatchProcessor {
         final String organizationNPI = job.getOrgNPI();
         if (practitionerNPI != null && organizationNPI != null) {
             MDC.put(MDCConstants.PROVIDER_NPI, practitionerNPI);
-            Flowable<Resource> flowable = fetchResource(job, patient, DPCResourceType.ExplanationOfBenefit, null);
+            Flowable<Resource> flowable = fetchResource(job, patient, DPCResourceType.ExplanationOfBenefit, getSinceForEoB(job));
             eobs = flowable.filter(resource -> Objects.requireNonNull(DPCResourceType.ExplanationOfBenefit.getPath()).equals(resource.getResourceType().getPath()));
             result = eobs
                     .map(ExplanationOfBenefit.class::cast)
-                    .map(resource -> lookBackService.getLookBackAnswer(resource, organizationNPI, practitionerNPI, operationsConfig.getLookBackMonths()))
+                    .map(resource -> lookBackService.getLookBackAnswer(resource, organizationNPI, practitionerNPI))
                     .toList()
                     .doOnError(e -> new ArrayList<>())
                     .blockingGet();
@@ -292,6 +301,38 @@ public class JobBatchProcessor {
             logger.error("couldn't get practitionerNPI and organizationNPI from job");
         }
         return Pair.of(result, eobs);
+    }
+
+    /**
+     * Figures out the since parameter we need to use while getting EoB resources.  We want to go back just far enough
+     * to satisfy the customer's request and our lookback check and no further.
+     * @param batch The batch we're currently processing.
+     * @return The since parameter we should use.  Null if we shouldn't use one at all.
+     */
+    private OffsetDateTime getSinceForEoB(JobQueueBatch batch) {
+        // Get the date/time we need to search back to to satisfy a lookback check
+        int lookBackMonths = operationsConfig.getLookBackMonths();
+        YearMonth lookBackYearMonth = operationsConfig.getLookBackDate().minusMonths(lookBackMonths);
+        OffsetDateTime lookBackOffsetDateTime = lookBackYearMonth
+            .atDay(1)
+            .atStartOfDay()
+            .atZone(ZoneId.systemDefault())
+            .toOffsetDateTime();
+
+        // If the customer isn't asking for EoBs, then we only need to search back as far as is required for lookback
+        if( !batch.getResourceTypes().contains(DPCResourceType.ExplanationOfBenefit) ) {
+            return lookBackOffsetDateTime;
+        }
+
+        // If the customer is asking for all EoBs, then we need to go back forever, and there's no since parameter
+        Optional<OffsetDateTime> optionalBatchSince = batch.getSince();
+        if(optionalBatchSince.isEmpty()) {
+            return null;
+        }
+
+        // If the customer is asking for some EoBs, we need to go back far enough to satisfy lookback and the customer's request
+        OffsetDateTime customerOffsetDateTime = optionalBatchSince.get();
+        return customerOffsetDateTime.isBefore(lookBackOffsetDateTime) ? customerOffsetDateTime: lookBackOffsetDateTime;
     }
 
     private Flowable<JobQueueBatchFile> writeResource(JobQueueBatch job, Flowable<Resource> flow) {

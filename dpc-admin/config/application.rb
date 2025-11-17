@@ -23,13 +23,13 @@ module Admin
     # -- all .rb files in that directory are automatically loaded after loading
     # the framework and any gems in your application.
 
-    config.active_job.queue_adapter = :sidekiq
+    config.active_job.queue_adapter = :solid_queue
 
     # Sending mail with`DeliveryJob` has been deprecated. Work has been moved to `MailDeliveryJob`
     config.action_mailer.delivery_job = 'ActionMailer::MailDeliveryJob'
 
     # Ensure mailer jobs get sent to a specialized admin queue. Our web applications share
-    # a single Redis instance and process jobs based on their queue name.
+    # a single solid queue database and process jobs based on their queue name.
     config.action_mailer.deliver_later_queue_name = "admin"
 
     config.to_prepare { Devise::Mailer.layout 'mailer' }

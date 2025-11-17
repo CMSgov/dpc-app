@@ -43,7 +43,6 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
-import java.time.YearMonth;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -89,7 +88,7 @@ class AggregationEngineTest {
 
         queue = Mockito.spy(new MemoryBatchQueue(10));
         bbclient = Mockito.spy(new MockBlueButtonClient(fhirContext));
-        var operationalConfig = new OperationsConfig(1000, EXPORT_PATH, 500, YearMonth.of(2014, 3));
+        var operationalConfig = new OperationsConfig(1000, EXPORT_PATH, 500);
         LookBackService lookBackService = Mockito.spy(EveryoneGetsDataLookBackServiceImpl.class);
         JobBatchProcessor jobBatchProcessor = Mockito.spy(new JobBatchProcessor(bbclient, fhirContext, metricRegistry, operationalConfig, lookBackService, mockConsentService));
         engine = Mockito.spy(new AggregationEngine(aggregatorID, queue, operationalConfig, jobBatchProcessor));
@@ -367,7 +366,7 @@ class AggregationEngineTest {
      * Test that stopping the engine while a long running batch is still processing pauses the batch.
      */
     @Test
-    void stopEngineDuringBatchProcessing() throws InterruptedException {
+    void stopEngineDuringBatchProcessing()  {
         // Create a batch that will hang forever
         final var orgID = UUID.randomUUID();
         final List<String> mbis = List.of(MockBlueButtonClient.TEST_PATIENT_TIME_OUT);
@@ -768,7 +767,7 @@ class AggregationEngineTest {
 
         private static List<String> getLogMessages() {
             boolean success = false;
-            int count = 0, maxTries = 50;
+            int count = 0, maxTries =100;
             List<String> logMessages = new ArrayList<>();
 
             // These tests throw non-stochastic ConcurrentModificationExceptions, this is a rough way to ignore them

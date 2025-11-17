@@ -8,16 +8,17 @@ import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.KeyType;
 import gov.cms.dpc.testing.models.KeyView;
 import jakarta.ws.rs.core.MediaType;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.net.URIBuilder;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 
@@ -46,7 +47,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testInvalidKeySubmission() throws GeneralSecurityException, IOException, URISyntaxException {
+    void testInvalidKeySubmission() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         KeyResource.KeySignature keySig = generateKeyAndSignature();
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
@@ -59,12 +60,12 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
 
             try (CloseableHttpResponse response = client.execute(post)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Key should be valid");
+                assertEquals(HttpStatus.OK_200, response.getCode(), "Key should be valid");
             }
 
             // Try the same key again
             try (CloseableHttpResponse response = client.execute(post)) {
-                assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Cannot submit duplicated keys"),
+                assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getCode(), "Cannot submit duplicated keys"),
                         () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("duplicate key value violates unique constraint"), "Should have nice error message"));
             }
 
@@ -73,7 +74,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             String json2 = new ObjectMapper().writeValueAsString(keySig2);
             post.setEntity(new StringEntity(json2));
             try (CloseableHttpResponse response = client.execute(post)) {
-                assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Cannot submit duplicated keys"),
+                assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getCode(), "Cannot submit duplicated keys"),
                         () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("duplicate key value violates unique constraint"), "Should have nice error message"));
             }
 
@@ -86,7 +87,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             labelViolationPost.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
             labelViolationPost.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
             try (CloseableHttpResponse response = client.execute(labelViolationPost)) {
-                assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Key label cannot be too long");
+                assertEquals(HttpStatus.BAD_REQUEST_400, response.getCode(), "Key label cannot be too long");
                 assertEquals("{\"code\":400,\"message\":\"Key label cannot be more than 25 characters\"}", EntityUtils.toString(response.getEntity()), "Key label should have correct error message");
             }
         }
@@ -106,7 +107,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
         post.setEntity(new StringEntity(json3));
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             try (CloseableHttpResponse response = client.execute(post)) {
-                assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getStatusLine().getStatusCode(), "Should not accept mismatched public key and signature"),
+                assertAll(() -> assertEquals(HttpStatus.BAD_REQUEST_400, response.getCode(), "Should not accept mismatched public key and signature"),
                         () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("Public key could not be verified"), "Should have informative error message"));
             }
         }
@@ -125,7 +126,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
 
             try (CloseableHttpResponse response = client.execute(post)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Token should be valid");
+                assertEquals(HttpStatus.OK_200, response.getCode(), "Token should be valid");
                 entity = this.mapper.readValue(response.getEntity().getContent(), KeyView.class);
             }
             assertNotNull(entity, "Should have retrieved entity");
@@ -133,7 +134,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
 
             try (CloseableHttpResponse response = client.execute(get)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+                assertEquals(HttpStatus.OK_200, response.getCode(), "Should have succeeded");
                 final KeyView fetched = this.mapper.readValue(response.getEntity().getContent(), KeyView.class);
                 // Verify the keys are equal, aside from different new line characters
                 assertEquals(keySig.getKey().replaceAll("\\n", "").replaceAll("\\r", ""),
@@ -154,7 +155,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             keyDeletion.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
             try (CloseableHttpResponse response = client.execute(keyDeletion)) {
-                assertEquals(HttpStatus.OK_200, response.getStatusLine().getStatusCode(), "Should have succeeded");
+                assertEquals(HttpStatus.OK_200, response.getCode(), "Should have succeeded");
             }
 
             // Check to see everything is gone.
@@ -180,7 +181,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
 
             try (CloseableHttpResponse response = client.execute(post)) {
-                assertEquals(HttpStatus.UNPROCESSABLE_ENTITY_422, response.getStatusLine().getStatusCode(), "ECC key should be rejected");
+                assertEquals(HttpStatus.UNPROCESSABLE_ENTITY_422, response.getCode(), "ECC key should be rejected");
                 Map<String, String> respBody = new ObjectMapper().readValue(response.getEntity().getContent(), Map.class);
                 assertEquals("ECC keys are not currently supported", respBody.get("message"), "Should return helpful error message");
             }

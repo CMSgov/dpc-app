@@ -2,7 +2,7 @@
 
 class ApplicationJob < ActiveJob::Base
   # Ensure jobs get sent to a specialized admin queue. Our web applications share
-  # a single Redis instance and process jobs based on their queue name.
+  # a single solid queue database and process jobs based on their queue name.
   queue_as :admin
 
   # Automatically retry jobs that encountered a deadlock

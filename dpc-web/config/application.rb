@@ -52,13 +52,13 @@ module DpcWebsite
     # Add middleware to fix issue with /ig links breaking
     config.middleware.insert_before ActionDispatch::Static, DpcMiddleware::IgFix
 
-    config.active_job.queue_adapter = :sidekiq
+    config.active_job.queue_adapter = :solid_queue
 
     # Sending mail with`DeliveryJob` has been deprecated. Work has been moved to `MailDeliveryJob`
     config.action_mailer.delivery_job = "ActionMailer::MailDeliveryJob"
     
-    # Ensure mailer jobs get sent to a specialized web queue. Our web applications share
-    # a single Redis instance and process jobs based on their queue name.
+    # Ensure mailer jobs get sent to a specialized web queue. Our sandbox web applications share
+    # a single solid queue database and process jobs based on their queue name.
     config.action_mailer.deliver_later_queue_name = "web"
     
     config.to_prepare { Devise::Mailer.layout "mailer" }

@@ -12,7 +12,7 @@ import gov.cms.dpc.testing.exceptions.SystemExitException;
 import io.dropwizard.core.cli.Cli;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
-public class TokenListUnitTest {
+class TokenListUnitTest {
     private final PrintStream originalOut = System.out;
     private final PrintStream originalErr = System.err;
 
@@ -69,14 +69,14 @@ public class TokenListUnitTest {
     }
 
     @Test
-    public void testListTokens_happyPath() throws IOException {
+    void testListTokens_happyPath() throws IOException {
         UUID org_id = UUID.randomUUID();
         TokenEntity tokenEntity = new TokenEntity("tokenID", org_id, TokenType.OAUTH);
         tokenEntity.setLabel("test list tokens");
         tokenEntity.setCreatedAt(OffsetDateTime.now());
         tokenEntity.setExpiresAt(OffsetDateTime.now());
         tokenEntity.setToken("token");
-        CollectionResponse collectionResponse = new CollectionResponse(List.of(tokenEntity));
+        CollectionResponse<TokenEntity> collectionResponse = new CollectionResponse<>(List.of(tokenEntity));
 
         ObjectMapper mapper = new ObjectMapper();
         String payload = mapper.writeValueAsString(collectionResponse);
@@ -85,7 +85,7 @@ public class TokenListUnitTest {
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "list-tokens")
+                    .withPath(taskUri.getPath() + "/list-tokens")
                     .withQueryStringParameters(List.of(Parameter.param("organization", org_id.toString())))
             )
             .respond(
@@ -102,12 +102,12 @@ public class TokenListUnitTest {
     }
 
     @Test
-    public void testListTokens_badResponse() throws IOException {
+    void testListTokens_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "list-tokens")
+                    .withPath(taskUri.getPath() + "/list-tokens")
                     .withQueryStringParameters(List.of(Parameter.param("organization", "org_id")))
             )
             .respond(

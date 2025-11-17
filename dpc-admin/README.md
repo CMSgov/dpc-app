@@ -70,17 +70,15 @@ To test the rails app, run `rspec spec` in the terminal.
 Navigate to /dpc-app
 
 DPC Admin: localhost:3000\
-Admin Sidekiq Console: localhost:3000/sidekiq\
 Admin Letter Opener: localhost:3000/letter_opener
 
 DPC Web: localhost:9000\
-Admin Sidekiq Console: localhost:3900/sidekiq\
 Admin Letter Opener: localhost:3900/letter_opener
 
 Port mappings can be changed in:\
 `docker-compose.portals.yml`
 
 Helpful make commands:\
-`make start-portals` : Starts Web,Admin,Impl,Redis,Sidekiqs,and db\
-`make stop-portals` : Stops Web,Admin,Impl,Redis,Sidekiqs,and db\
-`make down-portals` : Removes Web,Admin,Impl,Redis,Sidekiqs,db and docker network.
+`make start-portals` : Starts Web,Admin,Portal and db\
+`make stop-portals` : Stops Web,Admin,Portal and db\
+`make down-portals` : Removes Web,Admin,Portal, db and docker network.

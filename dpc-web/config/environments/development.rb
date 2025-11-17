@@ -15,9 +15,6 @@ Rails.application.configure do
   # don't cache controller
   config.action_controller.perform_caching = false
 
-  # use redis cache for session
-  config.cache_store = :redis_cache_store, { url: "#{ENV.fetch('REDIS_URL', 'redis://localhost')}:6379/1" }
-
   # Store uploaded files on the local file system (see config/storage.yml for options)
   config.active_storage.service = :local
 

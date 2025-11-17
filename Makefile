@@ -40,6 +40,17 @@ smoketest-k6-backend-remote: secure-envs
 	@echo "Running K6 smoketests against ${HOST_URL}..."
 	@./run-k6-backend-smoketests.sh
 
+.PHONY: smoketest-k6-frontend-local
+smoketest-k6-frontend-local: secure-envs
+	@echo "Running K6 smoketests locally..."
+	@./run-k6-frontend-smoketests.sh --k6-env=local
+
+# for use w/ dev, test, sandbox, and prod
+.PHONY: smoketest-k6-frontend-remote
+smoketest-k6-frontend-remote: secure-envs
+	@echo "Running K6 smoketests against ${HOST_URL}..."
+	@./run-k6-frontend-smoketests.sh
+
 # Build commands
 #
 # These commands build/compile our applications and docker images.

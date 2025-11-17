@@ -106,6 +106,15 @@ jobs:
           ENVIRONMENT: ${{ inputs.env }}
         run:
           make smoketest-k6-backend-remote
+      - name: Run K6 Frontend Smoketest
+        id: run-k6-smoke-test-frontend
+        env:
+          PORTAL_HOST: ${{ steps.determine-host.outputs.HOST }}
+          WEB_HOST: ${{ steps.determine-host.outputs.HOST }}
+          WEB_ADMIN_HOST: ${{ steps.determine-host.outputs.HOST }}
+          ENVIRONMENT: ${{ inputs.env }}
+        run: |
+          make smoketest-k6-frontend-remote
       - name: Run Smoke Test
         id: run-smoke-test
         env:

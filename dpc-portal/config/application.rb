@@ -25,10 +25,10 @@ module DpcPortal
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
-    config.active_job.queue_adapter = :sidekiq
+    config.active_support.to_time_preserves_timezone = :zone
+    config.active_job.queue_adapter = :solid_queue
     
-    # Ensure mailer jobs get sent to a specialized admin queue. Our web applications share
-    # a single Redis instance and process jobs based on their queue name.
+    # Ensure mailer jobs get sent to a specialized queue.
     config.action_mailer.deliver_later_queue_name = "portal"
 
     # Look up previews directly in the path and set default layout

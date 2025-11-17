@@ -39,12 +39,25 @@ Ensure all services are running
 ```dtd
 make api
 make start-app
+```
+
+Run make command for backend tests
+```dtd
+make smoketest-k6-backend-local
+```
+
+
+#### Smoketests for validating frontends
+
+Ensure all frontends are running
+```dtd
 make website
 make admin
 make portal
 make start-portals
 ```
-Run make command for backend tests
+
+Run make command for frontend tests
 ```dtd
-make smoketest-k6-backend-local
+make smoketest-k6-frontend-local
 ```
