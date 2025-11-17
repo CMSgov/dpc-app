@@ -202,8 +202,6 @@ GEM
       factory_bot (~> 6.4)
       railties (>= 5.0.0)
     fakefs (2.5.0)
-    fakeredis (0.9.2)
-      redis (~> 4.8)
     faraday (2.10.1)
       faraday-net_http (>= 2.0, < 3.2)
       logger
@@ -436,9 +434,6 @@ GEM
       erb
       psych (>= 4.0.0)
     redcarpet (3.6.0)
-    redis (4.8.1)
-    redis-namespace (1.11.0)
-      redis (>= 4)
     regexp_parser (2.9.3)
     reline (0.6.2)
       io-console (~> 0.5)
@@ -620,7 +615,6 @@ DEPENDENCIES
   dotenv-rails
   factory_bot_rails
   fakefs
-  fakeredis
   fhir_models
   health_check
   jbuilder (~> 2.7)
@@ -646,8 +640,6 @@ DEPENDENCIES
   railties (~> 8.0.2.1)
   rbnacl
   rbnacl-libsodium
-  redis (~> 4.0)
-  redis-namespace
   rexml (>= 3.4.2)
   rspec-rails
   rubocop
