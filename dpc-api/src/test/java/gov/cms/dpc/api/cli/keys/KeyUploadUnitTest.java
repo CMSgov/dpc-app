@@ -8,7 +8,7 @@ import gov.cms.dpc.testing.exceptions.SystemExitException;
 import io.dropwizard.core.cli.Cli;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,6 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.Parameter;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -68,12 +67,12 @@ class KeyUploadUnitTest {
     }
 
     @Test
-    public void testDeleteKeys_happyPath() throws IOException {
+    void testDeleteKeys_happyPath() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
                 HttpRequest.request()
                     .withMethod("POST")
-                    .withPath(taskUri.getPath() + "upload-key")
+                    .withPath(taskUri.getPath() + "/upload-key")
                     .withQueryStringParameters(List.of(
                         Parameter.param("organization", "org_id"),
                         Parameter.param("label", "label")
@@ -85,7 +84,7 @@ class KeyUploadUnitTest {
                     .withBody("org_id")
             );
 
-        Optional<Throwable> errors = Optional.empty();
+        Optional<Throwable> errors;
         try (MockedStatic<Files> files = Mockito.mockStatic(Files.class, Mockito.CALLS_REAL_METHODS)) {
             files.when(() -> Files.readString(eq(Paths.get("key_file")))).thenReturn("fake key data");
             files.when(() -> Files.readString(eq(Paths.get("sig_file")))).thenReturn("fake sig data");
@@ -99,12 +98,12 @@ class KeyUploadUnitTest {
     }
 
     @Test
-    public void testDeleteKeys_badResponse() throws IOException {
+    void testDeleteKeys_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
                 .when(
                         HttpRequest.request()
                                 .withMethod("POST")
-                                .withPath(taskUri.getPath() + "upload-key")
+                                .withPath(taskUri.getPath() + "/upload-key")
                                 .withQueryStringParameters(List.of(
                                         Parameter.param("organization", "org_id"),
                                         Parameter.param("label", "label")
@@ -120,7 +119,7 @@ class KeyUploadUnitTest {
         SecurityManager originalSecurityManager = System.getSecurityManager();
         System.setSecurityManager(new NoExitSecurityManager());
 
-        Optional<Throwable> errors = Optional.empty();
+        Optional<Throwable> errors;
         try (MockedStatic<Files> files = Mockito.mockStatic(Files.class, Mockito.CALLS_REAL_METHODS)) {
             files.when(() -> Files.readString(eq(Paths.get("key_file")))).thenReturn("fake key data");
             files.when(() -> Files.readString(eq(Paths.get("sig_file")))).thenReturn("fake sig data");

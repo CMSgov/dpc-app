@@ -76,7 +76,7 @@ class DataResourceTest {
 
         final Response response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
-                .header(org.apache.http.HttpHeaders.ACCEPT, "application/ndjson")
+                .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
                 .get();
 
         final InputStream output = response.readEntity(InputStream.class);
@@ -125,15 +125,15 @@ class DataResourceTest {
         // Try to request one byte
         Response response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
-                .header(org.apache.http.HttpHeaders.RANGE, "bytes=0-1")
-                .header(org.apache.http.HttpHeaders.ACCEPT, "application/ndjson")
+                .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=0-1")
+                .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
                 .get();
 
         InputStream is = response.readEntity(InputStream.class);
         StringWriter stringWriter = new StringWriter();
         IOUtils.copy(is, stringWriter, StandardCharsets.UTF_8);
 
-        final String ch1 = response.getHeaderString(org.apache.http.HttpHeaders.CONTENT_LENGTH);
+        final String ch1 = response.getHeaderString(org.apache.hc.core5.http.HttpHeaders.CONTENT_LENGTH);
         final String ws1 = stringWriter.toString();
         assertAll(() -> assertNotNull(ch1, "Should have header"),
                 () -> assertEquals(1, Integer.parseInt(ch1), "Should only have a single byte"),
@@ -145,14 +145,14 @@ class DataResourceTest {
         int end = 500 * 1024 + start;
         response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
-                .header(org.apache.http.HttpHeaders.RANGE, String.format("bytes=%d-%s", start, end))
+                .header(org.apache.hc.core5.http.HttpHeaders.RANGE, String.format("bytes=%d-%s", start, end))
                 .get();
 
         is = response.readEntity(InputStream.class);
         stringWriter = new StringWriter();
         IOUtils.copy(is, stringWriter, StandardCharsets.UTF_8);
 
-        final String ch2 = response.getHeaderString(org.apache.http.HttpHeaders.CONTENT_LENGTH);
+        final String ch2 = response.getHeaderString(org.apache.hc.core5.http.HttpHeaders.CONTENT_LENGTH);
         final String ws2 = stringWriter.toString();
         assertAll(() -> assertNotNull(ch1, "Should have header"),
                 () -> assertEquals(500 * 1024, Integer.parseInt(ch2), "Should have 500 kb"),
@@ -162,14 +162,14 @@ class DataResourceTest {
         // Request the entire file
         response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
-                .header(org.apache.http.HttpHeaders.RANGE, String.format("bytes=0-%s", length))
+                .header(org.apache.hc.core5.http.HttpHeaders.RANGE, String.format("bytes=0-%s", length))
                 .get();
 
         is = response.readEntity(InputStream.class);
         stringWriter = new StringWriter();
         IOUtils.copy(is, stringWriter, StandardCharsets.UTF_8);
 
-        final String ch3 = response.getHeaderString(org.apache.http.HttpHeaders.CONTENT_LENGTH);
+        final String ch3 = response.getHeaderString(org.apache.hc.core5.http.HttpHeaders.CONTENT_LENGTH);
         final String ws3 = stringWriter.toString();
         assertAll(() -> assertNotNull(ch1, "Should have header"),
                 () -> assertEquals(length, Integer.parseInt(ch3), "Should have correct file length"),
@@ -179,14 +179,14 @@ class DataResourceTest {
         // Request the entire file, without the ending value, which returns one chunk
         response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
-                .header(org.apache.http.HttpHeaders.RANGE, "bytes=0-")
+                .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=0-")
                 .get();
 
         is = response.readEntity(InputStream.class);
         stringWriter = new StringWriter();
         IOUtils.copy(is, stringWriter, StandardCharsets.UTF_8);
 
-        final String ch4 = response.getHeaderString(org.apache.http.HttpHeaders.CONTENT_LENGTH);
+        final String ch4 = response.getHeaderString(org.apache.hc.core5.http.HttpHeaders.CONTENT_LENGTH);
         final String ws4 = stringWriter.toString();
         assertAll(() -> assertNotNull(ch1, "Should have header"),
                 () -> assertEquals(1024 * 1024, Integer.parseInt(ch4), "Should have 1 MB chunk"),
@@ -195,8 +195,8 @@ class DataResourceTest {
         // Request file with an invalid range
         response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
-                .header(org.apache.http.HttpHeaders.ACCEPT, "application/ndjson")
-                .header(org.apache.http.HttpHeaders.RANGE, "bytes=50-0")
+                .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
+                .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=50-0")
                 .get();
 
         assertEquals(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE.getStatusCode(), response.getStatus());
@@ -214,8 +214,8 @@ class DataResourceTest {
 
         final Response response = RESOURCE.target("/v1/Data/test.ndjson")
                 .request()
-                .header(org.apache.http.HttpHeaders.ACCEPT, "application/ndjson")
-                .header(org.apache.http.HttpHeaders.RANGE, "frames=0-1")
+                .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
+                .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "frames=0-1")
                 .get();
 
         assertAll(() -> assertEquals(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE.getStatusCode(), response.getStatus(), "Should have correct status code"),
@@ -253,7 +253,7 @@ class DataResourceTest {
         void testMismatchingETagHeader(String method) {
             final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()
-                    .header(org.apache.http.HttpHeaders.ACCEPT, "application/ndjson")
+                    .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
                     .header(HttpHeaders.IF_NONE_MATCH, "Not a real value");
 
             final Response response = createHTTPMethodCall(method, builder);
@@ -276,7 +276,7 @@ class DataResourceTest {
         void testWeakETagHeader(String method) {
             final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()
-                    .header(org.apache.http.HttpHeaders.ACCEPT, "application/ndjson")
+                    .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
                     .header(HttpHeaders.IF_NONE_MATCH, "This should match--gzip");
 
             final Response response = createHTTPMethodCall(method, builder);
@@ -289,7 +289,7 @@ class DataResourceTest {
 
             final Invocation.Builder builder = RESOURCE.target("/v1/Data/test.ndjson")
                     .request()
-                    .header(org.apache.http.HttpHeaders.ACCEPT, "application/ndjson")
+                    .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
                     .header(HttpHeaders.IF_MODIFIED_SINCE, modifiedDate.toInstant().toEpochMilli());
 
             final Response response = createHTTPMethodCall(method, builder);

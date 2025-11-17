@@ -34,7 +34,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -415,10 +415,10 @@ public class GroupResource extends AbstractGroupResource {
             String groupPractitionerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
 
             if (!provenancePractitionerNPI.getValue().equals(groupPractitionerNPI)) {
-                throw new WebApplicationException("Provenance header's provider does not match group provider", HttpStatus.SC_UNPROCESSABLE_ENTITY);
+                throw new WebApplicationException("Provenance header's provider does not match group provider", HttpStatus.SC_UNPROCESSABLE_CONTENT);
             }
         } catch (ResourceNotFoundException e) {
-            throw new WebApplicationException("Could not find provider defined in provenance header", HttpStatus.SC_UNPROCESSABLE_ENTITY);
+            throw new WebApplicationException("Could not find provider defined in provenance header", HttpStatus.SC_UNPROCESSABLE_CONTENT);
         }
 
     }

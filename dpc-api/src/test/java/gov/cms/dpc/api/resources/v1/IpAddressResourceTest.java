@@ -8,17 +8,20 @@ import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import jakarta.ws.rs.core.MediaType;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.junit.jupiter.api.*;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.net.URIBuilder;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -52,7 +55,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer FAKE_AUTH_TOKEN" );
 
         CloseableHttpResponse response = client.execute(get);
-        assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatusLine().getStatusCode());
+        assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getCode());
     }
 
     @Test
@@ -65,7 +68,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         get.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 
         CloseableHttpResponse response = client.execute(get);
-        assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatusLine().getStatusCode());
+        assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getCode());
     }
 
     @Test
@@ -82,7 +85,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
 
         CloseableHttpResponse response = client.execute(post);
-        assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+        assertEquals(HttpStatus.SC_OK, response.getCode());
 
         IpAddressEntity responseIp = mapper.readValue(response.getEntity().getContent(), IpAddressEntity.class);
         assertNotNull(responseIp.getId());
@@ -107,7 +110,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
 
         CloseableHttpResponse response = client.execute(get);
-        assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+        assertEquals(HttpStatus.SC_OK, response.getCode());
 
         TypeReference<CollectionResponse<IpAddressEntity>> typeRef = new TypeReference<>() {};
         CollectionResponse<IpAddressEntity> responseCollection = mapper.readValue(response.getEntity().getContent(), typeRef);
@@ -132,7 +135,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         delete.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
 
         CloseableHttpResponse response = client.execute(delete);
-        assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatusLine().getStatusCode());
+        assertEquals(HttpStatus.SC_NO_CONTENT, response.getCode());
     }
 
     @Test
@@ -146,7 +149,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         delete.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
 
         CloseableHttpResponse response = client.execute(delete);
-        assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusLine().getStatusCode());
+        assertEquals(HttpStatus.SC_NOT_FOUND, response.getCode());
     }
 
     @Test
@@ -171,7 +174,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
 
         CloseableHttpResponse response = client.execute(post);
-        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getCode());
     }
 
     @Test
@@ -190,7 +193,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + this.fullyAuthedToken);
 
         CloseableHttpResponse response = client.execute(post);
-        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getCode());
     }
 
     private IpAddressEntity writeIpAddress(String label, String ip) throws URISyntaxException, IOException {
