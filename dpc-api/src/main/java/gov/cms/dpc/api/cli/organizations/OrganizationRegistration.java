@@ -7,12 +7,13 @@ import io.dropwizard.core.setup.Bootstrap;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.net.URIBuilder;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -76,8 +77,8 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
         registerOrganization(organization, namespace.getString(ATTR_HOSTNAME), noToken, apiService);
     }
 
-    private void registerOrganization(Bundle organization, String attributionService, boolean noToken, String apiService) throws IOException, URISyntaxException {
-        System.out.println(String.format("Connecting to Attribution service at: %s", attributionService));
+    private void registerOrganization(Bundle organization, String attributionService, boolean noToken, String apiService) throws IOException, URISyntaxException, ParseException {
+        System.out.printf("Connecting to Attribution service at: %s%n", attributionService);
         final IGenericClient client = ctx.newRestfulGenericClient(attributionService);
 
         final Parameters parameters = new Parameters();
@@ -97,16 +98,16 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
                     .execute();
 
             organizationID = UUID.fromString(createdOrg.getIdElement().getIdPart());
-            System.out.println(String.format("Registered organization: %s", organizationID));
+            System.out.printf("Registered organization: %s%n", organizationID);
 
         } catch (Exception e) {
-            System.err.println(String.format("Unable to register organization. %s", e.getMessage()));
+            System.err.printf("Unable to register organization. %s%n", e.getMessage());
             System.exit(1);
         }
 
         // Now, create a token, unless --no-token has been passed
         if (!noToken) {
-            System.out.println(String.format("Connecting to API service at: %s", apiService));
+            System.out.printf("Connecting to API service at: %s%n", apiService);
             try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
                 final URIBuilder builder = new URIBuilder(String.format("%s/generate-token", apiService));
                 builder.setParameter("organization", organizationID.toString());
@@ -115,7 +116,7 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
 
                 try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                     final String token = EntityUtils.toString(response.getEntity());
-                    System.out.println(String.format("Organization token: %s", token));
+                    System.out.printf("Organization token: %s%n", token);
                 }
             }
         }

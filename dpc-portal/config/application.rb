@@ -28,8 +28,7 @@ module DpcPortal
     config.active_support.to_time_preserves_timezone = :zone
     config.active_job.queue_adapter = :solid_queue
     
-    # Ensure mailer jobs get sent to a specialized admin queue. Our web applications share
-    # a single Redis instance and process jobs based on their queue name.
+    # Ensure mailer jobs get sent to a specialized queue.
     config.action_mailer.deliver_later_queue_name = "portal"
 
     # Look up previews directly in the path and set default layout

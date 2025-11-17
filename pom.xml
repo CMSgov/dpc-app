@@ -367,7 +367,7 @@
             </dependency>
             <dependency>
                 <groupId>${hapi.fhir.groupID}</groupId>
-                <artifactId>hapi-fhir-client</artifactId>
+                <artifactId>hapi-fhir-client-apache-http5</artifactId>
                 <version>${hapi.fhir.version}</version>
             </dependency>
             <dependency>
@@ -383,9 +383,9 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>4.5.14</version>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>5.5.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
