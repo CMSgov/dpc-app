@@ -82,3 +82,5 @@ Helpful make commands:\
 `make start-portals` : Starts Web,Admin,Portal and db\
 `make stop-portals` : Stops Web,Admin,Portal and db\
 `make down-portals` : Removes Web,Admin,Portal, db and docker network.
+
+test
