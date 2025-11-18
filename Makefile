@@ -40,6 +40,17 @@ smoke/prod: venv smoke
 smoke/k6:
 	docker run --rm -v $(shell pwd)/dpc-load-testing:/src --env-file $(shell pwd)/ops/config/decrypted/local.env -e ENVIRONMENT=local -i grafana/k6 run /src/smoke-test-auth.js
 
+.PHONY: smoketest-k6-frontend-local
+smoketest-k6-frontend-local: secure-envs
+	@echo "Running K6 smoketests locally..."
+	@./run-k6-frontend-smoketests.sh --k6-env=local
+
+# for use w/ dev, test, sandbox, and prod
+.PHONY: smoketest-k6-frontend-remote
+smoketest-k6-frontend-remote: secure-envs
+	@echo "Running K6 smoketests against ${HOST_URL}..."
+	@./run-k6-frontend-smoketests.sh
+
 # Build commands
 #
 # These commands build/compile our applications and docker images.

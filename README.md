@@ -375,6 +375,9 @@ In order to run the tests, you'll need to ensure that `virtualenv` is installed.
 ```bash
 pip3 install virtualenv
 ```
+
+> Note: JMETER smoketests are scheduled for removal. See instructions for smoketesting via K6 [HERE](dpc-load-testing/README.md).
+> 
 ## Generating the Source Code Documentation via JavaDoc 
 ###### [`^`](#table-of-contents)
 
