@@ -115,8 +115,8 @@ jobs:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
           params: |
-            DB_USER=/dpc/test/consent/db_read_only_user_dpc_consent
-            DB_PASSWORD=/dpc/test/consent/db_read_only_pass_dpc_consent
+            DB_USER=/dpc/test/aggregation/db_read_only_user_dpc_consent
+            DB_PASSWORD=/dpc/test/aggregation/db_read_only_pass_dpc_consent
             HOST=/dpc/test/db/url
       - name: Stop old db container if exists
         run: |
