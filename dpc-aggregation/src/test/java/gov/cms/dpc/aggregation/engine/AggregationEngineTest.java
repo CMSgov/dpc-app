@@ -766,22 +766,7 @@ class AggregationEngineTest {
         }
 
         private static List<String> getLogMessages() {
-            boolean success = false;
-            int count = 0, maxTries =100;
-            List<String> logMessages = new ArrayList<>();
-
-            // These tests throw non-stochastic ConcurrentModificationExceptions, this is a rough way to ignore them
-            while (!success) {
-                try {
-                    logMessages = listAppender.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
-                    success = true;
-                } catch (ConcurrentModificationException e) {
-                    if (count >= maxTries) throw e;
-                    count++;
-                }
-            }
-
-            return logMessages;
+            return listAppender.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
         }
 
         private static List<Exception> provideExceptions() {
