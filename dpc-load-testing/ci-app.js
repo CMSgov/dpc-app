@@ -26,13 +26,10 @@ import {
   removePatientFromGroup,
   updateOrganization,
 } from './dpc-api-client.js';
+import { fhirOK, fhirType, memberContentVerified } from './utils/test-utils.js';
 import NPIGeneratorCache from './utils/npi-generator.js';
 
 const npiGeneratorCache = new NPIGeneratorCache();
-const fhirType = 'application/fhir+json';
-const fhirOK = function(res) {
-  return res.status === 200 && res.headers['Content-Type'] === fhirType;
-};
 
 export const options = {
   thresholds: {
@@ -156,26 +153,13 @@ export function workflow(data) {
 
   const createGroupResponse = createGroupWithPatients(token, orgId, practitionerId, practitionerNpi, patients);
 
-  const memberContentVerified = function(res) {
-    let pass = true;
-    res.json().member.forEach((patient) => {
-      if (!patients.includes(patient.entity.reference.slice(8))){
-        pass = false;
-      }
-      if (!patient.period.start || patient.period.start === patient.period.end) {
-        pass = false;
-      }
-    });
-    return pass;
-  }
-
   const checkCreateGroupResponse = check(
     createGroupResponse,
     {
       'response code was 201': res => res.status === 201,
       'accept header fhir type': res => res.headers['Content-Type'] === fhirType,
       'correct number of patients': res => res.json().member.length === mbis.length,
-      'member content verified': memberContentVerified,
+      'member content verified': res => memberContentVerified(res, patients),
     }
   );
 

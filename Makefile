@@ -14,27 +14,31 @@ venv/bin/activate: requirements.txt
 smoke:
 	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
 
-.PHONY: smoke/local
-smoke/local: export USE_BFD_MOCK=false
-smoke/local: export AUTH_DISABLED=false
-smoke/local: venv smoke start-dpc
-	@echo "Running Smoke Tests against Local env"
-	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/local.smoke_test.yml
-
 .PHONY: smoke/remote
 smoke/remote: venv smoke
-	@echo "Running Smoke Tests against ${HOST_URL}"
+	@echo "Running JMeter Smoke Tests against ${HOST_URL}"
 	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/remote.smoke_test.yml
 
 .PHONY: smoke/sandbox
 smoke/sandbox: venv smoke
-	@echo "Running Smoke Tests against ${HOST_URL}"
+	@echo "Running JMeter Smoke Tests against ${HOST_URL}"
 	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/sandbox.smoke_test.yml
 
 .PHONY: smoke/prod
 smoke/prod: venv smoke
-	@echo "Running Smoke Tests against ${HOST_URL}"
+	@echo "Running JMeter Smoke Tests against ${HOST_URL}"
 	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/prod.smoke_test.yml
+
+.PHONY: smoketest-k6-backend-local
+smoketest-k6-backend-local: secure-envs
+	@echo "Running K6 smoketests locally..."
+	@./run-k6-backend-smoketests.sh --k6-env=local
+
+# for use w/ dev, test, sandbox, and prod
+.PHONY: smoketest-k6-backend-remote
+smoketest-k6-backend-remote: secure-envs
+	@echo "Running K6 smoketests against ${HOST_URL}..."
+	@./run-k6-backend-smoketests.sh
 
 .PHONY: smoketest-k6-frontend-local
 smoketest-k6-frontend-local: secure-envs
