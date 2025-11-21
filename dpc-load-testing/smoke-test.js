@@ -7,8 +7,8 @@ import { fetchGoldenMacaroon, generateDPCToken } from './generate-dpc-token.js';
 import {
   authorizedGet,
   createGroupWithPatients,
-  createPatientsFile,
-  createPractitionersFile,
+  createPatientsRawData,
+  createPractitionersRawData,
   deleteOrganization,
   exportGroup,
   findGroupByPractitionerNpi,
@@ -137,7 +137,7 @@ export async function bulkExportWorkflow(data) {
   const token = data.tokens[idx];
 
   // Uploading Practitioners
-  const uploadPractitionersResponse = createPractitionersFile(token, practitionerBundle);
+  const uploadPractitionersResponse = createPractitionersRawData(token, practitionerBundle);
   const checkUploadPractitioners = check(
     uploadPractitionersResponse,
     {
@@ -151,7 +151,7 @@ export async function bulkExportWorkflow(data) {
   const practitioners = uploadPractitionersResponse.json();
 
   // Uploading Patients
-  const uploadPatientsResponse = createPatientsFile(token, patientBundle);
+  const uploadPatientsResponse = createPatientsRawData(token, patientBundle);
   const checkUploadPatients = check(
     uploadPatientsResponse,
     {

@@ -82,8 +82,8 @@ export function createPractitioners(token, npi) {
   return res;
 }
 
-export function createPractitionersFile(token, file) {
-  const res = http.post(`${urlRoot}/Practitioner/$submit`, file, createHeaderParam(token));
+export function createPractitionersRawData(token, rawData) {
+  const res = http.post(`${urlRoot}/Practitioner/$submit`, rawData, createHeaderParam(token));
 
   return res;
 }
@@ -131,8 +131,8 @@ export function createPatientsBatch(token, mbis) {
   return res;
 }
 
-export function createPatientsFile(token, file) {
-  const res = http.post(`${urlRoot}/Patient/$submit`, file, createHeaderParam(token));
+export function createPatientsRawData(token, rawData) {
+  const res = http.post(`${urlRoot}/Patient/$submit`, rawData, createHeaderParam(token));
 
   return res;
 }
