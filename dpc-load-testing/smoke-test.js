@@ -232,22 +232,29 @@ function monitorJob(token, jobUrl, badChecks){
     jobResponse = authorizedGet(token, jobUrl);
   }
 
-  const checkJobResponse = check(
-    jobResponse,
-    {
-      'response code was 200': res => res.status === 200,
-      'no job output errors': res => (res.json().error || 'errorlength').length <= JOB_OUPUT_ERROR_LENGTH,
+  try {
+    const checkJobResponse = check(
+      jobResponse,
+      {
+	'response code was 200': res => res.status === 200,
+	'no job output errors': res => (res.json().error || 'errorlength').length <= JOB_OUPUT_ERROR_LENGTH,
+      }
+    );
+    
+    if (!checkJobResponse) {
+      if (jobResponse.status == 401) {
+	console.error('JOB TIMED OUT FOR TEST - MAYBE NOT FAIL');
+      } else if (jobResponse.json().error) {
+	console.error(`Too many errors in job output ${jobResponse.json().error.length}`);
+      } else {
+	console.error('Unable to check job output');
+      }
+      badChecks.push(checkJobResponse);
     }
-  );
-  if (!checkJobResponse){
-    if (jobResponse.status == 401) {
-      console.error('JOB TIMED OUT FOR TEST - MAYBE NOT FAIL');
-    } else if (jobResponse.json().error) {
-      console.error(`Too many errors in job output ${jobResponse.json().error.length}`);
-    } else {
-      console.error('Unable to check job output');
-    }
-    badChecks.push(checkJobResponse);
+  } catch (error) {
+    console.error(`Error in ${jobResponse.body}`)
+    console.error(error);
+    badCheck.push(error);
   }
 }
 
