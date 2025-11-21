@@ -202,6 +202,7 @@ function exportGroups(token, orgId, practitioners) {
     }
   }
 
+  const jobUrls = [];
   for (const groupId of groupIds) {
     const getGroupExportResponse = exportGroup(token, groupId);
     const checkGetGroupExportResponse = check(
@@ -213,11 +214,15 @@ function exportGroups(token, orgId, practitioners) {
     );
     if (checkGetGroupExportResponse) {
       const jobUrl = getGroupExportResponse.headers['Content-Location'];
-      monitorJob(token, jobUrl, badChecks);
+      jobUrls.push(jobUrl);
     } else {
       console.log(`Unable to export group for ${groupNpiMap[groupId]}`);
       badChecks.push(checkGetGroupExportResponse);
     }
+  }
+
+  for (const jobUrl of jobUrls) {
+    monitorJob(token, jobUrl, badChecks);
   }
 
   if (badChecks.length > 0) {
