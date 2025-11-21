@@ -720,6 +720,7 @@ class AggregationEngineTest {
         static void setUp() throws NoSuchMethodException {
             Logger logger = (Logger) LoggerFactory.getLogger(AggregationEngine.class);
             logger.setLevel(Level.WARN);
+            listAppender.list = Collections.synchronizedList(listAppender.list);
             listAppender.start();
             logger.addAppender(listAppender);
 
@@ -766,22 +767,11 @@ class AggregationEngineTest {
         }
 
         private static List<String> getLogMessages() {
-            boolean success = false;
-            int count = 0, maxTries =100;
-            List<String> logMessages = new ArrayList<>();
-
-            // These tests throw non-stochastic ConcurrentModificationExceptions, this is a rough way to ignore them
-            while (!success) {
-                try {
-                    logMessages = listAppender.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
-                    success = true;
-                } catch (ConcurrentModificationException e) {
-                    if (count >= maxTries) throw e;
-                    count++;
-                }
+            synchronized (listAppender.list) {
+                return listAppender.list.stream()
+                        .map(ILoggingEvent::getFormattedMessage)
+                        .toList();
             }
-
-            return logMessages;
         }
 
         private static List<Exception> provideExceptions() {
