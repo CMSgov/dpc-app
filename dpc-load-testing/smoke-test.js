@@ -37,10 +37,10 @@ export const options = {
 
 const EXPORT_POLL_INTERVAL_SEC = __ENV.ENVIRONMENT == 'local' ? 1 : 20;
 const JOB_OUPUT_ERROR_LENGTH = __ENV.ENVIRONMENT == 'local' ? 1 : 0;
-const practitionerBundle =  __ENV.ENVIRONMENT != 'prod' ? open('./resources/prod_provider_bundle.json') : open('./resources/provider_bundle.json');
-const patientBundle =  __ENV.ENVIRONMENT != 'prod' ? open('./resources/prod_patient_bundle-dpr.json') : open('./resources/patient_bundle-dpr.json');
-const associationsFile =  __ENV.ENVIRONMENT != 'prod' ? open('./resources/prod_test_associations.csv') : open('./resources/test_associations-dpr.csv');
-const practitionerCount =  __ENV.ENVIRONMENT != 'prod' ? 2 : 4;
+const practitionerBundle =  __ENV.ENVIRONMENT == 'prod' ? open('./resources/prod_provider_bundle.json') : open('./resources/provider_bundle.json');
+const patientBundle =  __ENV.ENVIRONMENT == 'prod' ? open('./resources/prod_patient_bundle-dpr.json') : open('./resources/patient_bundle-dpr.json');
+const associationsFile =  __ENV.ENVIRONMENT == 'prod' ? open('./resources/prod_test_associations.csv') : open('./resources/test_associations-dpr.csv');
+const practitionerCount =  __ENV.ENVIRONMENT == 'prod' ? 2 : 4;
 
 // Sets up two test organizations
 export function setup() {
