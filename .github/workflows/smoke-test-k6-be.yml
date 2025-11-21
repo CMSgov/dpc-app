@@ -1,4 +1,4 @@
-name: 'DPC - Smoke Test'
+name: 'DPC - Smoke Test - K6 - Back End'
 
 on:
   workflow_dispatch:
