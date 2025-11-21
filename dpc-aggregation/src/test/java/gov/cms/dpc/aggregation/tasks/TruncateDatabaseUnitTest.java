@@ -1,7 +1,7 @@
 package gov.cms.dpc.aggregation.tasks;
 
 import gov.cms.dpc.aggregation.DPCAggregationConfiguration;
-import gov.cms.dpc.testing.utils.DBUtils;
+import gov.cms.dpc.common.utils.DBUtils;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.db.ManagedDataSource;
 import org.jooq.DSLContext;
