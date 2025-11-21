@@ -10,6 +10,7 @@ export default defineConfig([
 		languageOptions: {
 		    globals: {
 		        __ENV: "readonly",
+			"open": "readonly",
 		    },
 		},
 	},
