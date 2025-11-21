@@ -720,6 +720,7 @@ class AggregationEngineTest {
         static void setUp() throws NoSuchMethodException {
             Logger logger = (Logger) LoggerFactory.getLogger(AggregationEngine.class);
             logger.setLevel(Level.WARN);
+            listAppender.list = Collections.synchronizedList(listAppender.list);
             listAppender.start();
             logger.addAppender(listAppender);
 
@@ -766,7 +767,11 @@ class AggregationEngineTest {
         }
 
         private static List<String> getLogMessages() {
-            return listAppender.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
+            synchronized (listAppender.list) {
+                return listAppender.list.stream()
+                        .map(ILoggingEvent::getFormattedMessage)
+                        .toList();
+            }
         }
 
         private static List<Exception> provideExceptions() {
