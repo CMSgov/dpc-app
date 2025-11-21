@@ -56,12 +56,12 @@ jobs:
           # Build the k6 binary
           xk6 build
       - name: Set env vars from AWS params
-        uses: cmsgov/cdap/actions/aws-params-env-action@main
+        uses: cmsgov/cdap/actions/aws-params-env-action@8343fb96563ce4b74c4dececee9b268f42bd4a40
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
           params: |
-            GOLDEN_MACAROON=/dpc/test/web/golden_macaroon
+            GOLDEN_MACAROON=/dpc/${{ inputs.env }}/web/golden_macaroon
       - name: Run K6 Smoketest
         id: run-k6-smoke-test
         env:
