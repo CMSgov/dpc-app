@@ -35,8 +35,9 @@ export const options = {
   }
 };
 
-const EXPORT_POLL_INTERVAL_SEC = __ENV.ENVIRONMENT == 'local' ? 1 : 20;
+// We allow errors in local because we don't need to test our own connection to BFD
 const JOB_OUPUT_ERROR_LENGTH = __ENV.ENVIRONMENT == 'local' ? 1 : 0;
+const EXPORT_POLL_INTERVAL_SEC = __ENV.ENVIRONMENT == 'local' ? 1 : 20;
 const practitionerBundle =  __ENV.ENVIRONMENT == 'prod' ? open('./resources/prod_provider_bundle.json') : open('./resources/provider_bundle.json');
 const patientBundle =  __ENV.ENVIRONMENT == 'prod' ? open('./resources/prod_patient_bundle-dpr.json') : open('./resources/patient_bundle-dpr.json');
 const associationsFile =  __ENV.ENVIRONMENT == 'prod' ? open('./resources/prod_test_associations.csv') : open('./resources/test_associations-dpr.csv');
@@ -133,8 +134,9 @@ export async function bulkExportWorkflow(data) {
   if (!orgId) {
     exec.test.abort('error indexing VU ID against orgIds array');
   }
-
   const token = data.tokens[idx];
+
+  // Uploading Practitioners
   const uploadPractitionersResponse = createPractitionersFile(token, practitionerBundle);
   const checkUploadPractitioners = check(
     uploadPractitionersResponse,
@@ -143,12 +145,12 @@ export async function bulkExportWorkflow(data) {
       'uploaded four practitioners': res => res.json().entry.length == practitionerCount,
     }
   )
-
   if (!checkUploadPractitioners) {
-    console.error(uploadPractitionersResponse.body);
+    console.error(`Failed to upload practitioners ${uploadPractitionersResponse.body}`);
   }
   const practitioners = uploadPractitionersResponse.json();
 
+  // Uploading Patients
   const uploadPatientsResponse = createPatientsFile(token, patientBundle);
   const checkUploadPatients = check(
     uploadPatientsResponse,
@@ -158,30 +160,34 @@ export async function bulkExportWorkflow(data) {
     }
   )
   if (!checkUploadPatients) {
-    console.error(uploadPatientsResponse.body);
+    console.error("Failed to upload patients ${uploadPatientsResponse.body}");
   }
+  const patients = uploadPatientsResponse.json();
 
+  // Abort if either upload failed
   if (!checkUploadPractitioners || !checkUploadPatients) {
     exec.test.abort('Failed to upload practitioners and/or patients');
   }
 
-  const patients = uploadPatientsResponse.json();
-  createGroups(token, orgId, patients, practitioners);
-  exportGroups(token, orgId, practitioners);
-}
 
-export function teardown(data) {
-  for (const orgId of data.orgIds) {
-    if (orgId) {
-      deleteOrganization(orgId, data.goldenMacaroon);
-    }
-  }
-}
-
-function exportGroups(token, orgId, practitioners) {
-  const practitionerMap = practitonerNpiPractitionerIdMap(practitioners);
+  // Holds all the errors so one error doesn't block others' attempts
   const badChecks = [];
-  const groupIds = [];
+  createGroups(token, orgId, patients, practitioners, badChecks);
+
+  exportGroups(token, orgId, practitioners, badChecks);
+
+  if (badChecks.length > 0) {
+    console.error(`Bad Checks: ${badChecks.length}`);
+    exec.test.abort('Failed to create and export all groups.');
+  }
+
+}
+
+function exportGroups(token, orgId, practitioners, badChecks) {
+  // Map of practitioner NPI to DPC-ID
+  const practitionerMap = practitonerNpiPractitionerIdMap(practitioners);
+
+  // Get the DPC-Group-IDs from practitioner's NPIs
   const groupNpiMap = {};
   for (const npi of Object.keys(practitionerMap)){
     const findGroupResponse = findGroupByPractitionerNpi(token, npi);
@@ -189,89 +195,95 @@ function exportGroups(token, orgId, practitioners) {
       findGroupResponse,
       {
         'find group returns 200': res => res.status == 200,
-        'found at least one group': res => res.json().total > 0,
+        'found at least one group for practitioner': res => res.json().total > 0,
       }
     );
     if (checkFindGroup) {
       const groupId = findGroupResponse.json().entry[0].resource.id;
-      groupIds.push(groupId)
       groupNpiMap[groupId] = npi;
     } else {
-      console.error(`Failed to find group for ${npi}`);
+      console.error(`Failed to find group for ${npi} -- status ${findGroupResponse.status}`);
       badChecks.push(checkFindGroup);
     }
   }
 
+  // Call the export api to get the jobs started
   const jobUrls = [];
-  for (const groupId of groupIds) {
+  for (const groupId of Object.keys(groupNpiMap)) {
     const getGroupExportResponse = exportGroup(token, groupId);
     const checkGetGroupExportResponse = check(
       getGroupExportResponse,
       {
-        'response code was 202': res => res.status === 202,
-        'has content-location header': res => res.headers['Content-Location'],
+        'export response code was 202': res => res.status === 202,
+        'export has content-location header': res => res.headers['Content-Location'],
       },
     );
     if (checkGetGroupExportResponse) {
       const jobUrl = getGroupExportResponse.headers['Content-Location'];
       jobUrls.push(jobUrl);
     } else {
-      console.log(`Unable to export group for ${groupNpiMap[groupId]}`);
+      console.log(`Unable to export group for ${groupNpiMap[groupId]} -- ${getGroupExportResponse.status}`);
       badChecks.push(checkGetGroupExportResponse);
     }
   }
 
+  // Verify the export worked
   for (const jobUrl of jobUrls) {
     monitorJob(token, jobUrl, badChecks);
-  }
-
-  if (badChecks.length > 0) {
-    exec.test.abort('Failed to export all groups.');
   }
 }
 
 function monitorJob(token, jobUrl, badChecks){
+  // Loop until it isn't 202
+  // NB: because we are not refreshing the token, it will eventually get a 401
   let jobResponse = authorizedGet(token, jobUrl);
   while(jobResponse.status === 202){
     sleep(EXPORT_POLL_INTERVAL_SEC);
     jobResponse = authorizedGet(token, jobUrl);
   }
 
+  // We got a rare exception when testing, so try is to make sure we capture the problem
   try {
     const checkJobResponse = check(
       jobResponse,
       {
-        'response code was 200': res => res.status === 200,
+        'job response code was 200': res => res.status === 200,
         'no job output errors': res => (res.json().error || 'errorlength').length <= JOB_OUPUT_ERROR_LENGTH,
       }
     );
 
     if (!checkJobResponse) {
       if (jobResponse.status == 401) {
-        console.error('JOB TIMED OUT FOR TEST - MAYBE NOT FAIL');
+        console.error(`JOB TIMED OUT FOR TEST - MAYBE NOT FAIL: ${jobUrl}`);
       } else if (jobResponse.json().error) {
-        console.error(`Too many errors in job output ${jobResponse.json().error.length}`);
+        console.error(`Too many errors in job output ${jobResponse.json().error.length}: ${jobUrl}`);
       } else {
-        console.error('Unable to check job output');
+        console.error(`Bad response code when checking job output ${jobResponse.status} ${jobUrl}`);
       }
       badChecks.push(checkJobResponse);
     }
   } catch (error) {
-    console.error(`Error in ${jobResponse.body}`)
+    console.error(`Error in ${jobResponse.body}: ${jobUrl}`)
     console.error(error);
     badChecks.push(error);
   }
 }
 
-function createGroups(token, orgId, patients, practitioners) {
+function createGroups(token, orgId, patients, practitioners, badChecks) {
+  // Map of practitioners to their patients
   const practitionerPatientMap = practitionerNpiPatientMbiMap();
-  const patientMbiIdMap = patientMbiUUIDMap(patients);
+  // Map of patient MBI to DPC-ID
+  const patientMbiIdMap = patientMbiPatientIdMap(patients);
+  // Map of practitioner NPI to DPC-ID
   const practitionerMap = practitonerNpiPractitionerIdMap(practitioners);
-  const badChecks = [];
+
+  // Create a group for each practitioner
   for (const npi of Object.keys(practitionerPatientMap)){
     const practitionerId = practitionerMap[npi];
     if (! practitionerId) {
-      exec.test.abort(`Test misconfigured: missing practitioner ${npi}`);
+      badChecks.push('Missing Practitioner');
+      console.error(`Test misconfigured: missing practitioner ${npi}`);
+      continue;
     }
     const patientIds = []
     for(const mbi of practitionerPatientMap[npi]){
@@ -281,7 +293,9 @@ function createGroups(token, orgId, patients, practitioners) {
       }
     }
     if (patientIds.length == 0){
-      exec.test.abort(`Test misconfigured: missing patients for ${npi}`);
+      badChecks.push('Missing Patients');
+      console.error(`Test misconfigured: missing patients for ${npi}`);
+      continue;
     }
     const createGroupResponse = createGroupWithPatients(token, orgId, practitionerId, npi, patientIds);
     const checkCreateGroup = check(
@@ -292,16 +306,13 @@ function createGroups(token, orgId, patients, practitioners) {
     )
 
     if (! checkCreateGroup){
-      console.error(`Failed to create group for ${npi}`);
+      console.error(`Failed to create group for ${npi}: ${createGroupResponse.body}`);
       badChecks.push(checkCreateGroup);
     }
   }
-  if (badChecks.length > 0) {
-    exec.test.abort('Failed to create all groups.');
-  }
-
 }
 
+// Build map of practitioner NPI to DPC-ID
 function practitonerNpiPractitionerIdMap(practitioners) {
   const map = {};
   for (const entry of practitioners.entry) {
@@ -320,6 +331,7 @@ function practitonerNpiPractitionerIdMap(practitioners) {
   return map;
 }
 
+// Build map of practitioners to their patients
 function practitionerNpiPatientMbiMap() {
   const practitionerPatientMap = {};
   const rows = associationsFile.split('\n');
@@ -334,7 +346,8 @@ function practitionerNpiPatientMbiMap() {
   return practitionerPatientMap;
 }
 
-function patientMbiUUIDMap(patients){
+// Build map of patient MBI to DPC-ID
+function patientMbiPatientIdMap(patients){
   const patientMbiIdMap = {};
   for(const entry of patients.entry){
     const id = entry.resource.id;
@@ -350,4 +363,12 @@ function patientMbiUUIDMap(patients){
     }
   }
   return patientMbiIdMap;
+}
+
+export function teardown(data) {
+  for (const orgId of data.orgIds) {
+    if (orgId) {
+      deleteOrganization(orgId, data.goldenMacaroon);
+    }
+  }
 }
