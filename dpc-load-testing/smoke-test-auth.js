@@ -16,10 +16,10 @@ import {
   validateJwt
 } from './dpc-api-client.js';
 import {
-	 exportPublicKey,
-	 generateKey,
-	 makeJwt,
-	 signatureSnippet
+  exportPublicKey,
+  generateKey,
+  makeJwt,
+  signatureSnippet
 } from './generate-jwt.js'
 
 import NPIGeneratorCache from './utils/npi-generator.js';
@@ -61,7 +61,7 @@ export function setup() {
     const checkGetOrgOutput = check(
       existingOrgResponse,
       {
-	'find org by id code 200 or 404': res => res.status == 404 || res.status == 200,
+        'find org by id code 200 or 404': res => res.status == 404 || res.status == 200,
       }
     );
     
@@ -74,26 +74,34 @@ export function setup() {
       deleteOrganization(orgId, goldenMacaroon);
     }
     var npi;
-    while(true) {
-      npi = npiGenerator.iterate();
+    var count = 0;
+    while(count < 200) {
+      count++;
+      const npiToCheck = npiGenerator.iterate();
       // check if org with npi exists
-      const existingNpiResponse = findOrganizationByNpi(npi, goldenMacaroon);
+      const existingNpiResponse = findOrganizationByNpi(npiToCheck, goldenMacaroon);
 
       const checkFindOutput = check(
-	existingNpiResponse,
-	{
+        existingNpiResponse,
+        {
           'find org by npi response code was 200': res => res.status === 200,
-	}
+        }
       );
 
       if (!checkFindOutput) {
-	console.error(existingNpiResponse.body);
-	exec.test.abort('failed find org by npi');
+        console.error(existingNpiResponse.body);
+        exec.test.abort('failed find org by npi');
       }
       
       const existingOrgs =  existingNpiResponse.json();
 
-      if ( existingOrgs.total == 0) break;
+      if ( existingOrgs.total == 0) {
+	npi = npiToCheck;
+	break;
+      }
+    }
+    if (! npi) {
+      exec.test.abort('failed to generate unused npi');
     }
 
     const org = createSmokeTestOrganization(npi, orgId, goldenMacaroon);
