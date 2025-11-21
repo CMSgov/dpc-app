@@ -28,7 +28,7 @@ export const options = {
   scenarios: {
     bulkExportWorkflow: {
       executor: 'per-vu-iterations',
-      vus: 1,
+      vus: 3,
       iterations: 1,
       exec: "bulkExportWorkflow"
     }
@@ -127,7 +127,8 @@ export function setup() {
 }
 
 export async function bulkExportWorkflow(data) {
-  const idx = (exec.vu.idInInstance % 3) - 1;
+  const idx = (exec.vu.idInInstance % 3);
+
   const orgId = data.orgIds[idx];
   if (!orgId) {
     exec.test.abort('error indexing VU ID against orgIds array');
