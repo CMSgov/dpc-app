@@ -1,4 +1,5 @@
 import http from 'k6/http';
+
 import {
   generateBundle,
   generateOrganizationResourceBody,
@@ -8,7 +9,7 @@ import {
   generateProvenanceResourceBody
 } from "./resource-request-bodies.js"
 
-const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/api/v1' : 'https://test.dpc.cms.gov/api/v1';
+export const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/api/v1' : `https://${__ENV.ENVIRONMENT}.dpc.cms.gov/api/v1`;
 
 export function findOrganizationByNpi(npi, goldenMacaroon) {
   const res = http.get(`${urlRoot}/Admin/Organization?npis=npi|${npi}`, {
@@ -36,6 +37,26 @@ export function createOrganization(npi, name, goldenMacaroon) {
   return res;
 }
 
+export function createSmokeTestOrganization(npi, orgId, goldenMacaroon) {
+  const body = generateOrganizationResourceBody(npi, `SmokeTest ${orgId}`, orgId);
+  const res = http.post(`${urlRoot}/Organization/$submit`, JSON.stringify(body), {
+    headers: {
+      'Authorization': `Bearer ${goldenMacaroon}`,
+      'Content-Type': 'application/fhir+json',
+      'Accept': 'application/fhir+json'
+    }
+  });
+
+  return res;
+}
+
+export function getOrganizationById(token, orgId) {
+  const headers = createHeaderParam(token);
+  const res = http.get(`${urlRoot}/Organization/${orgId}`, headers);
+
+  return res;
+}
+
 export function updateOrganization(token, organization, contentTypeHeader=null) {
   const headers = createHeaderParam(token);
   if (contentTypeHeader) {
@@ -57,6 +78,12 @@ export function createPractitioner(token, npi) {
 export function createPractitioners(token, npi) {
   const body = generateBundle([{"resource": generateProviderResourceBody(npi)}]);
   const res = http.post(`${urlRoot}/Practitioner/$submit`, JSON.stringify(body), createHeaderParam(token));
+
+  return res;
+}
+
+export function createPractitionersFile(token, file) {
+  const res = http.post(`${urlRoot}/Practitioner/$submit`, file, createHeaderParam(token));
 
   return res;
 }
@@ -100,6 +127,12 @@ export function createPatientsBatch(token, mbis) {
   mbis.forEach((mbi) => entries.push({'resource': generatePatientResourceBody(mbi)}));
   const body = generateBundle(entries);
   const res = http.post(`${urlRoot}/Patient/$submit`, JSON.stringify(body), createHeaderParam(token));
+
+  return res;
+}
+
+export function createPatientsFile(token, file) {
+  const res = http.post(`${urlRoot}/Patient/$submit`, file, createHeaderParam(token));
 
   return res;
 }

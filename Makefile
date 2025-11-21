@@ -36,6 +36,10 @@ smoke/prod: venv smoke
 	@echo "Running Smoke Tests against ${HOST_URL}"
 	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/prod.smoke_test.yml
 
+.PHONY: smoke/k6
+smoke/k6:
+	docker run --rm -v $(shell pwd)/dpc-load-testing:/src --env-file $(shell pwd)/ops/config/decrypted/local.env -e ENVIRONMENT=local -i grafana/k6 run /src/smoke-test.js
+
 .PHONY: smoketest-k6-frontend-local
 smoketest-k6-frontend-local: secure-envs
 	@echo "Running K6 smoketests locally..."
