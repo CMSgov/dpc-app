@@ -2,7 +2,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import js from "@eslint/js";
 
 export default defineConfig([
-    [ globalIgnores(["__tests__", "macaroonTests.js", "lib"]) ],
+    [ globalIgnores(["__tests__", "jwtTests.js", "macaroonTests.js", "lib"]) ],
 	{
 		files: ["**/*.js"],
 		plugins: { js },
@@ -10,6 +10,7 @@ export default defineConfig([
 		languageOptions: {
 		    globals: {
 		        __ENV: "readonly",
+			"crypto": "readonly",
 		    },
 		},
 	},
