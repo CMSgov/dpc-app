@@ -37,6 +37,7 @@ export const options = {
 
 // We allow errors in local because we don't need to test our own connection to BFD
 const JOB_OUPUT_ERROR_LENGTH = __ENV.ENVIRONMENT == 'local' ? 1 : 0;
+// Our WAF rate limits us to 300 requests every 5 minutes, so don't poll too often
 const EXPORT_POLL_INTERVAL_SEC = __ENV.ENVIRONMENT == 'local' ? 1 : 20;
 const practitionerBundle =  __ENV.ENVIRONMENT == 'prod' ? open('./resources/prod_provider_bundle.json') : open('./resources/provider_bundle.json');
 const patientBundle =  __ENV.ENVIRONMENT == 'prod' ? open('./resources/prod_patient_bundle-dpr.json') : open('./resources/patient_bundle-dpr.json');
@@ -180,7 +181,6 @@ export async function bulkExportWorkflow(data) {
     console.error(`Bad Checks: ${badChecks.length}`);
     exec.test.abort('Failed to create and export all groups.');
   }
-
 }
 
 function exportGroups(token, orgId, practitioners, badChecks) {
@@ -342,7 +342,6 @@ function practitionerNpiPatientMbiMap() {
       practitionerPatientMap[rowItems[1]].push(rowItems[0]);
     }
   }
-
   return practitionerPatientMap;
 }
 
