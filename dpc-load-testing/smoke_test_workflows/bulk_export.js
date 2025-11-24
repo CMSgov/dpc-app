@@ -10,7 +10,6 @@ import {
   createPractitionersRawData,
   exportGroup,
   findGroupByPractitionerNpi,
-  findOrganizationByNpi,
 } from '../dpc-api-client.js';
 
 
