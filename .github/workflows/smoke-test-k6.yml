@@ -69,4 +69,4 @@ jobs:
         env:
           ENVIRONMENT: ${{ inputs.env }}
         run: |
-          ./k6 run ./smoke-test-auth.js
+          ./k6 run ./smoke-test.js
