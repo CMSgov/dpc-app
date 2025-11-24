@@ -35,7 +35,7 @@ export function authWorkflow(data) {
   checkAuthWorkflow(data);
 }
 
-// Sets up two test organizations
+// Sets up three test organizations
 export function setup() {
   const goldenMacaroon = fetchGoldenMacaroon();
   const orgIds = [
