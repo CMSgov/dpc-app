@@ -1,4 +1,4 @@
-name: 'DPC - Smoke Test - K6 - Back End'
+name: 'DPC - Smoke Test - K6'
 
 on:
   workflow_dispatch:
@@ -53,6 +53,7 @@ jobs:
         run: |
           # Install xk6
           go install go.k6.io/xk6/cmd/xk6@v1.1.5
+
           # Build the k6 binary
           xk6 build
       - name: Set env vars from AWS params
@@ -62,8 +63,9 @@ jobs:
         with:
           params: |
             GOLDEN_MACAROON=/dpc/${{ inputs.env }}/web/golden_macaroon
-      - name: Run K6 Smoketest
-        id: run-k6-smoke-test
+
+      - name: Run Smoke Test
+        id: run-smoke-test
         env:
           ENVIRONMENT: ${{ inputs.env }}
         run: |

@@ -11,7 +11,10 @@ import {
   findOrganizationByNpi,
 } from './dpc-api-client.js';
 
+
 import { checkBulkExportWorkflow } from './smoke_test_workflows/bulk_export.js';
+import { checkAuthWorkflow } from './smoke_test_workflows/auth.js';
+
 
 import NPIGeneratorCache from './utils/npi-generator.js';
 
@@ -27,12 +30,23 @@ export const options = {
       vus: 3,
       iterations: 1,
       exec: "bulkExportWorkflow"
+    },
+    checkAuthWorkflow: {
+      executor: 'per-vu-iterations',
+      vus: 3,
+      iterations: 1,
+      exec: "authWorkflow"
+
     }
   }
 };
 
 export function bulkExportWorkflow(data) {
   checkBulkExportWorkflow(data);
+}
+
+export function authWorkflow(data) {
+  checkAuthWorkflow(data);
 }
 
 // Sets up three test organizations
