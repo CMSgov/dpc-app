@@ -154,4 +154,122 @@
         </addColumn>
     </changeSet>
 
+    <!-- Create a foreign data wrapper linking to the provider table in dpc-attribution -->
+    <changeSet id="create-postgres-fdw-extension" author="Mike Esposito">
+        <sql>
+            CREATE EXTENSION IF NOT EXISTS postgres_fdw;
+        </sql>
+    </changeSet>
+    <changeSet id="create-foreign-attribution-server" author="Mike Esposito">
+        <sql>
+            CREATE SERVER IF NOT EXISTS dpc_attribution
+            FOREIGN DATA WRAPPER postgres_fdw
+            OPTIONS (host 'localhost', dbname 'dpc_attribution', port '5432');
+        </sql>
+    </changeSet>
+    <changeSet id="create-fdw-user-mapping" author="Mike Esposito">
+        <sql>
+            CREATE USER MAPPING IF NOT EXISTS FOR ${QUEUE_DB_USER}
+            SERVER dpc_attribution
+            OPTIONS (user '${ATTRIBUTION_DB_USER}', password_required 'false');
+        </sql>
+    </changeSet>
+    <changeSet id="import-provider-table" author="Mike Esposito">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="providers">
+                    select relname
+                    from pg_class
+                    where relname = 'providers'
+                    and relkind = 'f';
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <sql>
+            IMPORT FOREIGN SCHEMA public
+            LIMIT TO (providers)
+            FROM SERVER dpc_attribution
+            INTO public;
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-quicksight-views" author="Mike Esposito">
+        <!-- No preconditions are necessary since we can always recreate a new view on top of an old one -->
+
+        <createView viewName="unique_providers_served_all_time"
+                    replaceIfExists="true"
+                    schemaName="public">
+            select COUNT(DISTINCT(p.id)) as unique_providers_served
+            from job_queue_batch j,
+                 providers p
+            where j.status = 2
+            and (p.id::text = j.provider_id or p.provider_id = j.provider_npi)
+        </createView>
+
+        <!-- Postgres weeks are Monday to Sunday, but we want Sunday to Saturday -->
+        <createView viewName="benes_requested_last_week"
+                    replaceIfExists="true"
+                    schemaName="public">
+            select SUM(ARRAY_LENGTH(STRING_TO_ARRAY(patients, ','), 1)) as benes_requested
+            from job_queue_batch
+            where patients IS NOT NULL
+            and submit_time AT TIME ZONE 'America/New_York' >= DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '8 day'
+            and submit_time AT TIME ZONE 'America/New_York' &lt; DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '1 day'
+        </createView>
+        
+        <createView viewName="unique_benes_served_last_week"
+                    replaceIfExists="true"
+                    schemaName="public">
+            select COUNT(DISTINCT p.patients) as unique_benes_served
+            from job_queue_batch j,
+            lateral UNNEST(STRING_TO_ARRAY(j.patients, ',')) as p(patients)
+            where j.patients IS NOT NULL
+            and status = 2
+            and j.submit_time AT TIME ZONE 'America/New_York' >= DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '8 day'
+            and j.submit_time AT TIME ZONE 'America/New_York' &lt; DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '1 day'
+        </createView>
+
+        <createView viewName="bulk_calls_made_last_week"
+                    replaceIfExists="true"
+                    schemaName="public">
+            SELECT COUNT(DISTINCT job_id) as bulk_calls
+            FROM job_queue_batch
+            WHERE is_bulk = true
+            and submit_time AT TIME ZONE 'America/New_York' >= DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '8 day'
+            and submit_time AT TIME ZONE 'America/New_York' &lt; DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '1 day'
+        </createView>
+
+        <createView viewName="patient_everything_requests_last_week"
+                    replaceIfExists="true"
+                    schemaName="public">
+            select COUNT(*) as everything_requests
+            from job_queue_batch
+            where STRPOS(patients, ',') = 0
+            and is_bulk = false
+            and submit_time AT TIME ZONE 'America/New_York' >= DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '8 day'
+            and submit_time AT TIME ZONE 'America/New_York' &lt; DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '1 day'
+        </createView>
+
+        <createView viewName="since_requests_last_week"
+                    replaceIfExists="true"
+                    schemaName="public">
+            select COUNT(DISTINCT job_id) as since_requests
+            from job_queue_batch
+            where since IS NOT NULL
+            and submit_time AT TIME ZONE 'America/New_York' >= DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '8 day'
+            and submit_time AT TIME ZONE 'America/New_York' &lt; DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '1 day'
+        </createView>
+    </changeSet>
+    
+    <changeSet id="create-quicksight-indexes" author="Mike Esposito">
+        <createIndex tableName="job_queue_batch" indexName="job_queue_batch_since_requests">
+            <column name="since"></column>
+            <column name="submit_time"></column>
+        </createIndex>
+        <createIndex tableName="job_queue_batch" indexName="job_queue_batch_everything_requests">
+            <column name="is_bulk"></column>
+            <column name="submit_time"></column>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>

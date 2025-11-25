@@ -118,4 +118,24 @@
         </createIndex>
     </changeSet>
 
+    <changeSet id="create-quicksight-views" author="Mike Esposito">
+        <!-- No preconditions are necessary since we can always recreate a new view on top of an old one -->
+
+        <createView viewName="hcos_credentialed_all_time"
+                    replaceIfExists="true"
+                    schemaName="public">
+            select COUNT(DISTINCT organization_id) as credentialed_all_time
+            from organization_tokens
+            where organization_id not in ('0ab352f1-2bf1-44c4-aa7a-3004a1ffef12', '69c0d4d4-9c07-4fa8-9053-e10fb1608b48', 'c7f5247b-4c41-478c-84eb-a6e801bdb145');
+        </createView>
+        
+        <createView viewName="hcos_with_active_credentials"
+                    replaceIfExists="true"
+                    schemaName="public">
+            select COUNT(DISTINCT organization_id) as active_credentials
+            from organization_tokens
+            where expires_at AT TIME ZONE 'America/New_York' > now() AT TIME ZONE 'America/New_York'
+        </createView>
+    </changeSet>
+
 </databaseChangeLog>
