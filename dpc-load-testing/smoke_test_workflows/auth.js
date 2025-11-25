@@ -51,15 +51,15 @@ export async function checkAuthWorkflow(data) {
     }
   );
   if (!checkCreatePublicKey) {
+    console.error(`Failed to create public key for ${orgId}`);
     console.error(createPublicKeyResponse.body);
-    exec.test.fail('Failed to create public key');
     return;
   }
 
   // Checking here because create public key does not depend on this
   if (!checkCreateToken) {
+    console.error(`Failed to create client token for ${orgId}`);
     console.error(createTokenResponse.body);
-    exec.test.fail('Failed to create token.');
     return;
   }
 
@@ -74,8 +74,8 @@ export async function checkAuthWorkflow(data) {
     }
   );
   if (!checkValidateJwt) {
+    console.error(`Failed to validate jwt for ${orgId}`);
     console.error(validateJwtResponse.body);
-    exec.test.fail('Failed to validate jwt');
     return;
   }
 
@@ -88,8 +88,8 @@ export async function checkAuthWorkflow(data) {
     }
   );
   if (!checkAccessToken) {
+    console.error(`Failed access token check for ${orgId}`);
     console.error(accessTokenResponse.body);
-    exec.test.fail('Failed to retrieve access token');
     return;
   }
   const accessToken = accessTokenResponse.json().access_token
@@ -103,7 +103,7 @@ export async function checkAuthWorkflow(data) {
     }
   )
   if (!checkGetOrgByAccessToken) {
-    exec.test.fail('Failed to get organization by access token');
-    return;
+    console.error(`Failed get organization by access token for ${orgId}`);
+    console.error(getOrgByAccessTokenResponse.body);
   }
 }
