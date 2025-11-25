@@ -169,7 +169,7 @@
     </changeSet>
     <changeSet id="create-fdw-user-mapping" author="Mike Esposito">
         <sql>
-            CREATE USER MAPPING IF NOT EXISTS FOR ${QUEUE_DB_USER}
+            CREATE USER MAPPING IF NOT EXISTS FOR "${QUEUE_DB_USER}"
             SERVER dpc_attribution
             OPTIONS (user '${ATTRIBUTION_DB_USER}', password_required 'false');
         </sql>
