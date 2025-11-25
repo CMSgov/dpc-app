@@ -57,7 +57,6 @@ export function getOrganizationById(token, orgId) {
   return res;
 }
 
-
 export function getOrganizationByAccessToken(token) {
   const headers = createHeaderParam(token);
   const res = http.get(`${urlRoot}/Organization`, headers);

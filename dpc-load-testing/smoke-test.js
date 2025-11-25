@@ -10,8 +10,6 @@ import {
   createSmokeTestOrganization,
   findOrganizationByNpi,
 } from './dpc-api-client.js';
-
-
 import { checkBulkExportWorkflow } from './smoke_test_workflows/bulk_export.js';
 import { checkAuthWorkflow } from './smoke_test_workflows/auth.js';
 
