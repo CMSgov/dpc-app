@@ -176,14 +176,12 @@
     </changeSet>
     <changeSet id="import-provider-table" author="Mike Esposito">
         <preConditions onFail="MARK_RAN">
-            <not>
-                <sqlCheck expectedResult="providers">
-                    select relname
-                    from pg_class
-                    where relname = 'providers'
-                    and relkind = 'f';
-                </sqlCheck>
-            </not>
+            <sqlCheck expectedResult="1">
+                select count(*)
+                from pg_class
+                where relname = 'providers'
+                and relkind = 'f';
+            </sqlCheck>
         </preConditions>
         <sql>
             IMPORT FOREIGN SCHEMA public
