@@ -3,6 +3,7 @@
 
 import { check, sleep } from 'k6';
 import exec from 'k6/execution'
+import { generateDPCToken } from '../generate-dpc-token.js';
 import {
   authorizedGet,
   createGroupWithPatients,
@@ -24,13 +25,9 @@ const practitionerCount =  __ENV.ENVIRONMENT == 'prod' ? 2 : 4;
 
 // Sets up two test organizations
 export async function checkBulkExportWorkflow(data) {
-  const idx = (exec.vu.idInInstance % 3);
+  const orgId = data.orgId;
 
-  const orgId = data.orgIds[idx];
-  if (!orgId) {
-    exec.test.abort('error indexing VU ID against orgIds array');
-  }
-  const token = data.tokens[idx];
+  const token = generateDPCToken(orgId, data.goldenMacaroon);
 
   // Uploading Practitioners
   const uploadPractitionersResponse = createPractitionersRawData(token, practitionerBundle);
@@ -62,7 +59,8 @@ export async function checkBulkExportWorkflow(data) {
 
   // Abort if either upload failed
   if (!checkUploadPractitioners || !checkUploadPatients) {
-    exec.test.abort('Failed to upload practitioners and/or patients');
+    exec.test.fail('Failed to upload practitioners and/or patients');
+    return;
   }
 
 
@@ -74,7 +72,7 @@ export async function checkBulkExportWorkflow(data) {
 
   if (badChecks.length > 0) {
     console.error(`Bad Checks: ${badChecks.length}`);
-    exec.test.abort('Failed to create and export all groups.');
+    exec.test.fail('Failed to create and export all groups.');
   }
 }
 
@@ -117,7 +115,7 @@ function exportGroups(token, orgId, practitioners, badChecks) {
       const jobUrl = getGroupExportResponse.headers['Content-Location'];
       jobUrls.push(jobUrl);
     } else {
-      console.log(`Unable to export group for ${groupNpiMap[groupId]} -- ${getGroupExportResponse.status}`);
+      console.error(`Unable to export group for ${groupNpiMap[groupId]} -- ${getGroupExportResponse.status}`);
       badChecks.push(checkGetGroupExportResponse);
     }
   }

@@ -317,11 +317,11 @@ export function createPublicKey(token, label, key, signature) {
 
 export function validateJwt(jwt) {
   const headers = {'Accept': 'application/json', 'Content-Type': 'text/plain' };
-  
+
   const res = http.post(`${urlRoot}/Token/validate`, jwt, { 'headers': headers });
   return res;
-  
 }
+
 export function retrieveAccessToken(jwt) {
   const headers = {'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json'};
   const payload = { 'grant_type': 'client_credentials',
@@ -330,7 +330,6 @@ export function retrieveAccessToken(jwt) {
                     'client_assertion': jwt };
   const res = http.post(`${urlRoot}/Token/auth`, payload, { 'headers': headers });
   return res;
-  
 }
 
 export function authorizedGet(token, url, headers = {}) {

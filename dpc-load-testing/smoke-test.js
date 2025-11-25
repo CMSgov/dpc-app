@@ -25,46 +25,42 @@ export const options = {
     checks: ['rate===1'],
   },
   scenarios: {
-    checkBulkExportWorkflow: {
+    smokeTests: {
       executor: 'per-vu-iterations',
-      vus: 3,
-      iterations: 1,
-      exec: "bulkExportWorkflow"
-    },
-    checkAuthWorkflow: {
-      executor: 'per-vu-iterations',
-      vus: 3,
-      iterations: 1,
-      exec: "authWorkflow"
+      vus: 1,
+      iterations: 3,
+      exec: "runSmokeTests"
 
     }
   }
 };
 
-export function bulkExportWorkflow(data) {
-  checkBulkExportWorkflow(data);
-}
+const orgIds = [
+  '0ab352f1-2bf1-44c4-aa7a-3004a1ffef12',
+  '69c0d4d4-9c07-4fa8-9053-e10fb1608b48',
+  'c7f5247b-4c41-478c-84eb-a6e801bdb145'
+];
 
-export function authWorkflow(data) {
-  checkAuthWorkflow(data);
+export function runSmokeTests(data) {
+  const idx = exec.vu.iterationInScenario;
+  const iterationData = {
+      idx: idx,
+      orgId: orgIds[idx],
+      goldenMacaroon: data.goldenMacaroon
+  };
+  checkAuthWorkflow(iterationData);
+  checkBulkExportWorkflow(iterationData);
 }
 
 // Sets up three test organizations
 export function setup() {
   const goldenMacaroon = fetchGoldenMacaroon();
-  const orgIds = [
-    '0ab352f1-2bf1-44c4-aa7a-3004a1ffef12',
-    '69c0d4d4-9c07-4fa8-9053-e10fb1608b48',
-    'c7f5247b-4c41-478c-84eb-a6e801bdb145'
-  ];
-  const tokens = Array();
   const npiGenerator = npiGeneratorCache.getGenerator(0);
   // array returned from setup distributes its members starting from the 1 index
   for (let i = 0; i < orgIds.length; i++) {
     // delete smoke test org if present
     const orgId = orgIds[i];
     const token = generateDPCToken(orgId, goldenMacaroon);
-    tokens[i] = token;
     const existingOrgResponse = getOrganizationById(token, orgId);
 
     const checkGetOrgOutput = check(
@@ -79,7 +75,7 @@ export function setup() {
       exec.test.abort('failed find org by id');
     }
 
-    if (existingOrgResponse == 200) {
+    if (existingOrgResponse.status == 200) {
       deleteOrganization(orgId, goldenMacaroon);
     }
     let npi;
@@ -130,7 +126,7 @@ export function setup() {
 
   }
 
-  return { orgIds: orgIds, tokens: tokens, goldenMacaroon: goldenMacaroon };
+  return { orgIds: orgIds, goldenMacaroon: goldenMacaroon };
 }
 
 export function teardown(data) {
