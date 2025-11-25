@@ -176,7 +176,7 @@
     </changeSet>
     <changeSet id="import-provider-table" author="Mike Esposito">
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="1">
+            <sqlCheck expectedResult="0">
                 select count(*)
                 from pg_class
                 where relname = 'providers'
