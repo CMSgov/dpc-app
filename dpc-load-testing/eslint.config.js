@@ -11,6 +11,7 @@ export default defineConfig([
 		    globals: {
 		        __ENV: "readonly",
 			"crypto": "readonly",
+			"open": "readonly",
 		    },
 		},
 	},

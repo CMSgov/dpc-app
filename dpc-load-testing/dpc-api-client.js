@@ -89,6 +89,12 @@ export function createPractitioners(token, npi) {
   return res;
 }
 
+export function createPractitionersRawData(token, rawData) {
+  const res = http.post(`${urlRoot}/Practitioner/$submit`, rawData, createHeaderParam(token));
+
+  return res;
+}
+
 export function deletePractitioner(token, practitionerId) {
   return http.del(`${urlRoot}/Practitioner/${practitionerId}`, null, createHeaderParam(token));
 }
@@ -128,6 +134,12 @@ export function createPatientsBatch(token, mbis) {
   mbis.forEach((mbi) => entries.push({'resource': generatePatientResourceBody(mbi)}));
   const body = generateBundle(entries);
   const res = http.post(`${urlRoot}/Patient/$submit`, JSON.stringify(body), createHeaderParam(token));
+
+  return res;
+}
+
+export function createPatientsRawData(token, rawData) {
+  const res = http.post(`${urlRoot}/Patient/$submit`, rawData, createHeaderParam(token));
 
   return res;
 }
@@ -304,11 +316,11 @@ export function createPublicKey(token, label, key, signature) {
 
 export function validateJwt(jwt) {
   const headers = {'Accept': 'application/json', 'Content-Type': 'text/plain' };
-  
+
   const res = http.post(`${urlRoot}/Token/validate`, jwt, { 'headers': headers });
   return res;
-  
 }
+
 export function retrieveAccessToken(jwt) {
   const headers = {'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json'};
   const payload = { 'grant_type': 'client_credentials',
@@ -317,7 +329,6 @@ export function retrieveAccessToken(jwt) {
                     'client_assertion': jwt };
   const res = http.post(`${urlRoot}/Token/auth`, payload, { 'headers': headers });
   return res;
-  
 }
 
 export function authorizedGet(token, url, headers = {}) {

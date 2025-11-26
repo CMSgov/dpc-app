@@ -1,8 +1,8 @@
-/*global console*/ 
+/*global console*/
 /* eslint no-console: "off" */
 
 import { check } from 'k6';
-import exec from 'k6/execution'
+import { generateDPCToken } from '../generate-dpc-token.js';
 import {
   createClientToken,
   getOrganizationByAccessToken,
@@ -19,13 +19,10 @@ import {
 
 
 export async function checkAuthWorkflow(data) {
-  const idx = exec.vu.idInInstance - 1;
-  const orgId = data.orgIds[idx];
-  if (!orgId) {
-    exec.test.abort('error indexing VU ID against orgIds array');
-  }
+  const idx = data.idx;
+  const orgId = data.orgId;
 
-  const token = data.tokens[idx];
+  const token = generateDPCToken(orgId, data.goldenMacaroon);
 
   const createTokenResponse = createClientToken(token, `New token ${idx}`);
   const checkCreateToken = check(
@@ -38,8 +35,8 @@ export async function checkAuthWorkflow(data) {
   const clientToken = createTokenResponse.json().token;
 
   // Go ahead and try to create public key even if fail to create token
-  // Abort on create token failure afterwards
-  
+  // Fail on create token failure afterwards
+
   const keyPair = await generateKey();
   const privateKey = keyPair['privateKey'];
   const publicKey = await exportPublicKey(keyPair['publicKey']);
@@ -53,14 +50,16 @@ export async function checkAuthWorkflow(data) {
     }
   );
   if (!checkCreatePublicKey) {
+    console.error(`Failed to create public key for ${orgId}`);
     console.error(createPublicKeyResponse.body);
-    exec.test.abort('Failed to create public key');
+    return;
   }
 
   // Checking here because create public key does not depend on this
   if (!checkCreateToken) {
+    console.error(`Failed to create client token for ${orgId}`);
     console.error(createTokenResponse.body);
-    exec.test.abort('Failed to create token.');
+    return;
   }
 
   const publicKeyId = createPublicKeyResponse.json().id
@@ -74,8 +73,9 @@ export async function checkAuthWorkflow(data) {
     }
   );
   if (!checkValidateJwt) {
+    console.error(`Failed to validate jwt for ${orgId}`);
     console.error(validateJwtResponse.body);
-    exec.test.abort('Failed to validate jwt');
+    return;
   }
 
   const accessTokenResponse = retrieveAccessToken(jwt);
@@ -87,8 +87,9 @@ export async function checkAuthWorkflow(data) {
     }
   );
   if (!checkAccessToken) {
+    console.error(`Failed access token check for ${orgId}`);
     console.error(accessTokenResponse.body);
-    exec.test.abort('Failed to retrieve access token');
+    return;
   }
   const accessToken = accessTokenResponse.json().access_token
 
@@ -101,6 +102,7 @@ export async function checkAuthWorkflow(data) {
     }
   )
   if (!checkGetOrgByAccessToken) {
-    exec.test.abort('Failed to get organization by access token');
+    console.error(`Failed get organization by access token for ${orgId}`);
+    console.error(getOrgByAccessTokenResponse.body);
   }
 }
