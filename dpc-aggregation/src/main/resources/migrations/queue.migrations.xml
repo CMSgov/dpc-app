@@ -168,6 +168,13 @@
         </sql>
     </changeSet>
     <changeSet id="create-fdw-user-mapping" author="Mike Esposito">
+        <preConditions>
+            <sqlCheck expectedResult="0">
+                select count(*)
+                from pg_user_mappings
+                where srvname = 'dpc_attribution' and usename = '${QUEUE_DB_USER}'
+            </sqlCheck>
+        </preConditions>
         <sql>
             CREATE USER MAPPING IF NOT EXISTS FOR "${QUEUE_DB_USER}"
             SERVER dpc_attribution
