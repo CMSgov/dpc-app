@@ -171,7 +171,6 @@
         <sql>
             CREATE USER MAPPING IF NOT EXISTS FOR "${QUEUE_DB_USER}"
             SERVER dpc_attribution
-            OPTIONS (user '${ATTRIBUTION_DB_USER}', password_required 'false');
         </sql>
     </changeSet>
     <changeSet id="import-provider-table" author="Mike Esposito">
