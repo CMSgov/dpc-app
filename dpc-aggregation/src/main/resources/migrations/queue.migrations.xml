@@ -168,7 +168,7 @@
         </sql>
     </changeSet>
     <changeSet id="create-fdw-user-mapping" author="Mike Esposito">
-        <preConditions>
+        <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 select count(*)
                 from pg_user_mappings
