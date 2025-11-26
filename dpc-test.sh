@@ -55,9 +55,7 @@ fi
 
 docker compose -p start-v1-app down
 
-# The attribution DB migration has to finish before the aggregation migration can start
-USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution --wait
-USE_BFD_MOCK=true docker compose -p start-v1-app up db aggregation --wait
+USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
 
 # Run the integration tests
 USE_BFD_MOCK=true docker compose -p start-v1-app up --exit-code-from tests tests

@@ -154,49 +154,6 @@
         </addColumn>
     </changeSet>
 
-    <!-- Create a foreign data wrapper linking to the provider table in dpc-attribution -->
-    <changeSet id="create-postgres-fdw-extension" author="Mike Esposito">
-        <sql>
-            CREATE EXTENSION IF NOT EXISTS postgres_fdw;
-        </sql>
-    </changeSet>
-    <changeSet id="create-foreign-attribution-server" author="Mike Esposito">
-        <sql>
-            CREATE SERVER IF NOT EXISTS dpc_attribution
-            FOREIGN DATA WRAPPER postgres_fdw
-            OPTIONS (host 'localhost', dbname 'dpc_attribution', port '5432');
-        </sql>
-    </changeSet>
-    <changeSet id="create-fdw-user-mapping" author="Mike Esposito">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                select count(*)
-                from pg_user_mappings
-                where srvname = 'dpc_attribution' and usename = '${QUEUE_DB_USER}'
-            </sqlCheck>
-        </preConditions>
-        <sql>
-            CREATE USER MAPPING IF NOT EXISTS FOR "${QUEUE_DB_USER}"
-            SERVER dpc_attribution
-        </sql>
-    </changeSet>
-    <changeSet id="import-provider-table" author="Mike Esposito">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                select count(*)
-                from pg_class
-                where relname = 'providers'
-                and relkind = 'f';
-            </sqlCheck>
-        </preConditions>
-        <sql>
-            IMPORT FOREIGN SCHEMA public
-            LIMIT TO (providers)
-            FROM SERVER dpc_attribution
-            INTO public;
-        </sql>
-    </changeSet>
-
     <changeSet id="create-quicksight-views" author="Mike Esposito">
         <!-- No preconditions are necessary since we can always recreate a new view on top of an old one -->
 
@@ -267,12 +224,12 @@
     
     <changeSet id="create-quicksight-indexes" author="Mike Esposito">
         <createIndex tableName="job_queue_batch" indexName="job_queue_batch_since_requests">
-            <column name="since"></column>
-            <column name="submit_time"></column>
+            <column name="since"/>
+            <column name="submit_time"/>
         </createIndex>
         <createIndex tableName="job_queue_batch" indexName="job_queue_batch_everything_requests">
-            <column name="is_bulk"></column>
-            <column name="submit_time"></column>
+            <column name="is_bulk"/>
+            <column name="submit_time"/>
         </createIndex>
     </changeSet>
 
