@@ -1,7 +1,7 @@
 package gov.cms.dpc.aggregation.tasks;
 
 import gov.cms.dpc.aggregation.DPCAggregationConfiguration;
-import gov.cms.dpc.testing.utils.DBUtils;
+import gov.cms.dpc.common.utils.DBUtils;
 import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.servlets.tasks.Task;
