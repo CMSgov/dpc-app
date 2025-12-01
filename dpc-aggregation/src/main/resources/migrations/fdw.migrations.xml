@@ -35,21 +35,5 @@
             OPTIONS (user '${ATTRIBUTION_DB_USER}', password '${ATTRIBUTION_DB_PASS}');
         </sql>
     </changeSet>
-    <changeSet id="import-provider-table" author="Mike Esposito">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                select count(*)
-                from pg_class
-                where relname = 'providers'
-                and relkind = 'f';
-            </sqlCheck>
-        </preConditions>
-        <sql>
-            IMPORT FOREIGN SCHEMA public
-            LIMIT TO (providers)
-            FROM SERVER dpc_attribution
-            INTO public;
-        </sql>
-    </changeSet>
 
 </databaseChangeLog>

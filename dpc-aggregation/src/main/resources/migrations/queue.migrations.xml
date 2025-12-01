@@ -154,6 +154,23 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="import-provider-table" author="Mike Esposito">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*)
+                from pg_class
+                where relname = 'providers'
+                and relkind = 'f';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            IMPORT FOREIGN SCHEMA public
+            LIMIT TO (providers)
+            FROM SERVER dpc_attribution
+            INTO public;
+        </sql>
+    </changeSet>
+
     <changeSet id="create-quicksight-views" author="Mike Esposito">
         <!-- No preconditions are necessary since we can always recreate a new view on top of an old one -->
 
