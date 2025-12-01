@@ -97,6 +97,10 @@
     </changeSet>
 
     <changeSet id="create-ip-addresses-table" author="Mike Esposito">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="IP_ADDRESSES"/></not>
+        </preConditions>
+
         <createTable tableName="IP_ADDRESSES">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
