@@ -18,7 +18,6 @@ const portals = {
               signInPath: 'portal/users/sign_in',
 	      protectedPath: 'portal/organizations',
               signInText: 'Sign in' },
-
 }
 
 export async function checkPortalsWorkflow(data) {
