@@ -7,11 +7,10 @@ Run with:
 psql -U {MASTER_DB_USER} \
 -d dpc_queue \
 -h {DB_ENDPOINT} \
--v QUEUE_DB_USER={QUEUE_DB_USER} \
+-v ENV={ENV}
 -v ATTRIBUTION_DB_USER={ATTRIBUTION_READ_ONLY_USER} \
 -v ATTRIBUTION_DB_PASS='{ATTRIBUTION_READ_ONLY_DB_PASS}' \
--f scripts/config_fdw.sql \
--a
+-f scripts/config_fdw.sql
 */
 
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
@@ -20,9 +19,27 @@ CREATE SERVER IF NOT EXISTS dpc_attribution
 FOREIGN DATA WRAPPER postgres_fdw
 OPTIONS (host 'localhost', dbname 'dpc_attribution', port '5432');
 
-CREATE USER MAPPING IF NOT EXISTS FOR :"QUEUE_DB_USER"
-SERVER dpc_attribution
-OPTIONS (user :'ATTRIBUTION_DB_USER', password :'ATTRIBUTION_DB_PASS');
+-- Create user mappings for any role we might be logged in as and give them read only access
+CREATE OR REPLACE FUNCTION create_user_mapping(
+    local_user TEXT,
+    foreign_server TEXT,
+    foreign_user TEXT,
+    foreign_password TEXT
+) RETURNS void AS $$
+BEGIN
+    EXECUTE format('CREATE USER MAPPING IF NOT EXISTS FOR %I SERVER %I OPTIONS (user ''%s'', password ''%s'')',
+        local_user,
+        foreign_server,
+        foreign_user,
+        foreign_password
+    );
+    EXECUTE format('GRANT USAGE ON FOREIGN DATA WRAPPER postgres_fdw TO %I',
+        local_user
+    );
+END;
+$$ LANGUAGE plpgsql;
 
-GRANT USAGE ON FOREIGN DATA WRAPPER postgres_fdw TO :"QUEUE_DB_USER";
-GRANT USAGE ON FOREIGN SERVER dpc_attribution TO :"QUEUE_DB_USER";
+SELECT create_user_mapping(:'ENV' || '-dpc_queue-role', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
+SELECT create_user_mapping(:'ENV' || '-aggregation-dpc_queue-role', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
+SELECT create_user_mapping(:'ENV' || '-aggregation-dpc_queue-read-only-role', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
+SELECT create_user_mapping('postgres', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');

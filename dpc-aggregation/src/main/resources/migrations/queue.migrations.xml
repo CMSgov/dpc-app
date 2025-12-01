@@ -171,7 +171,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="grant-permissions-on-quicksight-views" author="Mike Esposito">
+    <changeSet id="grant-permissions-on-foreign_providers" author="Mike Esposito">
         <sql>
             GRANT SELECT ON providers TO PUBLIC;
         </sql>
