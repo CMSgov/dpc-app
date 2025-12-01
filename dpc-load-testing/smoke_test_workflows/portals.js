@@ -36,7 +36,7 @@ export async function checkPortalsWorkflow(data) {
     {
       'sign in should return 200': res => res.status == '200',
       'sign in should have DPC': res => res.body.includes("Data at the Point of Care"),
-      'sign in should have sign in': res => res.body.includes(config['signInText'])
+      'sign in should have sign in text': res => res.body.includes(config['signInText'])
     }
   );
   if (!checkSignIn){
@@ -51,7 +51,7 @@ export async function checkPortalsWorkflow(data) {
     {
       'protected path should return 302': res => res.status == '302',
       'protected path has location header': res => res.headers['Location'],
-      'protected path location header should be sign in': res => res.headers['Location'] == signInUrl
+      'protected path location header should be sign in url': res => res.headers['Location'] == signInUrl
     }
   );
 
