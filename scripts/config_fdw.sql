@@ -23,3 +23,6 @@ OPTIONS (host 'localhost', dbname 'dpc_attribution', port '5432');
 CREATE USER MAPPING IF NOT EXISTS FOR :"QUEUE_DB_USER"
 SERVER dpc_attribution
 OPTIONS (user :'ATTRIBUTION_DB_USER', password :'ATTRIBUTION_DB_PASS');
+
+GRANT USAGE ON FOREIGN DATA WRAPPER postgres_fdw TO :"QUEUE_DB_USER";
+GRANT USAGE ON FOREIGN SERVER dpc_attribution TO :"QUEUE_DB_USER";
