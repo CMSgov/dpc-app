@@ -7,16 +7,16 @@ import http from 'k6/http';
 
 const portals = {
   'admin': { envs: ['local', 'dev', 'test', 'sandbox'],
-	     signInPath: 'admin/internal/sign_in',
-	     protectedPath: 'admin/organizations',
+             signInPath: 'admin/internal/sign_in',
+             protectedPath: 'admin/organizations',
              signInText: 'Log in' },
   'web': { envs: ['local', 'dev', 'test', 'sandbox'],
            signInPath: 'users/sign_in',
-	   protectedPath: 'organizations/foo/edit',
+           protectedPath: 'organizations/foo/edit',
            signInText: 'Log in' },
   'portal': { envs: ['local', 'dev', 'test'],
               signInPath: 'portal/users/sign_in',
-	      protectedPath: 'portal/organizations',
+              protectedPath: 'portal/organizations',
               signInText: 'Sign in' },
 }
 
