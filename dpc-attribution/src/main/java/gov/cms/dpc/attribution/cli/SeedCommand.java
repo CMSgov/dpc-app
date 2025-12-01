@@ -13,7 +13,7 @@ import gov.cms.dpc.attribution.jdbi.RosterUtils;
 import gov.cms.dpc.common.entities.*;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
-import gov.cms.dpc.testing.utils.DBUtils;
+import gov.cms.dpc.common.utils.DBUtils;
 import io.dropwizard.core.Application;
 import io.dropwizard.core.cli.EnvironmentCommand;
 import io.dropwizard.core.setup.Environment;
