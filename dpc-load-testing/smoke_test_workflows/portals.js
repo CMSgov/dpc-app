@@ -7,13 +7,16 @@ import http from 'k6/http';
 
 const portals = {
   'admin': { envs: ['local', 'dev', 'test', 'sandbox'],
-             paths: ['admin/internal/sign_in', 'admin/organizations'],
+	     signInPath: 'admin/internal/sign_in',
+	     protectedPath: 'admin/organizations',
              signInText: 'Log in' },
   'web': { envs: ['local', 'dev', 'test', 'sandbox'],
-           paths: ['users/sign_in', 'organizations/foo/edit'],
+           signInPath: 'users/sign_in',
+	   protectedPath: 'organizations/foo/edit',
            signInText: 'Log in' },
   'portal': { envs: ['local', 'dev', 'test'],
-              paths: ['portal/users/sign_in', 'portal/organizations'],
+              signInPath: 'portal/users/sign_in',
+	      protectedPath: 'portal/organizations',
               signInText: 'Sign in' },
 
 }
@@ -27,7 +30,7 @@ export async function checkPortalsWorkflow(data) {
     return;
   }
   const host = urlRoot(service);
-  const signInUrl = `${host}/${config['paths'][0]}`;
+  const signInUrl = `${host}/${config['signInPath']}`;
   const signInResponse = http.get(signInUrl);
   const checkSignIn = check(
     signInResponse,
@@ -43,7 +46,7 @@ export async function checkPortalsWorkflow(data) {
     return;
   }
 
-  const protectedPathResponse = http.get(`${host}/${config['paths'][1]}`, { redirects: 0 });
+  const protectedPathResponse = http.get(`${host}/${config['protectedPath']}`, { redirects: 0 });
   const checkProtectedPath = check(
     protectedPathResponse,
     {
