@@ -223,6 +223,13 @@
     </changeSet>
     
     <changeSet id="create-quicksight-indexes" author="Mike Esposito">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="job_queue_batch_since_requests"/>
+                <indexExists indexName="job_queue_batch_everything_requests"/>
+            </not>
+        </preConditions>
+
         <createIndex tableName="job_queue_batch" indexName="job_queue_batch_since_requests">
             <column name="since"/>
             <column name="submit_time"/>
