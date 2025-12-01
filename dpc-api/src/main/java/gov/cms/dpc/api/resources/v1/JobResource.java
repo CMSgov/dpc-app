@@ -89,6 +89,9 @@ public class JobResource extends AbstractJobResource {
             if (!batch.getOrgID().equals(orgUUID)) {
                 return Response.status(HttpStatus.UNAUTHORIZED_401).entity("Invalid organization for job").build();
             }
+            if (batch.getStatus() == JobStatus.FAILED) {
+                throw new JobQueueFailure(jobUUID, batch.getBatchID(), "Batch failed");
+            }
             if (!batch.isValid()) {
                 throw new JobQueueFailure(jobUUID, batch.getBatchID(), "Fetched an invalid job model");
             }
