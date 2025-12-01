@@ -171,6 +171,12 @@
         </sql>
     </changeSet>
 
+    <changeSet id="grant-permissions-on-quicksight-views" author="Mike Esposito">
+        <sql>
+            GRANT SELECT ON providers TO PUBLIC;
+        </sql>
+    </changeSet>
+
     <changeSet id="create-quicksight-views" author="Mike Esposito">
         <!-- No preconditions are necessary since we can always recreate a new view on top of an old one -->
 
@@ -237,6 +243,17 @@
             and submit_time AT TIME ZONE 'America/New_York' >= DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '8 day'
             and submit_time AT TIME ZONE 'America/New_York' &lt; DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '1 day'
         </createView>
+    </changeSet>
+
+    <changeSet id="grant-permissions-on-quicksight-views" author="Mike Esposito">
+        <sql>
+            GRANT SELECT ON unique_providers_served_all_time TO PUBLIC;
+            GRANT SELECT ON benes_requested_last_week TO PUBLIC;
+            GRANT SELECT ON unique_benes_served_last_week TO PUBLIC;
+            GRANT SELECT ON bulk_calls_made_last_week TO PUBLIC;
+            GRANT SELECT ON patient_everything_requests_last_week TO PUBLIC;
+            GRANT SELECT ON since_requests_last_week TO PUBLIC;
+        </sql>
     </changeSet>
     
     <changeSet id="create-quicksight-indexes" author="Mike Esposito">

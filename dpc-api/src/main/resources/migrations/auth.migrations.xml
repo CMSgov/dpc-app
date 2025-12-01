@@ -138,4 +138,11 @@
         </createView>
     </changeSet>
 
+    <changeSet id="grant-permissions-on-quicksight-views" author="Mike Esposito">
+        <sql>
+            GRANT SELECT ON hcos_credentialed_all_time TO PUBLIC;
+            GRANT SELECT ON hcos_with_active_credentials TO PUBLIC;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
