@@ -37,7 +37,7 @@ When importing local files, you'll need to include the file extension, e.g. `imp
 Ensure all services are running
 ```dtd
 make docker-base
-make app
+make api
 make website
 make admin
 make portal
