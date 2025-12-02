@@ -84,3 +84,4 @@ Helpful make commands:\
 `make down-portals` : Removes Web,Admin,Portal, db and docker network.
 
 test
+test again
