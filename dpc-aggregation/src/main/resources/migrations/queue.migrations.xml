@@ -228,8 +228,7 @@
                     schemaName="public">
             select COUNT(*) as everything_requests
             from job_queue_batch
-            where STRPOS(patients, ',') = 0
-            and is_bulk = false
+            where is_bulk = false
             and submit_time AT TIME ZONE 'America/New_York' >= DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '8 day'
             and submit_time AT TIME ZONE 'America/New_York' &lt; DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '1 day'
         </createView>
