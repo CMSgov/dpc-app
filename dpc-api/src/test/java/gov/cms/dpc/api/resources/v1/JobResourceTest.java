@@ -6,6 +6,7 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.MemoryBatchQueue;
+import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -219,8 +220,8 @@ public class JobResourceTest {
 
         // Test the response
         final var resource = new JobResource(queue, TEST_BASEURL);
-        final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
-        assertAll(() -> assertEquals(HttpStatus.INTERNAL_SERVER_ERROR_500, response.getStatus()));
+        JobQueueFailure exception = assertThrows(JobQueueFailure.class, () -> resource.checkJobStatus(organizationPrincipal, jobID.toString()));
+        assertEquals(String.format("Operation on Job(%s) Batch(%s) failed for reason: Batch failed", jobID, runningJob.getBatchID()), exception.getMessage());
     }
 
     @Test

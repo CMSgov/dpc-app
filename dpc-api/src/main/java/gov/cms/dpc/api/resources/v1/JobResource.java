@@ -89,6 +89,9 @@ public class JobResource extends AbstractJobResource {
             if (!batch.getOrgID().equals(orgUUID)) {
                 return Response.status(HttpStatus.UNAUTHORIZED_401).entity("Invalid organization for job").build();
             }
+            if (batch.getStatus() == JobStatus.FAILED) {
+                throw new JobQueueFailure(jobUUID, batch.getBatchID(), "Batch failed");
+            }
             if (!batch.isValid()) {
                 throw new JobQueueFailure(jobUUID, batch.getBatchID(), "Fetched an invalid job model");
             }
@@ -97,10 +100,7 @@ public class JobResource extends AbstractJobResource {
         Response.ResponseBuilder builder = Response.noContent();
         Set<JobStatus> jobStatusSet = batches.stream().map(JobQueueBatch::getStatus).collect(Collectors.toSet());
 
-        if (jobStatusSet.contains(JobStatus.FAILED)) {
-            // If any part of the job has failed, report a failed status
-            builder = builder.status(HttpStatus.INTERNAL_SERVER_ERROR_500);
-        } else if (jobStatusSet.contains(JobStatus.RUNNING) || jobStatusSet.contains(JobStatus.QUEUED)) {
+        if (jobStatusSet.contains(JobStatus.RUNNING) || jobStatusSet.contains(JobStatus.QUEUED)) {
             // The job is still being processed
             builder = buildJobStatusInProgress(builder, batches, jobStatusSet);
         } else if (jobStatusSet.size() == 1 && jobStatusSet.contains(JobStatus.COMPLETED)) {

@@ -218,8 +218,9 @@ public class JobQueueBatch implements Serializable {
         return switch (status) {
             case QUEUED -> submitTime != null && aggregatorID == null;
             case RUNNING -> submitTime != null && startTime != null && updateTime != null && aggregatorID != null;
-            case COMPLETED, FAILED ->
+            case COMPLETED ->
                     submitTime != null && startTime != null && updateTime != null && completeTime != null && aggregatorID == null;
+            default -> false;
         };
     }
 
