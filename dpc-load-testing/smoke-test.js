@@ -25,7 +25,7 @@ export const options = {
   scenarios: {
     smokeTests: {
       executor: 'per-vu-iterations',
-      vus: 3,
+      vus: 3, // This has to stay at three to ensure even distribution of organizations.
       iterations: 1,
       exec: "runSmokeTests"
 
