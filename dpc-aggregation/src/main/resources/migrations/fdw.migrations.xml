@@ -1,0 +1,39 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+
+    <!-- Create a foreign data wrapper linking to the provider table in dpc-attribution -->
+    <!--
+        This should only be run locally and in CI as it needs the master DB account.  In our persisted environments
+        it will be run manually.
+    -->
+    <changeSet id="create-postgres-fdw-extension" author="Mike Esposito">
+        <sql>
+            CREATE EXTENSION IF NOT EXISTS postgres_fdw;
+        </sql>
+    </changeSet>
+    <changeSet id="create-foreign-attribution-server" author="Mike Esposito">
+        <sql>
+            CREATE SERVER IF NOT EXISTS dpc_attribution
+            FOREIGN DATA WRAPPER postgres_fdw
+            OPTIONS (host 'localhost', dbname 'dpc_attribution', port '5432');
+        </sql>
+    </changeSet>
+    <changeSet id="create-fdw-user-mapping" author="Mike Esposito">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*)
+                from pg_user_mappings
+                where srvname = 'dpc_attribution' and usename = '${QUEUE_DB_USER}'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            CREATE USER MAPPING IF NOT EXISTS FOR "${QUEUE_DB_USER}"
+            SERVER dpc_attribution
+            OPTIONS (user '${ATTRIBUTION_DB_USER}', password '${ATTRIBUTION_DB_PASS}');
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
