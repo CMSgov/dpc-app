@@ -42,6 +42,7 @@ services:
       - DPC_CA_CERT=${DPC_CA_CERT}
       - RUBY_YJIT_ENABLE=1
       - DISABLE_JSON_LOGGER=true
+      - RAILS_DEVELOPMENT_HOSTS=host.docker.internal
     ports:
       - "3900:3500"
     depends_on:
@@ -79,6 +80,7 @@ services:
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
       - RUBY_YJIT_ENABLE=1
       - DISABLE_JSON_LOGGER=true
+      - RAILS_DEVELOPMENT_HOSTS=host.docker.internal
     ports:
       - "3000:3000"
     depends_on:
@@ -141,6 +143,7 @@ services:
       - ENV=local
       - NEW_RELIC_MONITOR_MODE=false
       - DISABLE_JSON_LOGGER=true
+      - RAILS_DEVELOPMENT_HOSTS=host.docker.internal
     ports:
       - "3100:3100"
     depends_on:

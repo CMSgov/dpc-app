@@ -33,16 +33,17 @@ Many utilities are provided by K6. See: https://jslib.k6.io/. In addition, K6 pr
 When importing local files, you'll need to include the file extension, e.g. `import generateDPCToken from './generate-dpc-token.js';`
 
 ### Smoke Tests
-#### Smoketests for validating frontends
 
-Ensure all frontends are running
+Ensure all services are running
 ```dtd
+make docker-base
+make api
 make website
 make admin
 make portal
-make start-portals
+make start-dpc
 ```
 Run make command for frontend tests
 ```dtd
-make smoketest-k6-frontend-local
+make smoke/k6
 ```

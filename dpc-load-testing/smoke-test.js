@@ -12,7 +12,7 @@ import {
 } from './dpc-api-client.js';
 import { checkBulkExportWorkflow } from './smoke_test_workflows/bulk_export.js';
 import { checkAuthWorkflow } from './smoke_test_workflows/auth.js';
-
+import { checkPortalsWorkflow } from './smoke_test_workflows/portals.js';
 
 import NPIGeneratorCache from './utils/npi-generator.js';
 
@@ -25,8 +25,8 @@ export const options = {
   scenarios: {
     smokeTests: {
       executor: 'per-vu-iterations',
-      vus: 1,
-      iterations: 3,
+      vus: 3, // This has to stay at three to ensure even distribution of organizations.
+      iterations: 1,
       exec: "runSmokeTests"
 
     }
@@ -40,7 +40,7 @@ const orgIds = [
 ];
 
 export function runSmokeTests(data) {
-  const idx = exec.vu.iterationInScenario;
+  const idx = exec.vu.idInInstance % 3;
   const iterationData = {
       idx: idx,
       orgId: orgIds[idx],
@@ -48,6 +48,7 @@ export function runSmokeTests(data) {
   };
   checkAuthWorkflow(iterationData);
   checkBulkExportWorkflow(iterationData);
+  checkPortalsWorkflow(iterationData);
 }
 
 // Sets up three test organizations
