@@ -2,6 +2,7 @@ package gov.cms.dpc.common.logging;
 
 import ch.qos.logback.classic.pattern.ThrowableHandlingConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import com.google.re2j.Pattern;
 import io.dropwizard.logging.json.EventAttribute;
 import io.dropwizard.logging.json.layout.EventJsonLayout;
 import io.dropwizard.logging.json.layout.JsonFormatter;
@@ -12,8 +13,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.util.Map;
+import java.util.Set;
+import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -65,7 +67,7 @@ public class DPCJsonLayout extends EventJsonLayout {
         CSVFormat csvFormat = CSVFormat.newFormat(ENTRY_SEPARATOR).builder()
             .setSkipHeaderRecord(true)
             .setEscape('\\')
-            .build();
+            .get();
 
         // Load the message string as a record, with each comma separated value as a column
         CSVRecord rec = csvFormat.parse(new StringReader(in)).getRecords().get(0);

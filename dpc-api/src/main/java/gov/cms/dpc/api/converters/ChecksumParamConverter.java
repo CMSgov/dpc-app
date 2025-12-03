@@ -1,8 +1,7 @@
 package gov.cms.dpc.api.converters;
 
+import com.google.re2j.Pattern;
 import jakarta.ws.rs.ext.ParamConverter;
-
-import java.util.regex.Pattern;
 
 /**
  * {@link ParamConverter} which processes {@link jakarta.ws.rs.core.HttpHeaders#IF_NONE_MATCH} values to remove any trailing compression values, which cannot be directly matched against the actual checksum.

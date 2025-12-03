@@ -1,12 +1,11 @@
 package gov.cms.dpc.api.converters;
 
+import com.google.re2j.Matcher;
+import com.google.re2j.Pattern;
 import gov.cms.dpc.api.models.RangeHeader;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ParamConverter;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * {@link ParamConverter} for handling range request values from the {@link org.eclipse.jetty.http.HttpHeader#RANGE} header.

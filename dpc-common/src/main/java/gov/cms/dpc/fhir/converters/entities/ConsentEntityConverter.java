@@ -1,5 +1,7 @@
 package gov.cms.dpc.fhir.converters.entities;
 
+import com.google.re2j.Matcher;
+import com.google.re2j.Pattern;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
@@ -15,8 +17,6 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static gov.cms.dpc.common.consent.entities.ConsentEntity.*;
 
