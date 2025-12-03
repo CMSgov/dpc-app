@@ -45,7 +45,7 @@ make start-api
 
 Run the tests from the project root directory:
 ```
-docker run --rm -v $(pwd)/dpc-load-testing:/src -e ENVIRONMENT=local -e GOLDEN_MACAROON=${GOLDEN_MACAROON} -i grafana/k6 run /src/ci-app.js
+docker run --rm -v $(pwd)/dpc-load-testing:/src --env-file $(pwd)/ops/config/decrypted/local.env --add-host host.docker.internal=host-gateway -e ENVIRONMENT=local -i grafana/k6 run /src/ci-app.js
 ```
 
 
