@@ -45,7 +45,7 @@ fi
 echo "Waiting for ELB target group ${TARGET_GROUP} to become stable..."
 
 aws elbv2 wait target-in-service \
-  --target-group-arn ${TARGET_GROUP_ARN}
+  --target-group-arn "${TARGET_GROUP_ARN}"
 
 if [ $? -ne 0 ]; then
     echo "ELB target group health check failed or timed out."
