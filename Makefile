@@ -10,34 +10,12 @@ venv/bin/activate: requirements.txt
 	. venv/bin/activate
 	touch venv/bin/activate
 
-.PHONY: smoke
-smoke:
-	@mvn clean package -DskipTests -Djib.skip=True -pl dpc-smoketest -am -ntp
 
 .PHONY: smoke/local
-smoke/local: export USE_BFD_MOCK=false
+smoke/local: export USE_BFD_MOCK=true
 smoke/local: export AUTH_DISABLED=false
-smoke/local: venv smoke start-dpc
+smoke/local: start-dpc
 	@echo "Running Smoke Tests against Local env"
-	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/local.smoke_test.yml
-
-.PHONY: smoke/remote
-smoke/remote: venv smoke
-	@echo "Running Smoke Tests against ${HOST_URL}"
-	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/remote.smoke_test.yml
-
-.PHONY: smoke/sandbox
-smoke/sandbox: venv smoke
-	@echo "Running Smoke Tests against ${HOST_URL}"
-	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/sandbox.smoke_test.yml
-
-.PHONY: smoke/prod
-smoke/prod: venv smoke
-	@echo "Running Smoke Tests against ${HOST_URL}"
-	. venv/bin/activate; pip install -Ur requirements.txt; bzt src/test/prod.smoke_test.yml
-
-.PHONY: smoke/k6
-smoke/k6:
 	docker run --rm -v $(shell pwd)/dpc-load-testing:/src -e ENVIRONMENT=local -e GOLDEN_MACAROON=${GOLDEN_MACAROON} -i grafana/k6:1.4.2 run /src/smoke-test.js
 
 # Build commands

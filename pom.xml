@@ -13,7 +13,6 @@
         <module>dpc-common</module>
         <module>dpc-bluebutton</module>
         <module>dpc-macaroons</module>
-        <module>dpc-smoketest</module>
         <module>dpc-testing</module>
     </modules>
 
