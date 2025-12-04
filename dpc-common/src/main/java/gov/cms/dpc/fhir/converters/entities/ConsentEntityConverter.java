@@ -112,6 +112,8 @@ public class ConsentEntityConverter {
         return coding.getCode();
     }
 
+    // lookahead is not supported by RE2/J, so we have to use the Java regex classes
+    // see https://github.com/google/re2/wiki/Syntax
     private static String mbiFromPatientReference(String patientRefStr) {
         String mbi = "";
         Pattern patientIdPattern = Pattern.compile("/Patient\\?identity=\\|(?<mbi>\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z][a-zA-Z0-9]\\d[a-zA-Z]{2}\\d{2})");
