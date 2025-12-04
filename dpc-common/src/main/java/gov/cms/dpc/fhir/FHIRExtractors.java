@@ -98,7 +98,7 @@ public class FHIRExtractors {
                 if(mbiPattern.matcher(identifier.getValue()).matches()) {
                     return identifier.getValue();
                 } else {
-                    logger.warn("MBI: {} for patient: {} does not match MBI format", identifier.getValue(), patient.getId());
+                    logger.warn("MBI for patient: {} does not match MBI format", patient.getId());
                     return null;
                 }
             })
