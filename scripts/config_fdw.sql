@@ -36,6 +36,9 @@ BEGIN
     EXECUTE format('GRANT USAGE ON FOREIGN DATA WRAPPER postgres_fdw TO %I',
         local_user
     );
+    EXECUTE format('GRANT USAGE ON FOREIGN SERVER dpc_attribution TO %I',
+        local_user
+    );
 END;
 $$ LANGUAGE plpgsql;
 
