@@ -2,10 +2,10 @@ package gov.cms.dpc.macaroons;
 
 import com.github.nitram509.jmacaroons.CaveatPacket;
 import com.github.nitram509.jmacaroons.MacaroonsConstants;
+import com.google.re2j.Matcher;
+import com.google.re2j.Pattern;
 
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MacaroonCondition {
     // Regex for matching key, op and value from a given caveat string
@@ -33,7 +33,7 @@ public class MacaroonCondition {
          */
         GT(">"),
         /**
-         * Verifier value is greater than or equal to øthe caveat value
+         * Verifier value is greater than or equal to the caveat value
          */
         GEQ(">=");
 
@@ -119,8 +119,7 @@ public class MacaroonCondition {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof MacaroonCondition)) return false;
-        MacaroonCondition that = (MacaroonCondition) o;
+        if (!(o instanceof MacaroonCondition that)) return false;
         return Objects.equals(key, that.key) &&
                 Objects.equals(value, that.value) &&
                 op == that.op;
