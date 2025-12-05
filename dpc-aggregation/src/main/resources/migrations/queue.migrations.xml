@@ -154,4 +154,129 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="import-provider-table" author="Mike Esposito">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*)
+                from pg_class
+                where relname = 'providers'
+                and relkind = 'f';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            IMPORT FOREIGN SCHEMA public
+            LIMIT TO (providers)
+            FROM SERVER dpc_attribution
+            INTO public;
+        </sql>
+    </changeSet>
+
+    <changeSet id="grant-permissions-on-foreign_providers" author="Mike Esposito">
+        <sql>
+            GRANT SELECT ON providers TO PUBLIC;
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-quicksight-views" author="Mike Esposito">
+        <!-- No preconditions are necessary since we can always recreate a new view on top of an old one -->
+
+        <createView viewName="unique_providers_served_all_time"
+                    replaceIfExists="true"
+                    schemaName="public">
+            select COUNT(DISTINCT(p.id)) as unique_providers_served
+            from job_queue_batch j,
+                 providers p
+            where j.status = 2
+            and j.organization_id not in ('0ab352f1-2bf1-44c4-aa7a-3004a1ffef12', '69c0d4d4-9c07-4fa8-9053-e10fb1608b48', 'c7f5247b-4c41-478c-84eb-a6e801bdb145')
+            and (p.id::text = j.provider_id or p.provider_id = j.provider_npi)
+        </createView>
+
+        <!-- Postgres weeks are Monday to Sunday, but we want Sunday to Saturday -->
+        <createView viewName="benes_requested_last_week"
+                    replaceIfExists="true"
+                    schemaName="public">
+            select SUM(ARRAY_LENGTH(STRING_TO_ARRAY(patients, ','), 1)) as benes_requested
+            from job_queue_batch
+            where patients IS NOT NULL
+            and submit_time AT TIME ZONE 'America/New_York' >= DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '8 day'
+            and submit_time AT TIME ZONE 'America/New_York' &lt; DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '1 day'
+            and organization_id not in ('0ab352f1-2bf1-44c4-aa7a-3004a1ffef12', '69c0d4d4-9c07-4fa8-9053-e10fb1608b48', 'c7f5247b-4c41-478c-84eb-a6e801bdb145')
+        </createView>
+        
+        <createView viewName="unique_benes_served_last_week"
+                    replaceIfExists="true"
+                    schemaName="public">
+            select COUNT(DISTINCT p.patients) as unique_benes_served
+            from job_queue_batch j,
+            lateral UNNEST(STRING_TO_ARRAY(j.patients, ',')) as p(patients)
+            where j.patients IS NOT NULL
+            and status = 2
+            and j.submit_time AT TIME ZONE 'America/New_York' >= DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '8 day'
+            and j.submit_time AT TIME ZONE 'America/New_York' &lt; DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '1 day'
+            and j.organization_id not in ('0ab352f1-2bf1-44c4-aa7a-3004a1ffef12', '69c0d4d4-9c07-4fa8-9053-e10fb1608b48', 'c7f5247b-4c41-478c-84eb-a6e801bdb145')
+        </createView>
+
+        <createView viewName="bulk_calls_made_last_week"
+                    replaceIfExists="true"
+                    schemaName="public">
+            SELECT COUNT(DISTINCT job_id) as bulk_calls
+            FROM job_queue_batch
+            WHERE is_bulk = true
+            and submit_time AT TIME ZONE 'America/New_York' >= DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '8 day'
+            and submit_time AT TIME ZONE 'America/New_York' &lt; DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '1 day'
+            and organization_id not in ('0ab352f1-2bf1-44c4-aa7a-3004a1ffef12', '69c0d4d4-9c07-4fa8-9053-e10fb1608b48', 'c7f5247b-4c41-478c-84eb-a6e801bdb145')
+        </createView>
+
+        <createView viewName="patient_everything_requests_last_week"
+                    replaceIfExists="true"
+                    schemaName="public">
+            select COUNT(*) as everything_requests
+            from job_queue_batch
+            where is_bulk = false
+            and submit_time AT TIME ZONE 'America/New_York' >= DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '8 day'
+            and submit_time AT TIME ZONE 'America/New_York' &lt; DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '1 day'
+            and organization_id not in ('0ab352f1-2bf1-44c4-aa7a-3004a1ffef12', '69c0d4d4-9c07-4fa8-9053-e10fb1608b48', 'c7f5247b-4c41-478c-84eb-a6e801bdb145')
+        </createView>
+
+        <createView viewName="since_requests_last_week"
+                    replaceIfExists="true"
+                    schemaName="public">
+            select COUNT(DISTINCT job_id) as since_requests
+            from job_queue_batch
+            where since IS NOT NULL
+            and submit_time AT TIME ZONE 'America/New_York' >= DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '8 day'
+            and submit_time AT TIME ZONE 'America/New_York' &lt; DATE_TRUNC('week', now() AT TIME ZONE 'America/New_York' + INTERVAL '1 day') - INTERVAL '1 day'
+            and organization_id not in ('0ab352f1-2bf1-44c4-aa7a-3004a1ffef12', '69c0d4d4-9c07-4fa8-9053-e10fb1608b48', 'c7f5247b-4c41-478c-84eb-a6e801bdb145')
+        </createView>
+    </changeSet>
+
+    <changeSet id="grant-permissions-on-quicksight-views" author="Mike Esposito">
+        <sql>
+            GRANT SELECT ON unique_providers_served_all_time TO PUBLIC;
+            GRANT SELECT ON benes_requested_last_week TO PUBLIC;
+            GRANT SELECT ON unique_benes_served_last_week TO PUBLIC;
+            GRANT SELECT ON bulk_calls_made_last_week TO PUBLIC;
+            GRANT SELECT ON patient_everything_requests_last_week TO PUBLIC;
+            GRANT SELECT ON since_requests_last_week TO PUBLIC;
+        </sql>
+    </changeSet>
+    
+    <changeSet id="create-quicksight-indexes" author="Mike Esposito">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="job_queue_batch_since_requests"/>
+                <indexExists indexName="job_queue_batch_everything_requests"/>
+            </not>
+        </preConditions>
+
+        <createIndex tableName="job_queue_batch" indexName="job_queue_batch_since_requests">
+            <column name="since"/>
+            <column name="submit_time"/>
+        </createIndex>
+        <createIndex tableName="job_queue_batch" indexName="job_queue_batch_everything_requests">
+            <column name="is_bulk"/>
+            <column name="submit_time"/>
+        </createIndex>
+    </changeSet>
+
 </databaseChangeLog>
