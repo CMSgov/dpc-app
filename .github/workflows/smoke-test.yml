@@ -84,6 +84,20 @@ jobs:
         run: |
           ./k6 run ./smoke-test.js
       - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
+        name: Slack Success
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            attachments:
+              - color: good
+                text: "Smoke test of `${{ inputs.env }}` has succeeded"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Smoke Test - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer
+      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
         name: Slack failure
         if: ${{ failure() }}
         with:
