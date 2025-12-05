@@ -332,6 +332,11 @@
                 <scope>provided</scope>
                 <type>${newrelic.agent.type}</type>
             </dependency>
+            <dependency>
+                <groupId>com.google.re2j</groupId>
+                <artifactId>re2j</artifactId>
+                <version>1.6</version>
+            </dependency>
             <!--Test dependencies-->
             <dependency>
                 <groupId>org.junit</groupId>

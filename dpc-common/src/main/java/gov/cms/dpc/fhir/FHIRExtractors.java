@@ -1,5 +1,7 @@
 package gov.cms.dpc.fhir;
 
+import com.google.re2j.Matcher;
+import com.google.re2j.Pattern;
 import gov.cms.dpc.common.entities.PatientEntity;
 import gov.cms.dpc.fhir.helpers.DPCCollectors;
 import org.apache.commons.lang3.tuple.Pair;
@@ -12,8 +14,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -98,7 +98,7 @@ public class FHIRExtractors {
                 if(mbiPattern.matcher(identifier.getValue()).matches()) {
                     return identifier.getValue();
                 } else {
-                    logger.warn("MBI: " + identifier.getValue() + " for patient: " + patient.getId() + " does not match MBI format");
+                    logger.warn("MBI for patient: {} does not match MBI format", patient.getId());
                     return null;
                 }
             })
