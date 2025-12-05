@@ -10,16 +10,53 @@ SVC_VERSION="$6" # service version
 
 # 1) Wait for ECS to certify deployment stability
 
-echo "Waiting for ECS service ${SVC_NAME}-${SVC_VERSION} to become stable..."
+echo "Waiting for ECS service ${SVC_NAME}-${SVC_VERSION} deployment to succeed..."
 
-aws ecs wait services-stable \
-  --cluster "$CLUSTER_NAME" \
-  --services "${SVC_NAME}-${SVC_VERSION}"
+MAX_ATTEMPTS=60   # 60 attempts
+SLEEP_SECONDS=10  # 10 seconds between attempts
+TOTAL_TIMEOUT=$((MAX_ATTEMPTS * SLEEP_SECONDS)) # Total time: 600 seconds (10 minutes)
 
-if [ $? -ne 0 ]; then
-    echo "ECS deployment failed or timed out. Circuit Breaker may have initiated a rollback."
+# Use a for loop to iterate a fixed number of times
+for ((i=1; i<=MAX_ATTEMPTS; i++)); do
+
+  echo "Attempt $i of $MAX_ATTEMPTS: Checking rollout state..."
+
+  # 1. Get the current rollout state of the PRIMARY deployment
+  set +e
+  ROLLOUT_STATE=$(aws ecs describe-services \
+    --cluster "$CLUSTER_NAME" \
+    --services "${SVC_NAME}-${SVC_VERSION}" \
+    --query "services[0].deployments[?status == 'PRIMARY'].rolloutState" \
+    --output text)
+  AWS_EXIT_CODE=$?
+  set -e
+
+  # --- Check Rollout State ---
+  if [ "$ROLLOUT_STATE" == "COMPLETED" ]; then
+    echo "Service deployment completed successfully."
+    break
+
+  elif [ "$ROLLOUT_STATE" == "FAILED" ]; then
+    echo "Deployment failed (rolloutState is FAILED).This was detected by the Circuit Breaker. Check ECS service events."
     exit 1
-fi
+
+  elif [ "$AWS_EXIT_CODE" -ne 0 ]; then
+    echo "Warning: AWS API call failed (Exit Code: $AWS_EXIT_CODE). Retrying in ${SLEEP_SECONDS}s..."
+
+  elif [ "$ROLLOUT_STATE" == "None" ] || -z "$ROLLOUT_STATE" ]; then
+    echo "ERROR: AWS API call succeeded (Exit Code: 0) but resource was not found (Blank Output). ECS service check failed"
+    exit 1
+
+  elif [ "$ROLLOUT_STATE" == "IN_PROGRESS" ]; then
+    echo "Status: IN_PROGRESS. Continuing to wait..."
+  fi
+
+  # Wait before the next attempt, but only if we are not on the last attempt
+  if [ $i -lt $MAX_ATTEMPTS ]; then
+    sleep "${SLEEP_SECONDS}s"
+  fi
+
+done
 
 echo "ECS service ${SVC_NAME}-${SVC_VERSION} stable"
 
