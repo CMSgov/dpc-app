@@ -32,18 +32,33 @@ Many utilities are provided by K6. See: https://jslib.k6.io/. In addition, K6 pr
 
 When importing local files, you'll need to include the file extension, e.g. `import generateDPCToken from './generate-dpc-token.js';`
 
-### Smoke Tests
+### CI tests
 
-Ensure all services are running
-```dtd
+You can run the k6 tests we use for ci separately.
+
+First, ensure the java services are running:
+```
 make docker-base
 make api
-make website
-make admin
-make portal
-make start-dpc
+make start-api
 ```
-Run make command for frontend tests
-```dtd
-make smoke/k6
+
+Run the tests from the project root directory:
+```
+docker run --rm -v $(pwd)/dpc-load-testing:/src --env-file $(pwd)/ops/config/decrypted/local.env --add-host host.docker.internal=host-gateway -e ENVIRONMENT=local -i grafana/k6 run /src/ci-app.js
+```
+
+
+
+### Smoke Tests
+
+Ensure the java images have been built (the portals will build themselves if necessary). In the project root directory:
+```
+make docker-base
+make api
+```
+
+Run make command for smoke tests in the project root directory:
+```
+make smoke/local
 ```

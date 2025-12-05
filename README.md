@@ -80,7 +80,6 @@ In addition to services, several modules are shared across components.
 |[dpc-queue](/dpc-queue)| Provides an interface for managing export jobs and batches|Java|
 |[dpc-common](/dpc-common)|Shared utilities for components|Java|
 |[dpc-testing](/dpc-testing)|Shared utilities for testing|Java|
-|[dpc-smoketest](/dpc-smoketest)|Smoke test suite|Java|
 |[engines](/engines)|Shared engines|Ruby|
 
 ## Local Development Setup
@@ -102,8 +101,6 @@ If you want to build applications locally, you'll need the following tools:
 - Java 17 and Maven (`mvn`)
 
 In addition, it's helpful to have the following installed for more specific scenarios:
-
-- Running [smoke tests](#smoke-tests): Python 3 (includes `pip`)
 - Running [postman tests](#postman-collection): Node.js (includes `npm`)
 
 ### Recommended tools
@@ -367,17 +364,9 @@ You will need to set the Accept header to `application/fhir+json` (per the FHIR 
 
 ### Smoke tests
 
-Smoke tests are provided by [Taurus](https://github.com/Blazemeter/taurus) and [JMeter](https://jmeter.apache.org).
-The tests can be run by the environment-specific Makefile commands (e.g., `make smoke/local` will run the smoke tests against the locally running Docker instances).
+Smoke tests are provided by k6.
+They can be run locally with `make smoke/local`. Errors may occur if the docker images have not been built. See the load testing [README](dpc-load-testing/README.md#smoke-tests) for more details.
 
-In order to run the tests, you'll need to ensure that `virtualenv` is installed.
-
-```bash
-pip3 install virtualenv
-```
-
-> Note: JMETER smoketests are scheduled for removal. See instructions for smoketesting via K6 [HERE](dpc-load-testing/README.md).
-> 
 ## Generating the Source Code Documentation via JavaDoc 
 ###### [`^`](#table-of-contents)
 
