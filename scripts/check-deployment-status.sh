@@ -15,6 +15,7 @@ echo "Waiting for ECS service ${SVC_NAME}-${SVC_VERSION} deployment to succeed..
 MAX_ATTEMPTS=60   # 60 attempts
 SLEEP_SECONDS=10  # 10 seconds between attempts
 TOTAL_TIMEOUT=$((MAX_ATTEMPTS * SLEEP_SECONDS)) # Total time: 600 seconds (10 minutes)
+DEPLOYMENT_STATUS="TIMEOUT" # Initialize status flag for post-loop check
 
 # Use a for loop to iterate a fixed number of times
 for ((i=1; i<=MAX_ATTEMPTS; i++)); do
@@ -34,18 +35,21 @@ for ((i=1; i<=MAX_ATTEMPTS; i++)); do
   # --- Check Rollout State ---
   if [ "$ROLLOUT_STATE" == "COMPLETED" ]; then
     echo "Service deployment completed successfully."
+    DEPLOYMENT_STATUS="SUCCESS"
     break
 
   elif [ "$ROLLOUT_STATE" == "FAILED" ]; then
     echo "Deployment failed (rolloutState is FAILED).This was detected by the Circuit Breaker. Check ECS service events."
-    exit 1
+    DEPLOYMENT_STATUS="FAILURE"
+    break
 
   elif [ "$AWS_EXIT_CODE" -ne 0 ]; then
     echo "Warning: AWS API call failed (Exit Code: $AWS_EXIT_CODE). Retrying in ${SLEEP_SECONDS}s..."
 
   elif [ "$ROLLOUT_STATE" == "None" ] || -z "$ROLLOUT_STATE" ]; then
     echo "ERROR: AWS API call succeeded (Exit Code: 0) but resource was not found (Blank Output). ECS service check failed"
-    exit 1
+    DEPLOYMENT_STATUS="FAILURE"
+    break
 
   elif [ "$ROLLOUT_STATE" == "IN_PROGRESS" ]; then
     echo "Status: IN_PROGRESS. Continuing to wait..."
@@ -57,6 +61,17 @@ for ((i=1; i<=MAX_ATTEMPTS; i++)); do
   fi
 
 done
+
+# Check the deployment status flag set inside the loop.
+if [ "$DEPLOYMENT_STATUS" == "FAILURE" ]; then
+    exit 1 # Terminate the entire script if a terminal failure was detected.
+fi
+
+if [ "$DEPLOYMENT_STATUS" == "TIMEOUT" ]; then
+    # If the status is still TIMEOUT, it means the loop completed 60 attempts without breaking.
+    echo "TIMEOUT ERROR: Deployment did not stabilize or failed within ${TOTAL_TIMEOUT} seconds."
+    exit 1
+fi
 
 echo "ECS service ${SVC_NAME}-${SVC_VERSION} stable"
 
