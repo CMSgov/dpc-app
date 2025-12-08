@@ -228,6 +228,9 @@
                             <DB_MIGRATION>1</DB_MIGRATION>
                         </environment>
                         <entrypoint>/entrypoint.sh</entrypoint>
+                        <volumes>
+                            <volume>/jacoco-report</volume>
+                        </volumes>
                     </container>
                     <extraDirectories>
                         <paths>
@@ -239,6 +242,10 @@
                             <permission>
                                 <file>/entrypoint.sh</file>
                                 <mode>755</mode>
+                            </permission>
+                            <permission>
+                                <file>/jacoco-report</file>
+                                <mode>777</mode>
                             </permission>
                         </permissions>
                     </extraDirectories>
