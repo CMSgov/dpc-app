@@ -46,7 +46,7 @@ for ((i=1; i<=MAX_ATTEMPTS; i++)); do
   elif [ "$AWS_EXIT_CODE" -ne 0 ]; then
     echo "Warning: AWS API call failed (Exit Code: $AWS_EXIT_CODE). Retrying in ${SLEEP_SECONDS}s..."
 
-  elif [ "$ROLLOUT_STATE" == "None" ] || -z "$ROLLOUT_STATE" ]; then
+  elif [[ "$ROLLOUT_STATE" == "None" ]] || [[ -z "$ROLLOUT_STATE" ]]; then
     echo "ERROR: AWS API call succeeded (Exit Code: 0) but resource was not found (Blank Output). ECS service check failed"
     DEPLOYMENT_STATUS="FAILURE"
     break
