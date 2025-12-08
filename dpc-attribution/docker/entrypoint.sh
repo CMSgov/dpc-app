@@ -2,6 +2,10 @@
 
 set -e
 
+# Check permissions on jacoco-report/jacoco-it.exec
+eval ls -l /
+eval ls -l /jacocoReport
+
 if [ -n "$JACOCO" ]; then
   JACOCO="-javaagent:/org.jacoco.agent-runtime.jar=destfile=/jacoco-report/jacoco-it.exec"
 else
