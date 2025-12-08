@@ -6,7 +6,7 @@ RUN  apk update && apk add --no-cache aws-cli && apk add --no-cache curl \
 
 # Install AWS RDS cert bundle
 && mkdir /awscert \
-&& wget -P /awscert https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+&& wget -P /awscert https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem \
 
 # Make jacoco dir accessible
 && chmod -R 777 /jacoco-report
