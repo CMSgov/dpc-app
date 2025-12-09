@@ -14,6 +14,7 @@ set +o allexport
 
 echo "debug dpc-test before remove ++++++"
 echo "${DIR}"
+pwd
 ls -l "$DIR"
 ls -l ./jacocoReport
 ls -l ./jacocoReport/dpc-attribution
@@ -29,8 +30,8 @@ mkdir "${DIR}"/jacocoReport
 mkdir -p "${DIR}"/jacocoReport/dpc-api
 mkdir -p "${DIR}"/jacocoReport/dpc-attribution
 mkdir -p "${DIR}"/jacocoReport/dpc-aggregation
-chown -R 65334:65334 "${DIR}"/jacocoReport
-chmod 777 "${DIR}"/jacocoReport
+chown -R 65534:65534 "${DIR}"/jacocoReport
+chmod -R 777 "${DIR}"/jacocoReport
 
 echo "debug dpc-test after recreate ++++++"
 ls -l "$DIR"
