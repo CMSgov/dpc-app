@@ -98,8 +98,7 @@ function verifyEmailConfirmation() {
   if (valid && emailConfirmation.value != email.value) {
     valid = false;
     renderError(emailConfirmation, errorFieldId, "Email doesn't match");
-  }
-  if (valid && !emailRegex.test(emailConfirmation.value)) {
+  } else if (valid && !emailRegex.test(emailConfirmation.value)) {
     valid = false;
     renderError(emailConfirmation, errorFieldId, "Invalid email format");
   }
