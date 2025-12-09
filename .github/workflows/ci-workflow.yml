@@ -77,6 +77,8 @@ jobs:
           ls -l /jacocoReport
           id -u
           id -g
+          echo "${{github.workspace}}"
+          ls -l ${{github.workspace}}
           echo "debug workflow -----"
       - name: "API Build"
         id: ci-app
