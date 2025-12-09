@@ -17,11 +17,13 @@ if [ -d "${DIR}/jacocoReport" ]; then
     rm -r "${DIR}/jacocoReport"
 fi
 
-# Create jacocoReport and make accessible
-mkdir -p "${DIR}"/jacocoReport/dpc-api
-mkdir -p "${DIR}"/jacocoReport/dpc-attribution
-mkdir -p "${DIR}"/jacocoReport/dpc-aggregation
-chmod -R 777 "${DIR}"/jacocoReport
+# Create jacocoReport and make accessible for writing output from containers if we're running tests
+if [ "$ENV" = 'github-ci' ] || [ "$ENV" = 'local' ]; then
+  mkdir -p "${DIR}"/jacocoReport/dpc-api
+  mkdir -p "${DIR}"/jacocoReport/dpc-attribution
+  mkdir -p "${DIR}"/jacocoReport/dpc-aggregation
+  chmod -R 777 "${DIR}"/jacocoReport
+fi
 
 function _finally {
   # don't shut it down if running on ci
@@ -60,6 +62,7 @@ if [ -n "$REPORT_COVERAGE" ]; then
 fi
 
 docker compose -p start-v1-app down
+
 USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
 
 # Run the integration tests
