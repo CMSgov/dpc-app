@@ -240,10 +240,6 @@
                                 <file>/entrypoint.sh</file>
                                 <mode>755</mode>
                             </permission>
-                            <permission>
-                                <file>/jacoco-report</file>
-                                <mode>777</mode>
-                            </permission>
                         </permissions>
                     </extraDirectories>
                 </configuration>

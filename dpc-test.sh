@@ -18,17 +18,10 @@ if [ -d "${DIR}/jacocoReport" ]; then
 fi
 
 # Create jacocoReport and make accessible
-#mkdir "${DIR}"/jacocoReport
 mkdir -p "${DIR}"/jacocoReport/dpc-api
 mkdir -p "${DIR}"/jacocoReport/dpc-attribution
 mkdir -p "${DIR}"/jacocoReport/dpc-aggregation
-chown -R nobody:nobody "${DIR}"/jacocoReport
-#chmod -R 777 "${DIR}"/jacocoReport
-
-echo "debug dpc-test after recreate ++++++"
-ls -l "$DIR"
-ls -l "${DIR}"/jacocoReport
-echo "debug dpc-test -----"
+chmod -R 777 "${DIR}"/jacocoReport
 
 function _finally {
   # don't shut it down if running on ci
