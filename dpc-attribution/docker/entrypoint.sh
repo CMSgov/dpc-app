@@ -8,6 +8,7 @@ whoami
 id -u
 id -g
 ls -l /
+echo "jacoco-report dir"
 ls -l /jacoco-report
 echo "debug-----"
 
