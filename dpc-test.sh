@@ -24,7 +24,11 @@ if [ -d "${DIR}/jacocoReport" ]; then
     rm -r "${DIR}/jacocoReport"
 fi
 
-echo "debug dpc-test before remove ++++++"
+# Create jacocoReport and make accessible
+mkdir "${DIR}"/jacocoReport
+chmod 777 "${DIR}"/jacocoReport
+
+echo "debug dpc-test after recreate ++++++"
 ls -l "$DIR"
 echo "debug dpc-test -----"
 
