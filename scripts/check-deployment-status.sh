@@ -29,7 +29,6 @@ for ((i=1; i<=MAX_ATTEMPTS; i++)); do
     --services "${SVC_NAME}-${SVC_VERSION}" \
     --query "services[0].deployments[?status == 'PRIMARY'].rolloutState" \
     --output text)
-  AWS_EXIT_CODE=$?
   set -e
 
   # --- Check Rollout State ---
@@ -39,15 +38,12 @@ for ((i=1; i<=MAX_ATTEMPTS; i++)); do
     break
 
   elif [ "$ROLLOUT_STATE" == "FAILED" ]; then
-    echo "Deployment failed (rolloutState is FAILED).This was detected by the Circuit Breaker. Check ECS service events."
+    echo "Deployment failed (rolloutState is FAILED).This was detected by the deployment Circuit Breaker. Check ECS service events for more details."
     DEPLOYMENT_STATUS="FAILURE"
     break
 
-  elif [ "$AWS_EXIT_CODE" -ne 0 ]; then
-    echo "Warning: AWS API call failed (Exit Code: $AWS_EXIT_CODE). Retrying in ${SLEEP_SECONDS}s..."
-
   elif [[ "$ROLLOUT_STATE" == "None" ]] || [[ -z "$ROLLOUT_STATE" ]]; then
-    echo "ERROR: AWS API call succeeded (Exit Code: 0) but resource was not found (Blank Output). ECS service check failed"
+    echo "ERROR: AWS API call to ECS describe services failed."
     DEPLOYMENT_STATUS="FAILURE"
     break
 
