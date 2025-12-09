@@ -58,7 +58,7 @@ RSpec.describe Page::PublicKey::NewKeyComponent, type: :component do
         let(:errors) { { label: 'Bad Label' } }
         it 'should show error' do
           bad_label = <<~HTML
-            <p style="color: #b50909;">Bad Label</p>
+            <p id="label_error_msg" style="color: #b50909;">Bad Label</p>
             <input type="text" name="label" id="label" maxlength="25" class="usa-input usa-input--error" />
           HTML
           is_expected.to include(normalize_space(bad_label))

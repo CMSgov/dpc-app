@@ -73,7 +73,7 @@ RSpec.describe Core::Form::TextInputComponent, type: :component do
         <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="attr">Some Label</label>
-            <p style="color: #b50909;">Bad Input</p>
+            <p id="attr_error_msg" style="color: #b50909;">Bad Input</p>
             <input type="text" name="attr" id="attr" value="" class="usa-input usa-input--error" />
            </div>
         HTML

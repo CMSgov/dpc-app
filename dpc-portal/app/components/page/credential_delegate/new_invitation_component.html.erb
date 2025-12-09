@@ -24,23 +24,21 @@
           hint: 'For example, Jose, Darren, or Mai',
           default: cd_invite.invited_given_name,
           error_msg: cd_invite.errors[:invited_given_name]&.first,
-          input_options: { maxlength: 25, required: :required })) %>
+          input_options: { maxlength: 25 })) %>
       <%= render(Core::Form::TextInputComponent.new(label: 'Last or family name',
           attribute: :invited_family_name,
           hint: 'For example, Martinez Gonzalez, Gu, or Smith',
           default: cd_invite.invited_family_name,
           error_msg: cd_invite.errors[:invited_family_name]&.first,
-          input_options: { maxlength: 25, required: :required })) %>
-      <%= render(Core::Form::EmailInputComponent.new(label: 'Email',
+          input_options: { maxlength: 25 })) %>
+      <%= render(Core::Form::TextInputComponent.new(label: 'Email',
           attribute: :invited_email,
           error_msg: cd_invite.errors[:invited_email]&.first,
-          default: cd_invite.invited_email,
-          input_options: { required: :required })) %>
-      <%= render(Core::Form::EmailInputComponent.new(label: 'Confirm email',
+          default: cd_invite.invited_email)) %>
+      <%= render(Core::Form::TextInputComponent.new(label: 'Confirm email',
           attribute: :invited_email_confirmation,
           error_msg: cd_invite.errors[:invited_email_confirmation]&.first,
-          default: cd_invite.invited_email_confirmation,
-          input_options: { required: :required })) %>
+          default: cd_invite.invited_email_confirmation)) %>
       <%= link_to 'Go Back', organization_path(organization.path_id), class: ['usa-button', 'usa-button--outline'] %>
       <%= submit_tag('Send invite', class: "usa-button") %>
     <% end %>
@@ -57,24 +55,97 @@
 </div>
 
 <%= javascript_tag do %>
-document.getElementById('cd-form').addEventListener('submit', (event) => {
-  if (event.submitter == document.getElementById('modal-submitter')) {
+function verifyNotBlank(formField, errorElementId) {
+  var errorElement = document.getElementById(errorElementId);
+  if (formField.value.trim()) {
+    formField.classList.remove("usa-input--error");
+    if (errorElement) {
+      errorElement.remove();
+    }
+    return true;
+  } else {
+    renderError(formField, errorElementId, "Can't be blank");
+    return false;
+  }
+}
+
+function renderError(formField, errorElementId, errorMsg) {
+  var errorElement = document.getElementById(errorElementId);
+  if (!errorElement) {
+    errorElement = document.createElement("p");
+    errorElement.classList.add("usa-error-message");
+    errorElement.id = errorElementId;
+    formField.insertAdjacentElement("beforebegin", errorElement);
+  }
+  errorElement.textContent = errorMsg;
+  formField.classList.add("usa-input--error");
+}
+
+const emailRegex = /[^ ]+@[^ ]+\.[^ ]+/;
+function verifyEmail() {
+  const errorFieldId = "invited_email_error_msg";
+  var valid = verifyNotBlank(email, errorFieldId);
+  if (valid && !emailRegex.test(email.value)) {
+    valid = false;
+    renderError(email, errorFieldId, "Invalid email format");
+  }
+  return valid;
+}
+
+function verifyEmailConfirmation() {
+  const errorFieldId = "invited_email_confirmation_error_msg";
+  var valid = verifyNotBlank(emailConfirmation, errorFieldId);
+  if (valid && emailConfirmation.value != email.value) {
+    valid = false;
+    renderError(emailConfirmation, errorFieldId, "Email doesn't match");
+  }
+  if (valid && !emailRegex.test(emailConfirmation.value)) {
+    valid = false;
+    renderError(emailConfirmation, errorFieldId, "Invalid email format");
+  }
+  return valid;
+}
+
+const givenName  = document.getElementById("invited_given_name");
+givenName.addEventListener("blur", () => {
+  verifyNotBlank(givenName, "invited_given_name_error_msg");
+});
+
+const familyName  = document.getElementById("invited_family_name");
+familyName.addEventListener("blur", () => {
+  verifyNotBlank(familyName, "invited_family_name_error_msg");
+});
+
+const email  = document.getElementById("invited_email");
+email.addEventListener("blur", () => {
+  verifyEmail();
+});
+
+const emailConfirmation  = document.getElementById("invited_email_confirmation");
+emailConfirmation.addEventListener("blur", () => {
+  verifyEmailConfirmation();
+});
+
+document.getElementById("cd-form").addEventListener("submit", (event) => {
+  if (event.submitter == document.getElementById("modal-submitter")) {
     return true;
   }
-  event.preventDefault()
-  const confirmField = document.getElementById("invited_email_confirmation");
-  if (confirmField.value == document.getElementById("invited_email").value) {
+
+  event.preventDefault();
+
+  var valid = verifyNotBlank(givenName, "invited_given_name_error_msg");
+  if (!verifyNotBlank(familyName, "invited_family_name_error_msg")) {
+    valid = false;
+  }
+  if (!verifyEmail()) {
+    valid = false;
+  }
+  if (!verifyEmailConfirmation()) {
+    valid = false;
+  }
+
+  if (valid) {
     document.getElementById("modal-opener").click();
-  } else {
-    var errorMsg = document.getElementById("confirmErrorMsg");
-    if (!errorMsg) {
-      errorMsg = document.createElement("p");
-      errorMsg.classList.add("usa-error-message");
-      errorMsg.textContent = "doesn't match invited email";
-      errorMsg.id = "confirmErrorMsg";
-      confirmField.insertAdjacentElement("beforebegin", errorMsg);
-    }
-    confirmField.focus();
-    confirmField.classList.add("usa-input--error");
-  }})
+  }
+});
 <% end %>
