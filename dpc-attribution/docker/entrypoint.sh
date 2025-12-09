@@ -3,8 +3,10 @@
 set -e
 
 # Check permissions on jacoco-report/jacoco-it.exec
-echo "debug+++++"
+echo "debug entry point +++++"
 whoami
+id -u
+id -g
 ls -l /
 ls -l /jacoco-report
 echo "debug-----"

@@ -55,6 +55,14 @@ fi
 
 docker compose -p start-v1-app down
 
+echo "debug dpc-test +++++"
+whoami
+id -u
+id -g
+ls -l /
+ls -l /jacoco-report
+echo "debug dpc-test -----"
+
 USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
 
 # Run the integration tests

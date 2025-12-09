@@ -71,8 +71,12 @@ jobs:
           mkdir -p /jacocoReport/dpc-attribution
           mkdir -p /jacocoReport/dpc-aggregation
           sudo chmod -R 777 /jacocoReport
+          echo "debug workflow +++++"
           ls -l /
           ls -l /jacocoReport
+          id -u
+          id -g
+          echo "debug workflow -----"
       - name: "API Build"
         id: ci-app
         run: |
