@@ -12,10 +12,21 @@ set -o allexport
 [[ -f ${DIR}/ops/config/decrypted/local.env ]] && source ${DIR}/ops/config/decrypted/local.env
 set +o allexport
 
+echo "debug dpc-test before remove ++++++"
+echo "${DIR}"
+ls -l "$DIR"
+ls -l ./jacocoReport
+ls -l ./jacocoReport/dpc-attribution
+echo "debug dpc-test -----"
+
 # Remove jacocoReport directory
 if [ -d "${DIR}/jacocoReport" ]; then
     rm -r "${DIR}/jacocoReport"
 fi
+
+echo "debug dpc-test before remove ++++++"
+ls -l "$DIR"
+echo "debug dpc-test -----"
 
 function _finally {
   # don't shut it down if running on ci
