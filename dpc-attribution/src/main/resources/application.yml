@@ -42,9 +42,6 @@ server:
             version: ${APP_VERSION:-"unknown_version"}
             application: ${APPLICATION:-"dpc-attribution"}
         filterFactories:
-          - type: uri
-            uris:
-              - "/v1/version"
           - type: successful-healthcheck
 
 logging:
@@ -57,9 +54,6 @@ logging:
           secrets:
             - ATTRIBUTION_DB_PASS
             - NEW_RELIC_LICENSE_KEY
-        - type: uri
-          uris:
-            - "/v1/version"
       timeZone: UTC
       layout:
         type: json-dpc
@@ -81,7 +75,7 @@ logging:
     # Turn this on to verify updates/inserts are getting batched
     #"org.hibernate.engine.jdbc.batch.internal.BatchingBatch": DEBUG
     "gov.cms.dpc.api.auth": INFO
-    "gov.cms.dpc.common.logging.filters": INFO
+    "gov.cms.dpc.common.logging.filters": WARN
 
 expirationThreshold: 90 # In days
 migrationEnabled: true
