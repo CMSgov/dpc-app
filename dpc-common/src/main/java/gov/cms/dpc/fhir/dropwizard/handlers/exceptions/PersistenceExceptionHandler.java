@@ -1,5 +1,7 @@
 package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
 
+import com.google.re2j.Matcher;
+import com.google.re2j.Pattern;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import jakarta.inject.Inject;
 import jakarta.persistence.PersistenceException;
@@ -16,8 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.BatchUpdateException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Custom exception handler for {@link PersistenceException} handling.
