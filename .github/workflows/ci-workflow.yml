@@ -65,24 +65,6 @@ jobs:
           curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-      - name: Create Jacoco dir
-        run: |
-          mkdir -p ${{github.workspace}}/jacocoReport/dpc-api
-          mkdir -p ${{github.workspace}}/jacocoReport/dpc-attribution
-          mkdir -p ${{github.workspace}}/jacocoReport/dpc-aggregation
-          touch ${{github.workspace}}/jacocoReport/dpc-api/api.test
-          touch ${{github.workspace}}/jacocoReport/dpc-attribution/attribution.test
-          touch ${{github.workspace}}/jacocoReport/dpc-aggregation/aggregation.test
-          sudo chmod -R 777 ${{github.workspace}}/jacocoReport
-          sudo chown -R 65534:65534 ${{github.workspace}}/jacocoReport
-          echo "debug workflow +++++"
-          id -u
-          id -g
-          echo "${{github.workspace}}"
-          ls -l ${{github.workspace}}
-          ls -l ${{github.workspace}}/jacocoReport
-          ls -l ${{github.workspace}}/jacocoReport/dpc-attribution
-          echo "debug workflow -----"
       - name: "API Build"
         id: ci-app
         run: |

@@ -12,26 +12,18 @@ set -o allexport
 [[ -f ${DIR}/ops/config/decrypted/local.env ]] && source ${DIR}/ops/config/decrypted/local.env
 set +o allexport
 
-echo "debug dpc-test before remove ++++++"
-echo "${DIR}"
-pwd
-ls -l "$DIR"
-ls -l ./jacocoReport
-ls -l ./jacocoReport/dpc-attribution
-echo "debug dpc-test -----"
-
 # Remove jacocoReport directory
 if [ -d "${DIR}/jacocoReport" ]; then
     rm -r "${DIR}/jacocoReport"
 fi
 
 # Create jacocoReport and make accessible
-mkdir "${DIR}"/jacocoReport
+#mkdir "${DIR}"/jacocoReport
 mkdir -p "${DIR}"/jacocoReport/dpc-api
 mkdir -p "${DIR}"/jacocoReport/dpc-attribution
 mkdir -p "${DIR}"/jacocoReport/dpc-aggregation
-chown -R 65534:65534 "${DIR}"/jacocoReport
-chmod -R 777 "${DIR}"/jacocoReport
+chown -R nobody:nobody "${DIR}"/jacocoReport
+#chmod -R 777 "${DIR}"/jacocoReport
 
 echo "debug dpc-test after recreate ++++++"
 ls -l "$DIR"

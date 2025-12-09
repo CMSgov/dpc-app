@@ -2,16 +2,6 @@
 
 set -e
 
-# Check permissions on jacoco-report/jacoco-it.exec
-echo "debug entry point +++++"
-whoami
-id -u
-id -g
-ls -l /
-echo "jacoco-report dir"
-ls -l /jacoco-report
-echo "debug-----"
-
 if [ -n "$JACOCO" ]; then
   JACOCO="-javaagent:/org.jacoco.agent-runtime.jar=destfile=/jacoco-report/jacoco-it.exec"
 else
