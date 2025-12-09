@@ -70,8 +70,6 @@ jobs:
           mkdir -p ${{github.workspace}}/jacocoReport
           sudo chmod -R 777 ${{github.workspace}}/jacocoReport
           echo "debug workflow +++++"
-          ls -l /
-          ls -l /jacocoReport
           id -u
           id -g
           echo "${{github.workspace}}"
