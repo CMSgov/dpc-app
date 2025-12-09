@@ -71,6 +71,7 @@ jobs:
           mkdir -p /jacocoReport/dpc-attribution
           mkdir -p /jacocoReport/dpc-aggregation
           sudo chmod -R 777 /jacocoReport
+          sudo chown -R 65534:65534 /jacocoReport
           echo "debug workflow +++++"
           ls -l /
           ls -l /jacocoReport

@@ -60,7 +60,7 @@ whoami
 id -u
 id -g
 ls -l /
-ls -l /jacoco-report
+ls -l /jacocoReport
 echo "debug dpc-test -----"
 
 USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
