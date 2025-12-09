@@ -26,10 +26,15 @@ fi
 
 # Create jacocoReport and make accessible
 mkdir "${DIR}"/jacocoReport
+mkdir -p "${DIR}"/jacocoReport/dpc-api
+mkdir -p "${DIR}"/jacocoReport/dpc-attribution
+mkdir -p "${DIR}"/jacocoReport/dpc-aggregation
+chown -R 65334:65334 "${DIR}"/jacocoReport
 chmod 777 "${DIR}"/jacocoReport
 
 echo "debug dpc-test after recreate ++++++"
 ls -l "$DIR"
+ls -l "${DIR}"/jacocoReport
 echo "debug dpc-test -----"
 
 function _finally {
