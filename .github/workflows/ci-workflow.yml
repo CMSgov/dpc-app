@@ -67,7 +67,12 @@ jobs:
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
       - name: Create of Jacoco dir
         run: |
-          mkdir -p ${{github.workspace}}/jacocoReport
+          mkdir -p ${{github.workspace}}/jacocoReport/dpc-api
+          mkdir -p ${{github.workspace}}/jacocoReport/dpc-attribution
+          mkdir -p ${{github.workspace}}/jacocoReport/dpc-aggregation
+          touch ${{github.workspace}}/jacocoReport/dpc-api/api.test
+          touch ${{github.workspace}}/jacocoReport/dpc-attribution/attribution.test
+          touch ${{github.workspace}}/jacocoReport/dpc-aggregation/aggregation.test
           sudo chmod -R 777 ${{github.workspace}}/jacocoReport
           echo "debug workflow +++++"
           id -u
