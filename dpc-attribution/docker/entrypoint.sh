@@ -50,4 +50,5 @@ if [ -d "/tmp" ]; then chown nobody:nobody /tmp; fi
 if [ -d "/newrelic/logs" ]; then chown nobody:nobody /newrelic/logs; fi
 
 echo "Running server via entrypoint as nobody!"
-exec sudo -E -u nobody ${CMDLINE} "$@" ${CONF_FILE}
+# Note: -E preserves "most" env variables, but not all.  Ones deemed sensitive, like ENV need to be passed explicitly.
+exec sudo -E ENV=$ENV -u nobody ${CMDLINE} "$@" ${CONF_FILE}
