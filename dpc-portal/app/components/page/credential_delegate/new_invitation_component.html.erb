@@ -56,7 +56,7 @@
 
 <%= javascript_tag do %>
 function verifyNotBlank(formField, errorElementId) {
-  let errorElement = document.getElementById(errorElementId);
+  var errorElement = document.getElementById(errorElementId);
   if (formField.value.trim()) {
     formField.classList.remove("usa-input--error");
     if (errorElement) {
@@ -70,7 +70,7 @@ function verifyNotBlank(formField, errorElementId) {
 }
 
 function renderError(formField, errorElementId, errorMsg) {
-  let errorElement = document.getElementById(errorElementId);
+  var errorElement = document.getElementById(errorElementId);
   if (!errorElement) {
     errorElement = document.createElement("p");
     errorElement.classList.add("usa-error-message");
@@ -81,10 +81,10 @@ function renderError(formField, errorElementId, errorMsg) {
   formField.classList.add("usa-input--error");
 }
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const emailRegex = /[^ ]+@[^ ]+\.[^ ]+/;
 function verifyEmail() {
   const errorFieldId = "invited_email_error_msg";
-  let valid = verifyNotBlank(email, errorFieldId);
+  var valid = verifyNotBlank(email, errorFieldId);
   if (valid && !emailRegex.test(email.value)) {
     valid = false;
     renderError(email, errorFieldId, "Invalid email format");
@@ -94,7 +94,7 @@ function verifyEmail() {
 
 function verifyEmailConfirmation() {
   const errorFieldId = "invited_email_confirmation_error_msg";
-  let valid = verifyNotBlank(emailConfirmation, errorFieldId);
+  var valid = verifyNotBlank(emailConfirmation, errorFieldId);
   if (valid && emailConfirmation.value != email.value) {
     valid = false;
     renderError(emailConfirmation, errorFieldId, "Email doesn't match");
@@ -132,7 +132,7 @@ document.getElementById("cd-form").addEventListener("submit", (event) => {
 
   event.preventDefault();
 
-  let valid = verifyNotBlank(givenName, "invited_given_name_error_msg");
+  var valid = verifyNotBlank(givenName, "invited_given_name_error_msg");
   if (!verifyNotBlank(familyName, "invited_family_name_error_msg")) {
     valid = false;
   }
