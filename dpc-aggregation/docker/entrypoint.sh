@@ -11,6 +11,11 @@ bootstrap_config() {
   aws s3 sync "s3://$bucket" config/
 }
 
+#Debug
+echo "debug entry point +++++"
+ls -l
+echo "debug entry point -----"
+
 if [ -n "$JACOCO" ]; then
   JACOCO="-javaagent:/org.jacoco.agent-runtime.jar=destfile=/jacoco-report/jacoco-it.exec"
 else

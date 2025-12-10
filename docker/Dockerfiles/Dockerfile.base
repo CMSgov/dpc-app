@@ -6,7 +6,13 @@ RUN  apk update && apk add --no-cache aws-cli && apk add --no-cache curl \
 
 # Install AWS RDS cert bundle
 && mkdir /awscert \
-&& wget -P /awscert https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+&& wget -P /awscert https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem \
+
+# Make sure volumes in our persisted environments are readable
+&& if [ -d "/app/data" ]; then chown nobody:nobody /app/data; fi \
+&& if [ -d "/config" ]; then chown nobody:nobody /config; fi \
+&& if [ -d "/tmp" ]; then chown nobody:nobody /tmp; fi \
+&& if [ -d "/newrelic/logs" ]; then chown nobody:nobody /newrelic/logs; fi
 
 # Switch to nobody user with minimal permissions
 USER nobody
