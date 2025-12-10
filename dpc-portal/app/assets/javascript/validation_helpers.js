@@ -24,7 +24,7 @@ function renderError(formField, errorElementId, errorMsg) {
   formField.classList.add("usa-input--error");
 }
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const emailRegex = /^[^\s@]{1,255}@[^\s@]{1,255}\.[^\s@]{1,255}$/;
 function verifyEmailFormat(formField, errorElementId) {
   let valid = emailRegex.test(email.value);
   if (!valid) {
