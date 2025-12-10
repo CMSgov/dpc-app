@@ -55,7 +55,7 @@ fi
 
 CMDLINE="java ${CONF_FLAGS} ${DEBUG_FLAGS} ${JACOCO} ${NR_AGENT} ${JAVA_CLASSES}"
 
-# Make sure volumes in our persisted environments are readable by nobody
+# Make sure volumes in our persisted environments are writeable by nobody
 if [ -d "/app/data" ]; then chown nobody:nobody /app/data; fi
 if [ -d "/config" ]; then chown nobody:nobody /config; fi
 if [ -d "/tmp" ]; then chown nobody:nobody /tmp; fi
