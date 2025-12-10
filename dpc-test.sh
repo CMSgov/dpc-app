@@ -23,7 +23,6 @@ if [ "$ENV" = 'github-ci' ] || [ "$ENV" = 'local' ]; then
   mkdir -p "${DIR}"/jacocoReport/dpc-attribution
   mkdir -p "${DIR}"/jacocoReport/dpc-aggregation
   chown -R nobody:nobody "${DIR}"/jacocoReport
-  #chmod -R 777 "${DIR}"/jacocoReport
 fi
 
 function _finally {

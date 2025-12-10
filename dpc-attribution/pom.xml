@@ -240,14 +240,6 @@
                                 <file>/entrypoint.sh</file>
                                 <mode>755</mode>
                             </permission>
-                            <permission>
-                                <file>/tmp</file>
-                                <mode>777</mode>
-                            </permission>
-                            <permission>
-                                <file>/newrelic/logs</file>
-                                <mode>777</mode>
-                            </permission>
                         </permissions>
                     </extraDirectories>
                 </configuration>

@@ -45,5 +45,9 @@ if [ -n "$SEED" ]; then
   eval java ${JVM_FLAGS} ${JAVA_CLASSES} seed ${CONF_FILE}
 fi
 
-echo "Running server via entrypoint!"
-exec ${CMDLINE} "$@" ${CONF_FILE}
+# Make sure volumes in our persisted environments are readable by nobody
+if [ -d "/tmp" ]; then chown nobody:nobody /tmp; fi
+if [ -d "/newrelic/logs" ]; then chown nobody:nobody /newrelic/logs; fi
+
+echo "Running server via entrypoint as nobody!"
+exec sudo -E -u nobody ${CMDLINE} "$@" ${CONF_FILE}

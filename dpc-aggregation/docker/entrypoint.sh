@@ -11,11 +11,6 @@ bootstrap_config() {
   aws s3 sync "s3://$bucket" config/
 }
 
-#Debug
-echo "debug entry point +++++"
-ls -l
-echo "debug entry point -----"
-
 if [ -n "$JACOCO" ]; then
   JACOCO="-javaagent:/org.jacoco.agent-runtime.jar=destfile=/jacoco-report/jacoco-it.exec"
 else
@@ -65,5 +60,11 @@ fi
 
 CMDLINE="java ${DEBUG_FLAGS} ${JACOCO} ${NR_AGENT} ${JAVA_CLASSES}"
 
-echo "Running server via entrypoint!"
-exec ${CMDLINE} "$@" ${CONF_FILE}
+# Make sure volumes in our persisted environments are readable by nobody
+if [ -d "/app/data" ]; then chown nobody:nobody /app/data; fi
+if [ -d "/config" ]; then chown nobody:nobody /config; fi
+if [ -d "/tmp" ]; then chown nobody:nobody /tmp; fi
+if [ -d "/newrelic/logs" ]; then chown nobody:nobody /newrelic/logs; fi
+
+echo "Running server via entrypoint as nobody user!"
+exec sudo -E -u nobody ${CMDLINE} "$@" ${CONF_FILE}
