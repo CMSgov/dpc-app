@@ -1,5 +1,5 @@
 function verifyNotBlank(formField, errorElementId) {
-  var errorElement = document.getElementById(errorElementId);
+  let errorElement = document.getElementById(errorElementId);
   if (formField.value.trim()) {
     formField.classList.remove("usa-input--error");
     if (errorElement) {
@@ -13,7 +13,7 @@ function verifyNotBlank(formField, errorElementId) {
 }
 
 function renderError(formField, errorElementId, errorMsg) {
-  var errorElement = document.getElementById(errorElementId);
+  let errorElement = document.getElementById(errorElementId);
   if (!errorElement) {
     errorElement = document.createElement("p");
     errorElement.classList.add("usa-error-message");
@@ -26,7 +26,7 @@ function renderError(formField, errorElementId, errorMsg) {
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function verifyEmailFormat(formField, errorElementId) {
-  var valid = emailRegex.test(email.value);
+  let valid = emailRegex.test(email.value);
   if (!valid) {
     renderError(formField, errorElementId, "Invalid email format");
   }

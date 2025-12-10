@@ -1,6 +1,6 @@
 function verifyEmail() {
   const errorFieldId = "invited_email_error_msg";
-  var valid = verifyNotBlank(email, errorFieldId);
+  let valid = verifyNotBlank(email, errorFieldId);
   if (valid) {
     valid = verifyEmailFormat(email, errorFieldId);
   }
@@ -9,7 +9,7 @@ function verifyEmail() {
 
 function verifyEmailConfirmation() {
   const errorFieldId = "invited_email_confirmation_error_msg";
-  var valid = verifyNotBlank(emailConfirmation, errorFieldId);
+  let valid = verifyNotBlank(emailConfirmation, errorFieldId);
   if (valid && emailConfirmation.value != email.value) {
     valid = false;
     renderError(emailConfirmation, errorFieldId, "Email doesn't match");
@@ -46,7 +46,7 @@ document.getElementById("cd-form").addEventListener("submit", (event) => {
 
   event.preventDefault();
 
-  var valid = verifyNotBlank(givenName, "invited_given_name_error_msg");
+  let valid = verifyNotBlank(givenName, "invited_given_name_error_msg");
   if (!verifyNotBlank(familyName, "invited_family_name_error_msg")) {
     valid = false;
   }
