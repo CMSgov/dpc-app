@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-module Page
-  module Organization
+module Core
+  module TosContent
     # Component to display Terms of Service content
     class TosContentComponent < ViewComponent::Base
     end
