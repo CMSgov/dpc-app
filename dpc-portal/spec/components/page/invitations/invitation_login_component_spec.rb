@@ -23,7 +23,7 @@ RSpec.describe Page::Invitations::InvitationLoginComponent, type: :component do
 
     it 'should post to appropriate url' do
       path = "organizations/#{provider_organization.id}/invitations/#{invitation.id}/login"
-      url = "http://test.host/portal/#{path}"
+      url = "http://test.host/#{path}"
       expect(page.find('form')[:action]).to eq url
       expect(page.find('form')[:method]).to eq 'post'
     end

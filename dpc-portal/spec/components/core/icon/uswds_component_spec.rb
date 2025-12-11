@@ -13,7 +13,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
     let(:expected_html) do
       <<~HTML
         <svg class="usa-icon" style="transform: scale(1)" aria-hidden="true" role="img">
-          <use xlink:href=/portal/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#lock></use>
+          <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#lock></use>
         </svg>
       HTML
     end
@@ -29,7 +29,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <svg class="usa-icon" style="transform: scale(2)" aria-hidden="true" role="img">
-            <use xlink:href=/portal/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#circle_check></use>
+            <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#circle_check></use>
           </svg>
         HTML
       end
@@ -41,7 +41,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <svg class="foo bar usa-icon" style="transform: scale(1)" aria-hidden="true" role="img">
-            <use xlink:href=/portal/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#lock></use>
+            <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#lock></use>
           </svg>
         HTML
       end

@@ -30,7 +30,7 @@ RSpec.describe Page::Invitations::StartComponent, type: :component do
     end
 
     it 'should go to accept page' do
-      expected = "/portal/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/accept"
+      expected = "/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/accept"
       form = page.find('form')
       expect(form[:action]).to eq expected
     end
@@ -62,7 +62,7 @@ RSpec.describe Page::Invitations::StartComponent, type: :component do
     end
 
     it 'should go to confirm_cd page' do
-      expected = "/portal/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/confirm_cd"
+      expected = "/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/confirm_cd"
       form = page.find('form')
       expect(form[:action]).to eq expected
     end

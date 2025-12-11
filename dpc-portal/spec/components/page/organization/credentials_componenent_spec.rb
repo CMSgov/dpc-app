@@ -20,7 +20,7 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       let(:org) { ComponentSupport::MockOrg.new(0) }
       it 'Should have Generate token button' do
         button = <<~BUTTON
-          <form class="button_to" method="get" action="/portal/organizations/#{org.path_id}/client_tokens/new">
+          <form class="button_to" method="get" action="/organizations/#{org.path_id}/client_tokens/new">
             <button class="usa-button" type="submit">Generate token</button>
           </form>
         BUTTON
@@ -28,7 +28,7 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       end
       it 'Should have Create key button' do
         button = <<~BUTTON
-          <form class="button_to" method="get" action="/portal/organizations/#{org.path_id}/public_keys/new">
+          <form class="button_to" method="get" action="/organizations/#{org.path_id}/public_keys/new">
             <button class="usa-button" type="submit">Create key</button>
           </form>
         BUTTON
@@ -36,7 +36,7 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       end
       it 'Should have Add IP button' do
         button = <<~BUTTON
-          <form class="button_to" method="get" action="/portal/organizations/#{org.path_id}/ip_addresses/new">
+          <form class="button_to" method="get" action="/organizations/#{org.path_id}/ip_addresses/new">
             <button class="usa-button" type="submit">Add IP</button>
           </form>
         BUTTON
@@ -95,13 +95,13 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       end
       it 'should have delete token form' do
         form1 = <<~HTML
-          <form class="button_to" method="post" action="/portal/organizations/2/client_tokens/token-id-1">
+          <form class="button_to" method="post" action="/organizations/2/client_tokens/token-id-1">
            <input type="hidden" name="_method" value="delete" autocomplete="off" />
            <button class="usa-button" type="submit">Yes, revoke token</button>
           </form>
         HTML
         form2 = <<~HTML
-          <form class="button_to" method="post" action="/portal/organizations/2/client_tokens/token-id-2">
+          <form class="button_to" method="post" action="/organizations/2/client_tokens/token-id-2">
            <input type="hidden" name="_method" value="delete" autocomplete="off" />
            <button class="usa-button" type="submit">Yes, revoke token</button>
           </form>
@@ -148,13 +148,13 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       end
       it 'should have delete key form' do
         form1 = <<~HTML
-          <form class="button_to" method="post" action="/portal/organizations/2/public_keys/key-id-1">
+          <form class="button_to" method="post" action="/organizations/2/public_keys/key-id-1">
             <input type="hidden" name="_method" value="delete" autocomplete="off" />
             <button class="usa-button" type="submit">Yes, revoke key</button>
           </form>
         HTML
         form2 = <<~HTML
-          <form class="button_to" method="post" action="/portal/organizations/2/public_keys/key-id-2">
+          <form class="button_to" method="post" action="/organizations/2/public_keys/key-id-2">
             <input type="hidden" name="_method" value="delete" autocomplete="off" />
             <button class="usa-button" type="submit">Yes, revoke key</button>
           </form>
@@ -201,13 +201,13 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       end
       it 'should have delete address form' do
         form1 = <<~HTML
-          <form class="button_to" method="post" action="/portal/organizations/2/ip_addresses/addr-id-1">
+          <form class="button_to" method="post" action="/organizations/2/ip_addresses/addr-id-1">
             <input type="hidden" name="_method" value="delete" autocomplete="off" />
             <button class="usa-button" type="submit">Yes, revoke address</button>
           </form>
         HTML
         form2 = <<~HTML
-          <form class="button_to" method="post" action="/portal/organizations/2/ip_addresses/addr-id-2">
+          <form class="button_to" method="post" action="/organizations/2/ip_addresses/addr-id-2">
             <input type="hidden" name="_method" value="delete" autocomplete="off" />
             <button class="usa-button" type="submit">Yes, revoke address</button>
           </form>

@@ -33,7 +33,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
                     <h2>Credential delegates</h2>
                   </div>
                   <div class="flex-align-self-center">
-                    <form class="button_to" method="get" action="/portal/organizations/#{org.path_id}/credential_delegate_invitations/new"><button class="usa-button" type="submit">Assign CD</button></form>
+                    <form class="button_to" method="get" action="/organizations/#{org.path_id}/credential_delegate_invitations/new"><button class="usa-button" type="submit">Assign CD</button></form>
                   </div>
                 </div>
                 <hr />
@@ -143,7 +143,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
             <td data-sort-value="bob@example.com">bob@example.com</td>
         HTML
         delete_invitation = <<~HTML
-          <form class="button_to" method="post" action="/portal/organizations/2/credential_delegate_invitations/3">
+          <form class="button_to" method="post" action="/organizations/2/credential_delegate_invitations/3">
            <input type="hidden" name="_method" value="delete" autocomplete="off" />
            <button class="usa-button" type="submit">Yes, delete invite</button>
           </form>
