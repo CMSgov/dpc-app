@@ -15,7 +15,7 @@ const portals = {
            protectedPath: 'organizations/foo/edit',
            signInText: 'Log in' },
   'portal': { envs: ['local', 'dev', 'test'],
-              signInPath: 'users/sign_in',
+              signInPath: __ENV.ENVIRONMENT == 'local' ? 'users/sign_in' : 'portal/users/sign_in',
               protectedPath: 'organizations',
               signInText: 'Sign in' },
 }
