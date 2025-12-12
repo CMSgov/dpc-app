@@ -65,7 +65,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
             <tbody>
               <tr>
                 <th scope="row" style="width: 50%;" aria-label="name" >
-                  <a class="display-block maxw-full visited:text-blue text-underline text-normal truncate-text-ellipsis" href="/portal/organizations/5" aria-label="name">
+                  <a class="display-block maxw-full visited:text-blue text-underline text-normal truncate-text-ellipsis" href="/organizations/5" aria-label="name">
                     name
                   </a>
                 </th>
@@ -76,7 +76,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
                 <td style="width: 25%;">
                     <div class="clearfix">
                       <div class="float-left">  <svg class="text-gold usa-icon" style="transform: scale(1)" aria-hidden="true" role="img">
-                        <use xlink:href=/portal/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#warning></use>
+                        <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#warning></use>
                       </svg>
                       </div>
                     <div class="float-left margin-left-1 margin-top-neg-2px">Configuration needed</div>

@@ -21,12 +21,12 @@ RSpec.describe Page::PublicKey::NewKeyComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <div>
-            <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}">#{org.name}</a></div>
+            <div class="margin-bottom-5">← <a href="/organizations/#{org.path_id}">#{org.name}</a></div>
             <h1>Add public key</h1>
             <section class="box">
               <div>
                 <h2>New public key for #{org.name}</h2>
-                <form action="/portal/organizations/#{org.path_id}/public_keys" accept-charset="UTF-8" method="post">
+                <form action="/organizations/#{org.path_id}/public_keys" accept-charset="UTF-8" method="post">
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="label">Label</label>
                     <p class="usa-hint">Choose a descriptive name to make your key easily identifiable to you.</p>
