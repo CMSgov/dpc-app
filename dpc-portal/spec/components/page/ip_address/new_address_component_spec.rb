@@ -53,7 +53,7 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
         let(:errors) { { label: 'Bad Label' } }
         it 'should show error' do
           bad_label = <<~HTML
-            <p style="color: #b50909;">Bad Label</p>
+            <p id="label_error_msg" style="color: #b50909;">Bad Label</p>
             <input type="text" name="label" id="label" maxlength="25" class="usa-input usa-input--error" />
           HTML
           is_expected.to include(normalize_space(bad_label))
@@ -63,7 +63,7 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
         let(:errors) { { ip_address: 'Bad IP Address' } }
         it 'should show error' do
           bad_ip_address = <<~HTML
-            <p style="color: #b50909;">Bad IP Address</p>
+            <p id="ip_address_error_msg" style="color: #b50909;">Bad IP Address</p>
             <input type="text" name="ip_address" id="ip_address" maxlength="15" class="usa-input usa-input--error" />
           HTML
           is_expected.to include(normalize_space(bad_ip_address))
