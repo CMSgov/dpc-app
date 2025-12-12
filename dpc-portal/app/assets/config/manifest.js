@@ -8,6 +8,9 @@
 //= link @uswds/uswds/dist/js/uswds-init.min.js
 //= link @uswds/uswds/dist/js/uswds.min.js
 
+// Link js
+//= link_tree ../javascript
+
 // Link any assets in the app/assets/images directory.
 //= link_tree ../images
 
