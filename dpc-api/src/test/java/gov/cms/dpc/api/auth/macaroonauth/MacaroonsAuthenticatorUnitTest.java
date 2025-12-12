@@ -7,6 +7,7 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
+import jakarta.ws.rs.NotFoundException;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -14,7 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
@@ -107,7 +108,9 @@ class MacaroonsAuthenticatorUnitTest {
 		when(whereMapQuery.returnBundle(Bundle.class).encodedJson()).thenReturn(bundleQuery);
 		when(bundleQuery.execute()).thenReturn(bundle);
 
-		assertTrue(macaroonsAuthenticator.authenticate(dpcAuthCredentials).isEmpty());
+		NotFoundException exception = assertThrows(NotFoundException.class,
+			() -> macaroonsAuthenticator.authenticate(dpcAuthCredentials));
+		assertEquals(String.format("%s not found", DPCResourceType.Patient.name()), exception.getMessage());
 	}
 
 	@Test

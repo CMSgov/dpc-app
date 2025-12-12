@@ -5,8 +5,8 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.TestOrganizationContext;
@@ -92,7 +92,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
 
         // Try again, should be not found
-        assertThrows(AuthenticationException.class, clientQuery::execute, "Should not have practitioner");
+        assertThrows(ResourceNotFoundException.class, clientQuery::execute, "Should not have practitioner");
 
         // Create a new org and make sure it has no providers
         final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
@@ -157,7 +157,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testCreatePractitionerReturnsAppropriateHeaders() {
+    void testCreatePractitionerReturnsAppropriateHeaders() {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), APITestHelpers.ORGANIZATION_ID);
 
@@ -186,7 +186,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testUpdatePractitionerNotImplemented() throws IOException {
+    void testUpdatePractitionerNotImplemented() throws IOException {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         final IParser parser = ctx.newJsonParser();
         APITestHelpers.setupPractitionerTest(client, parser);
@@ -211,7 +211,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
 
     @Test
-    public void testPractitionerPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
+    void testPractitionerPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -235,12 +235,12 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
         //Test GET /Practitioner/{id}
         assertNotNull(APITestHelpers.getResourceById(orgAClient, Practitioner.class, orgAPractitioner.getIdElement().getIdPart()));
         assertNotNull(APITestHelpers.getResourceById(orgBClient, Practitioner.class, orgBPractitioner.getIdElement().getIdPart()));
-        assertThrows(AuthenticationException.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> APITestHelpers.getResourceById(orgBClient, Practitioner.class, orgAPractitioner.getIdElement().getIdPart())
                 , "Expected auth exception when accessing another org's practitioner.");
 
         //Test PUT /Practitioner/{id}
-        assertThrows(AuthenticationException.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> APITestHelpers.updateResource(orgBClient, orgAPractitioner.getIdElement().getIdPart(), orgAPractitioner)
                 , "Expected auth exception when updating another org's practitioner.");
         assertThrows(NotImplementedOperationException.class,
@@ -251,7 +251,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
                 , "Expected Not Implemented exception when updating a practitioner.");
 
         //Test DELETE /Practitioner/{id}
-        assertThrows(AuthenticationException.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Practitioner, orgAPractitioner.getIdElement().getIdPart())
                 , "Expected auth exception when deleting another org's practitioner.");
 
@@ -260,7 +260,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testRequestBodyForgery() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
+    void testRequestBodyForgery() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -284,7 +284,7 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testRequestBodyForgeryOnMultipleSubmit() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
+    void testRequestBodyForgeryOnMultipleSubmit() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
