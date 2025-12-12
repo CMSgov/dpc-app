@@ -1,0 +1,21 @@
+name: Lambda deploys
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: string
+        default: "dev"
+
+jobs:
+  waf-sync-deploy:
+    if: ${{ inputs.env != 'sandbox' }}
+    uses: ./.github/workflows/api-waf-sync-deploy.yml
+  opt-out-deploy:
+    if: ${{ inputs.env != 'sandbox' }}
+    uses: ./.github/workflows/opt-out-import-deploy.yml
+  opt-in-deploy:
+    if: ${{ inputs.env != 'sandbox' }}
+    uses: ./.github/workflows/opt-out-export-deploy.yml
