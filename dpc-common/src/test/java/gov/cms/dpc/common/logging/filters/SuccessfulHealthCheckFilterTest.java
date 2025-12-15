@@ -45,4 +45,31 @@ class SuccessfulHealthCheckFilterTest {
         FilterReply reply = filter.decide(event);
         Assertions.assertEquals(FilterReply.DENY, reply);
     }
+
+    @Test
+    void test_denyVersionCheck() {
+        Mockito.when(event.getRequestURI()).thenReturn("/v1/version");
+        Mockito.when(event.getResponse()).thenReturn(response);
+        Mockito.when(response.getStatus()).thenReturn(200);
+        FilterReply reply = filter.decide(event);
+        Assertions.assertEquals(FilterReply.DENY, reply);
+    }
+
+    @Test
+    void test_denyApiVersionCheck() {
+        Mockito.when(event.getRequestURI()).thenReturn("/api/v1/version");
+        Mockito.when(event.getResponse()).thenReturn(response);
+        Mockito.when(response.getStatus()).thenReturn(200);
+        FilterReply reply = filter.decide(event);
+        Assertions.assertEquals(FilterReply.DENY, reply);
+    }
+
+    @Test
+    void test_denyPing() {
+        Mockito.when(event.getRequestURI()).thenReturn("/ping");
+        Mockito.when(event.getResponse()).thenReturn(response);
+        Mockito.when(response.getStatus()).thenReturn(200);
+        FilterReply reply = filter.decide(event);
+        Assertions.assertEquals(FilterReply.DENY, reply);
+    }
 }
