@@ -22,6 +22,7 @@ import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.ParseException;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.sql.Date;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -335,5 +337,30 @@ class PractitionerResourceTest extends AbstractSecureApplicationTest {
 
         result = APITestHelpers.resourceSearch(orgAClient, DPCResourceType.Practitioner);
         assertEquals(4, result.getTotal(), "Expected Org A to have 1 practitioner.");
+    }
+
+    @Test
+    void testBadPractitionerIdReturns404() throws IOException {
+        final IParser parser = ctx.newJsonParser();
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        APITestHelpers.setupPractitionerTest(client, parser);
+
+        final IReadExecutable<Practitioner> clientQuery = client
+            .read()
+            .resource(Practitioner.class)
+            .withId(UUID.randomUUID().toString())
+            .encodedJson();
+
+        ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class, clientQuery::execute, "Should be not found");
+        assertEquals(HttpStatus.NOT_FOUND_404, e.getStatusCode());
+
+        // Make sure we get 1 fatal issue back with the correct message and status
+        OperationOutcome operationOutcome = (OperationOutcome) e.getOperationOutcome();
+        List<OperationOutcome.OperationOutcomeIssueComponent> operationOutcomeIssueComponentList = operationOutcome.getIssue();
+        assertEquals(1, operationOutcomeIssueComponentList.size());
+
+        OperationOutcome.OperationOutcomeIssueComponent issue = operationOutcomeIssueComponentList.get(0);
+        assertEquals(OperationOutcome.IssueSeverity.FATAL, issue.getSeverity());
+        assertEquals("Practitioner not found", issue.getDetails().getText());
     }
 }
