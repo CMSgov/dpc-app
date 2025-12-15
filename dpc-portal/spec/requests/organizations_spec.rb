@@ -10,7 +10,7 @@ RSpec.describe 'Organizations', type: :request do
     context 'not logged in' do
       it 'redirects to login' do
         get '/organizations'
-        expect(response).to redirect_to('/portal/users/sign_in')
+        expect(response).to redirect_to('/users/sign_in')
       end
     end
 
@@ -56,7 +56,7 @@ RSpec.describe 'Organizations', type: :request do
       it 'redirects to login' do
         org = create(:provider_organization)
         get "/organizations/#{org.id}"
-        expect(response).to redirect_to('/portal/users/sign_in')
+        expect(response).to redirect_to('/users/sign_in')
       end
     end
 
