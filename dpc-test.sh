@@ -18,7 +18,7 @@ if [ -d "${DIR}/jacocoReport" ]; then
 fi
 
 # Create jacocoReport and make accessible for writing output from containers if we're running tests
-if [ "$ENV" = 'github-ci' ] || [ "$ENV" = 'local' ]; then
+if [ "$ENV" = 'local' ] || [ "$ENV" = 'github-ci' ]; then
   mkdir -p "${DIR}"/jacocoReport/dpc-api
   mkdir -p "${DIR}"/jacocoReport/dpc-attribution
   mkdir -p "${DIR}"/jacocoReport/dpc-aggregation
