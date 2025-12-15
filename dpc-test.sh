@@ -17,6 +17,14 @@ if [ -d "${DIR}/jacocoReport" ]; then
     rm -r "${DIR}/jacocoReport"
 fi
 
+# Create jacocoReport and make accessible for writing output from containers if we're running tests
+if [ "$ENV" = 'local' ] || [ "$ENV" = 'github-ci' ]; then
+  mkdir -p "${DIR}"/jacocoReport/dpc-api
+  mkdir -p "${DIR}"/jacocoReport/dpc-attribution
+  mkdir -p "${DIR}"/jacocoReport/dpc-aggregation
+  chown -R nobody:nobody "${DIR}"/jacocoReport
+fi
+
 function _finally {
   # don't shut it down if running on ci
   if [ "$ENV" != 'github-ci' ]; then

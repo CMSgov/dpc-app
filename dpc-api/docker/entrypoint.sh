@@ -55,5 +55,12 @@ fi
 
 CMDLINE="java ${CONF_FLAGS} ${DEBUG_FLAGS} ${JACOCO} ${NR_AGENT} ${JAVA_CLASSES}"
 
-echo "Running server via entrypoint!"
-exec ${CMDLINE} "$@" ${CONF_FILE}
+# Make sure volumes in our persisted environments are writeable by nobody
+if [ -d "/app/data" ]; then chown nobody:nobody /app/data; fi
+if [ -d "/config" ]; then chown nobody:nobody /config; fi
+if [ -d "/tmp" ]; then chown nobody:nobody /tmp; fi
+if [ -d "/newrelic/logs" ]; then chown nobody:nobody /newrelic/logs; fi
+
+echo "Running server via entrypoint as nobody!"
+# Note: -E preserves "most" env variables, but not all.  Ones deemed sensitive, like ENV need to be passed explicitly.
+exec sudo -E ENV=$ENV -u nobody ${CMDLINE} "$@" ${CONF_FILE}
