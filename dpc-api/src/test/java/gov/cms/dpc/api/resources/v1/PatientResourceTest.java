@@ -10,10 +10,7 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
@@ -166,7 +163,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .withId(foundPatient.getId())
                 .encodedJson();
 
-        assertThrows(AuthenticationException.class, fetchRequest::execute, "Should not be authorized");
+        assertThrows(ResourceNotFoundException.class, fetchRequest::execute, "Should not be authorized");
 
         // Search, and find nothing
         final Bundle otherSpecificSearch = client
@@ -210,8 +207,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
                 .withId(patient.getId())
                 .encodedJson();
 
-        // TODO: DPC-433, this really should be NotFound, but we can't disambiguate between the two cases
-        assertThrows(AuthenticationException.class, fetchRequest::execute, "Should not have found the resource");
+        assertThrows(ResourceNotFoundException.class, fetchRequest::execute, "Should not have found the resource");
 
         // Search again
         final Bundle secondSearch = fetchPatients(client);
@@ -712,7 +708,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         assertNotNull(APITestHelpers.getResourceById(orgAClient, Patient.class,orgAPatient.getId()), "Org should be able to retrieve their own patient.");
         assertNotNull(APITestHelpers.getResourceById(orgBClient,Patient.class, orgBPatient.getId()), "Org should be able to retrieve their own patient.");
-        assertThrows(AuthenticationException.class, () -> APITestHelpers.getResourceById(orgAClient,Patient.class, orgBPatient.getId()), "Expected auth error when retrieving another org's patient.");
+        assertThrows(ResourceNotFoundException.class, () -> APITestHelpers.getResourceById(orgAClient,Patient.class, orgBPatient.getId()), "Expected auth error when retrieving another org's patient.");
     }
 
     @Test
@@ -825,7 +821,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         //Setup org B with a patient
         final Patient orgBPatient = (Patient) APITestHelpers.createResource(orgBClient, APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId())).getResource();
 
-        assertThrows(AuthenticationException.class, () -> APITestHelpers.deleteResourceById(orgAClient, DPCResourceType.Patient, orgBPatient.getIdElement().getIdPart()), "Expected auth error when deleting another org's patient.");
+        assertThrows(ResourceNotFoundException.class, () -> APITestHelpers.deleteResourceById(orgAClient, DPCResourceType.Patient, orgBPatient.getIdElement().getIdPart()), "Expected auth error when deleting another org's patient.");
         APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Patient, orgBPatient.getIdElement().getIdPart());
     }
 
@@ -842,17 +838,17 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         //Test GET /Patient/{id}
         APITestHelpers.getResourceById(orgAClient,Patient.class,orgAPatient.getIdElement().getIdPart());
         APITestHelpers.getResourceById(orgBClient,Patient.class,orgBPatient.getIdElement().getIdPart());
-        assertThrows(AuthenticationException.class, () -> APITestHelpers.getResourceById(orgBClient,Patient.class,orgAPatient.getIdElement().getIdPart()), "Expected auth error when accessing another org's patient");
+        assertThrows(ResourceNotFoundException.class, () -> APITestHelpers.getResourceById(orgBClient,Patient.class,orgAPatient.getIdElement().getIdPart()), "Expected auth error when accessing another org's patient");
 
         //Test PUT /Patient/{id}
         APITestHelpers.updateResource(orgAClient,orgAPatient.getIdElement().getIdPart(),orgAPatient);
         APITestHelpers.updateResource(orgBClient,orgBPatient.getIdElement().getIdPart(),orgBPatient);
-        assertThrows(AuthenticationException.class, () -> APITestHelpers.updateResource(orgBClient,orgAPatient.getIdElement().getIdPart(),orgAPatient), "Expected auth error when updating another org's patient");
+        assertThrows(ResourceNotFoundException.class, () -> APITestHelpers.updateResource(orgBClient,orgAPatient.getIdElement().getIdPart(),orgAPatient), "Expected auth error when updating another org's patient");
 
         //Test PUT /Patient/{id}
         APITestHelpers.updateResource(orgAClient,orgAPatient.getIdElement().getIdPart(),orgAPatient);
         APITestHelpers.updateResource(orgBClient,orgBPatient.getIdElement().getIdPart(),orgBPatient);
-        assertThrows(AuthenticationException.class, () -> APITestHelpers.updateResource(orgBClient,orgAPatient.getIdElement().getIdPart(),orgAPatient), "Expected auth error when updating another org's patient");
+        assertThrows(ResourceNotFoundException.class, () -> APITestHelpers.updateResource(orgBClient,orgAPatient.getIdElement().getIdPart(),orgAPatient), "Expected auth error when updating another org's patient");
 
 
         //Test Get /Patient/{id}/$everything
@@ -867,7 +863,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
        assertEquals(64, result.getTotal(), "Should have 64 entries in Bundle");
 
         final String orgAPractitionerId = orgAPractitioner.getIdElement().getIdPart();
-       assertThrows(AuthenticationException.class, () ->
+       assertThrows(ResourceNotFoundException.class, () ->
                APITestHelpers.getPatientEverything(orgBClient, orgAPatient.getIdElement().getIdPart(), generateProvenance(orgAContext.getOrgId(), orgAPractitionerId))
        , "Expected auth error when export another org's patient's data");
     }
