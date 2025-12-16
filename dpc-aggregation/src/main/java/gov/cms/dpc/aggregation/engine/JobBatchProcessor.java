@@ -140,8 +140,8 @@ public class JobBatchProcessor {
         final String failReasonLabel = failReason.map(Enum::name).orElse("NA");
         stopWatch.stop();
         String patientId = optPatient.isPresent() ? optPatient.get().getId() : "-1";
-        logger.info("dpcMetric=DataExportResult,PatientId={}, AggregatorId={}, dataRetrieved={},failReason={},duration={} , resourceFileSizes={}",
-                patientId, aggregatorID,failReason.isEmpty(), failReasonLabel, durationInSeconds,fileSize.get());
+        logger.info("dpcMetric=dataExportResult,patientId={},aggregatorId={},dataRetrieved={},failReason={},duration={},resourceFileSizes={}",
+                patientId, aggregatorID, failReason.isEmpty(), failReasonLabel, durationInSeconds, fileSize.get());
         return results;
     }
 
