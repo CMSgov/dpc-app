@@ -1,3 +1,7 @@
+<% content_for :head do %>
+    <%= javascript_include_tag 'validation_helpers.js' %>
+<% end %>
+
 <div>
   <% unless cd_invite.errors[:base].empty? %>
     <div class="usa-alert usa-alert--error margin-bottom-4">
@@ -24,23 +28,21 @@
           hint: 'For example, Jose, Darren, or Mai',
           default: cd_invite.invited_given_name,
           error_msg: cd_invite.errors[:invited_given_name]&.first,
-          input_options: { maxlength: 25, required: :required })) %>
+          input_options: { maxlength: 25 })) %>
       <%= render(Core::Form::TextInputComponent.new(label: 'Last or family name',
           attribute: :invited_family_name,
           hint: 'For example, Martinez Gonzalez, Gu, or Smith',
           default: cd_invite.invited_family_name,
           error_msg: cd_invite.errors[:invited_family_name]&.first,
-          input_options: { maxlength: 25, required: :required })) %>
-      <%= render(Core::Form::EmailInputComponent.new(label: 'Email',
+          input_options: { maxlength: 25 })) %>
+      <%= render(Core::Form::TextInputComponent.new(label: 'Email',
           attribute: :invited_email,
           error_msg: cd_invite.errors[:invited_email]&.first,
-          default: cd_invite.invited_email,
-          input_options: { required: :required })) %>
-      <%= render(Core::Form::EmailInputComponent.new(label: 'Confirm email',
+          default: cd_invite.invited_email)) %>
+      <%= render(Core::Form::TextInputComponent.new(label: 'Confirm email',
           attribute: :invited_email_confirmation,
           error_msg: cd_invite.errors[:invited_email_confirmation]&.first,
-          default: cd_invite.invited_email_confirmation,
-          input_options: { required: :required })) %>
+          default: cd_invite.invited_email_confirmation)) %>
       <%= link_to 'Go Back', organization_path(organization.path_id), class: ['usa-button', 'usa-button--outline'] %>
       <%= submit_tag('Send invite', class: "usa-button") %>
     <% end %>
@@ -55,26 +57,4 @@
         'verify-modal')) %>
   </div>
 </div>
-
-<%= javascript_tag do %>
-document.getElementById('cd-form').addEventListener('submit', (event) => {
-  if (event.submitter == document.getElementById('modal-submitter')) {
-    return true;
-  }
-  event.preventDefault()
-  const confirmField = document.getElementById("invited_email_confirmation");
-  if (confirmField.value == document.getElementById("invited_email").value) {
-    document.getElementById("modal-opener").click();
-  } else {
-    var errorMsg = document.getElementById("confirmErrorMsg");
-    if (!errorMsg) {
-      errorMsg = document.createElement("p");
-      errorMsg.classList.add("usa-error-message");
-      errorMsg.textContent = "doesn't match invited email";
-      errorMsg.id = "confirmErrorMsg";
-      confirmField.insertAdjacentElement("beforebegin", errorMsg);
-    }
-    confirmField.focus();
-    confirmField.classList.add("usa-input--error");
-  }})
-<% end %>
+<%= javascript_include_tag 'new_cd_invitation.js' %>
