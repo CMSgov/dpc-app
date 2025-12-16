@@ -35,33 +35,33 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
     @Override
     public Optional<OrganizationPrincipal> authenticate(DPCAuthCredentials credentials) {
         logger.debug("Performing token authentication");
-        PathAuthorizer pa = credentials.getPathAuthorizer();
+        PathAuthorizer pathAuthorizer = credentials.getPathAuthorizer();
 
         // If we don't have a path authorizer, just return the principal
         final OrganizationPrincipal principal = new OrganizationPrincipal(credentials.getOrganization());
-        if (pa == null) {
+        if (pathAuthorizer == null) {
             logger.debug("No path authorizer is present, returning principal");
             return Optional.of(principal);
         }
 
         // If we're an organization, we just check the org ID against the path value and see if it matches
-        if (pa.type() == DPCResourceType.Organization) {
+        if (pathAuthorizer.type() == DPCResourceType.Organization) {
             return validateOrganization(principal, credentials);
         }
 
         // Otherwise, try to lookup the matching resource
-        logger.debug("Looking up resource {} in path authorizer. With value: {}", pa.type(), pa.pathParam());
+        logger.debug("Looking up resource {} in path authorizer. With value: {}", pathAuthorizer.type(), pathAuthorizer.pathParam());
         Map<String, List<String>> searchParams = new HashMap<>();
         searchParams.put("_id", Collections.singletonList(credentials.getPathValue()));
         searchParams.put("organization", Collections.singletonList(credentials.getOrganization().getId()));
 
         // Special handling of Group resources, which use tags instead of resource properties.
-        if (pa.type() == DPCResourceType.Group) {
+        if (pathAuthorizer.type() == DPCResourceType.Group) {
             searchParams.put("_tag", Collections.singletonList(String.format("%s|%s", DPCIdentifierSystem.DPC.getSystem(), credentials.getOrganization().getId())));
         }
         final Bundle bundle = this.client
                 .search()
-                .forResource(pa.type().toString())
+                .forResource(pathAuthorizer.type().toString())
                 .whereMap(searchParams)
                 .returnBundle(Bundle.class)
                 .encodedJson()
@@ -70,7 +70,7 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
         // We're using a path authorizer.  If the bundle is empty we want to force a 404 Not Found response instead of
         // 401 Unauthorized that would be returned for a standard auth failure.
         if (bundle.getEntry().isEmpty()) {
-            throw new NotFoundException(String.format("%s not found", pa.type().toString()));
+            throw new NotFoundException(String.format("%s not found", pathAuthorizer.type().toString()));
         }
 
         return Optional.of(principal);
