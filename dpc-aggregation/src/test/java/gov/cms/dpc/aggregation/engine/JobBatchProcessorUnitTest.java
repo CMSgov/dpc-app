@@ -561,9 +561,9 @@ class JobBatchProcessorUnitTest {
         // Verify log message format
         // Verify log message format
         String logMessage = testLogger.getLastLogMessage();
-        assertTrue(logMessage.contains("dpcMetric=dataExportResult"), "Log should contain metric name");
-        assertTrue(logMessage.contains("patientId=" + patientIndex), "Log should contain patient index");
-        assertTrue(logMessage.contains("aggregatorId=" + aggregatorId), "Log should contain aggregator ID");
+        assertTrue(logMessage.contains("dpcMetric=DataExportResult"), "Log should contain metric name");
+        assertTrue(logMessage.contains("PatientId=" + patientIndex), "Log should contain patient index");
+        assertTrue(logMessage.contains("AggregatorId=" + aggregatorId), "Log should contain aggregator ID");
         assertTrue(logMessage.contains("dataRetrieved=true"), "Log should indicate data was retrieved");
         assertTrue(logMessage.contains("failReason=NA"), "Log should show no failure");
         assertTrue(logMessage.contains("resourceFileSizes="), "Log should contain resource sizes");

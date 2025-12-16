@@ -252,7 +252,7 @@ class ResourceFetcher {
             loggingEventBuilder = logger.atInfo();
         }
 
-        loggingEventBuilder.log("dpcMetric=resourceFetched,resourceType={},fetchId={},durationSeconds={},resourceCount={}",
+        loggingEventBuilder.log("dpcMetric=ResourceFetched,resourceType={},fetchId={},durationSeconds={},resourceCount={}",
             resourceType.toString(), fetchId, seconds, resourceCount
         );
     }
