@@ -20,7 +20,7 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
   end
 
   def no_account
-    render(Page::Invitations::BadInvitationComponent.new(nil, 'no_account'),
+    render(Page::Utility::ErrorComponent.new(nil, 'no_account'),
            status: :forbidden)
   end
 
@@ -61,7 +61,7 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
                          actionType: LoggingConstants::ActionType::FailedLogin }])
     invitation = Invitation.find(invitation_id)
     if invitation.credential_delegate?
-      render(Page::Invitations::BadInvitationComponent.new(invitation, 'fail_to_proof'),
+      render(Page::Utility::ErrorComponent.new(invitation, 'fail_to_proof'),
              status: :forbidden)
     else
       render(Page::Invitations::AoFlowFailComponent.new(invitation, 'fail_to_proof', 1),
