@@ -64,6 +64,10 @@ module Page
         reason = 'server_error'
         render(Page::Utility::ErrorComponent.new(invitation, reason))
       end
+      def no_account
+        reason = 'no_account'
+        render(Page::Utility::ErrorComponent.new(nil, reason))
+      end
     end
   end
 end
