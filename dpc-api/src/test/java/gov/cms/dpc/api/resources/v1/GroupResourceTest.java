@@ -4,8 +4,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
@@ -133,7 +133,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testInvalidInputsWhenCreatingGroup() throws IOException {
+    void testInvalidInputsWhenCreatingGroup() throws IOException {
         final IParser parser = ctx.newJsonParser();
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
@@ -253,7 +253,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testCreateGroupReturnsAppropriateHeaders() throws IOException {
+    void testCreateGroupReturnsAppropriateHeaders() throws IOException {
         final IParser parser = ctx.newJsonParser();
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
@@ -340,7 +340,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testProvenanceHeaderAndGroupProviderMatch() {
+    void testProvenanceHeaderAndGroupProviderMatch() {
         IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), ORGANIZATION_ID);
 
@@ -401,7 +401,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testGroupCanOnlyBeRetrievedByOwner() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
+    void testGroupCanOnlyBeRetrievedByOwner() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -432,7 +432,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         assertEquals(orgBGroup.getId(), foundGroup.getId(), "Returned group ID should have been the same as requested ID");
 
 
-        assertThrows(AuthenticationException.class, () ->
+        assertThrows(ResourceNotFoundException.class, () ->
                 orgBClient.read()
                         .resource(Group.class)
                         .withId(orgAGroup.getId())
@@ -442,7 +442,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testOrgCanOnlyDeleteTheirOwnGroup() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
+    void testOrgCanOnlyDeleteTheirOwnGroup() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -455,7 +455,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
         Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
-        assertThrows(AuthenticationException.class, () ->
+        assertThrows(ResourceNotFoundException.class, () ->
                 orgBClient.delete()
                         .resource(orgAGroup)
                         .encodedJson()
@@ -472,7 +472,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testOrgCanOnlyUpdateTheirOwnGroup() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
+    void testOrgCanOnlyUpdateTheirOwnGroup() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -485,7 +485,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
         Provenance provenance = APITestHelpers.createProvenance(orgBContext.getOrgId(), orgBPractitioner.getId(), Collections.emptyList());
-        assertThrows(AuthenticationException.class, () ->
+        assertThrows(ResourceNotFoundException.class, () ->
                 orgBClient.update().resource(orgAGroup)
                         .encodedJson()
                         .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
@@ -501,7 +501,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testOrgCanOnlyListTheirOwnGroups() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
+    void testOrgCanOnlyListTheirOwnGroups() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -525,7 +525,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
 
 
     @Test
-    public void testOrgCanOnlyCreateGroupWithPatientsTheyManage() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
+    void testOrgCanOnlyCreateGroupWithPatientsTheyManage() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -553,7 +553,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    public void testOrgCanOnlyUpdateGroupWithPatientsTheyManage() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
+    void testOrgCanOnlyUpdateGroupWithPatientsTheyManage() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
@@ -582,7 +582,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
 
 
     @Test
-    public void testOrgCanOnlyAddPatientsTheyManageToGroup() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
+    void testOrgCanOnlyAddPatientsTheyManageToGroup() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
         final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
