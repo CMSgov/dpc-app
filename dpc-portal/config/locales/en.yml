@@ -1,5 +1,7 @@
 en:
   verification:
+    no_account_status: The email you used is not associated with a DPC account.
+    no_account_text: Please sign out and log back in with the email associated with your DPC account.
     email_mismatch_status: The email you used to sign in doesn't match your invite.
     email_mismatch_text: <p>Please <b>sign out</b> of Login.gov and either:<ul><li>Create an account.</li><li>Add an alternate email to your current Login.gov account.</li></ul></p>
     pii_mismatch_status: The name you used does not match your invite.
