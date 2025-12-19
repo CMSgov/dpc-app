@@ -127,12 +127,15 @@ RSpec.describe IpAddressManager do
   describe '#ip_addresses' do
     context 'successful API request' do
       it 'returns array of IP addresses' do
-        addresses = [{ 'id' => SecureRandom.uuid }]
+        addresses = [{ 'id' => SecureRandom.uuid,
+                       'ipAddress' => { 'address' => '127.0.0.1' } }]
         stub_self_returning_api_client(message: :get_ip_addresses,
                                        response: { 'entities' => addresses },
                                        with: [api_id])
-
-        expect(manager.ip_addresses).to eq(addresses)
+        ip_addresses = manager.ip_addresses
+        expect(ip_addresses.length).to eq 1
+        expect(ip_addresses.first['ip_addr']).to_not be_nil
+        expect(ip_addresses.first['ip_addr']).to eq ip_addresses.first.dig('ipAddress', 'address')
       end
     end
 
