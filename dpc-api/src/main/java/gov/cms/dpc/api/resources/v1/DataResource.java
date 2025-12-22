@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 
 import static gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter.X_CONTENT_LENGTH;
 
@@ -292,5 +293,101 @@ public class DataResource extends AbstractDataResource {
         int getLength() {
             return length;
         }
+    }
+
+    @Path("/{fileID}.ndjson.gz")
+    @HEAD
+    @Timed
+    @ExceptionMetered
+    @Authorizer
+    @ApiOperation(value = "Metadata for downloading compressed output files.", notes = "Retrieve the metadata for a corresponding `GET` request to download compressed ndjson formatted output files from the server. The file will be decompressed before sending.")
+    @ApiResponses({
+            @ApiResponse(code = HttpStatus.OK_200, message = "Metadata for compressed file of newline-delimited JSON FHIR objects", responseHeaders = {
+                    @ResponseHeader(name = HttpHeaders.ETAG, description = "SHA256 checksum of file"),
+                    @ResponseHeader(name = HttpHeaders.CONTENT_LENGTH, description = "size of decompressed file (in bytes)"),
+                    @ResponseHeader(name = HttpHeaders.LAST_MODIFIED, description = "creation timestamp of file (in milliseconds since Unix epoch)")
+            }),
+            @ApiResponse(code = HttpStatus.NOT_MODIFIED_304, message = "No newer files available"),
+            @ApiResponse(code = HttpStatus.UNAUTHORIZED_401, message = "Not authorized to download file"),
+            @ApiResponse(code = HttpStatus.GONE_410, message = "File has expired"),
+            @ApiResponse(code = HttpStatus.INTERNAL_SERVER_ERROR_500, message = "An error occurred", response = OperationOutcome.class)
+    })
+    public Response exportCompressedFileHead(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
+                                             @HeaderParam(HttpHeaders.IF_NONE_MATCH)
+                                             @ApiParam(value = "Download file only if provided SHA256 checksum doesn't match")
+                                                     Optional<String> fileChecksum,
+                                             @HeaderParam(HttpHeaders.IF_MODIFIED_SINCE)
+                                             @ApiParam(value = "Download file only if provided timestamp (milliseconds since Unix Epoch) is older than file creation timestamp", example = "1575394136")
+                                                     Optional<String> modifiedHeader,
+                                             @PathParam("fileID")
+                                             @ApiParam(required = true, value = "Compressed NDJSON file name", example = "728b270d-d7de-4143-82fe-d3ccd92cebe4-1-coverage.ndjson.gz")
+                                                 @NoHtml String fileID) {
+        final FileManager.FilePointer filePointer = this.manager.getCompressedFile(organizationPrincipal.getID(), fileID);
+
+        if (returnCachedValue(filePointer, fileChecksum, modifiedHeader)) {
+            return Response.status(Response.Status.NOT_MODIFIED).build();
+        }
+
+        return Response.ok()
+                .header(HttpHeaders.ETAG, filePointer.getChecksum())
+                .header(HttpHeaders.LAST_MODIFIED, filePointer.getCreationTime().toInstant().toEpochMilli())
+                .build();
+    }
+
+    @Path("/{fileID}.ndjson.gz")
+    @GET
+    @Timed
+    @ExceptionMetered
+    @Authorizer
+    @ApiOperation(value = "Download compressed output files.", notes = "Download compressed ndjson formatted output files from the server. " +
+            "The file will be decompressed before sending to the client. " +
+            "<p>Note: Range requests are not supported for compressed files. " +
+            "<p>This endpoint will return a `" + HttpStatus.NOT_MODIFIED_304 + "` response if the `"
+            + HttpHeaders.IF_MODIFIED_SINCE + "` or `" + HttpHeaders.IF_NONE_MATCH + "` headers are provided and match an existing file.")
+    @ApiResponses({
+            @ApiResponse(code = HttpStatus.OK_200, message = "Decompressed file of newline-delimited JSON FHIR objects", responseHeaders = {
+                    @ResponseHeader(name = HttpHeaders.ETAG, description = "SHA256 checksum of file"),
+                    @ResponseHeader(name = HttpHeaders.LAST_MODIFIED, description = "creation timestamp of file (in milliseconds since Unix epoch)")
+            }),
+            @ApiResponse(code = HttpStatus.NOT_MODIFIED_304, message = "No newer files available"),
+            @ApiResponse(code = HttpStatus.UNAUTHORIZED_401, message = "Not authorized to download file"),
+            @ApiResponse(code = HttpStatus.GONE_410, message = "File has expired"),
+            @ApiResponse(code = HttpStatus.INTERNAL_SERVER_ERROR_500, message = "An error occurred", response = OperationOutcome.class)
+    })
+    public Response downloadCompressedExportFile(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
+                                                @PathParam("fileID")
+                                                @ApiParam(required = true, value = "Compressed NDJSON file name", example = "728b270d-d7de-4143-82fe-d3ccd92cebe4-1-coverage.ndjson.gz")
+                                                    @NoHtml String fileID) {
+
+        final FileManager.FilePointer filePointer = this.manager.getCompressedFile(organizationPrincipal.getID(), fileID);
+
+        // Probably want to log JobID() and can avoid extra lookups for testing
+        // filePointer.getJobID()
+
+        // Chain stream to decompress data
+        // Don't calculate Content-Length here to avoid decompressing twice.
+        final StreamingOutput decompressedStream = outputStream -> {
+            try (FileInputStream fileInputStream = new FileInputStream(filePointer.getFile());
+                 GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream)) {
+                // Decompress and stream to output
+                IOUtils.copy(gzipInputStream, outputStream);
+            } catch (FileNotFoundException e) {
+                throw new WebApplicationException(String.format("Unable to open compressed file `%s`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
+            } catch (IOException e) {
+                throw new WebApplicationException(String.format("Unable to decompress file `%s`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
+            }
+            outputStream.flush();
+        };
+
+        final CacheControl cacheControl = new CacheControl();
+        cacheControl.setNoCache(true);
+        cacheControl.setNoStore(true);
+
+        return Response.ok()
+                .entity(decompressedStream)
+                .header(HttpHeaders.ETAG, filePointer.getChecksum())
+                .header(HttpHeaders.LAST_MODIFIED, filePointer.getCreationTime().toInstant().toEpochMilli())
+                .cacheControl(cacheControl)
+                .build();
     }
 }
