@@ -48,6 +48,7 @@ public class DPCJsonLayout extends EventJsonLayout {
         if(map.get(EXCEPTION) != null){
             String maskedExceptionDetails = maskPSQLData(map.get(EXCEPTION).toString());
             map.put(EXCEPTION, maskedExceptionDetails);
+            map.put("exceptionClass", event.getThrowableProxy().getCause().getClassName());
         }
         return map;
     }
