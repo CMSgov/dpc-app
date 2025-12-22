@@ -141,8 +141,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         it 'does not sign in user' do
           post '/users/auth/openid_connect'
           follow_redirect!
-          expect(response.location).to eq new_user_session_url
-          expect(flash[:alert]).to eq('You must have an account to sign in.')
+          expect(response.location).to eq no_account_url
           expect(response).to be_redirect
         end
 
@@ -207,6 +206,13 @@ RSpec.describe 'LoginDotGov', type: :request do
     it 'should redirect to new session if no user_return_to set' do
       get '/users/auth/logged_out'
       expect(response).to redirect_to(new_user_session_path)
+    end
+  end
+
+  describe 'Get /users/auth/no_account' do
+    it 'should show logout button' do
+      get '/users/auth/no_account'
+      expect(response.body).to include 'Sign out of Login.gov'
     end
   end
 end

@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   devise_scope :user do
     get '/users/auth/failure', to: 'login_dot_gov#failure', as: 'login_dot_gov_failure'
     get '/users/auth/logged_out', to: 'login_dot_gov#logged_out'
+    get '/users/auth/no_account', to: 'login_dot_gov#no_account', as: 'no_account'
     delete '/logout', to: 'login_dot_gov#logout', as: 'login_dot_gov_logout'
     get 'active', to: 'users/sessions#active'
     get 'timeout', to: 'users/sessions#timeout'
