@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Page::Invitations::BadInvitationComponent, type: :component do
+RSpec.describe Page::Utility::ErrorComponent, type: :component do
   include ComponentSupport
 
   describe 'html' do
