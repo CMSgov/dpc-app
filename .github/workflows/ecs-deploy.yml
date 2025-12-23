@@ -70,9 +70,7 @@ env:
 jobs:
   services-up:
     name: All Services Healthy
-    needs: deploy
     uses: ./.github/workflows/check_healthy.yml
     with:
       env: ${{ inputs.env }}
     secrets: inherit
-
