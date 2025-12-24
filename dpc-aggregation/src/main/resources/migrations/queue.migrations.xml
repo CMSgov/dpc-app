@@ -295,6 +295,7 @@
                 select p.id
                 from job_queue_batch jqb, providers p
                 where p.provider_id = jqb.provider_npi
+                and p.id::text != jqb.provider_id
                 and jqb.status = 2
                 and jqb.organization_id not in ('0ab352f1-2bf1-44c4-aa7a-3004a1ffef12', '69c0d4d4-9c07-4fa8-9053-e10fb1608b48', 'c7f5247b-4c41-478c-84eb-a6e801bdb145')
             )
