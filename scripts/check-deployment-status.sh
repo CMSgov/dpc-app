@@ -8,6 +8,11 @@ SVC_NAME="dpc-${ENV}-${4}" # service
 CLUSTER_NAME="dpc-${ENV}-${5}" # cluster
 SVC_VERSION="$6" # service version
 
+if [ $7 == 'true' ]; then
+    echo "Skipping $SVC_NAME"
+    exit 0
+fi
+
 # 1) Wait for ECS to certify deployment stability
 
 echo "Waiting for ECS service ${SVC_NAME}-${SVC_VERSION} deployment to succeed..."
