@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   get '/users/sign_in', to: 'users/sessions#new', as: 'new_user_session'
   delete '/users/sign_out', to: 'users/sessions#destroy', as: 'destroy_user_session'
   get 'active', to: 'users/sessions#active', as: 'active'
+  get '/auth/logged_out', to: redirect('/portal/users/sign_in')
   get 'timeout', to: 'users/sessions#timeout', as: 'timeout'
   resources :organizations, only: [:index, :show, :new, :create] do
     resources :client_tokens, only: [:new, :create, :destroy]

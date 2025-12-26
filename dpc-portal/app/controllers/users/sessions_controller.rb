@@ -11,11 +11,13 @@ module Users
     end
     def create
       user_info = request.env['omniauth.auth']
-      if user_info.provider == 'developer'
+      if user_info.provider == 'developer' && !Rails.env.test?
+        Rails.logger.warn('Trying to log in via developer provider outside test')
+      else
         user = User.where(email: user_info.info.email).first
         session['user'] = user.id if user
       end
-      render plain: :foo
+      redirect_to(session.delete(:user_return_to) || organizations_path)
     end
     def destroy
       Rails.logger.info(['User logged out',

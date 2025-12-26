@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'support/login_support'
 require 'support/credential_resource_shared_examples'
 
 RSpec.describe 'ClientTokens', type: :request do
@@ -158,7 +159,7 @@ RSpec.describe 'ClientTokens', type: :request do
     context 'not logged in' do
       it 'redirects to login' do
         post '/organizations/no-such-id/client_tokens'
-        expect(response).to redirect_to('/users/sign_in')
+        expect(response).to redirect_to('/portal/users/sign_in')
       end
     end
 
@@ -223,7 +224,7 @@ RSpec.describe 'ClientTokens', type: :request do
     context 'not logged in' do
       it 'redirects to login' do
         delete '/organizations/no-such-id/client_tokens/no-such-id'
-        expect(response).to redirect_to('/users/sign_in')
+        expect(response).to redirect_to('/portal/users/sign_in')
       end
     end
 
