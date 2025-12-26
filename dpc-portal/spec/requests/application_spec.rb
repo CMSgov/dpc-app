@@ -3,6 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Application', type: :request do
+  include LoginSupport
   before(:all) do
     Rails.application.routes.disable_clear_and_finalize = true
     Rails.application.routes.draw do
@@ -57,8 +58,7 @@ RSpec.describe 'Application', type: :request do
 end
 
 class TestController < ApplicationController
-  before_action :authenticate_user!
   def index
-    render plain: 'foo'
+    render plain: :foo
   end
 end

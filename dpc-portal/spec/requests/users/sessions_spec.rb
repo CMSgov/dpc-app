@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'Users::Sessions', type: :request do
+RSpec.describe 'Sessions', type: :request do
   describe 'logout' do
     context 'logged in' do
       let!(:user) { create(:user) }

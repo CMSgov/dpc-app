@@ -3,7 +3,6 @@
 require 'rails_helper'
 
 RSpec.describe 'Accessibility', type: :system do
-  include Devise::Test::IntegrationHelpers
   include DpcClientSupport
   before do
     driven_by(:selenium_headless)

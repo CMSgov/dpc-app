@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Handles interactions with login.gov
-class LoginDotGovController < Devise::OmniauthCallbacksController
+class LoginDotGovController
   skip_before_action :verify_authenticity_token, only: :openid_connect
 
   def openid_connect

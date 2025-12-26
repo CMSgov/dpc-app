@@ -5,16 +5,6 @@
 # and config.ru via config.relative_url_root.
 #
 Rails.application.routes.draw do
-  devise_for :users, controllers: { sessions: 'users/sessions', omniauth_callbacks: 'login_dot_gov' }
-  devise_scope :user do
-    get '/users/auth/failure', to: 'login_dot_gov#failure', as: 'login_dot_gov_failure'
-    get '/users/auth/logged_out', to: 'login_dot_gov#logged_out'
-    get '/users/auth/no_account', to: 'login_dot_gov#no_account', as: 'no_account'
-    delete '/logout', to: 'login_dot_gov#logout', as: 'login_dot_gov_logout'
-    get 'active', to: 'users/sessions#active'
-    get 'timeout', to: 'users/sessions#timeout'
-  end
-
   # Defines the root path route ("/")
   root 'organizations#index'
 
@@ -23,7 +13,12 @@ Rails.application.routes.draw do
   # However, to complete the mimicing, it uses the Rails.application.routes.recognize_path
   # method, which does not work correctly for applications served on a subpath.
   match '/portal', to: 'organizations#index', via: :get
-
+  delete '/logout', to: 'login_dot_gov#logout', as: 'login_dot_gov_logout'
+  get '/auth/:provider/callback', to: 'users/sessions#create'
+  get '/users/sign_in', to: 'users/sessions#new', as: 'new_user_session'
+  delete '/users/sign_out', to: 'users/sessions#destroy', as: 'destroy_user_session'
+  get 'active', to: 'users/sessions#active', as: 'active'
+  get 'timeout', to: 'users/sessions#timeout', as: 'timeout'
   resources :organizations, only: [:index, :show, :new, :create] do
     resources :client_tokens, only: [:new, :create, :destroy]
     resources :public_keys, only: [:new, :create, :destroy]

@@ -5,6 +5,7 @@ require 'support/credential_resource_shared_examples'
 
 RSpec.describe 'PublicKeys', type: :request do
   include DpcClientSupport
+  include LoginSupport
 
   let(:terms_of_service_accepted_by) { create(:user) }
 
@@ -21,7 +22,7 @@ RSpec.describe 'PublicKeys', type: :request do
     context 'not logged in' do
       it 'redirects to login' do
         get '/organizations/no-such-id/public_keys/new'
-        expect(response).to redirect_to('/portal/users/sign_in')
+        expect(response).to redirect_to('/users/sign_in')
       end
     end
 
@@ -161,7 +162,7 @@ RSpec.describe 'PublicKeys', type: :request do
     context 'not logged in' do
       it 'redirects to login' do
         post '/organizations/no-such-id/public_keys'
-        expect(response).to redirect_to('/portal/users/sign_in')
+        expect(response).to redirect_to('/users/sign_in')
       end
     end
 
@@ -263,7 +264,7 @@ RSpec.describe 'PublicKeys', type: :request do
     context 'not logged in' do
       it 'redirects to login' do
         delete '/organizations/no-such-id/public_keys/no-such-id'
-        expect(response).to redirect_to('/portal/users/sign_in')
+        expect(response).to redirect_to('/users/sign_in')
       end
     end
 

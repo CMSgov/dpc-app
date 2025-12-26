@@ -3,6 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Invitations', type: :request do
+  include LoginSupport
   RSpec.shared_examples 'an invitation endpoint' do |method, path_suffix|
     let(:org) { invitation.provider_organization }
     let(:bad_org) { create(:provider_organization) }

@@ -4,12 +4,13 @@ require 'rails_helper'
 
 RSpec.describe 'CredentialDelegateInvitations', type: :request do
   include DpcClientSupport
+  include LoginSupport
 
   describe 'GET /new' do
     context 'not logged in' do
       it 'redirects to login' do
         get '/organizations/no-such-id/credential_delegate_invitations/new'
-        expect(response).to redirect_to('/portal/users/sign_in')
+        expect(response).to redirect_to('/users/sign_in')
       end
     end
 
