@@ -5,6 +5,14 @@
 # and config.ru via config.relative_url_root.
 #
 Rails.application.routes.draw do
+  # Former devise routes
+  get '/auth/failure', to: 'login_dot_gov#failure', as: 'login_dot_gov_failure'
+  get '/auth/logged_out', to: 'users/sessions#logged_out'
+  get '/auth/no_account', to: 'login_dot_gov#no_account', as: 'no_account'
+  delete '/logout', to: 'login_dot_gov#logout', as: 'login_dot_gov_logout'
+  get 'active', to: 'users/sessions#active', as: 'active'
+  get 'timeout', to: 'users/sessions#timeout', as: 'timeout'
+
   # Defines the root path route ("/")
   root 'organizations#index'
 
@@ -13,13 +21,6 @@ Rails.application.routes.draw do
   # However, to complete the mimicing, it uses the Rails.application.routes.recognize_path
   # method, which does not work correctly for applications served on a subpath.
   match '/portal', to: 'organizations#index', via: :get
-
-  get '/auth/failure', to: 'login_dot_gov#failure', as: 'login_dot_gov_failure'
-  get '/auth/logged_out', to: 'users/sessions#logged_out'
-  get '/auth/no_account', to: 'login_dot_gov#no_account', as: 'no_account'
-  delete '/logout', to: 'login_dot_gov#logout', as: 'login_dot_gov_logout'
-  get 'active', to: 'users/sessions#active', as: 'active'
-  get 'timeout', to: 'users/sessions#timeout', as: 'timeout'
 
   get '/users/sign_in', to: 'users/sessions#new', as: 'sign_in'
   delete '/users/sign_out', to: 'users/sessions#destroy', as: 'destroy_user_session'
