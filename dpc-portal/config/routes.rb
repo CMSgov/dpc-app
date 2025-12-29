@@ -12,6 +12,9 @@ Rails.application.routes.draw do
   delete '/logout', to: 'login_dot_gov#logout', as: 'login_dot_gov_logout'
   get 'active', to: 'users/sessions#active', as: 'active'
   get 'timeout', to: 'users/sessions#timeout', as: 'timeout'
+  get '/users/sign_in', to: 'users/sessions#new', as: 'sign_in'
+  delete '/users/sign_out', to: 'users/sessions#destroy', as: 'destroy_user_session'
+  get '/auth/login_dot_gov/callback', to: 'login_dot_gov#openid_connect'
 
   # Defines the root path route ("/")
   root 'organizations#index'
@@ -22,10 +25,6 @@ Rails.application.routes.draw do
   # method, which does not work correctly for applications served on a subpath.
   match '/portal', to: 'organizations#index', via: :get
 
-  get '/users/sign_in', to: 'users/sessions#new', as: 'sign_in'
-  delete '/users/sign_out', to: 'users/sessions#destroy', as: 'destroy_user_session'
-  get '/auth/login_dot_gov/callback', to: 'login_dot_gov#openid_connect'
-  get '/auth/:provider/callback', to: 'users/sessions#create'
 
   resources :organizations, only: [:index, :show, :new, :create] do
     resources :client_tokens, only: [:new, :create, :destroy]
