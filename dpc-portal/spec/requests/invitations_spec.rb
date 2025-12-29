@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'support/login_support'
 
 RSpec.describe 'Invitations', type: :request do
   include LoginSupport
@@ -156,7 +157,7 @@ RSpec.describe 'Invitations', type: :request do
       it 'should show error page if fail to proof' do
         org_id = invitation.provider_organization.id
         post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
-        get '/users/auth/failure'
+        get '/auth/failure'
         expect(response).to be_forbidden
         expect(response.body).to include(I18n.t('verification.fail_to_proof_text'))
       end
@@ -178,7 +179,7 @@ RSpec.describe 'Invitations', type: :request do
         it 'should not show step navigation' do
           org_id = invitation.provider_organization.id
           post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
-          get '/users/auth/failure'
+          get '/auth/failure'
           expect(response).to be_forbidden
           expect(response.body).to_not include('<span class="usa-step-indicator__current-step">')
         end
@@ -198,7 +199,7 @@ RSpec.describe 'Invitations', type: :request do
         it 'should show step 2' do
           org_id = invitation.provider_organization.id
           post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
-          get '/users/auth/failure'
+          get '/auth/failure'
           expect(response).to be_forbidden
           expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
         end
@@ -810,7 +811,7 @@ end
 
 def log_in
   OmniAuth.config.test_mode = true
-  OmniAuth.config.add_mock(:openid_connect,
+  OmniAuth.config.add_mock(:login_dot_gov,
                            { uid: '12345',
                              credentials: { expires_in: 899,
                                             token: 'bearer-token' },
@@ -818,7 +819,7 @@ def log_in
                              extra: { raw_info: { given_name: 'Bob',
                                                   family_name: 'Hoskins',
                                                   ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
-  post '/users/auth/openid_connect'
+  post '/auth/login_dot_gov'
   follow_redirect!
 end
 

@@ -2,7 +2,6 @@
 
 # Parent class of all controllers
 class ApplicationController < ActionController::Base
-  attr_accessor :current_user
   IDP_HOST = ENV.fetch('IDP_HOST')
   IDP_CLIENT_ID = "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV.fetch('ENV')}".freeze
 
@@ -15,14 +14,23 @@ class ApplicationController < ActionController::Base
   def active_url
     '/active'
   end
-  
+
   def current_user
-    @current_user = User.where(id: session['user']).first
+    @current_user ||= User.where(id: session['user']).first
   end
 
   def authenticate_user!
-    redirect_to new_user_session_path unless current_user
+    return if current_user
+
+    flash[:alert] = t('devise.failure.unauthenticated')
+    session[:user_return_to] = request.path
+    redirect_to sign_in_path
   end
+
+  def sign_in(user)
+    session['user'] = user.id
+  end
+
   private
 
   def check_user_verification

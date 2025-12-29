@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'support/login_support'
 
 RSpec.describe 'Organizations', type: :request do
   include DpcClientSupport

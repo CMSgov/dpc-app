@@ -2,6 +2,7 @@
 
 require 'rails_helper'
 require 'support/credential_resource_shared_examples'
+require 'support/login_support'
 
 RSpec.describe 'PublicKeys', type: :request do
   include DpcClientSupport

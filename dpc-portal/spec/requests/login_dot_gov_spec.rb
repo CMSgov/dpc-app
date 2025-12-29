@@ -3,12 +3,12 @@
 require 'rails_helper'
 
 RSpec.describe 'LoginDotGov', type: :request do
-  describe 'POST /users/auth/openid_connect' do
+  describe 'POST /auth/login_dot_gov' do
     RSpec.shared_examples 'an openid client' do
       context 'user exists' do
-        before { create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com') }
+        before { create(:user, uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com') }
         it 'should sign in a user' do
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(response.location).to eq organizations_url
           expect(response).to be_redirect
@@ -20,13 +20,13 @@ RSpec.describe 'LoginDotGov', type: :request do
           expect(Rails.logger).to receive(:info).with(['User logged in',
                                                        { actionContext: LoggingConstants::ActionContext::Authentication,
                                                          actionType: LoggingConstants::ActionType::UserLoggedIn }])
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
         end
         it 'should not add another user' do
-          expect(User.where(uid: '12345', provider: 'openid_connect').count).to eq 1
+          expect(User.where(uid: '12345', provider: 'login_dot_gov').count).to eq 1
           expect do
-            post '/users/auth/openid_connect'
+            post '/auth/login_dot_gov'
             follow_redirect!
           end.to change { User.count }.by(0)
         end
@@ -35,7 +35,7 @@ RSpec.describe 'LoginDotGov', type: :request do
       context 'user does not exist' do
         it 'should not persist user' do
           expect do
-            post '/users/auth/openid_connect'
+            post '/auth/login_dot_gov'
             follow_redirect!
           end.to change { User.count }.by(0)
         end
@@ -46,7 +46,7 @@ RSpec.describe 'LoginDotGov', type: :request do
     context 'IAL/2' do
       before do
         OmniAuth.config.test_mode = true
-        OmniAuth.config.add_mock(:openid_connect,
+        OmniAuth.config.add_mock(:login_dot_gov,
                                  { uid: '12345',
                                    credentials: { expires_in: 899,
                                                   token: },
@@ -61,20 +61,20 @@ RSpec.describe 'LoginDotGov', type: :request do
       it_behaves_like 'an openid client'
 
       context :user_exists do
-        before { create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com') }
+        before { create(:user, uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com') }
         it 'updates user names' do
           expect do
-            post '/users/auth/openid_connect'
+            post '/auth/login_dot_gov'
             follow_redirect!
           end.to change {
-                   User.where(uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
+                   User.where(uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com', given_name: 'Bob',
                               family_name: 'Hoskins').count
                  }.by 1
           expect(response.location).to eq organizations_url
         end
 
         it 'sets authentication token' do
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(request.session[:login_dot_gov_token]).to eq token
           expect(request.session[:login_dot_gov_token_exp]).to_not be_nil
@@ -84,7 +84,7 @@ RSpec.describe 'LoginDotGov', type: :request do
 
       context :user_does_not_exist do
         it 'does not sign in user' do
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(response.location).to eq organizations_url
           expect(response).to be_redirect
@@ -93,7 +93,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         end
 
         it 'sets authentication token' do
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(request.session[:login_dot_gov_token]).to eq token
           expect(request.session[:login_dot_gov_token_exp]).to_not be_nil
@@ -105,7 +105,7 @@ RSpec.describe 'LoginDotGov', type: :request do
     context 'IAL/1' do
       before do
         OmniAuth.config.test_mode = true
-        OmniAuth.config.add_mock(:openid_connect,
+        OmniAuth.config.add_mock(:login_dot_gov,
                                  { uid: '12345',
                                    info: { email: 'bob@example.com' },
                                    extra: { raw_info: { all_emails: %w[bob@example.com bob2@example.com],
@@ -116,21 +116,21 @@ RSpec.describe 'LoginDotGov', type: :request do
 
       context :user_exists do
         before do
-          create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
+          create(:user, uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com', given_name: 'Bob',
                         family_name: 'Hoskins')
         end
         it 'does not update user names' do
-          expect(User.where(uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
+          expect(User.where(uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com', given_name: 'Bob',
                             family_name: 'Hoskins').count).to eq 1
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(response.location).to eq organizations_url
-          expect(User.where(uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
+          expect(User.where(uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com', given_name: 'Bob',
                             family_name: 'Hoskins').count).to eq 1
         end
 
         it 'does not set authentication token' do
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(request.session[:login_dot_gov_token]).to be_nil
           expect(request.session[:login_dot_gov_token_exp]).to be_nil
@@ -139,7 +139,7 @@ RSpec.describe 'LoginDotGov', type: :request do
 
       context 'user does not exist' do
         it 'does not sign in user' do
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(response.location).to eq no_account_url
           expect(response).to be_redirect
@@ -152,12 +152,12 @@ RSpec.describe 'LoginDotGov', type: :request do
              { actionContext: LoggingConstants::ActionContext::Authentication,
                actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }]
           )
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
         end
 
         it 'does not set authentication token' do
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(request.session[:login_dot_gov_token]).to be_nil
           expect(request.session[:login_dot_gov_token_exp]).to be_nil
@@ -166,9 +166,9 @@ RSpec.describe 'LoginDotGov', type: :request do
     end
   end
 
-  describe 'Get /users/auth/failure' do
+  describe 'Get /auth/failure' do
     it 'should succeed' do
-      get '/users/auth/failure'
+      get '/auth/failure'
       expect(response).to be_ok
     end
 
@@ -177,7 +177,7 @@ RSpec.describe 'LoginDotGov', type: :request do
       expect(Rails.logger).to receive(:info).with(['User cancelled login',
                                                    { actionContext: LoggingConstants::ActionContext::Authentication,
                                                      actionType: LoggingConstants::ActionType::UserCancelledLogin }])
-      get '/users/auth/failure'
+      get '/auth/failure'
     end
   end
 
@@ -195,23 +195,9 @@ RSpec.describe 'LoginDotGov', type: :request do
     end
   end
 
-  describe 'Get /users/auth/logged_out' do
-    it 'should redirect to user_return_to' do
-      get '/organizations'
-      expect(request.session[:user_return_to]).to eq organizations_path
-      get '/users/auth/logged_out'
-      expect(response).to redirect_to(organizations_path)
-    end
-
-    it 'should redirect to new session if no user_return_to set' do
-      get '/users/auth/logged_out'
-      expect(response).to redirect_to(new_user_session_path)
-    end
-  end
-
-  describe 'Get /users/auth/no_account' do
+  describe 'Get /auth/no_account' do
     it 'should show logout button' do
-      get '/users/auth/no_account'
+      get '/auth/no_account'
       expect(response.body).to include 'Sign out of Login.gov'
     end
   end

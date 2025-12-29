@@ -8,8 +8,6 @@ include DpcPortalUtils
 
 Rails.application.config.middleware.use OmniAuth::Builder do
   OmniAuth.config.logger = Rails.logger
-  provider :developer if Rails.env.test?
-
   begin
     private_key = OpenSSL::PKey::RSA.new(ENV['LOGIN_GOV_PRIVATE_KEY'])
   rescue TypeError, OpenSSL::PKey::RSAError => e
@@ -18,7 +16,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
   end
   idp_host = ENV.fetch('IDP_HOST', 'idp.int.identitysandbox.gov')
   provider :openid_connect, {
-                    name: :ldg_ial1,
+                    name: :login_dot_gov,
                     issuer: "https://#{idp_host}/",
                     discovery: true,
                     scope: %i[openid email all_emails],
@@ -31,24 +29,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
                       host: idp_host,
                       identifier: "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
                       private_key: private_key,
-                      redirect_uri: "#{my_protocol_host}/portal/auth/ldg_ial1/callback"
-                    }
-                  }
-  provider :openid_connect, {
-                    name: :ldg_ial2,
-                    issuer: "https://#{idp_host}/",
-                    discovery: true,
-                    scope: %i[openid email all_emails profile social_security_number],
-                    response_type: :code,
-                    acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
-                    client_auth_method: :jwt_bearer,
-                    client_options: {
-                      port: 443,
-                      scheme: 'https',
-                      host: idp_host,
-                      identifier: "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
-                      private_key: private_key,
-                      redirect_uri: "#{my_protocol_host}/portal/auth/ldg_ial2/callback"
+                      redirect_uri: "#{my_protocol_host}/portal/auth/login_dot_gov/callback"
                     }
                   }
 end

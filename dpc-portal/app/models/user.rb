@@ -26,6 +26,7 @@ class User < ApplicationRecord
   def timeout_in
     self.class.timeout_in
   end
+
   def provider_links
     ao_org_links.includes(:provider_organization) +
       cd_org_links.where(disabled_at: nil).includes(:provider_organization)

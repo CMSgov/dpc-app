@@ -159,7 +159,7 @@ RSpec.describe 'ClientTokens', type: :request do
     context 'not logged in' do
       it 'redirects to login' do
         post '/organizations/no-such-id/client_tokens'
-        expect(response).to redirect_to('/portal/users/sign_in')
+        expect(response).to redirect_to('/users/sign_in')
       end
     end
 
@@ -224,7 +224,7 @@ RSpec.describe 'ClientTokens', type: :request do
     context 'not logged in' do
       it 'redirects to login' do
         delete '/organizations/no-such-id/client_tokens/no-such-id'
-        expect(response).to redirect_to('/portal/users/sign_in')
+        expect(response).to redirect_to('/users/sign_in')
       end
     end
 
