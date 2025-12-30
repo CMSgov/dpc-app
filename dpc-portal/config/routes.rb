@@ -6,7 +6,7 @@
 #
 Rails.application.routes.draw do
   # Former devise routes
-  get '/auth/failure', to: 'login_dot_gov#failure', as: 'login_dot_gov_failure'
+  get '/users/auth/failure', to: 'login_dot_gov#failure', as: 'login_dot_gov_failure'
   get '/auth/logged_out', to: 'users/sessions#logged_out'
   get '/auth/no_account', to: 'login_dot_gov#no_account', as: 'no_account'
   delete '/logout', to: 'login_dot_gov#logout', as: 'login_dot_gov_logout'

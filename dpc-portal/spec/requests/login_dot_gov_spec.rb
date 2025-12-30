@@ -168,7 +168,7 @@ RSpec.describe 'LoginDotGov', type: :request do
 
   describe 'Get /auth/failure' do
     it 'should succeed' do
-      get '/auth/failure'
+      get '/users/auth/failure'
       expect(response).to be_ok
     end
 
@@ -177,7 +177,7 @@ RSpec.describe 'LoginDotGov', type: :request do
       expect(Rails.logger).to receive(:info).with(['User cancelled login',
                                                    { actionContext: LoggingConstants::ActionContext::Authentication,
                                                      actionType: LoggingConstants::ActionType::UserCancelledLogin }])
-      get '/auth/failure'
+      get '/users/auth/failure'
     end
   end
 
