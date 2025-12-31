@@ -51,7 +51,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
       let(:expected_html) do
         <<~HTML
           <div class="usa-table-container--scrollable" tabindex="0">
-            <table class="usa-table usa-table--borderless organizations-list table-bg-transparent" style="table-layout: fixed; width: 100%;">
+            <table class="usa-table usa-table--borderless organizations-list table-bg-transparent header-top-border-in-body" style="table-layout: fixed; width: 100%;">
               <caption class="usa-sr-only">
                 Organizations you manage as the AO or CD
               </caption>
