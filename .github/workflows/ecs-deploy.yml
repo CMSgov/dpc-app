@@ -109,6 +109,13 @@ jobs:
             echo "image_tag=$EXPLICIT_TAG" >> "$GITHUB_OUTPUT"
           fi
           echo $image_tag
+
+      - name: Fail if non-release image tag used for upper environments
+        if: ${{ (inputs.env == 'sandbox' || inputs.env == 'prod') && !startsWith(steps.image-tag.outputs.image_tag, 'rls-r') }}
+        run: |
+          echo "Dev image detected '${{ steps.image-tag.outputs.image_tag }}'. Tag must start with 'rls-r'."
+          exit 1
+
       - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
         name: Slack Starting
         with:
