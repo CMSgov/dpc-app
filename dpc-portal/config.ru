@@ -4,6 +4,11 @@
 
 require_relative 'config/environment'
 
+require 'rack/rewrite'
+use Rack::Rewrite do
+  r301      '/',   '/portal'
+end
+
 # Ensure that route path helpers used in Engines are prefixed correctly
 # with the relative_url_root.
 #
