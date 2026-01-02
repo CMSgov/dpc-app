@@ -74,14 +74,14 @@ RSpec.describe Core::Table::HeaderComponent, type: :component do
     end
 
     context 'when the header has a sorted row' do
-      let(:component) { described_class.new(caption: 'caption', columns: %w[A B], sort: 1) }
+      let(:component) { described_class.new(caption: 'caption', columns: %w[A B], sorts: [1]) }
       let(:expected_html) do
         <<~HTML
           <caption aria-hidden="true" hidden>caption</caption>
           <thead>
             <tr>
                 <th scope="row" role="columnheader">A</th>
-                <th data-sortable scope="row" role="columnheader" aria-sort="ascending">B</th>
+                <th data-sortable scope="row" role="columnheader" aria-sort="descending">B</th>
             </tr>
           </thead>
         HTML

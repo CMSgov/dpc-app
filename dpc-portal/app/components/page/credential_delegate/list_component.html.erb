@@ -6,9 +6,10 @@
       <div>
         <h2>Active</h2>
         <% if @active_credential_delegates.present? %>
-          <%= render(Core::Table::TableComponent.new(id: 'active-cd-table', additional_classes: ['width-full'], sortable: false)) do %>
+          <%= render(Core::Table::TableComponent.new(id: 'active-cd-table', additional_classes: ['width-full'], sortable: true)) do %>
             <%= render(Core::Table::HeaderComponent.new(caption: 'Active Credential Delegate Table',
-                                                    columns: ['Name', 'Email', 'Active since'])) %>
+                                                        columns: ['Name', 'Email', 'Active since'],
+                                                        sorts: (0..2).to_a)) %>
             <%= render(Core::Table::RowComponent.with_collection(@active_credential_delegates, keys: ['full_name', 'email', 'activated_at'])) %>
           <% end %>
         <% else %>
@@ -18,9 +19,10 @@
       <div>
         <h2>Pending invitations</h2>
         <% if @pending_credential_delegates.present? %>
-          <%= render(Core::Table::TableComponent.new(id: 'pending-cd-table', additional_classes: ['width-full'], sortable: false)) do %>
+          <%= render(Core::Table::TableComponent.new(id: 'pending-cd-table', additional_classes: ['width-full'], sortable: true)) do %>
             <%= render(Core::Table::HeaderComponent.new(caption: 'Pending Credential Delegate Table',
-                                                    columns: ['Name', 'Email', ''])) %>
+                                                    columns: ['Name', 'Email', ''],
+                                                    sorts: (0..1).to_a)) %>
             <%= render(Core::Table::RowComponent.with_collection(@pending_credential_delegates, keys: ['full_name', 'email'], delete_path: organization_credential_delegate_invitations_path(@organization.path_id), obj_name: 'CD invitation')) %>
           <% end %>
       <% else %>
@@ -31,9 +33,10 @@
       <h2>Expired invitations</h2>
       <p>These invites expired. You can resend the invite to give them more time to accept.</p>
       <% if @expired_invitations.present? %>
-        <%= render(Core::Table::TableComponent.new(id: 'expired-invitation-table', additional_classes: ['width-full'], sortable: false)) do %>
+        <%= render(Core::Table::TableComponent.new(id: 'expired-invitation-table', additional_classes: ['width-full'], sortable: true)) do %>
           <%= render(Core::Table::HeaderComponent.new(caption: 'Expired Invitation Table',
-                                                      columns: ['Name', 'Email', 'Expired on'])) %>
+                                                      columns: ['Name', 'Email', 'Expired on'],
+                                                      sorts: (0..2).to_a)) %>
           <%= render(Core::Table::RowComponent.with_collection(@expired_invitations, keys: ['full_name', 'email', 'expired_at'], obj_name: 'expired invitation')) %>
         <% end %>
       <% else %>
