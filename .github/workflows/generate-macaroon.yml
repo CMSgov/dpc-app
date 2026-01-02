@@ -46,5 +46,6 @@ jobs:
           ALB_URL=$(aws elbv2 describe-load-balancers --names dpc-${{ inputs.env }}-frontend-internal | jq -r '.LoadBalancers[0].DNSName')
           token=$(curl --fail --silent -X POST ${ALB_URL}:9900/tasks/generate-token)
           if [[ -n $token ]]; then
-             echo $token | base64 -d -i || echo $token
+             echo $token | base64 -d -i 1>/dev/null && \
+                 aws ssm put-parameter --name '/dpc/${{ inputs.env }}/web/golden_macaroon' --type 'SecureString' --value "${token}" --key-id 'alias/dpc-${{ inputs.env }}-master-key' --overwrite
           fi
