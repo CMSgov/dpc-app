@@ -151,7 +151,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
         try (final Session session = this.factory.openSession()) {
             final String queryString = """
                 SELECT f
-                FROM job_queue_batch b, job_queue_batch_file f
+                FROM JobQueueBatch b, JobQueueBatchFile f
                 WHERE b.orgID = :orgID
                   AND b.batchID = :batchID
                   AND f.jobQueueBatchFileID.batchID = b.batchID
@@ -388,7 +388,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
 
                 logger.debug("Checking aggregatorID({}) for stuck jobs since ({})...", aggregatorID, stuckSince);
                 Long stuckBatchCount = session
-                        .createQuery("select count(*) from job_queue_batch where aggregatorID = :aggregatorID and status = 1 and updateTime < :updateTime", Long.class)
+                        .createQuery("select count(*) from JobQueueBatch where aggregatorID = :aggregatorID and status = 1 and updateTime < :updateTime", Long.class)
                         .setParameter("aggregatorID", aggregatorID)
                         .setParameter("updateTime", stuckSince)
                         .uniqueResult();

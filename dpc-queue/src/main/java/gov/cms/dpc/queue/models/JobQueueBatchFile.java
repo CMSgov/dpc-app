@@ -1,11 +1,7 @@
 package gov.cms.dpc.queue.models;
 
 import gov.cms.dpc.fhir.DPCResourceType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -15,7 +11,8 @@ import java.util.UUID;
  * A JobQueueBatchFile represents the output of a job. There is a one-to-one relationship with export files.
  * The object is immutable.
  */
-@Entity(name = "job_queue_batch_file")
+@Entity
+@Table(name = "job_queue_batch_file")
 public class JobQueueBatchFile implements Serializable {
     public static final long serialVersionUID = 42L;
 

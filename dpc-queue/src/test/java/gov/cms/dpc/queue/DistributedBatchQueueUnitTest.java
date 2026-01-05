@@ -36,7 +36,7 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 	@Test
 	void test_queueAge_returns_0_on_empty() {
 		Transaction transaction = session.beginTransaction();
-		session.createMutationQuery("DELETE from job_queue_batch").executeUpdate();
+		session.createMutationQuery("DELETE from JobQueueBatch").executeUpdate();
 		transaction.commit();
 
 		assertEquals(0, queue.queueAge());
