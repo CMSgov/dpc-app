@@ -188,7 +188,7 @@ public class DPCJsonLayoutUnitTest {
 
         Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
         assertEquals(expectedLogMessage, map.get("exception"));
-        assertEquals(sqlException.getClass().getName(), map.get("exceptionClass"));
+        assertEquals("ConstraintViolationException", map.get("exceptionClass"));
     }
 
     @Test
