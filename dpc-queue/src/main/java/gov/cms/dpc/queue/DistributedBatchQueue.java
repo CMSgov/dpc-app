@@ -14,6 +14,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -140,13 +141,28 @@ public class DistributedBatchQueue extends JobQueueCommon {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<JobQueueBatchFile> getJobBatchFile(UUID organizationID, String fileID) {
+        UUID batchID;
+        try {
+            batchID = getBatchIdFromFileName(fileID);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(String.format("Could not get batchId from fileId: %s", fileID), e);
+        }
+
         try (final Session session = this.factory.openSession()) {
-            final String queryString =
-                    "SELECT f FROM gov.cms.dpc.queue.models.JobQueueBatchFile f LEFT JOIN gov.cms.dpc.queue.models.JobQueueBatch b on b.jobID = f.jobID WHERE f.fileName = :fileName AND b.orgID = :org";
+            final String queryString = """
+                SELECT f
+                FROM job_queue_batch b, job_queue_batch_file f
+                WHERE b.orgID = :orgID
+                  AND b.batchID = :batchID
+                  AND f.jobQueueBatchFileID.batchID = b.batchID
+                  AND f.jobID = b.jobID
+                  AND f.fileName = :fileName
+                """;
 
             final Query query = session.createQuery(queryString, JobQueueBatchFile.class);
             query.setParameter("fileName", fileID);
-            query.setParameter("org", organizationID);
+            query.setParameter("orgID", organizationID);
+            query.setParameter("batchID", batchID);
             return query.uniqueResultOptional();
         }
     }
@@ -227,6 +243,18 @@ public class DistributedBatchQueue extends JobQueueCommon {
         } else {
             return Optional.empty();
         }
+    }
+
+    /**
+     * Takes a given filename of the format "batchId-seq.resourceType", extracts the batchId and converts it to a UUID.
+     * Throws an {@link IllegalArgumentException} if the filename isn't in the correct format or the UUID is bad.
+     *
+     * @param fileName Filename starting with the batch id.
+     * @return The batchId in the form of a UUID.
+     */
+    private UUID getBatchIdFromFileName(String fileName) {
+        final int UUID_SIZE = 36;
+        return UUID.fromString(StringUtils.left(fileName, UUID_SIZE));
     }
 
     @Override
