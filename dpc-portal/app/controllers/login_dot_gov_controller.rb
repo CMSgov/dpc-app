@@ -19,6 +19,11 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
     redirect_to path(user, auth)
   end
 
+  def no_account
+    render(Page::Utility::ErrorComponent.new(nil, 'no_account'),
+           status: :forbidden)
+  end
+
   def failure
     invitation_flow_match = session[:user_return_to]&.match(%r{/organizations/([0-9]+)/invitations/([0-9]+)})
     if invitation_flow_match
@@ -56,7 +61,7 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
                          actionType: LoggingConstants::ActionType::FailedLogin }])
     invitation = Invitation.find(invitation_id)
     if invitation.credential_delegate?
-      render(Page::Invitations::BadInvitationComponent.new(invitation, 'fail_to_proof'),
+      render(Page::Utility::ErrorComponent.new(invitation, 'fail_to_proof'),
              status: :forbidden)
     else
       render(Page::Invitations::AoFlowFailComponent.new(invitation, 'fail_to_proof', 1),
@@ -80,11 +85,10 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
 
   def path(user, auth)
     if user.blank? && auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
-      flash[:alert] = 'You must have an account to sign in.'
       Rails.logger.info(['User logged in without account',
                          { actionContext: LoggingConstants::ActionContext::Authentication,
                            actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }])
-      return new_user_session_url
+      return no_account_url
     end
     session.delete(:user_return_to) || organizations_path
   end

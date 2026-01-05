@@ -40,7 +40,9 @@ class IpAddressManager
     api_client.get_ip_addresses(api_id)
 
     if api_client.response_successful?
-      api_client.response_body['entities']
+      entities = api_client.response_body['entities']
+      entities.each { |e| e['ip_addr'] = e.dig('ipAddress', 'address') }
+      entities
     else
       Rails.logger.warn "Could not get IP addresses: #{api_client.response_body}"
       parse_errors(api_client.response_body) if api_client.response_body.present?
