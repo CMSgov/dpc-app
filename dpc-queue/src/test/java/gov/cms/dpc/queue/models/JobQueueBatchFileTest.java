@@ -45,4 +45,15 @@ class JobQueueBatchFileTest {
         assertEquals(1, a.getCount());
         assertEquals(new JobQueueBatchFile.JobQueueBatchFileID(batchID, DPCResourceType.Patient, 0), a.getJobQueueBatchFileID());;
     }
+
+    @Test
+    void testFileNameContainsBatchId() {
+        /*
+            In the /Data endpoint, when we search for a file we extract the batch ID from the file name to make our DB
+            query faster.  This is a quick check to make sure we haven't changed the filename and broken things.
+         */
+        final UUID batchID = UUID.randomUUID();
+        final String fileName = JobQueueBatchFile.formOutputFileName(batchID, DPCResourceType.Patient, 0);
+        assertEquals(batchID.toString(), fileName.substring(0, 36));
+    }
 }
