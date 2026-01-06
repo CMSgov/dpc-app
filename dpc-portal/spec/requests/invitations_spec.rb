@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'support/login_support'
 
 RSpec.describe 'Invitations', type: :request do
+  include LoginSupport
   RSpec.shared_examples 'an invitation endpoint' do |method, path_suffix|
     let(:org) { invitation.provider_organization }
     let(:bad_org) { create(:provider_organization) }
@@ -809,7 +811,7 @@ end
 
 def log_in
   OmniAuth.config.test_mode = true
-  OmniAuth.config.add_mock(:openid_connect,
+  OmniAuth.config.add_mock(:login_dot_gov,
                            { uid: '12345',
                              credentials: { expires_in: 899,
                                             token: 'bearer-token' },
@@ -817,7 +819,7 @@ def log_in
                              extra: { raw_info: { given_name: 'Bob',
                                                   family_name: 'Hoskins',
                                                   ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
-  post '/users/auth/openid_connect'
+  post '/auth/login_dot_gov'
   follow_redirect!
 end
 
