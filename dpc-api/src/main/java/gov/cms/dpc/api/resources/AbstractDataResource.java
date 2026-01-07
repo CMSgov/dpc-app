@@ -26,6 +26,18 @@ public abstract class AbstractDataResource {
     public abstract Response downloadExportFile(OrganizationPrincipal organizationPrincipal, RangeHeader range, Optional<String> fileChecksum, Optional<String> modifiedHeader, @NoHtml String fileID);
 
     @Path("/{fileID}/")
+    @HEAD
+    public abstract Response exportCompressedFileHead(OrganizationPrincipal organizationPrincipal, Optional<String> fileChecksum, Optional<String> modifiedHeader, @NoHtml String fileID);
+
+    @Path("/{fileID}/")
     @GET
     public abstract Response downloadCompressedExportFile(OrganizationPrincipal organizationPrincipal, @NoHtml String fileID);
+
+    @Path("/{fileID}/raw")
+    @HEAD
+    public abstract Response exportRawCompressedFileHead(OrganizationPrincipal organizationPrincipal, Optional<String> fileChecksum, Optional<String> modifiedHeader, @NoHtml String fileID);
+
+    @Path("/{fileID}/raw")
+    @GET
+    public abstract Response downloadRawCompressedExportFile(OrganizationPrincipal organizationPrincipal, RangeHeader range, Optional<String> fileChecksum, Optional<String> modifiedHeader, @NoHtml String fileID);
 }

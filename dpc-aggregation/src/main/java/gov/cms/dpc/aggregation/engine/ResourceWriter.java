@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Writes files from batches of FHIR Resources
@@ -39,6 +40,17 @@ class ResourceWriter {
      */
     static String formOutputFilePath(String exportPath, UUID batchID, DPCResourceType resourceType, int sequence) {
         return String.format("%s/%s.ndjson", exportPath, JobQueueBatchFile.formOutputFileName(batchID, resourceType, sequence));
+    }
+
+    /**
+     * Form the full file name of a gzipped output file
+     * @param batchID      - {@link UUID} ID of the batch job
+     * @param resourceType - {@link DPCResourceType} to append to filename
+     * @param sequence     - batch sequence number
+     * @return return the path
+     */
+    static String formGzippedOutputFilePath(String exportPath, UUID batchID, DPCResourceType resourceType, int sequence) {
+        return String.format("%s/%s.ndjson.gz", exportPath, JobQueueBatchFile.formOutputFileName(batchID, resourceType, sequence));
     }
 
     /**
@@ -94,8 +106,16 @@ class ResourceWriter {
             file.setPatientFileSize(dataSize);
             writer.flush();
             writer.close();
-            writeToFile(byteStream.toByteArray(), outputPath, shouldAppendToFile);
+            byte[] dataBytes = byteStream.toByteArray();
+            
+            // Write the regular .ndjson file
+            writeToFile(dataBytes, outputPath, shouldAppendToFile);
             logger.debug("Finished writing to '{}'", outputPath);
+            
+            // Also write the gzipped .ndjson.gz file
+            String gzippedOutputPath = formGzippedOutputFilePath(config.getExportPath(), job.getBatchID(), resourceType, sequence);
+            writeGzippedToFile(dataBytes, gzippedOutputPath, shouldAppendToFile);
+            logger.debug("Finished writing gzipped file to '{}'", gzippedOutputPath);
 
             return file;
         } catch(IOException ex) {
@@ -112,7 +132,7 @@ class ResourceWriter {
      *
      * @param bytes - Bytes to write
      * @param fileName - The fileName to write too
-     * @param append - If the
+     * @param append - If the file should be appended to
      * @throws IOException - If the write fails
      */
     private void writeToFile(byte[] bytes, String fileName, Boolean append) throws IOException {
@@ -122,6 +142,26 @@ class ResourceWriter {
         try (final var outputFile = new FileOutputStream(fileName, append)) {
             outputFile.write(bytes);
             outputFile.flush();
+        }
+    }
+
+    /**
+     * Write an array of bytes to a gzipped file. Name the file according to the supplied name
+     *
+     * @param bytes - Bytes to write (will be compressed)
+     * @param fileName - The fileName to write too (should end with .gz)
+     * @param append - If the file should be appended to
+     * @throws IOException - If the write fails
+     */
+    private void writeGzippedToFile(byte[] bytes, String fileName, Boolean append) throws IOException {
+        if (bytes.length == 0) {
+            return;
+        }
+        try (final var outputFile = new FileOutputStream(fileName, append);
+             final var gzipOutputStream = new GZIPOutputStream(outputFile)) {
+            gzipOutputStream.write(bytes);
+            gzipOutputStream.finish();
+            gzipOutputStream.flush();
         }
     }
 }
