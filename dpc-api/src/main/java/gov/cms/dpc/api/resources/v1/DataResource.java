@@ -36,6 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter.X_CONTENT_LENGTH;
 
@@ -164,7 +165,7 @@ public class DataResource extends AbstractDataResource {
 
         // Process the range request and return a partial stream, but only if they request bytes, ignore everything else
         if (rangeHeader != null) {
-            response = buildRangedRequest(fileID, filePointer.getFile(), rangeHeader);
+            response = buildRangedRequest(fileID, filePointer.getFile(), rangeHeader, "uncompressed", filePointer.getFileSize());
         } else {
             // Return a non-ranged streamed response if the requester doesn't actually send the range header, or if we don't understand the range unit
             response = buildDefaultResponse(fileID, filePointer);
@@ -181,16 +182,29 @@ public class DataResource extends AbstractDataResource {
     }
 
     private Response buildDefaultResponse(String fileID, FileManager.FilePointer filePointer) {
+        final long fileSize = filePointer.getFileSize();
+        final long startTime = System.nanoTime();
+        
         final StreamingOutput fileStream = outputStream -> {
+            final AtomicLong bytesTransferred = new AtomicLong(0);
             try (FileInputStream fileInputStream = new FileInputStream(filePointer.getFile())) {
                 // Use the IOUtils copy method, which internally buffers the files
-                IOUtils.copy(fileInputStream, outputStream);
+                bytesTransferred.set(IOUtils.copy(fileInputStream, outputStream));
             } catch (FileNotFoundException e) {
                 throw new WebApplicationException(String.format("Unable to open file `%s`.`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
+            } finally {
+                final long endTime = System.nanoTime();
+                final double durationSeconds = (endTime - startTime) / 1_000_000_000.0;
+                final double throughputMBps = (bytesTransferred.get() / 1_048_576.0) / durationSeconds;
+                
+                logger.info("dpcMetric=FileDownloadComplete,deliveryMethod=uncompressed,fileID={},fileSizeBytes={},bytesTransferred={},durationSeconds={},throughputMBps={}",
+                        fileID, fileSize, bytesTransferred.get(), durationSeconds, throughputMBps);
             }
             outputStream.flush();
         };
 
+        logger.info("dpcMetric=FileDownloadStart,deliveryMethod=uncompressed,fileID={},fileSizeBytes={}", fileID, fileSize);
+        
         return Response
                 .status(Response.Status.OK)
                 .entity(fileStream)
@@ -200,7 +214,7 @@ public class DataResource extends AbstractDataResource {
                 .build();
     }
 
-    private Response buildRangedRequest(String fileID, File file, RangeHeader range) {
+    private Response buildRangedRequest(String fileID, File file, RangeHeader range, String deliveryMethod, long totalFileSize) {
         if (!range.getUnit().equals(ACCEPTED_RANGE_VALUE)) {
             throw new WebApplicationException("Only `bytes` are acceptable as ranges", Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
         }
@@ -212,6 +226,10 @@ public class DataResource extends AbstractDataResource {
         if (len < 0) {
             throw new WebApplicationException("Range end cannot be before begin", Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
         }
+
+        final long startTime = System.nanoTime();
+        logger.info("dpcMetric=FileDownloadStart,deliveryMethod={},fileID={},rangeStart={},rangeEnd={},rangeSizeBytes={},totalFileSizeBytes={}",
+                deliveryMethod, fileID, rangeStart, rangeEnd, len, totalFileSize);
 
         RandomAccessFile randomAccessFile;
         try {
@@ -230,7 +248,7 @@ public class DataResource extends AbstractDataResource {
             throw new WebApplicationException(String.format("Unable to read file `%s`.`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
         }
 
-        final PartialFileStreamer fileStreamer = new PartialFileStreamer((int) len, randomAccessFile);
+        final PartialFileStreamer fileStreamer = new PartialFileStreamer((int) len, randomAccessFile, fileID, deliveryMethod, startTime);
 
         final String responseRange = String.format("bytes %d-%d/%d", rangeStart, rangeEnd, file.length());
         return Response
@@ -270,23 +288,37 @@ public class DataResource extends AbstractDataResource {
         private int length;
         private final RandomAccessFile raf;
         final byte[] buf = new byte[4096];
+        private final String fileID;
+        private final String deliveryMethod;
+        private final long startTime;
 
-        PartialFileStreamer(int length, RandomAccessFile raf) {
+        PartialFileStreamer(int length, RandomAccessFile raf, String fileID, String deliveryMethod, long startTime) {
             this.length = length;
             this.raf = raf;
+            this.fileID = fileID;
+            this.deliveryMethod = deliveryMethod;
+            this.startTime = startTime;
         }
 
         @Override
         public void write(OutputStream outputStream) throws IOException, WebApplicationException {
+            final AtomicLong bytesTransferred = new AtomicLong(0);
             try {
                 while (length != 0) {
                     int read = raf.read(buf, 0, Math.min(buf.length, length));
                     outputStream.write(buf, 0, read);
+                    bytesTransferred.addAndGet(read);
                     length -= read;
                 }
                 outputStream.flush();
             } finally {
                 raf.close();
+                final long endTime = System.nanoTime();
+                final double durationSeconds = (endTime - startTime) / 1_000_000_000.0;
+                final double throughputMBps = (bytesTransferred.get() / 1_048_576.0) / durationSeconds;
+                
+                logger.info("dpcMetric=FileDownloadComplete,deliveryMethod={},fileID={},bytesTransferred={},durationSeconds={},throughputMBps={},isRangeRequest=true",
+                        deliveryMethod, fileID, bytesTransferred.get(), durationSeconds, throughputMBps);
             }
         }
 
@@ -364,20 +396,36 @@ public class DataResource extends AbstractDataResource {
         // Probably want to log JobID() and can avoid extra lookups for testing
         // filePointer.getJobID()
 
+        final long compressedFileSize = filePointer.getFile().length();
+        final long uncompressedFileSize = filePointer.getFileSize(); // This is the decompressed size from metadata
+        final long startTime = System.nanoTime();
+
         // Chain stream to decompress data
         // Don't calculate Content-Length here to avoid decompressing twice.
         final StreamingOutput decompressedStream = outputStream -> {
+            final AtomicLong bytesTransferred = new AtomicLong(0);
             try (FileInputStream fileInputStream = new FileInputStream(filePointer.getFile());
                  GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream)) {
                 // Decompress and stream to output
-                IOUtils.copy(gzipInputStream, outputStream);
+                bytesTransferred.set(IOUtils.copy(gzipInputStream, outputStream));
             } catch (FileNotFoundException e) {
                 throw new WebApplicationException(String.format("Unable to open compressed file `%s`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
             } catch (IOException e) {
                 throw new WebApplicationException(String.format("Unable to decompress file `%s`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
+            } finally {
+                final long endTime = System.nanoTime();
+                final double durationSeconds = (endTime - startTime) / 1_000_000_000.0;
+                final double throughputMBps = (bytesTransferred.get() / 1_048_576.0) / durationSeconds;
+                final double compressionRatio = (double) compressedFileSize / uncompressedFileSize;
+                
+                logger.info("dpcMetric=FileDownloadComplete,deliveryMethod=compressed-decompressed,fileID={},compressedFileSizeBytes={},uncompressedFileSizeBytes={},bytesTransferred={},durationSeconds={},throughputMBps={},compressionRatio={}",
+                        fileID, compressedFileSize, uncompressedFileSize, bytesTransferred.get(), durationSeconds, throughputMBps, compressionRatio);
             }
             outputStream.flush();
         };
+
+        logger.info("dpcMetric=FileDownloadStart,deliveryMethod=compressed-decompressed,fileID={},compressedFileSizeBytes={},uncompressedFileSizeBytes={}",
+                fileID, compressedFileSize, uncompressedFileSize);
 
         final CacheControl cacheControl = new CacheControl();
         cacheControl.setNoCache(true);
@@ -499,7 +547,7 @@ public class DataResource extends AbstractDataResource {
         final Response response;
 
         if (rangeHeader != null) {
-            response = buildRangedRequest(fileID, filePointer.getFile(), rangeHeader);
+            response = buildRangedRequest(fileID, filePointer.getFile(), rangeHeader, "compressed-raw", compressedFileSize);
         } else {
             response = buildRawCompressedResponse(fileID, filePointer, compressedFileSize);
         }
@@ -515,14 +563,29 @@ public class DataResource extends AbstractDataResource {
     }
 
     private Response buildRawCompressedResponse(String fileID, FileManager.FilePointer filePointer, long compressedFileSize) {
+        final long uncompressedFileSize = filePointer.getFileSize(); // This is the decompressed size from metadata
+        final long startTime = System.nanoTime();
+        
         final StreamingOutput fileStream = outputStream -> {
+            final AtomicLong bytesTransferred = new AtomicLong(0);
             try (FileInputStream fileInputStream = new FileInputStream(filePointer.getFile())) {
-                IOUtils.copy(fileInputStream, outputStream);
+                bytesTransferred.set(IOUtils.copy(fileInputStream, outputStream));
             } catch (FileNotFoundException e) {
                 throw new WebApplicationException(String.format("Unable to open compressed file `%s`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
+            } finally {
+                final long endTime = System.nanoTime();
+                final double durationSeconds = (endTime - startTime) / 1_000_000_000.0;
+                final double throughputMBps = (bytesTransferred.get() / 1_048_576.0) / durationSeconds;
+                final double compressionRatio = (double) compressedFileSize / uncompressedFileSize;
+                
+                logger.info("dpcMetric=FileDownloadComplete,deliveryMethod=compressed-raw,fileID={},compressedFileSizeBytes={},uncompressedFileSizeBytes={},bytesTransferred={},durationSeconds={},throughputMBps={},compressionRatio={}",
+                        fileID, compressedFileSize, uncompressedFileSize, bytesTransferred.get(), durationSeconds, throughputMBps, compressionRatio);
             }
             outputStream.flush();
         };
+
+        logger.info("dpcMetric=FileDownloadStart,deliveryMethod=compressed-raw,fileID={},compressedFileSizeBytes={},uncompressedFileSizeBytes={}",
+                fileID, compressedFileSize, uncompressedFileSize);
 
         return Response
                 .status(Response.Status.OK)
