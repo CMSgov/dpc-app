@@ -8,7 +8,13 @@
 
         <!-- Connection settings -->
         <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
-        <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/dpc_queue</property>
+
+        <!--
+            This is set to dpc_attribution because to test the queue we need to be able to write jobs to the job queue
+            tables without dpc_aggregation picking them up and processing them.  Don't make the same mistake I did by
+            "fixing" it, and then wasting an entire day wondering why queue tests are failing.
+        -->
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/dpc_attribution</property>
         <property name="hibernate.connection.username">postgres</property>
         <property name="hibernate.connection.password">dpc-safe</property>
 
