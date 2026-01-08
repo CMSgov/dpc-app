@@ -137,7 +137,7 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 	void test_getJobBatchFile_handles_bad_file_name() {
 		UUID orgId = UUID.randomUUID();
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> queue.getJobBatchFile(orgId, "bad_file"));
-		assertEquals("Could not get batchId from fileId: bad_file", e.getMessage());
+		assertEquals("Could not parse file name: bad_file", e.getMessage());
 	}
 
 	@Test
@@ -145,7 +145,25 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 		UUID orgId = UUID.randomUUID();
 		String fileName = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-0.explanationofbenefit";
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> queue.getJobBatchFile(orgId, fileName));
-		assertEquals(String.format("Could not get batchId from fileId: %s", fileName), e.getMessage());
+		assertEquals(String.format("Could not parse file name: %s", fileName), e.getMessage());
+	}
+
+	@Test
+	void test_getJobBatchFile_handles_bad_sequence() {
+		UUID orgId = UUID.randomUUID();
+		UUID batchId = UUID.randomUUID();
+		String fileName = String.format("%s-A.explanationofbenefit", batchId);
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> queue.getJobBatchFile(orgId, fileName));
+		assertEquals(String.format("Could not parse file name: %s", fileName), e.getMessage());
+	}
+
+	@Test
+	void test_getJobBatchFile_handles_bad_resource() {
+		UUID orgId = UUID.randomUUID();
+		UUID batchId = UUID.randomUUID();
+		String fileName = String.format("%s-0.fake_resource", batchId);
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> queue.getJobBatchFile(orgId, fileName));
+		assertEquals(String.format("Could not parse file name: %s", fileName), e.getMessage());
 	}
 
 	@Test

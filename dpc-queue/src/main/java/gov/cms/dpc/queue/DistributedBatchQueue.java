@@ -14,7 +14,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -140,29 +139,28 @@ public class DistributedBatchQueue extends JobQueueCommon {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public Optional<JobQueueBatchFile> getJobBatchFile(UUID organizationID, String fileID) {
-        UUID batchID;
-        try {
-            batchID = getBatchIdFromFileName(fileID);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(String.format("Could not get batchId from fileId: %s", fileID), e);
-        }
+    public Optional<JobQueueBatchFile> getJobBatchFile(UUID organizationID, String fileName) {
+        final JobQueueBatchFile.JobQueueBatchFileID fileId = JobQueueBatchFile.getFileIdFromName(fileName);
 
         try (final Session session = this.factory.openSession()) {
             final String queryString = """
                 SELECT f
-                FROM JobQueueBatch b, JobQueueBatchFile f
-                WHERE b.orgID = :orgID
-                  AND b.batchID = :batchID
-                  AND f.jobQueueBatchFileID.batchID = b.batchID
-                  AND f.jobID = b.jobID
+                FROM JobQueueBatchFile f, JobQueueBatch b
+                WHERE f.jobQueueBatchFileID.batchID = :batchID
+                  AND f.jobQueueBatchFileID.sequence = :sequence
+                  AND f.jobQueueBatchFileID.resourceType = :resourceType
                   AND f.fileName = :fileName
+                  AND b.orgID = :orgID
+                  AND b.batchID = jobQueueBatchFileID.batchID
+                  AND b.jobID = f.jobID
                 """;
 
             final Query query = session.createQuery(queryString, JobQueueBatchFile.class);
-            query.setParameter("fileName", fileID);
+            query.setParameter("fileName", fileName);
             query.setParameter("orgID", organizationID);
-            query.setParameter("batchID", batchID);
+            query.setParameter("batchID", fileId.getBatchID());
+            query.setParameter("sequence", fileId.getSequence());
+            query.setParameter("resourceType", fileId.getResourceType());
             return query.uniqueResultOptional();
         }
     }
@@ -243,18 +241,6 @@ public class DistributedBatchQueue extends JobQueueCommon {
         } else {
             return Optional.empty();
         }
-    }
-
-    /**
-     * Takes a given filename of the format "batchId-seq.resourceType", extracts the batchId and converts it to a UUID.
-     * Throws an {@link IllegalArgumentException} if the filename isn't in the correct format or the UUID is bad.
-     *
-     * @param fileName Filename starting with the batch id.
-     * @return The batchId in the form of a UUID.
-     */
-    private UUID getBatchIdFromFileName(String fileName) {
-        final int UUID_SIZE = 36;
-        return UUID.fromString(StringUtils.left(fileName, UUID_SIZE));
     }
 
     @Override
