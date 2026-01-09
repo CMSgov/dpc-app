@@ -17,6 +17,7 @@ class DPCResourceTypeTests {
         assertEquals(resourceName.toLowerCase(), resourceType.getPath());
         assertEquals(resourceType, DPCResourceType.fromCode(resourceName));
         assertEquals(resourceName, DPCResourceType.toResource(resourceType).getSimpleName());
+        assertEquals(resourceType, DPCResourceType.fromPath(resourceType.getPath()));
     }
 
     @Test
@@ -24,5 +25,4 @@ class DPCResourceTypeTests {
         FHIRException exception = assertThrows(FHIRException.class, () -> DPCResourceType.fromCode("foo"));
         assertEquals("Unknown resource type: foo", exception.getMessage());
     }
-
 }

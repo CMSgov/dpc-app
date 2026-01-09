@@ -139,14 +139,28 @@ public class DistributedBatchQueue extends JobQueueCommon {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public Optional<JobQueueBatchFile> getJobBatchFile(UUID organizationID, String fileID) {
+    public Optional<JobQueueBatchFile> getJobBatchFile(UUID organizationID, String fileName) {
+        final JobQueueBatchFile.JobQueueBatchFileID fileId = JobQueueBatchFile.getFileIdFromName(fileName);
+
         try (final Session session = this.factory.openSession()) {
-            final String queryString =
-                    "SELECT f FROM gov.cms.dpc.queue.models.JobQueueBatchFile f LEFT JOIN gov.cms.dpc.queue.models.JobQueueBatch b on b.jobID = f.jobID WHERE f.fileName = :fileName AND b.orgID = :org";
+            final String queryString = """
+                SELECT f
+                FROM JobQueueBatchFile f, JobQueueBatch b
+                WHERE f.jobQueueBatchFileID.batchID = :batchID
+                  AND f.jobQueueBatchFileID.sequence = :sequence
+                  AND f.jobQueueBatchFileID.resourceType = :resourceType
+                  AND f.fileName = :fileName
+                  AND b.orgID = :orgID
+                  AND b.batchID = jobQueueBatchFileID.batchID
+                  AND b.jobID = f.jobID
+                """;
 
             final Query query = session.createQuery(queryString, JobQueueBatchFile.class);
-            query.setParameter("fileName", fileID);
-            query.setParameter("org", organizationID);
+            query.setParameter("fileName", fileName);
+            query.setParameter("orgID", organizationID);
+            query.setParameter("batchID", fileId.getBatchID());
+            query.setParameter("sequence", fileId.getSequence());
+            query.setParameter("resourceType", fileId.getResourceType());
             return query.uniqueResultOptional();
         }
     }
@@ -360,7 +374,7 @@ public class DistributedBatchQueue extends JobQueueCommon {
 
                 logger.debug("Checking aggregatorID({}) for stuck jobs since ({})...", aggregatorID, stuckSince);
                 Long stuckBatchCount = session
-                        .createQuery("select count(*) from job_queue_batch where aggregatorID = :aggregatorID and status = 1 and updateTime < :updateTime", Long.class)
+                        .createQuery("select count(*) from JobQueueBatch where aggregatorID = :aggregatorID and status = 1 and updateTime < :updateTime", Long.class)
                         .setParameter("aggregatorID", aggregatorID)
                         .setParameter("updateTime", stuckSince)
                         .uniqueResult();
