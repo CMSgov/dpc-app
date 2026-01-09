@@ -66,9 +66,9 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
           <caption aria-hidden="true" hidden>Public key table</caption>
           <thead>
             <tr>
-              <th scope="row" role="columnheader">Label</th>
-              <th scope="row" role="columnheader">Key ID</th>
-              <th data-sortable scope="row" role="columnheader" aria-sort="ascending">
+              <th data-sortable scope="row" role="columnheader" aria-sort="descending">Label</th>
+              <th data-sortable scope="row" role="columnheader" aria-sort="descending">Key ID</th>
+              <th data-sortable scope="row" role="columnheader" aria-sort="descending">
                 Creation Date
               </th>
               <th scope="row" role="columnheader"></th>
@@ -114,13 +114,13 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
           <caption aria-hidden="true" hidden>Public key table</caption>
           <thead>
             <tr>
-              <th scope="row" role="columnheader">
+              <th data-sortable scope="row" role="columnheader" aria-sort="descending">
                 Label
               </th>
-              <th scope="row" role="columnheader">
+              <th data-sortable scope="row" role="columnheader" aria-sort="descending">
                 Key ID
               </th>
-              <th data-sortable scope="row" role="columnheader" aria-sort="ascending">
+              <th data-sortable scope="row" role="columnheader" aria-sort="descending">
                 Creation Date
               </th>
               <th scope="row" role="columnheader">
@@ -167,13 +167,13 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
           <caption aria-hidden="true" hidden>Public IP address table</caption>
           <thead>
             <tr>
-              <th scope="row" role="columnheader">
+              <th data-sortable scope="row" role="columnheader" aria-sort="descending">
                 Label
               </th>
-              <th scope="row" role="columnheader">
+              <th data-sortable scope="row" role="columnheader" aria-sort="descending">
                 Public IP
               </th>
-              <th data-sortable scope="row" role="columnheader" aria-sort="ascending">
+              <th data-sortable scope="row" role="columnheader" aria-sort="descending">
                 Date Added
               </th>
               <th scope="row" role="columnheader">

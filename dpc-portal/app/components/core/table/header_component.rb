@@ -4,13 +4,13 @@ module Core
   module Table
     # Render a USWDS-styled table.
     class HeaderComponent < ViewComponent::Base
-      attr_accessor :caption, :columns, :sort
+      attr_accessor :caption, :columns, :sorts
 
-      def initialize(caption: '', columns: [], sort: -1)
+      def initialize(caption: '', columns: [], sorts: [])
         super
         @caption = caption
         @columns = columns
-        @sort = sort
+        @sorts = sorts
       end
     end
   end
