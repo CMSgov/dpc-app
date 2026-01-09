@@ -58,4 +58,34 @@ class JobQueueBatchFileTest {
         assertEquals(seq, fileId.getSequence());
         assertEquals(DPCResourceType.Patient, fileId.getResourceType());
     }
+
+    @Test
+    void testHandlesBadFileName() {
+        final String fileName = "bad_file_name";
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> JobQueueBatchFile.getFileIdFromName(fileName));
+        assertEquals(String.format("Could not parse file name: %s", fileName), e.getMessage());
+    }
+
+    @Test
+    void testHandlesBadUUIDInFileName() {
+        final String fileName = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx-0.explanationofbenefit";
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> JobQueueBatchFile.getFileIdFromName(fileName));
+        assertEquals(String.format("Could not parse file name: %s", fileName), e.getMessage());
+    }
+
+    @Test
+    void testHandlesBadSeqInFileName() {
+        final UUID batchId = UUID.randomUUID();
+        final String fileName = String.format("%s-X.fake_resource", batchId);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> JobQueueBatchFile.getFileIdFromName(fileName));
+        assertEquals(String.format("Could not parse file name: %s", fileName), e.getMessage());
+    }
+
+    @Test
+    void testHandlesBadResourceInFileName() {
+        final UUID batchId = UUID.randomUUID();
+        final String fileName = String.format("%s-0.fake_resource", batchId);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> JobQueueBatchFile.getFileIdFromName(fileName));
+        assertEquals(String.format("Could not parse file name: %s", fileName), e.getMessage());
+    }
 }
