@@ -161,11 +161,13 @@ function monitorJob(token, jobUrl){
 
 function testFileDownloads(token, outputFiles) {
   const baseUrl = urlRoot;
-  
+  const testType = __ENV.GZIP_TEST_TYPE;
+
   for (const file of outputFiles) {
     if (!file.url) {
       continue;
     }
+//    console.log('processing file.url: ', file.url);
 
     // Extract fileID from URL (e.g., "abc-123-0.patient" from "http://.../Data/abc-123-0.patient.ndjson")
     const urlMatch = file.url.match(/\/Data\/(.+)\.ndjson$/);
@@ -175,49 +177,56 @@ function testFileDownloads(token, outputFiles) {
     }
     
     const fileID = urlMatch[1];
-    
-    // Test uncompressed endpoint (original URL)
-    const uncompressedUrl = `${baseUrl}/Data/${fileID}.ndjson`;
-    const uncompressedResponse = authorizedGet(token, uncompressedUrl);
-    const checkUncompressed = check(
-      uncompressedResponse,
-      {
-        [`uncompressed download returns 200 for ${fileID}`]: res => res.status === 200,
-        [`uncompressed download has content for ${fileID}`]: res => res.body && res.body.length > 0,
-      }
-    );
-    if (!checkUncompressed) {
-      console.error(`Failed to download uncompressed file ${fileID}: ${uncompressedResponse.status}`);
-    }
 
-    // Test compressed-decompressed endpoint
-    const compressedDecompressedUrl = `${baseUrl}/Data/${fileID}.ndjson.gz`;
-    const compressedDecompressedResponse = authorizedGet(token, compressedDecompressedUrl);
-    const checkCompressedDecompressed = check(
-      compressedDecompressedResponse,
-      {
-        [`compressed-decompressed download returns 200 for ${fileID}`]: res => res.status === 200,
-        [`compressed-decompressed download has content for ${fileID}`]: res => res.body && res.body.length > 0,
-        [`compressed-decompressed has ndjson content type for ${fileID}`]: res => res.headers['Content-Type'] === 'application/ndjson',
+    if (testType == "uncompressed") {
+      // Test uncompressed endpoint (original URL)
+      const uncompressedUrl = `${baseUrl}/Data/${fileID}.ndjson`;
+      const uncompressedResponse = authorizedGet(token, uncompressedUrl);
+      console.log(`took ${uncompressedResponse.timings.duration} to process ${uncompressedUrl}, size:  ${uncompressedResponse.headers['Content-Length']}`);
+      const checkUncompressed = check(
+        uncompressedResponse,
+        {
+          [`uncompressed download returns 200 for ${fileID}`]: res => res.status === 200,
+          [`uncompressed download has content for ${fileID}`]: res => res.body && res.body.length > 0,
+        }
+      );
+      if (!checkUncompressed) {
+        console.error(`Failed to download uncompressed file ${fileID}: ${uncompressedResponse.status}`);
       }
-    );
-    if (!checkCompressedDecompressed) {
-      console.error(`Failed to download compressed-decompressed file ${fileID}: ${compressedDecompressedResponse.status}`);
     }
-
-    // Test compressed-raw endpoint
-    const compressedRawUrl = `${baseUrl}/Data/${fileID}.ndjson.gz/raw`;
-    const compressedRawResponse = authorizedGet(token, compressedRawUrl);
-    const checkCompressedRaw = check(
-      compressedRawResponse,
-      {
-        [`compressed-raw download returns 200 for ${fileID}`]: res => res.status === 200,
-        [`compressed-raw download has content for ${fileID}`]: res => res.body && res.body.length > 0,
-        [`compressed-raw has gzip content type for ${fileID}`]: res => res.headers['Content-Type'] === 'application/gzip',
+    else if (testType == "uncompress_on_fly") {
+      // Test compressed-decompressed endpoint
+      const compressedDecompressedUrl = `${baseUrl}/Data/${fileID}.ndjson.gz`;
+      const compressedDecompressedResponse = authorizedGet(token, compressedDecompressedUrl);
+      console.log(`took ${compressedDecompressedResponse.timings.duration} to process ${compressedDecompressedUrl}, size: ${compressedDecompressedResponse.headers['Content-Length']}`);
+      const checkCompressedDecompressed = check(
+        compressedDecompressedResponse,
+        {
+          [`compressed-decompressed download returns 200 for ${fileID}`]: res => res.status === 200,
+          [`compressed-decompressed download has content for ${fileID}`]: res => res.body && res.body.length > 0,
+          [`compressed-decompressed has ndjson content type for ${fileID}`]: res => res.headers['Content-Type'] === 'application/ndjson',
+        }
+      );
+      if (!checkCompressedDecompressed) {
+        console.error(`Failed to download compressed-decompressed file ${fileID}: ${compressedDecompressedResponse.status}`);
       }
-    );
-    if (!checkCompressedRaw) {
-      console.error(`Failed to download compressed-raw file ${fileID}: ${compressedRawResponse.status}`);
+    }
+    else {
+      // Test compressed-raw endpoint
+      const compressedRawUrl = `${baseUrl}/Data/${fileID}.ndjson.gz/raw`;
+      const compressedRawResponse = authorizedGet(token, compressedRawUrl);
+      console.log(`took ${compressedRawResponse.timings.duration} to process ${compressedRawUrl}, size: ${compressedRawResponse.headers['Content-Length']}`);
+      const checkCompressedRaw = check(
+        compressedRawResponse,
+        {
+          [`compressed-raw download returns 200 for ${fileID}`]: res => res.status === 200,
+          [`compressed-raw download has content for ${fileID}`]: res => res.body && res.body.length > 0,
+          [`compressed-raw has gzip content type for ${fileID}`]: res => res.headers['Content-Type'] === 'application/gzip',
+        }
+      );
+      if (!checkCompressedRaw) {
+        console.error(`Failed to download compressed-raw file ${fileID}: ${compressedRawResponse.status}`);
+      }
     }
   }
 }
