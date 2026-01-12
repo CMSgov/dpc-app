@@ -160,6 +160,11 @@
             <groupId>com.google.re2j</groupId>
             <artifactId>re2j</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http</artifactId>
+            <version>4.2.9.Final</version>
+        </dependency>
 
         <!--Test resources-->
         <dependency>
