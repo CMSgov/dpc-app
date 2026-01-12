@@ -2,6 +2,7 @@ package gov.cms.dpc.queue.models;
 
 import gov.cms.dpc.fhir.DPCResourceType;
 import jakarta.persistence.*;
+import org.hl7.fhir.exceptions.FHIRException;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -102,7 +103,7 @@ public class JobQueueBatchFile implements Serializable {
             batchId = UUID.fromString(fileName.substring(0, 36));
             sequence = Integer.parseInt(fileName.substring(37, 38));
             resourceType = DPCResourceType.fromPath(fileName.substring(39));
-        } catch (Exception e) {
+        } catch (IllegalArgumentException | IndexOutOfBoundsException | FHIRException e) {
             throw new IllegalArgumentException(String.format("Could not parse file name: %s", fileName), e);
         }
 

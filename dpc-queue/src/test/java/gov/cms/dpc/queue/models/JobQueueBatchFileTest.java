@@ -76,7 +76,7 @@ class JobQueueBatchFileTest {
     @Test
     void testHandlesBadSeqInFileName() {
         final UUID batchId = UUID.randomUUID();
-        final String fileName = String.format("%s-X.fake_resource", batchId);
+        final String fileName = String.format("%s-X.explanationofbenefit", batchId);
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> JobQueueBatchFile.getFileIdFromName(fileName));
         assertEquals(String.format("Could not parse file name: %s", fileName), e.getMessage());
     }
