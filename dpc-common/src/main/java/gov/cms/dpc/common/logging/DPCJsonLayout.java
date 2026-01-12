@@ -2,6 +2,7 @@ package gov.cms.dpc.common.logging;
 
 import ch.qos.logback.classic.pattern.ThrowableHandlingConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.IThrowableProxy;
 import com.google.re2j.Pattern;
 import io.dropwizard.logging.json.EventAttribute;
 import io.dropwizard.logging.json.layout.EventJsonLayout;
@@ -48,8 +49,14 @@ public class DPCJsonLayout extends EventJsonLayout {
         if(map.get(EXCEPTION) != null){
             String maskedExceptionDetails = maskPSQLData(map.get(EXCEPTION).toString());
             map.put(EXCEPTION, maskedExceptionDetails);
+            map.put("exceptionClass", getExceptionClass(event.getThrowableProxy()));
         }
         return map;
+    }
+
+    private String getExceptionClass(IThrowableProxy e) {
+        String[] tokens = e.getClassName().split("\\.");
+        return tokens[tokens.length - 1];
     }
 
     private void parseJsonMessageIfPossible(Map<String, Object> map,  String message) {
