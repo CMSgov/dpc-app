@@ -8,10 +8,11 @@ module Core
       #
       # @param caption textarea
       # @param columns textarea comma-delimited
-      # @param sort textarea
-      def parameterized(caption: 'caption', columns: nil, sort: nil)
+      # @param sort_indexes textarea comma-delimited
+      def parameterized(caption: 'caption', columns: nil, sort_indexes: nil)
         column_titles = columns.present? ? columns.split(',') : %w[A B]
-        render(Core::Table::HeaderComponent.new(caption:, columns: column_titles, sort: sort&.to_i))
+        sorts = sort_indexes.present? ? sort_indexes.split(',').map(&:to_i) : []
+        render(Core::Table::HeaderComponent.new(caption:, columns: column_titles, sorts:))
       end
 
       private
