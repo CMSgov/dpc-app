@@ -337,6 +337,18 @@ export function authorizedGet(token, url, headers = {}) {
 		  { 'headers': headers });
 }
 
+export function authorizedGetBinary(token, url, headers = {}) {
+  headers['Authorization'] = `Bearer ${token}`;
+  return http.get(
+    url.replace('localhost', 'host.docker.internal'),
+	{
+	  'headers': headers,
+	  'responseType': 'binary'
+	}
+  );
+}
+
+
 
 /**
  * Returns a Parameters object with the default headers we use for every request, along with any additional

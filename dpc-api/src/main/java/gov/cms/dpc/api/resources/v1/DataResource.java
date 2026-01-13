@@ -96,9 +96,10 @@ public class DataResource extends AbstractDataResource {
             return Response.status(Response.Status.NOT_MODIFIED).build();
         }
 
+        // .header(HttpHeaders.CONTENT_LENGTH, filePointer.getFileSize())
+        // NOTE: .getFileSize() won't work if file will be unzipped
         return Response.ok()
                 .header(HttpHeaders.ETAG, filePointer.getChecksum())
-                .header(HttpHeaders.CONTENT_LENGTH, filePointer.getFileSize())
                 .header(HttpHeaders.LAST_MODIFIED, filePointer.getCreationTime().toInstant().toEpochMilli())
                 .header(HttpHeaders.ACCEPT_RANGES, ACCEPTED_RANGE_VALUE)
                 .build();
