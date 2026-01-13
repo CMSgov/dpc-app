@@ -227,6 +227,7 @@ jobs:
         id: login-ecr-prod
         uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
       - name: Push image to registries for prod aws account
+        if: ${{ startsWith(needs.generate_docker_tag.outputs.docker_tag, 'rls-r') }}
         env:
           IMAGE_TAG: ${{ needs.generate_docker_tag.outputs.docker_tag }}
           REGISTRY: ${{ steps.login-ecr-prod.outputs.registry }}
