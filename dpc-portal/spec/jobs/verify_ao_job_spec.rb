@@ -275,7 +275,7 @@ RSpec.describe VerifyAoJob, type: :job do
         let(:links) { [] }
         before do
           3.times do
-            links << create(:ao_org_link, provider_organization:)
+            links << create(:ao_org_link, user: create(:user), provider_organization:)
           end
           links.first.update!(last_checked_at: 8.days.ago)
         end
