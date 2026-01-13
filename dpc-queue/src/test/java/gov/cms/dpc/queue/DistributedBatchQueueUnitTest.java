@@ -2,6 +2,7 @@ package gov.cms.dpc.queue;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.testing.AbstractMultipleDAOTest;
@@ -12,10 +13,10 @@ import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 	DistributedBatchQueueUnitTest() {
@@ -35,7 +36,7 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 	@Test
 	void test_queueAge_returns_0_on_empty() {
 		Transaction transaction = session.beginTransaction();
-		session.createMutationQuery("DELETE from job_queue_batch").executeUpdate();
+		session.createMutationQuery("DELETE from JobQueueBatch").executeUpdate();
 		transaction.commit();
 
 		assertEquals(0, queue.queueAge());
@@ -130,5 +131,57 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 		OffsetDateTime retrievedUpdateTime = jobQueueBatch.getUpdateTime().get();
 
 		assertTrue(retrievedUpdateTime.isAfter(initialUpdateTime));
+	}
+
+	@Test
+	void test_getJobBatchFile_handles_parsing_exception() {
+		UUID orgId = UUID.randomUUID();
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> queue.getJobBatchFile(orgId, "bad_file"));
+		assertEquals("Could not parse file name: bad_file", e.getMessage());
+	}
+
+	@Test
+	void test_getJobBatchFile_works() {
+		Transaction transaction = session.beginTransaction();
+
+		UUID orgId = UUID.randomUUID();
+		UUID jobId = UUID.randomUUID();
+		JobQueueBatch jobQueueBatch = new JobQueueBatch(
+			jobId,
+			orgId,
+			"orgNpi",
+			"providerNpi",
+			List.of(),
+			List.of(),
+			OffsetDateTime.now(),
+			OffsetDateTime.now(),
+			"reqIp",
+			"reqUrl",
+			true
+		);
+		UUID batchId = jobQueueBatch.getBatchID();
+
+		int sequence = 0;
+		DPCResourceType resource = DPCResourceType.ExplanationOfBenefit;
+		JobQueueBatchFile jobQueueBatchFile = new JobQueueBatchFile(
+			jobId,
+			batchId,
+			resource,
+			sequence,
+			0
+		);
+
+		session.persist(jobQueueBatch);
+		session.persist(jobQueueBatchFile);
+		transaction.commit();
+
+		String fileName = JobQueueBatchFile.formOutputFileName(batchId, resource, sequence);
+		Optional<JobQueueBatchFile> optionalJobQueueBatchFile = queue.getJobBatchFile(orgId, fileName);
+		assertTrue(optionalJobQueueBatchFile.isPresent());
+
+		JobQueueBatchFile retrievedJobQueueBatchFile = optionalJobQueueBatchFile.get();
+		assertEquals(fileName, retrievedJobQueueBatchFile.getFileName());
+		assertEquals(batchId, retrievedJobQueueBatchFile.getBatchID());
+		assertEquals(jobId, retrievedJobQueueBatchFile.getJobID());
 	}
 }

@@ -20,7 +20,8 @@ import java.util.*;
  * <p>
  * For additional information on the design: https://confluenceent.cms.gov/display/DAPC/Queue+v2+Notes
  */
-@Entity(name = "job_queue_batch")
+@Entity
+@Table(name = "job_queue_batch")
 public class JobQueueBatch implements Serializable {
 
     private static final long serialVersionUID = -578824686165779398L;

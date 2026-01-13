@@ -116,8 +116,8 @@ class QueueTest {
 
             final Transaction tx = session.beginTransaction();
             try {
-                session.createMutationQuery("delete from job_queue_batch_file").executeUpdate();
-                session.createMutationQuery("delete from job_queue_batch").executeUpdate();
+                session.createMutationQuery("delete from JobQueueBatchFile").executeUpdate();
+                session.createMutationQuery("delete from JobQueueBatch").executeUpdate();
             } finally {
                 tx.commit();
             }
@@ -171,7 +171,8 @@ class QueueTest {
                 () -> assertEquals(DPCResourceType.Patient, jobBatchFile.get().getResourceType(), "Should be a patient resource"));
 
         // Try with bad file ID and Org ID
-        assertFalse(queue.getJobBatchFile(orgID, "not a real file").isPresent(), "Should not find file");
+        String fakeFileName = JobQueueBatchFile.formOutputFileName(UUID.randomUUID(), DPCResourceType.ExplanationOfBenefit, 0);
+        assertFalse(queue.getJobBatchFile(orgID, fakeFileName).isPresent(), "Should not find file");
         assertFalse(queue.getJobBatchFile(UUID.randomUUID(), fileName).isPresent(), "Should not find file");
 
         // Work the second job

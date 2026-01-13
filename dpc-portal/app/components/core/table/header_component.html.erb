@@ -2,8 +2,8 @@
           <thead>
             <tr>
               <% columns.each_with_index do |title, index| %>
-                <% if sort == index %>
-                  <th data-sortable scope="row" role="columnheader" aria-sort="ascending">
+                <% if sorts.include?(index) %>
+                  <th data-sortable scope="row" role="columnheader" aria-sort="descending">
                 <% else %>
                   <th scope="row" role="columnheader">
                 <% end %>
