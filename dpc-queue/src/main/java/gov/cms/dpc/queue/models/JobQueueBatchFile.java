@@ -1,11 +1,8 @@
 package gov.cms.dpc.queue.models;
 
 import gov.cms.dpc.fhir.DPCResourceType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
+import org.hl7.fhir.exceptions.FHIRException;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -15,7 +12,8 @@ import java.util.UUID;
  * A JobQueueBatchFile represents the output of a job. There is a one-to-one relationship with export files.
  * The object is immutable.
  */
-@Entity(name = "job_queue_batch_file")
+@Entity
+@Table(name = "job_queue_batch_file")
 public class JobQueueBatchFile implements Serializable {
     public static final long serialVersionUID = 42L;
 
@@ -87,6 +85,29 @@ public class JobQueueBatchFile implements Serializable {
      */
     public static String formOutputFileName(UUID batchID, DPCResourceType resourceType, int sequence) {
         return String.format("%s-%s.%s", batchID.toString(), sequence, resourceType.getPath());
+    }
+
+    /**
+     * Takes a given filename of the format "batchId-seq.resourceType" and converts it into a {@link JobQueueBatchFileID}
+     * with a batchId, sequence and resource type.
+     * Throws an {@link IllegalArgumentException} if the filename isn't in the correct format.
+     *
+     * @param fileName The filename to convert.
+     * @return {@link JobQueueBatchFileID}.
+     */
+    public static JobQueueBatchFileID getFileIdFromName(String fileName) {
+        UUID batchId;
+        int sequence;
+        DPCResourceType resourceType;
+        try {
+            batchId = UUID.fromString(fileName.substring(0, 36));
+            sequence = Integer.parseInt(fileName.substring(37, 38));
+            resourceType = DPCResourceType.fromPath(fileName.substring(39));
+        } catch (IllegalArgumentException | IndexOutOfBoundsException | FHIRException e) {
+            throw new IllegalArgumentException(String.format("Could not parse file name: %s", fileName), e);
+        }
+
+        return new JobQueueBatchFileID(batchId, resourceType, sequence);
     }
 
     @EmbeddedId

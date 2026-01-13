@@ -31,17 +31,21 @@ public enum DPCResourceType {
 
 
     public static DPCResourceType fromCode(String code) throws FHIRException {
-        return switch (code) {
-            case "Bundle" -> Bundle;
-            case "Coverage" -> Coverage;
-            case "ExplanationOfBenefit" -> ExplanationOfBenefit;
-            case "Group" -> Group;
-            case "OperationOutcome" -> OperationOutcome;
-            case "Organization" -> Organization;
-            case "Patient" -> Patient;
-            case "Practitioner" -> Practitioner;
-            case "Schedule" -> Schedule;
-            default -> throw new FHIRException("Unknown resource type: " + code);
+        return fromPath(code.toLowerCase());
+    }
+
+    public static DPCResourceType fromPath(String path) throws FHIRException {
+        return switch (path) {
+            case "bundle" -> Bundle;
+            case "coverage" -> Coverage;
+            case "explanationofbenefit" -> ExplanationOfBenefit;
+            case "group" -> Group;
+            case "operationoutcome" -> OperationOutcome;
+            case "organization" -> Organization;
+            case "patient" -> Patient;
+            case "practitioner" -> Practitioner;
+            case "schedule" -> Schedule;
+            default -> throw new FHIRException("Unknown resource type: " + path);
         };
     }
 
