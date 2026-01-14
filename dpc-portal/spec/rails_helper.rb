@@ -74,3 +74,9 @@ RSpec.configure do |config|
     c.max_formatted_output_length = nil
   end
 end
+module Devise
+  def self.mappings
+    Rails.application.try(:reload_routes_unless_loaded)
+    @@mappings
+  end
+end
