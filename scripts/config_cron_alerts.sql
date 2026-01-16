@@ -30,7 +30,7 @@ BEGIN
             );
         $f$,
             NOW(),
-            NEW.return_message
+            CONCAT('runid=', NEW.runid, ' ' NEW.return_message)
         );
     END IF;
 
