@@ -7,6 +7,8 @@ import ch.qos.logback.core.read.ListAppender;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.UriInfo;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -63,6 +65,26 @@ class LogHeaderFilterUnitTest {
 		assertEquals(headerValueLogged, listAppender.list.get(0).getFormattedMessage());
 	}
 
+    @ParameterizedTest(name = "do not log for excluded uri: {0}")
+    @MethodSource("excludedUris")
+    void testDoesNotLogExcludedUris(String excludedPath) throws IOException {
+        final String headerValue = "fakeValue,fakervalue";
+        final String fakeUrl = "fake.com" + excludedPath;
+        final String pathWithoutPrependedSlash = excludedPath.substring(1);
+        ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
+        when(requestContext.getHeaderString(headerKey)).thenReturn(headerValue);
+        final URI fakeUri = URI.create(fakeUrl);
+        UriInfo uriInfo = mock(UriInfo.class);
+
+        when(uriInfo.getRequestUri()).thenReturn(fakeUri);
+        when(requestContext.getUriInfo()).thenReturn(uriInfo);
+        when(uriInfo.getPath()).thenReturn(pathWithoutPrependedSlash);
+
+        logHeaderFilter.filter(requestContext);
+
+        assertEquals(0, listAppender.list.size(), "Do not log for exclude uri: " + excludedPath);
+    }
+
     @Test
     void testLogMessageSanitization() throws IOException {
         final String headerValue = "fakeValue,fakervalue";
@@ -100,4 +122,8 @@ class LogHeaderFilterUnitTest {
 		assertEquals(Level.INFO, listAppender.list.get(0).getLevel());
 		assertEquals(headerValueLogged, listAppender.list.get(0).getFormattedMessage());
 	}
+
+    static Iterable<String> excludedUris() {
+        return LoggingConstants.EXCLUDED_URIS;
+    }
 }
