@@ -16,13 +16,13 @@ BEGIN
     IF NEW.status = 'failed' THEN
         EXECUTE format($f$
             SELECT aws_lambda.invoke(
-                aws_commons.create_lambda_function_arn('arn:aws:lambda:us-east-1:202533514245:function:dpc-prod-alarm-to-slack'),
+                aws_commons.create_lambda_function_arn('arn:aws:lambda:us-east-1:202533514245:function:bcda-prod-alarm-to-slack'),
                 $rec$
                 {
                   "Records": [
                     {
                       "messageId": "",
-                      "body": "{\"Type\": \"Notification\", \"Message\": \"{\\\"AlarmName\\\": \\\"Postgres Export Alert\\\", \\\"NewStateValue\\\": \\\"ALARM\\\", \\\"OldStateValue\\\": \\\"OK\\\", \\\"StateChangeTime\\\": \\\"%s\\\", \\\"AlarmDescription\\\": \\\"%s\\\"}\"}"
+                      "body": "{\"Type\": \"Notification\", \"Message\": \"{\\\"AlarmName\\\": \\\"dpc-prod-Postgres Export Alert\\\", \\\"NewStateValue\\\": \\\"ALARM\\\", \\\"OldStateValue\\\": \\\"OK\\\", \\\"StateChangeTime\\\": \\\"%s\\\", \\\"AlarmDescription\\\": \\\"%s\\\"}\"}"
                     }
                   ]
                 }
