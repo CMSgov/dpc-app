@@ -22,7 +22,7 @@ BEGIN
                   "Records": [
                     {
                       "messageId": "",
-                      "body": "{\"Type\": \"Notification\", \"Message\": \"{\\\"AlarmName\\\": \\\"dpc-prod-Postgres Export Alert\\\", \\\"NewStateValue\\\": \\\"ALARM\\\", \\\"OldStateValue\\\": \\\"OK\\\", \\\"StateChangeTime\\\": \\\"%s\\\", \\\"AlarmDescription\\\": \\\"%s\\\"}\"}"
+                      "body": "{\"Type\": \"Notification\", \"Message\": \"{\\\"AlarmName\\\": \\\"dpc-prod-postgres-export-alert\\\", \\\"NewStateValue\\\": \\\"ALARM\\\", \\\"OldStateValue\\\": \\\"OK\\\", \\\"StateChangeTime\\\": \\\"%s\\\", \\\"AlarmDescription\\\": \\\"%s\\\"}\"}"
                     }
                   ]
                 }
