@@ -109,6 +109,23 @@ jobs:
             echo "image_tag=$EXPLICIT_TAG" >> "$GITHUB_OUTPUT"
           fi
           echo $image_tag
+      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
+        name: Slack Starting
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            text:  "GHA Deployment to `${{ inputs.env }}` has started"
+            attachments:
+              - color: warning
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|ECS Deploy - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer
+                fields:
+                  - title: Image Tag
+                    value: ${{ steps.image-tag.outputs.image_tag }}
       - name: "Checkout code"
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
         with:
