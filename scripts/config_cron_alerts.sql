@@ -30,7 +30,7 @@ BEGIN
             );
         $f$,
             NOW(),
-            CONCAT('runid=', NEW.runid, ' ' NEW.return_message)
+            CONCAT('runid=', NEW.runid, '.  ', REGEXP_REPLACE(NEW.return_message, '[\n\r"]', ' ', 'g'))
         );
     END IF;
 
