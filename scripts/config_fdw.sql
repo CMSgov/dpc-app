@@ -51,7 +51,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT create_user_mapping(:'ENV' || '-dpc_queue-role', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
-SELECT create_user_mapping(:'ENV' || '-aggregation-dpc_queue-role', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
-SELECT create_user_mapping(:'ENV' || '-aggregation-dpc_queue-read-only-role', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
+SELECT create_user_mapping(:'queue_role', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
+SELECT create_user_mapping(:'aggregation_role', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
+SELECT create_user_mapping(:'aggregation_ro_role', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
 SELECT create_user_mapping('postgres', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
