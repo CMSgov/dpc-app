@@ -17,13 +17,13 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <div>
-            <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}">#{org.name}</a></div>
+            <div class="margin-bottom-5">← <a href="/organizations/#{org.path_id}">#{org.name}</a></div>
             <h1>Add public IP address</h1>
             <section class="box">
               <div>
                 <p>Limit of 8 addresses per organization.</p>
                 <h2>New IP address for #{org.name}</h2>
-                <form action="/portal/organizations/#{org.path_id}/ip_addresses" accept-charset="UTF-8" method="post">
+                <form action="/organizations/#{org.path_id}/ip_addresses" accept-charset="UTF-8" method="post">
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="label">Label</label>
                     <p class="usa-hint">Choose a descriptive name to make your IP address easily identifiable to you.</p>
