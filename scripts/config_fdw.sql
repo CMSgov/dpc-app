@@ -19,6 +19,15 @@ CREATE SERVER IF NOT EXISTS dpc_attribution
 FOREIGN DATA WRAPPER postgres_fdw
 OPTIONS (host 'localhost', dbname 'dpc_attribution', port '5432');
 
+-- Drop user mappings
+\set queue_role :ENV '-dpc_queue-role'
+\set aggregation_role :ENV '-dpc-aggregation-dpc_queue-role'
+\set aggregation_ro_role :ENV '-dpc-aggregation-dpc_queue-read-only-role'
+DROP USER MAPPING IF EXISTS FOR :"queue_role" SERVER "dpc_attribution";
+DROP USER MAPPING IF EXISTS FOR :"aggregation_role" SERVER "dpc_attribution";
+DROP USER MAPPING IF EXISTS FOR :"aggregation_ro_role" SERVER "dpc_attribution";
+DROP USER MAPPING IF EXISTS FOR "postgres" SERVER "dpc_attribution";
+
 -- Create user mappings for any role we might be logged in as and give them read only access
 CREATE OR REPLACE FUNCTION create_user_mapping(
     local_user TEXT,
