@@ -21,8 +21,8 @@ OPTIONS (host 'localhost', dbname 'dpc_attribution', port '5432');
 
 -- Drop user mappings
 \set queue_role :ENV '-dpc_queue-role'
-\set aggregation_role :ENV '-dpc-aggregation-dpc_queue-role'
-\set aggregation_ro_role :ENV '-dpc-aggregation-dpc_queue-read-only-role'
+\set aggregation_role :ENV '-aggregation-dpc_queue-role'
+\set aggregation_ro_role :ENV '-aggregation-dpc_queue-read-only-role'
 DROP USER MAPPING IF EXISTS FOR :"queue_role" SERVER "dpc_attribution";
 DROP USER MAPPING IF EXISTS FOR :"aggregation_role" SERVER "dpc_attribution";
 DROP USER MAPPING IF EXISTS FOR :"aggregation_ro_role" SERVER "dpc_attribution";
