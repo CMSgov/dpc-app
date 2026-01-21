@@ -20,7 +20,7 @@ on:
 jobs:
   deploy:
     name: 'Deploy API WAF sync'
-    uses: ./.github/workflows/update_fwdw_passwords.yml
+    uses: ./.github/workflows/update_fdw_passwords.yml
     permissions:
       id-token: write
       contents: read
