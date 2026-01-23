@@ -120,6 +120,15 @@ RSpec.describe Core::Alert::Component, type: :component do
         expect(page).to have_selector('.usa-alert.usa-alert--success')
       end
     end
+
+    context 'when the status is invalid' do
+      subject(:component) { described_class.new status: 'invalid' }
+
+      it 'renders nothing' do
+        render_component
+        expect(page).to_not have_selector('.usa-alert')
+      end
+    end
   end
 
   describe 'icon option' do
