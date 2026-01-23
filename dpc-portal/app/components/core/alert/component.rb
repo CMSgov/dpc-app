@@ -6,15 +6,13 @@ module Core
     class Component < ViewComponent::Base
       attr_accessor :status, :include_icon, :heading
 
+      VALID_STATUSES = %i[info warning error success notice alert].freeze
+
       def initialize(status: '', heading: '', include_icon: true)
         super
 
-        if %i[info warning error success notice alert].include?(status.to_sym) || status.blank?
-          @valid = true
-        else
-          log_error(status)
-          @valid = false
-        end
+        @valid = VALID_STATUSES.include?(status.to_sym) || status.blank?
+        log_error(status) unless @valid
 
         @status = case status
                   when '', 'notice', :notice
