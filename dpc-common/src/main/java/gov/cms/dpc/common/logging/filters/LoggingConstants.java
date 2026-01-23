@@ -6,5 +6,5 @@ public class LoggingConstants {
     private LoggingConstants() {
     }
 
-    static final Set<String> EXCLUDED_URIS = Set.of("/healthcheck", "/v1/version", "/api/v1/version", "/ping");
+    public static final Set<String> EXCLUDED_URIS = Set.of("/healthcheck", "/v1/version", "/api/v1/version", "/ping");
 }

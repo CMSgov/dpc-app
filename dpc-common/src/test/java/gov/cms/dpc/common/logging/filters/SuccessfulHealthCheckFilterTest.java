@@ -40,7 +40,7 @@ class SuccessfulHealthCheckFilterTest {
     }
 
     @ParameterizedTest(name = "deny excluded uri: {0}")
-    @MethodSource("excludedUris")
+    @MethodSource("gov.cms.dpc.common.logging.LoggingTestUtil#excludedUris")
     void test_denyExcludedUris(String uri) {
         Mockito.when(event.getRequestURI()).thenReturn(uri);
         Mockito.when(event.getResponse()).thenReturn(response);
@@ -48,9 +48,5 @@ class SuccessfulHealthCheckFilterTest {
 
         FilterReply reply = filter.decide(event);
         Assertions.assertEquals(FilterReply.DENY, reply);
-    }
-
-    static Iterable<String> excludedUris() {
-        return LoggingConstants.EXCLUDED_URIS; // Set implements Iterable
     }
 }
