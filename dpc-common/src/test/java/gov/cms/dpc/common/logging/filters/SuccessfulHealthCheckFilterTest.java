@@ -40,7 +40,7 @@ class SuccessfulHealthCheckFilterTest {
     }
 
     @ParameterizedTest(name = "deny excluded uri: {0}")
-    @MethodSource("gov.cms.dpc.common.logging.LoggingTestUtil#excludedUris")
+    @MethodSource("gov.cms.dpc.common.logging.filters.LoggingConstants#excludedUris")
     void test_denyExcludedUris(String uri) {
         Mockito.when(event.getRequestURI()).thenReturn(uri);
         Mockito.when(event.getResponse()).thenReturn(response);

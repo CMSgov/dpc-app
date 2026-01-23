@@ -66,7 +66,7 @@ class LogHeaderFilterUnitTest {
 	}
 
     @ParameterizedTest(name = "do not log for excluded uri: {0}")
-    @MethodSource("gov.cms.dpc.common.logging.LoggingTestUtil#excludedUris")
+    @MethodSource("gov.cms.dpc.common.logging.filters.LoggingConstants#excludedUris")
     void testDoesNotLogExcludedUris(String excludedPath) throws IOException {
         final String headerValue = "fakeValue,fakervalue";
         final String fakeUrl = "fake.com" + excludedPath;

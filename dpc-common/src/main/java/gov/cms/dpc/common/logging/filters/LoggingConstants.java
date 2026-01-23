@@ -7,4 +7,8 @@ public class LoggingConstants {
     }
 
     public static final Set<String> EXCLUDED_URIS = Set.of("/healthcheck", "/v1/version", "/api/v1/version", "/ping");
+
+    public static Iterable<String> excludedUris() {
+        return EXCLUDED_URIS;
+    }
 }
