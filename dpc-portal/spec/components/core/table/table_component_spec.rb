@@ -16,8 +16,10 @@ RSpec.describe Core::Table::TableComponent, type: :component do
     let(:component) { described_class.new }
     let(:expected_html) do
       <<~HTML
-        <table id="" class="usa-table">
-        </table>
+        <div class="usa-table-container--scrollable">
+          <table id="" class="usa-table">
+          </table>
+        </div>
       HTML
     end
 
@@ -31,8 +33,10 @@ RSpec.describe Core::Table::TableComponent, type: :component do
       let(:component) { described_class.new }
       let(:expected_html) do
         <<~HTML
-          <table id="" class="usa-table">
-          </table>
+          <div class="usa-table-container--scrollable">
+            <table id="" class="usa-table">
+            </table>
+          </div>
         HTML
       end
 
@@ -43,8 +47,10 @@ RSpec.describe Core::Table::TableComponent, type: :component do
       let(:component) { described_class.new(additional_classes: ['width-full']) }
       let(:expected_html) do
         <<~HTML
-          <table id="" class="width-full usa-table">
-          </table>
+          <div class="usa-table-container--scrollable">
+            <table id="" class="width-full usa-table">
+            </table>
+          </div>
         HTML
       end
 
@@ -55,9 +61,11 @@ RSpec.describe Core::Table::TableComponent, type: :component do
       let(:component) { described_class.new(sortable: true) }
       let(:expected_html) do
         <<~HTML
-          <table id="" class="usa-table">
-          </table>
-          <div class="usa-sr-only usa-table__announcement-region" aria-live="polite"></div>
+          <div class="usa-table-container--scrollable">
+            <table id="" class="usa-table">
+            </table>
+            <div class="usa-sr-only usa-table__announcement-region" aria-live="polite"></div>
+          </div>
         HTML
       end
 
@@ -68,8 +76,10 @@ RSpec.describe Core::Table::TableComponent, type: :component do
       let(:component) { described_class.new(id: 'table42') }
       let(:expected_html) do
         <<~HTML
-          <table class="usa-table" id="table42">
-          </table>
+          <div class="usa-table-container--scrollable">
+            <table class="usa-table" id="table42">
+            </table>
+          </div>
         HTML
       end
 

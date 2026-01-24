@@ -9,15 +9,18 @@ import com.google.common.collect.Maps;
 import io.dropwizard.logging.json.EventAttribute;
 import io.dropwizard.logging.json.layout.JsonFormatter;
 import io.dropwizard.logging.json.layout.TimestampFormatter;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
-import org.hibernate.exception.ConstraintViolationException;
-import java.sql.SQLException;
 
-import java.util.*;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -185,6 +188,7 @@ public class DPCJsonLayoutUnitTest {
 
         Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
         assertEquals(expectedLogMessage, map.get("exception"));
+        assertEquals("ConstraintViolationException", map.get("exceptionClass"));
     }
 
     @Test

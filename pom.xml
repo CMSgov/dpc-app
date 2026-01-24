@@ -48,7 +48,7 @@
         <newrelic.agent.version>8.21.0</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
         <h2.version>2.3.232</h2.version>
-        <aws.java.sdk.version>2.33.9</aws.java.sdk.version>
+        <aws.java.sdk.version>2.41.2</aws.java.sdk.version>
         <sonar.coverage.exclusions>**/MockBlueButton*.java</sonar.coverage.exclusions>
     </properties>
 
@@ -308,12 +308,17 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-access</artifactId>
-                <version>1.5.18</version>
+                <version>1.5.25</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.5.25</version>
             </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
-                <version>1.5.19</version>
+                <version>1.5.25</version>
             </dependency>
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>
