@@ -6,17 +6,14 @@ import ch.qos.logback.core.spi.FilterReply;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import io.dropwizard.logging.common.filter.FilterFactory;
 
-import java.util.Set;
-
 @JsonTypeName("successful-healthcheck")
 public class SuccessfulHealthCheckFilter implements FilterFactory<IAccessEvent> {
-    private static final Set<String> URIS = Set.of("/healthcheck", "/v1/version", "/api/v1/version", "/ping");
     @Override
     public Filter<IAccessEvent> build() {
         return new Filter<>() {
             @Override
             public FilterReply decide(IAccessEvent iAccessEvent) {
-                if (URIS.contains(iAccessEvent.getRequestURI()) && iAccessEvent.getResponse().getStatus() == 200) {
+                if (LoggingConstants.EXCLUDED_URIS.contains(iAccessEvent.getRequestURI()) && iAccessEvent.getResponse().getStatus() == 200) {
                     return FilterReply.DENY;
                 }
                 return FilterReply.NEUTRAL;

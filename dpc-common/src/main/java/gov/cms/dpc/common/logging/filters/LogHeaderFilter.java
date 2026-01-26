@@ -25,9 +25,15 @@ public class LogHeaderFilter implements ContainerRequestFilter {
 
         UriInfo uriInfo = requestContext.getUriInfo();
         String uriValue = null;
+
         if(uriInfo != null) {
             uriValue = String.valueOf(uriInfo.getRequestUri());
             uriValue = uriValue.replaceAll("[\n\r]", "_");
+
+            String uriPath = uriInfo.getPath();
+            if (uriPath != null && LoggingConstants.EXCLUDED_URIS.contains("/" + uriPath)) {
+                return;
+            }
         }
 		logger.info("{}={}, uri={}", headerKey, headerValue, uriValue);
 	}
