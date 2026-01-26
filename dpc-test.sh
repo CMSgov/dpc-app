@@ -56,7 +56,7 @@ docker compose -p start-v1-app up db --wait
 mvn -T 4 clean compile -Perror-prone -B -V -ntp
 mvn -T 4 -pl -dpc-api test # exclude api from threaded tests
 mvn -pl dpc-api test # test api
-mvn -T 4 package -Pci -ntp -DskipTests
+mvn package -Pci -ntp -DskipTests
 
 # Format the test results
 if [ -n "$REPORT_COVERAGE" ]; then
