@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 class SuccessfulHealthCheckFilterTest {
@@ -37,38 +39,13 @@ class SuccessfulHealthCheckFilterTest {
         Assertions.assertEquals(FilterReply.NEUTRAL, reply);
     }
 
-    @Test
-    void test_denyHealthcheckSuccess() {
-        Mockito.when(event.getRequestURI()).thenReturn("/healthcheck");
+    @ParameterizedTest(name = "deny excluded uri: {0}")
+    @MethodSource("gov.cms.dpc.common.logging.filters.LoggingConstants#excludedUris")
+    void test_denyExcludedUris(String uri) {
+        Mockito.when(event.getRequestURI()).thenReturn(uri);
         Mockito.when(event.getResponse()).thenReturn(response);
         Mockito.when(response.getStatus()).thenReturn(200);
-        FilterReply reply = filter.decide(event);
-        Assertions.assertEquals(FilterReply.DENY, reply);
-    }
 
-    @Test
-    void test_denyVersionCheck() {
-        Mockito.when(event.getRequestURI()).thenReturn("/v1/version");
-        Mockito.when(event.getResponse()).thenReturn(response);
-        Mockito.when(response.getStatus()).thenReturn(200);
-        FilterReply reply = filter.decide(event);
-        Assertions.assertEquals(FilterReply.DENY, reply);
-    }
-
-    @Test
-    void test_denyApiVersionCheck() {
-        Mockito.when(event.getRequestURI()).thenReturn("/api/v1/version");
-        Mockito.when(event.getResponse()).thenReturn(response);
-        Mockito.when(response.getStatus()).thenReturn(200);
-        FilterReply reply = filter.decide(event);
-        Assertions.assertEquals(FilterReply.DENY, reply);
-    }
-
-    @Test
-    void test_denyPing() {
-        Mockito.when(event.getRequestURI()).thenReturn("/ping");
-        Mockito.when(event.getResponse()).thenReturn(response);
-        Mockito.when(response.getStatus()).thenReturn(200);
         FilterReply reply = filter.decide(event);
         Assertions.assertEquals(FilterReply.DENY, reply);
     }
