@@ -53,7 +53,7 @@ fi
 
 # Build the application
 docker compose -p start-v1-app up db --wait
-mvn -T 4 clean compile -Perror-prone -B -V -ntp
+mvn clean compile -Perror-prone -B -V -ntp
 mvn -T 4 -pl -dpc-api test # exclude api from threaded tests
 mvn -pl dpc-api test # test api
 mvn package -Pci -ntp -DskipTests
