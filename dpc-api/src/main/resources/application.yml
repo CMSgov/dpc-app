@@ -60,6 +60,7 @@ logging:
     "org.hibernate.SQL": ERROR
     "gov.cms.dpc.api.auth": INFO
     "gov.cms.dpc.common.logging.filters": WARN
+    "gov.cms.dpc.common.logging.filters.LogHeaderFilter": INFO
   appenders:
     - type: console
       filterFactories:
