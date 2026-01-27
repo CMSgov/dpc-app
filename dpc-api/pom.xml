@@ -193,12 +193,6 @@
             <!-- Ideally, this should track the version used in Dropwizard-->
             <version>4.0.0-M1</version>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
