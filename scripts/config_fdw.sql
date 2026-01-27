@@ -19,6 +19,15 @@ CREATE SERVER IF NOT EXISTS dpc_attribution
 FOREIGN DATA WRAPPER postgres_fdw
 OPTIONS (host 'localhost', dbname 'dpc_attribution', port '5432');
 
+-- Drop user mappings
+\set queue_role :ENV '-dpc_queue-role'
+\set aggregation_role :ENV '-aggregation-dpc_queue-role'
+\set aggregation_ro_role :ENV '-aggregation-dpc_queue-read-only-role'
+DROP USER MAPPING IF EXISTS FOR :"queue_role" SERVER "dpc_attribution";
+DROP USER MAPPING IF EXISTS FOR :"aggregation_role" SERVER "dpc_attribution";
+DROP USER MAPPING IF EXISTS FOR :"aggregation_ro_role" SERVER "dpc_attribution";
+DROP USER MAPPING IF EXISTS FOR "postgres" SERVER "dpc_attribution";
+
 -- Create user mappings for any role we might be logged in as and give them read only access
 CREATE OR REPLACE FUNCTION create_user_mapping(
     local_user TEXT,
@@ -42,7 +51,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT create_user_mapping(:'ENV' || '-dpc_queue-role', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
-SELECT create_user_mapping(:'ENV' || '-aggregation-dpc_queue-role', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
-SELECT create_user_mapping(:'ENV' || '-aggregation-dpc_queue-read-only-role', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
+SELECT create_user_mapping(:'queue_role', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
+SELECT create_user_mapping(:'aggregation_role', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
+SELECT create_user_mapping(:'aggregation_ro_role', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
 SELECT create_user_mapping('postgres', 'dpc_attribution', :'ATTRIBUTION_DB_USER', :'ATTRIBUTION_DB_PASS');
