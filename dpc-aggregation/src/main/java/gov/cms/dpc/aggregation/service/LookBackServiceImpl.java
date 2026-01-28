@@ -2,6 +2,7 @@ package gov.cms.dpc.aggregation.service;
 
 import com.google.common.base.Joiner;
 import gov.cms.dpc.aggregation.engine.OperationsConfig;
+import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import io.dropwizard.hibernate.UnitOfWork;
 import jakarta.inject.Inject;
@@ -35,7 +36,7 @@ public class LookBackServiceImpl implements LookBackService {
     }
 
     @Override
-    @UnitOfWork(readOnly = true)
+    @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME, readOnly = true)
     @SuppressWarnings("JdkObsolete") // Date class used by FHIR stu3 Period model
     public LookBackAnswer getLookBackAnswer(ExplanationOfBenefit explanationOfBenefit, String organizationNPI, String practitionerNPI) {
         MDC.put(EOB_ID, explanationOfBenefit.getId());

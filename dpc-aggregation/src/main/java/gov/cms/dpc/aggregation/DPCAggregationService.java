@@ -2,8 +2,6 @@ package gov.cms.dpc.aggregation;
 
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.bluebutton.BlueButtonClientModule;
-import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
-import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
@@ -23,7 +21,6 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
 
     private final DPCQueueHibernateBundle<DPCAggregationConfiguration> queueHibernateBundle = new DPCQueueHibernateBundle<>();
     private final DPCConsentHibernateBundle<DPCAggregationConfiguration> consentHibernateBundle = new DPCConsentHibernateBundle<>();
-    private final DPCHibernateBundle<DPCAggregationConfiguration> hibernateBundle = new DPCHibernateBundle<>();
 
     public static void main(final String[] args) throws Exception {
         new DPCAggregationService().run(args);
@@ -51,7 +48,6 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
                 .modules(new DPCQueueHibernateModule<>(queueHibernateBundle),
                         new DPCConsentHibernateModule<>(consentHibernateBundle),
                         new AggregationAppModule(),
-                        new DPCHibernateModule<>(hibernateBundle),
                         new JobQueueModule<DPCAggregationConfiguration>(),
                         new BlueButtonClientModule<DPCAggregationConfiguration>())
                 .build();
@@ -61,7 +57,6 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         // so Dropwizard needs to initialize the HibernateBundle first to create the SessionFactory.
         bootstrap.addBundle(queueHibernateBundle);
         bootstrap.addBundle(consentHibernateBundle);
-        bootstrap.addBundle(hibernateBundle);
 
         bootstrap.addBundle(guiceBundle);
         bootstrap.addBundle(new MigrationsBundle<>() {

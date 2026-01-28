@@ -3,7 +3,6 @@ package gov.cms.dpc.aggregation;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
-import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.common.hibernate.consent.IDPCConsentDatabase;
 import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
 import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
@@ -18,12 +17,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public class DPCAggregationConfiguration extends Configuration implements BlueButtonBundleConfiguration, IDPCDatabase, IDPCConsentDatabase, IDPCQueueDatabase, DPCQueueConfig {
-
-    @Valid
-    @NotNull
-    @JsonProperty("database")
-    private final DataSourceFactory database = new DataSourceFactory();
+public class DPCAggregationConfiguration extends Configuration implements BlueButtonBundleConfiguration, IDPCConsentDatabase, IDPCQueueDatabase, DPCQueueConfig {
 
     @Valid
     @NotNull
@@ -77,11 +71,6 @@ public class DPCAggregationConfiguration extends Configuration implements BlueBu
 
     @NotEmpty
     private String fhirReferenceURL;
-
-    @Override
-    public DataSourceFactory getDatabase() {
-        return this.database;
-    }
 
     @Override
     public DataSourceFactory getQueueDatabase() {
