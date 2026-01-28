@@ -39,7 +39,9 @@ env:
 jobs:
   build-api:
     name: "Build and Test API"
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on:
+      - codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+      - instance-size:large
     steps:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
