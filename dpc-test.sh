@@ -53,8 +53,8 @@ fi
 
 # Build the application
 docker compose -p start-v1-app up db --wait
-mvn clean compile -Perror-prone -B -V -ntp
-mvn package -Pci -ntp
+mvn -T 4 clean compile -Perror-prone -B -V -ntp
+mvn -T 4 package -Pci -ntp
 
 # Format the test results
 if [ -n "$REPORT_COVERAGE" ]; then
