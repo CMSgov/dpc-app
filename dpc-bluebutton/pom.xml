@@ -29,10 +29,6 @@
         </dependency>
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-structures-dstu3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-structures-r4</artifactId>
             <scope>test</scope>
         </dependency>
@@ -59,42 +55,16 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.mock-server/mockserver-core -->
-        <dependency>
-            <groupId>org.mozilla</groupId>
-            <artifactId>rhino</artifactId>
-            <version>1.8.1</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity-engine-scripting</artifactId>
             <version>2.4.1</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.19.1</version>
-        </dependency>
-        <dependency>
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-netty-no-dependencies</artifactId>
             <version>${mockserverVersion}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-codec-socks</artifactId>
-            <version>4.2.2.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-handler-proxy</artifactId>
-            <version>4.2.9.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>net.minidev</groupId>
-            <artifactId>json-smart</artifactId>
-            <version>2.5.2</version>
         </dependency>
        <dependency>
           <groupId>gov.cms.dpc</groupId>
@@ -106,10 +76,6 @@
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
             <version>${bouncey.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
         </dependency>
     </dependencies>
 
