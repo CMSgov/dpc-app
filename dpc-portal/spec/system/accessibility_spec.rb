@@ -12,8 +12,9 @@ RSpec.describe 'Accessibility', type: :system do
   after do |test_case|
     next unless test_case.exception
 
-    url  = page.current_url rescue nil
-    warn "[Failure URL]: #{url}" if url
+    if page.current_url.present?
+      warn "[Failure URL]: #{page.current_url}"
+    end
   end
 
   let(:dpc_api_organization_id) { 'some-gnarly-guid' }
