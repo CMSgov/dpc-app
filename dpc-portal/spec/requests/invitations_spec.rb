@@ -646,9 +646,10 @@ RSpec.describe 'Invitations', type: :request do
           expect(user.given_name).to eq user_info_template['given_name']
           expect(user.family_name).to eq user_info_template['family_name']
         end
-        xit 'should not override pac_id on existing user' do
+        it 'should not override pac_id on existing user' do
           create(:user, email: user_info_template['email'], pac_id: :foo)
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          expect(response).to be_ok
           user = User.find_by(email: user_info_template['email'])
           # We have the fake CPI API Gateway return the ssn as pac_id
           expect(user.pac_id).to eq 'foo'

@@ -123,7 +123,7 @@ RSpec.describe 'LoginDotGov', type: :request do
       context :user_exists do
         before do
           user = create(:user, email: 'bob@example.com', given_name: 'Bob',
-                        family_name: 'Hoskins')
+                               family_name: 'Hoskins')
           create(:user_credential, user:, uid: '12345', provider: 'login_dot_gov')
         end
         it 'does not update user names' do

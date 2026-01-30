@@ -201,19 +201,28 @@ class InvitationsController < ApplicationController
   def user
     user_info = UserInfoService.new.user_info(session)
     @user = if @invitation.authorized_official? && (ENV['ENV'] == 'prod' || Rails.env.test?)
-              User.find_or_create_by(pac_id: session[:user_pac_id]) do |user_to_create|
-                assign_user_attributes(user_to_create, user_info)
-                log_create_user
-              end
+              ao_user(user_info)
             else
               User.find_or_create_by(email: @invitation.invited_email) do |user_to_create|
                 assign_user_attributes(user_to_create, user_info)
                 log_create_user
               end
             end
-    user_credential = UserCredential.find_or_create_by!(user: @user, provider: :login_dot_gov, uid: user_info['sub'])
+    UserCredential.find_or_create_by!(user: @user, provider: :login_dot_gov, uid: user_info['sub'])
     update_user(user_info)
     @user
+  end
+
+  def ao_user(user_info)
+    matching_users = User.where('email = ? OR pac_id = ?', @invitation.invited_email, session[:user_pac_id])
+    raise UserVerificationError('too many matching users') if matching_users.size > 1
+    return matching_users.first if matching_users.present?
+
+    user = User.new
+    assign_user_attributes(user, user_info)
+    user.save!
+    log_create_user
+    user
   end
 
   def assign_user_attributes(user_to_create, user_info)
@@ -361,3 +370,5 @@ class InvitationsController < ApplicationController
                          invitation: @invitation.id }])
   end
 end
+
+class UserMatchError < StandardError; end
