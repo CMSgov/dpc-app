@@ -176,6 +176,12 @@ class InvitationsController < ApplicationController
              status: :unprocessable_entity)
       false
     end
+  rescue MultiUserMatchError => e
+    logger.error(['User matches too many existing users',
+                  { actionContext: LoggingConstants::ActionContext::Registration, error: e.message }])
+
+    render(Page::Utility::ErrorComponent.new(@invitation, 'multi_user_match'))
+    nil
   end
 
   def create_cd_org_link
@@ -214,15 +220,21 @@ class InvitationsController < ApplicationController
   end
 
   def ao_user(user_info)
-    matching_users = User.where('email = ? OR pac_id = ?', @invitation.invited_email, session[:user_pac_id])
-    raise UserVerificationError('too many matching users') if matching_users.size > 1
-    return matching_users.first if matching_users.present?
+    matching_user = matching_ao
+    return matching_user if matching_user.present?
 
     user = User.new
     assign_user_attributes(user, user_info)
     user.save!
     log_create_user
     user
+  end
+
+  def matching_ao
+    matching_users = User.where('email = ? OR pac_id = ?', @invitation.invited_email, session[:user_pac_id])
+    raise MultiUserMatchError, "too many matching users | pac_id: #{session[:user_pac_id]}" if matching_users.size > 1
+
+    matching_users.first
   end
 
   def assign_user_attributes(user_to_create, user_info)
@@ -371,4 +383,4 @@ class InvitationsController < ApplicationController
   end
 end
 
-class UserMatchError < StandardError; end
+class MultiUserMatchError < StandardError; end
