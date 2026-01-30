@@ -1,23 +1,13 @@
 # See: https://github.com/corretto/corretto-docker/blob/main/17/jdk/alpine/3.20/Dockerfile
 FROM artifactory.cloud.cms.gov/docker/amazoncorretto:17-alpine-jdk
 
-# Add Maven Daemon
-ARG MVND_VERSION=1.0.3
-ADD https://github.com/apache/maven-mvnd/releases/download/${MVND_VERSION}/maven-mvnd-${MVND_VERSION}-linux-amd64.zip .
-
 # Install additional packages used across DPC images
-RUN apk update && apk add --no-cache aws-cli \
+RUN  apk update && apk add --no-cache aws-cli \
 && apk add --no-cache curl \
 && apk add --no-cache sudo \
-&& apk add --no-cache unzip
-
-# Install Maven Daemon
-RUN mkdir /opt/mvnd \
-&& unzip maven-mvnd-1.0.3-linux-amd64 \
-&& mv maven-mvnd-1.0.3-linux-amd64/* /opt/mvnd
 
 # Install AWS RDS cert bundle
-RUN mkdir /awscert \
+&& mkdir /awscert \
 && wget -P /awscert https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
 
 # Use the default command/entrypoint

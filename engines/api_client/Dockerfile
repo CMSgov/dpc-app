@@ -5,7 +5,17 @@ RUN apk update && \
     apk add --no-cache libffi-dev && \
     apk add --no-cache yaml-dev && \
     apk add --no-cache --virtual build-deps alpine-sdk tzdata && \
-    apk add --no-cache gcompat
+    apk add --no-cache gcompat && \
+    apk add --no-cache unzip \
+
+# Add Maven Daemon
+ARG MVND_VERSION=1.0.3
+ADD https://github.com/apache/maven-mvnd/releases/download/${MVND_VERSION}/maven-mvnd-${MVND_VERSION}-linux-amd64.zip .
+
+# Install Maven Daemon
+RUN mkdir /opt/mvnd && \
+unzip maven-mvnd-${MVND_VERSION}-linux-amd64 && \
+mv maven-mvnd-${MVND_VERSION}-linux-amd64/* /opt/mvnd
 
 # Set the working directory
 RUN mkdir /api-client
