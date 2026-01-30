@@ -65,11 +65,6 @@ jobs:
           curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
-      - name: Install Maven Daemon
-        run: |
-          curl -SL https://downloads.apache.org/maven/mvnd/1.0.3/maven-mvnd-1.0.3-linux-amd64.zip
-          mkdir -p /opt/mvnd
-          python -m zipfile -e maven-mvnd-1.0.3-linux-amd64 /opt/mvnd
       - name: "API Build"
         id: ci-app
         run: |
