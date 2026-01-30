@@ -105,7 +105,7 @@ services:
       - export-volume:/tmp
       - ./:/usr/src/mymaven
     working_dir: /usr/src/mymaven
-    command: sh -c "mvn verify -Pintegration-tests -am -ntp -Djib.skip=true"
+    command: sh -c "mvnd verify -Pintegration-tests -am -ntp -Djib.skip=true"
     network_mode: host
 
 volumes:
