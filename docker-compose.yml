@@ -98,6 +98,9 @@ services:
       retries: 10
 
   tests:
+    build:
+      context: .
+      dockerfile: docker/Dockerfiles/tests.Dockerfile
     image: maven:3.9.9-amazoncorretto-17
     env_file:
       - ./ops/config/decrypted/local.env
