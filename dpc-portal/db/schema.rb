@@ -69,6 +69,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_29_150757) do
     t.index ["user_id"], name: "index_credential_audit_logs_on_user_id"
   end
 
+  create_table "idp_uids", force: :cascade do |t|
+    t.string "provider"
+    t.string "uid"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["provider", "uid"], name: "index_idp_uids_on_provider_and_uid"
+  end
+
   create_table "invitations", force: :cascade do |t|
     t.bigint "provider_organization_id", null: false
     t.bigint "invited_by_id"
@@ -225,15 +234,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_29_150757) do
     t.index ["expires_at"], name: "index_solid_queue_semaphores_on_expires_at"
     t.index ["key", "value"], name: "index_solid_queue_semaphores_on_key_and_value"
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
-  end
-
-  create_table "user_credentials", force: :cascade do |t|
-    t.string "provider"
-    t.string "uid"
-    t.integer "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["provider", "uid"], name: "index_user_credentials_on_provider_and_uid"
   end
 
   create_table "users", force: :cascade do |t|

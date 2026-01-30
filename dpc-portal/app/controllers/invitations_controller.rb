@@ -214,7 +214,7 @@ class InvitationsController < ApplicationController
                 log_create_user
               end
             end
-    UserCredential.find_or_create_by!(user: @user, provider: :login_dot_gov, uid: user_info['sub'])
+    IdpUid.find_or_create_by!(user: @user, provider: :login_dot_gov, uid: user_info['sub'])
     update_user(user_info)
     @user
   end

@@ -741,34 +741,34 @@ RSpec.describe 'Invitations', type: :request do
           user = create(:user, pac_id: user_info_template['social_security_number'])
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          end.to change { UserCredential.where(user:).count }.by 1
+          end.to change { IdpUid.where(user:).count }.by 1
         end
         it 'should add credential if user with pac id exists and non-matching credential exists' do
           user = create(:user, pac_id: user_info_template['social_security_number'])
-          create(:user_credential, user:, uid: user_info_template['sub'], provider: :other_idp)
+          create(:idp_uid, user:, uid: user_info_template['sub'], provider: :other_idp)
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          end.to change { UserCredential.where(user:).count }.by 1
+          end.to change { IdpUid.where(user:).count }.by 1
         end
         it 'should not add credential if credential exists match on pac_id' do
           user = create(:user, pac_id: user_info_template['social_security_number'])
-          create(:user_credential, user:, uid: user_info_template['sub'], provider: :login_dot_gov)
+          create(:idp_uid, user:, uid: user_info_template['sub'], provider: :login_dot_gov)
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          end.to change { UserCredential.count }.by 0
+          end.to change { IdpUid.count }.by 0
         end
         it 'should add credential if user with email exists' do
           user = create(:user, email: user_info_template['email'])
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          end.to change { UserCredential.where(user:).count }.by 1
+          end.to change { IdpUid.where(user:).count }.by 1
         end
         it 'should not add credential if credential exists match on email' do
           user = create(:user, email: user_info_template['email'])
-          create(:user_credential, user:, uid: user_info_template['sub'], provider: :login_dot_gov)
+          create(:idp_uid, user:, uid: user_info_template['sub'], provider: :login_dot_gov)
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          end.to change { UserCredential.count }.by 0
+          end.to change { IdpUid.count }.by 0
         end
         it 'should save verification_status on user and org' do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"

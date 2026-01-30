@@ -8,7 +8,7 @@ RSpec.describe 'LoginDotGov', type: :request do
       context 'user exists' do
         before do
           user = create(:user, email: 'bob@example.com')
-          create(:user_credential, user:, uid: '12345', provider: 'login_dot_gov')
+          create(:idp_uid, user:, uid: '12345', provider: 'login_dot_gov')
         end
         it 'should sign in a user' do
           post '/auth/login_dot_gov'
@@ -27,11 +27,11 @@ RSpec.describe 'LoginDotGov', type: :request do
           follow_redirect!
         end
         it 'should not add another user credential' do
-          expect(UserCredential.where(uid: '12345', provider: 'login_dot_gov').count).to eq 1
+          expect(IdpUid.where(uid: '12345', provider: 'login_dot_gov').count).to eq 1
           expect do
             post '/auth/login_dot_gov'
             follow_redirect!
-          end.to change { UserCredential.count }.by(0)
+          end.to change { IdpUid.count }.by(0)
         end
       end
 
@@ -66,7 +66,7 @@ RSpec.describe 'LoginDotGov', type: :request do
       context :user_exists do
         before do
           user = create(:user, email: 'bob@example.com')
-          create(:user_credential, user:, uid: '12345', provider: 'login_dot_gov')
+          create(:idp_uid, user:, uid: '12345', provider: 'login_dot_gov')
         end
         it 'updates user names' do
           expect do
@@ -124,7 +124,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         before do
           user = create(:user, email: 'bob@example.com', given_name: 'Bob',
                                family_name: 'Hoskins')
-          create(:user_credential, user:, uid: '12345', provider: 'login_dot_gov')
+          create(:idp_uid, user:, uid: '12345', provider: 'login_dot_gov')
         end
         it 'does not update user names' do
           expect(User.where(email: 'bob@example.com', given_name: 'Bob',
