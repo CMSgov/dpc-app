@@ -579,7 +579,7 @@
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <configuration>
+                        <configuration combine.self="append">
                             <dataFile>${project.basedir}/../jacocoReport/${project.artifactId}/jacoco-it.exec</dataFile>
                         </configuration>
                         <executions>
@@ -659,7 +659,7 @@
                         <artifactId>jib-maven-plugin</artifactId>
                         <configuration>
                             <to>
-                                <tags>
+                                <tags combine.children="override">
                                     <tag>${project.version}</tag>
                                 </tags>
                             </to>
