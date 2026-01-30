@@ -631,14 +631,14 @@ RSpec.describe 'Invitations', type: :request do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
         end
         it 'should not create user if exists' do
-          create(:user, pac_id: '900888888', email: 'bob@testy.com')
+          create(:user, pac_id: user_info_template['social_security_number'], email: 'bob@testy.com')
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { User.count }.by 0
         end
         it 'should update name of user if changed' do
-          user = create(:user, pac_id: '900888888', email: 'bob@testy.com', given_name: :foo,
-                               family_name: :bar)
+          user = create(:user, pac_id: user_info_template['social_security_number'],
+                               email: 'bob@testy.com', given_name: :foo, family_name: :bar)
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { User.count }.by 0
@@ -719,19 +719,56 @@ RSpec.describe 'Invitations', type: :request do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
         end
         it 'should set pac_id on new user' do
-          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { User.count }.by(1)
           user = User.find_by(pac_id: user_info_template['social_security_number'])
           # We have the fake CPI API Gateway return the ssn as pac_id
           expect(user.pac_id).to eq user_info_template['social_security_number']
           expect(request.session[:user_pac_id]).to be_nil
         end
-        xit 'should set pac_id on existing user' do
-          create(:user, provider: :login_dot_gov, uid: user_info_template['sub'])
-          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          user = User.find_by(uid: user_info_template['sub'])
+        it 'should set pac_id on existing user' do
+          create(:user, email: user_info_template['email'])
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { User.count }.by 0
+          user = User.find_by(email: user_info_template['email'])
           # We have the fake CPI API Gateway return the ssn as pac_id
           expect(user.pac_id).to eq user_info_template['social_security_number']
           expect(request.session[:user_pac_id]).to be_nil
+        end
+        it 'should add credential if user with pac id exists' do
+          user = create(:user, pac_id: user_info_template['social_security_number'])
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { UserCredential.where(user:).count }.by 1
+        end
+        it 'should add credential if user with pac id exists and non-matching credential exists' do
+          user = create(:user, pac_id: user_info_template['social_security_number'])
+          create(:user_credential, user:, uid: user_info_template['sub'], provider: :other_idp)
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { UserCredential.where(user:).count }.by 1
+        end
+        it 'should not add credential if credential exists match on pac_id' do
+          user = create(:user, pac_id: user_info_template['social_security_number'])
+          create(:user_credential, user:, uid: user_info_template['sub'], provider: :login_dot_gov)
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { UserCredential.count }.by 0
+        end
+        it 'should add credential if user with email exists' do
+          user = create(:user, email: user_info_template['email'])
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { UserCredential.where(user:).count }.by 1
+        end
+        it 'should not add credential if credential exists match on email' do
+          user = create(:user, email: user_info_template['email'])
+          create(:user_credential, user:, uid: user_info_template['sub'], provider: :login_dot_gov)
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { UserCredential.count }.by 0
         end
         it 'should save verification_status on user and org' do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
