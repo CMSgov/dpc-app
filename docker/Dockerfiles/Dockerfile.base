@@ -9,15 +9,15 @@ ADD https://github.com/apache/maven-mvnd/releases/download/${MVND_VERSION}/maven
 RUN apk update && apk add --no-cache aws-cli \
 && apk add --no-cache curl \
 && apk add --no-cache sudo \
-&& apk add --no-cache unzip \
+&& apk add --no-cache unzip
 
 # Install Maven Daemon
-&& mkdir /opt/mvnd \
+RUN mkdir /opt/mvnd \
 && unzip maven-mvnd-1.0.3-linux-amd64 \
-&& mv maven-mvnd-1.0.3-linux-amd64/* /opt/mvnd \
+&& mv maven-mvnd-1.0.3-linux-amd64/* /opt/mvnd
 
 # Install AWS RDS cert bundle
-&& mkdir /awscert \
+RUN mkdir /awscert \
 && wget -P /awscert https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
 
 # Use the default command/entrypoint
