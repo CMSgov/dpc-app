@@ -200,10 +200,18 @@ class InvitationsController < ApplicationController
 
   def user
     user_info = UserInfoService.new.user_info(session)
-    @user = User.find_or_create_by!(provider: :login_dot_gov, uid: user_info['sub']) do |user_to_create|
-      assign_user_attributes(user_to_create, user_info)
-      log_create_user
-    end
+    @user = if @invitation.authorized_official? && (ENV['ENV'] == 'prod' || Rails.env.test?)
+              User.find_or_create_by(pac_id: session[:user_pac_id]) do |user_to_create|
+                assign_user_attributes(user_to_create, user_info)
+                log_create_user
+              end
+            else
+              User.find_or_create_by(email: @invitation.invited_email) do |user_to_create|
+                assign_user_attributes(user_to_create, user_info)
+                log_create_user
+              end
+            end
+    user_credential = UserCredential.find_or_create_by!(user: @user, provider: :login_dot_gov, uid: user_info['sub'])
     update_user(user_info)
     @user
   end

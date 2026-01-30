@@ -7,7 +7,7 @@ class LoginDotGovController < ApplicationController
   def openid_connect
     auth = request.env['omniauth.auth']
 
-    user = User.find_by(provider: auth.provider, uid: auth.uid)
+    user = UserCredential.find_by(provider: auth.provider, uid: auth.uid)&.user
     if user
       sign_in(user)
       session[:logged_in_at] = Time.now
