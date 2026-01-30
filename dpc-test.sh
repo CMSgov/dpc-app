@@ -53,12 +53,14 @@ fi
 
 # Build the application
 docker compose -p start-v1-app up db --wait
-mvn -T 4 clean compile -Perror-prone -B -V -ntp
-mvn -T 4 package -Pci -ntp
+mvnd clean compile -Perror-prone -B -V -ntp
+mvnd test -pl '!dpc-api'
+mvn test -pl dpc-api
+mvnd package -Pci -ntp -DskipTests
 
 # Format the test results
 if [ -n "$REPORT_COVERAGE" ]; then
-  mvn jacoco:report -ntp
+  mvnd jacoco:report -ntp
 fi
 
 docker compose -p start-v1-app down
@@ -79,7 +81,7 @@ docker compose -p start-v1-app down -t 60
 
 # Collect the coverage reports for the Docker integration tests
 if [ -n "$REPORT_COVERAGE" ]; then
-  mvn jacoco:report-integration -Pci -ntp
+  mvnd jacoco:report-integration -Pci -ntp
 fi
 
 echo "┌──────────────────────────────────────────┐"
