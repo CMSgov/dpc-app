@@ -220,21 +220,16 @@ class InvitationsController < ApplicationController
   end
 
   def ao_user(user_info)
-    matching_user = matching_ao
-    return matching_user if matching_user.present?
+    matching_users = User.where('email = ? OR pac_id = ?', @invitation.invited_email, session[:user_pac_id])
+    raise MultiUserMatchError, "too many matching users | pac_id: #{session[:user_pac_id]}" if matching_users.size > 1
+
+    return matching_users.first if matching_users.present?
 
     user = User.new
     assign_user_attributes(user, user_info)
     user.save!
     log_create_user
     user
-  end
-
-  def matching_ao
-    matching_users = User.where('email = ? OR pac_id = ?', @invitation.invited_email, session[:user_pac_id])
-    raise MultiUserMatchError, "too many matching users | pac_id: #{session[:user_pac_id]}" if matching_users.size > 1
-
-    matching_users.first
   end
 
   def assign_user_attributes(user_to_create, user_info)
