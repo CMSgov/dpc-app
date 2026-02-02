@@ -1,3 +1,4 @@
+<% if @valid %>
 <div class="usa-alert usa-alert--<%= status %> <%= heading.present? ? '' : ' usa-alert--slim' %> <%= include_icon ? '' : 'usa-alert--no-icon' %>">
     <div class="usa-alert__body" role="complementary">
       <% if heading.present? %>
@@ -8,3 +9,4 @@
       </p>
     </div>
 </div>
+<% end %>

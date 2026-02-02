@@ -8,6 +8,7 @@ module LoggingConstants
     Authentication = 'Authentication'
     BatchVerificationCheck = 'BatchVerificationCheck'
     HealthCheck = 'HealthCheck'
+    Rendering = 'Rendering'
   end
 
   module ActionType
@@ -47,5 +48,7 @@ module LoggingConstants
 
     InvalidInvitation = 'InvalidInvitation'
     UnacceptableInvitation = 'UnacceptableInvitation'
+
+    InvalidFlashStatus = 'InvalidFlashStatus'
   end
 end
