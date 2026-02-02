@@ -10,7 +10,7 @@ psql -U {MASTER_DB_USER} \
 -v ENV={ENV}
 -v ATTRIBUTION_DB_USER={ATTRIBUTION_READ_ONLY_USER} \
 -v ATTRIBUTION_DB_PASS='{ATTRIBUTION_READ_ONLY_DB_PASS}' \
--f config_fdw.sql
+-f scripts/config_fdw.sql
 */
 
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;

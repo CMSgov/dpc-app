@@ -10,7 +10,7 @@ psql -U {MASTER_DB_USER} \
 -d postgres \
 -h {DB_ENDPOINT} \
 -v LAMBDA_ARN={LAMBDA_ARN}
--f config_cron_alerts.sql
+-f scripts/config_cron_alerts.sql
 */
 
 CREATE OR REPLACE FUNCTION cron.check_cron_status() RETURNS TRIGGER AS $$

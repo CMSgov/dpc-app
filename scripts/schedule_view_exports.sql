@@ -7,7 +7,7 @@ Run with:
 psql -U {MASTER_DB_USER} \
 -d postgres \
 -h {DB_ENDPOINT} \
--f schedule_view_exports.sql
+-f scripts/schedule_view_exports.sql
 */
 
 -- Create a job in the cron.job table.  Jobs will be overwritten if they have the same job name, so this is idempotent.
