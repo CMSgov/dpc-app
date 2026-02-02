@@ -31,11 +31,11 @@ en:
     user_not_authorized_official_status: You’re not the Authorized Official.
     user_not_authorized_official_text: You are not on record as the Authorized Official for this organization. Your organization may need to <a href="https://pecos.cms.hhs.gov/pecos/login.do#headingLv1">update its Authorized Official</a> in PECOS, the Medicare enrollment system.
     fail_to_proof_status: You must complete verification before continuing registration.
-    fail_to_proof_text: You still have steps to complete in order to continue to registration. Please sign in again at <a href="https://www.login.gov/what-is-login/">Login.gov</a> to complete those steps.
+    fail_to_proof_text: "You'll need to verify your identity before registering your organization. You can choose from any of the supported government-approved identity verification services, including Login.gov, ID.me, and CLEAR. Info to have ready: <ul><li>The email address where you received this invitation</li><li>Driver's license or state-issued ID</li><li>Social Security number</li><li>Phone number</li><li>A phone or camera to take and upload photos</li></ul>"
     missing_info_status: Can't complete your registration.
     missing_info_text: Something happened on our end and we're unable to continue. Please contact <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
     server_error_status: "Registration unavailable: external system error."
-    server_error_text: We're experiencing a temporary outage due to an external system error. Please try again later. 
+    server_error_text: We're unable to complete your request right now because a required external system is unavailable. Please try again later.
     manage_org: Manage your organization.
     tos_not_signed: You must sign DPC Terms of Service.
     sign_tos: Sign terms of service
