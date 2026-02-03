@@ -5,7 +5,9 @@
   <% end %>
   <% if delete_path %>
   <td>
-    <a href="#delete-modal-<%= obj['id'] %>" aria-controls="delete-modal-<%= obj['id'] %>" data-open-modal>X</a>
+    <a class="usa-button usa-button--icon usa-button--secondary-ghost" href="#delete-modal-<%= obj['id'] %>" aria-controls="delete-modal-<%= obj['id'] %>" data-open-modal>
+      <%= render Core::Icon::UswdsComponent.new('delete') %>
+    </a>
     <% if obj_name == 'CD invitation' %>
       <%= render(Core::Modal::ModalComponent.new('Cancel CD invite?',
           'Once cancelled, this invitation can no longer be accepted by the invited credential delegate.',

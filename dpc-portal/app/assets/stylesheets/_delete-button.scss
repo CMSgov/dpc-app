@@ -1,0 +1,32 @@
+// #D83933 = USWDS 'secondary'
+// #B50909 = USWDS 'seconary-dark'
+// rgb(216, 57, 511) = USWDS 'secondary'
+
+.usa-button--secondary-ghost {
+  background-color: rgba(0,0,0,0);
+  color:  #D83933;
+  
+  &:hover {
+    background-color: rgba(216, 57, 51, 0.1);
+    color:  #D83933;
+  }
+
+  &:active {
+    background-color: rgba(216, 57, 51, 0.2);
+    color: #B50909;
+  }
+}
+
+.usa-button--icon {
+  display: flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+
+  & svg {
+    fill: currentColor
+  }
+}
+;
