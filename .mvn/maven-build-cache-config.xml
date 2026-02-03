@@ -6,7 +6,7 @@
     </configuration>
     <input>
         <global>
-            <glob>{*.java,*.xml,*.properties}</glob>
+            <glob>{*}</glob>
         </global>
     </input>
 </cache>
