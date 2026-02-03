@@ -29,17 +29,17 @@ RSpec.describe Page::PublicKey::NewKeyComponent, type: :component do
                 <form action="/portal/organizations/#{org.path_id}/public_keys" accept-charset="UTF-8" method="post">
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="label">Label</label>
-                    <p class="usa-hint">Choose a descriptive name to make your key easily identifiable to you.</p>
+                    <p class="text-base-darker">Choose a descriptive name to make your key easily identifiable to you.</p>
                     <input type="text" name="label" id="label" maxlength="25" class="usa-input">
                   </div>
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="public_key">Public key</label>
-                    <p class="usa-hint">Must include the "BEGIN PUBLIC KEY" and "END PUBLIC KEY" tags from your public.pem file.</p>
+                    <p class="text-base-darker">Must include the "BEGIN PUBLIC KEY" and "END PUBLIC KEY" tags from your public.pem file.</p>
                     <textarea name="public_key" id="public_key" class="usa-textarea"></textarea>
                   </div>
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="snippet_signature">Signature snippet</label>
-                    <p class="usa-hint">Must yield "Verified Ok" results in order to generate the signature.sig file.</p>
+                    <p class="text-base-darker">Must yield "Verified Ok" results in order to generate the signature.sig file.</p>
                     <textarea name="snippet_signature" id="snippet_signature" class="usa-textarea"></textarea>
                   </div>
                   <input type="submit" name="commit" value="Add key" class="usa-button" data-test="form:submit" data-disable-with="Add key">
