@@ -31,7 +31,7 @@ RSpec.describe Core::Form::EmailInputComponent, type: :component do
         <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="attr">Some Label</label>
-            <p class="usa-hint">Hint</p>
+            <p class="text-base-darker">Hint</p>
             <input type="email" name="attr" id="attr" value="" class="usa-input" />
            </div>
         HTML
