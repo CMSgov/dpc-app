@@ -13,9 +13,10 @@ module Page
         @list_styles = %i[text-green usa-media-block__img]
         @musts = if @invitation.authorized_official?
                    [
-                     'Be an active AO of your organization',
-                     'Not be listed on the Medicare Exclusions Database (or your organization)',
-                     'Be registered in the Provider Enrollment, Chain, and Ownership System (PECOS)'
+                     'Complete identity verification when prompted',
+                     'Be an Authorized Official of your organization',
+                     'Have an active Medicare enrollment for your organization in PECOS',
+                     'Not be listed on the Medicare Exclusions Database (or your organization)'
                    ]
                  else
                    [

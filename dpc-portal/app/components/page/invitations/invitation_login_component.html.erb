@@ -1,7 +1,7 @@
 <%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::AO_STEPS, 1)) if @invitation.authorized_official? %>
 <%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::CD_STEPS, 1)) if @invitation.credential_delegate? %>
 <div>
-  <p>To register your organization you'll need to 1) have a Login.gov account and 2) verify your identity. Info to have ready:
+  <p>You'll need to verify your identity before registering your organization.  You can choose from any of the supported government-approved identity verifcation services, including Login.gov, ID.me, and CLEAR. <br><br> Info to have ready:
     <ul>
       <% @musts.each do |must| %>
       <li class="margin-top-2"><%= must %></li>

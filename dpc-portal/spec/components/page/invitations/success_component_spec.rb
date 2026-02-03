@@ -14,9 +14,9 @@ RSpec.describe Page::Invitations::SuccessComponent, type: :component do
       expect(page.find('.usa-step-indicator__current-step').text).to eq '5'
     end
 
-    it "should have the organization's name and NPI" do
+    it "should have the organization's name" do
       org = invitation.provider_organization
-      expect(page).to have_text("#{org.name} (NPI #{org.npi})")
+      expect(page).to have_text(org.name.to_s)
     end
 
     it "should not have the invited user's name" do

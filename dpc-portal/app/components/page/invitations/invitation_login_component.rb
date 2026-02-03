@@ -8,10 +8,11 @@ module Page
         super
         @invitation = invitation
         @musts = [
-          'Email address (you must use the same email that received the invitation)',
-          'Drivers license or state ID',
-          'Social security number',
-          'Phone number'
+          'The email address your invite was sent to',
+          'Driver\'s license or state-issued ID',
+          'Social Security number',
+          'Phone number',
+          'A phone or camera to take and upload photos'
         ]
       end
     end

@@ -29,7 +29,7 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       it 'Should have Create key button' do
         button = <<~BUTTON
           <form class="button_to" method="get" action="/portal/organizations/#{org.path_id}/public_keys/new">
-            <button class="usa-button" type="submit">Create key</button>
+            <button class="usa-button" type="submit">Add key</button>
           </form>
         BUTTON
         is_expected.to include(normalize_space(button))
@@ -43,19 +43,15 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
         is_expected.to include(normalize_space(button))
       end
       it 'Should have no tokens message' do
-        no_token = ['<p>Before you can access production data,',
-                    'you must create a unique client token for',
-                    'each application or vendor that will have access to API.</p>']
-        is_expected.to include(no_token.join(' '))
+        no_token = '<p>You have no client tokens.</p>'
+        is_expected.to include(no_token)
       end
       it 'Should have no keys message' do
-        no_key = ['<p>Before you can access production data,',
-                  'add your public keys to get a UUID that you',
-                  'will use when you authenticate access.</p>']
-        is_expected.to include(no_key.join(' '))
+        no_key = '<p>You have no public keys.</p>'
+        is_expected.to include(no_key)
       end
       it 'Should have no ip_addrs message' do
-        no_ip_addr = '<p>Before you can access production data, you must provide a public IP address (max of 8).</p>'
+        no_ip_addr = '<p>You have no public IP addresses.</p>'
         is_expected.to include(no_ip_addr)
       end
     end

@@ -3,9 +3,12 @@
 <div>
   <div>
     <% if @invitation.authorized_official? %>
-    <p>Thank you for signing in, <%= @name %>.</p>
-
-    <p>Now that your identity is verified we'll check your and your organization's enrollment with the Medicare Provider Enrollment, Chain, and Ownership System (PECOS).</p>
+      <p>Next, we need to verify your organization's Medicare enrollment information. We're confirming:
+        <ul>
+          <% @musts.each do |must| %>
+            <li class="margin-top-2"><%= must %></li>
+          <% end %>
+      </p>
     <%= render Core::Button::ButtonComponent.new(label: 'Continue to register',
         destination: confirm_organization_invitation_path(@organization, @invitation),
         method: :post) %>
