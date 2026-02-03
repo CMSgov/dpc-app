@@ -5,7 +5,7 @@
   <% end %>
   <% if delete_path %>
   <td>
-    <a class="usa-button usa-button--icon usa-button--secondary-ghost" href="#delete-modal-<%= obj['id'] %>" aria-controls="delete-modal-<%= obj['id'] %>" data-open-modal>
+    <a class="usa-button delete-icon delete-icon--secondary-ghost" href="#delete-modal-<%= obj['id'] %>" aria-controls="delete-modal-<%= obj['id'] %>" data-open-modal>
       <%= render Core::Icon::UswdsComponent.new('delete') %>
     </a>
     <% if obj_name == 'CD invitation' %>

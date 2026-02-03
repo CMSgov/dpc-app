@@ -2,10 +2,10 @@
 // #B50909 = USWDS 'seconary-dark'
 // rgb(216, 57, 511) = USWDS 'secondary'
 
-.usa-button--secondary-ghost {
+.delete-icon--secondary-ghost {
   background-color: rgba(0,0,0,0);
   color:  #D83933;
-  
+
   &:hover {
     background-color: rgba(216, 57, 51, 0.1);
     color:  #D83933;
@@ -17,7 +17,7 @@
   }
 }
 
-.usa-button--icon {
+.delete-icon {
   display: flex;
   height: 2.5rem;
   width: 2.5rem;
