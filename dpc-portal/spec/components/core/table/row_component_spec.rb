@@ -32,12 +32,14 @@ RSpec.describe Core::Table::RowComponent, type: :component do
       let(:component) do
         described_class.with_collection([obj], keys: %w[a b], delete_path: '/foo/bar', obj_name: 'row component')
       end
-      let(:expected_html) do
+      let(:expected_form) do
         <<~HTML
           <form class="button_to" method="post" action="/foo/bar/some-guid"><input type="hidden" name="_method" value="delete" autocomplete="off" /><button class="usa-button" type="submit">Yes, revoke component</button></form>
         HTML
       end
-      it { is_expected.to include(expected_html) }
+      let(:expected_icon) { '<use xlink:href=/portal/assets/@uswds/uswds/dist/img/sprite.*svg\#delete></use>' }
+      it { is_expected.to include(expected_form) }
+      it { is_expected.to match(expected_icon) }
     end
 
     context 'with two rows' do
