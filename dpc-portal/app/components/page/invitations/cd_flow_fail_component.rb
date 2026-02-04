@@ -12,7 +12,7 @@ module Page
         @reason = reason.to_sym
         @status = "verification.#{@reason}_status"
         @text = "verification.#{@reason}_text"
-        @ao_email = "foo@bar.baz"
+        @ao_email = 'foo@bar.baz'
       end
     end
   end
