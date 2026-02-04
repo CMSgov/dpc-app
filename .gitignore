@@ -42,6 +42,8 @@ src/vendor
 ops/config/decrypted/*
 !ops/config/decrypted/README.md
 .mvn/
+!.mvn/maven-build-cache-config.xml
+!.mvn/extensions.xml
 
 # Ignore all contents in project tmp/ directory (except .keep file)
 tmp/
