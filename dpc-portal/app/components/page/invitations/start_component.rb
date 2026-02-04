@@ -20,9 +20,9 @@ module Page
                    ]
                  else
                    [
-                     'Verify your identity with Login.gov',
-                     'Use the same email address the invite was sent to',
-                     'Make sure the name you sign up with matches the one shown on this screen'
+                     'Use the email address your invite was sent to',
+                     'Make sure the name you sign up with matches the one shown on this screen',
+                     'Complete identity verification when prompted'
                    ]
                  end
       end

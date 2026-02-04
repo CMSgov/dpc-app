@@ -17,7 +17,7 @@ class Invitation < ApplicationRecord
 
   AO_STEPS = ['Begin registration', 'Verify my identity', 'Verify Medicare enrollment information',
               'Submit registration', 'Finished'].freeze
-  CD_STEPS = ['Welcome to DPC Portal', 'Sign in or create a Login.gov account', 'Accept invite', 'Finished'].freeze
+  CD_STEPS = ['Get started', 'Verify my identity', 'Accept invite', 'Finished'].freeze
 
   def show_attributes
     { full_name: "#{invited_given_name} #{invited_family_name}",

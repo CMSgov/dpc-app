@@ -4,10 +4,10 @@
   <% if @invitation.credential_delegate? %>
     <div class="usa-alert usa-alert--success margin-bottom-4">
       <div class="usa-alert__body">
-        <p class="usa-alert__text">You're now authorized to manage the DPC API for <%= @organization.name %> (NPI <%= @organization.npi %>).</p>
+        <p class="usa-alert__text">You're now authorized to manage the DPC API for <%= @organization.name %>.</p>
       </div>
     </div>
-    <p>Thank you for accepting your invite. You can now manage your organization's credentials in the DPC Portal.</p>
+    <p>Thank you for accepting your invite. You can now setup and managage your organization's access to the API.</p>
   <% else %>
   <div class="usa-alert usa-alert--success margin-bottom-4">
     <div class="usa-alert__body">
@@ -17,12 +17,12 @@
     </div>
   </div>
   <p>Thank you for registering.  Please complete the remaining steps:</p>
-  <% end %>
   <ul>
       <% @musts.each do |must| %>
       <li class="margin-top-2"><%= must %></li>
       <% end %>
   </ul>
+  <% end %>
   <%= render Core::Button::ButtonComponent.new(label: 'Go to DPC Portal',
       destination: root_url,
       method: :get) %>

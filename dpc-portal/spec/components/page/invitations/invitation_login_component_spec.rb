@@ -9,16 +9,14 @@ RSpec.describe Page::Invitations::InvitationLoginComponent, type: :component do
     let(:invitation) { create(:invitation, :cd, provider_organization:) }
     let(:component) { described_class.new(invitation) }
     before { render_inline(component) }
-    it 'should have a login button' do
+    it 'should have a verify identity button' do
       expect(page).to have_selector('button.usa-button')
-      expect(page.find('button.usa-button')).to have_content('Sign in with')
-      expect(page).to have_selector('button.usa-button span.login-button__logo')
-      expect(page.find('button.usa-button span.login-button__logo')).to have_content('Login.gov')
+      expect(page.find('button.usa-button')).to have_content('Verify my identity')
     end
 
-    it 'should render a link to the System Use Agreement' do
-      expect(page).to have_link('System Use Agreement',
-                                href: Rails.application.routes.url_helpers.system_use_agreement_path)
+    it 'should render a link to the How to verify your identity url' do
+      expect(page).to have_link('How to verify your identity',
+                                href: 'https://login.gov/help/verify-your-identity/how-to-verify-your-identity/')
     end
 
     it 'should post to appropriate url' do
