@@ -7,8 +7,14 @@ module Page
       # @param error_code select :error_codes
       # @param step
       def verification_failure(error_code: :pii_mismatch, step: 2)
+        provider_organization = ProviderOrganization.new(id: 1, name: 'Health Hut')
         user = User.new(given_name: 'Robert', family_name: 'Hodges')
-        invitation = Invitation.new(id: 4, invited_by: user, invitation_type: :credential_delegate)
+        invitation = Invitation.new(
+          id: 4,
+          invited_by: user,
+          invitation_type: :credential_delegate,
+          provider_organization: provider_organization
+        )
         render(Page::Invitations::CdFlowFailComponent.new(invitation, error_code, step))
       end
 
