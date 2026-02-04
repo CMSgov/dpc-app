@@ -642,7 +642,7 @@
                                     </annotationProcessorPaths>
                                     <!-- Erroneously inverted logic... for details, see
                                     https://jira.codehaus.org/browse/MCOMPILER-209 -->
-                                    <useIncrementalCompilation>false</useIncrementalCompilation>
+                                    <useIncrementalCompilation>true</useIncrementalCompilation>
                                 </configuration>
                             </execution>
                         </executions>
