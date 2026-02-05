@@ -16,18 +16,19 @@ RSpec.describe Page::ClientToken::NewTokenComponent, type: :component do
     let(:expected_html) do
       <<~HTML
         <div>
-          <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}">#{org.name}</a></div>
-          <h1>Create a new client token</h1>
+          <h1>Generate new client token</h1>
           <div>
-            <h2>New token for #{org.name}</h2>
-            <hr/>
-            <form action="/portal/organizations/#{org.path_id}/client_tokens" accept-charset="UTF-8" method="post">
-              <div class="margin-bottom-4">
-                <label class="usa-label" for="label">Label</label>
-                <p class="usa-hint">Choose a descriptive name to make your token easily identifiable to you.</p>
-                <input type="text" name="label" id="label" maxlength="25" class="usa-input" />
-              </div>
-              <input type="submit" name="commit" value="Create token" class="usa-button" data-test="form-submit" data-disable-with="Create token" />
+            <p>Add a client token to monitor who's accessing the API with your organization credentials.
+              <form action="/portal/organizations/#{org.path_id}/client_tokens" accept-charset="UTF-8" method="post">
+                <div class="margin-bottom-4">
+                  <label class="usa-label" for="label">Enter token name</label>
+                  <p class="usa-hint">Choose a name that will be easy to identify.</p>
+                  <input type="text" name="label" id="label" maxlength="25" class="usa-input" />
+                </div>
+                <input type="submit" name="commit" value="Generate token" class="usa-button" data-test="form-submit" data-disable-with="Generate token" />
+                <a class="usa-button usa-button--outline" href="/portal/organizations/#{org.path_id}">Cancel</a>
+              </p>
+              <p class="margin-top-5"><a href="https://dpc.cms.gov/docsV1">View API Documentation</a></p>
             </form>
           </div>
         </div>

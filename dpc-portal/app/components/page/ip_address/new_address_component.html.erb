@@ -1,24 +1,19 @@
 <div>
-    <div class="margin-bottom-5">&larr; <%= link_to @organization.name, organization_path(organization.path_id) %></div>
-    <h1>Add public IP address</h1>
+    <h1>Add public IP</h1>
 
     <section class="box">
       <div>
-	<p>Limit of 8 addresses per organization.</p>
-            <h2>New IP address for <%= @organization.name %></h2>
-            <%= form_tag organization_ip_addresses_path(organization_id: organization.path_id), method: :post do %>
-                <%= render(Core::Form::TextInputComponent.new(
-                        label: "Label", attribute: :label, default: params[:label], input_options: { maxlength: 25 },
-                        hint: 'Choose a descriptive name to make your IP address easily identifiable to you.',
-                        error_msg: @errors[:label])
-                    ) %>
-                <%= render(Core::Form::TextInputComponent.new(
-                        label: "Public IP address (IPv4 only)", attribute: :ip_address, default: params[:ip_address], input_options: { maxlength: 15 },
-                        hint: 'Use the format 136.226.19.87',
-                        error_msg: @errors[:ip_address])
-                    ) %>
-                <%= submit_tag "Add IP", class: "usa-button", data: { test: "form:submit" } %>
-            <% end %>
-        </div>
+	    <p>Provide a maximum of 8 public ip addresses associated with systems that will access claims data.</p>
+        <%= form_tag organization_ip_addresses_path(organization_id: organization.path_id), method: :post do %>
+            <%= render(Core::Form::TextInputComponent.new(
+                    label: "Public IP address", attribute: :ip_address, default: params[:ip_address], input_options: { maxlength: 15 },
+                    hint: 'Enter your IP address in the form XXX.XXX.XX.XX. Only IPv4 addresses are allowed. IP address ranges are not supported.',
+                    error_msg: @errors[:ip_address])
+                ) %>
+            <%= submit_tag "Add IP address", class: "usa-button", data: { test: "form:submit" } %>
+            <%= link_to 'Cancel', organization_path(organization.path_id), class: ['usa-button', 'usa-button--outline'] %>
+        <% end %>
+        <p class="margin-top-5"><%= link_to 'View API Documentation', 'https://dpc.cms.gov/docsV1' %></p>
+      </div>
     </section>
 </div>

@@ -1,18 +1,20 @@
 <div>
-  <div class="margin-bottom-5">&larr; <%= link_to @organization.name, organization_path(organization.path_id) %></div>
-  <h1>Create a new client token</h1>
+  <h1>Generate new client token</h1>
   <div>
-    <h2>New token for <%= organization.name %></h2>
-    <hr/>
+    <p>Add a client token to monitor who's accessing the API with your organization credentials.
+
     <%= form_tag organization_client_tokens_path(organization_id: organization.path_id), method: :post do %>
 
-    <%= render(Core::Form::TextInputComponent.new(label: 'Label',
+    <%= render(Core::Form::TextInputComponent.new(label: 'Enter token name',
         attribute: :label,
-        hint: 'Choose a descriptive name to make your token easily identifiable to you.',
+        hint: 'Choose a name that will be easy to identify.',
         default: params[:label],
         error_msg: @errors[:label],
         input_options: { maxlength: 25 })) %>
-    <%= submit_tag "Create token", class: "usa-button", data: { test: "form-submit" } %>
+    <%= submit_tag "Generate token", class: "usa-button", data: { test: "form-submit" } %>
+    <%= link_to 'Cancel', organization_path(organization.path_id), class: ['usa-button', 'usa-button--outline'] %>
+    </p>
+    <p class="margin-top-5"><%= link_to 'View API Documentation', 'https://dpc.cms.gov/docsV1' %></p>
     <% end %>
   </div>
 </div>

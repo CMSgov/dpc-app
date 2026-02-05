@@ -21,29 +21,32 @@ RSpec.describe Page::PublicKey::NewKeyComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <div>
-            <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}">#{org.name}</a></div>
             <h1>Add public key</h1>
             <section class="box">
               <div>
-                <h2>New public key for #{org.name}</h2>
+                <p>Public keys verify that client token requests are coming from an authorized application.</p>
                 <form action="/portal/organizations/#{org.path_id}/public_keys" accept-charset="UTF-8" method="post">
                   <div class="margin-bottom-4">
-                    <label class="usa-label" for="label">Label</label>
-                    <p class="usa-hint">Choose a descriptive name to make your key easily identifiable to you.</p>
-                    <input type="text" name="label" id="label" maxlength="25" class="usa-input">
+                    <label class="usa-label" for="label">Public key label</label>
+                    <p class="usa-hint">Choose a label that will be easy to identify.</p>
+                    <input type="text" name="label" id="label" maxlength="25" class="usa-input" />
                   </div>
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="public_key">Public key</label>
-                    <p class="usa-hint">Must include the "BEGIN PUBLIC KEY" and "END PUBLIC KEY" tags from your public.pem file.</p>
-                    <textarea name="public_key" id="public_key" class="usa-textarea"></textarea>
+                    <p class="usa-hint">Enter a new public key. It must include "BEGIN PUBLIC KEY" and "END PUBLIC KEY" tags from your public.pem file.</p>
+                    <textarea name="public_key" id="public_key" class="usa-textarea">
+                    </textarea>
                   </div>
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="snippet_signature">Signature snippet</label>
-                    <p class="usa-hint">Must yield "Verified Ok" results in order to generate the signature.sig file.</p>
-                    <textarea name="snippet_signature" id="snippet_signature" class="usa-textarea"></textarea>
+                    <p class="usa-hint">Enter a signature snipped. This snippet must yield "Verified Ok" results to generate the signature.sig file.</p>
+                    <textarea name="snippet_signature" id="snippet_signature" class="usa-textarea">
+                    </textarea>
                   </div>
-                  <input type="submit" name="commit" value="Add key" class="usa-button" data-test="form:submit" data-disable-with="Add key">
+                  <input type="submit" name="commit" value="Add key" class="usa-button" data-test="form:submit" data-disable-with="Add key" />
+                  <a class="usa-button usa-button--outline" href="/portal/organizations/#{org.path_id}">Cancel</a>
                 </form>
+                <p class="margin-top-5"><a href="https://dpc.cms.gov/docsV1">View API Documentation</a></p>
               </div>
             </section>
           </div>

@@ -16,27 +16,23 @@ RSpec.describe Page::ClientToken::ShowTokenComponent, type: :component do
     let(:expected_html) do
       <<~HTML
         <div>
-          <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}?credential_start=true">#{org.name}</a></div>
-          <h1>Client token created</h1>
+          <h1>Client token</h1>
           <div>
-            <h2>"Your token" created for #{org.name}</h2>
-            <hr/>
-            <div class="margin-bottom-4">
-              <label class="usa-label" for="token">Your token</label>
-              <textarea name="token" id="token" rows="9" readonly="readonly" class="usa-textarea">
-                some-token
-              </textarea>
-            </div>
             <div class="usa-alert usa-alert--warning margin-bottom-4">
               <div class="usa-alert__body">
+                <h2 class="usa-alert__heading">Alert</h2>
                 <p class="usa-alert__text">
-                  Copy or download your token right now! You won't be able to see it again.
+                  This token won't be saved if you exit this screen.
                 </p>
               </div>
             </div>
-            <form class="button_to" method="get" action="http://test.host/portal/">
-              <button class="usa-button" type="submit">Return to portal</button>
-            </form>
+            <div class="margin-bottom-4">
+              <label class="usa-label" for="token">Copy client token</label>
+              <textarea name="token" id="token" rows="9" readonly="readonly" class="usa-textarea">
+                some-token</textarea>
+            </div>
+            <a class="usa-button usa-button" href="/portal/organizations/#{org.path_id}">Back to organization</a>
+            <p class="margin-top-5"><a href="https://dpc.cms.gov/docsV1">View API Documentation</a></p>
           </div>
         </div>
       HTML
