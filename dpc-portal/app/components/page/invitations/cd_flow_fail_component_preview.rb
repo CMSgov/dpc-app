@@ -21,7 +21,7 @@ module Page
       private
 
       def error_codes
-        { choices: %i[pii_mismatch missing_info server_error fail_to_proof] }
+        { choices: %i[pii_mismatch missing_info fail_to_proof] }
       end
     end
   end
