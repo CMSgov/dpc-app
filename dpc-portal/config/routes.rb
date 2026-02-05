@@ -5,15 +5,16 @@
 # and config.ru via config.relative_url_root.
 #
 Rails.application.routes.draw do
-  devise_for :users, controllers: { sessions: 'users/sessions', omniauth_callbacks: 'login_dot_gov' }
-  devise_scope :user do
-    get '/users/auth/failure', to: 'login_dot_gov#failure', as: 'login_dot_gov_failure'
-    get '/users/auth/logged_out', to: 'login_dot_gov#logged_out'
-    get '/users/auth/no_account', to: 'login_dot_gov#no_account', as: 'no_account'
-    delete '/logout', to: 'login_dot_gov#logout', as: 'login_dot_gov_logout'
-    get 'active', to: 'users/sessions#active'
-    get 'timeout', to: 'users/sessions#timeout'
-  end
+  # Former devise routes
+  get '/users/auth/failure', to: 'login_dot_gov#failure', as: 'login_dot_gov_failure'
+  get '/auth/logged_out', to: 'users/sessions#logged_out'
+  get '/auth/no_account', to: 'login_dot_gov#no_account', as: 'no_account'
+  delete '/logout', to: 'login_dot_gov#logout', as: 'login_dot_gov_logout'
+  get 'active', to: 'users/sessions#active', as: 'active'
+  get 'timeout', to: 'users/sessions#timeout', as: 'timeout'
+  get '/users/sign_in', to: 'users/sessions#new', as: 'sign_in'
+  delete '/users/sign_out', to: 'users/sessions#destroy', as: 'destroy_user_session'
+  get '/auth/login_dot_gov/callback', to: 'login_dot_gov#openid_connect'
 
   # Defines the root path route ("/")
   root 'organizations#index'
