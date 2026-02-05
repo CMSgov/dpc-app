@@ -33,7 +33,6 @@ RSpec.describe Page::Invitations::CdFlowFailComponent, type: :component do
     end
   end
 
-
   describe 'name does not match invite' do
     let(:reason) { 'pii_mismatch' }
 
