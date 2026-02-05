@@ -8,6 +8,15 @@ RSpec.describe 'Accessibility', type: :system do
   before do
     driven_by(:selenium_headless)
   end
+
+  after do |test_case|
+    next unless test_case.exception
+
+    if page.current_url.present?
+      warn "[Failure URL]: #{page.current_url}"
+    end
+  end
+
   let(:dpc_api_organization_id) { 'some-gnarly-guid' }
   let(:axe_standard) { %w[best-practice wcag21aa] }
   context 'login' do
