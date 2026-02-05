@@ -47,7 +47,7 @@ RSpec.describe Page::Organization::NewOrganizationComponent, type: :component do
       let(:component) { described_class.new("can't be blank") }
       it 'should have errored npi stanza' do
         npi_field = <<~HTML
-          <p id="npi_error_msg" style="color: #b50909;">Can't be blank</p>
+          <p id="npi_error_msg" style="color: #b50909;">can't be blank</p>
         HTML
         is_expected.to include(normalize_space(npi_field))
       end
