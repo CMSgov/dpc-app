@@ -36,6 +36,8 @@ en:
     missing_info_text: Something happened on our end and we're unable to continue. Please contact <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
     server_error_status: "Registration unavailable: external system error."
     server_error_text: We're experiencing a temporary outage due to an external system error. Please try again later. 
+    multi_user_match_status: multi_user_match_status
+    multi_user_match_text: multi_user_match_text
     manage_org: Manage your organization.
     tos_not_signed: You must sign DPC Terms of Service.
     sign_tos: Sign terms of service
