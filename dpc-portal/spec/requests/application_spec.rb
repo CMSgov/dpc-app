@@ -32,7 +32,7 @@ RSpec.describe 'Application', type: :request do
       expect(response.body).to eq('foo')
       Timecop.travel(31.minutes.from_now)
       get '/test'
-      expect(response).to redirect_to('/portal/users/sign_in')
+      expect(response).to redirect_to('/users/sign_in')
       expect(flash[:notice] = 'Your session expired. Please sign in again to continue.')
     end
 
