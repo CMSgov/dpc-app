@@ -254,7 +254,7 @@ RSpec.describe 'PublicKeys', type: :request do
           public_key: file_fixture('stubbed_key.pem').read,
           snippet_signature: 'test snippet signature'
         }
-        expect(flash[:alert]).to eq("We're sorry, but we can't complete your request. Please try again tomorrow.")
+        expect(flash[:alert]).to eq("We're sorry but we can't complete your request. Please try again tomorrow.")
       end
     end
   end

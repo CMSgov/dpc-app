@@ -23,7 +23,7 @@ class IpAddressesController < ApplicationController
       redirect_to organization_path(@organization, credential_start: true)
     else
       @errors = new_ip_address[:errors] || {}
-      flash[:alert] = @errors[:root] || 'IP address invalid'
+      flash[:alert] = @errors[:root] || 'IP address invalid.'
       render Page::IpAddress::NewAddressComponent.new(@organization, errors: @errors)
     end
   end

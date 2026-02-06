@@ -9,11 +9,11 @@ module Page
       end
 
       def blank_error
-        render(Page::Organization::NewOrganizationComponent.new("can't be blank"))
+        render(Page::Organization::NewOrganizationComponent.new("Can't be blank"))
       end
 
       def length_error
-        render(Page::Organization::NewOrganizationComponent.new('length has to be 10'))
+        render(Page::Organization::NewOrganizationComponent.new('Length has to be 10'))
       end
     end
   end
