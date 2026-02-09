@@ -234,7 +234,7 @@ RSpec.describe 'IpAddresses', type: :request do
                                        success: false,
                                        response: nil)
         post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
-        expect(flash[:alert]).to eq("We're sorry, but we can't complete your request. Please try again tomorrow.")
+        expect(flash[:alert]).to eq("We're sorry but we can't complete your request. Please try again tomorrow.")
       end
     end
   end

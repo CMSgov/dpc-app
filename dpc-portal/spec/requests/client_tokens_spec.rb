@@ -215,7 +215,7 @@ RSpec.describe 'ClientTokens', type: :request do
                                        success: false,
                                        response: nil)
         post "/organizations/#{org.id}/client_tokens", params: { label: 'New Token' }
-        expect(flash[:alert]).to eq("We're sorry, but we can't complete your request. Please try again tomorrow.")
+        expect(flash[:alert]).to eq("We're sorry but we can't complete your request. Please try again tomorrow.")
       end
     end
   end

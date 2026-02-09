@@ -399,7 +399,7 @@ RSpec.describe 'Organizations', type: :request do
       it 'fails if blank' do
         post '/organizations', params: { npi: '' }
         expect(response).to be_bad_request
-        expect(assigns(:npi_error)).to eq "can't be blank"
+        expect(assigns(:npi_error)).to eq "Can't be blank"
       end
 
       it 'fails if not 10 digits' do
