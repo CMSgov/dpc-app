@@ -2,6 +2,7 @@ package gov.cms.dpc.queue.models;
 
 import gov.cms.dpc.fhir.DPCResourceType;
 import jakarta.persistence.*;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 
 import java.io.Serializable;
@@ -100,9 +101,17 @@ public class JobQueueBatchFile implements Serializable {
         int sequence;
         DPCResourceType resourceType;
         try {
+            // Batch ID makes up the first 36 characters
             batchId = UUID.fromString(fileName.substring(0, 36));
-            sequence = Integer.parseInt(fileName.substring(37, 38));
-            resourceType = DPCResourceType.fromPath(fileName.substring(39));
+
+            // The rest of the file name is in the format #.resource
+            String[] restOfFileName = StringUtils.split(fileName.substring(37), ".");
+            if (restOfFileName.length != 2) {
+                throw new IllegalArgumentException("Filename has extra data appended after resource: " + fileName);
+            }
+
+            sequence = Integer.parseInt(restOfFileName[0]);
+            resourceType = DPCResourceType.fromPath(restOfFileName[1]);
         } catch (IllegalArgumentException | IndexOutOfBoundsException | FHIRException e) {
             throw new IllegalArgumentException(String.format("Could not parse file name: %s", fileName), e);
         }
