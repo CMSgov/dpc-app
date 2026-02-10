@@ -24,7 +24,7 @@ BEGIN
                 $job$ SELECT * from aws_s3.query_export_to_s3('select * from %s',
                   aws_commons.create_s3_uri(
                     'dpc-prod-aurora-export-20251028154132844600000001',
-                    CONCAT('%s_', '.csv'),
+                    CONCAT('%s_', TO_CHAR(NOW(), 'YYYY-MM-DD_HH24-MI-SS'), '.txt'),
                     'us-east-1'
                   )
                 ) $job$,
@@ -45,6 +45,6 @@ SELECT create_job('bulk_calls_made_last_week', '5 0 * * *', 'dpc_queue');
 SELECT create_job('patient_everything_requests_last_week', '10 0 * * *', 'dpc_queue');
 SELECT create_job('since_requests_last_week', '15 0 * * *', 'dpc_queue');
 SELECT create_job('unique_benes_served_last_week', '20 0 * * *', 'dpc_queue');
-SELECT create_job('unique_providers_served_all_time', '25 0 * * *', 'dpc_queue');
-SELECT create_job('hcos_credentialed_all_time', '30 0 * * *', 'dpc_auth');
-SELECT create_job('hcos_with_active_credentials', '35 0 * * *', 'dpc_auth');
+SELECT create_job('unique_providers_served_all_time', '45 23 * * *', 'dpc_queue');
+SELECT create_job('hcos_credentialed_all_time', '50 23 * * *', 'dpc_auth');
+SELECT create_job('hcos_with_active_credentials', '55 23 * * *', 'dpc_auth');
