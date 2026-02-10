@@ -24,7 +24,7 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
                 <form action="/portal/organizations/#{org.path_id}/ip_addresses" accept-charset="UTF-8" method="post">
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="ip_address">Public IP address</label>
-                    <p class="usa-hint">Enter your IP address in the form XXX.XXX.XX.XX. Only IPv4 addresses are allowed. IP address ranges are not supported.</p>
+                    <p class="text-base-darker">Enter your IP address in the form XXX.XXX.XX.XX. Only IPv4 addresses are allowed. IP address ranges are not supported.</p>
                     <input type="text" name="ip_address" id="ip_address" maxlength="15" class="usa-input" />
                   </div>
                   <input type="submit" name="commit" value="Add IP address" class="usa-button" data-test="form:submit" data-disable-with="Add IP address" />

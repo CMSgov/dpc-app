@@ -22,7 +22,7 @@ RSpec.describe Page::ClientToken::NewTokenComponent, type: :component do
               <form action="/portal/organizations/#{org.path_id}/client_tokens" accept-charset="UTF-8" method="post">
                 <div class="margin-bottom-4">
                   <label class="usa-label" for="label">Enter token name</label>
-                  <p class="usa-hint">Choose a name that will be easy to identify.</p>
+                  <p class="text-base-darker">Choose a name that will be easy to identify.</p>
                   <input type="text" name="label" id="label" maxlength="25" class="usa-input" />
                 </div>
                 <input type="submit" name="commit" value="Generate token" class="usa-button" data-test="form-submit" data-disable-with="Generate token" />
