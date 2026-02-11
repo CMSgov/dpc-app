@@ -43,6 +43,7 @@ jobs:
         run: |
           echo "Only run on test or prod"
           exit 1
+
       - name: Run and Fail if Inputs Invalid
         if: ${{ inputs.env != inputs.confirm_env }}
         run: |
@@ -69,12 +70,14 @@ jobs:
           ref: ${{ inputs.ops-ref }}
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
           path: dpc-ops
-      - name: test
+
+      - name: Test and Lint Lambda Handler
         run: |
           pip install pytest pylint boto3 aws_lambda_powertools
           cd dpc-ops/terraform/lambda/quicksight-reports/lambda_src
           pytest
           pylint .
+
       - name: Install Cosign to verify tenv and tofu installs
         uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159  # v3.9.2
 
@@ -86,6 +89,7 @@ jobs:
           cd dpc-ops/terraform/lambda/quicksight-reports
           tofu init -backend-config=backends/${{ inputs.env }}.config
           tofu plan -var env=${{ inputs.env }} -out dpc-quicksight-report-release-${{ inputs.env }}.tfplan 2>&1
+
       - name: Apply plan
         run: |
           cd dpc-ops/terraform/lambda/quicksight-reports
