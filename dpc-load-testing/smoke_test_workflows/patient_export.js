@@ -15,7 +15,8 @@ import {
 } from '../dpc-api-client.js';
 
 // Update with Prod Examples 
-const singlePatient =  __ENV.ENVIRONMENT == 'prod' ? open('./resources/single_patient.json') : open('./resources/single_patient.json');
+const singlePatient =  __ENV.ENVIRONMENT == 'prod' ? open('./resources/prod_single_patient.json') : open('./resources/single_patient.json');
+const EXPORT_POLL_INTERVAL_SEC = __ENV.ENVIRONMENT == 'local' ? 1 : 20;
 
 // Sets up two test organizations
 export async function checkPatientEverythingExportWorkflow(data) {
@@ -84,5 +85,54 @@ export async function checkPatientEverythingExportWorkflow(data) {
     console.error(`Failed to call patient everything for ${patientId}: ${patientEverythingResponse.body}`);
   }
 
+  // Patient everything export async
+  const patientEverythingAsyncResponse = patientEverything(token, orgId, practitionerId, patientId, "respond-async");
+  const checkPatientEverythingAsync = check(
+    patientEverythingAsyncResponse,
+    {
+      'get patient everything async returns 202': res => res.status == 202,
+      'response location header present': (res) => !!(res?.headers['Content-Location']),
+    }
+  )
+
+  if (!checkPatientEverythingAsync) {
+    console.error(`Failed to call patient everything async for ${patientId}: ${patientEverythingAsyncResponse.body}`);
+  }
+
+  // Verify patient everything job succeeds
+  const jobUrl = patientEverythingAsyncResponse.headers['Content-Location'];
+  const pollJobStatusResponse = pollJobStatus(token, jobUrl);
+  const checkPollJobStatus = check(
+    pollJobStatusResponse,
+    {
+      'get patient everything async job status returned 200': res => res.status == 200,
+    }
+  )
+
+  if (!checkPollJobStatus) {
+    console.error(`Polling failed with status: ${checkPollJobStatus.status}`);
+  }
+
 }
 
+function pollJobStatus(token, jobUrl) {
+  let retryCount = 0;
+  const maxRetries = 10;
+  
+  while (retryCount < maxRetries) {
+    sleep(EXPORT_POLL_INTERVAL_SEC); 
+    
+    const res = authorizedGet(token, jobUrl);
+    
+    if (res.status === 200) {
+      console.log('Job complete!');
+      return res;
+    } else if (res.status === 202) {
+      console.log('Job still processing...');
+      retryCount++;
+    } else {
+      console.error('Error while polling job status');
+      break;
+    }
+  }
+}

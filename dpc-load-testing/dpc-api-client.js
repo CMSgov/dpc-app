@@ -165,10 +165,17 @@ export function findPatientsByMbi(token, mbis) {
   return res;
 }
 
-export function patientEverything(token, orgId, practitionerId, patientId) {
+// export function patientEverything(token, orgId, practitionerId, patientId) {
+//   const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
+//   return http.get(`${urlRoot}/Patient/${patientId}/$everything`,
+// 		  createHeaderParam(token, {'X-Provenance': JSON.stringify(provenanceBody)})
+// 		 );
+// }
+
+export function patientEverything(token, orgId, practitionerId, patientId, preference = 'respond-sync') {
   const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
   return http.get(`${urlRoot}/Patient/${patientId}/$everything`,
-		  createHeaderParam(token, {'X-Provenance': JSON.stringify(provenanceBody)})
+		  createHeaderParam(token, {'X-Provenance': JSON.stringify(provenanceBody), 'Prefer': preference})
 		 );
 }
 
