@@ -37,9 +37,6 @@ jobs:
       contents: read
       id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    defaults:
-      run:
-        working-directory: ./terraform/lambda/quicksight-reports
     steps:
       - name: Fail if not test or prod
         if: ${{ inputs.env == 'dev' || inputs.env == 'sandbox' }}
@@ -74,15 +71,16 @@ jobs:
           path: dpc-ops
       - name: Install Cosign to verify tenv and tofu installs
         uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159  # v3.9.2
-  
+
       - name: Install Tofu
         uses: cmsgov/cdap/actions/setup-tenv@8343fb96563ce4b74c4dececee9b268f42bd4a40
 
       - name: Verify plan
         run: |
-          tofu init -backend-config=backends/${{ inputs.evn }}.config
-          tofu plan -out dpc-quicksight-report-release-${{ inputs.env }}.tfplan 2>&1
+          cd dpc-ops/terraform/lambda/quicksight-reports
+          tofu init -backend-config=backends/${{ inputs.env }}.config
+          tofu plan -var env=${{ inputs.env }} -out dpc-quicksight-report-release-${{ inputs.env }}.tfplan 2>&1
       - name: Apply plan
         run: |
-          cd dpc-ops/terraform/${{ inputs.env }}/persistent
+          cd dpc-ops/terraform/lambda/quicksight-reports
           tofu apply dpc-quicksight-report-release-${{ inputs.env }}.tfplan
