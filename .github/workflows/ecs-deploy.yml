@@ -37,9 +37,6 @@ jobs:
       contents: read
       id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    defaults:
-      run:
-        working-directory: ./terraform/lambda/quicksight-reports
     steps:
       - name: Fail if not test or prod
         if: ${{ inputs.env == 'dev' || inputs.env == 'sandbox' }}
@@ -80,9 +77,10 @@ jobs:
 
       - name: Verify plan
         run: |
-          tofu init -backend-config=backends/${{ inputs.evn }}.config
+          cd dpc-ops/terraform/lambda/quicksight-reports
+          tofu init -backend-config=backends/${{ inputs.env }}.config
           tofu plan -out dpc-quicksight-report-release-${{ inputs.env }}.tfplan 2>&1
       - name: Apply plan
         run: |
-          cd dpc-ops/terraform/${{ inputs.env }}/persistent
+          cd dpc-ops/terraform/lambda/quicksight-reports
           tofu apply dpc-quicksight-report-release-${{ inputs.env }}.tfplan
