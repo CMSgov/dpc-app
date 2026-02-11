@@ -79,7 +79,7 @@ jobs:
         run: |
           cd dpc-ops/terraform/lambda/quicksight-reports
           tofu init -backend-config=backends/${{ inputs.env }}.config
-          tofu plan -out dpc-quicksight-report-release-${{ inputs.env }}.tfplan 2>&1
+          tofu plan -var env=${{ inputs.env }} -out dpc-quicksight-report-release-${{ inputs.env }}.tfplan 2>&1
       - name: Apply plan
         run: |
           cd dpc-ops/terraform/lambda/quicksight-reports
