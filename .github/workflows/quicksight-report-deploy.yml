@@ -69,6 +69,12 @@ jobs:
           ref: ${{ inputs.ops-ref }}
           ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
           path: dpc-ops
+      - name: test
+        run: |
+          pip install pytest pylint boto3 aws_lambda_powertools
+          cd dpc-ops/terraform/lambda/quicksight-reports/lambda_src
+          pytest
+          pylint .
       - name: Install Cosign to verify tenv and tofu installs
         uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159  # v3.9.2
 
