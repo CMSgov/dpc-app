@@ -68,7 +68,7 @@ export async function checkPatientEverythingExportWorkflow(data) {
   )
 
   if (!checkCreateGroup){
-      console.error(`Failed to create group for ${npi}: ${createGroupResponse.body}`);
+      console.error(`Failed to create group for ${practitionerNpi}: ${createGroupResponse.body}`);
   }
   
   // Patient everything export

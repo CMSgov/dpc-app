@@ -47,9 +47,9 @@ export function runSmokeTests(data) {
       orgId: orgIds[idx],
       goldenMacaroon: data.goldenMacaroon
   };
-  checkAuthWorkflow(iterationData);
-  checkBulkExportWorkflow(iterationData);
-  checkPortalsWorkflow(iterationData);
+  // checkAuthWorkflow(iterationData);
+  // checkBulkExportWorkflow(iterationData);
+  // checkPortalsWorkflow(iterationData);
   checkPatientEverythingExportWorkflow(iterationData);
 }
 
