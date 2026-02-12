@@ -17,7 +17,7 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <div>
-            <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}">#{org.name}</a></div>
+            <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}">Back to organization</a></div>
             <h1>Add public IP address</h1>
             <section class="box">
               <div>
