@@ -1,18 +1,96 @@
-name: Dpc-Web Accessibility Tests
+name: 'DPC - QuickSight Report Deploy'
 
 on:
   workflow_dispatch:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: 'string'
+        default: 'dev'
+      confirm_env:
+        description: Double check for environment
+        required: true
+        type: 'string'
+        default: ''
+      ops-ref:
+        description: Branch of dpc-ops to use
+        required: false
+        type: 'string'
+        default: 'main'
+
+concurrency:
+  group: deploy-quicksight-report-to-${{ inputs.env }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  TENV_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  test:
-    name: 'Run Axe Accessibility tests on DPC-Web'
+  deploy:
+    name: Deploy
     permissions:
       contents: read
       id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
+      - name: Fail if not test or prod
+        if: ${{ inputs.env == 'dev' || inputs.env == 'sandbox' }}
+        run: |
+          echo "Only run on test or prod"
+          exit 1
+
+      - name: Run and Fail if Inputs Invalid
+        if: ${{ inputs.env != inputs.confirm_env }}
+        run: |
+          echo "Target deployment environment \"${{ inputs.env }}\" must be specified and match confirmed deployment environment \"${{ inputs.confirm_env }}\"."
+          exit 1
+
+      - name: AWS Credentials (non-prod)
+        if: ${{ inputs.env == 'test' }}
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+      - name: AWS Credentials (prod)
+        if: ${{ inputs.env == 'prod' }}
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+
       - name: "Checkout code"
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
-      - name: "Run Tests"
+        with:
+          repository: 'CMSgov/dpc-ops'
+          ref: ${{ inputs.ops-ref }}
+          ssh-key: ${{ secrets.DPC_OPS_SSH_KEY }}
+          path: dpc-ops
+
+      - name: Test and Lint Lambda Handler
         run: |
-          make ci-web-accessibility
+          cd dpc-ops/terraform/lambda/quicksight-reports/lambda_src
+          pip install -r requirements.txt
+          pytest
+          pylint .
+
+      - name: Install Cosign to verify tenv and tofu installs
+        uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159  # v3.9.2
+
+      - name: Install Tofu
+        uses: cmsgov/cdap/actions/setup-tenv@8343fb96563ce4b74c4dececee9b268f42bd4a40
+
+      - name: Verify plan
+        run: |
+          cd dpc-ops/terraform/lambda/quicksight-reports
+          tofu init -backend-config=backends/${{ inputs.env }}.config
+          tofu plan -var env=${{ inputs.env }} -out dpc-quicksight-report-release-${{ inputs.env }}.tfplan 2>&1
+
+      - name: Apply plan
+        run: |
+          cd dpc-ops/terraform/lambda/quicksight-reports
+          tofu apply dpc-quicksight-report-release-${{ inputs.env }}.tfplan
