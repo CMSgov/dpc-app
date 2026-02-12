@@ -7,15 +7,12 @@ import { generateDPCToken } from '../generate-dpc-token.js';
 import {
   authorizedGet,
   createGroupWithPatients,
-  createPatientsRawData,
-  createPractitionersRawData,
-  exportGroup,
+  createPatientsBatch,
   patientEverything,
   createPractitioners,
 } from '../dpc-api-client.js';
 
 // Update with Prod Examples 
-const singlePatient =  __ENV.ENVIRONMENT == 'prod' ? open('./resources/prod_single_patient.json') : open('./resources/single_patient.json');
 const EXPORT_POLL_INTERVAL_SEC = __ENV.ENVIRONMENT == 'local' ? 1 : 20;
 
 // Sets up two test organizations
@@ -37,9 +34,9 @@ export async function checkPatientEverythingExportWorkflow(data) {
     console.error(`Failed to upload single practitioner ${createPractitionerResponse.body}`);
   }
 
-  // Uploading Patients
+  // Uploading Patient
   const patientMbi = "1SQ3F00AA00";
-  const uploadPatientResponse = createPatientsRawData(token, singlePatient);
+  const uploadPatientResponse = createPatientsBatch(token, [patientMbi]);
   const checkUploadPatient = check(
     uploadPatientResponse,
     {
