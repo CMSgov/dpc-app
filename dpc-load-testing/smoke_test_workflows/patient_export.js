@@ -54,18 +54,6 @@ export async function checkPatientEverythingExportWorkflow(data) {
   // Create Group for practitioner and patient
   const practitionerId = createPractitionerResponse.json().entry[0].resource.id;
   const patientId = uploadPatientResponse.json().entry[0].resource.id;
-
-  const createGroupResponse = createGroupWithPatients(token, orgId, practitionerId, practitionerNpi, [patientId]);
-  const checkCreateGroup = check(
-      createGroupResponse,
-      {
-      'create group returns 201': res => res.status == 201,
-      }
-  )
-
-  if (!checkCreateGroup){
-      console.error(`Failed to create group for ${practitionerNpi}: ${createGroupResponse.body}`);
-  }
   
   // Patient everything export
   const patientEverythingResponse = patientEverything(token, orgId, practitionerId, patientId);
