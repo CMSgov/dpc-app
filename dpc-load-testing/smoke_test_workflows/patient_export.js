@@ -14,12 +14,12 @@ import {
 
 // Update with Prod Examples 
 const EXPORT_POLL_INTERVAL_SEC = __ENV.ENVIRONMENT == 'local' ? 1 : 20;
+const practitionerNpi = __ENV.ENVIRONMENT == 'prod' ? "1232131239" : "1234329724";
 
 // Sets up two test organizations
 export async function checkPatientEverythingExportWorkflow(data) {
   const orgId = data.orgId;
   const token = generateDPCToken(orgId, data.goldenMacaroon);
-  const practitionerNpi = "1234329724";
 
   // Uploading single practitioner
   const createPractitionerResponse = createPractitioners(token, practitionerNpi);
@@ -35,7 +35,7 @@ export async function checkPatientEverythingExportWorkflow(data) {
   }
 
   // Uploading Patient
-  const patientMbi = "1SQ3F00AA00";
+  const patientMbi = "1SQ3F00AA00"; // valid BFD patient 
   const uploadPatientResponse = createPatientsBatch(token, [patientMbi]);
   const checkUploadPatient = check(
     uploadPatientResponse,
