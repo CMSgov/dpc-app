@@ -2,6 +2,7 @@
     <%= javascript_include_tag 'validation_helpers.js' %>
 <% end %>
 
+<div class="margin-bottom-5">&larr; <%= link_to 'Back to organization', organization_path(organization.path_id) %></div>
 <div>
   <% unless cd_invite.errors[:base].empty? %>
     <div class="usa-alert usa-alert--error margin-bottom-4">
@@ -43,7 +44,6 @@
           attribute: :invited_email_confirmation,
           error_msg: cd_invite.errors[:invited_email_confirmation]&.first,
           default: cd_invite.invited_email_confirmation)) %>
-      <%= link_to 'Go Back', organization_path(organization.path_id), class: ['usa-button', 'usa-button--outline'] %>
       <%= submit_tag('Send invite', class: "usa-button") %>
     <% end %>
     <a id="modal-opener" href="#verify-modal" aria-controls="verify-modal" class="display-none" data-open-modal>Send invite</a>

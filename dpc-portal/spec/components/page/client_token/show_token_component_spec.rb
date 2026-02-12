@@ -16,7 +16,7 @@ RSpec.describe Page::ClientToken::ShowTokenComponent, type: :component do
     let(:expected_html) do
       <<~HTML
         <div>
-          <div class="margin-top-5 margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}?credential_start=true">#{org.name}</a></div>
+          <div class="margin-top-5 margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}?credential_start=true">Back to organization</a></div>
           <h1>Client token created</h1>
           <div>
             <h2>"Your token" created for #{org.name}</h2>
@@ -34,9 +34,6 @@ RSpec.describe Page::ClientToken::ShowTokenComponent, type: :component do
                 </p>
               </div>
             </div>
-            <form class="button_to" method="get" action="http://test.host/portal/">
-              <button class="usa-button" type="submit">Return to portal</button>
-            </form>
           </div>
         </div>
       HTML
