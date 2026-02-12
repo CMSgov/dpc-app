@@ -16,7 +16,7 @@ RSpec.describe Page::ClientToken::NewTokenComponent, type: :component do
     let(:expected_html) do
       <<~HTML
         <div>
-          <div class="margin-bottom-5">← <a href="/organizations/#{org.path_id}">#{org.name}</a></div>
+          <div class="margin-bottom-5">← <a href="/organizations/#{org.path_id}">Back to organization</a></div>
           <h1>Create a new client token</h1>
           <div>
             <h2>New token for #{org.name}</h2>

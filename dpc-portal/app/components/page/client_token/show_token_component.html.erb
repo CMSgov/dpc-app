@@ -1,5 +1,5 @@
 <div>
-  <div class="margin-top-5 margin-bottom-5">&larr; <%= link_to organization.name, organization_path(organization, credential_start: :true) %></div>
+  <div class="margin-top-5 margin-bottom-5">&larr; <%= link_to 'Back to organization', organization_path(organization, credential_start: :true) %></div>
   <h1>Client token created</h1>
   <div>
     <h2>"<%= client_token['label'] %>" created for <%= organization.name %></h2>
@@ -12,6 +12,5 @@
         </p>
       </div>
     </div>
-    <%= render(Core::Button::ButtonComponent.new(label: 'Return to portal', destination: root_url)) %>
   </div>
 </div>
