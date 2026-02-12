@@ -5,7 +5,6 @@ import { check, sleep } from 'k6';
 import { generateDPCToken } from '../generate-dpc-token.js';
 import {
   authorizedGet,
-  createGroupWithPatients,
   createPatientsBatch,
   patientEverything,
   createPractitioners,
