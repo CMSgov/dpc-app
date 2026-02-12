@@ -12,16 +12,15 @@ import {
   createPractitioners,
 } from '../dpc-api-client.js';
 
-// Update with Prod Examples 
+// Our WAF rate limits us to 300 requests every 5 minutes, so don't poll too often
 const EXPORT_POLL_INTERVAL_SEC = __ENV.ENVIRONMENT == 'local' ? 1 : 20;
 const practitionerNpi = __ENV.ENVIRONMENT == 'prod' ? "1232131239" : "1234329724";
 
-// Sets up two test organizations
 export async function checkPatientEverythingExportWorkflow(data) {
   const orgId = data.orgId;
   const token = generateDPCToken(orgId, data.goldenMacaroon);
 
-  // Uploading single practitioner
+  // Uploading practitioner
   const createPractitionerResponse = createPractitioners(token, practitionerNpi);
   const checkUploadPractitioners = check(
     createPractitionerResponse,
