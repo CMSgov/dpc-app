@@ -17,7 +17,8 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <div>
-            <h1>Add public IP</h1>
+            <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}">Back to organization</a></div>
+            <h1>Add public IP address</h1>
             <section class="box">
               <div>
                 <p>Provide a maximum of 8 public ip addresses associated with systems that will access claims data.</p>

@@ -16,7 +16,8 @@ RSpec.describe Page::ClientToken::NewTokenComponent, type: :component do
     let(:expected_html) do
       <<~HTML
         <div>
-          <h1>Generate new client token</h1>
+          <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}">Back to organization</a></div>
+          <h1>Create a new client token</h1>
           <div>
             <p>Add a client token to monitor who's accessing the API with your organization credentials.
               <form action="/portal/organizations/#{org.path_id}/client_tokens" accept-charset="UTF-8" method="post">

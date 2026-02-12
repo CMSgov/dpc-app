@@ -16,7 +16,8 @@ RSpec.describe Page::ClientToken::ShowTokenComponent, type: :component do
     let(:expected_html) do
       <<~HTML
         <div>
-          <h1>Client token</h1>
+          <div class="margin-top-5 margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}?credential_start=true">Back to organization</a></div>
+          <h1>Client token created</h1>
           <div>
             <div class="usa-alert usa-alert--warning margin-bottom-4">
               <div class="usa-alert__body">

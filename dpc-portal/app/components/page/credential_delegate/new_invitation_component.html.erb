@@ -2,6 +2,7 @@
     <%= javascript_include_tag 'validation_helpers.js' %>
 <% end %>
 
+<div class="margin-bottom-5">&larr; <%= link_to 'Back to organization', organization_path(organization.path_id) %></div>
 <div>
   <% unless cd_invite.errors[:base].empty? %>
     <div class="usa-alert usa-alert--error margin-bottom-4">

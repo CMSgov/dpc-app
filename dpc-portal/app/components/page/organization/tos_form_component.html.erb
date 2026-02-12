@@ -1,3 +1,4 @@
+<div class="margin-bottom-5">&larr; <%= link_to 'Return to organization list', organizations_path %></div>
 <div>
   <h2>Sign Terms of Service</h2>
   <p>Once you sign our Terms of Service, <%= @organization.name %> will be allowed to access Medicare claims data.</p>
@@ -9,9 +10,6 @@
       <ul class="usa-button-group">
         <li class="usa-button-group__item">
           <%= button_to 'I have read and accepted the Terms of Service', sign_tos_organization_path(@organization), class: 'usa-button' %>
-        </li>
-        <li class="usa-button-group__item">
-          <%= button_to 'Cancel', organizations_path, class: ['usa-button', 'usa-button--unstyled', 'padding-105', 'text-center'], method: :get %>
         </li>
       </ul>
   </div>
