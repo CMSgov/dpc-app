@@ -40,7 +40,7 @@ RSpec.describe Page::PublicKey::NewKeyComponent, type: :component do
                   </div>
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="snippet_signature">Signature snippet</label>
-                    <p class="text-base-darker">Enter a signature snipped. This snippet must yield "Verified Ok" results to generate the signature.sig file.</p>
+                    <p class="text-base-darker">Enter a signature snippet. This snippet must yield "Verified Ok" results to generate the signature.sig file.</p>
                     <textarea name="snippet_signature" id="snippet_signature" class="usa-textarea">
                     </textarea>
                   </div>

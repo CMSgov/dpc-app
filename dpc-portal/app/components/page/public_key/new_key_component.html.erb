@@ -19,7 +19,7 @@
             ) %>
             <%= render(Core::Form::TextAreaComponent.new(
               label: "Signature snippet", attribute: :snippet_signature, default: params[:snippet_signature],
-              hint: 'Enter a signature snipped. This snippet must yield "Verified Ok" results to generate the signature.sig file.',
+              hint: 'Enter a signature snippet. This snippet must yield "Verified Ok" results to generate the signature.sig file.',
               error_msg: @errors[:snippet_signature])
             ) %>
 
