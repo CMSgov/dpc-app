@@ -6,6 +6,10 @@ set -e
 if [ -f tmp/pids/server.pid ]; then
   rm tmp/pids/server.pid
 fi
+if [ -f tmp/solid_queue_pidfile ]; then
+  echo "Removing solid queue pidfile"
+  rm tmp/solid_queue_pidfile
+fi
 
 if [ "$1" == "portal" ]; then
   # Start the database service (and make accessible outside the Docker container)
@@ -34,3 +38,4 @@ elif [ "$1" == "portal-async" ]; then
     ./bin/nonprod_async
   fi
 fi
+
