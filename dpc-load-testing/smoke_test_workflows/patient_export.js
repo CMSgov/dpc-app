@@ -12,8 +12,6 @@ import {
   monitorJob,
 } from './smoke_test_utils.js';
 
-// Our WAF rate limits us to 300 requests every 5 minutes, so don't poll too often
-const EXPORT_POLL_INTERVAL_SEC = __ENV.ENVIRONMENT == 'local' ? 1 : 20;
 const practitionerNpi = __ENV.ENVIRONMENT == 'prod' ? "1234329724" : "3247281157";
 
 export async function checkPatientEverythingExportWorkflow(data) {
