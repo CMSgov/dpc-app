@@ -60,6 +60,10 @@ export async function checkPatientEverythingExportWorkflow(data) {
     patientEverythingResponse,
     {
       'get patient everything returns 200': res => res.status == 200,
+      'response returns bundle with data': (res) => {
+          const resJson = res.json();
+          return resJson.resourceType == "Bundle" && (resJson.total > 0 || (resJson.entry && resJson.entry.length > 0));
+      },
     }
   )
 
