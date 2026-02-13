@@ -1,14 +1,16 @@
 /*global console*/
 /* eslint no-console: "off" */
 
-import { check, sleep } from 'k6';
+import { check } from 'k6';
 import { generateDPCToken } from '../generate-dpc-token.js';
 import {
-  authorizedGet,
   createPatientsBatch,
   patientEverything,
   createPractitioners,
 } from '../dpc-api-client.js';
+import {
+  monitorJob,
+} from './smoke_test_utils.js';
 
 // Our WAF rate limits us to 300 requests every 5 minutes, so don't poll too often
 const EXPORT_POLL_INTERVAL_SEC = __ENV.ENVIRONMENT == 'local' ? 1 : 20;
@@ -83,38 +85,6 @@ export async function checkPatientEverythingExportWorkflow(data) {
 
   // Verify patient everything job succeeds
   const jobUrl = patientEverythingAsyncResponse.headers['Content-Location'];
-  const pollJobStatusResponse = pollJobStatus(token, jobUrl);
-  const checkPollJobStatus = check(
-    pollJobStatusResponse,
-    {
-      'get patient everything async job status returned 200': res => res.status == 200,
-    }
-  )
+  monitorJob(token, jobUrl);
 
-  if (!checkPollJobStatus) {
-    console.error(`Polling failed with status: ${checkPollJobStatus.status}`);
-  }
-
-}
-
-function pollJobStatus(token, jobUrl) {
-  let retryCount = 0;
-  const maxRetries = 10;
-  
-  while (retryCount < maxRetries) {
-    sleep(EXPORT_POLL_INTERVAL_SEC); 
-    
-    const res = authorizedGet(token, jobUrl);
-    
-    if (res.status === 200) {
-      console.log('Job complete!');
-      return res;
-    } else if (res.status === 202) {
-      console.log('Job still processing...');
-      retryCount++;
-    } else {
-      console.error('Error while polling job status');
-      break;
-    }
-  }
 }
