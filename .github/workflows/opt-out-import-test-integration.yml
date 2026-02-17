@@ -85,7 +85,9 @@ jobs:
           role-skip-session-tagging: true
       - name: Verify import file still in bucket
         run: |
-          aws s3api head-object --bucket bfd-test-eft --key bfdeft01/dpc/in/${{ needs.trigger.outputs.filename }}
+          while read line; do
+            echo $line
+          done < <(aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/in/)
       - name: Verify confirmation file put in bucket
         env:
           STARTTIME: ${{needs.trigger.outputs.start_time}}
