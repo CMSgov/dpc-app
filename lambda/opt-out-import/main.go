@@ -79,14 +79,9 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 
 			if err != nil {
 				logger.Errorf("Failed to import response file: %s", err)
-				return e.S3.Object.Key, err
-			}
+			} else {
 
-			logger.Info("Successfully imported response file and uploaded confirmation file")
-
-			err = deleteS3File(ctx, e.S3.Bucket.Name, e.S3.Object.Key)
-			if err != nil {
-				logger.Errorf("Failed to delete response file after import: %s", err)
+				logger.Info("Successfully imported response file and uploaded confirmation file")
 			}
 			return e.S3.Object.Key, err
 		}
