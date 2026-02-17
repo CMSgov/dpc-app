@@ -22,12 +22,12 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
     context 'New form' do
       it 'should match header' do
         header = <<~HTML
-          <h1>Invite new user</h1>
+          <h1>Assign Credential Delegate</h1>
             <div class="usa-alert usa-alert--warning margin-bottom-4">
               <div class="usa-alert__body">
                 <h2 class="usa-alert__heading">Exact match required</h2>
                 <p class="usa-alert__text">
-                  The name and contact info you enter must be an exact match to the name and contact info your Credential Delegate will provide after receiving this invite.
+                  The Credential Delegate must use the name and email exactly as you enter them below.
                 </p>
               </div>
             </div>
@@ -236,18 +236,18 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
                 <p class="usa-alert__text">#{I18n.t('errors.attributes.base.duplicate_cd.text')}</p>
               </div>
             </div>
-            <h1>Invite new user</h1>
+            <h1>Assign Credential Delegate</h1>
           HTML
           is_expected.to include(normalize_space(error))
         end
         it 'should match header' do
           header = <<~HTML
-            <h1>Invite new user</h1>
+            <h1>Assign Credential Delegate</h1>
               <div class="usa-alert usa-alert--warning margin-bottom-4">
                 <div class="usa-alert__body">
                   <h2 class="usa-alert__heading">Exact match required</h2>
                   <p class="usa-alert__text">
-                    The name and contact info you enter must be an exact match to the name and contact info your Credential Delegate will provide after receiving this invite.
+                    The Credential Delegate must use the name and email exactly as you enter them below.
                   </p>
                 </div>
               </div>

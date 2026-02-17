@@ -67,8 +67,8 @@ RSpec.describe Page::Invitations::StartComponent, type: :component do
       expect(form[:action]).to eq expected
     end
 
-    it 'should include organization name and NPI' do
-      expect(page).to have_text "#{invitation.provider_organization.name} (NPI #{invitation.provider_organization.npi})"
+    it 'should include organization name' do
+      expect(page).to have_text invitation.provider_organization.name.to_s
     end
   end
 end
