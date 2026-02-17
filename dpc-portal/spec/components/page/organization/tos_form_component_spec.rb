@@ -14,6 +14,7 @@ RSpec.describe Page::Organization::TosFormComponent, type: :component do
     let(:component) { described_class.new(organization) }
     let(:expected_html) do
       <<~HTML
+        <div class="margin-bottom-5">← <a href="/portal/organizations">Return to organization list</a></div>
         <div>
           <h1>Add new organization</h1>
           <h2>Sign Terms of Service</h2>
@@ -179,10 +180,6 @@ RSpec.describe Page::Organization::TosFormComponent, type: :component do
             <ul class="usa-button-group">
               <li class="usa-button-group__item">
                 <form class="button_to" method="post" action="/portal/organizations/#{organization.id}/sign_tos"><button class="usa-button" type="submit">I have read and accepted the Terms of Service</button></form>
-              </li>
-              <li class="usa-button-group__item">
-                <form class="button_to" method="get" action="/portal/organizations"><button class="usa-button usa-button--unstyled padding-105 text-center" type="submit">Cancel</button></form>
-                </button>
               </li>
             </ul>
           </div>
