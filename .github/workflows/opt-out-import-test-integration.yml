@@ -63,6 +63,9 @@ jobs:
           echo "STARTTIME=`date +%s`" >> "$GITHUB_OUTPUT"
           aws s3 cp --no-progress synthetic_test_data/T.NGD.DPC.RSP.D240123.T1122001.IN \
             s3://bfd-test-eft/bfdeft01/dpc/in/$fname
+      - name: List bucket
+        run: |
+          aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/in/
 
   verify-bucket:
     if: ${{ always() && needs.trigger.result == 'success' }}
@@ -85,9 +88,7 @@ jobs:
           role-skip-session-tagging: true
       - name: Verify import file still in bucket
         run: |
-          while read line; do
-            echo $line
-          done < <(aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/in/)
+          aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/in/
       - name: Verify confirmation file put in bucket
         env:
           STARTTIME: ${{needs.trigger.outputs.start_time}}
