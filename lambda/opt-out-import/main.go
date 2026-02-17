@@ -71,9 +71,6 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 		if e.EventName == "ObjectCreated:Put" {
 			logger := log.WithFields(log.Fields{
 				"response_filename":      e.S3.Object.Key,
-				"created_opt_outs_count": createdOptOutCount,
-				"created_opt_ins_count":  createdOptInCount,
-				"confirmation_filename":  confirmationFileName,
 			})
 
 			if err != nil {
