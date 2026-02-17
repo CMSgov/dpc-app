@@ -32,6 +32,7 @@ elif [ "$1" == "portal-async" ]; then
   echo "Starting Solid Queue..."
   if [[ "$ENV" == "production" ]]; then
     echo "Starting in production"
+    bundle exec rails server -b 0.0.0.0 -p 3100
     bundle exec rails solid_queue:start
   elif [[ "$ENV" != "local" ]]; then
     echo "Starting in non-production"
