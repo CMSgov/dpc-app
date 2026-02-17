@@ -55,9 +55,6 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/delegatedadmin/developer/bfd-test-eft-dpc-ct-bucket-role
           role-chaining: true
           role-skip-session-tagging: true
-      - name: List bucket
-        run: |
-          aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/in/
       - name: Upload test file to the BFD bucket to trigger lambda function via SNS message
         id: createfile
         run: |
