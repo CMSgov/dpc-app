@@ -10,7 +10,7 @@ module Page
         @invitation = invitation
         @musts = [
           'Your role as the Authorized Official',
-          'Your organizations\' Medicare enrollment status',
+          'Your organization\'s Medicare enrollment status',
           'That you or your organization are not on the Medicare exclusion list'
         ]
       end

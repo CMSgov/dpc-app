@@ -12,7 +12,7 @@ module Page
         @musts = [
           'Sign Terms of Service',
           'Complete API setup',
-          'Optional: Invite a Credential Delegate to setup and manage your organization\'s API access'
+          'Optional: Invite a Credential Delegate to set up and manage your organization\'s API access'
         ]
       end
     end

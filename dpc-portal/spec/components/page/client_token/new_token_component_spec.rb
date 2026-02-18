@@ -27,7 +27,6 @@ RSpec.describe Page::ClientToken::NewTokenComponent, type: :component do
                   <input type="text" name="label" id="label" maxlength="25" class="usa-input" />
                 </div>
                 <input type="submit" name="commit" value="Generate token" class="usa-button" data-test="form-submit" data-disable-with="Generate token" />
-                <a class="usa-button usa-button--outline" href="/portal/organizations/#{org.path_id}">Cancel</a>
               </p>
               <p class="margin-top-5"><a href="https://dpc.cms.gov/docsV1">View API Documentation</a></p>
             </form>

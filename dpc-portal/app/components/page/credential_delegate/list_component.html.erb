@@ -1,6 +1,6 @@
 <div id="credential_delegates">
   <%= render(Core::Card::BasicComponent.new(text_content: '<h2>Credential Delegates</h2>')) do %>
-      <p>A credential delegate (CD) helps your organization setup and manage your API access.</p>
+      <p>A credential delegate (CD) helps your organization set up and manage your API access.</p>
       <div>
         <% if @active_credential_delegates.present? %>
           <%= render(Core::Table::TableComponent.new(id: 'active-cd-table', additional_classes: ['width-full'], sortable: true)) do %>
@@ -10,7 +10,7 @@
             <%= render(Core::Table::RowComponent.with_collection(@active_credential_delegates, keys: ['full_name', 'email', 'activated_at'])) %>
           <% end %>
         <% else %>
-          <p>You have no active credential delegates.</p>
+          <p>You have no active Credential Delegates.</p>
         <% end %>
       </div>
   <% end %>

@@ -21,7 +21,7 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
             <h1>Add public IP address</h1>
             <section class="box">
               <div>
-                <p>Provide a maximum of 8 public ip addresses associated with systems that will access claims data.</p>
+                <p>Provide a maximum of 8 public IP addresses associated with systems that will access claims data.</p>
                 <form action="/portal/organizations/#{org.path_id}/ip_addresses" accept-charset="UTF-8" method="post">
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="ip_address">Public IP address</label>
@@ -29,7 +29,6 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
                     <input type="text" name="ip_address" id="ip_address" maxlength="15" class="usa-input" />
                   </div>
                   <input type="submit" name="commit" value="Add IP address" class="usa-button" data-test="form:submit" data-disable-with="Add IP address" />
-                  <a class="usa-button usa-button--outline" href="/portal/organizations/#{org.path_id}">Cancel</a>
                 </form>
                 <p class="margin-top-5"><a href="https://dpc.cms.gov/docsV1">View API Documentation</a></p>
               </div>

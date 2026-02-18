@@ -35,9 +35,9 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
                   <div class="flex-align-self-center">
                   </div>
                 </div>
-                <p>A credential delegate (CD) helps your organization setup and manage your API access.</p>
+                <p>A credential delegate (CD) helps your organization set up and manage your API access.</p>
                 <div>
-                  <p>You have no active credential delegates.</p>
+                  <p>You have no active Credential Delegates.</p>
                 </div>
               </div>
             </div>
@@ -162,7 +162,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
       end
 
       it 'has no active credential delegates' do
-        expected_html = '<p>You have no active credential delegates.</p>'
+        expected_html = '<p>You have no active Credential Delegates.</p>'
         is_expected.to include(normalize_space(expected_html))
       end
 
@@ -217,7 +217,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
       end
 
       it 'has no pending credential delegates' do
-        expected_html = '<p>You have no active credential delegates.</p>'
+        expected_html = '<p>You have no active Credential Delegates.</p>'
         is_expected.to include(normalize_space(expected_html))
       end
     end

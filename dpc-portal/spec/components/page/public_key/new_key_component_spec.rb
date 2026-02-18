@@ -45,7 +45,6 @@ RSpec.describe Page::PublicKey::NewKeyComponent, type: :component do
                     </textarea>
                   </div>
                   <input type="submit" name="commit" value="Add key" class="usa-button" data-test="form:submit" data-disable-with="Add key" />
-                  <a class="usa-button usa-button--outline" href="/portal/organizations/#{org.path_id}">Cancel</a>
                 </form>
                 <p class="margin-top-5"><a href="https://dpc.cms.gov/docsV1">View API Documentation</a></p>
               </div>

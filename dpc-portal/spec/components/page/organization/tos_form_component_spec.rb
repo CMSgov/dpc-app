@@ -177,7 +177,7 @@ RSpec.describe Page::Organization::TosFormComponent, type: :component do
           <div>
             <ul class="usa-button-group">
               <li class="usa-button-group__item">
-                <form class="button_to" method="post" action="/portal/organizations/#{organization.id}/sign_tos"><button class="usa-button" type="submit">I have read and accepted the Terms of Service</button></form>
+                <form class="button_to" method="post" action="/portal/organizations/#{organization.id}/sign_tos"><button class="usa-button" type="submit">I have read and agreed to the Terms of Service</button></form>
               </li>
             </ul>
           </div>

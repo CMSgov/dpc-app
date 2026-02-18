@@ -22,7 +22,7 @@
     </div>
   </div>
   <div>
-    <p>Invite a Credential Delegate (CD) to setup and manage access to the DPC API. The CD will receive an invite at the address you enter in this form. The invite will expire in 48 hours.</h2>
+    <p>Invite a Credential Delegate (CD) to set up and manage access to the DPC API. The CD will receive an invite at the address you enter in this form. The invite will expire in 48 hours.</h2>
     <%= form_tag organization_credential_delegate_invitations_path(@organization.path_id), method: :post, class: ['usa-form'], id: "cd-form" do %>
       <%= render(Core::Form::TextInputComponent.new(label: 'First or given name',
           attribute: :invited_given_name,
@@ -45,7 +45,6 @@
           error_msg: cd_invite.errors[:invited_email_confirmation]&.first,
           default: cd_invite.invited_email_confirmation)) %>
       <%= submit_tag('Send invite', class: "usa-button") %>
-      <%= link_to 'Cancel', organization_path(organization.path_id), class: ['usa-button', 'usa-button--outline'] %>
     <% end %>
     <a id="modal-opener" href="#verify-modal" aria-controls="verify-modal" class="display-none" data-open-modal>Send invite</a>
     <%= render(Core::Modal::ModalComponent.new(

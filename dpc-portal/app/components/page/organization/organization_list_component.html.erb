@@ -1,12 +1,16 @@
 <div>
 <h1>Welcome to the DPC Portal</h1>
-<p>Use this portal to manage your organization's access to Data at the Point of Care (DPC) API. Depending on your role, you may register your organization, sign Terms of Service, or setup/manage your organization's API access.</p>
+<p>Use this portal to manage your organization's access to Data at the Point of Care (DPC) API.</p>
 <div class="display-flex flex-row flex-justify">
   <div class="flex-align-self-center">
     <h2 class="margin-bottom-0">My organizations</h2>
   </div>
 </div>
-<p>You’re designated as an Authorized Official (AO) and/or Credential Delegate (CD) of the following organizations. AOs can register their organization, sign Terms of Service, and manage overall access to the DPC API. CDs are assigned by an AO to help setup and manage the organization's API access.</p>
+<p>You’re listed as the Authorized Official (AO) or Credential Delegate (CD) for the organizations below.</p>
+<ul>
+  <li class="margin-top-2">Authorized Officials (AO) can register organizations, sign Terms of Service, invite users, and manage API access.</li>
+  <li class="margin-top-2">Credential Delegates (CD) can manage API access only. They cannot invite users or manage roles.</li>
+</ul>
 
 <% if @links.present? %>
   <div class="usa-table-container--scrollable" tabindex="0">

@@ -190,7 +190,7 @@ RSpec.describe 'Organizations', type: :request do
 
         it 'shows correct status' do
           get "/organizations/#{org.id}"
-          expect(response.body).to include('Configuration needed')
+          expect(response.body).to include('Setup needed')
           expect(response.body).to include('#warning')
         end
 
@@ -255,7 +255,7 @@ RSpec.describe 'Organizations', type: :request do
 
         it 'shows correct status' do
           get "/organizations/#{org.id}"
-          expect(response.body).to include('Configuration needed')
+          expect(response.body).to include('Setup needed')
           expect(response.body).to include('#warning')
         end
 

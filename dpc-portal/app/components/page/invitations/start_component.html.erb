@@ -9,7 +9,7 @@
             <p>You've been invited to register your organization in the Data at the Point of Care (DPC) API Portal. This invitation is for: <strong><%= @invitation.invited_email %></strong> at <strong><%= @organization.name %> (NPI <%= @organization.npi %>)</strong>. Make sure to use this email address when prompted.</p>
           <% end %>
           <% if @invitation.credential_delegate? %>
-            <p>This invite is for <strong><%= @invitation.show_attributes['full_name'] %></strong> at <strong><%= @organization.name %></strong>. AO NAME assigned you as a Credential Delegate to setup and manage access to the Data at the Point of Care (DPC) API. Use the email address <strong><%= mail_to @invitation.invited_email, @invitation.invited_email %></strong> to complete your acceptance of this invite.</p>
+            <p>This invite is for <strong><%= @invitation.show_attributes['full_name'] %></strong> at <strong><%= @organization.name %></strong>. <%= @invitation.invited_by_full_name %> assigned you as a Credential Delegate to setup and manage access to the Data at the Point of Care (DPC) API. Use the email address <strong><%= mail_to @invitation.invited_email, @invitation.invited_email %></strong> to complete your acceptance of this invite.</p>
           <% end %>
           <div class="usa-alert usa-alert--warning margin-bottom-4">
             <div class="usa-alert__body">
@@ -48,7 +48,7 @@
             destination: accept_organization_invitation_path(@organization, @invitation),
                                                      additional_classes: ['start-component-button'],
             method: :get) if @invitation.authorized_official? %>
-        <%= render Core::Button::ButtonComponent.new(label: 'Accept invitation',
+        <%= render Core::Button::ButtonComponent.new(label: 'Get Started',
             destination: confirm_cd_organization_invitation_path(@organization, @invitation),
                                                      additional_classes: ['start-component-button'],
             method: :get) if @invitation.credential_delegate? %>

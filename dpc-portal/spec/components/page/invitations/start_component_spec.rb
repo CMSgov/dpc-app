@@ -49,7 +49,7 @@ RSpec.describe Page::Invitations::StartComponent, type: :component do
 
     it 'should show start button' do
       button = page.find('.usa-button')
-      expect(button.text).to eq 'Accept invitation'
+      expect(button.text).to eq 'Get Started'
     end
 
     it 'should include the correct musts' do
