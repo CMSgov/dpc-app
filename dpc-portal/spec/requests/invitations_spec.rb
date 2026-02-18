@@ -676,6 +676,7 @@ RSpec.describe 'Invitations', type: :request do
           if invitation.authorized_official?
             post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
           else
+            stub_user_info
             get "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
           end
           user_service_class = class_double(UserInfoService).as_stubbed_const
