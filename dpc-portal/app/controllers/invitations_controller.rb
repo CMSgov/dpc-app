@@ -69,7 +69,7 @@ class InvitationsController < ApplicationController
                          invitation: @invitation.id }])
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation, @given_name, @family_name))
   rescue UserInfoServiceError => e
-    handle_user_info_service_error(e, 3)
+    handle_user_info_service_error(e, 2)
   end
 
   def login
