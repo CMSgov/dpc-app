@@ -33,7 +33,7 @@ jobs:
       id-token: write
       contents: read
     with:
-      env: ${{ inputs.env || 'dev' }}
+      env: ${{ inputs.env || 'test' }}
       project: opt-out-import
       go_files: "main.go parsers.go utils.go models.go db.go"
     secrets: inherit
