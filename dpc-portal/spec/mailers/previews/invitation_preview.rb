@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Preview all invitation emails at http://localhost:3100/rails/mailers/invitation
+# Preview all invitation emails at http://localhost:3100/portal/rails/mailers/invitation
 class InvitationPreview < ActionMailer::Preview
   def invite_cd
     invited_by = User.new(given_name: 'Robert', family_name: 'Hodges')
