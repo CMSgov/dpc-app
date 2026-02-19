@@ -20,7 +20,7 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       let(:org) { ComponentSupport::MockOrg.new(0) }
       it 'Should have Generate token button' do
         button = <<~BUTTON
-          <form class="button_to" method="get" action="/portal/organizations/#{org.path_id}/client_tokens/new">
+          <form class="button_to" method="post" action="/portal/organizations/#{org.path_id}/client_tokens/new">
             <button class="usa-button" type="submit">Generate token</button>
           </form>
         BUTTON
@@ -28,7 +28,7 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       end
       it 'Should have Create key button' do
         button = <<~BUTTON
-          <form class="button_to" method="get" action="/portal/organizations/#{org.path_id}/public_keys/new">
+          <form class="button_to" method="post" action="/portal/organizations/#{org.path_id}/public_keys/new">
             <button class="usa-button" type="submit">Add key</button>
           </form>
         BUTTON
@@ -36,7 +36,7 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       end
       it 'Should have Add IP button' do
         button = <<~BUTTON
-          <form class="button_to" method="get" action="/portal/organizations/#{org.path_id}/ip_addresses/new">
+          <form class="button_to" method="post" action="/portal/organizations/#{org.path_id}/ip_addresses/new">
             <button class="usa-button" type="submit">Add IP</button>
           </form>
         BUTTON
