@@ -3,7 +3,7 @@
 echo "Testing removal of foreman log prefix (should be json)"
 export LOG_STR='06:21:25 web.1   | {"level": "debug", "time": "blahblahblah"}'
 export EVERYTHING_AFTER_PIPE_REGEX='s/[^|]*|//'
-echo $LOG_STR | sed $EVERYTHING_AFTER_PIPE_REGEX
+echo $LOG_STR | sed $EVERYTHING_AFTER_PIPE_REGEX                             
 
 echo "Starting Procfile.nonprod"
 exec foreman start -f Procfile.nonprod "$@" | sed $EVERYTHING_AFTER_PIPE_REGEX
