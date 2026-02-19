@@ -5,6 +5,7 @@ require 'support/credential_resource_shared_examples'
 
 RSpec.describe 'IpAddresses', type: :request do
   include DpcClientSupport
+  include LoginSupport
 
   let(:terms_of_service_accepted_by) { create(:user) }
 
@@ -17,7 +18,7 @@ RSpec.describe 'IpAddresses', type: :request do
     context 'not logged in' do
       it 'redirects to login' do
         get '/organizations/no-such-id/ip_addresses/new'
-        expect(response).to redirect_to('/portal/users/sign_in')
+        expect(response).to redirect_to('/users/sign_in')
       end
     end
 
@@ -157,7 +158,7 @@ RSpec.describe 'IpAddresses', type: :request do
     context 'not logged in' do
       it 'redirects to login' do
         post '/organizations/no-such-id/ip_addresses'
-        expect(response).to redirect_to('/portal/users/sign_in')
+        expect(response).to redirect_to('/users/sign_in')
       end
     end
 
@@ -242,7 +243,7 @@ RSpec.describe 'IpAddresses', type: :request do
     context 'not logged in' do
       it 'redirects to login' do
         delete '/organizations/no-such-id/ip_addresses/no-such-id'
-        expect(response).to redirect_to('/portal/users/sign_in')
+        expect(response).to redirect_to('/users/sign_in')
       end
     end
 

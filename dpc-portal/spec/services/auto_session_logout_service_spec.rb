@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'support/login_support'
 
 RSpec.describe 'AutoSessionLogoutService', type: :request do
+  include LoginSupport
   let(:user) { create(:user) }
   before { sign_in user }
 
@@ -13,6 +15,6 @@ RSpec.describe 'AutoSessionLogoutService', type: :request do
 
   it 'is timed out' do
     get '/timeout'
-    expect(response).to redirect_to(new_user_session_path)
+    expect(response).to redirect_to(sign_in_path)
   end
 end
