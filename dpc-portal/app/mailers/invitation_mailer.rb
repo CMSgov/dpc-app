@@ -6,7 +6,7 @@ class InvitationMailer < ApplicationMailer
     @invitation = params[:invitation]
     mail(
       to: @invitation.invited_email,
-      subject: "You've been delegated to manage API access"
+      subject: 'Action required: You’ve been delegated to manage API access'
     )
   end
 
@@ -14,10 +14,9 @@ class InvitationMailer < ApplicationMailer
     @invitation = params[:invitation]
     @given_name = params[:given_name]
     @family_name = params[:family_name]
-    attachments.inline['dpc.png'] = File.read("#{Rails.root}/app/assets/images/dpc.png")
     mail(
       to: @invitation.invited_email,
-      subject: 'Time to register your organization with DPC'
+      subject: 'Action required: Register your organization to continue accessing API claims data'
     )
   end
 
