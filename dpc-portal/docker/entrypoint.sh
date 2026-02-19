@@ -6,6 +6,10 @@ set -e
 if [ -f tmp/pids/server.pid ]; then
   rm tmp/pids/server.pid
 fi
+if [ -f tmp/solid_queue_pidfile ]; then
+  echo "Removing solid queue pidfile"
+  rm tmp/solid_queue_pidfile
+fi
 
 if [ "$1" == "portal" ]; then
   # Start the database service (and make accessible outside the Docker container)
@@ -23,5 +27,15 @@ if [ "$1" == "portal" ]; then
   else
     echo "Starting in non-production"
     ./bin/nonprod
+  fi
+elif [ "$1" == "async" ]; then
+  echo "Starting Solid Queue..."
+  if [[ "$ENV" == "production" ]]; then
+    echo "Starting in production"
+    bundle exec rails solid_queue:start
+  # For local, SolidQueue starts in same container
+  elif [[ "$ENV" != "local" ]]; then
+    echo "Starting in non-production"
+    ./bin/nonprod_async
   fi
 fi

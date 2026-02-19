@@ -27,6 +27,7 @@ module DpcPortal
 
     config.active_support.to_time_preserves_timezone = :zone
     config.active_job.queue_adapter = :solid_queue
+    config.solid_queue.supervisor_pidfile = 'tmp/solid_queue_pidfile'
     
     # Ensure mailer jobs get sent to a specialized queue.
     config.action_mailer.deliver_later_queue_name = "portal"
