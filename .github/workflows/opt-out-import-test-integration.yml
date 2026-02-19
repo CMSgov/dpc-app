@@ -83,6 +83,9 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/delegatedadmin/developer/bfd-test-eft-dpc-ct-bucket-role
           role-chaining: true
           role-skip-session-tagging: true
+      - name: Verify import file still in bucket
+        run: |
+          aws s3api head-object --bucket bfd-test-eft --key bfdeft01/dpc/in/${{ needs.trigger.outputs.filename }}
       - name: Verify confirmation file put in bucket
         env:
           STARTTIME: ${{needs.trigger.outputs.start_time}}
