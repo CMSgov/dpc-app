@@ -69,6 +69,14 @@ module Page
         reason = 'no_account'
         render(Page::Utility::ErrorComponent.new(nil, reason))
       end
+      def login_gov_signin_cancel
+        reason = 'login_gov_signin_cancel'
+        render(Page::Utility::ErrorComponent.new(nil, reason))
+      end
+      def login_gov_signin_fail
+        reason = 'login_gov_signin_fail'
+        render(Page::Utility::ErrorComponent.new(nil, reason))
+      end
     end
   end
 end

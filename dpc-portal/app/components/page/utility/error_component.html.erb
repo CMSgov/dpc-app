@@ -32,5 +32,9 @@
         <%= render Core::Button::ButtonComponent.new(label: "Sign out of Login.gov",
             destination: login_dot_gov_logout_path,
             method: :delete) %>
+      <% when :login_gov_signin_cancel %>
+        <%= link_to 'Back to portal home', root_path, class: 'usa-button usa-button--outline', data: { turbo: false }%>
+      <% when :login_gov_signin_fail %>
+        <%= link_to 'Back to portal home', root_path, class: 'usa-button usa-button--outline', data: { turbo: false }%>
     <% end %>
 </div>
