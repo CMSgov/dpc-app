@@ -674,6 +674,19 @@ RSpec.describe 'Invitations', type: :request do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           expect(response).to redirect_to(organization_invitation_path(org, invitation))
         end
+        it 'should show login if token expired' do
+          if invitation.authorized_official?
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+          else
+            stub_user_info
+            get "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
+          end
+          user_service_class = class_double(UserInfoService).as_stubbed_const
+          allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'unauthorized')
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          expect(response).to be_ok
+          expect(response.body).to include(login_organization_invitation_path(org, invitation))
+        end
       end
     end
 
