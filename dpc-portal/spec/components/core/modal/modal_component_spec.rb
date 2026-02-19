@@ -44,8 +44,8 @@ RSpec.describe Core::Modal::ModalComponent, type: :component do
               </div>
             </div>
             <button type="button" class="usa-button usa-modal__close" aria-label="Close this window" data-close-modal>
-              <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
-                <use xlink:href="/assets/img/sprite.svg#close"></use>
+              <svg class="usa-icon" style="transform: scale(1)" aria-hidden="true" role="img">
+                <use xlink:href="/portal/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#close"></use>
               </svg>
             </button>
           </div>
