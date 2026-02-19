@@ -13,13 +13,11 @@
             destination: renew_organization_invitation_path(@invitation.provider_organization, @invitation),
             method: :post) %>
       <% when :ao_accepted %>
-        <%= button_to new_user_session_path, class: 'usa-button', method: :get, data: { turbo: false } do %>
+        <%= link_to new_user_session_path, class: 'usa-button', data: { turbo: false } do %>
           Sign in with <span class="login-button__logo">Login.gov</span>
         <% end %>
       <% when :cd_accepted %>
-        <%= render Core::Button::ButtonComponent.new(label: "Go to DPC home",
-            destination: root_path,
-            method: :get) %>
+        <%= link_to 'Go to DPC home', root_url, class: 'usa-button margin-right-0' %>
       <% when :pii_mismatch %>
         <%= render Core::Button::ButtonComponent.new(label: "Sign out of Login.gov",
             destination: login_dot_gov_logout_path(invitation_id: @invitation.id),

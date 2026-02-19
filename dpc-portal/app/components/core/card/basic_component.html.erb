@@ -6,7 +6,7 @@
       </div>
       <div class="flex-align-self-center">
         <% if @button_params %>
-          <%= button_to @button_params[:name], @button_params[:path], method: @button_params[:method], class: 'usa-button' %>
+          <%= link_to @button_params[:name], @button_params[:path], class: 'usa-button' %>
         <% end %>
       </div>
     </div>

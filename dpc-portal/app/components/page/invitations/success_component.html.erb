@@ -23,7 +23,5 @@
       <% end %>
   </ul>
   <% end %>
-  <%= render Core::Button::ButtonComponent.new(label: 'Go to DPC Portal',
-      destination: root_url,
-      method: :get) %>
+  <%= link_to 'Go to DPC Portal', root_url, class: 'usa-button margin-right-0' %>
 </div>

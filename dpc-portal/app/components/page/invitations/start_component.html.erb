@@ -44,14 +44,8 @@
             <% end %>
           </ul>
         </p>
-        <%= render Core::Button::ButtonComponent.new(label: 'Begin registration',
-            destination: accept_organization_invitation_path(@organization, @invitation),
-                                                     additional_classes: ['start-component-button'],
-            method: :get) if @invitation.authorized_official? %>
-        <%= render Core::Button::ButtonComponent.new(label: 'Get Started',
-            destination: confirm_cd_organization_invitation_path(@organization, @invitation),
-                                                     additional_classes: ['start-component-button'],
-            method: :get) if @invitation.credential_delegate? %>
+        <%= link_to 'Begin registration', accept_organization_invitation_path(@organization, @invitation), class: 'usa-button start-component-button' if @invitation.authorized_official? %> 
+        <%= link_to 'Accept invitation', confirm_cd_organization_invitation_path(@organization, @invitation), class: 'usa-button start-component-button' if @invitation.credential_delegate? %> 
       </div>
     </div>
   </div>

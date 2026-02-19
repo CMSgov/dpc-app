@@ -34,7 +34,7 @@ RSpec.describe Core::Card::BasicComponent, type: :component do
 
     context 'when has button' do
       let(:component) do
-        described_class.new(text_content: '<h1>Yo</h1>', button_params: { name: 'Doit', path: '/there', method: :post })
+        described_class.new(text_content: '<h1>Yo</h1>', button_params: { name: 'Doit', path: '/there' })
       end
       let(:expected_html) do
         <<~HTML
