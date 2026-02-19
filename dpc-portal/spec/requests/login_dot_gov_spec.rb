@@ -6,7 +6,10 @@ RSpec.describe 'LoginDotGov', type: :request do
   describe 'POST /auth/login_dot_gov' do
     RSpec.shared_examples 'an openid client' do
       context 'user exists' do
-        before { create(:user, uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com') }
+        before do
+          user = create(:user, email: 'bob@example.com')
+          create(:idp_uid, user:, uid: '12345', provider: 'login_dot_gov')
+        end
         it 'should sign in a user' do
           post '/auth/login_dot_gov'
           follow_redirect!
@@ -23,12 +26,12 @@ RSpec.describe 'LoginDotGov', type: :request do
           post '/auth/login_dot_gov'
           follow_redirect!
         end
-        it 'should not add another user' do
-          expect(User.where(uid: '12345', provider: 'login_dot_gov').count).to eq 1
+        it 'should not add another user credential' do
+          expect(IdpUid.where(uid: '12345', provider: 'login_dot_gov').count).to eq 1
           expect do
             post '/auth/login_dot_gov'
             follow_redirect!
-          end.to change { User.count }.by(0)
+          end.to change { IdpUid.count }.by(0)
         end
       end
 
@@ -61,13 +64,16 @@ RSpec.describe 'LoginDotGov', type: :request do
       it_behaves_like 'an openid client'
 
       context :user_exists do
-        before { create(:user, uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com') }
+        before do
+          user = create(:user, email: 'bob@example.com')
+          create(:idp_uid, user:, uid: '12345', provider: 'login_dot_gov')
+        end
         it 'updates user names' do
           expect do
             post '/auth/login_dot_gov'
             follow_redirect!
           end.to change {
-                   User.where(uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com', given_name: 'Bob',
+                   User.where(email: 'bob@example.com', given_name: 'Bob',
                               family_name: 'Hoskins').count
                  }.by 1
           expect(response.location).to eq organizations_url
@@ -116,16 +122,17 @@ RSpec.describe 'LoginDotGov', type: :request do
 
       context :user_exists do
         before do
-          create(:user, uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com', given_name: 'Bob',
-                        family_name: 'Hoskins')
+          user = create(:user, email: 'bob@example.com', given_name: 'Bob',
+                               family_name: 'Hoskins')
+          create(:idp_uid, user:, uid: '12345', provider: 'login_dot_gov')
         end
         it 'does not update user names' do
-          expect(User.where(uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com', given_name: 'Bob',
+          expect(User.where(email: 'bob@example.com', given_name: 'Bob',
                             family_name: 'Hoskins').count).to eq 1
           post '/auth/login_dot_gov'
           follow_redirect!
           expect(response.location).to eq organizations_url
-          expect(User.where(uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com', given_name: 'Bob',
+          expect(User.where(email: 'bob@example.com', given_name: 'Bob',
                             family_name: 'Hoskins').count).to eq 1
         end
 
