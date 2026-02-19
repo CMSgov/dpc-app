@@ -33,6 +33,7 @@ elif [ "$1" == "async" ]; then
   if [[ "$ENV" == "production" ]]; then
     echo "Starting in production"
     bundle exec rails solid_queue:start
+  # For local, SolidQueue starts in same container
   elif [[ "$ENV" != "local" ]]; then
     echo "Starting in non-production"
     ./bin/nonprod_async
