@@ -174,7 +174,8 @@ class InvitationsController < ApplicationController
     elsif @invitation.authorized_official?
       create_ao_org_link
     else
-      render(Page::Utility::ErrorComponent.new(@invitation, 'invalid'),
+      invalid_status = @invitation.credential_delegate? ? 'cd_invalid' : 'ao_invalid'
+      render(Page::Utility::ErrorComponent.new(@invitation, invalid_status),
              status: :unprocessable_entity)
       false
     end
@@ -227,10 +228,11 @@ class InvitationsController < ApplicationController
   def load_invitation
     @invitation = Invitation.find(params[:id])
     if @organization != @invitation.provider_organization
-      render(Page::Utility::ErrorComponent.new(@invitation, 'invalid'), status: :not_found)
+      invalid_status = @invitation.credential_delegate? ? 'cd_invalid' : 'ao_invalid'
+      render(Page::Utility::ErrorComponent.new(@invitation, invalid_status), status: :not_found)
     end
   rescue ActiveRecord::RecordNotFound
-    render(Page::Utility::ErrorComponent.new(@invitation, 'invalid'), status: :not_found)
+    render(Page::Utility::ErrorComponent.new(@invitation, 'ao_invalid'), status: :not_found)
   end
 
   def validate_invitation
@@ -247,7 +249,8 @@ class InvitationsController < ApplicationController
 
   def get_invitation_log_data(reason)
     unacceptable_reason_map = {
-      invalid: ['Invalid Invitation', LoggingConstants::ActionType::InvalidInvitation],
+      ao_invalid: ['AO Invalid Invitation', LoggingConstants::ActionType::InvalidInvitation],
+      cd_invalid: ['CD Invalid Invitation', LoggingConstants::ActionType::InvalidInvitation],
       ao_renewed: ['Ao Renewed Expired Invitation', LoggingConstants::ActionType::AoRenewedExpiredInvitation],
       ao_accepted: ['Authorized Official Invitation already accepted',
                     LoggingConstants::ActionType::AoAlreadyRegistered],

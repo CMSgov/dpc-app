@@ -9,7 +9,9 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
       normalize_space(rendered_content)
     end
 
-    let(:ao_or_cd_ref) { 'as an Authorized Official (AO) and/or Credential Delegate (CD)' }
+    let(:ao_or_cd_ref) do
+      'You’re listed as the Authorized Official (AO) or Credential Delegate (CD) for the organizations below.'
+    end
     def normalize_space(str)
       str.gsub(/^ +/, '').gsub("\n", '')
     end
@@ -80,7 +82,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
                           <use xlink:href=/portal/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#warning></use>
                         </svg>
                         </div>
-                      <div class="float-left margin-left-1 margin-top-neg-2px">Configuration needed</div>
+                      <div class="float-left margin-left-1 margin-top-neg-2px">Setup needed</div>
                     </div>
                   </td>
                 </tr>

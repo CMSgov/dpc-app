@@ -25,7 +25,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       context 'credential delegate start' do
         let(:credential_start) { false }
         it 'Should have org name' do
-          is_expected.to include("<h1>#{org.name}</h1>")
+          is_expected.to include("<span class=\"text-bold\">Organization:</span> #{org.name}")
         end
         it 'Should have npi' do
           is_expected.to include("<span class=\"text-bold\">NPI-2:</span> #{org.npi}")
@@ -70,7 +70,7 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
       let(:credential_start) { true }
       let(:role) { 'Credential Delegate' }
       it 'Should have org name' do
-        is_expected.to include("<h1>#{org.name}</h1>")
+        is_expected.to include("<span class=\"text-bold\">Organization:</span> #{org.name}")
       end
       it 'Should have npi' do
         is_expected.to include("<span class=\"text-bold\">NPI-2:</span> #{org.npi}")

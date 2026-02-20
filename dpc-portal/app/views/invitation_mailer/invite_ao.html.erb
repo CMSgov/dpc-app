@@ -5,28 +5,36 @@
     <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
   </head>
   <body>
-    <h1>Register <%= @invitation.provider_organization.name %> (NPI <%= @invitation.provider_organization.npi %>) to access API claims data.</h1>
+    <h1>Create an account in the new DPC Portal</h1>
 
-    <p>You've been identified as an Authorized Official (AO) of <%= @invitation.provider_organization.name %> (NPI <%= @invitation.provider_organization.npi %>). As an AO, you must register the organization so that it can access beneficiary claims data through Data at the Point of Care (DPC). You also must sign program Terms of Service.</p>
+    <p>You’ve been identified as the Authorized Official for:</p>
+    <ul>
+        <li><%= @invitation.provider_organization.name %></li>
+        <li>NPI: <%= @invitation.provider_organization.npi %></li>
+    </ul>
 
-    <p><%= link_to 'Use this link to register your organization in the DPC Portal.',
+    <p>DPC has launched a new verification process for API access. You'll need to register your organization in DPC’s new onboarding portal.</p>
+
+    <p>👉 <%= link_to 'Register in DPC Portal.',
 	   organization_invitation_url(@invitation.provider_organization, @invitation, protocol: Rails.env.production? ? 'https' : 'http') %></p>
 
-    <p>This link will expire in 48 hours.</p>
+    <p>(This link will expire in 48 hours.)</p>
+
+    <p>If you have questions or need help, contact <%= mail_to "dpcinfo@cms.hhs.gov", "dpcinfo@cms.hhs.gov" %></p>
+
 
     <h2>What is DPC?</h2>
 
-    <p>DPC is an Application Programming Interface (API) allowing your systems to access patient medical data. The API delivers information from Medicare claims for treatment purposes. <%= link_to 'Learn more about DPC', 'https://dpc.cms.gov/' %>.</p>
+    <p>The <%= link_to 'DPC API', 'https://dpc.cms.gov/' %> gives your organization access to Medicare claims data for treatment and care coordination.</p>
 
-    <h2>What happens when I select the registration link?</h2>
+    <h2>What happens when I register?</h2>
 
-    <p>You'll be prompted to sign in or create an account with <%= link_to 'Login.gov', 'https://www.login.gov/what-is-login/' %> at the DPC Portal. You may need to provide your State-Issued ID, a Social Security Number, and email address. <%= link_to 'How to verify your identity', 'https://www.login.gov/help/verify-your-identity/how-to-verify-your-identity/' %>.</p>
+    <p>You will be asked to sign in or create an account with a government-approved identity verification service.</p>
 
-    <p>Once you register your organization you have the opportunity to assign a delegate who will manage the remainder of the API onboarding process.</p>
+    <p>If you want, you can assign a delegate to set up and manage your organization’s API access.</p>
 
-    <p>Thank you for your interest in Data at the Point of Care.</p>
+    <p>Thanks for your participation in Data at the Point of Care.</p>
 
-    <p>- Centers for Medicare & Medicaid Services</p>
     <div>
       <%= image_tag attachments['dpc.png'].url, style: "height: 34px" -%>
     </div>

@@ -3,17 +3,19 @@
 <div>
   <div>
     <% if @invitation.authorized_official? %>
-    <p>Thank you for signing in, <%= @name %>.</p>
-
-    <p>Now that your identity is verified we'll check your and your organization's enrollment with the Medicare Provider Enrollment, Chain, and Ownership System (PECOS).</p>
-    <%= render Core::Button::ButtonComponent.new(label: 'Continue to register',
+      <p>Next, we need to verify your organization's Medicare enrollment information. We're confirming:
+        <ul>
+          <% @musts.each do |must| %>
+            <li class="margin-top-2"><%= must %></li>
+          <% end %>
+        </ul>
+      </p>
+    <%= render Core::Button::ButtonComponent.new(label: 'Verify information',
         destination: confirm_organization_invitation_path(@organization, @invitation),
         method: :post) %>
     <% end %>
     <% if @invitation.credential_delegate? %>
-    <p>Thank you for signing in, <%= @name %>.</p>
-
-    <p>Now that we've confirmed your identity via Login.gov you can complete your acceptance of this invite.</p>
+    <p>Your identity has been verified. You can now accept your invite</p>
     <%= render Core::Button::ButtonComponent.new(label: 'Accept invite',
         destination: register_organization_invitation_path(@organization, @invitation),
         method: :post) %>

@@ -8,7 +8,11 @@ module Page
         super
         @organization = organization
         @invitation = invitation
-        @name = "#{given_name} #{family_name}"
+        @musts = [
+          'Your role as the Authorized Official',
+          'Your organization\'s Medicare enrollment status',
+          'That you or your organization are not on the Medicare exclusion list'
+        ]
       end
     end
   end
