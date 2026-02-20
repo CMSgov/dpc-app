@@ -35,7 +35,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
                   <div class="flex-align-self-center">
                   </div>
                 </div>
-                <p>A credential delegate (CD) helps your organization set up and manage your API access.</p>
+                <p>A Credential Delegate (CD) helps your organization set up and manage your API access.</p>
                 <div>
                   <p>You have no active Credential Delegates.</p>
                 </div>
