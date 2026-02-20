@@ -11,19 +11,22 @@ RSpec.describe InvitationMailer, type: :mailer do
       expected_url = 'http://localhost:3100/portal/organizations/2/invitations/4'
 
       mailer = InvitationMailer.with(invitation:).invite_cd
-      expect(mailer.body).to match(expected_url)
+      html = mailer.body.parts.select { |part| part.content_type.match 'text/html' }.first
+      expect(html.body).to match(expected_url)
     end
     it 'uses https for invitation link if it thinks it is prod' do
       expect(Rails.env).to receive(:production?).and_return true
       expected_url = 'https://localhost:3100/portal/organizations/2/invitations/4'
 
       mailer = InvitationMailer.with(invitation:).invite_cd
-      expect(mailer.body).to match(expected_url)
+      html = mailer.body.parts.select { |part| part.content_type.match 'text/html' }.first
+      expect(html.body).to match(expected_url)
     end
     it 'has organization name and NPI' do
       mailer = InvitationMailer.with(invitation:).invite_cd
-      expect(mailer.body).to match(provider_organization.name)
-      expect(mailer.body).to match("NPI: #{provider_organization.npi}")
+      html = mailer.body.parts.select { |part| part.content_type.match 'text/html' }.first
+      expect(html.body).to match(provider_organization.name)
+      expect(html.body).to match("NPI: #{provider_organization.npi}")
     end
   end
   describe :invite_ao do
@@ -35,19 +38,22 @@ RSpec.describe InvitationMailer, type: :mailer do
       expected_url = 'http://localhost:3100/portal/organizations/2/invitations/4'
 
       mailer = InvitationMailer.with(invitation:, given_name:, family_name:).invite_ao
-      expect(mailer.body).to match(expected_url)
+      html = mailer.body.parts.select { |part| part.content_type.match 'text/html' }.first
+      expect(html.body).to match(expected_url)
     end
     it 'uses https for invitation link if it thinks it is prod' do
       expect(Rails.env).to receive(:production?).and_return true
       expected_url = 'https://localhost:3100/portal/organizations/2/invitations/4'
 
       mailer = InvitationMailer.with(invitation:, given_name:, family_name:).invite_ao
-      expect(mailer.body).to match(expected_url)
+      html = mailer.body.parts.select { |part| part.content_type.match 'text/html' }.first
+      expect(html.body).to match(expected_url)
     end
     it 'has organization name and NPI' do
       mailer = InvitationMailer.with(invitation:, given_name:, family_name:).invite_ao
-      expect(mailer.body).to match(provider_organization.name)
-      expect(mailer.body).to match("NPI: #{provider_organization.npi}")
+      html = mailer.body.parts.select { |part| part.content_type.match 'text/html' }.first
+      expect(html.body).to match(provider_organization.name)
+      expect(html.body).to match("NPI: #{provider_organization.npi}")
     end
   end
   describe :cd_accepted do
