@@ -20,7 +20,7 @@ RSpec.describe Page::Organization::TosFormComponent, type: :component do
           <h2>Sign Terms of Service</h2>
           <p>Confirmed! We successfully identified you as an Authorized Official (AO) of Health Hut (NPI 11111111).</p>
           <p>To manage this organization's credentials, you must agree to the DPC API's Terms of Service.</p>
-          <div style="width: 100%; height: 420px; overflow-y: auto; border: 2px solid silver; padding: 1rem;" class="margin-bottom-5">
+          <div style="width: 100%; height: 420px; overflow-y: auto; border: 2px solid silver; padding: 1rem; background-color: white;" class="margin-bottom-5">
             <div class="usa-prose measure-5">
               <section class="ds-l-container ds-u-padding-top--7 ds-u-padding-bottom--7">
 
