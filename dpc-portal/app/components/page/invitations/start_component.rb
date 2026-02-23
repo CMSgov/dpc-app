@@ -13,15 +13,16 @@ module Page
         @list_styles = %i[text-green usa-media-block__img]
         @musts = if @invitation.authorized_official?
                    [
-                     'Be an active AO of your organization',
-                     'Not be listed on the Medicare Exclusions Database (or your organization)',
-                     'Be registered in the Provider Enrollment, Chain, and Ownership System (PECOS)'
+                     'Complete identity verification when prompted',
+                     'Be an Authorized Official of your organization',
+                     'Have an active Medicare enrollment for your organization in PECOS',
+                     'Not be listed on the Medicare Exclusions Database (or your organization)'
                    ]
                  else
                    [
-                     'Verify your identity with Login.gov',
-                     'Use the same email address the invite was sent to',
-                     'Make sure the name you sign up with matches the one shown on this screen'
+                     'Use the email address your invite was sent to',
+                     'Make sure the name you sign up with matches the one shown on this screen',
+                     'Complete identity verification when prompted'
                    ]
                  end
       end

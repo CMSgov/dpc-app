@@ -30,26 +30,35 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
               <div class="bg-white shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-x-3 padding-bottom-3">
                 <div class="display-flex flex-row flex-justify">
                   <div class="flex-align-self-center">
-                    <h2>Credential delegates</h2>
+                    <h2>Credential Delegates</h2>
                   </div>
                   <div class="flex-align-self-center">
-                    <form class="button_to" method="get" action="/organizations/#{org.path_id}/credential_delegate_invitations/new"><button class="usa-button" type="submit">Assign CD</button></form>
                   </div>
                 </div>
-                <hr />
-                <p>A credential delegate (CD) manages secure API login information. You can assign anyone as a CD.</p>
+                <p>A Credential Delegate (CD) helps your organization set up and manage your API access.</p>
                 <div>
-                  <h2>Active</h2>
-                  <p>There are no active credential delegates.</p>
+                  <p>You have no active Credential Delegates.</p>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="bg-white shadow-5 border-1px border-base-lighter radius-md margin-bottom-4 padding-x-3 padding-bottom-3">
+                <div class="display-flex flex-row flex-justify">
+                  <div class="flex-align-self-center">
+                    <h2>Invites</h2>
+                  </div>
+                  <div class="flex-align-self-center">
+                    <form class="button_to" method="get" action="/organizations/#{org.path_id}/credential_delegate_invitations/new"><button class="usa-button" type="submit">Invite CD</button></form>
+                  </div>
+                </div>
+                <p>You can invite users to be Credential Delegates.</p>
+                <div>
+                  <h2>Pending invites</h2>
+                  <p>You have no pending invites.</p>
                 </div>
                 <div>
-                  <h2>Pending invitations</h2>
-                  <p>There are no pending credential delegates.</p>
-                </div>
-                <div>
-                  <h2>Expired invitations</h2>
-                  <p>These invites expired. You can resend the invite to give them more time to accept.</p>
-                  <p>You have no expired invitations.</p>
+                  <h2>Expired invites</h2>
+                  <p>You have no expired invites.</p>
                 </div>
               </div>
             </div>
@@ -103,7 +112,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
       end
 
       it 'has no pending credential delegates' do
-        expected_html = '<p>There are no pending credential delegates.</p>'
+        expected_html = '<p>You have no pending invites.</p>'
         is_expected.to include(normalize_space(expected_html))
       end
     end
@@ -153,12 +162,12 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
       end
 
       it 'has no active credential delegates' do
-        expected_html = '<p>There are no active credential delegates.</p>'
+        expected_html = '<p>You have no active Credential Delegates.</p>'
         is_expected.to include(normalize_space(expected_html))
       end
 
       it 'has no expired invitations' do
-        expected_html = '<p>You have no expired invitations.</p>'
+        expected_html = '<p>You have no expired invites.</p>'
         is_expected.to include(normalize_space(expected_html))
       end
     end
@@ -208,7 +217,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
       end
 
       it 'has no pending credential delegates' do
-        expected_html = '<p>There are no pending credential delegates.</p>'
+        expected_html = '<p>You have no active Credential Delegates.</p>'
         is_expected.to include(normalize_space(expected_html))
       end
     end

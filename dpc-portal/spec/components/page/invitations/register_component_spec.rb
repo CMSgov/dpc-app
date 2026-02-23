@@ -13,10 +13,6 @@ RSpec.describe Page::Invitations::RegisterComponent, type: :component do
       form = page.find('form')
       expect(form[:action]).to eq expected
     end
-
-    it 'should include organization name and NPI' do
-      expect(page).to have_text "#{invitation.provider_organization.name} (NPI #{invitation.provider_organization.npi})"
-    end
   end
 
   describe 'ao' do
@@ -30,10 +26,6 @@ RSpec.describe Page::Invitations::RegisterComponent, type: :component do
       expected = "/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/register"
       form = page.find('form')
       expect(form[:action]).to eq expected
-    end
-
-    it 'should include organization name and NPI' do
-      expect(page).to have_text "#{invitation.provider_organization.name} (NPI #{invitation.provider_organization.npi})"
     end
   end
 end

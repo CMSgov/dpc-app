@@ -190,7 +190,7 @@ RSpec.describe 'Organizations', type: :request do
 
         it 'shows correct status' do
           get "/organizations/#{org.id}"
-          expect(response.body).to include('Configuration needed')
+          expect(response.body).to include('Setup needed')
           expect(response.body).to include('#warning')
         end
 
@@ -248,15 +248,14 @@ RSpec.describe 'Organizations', type: :request do
 
         it 'shows CD list page' do
           get "/organizations/#{org.id}"
-          expect(response.body).to include('<h2>Credential delegates</h2>')
-          expect(response.body).to include('<h2>Pending invitations</h2>')
-          expect(response.body).to include('<h2>Active</h2>')
-          expect(response.body).to include('<h2>Expired invitations</h2>')
+          expect(response.body).to include('<h2>Credential Delegates</h2>')
+          expect(response.body).to include('<h2>Pending invites</h2>')
+          expect(response.body).to include('<h2>Expired invites</h2>')
         end
 
         it 'shows correct status' do
           get "/organizations/#{org.id}"
-          expect(response.body).to include('Configuration needed')
+          expect(response.body).to include('Setup needed')
           expect(response.body).to include('#warning')
         end
 

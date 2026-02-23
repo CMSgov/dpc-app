@@ -38,7 +38,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         org.update(terms_of_service_accepted_by: user)
         get "/organizations/#{org.id}/credential_delegate_invitations/new"
         expect(assigns(:organization)).to eq org
-        expect(response.body).to include('<h1>Invite new user</h1>')
+        expect(response.body).to include('<h1>Assign Credential Delegate</h1>')
       end
     end
 
