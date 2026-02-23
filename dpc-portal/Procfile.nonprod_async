@@ -1,0 +1,2 @@
+solidqueue: bundle exec rails solid_queue:start
+cpigw: env PORT=4567 ruby spec/support/fake_cpi_gateway.rb
