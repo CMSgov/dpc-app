@@ -5,7 +5,7 @@ require 'support/login_support'
 
 RSpec.describe 'Invitations', type: :request do
   include LoginSupport
-  RSpec.shared_examples 'an invitation endpoint' do |method, path_suffix|
+  RSpec.shared_examples 'an invitation endpoint' do |method, path_suffix, type|
     let(:org) { invitation.provider_organization }
     let(:bad_org) { create(:provider_organization) }
     let(:expected_success_status) { 200 }
@@ -16,19 +16,20 @@ RSpec.describe 'Invitations', type: :request do
     it 'should show warning page with 404 if missing' do
       send(method, "/organizations/#{org.id}/invitations/bad-id/#{path_suffix}")
       expect(response).to be_not_found
-      expect(response.body).to include(I18n.t('verification.invalid_status'))
+      # If we don't have an invitation  we don't know if it's for an AO or CD, so we default to AO in the error message.
+      expect(response.body).to include(I18n.t('verification.ao_invalid_status'))
     end
     it 'should show warning page with 404 if org-invitation mismatch' do
       bad_org = create(:provider_organization)
       send(method, "/organizations/#{bad_org.id}/invitations/#{invitation.id}/#{path_suffix}")
       expect(response).to be_not_found
-      expect(response.body).to include(I18n.t('verification.invalid_status'))
+      expect(response.body).to include(I18n.t("verification.#{type}_invalid_status"))
     end
     it 'should show warning page if cancelled' do
       invitation.update(status: :cancelled)
       send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
       expect(response).to be_forbidden
-      expect(response.body).to include(I18n.t('verification.invalid_status'))
+      expect(response.body).to include(I18n.t("verification.#{type}_invalid_status"))
     end
     context 'invitation expired' do
       before { invitation.update_attribute(:created_at, 3.days.ago) }
@@ -107,7 +108,7 @@ RSpec.describe 'Invitations', type: :request do
       let(:ao_invite) { create(:invitation, :ao) }
       let(:org) { ao_invite.provider_organization }
 
-      it_behaves_like 'an invitation endpoint', :get, '' do
+      it_behaves_like 'an invitation endpoint', :get, '', :ao do
         let(:invitation) { create(:invitation, :ao) }
       end
 
@@ -121,7 +122,7 @@ RSpec.describe 'Invitations', type: :request do
       let(:cd_invite) { create(:invitation, :cd) }
       let(:org) { cd_invite.provider_organization }
 
-      it_behaves_like 'an invitation endpoint', :get, '' do
+      it_behaves_like 'an invitation endpoint', :get, '', :cd do
         let(:invitation) { create(:invitation, :cd) }
       end
 
@@ -164,7 +165,7 @@ RSpec.describe 'Invitations', type: :request do
     end
 
     context :cd do
-      it_behaves_like 'an invitation endpoint', :post, 'login' do
+      it_behaves_like 'an invitation endpoint', :post, 'login', :cd do
         let(:invitation) { create(:invitation, :cd) }
         let(:expected_success_status) { 302 }
       end
@@ -186,7 +187,7 @@ RSpec.describe 'Invitations', type: :request do
       end
     end
     context :ao do
-      it_behaves_like 'an invitation endpoint', :post, 'login' do
+      it_behaves_like 'an invitation endpoint', :post, 'login', :ao do
         let(:invitation) { create(:invitation, :ao) }
         let(:expected_success_status) { 302 }
       end
@@ -208,7 +209,7 @@ RSpec.describe 'Invitations', type: :request do
   end
 
   describe 'GET /accept' do
-    it_behaves_like 'an invitation endpoint', :get, 'accept' do
+    it_behaves_like 'an invitation endpoint', :get, 'accept', :ao do
       let(:invitation) { create(:invitation, :ao) }
     end
     let(:invitation) { create(:invitation, :ao) }
@@ -283,7 +284,7 @@ RSpec.describe 'Invitations', type: :request do
   end
 
   describe 'POST /confirm' do
-    it_behaves_like 'an invitation endpoint', :post, 'confirm' do
+    it_behaves_like 'an invitation endpoint', :post, 'confirm', :ao do
       let(:invitation) { create(:invitation, :ao) }
     end
     context :success do
@@ -460,7 +461,7 @@ RSpec.describe 'Invitations', type: :request do
   end
 
   describe 'GET /confirm_cd' do
-    it_behaves_like 'an invitation endpoint', :get, 'confirm_cd' do
+    it_behaves_like 'an invitation endpoint', :get, 'confirm_cd', :cd do
       let(:invitation) { create(:invitation, :cd) }
     end
     context 'logged in' do
@@ -691,7 +692,7 @@ RSpec.describe 'Invitations', type: :request do
     end
 
     context :cd do
-      it_behaves_like 'an invitation endpoint', :post, 'register' do
+      it_behaves_like 'an invitation endpoint', :post, 'register', :cd do
         let(:invitation) { create(:invitation, :cd) }
       end
       it_behaves_like 'a register endpoint' do
@@ -715,7 +716,7 @@ RSpec.describe 'Invitations', type: :request do
       end
     end
     context :ao do
-      it_behaves_like 'an invitation endpoint', :post, 'register' do
+      it_behaves_like 'an invitation endpoint', :post, 'register', :ao do
         let(:invitation) { create(:invitation, :ao) }
       end
       it_behaves_like 'a register endpoint' do
@@ -805,7 +806,7 @@ RSpec.describe 'Invitations', type: :request do
     let(:invitation) { create(:invitation, :ao) }
     let(:org_id) { invitation.provider_organization.id }
 
-    it_behaves_like 'an invitation endpoint', :get, 'set_idp_token' do
+    it_behaves_like 'an invitation endpoint', :get, 'set_idp_token', :ao do
       let(:invitation) { create(:invitation, :ao) }
     end
 

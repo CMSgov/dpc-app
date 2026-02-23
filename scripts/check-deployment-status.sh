@@ -4,11 +4,11 @@ set -euxo pipefail
 
 ENV="$1" # env
 TARGET_GROUP="dpc-${ENV}-${2}" # target
-SVC_NAME="dpc-${ENV}-${4}" # service
-CLUSTER_NAME="dpc-${ENV}-${5}" # cluster
-SVC_VERSION="$6" # service version
+SVC_NAME="dpc-${ENV}-${3}" # service
+CLUSTER_NAME="dpc-${ENV}-${4}" # cluster
+SVC_VERSION="$5" # service version
 
-if [ $7 == 'true' ]; then
+if [ $6 == 'true' ]; then
     echo "Skipping $SVC_NAME"
     exit 0
 fi
@@ -79,6 +79,12 @@ echo "ECS service ${SVC_NAME}-${SVC_VERSION} stable"
 # 2) Wait for ELB to verify target group health
 echo "---"
 echo "1. Checking for existing Target Group: $TARGET_GROUP"
+
+if [ $2 == "none" ]; then
+  echo "Skipping Target Group Check as no Target Group defined"
+  echo "Deployment successful and application layer confirmed healthy."
+  exit 0
+fi
 
 set +e
 TARGET_GROUP_ARN=$(aws elbv2 describe-target-groups \

@@ -16,11 +16,9 @@ RSpec.describe Page::Organization::TosFormComponent, type: :component do
       <<~HTML
         <div class="margin-bottom-5">← <a href="/portal/organizations">Return to organization list</a></div>
         <div>
-          <h1>Add new organization</h1>
           <h2>Sign Terms of Service</h2>
-          <p>Confirmed! We successfully identified you as an Authorized Official (AO) of Health Hut (NPI 11111111).</p>
-          <p>To manage this organization's credentials, you must agree to the DPC API's Terms of Service.</p>
-          <div style="width: 100%; height: 420px; overflow-y: auto; border: 2px solid silver; padding: 1rem;" class="margin-bottom-5">
+          <p>Once you sign our Terms of Service, Health Hut will be allowed to access Medicare claims data.</p>
+          <div style="width: 100%; height: 420px; overflow-y: auto; border: 2px solid silver; padding: 1rem;" class="margin-bottom-5 bg-white">
             <div class="usa-prose measure-5">
               <section class="ds-l-container ds-u-padding-top--7 ds-u-padding-bottom--7">
 
@@ -179,7 +177,7 @@ RSpec.describe Page::Organization::TosFormComponent, type: :component do
           <div>
             <ul class="usa-button-group">
               <li class="usa-button-group__item">
-                <form class="button_to" method="post" action="/portal/organizations/#{organization.id}/sign_tos"><button class="usa-button" type="submit">I have read and accepted the Terms of Service</button></form>
+                <form class="button_to" method="post" action="/portal/organizations/#{organization.id}/sign_tos"><button class="usa-button" type="submit">I have read and agree to the Terms of Service</button></form>
               </li>
             </ul>
           </div>
