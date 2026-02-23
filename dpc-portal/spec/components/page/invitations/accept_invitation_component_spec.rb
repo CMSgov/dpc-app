@@ -32,7 +32,7 @@ RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
       end
 
       it 'should have Continue to register button' do
-        is_expected.to include('Continue to register')
+        is_expected.to include('Verify information')
       end
     end
 
