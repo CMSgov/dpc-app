@@ -12,12 +12,14 @@ en:
     cd_accepted_text: If you meant to accept a different invite, check your inbox for the correct invitation. Otherwise you are approved to manage this organization.
     ao_expired_status:  Your registration link has expired.
     ao_expired_text: You've exceeded the 48-hour expiration period.
-    cd_expired_status: Your registration link has expired.
-    cd_expired_text: "Contact the designated Authorized Official (AO) at %{ao_email}. The AO will need to sign in to the DPC Portal and create a new invite."
+    cd_expired_status: Your invite link has expired.
+    cd_expired_text: "<p>You've exceeded the 48 hour expiration period.</p><p>Contact the designated Authorized Official (AO) to create a new invite (<a href=\"%{ao_email}\">%{ao_email}</a>). The AO will need to sign in to the DPC Portal to complete this step.</p>"
     ao_renewed_status: You already requested a new invite.
     ao_renewed_text: Please check your email. We sent you a message which includes a new link.
-    invalid_status: Your link is invalid.
-    invalid_text: Please check the email where you received this request and try again. Make sure you're using the same email address to register as the one where you received the invite. If the problem persists contact DPC at <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
+    ao_invalid_status: Your registration link is invalid.
+    cd_invalid_status: Your invite is invalid.
+    ao_invalid_text: Make sure you're using the email address your invite was originally sent to and try again. If the problem persists contact DPC at <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
+    cd_invalid_text: Check the email where you received this request and try again. Make sure you're using the email address your invite was originally sent to. If the problem persists contact DPC at <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
     ao_med_sanctions_status: You are in the Medicare Exclusions Database.
     ao_med_sanctions_text: You are listed as an excluded individual by the Office of Inspector General (OIG), which prohibits you from acting as this organization’s Authorized Official. For more information, contact the <a href="https://oig.hhs.gov/about-oig/contact-us/#exclusions">OIG Exclusions Branch</a>.
     org_med_sanctions_status: Your organization is in the Medicare Exclusions Database.
@@ -40,9 +42,9 @@ en:
     multi_user_match_text: multi_user_match_text
     manage_org: Manage your organization.
     tos_not_signed: You must sign DPC Terms of Service.
-    sign_tos: Sign terms of service
-    configuration_needed: Configuration needed
-    configuration_complete: Configuration complete
+    sign_tos: Sign Terms of Service
+    configuration_needed: Setup needed
+    configuration_complete: Setup complete
     api_disabled: API disabled
     access_denied: Access denied
   cd_access:
@@ -52,9 +54,9 @@ en:
     org_med_sanctions_text: This organization is listed as an excluded entity by the Office of Inspector General (OIG), which prohibits it from accessing beneficiary claims data.
     manage_org: Manage credentials.
     tos_not_signed: DPC Terms of Service not yet signed.
-    sign_tos: Sign terms of service
-    configuration_needed: Configuration needed
-    configuration_complete: Configuration complete
+    sign_tos: Sign Terms of Service
+    configuration_needed: Setup needed
+    configuration_complete: Setup complete
     api_disabled: API disabled
     access_denied: Access denied
   errors:

@@ -6,12 +6,10 @@
       <div class="border-top border-base-lighter padding-top-4 desktop:border-0 desktop:padding-top-0">
         <div class="usa-prose">
           <% if @invitation.authorized_official? %>
-            <p>To access the DPC API portal, an Authorized Official (AO) needs to register your organization. This registration request is for <strong><%= @invitation.invited_email %></strong> at <%= @organization.name %> (NPI <%= @organization.npi %>). Use this email to sign in or create a Login.gov account.</p>
-            <p>DPC uses Login.gov for identity verification. Continue to sign in or create a Login.gov account.</p>
+            <p>You've been invited to register your organization in the Data at the Point of Care (DPC) API Portal. This invitation is for: <strong><%= @invitation.invited_email %></strong> at <strong><%= @organization.name %> (NPI <%= @organization.npi %>)</strong>. Make sure to use this email address when prompted.</p>
           <% end %>
           <% if @invitation.credential_delegate? %>
-            <p>Welcome <%= @invitation.show_attributes['full_name'] %> (<%= @invitation.invited_email %>).</p>
-            <p>You've been delegated to manage access to the Data at the Point of Care (DPC) API for <%= @organization.name %> (NPI <%= @organization.npi %>). </p>
+            <p>This invite is for <strong><%= @invitation.show_attributes['full_name'] %></strong> at <strong><%= @organization.name %></strong>. <%= @invitation.invited_by_full_name %> assigned you as a Credential Delegate to setup and manage access to the Data at the Point of Care (DPC) API. Use the email address <strong><%= mail_to @invitation.invited_email, @invitation.invited_email %></strong> to complete your acceptance of this invite.</p>
           <% end %>
           <div class="usa-alert usa-alert--warning margin-bottom-4">
             <div class="usa-alert__body">
@@ -25,18 +23,13 @@
     </div>
     <div class="grid-col-12 mobile-lg:grid-col-10 tablet:grid-col-8 desktop:grid-col-6 padding-x-205 margin-bottom-4">
       <div class="bg-white padding-y-3 padding-x-5 border border-base-lighter">
-        <% if @invitation.authorized_official? %>
-          <h2 class="margin-bottom-0">It's time to register your organization</h2>
-        <% end %>
-        <% if @invitation.credential_delegate? %>
-          <h2 class="margin-bottom-0">It's time to accept your organization invite.</h2>
-        <% end %>
+        <h2 class="margin-bottom-0">Before you get started</h2>
         <p>
           <% if @invitation.authorized_official? %>
-            To register your organization you must:
+            This registration will take about 5-10 minutes. To register your organization you must:
           <% end %>
           <% if @invitation.credential_delegate? %>
-            To accept your invite, you must:
+            This process will take about 5-10 minutes. To accept your invite as a Credential Delegate you must:
           <% end %>
           <ul class="usa-icon-list">
             <% @musts.each do |must| %>
@@ -55,7 +48,7 @@
             destination: accept_organization_invitation_path(@organization, @invitation),
                                                      additional_classes: ['start-component-button'],
             method: :get) if @invitation.authorized_official? %>
-        <%= render Core::Button::ButtonComponent.new(label: 'Accept invitation',
+        <%= render Core::Button::ButtonComponent.new(label: 'Get Started',
             destination: confirm_cd_organization_invitation_path(@organization, @invitation),
                                                      additional_classes: ['start-component-button'],
             method: :get) if @invitation.credential_delegate? %>
