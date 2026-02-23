@@ -7,7 +7,7 @@ module Page
       def initialize(organization, delegate_information, credential_start, role, status_display)
         super
         @links = [['Credential Delegates', '#credential_delegates', !credential_start],
-                  ['API Configuration', '#credentials', credential_start]]
+                  ['API setup', '#credentials', credential_start]]
         @organization = organization
         @active_credential_delegates = delegate_information[:active]
         @pending_credential_delegates = delegate_information[:pending]

@@ -17,22 +17,25 @@ jobs:
       matrix:
         include:
           - service: api
-            script_params: api-1 api api frontend v9
+            script_params: api-1 api frontend v9
             skip: false
           - service: attribution
-            script_params: attribution attribution attribution backend v9
+            script_params: attribution attribution backend v9
             skip: false
           - service: aggregation
-            script_params: aggregation aggregation aggregation backend v9
+            script_params: aggregation aggregation backend v9
             skip: false
           - service: web
-            script_params: web-v2-1 web web frontend v9
+            script_params: web-v2-1 web frontend v9
             skip: ${{ inputs.env == 'prod' }}
           - service: admin
-            script_params: web-admin-1 web-admin web-admin frontend v9
+            script_params: web-admin-1 web-admin frontend v9
             skip: ${{ inputs.env == 'prod' }}
-          - service: portal
-            script_params: web-portal-1 dpc-portal web-portal frontend v9
+          - service: web-portal
+            script_params: web-portal-1 web-portal frontend v9
+            skip: ${{ inputs.env == 'prod' || inputs.env == 'sandbox' }}
+          - service: async-portal
+            script_params: none async-portal frontend v9
             skip: ${{ inputs.env == 'prod' || inputs.env == 'sandbox' }}
     steps:
       - name: "Checkout code"
