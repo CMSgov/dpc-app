@@ -139,21 +139,21 @@ RSpec.describe 'Accessibility', type: :system do
         it 'shows needs terms of service' do
           visit "/organizations/#{org.id}"
           expect(page).to have_text('Terms of Service')
-          expect(page).to_not have_text('A credential delegate (CD) manages secure API login information.')
+          expect(page).to_not have_text('A Credential Delegate (CD) helps your organization set up and manage your API access.')
           expect(page).to be_axe_clean.according_to axe_standard
         end
         it 'shows terms of service signed success' do
           visit "/organizations/#{org.id}"
           page.find('.usa-button', text: 'I have read and agree to the Terms of Service').click
           expect(page).to_not have_text('Terms of Service')
-          expect(page).to have_text('A credential delegate (CD) manages secure API login information.')
+          expect(page).to have_text('A Credential Delegate (CD) helps your organization set up and manage your API access.')
           expect(page).to be_axe_clean.according_to axe_standard
         end
         context 'tos signed' do
           before { org.update!(terms_of_service_accepted_by: user) }
           it 'should show with no cds' do
             visit "/organizations/#{org.id}"
-            expect(page).to have_text('A credential delegate (CD) manages secure API login information.')
+            expect(page).to have_text('A Credential Delegate (CD) helps your organization set up and manage your API access.')
             expect(page).to have_css('#credential_delegates')
             expect(page).to_not have_css('#credentials')
             expect(page).to_not have_css('#active-cd-table')
@@ -177,7 +177,7 @@ RSpec.describe 'Accessibility', type: :system do
             let!(:invitation) { create(:invitation, :cd, provider_organization: org, invited_by: user) }
             it 'should show credential delegate tables' do
               visit "/organizations/#{org.id}"
-              expect(page).to have_text('A credential delegate (CD) manages secure API login information.')
+              expect(page).to have_text('A Credential Delegate (CD) helps your organization set up and manage your API access.')
               expect(page).to have_css('#active-cd-table')
               expect(page).to have_css('#pending-cd-table')
               expect(page).to be_axe_clean.according_to axe_standard
@@ -327,7 +327,7 @@ RSpec.describe 'Accessibility', type: :system do
           before { org.update!(terms_of_service_accepted_by: user) }
           it 'should show with no credentials' do
             visit "/organizations/#{org.id}"
-            expect(page).to_not have_text('A credential delegate (CD) manages secure API login information.')
+            expect(page).to_not have_text('A Credential Delegate (CD) helps your organization set up and manage your API access.')
             expect(page).to_not have_css('#credential_delegates')
             expect(page).to_not have_css('#client-tokens-table')
             expect(page).to_not have_css('#public-keys-table')
