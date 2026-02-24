@@ -123,7 +123,7 @@ GEM
       bigdecimal (~> 3.1)
     net-http (0.9.1)
       uri (>= 0.11.1)
-    nokogiri (1.18.9)
+    nokogiri (1.19.1)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     oauth2 (2.0.12)
@@ -147,7 +147,7 @@ GEM
       stringio
     public_suffix (6.0.2)
     racc (1.8.1)
-    rack (3.2.3)
+    rack (3.2.5)
     rack-session (2.1.1)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
