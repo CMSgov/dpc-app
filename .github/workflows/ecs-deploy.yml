@@ -167,6 +167,22 @@ jobs:
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
           tofu apply dpc-release-${{ inputs.env }}.tfplan
+      - name: Login to Amazon ECR (prod)
+        if: ${{ inputs.env == 'prod' || inputs.env == 'sandbox' }}
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
+      - name: Add tag to ECR images deployed in prod/sandbox
+        if: ${{ inputs.env == 'prod' || inputs.env == 'sandbox' }}
+        env:
+          IMAGE_TAG: ${{ steps.image-tag.outputs.image_tag }}
+          DEPLOY_TAG: deployed-${{ inputs.env }}-${{ steps.image-tag.outputs.image_tag }}
+        run: |
+          for repo in dpc-api dpc-attribution dpc-aggregation dpc-web dpc-web-admin dpc-web-portal; do
+            echo "Adding deployment tag to $repo..."
+            MANIFEST=$(aws ecr batch-get-image --region us-east-1 --repository-name $repo --image-ids imageTag="$IMAGE_TAG" --query 'images[0].imageManifest' --output text)
+            aws ecr put-image --region us-east-1 --repository-name $repo --image-manifest "$MANIFEST" --image-tag "$DEPLOY_TAG"
+            echo "Tagged $repo with $DEPLOY_TAG"
+          done
       - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
         name: Slack failure
         if: ${{ failure() }}
