@@ -374,7 +374,7 @@ RSpec.describe 'Accessibility', type: :system do
     end
     it 'should show login page' do
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-      expect(page).to have_text('Get Started')
+      expect(page).to have_text('Begin registration')
       expect(page).to be_axe_clean.according_to axe_standard
     end
     it 'should show accept page' do
@@ -394,7 +394,7 @@ RSpec.describe 'Accessibility', type: :system do
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
       page.find('.usa-button', text: 'Verify information').click
-      page.find('.usa-button', text: 'Complete registration').click
+      page.find('.usa-button', text: 'Submit registration').click
       expect(page).to have_text('Step 5')
       expect(page).to be_axe_clean.according_to axe_standard
     end
@@ -476,7 +476,7 @@ RSpec.describe 'Accessibility', type: :system do
     end
     it 'should show login page' do
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
-      expect(page).to have_text('Make sure to use this email address when prompted.')
+      expect(page).to have_text('Get Started')
       expect(page).to be_axe_clean.according_to axe_standard
     end
     it 'should show confirm page' do
