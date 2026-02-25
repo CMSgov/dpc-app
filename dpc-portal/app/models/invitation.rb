@@ -117,7 +117,7 @@ class Invitation < ApplicationRecord
 
   def existing_invite?
     Invitation.where(provider_organization:, invited_email:, invited_given_name:, invited_family_name:,
-                     status: :pending).any?
+                     status: :pending).where('created_at > ?', 2.days.ago).any?
   end
 
   def existing_credential_delegate?
