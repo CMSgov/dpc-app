@@ -82,11 +82,11 @@
 /dpc/test/web/smtp_password: ENC[AES256_GCM,data:ADXaClw=,iv:YBMjcZG/Kf7OrmtOp7j9txNdwKdzHB5rDbowPJsMmak=,tag:DpWPf3wTXz2+MLFQLWrngw==,type:str]
 sops:
     kms:
-        - arn: arn:aws:kms:us-east-1:539247469933:alias/dpc-test
+        - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/dpc-test
           created_at: "2026-02-24T18:59:47Z"
           enc: AQICAHiJ2VyTbM1GPYeYg+Jay2PKSqq6JpKQUO26MBqqLRSMVAHsX4paaK2bUtdMeYemxYDIAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMIGntrkmmdep25NznAgEQgDtzFNQT5r3BD8nW1ICdPONcxQq7d70tpsqDRquwdVJs/keEC24Y0yMT5Ujld1XP2VTvr8oWytBm1aWpYA==
           aws_profile: ""
-        - arn: arn:aws:kms:us-west-2:539247469933:alias/dpc-test
+        - arn: arn:aws:kms:us-west-2:${ACCOUNT_ID}:alias/dpc-test
           created_at: "2026-02-24T19:41:20Z"
           enc: AQICAHhriHaL3+UbLIsghpKG7Pc/xN0D974NR5TsBs0e/9ll3gF02jzXvLoZuMCB3/1VawydAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMmxACfMSisdr35tltAgEQgDtN6Cr28hw20AqHxklOhVBCb5ViVSzsf6eh8l50q4t0px1IZS2Yq2J/GnDUhK6NTknpyBJmRRj9N3mXfw==
           aws_profile: ""

@@ -43,11 +43,11 @@
 /dpc/sandbox/web/smtp_user: ""
 sops:
     kms:
-        - arn: arn:aws:kms:us-east-1:202533514245:alias/dpc-sandbox
+        - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/dpc-sandbox
           created_at: "2026-02-24T19:44:27Z"
           enc: AQICAHi7YevSlmdx4PuA0JpqECRMeezsV2t4FVM+KwSCmgZI2wF5j54X9TnoIo0IcaAoyYdXAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM9IN0x1yzEcE2yRbhAgEQgDteW8wqBJqw9N5R4zJPmogLLOhIWP5OHIbcA0FI4QjNKQqpCool3sKO1ZsveqXcyqLAFQxmE8tjnZUjTw==
           aws_profile: ""
-        - arn: arn:aws:kms:us-west-2:202533514245:alias/dpc-sandbox
+        - arn: arn:aws:kms:us-west-2:${ACCOUNT_ID}:alias/dpc-sandbox
           created_at: "2026-02-24T19:44:46Z"
           enc: AQICAHg5GPpFZjIBELFSKxJglSo/MCDxMY4YZXrHpiXCA1ZasQHtGTEeEfmDK/hSnKAaR+LwAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM1Tns+2HBFqpMWpxTAgEQgDvtk9WEJ348YYBO4EtJ18ZR9dKVyblTP/MDf7U16fuZs6ZmS3xBHxqnXgVKuy9dTTeA6eUkhMXyLLKK4w==
           aws_profile: ""

@@ -92,11 +92,11 @@
 /dpc/prod/web/ssl_certificate_arn: ENC[AES256_GCM,data:l6AelekbtKz4V8ss33Ad/9TBZlRbTQArud73293Z9Dh8E3kb2Dfx8C/TN9mMzcTPdLY1fOgDiG2wQbQ7T2QIQ6SWyEQawYxw9ClSm9qXpfQDOYo=,iv:wQzw5TIaizKQ4K+s8d+FMs6ibs/U44IKy5tksat2PmA=,tag:mfcoV3TNqSun+uvF044BZg==,type:str]
 sops:
     kms:
-        - arn: arn:aws:kms:us-east-1:202533514245:alias/dpc-prod
+        - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/dpc-prod
           created_at: "2026-02-24T19:46:01Z"
           enc: AQICAHhNpEKO9SHE//bg9rfjqqIKCtODlTsy5G1GVvT0FfmHagEhZuwrrACDbLCw6TXIzvE6AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMNqEr8VcOEr+8TMznAgEQgDuRH0h5SEvcm+FYYpwqycm3ORFOAmOezzPgF+NGXiK2EvNNErMOCYp28xEbERFNAzfvtf3Xp3I3N0geXw==
           aws_profile: ""
-        - arn: arn:aws:kms:us-west-2:202533514245:alias/dpc-prod
+        - arn: arn:aws:kms:us-west-2:${ACCOUNT_ID}:alias/dpc-prod
           created_at: "2026-02-24T19:46:11Z"
           enc: AQICAHjgOVH6vKv/vT7Ugq8lVNuajbWIVNXc6apsO+9oPWq1jAGEhxlmXbPXxR2nk2cB8eCkAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMvlTuL7odaUh4qup0AgEQgDuhJYKr7WLjalsnY2TrVfM+a+xLzuB3e8kEEzp5ITaH23vo5UVZEbIchxv4NBczKc0X3adhs9wBKdNIaQ==
           aws_profile: ""
