@@ -20,8 +20,6 @@ import NPIGeneratorCache from './utils/npi-generator.js';
 const npiGeneratorCache = new NPIGeneratorCache();
 
 export const options = {
-  // TODO: Add PACE cert when running in GHA (DPC-5222) and remove insecureSkipTLSVerify
-  insecureSkipTLSVerify: true,
   thresholds: {
     checks: ['rate===1'],
   },
