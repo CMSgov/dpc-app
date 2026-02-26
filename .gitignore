@@ -72,3 +72,4 @@ dpc-go/dpc-attribution/shared_files/decrypted/*
 .terraform.lock.hcl
 terraform.tfstate*
 *.tfvars*
+ops/services/**/bin
