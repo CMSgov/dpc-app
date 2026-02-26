@@ -2,7 +2,7 @@
   <div class="margin-bottom-5">&larr; <%= link_to 'Back to organization', organization_path(organization.path_id) %></div>
   <h1>Create a new client token</h1>
   <div>
-    <p>Add a client token to monitor who's accessing the API with your organization credentials.
+    <p>Add a client token to monitor who's accessing the API with your organization credentials.</p>
 
     <%= form_tag organization_client_tokens_path(organization_id: organization.path_id), method: :post do %>
 
@@ -13,7 +13,6 @@
         error_msg: @errors[:label],
         input_options: { maxlength: 25 })) %>
     <%= submit_tag "Generate token", class: "usa-button", data: { test: "form-submit" } %>
-    </p>
     <p class="margin-top-5"><%= link_to 'View API Documentation', 'https://dpc.cms.gov/docsV1' %></p>
     <% end %>
   </div>

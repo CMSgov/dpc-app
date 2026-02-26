@@ -1,8 +1,8 @@
         <div class="margin-bottom-4">
           <%= label_tag attribute, label, class: "usa-label" %>
-          <%= raw %[<p class="text-base-darker">#{hint}</p>] if hint.present? %>
-          <%= raw %[<p style="color: #b50909;">#{error_msg}</p>] if error_msg.present? %>
-          <%= email_field_tag attribute, default, input_options  %>
+          <%= raw %[<span id="#{attribute}_hint" class="text-base-darker">#{hint}</span>] if hint.present? %>
+          <%= raw %[<span id="#{attribute}_error_msg" class="usa-error-message" role="alert">#{error_msg}</span>] if error_msg.present? %>
+          <%= email_field_tag attribute, default, input_options.merge(hint.present? ? {"aria-describedby": "#{attribute}_hint"} : {})  %>
         </div>
 
 
