@@ -49,5 +49,5 @@ jobs:
       - name: tofu apply - config
         working-directory: ops/services/10-config/
         run: |
-          tofu init -var=env=$ENV -reconfigure
+          tofu init -var env=$ENV -reconfigure
           tofu plan -out=tfplan
