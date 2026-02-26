@@ -31,7 +31,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     env:
       APP: dpc
       ENV: ${{ inputs.environment }}
