@@ -44,7 +44,7 @@ jobs:
       - uses: cmsgov/cdap/actions/setup-yq@328406d6e1d435b4e3da598bcdab22e576c3945e
       - uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v5.1.0
         with:
-          role-to-assume: arn:aws:iam::${{ contains(fromJSON('["dev", "test"]'), inputs.environment) && secrets.NON_PROD_ACCOUNT || secrets.PROD_ACCOUNT }}:role/delegatedadmin/developer/dpc-${{ inputs.environment }}-github-actions
+          role-to-assume: arn:aws:iam::${{ contains(fromJSON('["dev", "test"]'), inputs.environment) && secrets.NON_PROD_ACCOUNT_ID || secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.environment }}-github-actions
           aws-region: ${{ vars.AWS_REGION }}
       - name: tofu apply - config
         working-directory: ops/services/10-config/
