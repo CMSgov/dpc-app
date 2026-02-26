@@ -53,11 +53,11 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
                 </div>
                 <p>You can invite users to be Credential Delegates.</p>
                 <div>
-                  <h2>Pending invites</h2>
+                  <h3>Pending invites</h3>
                   <p>You have no pending invites.</p>
                 </div>
                 <div>
-                  <h2>Expired invites</h2>
+                  <h3>Expired invites</h3>
                   <p>You have no expired invites.</p>
                 </div>
               </div>

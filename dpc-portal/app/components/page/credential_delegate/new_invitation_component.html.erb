@@ -46,7 +46,6 @@
           default: cd_invite.invited_email_confirmation)) %>
       <%= submit_tag('Send invite', class: "usa-button") %>
     <% end %>
-    <a id="modal-opener" href="#verify-modal" aria-controls="verify-modal" class="display-none" data-open-modal>Send invite</a>
     <%= render(Core::Modal::ModalComponent.new(
         'Acknowledgement',
         "<p>By assigning this user as a delegate, you are providing them with access to private health information. This means you assume responsibility for their compliance with the Health Insurance Portability and Accountability Act (HIPAA).</p>
