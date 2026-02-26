@@ -1,53 +1,39 @@
-name: DPC - Set SSM Params
-run-name: DPC - Set SSM Params ${{ inputs.environment }}
+name: Opt-Out-Export Deploy
 
 on:
   workflow_call:
     inputs:
-      environment:
-        description: AWS environment
+      env:
+        description: AWS environment to deploy to
         required: true
         type: string
+        default: "dev"
+
   workflow_dispatch:
     inputs:
-      environment:
-        description: AWS environment
+      env:
+        description: AWS environment to deploy to
         required: true
-        type: choice
-        options:
-          - dev
-          - test
-          - sandbox
-          - prod
+        type: string
+        default: "dev"
 
-concurrency:
-  group: tofu-plan-or-apply-${ inputs.environment }
-
-env:
-  TENV_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  push:
+    branches:
+      - main
+    paths:
+      - lambda/opt-out-export/**
+      - .github/workflows/opt-out-export-deploy.yml
+      - .github/workflows/deploy_go_lambda.yml
 
 jobs:
-  apply:
+  deploy:
+    name: 'Deploy Opt Out Export'
+    uses: ./.github/workflows/deploy_go_lambda.yml
     permissions:
-      contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    env:
-      APP: dpc
-      ENV: ${{ inputs.environment }}
-      BOOTSTRAP_ENV: ${{ contains(fromJSON('["dev", "test"]'), inputs.environment) && 'test' || 'prod' }}
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159  # v3.9.2
-      - uses: cmsgov/cdap/actions/setup-tenv@8343fb96563ce4b74c4dececee9b268f42bd4a40
-      - uses: cmsgov/cdap/actions/setup-sops@84a6bcee5b70d63c44f8fec4f9b542cb5ec29a54
-      - uses: cmsgov/cdap/actions/setup-yq@328406d6e1d435b4e3da598bcdab22e576c3945e
-      - uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v5.1.0
-        with:
-          role-to-assume: arn:aws:iam::${{ contains(fromJSON('["dev", "test"]'), inputs.environment) && secrets.NON_PROD_ACCOUNT_ID || secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.environment }}-github-actions
-          aws-region: ${{ vars.AWS_REGION }}
-      - name: tofu apply - config
-        working-directory: ops/services/10-config/
-        run: |
-          tofu init -var env=$ENV -reconfigure
-          tofu plan -var env=$ENV -out=tfplan
+      contents: read
+    with:
+      env: ${{ inputs.env || 'dev' }}
+      project: opt-out-export
+      go_files: "main.go db.go"
+    secrets: inherit
