@@ -15,7 +15,7 @@ const portals = {
            protectedPath: 'organizations/foo/edit',
            signInText: 'Log in' },
   'portal': { envs: ['local', 'dev', 'test'],
-              signInPath: __ENV.ENVIRONMENT == 'local' ? 'users/sign_in' : 'portal/users/sign_in',
+              signInPath: 'users/sign_in',
               protectedPath: 'organizations',
               signInText: 'Sign in' },
 }
@@ -63,6 +63,9 @@ export async function checkPortalsWorkflow(data) {
 
 function urlRoot(service) {
   if (__ENV.ENVIRONMENT != 'local') {
+    if (service == 'portal') {
+      return 'https://portal.${__ENV.ENVIRONMENT}.dpc.cmscloud.local';
+    }
     return `https://${__ENV.ENVIRONMENT}.dpc.cms.gov`;
   } else if (service == 'portal') {
     return 'http://host.docker.internal:3100';
