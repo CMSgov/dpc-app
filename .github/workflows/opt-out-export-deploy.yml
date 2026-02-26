@@ -51,4 +51,3 @@ jobs:
         run: |
           tofu init -var=env=$ENV -reconfigure
           tofu plan -out=tfplan
-          tofu apply tfplan
