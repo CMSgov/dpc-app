@@ -25,8 +25,8 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
                 <form action="/organizations/#{org.path_id}/ip_addresses" accept-charset="UTF-8" method="post">
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="ip_address">Public IP address</label>
-                    <p class="text-base-darker">Enter your IP address in the form XXX.XXX.XX.XX. Only IPv4 addresses are allowed. IP address ranges are not supported.</p>
-                    <input type="text" name="ip_address" id="ip_address" maxlength="15" class="usa-input" />
+                    <span id="ip_address_hint" class="text-base-darker">Enter your IP address in the form XXX.XXX.XX.XX. Only IPv4 addresses are allowed. IP address ranges are not supported.</span>
+                    <input type="text" name="ip_address" id="ip_address" maxlength="15" class="usa-input" aria-describedby="ip_address_hint" />
                   </div>
                   <input type="submit" name="commit" value="Add IP address" class="usa-button" data-test="form:submit" data-disable-with="Add IP address" />
                 </form>
@@ -48,8 +48,8 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
         let(:errors) { { ip_address: 'Bad IP Address' } }
         it 'should show error' do
           bad_ip_address = <<~HTML
-            <p id="ip_address_error_msg" style="color: #b50909;">Bad IP Address</p>
-            <input type="text" name="ip_address" id="ip_address" maxlength="15" class="usa-input usa-input--error" />
+            <span id="ip_address_error_msg" class="usa-error-message" role="alert">Bad IP Address</span>
+            <input type="text" name="ip_address" id="ip_address" maxlength="15" class="usa-input usa-input--error" aria-describedby="ip_address_hint" />
           HTML
           is_expected.to include(normalize_space(bad_ip_address))
         end

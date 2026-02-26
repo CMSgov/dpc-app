@@ -29,19 +29,19 @@ RSpec.describe Page::PublicKey::NewKeyComponent, type: :component do
                 <form action="/organizations/#{org.path_id}/public_keys" accept-charset="UTF-8" method="post">
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="label">Public key label</label>
-                    <p class="text-base-darker">Choose a label that will be easy to identify.</p>
-                    <input type="text" name="label" id="label" maxlength="25" class="usa-input" />
+                    <span id="label_hint" class="text-base-darker">Choose a label that will be easy to identify.</span>
+                    <input type="text" name="label" id="label" maxlength="25" class="usa-input" aria-describedby="label_hint" />
                   </div>
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="public_key">Public key</label>
-                    <p class="text-base-darker">Enter a new public key. It must include "BEGIN PUBLIC KEY" and "END PUBLIC KEY" tags from your public.pem file.</p>
-                    <textarea name="public_key" id="public_key" class="usa-textarea">
+                    <span id="public_key_hint" class="text-base-darker">Enter a new public key. It must include "BEGIN PUBLIC KEY" and "END PUBLIC KEY" tags from your public.pem file.</span>
+                    <textarea name="public_key" id="public_key" class="usa-textarea" aria-describedby="public_key_hint">
                     </textarea>
                   </div>
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="snippet_signature">Signature snippet</label>
-                    <p class="text-base-darker">Enter a signature snipped. This snippet must yield "Verified Ok" results to generate the signature.sig file.</p>
-                    <textarea name="snippet_signature" id="snippet_signature" class="usa-textarea">
+                    <span id="snippet_signature_hint" class="text-base-darker">Enter a signature snipped. This snippet must yield "Verified Ok" results to generate the signature.sig file.</span>
+                    <textarea name="snippet_signature" id="snippet_signature" class="usa-textarea" aria-describedby="snippet_signature_hint">
                     </textarea>
                   </div>
                   <input type="submit" name="commit" value="Add key" class="usa-button" data-test="form:submit" data-disable-with="Add key" />
@@ -61,8 +61,8 @@ RSpec.describe Page::PublicKey::NewKeyComponent, type: :component do
         let(:errors) { { label: 'Bad Label' } }
         it 'should show error' do
           bad_label = <<~HTML
-            <p id="label_error_msg" style="color: #b50909;">Bad Label</p>
-            <input type="text" name="label" id="label" maxlength="25" class="usa-input usa-input--error" />
+            <span id="label_error_msg" class="usa-error-message" role="alert">Bad Label</span>
+            <input type="text" name="label" id="label" maxlength="25" class="usa-input usa-input--error" aria-describedby="label_hint" />
           HTML
           is_expected.to include(normalize_space(bad_label))
         end
@@ -71,8 +71,8 @@ RSpec.describe Page::PublicKey::NewKeyComponent, type: :component do
         let(:errors) { { public_key: 'Bad Public Key' } }
         it 'should show error' do
           bad_public_key = <<~HTML
-            <p style="color: #b50909;">Bad Public Key</p>
-            <textarea name="public_key" id="public_key" class="usa-textarea usa-input--error">
+            <span id="public_key_error_msg" class="usa-error-message" role="alert">Bad Public Key</span>
+            <textarea name="public_key" id="public_key" class="usa-textarea usa-input--error" aria-describedby="public_key_hint">
           HTML
           is_expected.to include(normalize_space(bad_public_key))
         end
@@ -81,8 +81,8 @@ RSpec.describe Page::PublicKey::NewKeyComponent, type: :component do
         let(:errors) { { snippet_signature: 'Bad Snippet Signature' } }
         it 'should show error' do
           bad_snippet_signature = <<~HTML
-            <p style="color: #b50909;">Bad Snippet Signature</p>
-            <textarea name="snippet_signature" id="snippet_signature" class="usa-textarea usa-input--error">
+            <span id="snippet_signature_error_msg" class="usa-error-message" role="alert">Bad Snippet Signature</span>
+            <textarea name="snippet_signature" id="snippet_signature" class="usa-textarea usa-input--error" aria-describedby="snippet_signature_hint">
           HTML
           is_expected.to include(normalize_space(bad_snippet_signature))
         end
