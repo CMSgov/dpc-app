@@ -64,7 +64,7 @@ export async function checkPortalsWorkflow(data) {
 function urlRoot(service) {
   if (__ENV.ENVIRONMENT != 'local') {
     if (service == 'portal') {
-      return 'https://portal.${__ENV.ENVIRONMENT}.dpc.cmscloud.local';
+      return `https://portal.${__ENV.ENVIRONMENT}.dpc.cmscloud.local`;
     }
     return `https://${__ENV.ENVIRONMENT}.dpc.cms.gov`;
   } else if (service == 'portal') {
