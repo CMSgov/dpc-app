@@ -153,21 +153,27 @@ RSpec.describe 'Accessibility', type: :system do
         it 'shows needs terms of service' do
           visit "/organizations/#{org.id}"
           expect(page).to have_text('Terms of Service')
-          expect(page).to_not have_text('You can assign anyone as a CD')
+          expect(page).to_not have_text(
+            'A Credential Delegate (CD) helps your organization set up and manage your API access.'
+          )
           expect(page).to be_axe_clean.according_to axe_standard
         end
         it 'shows terms of service signed success' do
           visit "/organizations/#{org.id}"
-          page.find('.usa-button', text: 'I have read and accepted the Terms of Service').click
+          page.find('.usa-button', text: 'I have read and agree to the Terms of Service').click
           expect(page).to_not have_text('Terms of Service')
-          expect(page).to have_text('You can assign anyone as a CD')
+          expect(page).to have_text(
+            'A Credential Delegate (CD) helps your organization set up and manage your API access.'
+          )
           expect(page).to be_axe_clean.according_to axe_standard
         end
         context 'tos signed' do
           before { org.update!(terms_of_service_accepted_by: user) }
           it 'should show with no cds' do
             visit "/organizations/#{org.id}"
-            expect(page).to have_text('You can assign anyone as a CD')
+            expect(page).to have_text(
+              'A Credential Delegate (CD) helps your organization set up and manage your API access.'
+            )
             expect(page).to have_css('#credential_delegates')
             expect(page).to_not have_css('#credentials')
             expect(page).to_not have_css('#active-cd-table')
@@ -177,7 +183,7 @@ RSpec.describe 'Accessibility', type: :system do
           it 'should show with no credentials' do
             visit "/organizations/#{org.id}"
             page.execute_script('make_current(1)')
-            expect(page).to have_text('you must create a unique client token')
+            expect(page).to have_text('You have no client tokens.')
             expect(page).to_not have_css('#credential_delegates')
             expect(page).to have_css('#credentials')
             expect(page).to_not have_css('#client-tokens-table')
@@ -191,7 +197,9 @@ RSpec.describe 'Accessibility', type: :system do
             let!(:invitation) { create(:invitation, :cd, provider_organization: org, invited_by: user) }
             it 'should show credential delegate tables' do
               visit "/organizations/#{org.id}"
-              expect(page).to have_text('You can assign anyone as a CD')
+              expect(page).to have_text(
+                'A Credential Delegate (CD) helps your organization set up and manage your API access.'
+              )
               expect(page).to have_css('#active-cd-table')
               expect(page).to have_css('#pending-cd-table')
               expect(page).to be_axe_clean.according_to axe_standard
@@ -275,7 +283,7 @@ RSpec.describe 'Accessibility', type: :system do
               error_response = { errors: { root: 'Test Error' } }
               expect(mock_ip_address_manager).to receive(:create_ip_address).and_return(error_response)
               visit "/organizations/#{org.id}/ip_addresses/new"
-              page.find_button(value: 'Add IP').click
+              page.find_button(value: 'Add IP address').click
               expect(page).to have_text('Test Error')
               expect(page).to be_axe_clean.according_to axe_standard
             end
@@ -283,7 +291,7 @@ RSpec.describe 'Accessibility', type: :system do
               success_response = { response: { message: { 'id' => 'foo' } } }
               expect(mock_ip_address_manager).to receive(:create_ip_address).and_return(success_response)
               visit "/organizations/#{org.id}/ip_addresses/new"
-              page.find_button(value: 'Add IP').click
+              page.find_button(value: 'Add IP address').click
               expect(page).to have_text('IP address created successfully')
               expect(page).to be_axe_clean.according_to axe_standard
             end
@@ -339,12 +347,14 @@ RSpec.describe 'Accessibility', type: :system do
           before { org.update!(terms_of_service_accepted_by: user) }
           it 'should show with no credentials' do
             visit "/organizations/#{org.id}"
-            expect(page).to_not have_text('You can assign anyone as a CD')
+            expect(page).to_not have_text(
+              'A Credential Delegate (CD) helps your organization set up and manage your API access.'
+            )
             expect(page).to_not have_css('#credential_delegates')
             expect(page).to_not have_css('#client-tokens-table')
             expect(page).to_not have_css('#public-keys-table')
             expect(page).to_not have_css('#public-ips-table')
-            expect(page).to have_text('you must create a unique client token')
+            expect(page).to have_text('You have no client tokens.')
             expect(page).to be_axe_clean.according_to axe_standard
           end
           context 'with tokens keys and ips' do
@@ -386,7 +396,7 @@ RSpec.describe 'Accessibility', type: :system do
     end
     it 'should show login page' do
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-      expect(page).to have_text('Sign in or create')
+      expect(page).to have_text('Step 2')
       expect(page).to be_axe_clean.according_to axe_standard
     end
     it 'should show accept page' do
@@ -398,15 +408,15 @@ RSpec.describe 'Accessibility', type: :system do
     it 'should show register page' do
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-      page.find('.usa-button', text: 'Continue to register').click
+      page.find('.usa-button', text: 'Verify information').click
       expect(page).to have_text('Step 4')
       expect(page).to be_axe_clean.according_to axe_standard
     end
     it 'should show success page' do
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-      page.find('.usa-button', text: 'Continue to register').click
-      page.find('.usa-button', text: 'Complete registration').click
+      page.find('.usa-button', text: 'Verify information').click
+      page.find('.usa-button', text: 'Submit registration').click
       expect(page).to have_text('Step 5')
       expect(page).to be_axe_clean.according_to axe_standard
     end
@@ -422,7 +432,7 @@ RSpec.describe 'Accessibility', type: :system do
       let(:renew_success) { 'You should receive your new invitation shortly' }
       it 'should show bad invitation' do
         visit "/organizations/#{org.id}/invitations/bad-id"
-        expect(page).to have_text('Your link is invalid.')
+        expect(page).to have_text('Your registration link is invalid.')
         expect(page).to be_axe_clean.according_to axe_standard
       end
       it 'should show expired invitation' do
@@ -457,7 +467,7 @@ RSpec.describe 'Accessibility', type: :system do
       it 'should show failed ao check' do
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-        page.find('.usa-button', text: 'Continue to register').click
+        page.find('.usa-button', text: 'Verify information').click
         expect(page).to have_text('Step 3')
         expect(page).to have_text('You’re not the Authorized Official.')
         expect(page).to be_axe_clean.according_to axe_standard
@@ -483,12 +493,12 @@ RSpec.describe 'Accessibility', type: :system do
     end
     it 'should show intro page' do
       visit "/organizations/#{org.id}/invitations/#{invitation.id}"
-      expect(page).to have_text("You've been delegated to manage access")
+      expect(page).to have_text('assigned you as a Credential Delegate')
       expect(page).to be_axe_clean.according_to axe_standard
     end
     it 'should show login page' do
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
-      expect(page).to have_text('Sign in or create a Login.gov account')
+      expect(page).to have_text('Accept invite')
       expect(page).to be_axe_clean.according_to axe_standard
     end
     it 'should show confirm page' do
