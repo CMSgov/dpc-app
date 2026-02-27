@@ -10,8 +10,6 @@
   <p><%=raw t(key=@text, org_name: @org_name) %></p>
   <% 'have to put statement here, as do not have route helper in ViewComponent'
     if @reason == :fail_to_proof %>
-      <%= render Core::Button::ButtonComponent.new(label: 'Go to DPC Portal',
-        destination: root_url,
-        method: :get) %>
+      <%= link_to 'Go to DPC Portal', root_url, class: 'usa-button margin-bottom-3' %>
     <% end %>
 </div>

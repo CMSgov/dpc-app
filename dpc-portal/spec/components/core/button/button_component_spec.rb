@@ -13,7 +13,7 @@ RSpec.describe Core::Button::ButtonComponent, type: :component do
       let(:component) { described_class.new(label: 'label', destination: 'destination') }
       let(:expected_html) do
         <<~HTML
-          <form class="button_to" method="get" action="destination"><button class="usa-button" type="submit">label</button></form>
+          <form class="button_to" method="post" action="destination"><button class="usa-button" type="submit">label</button></form>
         HTML
       end
 
@@ -30,7 +30,7 @@ RSpec.describe Core::Button::ButtonComponent, type: :component do
       end
       let(:expected_html) do
         <<~HTML
-          <form class="button_to" method="get" action="destination"><button class="usa-button--outline usa-button" type="submit">label</button></form>
+          <form class="button_to" method="post" action="destination"><button class="usa-button--outline usa-button" type="submit">label</button></form>
         HTML
       end
       it { is_expected.to match_html_fragment(expected_html) }
@@ -42,7 +42,7 @@ RSpec.describe Core::Button::ButtonComponent, type: :component do
       end
       let(:expected_html) do
         <<~HTML
-          <form class="button_to" method="get" action="destination"><button class="usa-button" disabled="disabled" type="submit">label</button></form>
+          <form class="button_to" method="post" action="destination"><button class="usa-button" disabled="disabled" type="submit">label</button></form>
         HTML
       end
       it { is_expected.to match_html_fragment(expected_html) }

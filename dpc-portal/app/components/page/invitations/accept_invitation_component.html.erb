@@ -11,14 +11,12 @@
         </ul>
       </p>
     <%= render Core::Button::ButtonComponent.new(label: 'Verify information',
-        destination: confirm_organization_invitation_path(@organization, @invitation),
-        method: :post) %>
+        destination: confirm_organization_invitation_path(@organization, @invitation)) %>
     <% end %>
     <% if @invitation.credential_delegate? %>
     <p>Your identity has been verified. You can now accept your invite</p>
     <%= render Core::Button::ButtonComponent.new(label: 'Accept invite',
-        destination: register_organization_invitation_path(@organization, @invitation),
-        method: :post) %>
+        destination: register_organization_invitation_path(@organization, @invitation)) %>
     <% end %>
   </div>
 </div>
