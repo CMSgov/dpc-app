@@ -12,22 +12,27 @@ on:
         description: Initials to tag temp service
         required: true
         type: 'string'
+        default: 'aw'
       org_npi:
         description: Organization NPI
         required: true
         type: 'string'
+        default: '1234567890'
       given_name:
         description: Given name
         required: true
         type: 'string'
+        default: 'Ashley'
       family_name:
         description: Family name
         required: true
         type: 'string'
+        default: 'Weaver'
       email:
         description: Email address
         required: true
         type: 'string'
+        default: 'ashleyweaver@navapbc.com'
 
 jobs:
   create-portal-invite:
@@ -55,7 +60,7 @@ jobs:
           echo "CLUSTER_NAME=dpc-${{ inputs.env }}-frontend" >> $GITHUB_ENV
           echo "SERVICE_NAME=dpc-${{ inputs.env }}-web-portal" >> $GITHUB_ENV
       - name: Start temp service
-        run: ./scripts/start_temp_service.sh $CLUSTER_NAME $SERVICE_NAME ${{ inputs.initial_tag }}
+        run: ./dpc-app/scripts/start_temp_service.sh $CLUSTER_NAME $SERVICE_NAME ${{ inputs.initial_tag }}
       - name: Generate invite link
         env:
           RAILS_CMD: rails dpc:invite_ao INVITE=${{ inputs.given_name}},${{ inputs.family_name }},${{ inputs.email }},${{ inputs.org_npi }}
