@@ -91,6 +91,8 @@ jobs:
           wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -O ${{ matrix.app_dir }}/config/bundle.pem
 
       - name: Build specified app
+        env:
+          PACE_CERT: ${{ secrets.PACE_CERT }}
         run: ${{ matrix.make_command }}
 
       - name: gzip the image

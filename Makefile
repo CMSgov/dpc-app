@@ -31,17 +31,17 @@ api: secure-envs
 
 website: ## Builds the sandbox portal website
 website:
-	@docker build -f dpc-web/Dockerfile . -t dpc-web
+	@docker build -f dpc-web/Dockerfile . -t dpc-web --build-arg PACE_CERT=${PACE_CERT}
 
 admin: ## Builds the sandbox admin website
 admin:
-	@docker build -f dpc-admin/Dockerfile . -t dpc-web-admin
+	@docker build -f dpc-admin/Dockerfile . -t dpc-web-admin --build-arg PACE_CERT=${PACE_CERT}
 
 portal: ## Builds the DPC portal
 portal:
 	mkdir -p dpc-portal/vendor/api_client
 	cp -r engines/api_client/ dpc-portal/vendor/api_client/
-	@docker build -f dpc-portal/Dockerfile . -t dpc-web-portal
+	@docker build -f dpc-portal/Dockerfile . -t dpc-web-portal --build-arg PACE_CERT=${PACE_CERT}
 
 
 # Start commands
