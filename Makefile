@@ -43,6 +43,7 @@ portal:
 	cp -r engines/api_client/ dpc-portal/vendor/api_client/
 	@docker build -f dpc-portal/Dockerfile . -t dpc-web-portal
 
+
 # Start commands
 # ==============
 
