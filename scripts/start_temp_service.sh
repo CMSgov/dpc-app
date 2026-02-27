@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euxo pipefail
+
 # Requires AWS CLI and session manager plugin.
 # Starts a temporary copy of a service that supports shell access.  Remember to delete it manually when you're done
 # with it!
