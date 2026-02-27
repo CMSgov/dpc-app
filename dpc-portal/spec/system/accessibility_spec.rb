@@ -3,13 +3,25 @@
 require 'rails_helper'
 
 RSpec.describe 'Accessibility', type: :system do
-  include Devise::Test::IntegrationHelpers
   include DpcClientSupport
   before do
     driven_by(:selenium_headless)
   end
   let(:dpc_api_organization_id) { 'some-gnarly-guid' }
   let(:axe_standard) { %w[best-practice wcag21aa] }
+  let(:uid) { '12345' }
+
+  before do
+    OmniAuth.config.test_mode = true
+    OmniAuth.config.add_mock(:login_dot_gov,
+                             { uid:,
+                               info: { email: 'bob@example.com' },
+                               extra: { raw_info: { all_emails: %w[bob@example.com bob2@example.com],
+                                                    ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
+  end
+  def sign_in
+    visit '/auth/login_dot_gov/callback'
+  end
   context 'login' do
     it 'shows login page ok' do
       visit '/users/sign_in'
@@ -24,31 +36,33 @@ RSpec.describe 'Accessibility', type: :system do
     end
 
     context 'bad user tries to log in' do
-      before do
-        OmniAuth.config.test_mode = true
-        OmniAuth.config.add_mock(:openid_connect,
-                                 { uid: '12345',
-                                   info: { email: 'bob@example.com' },
-                                   extra: { raw_info: { all_emails: %w[bob@example.com bob2@example.com],
-                                                        ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
-      end
       it 'shows no such user page' do
-        visit '/users/auth/openid_connect/callback'
+        visit '/auth/login_dot_gov/callback'
         expect(page).to have_text('The email you used is not associated with a DPC account.')
         expect(page).to be_axe_clean.according_to axe_standard
       end
       it 'shows sanctioned ao page' do
-        create(:user, provider: :openid_connect, uid: '12345',
+        create(:user, provider: :login_dot_gov, uid: '12345',
                       verification_status: 'rejected', verification_reason: 'ao_med_sanctions')
-        visit '/users/auth/openid_connect/callback'
+        visit '/auth/login_dot_gov/callback'
         expect(page).to have_text(I18n.t('verification.ao_med_sanctions_status'))
+        expect(page).to be_axe_clean.according_to axe_standard
+      end
+    end
+
+    context 'valid user tries to log in' do
+      it 'shows success page' do
+        create(:user, provider: :login_dot_gov, uid: '12345',
+                      verification_status: 'approved')
+        visit '/auth/login_dot_gov/callback'
+        expect(page).to have_text("You don't have any organizations to show.")
         expect(page).to be_axe_clean.according_to axe_standard
       end
     end
   end
 
   context 'organizations' do
-    let!(:user) { create(:user) }
+    let!(:user) { create(:user, uid:, provider: :login_dot_gov, verification_status: :approved) }
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let(:mock_client_token_manager) { instance_double(ClientTokenManager) }
     let(:mock_public_key_manager) { instance_double(PublicKeyManager) }
@@ -64,7 +78,7 @@ RSpec.describe 'Accessibility', type: :system do
       allow(mock_client_token_manager).to receive(:client_tokens).and_return(tokens)
       allow(mock_public_key_manager).to receive(:public_keys).and_return(keys)
       allow(mock_ip_address_manager).to receive(:ip_addresses).and_return(ip_addresses)
-      sign_in user
+      sign_in
     end
     context 'list' do
       it 'empty' do
@@ -303,7 +317,6 @@ RSpec.describe 'Accessibility', type: :system do
               page.fill_in 'invited_email', with: 'john@beatles.com'
               page.fill_in 'invited_email_confirmation', with: 'john@beatles.com'
               page.find_button(value: 'Send invite').click
-              page.find_button(value: 'Yes, I acknowledge').click
               expect(page).to_not have_text("can't be blank")
               expect(page).to have_text('Credential Delegate invited successfully')
               expect(page).to be_axe_clean.according_to axe_standard
@@ -316,7 +329,6 @@ RSpec.describe 'Accessibility', type: :system do
               page.fill_in 'invited_email', with: invitation.invited_email
               page.fill_in 'invited_email_confirmation', with: invitation.invited_email
               page.find_button(value: 'Send invite').click
-              page.find_button(value: 'Yes, I acknowledge').click
               expect(page).to_not have_text("can't be blank")
               expect(page).to have_text(I18n.t('errors.attributes.base.duplicate_cd.status'))
               expect(page).to be_axe_clean.according_to axe_standard

@@ -62,7 +62,7 @@ class InvitationsController < ApplicationController
     return unless create_link
 
     session.delete("invitation_status_#{@invitation.id}")
-    sign_in(:user, @user)
+    sign_in(@user)
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::UserLoggedIn,
@@ -82,7 +82,7 @@ class InvitationsController < ApplicationController
                            path: '/openid_connect/authorize',
                            query: { acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
                                     client_id: IDP_CLIENT_ID,
-                                    redirect_uri: "#{my_protocol_host}/portal/users/auth/openid_connect/callback",
+                                    redirect_uri: "#{my_protocol_host}/portal/auth/login_dot_gov/callback",
                                     response_type: 'code',
                                     scope: 'openid email all_emails profile social_security_number',
                                     nonce: @nonce,
@@ -203,7 +203,7 @@ class InvitationsController < ApplicationController
 
   def user
     user_info = UserInfoService.new.user_info(session)
-    @user = User.find_or_create_by!(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
+    @user = User.find_or_create_by!(provider: :login_dot_gov, uid: user_info['sub']) do |user_to_create|
       assign_user_attributes(user_to_create, user_info)
       log_create_user
     end

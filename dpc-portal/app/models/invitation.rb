@@ -4,7 +4,7 @@
 class Invitation < ApplicationRecord
   validates :invited_by, :invited_given_name, :invited_family_name, presence: true, if: :needs_validation?
   validates :invited_email, :invited_email_confirmation, presence: true, if: :new_record?
-  validates :invited_email, format: Devise.email_regexp, confirmation: true, if: :new_record?
+  validates :invited_email, format: URI::MailTo::EMAIL_REGEXP, confirmation: true, if: :new_record?
   validates :invitation_type, presence: true
   validate :cannot_cancel_accepted
   validate :check_if_duplicate, if: :new_record?

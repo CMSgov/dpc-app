@@ -2,12 +2,6 @@
 
 # Base user class
 class User < ApplicationRecord
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, and :trackable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable,
-         :timeoutable, :omniauthable, omniauth_providers: [:openid_connect]
-
   audited only: %i[verification_reason verification_status], on: :update
 
   validates :verification_reason, allow_nil: true, allow_blank: true,
@@ -21,10 +15,16 @@ class User < ApplicationRecord
   enum :verification_reason, %i[ao_med_sanction_waived ao_med_sanctions]
   enum :verification_status, %i[approved rejected]
 
-  before_validation(on: :create) do
-    # Assign random, acceptable password to keep Devise happy.
-    # User should log in only through IdP
-    self.password = Devise.friendly_token[0, 20] unless password.present?
+  def self.remember_for
+    12.hours
+  end
+
+  def self.timeout_in
+    30.minutes
+  end
+
+  def timeout_in
+    self.class.timeout_in
   end
 
   def provider_links
