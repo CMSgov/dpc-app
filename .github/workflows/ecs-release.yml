@@ -89,6 +89,13 @@ jobs:
       ops-ref: ${{ inputs.ops-ref || 'main' }}
     secrets: inherit
 
+  lambda-deploy:
+    needs:
+      - deploy
+    uses: ./.github/workflows/lambda-deploy.yml
+    with:
+      env: ${{ inputs.env || 'dev'  }}
+
   smoke-test:
      needs: deploy
      uses: ./.github/workflows/smoke-test.yml
