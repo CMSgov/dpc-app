@@ -10,5 +10,9 @@ RUN  apk update && apk add --no-cache aws-cli \
 && mkdir /awscert \
 && wget -P /awscert https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
 
+# Add CMS PACE root certificate for cmscloud.local domains
+ARG PACE_CERT=""
+RUN echo "${PACE_CERT}" >> /etc/ssl/certs/ca-certificates.crt
+
 # Use the default command/entrypoint
 CMD ["jshell"]
