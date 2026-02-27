@@ -22,12 +22,12 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
     context 'New form' do
       it 'should match header' do
         header = <<~HTML
-          <h1>Invite new user</h1>
+          <h1>Assign Credential Delegate</h1>
             <div class="usa-alert usa-alert--warning margin-bottom-4">
               <div class="usa-alert__body">
                 <h2 class="usa-alert__heading">Exact match required</h2>
                 <p class="usa-alert__text">
-                  The name and contact info you enter must be an exact match to the name and contact info your Credential Delegate will provide after receiving this invite.
+                  The Credential Delegate must use the name and email exactly as you enter them below.
                 </p>
               </div>
             </div>
@@ -47,8 +47,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         first_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_given_name">First or given name</label>
-            <p class="usa-hint">For example, Jose, Darren, or Mai</p>
-            <input type="text" name="invited_given_name" id="invited_given_name" maxlength="25" class="usa-input" />
+            <span id="invited_given_name_hint" class="text-base-darker">For example, Jose, Darren, or Mai</span>
+            <input type="text" name="invited_given_name" id="invited_given_name" maxlength="25" class="usa-input" aria-describedby="invited_given_name_hint" />
           </div>
         HTML
         is_expected.to include(normalize_space(first_name))
@@ -58,8 +58,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         invited_family_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_family_name">Last or family name</label>
-            <p class="usa-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
-            <input type="text" name="invited_family_name" id="invited_family_name" maxlength="25" class="usa-input" />
+            <span id="invited_family_name_hint" class="text-base-darker">For example, Martinez Gonzalez, Gu, or Smith</span>
+            <input type="text" name="invited_family_name" id="invited_family_name" maxlength="25" class="usa-input" aria-describedby="invited_family_name_hint" />
           </div>
         HTML
         is_expected.to include(normalize_space(invited_family_name))
@@ -86,10 +86,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
       end
 
       it 'should have modal prompt' do
-        modal_prompt = ['<a id="modal-opener" href="#verify-modal" aria-controls="verify-modal" ',
-                        'class="display-none" data-open-modal>',
-                        'Send invite',
-                        '</a>'].join
+        modal_prompt = ['<input type="submit" name="commit" value="Send invite" ',
+                        'class="usa-button" data-disable-with="Send invite" />'].join
         is_expected.to include(modal_prompt)
       end
 
@@ -101,9 +99,9 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
                   <h2 class="usa-modal__heading" id="verify-modal-heading">Acknowledgement</h2>
                   <div class="usa-prose">
                       <p id="verify-modal-description">
-                          <p>By assigning this user as a delegate, you are providing them with access to private health information. This means you assume responsibility for their compliance with the Health Insurance Portability and Accountability Act (HIPAA).</p>
-                          <p>Do you acknowledge your responsibility for your delegate's compliance with HIPAA regulations?</p>
-                          <p>Upon your acknowledgement they will receive an invitation to sign up for access to the DPC Portal. This invitation will expire in 48 hours.</p>
+                      <p>By assigning this user as a delegate, you are providing them with access to private health information. This means you assume responsibility for their compliance with the Health Insurance Portability and Accountability Act (HIPAA).</p>
+                      <p>Do you acknowledge your responsibility for your delegate's compliance with HIPAA regulations?</p>
+                      <p>Upon your acknowledgement they will receive an invitation to sign up for access to the DPC Portal. This invitation will expire in 48 hours.</p>
                       </p>
                   </div>
                   <div class="usa-modal__footer">
@@ -118,11 +116,11 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
                   </div>
               </div>
               <button type="button" class="usa-button usa-modal__close" aria-label="Close this window" data-close-modal>
-                  <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
-                      <use xlink:href="/assets/img/sprite.svg#close"></use>
+                  <svg class="usa-icon" style="transform: scale(1)" aria-hidden="true" role="img">
+                    <use xlink:href=/portal/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#close></use>
                   </svg>
               </button>
-          </div></div></div></div>
+          </div></div>
         HTML
 
         is_expected.to include(normalize_space(modal))
@@ -135,9 +133,9 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         first_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_given_name">First or given name</label>
-            <p class="usa-hint">For example, Jose, Darren, or Mai</p>
-            <p id="invited_given_name_error_msg" style="color: #b50909;">can't be blank</p>
-            <input type="text" name="invited_given_name" id="invited_given_name" maxlength="25" class="usa-input usa-input--error" />
+            <span id="invited_given_name_hint" class="text-base-darker">For example, Jose, Darren, or Mai</span>
+            <span id="invited_given_name_error_msg" class="usa-error-message" role="alert">can't be blank</span>
+            <input type="text" name="invited_given_name" id="invited_given_name" maxlength="25" class="usa-input usa-input--error" aria-describedby="invited_given_name_hint" />
           </div>
         HTML
         is_expected.to include(normalize_space(first_name))
@@ -147,9 +145,9 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         invited_family_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_family_name">Last or family name</label>
-            <p class="usa-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
-            <p id="invited_family_name_error_msg" style="color: #b50909;">can't be blank</p>
-            <input type="text" name="invited_family_name" id="invited_family_name" maxlength="25" class="usa-input usa-input--error" />
+            <span id="invited_family_name_hint" class="text-base-darker">For example, Martinez Gonzalez, Gu, or Smith</span>
+            <span id="invited_family_name_error_msg" class="usa-error-message" role="alert">can't be blank</span>
+            <input type="text" name="invited_family_name" id="invited_family_name" maxlength="25" class="usa-input usa-input--error" aria-describedby="invited_family_name_hint" />
           </div>
         HTML
         is_expected.to include(normalize_space(invited_family_name))
@@ -159,7 +157,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         email = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_email">Email</label>
-            <p id="invited_email_error_msg" style="color: #b50909;">can't be blank</p>
+            <span id="invited_email_error_msg" class="usa-error-message" role="alert">can't be blank</span>
             <input type="text" name="invited_email" id="invited_email" class="usa-input usa-input--error" />
           </div>
         HTML
@@ -170,7 +168,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         email_confirmation = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_email_confirmation">Confirm email</label>
-            <p id="invited_email_confirmation_error_msg" style="color: #b50909;">can't be blank</p>
+            <span id="invited_email_confirmation_error_msg" class="usa-error-message" role="alert">can't be blank</span>
             <input type="text" name="invited_email_confirmation" id="invited_email_confirmation" class="usa-input usa-input--error" />
           </div>
         HTML
@@ -189,8 +187,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         first_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_given_name">First or given name</label>
-            <p class="usa-hint">For example, Jose, Darren, or Mai</p>
-            <input type="text" name="invited_given_name" id="invited_given_name" value="Bob" maxlength="25" class="usa-input" />
+            <span id="invited_given_name_hint" class="text-base-darker">For example, Jose, Darren, or Mai</span>
+            <input type="text" name="invited_given_name" id="invited_given_name" value="Bob" maxlength="25" class="usa-input" aria-describedby="invited_given_name_hint" />
           </div>
         HTML
         is_expected.to include(normalize_space(first_name))
@@ -200,8 +198,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
         invited_family_name = <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="invited_family_name">Last or family name</label>
-            <p class="usa-hint">For example, Martinez Gonzalez, Gu, or Smith</p>
-            <input type="text" name="invited_family_name" id="invited_family_name" value="Hodges" maxlength="25" class="usa-input" />
+            <span id="invited_family_name_hint" class="text-base-darker">For example, Martinez Gonzalez, Gu, or Smith</span>
+            <input type="text" name="invited_family_name" id="invited_family_name" value="Hodges" maxlength="25" class="usa-input" aria-describedby="invited_family_name_hint" />
           </div>
         HTML
         is_expected.to include(normalize_space(invited_family_name))
@@ -236,18 +234,18 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
                 <p class="usa-alert__text">#{I18n.t('errors.attributes.base.duplicate_cd.text')}</p>
               </div>
             </div>
-            <h1>Invite new user</h1>
+            <h1>Assign Credential Delegate</h1>
           HTML
           is_expected.to include(normalize_space(error))
         end
         it 'should match header' do
           header = <<~HTML
-            <h1>Invite new user</h1>
+            <h1>Assign Credential Delegate</h1>
               <div class="usa-alert usa-alert--warning margin-bottom-4">
                 <div class="usa-alert__body">
                   <h2 class="usa-alert__heading">Exact match required</h2>
                   <p class="usa-alert__text">
-                    The name and contact info you enter must be an exact match to the name and contact info your Credential Delegate will provide after receiving this invite.
+                    The Credential Delegate must use the name and email exactly as you enter them below.
                   </p>
                 </div>
               </div>

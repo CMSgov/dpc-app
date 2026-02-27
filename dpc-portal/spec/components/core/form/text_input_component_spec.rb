@@ -31,8 +31,8 @@ RSpec.describe Core::Form::TextInputComponent, type: :component do
         <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="attr">Some Label</label>
-            <p class="usa-hint">Hint</p>
-            <input type="text" name="attr" id="attr" value="" class="usa-input" />
+            <span id="attr_hint" class="text-base-darker">Hint</span>
+            <input type="text" name="attr" id="attr" value="" class="usa-input" aria-describedby="attr_hint" />
            </div>
         HTML
       end
@@ -73,7 +73,7 @@ RSpec.describe Core::Form::TextInputComponent, type: :component do
         <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="attr">Some Label</label>
-            <p id="attr_error_msg" style="color: #b50909;">Bad Input</p>
+            <span id="attr_error_msg" class="usa-error-message" role="alert">Bad Input</span>
             <input type="text" name="attr" id="attr" value="" class="usa-input usa-input--error" />
            </div>
         HTML

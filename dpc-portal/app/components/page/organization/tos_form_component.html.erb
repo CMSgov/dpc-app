@@ -1,19 +1,15 @@
+<div class="margin-bottom-5">&larr; <%= link_to 'Return to organization list', organizations_path %></div>
 <div>
-  <h1>Add new organization</h1>
   <h2>Sign Terms of Service</h2>
-  <p>Confirmed! We successfully identified you as an Authorized Official (AO) of <%= @organization.name %> (NPI <%= @organization.npi %>).</p>
-  <p>To manage this organization's credentials, you must agree to the DPC API's Terms of Service.</p>
-  <div style="width: 100%; height: 420px; overflow-y: auto; border: 2px solid silver; padding: 1rem;" class="margin-bottom-5">
+  <p>Once you sign our Terms of Service, <%= @organization.name %> will be allowed to access Medicare claims data.</p>
+  <div style="width: 100%; height: 420px; overflow-y: auto; border: 2px solid silver; padding: 1rem;" class="margin-bottom-5 bg-white">
     <%= render Core::TosContent::TosContentComponent.new %>
   </div>
 
   <div>
       <ul class="usa-button-group">
         <li class="usa-button-group__item">
-          <%= button_to 'I have read and accepted the Terms of Service', sign_tos_organization_path(@organization), class: 'usa-button' %>
-        </li>
-        <li class="usa-button-group__item">
-          <%= button_to 'Cancel', organizations_path, class: ['usa-button', 'usa-button--unstyled', 'padding-105', 'text-center'], method: :get %>
+          <%= button_to 'I have read and agree to the Terms of Service', sign_tos_organization_path(@organization), class: 'usa-button' %>
         </li>
       </ul>
   </div>

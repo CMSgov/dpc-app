@@ -17,25 +17,20 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <div>
-            <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}">#{org.name}</a></div>
+            <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}">Back to organization</a></div>
             <h1>Add public IP address</h1>
             <section class="box">
               <div>
-                <p>Limit of 8 addresses per organization.</p>
-                <h2>New IP address for #{org.name}</h2>
+                <p>Provide a maximum of 8 public IP addresses associated with systems that will access claims data.</p>
                 <form action="/portal/organizations/#{org.path_id}/ip_addresses" accept-charset="UTF-8" method="post">
                   <div class="margin-bottom-4">
-                    <label class="usa-label" for="label">Label</label>
-                    <p class="usa-hint">Choose a descriptive name to make your IP address easily identifiable to you.</p>
-                    <input type="text" name="label" id="label" maxlength="25" class="usa-input">
+                    <label class="usa-label" for="ip_address">Public IP address</label>
+                    <span id="ip_address_hint" class="text-base-darker">Enter your IP address in the form XXX.XXX.XX.XX. Only IPv4 addresses are allowed. IP address ranges are not supported.</span>
+                    <input type="text" name="ip_address" id="ip_address" maxlength="15" class="usa-input" aria-describedby="ip_address_hint" />
                   </div>
-                  <div class="margin-bottom-4">
-                    <label class="usa-label" for="ip_address">Public IP address (IPv4 only)</label>
-                    <p class="usa-hint">Use the format 136.226.19.87</p>
-                    <input type="text" name="ip_address" id="ip_address" maxlength="15" class="usa-input">
-                  </div>
-                  <input type="submit" name="commit" value="Add IP" class="usa-button" data-test="form:submit" data-disable-with="Add IP">
+                  <input type="submit" name="commit" value="Add IP address" class="usa-button" data-test="form:submit" data-disable-with="Add IP address" />
                 </form>
+                <p class="margin-top-5"><a href="https://dpc.cms.gov/docsV1">View API Documentation</a></p>
               </div>
             </section>
           </div>
@@ -49,22 +44,12 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
     end
     context 'with error on' do
       let(:component) { described_class.new(org, errors:) }
-      context 'label' do
-        let(:errors) { { label: 'Bad Label' } }
-        it 'should show error' do
-          bad_label = <<~HTML
-            <p id="label_error_msg" style="color: #b50909;">Bad Label</p>
-            <input type="text" name="label" id="label" maxlength="25" class="usa-input usa-input--error" />
-          HTML
-          is_expected.to include(normalize_space(bad_label))
-        end
-      end
       context 'public key' do
         let(:errors) { { ip_address: 'Bad IP Address' } }
         it 'should show error' do
           bad_ip_address = <<~HTML
-            <p id="ip_address_error_msg" style="color: #b50909;">Bad IP Address</p>
-            <input type="text" name="ip_address" id="ip_address" maxlength="15" class="usa-input usa-input--error" />
+            <span id="ip_address_error_msg" class="usa-error-message" role="alert">Bad IP Address</span>
+            <input type="text" name="ip_address" id="ip_address" maxlength="15" class="usa-input usa-input--error" aria-describedby="ip_address_hint" />
           HTML
           is_expected.to include(normalize_space(bad_ip_address))
         end

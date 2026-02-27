@@ -93,6 +93,15 @@ RSpec.describe Invitation, type: :model do
           expect(new_cd_invite.errors[:base].first[:text]).to eq I18n.t('errors.attributes.base.duplicate_cd.text')
         end
 
+        it 'succeeds on expired invitation with same email and full name' do
+          valid_new_cd_invite.created_at = 3.days.ago
+          valid_new_cd_invite.save!
+          expect(valid_new_cd_invite.expired?).to eq true
+          new_cd_invite = build(:invitation, :cd, provider_organization: organization, invited_by: ao_user)
+          expect(new_cd_invite.valid?).to eq true
+          expect(new_cd_invite.errors[:base].size).to eq 0
+        end
+
         it 'fails on existing cd with same email' do
           user = create(:user)
           new_cd_invite = build(:invitation, :cd, provider_organization: organization, invited_by: ao_user,
@@ -444,7 +453,7 @@ RSpec.describe Invitation, type: :model do
     end
     it 'should be invalid if expired and ao and cancelled' do
       invitation = create(:invitation, :ao, created_at: 49.hours.ago, status: :cancelled)
-      expect(invitation.unacceptable_reason).to eq 'invalid'
+      expect(invitation.unacceptable_reason).to eq 'ao_invalid'
     end
     it 'should be ao_expired if expired and ao' do
       invitation = create(:invitation, :ao, created_at: 49.hours.ago)
@@ -456,7 +465,7 @@ RSpec.describe Invitation, type: :model do
     end
     it 'should be invalid if cancelled' do
       invitation = create(:invitation, :cd, status: :cancelled)
-      expect(invitation.unacceptable_reason).to eq 'invalid'
+      expect(invitation.unacceptable_reason).to eq 'cd_invalid'
     end
     it 'should be ao_accepted if accepted and ao' do
       invitation = create(:invitation, :ao)

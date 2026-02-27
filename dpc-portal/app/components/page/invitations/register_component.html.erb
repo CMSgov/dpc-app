@@ -1,10 +1,9 @@
 <%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::AO_STEPS, 3)) if @invitation.authorized_official? %>
 <div>
   <div>
-    <p>Complete your registration of <%= @organization.name %> (NPI <%= @organization.npi %>).</p>
-    <%= render Core::Button::ButtonComponent.new(label: "Complete registration",
+    <p>Your role as Authorized Official and your organization's Medicare enrollment have been verified.</p>
+    <%= render Core::Button::ButtonComponent.new(label: "Submit registration",
         destination: register_organization_invitation_path(@organization, @invitation),
         method: :post) %>
   </div>
 </div>
-

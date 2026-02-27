@@ -66,7 +66,7 @@ class OrganizationsController < ApplicationController
 
   def check_npi
     @npi_error = if params[:npi].blank?
-                   "can't be blank"
+                   "Can't be blank"
                  elsif params[:npi].length != 10
                    'length has to be 10'
                  end

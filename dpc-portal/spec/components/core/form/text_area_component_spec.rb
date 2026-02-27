@@ -31,8 +31,8 @@ RSpec.describe Core::Form::TextAreaComponent, type: :component do
         <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="attr">Some Label</label>
-            <p class="usa-hint">Here is a hint</p>
-            <textarea name="attr" id="attr" class="usa-textarea"/>
+            <span id="attr_hint" class="text-base-darker">Here is a hint</span>
+            <textarea name="attr" id="attr" class="usa-textarea" aria-describedby="attr_hint" />
           </div>
         HTML
       end
@@ -71,7 +71,7 @@ RSpec.describe Core::Form::TextAreaComponent, type: :component do
         <<~HTML
           <div class="margin-bottom-4">
             <label class="usa-label" for="attr">Some Label</label>
-            <p style="color: #b50909;">Bad Input</p>
+            <span id="attr_error_msg" class="usa-error-message" role="alert">Bad Input</span>
             <textarea name="attr" id="attr" class="usa-textarea usa-input--error" />
            </div>
         HTML

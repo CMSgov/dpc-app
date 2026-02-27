@@ -12,12 +12,14 @@ en:
     cd_accepted_text: If you meant to accept a different invite, check your inbox for the correct invitation. Otherwise you are approved to manage this organization.
     ao_expired_status:  Your registration link has expired.
     ao_expired_text: You've exceeded the 48-hour expiration period.
-    cd_expired_status: Your registration link has expired.
-    cd_expired_text: "Contact the designated Authorized Official (AO) at %{ao_email}. The AO will need to sign in to the DPC Portal and create a new invite."
+    cd_expired_status: Your invite link has expired.
+    cd_expired_text: "<p>You've exceeded the 48 hour expiration period.</p><p>Contact the designated Authorized Official (AO) to create a new invite (<a href=\"%{ao_email}\">%{ao_email}</a>). The AO will need to sign in to the DPC Portal to complete this step.</p>"
     ao_renewed_status: You already requested a new invite.
     ao_renewed_text: Please check your email. We sent you a message which includes a new link.
-    invalid_status: Your link is invalid.
-    invalid_text: Please check the email where you received this request and try again. Make sure you're using the same email address to register as the one where you received the invite. If the problem persists contact DPC at <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
+    ao_invalid_status: Your registration link is invalid.
+    cd_invalid_status: Your invite is invalid.
+    ao_invalid_text: Make sure you're using the email address your invite was originally sent to and try again. If the problem persists contact DPC at <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
+    cd_invalid_text: Check the email where you received this request and try again. Make sure you're using the email address your invite was originally sent to. If the problem persists contact DPC at <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
     ao_med_sanctions_status: You are in the Medicare Exclusions Database.
     ao_med_sanctions_text: You are listed as an excluded individual by the Office of Inspector General (OIG), which prohibits you from acting as this organization’s Authorized Official. For more information, contact the <a href="https://oig.hhs.gov/about-oig/contact-us/#exclusions">OIG Exclusions Branch</a>.
     org_med_sanctions_status: Your organization is in the Medicare Exclusions Database.
@@ -30,17 +32,17 @@ en:
     bad_npi_text: Your organization must have an approved enrollment status with Medicare to access beneficiary claims data. Your organization may need to <a href="https://www.cms.gov/medicare/enrollment-renewal/providers-suppliers/chain-ownership-system-pecos/manage-your-enrollment">manage its enrollment</a> in PECOS, the Medicare enrollment system.
     user_not_authorized_official_status: You’re not the Authorized Official.
     user_not_authorized_official_text: You are not on record as the Authorized Official for this organization. Your organization may need to <a href="https://pecos.cms.hhs.gov/pecos/login.do#headingLv1">update its Authorized Official</a> in PECOS, the Medicare enrollment system.
-    fail_to_proof_status: Identity verification incomplete.
-    fail_to_proof_text: You still have steps to complete in order to continue to registration. Please sign in again at <a href="https://www.login.gov/what-is-login/">Login.gov</a> to complete those steps.
+    fail_to_proof_status: You must complete verification before continuing registration.
+    fail_to_proof_text: "You'll need to verify your identity before registering your organization. You can choose from any of the supported government-approved identity verification services, including Login.gov, ID.me, and CLEAR. Info to have ready: <ul><li>The email address where you received this invitation</li><li>Driver's license or state-issued ID</li><li>Social Security number</li><li>Phone number</li><li>A phone or camera to take and upload photos</li></ul>"
     missing_info_status: Can't complete your registration.
     missing_info_text: Something happened on our end and we're unable to continue. Please contact <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
     server_error_status: "Registration unavailable: external system error."
-    server_error_text: We're experiencing a temporary outage due to an external system error. Please try again later. 
+    server_error_text: We're unable to complete your request right now because a required external system is unavailable. Please try again later.
     manage_org: Manage your organization.
     tos_not_signed: You must sign DPC Terms of Service.
-    sign_tos: Sign terms of service
-    configuration_needed: Configuration needed
-    configuration_complete: Configuration complete
+    sign_tos: Sign Terms of Service
+    configuration_needed: Setup needed
+    configuration_complete: Setup complete
     api_disabled: API disabled
     access_denied: Access denied
   cd_access:
@@ -50,9 +52,9 @@ en:
     org_med_sanctions_text: This organization is listed as an excluded entity by the Office of Inspector General (OIG), which prohibits it from accessing beneficiary claims data.
     manage_org: Manage credentials.
     tos_not_signed: DPC Terms of Service not yet signed.
-    sign_tos: Sign terms of service
-    configuration_needed: Configuration needed
-    configuration_complete: Configuration complete
+    sign_tos: Sign Terms of Service
+    configuration_needed: Setup needed
+    configuration_complete: Setup complete
     api_disabled: API disabled
     access_denied: Access denied
   errors:

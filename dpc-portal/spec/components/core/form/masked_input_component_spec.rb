@@ -40,9 +40,9 @@ RSpec.describe Core::Form::MaskedInputComponent, type: :component do
       let(:component) { described_class.new(label: 'Some Label', attribute: 'attr', mask: :foo, hint: 'Hint') }
       let(:expected_html) do
         <<~HTML
-           <label class="usa-label" for="attr">Some Label</label>
-          <p class="usa-hint">Hint</p>
-           <input type="text" name="attr" id="attr" value="" class="usa-input usa-masked" />
+          <label class="usa-label" for="attr">Some Label</label>
+          <span id="attr_hint" class="text-base-darker">Hint</span>
+          <input type="text" name="attr" id="attr" value="" class="usa-input usa-masked" aria-describedby="attr_hint" />
         HTML
       end
       it { is_expected.to match_html_fragment(expected_html) }
@@ -55,7 +55,7 @@ RSpec.describe Core::Form::MaskedInputComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <label class="usa-label" for="attr">Some Label</label>
-          <p style="color: #b50909;">Bad Input</p>
+          <span id="attr_error_msg" class="usa-error-message" role="alert">Bad Input</span>
           <input type="text" name="attr" id="attr" value="" class="usa-input usa-masked usa-input--error" />
         HTML
       end
