@@ -17,12 +17,12 @@ RSpec.describe Page::IpAddress::NewAddressComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <div>
-            <div class="margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}">Back to organization</a></div>
+            <div class="margin-bottom-5">← <a href="/organizations/#{org.path_id}">Back to organization</a></div>
             <h1>Add public IP address</h1>
             <section class="box">
               <div>
                 <p>Provide a maximum of 8 public IP addresses associated with systems that will access claims data.</p>
-                <form action="/portal/organizations/#{org.path_id}/ip_addresses" accept-charset="UTF-8" method="post">
+                <form action="/organizations/#{org.path_id}/ip_addresses" accept-charset="UTF-8" method="post">
                   <div class="margin-bottom-4">
                     <label class="usa-label" for="ip_address">Public IP address</label>
                     <span id="ip_address_hint" class="text-base-darker">Enter your IP address in the form XXX.XXX.XX.XX. Only IPv4 addresses are allowed. IP address ranges are not supported.</span>

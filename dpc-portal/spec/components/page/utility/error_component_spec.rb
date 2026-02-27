@@ -87,7 +87,7 @@ RSpec.describe Page::Utility::ErrorComponent, type: :component do
       end
 
       it 'should have Go to DPC home button' do
-        button_url = '/portal/'
+        button_url = '/'
         is_expected.to include(button_url)
       end
     end

@@ -82,7 +82,7 @@ class InvitationsController < ApplicationController
                            path: '/openid_connect/authorize',
                            query: { acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
                                     client_id: IDP_CLIENT_ID,
-                                    redirect_uri: "#{my_protocol_host}/portal/users/auth/openid_connect/callback",
+                                    redirect_uri: "#{my_protocol_host}/users/auth/openid_connect/callback",
                                     response_type: 'code',
                                     scope: 'openid email all_emails profile social_security_number',
                                     nonce: @nonce,

@@ -34,7 +34,7 @@ Devise.setup do |config|
                       host: idp_host,
                       identifier: "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
                       private_key: private_key,
-                      redirect_uri: "#{my_protocol_host}/portal/users/auth/openid_connect/callback"
+                      redirect_uri: "#{my_protocol_host}/users/auth/openid_connect/callback"
                     }
                   }
   # The secret key used by Devise. Devise uses this key to generate

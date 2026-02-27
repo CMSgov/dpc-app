@@ -12,7 +12,7 @@ RSpec.describe 'Users::Sessions', type: :request do
       it 'should prevent access' do
         delete '/users/sign_out'
         get '/organizations'
-        expect(response).to redirect_to('/portal/users/sign_in')
+        expect(response).to redirect_to('/users/sign_in')
         expect(flash[:alert]).to be_present
       end
 

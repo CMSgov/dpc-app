@@ -14,9 +14,10 @@ const portals = {
            signInPath: 'users/sign_in',
            protectedPath: 'organizations/foo/edit',
            signInText: 'Log in' },
-  'portal': { envs: ['local', 'dev', 'test'],
-              signInPath: 'portal/users/sign_in',
-              protectedPath: 'portal/organizations',
+  // TODO: Add PACE cert when running in GHA (DPC-5222) and add 'dev' and 'test' back
+  'portal': { envs: ['local',],
+              signInPath: 'users/sign_in',
+              protectedPath: 'organizations',
               signInText: 'Sign in' },
 }
 
@@ -63,6 +64,9 @@ export async function checkPortalsWorkflow(data) {
 
 function urlRoot(service) {
   if (__ENV.ENVIRONMENT != 'local') {
+    if (service == 'portal') {
+      return `https://portal.${__ENV.ENVIRONMENT}.dpc.cmscloud.local`;
+    }
     return `https://${__ENV.ENVIRONMENT}.dpc.cms.gov`;
   } else if (service == 'portal') {
     return 'http://host.docker.internal:3100';
