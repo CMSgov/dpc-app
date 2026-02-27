@@ -7,17 +7,27 @@ on:
         description: AWS environment to check
         required: true
         type: 'string'
-        default: 'dev'
+        default: 'test'
+      initial_tag:
+        description: Initials to tag temp service
+        required: true
+        type: 'string'
+      org_npi:
+        description: Organization NPI
+        required: true
+        type: 'string'
+      given_name:
+        description: Given name
+        required: true
+        type: 'string'
+      family_name:
+        description: Family name
+        required: true
+        type: 'string'
       email:
         description: Email address
         required: true
         type: 'string'
-        default: ''
-      organization_npi:
-        description: Organization NPI
-        required: true
-        type: 'string'
-        default: ''
 
 jobs:
   create-portal-invite:
@@ -34,9 +44,34 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
-      - name: AWS Credentials (prod)
-        if: ${{ inputs.env == 'sandbox' || inputs.env == 'prod' }}
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
-        with:
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+#      - name: AWS Credentials (prod)
+#        if: ${{ inputs.env == 'sandbox' || inputs.env == 'prod' }}
+#        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+#        with:
+#          aws-region: ${{ vars.AWS_REGION }}
+#          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+      - name: Set cluster and service names
+        run: |
+          echo "CLUSTER_NAME=dpc-${{ inputs.env }}-frontend" >> $GITHUB_ENV
+          echo "SERVICE_NAME=dpc-${{ inputs.env }}-web-portal" >> $GITHUB_ENV
+      - name: Start temp service
+        run: ./scripts/start_temp_service.sh $CLUSTER_NAME $SERVICE_NAME ${{ inputs.initial_tag }}
+      - name: Generate invite link
+        env:
+          RAILS_CMD: rails dpc:invite_ao INVITE=${{ inputs.given_name}},${{ inputs.family_name }},${{ inputs.email }},${{ inputs.org_npi }}
+        run: |
+          aws ecs execute-command  \
+          --region ${{ vars.AWS_REGION }} \
+          --cluster $CLUSTER_NAME \
+          --task $NEW_TASK_ID \
+          --container $NEW_CONTAINER_NAME \
+          --command "$RAILS_CMD " \
+          --non-interactive
+      - name: Delete temp service
+        run: |
+          aws ecs delete-service \
+            --force \
+            --cluster $CLUSTER_NAME \
+            --service $SERVICE_NAME
+      - name: Deregister the task definition
+        run: aws ecs deregister-task-definition --task-definition $TASK_DEF
