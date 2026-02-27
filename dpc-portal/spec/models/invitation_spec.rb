@@ -93,6 +93,15 @@ RSpec.describe Invitation, type: :model do
           expect(new_cd_invite.errors[:base].first[:text]).to eq I18n.t('errors.attributes.base.duplicate_cd.text')
         end
 
+        it 'succeeds on expired invitation with same email and full name' do
+          valid_new_cd_invite.created_at = 3.days.ago
+          valid_new_cd_invite.save!
+          expect(valid_new_cd_invite.expired?).to eq true
+          new_cd_invite = build(:invitation, :cd, provider_organization: organization, invited_by: ao_user)
+          expect(new_cd_invite.valid?).to eq true
+          expect(new_cd_invite.errors[:base].size).to eq 0
+        end
+
         it 'fails on existing cd with same email' do
           user = create(:user)
           new_cd_invite = build(:invitation, :cd, provider_organization: organization, invited_by: ao_user,
