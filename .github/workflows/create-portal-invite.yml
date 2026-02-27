@@ -13,27 +13,22 @@ on:
         description: Initials to tag temp service
         required: true
         type: 'string'
-        default: 'aw'
       org_npi:
         description: Organization NPI
         required: true
         type: 'string'
-        default: '1234567890'
       given_name:
         description: Given name
         required: true
         type: 'string'
-        default: 'Ashley'
       family_name:
         description: Family name
         required: true
         type: 'string'
-        default: 'Weaver'
       email:
         description: Email address
         required: true
         type: 'string'
-        default: 'ashleyweaver@navapbc.com'
 
 jobs:
   create-portal-invite:
