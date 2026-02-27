@@ -139,7 +139,7 @@ RSpec.describe 'Invitations', type: :request do
         post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
         redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
         expect(redirect_params['acr_values']).to eq('http://idmanagement.gov/ns/assurance/ial/2')
-        expect(redirect_params['redirect_uri'][...28]).to eq 'http://localhost:3100/users/'
+        expect(redirect_params['redirect_uri']).to start_with('http://localhost:3100/users/')
         expect(request.session[:user_return_to]).to eq expected_redirect
       end
 
