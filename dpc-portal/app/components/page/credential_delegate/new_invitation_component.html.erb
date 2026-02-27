@@ -12,17 +12,17 @@
       </div>
     </div>
   <% end %>
-  <h1>Invite new user</h1>
+  <h1>Assign Credential Delegate</h1>
   <div class="usa-alert usa-alert--warning margin-bottom-4">
     <div class="usa-alert__body">
       <h2 class="usa-alert__heading">Exact match required</h2>
       <p class="usa-alert__text">
-        The name and contact info you enter must be an exact match to the name and contact info your Credential Delegate will provide after receiving this invite.
+        The Credential Delegate must use the name and email exactly as you enter them below.
       </p>
     </div>
   </div>
   <div>
-    <h2>Contact Information</h2>
+    <p>Invite a Credential Delegate (CD) to set up and manage access to the DPC API. The CD will receive an invite at the address you enter in this form. The invite will expire in 48 hours.</h2>
     <%= form_tag organization_credential_delegate_invitations_path(@organization.path_id), method: :post, class: ['usa-form'], id: "cd-form" do %>
       <%= render(Core::Form::TextInputComponent.new(label: 'First or given name',
           attribute: :invited_given_name,
@@ -46,7 +46,6 @@
           default: cd_invite.invited_email_confirmation)) %>
       <%= submit_tag('Send invite', class: "usa-button") %>
     <% end %>
-    <a id="modal-opener" href="#verify-modal" aria-controls="verify-modal" class="display-none" data-open-modal>Send invite</a>
     <%= render(Core::Modal::ModalComponent.new(
         'Acknowledgement',
         "<p>By assigning this user as a delegate, you are providing them with access to private health information. This means you assume responsibility for their compliance with the Health Insurance Portability and Accountability Act (HIPAA).</p>

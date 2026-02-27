@@ -15,9 +15,9 @@ class Invitation < ApplicationRecord
   belongs_to :provider_organization, required: true
   belongs_to :invited_by, class_name: 'User', required: false
 
-  AO_STEPS = ['Welcome to DPC Portal', 'Sign in or create a Login.gov account', 'Confirm your identity',
-              'Confirm organization registration', 'Finished'].freeze
-  CD_STEPS = ['Welcome to DPC Portal', 'Sign in or create a Login.gov account', 'Accept invite', 'Finished'].freeze
+  AO_STEPS = ['Begin registration', 'Verify my identity', 'Verify Medicare enrollment information',
+              'Submit registration', 'Finished'].freeze
+  CD_STEPS = ['Get started', 'Verify my identity', 'Accept invite', 'Finished'].freeze
 
   def show_attributes
     { full_name: "#{invited_given_name} #{invited_family_name}",
@@ -40,8 +40,12 @@ class Invitation < ApplicationRecord
     expiration_date
   end
 
+  def duration
+    2.days
+  end
+
   def expiration_date
-    created_at + 2.days
+    created_at + duration
   end
 
   def accept!
@@ -80,8 +84,9 @@ class Invitation < ApplicationRecord
     result
   end
 
-  def unacceptable_reason # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
-    return 'invalid' if cancelled?
+  def unacceptable_reason # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity,Metrics/AbcSize
+    return 'ao_invalid' if cancelled? && authorized_official?
+    return 'cd_invalid' if cancelled? && credential_delegate?
     return 'ao_renewed' if renewed? && authorized_official?
     return 'ao_accepted' if accepted? && authorized_official?
     return 'cd_accepted' if accepted? && credential_delegate?
@@ -116,7 +121,7 @@ class Invitation < ApplicationRecord
 
   def existing_invite?
     Invitation.where(provider_organization:, invited_email:, invited_given_name:, invited_family_name:,
-                     status: :pending).any?
+                     status: :pending).where('created_at > ?', duration.ago).any?
   end
 
   def existing_credential_delegate?

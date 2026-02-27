@@ -31,8 +31,8 @@ RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
         expect(page.find('.usa-step-indicator__current-step').text).to eq '3'
       end
 
-      it 'should have Continue to register button' do
-        is_expected.to include('Continue to register')
+      it 'should have Verify information button' do
+        is_expected.to include('Verify information')
       end
     end
 
