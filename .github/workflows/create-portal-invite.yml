@@ -28,7 +28,6 @@ on:
         description: Email address
         required: true
         type: 'string'
-  pull_request:
 
 jobs:
   create-portal-invite:
