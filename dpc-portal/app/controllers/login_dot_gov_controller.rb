@@ -29,13 +29,14 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
     if invitation_flow_match
       handle_invitation_flow_failure(invitation_flow_match[2])
     elsif params[:code]
-      @message = 'Something went wrong.'
       logger.error 'Login.gov Configuration error'
+      render(Page::Utility::ErrorComponent.new(nil, 'login_gov_signin_fail'))
     else
-      @message = 'You have decided not to authenticate via login.gov.'
-      Rails.logger.info(['User cancelled login',
-                         { actionContext: LoggingConstants::ActionContext::Authentication,
-                           actionType: LoggingConstants::ActionType::UserCancelledLogin }])
+        #   @message = 'You have decided not to authenticate via login.gov.'
+        Rails.logger.info(['User cancelled login',
+          { actionContext: LoggingConstants::ActionContext::Authentication,
+          actionType: LoggingConstants::ActionType::UserCancelledLogin }])
+        render(Page::Utility::ErrorComponent.new(nil, 'login_gov_signin_cancel'))
     end
   end
 
