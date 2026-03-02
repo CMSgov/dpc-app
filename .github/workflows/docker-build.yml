@@ -126,6 +126,8 @@ jobs:
         run: mvn -ntp -U clean
 
       - name: Build ci app
+        env:
+          PACE_CERT: ${{ secrets.PACE_CERT }}
         id: api-build
         run: |
           export PATH=$PATH:~/.local/bin
