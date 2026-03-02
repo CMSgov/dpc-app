@@ -15,9 +15,10 @@ const portals = {
            protectedPath: 'organizations/foo/edit',
            signInText: 'Log in' },
   // TODO: Add PACE cert when running in GHA (DPC-5222) and add 'dev' and 'test' back
-  'portal': { envs: ['local', 'dev', 'test'],
-              signInPath: '',
-              signInText: 'OK' },
+  'portal': { envs: ['local',],
+              signInPath: 'users/sign_in',
+              protectedPath: 'organizations',
+              signInText: 'Sign in' },
 }
 
 export async function checkPortalsWorkflow(data) {
