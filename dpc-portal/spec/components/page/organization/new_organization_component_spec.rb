@@ -27,7 +27,7 @@ RSpec.describe Page::Organization::NewOrganizationComponent, type: :component do
 
       it 'should match form tag' do
         form_tag = ['<form class="usa-form" id="new-organization-form"',
-                    %(action="http://test.host/portal/organizations"),
+                    %(action="http://test.host/organizations"),
                     'accept-charset="UTF-8" method="post">'].join(' ')
         is_expected.to include(form_tag)
       end
