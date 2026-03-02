@@ -21,7 +21,7 @@ RSpec.describe Page::Utility::AccessDeniedComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <div>
-            <div class="margin-bottom-5">← <a href="/portal/organizations">Return to my organizations</a></div>
+            <div class="margin-bottom-5">← <a href="/organizations">Return to my organizations</a></div>
             <h1>name</h1>
             <p><span class="text-bold">NPI:</span> npi</p>
             <div class="font-body-lg text-bold">#{I18n.t('verification.no_approved_enrollment_status')}</div>

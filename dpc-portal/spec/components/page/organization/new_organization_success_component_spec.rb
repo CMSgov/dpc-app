@@ -15,7 +15,7 @@ RSpec.describe Page::Organization::NewOrganizationSuccessComponent, type: :compo
     let(:expected_html) do
       <<~HTML
             <div>
-              <div class="margin-bottom-5">← <a href="/portal/">path</a></div>
+              <div class="margin-bottom-5">← <a href="/">path</a></div>
                <h1>Add new organization</h1>
                <h2>Organization added!</h2>
                <div class="usa-alert usa-alert--success">
@@ -35,11 +35,11 @@ RSpec.describe Page::Organization::NewOrganizationSuccessComponent, type: :compo
               <div class="margin-top-5">
                 <div class="display-flex flex-row flex-start" style="gap:20px;">
                     <div class="flex-align-self-center">
-                        <form class="button_to" method="get" action="/portal/organizations/#{org.id}/credential_delegate_invitations/new"><button class="usa-button" type="submit">Assign CD now</button></form>
+                        <form class="button_to" method="get" action="/organizations/#{org.id}/credential_delegate_invitations/new"><button class="usa-button" type="submit">Assign CD now</button></form>
 
                     </div>
                     <div class="flex-align-self-center">
-                        <a href="/portal/">Assign CD later</a>
+                        <a href="/">Assign CD later</a>
                     </div>
                 </div>
             </div>
