@@ -17,9 +17,9 @@ fi
 
 echo "Waiting for ECS service ${SVC_NAME}-${SVC_VERSION} deployment to succeed..."
 
-MAX_ATTEMPTS=60   # 60 attempts
+MAX_ATTEMPTS=90   # 90 attempts
 SLEEP_SECONDS=10  # 10 seconds between attempts
-TOTAL_TIMEOUT=$((MAX_ATTEMPTS * SLEEP_SECONDS)) # Total time: 600 seconds (10 minutes)
+TOTAL_TIMEOUT=$((MAX_ATTEMPTS * SLEEP_SECONDS)) # Total time: 900 seconds (15 minutes)
 DEPLOYMENT_STATUS="TIMEOUT" # Initialize status flag for post-loop check
 
 # Use a for loop to iterate a fixed number of times
