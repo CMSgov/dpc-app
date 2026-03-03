@@ -53,7 +53,7 @@ class IpAddressManager
   private
 
   def invalid_input?(ip_address, label)
-    validate_label(label)
+    # validate_label(label)
     validate_ip_address(ip_address)
     handle_root_errors if @root_errors.present?
     @errors.present?
