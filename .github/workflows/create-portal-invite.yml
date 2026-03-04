@@ -46,7 +46,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env || 'dev' }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env || 'test' }}-github-actions
 #      - name: AWS Credentials (prod)
 #        if: ${{ inputs.env == 'sandbox' || inputs.env == 'prod' }}
 #        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
@@ -55,8 +55,8 @@ jobs:
 #          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: Set cluster and service names
         run: |
-          echo "CLUSTER_NAME=dpc-${{ inputs.env || 'dev' }}-frontend" >> $GITHUB_ENV
-          echo "SERVICE_NAME=dpc-${{ inputs.env || 'dev' }}-web-portal" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=dpc-${{ inputs.env || 'test' }}-frontend" >> $GITHUB_ENV
+          echo "SERVICE_NAME=dpc-${{ inputs.env || 'test' }}-web-portal" >> $GITHUB_ENV
       - name: Start temp service
         run: ./dpc-app/scripts/start_temp_service.sh $CLUSTER_NAME $SERVICE_NAME ${{ inputs.initial_tag || 'aw' }}
       - name: Generate invite link
