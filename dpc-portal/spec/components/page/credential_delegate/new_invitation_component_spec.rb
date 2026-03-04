@@ -38,7 +38,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
 
       it 'should match form tag' do
         form_tag = ['<form class="usa-form" id="cd-form"',
-                    %(action="/portal/organizations/#{org.path_id}/credential_delegate_invitations"),
+                    %(action="/organizations/#{org.path_id}/credential_delegate_invitations"),
                     'accept-charset="UTF-8" method="post">'].join(' ')
         is_expected.to include(form_tag)
       end
@@ -117,7 +117,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
               </div>
               <button type="button" class="usa-button usa-modal__close" aria-label="Close this window" data-close-modal>
                   <svg class="usa-icon" style="transform: scale(1)" aria-hidden="true" role="img">
-                    <use xlink:href=/portal/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#close></use>
+                    <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#close></use>
                   </svg>
               </button>
           </div></div>

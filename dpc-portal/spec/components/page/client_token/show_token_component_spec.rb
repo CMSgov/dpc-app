@@ -16,7 +16,7 @@ RSpec.describe Page::ClientToken::ShowTokenComponent, type: :component do
     let(:expected_html) do
       <<~HTML
         <div>
-          <div class="margin-top-5 margin-bottom-5">← <a href="/portal/organizations/#{org.path_id}?credential_start=true">Back to organization</a></div>
+          <div class="margin-top-5 margin-bottom-5">← <a href="/organizations/#{org.path_id}?credential_start=true">Back to organization</a></div>
           <h1>Client token created</h1>
           <div>
             <div class="usa-alert usa-alert--warning margin-bottom-4">
@@ -32,7 +32,7 @@ RSpec.describe Page::ClientToken::ShowTokenComponent, type: :component do
               <textarea name="token" id="token" rows="9" readonly="readonly" class="usa-textarea">
                 some-token</textarea>
             </div>
-            <a class="usa-button usa-button" href="/portal/organizations/#{org.path_id}">Back to organization</a>
+            <a class="usa-button usa-button" href="/organizations/#{org.path_id}">Back to organization</a>
             <p class="margin-top-5"><a href="https://dpc.cms.gov/docsV1">View API Documentation</a></p>
           </div>
         </div>

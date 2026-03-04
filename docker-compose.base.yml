@@ -2,5 +2,7 @@ services:
   base:
     image: dpc-base:latest
     build:
+      args:
+        PACE_CERT: $PACE_CERT
       context: .
       dockerfile: docker/Dockerfiles/Dockerfile.base
