@@ -57,10 +57,10 @@ echo "New task id: $NEW_TASK_ID"
 echo "New container name: $NEW_CONTAINER_NAME"
 
 # Last but not least, get a shell into the container
-aws ecs execute-command \
-  --region us-east-1 \
-  --cluster "$CLUSTER_NAME"\
-  --task "$NEW_TASK_ID" \
-  --container "$NEW_CONTAINER_NAME" \
-  --command "/bin/sh" \
-  --interactive
+#aws ecs execute-command \
+#  --region us-east-1 \
+#  --cluster "$CLUSTER_NAME"\
+#  --task "$NEW_TASK_ID" \
+#  --container "$NEW_CONTAINER_NAME" \
+#  --command "/bin/sh" \
+#  --interactive
