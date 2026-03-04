@@ -11,16 +11,19 @@ set -euxo pipefail
 CLUSTER_NAME=$1
 SERVICE_NAME=$2
 INITIAL_TAG=$3
+export CLUSTER_NAME
+export SERVICE_NAME
 
 # Add your initials here
 NEW_SERVICE_NAME="${INITIAL_TAG}_${SERVICE_NAME}"
+export NEW_SERVICE_NAME
 
 # Check if the temp service is already up from a previous run, and if not start it.
 NEW_SERVICE_COUNT=$(aws ecs describe-services --cluster "$CLUSTER_NAME" --services "$NEW_SERVICE_NAME" | jq -r '.services[].runningCount')
 if [[ -z "$NEW_SERVICE_COUNT" || "$NEW_SERVICE_COUNT" -eq 0 ]]; then
 
   echo "Getting task definition."
-  TASK_DEF_ARN=$(./get_writeable_task_def_for_service.sh "$CLUSTER_NAME" "$SERVICE_NAME")
+  TASK_DEF_ARN=$(./dpc-app/scripts/get_writeable_task_def_for_service.sh "$CLUSTER_NAME" "$SERVICE_NAME")
   TASK_DEF=${TASK_DEF_ARN#*/}
   export TASK_DEF
 

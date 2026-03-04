@@ -8,7 +8,7 @@ CLUSTER_NAME=$1
 SERVICE_NAME=$2
 
 # Get the task def of the currently running service
-TASK_DEFINITION=$(./get_task_def_for_service.sh "$CLUSTER_NAME" "$SERVICE_NAME")
+TASK_DEFINITION=$(./dpc-app/scripts/get_task_def_for_service.sh "$CLUSTER_NAME" "$SERVICE_NAME")
 READ_ONLY_ROOT_FILE_SYSTEM=$(echo "$TASK_DEFINITION" | jq '.taskDefinition.containerDefinitions[0].readonlyRootFilesystem' )
 
 # Check if the task def already has a writeable file system.  If so, we can use it.

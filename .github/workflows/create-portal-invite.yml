@@ -55,13 +55,13 @@ jobs:
 #          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: Set cluster and service names
         run: |
-          echo "CLUSTER_NAME=dpc-${{ inputs.env }}-frontend" >> $GITHUB_ENV
-          echo "SERVICE_NAME=dpc-${{ inputs.env }}-web-portal" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=dpc-${{ inputs.env || 'dev' }}-frontend" >> $GITHUB_ENV
+          echo "SERVICE_NAME=dpc-${{ inputs.env || 'dev' }}-web-portal" >> $GITHUB_ENV
       - name: Start temp service
-        run: ./dpc-app/scripts/start_temp_service.sh $CLUSTER_NAME $SERVICE_NAME ${{ inputs.initial_tag }}
+        run: ./dpc-app/scripts/start_temp_service.sh $CLUSTER_NAME $SERVICE_NAME ${{ inputs.initial_tag || 'aw' }}
       - name: Generate invite link
         env:
-          RAILS_CMD: rails dpc:invite_ao INVITE=${{ inputs.given_name}},${{ inputs.family_name }},${{ inputs.email }},${{ inputs.org_npi }}
+          RAILS_CMD: rails dpc:invite_ao INVITE=${{ inputs.given_name || 'Ashley' }},${{ inputs.family_name || 'Weaver' }},${{ inputs.email || 'ashleyweaver@navapbc.com' }},${{ inputs.org_npi || '3058847591' }}
         run: |
           aws ecs execute-command  \
           --region ${{ vars.AWS_REGION }} \
@@ -75,6 +75,6 @@ jobs:
           aws ecs delete-service \
             --force \
             --cluster $CLUSTER_NAME \
-            --service $SERVICE_NAME
+            --service $NEW_SERVICE_NAME
       - name: Deregister the task definition
         run: aws ecs deregister-task-definition --task-definition $TASK_DEF
