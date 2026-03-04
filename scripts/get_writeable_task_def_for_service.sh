@@ -27,6 +27,7 @@ NEW_TASK_DEFINITION=$(echo "$NEW_TASK_DEFINITION" | jq 'del(.requiresAttributes)
 NEW_TASK_DEFINITION=$(echo "$NEW_TASK_DEFINITION" | jq 'del(.compatibilities)')
 NEW_TASK_DEFINITION=$(echo "$NEW_TASK_DEFINITION" | jq 'del(.registeredAt)')
 NEW_TASK_DEFINITION=$(echo "$NEW_TASK_DEFINITION" | jq 'del(.registeredBy)')
+NEW_TASK_DEFINITION=$(echo "$NEW_TASK_DEFINITION" | jq 'del(.deregisteredAt)')
 
 CREATED_TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEFINITION" )
 echo "$CREATED_TASK_DEFINITION" | jq -r '.taskDefinition.taskDefinitionArn'
