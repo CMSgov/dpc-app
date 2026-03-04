@@ -35,7 +35,7 @@ RSpec.describe Page::Organization::NewOrganizationSuccessComponent, type: :compo
               <div class="margin-top-5">
                 <div class="display-flex flex-row flex-start" style="gap:20px;">
                     <div class="flex-align-self-center">
-                        <a href="/portal/organizations/#{org.id}/credential_delegate_invitations/new" class="usa-button">Assign CD now</a>
+                        <a href="/organizations/#{org.id}/credential_delegate_invitations/new" class="usa-button margin-right-0">Assign CD now</a>
                     </div>
                     <div class="flex-align-self-center">
                         <a href="/">Assign CD later</a>

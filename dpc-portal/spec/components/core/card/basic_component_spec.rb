@@ -45,9 +45,7 @@ RSpec.describe Core::Card::BasicComponent, type: :component do
                   <h1>Yo</h1>
                 </div>
                 <div class="flex-align-self-center">
-                  <form class="button_to" method="post" action="/there">
-                   <button class="usa-button" type="submit">Doit</button>
-                  </form>#{'                  '}
+                  <a href="/there" class="usa-button">Doit</a>
                 </div>
               </div>
             </div>

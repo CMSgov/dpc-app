@@ -30,9 +30,8 @@ RSpec.describe Page::Session::LoginComponent, type: :component do
       expect(page.find('form', match: :first)[:method]).to eq 'post'
     end
 
-    it 'test data button should post to sandbox url' do
-      expect(page.find('form.sandbox_url')[:action]).to eq sandbox_url
-      expect(page.find('form.sandbox_url')[:method]).to eq 'get'
+    it 'test data button should link to sandbox url' do
+      expect(page.find('a.usa-button--outline.usa-button')[:href]).to eq sandbox_url
     end
 
     it 'should have two columns' do

@@ -20,19 +20,19 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       let(:org) { ComponentSupport::MockOrg.new(0) }
       it 'Should have Generate token button' do
         button = <<~BUTTON
-          <a href="/portal/organizations/#{org.path_id}/client_tokens/new" class="usa-button">Generate token</a>
+          <a class="usa-button" href="/organizations/#{org.path_id}/client_tokens/new">Generate token</a>
         BUTTON
         is_expected.to include(normalize_space(button))
       end
       it 'Should have Create key button' do
         button = <<~BUTTON
-          <a href="/portal/organizations/#{org.path_id}/public_keys/new" class="usa-button">Add key</a>
+          <a class="usa-button" href="/organizations/#{org.path_id}/public_keys/new">Add key</a>
         BUTTON
         is_expected.to include(normalize_space(button))
       end
       it 'Should have Add IP button' do
         button = <<~BUTTON
-            <a href="/portal/organizations/#{org.path_id}/ip_addresses/new" class="usa-button">Add IP</a>
+          <a class="usa-button" href="/organizations/#{org.path_id}/ip_addresses/new">Add IP</a>
         BUTTON
         is_expected.to include(normalize_space(button))
       end
