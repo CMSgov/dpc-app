@@ -65,7 +65,12 @@ jobs:
           echo "CLUSTER_NAME=dpc-${{ inputs.env || 'test' }}-frontend" >> $GITHUB_ENV
           echo "SERVICE_NAME=dpc-${{ inputs.env || 'test' }}-web-portal-v9" >> $GITHUB_ENV
       - name: Start temp service
-        run: ./dpc-app/scripts/start_temp_service.sh $CLUSTER_NAME $SERVICE_NAME ${{ inputs.initial_tag || 'aw' }}
+        run: |
+          ./dpc-app/scripts/start_temp_service.sh $CLUSTER_NAME $SERVICE_NAME ${{ inputs.initial_tag || 'aw' }}
+          echo "TASK_DEF=${{ env.TASK_DEF }}" >> $GITHUB_ENV
+          echo "NEW_TASK_ID=${{ env.NEW_TASK_ID }}" >> $GITHUB_ENV
+          echo "NEW_SERVICE_NAME=${{ env.NEW_SERVICE_NAME }}" >> $GITHUB_ENV
+          echo "NEW_CONTAINER_NAME=${{ env.NEW_CONTAINER_NAME }}" >> $GITHUB_ENV
       - name: Generate invite link
         env:
           RAILS_CMD: rails dpc:invite_ao INVITE=${{ inputs.given_name || 'Ashley' }},${{ inputs.family_name || 'Weaver' }},${{ inputs.email || 'ashleyweaver@navapbc.com' }},${{ inputs.org_npi || '3058847591' }}
