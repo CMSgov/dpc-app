@@ -19,8 +19,8 @@ NEW_SERVICE_NAME="${INITIAL_TAG}_${SERVICE_NAME}"
 export NEW_SERVICE_NAME
 
 # Check if the temp service is already up from a previous run, and if not start it.
-NEW_SERVICE_COUNT=$(aws ecs describe-services --cluster "$CLUSTER_NAME" --services "$NEW_SERVICE_NAME" | jq -r '.services[].runningCount')
-if [[ -z "$NEW_SERVICE_COUNT" || "$NEW_SERVICE_COUNT" -eq 0 ]]; then
+#NEW_SERVICE_COUNT=$(aws ecs describe-services --cluster "$CLUSTER_NAME" --services "$NEW_SERVICE_NAME" | jq -r '.services[].runningCount')
+#if [[ -z "$NEW_SERVICE_COUNT" || "$NEW_SERVICE_COUNT" -eq 0 ]]; then
 
   echo "Getting task definition."
   TASK_DEF_ARN=$(./dpc-app/scripts/get_writeable_task_def_for_service.sh "$CLUSTER_NAME" "$SERVICE_NAME")
@@ -42,9 +42,9 @@ if [[ -z "$NEW_SERVICE_COUNT" || "$NEW_SERVICE_COUNT" -eq 0 ]]; then
 
   echo "Waiting for $NEW_SERVICE_NAME to start."
   aws ecs wait services-stable --cluster "$CLUSTER_NAME" --services "$NEW_SERVICE_NAME"
-else
-  echo "$NEW_SERVICE_NAME is already running."
-fi
+#else
+#  echo "$NEW_SERVICE_NAME is already running."
+#fi
 
 echo "$NEW_SERVICE_NAME started, building login command."
 
