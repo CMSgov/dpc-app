@@ -60,7 +60,7 @@ jobs:
       - name: Set cluster and service names
         run: |
           echo "CLUSTER_NAME=dpc-${{ inputs.env || 'test' }}-frontend" >> $GITHUB_ENV
-          echo "SERVICE_NAME=dpc-${{ inputs.env || 'test' }}-web-portal" >> $GITHUB_ENV
+          echo "SERVICE_NAME=dpc-${{ inputs.env || 'test' }}-web-portal-v9" >> $GITHUB_ENV
       - name: Start temp service
         run: ./dpc-app/scripts/start_temp_service.sh $CLUSTER_NAME $SERVICE_NAME ${{ inputs.initial_tag || 'aw' }}
       - name: Generate invite link
