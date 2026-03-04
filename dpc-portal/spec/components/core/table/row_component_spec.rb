@@ -37,7 +37,7 @@ RSpec.describe Core::Table::RowComponent, type: :component do
           <form class="button_to" method="post" action="/foo/bar/some-guid"><input type="hidden" name="_method" value="delete" autocomplete="off" /><button class="usa-button" type="submit">Yes, revoke component</button></form>
         HTML
       end
-      let(:expected_icon) { '<use xlink:href=/portal/assets/@uswds/uswds/dist/img/sprite.*svg\#delete></use>' }
+      let(:expected_icon) { '<use xlink:href=/assets/@uswds/uswds/dist/img/sprite.*svg\#delete></use>' }
       it { is_expected.to include(expected_form) }
       it { is_expected.to match(expected_icon) }
     end
