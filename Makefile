@@ -5,6 +5,9 @@ SMOKE_THREADS ?= 10
 
 venv: venv/bin/activate
 
+clean-jacoco:
+	mkdir -p jacocoReport && rm -r jacocoReport
+
 venv/bin/activate: requirements.txt
 	test -d venv || python3 -m venv venv
 	. venv/bin/activate
@@ -25,7 +28,7 @@ smoke/local: start-dpc
 # ==============
 
 api: ## Builds the Java API services
-api: secure-envs
+api: secure-envs clean-jacoco
 	mvn clean compile -Perror-prone -B -V -ntp -T 4 -DskipTests
 	mvn package -Pci -ntp -T 4 -DskipTests
 
@@ -228,3 +231,7 @@ unit-tests:
 
 .PHONY: load-tests
 load-tests: start-api-load-tests start-load-tests down-dpc-load-tests
+
+.PHONY: api-client-integration-tests
+api-client-integration-tests: clean-jacoco docker-base api
+	@bash ./dpc-client-integration-test.sh
