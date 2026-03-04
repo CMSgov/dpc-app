@@ -8,7 +8,7 @@ RSpec.describe IpAddressManager do
   let(:api_id) { SecureRandom.uuid }
   let(:manager) { IpAddressManager.new(api_id) }
   describe '#create_ip_address' do
-    let(:ip_address_params) { { label: 'Public IP 1', ip_address: '136.226.19.87' } }
+    let(:ip_address_params) { { ip_address: '136.226.19.87' } }
 
     context 'with valid params' do
       context 'successful API request' do
@@ -55,23 +55,6 @@ RSpec.describe IpAddressManager do
     end
 
     context 'with invalid params' do
-      it 'has errors on all missing fields' do
-        new_ip_address = manager.create_ip_address(ip_address: '', label: '')
-        expect(new_ip_address[:response]).to eq(false)
-        expect(new_ip_address[:errors]).to eq(label: "Label can't be blank.",
-                                              ip_address: "IP address can't be blank.",
-                                              root: "Fields can't be blank.")
-      end
-      context 'label over 25 characters' do
-        it 'response with error' do
-          ip_address_params[:label] = 'aaaaabbbbbcccccdddddeeeeefffff'
-          new_ip_address = manager.create_ip_address(**ip_address_params)
-
-          expect(new_ip_address[:response]).to eq(false)
-          expect(new_ip_address[:errors]).to eq(label: 'Label must be 25 characters or fewer.', root: 'Invalid label.')
-        end
-      end
-
       context 'invalid IP' do
         it 'response with error' do
           ip_address_params[:ip_address] = '333.333.333.333'
@@ -79,19 +62,6 @@ RSpec.describe IpAddressManager do
 
           expect(new_ip_address[:response]).to eq(false)
           expect(new_ip_address[:errors]).to eq(ip_address: 'Invalid IP address.', root: 'Invalid IP address.')
-        end
-      end
-      context 'mixed errors' do
-        it 'response with errors' do
-          ip_address_params[:label] = 'aaaaabbbbbcccccdddddeeeeefffff'
-          ip_address_params[:ip_address] = '333.333.333.333'
-          new_ip_address = manager.create_ip_address(**ip_address_params)
-
-          expect(new_ip_address[:response]).to eq(false)
-          root = 'Errors:<ul><li>Invalid label.</li><li>Invalid IP address.</li></ul>'
-          expect(new_ip_address[:errors]).to eq(label: 'Label must be 25 characters or fewer.',
-                                                ip_address: 'Invalid IP address.',
-                                                root:)
         end
       end
     end

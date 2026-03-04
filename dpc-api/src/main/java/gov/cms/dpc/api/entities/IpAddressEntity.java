@@ -32,7 +32,7 @@ public class IpAddressEntity implements Serializable {
     @Column(name = "ip_address", nullable = false, columnDefinition = "inet")
     @JsonDeserialize(using = InetDeserializer.class)
     private Inet ipAddress;
-    
+
     private String label;
 
     @Column(name = "created_at", columnDefinition = "timestamp with time zone")

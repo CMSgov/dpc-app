@@ -5,13 +5,12 @@ class IpAddressManager
   require 'ipaddr'
   include CredentialManager
 
-  def create_ip_address(ip_address:, label:)
-    label = strip_carriage_returns(label)
+  def create_ip_address(ip_address:)
     ip_address = strip_carriage_returns(ip_address)
-    return { response: false, errors: @errors } if invalid_input?(ip_address, label)
+    return { response: false, errors: @errors } if invalid_input?(ip_address)
 
     api_client = DpcClient.new
-    api_client.create_ip_address(api_id, params: { label:, ip_address: })
+    api_client.create_ip_address(api_id, params: { ip_address: })
 
     unless api_client.response_successful?
       Rails.logger.error "Failed to create IP address: #{api_client.response_body}"
@@ -52,8 +51,7 @@ class IpAddressManager
 
   private
 
-  def invalid_input?(ip_address, label)
-    # validate_label(label)
+  def invalid_input?(ip_address)
     validate_ip_address(ip_address)
     handle_root_errors if @root_errors.present?
     @errors.present?
