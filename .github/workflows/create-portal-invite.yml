@@ -57,6 +57,8 @@ jobs:
 #        with:
 #          aws-region: ${{ vars.AWS_REGION }}
 #          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+      - name: Install AWS Session Manager Plugin
+        uses: ankurk91/install-session-manager-plugin-action@v1
       - name: Set cluster and service names
         run: |
           echo "CLUSTER_NAME=dpc-${{ inputs.env || 'test' }}-frontend" >> $GITHUB_ENV
