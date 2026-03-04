@@ -84,8 +84,7 @@ public class IpAddressResource extends AbstractIpAddressResource {
         } else {
             IpAddressEntity ipAddressEntity = new IpAddressEntity()
                 .setOrganizationId(organizationPrincipal.getID())
-                .setIpAddress(ipAddress)
-                .setLabel(createIpAddressRequest.getLabel());
+                .setIpAddress(ipAddress);
 
             return this.dao.persistIpAddress(ipAddressEntity);
         }
