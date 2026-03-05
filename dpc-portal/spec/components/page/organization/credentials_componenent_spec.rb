@@ -164,9 +164,6 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
           <thead>
             <tr>
               <th data-sortable scope="row" role="columnheader" aria-sort="descending">
-                Label
-              </th>
-              <th data-sortable scope="row" role="columnheader" aria-sort="descending">
                 Public IP
               </th>
               <th data-sortable scope="row" role="columnheader" aria-sort="descending">
@@ -182,13 +179,11 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       it 'should have ip_addr row' do
         row1 = <<~HTML
           <tr>
-              <td data-sort-value="IP Addr 1">IP Addr 1</td>
               <td data-sort-value="127.0.0.10">127.0.0.10</td>
               <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
         HTML
         row2 = <<~HTML
           <tr>
-            <td data-sort-value="IP Addr 2">IP Addr 2</td>
             <td data-sort-value="127.0.0.11">127.0.0.11</td>
             <td data-sort-value="12/15/2023 at  5:01PM UTC">12/15/2023 at  5:01PM UTC</td>
         HTML
