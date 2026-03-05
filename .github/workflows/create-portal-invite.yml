@@ -74,12 +74,14 @@ jobs:
           --command "$RAILS_CMD " \
           --interactive
       - name: Delete temp service
+        if: always()
         run: |
           aws ecs delete-service \
             --force \
             --cluster $CLUSTER_NAME \
             --service $NEW_SERVICE_NAME
       - name: Deregister the task definition
+        if: always()
         run: |
           TASK_DEF_ARN=$(aws ecs describe-tasks --cluster "$CLUSTER_NAME" --tasks "$NEW_TASK_ARN" | jq -r '.tasks[].taskDefinitionArn')
           aws ecs deregister-task-definition --task-definition $TASK_DEF_ARN
