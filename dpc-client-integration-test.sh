@@ -16,6 +16,7 @@ trap _finally EXIT
 # mvn clean compile -Perror-prone -B -V -ntp -T 4 -DskipTests
 # mvn package -Pci -ntp -T 4 -DskipTests
 
+unset REPORT_COVERAGE
 echo "Starting api server for client integration tests"
 USE_BFD_MOCK=true docker compose -p client-integration-app up api --wait
 
