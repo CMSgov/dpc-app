@@ -1,7 +1,3 @@
-volumes:
-  coverage:
-
-
 services:
   dpc_client:
     build:
