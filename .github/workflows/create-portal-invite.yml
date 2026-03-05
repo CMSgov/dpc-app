@@ -68,7 +68,7 @@ jobs:
         run: ./dpc-app/scripts/start_temp_service.sh $CLUSTER_NAME $SERVICE_NAME ${{ inputs.initial_tag || 'aw' }}
       - name: Generate invite link
         env:
-          RAILS_CMD: rails dpc:invite_ao INVITE=${{ inputs.given_name || 'Ashley' }},${{ inputs.family_name || 'Weaver' }},${{ inputs.email || 'ashleyweaver@navapbc.com' }},${{ inputs.org_npi || '3058847591' }}
+          RAILS_CMD: rails dpc:invite_ao INVITE=${{ inputs.given_name || 'Ashley' }},${{ inputs.family_name || 'Weaver' }},${{ inputs.email || 'ashleyweaver@navapbc.com' }},${{ inputs.org_npi || '3444714497' }}
         run: |
           aws ecs execute-command  \
           --region ${{ vars.AWS_REGION }} \
