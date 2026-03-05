@@ -207,6 +207,7 @@ jobs:
       - name: "DPC Client Build"
         run: |
           make ci-api-client
+          make api-client-integration-tests
       - name: Cleanup
         if: ${{ always() }}
         run: ./scripts/cleanup-docker.sh
