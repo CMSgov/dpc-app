@@ -1,7 +1,6 @@
 name: Create DPC Portal Invite
 
 on:
-  push:
   pull_request:
   workflow_dispatch:
     inputs:
