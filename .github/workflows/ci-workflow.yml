@@ -51,6 +51,7 @@ jobs:
         run: |
           make dpc-client-integration-test
       - name: "Debug attribution"
+        if: ${{ always() }}
         run: docker logs client-integration-app-attribution-1
       - name: Cleanup
         if: ${{ always() }}
