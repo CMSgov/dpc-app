@@ -65,9 +65,8 @@ jobs:
           echo "CLUSTER_NAME=dpc-${{ inputs.env || 'test' }}-frontend" >> $GITHUB_ENV
           echo "SERVICE_NAME=dpc-${{ inputs.env || 'test' }}-web-portal-v9" >> $GITHUB_ENV
       - name: Start temp service
-        run: ./dpc-app/scripts/start_temp_service.sh $CLUSTER_NAME $SERVICE_NAME ${{ inputs.initial_tag || 'aw' }}
-      - name: Set env vars
         run: |
+          ./dpc-app/scripts/start_temp_service.sh $CLUSTER_NAME $SERVICE_NAME ${{ inputs.initial_tag || 'aw' }}
           echo "TASK_DEF=$TASK_DEF" >> $GITHUB_ENV
           echo "NEW_TASK_ID=$NEW_TASK_ID" >> $GITHUB_ENV
           echo "NEW_SERVICE_NAME=$NEW_SERVICE_NAME" >> $GITHUB_ENV
