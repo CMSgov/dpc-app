@@ -64,12 +64,13 @@ RSpec.describe DpcClient, type: :integration do
     end
 
     describe 'client tokens' do
+      let(:label) { 'Sandbox Token 1' }
       context 'create' do
         it 'sends data to API and sets response instance variables' do
-          client.create_client_token(org_id, params: { label: 'Sandbox Token 1' })
+          client.create_client_token(org_id, params: { label: label })
 
           expect(client.response_status).to eq(200)
-          expect(client.response_body['label']).to eq('Sandbox Token 1')
+          expect(client.response_body['label']).to eq(label)
         end
       end
 
@@ -79,7 +80,7 @@ RSpec.describe DpcClient, type: :integration do
 
           expect(client.response_status).to eq(200)
           expect(client.response_body['count']).to be > 0
-          expect(client.response_body['entities'].first['label']).to eq('Sandbox Token 1')
+          expect(client.response_body['entities'].first['label']).to eq(label)
         end
       end
 
@@ -104,6 +105,7 @@ RSpec.describe DpcClient, type: :integration do
     end
 
     describe 'public keys' do
+      let(:label) { 'Sandbox Key 1' }
       context 'create' do
         it 'sends data to API and sets response instance variables' do
           rsa_key = OpenSSL::PKey::RSA.new(4096)
@@ -114,7 +116,6 @@ RSpec.describe DpcClient, type: :integration do
           signature_binary = rsa_key.sign(digest, message)
           snippet_signature = Base64.encode64(signature_binary)
 
-          label = 'Sandbox Key 1'
           client.create_public_key(
             org_id,
             params: { label:, public_key:, snippet_signature: }
@@ -131,7 +132,7 @@ RSpec.describe DpcClient, type: :integration do
 
           expect(client.response_status).to eq(200)
           expect(client.response_body['count']).to be > 0
-          expect(client.response_body['entities'].first['label']).to eq('Sandbox Key 1')
+          expect(client.response_body['entities'].first['label']).to eq(label)
         end
       end
 
