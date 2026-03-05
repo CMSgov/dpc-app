@@ -1,7 +1,6 @@
 name: Create DPC Portal Invite
 
 on:
-  pull_request:
   workflow_dispatch:
     inputs:
       env:
@@ -42,29 +41,29 @@ jobs:
         with:
           path: dpc-app
       - name: AWS Credentials (non-prod)
-#        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
+        if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
         uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env || 'test' }}-github-actions
-#      - name: AWS Credentials (prod)
-#        if: ${{ inputs.env == 'sandbox' || inputs.env == 'prod' }}
-#        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
-#        with:
-#          aws-region: ${{ vars.AWS_REGION }}
-#          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+      - name: AWS Credentials (prod)
+        if: ${{ inputs.env == 'sandbox' || inputs.env == 'prod' }}
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: Install AWS Session Manager Plugin
         run: |
           sudo dnf install -y https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm
       - name: Set cluster and service names
         run: |
-          echo "CLUSTER_NAME=dpc-${{ inputs.env || 'test' }}-frontend" >> $GITHUB_ENV
-          echo "SERVICE_NAME=dpc-${{ inputs.env || 'test' }}-web-portal-v9" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=dpc-${{ inputs.env }}-frontend" >> $GITHUB_ENV
+          echo "SERVICE_NAME=dpc-${{ inputs.env }}-web-portal-v9" >> $GITHUB_ENV
       - name: Start temp service
         run: ./dpc-app/scripts/start_temp_service.sh $CLUSTER_NAME $SERVICE_NAME
       - name: Generate invite link
         env:
-          RAILS_CMD: rails dpc:invite_ao INVITE=${{ inputs.given_name || 'Ashley' }},${{ inputs.family_name || 'Weaver' }},${{ inputs.email || 'ashleyweaver@navapbc.com' }},${{ inputs.org_npi || '3267880441' }}
+          RAILS_CMD: rails dpc:invite_ao INVITE=${{ inputs.given_name }},${{ inputs.family_name }},${{ inputs.email }},${{ inputs.org_npi }}
         run: |
           aws ecs execute-command  \
           --region ${{ vars.AWS_REGION }} \
