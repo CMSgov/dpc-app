@@ -69,7 +69,7 @@ jobs:
         run: mvn -ntp -U clean
       - name: "API Integration test"
         run: |
-          make ci-api-client-integration-test
+          make ci-api-client-integration
       - name: "Debug db"
         if: ${{ failure() }}
         run: docker logs client-integration-app-db-1
