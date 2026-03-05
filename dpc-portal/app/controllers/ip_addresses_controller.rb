@@ -15,7 +15,7 @@ class IpAddressesController < ApplicationController
   # rubocop:disable Metrics/AbcSize
   def create
     manager = IpAddressManager.new(@organization.dpc_api_organization_id)
-    new_ip_address = manager.create_ip_address(ip_address: params[:ip_address], label: params[:label])
+    new_ip_address = manager.create_ip_address(ip_address: params[:ip_address])
     if new_ip_address[:response]
       CheckConfigCompleteJob.perform_later(@organization.id) unless @organization.config_complete
       log_credential_action(:ip_address, new_ip_address.dig(:message, 'id'), :add)
