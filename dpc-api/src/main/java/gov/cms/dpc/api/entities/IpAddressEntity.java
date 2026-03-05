@@ -10,7 +10,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.io.Serializable;
@@ -33,9 +32,6 @@ public class IpAddressEntity implements Serializable {
     @JsonDeserialize(using = InetDeserializer.class)
     private Inet ipAddress;
 
-    @NotNull
-    private String label;
-
     @Column(name = "created_at", columnDefinition = "timestamp with time zone")
     @JsonSerialize(converter = OffsetDateTimeToStringConverter.class)
     @JsonDeserialize(converter = StringToOffsetDateTimeConverter.class)
@@ -48,7 +44,5 @@ public class IpAddressEntity implements Serializable {
     public UUID getOrganizationId() {return organizationId;}
     public IpAddressEntity setIpAddress(Inet ipAddress) {this.ipAddress = ipAddress; return this;}
     public Inet getIpAddress() {return ipAddress;}
-    public IpAddressEntity setLabel(String label) {this.label = label; return this;}
-    public String getLabel() {return label;}
     public OffsetDateTime getCreatedAt() {return createdAt;}
 }

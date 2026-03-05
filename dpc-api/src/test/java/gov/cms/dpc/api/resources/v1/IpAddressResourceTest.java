@@ -38,7 +38,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
 
     private static IpAddressEntity ipAddressEntityResponse = new IpAddressEntity();
 
-    private final CreateIpAddressRequest ipRequest = new CreateIpAddressRequest("192.168.1.1", "test label");
+    private final CreateIpAddressRequest ipRequest = new CreateIpAddressRequest("192.168.1.1");
 
     private IpAddressResourceTest() throws IOException, URISyntaxException {
         this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
@@ -90,7 +90,6 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         IpAddressEntity responseIp = mapper.readValue(response.getEntity().getContent(), IpAddressEntity.class);
         assertNotNull(responseIp.getId());
         assertEquals(ORGANIZATION_ID, responseIp.getOrganizationId().toString());
-        assertEquals(ipRequest.getLabel(), responseIp.getLabel());
         assertEquals(ipRequest.getIpAddress(), responseIp.getIpAddress().getAddress());
         assertNotNull(responseIp.getCreatedAt());
 
@@ -119,7 +118,6 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         IpAddressEntity responseIp = responseCollection.getEntities().stream().findFirst().get();
         assertNotNull(responseIp.getId());
         assertEquals(ipAddressEntityResponse.getOrganizationId(), responseIp.getOrganizationId());
-        assertEquals(ipAddressEntityResponse.getLabel(), responseIp.getLabel());
         assertEquals(ipAddressEntityResponse.getIpAddress(), responseIp.getIpAddress());
         assertNotNull(responseIp.getCreatedAt());
     }
@@ -158,10 +156,10 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     public void testPost_tooManyIps() throws IOException, URISyntaxException {
         // We shouldn't have any rows in the table at this point, so fill up to the max
         for(int i=1; i<=8; i++) {
-            writeIpAddress(String.format("test post %d", i), "192.168.1.1");
+            writeIpAddress("192.168.1.1");
         }
 
-        CreateIpAddressRequest ipAddressRequest = new CreateIpAddressRequest("192.128.1.1","should not post");
+        CreateIpAddressRequest ipAddressRequest = new CreateIpAddressRequest("192.128.1.1");
 
         CloseableHttpClient client = HttpClients.createDefault();
         String ipAddressJson = mapper.writeValueAsString(ipAddressRequest);
@@ -196,8 +194,8 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         assertEquals(HttpStatus.SC_BAD_REQUEST, response.getCode());
     }
 
-    private IpAddressEntity writeIpAddress(String label, String ip) throws URISyntaxException, IOException {
-        CreateIpAddressRequest ipAddressRequest = new CreateIpAddressRequest(ip, label);
+    private IpAddressEntity writeIpAddress(String ip) throws URISyntaxException, IOException {
+        CreateIpAddressRequest ipAddressRequest = new CreateIpAddressRequest(ip);
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             String ipAddressJson = mapper.writeValueAsString(ipAddressRequest);
