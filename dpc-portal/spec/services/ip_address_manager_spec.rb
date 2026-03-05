@@ -55,6 +55,11 @@ RSpec.describe IpAddressManager do
     end
 
     context 'with invalid params' do
+      it 'has errors on missing field' do
+        new_ip_address = manager.create_ip_address(ip_address: '')
+        expect(new_ip_address[:response]).to eq(false)
+        expect(new_ip_address[:errors]).to eq(ip_address: "IP address can't be blank.")
+      end
       context 'invalid IP' do
         it 'response with error' do
           ip_address_params[:ip_address] = '333.333.333.333'
