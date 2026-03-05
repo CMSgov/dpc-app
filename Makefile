@@ -226,7 +226,7 @@ ci-web-portal: secure-envs
 	@./dpc-web-portal-test.sh
 
 .PHONY: ci-api-client
-ci-api-client:
+ci-api-client: secure-envs
 	@./dpc-api-client-test.sh
 
 .PHONY: unit-tests
