@@ -17,7 +17,7 @@ trap _finally EXIT
 # mvn package -Pci -ntp -T 4 -DskipTests
 
 echo "Starting api server for client integration tests"
-USE_BFD_MOCK=true docker compose -p client-integration-app up api --wait
+JACOCO=false USE_BFD_MOCK=true docker compose -p client-integration-app up api --wait
 
 export GOLDEN_MACAROON=$(curl -X POST http://localhost:9903/tasks/generate-token)
 
