@@ -49,8 +49,9 @@ jobs:
         run: ./scripts/cleanup-docker.sh
       - name: "DPC Client Build"
         run: |
-          make ci-api-client
           make dpc-client-integration-test
+      - name: "Debug attribution"
+        run: docker logs client-integration-app-attribution-1
       - name: Cleanup
         if: ${{ always() }}
         run: ./scripts/cleanup-docker.sh

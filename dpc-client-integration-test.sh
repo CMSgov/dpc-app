@@ -2,9 +2,12 @@
 set -Ee
 
 function _finally {
-  echo "SHUTTING EVERYTHING DOWN"
-  docker compose -p client-integration-app down
-  docker volume rm client-integration-app_pgdata16
+  # don't shut it down if running on ci
+  if [ "$ENV" != 'github-ci' ]; then
+    echo "SHUTTING EVERYTHING DOWN"
+    docker compose -p client-integration-app down
+    docker volume rm client-integration-app_pgdata16
+  fi
 }
 
 trap _finally EXIT
