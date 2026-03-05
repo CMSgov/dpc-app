@@ -26,54 +26,45 @@ RSpec.describe DpcClient, type: :integration do
   end
 
   describe '#create_organization' do
-    context 'successful API request' do
-      it 'sends data to API and sets response instance variables' do
-        client.create_organization(org)
-
-        expect(client.response_status).to eq(200)
-        expect(client.response_body.dig('identifier', 0, 'value')).to eq npi
-      end
+    it 'sends data to API and sets response instance variables' do
+      client.create_organization(org)
+      expect(client.response_status).to eq(200)
+      expect(client.response_body.dig('identifier', 0, 'value')).to eq npi
     end
   end
 
   describe '#get_organization_by_npi' do
-    context 'successful API request' do
-      it 'retrieves organization data from API' do
-        response = client.get_organization_by_npi(npi)
-        expect(response&.entry).to_not be_nil
-        expect(response.entry.length).to eq 1
-        expect(response.entry.first.resource.identifier.first.value).to eq npi
-      end
+    it 'retrieves organization data from API' do
+      response = client.get_organization_by_npi(npi)
+      expect(response&.entry).to_not be_nil
+      expect(response.entry.length).to eq 1
+      expect(response.entry.first.resource.identifier.first.value).to eq npi
     end
   end
 
-  describe '#post_create' do
+  describe 'with existing org' do
     let(:org_id) do
       response = client.get_organization_by_npi(npi)
       response.entry.first.resource.id
     end
 
     describe '#get_organization' do
-      context 'successful API request' do
-        it 'retrieves organization data from API' do
-          response = client.get_organization(org_id)
-          expect(response).to_not be_nil
-          expect(response.resourceType).to eq 'Organization'
-        end
+      it 'retrieves organization data from API' do
+        response = client.get_organization(org_id)
+        expect(response).to_not be_nil
+        expect(response.resourceType).to eq 'Organization'
       end
     end
 
     describe '#update_organization' do
-      context 'successful request' do
-        it 'sends org data to API' do
-          expect(client.update_organization(org, org_id)).to eq(client)
-          expect(client.response_successful?).to eq(true)
-        end
+      it 'sends org data to API' do
+        expect(client.update_organization(org, org_id)).to eq(client)
+        expect(client.response_successful?).to eq(true)
       end
     end
 
-    describe '#create_client_token' do
-      context 'successful API request' do
+    describe 'client tokens' do
+      context 'create' do
         it 'sends data to API and sets response instance variables' do
           client.create_client_token(org_id, params: { label: 'Sandbox Token 1' })
 
@@ -81,10 +72,8 @@ RSpec.describe DpcClient, type: :integration do
           expect(client.response_body['label']).to eq('Sandbox Token 1')
         end
       end
-    end
 
-    describe '#get_client_tokens' do
-      context 'successful API request' do
+      context 'list' do
         it 'sends data to API and sets response instance variables' do
           client.get_client_tokens(org_id)
 
@@ -93,18 +82,20 @@ RSpec.describe DpcClient, type: :integration do
           expect(client.response_body['entities'].first['label']).to eq('Sandbox Token 1')
         end
       end
-    end
 
-    describe '#delete_client_token' do
-      context 'successful API request' do
+      context 'delete' do
         it 'returns success' do
+          # Need to get an existing id first
           client.get_client_tokens(org_id)
           expect(client.response_status).to eq(200)
           start_count = client.response_body['count']
           expect(start_count).to be > 0
           token_id = client.response_body['entities'].first['id']
+
           client.delete_client_token(org_id, token_id)
+
           expect(client.response_status).to eq(204)
+
           client.get_client_tokens(org_id)
           expect(client.response_status).to eq(200)
           expect(client.response_body['count'] + 1).to eq start_count
@@ -112,21 +103,15 @@ RSpec.describe DpcClient, type: :integration do
       end
     end
 
-    describe '#create_public_key' do
-      context 'successful API request' do
+    describe 'public keys' do
+      context 'create' do
         it 'sends data to API and sets response instance variables' do
           rsa_key = OpenSSL::PKey::RSA.new(4096)
-
           rsa_key.to_pem
-
           public_key = rsa_key.public_key.to_pem
-
           message = 'This is the snippet used to verify a key pair in DPC.'
-
           digest = OpenSSL::Digest.new('SHA256')
-
           signature_binary = rsa_key.sign(digest, message)
-
           snippet_signature = Base64.encode64(signature_binary)
 
           label = 'Sandbox Key 1'
@@ -139,10 +124,8 @@ RSpec.describe DpcClient, type: :integration do
           expect(client.response_body['label']).to eq label
         end
       end
-    end
 
-    describe '#get_public_keys' do
-      context 'successful API request' do
+      context 'list' do
         it 'sends data to API and sets response instance variables' do
           client.get_public_keys(org_id)
 
@@ -151,21 +134,20 @@ RSpec.describe DpcClient, type: :integration do
           expect(client.response_body['entities'].first['label']).to eq('Sandbox Key 1')
         end
       end
-    end
 
-    describe '#delete_public_key' do
-      context 'successful API request' do
+      context 'delete' do
         it 'sends data to API and sets response instance variables' do
+          # Need to get an existing id first
           client.get_public_keys(org_id)
           expect(client.response_status).to eq(200)
           start_count = client.response_body['count']
           expect(start_count).to be > 0
           public_key_id = client.response_body['entities'].first['id']
-          client.delete_public_key(
-            org_id,
-            public_key_id
-          )
+
+          client.delete_public_key(org_id, public_key_id)
+
           expect(client.response_status).to eq(200)
+
           client.get_public_keys(org_id)
           expect(client.response_status).to eq(200)
           expect(client.response_body['count'] + 1).to eq start_count
@@ -173,48 +155,41 @@ RSpec.describe DpcClient, type: :integration do
       end
     end
 
-    describe '#create_ip_address' do
-      context 'successful API request' do
+    describe 'ip address' do
+      context 'create' do
         it 'sends data to API and sets response instance variables' do
           client.create_ip_address(org_id, params: { ip_address: '136.226.19.87' })
           expect(client.response_status).to eq(200)
           expect(client.response_body['id']).to_not be_blank
         end
       end
-    end
 
-    describe '#get_ip_addresses' do
-      context 'successful API request' do
+      context 'list' do
         it 'sends data to API and sets response instance variables' do
           client.get_ip_addresses(org_id)
           expect(client.response_status).to eq(200)
           expect(client.response_body['count']).to be > 0
         end
       end
-    end
 
-    describe '#delete_ip_address' do
-      context 'successful API request' do
+      context 'delete' do
         it 'sends data to API and sets response instance variables' do
+          # Need to get an existing id first
           client.get_ip_addresses(org_id)
           expect(client.response_status).to eq(200)
           start_count = client.response_body['count']
           expect(start_count).to be > 0
           ip_address_id = client.response_body['entities'].first['id']
-          client.delete_ip_address(
-            org_id,
-            ip_address_id
-          )
+
+          client.delete_ip_address(org_id, ip_address_id)
+
           expect(client.response_status).to eq(204)
+
           client.get_ip_addresses(org_id)
           expect(client.response_status).to eq(200)
           expect(client.response_body['count'] + 1).to eq start_count
         end
       end
     end
-  end
-
-  def stubbed_key
-    file_fixture('stubbed_key.pem').read
   end
 end
