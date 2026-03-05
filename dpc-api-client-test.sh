@@ -8,7 +8,7 @@ echo "│                       │"
 echo "└───────────────────────┘"
 
 # Build the container
-docker build -f engines/api_client/Dockerfile.local engines/api_client -t api-client
+docker compose -f docker-compose.yml -f docker-compose.portals.yml build dpc_client
 
 # Run the tests
 echo "┌───────────────────────────┐"
@@ -16,8 +16,8 @@ echo "│                           │"
 echo "│  Running Api Gem Tests    │"
 echo "│                           │"
 echo "└───────────────────────────┘"
-docker run --rm -v ${PWD}/engines/api_client/coverage:/api-client/coverage api-client bundle exec rspec
-docker run --rm api-client bundle exec rubocop
+docker run --rm -v ${PWD}/engines/api_client/coverage:/api-client/coverage dpc-client bundle exec rspec
+docker run --rm dpc-client bundle exec rubocop
 
 echo "┌────────────────────────────────┐"
 echo "│                                │"

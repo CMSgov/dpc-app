@@ -2,12 +2,9 @@
 set -Ee
 
 function _finally {
-  # don't shut it down if running on ci
-  if [ "$ENV" != 'github-ci' ]; then
-    echo "SHUTTING EVERYTHING DOWN"
-    docker compose -p client-integration-app down
-    docker volume rm client-integration-app_pgdata16
-  fi
+  echo "SHUTTING EVERYTHING DOWN"
+  docker compose -p client-integration-app down
+  docker volume rm client-integration-app_pgdata16
 }
 
 trap _finally EXIT
@@ -19,10 +16,7 @@ trap _finally EXIT
 echo "Starting api server for client integration tests"
 USE_BFD_MOCK=true docker compose -p client-integration-app up api --wait
 
-export GOLDEN_MACAROON=$(curl -X POST http://localhost:9903/tasks/generate-token)
-
-echo "Starting end-to-end tests"
-SKIP_SIMPLE_COV=true docker compose -p client-integration-app -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rspec --tag type:integration" dpc_client
-
-# Wait for Jacoco to finish writing the output files
-docker compose -p client-integration-app down -t 60
+echo "Starting integration tests"
+GOLDEN_MACAROON=$(curl -X POST http://localhost:9903/tasks/generate-token) \
+SKIP_SIMPLE_COV=true \
+docker compose -p client-integration-app -f docker-compose.yml -f docker-compose.portals.yml run --remove-orphans --entrypoint "bundle exec rspec --tag type:integration" dpc_client
