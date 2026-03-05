@@ -24,19 +24,18 @@ class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
     @Test
     void writesIpAddress() {
         UUID orgId = UUID.randomUUID();
-        IpAddressEntity ipAddressEntity = createIpAddressEntity(orgId, "192.168.1.1", "test label");
+        IpAddressEntity ipAddressEntity = createIpAddressEntity(orgId, "192.168.1.1");
         IpAddressEntity returnedIp = db.inTransaction(() -> ipAddressDAO.persistIpAddress(ipAddressEntity));
 
         assertEquals(orgId, returnedIp.getOrganizationId());
         assertEquals("192.168.1.1", returnedIp.getIpAddress().getAddress());
-        assertEquals("test label", returnedIp.getLabel());
         assertFalse(returnedIp.getCreatedAt().toString().isEmpty());
         assertFalse(returnedIp.getId().toString().isEmpty());
     }
 
     @Test
     void failsWritingBadIpAddress() {
-        IpAddressEntity ipAddressEntity = createIpAddressEntity(UUID.randomUUID(), "bad_ip", "test label");
+        IpAddressEntity ipAddressEntity = createIpAddressEntity(UUID.randomUUID(), "bad_ip");
         assertThrows(PersistenceException.class, () ->
             db.inTransaction(() -> ipAddressDAO.persistIpAddress(ipAddressEntity)));
     }
@@ -47,9 +46,9 @@ class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
         UUID orgId2 = UUID.randomUUID();
 
         db.inTransaction(() -> {
-            ipAddressDAO.persistIpAddress(createIpAddressEntity(orgId1, "192.168.1.1", "label 1"));
-            ipAddressDAO.persistIpAddress(createIpAddressEntity(orgId1, "192.168.1.2", "label 2"));
-            ipAddressDAO.persistIpAddress(createIpAddressEntity(orgId2, "192.168.1.3", "label 3"));
+            ipAddressDAO.persistIpAddress(createIpAddressEntity(orgId1, "192.168.1.1"));
+            ipAddressDAO.persistIpAddress(createIpAddressEntity(orgId1, "192.168.1.2"));
+            ipAddressDAO.persistIpAddress(createIpAddressEntity(orgId2, "192.168.1.3"));
         });
 
         List<IpAddressEntity> results = db.inTransaction(() -> ipAddressDAO.fetchIpAddresses(orgId1));
@@ -59,12 +58,10 @@ class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
         IpAddressEntity ip1 = results.get(0);
         assertEquals(orgId1, ip1.getOrganizationId());
         assertEquals("192.168.1.1", ip1.getIpAddress().getAddress());
-        assertEquals("label 1", ip1.getLabel());
 
         IpAddressEntity ip2 = results.get(1);
         assertEquals(orgId1, ip2.getOrganizationId());
         assertEquals("192.168.1.2", ip2.getIpAddress().getAddress());
-        assertEquals("label 2", ip2.getLabel());
     }
 
     @Test
@@ -72,7 +69,7 @@ class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
         UUID orgId = UUID.randomUUID();
 
         IpAddressEntity persistedIpAddress = db.inTransaction(() ->
-            ipAddressDAO.persistIpAddress(createIpAddressEntity(orgId, "192.168.1.1", "label 1")));
+            ipAddressDAO.persistIpAddress(createIpAddressEntity(orgId, "192.168.1.1")));
 
         List<IpAddressEntity> results = db.inTransaction(() -> {
             ipAddressDAO.deleteIpAddress(persistedIpAddress);
@@ -82,10 +79,9 @@ class IpAddressDAOUnitTest extends AbstractDAOTest<IpAddressEntity> {
         assertEquals(0, results.size());
     }
 
-    private IpAddressEntity createIpAddressEntity(UUID orgId, String address, String label) {
+    private IpAddressEntity createIpAddressEntity(UUID orgId, String address) {
         return new IpAddressEntity()
             .setOrganizationId(orgId)
-            .setIpAddress(new Inet(address))
-            .setLabel(label);
+            .setIpAddress(new Inet(address));
     }
 }

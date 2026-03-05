@@ -150,4 +150,13 @@
         </sql>
     </changeSet>
 
+    <changeSet id="drop-ip-addresses-label-column" author="Jose Alejandro">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="IP_ADDRESSES" columnName="label"/>
+        </preConditions>
+
+        <dropColumn tableName="IP_ADDRESSES" columnName="label"/>
+    </changeSet>
+
+
 </databaseChangeLog>
