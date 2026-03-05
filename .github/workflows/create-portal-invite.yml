@@ -1,7 +1,6 @@
 name: Create DPC Portal Invite
 
 on:
-  pull_request:
   workflow_dispatch:
     inputs:
       env:
@@ -29,6 +28,7 @@ on:
         description: Email address
         required: true
         type: 'string'
+  pull_request:
 
 permissions:
   id-token: write
