@@ -76,7 +76,7 @@ jobs:
           --task $NEW_TASK_ID \
           --container $NEW_CONTAINER_NAME \
           --command "$RAILS_CMD " \
-          --non-interactive
+#          --non-interactive
       - name: Delete temp service
         run: |
           aws ecs delete-service \
