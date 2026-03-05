@@ -11,9 +11,12 @@ bootstrap_config() {
   aws s3 sync "s3://$bucket" config/
 }
 
+echo "JACOCO: ${JACOCO}"
 if [ -n "$JACOCO" ]; then
+  echo 'JACOCO SET'
   JACOCO="-javaagent:/org.jacoco.agent-runtime.jar=destfile=/jacoco-report/jacoco-it.exec"
 else
+  echo 'JACOCO NOT SET'
   JACOCO=""
 fi
 

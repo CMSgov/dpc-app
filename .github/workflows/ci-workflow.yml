@@ -53,6 +53,9 @@ jobs:
       - name: "Debug attribution"
         if: ${{ always() }}
         run: docker logs client-integration-app-attribution-1
+      - name: "Debug api"
+        if: ${{ always() }}
+        run: docker logs client-integration-app-api-1
       - name: Cleanup
         if: ${{ always() }}
         run: ./scripts/cleanup-docker.sh
