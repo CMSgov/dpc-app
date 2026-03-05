@@ -237,5 +237,5 @@ unit-tests:
 load-tests: start-api-load-tests start-load-tests down-dpc-load-tests
 
 .PHONY: dpc-client-integration-test
-dpc-client-integration-test: docker-base secure-envs
+ci-api-client-integration-test: docker-base secure-envs
 	@bash ./dpc-client-integration-test.sh

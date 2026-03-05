@@ -56,11 +56,34 @@ docker compose -p start-v1-app up db --wait
 mvn -T 1.5C clean compile -Perror-prone -B -V -ntp
 mvn -T 1.5C package -Pci -ntp
 
+# Format the test results
+if [ -n "$REPORT_COVERAGE" ]; then
+  mvn jacoco:report -ntp
+fi
+
 docker compose -p start-v1-app down
+
+USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
+
+# Run the integration tests
+USE_BFD_MOCK=true docker compose -p start-v1-app up --exit-code-from tests tests
 
 echo "Starting api server for end-to-end tests"
 USE_BFD_MOCK=true docker compose -p start-v1-app up api --wait
-echo "Starting integration tests"
-GOLDEN_MACAROON=$(curl -X POST http://localhost:9903/tasks/generate-token) \
-SKIP_SIMPLE_COV=true \
-docker compose -p client-integration-app -f docker-compose.yml -f docker-compose.portals.yml run --remove-orphans --entrypoint "bundle exec rspec --tag type:integration" dpc_client
+
+echo "Starting end-to-end tests"
+docker run --rm -v $(pwd)/dpc-load-testing:/src --env-file $(pwd)/ops/config/decrypted/local.env --add-host host.docker.internal=host-gateway -e ENVIRONMENT=local -i grafana/k6 run /src/ci-app.js
+
+# Wait for Jacoco to finish writing the output files
+docker compose -p start-v1-app down -t 60
+
+# Collect the coverage reports for the Docker integration tests
+if [ -n "$REPORT_COVERAGE" ]; then
+  mvn jacoco:report-integration -Pci -ntp
+fi
+
+echo "┌──────────────────────────────────────────┐"
+echo "│                                          │"
+echo "│             All Tests Complete           │"
+echo "│                                          │"
+echo "└──────────────────────────────────────────┘"
