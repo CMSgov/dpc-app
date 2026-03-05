@@ -10,10 +10,8 @@ set -euxo pipefail
 
 CLUSTER_NAME=$1
 SERVICE_NAME=$2
-INITIAL_TAG=$3
 
-# Add your initials here
-NEW_SERVICE_NAME="${INITIAL_TAG}_${SERVICE_NAME}"
+NEW_SERVICE_NAME="temp_${SERVICE_NAME}"
 
 # Check if the temp service is already up from a previous run, and if not start it.
 NEW_SERVICE_COUNT=$(aws ecs describe-services --cluster "$CLUSTER_NAME" --services "$NEW_SERVICE_NAME" | jq -r '.services[].runningCount')
