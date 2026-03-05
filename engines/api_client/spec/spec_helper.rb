@@ -3,7 +3,7 @@
 require 'simplecov'
 require 'webmock/rspec'
 
-unless ENV['SKIP_SIMPLE_COV'] == 'true'
+unless ENV.fetch('SKIP_SIMPLE_COV', 'false') == 'true'
   SimpleCov.start do
     track_files '**/{app,lib}/**/*.rb'
     add_filter 'lib/api_client/version.rb'
@@ -14,11 +14,12 @@ unless ENV['SKIP_SIMPLE_COV'] == 'true'
 end
 
 RSpec.configure do |config|
+  config.filter_run_excluding type: :integration
+
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
 
-  config.filter_run_excluding type: :integration
   config.mock_with :rspec do |mocks|
     # Prevents you from mocking or stubbing a method that does not exist on
     # a real object. This is generally recommended, and will default to

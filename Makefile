@@ -5,9 +5,6 @@ SMOKE_THREADS ?= 10
 
 venv: venv/bin/activate
 
-clean-jacoco:
-	mkdir -p jacocoReport && rm -r jacocoReport
-
 venv/bin/activate: requirements.txt
 	test -d venv || python3 -m venv venv
 	. venv/bin/activate
@@ -28,7 +25,7 @@ smoke/local: start-dpc
 # ==============
 
 api: ## Builds the Java API services
-api: secure-envs clean-jacoco
+api: secure-envs
 	mvn clean compile -Perror-prone -B -V -ntp -T 4 -DskipTests
 	mvn package -Pci -ntp -T 4 -DskipTests
 
@@ -47,7 +44,7 @@ portal:
 	@docker build -f dpc-portal/Dockerfile . -t dpc-web-portal
 
 dpc-client:
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml build dpc_client
+	@docker compose -f docker-compose.yml -f docker-compose.dpc-client.yml build dpc_client
 
 # Start commands
 # ==============
@@ -184,7 +181,7 @@ portal-console: ## Run a rails console shell
 	@docker compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/console
 
 dpc-client-sh:
-	@docker compose -p client-integration-app -f docker-compose.yml -f docker-compose.portals.yml run --remove-orphans --entrypoint "sh" dpc_client
+	@docker compose -f docker-compose.dpc-client.yml run --remove-orphans --entrypoint "sh" dpc_client
 
 # Build & Test commands
 # ======================
@@ -226,7 +223,7 @@ ci-web-portal: secure-envs
 	@./dpc-web-portal-test.sh
 
 .PHONY: ci-api-client
-ci-api-client: secure-envs
+ci-api-client:
 	@./dpc-api-client-test.sh
 
 .PHONY: unit-tests
@@ -236,6 +233,6 @@ unit-tests:
 .PHONY: load-tests
 load-tests: start-api-load-tests start-load-tests down-dpc-load-tests
 
-.PHONY: dpc-client-integration-test
-ci-api-client-integration-test: docker-base secure-envs
+.PHONY: ci-api-client-integration
+ci-api-client-integration: docker-base secure-envs
 	@bash ./dpc-client-integration-test.sh

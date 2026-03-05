@@ -8,7 +8,7 @@ echo "│                       │"
 echo "└───────────────────────┘"
 
 # Build the container
-docker compose -f docker-compose.yml -f docker-compose.portals.yml build dpc_client
+docker compose -f  docker-compose.dpc-client.yml build dpc_client
 
 # Run the tests
 echo "┌───────────────────────────┐"

@@ -37,4 +37,4 @@ USE_BFD_MOCK=true docker compose -p client-integration-app up api --wait
 echo "Starting integration tests"
 GOLDEN_MACAROON=$(curl -X POST http://localhost:9903/tasks/generate-token) \
 SKIP_SIMPLE_COV=true \
-docker compose -p client-integration-app -f docker-compose.yml -f docker-compose.portals.yml run --remove-orphans --entrypoint "bundle exec rspec --tag type:integration" dpc_client
+docker compose -p client-integration-app -f docker-compose.yml -f docker-compose.dpc-client.yml run --remove-orphans --entrypoint "bundle exec rspec --tag type:integration" dpc_client
