@@ -583,19 +583,18 @@ RSpec.describe DpcClient do
       context 'successful API request' do
         it 'sends data to API and sets response instance variables' do
           stub_request(:post, 'http://dpc.example.com/IpAddress').with(
-            body: { ip_address: '136.226.19.87', label: 'Sandbox IP 1' }
+            body: { ip_address: '136.226.19.87' }
           ).to_return(
             status: 200,
-            body: '{"label":"Sandbox IP 1","createdAt":"2019-11-07T19:38:44.205Z",' \
+            body: '{"createdAt":"2019-11-07T19:38:44.205Z",' \
                   '"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
           )
 
           api_client = DpcClient.new
-          api_client.create_ip_address(reg_org.api_id, params: { label: 'Sandbox IP 1', ip_address: '136.226.19.87' })
+          api_client.create_ip_address(reg_org.api_id, params: { ip_address: '136.226.19.87' })
           expect(api_client.response_status).to eq(200)
           expect(api_client.response_body).to eq(
             {
-              'label' => 'Sandbox IP 1',
               'createdAt' => '2019-11-07T19:38:44.205Z',
               'id' => '3fa85f64-5717-4562-b3fc-2c963f66afa6'
             }
@@ -608,17 +607,17 @@ RSpec.describe DpcClient do
       context 'successful API request' do
         it 'sends data to API and sets response instance variables' do
           stub_request(:post, 'http://dpc.example.com/IpAddress').with(
-            body: { ip_address: '136.226.19.87', label: 'Sandbox IP 1' }
+            body: { ip_address: '136.226.19.87' }
           ).to_return(
             status: 200,
-            body: '{"label":"Sandbox IP 1","createdAt":"2019-11-07T19:38:44.205Z",' \
+            body: '{"createdAt":"2019-11-07T19:38:44.205Z",' \
                   '"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6"}'
           )
 
           api_client = DpcClient.new
           api_client.create_ip_address(
             reg_org.api_id,
-            params: { label: 'Sandbox IP 1', ip_address: '136.226.19.87' }
+            params: { ip_address: '136.226.19.87' }
           )
           stub_request(:delete, 'http://dpc.example.com/IpAddress/3fa85f64-5717-4562-b3fc-2c963f66afa6')
             .with(
@@ -637,7 +636,7 @@ RSpec.describe DpcClient do
       context 'unsuccessful API request' do
         it 'sends data to API and sets response instance variables' do
           stub_request(:post, 'http://dpc.example.com/IpAddress').with(
-            body: { ip_address: '136.226.19.87', label: 'Sandbox IP 1' }
+            body: { ip_address: '136.226.19.87' }
           ).to_return(
             status: 500,
             body: '{}'
@@ -647,7 +646,6 @@ RSpec.describe DpcClient do
           api_client.create_ip_address(
             reg_org.api_id,
             params: {
-              label: 'Sandbox IP 1',
               ip_address: '136.226.19.87'
             }
           )
@@ -664,7 +662,7 @@ RSpec.describe DpcClient do
             headers: { 'Content-Type' => 'application/json' }
           ).to_return(
             status: 200,
-            body: '[{"id":"4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66","label":"Sandbox IP 1",' \
+            body: '[{"id":"4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66",' \
                   '"createdAt":"2019-11-07T17:15:22.781Z"}]'
           )
 
@@ -674,7 +672,6 @@ RSpec.describe DpcClient do
           expect(api_client.response_body).to eq(
             [{
               'id' => '4r85cfb4-dc36-4cd0-b8f8-400a6dea2d66',
-              'label' => 'Sandbox IP 1',
               'createdAt' => '2019-11-07T17:15:22.781Z'
             }]
           )
