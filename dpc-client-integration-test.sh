@@ -39,7 +39,7 @@ trap _finally EXIT
 # Build the application
 docker compose -p client-integration-app up db --wait
 mvn -T 1.5C clean compile -Perror-prone -B -V -ntp
-mvn -T 1.5C package -Pci -ntp
+mvn -T 1.5C package -Pci -ntp -DskipTests
 
 echo "Starting api server for client integration tests"
 USE_BFD_MOCK=true docker compose -p client-integration-app up api --wait

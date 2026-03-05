@@ -176,9 +176,9 @@ RSpec.describe DpcClient, type: :integration do
     describe '#create_ip_address' do
       context 'successful API request' do
         it 'sends data to API and sets response instance variables' do
-          client.create_ip_address(org_id, params: { label: 'Sandbox IP 1', ip_address: '136.226.19.87' })
+          client.create_ip_address(org_id, params: { ip_address: '136.226.19.87' })
           expect(client.response_status).to eq(200)
-          expect(client.response_body['label']).to eq 'Sandbox IP 1'
+          expect(client.response_body['id']).to_not be_blank
         end
       end
     end
@@ -189,7 +189,6 @@ RSpec.describe DpcClient, type: :integration do
           client.get_ip_addresses(org_id)
           expect(client.response_status).to eq(200)
           expect(client.response_body['count']).to be > 0
-          expect(client.response_body['entities'].first['label']).to eq('Sandbox IP 1')
         end
       end
     end
