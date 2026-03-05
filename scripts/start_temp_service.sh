@@ -40,9 +40,6 @@ if [[ -z "$NEW_SERVICE_COUNT" || "$NEW_SERVICE_COUNT" -eq 0 ]]; then
   aws ecs wait services-stable --cluster "$CLUSTER_NAME" --services "$NEW_SERVICE_NAME"
 else
   echo "$NEW_SERVICE_NAME is already running."
-
-  echo "Getting task definition."
-  TASK_DEF=$(./dpc-app/scripts/get_task_def_for_service.sh "$CLUSTER_NAME" "$NEW_SERVICE_NAME")
 fi
 
 echo "$NEW_SERVICE_NAME started, building login command."
@@ -63,7 +60,6 @@ echo "New container name: $NEW_CONTAINER_NAME"
 if [ -n "$GITHUB_ACTIONS" ]
 then
     {
-        echo "TASK_DEF=$TASK_DEF";
         echo "NEW_TASK_ID=$NEW_TASK_ID";
         echo "NEW_SERVICE_NAME=$NEW_SERVICE_NAME"
         echo "NEW_CONTAINER_NAME=$NEW_CONTAINER_NAME"
