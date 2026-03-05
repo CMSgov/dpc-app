@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'base64'
+require 'openssl'
 require 'rails_helper'
 
 RSpec.describe DpcClient, type: :integration do
@@ -110,12 +112,63 @@ RSpec.describe DpcClient, type: :integration do
       end
     end
 
+    describe '#create_public_key' do
+      context 'successful API request' do
+        it 'sends data to API and sets response instance variables' do
+          rsa_key = OpenSSL::PKey::RSA.new(4096)
+
+          rsa_key.to_pem
+
+          public_key = rsa_key.public_key.to_pem
+
+          message = 'This is the snippet used to verify a key pair in DPC.'
+
+          digest = OpenSSL::Digest.new('SHA256')
+
+          signature_binary = rsa_key.sign(digest, message)
+
+          snippet_signature = Base64.encode64(signature_binary)
+
+          label = 'Sandbox Key 1'
+          client.create_public_key(
+            org_id,
+            params: { label:, public_key:, snippet_signature: }
+          )
+
+          expect(client.response_status).to eq(200)
+          expect(client.response_body['label']).to eq label
+        end
+      end
+    end
+
     describe '#get_public_keys' do
       context 'successful API request' do
         it 'sends data to API and sets response instance variables' do
           client.get_public_keys(org_id)
 
           expect(client.response_status).to eq(200)
+          expect(client.response_body['count']).to be > 0
+          expect(client.response_body['entities'].first['label']).to eq('Sandbox Key 1')
+        end
+      end
+    end
+
+    describe '#delete_public_key' do
+      context 'successful API request' do
+        it 'sends data to API and sets response instance variables' do
+          client.get_public_keys(org_id)
+          expect(client.response_status).to eq(200)
+          start_count = client.response_body['count']
+          expect(start_count).to be > 0
+          public_key_id = client.response_body['entities'].first['id']
+          client.delete_public_key(
+            org_id,
+            public_key_id
+          )
+          expect(client.response_status).to eq(200)
+          client.get_public_keys(org_id)
+          expect(client.response_status).to eq(200)
+          expect(client.response_body['count'] + 1).to eq start_count
         end
       end
     end
