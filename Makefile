@@ -237,5 +237,5 @@ unit-tests:
 load-tests: start-api-load-tests start-load-tests down-dpc-load-tests
 
 .PHONY: dpc-client-integration-test
-dpc-client-integration-test: clean-jacoco docker-base api
+dpc-client-integration-test: clean-jacoco docker-base api secure-envs
 	@bash ./dpc-client-integration-test.sh
