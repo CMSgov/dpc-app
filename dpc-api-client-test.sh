@@ -8,7 +8,7 @@ echo "│                       │"
 echo "└───────────────────────┘"
 
 # Build the container
-docker build -f engines/api_client/Dockerfile engines/api_client -t api-client
+docker build -f engines/api_client/Dockerfile.local engines/api_client -t api-client
 
 # Run the tests
 echo "┌───────────────────────────┐"

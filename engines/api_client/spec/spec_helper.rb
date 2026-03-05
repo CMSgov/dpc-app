@@ -3,7 +3,6 @@
 require 'simplecov'
 require 'webmock/rspec'
 
-
 unless ENV['SKIP_SIMPLE_COV'] == 'true'
   SimpleCov.start do
     track_files '**/{app,lib}/**/*.rb'
