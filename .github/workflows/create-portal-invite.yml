@@ -83,5 +83,5 @@ jobs:
             --force \
             --cluster $CLUSTER_NAME \
             --service $NEW_SERVICE_NAME
-#      - name: Deregister the task definition
-#        run: aws ecs deregister-task-definition --task-definition $TASK_DEF
+      - name: Deregister the task definition
+        run: aws ecs deregister-task-definition --task-definition $NEW_TASK_ARN

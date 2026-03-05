@@ -61,6 +61,7 @@ if [ -n "$GITHUB_ACTIONS" ]
 then
     {
         echo "NEW_TASK_ID=$NEW_TASK_ID";
+        echo "NEW_TASK_ARN=$NEW_TASK_ARN"
         echo "NEW_SERVICE_NAME=$NEW_SERVICE_NAME"
         echo "NEW_CONTAINER_NAME=$NEW_CONTAINER_NAME"
     } >> "$GITHUB_ENV"
