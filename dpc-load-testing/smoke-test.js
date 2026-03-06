@@ -47,12 +47,10 @@ export function runSmokeTests(data) {
       orgId: orgIds[idx],
       goldenMacaroon: data.goldenMacaroon
   };
-  if (1 == 0){
-    checkAuthWorkflow(iterationData);
-    checkBulkExportWorkflow(iterationData);
-    checkPatientEverythingExportWorkflow(iterationData);
-  }
+  checkAuthWorkflow(iterationData);
+  checkBulkExportWorkflow(iterationData);
   checkPortalsWorkflow(iterationData);
+  checkPatientEverythingExportWorkflow(iterationData);
 }
 
 // Sets up three test organizations

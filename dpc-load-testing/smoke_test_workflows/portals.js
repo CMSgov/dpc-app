@@ -6,16 +6,15 @@ import exec from 'k6/execution';
 import http from 'k6/http';
 
 const portals = {
-  'admin': { envs: ['local'],
+  'admin': { envs: ['local', 'dev', 'test', 'sandbox'],
              signInPath: 'admin/internal/sign_in',
              protectedPath: 'admin/organizations',
              signInText: 'Log in' },
-  'web': { envs: ['local'],
+  'web': { envs: ['local', 'dev', 'test', 'sandbox'],
            signInPath: 'users/sign_in',
            protectedPath: 'organizations/foo/edit',
            signInText: 'Log in' },
-  // TODO: Add PACE cert when running in GHA (DPC-5222) and add 'dev' and 'test' back
-  'portal': { envs: ['local',],
+  'portal': { envs: ['local', 'dev', 'test'],
               signInPath: 'users/sign_in',
               protectedPath: 'organizations',
               signInText: 'Sign in' },
@@ -36,6 +35,7 @@ export async function checkPortalsWorkflow(data) {
     signInResponse,
     {
       'sign in should return 200': res => res.status == '200',
+      'sign in should have DPC': res => res.body.includes("Data at the Point of Care"),
       'sign in should have sign in text': res => res.body.includes(config['signInText'])
     }
   );
@@ -43,6 +43,21 @@ export async function checkPortalsWorkflow(data) {
     console.error(signInResponse.status);
     console.error(signInResponse.body);
     return;
+  }
+
+  const protectedPathResponse = http.get(`${host}/${config['protectedPath']}`, { redirects: 0 });
+  const checkProtectedPath = check(
+    protectedPathResponse,
+    {
+      'protected path should return 302': res => res.status == '302',
+      'protected path has location header': res => res.headers['Location'],
+      'protected path location header should be sign in url': res => res.headers['Location'] == signInUrl
+    }
+  );
+
+  if (!checkProtectedPath){
+    console.error(protectedPathResponse.status);
+    console.error(protectedPathResponse.headers);
   }
 }
 
