@@ -4,7 +4,7 @@ module Core
   module Icon
     # Renders an icon available from USWDS
     class UswdsComponent < ViewComponent::Base
-      def initialize(name, size: 2, additional_classes: [])
+      def initialize(name, size: nil, additional_classes: [])
         super()
         @name = name
         @size = size
@@ -12,10 +12,9 @@ module Core
       end
 
       def icon_classes
-        classes = @additional_classes
         # uswds only 'usa-icon--*' classes only start at size-3 (and end at size-9)
-        classes << ['usa-icon', @size >= 3 && @size <= 9 ? "usa-icon--size-#{@size}" : '']
-        classes.uniq.join(' ').strip
+        size_class = @size&.between?(3, 9) ? "usa-icon--size-#{@size}" : nil
+        (@additional_classes + ['usa-icon', size_class]).compact.uniq.join(' ')
       end
     end
   end
