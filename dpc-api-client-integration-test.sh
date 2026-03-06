@@ -1,11 +1,11 @@
 #!/bin/bash
 set -Ee
 
-echo "┌------------───────────────────────┐"
-echo "│                                   │"
-echo "│ Running Api Gem Integration Tests |"
-echo "│                                   │"
-echo "└------------───────────────────────┘"
+echo "┌-------------------───────────────────────┐"
+echo "│                                          │"
+echo "│ Running API Client Gem Integration Tests |"
+echo "│                                          │"
+echo "└------------─────────-------──────────────┘"
 
 # Current working directory
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
@@ -50,8 +50,8 @@ run --remove-orphans \
 --entrypoint "bundle exec rspec --order defined --tag type:integration" \
 dpc_api_client
 
-echo "┌─────────────────────-------------──┐"
-echo "│                                    │"
-echo "│ Api Gem Integration Tests Complete |"
-echo "│                                    │"
-echo "└────────────────────-------------───┘"
+echo "┌───────────-------──────────-------------──┐"
+echo "│                                           │"
+echo "│ API Client Gem Integration Tests Complete |"
+echo "│                                           │"
+echo "└────────────────────--------------------───┘"
