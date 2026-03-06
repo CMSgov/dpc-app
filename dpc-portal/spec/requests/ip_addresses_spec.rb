@@ -10,7 +10,7 @@ RSpec.describe 'IpAddresses', type: :request do
 
   it_behaves_like 'a credential resource' do
     let(:credential) { 'ip_address' }
-    let(:create_params) { { label: 'Public IP 1', ip_address: '136.226.19.87' } }
+    let(:create_params) { { ip_address: '136.226.19.87' } }
   end
 
   describe 'GET /new' do
@@ -174,7 +174,7 @@ RSpec.describe 'IpAddresses', type: :request do
       it 'succeeds with valid params' do
         stub_self_returning_api_client(message: :create_ip_address,
                                        response: default_get_ip_addresses['entities'].first)
-        post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
+        post "/organizations/#{org.id}/ip_addresses", params: { ip_address: '136.226.19.87' }
         expect(response).to redirect_to(organization_path(org, credential_start: true))
         expect(assigns(:organization)).to eq org
         expect(flash[:success]).to eq('Public IP address created successfully.')
@@ -185,7 +185,7 @@ RSpec.describe 'IpAddresses', type: :request do
         expect(config_complete_checker).to receive(:perform_later).with(org.id)
         stub_self_returning_api_client(message: :create_ip_address,
                                        response: default_get_ip_addresses['entities'].first)
-        post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
+        post "/organizations/#{org.id}/ip_addresses", params: { ip_address: '136.226.19.87' }
       end
       it 'does not check for complete if complete = true' do
         config_complete_checker = class_double('CheckConfigCompleteJob').as_stubbed_const
@@ -193,14 +193,13 @@ RSpec.describe 'IpAddresses', type: :request do
         org.update_attribute(:config_complete, true)
         stub_self_returning_api_client(message: :create_ip_address,
                                        response: default_get_ip_addresses['entities'].first)
-        post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
+        post "/organizations/#{org.id}/ip_addresses", params: { ip_address: '136.226.19.87' }
       end
       it 'fails if missing params' do
         post "/organizations/#{org.id}/ip_addresses"
         expect(assigns(:organization)).to eq org
-        expect(flash[:alert]).to eq("Fields can't be blank.")
-        expect(assigns[:errors]).to eq(ip_address: "IP address can't be blank.", label: "Label can't be blank.",
-                                       root: "Fields can't be blank.")
+        expect(flash[:alert]).to eq('IP address invalid.')
+        expect(assigns[:errors]).to eq(ip_address: "IP address can't be blank.")
       end
 
       it 'does not check for complete on failure' do
@@ -211,28 +210,18 @@ RSpec.describe 'IpAddresses', type: :request do
       it 'fails if invalid IP' do
         stub_self_returning_api_client(message: :create_ip_address,
                                        response: default_get_ip_addresses['entities'].first)
-        post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '333.333.333.333' }
+        post "/organizations/#{org.id}/ip_addresses", params: { ip_address: '333.333.333.333' }
         expect(assigns(:organization)).to eq org
         error_msg = 'Invalid IP address.'
         expect(flash[:alert]).to eq(error_msg)
         expect(assigns[:errors]).to eq(ip_address: error_msg, root: error_msg)
       end
 
-      it 'fails if label over 25 characters' do
-        stub_self_returning_api_client(message: :create_ip_address,
-                                       response: default_get_ip_addresses['entities'].first)
-        post "/organizations/#{org.id}/ip_addresses",
-             params: { label: 'aaaaabbbbbcccccdddddeeeeefffff', ip_address: '136.226.19.87' }
-        expect(assigns(:organization)).to eq org
-        expect(flash[:alert]).to eq('Invalid label.')
-        expect(assigns[:errors]).to eq(label: 'Label must be 25 characters or fewer.', root: 'Invalid label.')
-      end
-
       it 'shows error if problem' do
         stub_self_returning_api_client(message: :create_ip_address,
                                        success: false,
                                        response: nil)
-        post "/organizations/#{org.id}/ip_addresses", params: { label: 'Public IP 1', ip_address: '136.226.19.87' }
+        post "/organizations/#{org.id}/ip_addresses", params: { ip_address: '136.226.19.87' }
         expect(flash[:alert]).to eq("We're sorry but we can't complete your request. Please try again tomorrow.")
       end
     end
