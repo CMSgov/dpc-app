@@ -34,7 +34,7 @@ RSpec.describe Core::Card::BasicComponent, type: :component do
 
     context 'when has button' do
       let(:component) do
-        described_class.new(text_content: '<h1>Yo</h1>', button_params: { name: 'Doit', path: '/there', method: :post })
+        described_class.new(text_content: '<h1>Yo</h1>', button_params: { name: 'Doit', path: '/there' })
       end
       let(:expected_html) do
         <<~HTML
@@ -45,9 +45,7 @@ RSpec.describe Core::Card::BasicComponent, type: :component do
                   <h1>Yo</h1>
                 </div>
                 <div class="flex-align-self-center">
-                  <form class="button_to" method="post" action="/there">
-                   <button class="usa-button" type="submit">Doit</button>
-                  </form>#{'                  '}
+                  <a href="/there" class="usa-button">Doit</a>
                 </div>
               </div>
             </div>
