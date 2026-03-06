@@ -35,6 +35,6 @@
       <% when :login_gov_signin_cancel %>
         <%= link_to 'Back to portal home', root_path, class: 'usa-button usa-button--outline', data: { turbo: false }%>
       <% when :login_gov_signin_fail %>
-        <%= link_to 'Back to portal home', root_path, class: 'usa-button usa-button--outline', data: { turbo: false }%>
+        <%= link_to 'Back to portal home', new_user_session_path, class: 'usa-button usa-button--outline', data: { turbo: false }%>
     <% end %>
 </div>
