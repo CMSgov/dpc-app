@@ -10,9 +10,8 @@ module Core
         super
         @text_content = text_content
         @button_params = button_params&.merge({
-                                        class: ['usa-button', button_params[:class]].join(' ').strip
-                                        })
-
+                                                class: ['usa-button', button_params[:class]].join(' ').strip
+                                              })
       end
     end
   end
