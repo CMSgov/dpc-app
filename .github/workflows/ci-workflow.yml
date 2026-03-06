@@ -36,7 +36,7 @@ env:
   ENV: "github-ci"
 
 jobs:
-  build-dpc-client:
+  build-dpc-api-client:
     name: "Build and Test DPC Client"
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
@@ -72,14 +72,13 @@ jobs:
           make ci-api-client-integration
       - name: "Debug db"
         if: ${{ failure() }}
-        run: docker logs client-integration-app-db-1
+        run: docker logs api-client-integration-app-db-1
       - name: "Debug attribution"
         if: ${{ failure() }}
-        run: docker logs client-integration-app-attribution-1
+        run: docker logs api-client-integration-app-attribution-1
       - name: "Debug api"
         if: ${{ failure() }}
-        run: docker logs client-integration-app-api-1
+        run: docker logs api-client-integration-app-api-1
       - name: Cleanup
         if: ${{ always() }}
         run: ./scripts/cleanup-docker.sh
-

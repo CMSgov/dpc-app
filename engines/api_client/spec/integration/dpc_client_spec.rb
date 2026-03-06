@@ -14,9 +14,6 @@ RSpec.describe DpcClient, type: :integration do
            id: '8453e48b-0b42-4ddf-8b43-07c7aa2a3d88',
            address_zip: '22222')
   end
-  let!(:reg_org) do
-    double('RegisteredOrg', api_id: 'some-api-key')
-  end
 
   before(:all) do
     WebMock.disable!
@@ -109,7 +106,6 @@ RSpec.describe DpcClient, type: :integration do
       context 'create' do
         it 'sends data to API and sets response instance variables' do
           rsa_key = OpenSSL::PKey::RSA.new(4096)
-          rsa_key.to_pem
           public_key = rsa_key.public_key.to_pem
           message = 'This is the snippet used to verify a key pair in DPC.'
           digest = OpenSSL::Digest.new('SHA256')

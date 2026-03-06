@@ -1,11 +1,11 @@
 services:
-  dpc_client:
+  dpc_api_client:
     build:
       context: .
       dockerfile: engines/api_client/Dockerfile
-    image: dpc-client:latest
+    image: dpc-api-client:latest
     volumes:
-      # Mount specific directories to avoid overwriting 
+      # Mount specific directories to avoid overwriting
       # precompiled assets (public/assets/) and node_modules
       - "./engines/api_client:/api-client"
     environment:

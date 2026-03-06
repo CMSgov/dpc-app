@@ -19,15 +19,21 @@ And then execute:
 ```bash
 $ bundle install
 ```
+
 ## Debugging and Development
-To ssh into the container with the dpc_client, use the `make` command in the project root directory.
+To build an image, use the `make` command in the project root directory.
 ```bash
-make dpc-client-sh
+make api-client
 ```
 
 
+To ssh into a Docker container with the dpc_client code, use the `make` command in the project root directory.
+```bash
+make api-client-sh
+```
+
 ## Testing
-Testing is from the Makefile in the project root directory.
+Test using `make` commands in the project root directory.
 
 ### Unit Tests
 ```bash
