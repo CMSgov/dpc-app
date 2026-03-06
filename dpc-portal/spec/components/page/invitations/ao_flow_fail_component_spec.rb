@@ -50,7 +50,7 @@ RSpec.describe Page::Invitations::AoFlowFailComponent, type: :component do
     let(:invitation) { create(:invitation, :ao) }
     let(:reason) { 'fail_to_proof' }
     it 'should have url to login' do
-      url = 'http://test.host/'
+      url = '/users/sign_in'
       expect(page.find('a.usa-button')[:href]).to eq url
     end
   end
