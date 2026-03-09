@@ -45,6 +45,10 @@ en:
     configuration_complete: Setup complete
     api_disabled: API disabled
     access_denied: Access denied
+    login_gov_signin_cancel_status: Login.gov sign-in incomplete
+    login_gov_signin_cancel_text: Login.gov sign-in was unsuccessful. If this was an error, try signing in again. 
+    login_gov_signin_fail_status: Login.gov sign-in failed
+    login_gov_signin_fail_text: Something went wrong while trying to sign-in with Login.gov. Please try again.
   cd_access:
     no_approved_enrollment_status: This organization is not currently approved by Medicare.
     no_approved_enrollment_text: This organization must have an approved enrollment status with Medicare to access beneficiary claims data.

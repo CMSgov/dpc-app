@@ -31,8 +31,8 @@ RSpec.describe Page::Invitations::StartComponent, type: :component do
 
     it 'should go to accept page' do
       expected = "/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/accept"
-      form = page.find('form')
-      expect(form[:action]).to eq expected
+      link = page.find('a.usa-button')
+      expect(link[:href]).to eq expected
     end
 
     it 'should include organization name and NPI' do
@@ -63,8 +63,8 @@ RSpec.describe Page::Invitations::StartComponent, type: :component do
 
     it 'should go to confirm_cd page' do
       expected = "/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/confirm_cd"
-      form = page.find('form')
-      expect(form[:action]).to eq expected
+      link = page.find('a.usa-button')
+      expect(link[:href]).to eq expected
     end
 
     it 'should include organization name' do

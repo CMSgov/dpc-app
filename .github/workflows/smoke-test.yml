@@ -63,6 +63,12 @@ jobs:
       - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
           go-version: '1.24.x'
+      - name: Install PACE cert
+        env:
+          PACE_CERT: ${{ secrets.PACE_CERT }}
+        run: |
+          echo "${PACE_CERT}" > /etc/pki/ca-trust/source/anchors/pace.pem
+          update-ca-trust
       - name: Build K6
         run: |
           # Install xk6
