@@ -8,9 +8,7 @@ import {
   createPractitioners,
   patientExport,
 } from '../dpc-api-client.js';
-import {
-  monitorJob,
-} from './smoke_test_utils.js';
+import { monitorJob } from './smoke_test_utils.js';
 
 const practitionerNpi = __ENV.ENVIRONMENT == 'prod' ? "1234329724" : "3247281157";
 
@@ -32,7 +30,7 @@ export async function checkPatientExportWorkflow(data) {
   }
 
   // Uploading Patient
-  const patientMbi = "1SQ3F00AA00"; // valid BFD patient 
+  const patientMbi = "2SW4N00AA00"; // valid BFD patient 
   const uploadPatientResponse = createPatientsBatch(token, [patientMbi]);
   const checkUploadPatient = check(
     uploadPatientResponse,
@@ -55,7 +53,7 @@ export async function checkPatientExportWorkflow(data) {
   const patientId = uploadPatientResponse.json().entry[0].resource.id;
 
   // Patient export
-  const patientExportResponse = patientExport(token, orgId, practitionerId, patientId, "respond-async");
+  const patientExportResponse = patientExport(token, orgId, practitionerId, patientId);
   const checkPatientExport = check(
     patientExportResponse,
     {

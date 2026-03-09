@@ -173,11 +173,11 @@ export function patientEverything(token, orgId, practitionerId, patientId, prefe
 		 );
 }
 
-export function patientExport(token, orgId, practitionerId, patientId, preference = 'respond-sync') {
+export function patientExport(token, orgId, practitionerId, patientId) {
   const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
-  const exportUrl = new URL(`${urlRoot}/patient/${patientId}/$export`);
+  const exportUrl = new URL(`${urlRoot}/Patient/${patientId}/$export`);
   exportUrl.searchParams.set('_outputFormat', 'application/fhir+ndjson');
-  return http.get(exportUrl.toString(), createHeaderParam(token, {'X-Provenance': JSON.stringify(provenanceBody), 'Prefer': preference}));
+  return http.get(exportUrl.toString(), createHeaderParam(token, {'X-Provenance': JSON.stringify(provenanceBody), 'Prefer': 'respond-async'}));
 }
 
 export function removePatientFromGroup(token, orgId, practitionerId, practitionerNpi, groupId, patientId) {
