@@ -50,7 +50,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       it { is_expected.to match_html_fragment(expected_html) }
     end
 
-    context 'icon size 2' do
+    context 'should ignore icon size < 3' do
       let(:component) { described_class.new('circle_check', size: 2) }
       let(:expected_html) do
         <<~HTML
@@ -63,7 +63,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       it { is_expected.to match_html_fragment(expected_html) }
     end
 
-    context 'icon size 10' do
+    context 'should ignore icon size > 9' do
       let(:component) { described_class.new('circle_check', size: 10) }
       let(:expected_html) do
         <<~HTML
