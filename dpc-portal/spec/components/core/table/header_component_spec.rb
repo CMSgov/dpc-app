@@ -74,7 +74,9 @@ RSpec.describe Core::Table::HeaderComponent, type: :component do
     end
 
     context 'when the header has a sorted row' do
-      let(:component) { described_class.new(caption: 'caption', columns: %w[A B], sorts: [1]) }
+      let(:component) do
+        described_class.new(caption: 'caption', columns: [{ label: 'A' }, { label: 'B', sortable: true }])
+      end
       let(:expected_html) do
         <<~HTML
           <caption aria-hidden="true" hidden>caption</caption>
