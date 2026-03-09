@@ -13,7 +13,6 @@ import gov.cms.dpc.aggregation.tasks.TruncateDatabase;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
-import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.common.jdbi.ConsentDAO;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -113,7 +112,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
     }
 
     @Provides
-    LookBackService provideLookBackService(DPCQueueManagedSessionFactory sessionFactory, OperationsConfig operationsConfig) {
+    LookBackService provideLookBackService(OperationsConfig operationsConfig) {
         //Configuring to skip look back when look back months is less than 0
         if (operationsConfig.getLookBackMonths() < 0) {
             return new EveryoneGetsDataLookBackServiceImpl();
