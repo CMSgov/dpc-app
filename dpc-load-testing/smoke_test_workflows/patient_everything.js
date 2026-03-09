@@ -5,8 +5,8 @@ import { check } from 'k6';
 import { generateDPCToken } from '../generate-dpc-token.js';
 import {
   createPatientsBatch,
+  patientEverything,
   createPractitioners,
-  patientExport,
 } from '../dpc-api-client.js';
 import {
   monitorJob,
@@ -14,7 +14,7 @@ import {
 
 const practitionerNpi = __ENV.ENVIRONMENT == 'prod' ? "1234329724" : "3247281157";
 
-export async function checkPatientExportWorkflow(data) {
+export async function checkPatientEverythingWorkflow(data) {
   const orgId = data.orgId;
   const token = generateDPCToken(orgId, data.goldenMacaroon);
 
@@ -53,23 +53,40 @@ export async function checkPatientExportWorkflow(data) {
   // Create Group for practitioner and patient
   const practitionerId = createPractitionerResponse.json().entry[0].resource.id;
   const patientId = uploadPatientResponse.json().entry[0].resource.id;
-
-  // Patient export
-  const patientExportResponse = patientExport(token, orgId, practitionerId, patientId, "respond-async");
-  const checkPatientExport = check(
-    patientExportResponse,
+  
+  // Patient everything
+  const patientEverythingResponse = patientEverything(token, orgId, practitionerId, patientId);
+  const checkPatientEverything = check(
+    patientEverythingResponse,
     {
-      'get patient export returns 202': res => res.status == 202,
+      'get patient everything returns 200': res => res.status == 200,
+      'response returns bundle with data': (res) => {
+          const resJson = res.json();
+          return resJson.resourceType == "Bundle" && (resJson.total > 0 || (resJson.entry && resJson.entry.length > 0));
+      },
+    }
+  )
+
+  if (!checkPatientEverything){
+    console.error(`Failed to call patient everything for ${patientId}: ${patientEverythingResponse.body}`);
+  }
+
+  // Patient everything async
+  const patientEverythingAsyncResponse = patientEverything(token, orgId, practitionerId, patientId, "respond-async");
+  const checkPatientEverythingAsync = check(
+    patientEverythingAsyncResponse,
+    {
+      'get patient everything async returns 202': res => res.status == 202,
       'response location header present': (res) => !!(res?.headers['Content-Location']),
     }
   )
 
-  if (!checkPatientExport) {
-    console.error(`Failed to call patient export for ${patientId}: ${patientExportResponse.body}`);
+  if (!checkPatientEverythingAsync) {
+    console.error(`Failed to call patient everything async for ${patientId}: ${patientEverythingAsyncResponse.body}`);
   }
 
-  // Verify patient export job succeeds
-  const jobUrl = patientExportResponse.headers['Content-Location'];
+  // Verify patient everything job succeeds
+  const jobUrl = patientEverythingAsyncResponse.headers['Content-Location'];
   monitorJob(token, jobUrl);
 
 }
