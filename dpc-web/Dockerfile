@@ -8,7 +8,8 @@ RUN apk update && \
     apk add --no-cache shared-mime-info && \
     apk add --no-cache --virtual build-deps alpine-sdk npm tzdata && \
     apk add xz && \
-    apk add --no-cache gcompat
+    apk add --no-cache gcompat && \
+    apk add --no-cache "zlib>1.3.2"
 
 # Set the working directory
 RUN mkdir -p /dpc-web/vendor/api_client

@@ -43,6 +43,8 @@ portal:
 	cp -r engines/api_client/ dpc-portal/vendor/api_client/
 	@docker build -f dpc-portal/Dockerfile . -t dpc-web-portal
 
+api-client:
+	@docker compose -f docker-compose.yml -f docker-compose.api-client.yml build dpc_api_client
 
 # Start commands
 # ==============
@@ -178,6 +180,8 @@ portal-sh: ## Run a portal shell
 portal-console: ## Run a rails console shell
 	@docker compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/console
 
+api-client-sh:
+	@docker compose -f docker-compose.api-client.yml run --remove-orphans --entrypoint "sh" dpc_api_client
 
 # Build & Test commands
 # ======================
@@ -228,3 +232,7 @@ unit-tests:
 
 .PHONY: load-tests
 load-tests: start-api-load-tests start-load-tests down-dpc-load-tests
+
+.PHONY: ci-api-client-integration
+ci-api-client-integration: docker-base secure-envs
+	@bash ./dpc-api-client-integration-test.sh

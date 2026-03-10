@@ -32,7 +32,6 @@ concurrency:
 
 env:
   VAULT_PW: ${{ secrets.VAULT_PW }}
-  REPORT_COVERAGE: true
   DPC_CA_CERT: ${{ secrets.DPC_CA_CERT }}
   ENV: "github-ci"
 
@@ -40,6 +39,8 @@ jobs:
   build-api:
     name: "Build and Test API"
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    env:
+      REPORT_COVERAGE: true
     steps:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
@@ -60,9 +61,10 @@ jobs:
           sudo dnf -y install python3 python3-pip
           pip install ansible
       - name: Install docker compose manually
+        # With the switch to arm64, we might need to update docker compose to
+        # curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-aarch64 -o /usr/local/lib/docker/cli-plugins/docker-compose
         run: |
           mkdir -p /usr/local/lib/docker/cli-plugins
-          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
       - name: "API Build"
@@ -115,6 +117,8 @@ jobs:
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Install docker compose manually
+        # With the switch to arm64, we might need to update docker compose to
+        # curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-aarch64 -o /usr/local/lib/docker/cli-plugins/docker-compose
         run: |
           mkdir -p /usr/local/lib/docker/cli-plugins
           curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
@@ -194,8 +198,8 @@ jobs:
         if: ${{ always() }}
         run: ./scripts/cleanup-docker.sh
 
-  build-dpc-client:
-    name: "Build and Test DPC Client"
+  build-dpc-api-client:
+    name: "Build and Test DPC API Client"
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - name: Assert Ownership
@@ -204,9 +208,38 @@ jobs:
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
-      - name: "DPC Client Build"
+      - name: Install docker compose manually
         run: |
-          make ci-api-client
+          mkdir -p /usr/local/lib/docker/cli-plugins
+          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
+          chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
+          chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+      - name: "API Client Unit Tests"
+        run: make ci-api-client
+      - name: "Set up Python and install Ansible"
+        run: |
+          sudo dnf -y install python3 python3-pip
+          pip install ansible
+      - name: "Set up JDK 17"
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          java-version: "17"
+          distribution: "corretto"
+          cache: maven
+      - name: Clean maven
+        run: mvn -ntp -U clean
+      - name: "API Client Integration test"
+        id: integration-test
+        run: make ci-api-client-integration
+      - name: "Debug db"
+        if: ${{ failure() && steps.integration-test.outcome == 'failure' }}
+        run: docker logs api-client-integration-app-db-1
+      - name: "Debug attribution"
+        if: ${{ failure() && steps.integration-test.outcome == 'failure' }}
+        run: docker logs api-client-integration-app-attribution-1
+      - name: "Debug api"
+        if: ${{ failure() && steps.integration-test.outcome == 'failure' }}
+        run: docker logs api-client-integration-app-api-1
       - name: Cleanup
         if: ${{ always() }}
         run: ./scripts/cleanup-docker.sh

@@ -31,7 +31,7 @@ RSpec.describe 'Accessibility', type: :system do
     end
     it 'shows login failure' do
       visit '/users/auth/failure'
-      expect(page).to have_text('Try again')
+      expect(page).to have_text('sign-in was unsuccessful')
       expect(page).to be_axe_clean.according_to axe_standard
     end
 
