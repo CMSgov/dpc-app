@@ -46,7 +46,6 @@
       <h3>Expired invites</h3>
       <% if @expired_invitations.present? %>
         <%= render(Core::Table::TableComponent.new(id: 'expired-invitation-table', additional_classes: ['width-full'], sortable: true)) do %>
-          <% expired_table_cols = 
           <%= render(Core::Table::HeaderComponent.new(
                     caption: 'Expired Invitations',
                     columns: [
