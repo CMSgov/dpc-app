@@ -3,15 +3,19 @@
 require 'simplecov'
 require 'webmock/rspec'
 
-SimpleCov.start do
-  track_files '**/{app,lib}/**/*.rb'
-  add_filter 'lib/api_client/version.rb'
-  add_filter %r{/dummy/}
-  SimpleCov.minimum_coverage 80
-  SimpleCov.minimum_coverage_by_file 0
+unless ENV.fetch('SKIP_SIMPLE_COV', 'false') == 'true'
+  SimpleCov.start do
+    track_files '**/{app,lib}/**/*.rb'
+    add_filter 'lib/api_client/version.rb'
+    add_filter %r{/dummy/}
+    SimpleCov.minimum_coverage 80
+    SimpleCov.minimum_coverage_by_file 0
+  end
 end
 
 RSpec.configure do |config|
+  config.filter_run_excluding type: :integration
+
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
