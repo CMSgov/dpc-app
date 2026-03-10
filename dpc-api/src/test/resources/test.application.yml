@@ -30,6 +30,11 @@ server:
             application: ${APPLICATION:-"dpc-api"}
         filterFactories:
           - type: token-filter-factory
+  # Turn off gzip for the /Data endpoint only
+  gzip:
+    enabled: true
+    excludedPaths:
+      - "/v1/Data/*"
 
 logging:
   level: INFO
