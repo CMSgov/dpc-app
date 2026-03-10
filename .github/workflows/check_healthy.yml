@@ -23,7 +23,7 @@ jobs:
             script_params: attribution attribution backend v9
             skip: false
           - service: aggregation
-            script_params: aggregation aggregation backend v9
+            script_params: none aggregation backend v9
             skip: false
           - service: web
             script_params: web-v2-1 web frontend v9
