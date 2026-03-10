@@ -84,13 +84,13 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
             <caption aria-hidden="true" hidden>Active Credential Delegates</caption>
             <thead>
               <tr>
-                <th data-sortable scope="row" role="columnheader" aria-sort="descending">
+                <th data-sortable scope="col" aria-sort="descending">
                   Name
                 </th>
-                <th data-sortable scope="row" role="columnheader" aria-sort="descending">
+                <th data-sortable scope="col" aria-sort="descending">
                   Email
                 </th>
-                <th data-sortable scope="row" role="columnheader" aria-sort="descending">
+                <th data-sortable scope="col" aria-sort="descending">
                   Active since
                 </th>
               </tr>
@@ -131,13 +131,14 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
             <caption aria-hidden="true" hidden>Pending Credential Delegates</caption>
             <thead>
               <tr>
-                <th data-sortable scope="row" role="columnheader" aria-sort="descending">
+                <th data-sortable scope="col" aria-sort="descending">
                   Name
                 </th>
-                <th data-sortable scope="row" role="columnheader" aria-sort="descending">
+                <th data-sortable scope="col" aria-sort="descending">
                   Email
                 </th>
-                <th scope="row" role="columnheader">
+                <th scope="col">
+                    <span class="usa-sr-only">Actions</span>
                 </th>
               </tr>
             </thead>
@@ -187,9 +188,9 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
             <caption aria-hidden="true" hidden>Expired Invitations</caption>
             <thead>
               <tr>
-                <th data-sortable scope="row" role="columnheader" aria-sort="descending">Name</th>
-                <th data-sortable scope="row" role="columnheader" aria-sort="descending">Email</th>
-                <th data-sortable scope="row" role="columnheader" aria-sort="descending">Expired on</th>
+                <th data-sortable scope="col" aria-sort="descending">Name</th>
+                <th data-sortable scope="col" aria-sort="descending">Email</th>
+                <th data-sortable scope="col" aria-sort="descending">Expired on</th>
               </tr>
             </thead>
             <tbody>

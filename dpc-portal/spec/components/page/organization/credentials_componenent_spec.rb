@@ -56,12 +56,12 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
           <caption aria-hidden="true" hidden>Public keys</caption>
           <thead>
             <tr>
-              <th data-sortable scope="row" role="columnheader" aria-sort="descending">Label</th>
-              <th data-sortable scope="row" role="columnheader" aria-sort="descending">Key ID</th>
-              <th data-sortable scope="row" role="columnheader" aria-sort="descending">
+              <th data-sortable scope="col" aria-sort="descending">Label</th>
+              <th data-sortable scope="col" aria-sort="descending">Key ID</th>
+              <th data-sortable scope="col" aria-sort="descending">
                 Creation Date
               </th>
-              <th scope="row" role="columnheader">
+              <th scope="col">
                 <span class="usa-sr-only">Actions</span>
               </th>
             </tr>
@@ -106,16 +106,16 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
           <caption aria-hidden="true" hidden>Public keys</caption>
           <thead>
             <tr>
-              <th data-sortable scope="row" role="columnheader" aria-sort="descending">
+              <th data-sortable scope="col" aria-sort="descending">
                 Label
               </th>
-              <th data-sortable scope="row" role="columnheader" aria-sort="descending">
+              <th data-sortable scope="col" aria-sort="descending">
                 Key ID
               </th>
-              <th data-sortable scope="row" role="columnheader" aria-sort="descending">
+              <th data-sortable scope="col" aria-sort="descending">
                 Creation Date
               </th>
-              <th scope="row" role="columnheader">
+              <th scope="col">
                 <span class="usa-sr-only">Actions</span>
               </th>
             </tr>
@@ -160,13 +160,13 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
           <caption aria-hidden="true" hidden>Public IP addresses</caption>
           <thead>
             <tr>
-              <th data-sortable scope="row" role="columnheader" aria-sort="descending">
+              <th data-sortable scope="col" aria-sort="descending">
                 Public IP
               </th>
-              <th data-sortable scope="row" role="columnheader" aria-sort="descending">
+              <th data-sortable scope="col" aria-sort="descending">
                 Date Added
               </th>
-              <th scope="row" role="columnheader">
+              <th scope="col">
                 <span class="usa-sr-only">Actions</span>
               </th>
             </tr>

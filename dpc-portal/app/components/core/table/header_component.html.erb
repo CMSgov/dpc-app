@@ -5,11 +5,11 @@
   <tr>
     <% columns.each do |column| %>
       <% if column.sortable %>
-        <th data-sortable scope="col" role="columnheader" aria-sort="descending">
+        <th data-sortable scope="col" aria-sort="descending">
             <%= column.label %>
         </th>
       <% else %>
-        <th scope="col" role="columnheader">
+        <th scope="col">
             <%= column.label %>
         </th>
       <% end %>
