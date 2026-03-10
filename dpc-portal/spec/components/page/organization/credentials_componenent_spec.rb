@@ -53,7 +53,7 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       let(:org) { ComponentSupport::MockOrg.new(2) }
       it 'should have token table header' do
         header = <<~HTML
-          <caption aria-hidden="true" hidden>Public key table</caption>
+          <caption aria-hidden="true" hidden>Public keys</caption>
           <thead>
             <tr>
               <th data-sortable scope="row" role="columnheader" aria-sort="descending">Label</th>
@@ -61,7 +61,9 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
               <th data-sortable scope="row" role="columnheader" aria-sort="descending">
                 Creation Date
               </th>
-              <th scope="row" role="columnheader"></th>
+              <th scope="row" role="columnheader">
+                <span class="usa-sr-only">Actions</span>
+              </th>
             </tr>
           </thead>
         HTML
@@ -101,7 +103,7 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       end
       it 'should have key table header' do
         header = <<~HTML
-          <caption aria-hidden="true" hidden>Public key table</caption>
+          <caption aria-hidden="true" hidden>Public keys</caption>
           <thead>
             <tr>
               <th data-sortable scope="row" role="columnheader" aria-sort="descending">
@@ -114,6 +116,7 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
                 Creation Date
               </th>
               <th scope="row" role="columnheader">
+                <span class="usa-sr-only">Actions</span>
               </th>
             </tr>
           </thead>
@@ -154,7 +157,7 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
       end
       it 'should have ip_addr table header' do
         header = <<~HTML
-          <caption aria-hidden="true" hidden>Public IP address table</caption>
+          <caption aria-hidden="true" hidden>Public IP addresses</caption>
           <thead>
             <tr>
               <th data-sortable scope="row" role="columnheader" aria-sort="descending">
@@ -164,6 +167,7 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
                 Date Added
               </th>
               <th scope="row" role="columnheader">
+                <span class="usa-sr-only">Actions</span>
               </th>
             </tr>
           </thead>

@@ -81,7 +81,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
       it 'has a table' do
         expected_html = <<~HTML
           <table id="active-cd-table" class="width-full usa-table">
-            <caption aria-hidden="true" hidden>Active Credential Delegate Table</caption>
+            <caption aria-hidden="true" hidden>Active Credential Delegates</caption>
             <thead>
               <tr>
                 <th data-sortable scope="row" role="columnheader" aria-sort="descending">
@@ -128,7 +128,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
       it 'has a table' do
         expected_html = <<~HTML
           <table id="pending-cd-table" class="width-full usa-table">
-            <caption aria-hidden="true" hidden>Pending Credential Delegate Table</caption>
+            <caption aria-hidden="true" hidden>Pending Credential Delegates</caption>
             <thead>
               <tr>
                 <th data-sortable scope="row" role="columnheader" aria-sort="descending">
@@ -184,7 +184,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
         expired_at = expired_invitations.first.expired_at
         expected_html = <<~HTML
           <table id="expired-invitation-table" class="width-full usa-table">
-            <caption aria-hidden="true" hidden>Expired Invitation Table</caption>
+            <caption aria-hidden="true" hidden>Expired Invitations</caption>
             <thead>
               <tr>
                 <th data-sortable scope="row" role="columnheader" aria-sort="descending">Name</th>
