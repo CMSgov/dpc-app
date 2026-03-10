@@ -1,4 +1,5 @@
 import http from 'k6/http';
+import { URL } from "https://jslib.k6.io/url/1.0.0/index.js"
 
 import {
   generateBundle,
@@ -170,6 +171,13 @@ export function patientEverything(token, orgId, practitionerId, patientId, prefe
   return http.get(`${urlRoot}/Patient/${patientId}/$everything`,
 		  createHeaderParam(token, {'X-Provenance': JSON.stringify(provenanceBody), 'Prefer': preference})
 		 );
+}
+
+export function patientExport(token, orgId, practitionerId, patientId) {
+  const provenanceBody = generateProvenanceResourceBody(orgId, practitionerId);
+  const exportUrl = new URL(`${urlRoot}/Patient/${patientId}/$export`);
+  exportUrl.searchParams.set('_outputFormat', 'application/fhir+ndjson');
+  return http.get(exportUrl.toString(), createHeaderParam(token, {'X-Provenance': JSON.stringify(provenanceBody), 'Prefer': 'respond-async'}));
 }
 
 export function removePatientFromGroup(token, orgId, practitionerId, practitionerNpi, groupId, patientId) {

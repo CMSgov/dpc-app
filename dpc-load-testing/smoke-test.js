@@ -13,7 +13,8 @@ import {
 import { checkBulkExportWorkflow } from './smoke_test_workflows/bulk_export.js';
 import { checkAuthWorkflow } from './smoke_test_workflows/auth.js';
 import { checkPortalsWorkflow } from './smoke_test_workflows/portals.js';
-import { checkPatientEverythingExportWorkflow } from './smoke_test_workflows/patient_export.js';
+import { checkPatientEverythingWorkflow } from './smoke_test_workflows/patient_everything.js';
+import { checkPatientExportWorkflow } from './smoke_test_workflows/patient_export.js'
 
 import NPIGeneratorCache from './utils/npi-generator.js';
 
@@ -50,7 +51,8 @@ export function runSmokeTests(data) {
   checkAuthWorkflow(iterationData);
   checkBulkExportWorkflow(iterationData);
   checkPortalsWorkflow(iterationData);
-  checkPatientEverythingExportWorkflow(iterationData);
+  checkPatientEverythingWorkflow(iterationData);
+  checkPatientExportWorkflow(iterationData);
 }
 
 // Sets up three test organizations

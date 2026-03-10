@@ -12,13 +12,13 @@ RUN mkdir /api-client
 WORKDIR /api-client
 
 # Copy over the files needed to fetch dependencies
-COPY Gemfile Gemfile.lock api_client.gemspec /api-client/
-COPY lib /api-client/lib
+COPY engines/api_client/Gemfile engines/api_client/Gemfile.lock engines/api_client/api_client.gemspec /api-client/
+COPY engines/api_client/lib /api-client/lib
 RUN gem install bundler --no-document && \
     bundle config set force_ruby_platform true && \
     bundle install
 
-COPY app /api-client/app
-COPY spec /api-client/spec
-COPY coverage /api-client/coverage
-COPY .rubocop.yml /api-client/.rubocop.yml
+COPY engines/api_client/app /api-client/app
+COPY engines/api_client/spec /api-client/spec
+COPY engines/api_client/coverage /api-client/coverage
+COPY engines/api_client/.rubocop.yml /api-client/.rubocop.yml
