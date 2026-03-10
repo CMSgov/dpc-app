@@ -15,7 +15,7 @@
       </div>
   <% end %>
   <%= render(Core::Card::BasicComponent.new(text_content: '<h2>Invites</h2>',
-    button_params: { name: 'Invite CD', path: new_organization_credential_delegate_invitation_path(@organization.path_id), method: :get} )) do %>
+    button_params: { name: 'Invite CD', path: new_organization_credential_delegate_invitation_path(@organization.path_id), class: 'margin-0'} )) do %>
       <p>You can invite users to be Credential Delegates.</p>
       <div>
         <h3>Pending invites</h3>
