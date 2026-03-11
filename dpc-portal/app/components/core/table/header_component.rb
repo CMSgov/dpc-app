@@ -17,7 +17,7 @@ module Core
         @columns = columns.map do |col|
           Column.new(
             label: col.fetch(:label, ''),
-            sortable: !!col[:sortable]
+            sortable: col[:sortable]
           )
         end
       end
