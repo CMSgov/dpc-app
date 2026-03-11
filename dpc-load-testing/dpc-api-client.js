@@ -19,7 +19,7 @@ import {
 
 import {
   generateUniqueTestRunValue,
-} from './utils/test-utils.js'
+} from './smoke_test_workflows/smoke_test_utils.js'
 
 export const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/api/v1' : `https://${__ENV.ENVIRONMENT}.dpc.cms.gov/api/v1`;
 
