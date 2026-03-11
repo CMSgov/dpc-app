@@ -78,7 +78,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
                   </td>
                   <td style="width: 25%;">
                       <div class="clearfix">
-                        <div class="float-left">  <svg class="text-gold usa-icon" style="transform: scale(1)" aria-hidden="true" role="img">
+                        <div class="float-left">  <svg class="text-gold usa-icon" aria-hidden="true">
                           <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#warning></use>
                         </svg>
                         </div>
