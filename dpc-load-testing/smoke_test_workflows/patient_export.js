@@ -6,7 +6,7 @@ import {
   createPatientsBatch,
   createPractitioners,
   patientExport,
-  setupUserAuthToken,
+  generateClientAccessToken,
 } from '../dpc-api-client.js';
 import { monitorJob } from './smoke_test_utils.js';
 
@@ -16,7 +16,7 @@ export async function checkPatientExportWorkflow(data) {
   const orgId = data.orgId;
   
   // Auth is a prerequisite, and is not what we're testing
-  const token = await setupUserAuthToken(orgId, data.goldenMacaroon);
+  const token = await generateClientAccessToken(orgId, data.goldenMacaroon);
 
   // Uploading practitioner
   const createPractitionerResponse = createPractitioners(token, practitionerNpi);

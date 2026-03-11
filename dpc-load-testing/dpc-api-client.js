@@ -383,7 +383,7 @@ function createHeaderParam(token, headers) {
  * @param {*} goldenMacaroon
  * @returns Client Auth Token
  */
-export async function setupUserAuthToken(orgId, goldenMacaroon) {
+export async function generateClientAccessToken(orgId, goldenMacaroon) {
   const token = generateDPCToken(orgId, goldenMacaroon);
   const uniqueValue = generateUniqueTestRunValue();
   const createTokenResponse = createClientToken(token, `New token ${uniqueValue}`);

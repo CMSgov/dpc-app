@@ -9,7 +9,7 @@ import {
   createPractitionersRawData,
   exportGroup,
   findGroupByPractitionerNpi,
-  setupUserAuthToken,
+  generateClientAccessToken,
 } from '../dpc-api-client.js';
 import {
   monitorJob,
@@ -25,7 +25,7 @@ export async function checkBulkExportWorkflow(data) {
   const orgId = data.orgId;
 
   // Auth is a prerequisite, and is not what we're testing
-  const token = await setupUserAuthToken(orgId, data.goldenMacaroon);
+  const token = await generateClientAccessToken(orgId, data.goldenMacaroon);
 
   // Uploading Practitioners
   const uploadPractitionersResponse = createPractitionersRawData(token, practitionerBundle);
