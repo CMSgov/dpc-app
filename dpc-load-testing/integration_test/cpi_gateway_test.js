@@ -7,7 +7,9 @@ import { isEmptyObject, isObjectType, isDate, getToken, isArrayType } from '../u
 import http from 'k6/http';
 
 var PROVIDERS_PATH = "api/1.0/ppr/providers";
-var PROFILE_PATH = "api/1.0/ppr/providers/profiles";
+
+//var PROFILE_PATH = "api/1.0/ppr/providers/profiles";
+
 // No longer needed as we started to use SSM Parameter Store to aid local dev and testing.
 //var testData = __ENV.ENVIRONMENT == 'local' ? JSON.parse(open('./cpi_test_data.secret')) : {}
 
