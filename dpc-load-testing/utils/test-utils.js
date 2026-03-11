@@ -1,3 +1,6 @@
+/*global console*/
+/* eslint no-console: "off" */
+
 import { b64encode } from 'k6/encoding';
 import http from 'k6/http';
 
