@@ -1,3 +1,6 @@
+/*global console*/
+/* eslint no-console: "off" */
+
 import { string2Uint8Array } from './generate-dpc-token.js';
 import encoding from 'k6/encoding';
 import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
