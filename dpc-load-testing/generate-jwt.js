@@ -28,7 +28,6 @@ export function jwtPayload(urlPrefix, clientToken, exp, jti) {
   }
 }
 
-
 export async function makeJwt(clientToken, publicKeyId, key) {
   
   const headerData = jwtHeader(publicKeyId);
@@ -62,6 +61,7 @@ export async function signatureSnippet(privateKey) {
   const signature = await crypto.subtle.sign(algorithm, privateKey, snippet);
   return encoding.b64encode(signature);
 }
+
 export async function generateKey() {
   const key = await crypto.subtle.generateKey(
     algorithm,
@@ -70,8 +70,23 @@ export async function generateKey() {
   );
   return key;
 }
+
 export async function exportPublicKey(publicKey) {
   const exportedPublicKey = await crypto.subtle.exportKey('spki', publicKey);
   const publicKeyString = encoding.b64encode(exportedPublicKey);
   return "-----BEGIN PUBLIC KEY-----\n" + publicKeyString + "\n-----END PUBLIC KEY-----"
+}
+
+export async function generateKeyBundle() {
+  try {
+    const keyPair = await generateKey();
+    const privateKey = keyPair['privateKey'];
+    const publicKey = await exportPublicKey(keyPair['publicKey']);
+    const snippet = await signatureSnippet(privateKey);
+
+    return { privateKey, publicKey, snippet };
+  } catch (error) {
+    console.error("Error generating key bundle:", error);
+    throw error;
+  }
 }

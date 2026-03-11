@@ -43,8 +43,10 @@ const orgIds = [
 
 export function runSmokeTests(data) {
   const idx = exec.vu.idInInstance % 3;
+  const iterationIdx = exec.vu.iterationInInstance % 3;
   const iterationData = {
       idx: idx,
+      iterationIdx: iterationIdx,
       orgId: orgIds[idx],
       goldenMacaroon: data.goldenMacaroon
   };

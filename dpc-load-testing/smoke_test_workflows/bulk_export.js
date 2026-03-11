@@ -3,13 +3,13 @@
 
 import { check } from 'k6';
 import exec from 'k6/execution'
-import { generateDPCToken } from '../generate-dpc-token.js';
 import {
   createGroupWithPatients,
   createPatientsRawData,
   createPractitionersRawData,
   exportGroup,
   findGroupByPractitionerNpi,
+  setupUserAuthToken,
 } from '../dpc-api-client.js';
 import {
   monitorJob,
@@ -24,7 +24,8 @@ const practitionerCount =  __ENV.ENVIRONMENT == 'prod' ? 2 : 4;
 export async function checkBulkExportWorkflow(data) {
   const orgId = data.orgId;
 
-  const token = generateDPCToken(orgId, data.goldenMacaroon);
+  // Auth is a prerequisite, and is not what we're testing
+  const token = await setupUserAuthToken(data.idx, data.iterationIdx, orgId, data.goldenMacaroon);
 
   // Uploading Practitioners
   const uploadPractitionersResponse = createPractitionersRawData(token, practitionerBundle);

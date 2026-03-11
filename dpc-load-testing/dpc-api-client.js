@@ -10,6 +10,13 @@ import {
   generateProvenanceResourceBody
 } from "./resource-request-bodies.js"
 
+import { generateDPCToken } from './generate-dpc-token.js';
+
+import {
+  makeJwt,
+  generateKeyBundle,
+} from './generate-jwt.js'
+
 export const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/api/v1' : `https://${__ENV.ENVIRONMENT}.dpc.cms.gov/api/v1`;
 
 export function findOrganizationByNpi(npi, goldenMacaroon) {
@@ -361,4 +368,25 @@ function createHeaderParam(token, headers) {
   }
 
   return {'headers': {...defaultHeaders, ...headers}};
+}
+
+/**
+ * Generates the auth token required as a prerequisite for other test flows.
+ * NOTE: This is NOT testing auth — it's setting up auth for other tests.
+ */
+export async function setupUserAuthToken(idx, iterationIdx, orgId, goldenMacaroon) {
+  const token = generateDPCToken(orgId, goldenMacaroon);
+  const createTokenResponse = createClientToken(token, `New token ${idx}`);
+  const clientToken = createTokenResponse.json().token;
+
+  const { privateKey, publicKey, snippet } = await generateKeyBundle();
+  const createPublicKeyResponse = createPublicKey(token, `New+Key+${idx}+${iterationIdx}+${Date.now()}`, publicKey, snippet);
+
+  const publicKeyId = createPublicKeyResponse.json().id
+  const jwt = await makeJwt(clientToken, publicKeyId, privateKey);
+  validateJwt(jwt);
+
+  const accessTokenResponse = retrieveAccessToken(jwt);
+  const accessToken = accessTokenResponse.json().access_token
+  return accessToken;
 }
