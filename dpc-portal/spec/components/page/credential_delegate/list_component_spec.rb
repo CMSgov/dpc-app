@@ -48,7 +48,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
                     <h2>Invites</h2>
                   </div>
                   <div class="flex-align-self-center">
-                    <form class="button_to" method="get" action="/organizations/#{org.path_id}/credential_delegate_invitations/new"><button class="usa-button" type="submit">Invite CD</button></form>
+                    <a href="/organizations/#{org.path_id}/credential_delegate_invitations/new" class="usa-button margin-0">Invite CD</a>
                   </div>
                 </div>
                 <p>You can invite users to be Credential Delegates.</p>

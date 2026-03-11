@@ -1,0 +1,18 @@
+services:
+  dpc_api_client:
+    build:
+      context: .
+      dockerfile: engines/api_client/Dockerfile
+    image: dpc-api-client:latest
+    volumes:
+      # Mount specific directories to avoid overwriting
+      # precompiled assets (public/assets/) and node_modules
+      - "./engines/api_client:/api-client"
+    environment:
+      # Application settings
+      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
+      - API_METADATA_URL=http://api:3002/api/v1
+      - API_ADMIN_URL=http://api:9900
+      - RUBY_YJIT_ENABLE=1
+      - SKIP_SIMPLE_COV=${SKIP_SIMPLE_COV:-}
+      - ENV=local

@@ -3,7 +3,6 @@
   <div>
     <p>Your role as Authorized Official and your organization's Medicare enrollment have been verified.</p>
     <%= render Core::Button::ButtonComponent.new(label: "Submit registration",
-        destination: register_organization_invitation_path(@organization, @invitation),
-        method: :post) %>
+        destination: register_organization_invitation_path(@organization, @invitation)) %>
   </div>
 </div>
