@@ -376,7 +376,9 @@ function createHeaderParam(token, headers) {
 
 /**
  * Generates the client auth token required as a prerequisite for other test flows.
- * NOTE: This is NOT testing auth since it has its own workflow. This is setting up auth for other tests.
+ * NOTE: This is NOT testing auth workflow since it has its own dedicated set of smoke test. 
+ * This is setting up auth for other smoke tests to use.
+ * 
  * @param {*} orgId
  * @param {*} goldenMacaroon
  * @returns Client Auth Token
