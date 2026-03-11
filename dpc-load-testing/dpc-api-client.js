@@ -1,4 +1,3 @@
-import exec from 'k6/execution'
 import http from 'k6/http';
 import { URL } from "https://jslib.k6.io/url/1.0.0/index.js"
 
@@ -17,6 +16,10 @@ import {
   makeJwt,
   generateKeyBundle,
 } from './generate-jwt.js'
+
+import {
+  generateUniqueTestRunValue,
+} from './utils/test-utils.js'
 
 export const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/api/v1' : `https://${__ENV.ENVIRONMENT}.dpc.cms.gov/api/v1`;
 
@@ -394,8 +397,4 @@ export async function setupUserAuthToken(orgId, goldenMacaroon) {
   const accessTokenResponse = retrieveAccessToken(jwt);
   const accessToken = accessTokenResponse.json().access_token
   return accessToken;
-}
-
-function generateUniqueTestRunValue() {
-  return `${exec.vu.idInInstance}+${exec.vu.iterationInInstance}+${Date.now()}`;
 }
