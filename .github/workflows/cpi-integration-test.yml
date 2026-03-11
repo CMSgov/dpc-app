@@ -57,7 +57,7 @@ jobs:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
           params: |
-            CPI_API_GW_TESTDATA=/dpc/test/web_portal/cpi_api_gw_testdata
+            CPI_API_GW_TESTDATA=/dpc/test/web-portal/cpi_api_gw_testdata
             CLIENT_ID=/dpc/test/web-portal/cpi_api_gw_client_id
             CLIENT_SECRET=/dpc/test/web-portal/cpi_api_gw_client_secret
       - name: Run CPI Gateway Integration Test

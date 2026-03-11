@@ -8,7 +8,8 @@ import http from 'k6/http';
 
 var PROVIDERS_PATH = "api/1.0/ppr/providers";
 var PROFILE_PATH = "api/1.0/ppr/providers/profiles";
-var testData = __ENV.ENVIRONMENT == 'local' ? JSON.parse(open('./cpi_test_data.secret')) : {}
+// No longer needed as we started to use SSM Parameter Store to aid local dev and testing.
+//var testData = __ENV.ENVIRONMENT == 'local' ? JSON.parse(open('./cpi_test_data.secret')) : {}
 
 export const options = {
     thresholds: {
@@ -29,19 +30,10 @@ export const options = {
 // This function aggregates the config data from different sources based upon 
 // the environment and presents unified source for subsequent tests.
 function getConfig() {
-    if (__ENV.ENVIRONMENT != 'local') {
-        return {
-            ...JSON.parse(__ENV.CPI_API_GW_TESTDATA),
-            ...{ clientId: __ENV.CLIENT_ID, clientSecret: __ENV.CLIENT_SECRET }
-        };
-    } else {
-        return {
-            ...testData, ...{
-                clientId: __ENV.CLIENT_ID,
-                clientSecret: __ENV.CLIENT_SECRET
-            }
-        };
-    }
+    return {
+        ...JSON.parse(__ENV.CPI_API_GW_TESTDATA),
+        ...{ clientId: __ENV.CLIENT_ID, clientSecret: __ENV.CLIENT_SECRET }
+    };
 }
 
 export function setup() {
@@ -91,7 +83,7 @@ export function runCPITests(params) {
     var testDataForMedSanctions = testData["AO_WITH_MED_SANCTIONS"];
     const providerResponse = getDataForProvider(cpiBaseUrl, token, "ind", "ssn", testDataForMedSanctions.ao_ssn);
 
-    const checkProviderResponse = check(
+    check(
         providerResponse,
         {
             'get provider returns 200': res => res.status == 200,
@@ -106,7 +98,7 @@ export function runCPITests(params) {
 
     var testDataForWaivers = testData["AO_WITH_WAIVERS"];
     const waiverResponse = getDataForProvider(cpiBaseUrl, token, "ind", "ssn", testDataForWaivers.ao_ssn);
-    const checkWaiverResponse = check(
+    check(
         waiverResponse,
         {
             'get provider returns 200': res => res.status == 200,
@@ -151,6 +143,8 @@ function providerRequest(type, idType, id) {
         });
 }
 
+/*  Commenting this code out to pass linter rules till we get the 
+required data.
 function getProviderOrganization(cpiBaseUrl, token, npi) {
     const url = `${cpiBaseUrl}/${PROFILE_PATH}`;
     const payload = JSON.stringify(
@@ -169,6 +163,7 @@ function getProviderOrganization(cpiBaseUrl, token, npi) {
     return http.post(url, payload, params);
 
 }
+*/
 
 
 
