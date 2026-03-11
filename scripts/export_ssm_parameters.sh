@@ -29,7 +29,7 @@ done
 echo "Fetching parameters in batch..."
 
 # 3. Batch fetch (returns "Path Value" pairs)
-# We use --output json and 'jq' if available, but here's a pure CLI way:
+# Use --output json to enable querying using jq in next step
 JSON_RESPONSE=$(aws ssm get-parameters \
     --names $SSM_PATHS \
     --with-decryption \

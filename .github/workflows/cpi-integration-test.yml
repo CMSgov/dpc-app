@@ -5,6 +5,8 @@ on:
   workflow_call:
   schedule:
     - cron: '0 6 * * 1-5'
+  push:
+    branches: [ 'mw/dpc-5238-integration-test' ]
 
 permissions:
   id-token: write
