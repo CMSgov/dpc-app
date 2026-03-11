@@ -3,7 +3,8 @@
 
 import { check } from 'k6';
 import exec from 'k6/execution';
-import { isEmptyObject, isObjectType, isDate, getToken, isArrayType } from '../utils/test-utils.js';
+import { isEmptyObject, isObjectType, isDate, isArrayType } from '../utils/test-utils.js';
+import { getToken } from '../oauth-client.js';
 import http from 'k6/http';
 
 var PROVIDERS_PATH = "api/1.0/ppr/providers";
