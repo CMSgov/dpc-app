@@ -1,3 +1,4 @@
+import exec from 'k6/execution'
 import http from 'k6/http';
 import { URL } from "https://jslib.k6.io/url/1.0.0/index.js"
 
@@ -371,16 +372,20 @@ function createHeaderParam(token, headers) {
 }
 
 /**
- * Generates the auth token required as a prerequisite for other test flows.
- * NOTE: This is NOT testing auth — it's setting up auth for other tests.
+ * Generates the client auth token required as a prerequisite for other test flows.
+ * NOTE: This is NOT testing auth since it has its own workflow. This is setting up auth for other tests.
+ * @param {*} orgId
+ * @param {*} goldenMacaroon
+ * @returns Client Auth Token
  */
-export async function setupUserAuthToken(idx, iterationIdx, orgId, goldenMacaroon) {
+export async function setupUserAuthToken(orgId, goldenMacaroon) {
   const token = generateDPCToken(orgId, goldenMacaroon);
-  const createTokenResponse = createClientToken(token, `New token ${idx}`);
+  const uniqueValue = generateUniqueTestRunValue();
+  const createTokenResponse = createClientToken(token, `New token ${uniqueValue}`);
   const clientToken = createTokenResponse.json().token;
 
   const { privateKey, publicKey, snippet } = await generateKeyBundle();
-  const createPublicKeyResponse = createPublicKey(token, `New+Key+${idx}+${iterationIdx}+${Date.now()}`, publicKey, snippet);
+  const createPublicKeyResponse = createPublicKey(token, `New+Key+${uniqueValue}`, publicKey, snippet);
 
   const publicKeyId = createPublicKeyResponse.json().id
   const jwt = await makeJwt(clientToken, publicKeyId, privateKey);
@@ -389,4 +394,8 @@ export async function setupUserAuthToken(idx, iterationIdx, orgId, goldenMacaroo
   const accessTokenResponse = retrieveAccessToken(jwt);
   const accessToken = accessTokenResponse.json().access_token
   return accessToken;
+}
+
+function generateUniqueTestRunValue() {
+  return `${exec.vu.idInInstance}+${exec.vu.iterationInInstance}+${Date.now()}`;
 }

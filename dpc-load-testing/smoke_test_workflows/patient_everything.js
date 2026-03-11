@@ -18,7 +18,7 @@ export async function checkPatientEverythingWorkflow(data) {
   const orgId = data.orgId;
 
   // Auth is a prerequisite, and is not what we're testing
-  const token = await setupUserAuthToken(data.idx, data.iterationIdx, orgId, data.goldenMacaroon);
+  const token = await setupUserAuthToken(orgId, data.goldenMacaroon);
 
   // Uploading practitioner
   const createPractitionerResponse = createPractitioners(token, practitionerNpi);
