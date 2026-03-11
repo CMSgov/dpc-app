@@ -11,8 +11,10 @@ import {
   validateJwt
 } from '../dpc-api-client.js';
 import {
+  exportPublicKey,
+  generateKey,
   makeJwt,
-  generateKeyBundle,
+  signatureSnippet
 } from '../generate-jwt.js'
 
 
@@ -34,8 +36,11 @@ export async function checkAuthWorkflow(data) {
 
   // Go ahead and try to create public key even if fail to create token
   // Fail on create token failure afterwards
-  const { privateKey, publicKey, snippet } = await generateKeyBundle();
 
+  const keyPair = await generateKey();
+  const privateKey = keyPair['privateKey'];
+  const publicKey = await exportPublicKey(keyPair['publicKey']);
+  const snippet = await signatureSnippet(privateKey);
   const createPublicKeyResponse = createPublicKey(token, `New+Key+${idx}`, publicKey, snippet);
   const checkCreatePublicKey = check(
     createPublicKeyResponse,
