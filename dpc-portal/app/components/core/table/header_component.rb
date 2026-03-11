@@ -9,15 +9,15 @@ module Core
         :sortable,
         keyword_init: true
       )
-      attr_reader :caption, :columns, :sorts
+      attr_reader :caption, :columns
 
       def initialize(caption: '', columns: [])
         super
         @caption = caption
         @columns = columns.map do |col|
           Column.new(
-            label: col[:label] || '',
-            sortable: col[:sortable] || false
+            label: col.fetch(:label, ''),
+            sortable: !!col[:sortable]
           )
         end
       end
