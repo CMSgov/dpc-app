@@ -22,7 +22,7 @@
     </div>
   </div>
   <div>
-    <h2>Invite a Credential Delegate (CD) to set up and manage access to the DPC API. The CD will receive an invite at the address you enter in this form. The invite will expire in 48 hours.</h2>
+    <p>Invite a Credential Delegate (CD) to set up and manage access to the DPC API. The CD will receive an invite at the address you enter in this form. The invite will expire in 48 hours.</p>
     <%= form_tag organization_credential_delegate_invitations_path(@organization.path_id), method: :post, class: ['usa-form'], id: "cd-form" do %>
       <%= render(Core::Form::TextInputComponent.new(label: 'First or given name',
           attribute: :invited_given_name,
