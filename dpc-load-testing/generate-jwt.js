@@ -1,3 +1,6 @@
+/*global console*/
+/* eslint no-console: "off" */
+
 import { string2Uint8Array } from './generate-dpc-token.js';
 import encoding from 'k6/encoding';
 import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
@@ -27,7 +30,6 @@ export function jwtPayload(urlPrefix, clientToken, exp, jti) {
     "jti": jti || uuidv4()
   }
 }
-
 
 export async function makeJwt(clientToken, publicKeyId, key) {
   
@@ -62,6 +64,7 @@ export async function signatureSnippet(privateKey) {
   const signature = await crypto.subtle.sign(algorithm, privateKey, snippet);
   return encoding.b64encode(signature);
 }
+
 export async function generateKey() {
   const key = await crypto.subtle.generateKey(
     algorithm,
@@ -70,8 +73,23 @@ export async function generateKey() {
   );
   return key;
 }
+
 export async function exportPublicKey(publicKey) {
   const exportedPublicKey = await crypto.subtle.exportKey('spki', publicKey);
   const publicKeyString = encoding.b64encode(exportedPublicKey);
   return "-----BEGIN PUBLIC KEY-----\n" + publicKeyString + "\n-----END PUBLIC KEY-----"
+}
+
+export async function generateKeyBundle() {
+  try {
+    const keyPair = await generateKey();
+    const privateKey = keyPair['privateKey'];
+    const publicKey = await exportPublicKey(keyPair['publicKey']);
+    const snippet = await signatureSnippet(privateKey);
+
+    return { privateKey, publicKey, snippet };
+  } catch (error) {
+    console.error("Error generating key bundle:", error);
+    throw error;
+  }
 }
