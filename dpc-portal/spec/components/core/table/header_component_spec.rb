@@ -56,15 +56,15 @@ RSpec.describe Core::Table::HeaderComponent, type: :component do
       it { is_expected.to match_html_fragment(expected_html) }
     end
 
-    context 'when the header has two rows' do
-      let(:component) { described_class.new(caption: 'caption', columns: %w[A B]) }
+    context 'when the header has two cols' do
+      let(:component) { described_class.new(caption: 'caption', columns: [{ label: 'A' }, { label: 'B' }]) }
       let(:expected_html) do
         <<~HTML
           <caption aria-hidden="true" hidden>caption</caption>
           <thead>
             <tr>
-                <th scope="row" role="columnheader">A</th>
-                <th scope="row" role="columnheader">B</th>
+                <th scope="col">A</th>
+                <th scope="col">B</th>
             </tr>
           </thead>
         HTML
@@ -74,14 +74,16 @@ RSpec.describe Core::Table::HeaderComponent, type: :component do
     end
 
     context 'when the header has a sorted row' do
-      let(:component) { described_class.new(caption: 'caption', columns: %w[A B], sorts: [1]) }
+      let(:component) do
+        described_class.new(caption: 'caption', columns: [{ label: 'A' }, { label: 'B', sortable: true }])
+      end
       let(:expected_html) do
         <<~HTML
           <caption aria-hidden="true" hidden>caption</caption>
           <thead>
             <tr>
-                <th scope="row" role="columnheader">A</th>
-                <th data-sortable scope="row" role="columnheader" aria-sort="descending">B</th>
+                <th scope="col">A</th>
+                <th data-sortable scope="col" aria-sort="descending">B</th>
             </tr>
           </thead>
         HTML

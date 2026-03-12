@@ -1,14 +1,18 @@
-          <caption aria-hidden="true" hidden><%= caption %></caption>
-          <thead>
-            <tr>
-              <% columns.each_with_index do |title, index| %>
-                <% if sorts.include?(index) %>
-                  <th data-sortable scope="row" role="columnheader" aria-sort="descending">
-                <% else %>
-                  <th scope="row" role="columnheader">
-                <% end %>
-                  <%= title %>
-                </th>
-              <% end %>
-            </tr>
-          </thead>
+<%# <%# This is hidden from sr's on purpose, since its redundant when used with nearby content. %>
+<%# However, USWDS uses table captions for aria-live regions on sortable tables %>
+<caption aria-hidden="true" hidden><%= caption %></caption>
+<thead>
+  <tr>
+    <% columns.each do |column| %>
+      <% if column.sortable %>
+        <th data-sortable scope="col" aria-sort="descending">
+            <%= column.label %>
+        </th>
+      <% else %>
+        <th scope="col">
+            <%= column.label %>
+        </th>
+      <% end %>
+    <% end %>
+  </tr>
+</thead>
