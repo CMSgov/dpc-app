@@ -2,11 +2,11 @@
 /* eslint no-console: "off" */
 
 import { check } from 'k6';
-import { generateDPCToken } from '../generate-dpc-token.js';
 import {
   createPatientsBatch,
   patientEverything,
   createPractitioners,
+  generateClientAccessToken,
 } from '../dpc-api-client.js';
 import {
   monitorJob,
@@ -16,7 +16,9 @@ const practitionerNpi = __ENV.ENVIRONMENT == 'prod' ? "1234329724" : "3247281157
 
 export async function checkPatientEverythingWorkflow(data) {
   const orgId = data.orgId;
-  const token = generateDPCToken(orgId, data.goldenMacaroon);
+
+  // Auth is a prerequisite, and is not what we're testing
+  const token = await generateClientAccessToken(orgId, data.goldenMacaroon);
 
   // Uploading practitioner
   const createPractitionerResponse = createPractitioners(token, practitionerNpi);
