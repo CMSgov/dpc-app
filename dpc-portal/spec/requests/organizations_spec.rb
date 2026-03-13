@@ -220,7 +220,7 @@ RSpec.describe 'Organizations', type: :request do
         it 'shows tos page' do
           get "/organizations/#{org.id}"
           expect(response).to be_ok
-          expect(response.body).to include('<h2>Sign Terms of Service</h2>')
+          expect(response.body).to include('<h1>Sign Terms of Service</h1>')
         end
       end
 
@@ -422,7 +422,7 @@ RSpec.describe 'Organizations', type: :request do
         org = create(:provider_organization)
         create(:ao_org_link, provider_organization: org, user:)
         get "/organizations/#{org.id}/tos_form"
-        expect(response.body).to include('<h2>Sign Terms of Service</h2>')
+        expect(response.body).to include('<h1>Sign Terms of Service</h1>')
         expect(response).to be_ok
       end
 

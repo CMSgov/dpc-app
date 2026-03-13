@@ -3,6 +3,8 @@
   <div class="margin-bottom-5">&larr; <%= link_to "Return to my organizations", organizations_path %></div>
   <h1><%= @organization.name %></h1>
   <p><span class="text-bold">NPI:</span> <%= @organization.npi %></p>
+  <% else %>
+  <h1>Access Denied</h1>
   <% end %>
   <div class="font-body-lg text-bold"><%= t("#{@failure_code}_status") %></div>
   <p><%=raw t("#{@failure_code}_text") %></p>
