@@ -10,6 +10,17 @@ import {
   generateProvenanceResourceBody
 } from "./resource-request-bodies.js"
 
+import { generateDPCToken } from './generate-dpc-token.js';
+
+import {
+  makeJwt,
+  generateKeyBundle,
+} from './generate-jwt.js'
+
+import {
+  generateUniqueTestRunValue,
+} from './smoke_test_workflows/smoke_test_utils.js'
+
 export const urlRoot = __ENV.ENVIRONMENT == 'local' ? 'http://host.docker.internal:3002/api/v1' : `https://${__ENV.ENVIRONMENT}.dpc.cms.gov/api/v1`;
 
 export function findOrganizationByNpi(npi, goldenMacaroon) {
@@ -361,4 +372,31 @@ function createHeaderParam(token, headers) {
   }
 
   return {'headers': {...defaultHeaders, ...headers}};
+}
+
+/**
+ * Generates the client auth token required as a prerequisite for other test flows.
+ * NOTE: This is NOT testing auth workflow since it has its own dedicated set of smoke test. 
+ * This is setting up auth for other smoke tests to use.
+ * 
+ * @param {*} orgId
+ * @param {*} goldenMacaroon
+ * @returns Client Auth Token
+ */
+export async function generateClientAccessToken(orgId, goldenMacaroon) {
+  const token = generateDPCToken(orgId, goldenMacaroon);
+  const uniqueValue = generateUniqueTestRunValue();
+  const createTokenResponse = createClientToken(token, `New token ${uniqueValue}`);
+  const clientToken = createTokenResponse.json().token;
+
+  const { privateKey, publicKey, snippet } = await generateKeyBundle();
+  const createPublicKeyResponse = createPublicKey(token, `New+Key+${uniqueValue}`, publicKey, snippet);
+
+  const publicKeyId = createPublicKeyResponse.json().id
+  const jwt = await makeJwt(clientToken, publicKeyId, privateKey);
+  validateJwt(jwt);
+
+  const accessTokenResponse = retrieveAccessToken(jwt);
+  const accessToken = accessTokenResponse.json().access_token
+  return accessToken;
 }
