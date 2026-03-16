@@ -31,7 +31,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       it 'shows tos page if not signed' do
         get "/organizations/#{org.id}/credential_delegate_invitations/new"
         expect(assigns(:organization)).to eq org
-        expect(response.body).to include('<h2>Sign Terms of Service</h2>')
+        expect(response.body).to include('<h1>Sign Terms of Service</h1>')
       end
 
       it 'shows invite cd form if tos signed' do
