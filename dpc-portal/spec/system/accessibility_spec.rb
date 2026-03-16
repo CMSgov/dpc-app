@@ -299,15 +299,14 @@ RSpec.describe 'Accessibility', type: :system do
           context 'create credential delegate invitation' do
             it 'should show new page' do
               visit "/organizations/#{org.id}/credential_delegate_invitations/new"
-              expect(page).to have_text('Send invite')
+              expect(page).to have_button('Send invite')
               expect(page).to_not have_text("can't be blank")
               expect(page).to be_axe_clean.according_to axe_standard
             end
             it 'should show error page' do
               visit "/organizations/#{org.id}/credential_delegate_invitations/new"
               page.find_button(value: 'Send invite').click
-              attribute_message = page.find('#invited_given_name').native.attribute('validationMessage')
-              expect(attribute_message).to eq 'Please fill out this field.'
+              expect(page).to have_text("can't be blank")
               expect(page).to be_axe_clean.according_to axe_standard
             end
             it 'should show success page' do
