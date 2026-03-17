@@ -8,7 +8,7 @@ module LuhnacyLib
     end
   end
 
-  def self.validate_npi(npi)
+  def self.validate_npi?(npi)
     Luhnacy.doctor_npi?(npi)
   end
 end

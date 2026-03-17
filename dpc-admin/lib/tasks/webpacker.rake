@@ -11,11 +11,11 @@ namespace :webpacker do
       npm_requirement = JSON.parse(package_json_path.read).dig('engines', 'npm')
       requirement = Gem::Requirement.new(npm_requirement)
       unless requirement.satisfied_by?(version)
-        warn "Webpacker requires npm #{requirement} and you are using #{version}" && exit!
+        warn exit!
       end
     rescue Errno::ENOENT
       warn 'npm not installed'
-      warn 'Install NPM https://www.npmjs.com/get-npm' && exit!
+      warn exit!
     end
   end
   task :npm_install do

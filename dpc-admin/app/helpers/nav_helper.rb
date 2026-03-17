@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 module NavHelper
-  def current_sidenav_class?(nav_item, current)
-    'ds-c-vertical-nav__label--current' if nav_item.to_s == current.to_s
-  end
-
   def current_sidenav_class
     'ds-c-vertical-nav__label--current'
   end

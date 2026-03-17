@@ -7,7 +7,7 @@ class ClientTokenManager
     @registered_organization = registered_organization
   end
 
-  def create_client_token(label: nil)
+  def create_client_token?(label: nil)
     api_client = DpcClient.new
     api_client.create_client_token(registered_organization.api_id, params: { label: })
 

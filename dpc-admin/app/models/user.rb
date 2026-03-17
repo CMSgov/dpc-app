@@ -104,6 +104,6 @@ class User < ApplicationRecord
   end
 
   def unassigned?
-    organization_user_assignments.count.zero?
+    organization_user_assignments.none?
   end
 end

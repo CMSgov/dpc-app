@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.describe PublicKeyManager do
   include DpcClientSupport
+
   describe '#create_public_key' do
     before(:each) do
       @public_key_params = { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read, snippet_signature: 'stubbed_sign_txt_signature' }
@@ -70,10 +71,10 @@ RSpec.describe PublicKeyManager do
         registered_org = build(:registered_organization)
 
         api_client = stub_api_client(message: :get_public_keys, success: true,
-                                     response: { 'entities' => ['id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3'] })
+                                     response: { 'entities' => [{ 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' }] })
 
         manager = PublicKeyManager.new(registered_organization: registered_org)
-        expect(manager.public_keys).to eq(['id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3'])
+        expect(manager.public_keys).to eq([{ 'id' => '570f7a71-0e8f-48a1-83b0-c46ac35d6ef3' }])
         expect(api_client).to have_received(:get_public_keys)
           .with(registered_org.api_id)
       end

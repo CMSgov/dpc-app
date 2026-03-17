@@ -81,15 +81,15 @@ class Organization < ApplicationRecord
   def reg_org
     registered_organization
   end
-end
 
-private
+  private
 
-def validate_npi
-  npi = '80840' + self.npi
+  def validate_npi
+    npi = '80840' + self.npi
 
-  return if LuhnacyLib.validate_npi(npi)
+    return if LuhnacyLib.validate_npi?(npi)
 
-  errors.add :npi, 'must be valid.'
-  throw(:abort)
+    errors.add :npi, 'must be valid.'
+    throw(:abort)
+  end
 end
