@@ -11,6 +11,8 @@ import java.util.zip.GZIPOutputStream;
  * Utility class to Gzip compression and decompression.
  */
 public class GzipUtil {
+	public static final String GZIP = "gzip";
+
 	// A Gzipped file will start with these two "magic" numbers
 	private static final int GZIP_MAGIC_1 = 0x1f;
 	private static final int GZIP_MAGIC_2 = 0x8b;
@@ -20,30 +22,9 @@ public class GzipUtil {
 	}
 
 	/**
-	 * Checks if the given file is gzip compressed.
-	 * @param file The file to check.
-	 * @return true if the file is compressed, false otherwise.
-	 * @throws IOException If there is a problem reading the file.
-	 */
-	public static boolean isCompressed(File file) throws IOException {
-		if (file.length() < 2) {
-			return false;
-		}
-
-		try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
-			// Check if we start with the magic bytes
-			int b1 = is.read();
-			int b2 = is.read();
-
-			return (b1 == GZIP_MAGIC_1) && (b2 == GZIP_MAGIC_2);
-		}
-	}
-
-	/**
 	 * Checks if the given byte array is gzip compressed.
 	 * @param data The data to check.
 	 * @return true if the data is compressed, false otherwise.
-	 * @throws IOException If there is a problem reading the data.
 	 */
 	public static boolean isCompressed(byte[] data) {
 		if (data.length < 2) {
@@ -53,6 +34,29 @@ public class GzipUtil {
 		int byte1 = Byte.toUnsignedInt(data[0]);
 		int byte2 = Byte.toUnsignedInt(data[1]);
 		return (byte1 == GZIP_MAGIC_1) &&  (byte2 == GZIP_MAGIC_2);
+	}
+
+	/**
+	 * Checks if the {@link InputStream} is gzip compressed.  Note: The stream must be positioned at the start of the
+	 * compressed data for it to be recognized.
+	 * @param inputStream
+	 * @return Returns true if the {@link InputStream} is pointing to the start of gzip compressed data.
+	 * @throws IOException If there is a problem reading the {@link InputStream}.
+	 */
+	public static boolean isCompressed(InputStream inputStream) throws IOException {
+		// Wrapping in a buffered stream so we can reset our cursor
+		try (BufferedInputStream bis = new BufferedInputStream(inputStream)) {
+			byte[] firstTwoBytes = new byte[2];
+
+			// We need to read the first two bytes to determine if the input stream is compressed, but we don't want to
+			// remove those bytes from the stream.
+			bis.mark(2);
+			int bytesRead = bis.read(firstTwoBytes);
+			bis.reset();
+
+			if (bytesRead != 2) {return false;}
+			return isCompressed(firstTwoBytes);
+		}
 	}
 
 	/**

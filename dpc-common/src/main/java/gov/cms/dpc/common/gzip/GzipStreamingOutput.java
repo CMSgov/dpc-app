@@ -5,38 +5,36 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 import org.apache.commons.io.IOUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Ensures that the given {@link File} is gzip compressed and writes it to an {@link OutputStream} so it can be returned
+ * Ensures that the given {@link InputStream} is gzip compressed and writes it to an {@link OutputStream} so it can be returned
  * in a {@link jakarta.ws.rs.core.Response}.
  */
 public class GzipStreamingOutput implements StreamingOutput {
-	private final File file;
+	private final InputStream inputStream;
+	private final boolean isCompressed;
 
-	public GzipStreamingOutput(File file) {
-		this.file = file;
+	public GzipStreamingOutput(InputStream inputStream, boolean isCompressed) {
+		this.inputStream = inputStream;
+		this.isCompressed = isCompressed;
 	}
 
 	@Override
 	public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-		try (FileInputStream fileInputStream = new FileInputStream(file)) {
-
+		try {
 			// If the file's already compressed, just stream it.  If not, compress it first.
-			if (GzipUtil.isCompressed(file)) {
-				IOUtils.copy(fileInputStream, outputStream);
+			if (isCompressed) {
+				IOUtils.copy(inputStream, outputStream);
 			} else {
-				try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream)) {
-					IOUtils.copy(fileInputStream, gzipOutputStream);
-					gzipOutputStream.finish();
-				}
+				GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream);
+				IOUtils.copy(inputStream, gzipOutputStream);
+				gzipOutputStream.finish();
 			}
+			outputStream.flush();
 		} catch (IOException e) {
-			throw new WebApplicationException(String.format("Unable to read/compress file %s", file.getName()), e, Response.Status.INTERNAL_SERVER_ERROR);
+			throw new WebApplicationException("Unable to write compressed stream", e, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 }

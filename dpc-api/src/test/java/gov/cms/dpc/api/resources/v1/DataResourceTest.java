@@ -4,26 +4,24 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.common.gzip.GzipUtil;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.DistributedBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.testing.APIAuthHelpers;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.core5.http.*;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -31,8 +29,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,7 +38,6 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 
 	private static DistributedBatchQueue queue;
 	private final String exportPath = getExportPath();
-	private final String gZIP = "gzip";
 
 	@BeforeAll
 	static void configDb() {
@@ -50,51 +47,89 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 		queue = new DistributedBatchQueue(new DPCQueueManagedSessionFactory(sessionFactory), 100, new MetricRegistry());
 	}
 
-	@Test
-	void canDownloadUncompressed() {
-		String fileName = createTestExport("uncompressed_data");
+	static Stream<Arguments> downloadArgs() {
+		return Stream.of(
+			Arguments.of(false, Collections.EMPTY_MAP),	// uncompressed file, uncompressed download
+			Arguments.of(false, Map.of(HttpHeaders.ACCEPT_ENCODING, GzipUtil.GZIP)),	// uncompressed file, compressed download
+			Arguments.of(true, Collections.EMPTY_MAP), 	// compressed file, uncompressed download
+			Arguments.of(true, Map.of(HttpHeaders.ACCEPT_ENCODING, GzipUtil.GZIP))	// compressed file, compressed download
+		);
+	}
 
-		try (ClassicHttpResponse response = downloadExport(fileName, false)) {
+	@ParameterizedTest
+	@MethodSource("downloadArgs")
+	void canDownloadFiles(boolean compressFile, Map<String, String> requestHeaders) throws IOException {
+		String testData = "test data".repeat(100);
+		String fileName = createTestExport(testData, compressFile);
+
+		try (ClassicHttpResponse response = downloadExport(fileName, requestHeaders)) {
 			assertNotNull(response);
+
+			boolean expectGzipCompressed =
+				requestHeaders.containsKey(HttpHeaders.ACCEPT_ENCODING) && requestHeaders.get(HttpHeaders.ACCEPT_ENCODING).contains("gzip");
 
 			// Check content encoding
 			Header contentEncoding = response.getHeader(HttpHeaders.CONTENT_ENCODING);
-			assertNull(contentEncoding);
+			if (expectGzipCompressed) {
+				assertEquals(GzipUtil.GZIP, contentEncoding.getValue());
+			} else {
+				assertNull(contentEncoding);
+			}
 
 			// Make sure we can read the body
 			HttpEntity entity = response.getEntity();
-			if (entity != null) {
-				String responseString = EntityUtils.toString(entity);
-				assertEquals("uncompressed_data", responseString);
+			byte[] responseData = entity.getContent().readAllBytes();
+
+			String responseString;
+			if (expectGzipCompressed) {
+				responseString = GzipUtil.decompress(responseData);
+			} else {
+				responseString = new String(responseData);
 			}
-		} catch (IOException | ProtocolException E) {
+
+			assertEquals(testData, responseString);
+		} catch (IOException | ProtocolException e) {
 			fail("Failed to read response");
 		}
 	}
 
-	@Test
-	@Disabled("Will fail until we manually add compression back")
-	void canDownloadCompressed() {
-		// A response needs to be at least 256 bytes before Dropwizard will compress it
-		String expectedBody = "compressed_data".repeat(1000);
-		String fileName = createTestExport(expectedBody);
+	@ParameterizedTest
+	@MethodSource("downloadArgs")
+	void canDownloadFileRanges(boolean compressFile, Map<String, String> requestHeadersIn) throws IOException {
+		String testData = "uncompressed_data";
+		String fileName = createTestExport("12345_" + testData + "_54321", compressFile);
 
-		try (ClassicHttpResponse response = downloadExport(fileName, true)) {
+		// Add range header
+		Map<String, String> requestHeaders = new HashMap<>(requestHeadersIn);
+		requestHeaders.put(HttpHeaders.RANGE, String.format("bytes=%d-%d", 6, 6 + testData.length()));
+
+		boolean expectGzipCompressed =
+			requestHeaders.containsKey(HttpHeaders.ACCEPT_ENCODING) && requestHeaders.get(HttpHeaders.ACCEPT_ENCODING).contains("gzip");
+
+		try (ClassicHttpResponse response = downloadExport(fileName, requestHeaders))
+		{
 			assertNotNull(response);
-
-			// String test = EntityUtils.toString(response.getEntity());
 
 			// Check content encoding
 			Header contentEncoding = response.getHeader(HttpHeaders.CONTENT_ENCODING);
-			assertEquals(gZIP, contentEncoding.getValue());
+			if (expectGzipCompressed) {
+				assertEquals(GzipUtil.GZIP, contentEncoding.getValue());
+			} else {
+				assertNull(contentEncoding);
+			}
 
 			// Make sure we can read the body
 			HttpEntity entity = response.getEntity();
-			if (entity != null) {
-				byte[] responseBytes = EntityUtils.toByteArray(entity);
-				String decompressedResponseString = decompress(responseBytes);
-				assertEquals(expectedBody, decompressedResponseString);
+			byte[] responseData = entity.getContent().readAllBytes();
+
+			String responseString;
+			if (expectGzipCompressed) {
+				responseString = GzipUtil.decompress(responseData);
+			} else {
+				responseString = new String(responseData);
 			}
+
+			assertEquals(testData, responseString);
 		} catch (IOException | ProtocolException e) {
 			fail("Failed to read response");
 		}
@@ -102,19 +137,18 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 
 	// Downloads a file from the Data endpoint.
 	// Turns off auto-handling of gzip compression so each test can handle it itself.
-	private ClassicHttpResponse downloadExport(String fileName, Boolean compressed) {
+	private ClassicHttpResponse downloadExport(String fileName, Map<String, String> headers) {
 		// Create client and call Data end point
 		try {
 			APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
-			 try (final CloseableHttpClient client = APIAuthHelpers.createCustomHttpClient().disableCompression().trusting().build()) {
+			try (final CloseableHttpClient client = APIAuthHelpers.createCustomHttpClient().disableCompression().trusting().build()) {
 				final URIBuilder builder = new URIBuilder(String.format("%s/Data/%s", getBaseURL(), fileName));
 				final HttpGet httpGet = new HttpGet(builder.build());
 				httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + auth.accessToken);
 
-				// Add gzip compression
-				if (compressed) {
-					httpGet.addHeader(HttpHeaders.ACCEPT_ENCODING, gZIP);
+				for (Map.Entry<String, String> header : headers.entrySet()) {
+					httpGet.addHeader(header.getKey(), header.getValue());
 				}
 
 				return client.execute(httpGet, response -> response);
@@ -126,7 +160,7 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 	}
 
 	// Creates a fake export file we can use the DataResource to download
-	private String createTestExport(String content) {
+	private String createTestExport(String content, boolean compress) throws IOException {
 		DPCResourceType resourceType = DPCResourceType.Patient;
 		int sequence = 0;
 		UUID jobID = UUID.randomUUID();
@@ -157,9 +191,19 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 
 		// Create the file in the file system and get its metadata
 		String fileName = batchFile.getFileName() + ".ndjson";
-		Path path = Paths.get(exportPath + "/" + fileName);
+
+		Path path;
+		byte[] fileData;
+		if  (compress) {
+			path = Paths.get(exportPath + "/" + fileName + ".gz");
+			fileData = GzipUtil.compress(content);
+		} else {
+			path = Paths.get(exportPath + "/" + fileName);
+			fileData = content.getBytes(StandardCharsets.UTF_8);
+		}
+
 		try {
-			Files.writeString(path, content);
+			Files.write(path, fileData);
 
 			batchFile.setFileLength(Files.size(path));
 			batchFile.setChecksum(AggregationUtils.generateChecksum(path.toFile()));
@@ -173,13 +217,5 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 		queue.completeBatch(batch, aggregatorID);
 
 		return fileName;
-	}
-
-	// Manually decompresses a gzip'd string so we can check its value
-	private String decompress(byte[] in) throws IOException {
-		try (ByteArrayInputStream bais = new ByteArrayInputStream(in);
-			 GzipCompressorInputStream gzis = new GzipCompressorInputStream(bais)) {
-				return IOUtils.toString(gzis, StandardCharsets.UTF_8);
-		}
 	}
 }
