@@ -1,18 +1,15 @@
 name: 'DPC - Build and Deploy (arm64 test)'
 
 on:
+  schedule:
+    - cron: '0 6 * * 1-5'
   push:
     branches:
-      - "ja/dpc-5270-update-containers-to-arm64"
-  # schedule:
-  #   - cron: '0 6 * * 1-5'
-  # push:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - dpc-**
-  #     - engines/**
-  #     - .github/workflows/**
+      - main
+    paths:
+      - dpc-**
+      - engines/**
+      - .github/workflows/**
 
   workflow_dispatch:
     inputs:
