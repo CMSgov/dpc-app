@@ -1,4 +1,4 @@
-name: 'DPC - Build and Deploy (arm64 test)'
+name: 'DPC - Build and Deploy'
 
 on:
   schedule:
