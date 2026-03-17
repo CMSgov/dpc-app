@@ -1,15 +1,18 @@
-name: 'DPC - Build and Deploy'
+name: 'DPC - Build and Deploy (arm64 test)'
 
 on:
-  schedule:
-    - cron: '0 6 * * 1-5'
   push:
     branches:
-      - main
-    paths:
-      - dpc-**
-      - engines/**
-      - .github/workflows/**
+      - "ja/dpc-5270-update-containers-to-arm64"
+  # schedule:
+  #   - cron: '0 6 * * 1-5'
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - dpc-**
+  #     - engines/**
+  #     - .github/workflows/**
 
   workflow_dispatch:
     inputs:
@@ -58,7 +61,9 @@ permissions:
 jobs:
   validate-parameters:
     name: "Validate Parameters"
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    # runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+
     outputs:
       version_tag: ${{ steps.get-version-tag.outputs.version_tag }}
     steps:
