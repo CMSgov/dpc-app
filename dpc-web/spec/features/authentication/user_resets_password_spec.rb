@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.feature 'user resets password' do
   include ActiveJob::TestHelper
+
   let(:user) { create :user }
 
   context 'when successful' do
