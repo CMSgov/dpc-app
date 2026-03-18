@@ -22,7 +22,6 @@ import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,20 +29,23 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -65,89 +67,46 @@ class DataResourceUnitTest {
         Mockito.reset(manager);
     }
 
-    @Test
-    void streamingTest_uncompressedResponse_uncompressedFile() throws IOException {
-        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
-            final File tempPath = FileUtils.getTempDirectory();
-            final File file = File.createTempFile("test", ".ndjson", tempPath);
-            FileUtils.write(file, "This is a test", StandardCharsets.UTF_8);
-            return new FileManager.FilePointer("", file.length(), UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, false);
-        });
-
-        final Response response = RESOURCE.target("/v1/Data/test.ndjson")
-                .request()
-                .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
-                .get();
-
-        final InputStream output = response.readEntity(InputStream.class);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        IOUtils.copy(output, bos);
-        assertAll(() -> assertEquals("This is a test", bos.toString(StandardCharsets.UTF_8), "Should have correct string"),
-                () -> assertEquals(HttpStatus.OK_200, response.getStatus(), "Should have ok status"),
-                () -> assertNotNull(response.getHeaderString(HttpHeaders.ETAG), "Should have eTag"));
+    static Stream<Arguments> downloadArgs() {
+        return Stream.of(
+            Arguments.of(false, Collections.EMPTY_MAP),	// uncompressed file, uncompressed download
+            Arguments.of(false, Map.of(HttpHeaders.ACCEPT_ENCODING, GzipUtil.GZIP)),	// uncompressed file, compressed download
+            Arguments.of(true, Collections.EMPTY_MAP), 	// compressed file, uncompressed download
+            Arguments.of(true, Map.of(HttpHeaders.ACCEPT_ENCODING, GzipUtil.GZIP))	// compressed file, compressed download
+        );
     }
 
-    @Test
-    void streamingTest_uncompressedResponse_compressedFile() throws IOException {
-        String testData = "This is a test";
+    @ParameterizedTest
+    @MethodSource("downloadArgs")
+    void canDownloadFiles(boolean compressFile, Map<String, String> requestHeaders) throws IOException {
+        final String testData = "This is a test";
 
         Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
             final File tempPath = FileUtils.getTempDirectory();
-            final File file = File.createTempFile("test", ".ndjson.gz", tempPath);
-            FileUtils.writeByteArrayToFile(file, GzipUtil.compress(testData));
-            return new FileManager.FilePointer("", file.length(), UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, true);
+            File file;
+            if (compressFile) {
+                file = File.createTempFile("test", ".ndjson.gz", tempPath);
+                FileUtils.writeByteArrayToFile(file, GzipUtil.compress(testData));
+            } else {
+                file = File.createTempFile("test", ".ndjson", tempPath);
+                FileUtils.write(file, testData, StandardCharsets.UTF_8);
+            }
+            return new FileManager.FilePointer("", file.length(), UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, compressFile);
         });
 
-        final Response response = RESOURCE.target("/v1/Data/test.ndjson")
+        boolean expectGzipCompressed =
+            requestHeaders.containsKey(HttpHeaders.ACCEPT_ENCODING) && requestHeaders.get(HttpHeaders.ACCEPT_ENCODING).contains("gzip");
+
+        Invocation.Builder requestBuilder = RESOURCE.target("/v1/Data/test.ndjson")
             .request()
-            .header(HttpHeaders.ACCEPT, "application/ndjson")
-            .get();
+            .header(HttpHeaders.ACCEPT, "application/ndjson");
 
-        final InputStream output = response.readEntity(InputStream.class);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        IOUtils.copy(output, bos);
-        String responseBody = bos.toString(StandardCharsets.UTF_8);
-        assertAll(() -> assertEquals(testData, responseBody, "Should have correct string"),
-            () -> assertEquals(HttpStatus.OK_200, response.getStatus(), "Should have ok status"),
-            () -> assertNotNull(response.getHeaderString(HttpHeaders.ETAG), "Should have eTag"));
-    }
+        for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
+            requestBuilder.header(header.getKey(), header.getValue());
+        }
+        final Response response = requestBuilder.get();
 
-    @Test
-    void streamingTest_compressedResponse_uncompressedFile() throws IOException {
-        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
-            final File tempPath = FileUtils.getTempDirectory();
-            final File file = File.createTempFile("test", ".ndjson", tempPath);
-            FileUtils.write(file, "This is a test", StandardCharsets.UTF_8);
-            return new FileManager.FilePointer("", file.length(), UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, false);
-        });
-
-        final Response response = RESOURCE.target("/v1/Data/test.ndjson")
-            .request()
-            .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
-            .acceptEncoding(GzipUtil.GZIP)
-            .get();
-        String responseBody = readCompressedResponse(response);
-
-        assertAll(() -> assertEquals("This is a test", responseBody, "Should have correct string"),
-            () -> assertEquals(HttpStatus.OK_200, response.getStatus(), "Should have ok status"),
-            () -> assertNotNull(response.getHeaderString(HttpHeaders.ETAG), "Should have eTag"));
-    }
-
-    @Test
-    void streamingTest_compressedResponse_compressedFile() throws IOException {
-        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
-            final File tempPath = FileUtils.getTempDirectory();
-            final File file = File.createTempFile("test", ".ndjson.gz", tempPath);
-            FileUtils.writeByteArrayToFile(file, GzipUtil.compress("This is a test"));
-            return new FileManager.FilePointer("", file.length(), UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, true);
-        });
-
-        final Response response = RESOURCE.target("/v1/Data/test.ndjson")
-            .request()
-            .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
-            .acceptEncoding(GzipUtil.GZIP)
-            .get();
-        String responseBody = readCompressedResponse(response);
+        String responseBody = readResponse(response, expectGzipCompressed);
 
         assertAll(() -> assertEquals("This is a test", responseBody, "Should have correct string"),
             () -> assertEquals(HttpStatus.OK_200, response.getStatus(), "Should have ok status"),
@@ -179,295 +138,108 @@ class DataResourceUnitTest {
         assertEquals(HttpStatus.GONE_410, response.getStatus(), "Should have 410 Gone status");
     }
 
-    @Test
-    void testRangeRequest_uncompressedResponse_uncompressedFile() throws IOException {
+    @ParameterizedTest
+    @MethodSource("downloadArgs")
+    void canDownloadFileRanges(boolean compressFile, Map<String, String> requestHeaders) throws IOException {
         final File tempPath = FileUtils.getTempDirectory();
-        final File file = File.createTempFile("test", ".ndjson", tempPath);
         final int length = 4 * 1024 * 1024;
         final String randomString = buildRandomString();
-        FileUtils.write(file, randomString, StandardCharsets.UTF_8);
 
-        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenReturn(new FileManager.FilePointer("", 0, UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, false));
+        File file;
+        if (compressFile) {
+            file = File.createTempFile("test", ".ndjson.gz", tempPath);
+            FileUtils.writeByteArrayToFile(file, GzipUtil.compress(randomString));
+        } else {
+            file = File.createTempFile("test", ".ndjson", tempPath);
+            FileUtils.write(file, randomString, StandardCharsets.UTF_8);
+        }
 
-        // Try to request one byte
-        Response response = RESOURCE.target("/v1/Data/test.ndjson")
-                .request()
-                .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=0-1")
-                .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
-                .get();
+        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenReturn(
+            new FileManager.FilePointer("", 0, UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, compressFile)
+        );
 
-        InputStream is = response.readEntity(InputStream.class);
-        StringWriter stringWriter = new StringWriter();
-        IOUtils.copy(is, stringWriter, StandardCharsets.UTF_8);
-
-        final String ch1 = response.getHeaderString(org.apache.hc.core5.http.HttpHeaders.CONTENT_LENGTH);
-        final String ws1 = stringWriter.toString();
-        assertAll(() -> assertNotNull(ch1, "Should have header"),
-                () -> assertEquals(1, Integer.parseInt(ch1), "Should only have a single byte"),
-                () -> assertEquals(String.valueOf(randomString.charAt(0)), ws1, "Should only have a single byte"));
-        stringWriter.getBuffer().setLength(0);
-
-        // Request 500 kb, with an offset
-        int start = 30;
-        int end = 500 * 1024 + start;
-        response = RESOURCE.target("/v1/Data/test.ndjson")
-                .request()
-                .header(org.apache.hc.core5.http.HttpHeaders.RANGE, String.format("bytes=%d-%s", start, end))
-                .get();
-
-        is = response.readEntity(InputStream.class);
-        stringWriter = new StringWriter();
-        IOUtils.copy(is, stringWriter, StandardCharsets.UTF_8);
-
-        final String ws2 = stringWriter.toString();
-        assertEquals(randomString.substring(start, end), ws2, "Strings should match");
-        stringWriter.getBuffer().setLength(0);
-
-        // Request the entire file
-        response = RESOURCE.target("/v1/Data/test.ndjson")
-                .request()
-                .header(org.apache.hc.core5.http.HttpHeaders.RANGE, String.format("bytes=0-%s", length))
-                .get();
-
-        is = response.readEntity(InputStream.class);
-        stringWriter = new StringWriter();
-        IOUtils.copy(is, stringWriter, StandardCharsets.UTF_8);
-
-        final String ws3 = stringWriter.toString();
-        assertEquals(randomString, ws3, "Strings should match");
-        stringWriter.getBuffer().setLength(0);
-
-        // Request the entire file, without the ending value, which returns one chunk
-        response = RESOURCE.target("/v1/Data/test.ndjson")
-                .request()
-                .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=0-")
-                .get();
-
-        is = response.readEntity(InputStream.class);
-        stringWriter = new StringWriter();
-        IOUtils.copy(is, stringWriter, StandardCharsets.UTF_8);
-
-        final String ws4 = stringWriter.toString();
-        assertEquals(randomString.substring(0, 1024 * 1024), ws4, "Should match the first 1MB of the file");
-
-        // Request file with an invalid range
-        response = RESOURCE.target("/v1/Data/test.ndjson")
-                .request()
-                .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
-                .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=50-0")
-                .get();
-
-        assertEquals(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE.getStatusCode(), response.getStatus());
-        assertEquals("{\"code\":416,\"message\":\"Range end cannot be before begin\"}", response.readEntity(String.class), "Should have correct status code");
-    }
-
-    @Test
-    void testRangeRequest_compressedResponse_uncompressedFile() throws IOException {
-        final File tempPath = FileUtils.getTempDirectory();
-        final File file = File.createTempFile("test", ".ndjson", tempPath);
-        final int length = 4 * 1024 * 1024;
-        final String randomString = buildRandomString();
-        FileUtils.write(file, randomString, StandardCharsets.UTF_8);
-
-        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenReturn(new FileManager.FilePointer("", 0, UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, false));
+        boolean expectGzipCompressed =
+            requestHeaders.containsKey(HttpHeaders.ACCEPT_ENCODING) && requestHeaders.get(HttpHeaders.ACCEPT_ENCODING).contains("gzip");
 
         // Try to request one byte
-        Response response = RESOURCE.target("/v1/Data/test.ndjson")
+        Invocation.Builder requestBuilder = RESOURCE.target("/v1/Data/test.ndjson")
             .request()
             .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=0-1")
-            .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
-            .acceptEncoding(GzipUtil.GZIP)
-            .get();
-        final String responseBody = readCompressedResponse(response);
+            .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson");
 
+        for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
+            requestBuilder.header(header.getKey(), header.getValue());
+        }
+        Response response = requestBuilder.get();
+        String responseBody = readResponse(response, expectGzipCompressed);
+
+        assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus(), "Should have partial content status");
         assertEquals(String.valueOf(randomString.charAt(0)), responseBody, "Should only have a single byte");
 
         // Request 500 kb, with an offset
         int start = 30;
         int end = 500 * 1024 + start;
-        response = RESOURCE.target("/v1/Data/test.ndjson")
+        requestBuilder = RESOURCE.target("/v1/Data/test.ndjson")
             .request()
             .header(org.apache.hc.core5.http.HttpHeaders.RANGE, String.format("bytes=%d-%s", start, end))
-            .acceptEncoding(GzipUtil.GZIP)
-            .get();
-        final String responseBody2 = readCompressedResponse(response);
+            .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson");
 
-        assertEquals(randomString.substring(start, end), responseBody2, "Strings should match");
+        for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
+            requestBuilder.header(header.getKey(), header.getValue());
+        }
+        response = requestBuilder.get();
+        responseBody = readResponse(response, expectGzipCompressed);
 
-        // Request the entire file
-        response = RESOURCE.target("/v1/Data/test.ndjson")
-            .request()
-            .header(org.apache.hc.core5.http.HttpHeaders.RANGE, String.format("bytes=0-%s", length))
-            .acceptEncoding(GzipUtil.GZIP)
-            .get();
-        final String responseBody3 = readCompressedResponse(response);
-
-        assertEquals(randomString, responseBody3, "Strings should match");
-
-        // Request the entire file, without the ending value, which returns one chunk
-        response = RESOURCE.target("/v1/Data/test.ndjson")
-            .request()
-            .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=0-")
-            .acceptEncoding(GzipUtil.GZIP)
-            .get();
-        final String responseBody4 = readCompressedResponse(response);
-
-        assertEquals(randomString.substring(0, 1024 * 1024), responseBody4, "Should match the first 1MB of the file");
-
-        // Request file with an invalid range
-        response = RESOURCE.target("/v1/Data/test.ndjson")
-            .request()
-            .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
-            .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=50-0")
-            .acceptEncoding(GzipUtil.GZIP)
-            .get();
-
-        assertEquals(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE.getStatusCode(), response.getStatus());
-        assertEquals("{\"code\":416,\"message\":\"Range end cannot be before begin\"}", response.readEntity(String.class), "Should have correct status code");
-    }
-
-    @Test
-    void testRangeRequest_uncompressedResponse_compressedFile() throws IOException {
-        final File tempPath = FileUtils.getTempDirectory();
-        final File file = File.createTempFile("test", ".ndjson.gz", tempPath);
-        final int length = 4 * 1024 * 1024;
-        final String randomString = buildRandomString();
-        FileUtils.writeByteArrayToFile(file, GzipUtil.compress(randomString));
-
-        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenReturn(new FileManager.FilePointer("", 0, UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, true));
-
-        // Try to request one byte
-        Response response = RESOURCE.target("/v1/Data/test.ndjson")
-            .request()
-            .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=0-1")
-            .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
-            .get();
-
-        InputStream is = response.readEntity(InputStream.class);
-        StringWriter stringWriter = new StringWriter();
-        IOUtils.copy(is, stringWriter, StandardCharsets.UTF_8);
-
-        final String ws1 = stringWriter.toString();
-        assertEquals(String.valueOf(randomString.charAt(0)), ws1, "Should only have a single byte");
-        stringWriter.getBuffer().setLength(0);
-
-        // Request 500 kb, with an offset
-        int start = 30;
-        int end = 500 * 1024 + start;
-        response = RESOURCE.target("/v1/Data/test.ndjson")
-            .request()
-            .header(org.apache.hc.core5.http.HttpHeaders.RANGE, String.format("bytes=%d-%s", start, end))
-            .get();
-
-        is = response.readEntity(InputStream.class);
-        stringWriter = new StringWriter();
-        IOUtils.copy(is, stringWriter, StandardCharsets.UTF_8);
-
-        final String ws2 = stringWriter.toString();
-        assertEquals(randomString.substring(start, end), ws2, "Strings should match");
-        stringWriter.getBuffer().setLength(0);
+        assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus(), "Should have partial content status");
+        assertEquals(randomString.substring(start, end), responseBody, "Response should match");
 
         // Request the entire file
-        response = RESOURCE.target("/v1/Data/test.ndjson")
+        requestBuilder = RESOURCE.target("/v1/Data/test.ndjson")
             .request()
-            .header(org.apache.hc.core5.http.HttpHeaders.RANGE, String.format("bytes=0-%s", length))
-            .get();
+            .header(org.apache.hc.core5.http.HttpHeaders.RANGE, String.format("bytes=%d-%s", 0, length))
+            .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson");
 
-        is = response.readEntity(InputStream.class);
-        stringWriter = new StringWriter();
-        IOUtils.copy(is, stringWriter, StandardCharsets.UTF_8);
+        for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
+            requestBuilder.header(header.getKey(), header.getValue());
+        }
+        response = requestBuilder.get();
+        responseBody = readResponse(response, expectGzipCompressed);
 
-        final String ws3 = stringWriter.toString();
-        assertEquals(randomString, ws3, "Strings should match");
-        stringWriter.getBuffer().setLength(0);
+        assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus(), "Should have partial content status");
+        assertEquals(randomString, responseBody, "Response should match");
 
         // Request the entire file, without the ending value, which returns one chunk
-        response = RESOURCE.target("/v1/Data/test.ndjson")
+        requestBuilder = RESOURCE.target("/v1/Data/test.ndjson")
             .request()
-            .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=0-")
-            .get();
+            .header(org.apache.hc.core5.http.HttpHeaders.RANGE, String.format("bytes=%d-", 0))
+            .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson");
 
-        is = response.readEntity(InputStream.class);
-        stringWriter = new StringWriter();
-        IOUtils.copy(is, stringWriter, StandardCharsets.UTF_8);
+        for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
+            requestBuilder.header(header.getKey(), header.getValue());
+        }
+        response = requestBuilder.get();
+        responseBody = readResponse(response, expectGzipCompressed);
 
-        final String ws4 = stringWriter.toString();
-        assertEquals(randomString.substring(0, 1024 * 1024), ws4, "Should match the first 1MB of the file");
+        // Result might be chunked, so only check what the serve says it responded with
+        String contentRange = response.getHeaderString(org.apache.hc.core5.http.HttpHeaders.CONTENT_RANGE);
+        String[] splitContentRange = contentRange.split("[\\s-/]");
+        int responseStart = Integer.parseInt(splitContentRange[1]);
+        int responseEnd = Integer.parseInt(splitContentRange[2]);
+
+        assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus(), "Should have partial content status");
+        assertEquals(randomString.substring(responseStart, responseEnd), responseBody, "Response should match");
 
         // Request file with an invalid range
-        response = RESOURCE.target("/v1/Data/test.ndjson")
+        requestBuilder = RESOURCE.target("/v1/Data/test.ndjson")
             .request()
-            .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
             .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=50-0")
-            .get();
+            .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson");
+        for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
+            requestBuilder.header(header.getKey(), header.getValue());
+        }
+        response = requestBuilder.get();
 
         assertEquals(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE.getStatusCode(), response.getStatus());
-        assertEquals("{\"code\":416,\"message\":\"Range end cannot be before begin\"}", response.readEntity(String.class), "Should have correct status code");
-    }
-
-    @Test
-    void testRangeRequest_compressedResponse_compressedFile() throws IOException {
-        final File tempPath = FileUtils.getTempDirectory();
-        final File file = File.createTempFile("test", ".ndjson.gz", tempPath);
-        final int length = 4 * 1024 * 1024;
-        final String randomString = buildRandomString();
-        FileUtils.writeByteArrayToFile(file, GzipUtil.compress(randomString));
-
-        Mockito.when(manager.getFile(Mockito.any(), Mockito.anyString())).thenReturn(new FileManager.FilePointer("", 0, UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, true));
-
-        // Try to request one byte
-        Response response = RESOURCE.target("/v1/Data/test.ndjson")
-            .request()
-            .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=0-1")
-            .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
-            .acceptEncoding(GzipUtil.GZIP)
-            .get();
-        final String responseBody = readCompressedResponse(response);
-
-        assertEquals(String.valueOf(randomString.charAt(0)), responseBody, "Should only have a single byte");
-
-        // Request 500 kb, with an offset
-        int start = 30;
-        int end = 500 * 1024 + start;
-        response = RESOURCE.target("/v1/Data/test.ndjson")
-            .request()
-            .header(org.apache.hc.core5.http.HttpHeaders.RANGE, String.format("bytes=%d-%s", start, end))
-            .acceptEncoding(GzipUtil.GZIP)
-            .get();
-        final String responseBody2 = readCompressedResponse(response);
-
-        assertEquals(randomString.substring(start, end), responseBody2, "Strings should match");
-
-        // Request the entire file
-        response = RESOURCE.target("/v1/Data/test.ndjson")
-            .request()
-            .header(org.apache.hc.core5.http.HttpHeaders.RANGE, String.format("bytes=0-%s", length))
-            .acceptEncoding(GzipUtil.GZIP)
-            .get();
-        final String responseBody3 = readCompressedResponse(response);
-
-        assertEquals(randomString, responseBody3, "Strings should match");
-
-        // Request the entire file, without the ending value, which returns one chunk
-        response = RESOURCE.target("/v1/Data/test.ndjson")
-            .request()
-            .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=0-")
-            .acceptEncoding(GzipUtil.GZIP)
-            .get();
-        final String responseBody4 = readCompressedResponse(response);
-
-        assertEquals(randomString.substring(0, 1024 * 1024), responseBody4, "Should match the first 1MB of the file");
-
-        // Request file with an invalid range
-        response = RESOURCE.target("/v1/Data/test.ndjson")
-            .request()
-            .header(org.apache.hc.core5.http.HttpHeaders.ACCEPT, "application/ndjson")
-            .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=50-0")
-            .acceptEncoding(GzipUtil.GZIP)
-            .get();
-
-        assertEquals(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE.getStatusCode(), response.getStatus());
-        assertEquals("{\"code\":416,\"message\":\"Range end cannot be before begin\"}", response.readEntity(String.class), "Should have correct status code");
     }
 
     @Test
@@ -614,6 +386,15 @@ class DataResourceUnitTest {
     private String readCompressedResponse(Response response) throws IOException {
         final InputStream output = response.readEntity(InputStream.class);
         return GzipUtil.decompress(output.readAllBytes());
+    }
+
+    private String readResponse(Response response, boolean isCompressed) throws IOException {
+        if (isCompressed) {
+            return readCompressedResponse(response);
+        } else {
+            final InputStream inputStream = response.readEntity(InputStream.class);
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
     }
 
     @Retention(RetentionPolicy.RUNTIME)
