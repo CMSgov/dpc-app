@@ -6,7 +6,7 @@ on:
   push:
     branches:
       - main
-      - "ja/dpc-5270-update-containers-to-arm64"
+      - "ja/dpc-5270-update-containers-to-arm64-temp"
     paths:
       - dpc-**
       - engines/**
