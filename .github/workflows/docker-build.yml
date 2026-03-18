@@ -125,6 +125,11 @@ jobs:
           java-version: "17"
           distribution: "corretto"
           cache: maven
+      - name: Debug Environment
+        run: |
+          uname -m        # Should output: aarch64
+          java -version
+          mvn --version
       - name: Clean maven
         run: mvn -ntp -U clean
 
