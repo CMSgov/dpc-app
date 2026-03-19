@@ -49,7 +49,7 @@ gem 'bootstrap-table-rails'
 gem 'nokogiri', '>= 1.18.9'
 gem 'net-imap', '>= 0.5.8'
 
-# gem 'api_client', path: 'vendor/api_client'
+gem 'api_client', path: 'vendor/api_client'
 
 group :production do
   gem 'pg-aws_rds_iam'

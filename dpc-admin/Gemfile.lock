@@ -1,3 +1,12 @@
+PATH
+  remote: vendor/api_client
+  specs:
+    api_client (0.2.0)
+      active_model_serializers
+      activemodel (~> 8.0.2)
+      macaroons
+      oauth2
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -513,6 +522,7 @@ DEPENDENCIES
   activerecord (~> 8.0.2.1)
   activestorage (~> 8.0.2.1)
   activesupport (~> 8.0.2.1)
+  api_client!
   bootsnap (>= 1.4.2)
   bundler (>= 1.15.0)
   bundler-audit
