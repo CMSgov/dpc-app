@@ -1,6 +1,14 @@
 #!/bin/bash
 set -Ee
 
+# Detect architecture and set platform
+ARCH=$(uname -m)
+if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+  export DOCKER_DEFAULT_PLATFORM=linux/arm64
+else
+  export DOCKER_DEFAULT_PLATFORM=linux/amd64
+fi
+
 # Current working directory
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
@@ -61,7 +69,7 @@ if [ -n "$REPORT_COVERAGE" ]; then
   mvn jacoco:report -ntp
 fi
 
-docker compose -p start-v1-app down
+docker compose -p start-v1-app down --volumes --remove-orphans
 
 USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
 
