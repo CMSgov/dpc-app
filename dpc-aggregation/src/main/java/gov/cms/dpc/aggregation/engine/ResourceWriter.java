@@ -121,8 +121,7 @@ class ResourceWriter {
             return;
         }
         try (
-            // Fortunately, GZIPOutputStream supports appending to a file, but there's a tradeoff with compression
-            // efficiency.
+            // It shouldn't be possible for append=true, but we support it anyway.
             final FileOutputStream fileOutputStream = new FileOutputStream(fileName, append);
             final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(fileOutputStream);
         ) {

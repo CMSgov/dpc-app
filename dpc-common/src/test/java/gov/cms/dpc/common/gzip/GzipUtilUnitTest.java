@@ -1,8 +1,10 @@
 package gov.cms.dpc.common.gzip;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,5 +56,17 @@ class GzipUtilUnitTest {
 		byte[] compressedData = GzipUtil.compress(data);
 		String decompressedData = GzipUtil.decompress(compressedData);
 		assertEquals(data, decompressedData);
+	}
+
+	@Test
+	void canDecompressfile() throws IOException {
+		String data = "compressed_data";
+
+		File tempPath = FileUtils.getTempDirectory();
+		File file = File.createTempFile("test", ".ndjson.gz", tempPath);
+		FileUtils.writeByteArrayToFile(file, GzipUtil.compress(data));
+
+		String uncompressed = GzipUtil.decompress(file.getAbsolutePath());
+		assertEquals(data, uncompressed);
 	}
 }
