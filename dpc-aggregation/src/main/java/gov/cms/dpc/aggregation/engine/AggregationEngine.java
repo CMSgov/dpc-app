@@ -221,7 +221,7 @@ public class AggregationEngine implements Runnable {
     private void calculateFileMetadata(JobQueueBatch job) {
         job.getJobQueueBatchFiles()
                 .forEach(batchFile -> {
-                    final File file = new File(String.format("%s/%s.ndjson", this.operationsConfig.getExportPath(), batchFile.getFileName()));
+                    final File file = new File(String.format("%s/%s.ndjson.gz", this.operationsConfig.getExportPath(), batchFile.getFileName()));
                     try {
                         final byte[] checksum = AggregationUtils.generateChecksum(file);
                         batchFile.setChecksum(checksum);

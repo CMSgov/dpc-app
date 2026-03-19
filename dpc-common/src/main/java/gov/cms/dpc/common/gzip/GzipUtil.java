@@ -73,6 +73,21 @@ public class GzipUtil {
 	}
 
 	/**
+	 * Decompresses a file and returns its contents as a {@link String}.
+	 * @param inputFile Location of the file to be read.
+	 * @return Uncompressed file
+	 * @throws IOException If it can't read the file
+	 */
+	public static String decompress(String inputFile) throws IOException {
+		try (
+			FileInputStream fis = new FileInputStream(inputFile);
+			GZIPInputStream gzis = new GZIPInputStream(fis);
+		) {
+			return IOUtils.toString(gzis, StandardCharsets.UTF_8);
+		}
+	}
+
+	/**
 	 * Compresses the {@link String}.
 	 * @param in The {@link String} to be compressed.
 	 * @return The gzip compressed data.
