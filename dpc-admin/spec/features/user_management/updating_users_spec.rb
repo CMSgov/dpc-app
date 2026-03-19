@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.feature 'updating users' do
   include DpcClientSupport
+
   let!(:internal_user) { create :internal_user }
 
   before(:each) do
