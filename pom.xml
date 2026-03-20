@@ -741,9 +741,6 @@
                             <include>**/*Tests.java</include>
                         </includes>
                         <groups>Integration</groups>
-                        <!-- Disable parallel execution to enforce ordering -->
-                        <parallel>none</parallel>
-                        <threadCount>1</threadCount>
                         <!-- Add a per-test timeout to prevent hangs -->
                         <forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
                     </configuration>

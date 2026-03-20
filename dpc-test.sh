@@ -5,9 +5,11 @@ set -Ee
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 # Configure the Maven log level
-export MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=info \
-                    -Dio.netty.transport.noNative=true \
-                    -Dio.netty.noNative=true"
+#export MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=info \
+#                    -Dio.netty.transport.noNative=true \
+#                    -Dio.netty.noNative=true"
+
+export MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=info"
 
 # Include secure environment variables
 set -o allexport
@@ -63,7 +65,7 @@ if [ -n "$REPORT_COVERAGE" ]; then
   mvn jacoco:report -ntp
 fi
 
-docker compose -p start-v1-app down --volumes --remove-orphans
+docker compose -p start-v1-app down
 
 USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
 
