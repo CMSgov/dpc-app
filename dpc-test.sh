@@ -68,6 +68,7 @@ docker compose -p start-v1-app down --volumes --remove-orphans
 USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
 
 # Stream logs from dependencies in the background
+echo "Running the integration tests"
 docker compose -p start-v1-app logs -f attribution aggregation db &
 LOGS_PID=$!
 
