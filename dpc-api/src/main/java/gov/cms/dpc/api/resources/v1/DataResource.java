@@ -4,13 +4,13 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
-import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.api.models.RangeHeader;
 import gov.cms.dpc.api.resources.AbstractDataResource;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.gzip.GzipStreamingOutput;
 import gov.cms.dpc.common.gzip.GzipUtil;
 import gov.cms.dpc.common.gzip.UnGzipStreamingOutput;
+import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -40,6 +40,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter.X_CONTENT_LENGTH;
 
 /**
  * Streaming and range logic was taken from here:
@@ -198,10 +200,10 @@ public class DataResource extends AbstractDataResource {
         }
 
         Response.ResponseBuilder builder = Response
-                .status(Response.Status.OK)
-                .entity(streamingOutput)
-                .header(HttpHeaders.ETAG, filePointer.getChecksum())
-                .header(HttpHeaders.LAST_MODIFIED, filePointer.getCreationTime().toInstant().toEpochMilli());
+            .status(Response.Status.OK)
+            .entity(streamingOutput)
+            .header(HttpHeaders.ETAG, filePointer.getChecksum())
+            .header(HttpHeaders.LAST_MODIFIED, filePointer.getCreationTime().toInstant().toEpochMilli());
 
         return builder.build();
     }
@@ -245,12 +247,19 @@ public class DataResource extends AbstractDataResource {
             }
 
             final String responseRange = String.format("bytes %d-%d/%d", rangeStart, rangeEnd, len);
-            return Response
-                    .status(Response.Status.PARTIAL_CONTENT)
-                    .entity(streamingOutput)
-                    .header(HttpHeaders.ACCEPT_RANGES, ACCEPTED_RANGE_VALUE)
-                    .header(HttpHeaders.CONTENT_RANGE, responseRange)
-                    .build();
+            Response.ResponseBuilder responseBuilder =  Response
+                .status(Response.Status.PARTIAL_CONTENT)
+                .entity(streamingOutput)
+                .header(HttpHeaders.ACCEPT_RANGES, ACCEPTED_RANGE_VALUE)
+                .header(HttpHeaders.CONTENT_RANGE, responseRange);
+                // Set the X-Content-Length header, so we can manually override what Jersey does
+                // Streaming output and content-length are usually mutually exclusive, but I don't want to change
+                // existing functionality.  We'll leave this here for non-compressed responses, but for compressed,
+                // we don't know what the content length will be.
+                if (!compressResponse) {
+                    responseBuilder.header(X_CONTENT_LENGTH, len);
+                }
+                return responseBuilder.build();
         } catch (IOException e) {
             throw new WebApplicationException(String.format("Unable to open file `%s`.`.", fileID), e,
                     Response.Status.INTERNAL_SERVER_ERROR);
