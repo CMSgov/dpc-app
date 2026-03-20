@@ -4,7 +4,7 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
-import gov.cms.dpc.api.core.FileManager;
+import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.api.models.RangeHeader;
 import gov.cms.dpc.api.resources.AbstractDataResource;
 import gov.cms.dpc.common.annotations.NoHtml;

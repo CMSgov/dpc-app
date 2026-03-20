@@ -5,6 +5,7 @@ import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.logging.SplunkTimestamp;
 import gov.cms.dpc.fhir.DPCResourceType;
+import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.DataRetrievalException;
@@ -12,7 +13,9 @@ import gov.cms.dpc.queue.exceptions.DataRetrievalRetryException;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import jakarta.inject.Inject;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,13 +41,15 @@ public class DataService {
     private final String exportPath;
     private final FhirContext fhirContext;
     private final int jobTimeoutInSeconds;
+    private final FileManager fileManager;
 
     @Inject
-    public DataService(IJobQueue queue, FhirContext fhirContext, @ExportPath String exportPath, @JobTimeout int jobTimeoutInSeconds) {
+    public DataService(IJobQueue queue, FhirContext fhirContext, @ExportPath String exportPath, @JobTimeout int jobTimeoutInSeconds, FileManager fileManager) {
         this.queue = queue;
         this.fhirContext = fhirContext;
         this.exportPath = exportPath;
         this.jobTimeoutInSeconds = jobTimeoutInSeconds;
+        this.fileManager = fileManager;
     }
 
     public Resource retrieveData(UUID organizationId, String orgNPI, String providerNPI, List<String> patientIds, DPCResourceType... resourceTypes) {

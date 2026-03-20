@@ -1,7 +1,6 @@
-package gov.cms.dpc.api.core;
+package gov.cms.dpc.queue;
 
 import gov.cms.dpc.common.annotations.ExportPath;
-import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import jakarta.inject.Inject;
@@ -30,18 +29,21 @@ public class FileManager {
     private final IJobQueue jobQueue;
 
     @Inject
-    FileManager(@ExportPath String fileLocation, IJobQueue jobQueue) {
+    public FileManager(@ExportPath String fileLocation, IJobQueue jobQueue) {
         this.fileLocation = fileLocation;
         this.jobQueue = jobQueue;
     }
 
     public FilePointer getFile(UUID organizationID, String fileID) {
-
         final JobQueueBatchFile batchFile = this.jobQueue.getJobBatchFile(organizationID, fileID)
                 .orElseThrow(() -> new WebApplicationException("Cannot find file", Response.Status.NOT_FOUND));
 
+        return getFile(batchFile);
+    }
+
+    public FilePointer getFile(JobQueueBatchFile batchFile) {
         final JobQueueBatch jobQueueBatch = this.jobQueue.getBatch(batchFile.getBatchID())
-                .orElseThrow(() -> new WebApplicationException("Cannot export job for file", Response.Status.NOT_FOUND));
+            .orElseThrow(() -> new WebApplicationException("Cannot export job for file", Response.Status.NOT_FOUND));
 
         // File might be compressed or not
         final Path compressedPath = Paths.get(String.format("%s/%s.ndjson.gz", fileLocation, batchFile.getFileName()));
@@ -59,11 +61,11 @@ public class FileManager {
         logger.debug("Streaming file {}", path);
 
         return new FilePointer(Hex.toHexString(batchFile.getChecksum()),
-                batchFile.getFileLength(),
-                batchFile.getJobID(),
-                jobQueueBatch.getStartTime().orElseThrow(() -> new IllegalStateException("Cannot find start time of completed job")),
-                new File(path.toString()),
-                compressed);
+            batchFile.getFileLength(),
+            batchFile.getJobID(),
+            jobQueueBatch.getStartTime().orElseThrow(() -> new IllegalStateException("Cannot find start time of completed job")),
+            new File(path.toString()),
+            compressed);
     }
 
     public static class FilePointer {

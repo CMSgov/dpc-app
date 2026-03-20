@@ -3,6 +3,7 @@ package gov.cms.dpc.queue.service;
 import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
+import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.exceptions.DataRetrievalException;
@@ -29,6 +30,11 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataServiceTest {
+    @Spy
+    private MemoryBatchQueue queue;
+
+    @Spy
+    private FhirContext fhirContext;
 
     private final UUID aggregatorID = UUID.randomUUID();
     private final UUID orgID = UUID.randomUUID();
@@ -36,19 +42,14 @@ class DataServiceTest {
     private final String orgNPI = NPIUtil.generateNPI();
     private final String providerNPI = NPIUtil.generateNPI();
     private final String exportPath = "/tmp";
+    private final FileManager fileManager = new FileManager(exportPath, queue);
     private DataService dataService;
     private File tmpFile;
-
-    @Spy
-    private MemoryBatchQueue queue;
-
-    @Spy
-    private FhirContext fhirContext;
 
     @BeforeEach
     void before() {
         MockitoAnnotations.openMocks(this);
-        dataService = new DataService(queue, fhirContext, exportPath, 1);
+        dataService = new DataService(queue, fhirContext, exportPath, 1, fileManager);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
