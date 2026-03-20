@@ -9,7 +9,7 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 #                    -Dio.netty.transport.noNative=true \
 #                    -Dio.netty.noNative=true"
 
-export MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=info"
+export MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug"
 
 # Include secure environment variables
 set -o allexport
@@ -71,13 +71,13 @@ USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation -
 
 # Stream logs from dependencies in the background
 echo "Running the integration tests"
-docker compose -p start-v1-app logs -f attribution aggregation db &
-LOGS_PID=$!
+#docker compose -p start-v1-app logs -f attribution aggregation db &
+#LOGS_PID=$!
 
 # Run the integration tests
 USE_BFD_MOCK=true docker compose -p start-v1-app up --exit-code-from tests tests
 
-kill $LOGS_PID 2>/dev/null || true
+#kill $LOGS_PID 2>/dev/null || true
 
 echo "Starting api server for end-to-end tests"
 USE_BFD_MOCK=true docker compose -p start-v1-app up api --wait

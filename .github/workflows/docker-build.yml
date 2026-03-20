@@ -125,7 +125,7 @@ jobs:
           java-version: "17"
           distribution: "corretto"
           architecture: aarch64
-          # cache: maven - removing for testing
+          cache: maven - removing for testing
       - name: Debug Environment
         run: |
           uname -m        # Should output: aarch64
