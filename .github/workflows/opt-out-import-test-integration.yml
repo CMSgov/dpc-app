@@ -86,6 +86,19 @@ jobs:
       - name: Verify import file still in bucket
         run: |
           aws s3api head-object --bucket bfd-test-eft --key bfdeft01/dpc/in/${{ needs.trigger.outputs.filename }}
+      - name: Verify confirmation file not put in bucket
+        env:
+          STARTTIME: ${{needs.trigger.outputs.start_time}}
+        run: |
+          while read line; do
+            filedate_s=`echo $line | awk '{print $1 " " $2}'`
+            filedate=`date -d "$filedate_s" +%s`
+            if [[ $((filedate > STARTTIME)) == 1 ]]; then
+              echo "we have a loser!"
+              exit 1
+            fi
+          done < <(aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/out/ | grep CONF)
+          echo "no new file found"
 
   verify-db-changes:
     if: ${{ always() && needs.trigger.result == 'success' }}
