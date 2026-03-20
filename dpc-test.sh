@@ -9,7 +9,7 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 #                    -Dio.netty.transport.noNative=true \
 #                    -Dio.netty.noNative=true"
 
-export MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=debug"
+export MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=info"
 
 # Include secure environment variables
 set -o allexport
