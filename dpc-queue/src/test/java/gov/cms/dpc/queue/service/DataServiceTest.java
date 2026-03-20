@@ -1,6 +1,7 @@
 package gov.cms.dpc.queue.service;
 
 import ca.uhn.fhir.context.FhirContext;
+import gov.cms.dpc.common.gzip.GzipUtil;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.FileManager;
@@ -8,6 +9,8 @@ import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.exceptions.DataRetrievalException;
 import gov.cms.dpc.queue.models.JobQueueBatch;
+import gov.cms.dpc.queue.models.JobQueueBatchFile;
+import org.apache.commons.io.FileUtils;
 import org.assertj.core.util.Files;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -42,13 +45,13 @@ class DataServiceTest {
     private final String orgNPI = NPIUtil.generateNPI();
     private final String providerNPI = NPIUtil.generateNPI();
     private final String exportPath = "/tmp";
-    private final FileManager fileManager = new FileManager(exportPath, queue);
-    private DataService dataService;
+	private DataService dataService;
     private File tmpFile;
 
     @BeforeEach
     void before() {
         MockitoAnnotations.openMocks(this);
+		FileManager fileManager = new FileManager(exportPath, queue);
         dataService = new DataService(queue, fhirContext, exportPath, 1, fileManager);
     }
 
@@ -83,6 +86,15 @@ class DataServiceTest {
         DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
 
         workJob(false, resourceType);
+        Resource resource = dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType);
+        assertInstanceOf(Bundle.class, resource);
+    }
+
+    @Test
+    void whenGetJobBatchesReturnsCompletedJobWithResourceTypeFromCompressedExport() {
+        DPCResourceType resourceType = DPCResourceType.ExplanationOfBenefit;
+
+        workJob(false, resourceType, true);
         Resource resource = dataService.retrieveData(orgID, orgNPI, providerNPI, List.of(patientID.toString()), resourceType);
         assertInstanceOf(Bundle.class, resource);
     }
@@ -141,6 +153,10 @@ class DataServiceTest {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     private void workJob(boolean failBatch, DPCResourceType resourceType) {
+        workJob(failBatch, resourceType, false);
+    }
+
+    private void workJob(boolean failBatch, DPCResourceType resourceType, boolean compressedFile) {
         Mockito.doAnswer(mock -> {
             Optional<JobQueueBatch> workBatch = queue.claimBatch(aggregatorID);
             while (workBatch.flatMap(batch -> batch.fetchNextPatient(aggregatorID)).isPresent()) {
@@ -149,8 +165,21 @@ class DataServiceTest {
             if (failBatch) {
                 queue.failBatch(workBatch.get(), aggregatorID);
             } else {
-                tmpFile = Files.newFile(String.format("%s/%s-%s.%s.ndjson", exportPath, workBatch.get().getBatchID().toString(), 0, resourceType.getPath()));
-                workBatch.get().addJobQueueFile(resourceType, 0, 1);
+                String fileFormat;
+                byte[] tmpData;
+                if (compressedFile) {
+                    fileFormat = "%s/%s-%s.%s.ndjson.gz";
+                    // If we don't write a GZip header to the file, we won't be able to open up the input stream
+                    tmpData = GzipUtil.compress("");
+                } else {
+                    fileFormat = "%s/%s-%s.%s.ndjson";
+                    tmpData = new byte[0];
+                }
+
+                tmpFile = Files.newFile(String.format(fileFormat, exportPath, workBatch.get().getBatchID().toString(), 0, resourceType.getPath()));
+                FileUtils.writeByteArrayToFile(tmpFile, tmpData);
+                JobQueueBatchFile batchFile = workBatch.get().addJobQueueFile(resourceType, 0, 1);
+                batchFile.setChecksum(new byte[] {1, 2, 3});
                 queue.completeBatch(workBatch.get(), aggregatorID);
             }
             return List.of(workBatch.get());

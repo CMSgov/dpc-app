@@ -1,6 +1,7 @@
 package gov.cms.dpc.queue.service;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.logging.SplunkTimestamp;
@@ -13,17 +14,16 @@ import gov.cms.dpc.queue.exceptions.DataRetrievalRetryException;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import jakarta.inject.Inject;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -211,9 +211,8 @@ public class DataService {
                 .flatMap(List::stream)
                 .filter(bf -> resourceTypes.contains(bf.getResourceType()))
                 .forEach(batchFile -> {
-                    Path path = Paths.get(String.format("%s/%s.ndjson", exportPath, batchFile.getFileName()));
                     Class<? extends Resource> typeClass = getClassForResourceType(batchFile.getResourceType());
-                    addResourceEntries(typeClass, path, bundle);
+                    addResourceEntries(typeClass, batchFile, bundle);
                 });
 
 
@@ -230,12 +229,14 @@ public class DataService {
         throw new DataRetrievalException("Unexpected resource type: " + resourceType);
     }
 
-    private void addResourceEntries(Class<? extends Resource> clazz, Path path, Bundle bundle) {
-        try (BufferedReader br = Files.newBufferedReader(path)) {
-            br.lines().forEach(line -> {
-                Resource r = fhirContext.newJsonParser().parseResource(clazz, line);
-                bundle.addEntry().setResource(r);
-            });
+    private void addResourceEntries(Class<? extends Resource> clazz, JobQueueBatchFile batchFile, Bundle bundle) {
+        IParser parser = fhirContext.newJsonParser();
+        FileManager.FilePointer filePointer = fileManager.getFile(batchFile);
+
+        try (InputStream is = filePointer.getUncompressedInputStream()) {
+            IOUtils.readLines(is, StandardCharsets.UTF_8).stream()
+                .map(line -> parser.parseResource(clazz, line))
+                .forEach(r -> bundle.addEntry().setResource(r));
         } catch (IOException e) {
             LOGGER.error("Unable to read resource", e);
             throw new DataRetrievalException(String.format("Unable to read resource because %s", e.getMessage()));
@@ -252,13 +253,14 @@ public class DataService {
 
         if (batchFile.isPresent()) {
             OperationOutcome outcome = new OperationOutcome();
-            Path path = Paths.get(String.format("%s/%s.ndjson", exportPath, batchFile.get().getFileName()));
-            try (BufferedReader br = Files.newBufferedReader(path)) {
-                br.lines()
-                        .map(line -> fhirContext.newJsonParser().parseResource(OperationOutcome.class, line))
-                        .map(OperationOutcome::getIssue)
-                        .flatMap(List::stream)
-                        .forEach(outcome::addIssue);
+
+            FileManager.FilePointer filePointer = fileManager.getFile(batchFile.get());
+            try (InputStream is = filePointer.getUncompressedInputStream()) {
+                IOUtils.readLines(is, StandardCharsets.UTF_8).stream()
+                    .map(line -> fhirContext.newJsonParser().parseResource(OperationOutcome.class, line))
+                    .map(OperationOutcome::getIssue)
+                    .flatMap(List::stream)
+                    .forEach(outcome::addIssue);
             } catch (IOException e) {
                 LOGGER.error("Unable to read OperationOutcome", e);
                 throw new DataRetrievalException(String.format("Unable to read OperationOutcome because %s", e.getMessage()));
