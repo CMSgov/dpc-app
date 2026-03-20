@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 public final class AggregationUtils {
 
@@ -18,8 +19,11 @@ public final class AggregationUtils {
     }
 
     public static byte[] generateChecksum(File file) throws IOException {
-        try (FileInputStream fileInputStream = new FileInputStream(file)) {
-            return new SHA256.Digest().digest(fileInputStream.readAllBytes());
+        try (
+            FileInputStream fileInputStream = new FileInputStream(file);
+            GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
+        ) {
+            return new SHA256.Digest().digest(gzipInputStream.readAllBytes());
         }
     }
 
