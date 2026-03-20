@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.feature 'managing api credentials' do
   include DpcClientSupport
+
   context 'as an unassigned user' do
     let!(:user) { create :user }
 
