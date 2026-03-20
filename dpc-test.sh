@@ -1,19 +1,13 @@
 #!/bin/bash
 set -Ee
 
-# Detect architecture and set platform
-ARCH=$(uname -m)
-if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
-  export DOCKER_DEFAULT_PLATFORM=linux/arm64
-else
-  export DOCKER_DEFAULT_PLATFORM=linux/amd64
-fi
-
 # Current working directory
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 # Configure the Maven log level
-export MAVEN_OPTS=-Dorg.slf4j.simpleLogger.defaultLogLevel=info
+export MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=info \
+                    -Dio.netty.transport.noNative=true \
+                    -Dio.netty.noNative=true"
 
 # Include secure environment variables
 set -o allexport
@@ -73,8 +67,14 @@ docker compose -p start-v1-app down --volumes --remove-orphans
 
 USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
 
+# Stream logs from dependencies in the background
+docker compose -p start-v1-app logs -f attribution aggregation db &
+LOGS_PID=$!
+
 # Run the integration tests
 USE_BFD_MOCK=true docker compose -p start-v1-app up --exit-code-from tests tests
+
+kill $LOGS_PID 2>/dev/null || true
 
 echo "Starting api server for end-to-end tests"
 USE_BFD_MOCK=true docker compose -p start-v1-app up api --wait
