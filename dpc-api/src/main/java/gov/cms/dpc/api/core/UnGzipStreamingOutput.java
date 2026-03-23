@@ -1,4 +1,4 @@
-package gov.cms.dpc.common.gzip;
+package gov.cms.dpc.api.core;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;

@@ -6,7 +6,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
-import gov.cms.dpc.common.gzip.GzipUtil;
+import gov.cms.dpc.common.utils.GzipUtil;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.hapi.ContextUtils;

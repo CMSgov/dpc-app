@@ -1,7 +1,7 @@
 package gov.cms.dpc.aggregation.util;
 
 import gov.cms.dpc.aggregation.engine.OutcomeReason;
-import gov.cms.dpc.common.gzip.GzipUtil;
+import gov.cms.dpc.common.utils.GzipUtil;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.hl7.fhir.dstu3.model.OperationOutcome;

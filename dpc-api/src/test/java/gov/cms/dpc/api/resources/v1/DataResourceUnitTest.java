@@ -9,7 +9,7 @@ import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
 import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
 import gov.cms.dpc.queue.FileManager;
-import gov.cms.dpc.common.gzip.GzipUtil;
+import gov.cms.dpc.common.utils.GzipUtil;
 import gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;

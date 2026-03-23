@@ -2,7 +2,7 @@ package gov.cms.dpc.aggregation.engine;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import gov.cms.dpc.common.gzip.GzipUtil;
+import gov.cms.dpc.common.utils.GzipUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;

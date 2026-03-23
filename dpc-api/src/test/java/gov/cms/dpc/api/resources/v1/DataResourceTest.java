@@ -4,7 +4,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
-import gov.cms.dpc.common.gzip.GzipUtil;
+import gov.cms.dpc.common.utils.GzipUtil;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.DistributedBatchQueue;

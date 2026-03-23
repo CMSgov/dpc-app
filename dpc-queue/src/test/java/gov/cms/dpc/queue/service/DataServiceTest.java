@@ -1,7 +1,7 @@
 package gov.cms.dpc.queue.service;
 
 import ca.uhn.fhir.context.FhirContext;
-import gov.cms.dpc.common.gzip.GzipUtil;
+import gov.cms.dpc.common.utils.GzipUtil;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.FileManager;

@@ -1,7 +1,9 @@
-package gov.cms.dpc.common.gzip;
+package gov.cms.dpc.api.core;
 
+import gov.cms.dpc.common.utils.GzipUtil;
 import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.io.input.BrokenInputStream;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -11,36 +13,38 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class UnGzipStreamingOutputUnitTest {
+class GzipStreamingOutputUnitTest {
 	@Test
 	void canWriteUncompressed() throws IOException {
 		String data = "uncompressed data";
-		UnGzipStreamingOutput ugso = new UnGzipStreamingOutput(new ByteArrayInputStream(data.getBytes()), false);
+		GzipStreamingOutput gso = new GzipStreamingOutput(new ByteArrayInputStream(data.getBytes()), false);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ugso.write(baos);
+		gso.write(baos);
+		byte[] compressedData = baos.toByteArray();
 
-		assertEquals(data, baos.toString());
+		Assertions.assertEquals(data, GzipUtil.decompress(compressedData));
 	}
 
 	@Test
 	void canWriteCompressed() throws IOException {
-		String data = "compressed data";
+		String data = "compressed data".repeat(512);
 		byte[] compressedDataIn = GzipUtil.compress(data);
-		UnGzipStreamingOutput ugso = new UnGzipStreamingOutput(new ByteArrayInputStream(compressedDataIn), true);
+		GzipStreamingOutput gso = new GzipStreamingOutput(new ByteArrayInputStream(compressedDataIn), true);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ugso.write(baos);
+		gso.write(baos);
+		byte[] compressedDataOut = baos.toByteArray();
 
-		assertEquals(data, baos.toString());
+		assertEquals(data, GzipUtil.decompress(compressedDataOut));
 	}
 
 	@Test
 	void handlesIOException() {
 		BrokenInputStream bis = new BrokenInputStream();
-		UnGzipStreamingOutput ugso = new UnGzipStreamingOutput(bis, true);
+		GzipStreamingOutput gso = new GzipStreamingOutput(bis, false);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-		assertThrows(WebApplicationException.class, () -> ugso.write(baos));
+		assertThrows(WebApplicationException.class, () -> gso.write(baos));
 	}
 }
