@@ -9,6 +9,7 @@ import org.hl7.fhir.dstu3.model.StringType;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -18,13 +19,29 @@ public final class AggregationUtils {
         // static methods only
     }
 
+    /**
+     * Reads the contents of the given compressed file and returns its checksum.
+     * @param file A gzipped file.
+     * @return Checksum
+     * @throws IOException If the file isn't gzip compressed or can't be read.
+     */
     public static byte[] generateChecksum(File file) throws IOException {
         try (
             FileInputStream fileInputStream = new FileInputStream(file);
             GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
         ) {
-            return new SHA256.Digest().digest(gzipInputStream.readAllBytes());
+            return generateChecksum(gzipInputStream);
         }
+    }
+
+    /**
+     * Reads the contents of the given input stream to the end and returns its checksum.
+     * @param inputStream The {@link InputStream} to read.
+     * @return Checksum
+     * @throws IOException If the stream can't be read.
+     */
+    public static byte[] generateChecksum(InputStream inputStream) throws IOException {
+        return new SHA256.Digest().digest(inputStream.readAllBytes());
     }
 
     /**

@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -204,11 +205,12 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 
 		try {
 			Files.write(path, fileData);
-
-			batchFile.setFileLength(Files.size(path));
-			batchFile.setChecksum(AggregationUtils.generateChecksum(path.toFile()));
+			batchFile.setFileLength(content.length());
+			try (FileInputStream fis = new FileInputStream(path.toFile())) {
+				batchFile.setChecksum(AggregationUtils.generateChecksum(fis));
+			}
 		} catch (IOException e) {
-			fail();
+			fail("Could not create test file: " + path);
 		}
 
 		// Complete the batch and save metadata changes
