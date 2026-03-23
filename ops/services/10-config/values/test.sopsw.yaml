@@ -84,6 +84,8 @@
 /dpc/test/bene-prefs/sensitive/bfd-sns-topic-arn: ENC[AES256_GCM,data:mTSZVEv6QMWJW4jr3u/SpwsgmsvzVdN+ZHqpZbsIG8Bmd3rm8rtVMX/QNol3HdNhWhVh+B9IQ8r80vz2QuUPNKsKH1nLfQ==,iv:gP7JdvorT6GIj/xODb2vjQXWt/i5/p/vG3BYBnTJaqs=,tag:gNSFbkiuKeVjxutEr3hyDg==,type:str]
 #ENC[AES256_GCM,data:7Tm5YAumlXyoMG9uEwzfKyUGLKPQnMO/VtbWgYsFJIBskvpjSwU=,iv:bE12gAGPD4mFclcW33VtMW96EWS4nvsNIZerji8SXbA=,tag:KywgUhpqkwqb+tcM2I5JsA==,type:comment]
 /dpc/test/bene-prefs/sensitive/bfd-bucket-role-arn: ENC[AES256_GCM,data:ImNQA0ye/82KQTmbljwVlqsjt7j8mOxm/YQAkjQTgNM19FC//YvGEYkjyiZe8pDdiToF5+qes1mUB8J6TfuciZwPRop4064kc90FPN9Ojdla8ayn4XKZRBcDC6U2wM4OVj4=,iv:bJykoHg6YO20CJzGnIswGTYL0Y6bMlBpM0RrVwtNMXI=,tag:7NdYUVEJGzwYMsLP5P01OA==,type:str]
+#ENC[AES256_GCM,data:vxeOSXsP8qGeFsqG5jSHfGq5A+CTBdzCCMA=,iv:kOcjfmj9DFaDPc6LE/P/4TwSTV6p/dqpSMRKCx7+OMc=,tag:hGCeCGBe8z/uJ9yZa0BPKg==,type:comment]
+/dpc/test/bene-prefs/sensitive/bfd-bucket-arn: ENC[AES256_GCM,data:m7vjVG2n0Jxuoz7M7KvZic7glQNqbV6/nwOTFyhKvoZ6pXzIVlmd6Ergf/Znlr8gyGEJsIt7SDUIFiJTW0U=,iv:u/DA9xvRW4kis5V6THmkvnt1gxvQHD1RypMDHA9yL4c=,tag:Xq4W2d3qKDE6WouSz5vNdQ==,type:str]
 sops:
   kms:
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/dpc-test
