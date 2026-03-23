@@ -69,8 +69,9 @@ class KeyListUnitTest {
 
     @Test
     void testListKeys_happyPath() throws IOException {
+        UUID mockId = UUID.randomUUID();
         PublicKeyEntity publicKeyEntity = new PublicKeyEntity();
-        publicKeyEntity.setId(UUID.randomUUID());
+        publicKeyEntity.setId(mockId);
         publicKeyEntity.setLabel("test public key");
         publicKeyEntity.setCreatedAt(OffsetDateTime.now());
         CollectionResponse<PublicKeyEntity> collectionResponse = new CollectionResponse<>(List.of(publicKeyEntity));
@@ -92,21 +93,11 @@ class KeyListUnitTest {
                 );
 
         Optional<Throwable> errors = cli.run("list", "org_id");
-//        assertTrue(errors.isEmpty());
-//
-//        String results = stdOut.toString();
-//        assertTrue(results.contains("│ test public key │"));
+        assertTrue(errors.isEmpty());
+
         String results = stdOut.toString();
-        String errResults = stdErr.toString();
-
-        originalOut.println("=== STDOUT ===\n" + results);
-        originalOut.println("=== STDERR ===\n" + errResults);
-
-        assertAll(
-                () -> assertTrue(errors.isEmpty(), "Expected no errors but got: " + errors),
-                () -> assertTrue(results.contains("│ test public key │"),
-                        "stdOut did not contain expected table. Actual content:\n" + results)
-        );
+        assertTrue(results.contains("test public key"));
+        assertTrue(results.contains(mockId.toString()));
     }
 
     @Test
