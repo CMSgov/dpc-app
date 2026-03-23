@@ -14,7 +14,6 @@ import io.dropwizard.util.JarLocation;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
@@ -69,7 +68,6 @@ class KeyListUnitTest {
     }
 
     @Test
-    @Disabled
     void testListKeys_happyPath() throws IOException {
         PublicKeyEntity publicKeyEntity = new PublicKeyEntity();
         publicKeyEntity.setId(UUID.randomUUID());
@@ -101,7 +99,6 @@ class KeyListUnitTest {
     }
 
     @Test
-    @Disabled
     void testListKeys_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(

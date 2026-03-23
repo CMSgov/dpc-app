@@ -6,6 +6,7 @@ services:
 
   redis:
     image: artifactory.cloud.cms.gov/docker/redis:latest
+    platform: linux/arm64
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s

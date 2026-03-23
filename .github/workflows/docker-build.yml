@@ -129,9 +129,12 @@ jobs:
       - name: Debug Environment
         run: |
           uname -m        # Should output: aarch64
+          docker version
+          docker info | grep -i arch
       - name: Clean maven
         run: mvn -ntp -U clean
-
+      - name: Clear Maven cache
+        run: rm -rf ~/.m2/repository
       - name: Build ci app
         env:
           PACE_CERT: ${{ secrets.PACE_CERT }}

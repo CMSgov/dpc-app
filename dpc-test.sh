@@ -4,7 +4,8 @@ set -Ee
 # Current working directory
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
-export MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=info"
+export MAVEN_OPTS="-Dorg.slf4j.simpleLogger.defaultLogLevel=info \
+        -Djava.security.egd=file:/dev/./urandom"
 
 # Include secure environment variables
 set -o allexport

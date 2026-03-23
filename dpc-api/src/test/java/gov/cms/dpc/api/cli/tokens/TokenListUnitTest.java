@@ -15,7 +15,6 @@ import io.dropwizard.util.JarLocation;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
@@ -70,7 +69,6 @@ class TokenListUnitTest {
     }
 
     @Test
-    @Disabled
     void testListTokens_happyPath() throws IOException {
         UUID org_id = UUID.randomUUID();
         TokenEntity tokenEntity = new TokenEntity("tokenID", org_id, TokenType.OAUTH);
@@ -104,7 +102,6 @@ class TokenListUnitTest {
     }
 
     @Test
-    @Disabled
     void testListTokens_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
             .when(
