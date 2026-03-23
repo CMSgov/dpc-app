@@ -63,7 +63,7 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           # Note that we use the BFD role with access to the bucket
-          role-to-assume: $BFD_BUCKET_ROLE_ARN
+          role-to-assume: ${{ env.BFD_BUCKET_ROLE_ARN }}
           role-chaining: true
           role-skip-session-tagging: true
 
@@ -98,7 +98,7 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           # Note that we use the BFD role with access to the bucket
-          role-to-assume: ${{ BFD_BUCKET_ROLE_ARN }}
+          role-to-assume: ${{ env.BFD_BUCKET_ROLE_ARN }}
           role-chaining: true
           role-skip-session-tagging: true
       - name: Verify import file still in bucket
