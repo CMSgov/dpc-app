@@ -29,9 +29,11 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 class KeyListUnitTest {
     private final PrintStream originalOut = System.out;
@@ -57,11 +59,18 @@ class KeyListUnitTest {
 
         taskUri = new URI(APIAuthHelpers.TASK_URL);
         mockServer = ClientAndServer.startClientAndServer(taskUri.getPort());
+
+        // Wait until MockServer is actually ready
+        new MockServerClient(taskUri.getHost(), taskUri.getPort())
+                .isRunning(10, 500, TimeUnit.MILLISECONDS);
     }
 
     @AfterEach
     void teardown() {
         mockServer.stop();
+        // Wait for port release
+        await().atMost(5, TimeUnit.SECONDS)
+                .until(() -> !mockServer.isRunning());
 
         System.setOut(originalOut);
         System.setErr(originalErr);
