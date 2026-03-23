@@ -29,11 +29,9 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
-import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 class KeyListUnitTest {
     private final PrintStream originalOut = System.out;
@@ -59,18 +57,11 @@ class KeyListUnitTest {
 
         taskUri = new URI(APIAuthHelpers.TASK_URL);
         mockServer = ClientAndServer.startClientAndServer(taskUri.getPort());
-
-        // Wait until MockServer is actually ready
-        new MockServerClient(taskUri.getHost(), taskUri.getPort())
-                .isRunning(10, 500, TimeUnit.MILLISECONDS);
     }
 
     @AfterEach
     void teardown() {
         mockServer.stop();
-        // Wait for port release
-        await().atMost(5, TimeUnit.SECONDS)
-                .until(() -> !mockServer.isRunning());
 
         System.setOut(originalOut);
         System.setErr(originalErr);
@@ -88,38 +79,49 @@ class KeyListUnitTest {
         String payload = mapper.writeValueAsString(collectionResponse);
 
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
-            .when(
-                HttpRequest.request()
-                    .withMethod("POST")
-                    .withPath(taskUri.getPath() + "/list-keys")
-                    .withQueryStringParameters(List.of(Parameter.param("organization", "org_id")))
-            )
-            .respond(
-                org.mockserver.model.HttpResponse.response()
-                    .withStatusCode(HttpStatus.SC_OK)
-                    .withBody(payload)
-            );
+                .when(
+                        HttpRequest.request()
+                                .withMethod("POST")
+                                .withPath(taskUri.getPath() + "/list-keys")
+                                .withQueryStringParameters(List.of(Parameter.param("organization", "org_id")))
+                )
+                .respond(
+                        org.mockserver.model.HttpResponse.response()
+                                .withStatusCode(HttpStatus.SC_OK)
+                                .withBody(payload)
+                );
 
         Optional<Throwable> errors = cli.run("list", "org_id");
-        assertTrue(errors.isEmpty());
-
+//        assertTrue(errors.isEmpty());
+//
+//        String results = stdOut.toString();
+//        assertTrue(results.contains("│ test public key │"));
         String results = stdOut.toString();
-        assertTrue(results.contains("│ test public key │"));
+        String errResults = stdErr.toString();
+
+        originalOut.println("=== STDOUT ===\n" + results);
+        originalOut.println("=== STDERR ===\n" + errResults);
+
+        assertAll(
+                () -> assertTrue(errors.isEmpty(), "Expected no errors but got: " + errors),
+                () -> assertTrue(results.contains("│ test public key │"),
+                        "stdOut did not contain expected table. Actual content:\n" + results)
+        );
     }
 
     @Test
     void testListKeys_badResponse() {
         new MockServerClient(taskUri.getHost(), taskUri.getPort())
-            .when(
-                HttpRequest.request()
-                    .withMethod("POST")
-                    .withPath(taskUri.getPath() + "/list-keys")
-                    .withQueryStringParameters(List.of(Parameter.param("organization", "org_id")))
-            )
-            .respond(
-                org.mockserver.model.HttpResponse.response()
-                    .withStatusCode(HttpStatus.SC_BAD_REQUEST)
-            );
+                .when(
+                        HttpRequest.request()
+                                .withMethod("POST")
+                                .withPath(taskUri.getPath() + "/list-keys")
+                                .withQueryStringParameters(List.of(Parameter.param("organization", "org_id")))
+                )
+                .respond(
+                        org.mockserver.model.HttpResponse.response()
+                                .withStatusCode(HttpStatus.SC_BAD_REQUEST)
+                );
 
         // This is kind of kludgey and isn't guaranteed to work for all versions of Java, but it allows us to test error
         // cases that call System.exit()
