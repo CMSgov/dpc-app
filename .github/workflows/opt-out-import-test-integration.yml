@@ -58,7 +58,7 @@ jobs:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
           params: |
-            BFD_BUCKET_ROLE_ARN=/dpc/prod/bene-prefs/sensitive/bfd-bucket-role-arn 
+            BFD_BUCKET_ROLE_ARN=/dpc/test/bene-prefs/sensitive/bfd-bucket-role-arn 
       - uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-region: ${{ vars.AWS_REGION }}
