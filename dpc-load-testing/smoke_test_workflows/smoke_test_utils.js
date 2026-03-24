@@ -46,3 +46,7 @@ export async function monitorJob(token, jobUrl){
     exec.test.fail();
   }
 }
+
+export function generateUniqueTestRunValue() {
+  return `${exec.vu.idInInstance}+${exec.vu.iterationInInstance}+${Date.now()}`;
+}

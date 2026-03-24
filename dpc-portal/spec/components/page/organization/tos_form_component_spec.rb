@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.describe Page::Organization::TosFormComponent, type: :component do
   include ComponentSupport
+
   describe 'html' do
     subject(:html) do
       render_inline(component)
@@ -16,7 +17,7 @@ RSpec.describe Page::Organization::TosFormComponent, type: :component do
       <<~HTML
         <div class="margin-bottom-5">← <a href="/organizations">Return to organization list</a></div>
         <div>
-          <h2>Sign Terms of Service</h2>
+          <h1>Sign Terms of Service</h1>
           <p>Once you sign our Terms of Service, Health Hut will be allowed to access Medicare claims data.</p>
           <div style="width: 100%; height: 420px; overflow-y: auto; border: 2px solid silver; padding: 1rem;" class="margin-bottom-5 bg-white">
             <div class="usa-prose measure-5">

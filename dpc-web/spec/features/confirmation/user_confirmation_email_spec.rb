@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.feature 'user resends confirmation instructions' do
   include ActiveJob::TestHelper
+
   let(:user) { create :user, confirmed_at: nil }
 
   context 'when successful' do

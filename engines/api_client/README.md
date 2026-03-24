@@ -20,20 +20,27 @@ And then execute:
 $ bundle install
 ```
 
-## Testing
-Build the docker image
-
-In the api_client directory
+## Debugging and Development
+To build an image, use the `make` command in the project root directory.
 ```bash
-$ make build
+make api-client
 ```
 
-Run the tests until they pass
-```
-$ make test
+
+To ssh into a Docker container with the dpc_client code, use the `make` command in the project root directory.
+```bash
+make api-client-sh
 ```
 
-Jump into the docker shell for iterative development
+## Testing
+Test using `make` commands in the project root directory.
+
+### Unit Tests
+```bash
+make ci-api-client
 ```
-make run
+
+### Integration tests with the API
+```bash
+make ci-api-client-integration
 ```

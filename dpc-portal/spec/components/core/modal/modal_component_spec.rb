@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.describe Core::Modal::ModalComponent, type: :component do
   include ComponentSupport
+
   describe 'html' do
     subject(:html) do
       render_inline(component)
@@ -44,7 +45,7 @@ RSpec.describe Core::Modal::ModalComponent, type: :component do
               </div>
             </div>
             <button type="button" class="usa-button usa-modal__close" aria-label="Close this window" data-close-modal>
-              <svg class="usa-icon" style="transform: scale(1)" aria-hidden="true" role="img">
+              <svg class="usa-icon" aria-hidden="true">
                 <use xlink:href="/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#close"></use>
               </svg>
             </button>

@@ -12,7 +12,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
 
     let(:expected_html) do
       <<~HTML
-        <svg class="usa-icon" style="transform: scale(1)" aria-hidden="true" role="img">
+        <svg class="usa-icon" aria-hidden="true">
           <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#lock></use>
         </svg>
       HTML
@@ -24,11 +24,11 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
 
     it { is_expected.to match_html_fragment(expected_html) }
 
-    context 'changed size' do
-      let(:component) { described_class.new('circle_check', size: 2) }
+    context 'icon size 3' do
+      let(:component) { described_class.new('circle_check', size: 3) }
       let(:expected_html) do
         <<~HTML
-          <svg class="usa-icon" style="transform: scale(2)" aria-hidden="true" role="img">
+          <svg class="usa-icon usa-icon--size-3" aria-hidden="true">
             <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#circle_check></use>
           </svg>
         HTML
@@ -36,11 +36,51 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
 
       it { is_expected.to match_html_fragment(expected_html) }
     end
+
+    context 'no icon size' do
+      let(:component) { described_class.new('circle_check') }
+      let(:expected_html) do
+        <<~HTML
+          <svg class="usa-icon" aria-hidden="true">
+            <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#circle_check></use>
+          </svg>
+        HTML
+      end
+
+      it { is_expected.to match_html_fragment(expected_html) }
+    end
+
+    context 'should ignore icon size < 3' do
+      let(:component) { described_class.new('circle_check', size: 2) }
+      let(:expected_html) do
+        <<~HTML
+          <svg class="usa-icon" aria-hidden="true">
+            <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#circle_check></use>
+          </svg>
+        HTML
+      end
+
+      it { is_expected.to match_html_fragment(expected_html) }
+    end
+
+    context 'should ignore icon size > 9' do
+      let(:component) { described_class.new('circle_check', size: 10) }
+      let(:expected_html) do
+        <<~HTML
+          <svg class="usa-icon" aria-hidden="true">
+            <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#circle_check></use>
+          </svg>
+        HTML
+      end
+
+      it { is_expected.to match_html_fragment(expected_html) }
+    end
+
     context 'added classes' do
       let(:component) { described_class.new('lock', additional_classes: %w[foo bar]) }
       let(:expected_html) do
         <<~HTML
-          <svg class="foo bar usa-icon" style="transform: scale(1)" aria-hidden="true" role="img">
+          <svg class="foo bar usa-icon" aria-hidden="true">
             <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#lock></use>
           </svg>
         HTML

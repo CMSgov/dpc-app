@@ -39,6 +39,7 @@ RSpec.describe Page::Utility::AccessDeniedComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <div>
+            <h1>Access Denied</h1>
             <div class="font-body-lg text-bold">#{I18n.t('verification.ao_med_sanctions_status')}</div>
             <p>#{I18n.t('verification.ao_med_sanctions_text')}</p>
           </div>
