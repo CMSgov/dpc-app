@@ -74,7 +74,7 @@ jobs:
           echo "FILENAME=$fname" >> "$GITHUB_OUTPUT"
           echo "STARTTIME=`date +%s`" >> "$GITHUB_OUTPUT"
           aws s3 cp --no-progress synthetic_test_data/T.NGD.DPC.RSP.D240123.T1122001.IN \
-            s3://bfd-test-bene-prefs-dpc20260225231713184700000003/bene-prefs-test/dpc/in/$fname
+            s3://bfd-test-bene-prefs-dpc20260225231713184700000003/bfdeft01/dpc/in/$fname
 
   verify-bucket:
     if: ${{ always() && needs.trigger.result == 'success' }}
@@ -105,7 +105,7 @@ jobs:
         run: |
           aws s3api head-object \
             --bucket bfd-test-bene-prefs-dpc20260225231713184700000003 \
-            --key bene-prefs-test/dpc/in/${{ needs.trigger.outputs.filename }}
+            --key bfdeft01/dpc/in/${{ needs.trigger.outputs.filename }}
       - name: Verify confirmation file put in bucket
         env:
           STARTTIME: ${{needs.trigger.outputs.start_time}}
@@ -117,7 +117,7 @@ jobs:
               echo "we have a winner!"
               exit 0
             fi
-          done < <(aws s3 ls s3://bfd-test-bene-prefs-dpc20260225231713184700000003/bene-prefs-test/dpc/out/ | grep CONF)
+          done < <(aws s3 ls s3://bfd-test-bene-prefs-dpc20260225231713184700000003/bfdeft01/dpc/out/ | grep CONF)
           echo "no new file found"
           exit 1
 
