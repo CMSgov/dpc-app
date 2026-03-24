@@ -114,11 +114,6 @@ jobs:
       LANG: en_US.UTF-8
       LC_ALL: en_US.UTF-8
     steps:
-      - name: System Locale Setup
-        run: |
-          sudo apt-get install -y locales
-          sudo locale-gen en_US.UTF-8
-          sudo update-locale LANG=en_US.UTF-8
       - name: "Set up Ansible"
         run: pip install ansible
       - name: Assert Ownership
