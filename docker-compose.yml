@@ -103,6 +103,7 @@ services:
 
   tests:
     image: maven:3.9.9-amazoncorretto-17
+    platform: linux/arm64
     env_file:
       - ./ops/config/decrypted/local.env
     volumes:
