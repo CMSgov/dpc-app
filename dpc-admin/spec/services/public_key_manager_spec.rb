@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.describe PublicKeyManager do
   include DpcClientSupport
+
   describe '#create_public_key' do
     before(:each) do
       @public_key_params = { label: 'Test Key 1', public_key: file_fixture('stubbed_key.pem').read, snippet_signature: 'stubbed_sign_txt_signature' }
