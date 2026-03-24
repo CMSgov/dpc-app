@@ -113,8 +113,13 @@ jobs:
     env:
       LANG: en_US.UTF-8
       LC_ALL: en_US.UTF-8
-      JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8"
     steps:
+      - name: System Locale Setup
+        run: |
+          sudo locale-gen en_US.UTF-8
+          sudo update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+          # Optional: verify it worked
+          locale -a
       - name: "Set up Ansible"
         run: pip install ansible
       - name: Assert Ownership
