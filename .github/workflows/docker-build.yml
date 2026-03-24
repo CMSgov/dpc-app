@@ -110,6 +110,10 @@ jobs:
       id-token: write
     # runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+    env:
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF-8 -Dstdout.encoding=UTF-8 -Djava.security.egd=file:/dev/./urandom"
     steps:
       - name: "Set up Ansible"
         run: pip install ansible
