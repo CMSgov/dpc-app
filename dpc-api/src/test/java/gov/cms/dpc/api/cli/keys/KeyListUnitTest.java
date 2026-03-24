@@ -96,7 +96,8 @@ class KeyListUnitTest {
         assertTrue(errors.isEmpty());
 
         String results = stdOut.toString();
-        assertTrue(results.contains("test public key"));
+//        assertTrue(results.contains("test public key"));
+        assertTrue(results.contains("│ test public key │"));
         assertTrue(results.contains(mockId.toString()));
     }
 
