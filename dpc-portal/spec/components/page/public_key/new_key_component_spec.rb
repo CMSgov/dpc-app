@@ -4,7 +4,6 @@ require 'rails_helper'
 
 RSpec.describe Page::PublicKey::NewKeyComponent, type: :component do
   include ComponentSupport
-
   describe 'html' do
     subject(:html) do
       render_inline(component)

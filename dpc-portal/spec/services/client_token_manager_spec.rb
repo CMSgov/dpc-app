@@ -4,7 +4,6 @@ require 'rails_helper'
 
 RSpec.describe ClientTokenManager do
   include DpcClientSupport
-
   let(:api_id) { SecureRandom.uuid }
   let(:manager) { ClientTokenManager.new(api_id) }
   describe '#create_client_token' do

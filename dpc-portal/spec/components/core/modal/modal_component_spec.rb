@@ -4,7 +4,6 @@ require 'rails_helper'
 
 RSpec.describe Core::Modal::ModalComponent, type: :component do
   include ComponentSupport
-
   describe 'html' do
     subject(:html) do
       render_inline(component)

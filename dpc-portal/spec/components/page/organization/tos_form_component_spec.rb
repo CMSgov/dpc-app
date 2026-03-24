@@ -4,7 +4,6 @@ require 'rails_helper'
 
 RSpec.describe Page::Organization::TosFormComponent, type: :component do
   include ComponentSupport
-
   describe 'html' do
     subject(:html) do
       render_inline(component)

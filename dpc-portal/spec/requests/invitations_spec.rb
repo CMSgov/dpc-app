@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'support/login_support'
 
 RSpec.describe 'Invitations', type: :request do
+  include LoginSupport
   RSpec.shared_examples 'an invitation endpoint' do |method, path_suffix, type|
     let(:org) { invitation.provider_organization }
     let(:bad_org) { create(:provider_organization) }
@@ -630,13 +632,13 @@ RSpec.describe 'Invitations', type: :request do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
         end
         it 'should not create user if exists' do
-          create(:user, provider: :openid_connect, uid: user_info_template['sub'])
+          create(:user, provider: :login_dot_gov, uid: user_info_template['sub'])
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { User.count }.by 0
         end
         it 'should update name of user if changed' do
-          user = create(:user, provider: :openid_connect, uid: user_info_template['sub'], given_name: :foo,
+          user = create(:user, provider: :login_dot_gov, uid: user_info_template['sub'], given_name: :foo,
                                family_name: :bar)
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
@@ -646,7 +648,7 @@ RSpec.describe 'Invitations', type: :request do
           expect(user.family_name).to eq user_info_template['family_name']
         end
         it 'should not override pac_id on existing user' do
-          create(:user, provider: :openid_connect, uid: user_info_template['sub'], pac_id: :foo)
+          create(:user, provider: :login_dot_gov, uid: user_info_template['sub'], pac_id: :foo)
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           user = User.find_by(uid: user_info_template['sub'])
           # We have the fake CPI API Gateway return the ssn as pac_id
@@ -705,7 +707,7 @@ RSpec.describe 'Invitations', type: :request do
           get "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
         end
         it 'should not save verification_status on user and org' do
-          create(:user, provider: :openid_connect, uid: user_info_template['sub'], pac_id: :foo)
+          create(:user, provider: :login_dot_gov, uid: user_info_template['sub'], pac_id: :foo)
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           user = User.find_by(uid: user_info_template['sub'])
           expect(user.verification_status).to be_nil
@@ -737,7 +739,7 @@ RSpec.describe 'Invitations', type: :request do
           expect(request.session[:user_pac_id]).to be_nil
         end
         it 'should set pac_id on existing user' do
-          create(:user, provider: :openid_connect, uid: user_info_template['sub'])
+          create(:user, provider: :login_dot_gov, uid: user_info_template['sub'])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           user = User.find_by(uid: user_info_template['sub'])
           # We have the fake CPI API Gateway return the ssn as pac_id
@@ -823,7 +825,7 @@ end
 
 def log_in
   OmniAuth.config.test_mode = true
-  OmniAuth.config.add_mock(:openid_connect,
+  OmniAuth.config.add_mock(:login_dot_gov,
                            { uid: '12345',
                              credentials: { expires_in: 899,
                                             token: 'bearer-token' },
@@ -831,7 +833,7 @@ def log_in
                              extra: { raw_info: { given_name: 'Bob',
                                                   family_name: 'Hoskins',
                                                   ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
-  post '/users/auth/openid_connect'
+  post '/auth/login_dot_gov'
   follow_redirect!
 end
 

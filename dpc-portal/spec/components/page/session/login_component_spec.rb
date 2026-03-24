@@ -4,7 +4,6 @@ require 'rails_helper'
 
 RSpec.describe Page::Session::LoginComponent, type: :component do
   include ComponentSupport
-
   describe 'login component' do
     let(:url) { '/' }
     let(:sandbox_url) { 'https://sandbox.dpc.cms.gov/' }

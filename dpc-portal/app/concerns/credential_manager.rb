@@ -3,7 +3,6 @@
 # Shared functions of credential managers
 module CredentialManager
   extend ActiveSupport::Concern
-
   attr_reader :api_id, :errors
 
   SERVER_ERROR_MSG = "We're sorry but we can't complete your request. Please try again tomorrow."

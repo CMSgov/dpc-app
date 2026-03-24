@@ -5,7 +5,6 @@ module Core
     # Render a USWDS-styled card for an organization.
     class OrganizationListRowComponent < ViewComponent::Base
       include OrganizationUtils
-
       with_collection_parameter :link
 
       def initialize(link:)
