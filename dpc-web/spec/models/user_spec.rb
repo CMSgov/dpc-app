@@ -5,6 +5,7 @@ require 'fakefs/spec_helpers'
 
 RSpec.describe User, type: :model do
   include ActiveJob::TestHelper
+
   subject { create :user }
 
   describe 'factory' do
