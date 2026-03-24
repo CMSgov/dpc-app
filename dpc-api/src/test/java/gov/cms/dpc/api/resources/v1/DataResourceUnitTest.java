@@ -158,9 +158,6 @@ class DataResourceUnitTest {
             new FileManager.FilePointer("", 0, UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, compressFile)
         );
 
-        boolean expectGzipCompressed =
-            requestHeaders.containsKey(HttpHeaders.ACCEPT_ENCODING) && requestHeaders.get(HttpHeaders.ACCEPT_ENCODING).contains("gzip");
-
         // Try to request one byte
         Invocation.Builder requestBuilder = RESOURCE.target("/v1/Data/test.ndjson")
             .request()
@@ -171,7 +168,7 @@ class DataResourceUnitTest {
             requestBuilder.header(header.getKey(), header.getValue());
         }
         Response response = requestBuilder.get();
-        String responseBody = readResponse(response, expectGzipCompressed);
+        String responseBody = readResponse(response, false);
 
         assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus(), "Should have partial content status");
         assertEquals(String.valueOf(randomString.charAt(0)), responseBody, "Should only have a single byte");
@@ -188,7 +185,7 @@ class DataResourceUnitTest {
             requestBuilder.header(header.getKey(), header.getValue());
         }
         response = requestBuilder.get();
-        responseBody = readResponse(response, expectGzipCompressed);
+        responseBody = readResponse(response, false);
 
         assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus(), "Should have partial content status");
         assertEquals(randomString.substring(start, end), responseBody, "Response should match");
@@ -203,7 +200,7 @@ class DataResourceUnitTest {
             requestBuilder.header(header.getKey(), header.getValue());
         }
         response = requestBuilder.get();
-        responseBody = readResponse(response, expectGzipCompressed);
+        responseBody = readResponse(response, false);
 
         assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus(), "Should have partial content status");
         assertEquals(randomString, responseBody, "Response should match");
@@ -218,7 +215,7 @@ class DataResourceUnitTest {
             requestBuilder.header(header.getKey(), header.getValue());
         }
         response = requestBuilder.get();
-        responseBody = readResponse(response, expectGzipCompressed);
+        responseBody = readResponse(response, false);
 
         // Result might be chunked, so only check what the serve says it responded with
         String contentRange = response.getHeaderString(org.apache.hc.core5.http.HttpHeaders.CONTENT_RANGE);

@@ -104,32 +104,18 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 		Map<String, String> requestHeaders = new HashMap<>(requestHeadersIn);
 		requestHeaders.put(HttpHeaders.RANGE, String.format("bytes=%d-%d", 6, 6 + testData.length()));
 
-		boolean expectGzipCompressed =
-			requestHeaders.containsKey(HttpHeaders.ACCEPT_ENCODING) && requestHeaders.get(HttpHeaders.ACCEPT_ENCODING).contains("gzip");
-
 		try (ClassicHttpResponse response = downloadExport(fileName, requestHeaders))
 		{
 			assertNotNull(response);
 
 			// Check content encoding
 			Header contentEncoding = response.getHeader(HttpHeaders.CONTENT_ENCODING);
-			if (expectGzipCompressed) {
-				assertEquals(GzipUtil.GZIP, contentEncoding.getValue());
-			} else {
-				assertNull(contentEncoding);
-			}
+			assertNull(contentEncoding);
 
 			// Make sure we can read the body
 			HttpEntity entity = response.getEntity();
 			byte[] responseData = entity.getContent().readAllBytes();
-
-			String responseString;
-			if (expectGzipCompressed) {
-				responseString = GzipUtil.decompress(responseData);
-			} else {
-				responseString = new String(responseData);
-			}
-
+			String responseString = new String(responseData);
 			assertEquals(testData, responseString);
 		} catch (IOException | ProtocolException e) {
 			fail("Failed to read response");
@@ -137,7 +123,7 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 	}
 
 	// Downloads a file from the Data endpoint.
-	// Turns off auto-handling of gzip compression so each test can handle it itself.
+	// Turns off auto-handling of gzip compression so each test can verify the data is or isn't compressed.
 	private ClassicHttpResponse downloadExport(String fileName, Map<String, String> headers) {
 		// Create client and call Data end point
 		try {

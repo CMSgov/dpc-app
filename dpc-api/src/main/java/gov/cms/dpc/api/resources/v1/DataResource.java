@@ -162,7 +162,7 @@ public class DataResource extends AbstractDataResource {
         // request bytes, ignore everything else
         boolean compressResponse = shouldGzipCompress(acceptEncoding);
         if (rangeHeader != null) {
-            response = buildRangedRequest(fileID, filePointer, rangeHeader, compressResponse);
+            response = buildRangedRequest(fileID, filePointer, rangeHeader);
         } else {
             // Return a non-ranged streamed response if the requester doesn't actually send
             // the range header, or if we don't understand the range unit
@@ -173,17 +173,13 @@ public class DataResource extends AbstractDataResource {
         final CacheControl cacheControl = new CacheControl();
         cacheControl.setNoCache(true);
         cacheControl.setNoStore(true);
-
         Response.ResponseBuilder responseBuilder = Response.fromResponse(response)
             .cacheControl(cacheControl);
-        if (compressResponse) {
-            responseBuilder.encoding("gzip");
-        }
+
         return responseBuilder.build();
     }
 
-    private Response buildDefaultResponse(String fileID, FileManager.FilePointer filePointer,
-            boolean compressResponse) {
+    private Response buildDefaultResponse(String fileID, FileManager.FilePointer filePointer, boolean compressResponse) {
         FileInputStream fileInputStream;
         try {
             fileInputStream = new FileInputStream(filePointer.getFile());
@@ -204,12 +200,14 @@ public class DataResource extends AbstractDataResource {
             .entity(streamingOutput)
             .header(HttpHeaders.ETAG, filePointer.getChecksum())
             .header(HttpHeaders.LAST_MODIFIED, filePointer.getCreationTime().toInstant().toEpochMilli());
+        if (compressResponse) {
+            builder.encoding("gzip");
+        }
 
         return builder.build();
     }
 
-    private Response buildRangedRequest(String fileID, FileManager.FilePointer filePointer, RangeHeader range,
-            boolean compressResponse) {
+    private Response buildRangedRequest(String fileID, FileManager.FilePointer filePointer, RangeHeader range) {
         if (!range.getUnit().equals(ACCEPTED_RANGE_VALUE)) {
             throw new WebApplicationException("Only `bytes` are acceptable as ranges",
                     Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
@@ -224,10 +222,8 @@ public class DataResource extends AbstractDataResource {
                     Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
         }
 
-        // We need to get an uncompressed input stream, then move our cursor to the
-        // offset we want. We can't use a
-        // RandomAccessFile because they require the entire stream to be uncompressed
-        // first.
+        // We need to get an uncompressed input stream, then move our cursor to the offset we want. We can't use a
+        // RandomAccessFile because our file is more than likely compressed.
         try {
             InputStream uncompressedInputStream = filePointer.getUncompressedInputStream();
 
@@ -239,27 +235,19 @@ public class DataResource extends AbstractDataResource {
                     .setMaxCount(len)
                     .get();
 
-            StreamingOutput streamingOutput;
-            if (compressResponse) {
-                streamingOutput = new GzipStreamingOutput(boundedInputStream, false);
-            } else {
-                streamingOutput = new UnGzipStreamingOutput(boundedInputStream, false);
-            }
+            // The default DropWizard behavior is to not gzip compress responses when a range is requested, so we're
+            // duplicating that here and we only create non-zipped responses.
+            StreamingOutput streamingOutput = new UnGzipStreamingOutput(boundedInputStream, false);
 
             final String responseRange = String.format("bytes %d-%d/%d", rangeStart, rangeEnd, len);
-            Response.ResponseBuilder responseBuilder =  Response
+            return Response
                 .status(Response.Status.PARTIAL_CONTENT)
                 .entity(streamingOutput)
                 .header(HttpHeaders.ACCEPT_RANGES, ACCEPTED_RANGE_VALUE)
-                .header(HttpHeaders.CONTENT_RANGE, responseRange);
+                .header(HttpHeaders.CONTENT_RANGE, responseRange)
                 // Set the X-Content-Length header, so we can manually override what Jersey does
-                // Streaming output and content-length are usually mutually exclusive, but I don't want to change
-                // existing functionality.  We'll leave this here for non-compressed responses, but for compressed,
-                // we don't know what the content length will be.
-                if (!compressResponse) {
-                    responseBuilder.header(X_CONTENT_LENGTH, len);
-                }
-                return responseBuilder.build();
+                .header(X_CONTENT_LENGTH, len)
+                .build();
         } catch (IOException e) {
             throw new WebApplicationException(String.format("Unable to open file `%s`.`.", fileID), e,
                     Response.Status.INTERNAL_SERVER_ERROR);
