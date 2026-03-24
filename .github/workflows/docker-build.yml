@@ -125,17 +125,17 @@ jobs:
           java-version: "17"
           distribution: "corretto"
           architecture: aarch64
-      - name: Debug Environment
-        run: |
-          uname -m        # Should output: aarch64
-          docker version
-          docker info | grep -i arch
-      - name: Check charset and locale
-        run: |
-          echo "LANG=$LANG"
-          echo "LC_ALL=${LC_ALL:-unset}"
-          locale
-          java -XshowSettings:property -version 2>&1 | grep -E "file.encoding|stdout.encoding|native.encoding"
+      # - name: Debug Environment
+      #   run: |
+      #     uname -m        # Should output: aarch64
+      #     docker version
+      #     docker info | grep -i arch
+      # - name: Check charset and locale
+      #   run: |
+      #     echo "LANG=$LANG"
+      #     echo "LC_ALL=${LC_ALL:-unset}"
+      #     locale
+      #     java -XshowSettings:property -version 2>&1 | grep -E "file.encoding|stdout.encoding|native.encoding"
       - name: Clean maven
         run: mvn -ntp -U clean
       - name: Clear Maven cache

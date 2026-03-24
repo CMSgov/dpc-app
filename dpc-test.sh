@@ -52,7 +52,18 @@ else
 fi
 
 # Build the application
+echo "┌──────────────────────────────────────┐"
+echo "│                                      │"
+echo "│      docker compose up db            │"
+echo "│                                      │"
+echo "└──────────────────────────────────────┘"
 docker compose -p start-v1-app up db --wait
+
+echo "┌──────────────────────────────────────┐"
+echo "│                                      │"
+echo "│      Maven Clean, Compile, Package   │"
+echo "│                                      │"
+echo "└──────────────────────────────────────┘"
 mvn -T 1.5C clean compile -Perror-prone -B -V -ntp
 mvn -T 1.5C package -Pci -ntp
 
@@ -61,24 +72,46 @@ if [ -n "$REPORT_COVERAGE" ]; then
   mvn jacoco:report -ntp
 fi
 
+  echo "┌──────────────────────────────────────┐"
+  echo "│                                      │"
+  echo "│      docker start-v1-app down        │"
+  echo "│                                      │"
+  echo "└──────────────────────────────────────┘"
 docker compose -p start-v1-app down
 
+
+  echo "┌──────────────────────────────────────┐"
+  echo "│                                      │"
+  echo "│ docker up db attribution aggregation │"
+  echo "│                                      │"
+  echo "└──────────────────────────────────────┘"
 USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
 
+  echo "┌──────────────────────────────────────┐"
+  echo "│                                      │"
+  echo "│      docker integration tests        │"
+  echo "│                                      │"
+  echo "└──────────────────────────────────────┘"
 # Run the integration tests
-USE_BFD_MOCK=true docker compose -p start-v1-app \
-  run --rm tests \
-  sh -c "mvn verify -Pintegration-tests -pl dpc-api -am -ntp -Djib.skip=true"
+USE_BFD_MOCK=true docker compose -p start-v1-app up --exit-code-from tests tests
+
+echo "Starting api server for end-to-end tests"
+  echo "┌──────────────────────────────────────┐"
+  echo "│                                      │"
+  echo "│ api server for end-to-end tests      │"
+  echo "│                                      │"
+  echo "└──────────────────────────────────────┘"
+USE_BFD_MOCK=true docker compose -p start-v1-app up api --wait
+
+echo "Starting end-to-end tests"
+docker run --rm -v $(pwd)/dpc-load-testing:/src --env-file $(pwd)/ops/config/decrypted/local.env --add-host host.docker.internal=host-gateway -e ENVIRONMENT=local -i grafana/k6 run /src/ci-app.js
 
 
-#USE_BFD_MOCK=true docker compose -p start-v1-app up --exit-code-from tests tests
-#
-#echo "Starting api server for end-to-end tests"
-#USE_BFD_MOCK=true docker compose -p start-v1-app up api --wait
-#
-#echo "Starting end-to-end tests"
-#docker run --rm -v $(pwd)/dpc-load-testing:/src --env-file $(pwd)/ops/config/decrypted/local.env --add-host host.docker.internal=host-gateway -e ENVIRONMENT=local -i grafana/k6 run /src/ci-app.js
-
+  echo "┌──────────────────────────────────────┐"
+  echo "│                                      │"
+  echo "│     docker start-v1-app down         │"
+  echo "│                                      │"
+  echo "└──────────────────────────────────────┘"
 # Wait for Jacoco to finish writing the output files
 docker compose -p start-v1-app down -t 60
 
