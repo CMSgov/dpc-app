@@ -1,6 +1,7 @@
 services:
   base:
     image: dpc-base:latest
+    platform: linux/arm64
     build:
       args:
         PACE_CERT: ${PACE_CERT:-}

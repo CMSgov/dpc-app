@@ -6,6 +6,7 @@ services:
 
   redis:
     image: artifactory.cloud.cms.gov/docker/redis:latest
+    platform: linux/arm64
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -18,6 +19,7 @@ services:
       context: .
       dockerfile: dpc-web/Dockerfile
     image: dpc-web:latest
+    platform: linux/arm64
     volumes:
       - "./dpc-web/certs:/dpc-web/certs"
       - "./dpc-web/coverage:/dpc-web/coverage"
@@ -60,6 +62,7 @@ services:
       context: .
       dockerfile: dpc-admin/Dockerfile
     image: dpc-web-admin:latest
+    platform: linux/arm64
     volumes:
       - "./dpc-admin/coverage:/dpc-admin/coverage"
       - ./tmp/letter_opener/admin:/dpc-admin/tmp/letter_opener
@@ -98,6 +101,7 @@ services:
       context: .
       dockerfile: dpc-portal/Dockerfile
     image: dpc-web-portal:latest
+    platform: linux/arm64
     volumes:
       # Mount specific directories to avoid overwriting 
       # precompiled assets (public/assets/) and node_modules
