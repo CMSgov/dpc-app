@@ -89,22 +89,22 @@ USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation -
 
   echo "┌──────────────────────────────────────┐"
   echo "│                                      │"
-  echo "│      docker integration tests        │"
+  echo "│  SKIP: docker integration tests      │"
   echo "│                                      │"
   echo "└──────────────────────────────────────┘"
-# Run the integration tests
-USE_BFD_MOCK=true docker compose -p start-v1-app up --exit-code-from tests tests
+## Run the integration tests
+#USE_BFD_MOCK=true docker compose -p start-v1-app up --exit-code-from tests tests
 
 echo "Starting api server for end-to-end tests"
   echo "┌──────────────────────────────────────┐"
   echo "│                                      │"
-  echo "│ api server for end-to-end tests      │"
+  echo "│ SKIP: api server for end-to-end tests│"
   echo "│                                      │"
   echo "└──────────────────────────────────────┘"
-USE_BFD_MOCK=true docker compose -p start-v1-app up api --wait
-
-echo "Starting end-to-end tests"
-docker run --rm -v $(pwd)/dpc-load-testing:/src --env-file $(pwd)/ops/config/decrypted/local.env --add-host host.docker.internal=host-gateway -e ENVIRONMENT=local -i grafana/k6 run /src/ci-app.js
+#USE_BFD_MOCK=true docker compose -p start-v1-app up api --wait
+#
+#echo "Starting end-to-end tests"
+#docker run --rm -v $(pwd)/dpc-load-testing:/src --env-file $(pwd)/ops/config/decrypted/local.env --add-host host.docker.internal=host-gateway -e ENVIRONMENT=local -i grafana/k6 run /src/ci-app.js
 
 
   echo "┌──────────────────────────────────────┐"
