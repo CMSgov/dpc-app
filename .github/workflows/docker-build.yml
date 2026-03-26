@@ -32,7 +32,10 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+    runs-on:  >-
+      codebuild-dpc-app${{
+        contains(fromJSON('["dev", "test"]'), inputs.env) && '-non-prod' || '-prod'
+      }}-${{ github.run_id }}-${{ github.run_attempt }}
     outputs:
       version_tag: ${{ steps.get-version-tag.outputs.version_tag }}
       docker_tag: ${{ steps.output_docker_tag.outputs.docker_tag }}
@@ -64,7 +67,10 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+    runs-on:  >-
+      codebuild-dpc-app${{
+        contains(fromJSON('["dev", "test"]'), inputs.env) && '-non-prod' || '-prod'
+      }}-${{ github.run_id }}-${{ github.run_attempt }}
     strategy:
       matrix:
         app_dir: [ dpc-portal, dpc-admin, dpc-web ]
@@ -107,7 +113,6 @@ jobs:
       contents: read
       id-token: write
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    # runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - name: "Set up Ansible"
         run: pip install ansible
@@ -187,7 +192,10 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+    runs-on:  >-
+      codebuild-dpc-app${{
+        contains(fromJSON('["dev", "test"]'), inputs.env) && '-non-prod' || '-prod'
+      }}-${{ github.run_id }}-${{ github.run_attempt }}
     strategy:
       matrix:
         ecr_repository: [ web-portal, web-admin, web, api, attribution, aggregation ]
