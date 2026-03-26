@@ -530,6 +530,10 @@
                                 <phase>verify</phase>
                             </execution>
                         </executions>
+                        <configuration>
+                            <useFile>false</useFile>
+                            <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                        </configuration>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -721,6 +725,8 @@
                         </dependency>
                     </dependencies>
                     <configuration>
+                        <useFile>false</useFile>
+                        <redirectTestOutputToFile>false</redirectTestOutputToFile>
                         <reportFormat>plain</reportFormat>
                         <consoleOutputReporter>
                             <disable>true</disable>
@@ -729,12 +735,12 @@
                         <theme>UNICODE</theme>
                             <printStacktraceOnError>true</printStacktraceOnError>
                             <printStacktraceOnFailure>true</printStacktraceOnFailure>
-                            <printStdoutOnError>false</printStdoutOnError>
-                            <printStdoutOnFailure>false</printStdoutOnFailure>
+                            <printStdoutOnError>true</printStdoutOnError>
+                            <printStdoutOnFailure>true</printStdoutOnFailure>
                             <printStdoutOnSuccess>false</printStdoutOnSuccess>
                             <printStderrOnError>true</printStderrOnError>
                             <printStderrOnFailure>true</printStderrOnFailure>
-                            <printStderrOnSuccess>false</printStderrOnSuccess>
+                            <printStderrOnSuccess>true</printStderrOnSuccess>
                         </statelessTestsetInfoReporter>
                         <includes>
                             <include>**/*Test.java</include>

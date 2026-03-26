@@ -6,6 +6,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
 import org.slf4j.Logger;
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * This means we get silent logging unless {@link BufferedLoggerHandler#testFailed(ExtensionContext, Throwable)} is called, in which case we throw everything.
  */
-public class BufferedLoggerHandler implements TestWatcher, BeforeAllCallback {
+public class BufferedLoggerHandler implements TestWatcher, BeforeAllCallback, BeforeEachCallback {
 
     public static final String LOGGER_NAME = "BufferedLogger";
     public static final String LOGGER_PATTERN = "%-4relative [%thread] %-5level %logger{35} - %msg %n";
@@ -46,7 +47,22 @@ public class BufferedLoggerHandler implements TestWatcher, BeforeAllCallback {
     }
 
     @Override
+    public void beforeEach(ExtensionContext context) {
+        // Logs to original stderr so it's always visible in CI, even if the test hangs
+        System.err.printf("[TEST STARTED] %s::%s%n",
+                context.getTestClass().map(Class::getSimpleName).orElse("Unknown"),
+                context.getDisplayName()
+        );
+    }
+
+    @Override
     public void testFailed(ExtensionContext context, Throwable cause) {
+        System.err.printf("[TEST FAILED]  %s::%s — %s%n",
+                context.getTestClass().map(Class::getSimpleName).orElse("Unknown"),
+                context.getDisplayName(),
+                cause.getMessage()
+        );
+
         // Dump all the logs
         final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
@@ -56,6 +72,13 @@ public class BufferedLoggerHandler implements TestWatcher, BeforeAllCallback {
                 ((RingBufferLogger) appender).dumpLogMessages();
             }
         }
+    }
 
+    @Override
+    public void testSuccessful(ExtensionContext context) {
+        System.err.printf("[TEST PASSED]  %s::%s%n",
+                context.getTestClass().map(Class::getSimpleName).orElse("Unknown"),
+                context.getDisplayName()
+        );
     }
 }
