@@ -56,7 +56,7 @@ gem 'view_component', '~> 3.9'
 gem 'webrick'
 gem 'yard', '>= 0.9.36'
 
-# gem 'api_client', path: 'vendor/api_client'
+gem 'api_client', path: 'vendor/api_client'
 
 group :production do
   gem 'pg-aws_rds_iam'
