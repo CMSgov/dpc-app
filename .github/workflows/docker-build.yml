@@ -4,6 +4,11 @@ on:
   workflow_dispatch:
   workflow_call:
     inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: 'string'
+        default: 'dev'
       block_release_tag:
         description: Whether should block marking build as release
         type: boolean
@@ -34,7 +39,7 @@ jobs:
       id-token: write
     runs-on:  >-
       codebuild-dpc-app${{
-        contains(fromJSON('["dev", "test"]'), inputs.env) && '-non-prod' || '-prod'
+        contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
       }}-${{ github.run_id }}-${{ github.run_attempt }}
     outputs:
       version_tag: ${{ steps.get-version-tag.outputs.version_tag }}
@@ -69,7 +74,7 @@ jobs:
       id-token: write
     runs-on:  >-
       codebuild-dpc-app${{
-        contains(fromJSON('["dev", "test"]'), inputs.env) && '-non-prod' || '-prod'
+        contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
       }}-${{ github.run_id }}-${{ github.run_attempt }}
     strategy:
       matrix:
@@ -112,7 +117,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    # Will be updated as part of DPC-5307
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}} 
     steps:
       - name: "Set up Ansible"
         run: pip install ansible
@@ -128,18 +134,10 @@ jobs:
           java-version: "17"
           distribution: "corretto"
           cache: maven
-          # architecture: aarch64
       - name: Debug Environment
         run: |
           uname -m        # Should output: aarch64
-          docker version
           docker info | grep -i arch
-      # - name: Check charset and locale
-      #   run: |
-      #     echo "LANG=$LANG"
-      #     echo "LC_ALL=${LC_ALL:-unset}"
-      #     locale
-      #     java -XshowSettings:property -version 2>&1 | grep -E "file.encoding|stdout.encoding|native.encoding"
       - name: Clean maven
         run: mvn -ntp -U clean
 
@@ -194,7 +192,7 @@ jobs:
       id-token: write
     runs-on:  >-
       codebuild-dpc-app${{
-        contains(fromJSON('["dev", "test"]'), inputs.env) && '-non-prod' || '-prod'
+        contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
       }}-${{ github.run_id }}-${{ github.run_attempt }}
     strategy:
       matrix:
