@@ -69,11 +69,6 @@ USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution --wait
 USE_BFD_MOCK=true docker compose -p start-v1-app up aggregation --wait
 
 # Run the integration tests
-#echo "┌──────────────────────────────────────┐"
-#echo "│                                      │"
-#echo "│  Temporary: Skip other Tests         │"
-#echo "│                                      │"
-#echo "└──────────────────────────────────────┘"
 USE_BFD_MOCK=true docker compose -p start-v1-app up --exit-code-from tests tests
 
 echo "Starting api server for end-to-end tests"

@@ -69,7 +69,6 @@ class KeyListUnitTest {
     }
 
     @Test
-    @Disabled
     void testListKeys_happyPath() throws IOException {
         PublicKeyEntity publicKeyEntity = new PublicKeyEntity();
         publicKeyEntity.setId(UUID.randomUUID());

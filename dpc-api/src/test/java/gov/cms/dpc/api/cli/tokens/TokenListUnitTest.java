@@ -70,7 +70,6 @@ class TokenListUnitTest {
     }
 
     @Test
-    @Disabled
     void testListTokens_happyPath() throws IOException {
         UUID org_id = UUID.randomUUID();
         TokenEntity tokenEntity = new TokenEntity("tokenID", org_id, TokenType.OAUTH);
