@@ -60,7 +60,7 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 	@ParameterizedTest
 	@MethodSource("downloadArgs")
 	void canDownloadFiles(boolean compressFile, Map<String, String> requestHeaders) throws IOException {
-		String testData = "test data".repeat(100);
+		String testData = "test data".repeat(10000);
 		String fileName = createTestExport(testData, compressFile);
 
 		try (ClassicHttpResponse response = downloadExport(fileName, requestHeaders)) {
@@ -69,13 +69,20 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 			boolean expectGzipCompressed =
 				requestHeaders.containsKey(HttpHeaders.ACCEPT_ENCODING) && requestHeaders.get(HttpHeaders.ACCEPT_ENCODING).contains("gzip");
 
-			// Check content encoding
+			// Check headers
 			Header contentEncoding = response.getHeader(HttpHeaders.CONTENT_ENCODING);
+			Header contentLength = response.getHeader(HttpHeaders.CONTENT_LENGTH);
+			Header transferEncoding = response.getHeader(HttpHeaders.TRANSFER_ENCODING);
+
+			// A gzip'd response should have a content-encoding header
 			if (expectGzipCompressed) {
 				assertEquals(GzipUtil.GZIP, contentEncoding.getValue());
 			} else {
 				assertNull(contentEncoding);
 			}
+
+			// We should have content-length or transfer-encoding, but not both
+			assertTrue((contentLength != null) ^ (transferEncoding != null));
 
 			// Make sure we can read the body
 			HttpEntity entity = response.getEntity();
@@ -108,9 +115,15 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 		{
 			assertNotNull(response);
 
-			// Check content encoding
+			// Check headers
 			Header contentEncoding = response.getHeader(HttpHeaders.CONTENT_ENCODING);
+			Header contentLength = response.getHeader(HttpHeaders.CONTENT_LENGTH);
+			Header transferEncoding = response.getHeader(HttpHeaders.TRANSFER_ENCODING);
+
 			assertNull(contentEncoding);
+
+			// We should have content-length or transfer-encoding, but not both
+			assertTrue((contentLength != null) ^ (transferEncoding != null));
 
 			// Make sure we can read the body
 			HttpEntity entity = response.getEntity();
