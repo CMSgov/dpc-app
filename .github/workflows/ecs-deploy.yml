@@ -148,7 +148,7 @@ jobs:
         uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159  # v3.9.2
   
       - name: Install Tofu
-        uses: cmsgov/cdap/actions/setup-tenv@0b65099ef9232cfa2dfd4eea89cf8b9fa6052013
+        uses: cmsgov/cdap/actions/setup-tenv@f4c14d47cc20e7f6de9112d7155af1213c9bca5a
 
       - name: Verify persistent plan
         run: |
