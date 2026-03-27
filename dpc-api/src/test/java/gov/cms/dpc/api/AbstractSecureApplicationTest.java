@@ -77,6 +77,8 @@ public class AbstractSecureApplicationTest {
         return String.format("http://localhost:%d/v1/Admin", APPLICATION.getLocalPort());
     }
 
+    protected String getExportPath() { return APPLICATION.getConfiguration().getExportPath(); }
+
     @BeforeAll
     public static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
