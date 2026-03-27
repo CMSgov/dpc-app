@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -12,14 +10,10 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/ianlopshire/go-fixedwidth"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -61,45 +55,10 @@ func TestIntegrationImportResponseFile(t *testing.T) {
 	_, oofErr := db.Exec(deleteOptOutFile)
 	assert.Nil(t, oofErr)
 
-	createdOptOutCount, createdOptInCount, confirmationFileName, err := importResponseFile(ctx, "demo-bucket", "bfdeft01/dpc/in/T.NGD.DPC.RSP.D240123.T1122001.IN")
+	createdOptOutCount, createdOptInCount, err := importResponseFile(ctx, "demo-bucket", "bfdeft01/dpc/in/T.NGD.DPC.RSP.D240123.T1122001.IN")
 	assert.Nil(t, err)
 	assert.Equal(t, 6, createdOptOutCount)
 	assert.Equal(t, 1, createdOptInCount)
-	assert.True(t, strings.Contains(confirmationFileName, "T#EFT.ON.DPC.NGD.CONF."))
-
-	// Test confirmation file correct
-	b, downloadErr := downloadS3File(ctx, "demo-bucket", confirmationFileName)
-	assert.Nil(t, downloadErr)
-	r := bytes.NewReader(b)
-	scanner := bufio.NewScanner(r)
-	ctr := 0
-	for scanner.Scan() {
-		ctr += 1
-		if ctr == 1 {
-			var row FileHeader
-			fixedwidth.Unmarshal(scanner.Bytes(), &row)
-			assert.Equal(t, "HDR_BENECONFIRM", row.HeaderCode)
-			assert.Equal(t, today, row.FileCreationDate)
-		} else if ctr < 9 {
-			var row ConfirmationFileRow
-			fixedwidth.Unmarshal(scanner.Bytes(), &row)
-			assert.Equal(t, fmt.Sprintf("%dSJ0A00AA00", ctr - 1), row.MBI)
-			assert.Equal(t, today, row.EffectiveDate)
-			assert.Equal(t, "Accepted", row.RecordStatus)
-			assert.Equal(t, "00", row.ReasonCode)
-			if ctr == 7 {
-				assert.Equal(t, "Y", row.SharingPreference)
-			} else {
-				assert.Equal(t, "N", row.SharingPreference)
-			}
-		} else {
-			var row FileTrailer
-			fixedwidth.Unmarshal(scanner.Bytes(), &row)
-			assert.Equal(t, "TRL_BENECONFIRM", row.TrailerCode)
-			assert.Equal(t, today, row.FileCreationDate)
-			assert.Equal(t, "0000000007", row.DetailRecordCount)
-		}
-	}
 
 	// test database updated
 	countOptOutFile := fmt.Sprintf("SELECT COUNT(*) FROM opt_out_file WHERE import_status = 'Completed' AND created_at > '%s'", today)
@@ -190,112 +149,6 @@ func TestIntegrationDownloadS3File(t *testing.T) {
 		if test.err != nil {
 			assert.ErrorContains(t, err, test.err.Error())
 		}
-	}
-
-}
-
-func TestGenerateConfirmationFile(t *testing.T) {
-	output1 := fmt.Sprintf(`HDR_BENECONFIRM%s
-1SJ0A00AA0020240110NAccepted  00
-2SJ0A00AA0020240110YAccepted  00
-TRL_BENECONFIRM%s0000000002`, time.Now().Format("20060102"), time.Now().Format("20060102"))
-	output2 := fmt.Sprintf(`HDR_BENECONFIRM%s
-1SJ0A00AA0020240110NRejected  02
-TRL_BENECONFIRM%s0000000001`, time.Now().Format("20060102"), time.Now().Format("20060102"))
-	tests := []struct {
-		name       string
-		successful bool
-		records    []*OptOutRecord
-		marshaller FileMarshaler
-		expected   string
-	}{
-		{
-			name:       "successful-import",
-			successful: true,
-			records: []*OptOutRecord{
-				{
-					ID:           "test1",
-					OptOutFileID: "2",
-					MBI:          "1SJ0A00AA00",
-					PolicyCode:   "OPTOUT",
-					EffectiveDt:  time.Date(2024, 01, 10, 0, 0, 0, 0, time.UTC),
-					Status:       Accepted,
-				},
-				{
-					ID:           "test2",
-					OptOutFileID: "2",
-					MBI:          "2SJ0A00AA00",
-					PolicyCode:   "OPTIN",
-					EffectiveDt:  time.Date(2024, 01, 10, 0, 0, 0, 0, time.UTC),
-					Status:       Accepted,
-				},
-			},
-			marshaller: fixedwidth.Marshal,
-			expected:   output1,
-		},
-		{
-			name:       "unsuccessful-import",
-			successful: false,
-			records: []*OptOutRecord{
-				{
-					ID:           "test1",
-					OptOutFileID: "2",
-					MBI:          "1SJ0A00AA00",
-					PolicyCode:   "OPTOUT",
-					EffectiveDt:  time.Date(2024, 01, 10, 0, 0, 0, 0, time.UTC),
-					Status:       Rejected,
-				},
-			},
-			marshaller: fixedwidth.Marshal,
-			expected:   output2,
-		},
-	}
-
-	for _, test := range tests {
-		fmt.Printf("~~~ %s test\n", test.name)
-		output, err := generateConfirmationFile(test.successful, test.records, test.marshaller)
-		assert.Equal(t, test.expected, string(output[:]))
-		assert.Equal(t, err, nil)
-	}
-}
-
-func TestUploadConfirmationFile(t *testing.T) {
-	tests := []struct {
-		name             string
-		bucket           string
-		file             string
-		err              error
-		confirmationFile []byte
-		uploader         S3Uploader
-	}{
-		{
-			name:             "happy-path",
-			bucket:           "demo-bucket",
-			file:             "fake-file",
-			err:              nil,
-			confirmationFile: []byte("test"),
-			//ploader func(ctx context.Context, input *s3.PutObjectInput, opts ...func(*manager.Uploader)) (*manager.UploadOutput, error)
-			uploader: func(ctx context.Context, input *s3.PutObjectInput, opts ...func(*manager.Uploader)) (*manager.UploadOutput, error) {
-				return nil, nil
-			},
-		},
-		{
-			name:             "upload_fails",
-			bucket:           "demo-bucket",
-			file:             "fake-file",
-			err:              errors.New("upload failed"),
-			confirmationFile: []byte("test"),
-			uploader: func(ctx context.Context, input *s3.PutObjectInput, opts ...func(*manager.Uploader)) (*manager.UploadOutput, error) {
-				return nil, errors.New("upload failed")
-			},
-		},
-	}
-
-	ctx := context.TODO()
-	for _, test := range tests {
-		fmt.Printf("~~~ %s test\n", test.name)
-		err := uploadConfirmationFile(ctx, test.bucket, test.file, test.uploader, test.confirmationFile)
-		assert.Equal(t, test.err, err)
 	}
 
 }
