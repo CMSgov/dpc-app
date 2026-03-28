@@ -65,7 +65,8 @@ docker compose -p start-v1-app down
 
 USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
 
-# Apply quicksights migrations that rely on migrations from attribution
+# Apply migrations for enabling insights in quicksights - these rely on migrations from attribution so they were
+# moved from entrypoint
 if [ "$ENV" = 'local' ] || [ "$ENV" = 'github-ci' ]; then
   JAVA_CLASSES="-cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.aggregation.DPCAggregationService"
   CONF_FILE="/app/resources/application.yml"
