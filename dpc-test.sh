@@ -70,10 +70,9 @@ USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation -
 if [ "$ENV" = 'local' ] || [ "$ENV" = 'github-ci' ]; then
   JAVA_CLASSES="-cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.aggregation.DPCAggregationService"
   CONF_FILE="/app/resources/application.yml"
-#  QUEUE_DB_USER="${ENV}-dpc_queue-role"
-#  ATTRIBUTION_DB_USER="${ENV}-dpc_attribution-role"
-#  ATTRIBUTION_DB_PASS="dpc-safe"
-  USE_BFD_MOCK=true docker compose -p start-v1-app exec aggregation java $JAVA_CLASSES queuedb migrate $CONF_FILE --migrations "/app/resources/migrations/quicksights.migrations.xml"
+  QUICKSIGHTS_MIGRATIONS="/app/resources/migrations/quicksights.migrations.xml"
+  USE_BFD_MOCK=true docker compose -p start-v1-app exec aggregation sh -c \
+    ". /app/resources/${ENV}.application.env && java ${JAVA_CLASSES} queuedb migrate ${CONF_FILE} --migrations '${QUICKSIGHTS_MIGRATIONS}'"
 fi
 
 # Run the integration tests
