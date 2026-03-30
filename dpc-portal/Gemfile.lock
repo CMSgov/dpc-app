@@ -131,6 +131,7 @@ GEM
     base64 (0.2.0)
     bcp47 (0.3.3)
       i18n
+    bcrypt (3.1.22)
     benchmark (0.5.0)
     bigdecimal (3.1.8)
     bindata (2.5.0)
