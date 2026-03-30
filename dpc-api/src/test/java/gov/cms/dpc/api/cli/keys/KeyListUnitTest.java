@@ -71,8 +71,9 @@ class KeyListUnitTest {
     @Test
     @Disabled
     void testListKeys_happyPath() throws IOException {
+        UUID keyId = UUID.randomUUID();
         PublicKeyEntity publicKeyEntity = new PublicKeyEntity();
-        publicKeyEntity.setId(UUID.randomUUID());
+        publicKeyEntity.setId(keyId);
         publicKeyEntity.setLabel("test public key");
         publicKeyEntity.setCreatedAt(OffsetDateTime.now());
         CollectionResponse<PublicKeyEntity> collectionResponse = new CollectionResponse<>(List.of(publicKeyEntity));
@@ -97,7 +98,8 @@ class KeyListUnitTest {
         assertTrue(errors.isEmpty());
 
         String results = stdOut.toString();
-        assertTrue(results.contains("│ test public key │"));
+        assertTrue(results.contains(" test public key "));
+        assertTrue(results.contains(keyId.toString()));
     }
 
     @Test
