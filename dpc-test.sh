@@ -63,7 +63,10 @@ fi
 
 docker compose -p start-v1-app down
 
-USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
+# Temporary fix while DPC-5265 is in progress.  Remove once we have a better solution.
+#USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
+USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution --wait
+USE_BFD_MOCK=true docker compose -p start-v1-app up aggregation --wait
 
 # Run the integration tests
 USE_BFD_MOCK=true docker compose -p start-v1-app up --exit-code-from tests tests
