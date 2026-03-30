@@ -58,7 +58,10 @@ permissions:
 jobs:
   validate-parameters:
     name: "Validate Parameters"
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: >-
+      codebuild-dpc-app${{
+        contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
+      }}-${{ github.run_id }}-${{ github.run_attempt }}
     outputs:
       version_tag: ${{ steps.get-version-tag.outputs.version_tag }}
     steps:
@@ -74,6 +77,7 @@ jobs:
       - validate-parameters
     uses: ./.github/workflows/docker-build.yml
     with:
+      env: ${{ inputs.env || 'dev'  }}
       block_release_tag: ${{ github.event_name != 'workflow_dispatch' }}
     secrets: inherit
 

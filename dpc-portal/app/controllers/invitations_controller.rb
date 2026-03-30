@@ -382,6 +382,6 @@ class InvitationsController < ApplicationController
                          actionType: LoggingConstants::ActionType::AoHasWaiver,
                          invitation: @invitation.id }])
   end
-end
 
-class MultiUserMatchError < StandardError; end
+  class MultiUserMatchError < StandardError; end
+end

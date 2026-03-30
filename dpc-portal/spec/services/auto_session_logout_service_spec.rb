@@ -5,6 +5,7 @@ require 'support/login_support'
 
 RSpec.describe 'AutoSessionLogoutService', type: :request do
   include LoginSupport
+
   let(:user) { create(:user) }
   before { sign_in user }
 
