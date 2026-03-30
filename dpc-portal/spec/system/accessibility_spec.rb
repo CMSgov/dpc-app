@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'Accessibility', type: :system do
   include DpcClientSupport
+
   before do
     driven_by(:selenium_headless)
   end

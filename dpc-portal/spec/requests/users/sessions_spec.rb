@@ -5,6 +5,7 @@ require 'support/login_support'
 
 RSpec.describe 'Sessions', type: :request do
   include LoginSupport
+
   describe 'logout' do
     context 'logged in' do
       let!(:user) { create(:user) }
