@@ -247,7 +247,7 @@ jobs:
   sonar-quality-gate-dpc-web-and-admin:
     name: Sonarqube Quality Gate for dpc-web and dpc-admin
     needs: [build-dpc-admin, build-dpc-web]
-    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     env:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
@@ -300,7 +300,7 @@ jobs:
   sonar-quality-gate-dpc-portal:
     name: Sonarqube Quality Gate for dpc-portal
     needs: build-dpc-portal
-    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     env:
       # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
