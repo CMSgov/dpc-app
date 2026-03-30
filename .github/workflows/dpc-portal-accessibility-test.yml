@@ -2,9 +2,6 @@ name: Dpc-Portal Accessibility Tests
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - dpc-portal/**
 
 jobs:
   test:
@@ -12,14 +9,10 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     steps:
-      - name: Assert Ownership
-        run: sudo chmod -R 777 .
       - name: "Checkout code"
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
-      - name: Cleanup Runner
-        run: ./scripts/cleanup-docker.sh
       - name: "Run Tests"
         run: |
           make ci-portal-accessibility
