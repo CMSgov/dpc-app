@@ -72,7 +72,7 @@ if [ "$ENV" = 'local' ] || [ "$ENV" = 'github-ci' ]; then
   CONF_FILE="/app/resources/application.yml"
   QUICKSIGHTS_MIGRATIONS="/app/resources/migrations/quicksights.migrations.xml"
   USE_BFD_MOCK=true docker compose -p start-v1-app exec aggregation sh -c \
-    ". /app/resources/${ENV}.application.env && java ${JAVA_CLASSES} queuedb migrate ${CONF_FILE} --migrations '${QUICKSIGHTS_MIGRATIONS}'"
+    ". /app/resources/local.application.env && java ${JAVA_CLASSES} queuedb migrate ${CONF_FILE} --migrations '${QUICKSIGHTS_MIGRATIONS}'"
 fi
 
 # Run the integration tests
