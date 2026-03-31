@@ -1,3 +1,12 @@
+<!--
+    NOTE: This migration belongs to dpc-aggregation but depends on dpc-attribution being available.
+    If a new environment is spun up, changesets from this file must be executed manually, with a role
+    that has sufficient permissions to both attribution's and aggregation's databases.
+
+    All of these changesets are tied to enabling internal partner teams to get insights via quicksights
+    and these changes do not impact customer-facing features.
+-->
+
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
