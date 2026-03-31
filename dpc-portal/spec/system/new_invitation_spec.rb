@@ -10,9 +10,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :system, 
     driven_by(:selenium_headless)
   end
 
-  let(:dpc_api_organization_id) { 'some-gnarly-guid' }
-
   context 'CD invite' do
+    let(:dpc_api_organization_id) { 'some-gnarly-guid' }
     let!(:user) { create(:user) }
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let!(:ao_org_link) { create(:ao_org_link, user:, provider_organization: org) }
