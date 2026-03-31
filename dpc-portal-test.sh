@@ -28,6 +28,7 @@ echo "│                           │"
 echo "└───────────────────────────┘"
 docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rubocop" dpc_portal
 docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rspec" dpc_portal
+docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint docker/accessibility-test.sh dpc_portal
 
 echo "┌────────────────────────────────┐"
 echo "│                                │"
