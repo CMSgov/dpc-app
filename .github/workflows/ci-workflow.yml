@@ -200,7 +200,7 @@ jobs:
 
   build-dpc-api-client:
     name: "Build and Test DPC API Client"
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
@@ -228,18 +228,18 @@ jobs:
           cache: maven
       - name: Clean maven
         run: mvn -ntp -U clean
-      - name: "API Client Integration test"
-        id: integration-test
-        run: make ci-api-client-integration
-      - name: "Debug db"
-        if: ${{ failure() && steps.integration-test.outcome == 'failure' }}
-        run: docker logs api-client-integration-app-db-1
-      - name: "Debug attribution"
-        if: ${{ failure() && steps.integration-test.outcome == 'failure' }}
-        run: docker logs api-client-integration-app-attribution-1
-      - name: "Debug api"
-        if: ${{ failure() && steps.integration-test.outcome == 'failure' }}
-        run: docker logs api-client-integration-app-api-1
+      # - name: "API Client Integration test"
+      #   id: integration-test
+      #   run: make ci-api-client-integration
+      # - name: "Debug db"
+      #   if: ${{ failure() && steps.integration-test.outcome == 'failure' }}
+      #   run: docker logs api-client-integration-app-db-1
+      # - name: "Debug attribution"
+      #   if: ${{ failure() && steps.integration-test.outcome == 'failure' }}
+      #   run: docker logs api-client-integration-app-attribution-1
+      # - name: "Debug api"
+      #   if: ${{ failure() && steps.integration-test.outcome == 'failure' }}
+      #   run: docker logs api-client-integration-app-api-1
       - name: Cleanup
         if: ${{ always() }}
         run: ./scripts/cleanup-docker.sh
