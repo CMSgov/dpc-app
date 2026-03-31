@@ -38,7 +38,7 @@ env:
 jobs:
   build-api:
     name: "Build and Test API"
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
     env:
       REPORT_COVERAGE: true
     steps:
@@ -200,7 +200,7 @@ jobs:
 
   build-dpc-api-client:
     name: "Build and Test DPC API Client"
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
@@ -211,7 +211,7 @@ jobs:
       - name: Install docker compose manually
         run: |
           mkdir -p /usr/local/lib/docker/cli-plugins
-          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
+          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-aarch64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
       - name: "API Client Unit Tests"
