@@ -65,10 +65,25 @@ docker compose -p start-v1-app down
 
 USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
 
-# Apply quicksights migrations that rely on migrations from attribution
+# Apply migrations for enabling insights in quicksights - these rely on migrations from attribution so they were
+# moved from entrypoint
 JAVA_CLASSES="-cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.aggregation.DPCAggregationService"
 CONF_FILE="/app/resources/application.yml"
-USE_BFD_MOCK=true docker compose -p start-v1-app exec aggregation java $JAVA_CLASSES queuedb migrate $CONF_FILE --migrations "/app/resources/migrations/quicksights.migrations.xml"
+
+# retrieve credentials for fdw migrations for running in CI
+set -o allexport
+ENV_FILE="dpc-aggregation/src/main/resources/local.application.env"
+. "$ENV_FILE"
+set +o allexport
+
+USE_BFD_MOCK=true docker compose -p start-v1-app exec \
+  -e QUEUE_DB_USER=${QUEUE_DB_USER} \
+  -e ATTRIBUTION_DB_USER=${ATTRIBUTION_DB_USER} \
+  -e ATTRIBUTION_DB_PASS=${ATTRIBUTION_DB_PASS} \
+  aggregation \
+  sh -c "java ${JAVA_CLASSES} queuedb migrate ${CONF_FILE} --migrations '/app/resources/migrations/quicksights.migrations.xml'"
+
+echo "Quicksights migrations applied"
 
 # Run the integration tests
 USE_BFD_MOCK=true docker compose -p start-v1-app up --exit-code-from tests tests

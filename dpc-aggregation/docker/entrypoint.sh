@@ -40,11 +40,6 @@ set +o allexport
 
 CONF_FILE="/app/resources/application.yml"
 
-if [ "$ENV" = "local" ] || [ "$ENV" = "github-ci" ]; then
-  echo "Creating foreign data wrapper in DB"
-  eval java "${JAVA_CLASSES}" queuedb migrate ${CONF_FILE} --migrations "/app/resources/migrations/fdw.migrations.xml"
-fi
-
 if [ $DB_MIGRATION -eq 1 ]; then
   echo "Migrating the databases"
   eval java "${JAVA_CLASSES}" queuedb migrate ${CONF_FILE} --migrations "/app/resources/migrations/queue.migrations.xml"
