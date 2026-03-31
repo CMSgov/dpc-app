@@ -4,7 +4,6 @@ services:
       context: .
       dockerfile: engines/api_client/Dockerfile
     image: dpc-api-client:latest
-    platform: linux/arm64
     volumes:
       # Mount specific directories to avoid overwriting
       # precompiled assets (public/assets/) and node_modules
