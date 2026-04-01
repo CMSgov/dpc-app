@@ -146,7 +146,7 @@ jobs:
           path: dpc-ops
       - name: Install Cosign to verify tenv and tofu installs
         uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159  # v3.9.2
-  
+
       - name: Install Tofu
         uses: cmsgov/cdap/actions/setup-tenv@f4c14d47cc20e7f6de9112d7155af1213c9bca5a
 
@@ -202,8 +202,10 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    # Will be updated as part of DPC-5315
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: >-
+      codebuild-dpc-app${{
+        contains(fromJSON('["prod", "sandbox"]'), inputs.from_env) && '-prod' || '-non-prod'
+      }}-${{ github.run_id }}-${{ github.run_attempt }}
     needs: deploy
     steps:
       - name: AWS Credentials (non-prod)
