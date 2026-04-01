@@ -18,7 +18,7 @@ on:
         required: true
         type: 'string'
         default: ''
-    
+
 concurrency:
   group: promote-to-${{ inputs.to_env }}
   cancel-in-progress: true
@@ -30,7 +30,10 @@ permissions:
 jobs:
   set-parameters:
     name: "Set Parameters"
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: >-
+      codebuild-dpc-app${{
+        contains(fromJSON('["prod", "sandbox"]'), inputs.from_env) && '-prod' || '-non-prod'
+      }}-${{ github.run_id }}-${{ github.run_attempt }}
     outputs:
       app_version: ${{ steps.fetch-info.outputs.app_version }}
       ecr_image_tag: ${{ steps.fetch-info.outputs.ecr_image_tag }}
@@ -74,7 +77,7 @@ jobs:
       ecr_image_tag: ${{ needs.set-parameters.outputs.ecr_image_tag }}
       app-version: ${{ needs.set-parameters.outputs.app_version }}
     secrets: inherit
-      
+
   smoke-test:
     needs: deploy
     uses: ./.github/workflows/smoke-test.yml
