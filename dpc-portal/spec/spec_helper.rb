@@ -6,7 +6,7 @@ require 'axe-rspec'
 require 'capybara/rspec'
 
 # Accessibility tests are run separately and should not be subject to simplecov constraints
-unless ENV['ACCESSIBILITY'] == 'true'
+unless ENV['ACCESSIBILITY'] == 'true' || ENV['SYSTEM_TEST'] == 'true'
   SimpleCov.start 'rails' do
     add_group 'Serializers', 'app/serializers'
     add_group 'Services', 'app/services'

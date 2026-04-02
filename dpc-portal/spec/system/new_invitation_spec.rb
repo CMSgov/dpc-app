@@ -28,7 +28,9 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :system, 
       fill_in 'Last or family name', with: 'Smith'
       fill_in 'Email', with: 'fake@fake.com'
       fill_in 'Confirm email', with: 'fake@fake.com'
-      click_button 'Send invite'
+      within('#cd-form') do
+        click_button('Send invite')
+      end
       expect(page).to have_selector('#verify-modal', visible: true)
     end
   end
