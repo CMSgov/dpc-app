@@ -5,7 +5,7 @@ function _finally {
     docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml down --remove-orphans
     docker volume rm start-v1-portals_pgdata16
 }
-#trap _finally EXIT
+trap _finally EXIT
 
 echo "┌───────────────────────┐"
 echo "│                       │"
