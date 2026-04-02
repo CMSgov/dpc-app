@@ -4,12 +4,11 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
+import gov.cms.dpc.api.core.CompressibleStreamingOutput;
 import gov.cms.dpc.api.models.RangeHeader;
 import gov.cms.dpc.api.resources.AbstractDataResource;
 import gov.cms.dpc.common.annotations.NoHtml;
-import gov.cms.dpc.api.core.GzipStreamingOutput;
 import gov.cms.dpc.common.utils.GzipUtil;
-import gov.cms.dpc.api.core.UnGzipStreamingOutput;
 import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
@@ -188,12 +187,7 @@ public class DataResource extends AbstractDataResource {
                     Response.Status.INTERNAL_SERVER_ERROR);
         }
 
-        StreamingOutput streamingOutput;
-        if (compressResponse) {
-            streamingOutput = new GzipStreamingOutput(fileInputStream, filePointer.isCompressed());
-        } else {
-            streamingOutput = new UnGzipStreamingOutput(fileInputStream, filePointer.isCompressed());
-        }
+        StreamingOutput streamingOutput = new CompressibleStreamingOutput(fileInputStream, filePointer.isCompressed(), compressResponse);
 
         Response.ResponseBuilder builder = Response
             .status(Response.Status.OK)
@@ -237,7 +231,7 @@ public class DataResource extends AbstractDataResource {
 
             // The default DropWizard behavior is to not gzip compress responses when a range is requested, so we're
             // duplicating that here and we only create non-zipped responses.
-            StreamingOutput streamingOutput = new UnGzipStreamingOutput(boundedInputStream, false);
+            StreamingOutput streamingOutput = new CompressibleStreamingOutput(boundedInputStream, false, false);
 
             final String responseRange = String.format("bytes %d-%d/%d", rangeStart, rangeEnd, len);
             return Response
