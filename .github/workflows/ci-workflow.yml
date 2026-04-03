@@ -37,6 +37,7 @@ env:
 
 jobs:
   build-api:
+    if: ${{ failure() }}
     name: "Build and Test API"
     runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
     env:
@@ -184,6 +185,18 @@ jobs:
           curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-aarch64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+      - name: "Set up Python and install Ansible"
+        run: |
+          sudo dnf -y install python3 python3-pip
+          pip install ansible
+      - name: "Set up JDK 17"
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          java-version: "17"
+          distribution: "corretto"
+          cache: maven
+      - name: Clean maven
+        run: mvn -ntp -U clean
       - name: "DPC Portal Build"
         run: |
           make ci-portal

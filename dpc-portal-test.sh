@@ -2,8 +2,10 @@
 set -e
 
 function _finally {
-    docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml down --remove-orphans
-    docker volume rm start-v1-portals_pgdata16
+    if [ "$ENV" != 'github-ci' ]; then
+	docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml down --remove-orphans
+	docker volume rm start-v1-portals_pgdata16
+    fi
 }
 trap _finally EXIT
 
