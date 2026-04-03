@@ -26,6 +26,7 @@ services:
 
   aggregation:
     image: dpc-aggregation:latest
+    platform: linux/arm64
     ports:
       - "9901:9901"
     env_file:
@@ -51,6 +52,7 @@ services:
 
   attribution:
     image: dpc-attribution:latest
+    platform: linux/arm64
     depends_on:
       db:
         condition: service_healthy
@@ -72,6 +74,7 @@ services:
 
   api:
     image: dpc-api:latest
+    platform: linux/arm64
     ports:
       - "3002:3002"
       - "9903:9900"
@@ -99,6 +102,7 @@ services:
 
   tests:
     image: maven:3.9.9-amazoncorretto-17
+    platform: linux/arm64
     env_file:
       - ./ops/config/decrypted/local.env
     volumes:
