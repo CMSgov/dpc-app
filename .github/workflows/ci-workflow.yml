@@ -188,8 +188,7 @@ jobs:
         run: |
           make ci-portal
       - name: "Debug api"
-        if: ${{ failure() }}
-        run: docker logs start-v1-portal-api-1
+        run: docker logs start-v1-portals-api-1
       - name: "Copy test results"
         run: sudo cp dpc-portal/coverage/.resultset.json portal-resultset-raw.json
       - name: Archive code coverage results
