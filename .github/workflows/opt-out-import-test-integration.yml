@@ -1,6 +1,9 @@
 name: Opt-Out-Import Integration Tests
 
 on:
+  push:
+    branches:
+      - "jscott/DPC-5274_integration_test_fix"
   pull_request:
     paths:
       - .github/workflows/opt-out-import-test-integration.yml
@@ -89,6 +92,7 @@ jobs:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
           params: |
+            BFD_BUCKET_NAME=/dpc/test/bene-prefs/sensitive/bfd-bucket-name
             BFD_BUCKET_ROLE_ARN=/dpc/test/bene-prefs/sensitive/bfd-bucket-role-arn 
       - uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
