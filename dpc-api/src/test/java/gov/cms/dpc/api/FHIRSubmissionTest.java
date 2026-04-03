@@ -14,6 +14,7 @@ import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
+import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -60,7 +61,8 @@ class FHIRSubmissionTest {
     private static final String TEST_BASE_URL = "http://localhost:3002/v1";
     private static final UUID AGGREGATOR_ID = UUID.randomUUID();
     private static final IJobQueue queue = spy(MemoryBatchQueue.class);
-    private static final DataService dataService = new DataService(queue, FhirContext.forDstu3(), "/tmp", 1);
+    private static final FileManager fileManager = new FileManager("/tmp", queue);
+    private static final DataService dataService = new DataService(queue, FhirContext.forDstu3(), "/tmp", 1, fileManager);
     private static final IGenericClient client = mock(IGenericClient.class);
     private static final BlueButtonClient bfdClient = mock(BlueButtonClient.class);
     private static final IRead mockRead = mock(IRead.class);
