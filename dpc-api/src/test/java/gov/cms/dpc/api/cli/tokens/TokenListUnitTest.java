@@ -98,7 +98,8 @@ class TokenListUnitTest {
         assertTrue(errors.isEmpty());
 
         String results = stdOut.toString();
-        assertTrue(results.contains("│ test list tokens │"));
+        assertTrue(results.contains(" test list tokens "));
+        assertTrue(results.contains(org_id.toString()));
     }
 
     @Test
