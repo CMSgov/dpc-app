@@ -148,6 +148,7 @@ services:
       - NEW_RELIC_MONITOR_MODE=false
       - DISABLE_JSON_LOGGER=true
       - RAILS_DEVELOPMENT_HOSTS=host.docker.internal
+      - SKIP_SIMPLE_COV=${SKIP_SIMPLE_COV:-}
     ports:
       - "3100:3100"
     depends_on:
