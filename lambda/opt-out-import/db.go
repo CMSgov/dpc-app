@@ -30,7 +30,7 @@ func getAssumeRoleArn(ctx context.Context, cfg aws.Config) (string, error) {
 		return val, nil
 	}
 
-	parameterName := fmt.Sprintf("/opt-out-import/dpc/%s/bfd-bucket-role-arn", os.Getenv("ENV"))
+	parameterName := fmt.Sprintf("/dpc/%s/bene-prefs/sensitive/bfd-bucket-role-arn", os.Getenv("ENV"))
 
 	var keynames []*string = make([]*string, 1)
 	keynames[0] = &parameterName
