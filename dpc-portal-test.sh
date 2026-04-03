@@ -2,13 +2,11 @@
 set -e
 
 function _finally {
-    if [ "$ENV" != 'github-ci' ]; then
-	docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml down --remove-orphans
-	docker volume rm start-v1-portals_pgdata16
-    fi
+    docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml down --remove-orphans
+    docker volume rm start-v1-portals_pgdata16
 }
 trap _finally EXIT
-
+n
 echo "┌───────────────────────┐"
 echo "│                       │"
 echo "│ Running Portal Tests  |"
@@ -42,6 +40,7 @@ mvn -T 1.5C clean compile -Perror-prone -B -V -ntp -DskipTests
 mvn -T 1.5C package -Pci -ntp -DskipTests
 
 USE_BFD_MOCK=true docker compose -p start-v1-portals up api --wait
+
 GOLDEN_MACAROON=$(curl -X POST http://localhost:9903/tasks/generate-token) \
 SKIP_SIMPLE_COV=true \
 docker compose -p start-v1-portals \
@@ -49,7 +48,6 @@ docker compose -p start-v1-portals \
 run --remove-orphans \
 --entrypoint "bundle exec rspec --tag integration" \
 dpc_portal
-
 
 echo "┌────────────────────────────────┐"
 echo "│                                │"
