@@ -1,9 +1,6 @@
 name: Opt-Out-Import Integration Tests
 
 on:
-  push:
-    branches:
-      - "jscott/DPC-5274_integration_test_fix"
   pull_request:
     paths:
       - .github/workflows/opt-out-import-test-integration.yml
