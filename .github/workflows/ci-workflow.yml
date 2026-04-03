@@ -37,7 +37,6 @@ env:
 
 jobs:
   build-api:
-    if: ${{ failure() }}
     name: "Build and Test API"
     runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
     env:
@@ -200,9 +199,6 @@ jobs:
       - name: "DPC Portal Build"
         run: |
           make ci-portal
-      - name: "Debug api"
-        if: ${{ failure() }}
-        run: docker logs start-v1-portals-api-1
       - name: "Copy test results"
         run: sudo cp dpc-portal/coverage/.resultset.json portal-resultset-raw.json
       - name: Archive code coverage results

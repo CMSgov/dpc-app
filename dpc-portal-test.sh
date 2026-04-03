@@ -23,14 +23,20 @@ docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.porta
 docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails db:create db:migrate RAILS_ENV=test" dpc_portal
 
 # Run the tests
-echo "┌───────────────────────────┐"
-echo "│                           │"
-echo "│  Running DPC Portal Tests │"
-echo "│                           │"
-echo "└───────────────────────────┘"
+echo "┌─────────────────────────------─┐"
+echo "│                                │"
+echo "│  Running DPC Portal Unit Tests │"
+echo "│                                │"
+echo "└────────────────────────-----───┘"
+
 docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rubocop" dpc_portal
 docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rspec" dpc_portal
 
+echo "┌─────────────────────--------────-----─┐"
+echo "│                                       │"
+echo "│  Running DPC Portal Integration Tests │"
+echo "│                                       │"
+echo "└────────────────────────------------───┘"
 docker compose -f ./docker-compose.base.yml build base
 mvn -T 1.5C clean compile -Perror-prone -B -V -ntp -DskipTests
 mvn -T 1.5C package -Pci -ntp -DskipTests
