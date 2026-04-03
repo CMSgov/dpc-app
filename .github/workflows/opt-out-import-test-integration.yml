@@ -48,13 +48,21 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
+      - uses: cmsgov/cdap/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            BFD_BUCKET_NAME=/dpc/test/bene-prefs/sensitive/bfd-bucket-name
+            BFD_BUCKET_ROLE_ARN=/dpc/test/bene-prefs/sensitive/bfd-bucket-role-arn
       - uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-region: ${{ vars.AWS_REGION }}
           # Note that we use the BFD role with access to the bucket
-          role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/delegatedadmin/developer/bfd-test-eft-dpc-ct-bucket-role
+          role-to-assume: ${{ env.BFD_BUCKET_ROLE_ARN }}
           role-chaining: true
           role-skip-session-tagging: true
+
       - name: Upload test file to the BFD bucket to trigger lambda function via SNS message
         id: createfile
         run: |
@@ -62,7 +70,7 @@ jobs:
           echo "FILENAME=$fname" >> "$GITHUB_OUTPUT"
           echo "STARTTIME=`date +%s`" >> "$GITHUB_OUTPUT"
           aws s3 cp --no-progress synthetic_test_data/T.NGD.DPC.RSP.D240123.T1122001.IN \
-            s3://bfd-test-eft/bfdeft01/dpc/in/$fname
+            s3://${{ env.BFD_BUCKET_NAME }}/bfdeft01/dpc/in/$fname
 
   verify-bucket:
     if: ${{ always() && needs.trigger.result == 'success' }}
@@ -76,16 +84,25 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
+      - uses: cmsgov/cdap/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            BFD_BUCKET_NAME=/dpc/test/bene-prefs/sensitive/bfd-bucket-name
+            BFD_BUCKET_ROLE_ARN=/dpc/test/bene-prefs/sensitive/bfd-bucket-role-arn 
       - uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
         with:
           aws-region: ${{ vars.AWS_REGION }}
           # Note that we use the BFD role with access to the bucket
-          role-to-assume: arn:aws:iam::${{ secrets.BFD_ACCOUNT_ID }}:role/delegatedadmin/developer/bfd-test-eft-dpc-ct-bucket-role
+          role-to-assume: ${{ env.BFD_BUCKET_ROLE_ARN }}
           role-chaining: true
           role-skip-session-tagging: true
       - name: Verify import file still in bucket
         run: |
-          aws s3api head-object --bucket bfd-test-eft --key bfdeft01/dpc/in/${{ needs.trigger.outputs.filename }}
+          aws s3api head-object \
+            --bucket ${{ env.BFD_BUCKET_NAME }} \
+            --key bfdeft01/dpc/in/${{ needs.trigger.outputs.filename }}
       - name: Verify confirmation file not put in bucket
         env:
           STARTTIME: ${{needs.trigger.outputs.start_time}}
@@ -97,7 +114,7 @@ jobs:
               echo "we have a loser!"
               exit 1
             fi
-          done < <(aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/out/ | grep CONF)
+          done < <(aws s3 ls s3://${{ env.BFD_BUCKET_NAME }}/bfdeft01/dpc/out/ | grep CONF)
           echo "no new file found"
 
   verify-db-changes:
