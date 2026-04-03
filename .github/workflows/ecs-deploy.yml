@@ -73,7 +73,10 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: >-
+      codebuild-dpc-app${{
+        contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
+      }}-${{ github.run_id }}-${{ github.run_attempt }}
     outputs:
       image_tag: ${{ steps.image-tag.outputs.image_tag }}
     steps:
@@ -145,7 +148,7 @@ jobs:
         uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159  # v3.9.2
   
       - name: Install Tofu
-        uses: cmsgov/cdap/actions/setup-tenv@8343fb96563ce4b74c4dececee9b268f42bd4a40
+        uses: cmsgov/cdap/actions/setup-tenv@f4c14d47cc20e7f6de9112d7155af1213c9bca5a
 
       - name: Verify persistent plan
         run: |
@@ -199,6 +202,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    # Will be updated as part of DPC-5315
     runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
     needs: deploy
     steps:
@@ -269,7 +273,10 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: >-
+      codebuild-dpc-app${{
+        contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
+      }}-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
         name: Slack Success

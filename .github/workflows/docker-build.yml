@@ -4,6 +4,11 @@ on:
   workflow_dispatch:
   workflow_call:
     inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: 'string'
+        default: 'dev'
       block_release_tag:
         description: Whether should block marking build as release
         type: boolean
@@ -32,7 +37,10 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on:  >-
+      codebuild-dpc-app${{
+        contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
+      }}-${{ github.run_id }}-${{ github.run_attempt }}
     outputs:
       version_tag: ${{ steps.get-version-tag.outputs.version_tag }}
       docker_tag: ${{ steps.output_docker_tag.outputs.docker_tag }}
@@ -64,7 +72,10 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on:  >-
+      codebuild-dpc-app${{
+        contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
+      }}-${{ github.run_id }}-${{ github.run_attempt }}
     strategy:
       matrix:
         app_dir: [ dpc-portal, dpc-admin, dpc-web ]
@@ -106,7 +117,11 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    # Will be updated as part of DPC-5307
+    runs-on: >-
+      codebuild-dpc-app${{
+        contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
+      }}-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: "Set up Ansible"
         run: pip install ansible
@@ -122,6 +137,10 @@ jobs:
           java-version: "17"
           distribution: "corretto"
           cache: maven
+      - name: Debug Environment
+        run: |
+          uname -m        # Should output: aarch64
+          docker info | grep -i arch
       - name: Clean maven
         run: mvn -ntp -U clean
 
@@ -174,7 +193,10 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on:  >-
+      codebuild-dpc-app${{
+        contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
+      }}-${{ github.run_id }}-${{ github.run_attempt }}
     strategy:
       matrix:
         ecr_repository: [ web-portal, web-admin, web, api, attribution, aggregation ]
