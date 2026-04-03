@@ -6,7 +6,7 @@ on:
       runner:
         description: Which runner to use
         required: false
-        default: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+        default: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
         type: 'string'
       repo_ref:
         description: Which branch or tag
