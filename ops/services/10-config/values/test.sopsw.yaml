@@ -80,17 +80,21 @@
 /dpc/test/web/github_app_id: ENC[AES256_GCM,data:9fXsqt9BmFFw3CJJ7xzLu7T7Xd4=,iv:C1caPgj9LH2MDa5o7YdnizvO55vt//G5mgDStI2ti+A=,tag:/jRKvHUplC67JcBknEUWUw==,type:str]
 #ENC[AES256_GCM,data:HujWs+EDHyKSD5sc+hQQg5nqtIY=,iv:w7ikLgD4r6aNDSldVO413RV1mUT8siO0H5Nfe0zvlZg=,tag:BGQyo7BM/chcwtUx620X0Q==,type:comment]
 /dpc/test/web/smtp_password: ENC[AES256_GCM,data:ADXaClw=,iv:YBMjcZG/Kf7OrmtOp7j9txNdwKdzHB5rDbowPJsMmak=,tag:DpWPf3wTXz2+MLFQLWrngw==,type:str]
+#ENC[AES256_GCM,data:b6iMALC3IR0RGbr5bbdkGjPipdRfXYJo4YH/v2k=,iv:pjlbMY/dPiK8uouqFKiTS21u7SMhEFtOoiy09Z69XC0=,tag:k6Brgk0oYkO8vlUIbRkYgQ==,type:comment]
+/dpc/test/bene-prefs/sensitive/bfd-sns-topic-arn: ENC[AES256_GCM,data:mTSZVEv6QMWJW4jr3u/SpwsgmsvzVdN+ZHqpZbsIG8Bmd3rm8rtVMX/QNol3HdNhWhVh+B9IQ8r80vz2QuUPNKsKH1nLfQ==,iv:gP7JdvorT6GIj/xODb2vjQXWt/i5/p/vG3BYBnTJaqs=,tag:gNSFbkiuKeVjxutEr3hyDg==,type:str]
+#ENC[AES256_GCM,data:7Tm5YAumlXyoMG9uEwzfKyUGLKPQnMO/VtbWgYsFJIBskvpjSwU=,iv:bE12gAGPD4mFclcW33VtMW96EWS4nvsNIZerji8SXbA=,tag:KywgUhpqkwqb+tcM2I5JsA==,type:comment]
+/dpc/test/bene-prefs/sensitive/bfd-bucket-role-arn: ENC[AES256_GCM,data:ImNQA0ye/82KQTmbljwVlqsjt7j8mOxm/YQAkjQTgNM19FC//YvGEYkjyiZe8pDdiToF5+qes1mUB8J6TfuciZwPRop4064kc90FPN9Ojdla8ayn4XKZRBcDC6U2wM4OVj4=,iv:bJykoHg6YO20CJzGnIswGTYL0Y6bMlBpM0RrVwtNMXI=,tag:7NdYUVEJGzwYMsLP5P01OA==,type:str]
+#ENC[AES256_GCM,data:9NQ29QAm4kzU/gEoJa+13/kpUJo5Kz7zCvLxf51iAAbK7x0sjjUDhnZ2NwRS0TN03kyS,iv:Ub2FVSKXuJQT7eY/w8SuMqwBfIRNltYIMEPOiGsn5bg=,tag:Btytf794deSs2sQ8LRuy3Q==,type:comment]
+/dpc/test/bene-prefs/sensitive/bfd-bucket-name: ENC[AES256_GCM,data:+6aIQJzMO2jsJYnGrjZcHuh4pWyBysLiEZ4GUd/OuLTlyzn+ySjMfzl4Y2OWVF6LDQ==,iv:5+BjGgTBiEqOg8UjPDrTVk+10XxmYFuSfrk02+xCeBY=,tag:H2fm+8HE1N4iqGDZI+qYkw==,type:str]
 sops:
-    kms:
-        - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/dpc-test
-          created_at: "2026-02-24T18:59:47Z"
-          enc: AQICAHiJ2VyTbM1GPYeYg+Jay2PKSqq6JpKQUO26MBqqLRSMVAHsX4paaK2bUtdMeYemxYDIAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMIGntrkmmdep25NznAgEQgDtzFNQT5r3BD8nW1ICdPONcxQq7d70tpsqDRquwdVJs/keEC24Y0yMT5Ujld1XP2VTvr8oWytBm1aWpYA==
-          aws_profile: ""
-        - arn: arn:aws:kms:us-west-2:${ACCOUNT_ID}:alias/dpc-test
-          created_at: "2026-02-24T19:41:20Z"
-          enc: AQICAHhriHaL3+UbLIsghpKG7Pc/xN0D974NR5TsBs0e/9ll3gF02jzXvLoZuMCB3/1VawydAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMmxACfMSisdr35tltAgEQgDtN6Cr28hw20AqHxklOhVBCb5ViVSzsf6eh8l50q4t0px1IZS2Yq2J/GnDUhK6NTknpyBJmRRj9N3mXfw==
-          aws_profile: ""
-    lastmodified: "2026-02-24T19:39:29Z"
-    mac: ENC[AES256_GCM,data:vndRzju1ZJJ7Ab5NQ1AqZGZVZlIt7BiA8JM4bqdLAZc6BgmN8FMa74Y4UsxFKGlhBQ/yobYF6I7xYrv9IK+jQk0tQzgtD1xT1LtbWcztH8eEhdWRNMMS1KlIq5M8G6uzK4t63Dw4cLdD7pFJvrZ/QGX+xChvxlObZkzZl+zCdso=,iv:teMsiwYu0aK7I//uaNPvGGtby6UY3I4kj39XooqEu28=,tag:k2jQU5ogICx2ZG6yWnDiow==,type:str]
-    unencrypted_regex: /nonsensitive/
-    version: 3.12.0
+  kms:
+    - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/dpc-test
+      created_at: "2026-02-24T18:59:47Z"
+      enc: AQICAHiJ2VyTbM1GPYeYg+Jay2PKSqq6JpKQUO26MBqqLRSMVAHsX4paaK2bUtdMeYemxYDIAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMIGntrkmmdep25NznAgEQgDtzFNQT5r3BD8nW1ICdPONcxQq7d70tpsqDRquwdVJs/keEC24Y0yMT5Ujld1XP2VTvr8oWytBm1aWpYA==
+      aws_profile: ""
+    - arn: arn:aws:kms:us-west-2:${ACCOUNT_ID}:alias/dpc-test
+      created_at: "2026-02-24T19:41:20Z"
+      enc: AQICAHhriHaL3+UbLIsghpKG7Pc/xN0D974NR5TsBs0e/9ll3gF02jzXvLoZuMCB3/1VawydAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMmxACfMSisdr35tltAgEQgDtN6Cr28hw20AqHxklOhVBCb5ViVSzsf6eh8l50q4t0px1IZS2Yq2J/GnDUhK6NTknpyBJmRRj9N3mXfw==
+      aws_profile: ""
+  unencrypted_regex: /nonsensitive/
+  version: 3.12.1
