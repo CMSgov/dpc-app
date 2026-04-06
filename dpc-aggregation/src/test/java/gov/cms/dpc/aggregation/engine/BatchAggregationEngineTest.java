@@ -6,6 +6,7 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.aggregation.service.*;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
+import gov.cms.dpc.common.utils.GzipUtil;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
@@ -165,7 +166,7 @@ class BatchAggregationEngineTest {
         // Look at the output files
         completeJob.getJobQueueBatchFiles()
                 .forEach(batchFile -> {
-                    final var outputFilePath = String.format("%s/%s.ndjson", exportPath, batchFile.getFileName());
+                    final var outputFilePath = String.format("%s/%s.ndjson.gz", exportPath, batchFile.getFileName());
                     final File file = new File(Path.of(outputFilePath).toString());
                     assertAll(() -> assertNotNull(file, "Should have input file"),
                             () -> assertArrayEquals(AggregationUtils.generateChecksum(file), batchFile.getChecksum(), "Should have checksum"),
@@ -250,7 +251,7 @@ class BatchAggregationEngineTest {
         assertFalse(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
-        String operationOutcome = Files.readString(Path.of(errorFilePath));
+        String operationOutcome = GzipUtil.decompress(errorFilePath);
         OperationOutcome o = FhirContext.forDstu3().newJsonParser().parseResource(OperationOutcome.class, operationOutcome);
         assertEquals(OutcomeReason.LOOK_BACK_NO_DATE_MATCH.detail, o.getIssueFirstRep().getDetails().getText());
     }
@@ -293,7 +294,7 @@ class BatchAggregationEngineTest {
         assertFalse(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
-        String operationOutcome = Files.readString(Path.of(errorFilePath));
+        String operationOutcome = GzipUtil.decompress(errorFilePath);
         OperationOutcome o = FhirContext.forDstu3().newJsonParser().parseResource(OperationOutcome.class, operationOutcome);
         assertEquals(OutcomeReason.LOOK_BACK_NO_NPI_MATCH.detail, o.getIssueFirstRep().getDetails().getText());
     }
@@ -336,7 +337,7 @@ class BatchAggregationEngineTest {
         assertFalse(Files.exists(Path.of(outputFilePath)));
         final var errorFilePath = ResourceWriter.formOutputFilePath(exportPath, completeJob.getBatchID(), DPCResourceType.OperationOutcome, 0);
         assertTrue(Files.exists(Path.of(errorFilePath)), "expect error file for failed patient");
-        String operationOutcome = Files.readString(Path.of(errorFilePath));
+        String operationOutcome = GzipUtil.decompress(errorFilePath);
         OperationOutcome o = FhirContext.forDstu3().newJsonParser().parseResource(OperationOutcome.class, operationOutcome);
         assertEquals(OutcomeReason.LOOK_BACK_NO_NPI_MATCH.detail, o.getIssueFirstRep().getDetails().getText());
     }

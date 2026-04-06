@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Writes files from batches of FHIR Resources
@@ -38,7 +39,7 @@ class ResourceWriter {
      * @return return the path
      */
     static String formOutputFilePath(String exportPath, UUID batchID, DPCResourceType resourceType, int sequence) {
-        return String.format("%s/%s.ndjson", exportPath, JobQueueBatchFile.formOutputFileName(batchID, resourceType, sequence));
+        return String.format("%s/%s.ndjson.gz", exportPath, JobQueueBatchFile.formOutputFileName(batchID, resourceType, sequence));
     }
 
     /**
@@ -119,9 +120,13 @@ class ResourceWriter {
         if (bytes.length == 0) {
             return;
         }
-        try (final var outputFile = new FileOutputStream(fileName, append)) {
-            outputFile.write(bytes);
-            outputFile.flush();
+        try (
+            // It shouldn't be possible for append=true, but we support it anyway.
+            final FileOutputStream fileOutputStream = new FileOutputStream(fileName, append);
+            final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(fileOutputStream);
+        ) {
+            gzipOutputStream.write(bytes);
+            gzipOutputStream.finish();
         }
     }
 }

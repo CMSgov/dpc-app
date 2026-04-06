@@ -16,6 +16,7 @@ import gov.cms.dpc.aggregation.service.LookBackService;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
 import gov.cms.dpc.common.MDCConstants;
+import gov.cms.dpc.common.utils.GzipUtil;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.hapi.ContextUtils;
@@ -426,7 +427,7 @@ class AggregationEngineTest {
         var outputFilePath = Path.of(ResourceWriter.formOutputFilePath(EXPORT_PATH, queue.getJobBatches(jobID).stream().findFirst().get().getBatchID(), DPCResourceType.Patient, 0));
         assertTrue(Files.exists(outputFilePath));
         try {
-            final String fileContents = Files.readString(outputFilePath);
+            String fileContents = GzipUtil.decompress(outputFilePath.toString());
             assertEquals(mbis.size(), Arrays.stream(fileContents.split("\n")).count(), "Contains multiple patients in file output");
         } catch (Exception e) {
             fail("Failed to read output file");

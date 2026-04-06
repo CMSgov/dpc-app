@@ -507,6 +507,11 @@ public class APIAuthHelpers {
             return this;
         }
 
+        public CustomHttpBuilder disableCompression() {
+            this.builder.disableContentCompression();
+            return this;
+        }
+
         public CustomHttpBuilder isAuthed(String baseURL, String clientToken, UUID keyID, PrivateKey privateKey) {
             this.builder.addRequestInterceptorFirst(new HttpClientAuthInterceptor(baseURL, clientToken, keyID, privateKey));
             return this;
