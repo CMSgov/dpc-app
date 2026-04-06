@@ -35,5 +35,5 @@ jobs:
     with:
       env: ${{ inputs.env || 'test' }}
       project: opt-out-import
-      go_files: "main.go parsers.go utils.go models.go db.go"
+      go_files: "main.go parsers.go models.go db.go"
     secrets: inherit

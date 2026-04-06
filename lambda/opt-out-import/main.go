@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"fmt"
 	"os"
 	"time"
 
@@ -18,8 +16,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/smithy-go/logging"
-
-	"github.com/ianlopshire/go-fixedwidth"
 )
 
 var isTesting = os.Getenv("IS_TESTING") == "true"
@@ -40,11 +36,11 @@ type (
 func main() {
 	if isTesting {
 		filename := "bfdeft01/dpc/in/T.NGD.DPC.RSP.D240123.T1122001.IN"
-		createdOptOutCount, createdOptInCount, confirmationFileName, err := importResponseFile(context.TODO(), "demo-bucket", filename)
+		createdOptOutCount, createdOptInCount, err := importResponseFile(context.TODO(), "demo-bucket", filename)
 		if err != nil {
 			log.Error(err)
 		} else {
-			log.Infof("Created %d opt outs, %d opt ins, and generated confirmation %s", createdOptOutCount, createdOptInCount, confirmationFileName)
+			log.Infof("Created %d opt outs and %d opt ins", createdOptOutCount, createdOptInCount)
 		}
 	} else {
 		lambda.Start(handler)
@@ -69,19 +65,18 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 
 	for _, e := range s3Event.Records {
 		if e.EventName == "ObjectCreated:Put" {
-			createdOptOutCount, createdOptInCount, confirmationFileName, err := importResponseFile(ctx, e.S3.Bucket.Name, e.S3.Object.Key)
+			createdOptOutCount, createdOptInCount, err := importResponseFile(ctx, e.S3.Bucket.Name, e.S3.Object.Key)
 			logger := log.WithFields(log.Fields{
 				"response_filename":      e.S3.Object.Key,
 				"created_opt_outs_count": createdOptOutCount,
 				"created_opt_ins_count":  createdOptInCount,
-				"confirmation_filename":  confirmationFileName,
 			})
 
 			if err != nil {
 				logger.Errorf("Failed to import response file: %s", err)
 			} else {
 
-				logger.Info("Successfully imported response file and uploaded confirmation file")
+				logger.Info("Successfully imported response file")
 			}
 			return e.S3.Object.Key, err
 		}
@@ -91,53 +86,53 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) (string, error) {
 	return "", nil
 }
 
-func importResponseFile(ctx context.Context, bucket string, file string) (int, int, string, error) {
+func importResponseFile(ctx context.Context, bucket string, file string) (int, int, error) {
 	log.Infof("Importing opt out file: %s (bucket: %s)", file, bucket)
 	metadata, err := ParseMetadata(bucket, file)
 	if err != nil {
 		log.Warningf("Failed to parse opt out file metadata: %s", err)
-		return 0, 0, "", err
+		return 0, 0, err
 	}
 
 	db, err := createConnectionVar(ctx)
 	if err != nil {
 		log.Warningf("Failed to create db connection: %s", err)
-		return 0, 0, "", err
+		return 0, 0, err
 	}
 	if err := db.Ping(); err != nil {
 		log.Warningf("Ping error: %s", err)
-		return 0, 0, "", err
+		return 0, 0, err
 	}
 	defer db.Close()
 
 	optOutFileEntity, err := insertResponseFileMetadata(db, &metadata)
 	if err != nil {
 		log.Warningf("Failed to insert opt out metadata: %s", err)
-		return 0, 0, "", err
+		return 0, 0, err
 	}
 
 	bytes, err := downloadS3File(ctx, bucket, file)
 	if err != nil {
 		log.Warningf("Failed to download opt out file from S3: %s", err)
 		if updateStatusErr := updateResponseFileImportStatus(db, optOutFileEntity.id, ImportFail); updateStatusErr != nil {
-			return 0, 0, "", updateStatusErr
+			return 0, 0, updateStatusErr
 		}
-		return 0, 0, "", err
+		return 0, 0, err
 	}
 
 	records, err := ParseConsentRecords(&metadata, bytes)
 	if err != nil {
 		log.Warningf("Failed to parse consent records: %s", err)
 		if updateStatusErr := updateResponseFileImportStatus(db, optOutFileEntity.id, ImportFail); updateStatusErr != nil {
-			return 0, 0, "", updateStatusErr
+			return 0, 0, updateStatusErr
 		}
-		return 0, 0, "", err
+		return 0, 0, err
 	}
 
 	createdRecords, err := insertConsentRecords(db, optOutFileEntity.id, records)
 	if err != nil {
 		log.Warningf("Failed to insert consent records: %s", err)
-		return 0, 0, "", err
+		return 0, 0, err
 	}
 
 	createdOptOutCount := 0
@@ -157,28 +152,10 @@ func importResponseFile(ctx context.Context, bucket string, file string) (int, i
 
 	if err != nil {
 		log.Warningf("Failed to insert consent records: %s", err)
-		return createdOptOutCount, createdOptInCount, "", err
+		return createdOptOutCount, createdOptInCount, err
 	}
 
-	confirmationFileName := GenerateConfirmationFileName(file, time.Now())
-	confirmationFile, err := generateConfirmationFile(true, createdRecords, fixedwidth.Marshal)
-	if err != nil {
-		log.Warningf("Failed to generate confirmation file: %s", err)
-		return createdOptOutCount, createdOptInCount, confirmationFileName, err
-	}
-
-	if cfg, err := createConfig(ctx, true); err != nil {
-		log.Warning("Failed to create session for uploading confirmation file")
-		return createdOptOutCount, createdOptInCount, confirmationFileName, err
-	} else {
-		client := s3.NewFromConfig(cfg, func(o *s3.Options) { o.UsePathStyle = true })
-		if err = uploadConfirmationFile(ctx, bucket, confirmationFileName, manager.NewUploader(client).Upload, confirmationFile); err != nil {
-			log.Warning("Failed to write upload confirmation file")
-			return createdOptOutCount, createdOptInCount, confirmationFileName, err
-		}
-	}
-
-	return createdOptOutCount, createdOptInCount, confirmationFileName, err
+	return createdOptOutCount, createdOptInCount, err
 }
 
 var createConfig = func(ctx context.Context, assumeRole bool) (aws.Config, error) {
@@ -235,71 +212,6 @@ func downloadS3File(ctx context.Context, bucket string, file string) ([]byte, er
 	}
 
 	return buff.Bytes(), err
-}
-
-func generateConfirmationFile(successful bool, records []*OptOutRecord, marshaler FileMarshaler) ([]byte, error) {
-	fileCreationDate := time.Now().Format("20060102")
-	fileHeader := FileHeader{
-		HeaderCode:       "HDR_BENECONFIRM",
-		FileCreationDate: fileCreationDate,
-	}
-
-	fileTrailer := FileTrailer{
-		TrailerCode:       "TRL_BENECONFIRM",
-		FileCreationDate:  fileCreationDate,
-		DetailRecordCount: fmt.Sprintf("%010d", len(records)),
-	}
-
-	var rows []ConfirmationFileRow
-	for _, record := range records {
-		sharingPreference := "N"
-		if record.PolicyCode == "OPTIN" {
-			sharingPreference = "Y"
-		}
-		recordStatus := "Accepted"
-		reasonCode := "00"
-		if !successful {
-			recordStatus = "Rejected"
-			reasonCode = "02"
-		}
-
-		row := ConfirmationFileRow{
-			MBI:               record.MBI,
-			EffectiveDate:     record.EffectiveDt.Format("20060102"),
-			SharingPreference: sharingPreference,
-			RecordStatus:      recordStatus,
-			ReasonCode:        reasonCode,
-		}
-
-		rows = append(rows, row)
-	}
-
-	formattedHeader, err := marshaler(fileHeader)
-	if err != nil {
-		return []byte{}, err
-	}
-	formattedHeader = append(formattedHeader, "\n"...)
-	formattedRows, err := marshaler(rows)
-	if err != nil {
-		return []byte{}, err
-	}
-	formattedRows = append(formattedRows, "\n"...)
-	formattedTrailer, err := marshaler(fileTrailer)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	output := append(formattedHeader, formattedRows...)
-	return append(output, formattedTrailer...), nil
-}
-
-func uploadConfirmationFile(ctx context.Context, bucket string, file string, uploader S3Uploader, confirmationFile []byte) error {
-	_, err := uploader(ctx, &s3.PutObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(file),
-		Body:   bytes.NewReader(confirmationFile),
-	})
-	return err
 }
 
 func deleteS3File(ctx context.Context, bucket string, file string) error {

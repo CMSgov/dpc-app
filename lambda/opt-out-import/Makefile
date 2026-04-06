@@ -4,10 +4,10 @@ AWS_SECRET_ACCESS_KEY ?= 1234
 build: export GOOS=linux
 build: export GOARCH=amd64
 build: 
-	go build -o bin/bootstrap main.go parsers.go utils.go models.go db.go
+	go build -o bin/bootstrap main.go parsers.go models.go db.go
 	@du -h bin/bootstrap
 test-build:
-	go build -cover -o bin/bootstrap main.go parsers.go utils.go models.go db.go
+	go build -cover -o bin/bootstrap main.go parsers.go models.go db.go
 	rm -f coverage/*cov*
 	GOCOVERDIR=coverage ENV="local" DB_USER_DPC_CONSENT="postgres" DB_PASS_DPC_CONSENT="dpc-safe" DB_HOST="localhost" IS_TESTING=true ./bin/bootstrap
 	go tool covdata percent -i=coverage
@@ -27,6 +27,6 @@ integration-test:
 	go tool cover -html=coverage/int_coverage.out -o coverage/int_coverage.html
 
 run-local:
-	ENV="local" DB_USER_DPC_CONSENT="postgres" DB_PASS_DPC_CONSENT="dpc-safe" DB_HOST="localhost" IS_TESTING=true go run main.go parsers.go utils.go models.go db.go
+	ENV="local" DB_USER_DPC_CONSENT="postgres" DB_PASS_DPC_CONSENT="dpc-safe" DB_HOST="localhost" IS_TESTING=true go run main.go parsers.go models.go db.go
 run:
-	IS_TESTING=false go run main.go parsers.go utils.go models.go db.go
+	IS_TESTING=false go run main.go parsers.go models.go db.go
