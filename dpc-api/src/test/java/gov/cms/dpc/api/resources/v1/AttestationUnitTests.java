@@ -10,6 +10,7 @@ import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.service.DataService;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
@@ -47,7 +48,8 @@ public class AttestationUnitTests {
         logger.addAppender(listAppender);
         // Do all the things
         final IJobQueue mockQueue = Mockito.mock(IJobQueue.class);
-        final DataService dataService = new DataService(mockQueue, FhirContext.forDstu3(), "/", 1);
+        final FileManager fileManager = new FileManager("/", mockQueue);
+        final DataService dataService = new DataService(mockQueue, FhirContext.forDstu3(), "/", 1, fileManager);
         final IGenericClient mockClient = Mockito.mock(IGenericClient.class);
         final BlueButtonClient mockBfdClient = Mockito.mock(BlueButtonClient.class);
         groupResource = new GroupResource(dataService, mockClient, "http://local.test", mockBfdClient, new DPCAPIConfiguration());
