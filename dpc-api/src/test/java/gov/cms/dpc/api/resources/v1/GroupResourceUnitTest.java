@@ -16,6 +16,7 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
+import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.service.DataService;
 import gov.cms.dpc.testing.factories.FHIRGroupBuilder;
@@ -59,6 +60,7 @@ public class GroupResourceUnitTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     IJobQueue mockQueue;
 
+    FileManager fileManager;
     DataService dataService;
 
     DPCAPIConfiguration config = new DPCAPIConfiguration();
@@ -72,7 +74,8 @@ public class GroupResourceUnitTest {
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         config.setLookBackExemptOrgs(new LinkedList<>());
-        dataService = new DataService(mockQueue, FhirContext.forDstu3(), "/", 1);
+        fileManager = new FileManager("/", mockQueue);
+        dataService = new DataService(mockQueue, FhirContext.forDstu3(), "/", 1,  fileManager);
         resource = new GroupResource(dataService, attributionClient, "http://localhost:3002/v1", mockBfdClient, config);
     }
 
