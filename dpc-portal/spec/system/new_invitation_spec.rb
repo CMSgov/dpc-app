@@ -3,21 +3,32 @@
 require 'rails_helper'
 
 RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :system, js: true do
-  include Devise::Test::IntegrationHelpers
   include DpcClientSupport
 
   before do
     driven_by(:selenium_headless)
   end
+  let(:uid) { '12345' }
 
+  before do
+    OmniAuth.config.test_mode = true
+    OmniAuth.config.add_mock(:login_dot_gov,
+                             { uid:,
+                               info: { email: 'bob@example.com' },
+                               extra: { raw_info: { all_emails: %w[bob@example.com bob2@example.com],
+                                                    ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
+  end
+  def sign_in
+    visit '/auth/login_dot_gov/callback'
+  end
   context 'CD invite' do
     let(:dpc_api_organization_id) { 'some-gnarly-guid' }
-    let!(:user) { create(:user) }
+    let!(:user) { create(:user, provider: :login_dot_gov, uid: '12345') }
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let!(:ao_org_link) { create(:ao_org_link, user:, provider_organization: org) }
 
     before do
-      sign_in user
+      sign_in
       org.update!(terms_of_service_accepted_by: user)
     end
 
