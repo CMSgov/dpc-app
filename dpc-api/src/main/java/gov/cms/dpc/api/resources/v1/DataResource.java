@@ -4,10 +4,12 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
-import gov.cms.dpc.api.core.FileManager;
+import gov.cms.dpc.api.core.CompressibleStreamingOutput;
 import gov.cms.dpc.api.models.RangeHeader;
 import gov.cms.dpc.api.resources.AbstractDataResource;
 import gov.cms.dpc.common.annotations.NoHtml;
+import gov.cms.dpc.common.utils.GzipUtil;
+import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -18,14 +20,16 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -39,15 +43,17 @@ import java.util.stream.Collectors;
 import static gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter.X_CONTENT_LENGTH;
 
 /**
- * Streaming and range logic was taken from here: https://github.com/aruld/jersey-streaming
+ * Streaming and range logic was taken from here:
+ * https://github.com/aruld/jersey-streaming
  */
-@Api(tags = {"Bulk Data", "Data"}, authorizations = @Authorization(value = "access_token"))
+@Api(tags = { "Bulk Data", "Data" }, authorizations = @Authorization(value = "access_token"))
 @Path("/v1/Data")
 @Produces("application/ndjson")
 public class DataResource extends AbstractDataResource {
 
     private static final Logger logger = LoggerFactory.getLogger(DataResource.class);
-    private static final int CHUNK_SIZE = 1024 * 1024; // Return a maximum of 1MB chunks, but we can modify this later if we need to
+    private static final int CHUNK_SIZE = 1024 * 1024; // Return a maximum of 1MB chunks, but we can modify this later
+                                                       // if we need to
     private static final String ACCEPTED_RANGE_VALUE = "bytes";
 
     private final FileManager manager;
@@ -79,15 +85,9 @@ public class DataResource extends AbstractDataResource {
     })
     @Override
     public Response exportFileHead(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-                                   @HeaderParam(HttpHeaders.IF_NONE_MATCH)
-                                   @ApiParam(value = "Download file only if provided SHA256 checksum doesn't match")
-                                           Optional<String> fileChecksum,
-                                   @HeaderParam(HttpHeaders.IF_MODIFIED_SINCE)
-                                   @ApiParam(value = "Download file only if provided timestamp (milliseconds since Unix Epoch) is older than file creation timestamp", example = "1575394136")
-                                           Optional<String> modifiedHeader,
-                                   @PathParam("fileID")
-                                   @ApiParam(required = true, value = "NDJSON file name", example = "728b270d-d7de-4143-82fe-d3ccd92cebe4-1-coverage.ndjson")
-                                       @NoHtml String fileID) {
+            @HeaderParam(HttpHeaders.IF_NONE_MATCH) @ApiParam(value = "Download file only if provided SHA256 checksum doesn't match") Optional<String> fileChecksum,
+            @HeaderParam(HttpHeaders.IF_MODIFIED_SINCE) @ApiParam(value = "Download file only if provided timestamp (milliseconds since Unix Epoch) is older than file creation timestamp", example = "1575394136") Optional<String> modifiedHeader,
+            @PathParam("fileID") @ApiParam(required = true, value = "NDJSON file name", example = "728b270d-d7de-4143-82fe-d3ccd92cebe4-1-coverage.ndjson") @NoHtml String fileID) {
         final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
 
         if (returnCachedValue(filePointer, fileChecksum, modifiedHeader)) {
@@ -109,9 +109,11 @@ public class DataResource extends AbstractDataResource {
     @ExceptionMetered
     @Authorizer
     @ApiOperation(value = "Download output files.", notes = "Download ndjson formatted output files from the server. " +
-            "This endpoint supports returning partial results when the `" + HttpHeaders.RANGE + "` header is provided. " +
+            "This endpoint supports returning partial results when the `" + HttpHeaders.RANGE + "` header is provided. "
+            +
             "<p>This endpoint will return a `" + HttpStatus.NOT_MODIFIED_304 + "` response if the `"
-            + HttpHeaders.IF_MODIFIED_SINCE + "` or `" + HttpHeaders.IF_NONE_MATCH + "` headers are provided and match an existing file.")
+            + HttpHeaders.IF_MODIFIED_SINCE + "` or `" + HttpHeaders.IF_NONE_MATCH
+            + "` headers are provided and match an existing file.")
     @ApiResponses({
             @ApiResponse(code = HttpStatus.OK_200, message = "File of newline-delimited JSON FHIR objects", responseHeaders = {
                     @ResponseHeader(name = HttpHeaders.ETAG, description = "SHA256 checksum of file"),
@@ -128,18 +130,11 @@ public class DataResource extends AbstractDataResource {
             @ApiResponse(code = HttpStatus.INTERNAL_SERVER_ERROR_500, message = "An error occurred", response = OperationOutcome.class)
     })
     public Response downloadExportFile(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-                                       @HeaderParam(HttpHeaders.RANGE)
-                                       @ApiParam(value = "HTTP Range request for partial file download", example = "bytes=0-1234")
-                                               RangeHeader rangeHeader,
-                                       @HeaderParam(HttpHeaders.IF_NONE_MATCH)
-                                       @ApiParam(value = "Download file only if provided SHA256 checksum doesn't match")
-                                               Optional<String> fileChecksum,
-                                       @HeaderParam(HttpHeaders.IF_MODIFIED_SINCE)
-                                       @ApiParam(value = "Download file only if provided timestamp (milliseconds since Unix Epoch) is older than file creation timestamp", example = "1575394136")
-                                               Optional<String> modifiedHeader,
-                                       @PathParam("fileID")
-                                       @ApiParam(required = true, value = "NDJSON file name", example = "728b270d-d7de-4143-82fe-d3ccd92cebe4-1-coverage.ndjson")
-                                           @NoHtml String fileID) {
+            @HeaderParam(HttpHeaders.RANGE) @ApiParam(value = "HTTP Range request for partial file download", example = "bytes=0-1234") RangeHeader rangeHeader,
+            @HeaderParam(HttpHeaders.IF_NONE_MATCH) @ApiParam(value = "Download file only if provided SHA256 checksum doesn't match") Optional<String> fileChecksum,
+            @HeaderParam(HttpHeaders.IF_MODIFIED_SINCE) @ApiParam(value = "Download file only if provided timestamp (milliseconds since Unix Epoch) is older than file creation timestamp", example = "1575394136") Optional<String> modifiedHeader,
+            @HeaderParam(HttpHeaders.ACCEPT_ENCODING) @ApiParam(value = "Accept-Encoding header", example = "gzip") Optional<String> acceptEncoding,
+            @PathParam("fileID") @ApiParam(required = true, value = "NDJSON file name", example = "728b270d-d7de-4143-82fe-d3ccd92cebe4-1-coverage.ndjson") @NoHtml String fileID) {
 
         final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
 
@@ -149,7 +144,8 @@ public class DataResource extends AbstractDataResource {
         if (jobStatusSet.size() == 1 && jobStatusSet.contains(JobStatus.COMPLETED)) {
             OffsetDateTime lastCompleteTime = JobResource.getLatestBatchCompleteTime(batches);
 
-            if (lastCompleteTime.isBefore(OffsetDateTime.now(ZoneOffset.UTC).minusHours(JobResource.JOB_EXPIRATION_HOURS))) {
+            if (lastCompleteTime
+                    .isBefore(OffsetDateTime.now(ZoneOffset.UTC).minusHours(JobResource.JOB_EXPIRATION_HOURS))) {
                 return Response.status(Response.Status.GONE).build();
             }
         }
@@ -161,47 +157,54 @@ public class DataResource extends AbstractDataResource {
 
         final Response response;
 
-        // Process the range request and return a partial stream, but only if they request bytes, ignore everything else
+        // Process the range request and return a partial stream, but only if they
+        // request bytes, ignore everything else
+        boolean compressResponse = shouldGzipCompress(acceptEncoding);
         if (rangeHeader != null) {
-            response = buildRangedRequest(fileID, filePointer.getFile(), rangeHeader);
+            response = buildRangedRequest(fileID, filePointer, rangeHeader);
         } else {
-            // Return a non-ranged streamed response if the requester doesn't actually send the range header, or if we don't understand the range unit
-            response = buildDefaultResponse(fileID, filePointer);
+            // Return a non-ranged streamed response if the requester doesn't actually send
+            // the range header, or if we don't understand the range unit
+            response = buildDefaultResponse(fileID, filePointer, compressResponse);
         }
 
         // Set the cache control headers to make sure the file isn't retained in transit
         final CacheControl cacheControl = new CacheControl();
         cacheControl.setNoCache(true);
         cacheControl.setNoStore(true);
+        Response.ResponseBuilder responseBuilder = Response.fromResponse(response)
+            .cacheControl(cacheControl);
 
-        return Response.fromResponse(response)
-                .cacheControl(cacheControl)
-                .build();
+        return responseBuilder.build();
     }
 
-    private Response buildDefaultResponse(String fileID, FileManager.FilePointer filePointer) {
-        final StreamingOutput fileStream = outputStream -> {
-            try (FileInputStream fileInputStream = new FileInputStream(filePointer.getFile())) {
-                // Use the IOUtils copy method, which internally buffers the files
-                IOUtils.copy(fileInputStream, outputStream);
-            } catch (FileNotFoundException e) {
-                throw new WebApplicationException(String.format("Unable to open file `%s`.`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
-            }
-            outputStream.flush();
-        };
+    private Response buildDefaultResponse(String fileID, FileManager.FilePointer filePointer, boolean compressResponse) {
+        FileInputStream fileInputStream;
+        try {
+            fileInputStream = new FileInputStream(filePointer.getFile());
+        } catch (IOException e) {
+            throw new WebApplicationException(String.format("Unable to open file `%s`.`.", fileID), e,
+                    Response.Status.INTERNAL_SERVER_ERROR);
+        }
 
-        return Response
-                .status(Response.Status.OK)
-                .entity(fileStream)
-                .header(HttpHeaders.ETAG, filePointer.getChecksum())
-                .header(HttpHeaders.CONTENT_LENGTH, filePointer.getFileSize())
-                .header(HttpHeaders.LAST_MODIFIED, filePointer.getCreationTime().toInstant().toEpochMilli())
-                .build();
+        StreamingOutput streamingOutput = new CompressibleStreamingOutput(fileInputStream, filePointer.isCompressed(), compressResponse);
+
+        Response.ResponseBuilder builder = Response
+            .status(Response.Status.OK)
+            .entity(streamingOutput)
+            .header(HttpHeaders.ETAG, filePointer.getChecksum())
+            .header(HttpHeaders.LAST_MODIFIED, filePointer.getCreationTime().toInstant().toEpochMilli());
+        if (compressResponse) {
+            builder.encoding("gzip");
+        }
+
+        return builder.build();
     }
 
-    private Response buildRangedRequest(String fileID, File file, RangeHeader range) {
+    private Response buildRangedRequest(String fileID, FileManager.FilePointer filePointer, RangeHeader range) {
         if (!range.getUnit().equals(ACCEPTED_RANGE_VALUE)) {
-            throw new WebApplicationException("Only `bytes` are acceptable as ranges", Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
+            throw new WebApplicationException("Only `bytes` are acceptable as ranges",
+                    Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
         }
         final long rangeStart = range.getStart() < 0 ? 0 : range.getStart();
         final long rangeEnd = range.getEnd().orElse(rangeStart + CHUNK_SIZE);
@@ -209,41 +212,45 @@ public class DataResource extends AbstractDataResource {
 
         // If we have a negative range, throw an exception
         if (len < 0) {
-            throw new WebApplicationException("Range end cannot be before begin", Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
+            throw new WebApplicationException("Range end cannot be before begin",
+                    Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
         }
 
-        RandomAccessFile randomAccessFile;
+        // We need to get an uncompressed input stream, then move our cursor to the offset we want. We can't use a
+        // RandomAccessFile because our file is more than likely compressed.
         try {
-            randomAccessFile = new RandomAccessFile(file, "r");
-        } catch (IOException e) {
-            throw new WebApplicationException(String.format("Unable to open file `%s`.`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
-        }
-        try {
-            randomAccessFile.seek(rangeStart);
-        } catch (IOException e) {
-            try {
-                randomAccessFile.close();
-            } catch (IOException e1) {
-                logger.error("Failed to close file after exception", e1);
-            }
-            throw new WebApplicationException(String.format("Unable to read file `%s`.`.", fileID), e, Response.Status.INTERNAL_SERVER_ERROR);
-        }
+            InputStream uncompressedInputStream = filePointer.getUncompressedInputStream();
 
-        final PartialFileStreamer fileStreamer = new PartialFileStreamer((int) len, randomAccessFile);
+            // Build a new stream that starts at the beginning of our range and ends at the
+            // end
+            uncompressedInputStream.skipNBytes(rangeStart);
+            BoundedInputStream boundedInputStream = BoundedInputStream.builder()
+                    .setInputStream(uncompressedInputStream)
+                    .setMaxCount(len)
+                    .get();
 
-        final String responseRange = String.format("bytes %d-%d/%d", rangeStart, rangeEnd, file.length());
-        return Response
+            // The default DropWizard behavior is to not gzip compress responses when a range is requested, so we're
+            // duplicating that here and we only create non-zipped responses.
+            StreamingOutput streamingOutput = new CompressibleStreamingOutput(boundedInputStream, false, false);
+
+            final String responseRange = String.format("bytes %d-%d/%d", rangeStart, rangeEnd, len);
+            return Response
                 .status(Response.Status.PARTIAL_CONTENT)
-                .entity(fileStreamer)
+                .entity(streamingOutput)
                 .header(HttpHeaders.ACCEPT_RANGES, ACCEPTED_RANGE_VALUE)
                 .header(HttpHeaders.CONTENT_RANGE, responseRange)
                 // Set the X-Content-Length header, so we can manually override what Jersey does
-                .header(X_CONTENT_LENGTH, fileStreamer.getLength())
+                .header(X_CONTENT_LENGTH, len)
                 .build();
+        } catch (IOException e) {
+            throw new WebApplicationException(String.format("Unable to open file `%s`.`.", fileID), e,
+                    Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private boolean returnCachedValue(FileManager.FilePointer filePointer, Optional<String> checksum, Optional<String> modifiedSince) {
+    private boolean returnCachedValue(FileManager.FilePointer filePointer, Optional<String> checksum,
+            Optional<String> modifiedSince) {
         // If we're provided a file checksum, verify it matches, if so, return a 304
         if (checksum.isPresent() && checksum.get().equals(filePointer.getChecksum())) {
             return true;
@@ -258,39 +265,17 @@ public class DataResource extends AbstractDataResource {
                 logger.error("Unable to parse modified timestamp", e);
                 return false;
             }
-            // Verify that the creation timestamp is not after the value of the modified header
-            return !filePointer.getCreationTime().truncatedTo(ChronoUnit.MILLIS).isAfter(modifiedValue.truncatedTo(ChronoUnit.MILLIS));
+            // Verify that the creation timestamp is not after the value of the modified
+            // header
+            return !filePointer.getCreationTime().truncatedTo(ChronoUnit.MILLIS)
+                    .isAfter(modifiedValue.truncatedTo(ChronoUnit.MILLIS));
         }
         return false;
     }
 
-    private static class PartialFileStreamer implements StreamingOutput {
-
-        private int length;
-        private final RandomAccessFile raf;
-        final byte[] buf = new byte[4096];
-
-        PartialFileStreamer(int length, RandomAccessFile raf) {
-            this.length = length;
-            this.raf = raf;
-        }
-
-        @Override
-        public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-            try {
-                while (length != 0) {
-                    int read = raf.read(buf, 0, Math.min(buf.length, length));
-                    outputStream.write(buf, 0, read);
-                    length -= read;
-                }
-                outputStream.flush();
-            } finally {
-                raf.close();
-            }
-        }
-
-        int getLength() {
-            return length;
-        }
+    // True if we should gzip our response, false otherwise
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private boolean shouldGzipCompress(Optional<String> acceptEncoding) {
+        return (acceptEncoding.isPresent()) && (acceptEncoding.get().toLowerCase().contains(GzipUtil.GZIP));
     }
 }
