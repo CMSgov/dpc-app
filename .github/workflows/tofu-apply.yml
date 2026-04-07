@@ -33,7 +33,7 @@ jobs:
       id-token: write
     runs-on: >-
       codebuild-dpc-app${{
-        contains(fromJSON('["dev", "test"]'), inputs.environment) && '-non-prod' || '-prod'
+        contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
       }}-${{ github.run_id }}-${{ github.run_attempt }}
     env:
       APP: dpc
