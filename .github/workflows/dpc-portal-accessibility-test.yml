@@ -2,6 +2,9 @@ name: Dpc-Portal Accessibility Tests
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - dpc-portal/**
 
 jobs:
   test:
