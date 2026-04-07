@@ -11,7 +11,7 @@ import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.auth.jwt.JwtKeyLocator;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
 import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
-import gov.cms.dpc.api.core.FileManager;
+import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
