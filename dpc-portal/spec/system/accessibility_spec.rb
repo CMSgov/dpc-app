@@ -16,11 +16,6 @@ RSpec.describe 'Accessibility', type: :system do
     warn "[Failure URL]: #{page.current_url}" if page.current_url.present?
   end
 
-  before(:example) do
-    WebMock.disable_net_connect!(allow_localhost: true, allow: ['github.com', 'release-assets.githubusercontent.com'])
-  end
-  after(:example) { WebMock.disable_net_connect!(allow_localhost: true) }
-
   let(:dpc_api_organization_id) { 'some-gnarly-guid' }
   let(:axe_standard) { %w[best-practice wcag21aa] }
   context 'login' do
