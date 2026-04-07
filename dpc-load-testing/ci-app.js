@@ -280,142 +280,156 @@ export function workflow(data) {
     );
 
     if (checkJobResponse) {
+      const checkJobResponse = function(jobResponse, gzip) {
+        let gzipHeader = {};
+        if (gzip) gzipHeader['Accept-Encoding'] = 'gzip';
 
-      // GET patient data
-      const patient = jobResponse.json().output.filter((elem) => elem.type == "Patient")[0];
-      const patientChecksum = patient.extension[0].valueString;
-      const patientDataResponse = authorizedGet(token, patient.url);
+        // GET patient data
+        const patient = jobResponse.json().output.filter((elem) => elem.type == "Patient")[0];
+        const patientChecksum = patient.extension[0].valueString;
+        const patientDataResponse = authorizedGet(token, patient.url, gzipHeader);
 
-      const verifyPatientData = function(body) {
-        const patientBlocks = body.trim().split('\n');
-        if (patientBlocks.length != 3) return false;
-        let pass = true;
-        patientBlocks.forEach((block) => {
-          const blockData = JSON.parse(block);
-          if (blockData.resourceType != 'Patient') pass = false;
-          const mbiStanza = blockData.identifier.find(i => i.system === "http://hl7.org/fhir/sid/us-mbi");
-          if (mbiStanza === undefined) pass = false;
-        });
-        const checksum  = crypto.sha256(body, 'hex');
-        if (`sha256:${checksum}` != patientChecksum) pass = false;
-        return pass;
-      }
-      const checkPatientDataResponse = check(
-        patientDataResponse,
-        {
-          'response code was 200': res => res.status === 200,
-          'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
-          'has correct patient data': res => verifyPatientData(res.body),
+        const verifyPatientData = function(body) {
+          const patientBlocks = body.trim().split('\n');
+          if (patientBlocks.length != 3) return false;
+          let pass = true;
+          patientBlocks.forEach((block) => {
+            const blockData = JSON.parse(block);
+            if (blockData.resourceType != 'Patient') pass = false;
+            const mbiStanza = blockData.identifier.find(i => i.system === "http://hl7.org/fhir/sid/us-mbi");
+            if (mbiStanza === undefined) pass = false;
+          });
+          const checksum  = crypto.sha256(body, 'hex');
+          if (`sha256:${checksum}` != patientChecksum) pass = false;
+          return pass;
         }
-      );
-      if (!checkPatientDataResponse){
-        console.error('Patient data response failure');
-      }
-
-      // GET eob data
-      const eob = jobResponse.json().output.filter((elem) => elem.type == "ExplanationOfBenefit")[0];
-
-      const eobDataResponse = authorizedGet(token, eob.url);
-      const verifyEobData = function(body) {
-        const eobBlocks = body.trim().split('\n');
-        if (eobBlocks.length < 100) return false;
-        let pass = true;
-        eobBlocks.forEach((block) => {
-          const blockData = JSON.parse(block);
-          if (blockData.resourceType != 'ExplanationOfBenefit') pass = false;
-        });
-        return pass;
-      }
-      const checkEobDataResponse = check(
-        eobDataResponse,
-        {
-          'response code was 200': res => res.status === 200,
-          'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
-          'has correct eob data': res => verifyEobData(res.body),
-        }
-      );
-      if (!checkEobDataResponse){
-        console.error('ExplanationOfBenefits data response failure');
-      }
-      // Get partial eob data
-      const requestedByteCount = 10240;
-      const partialRequestHeaders = {'Range': `bytes=0-${requestedByteCount}`};
-
-      const partialEobDataResponse = authorizedGet(token, eob.url, partialRequestHeaders);
-
-      const checkPartialEobDataResponse = check(
-        partialEobDataResponse,
-        {
-          'expect content length header to be requested': res => res.headers['Content-Length'] == requestedByteCount,
-          'expect body length to be requested': res => res.body.length === requestedByteCount,
-        }
-      )
-      if (!checkPartialEobDataResponse){
-        console.error('Parital ExplanationOfBenefits data response failure');
-      }
-
-      // Get coverage data
-      const coverage = jobResponse.json().output.filter((elem) => elem.type == "Coverage")[0];
-      const coverageChecksum = coverage.extension[0].valueString;
-      const coverageDataResponse = authorizedGet(token, coverage.url);
-
-      const verifyCoverageData = function(body) {
-        const coverageBlocks = body.trim().split('\n');
-        if (coverageBlocks.length != 12) return false;
-        let pass = true;
-        coverageBlocks.forEach((block) => {
-          const blockData = JSON.parse(block);
-          if (blockData.resourceType != 'Coverage') pass = false;
-        });
-        const checksum  = crypto.sha256(body, 'hex');
-        if (`sha256:${checksum}` != coverageChecksum) pass = false;
-        return pass;
-      }
-      const checkCoverageDataResponse = check(
-        coverageDataResponse,
-        {
-          'response code was 200': res => res.status === 200,
-          'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
-          'has correct coverage data': res => verifyCoverageData(res.body),
-        }
-      );
-      if (!checkCoverageDataResponse){
-        console.error('Coverage data response failure');
-      }
-
-      // GET operation outcome data
-      const operationOutcome = jobResponse.json().error[0];
-      const operationOutcomeChecksum = operationOutcome.extension[0].valueString;
-      const operationOutcomeDataResponse = authorizedGet(token, operationOutcome.url);
-
-      const verifyOperationOutcomeData = function(body) {
-        const operationOutcomeBlocks = body.trim().split('\n');
-        if (operationOutcomeBlocks.length != 1) return false;
-        let pass = true;
-        operationOutcomeBlocks.forEach((block) => {
-          const blockData = JSON.parse(block);
-          if (blockData.resourceType != 'OperationOutcome') pass = false;
-          const issue = blockData.issue[0];
-          if (issue.details.text != 'Unable to retrieve patient data due to internal error') {
-            pass = false;
+        const checkPatientDataResponse = check(
+          patientDataResponse,
+          {
+            'response code was 200': res => res.status === 200,
+            'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
+            'has correct patient data': res => verifyPatientData(res.body),
           }
-          if (!issue.location.includes('0S80C00AA00')) pass = false;
-        });
-        const checksum  = crypto.sha256(body, 'hex');
-        if (`sha256:${checksum}` != operationOutcomeChecksum) pass = false;
-        return pass;
-      }
-      const checkOperationOutcomeDataResponse = check(
-        operationOutcomeDataResponse,
-        {
-          'response code was 200': res => res.status === 200,
-          'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
-          'has correct operationOutcome data': res => verifyOperationOutcomeData(res.body),
+        );
+        if (!checkPatientDataResponse){
+          console.error('Patient data response failure');
         }
-      );
-      if (!checkOperationOutcomeDataResponse){
-        console.error('OperationOutcome data response failure');
+
+        // GET eob data
+        const eob = jobResponse.json().output.filter((elem) => elem.type == "ExplanationOfBenefit")[0];
+
+        const eobDataResponse = authorizedGet(token, eob.url, gzipHeader);
+        const verifyEobData = function(body) {
+          const eobBlocks = body.trim().split('\n');
+          if (eobBlocks.length < 100) return false;
+          let pass = true;
+          eobBlocks.forEach((block) => {
+            const blockData = JSON.parse(block);
+            if (blockData.resourceType != 'ExplanationOfBenefit') pass = false;
+          });
+          return pass;
+        }
+        const checkEobDataResponse = check(
+          eobDataResponse,
+          {
+            'response code was 200': res => res.status === 200,
+            'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
+            'has correct eob data': res => verifyEobData(res.body),
+          }
+        );
+        if (!checkEobDataResponse){
+          console.error('ExplanationOfBenefits data response failure');
+        }
+
+        // Get partial eob data
+        const requestedByteCount = 10240;
+        const partialRequestHeaders = {'Range': `bytes=0-${requestedByteCount}`};
+
+        const partialEobDataResponse = authorizedGet(token, eob.url, {...gzipHeader, ...partialRequestHeaders});
+
+        const partialEobChecks = {
+          'expect body length to be requested': res => res.body.length === requestedByteCount,
+        };
+        if (!gzip) {
+          // Content length is only returned if the data is not compressed
+          partialEobChecks['expect content length header to be requested'] = res => res.headers['Content-Length'] == requestedByteCount;
+        }
+
+        const checkPartialEobDataResponse = check(
+          partialEobDataResponse,
+          partialEobChecks
+        )
+        if (!checkPartialEobDataResponse){
+          console.error('Parital ExplanationOfBenefits data response failure');
+        }
+
+        // Get coverage data
+        const coverage = jobResponse.json().output.filter((elem) => elem.type == "Coverage")[0];
+        const coverageChecksum = coverage.extension[0].valueString;
+        const coverageDataResponse = authorizedGet(token, coverage.url, gzipHeader);
+
+        const verifyCoverageData = function(body) {
+          const coverageBlocks = body.trim().split('\n');
+          if (coverageBlocks.length != 12) return false;
+          let pass = true;
+          coverageBlocks.forEach((block) => {
+            const blockData = JSON.parse(block);
+            if (blockData.resourceType != 'Coverage') pass = false;
+          });
+          const checksum  = crypto.sha256(body, 'hex');
+          if (`sha256:${checksum}` != coverageChecksum) pass = false;
+          return pass;
+        }
+        const checkCoverageDataResponse = check(
+          coverageDataResponse,
+          {
+            'response code was 200': res => res.status === 200,
+            'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
+            'has correct coverage data': res => verifyCoverageData(res.body),
+          }
+        );
+        if (!checkCoverageDataResponse){
+          console.error('Coverage data response failure');
+        }
+
+        // GET operation outcome data
+        const operationOutcome = jobResponse.json().error[0];
+        const operationOutcomeChecksum = operationOutcome.extension[0].valueString;
+        const operationOutcomeDataResponse = authorizedGet(token, operationOutcome.url, gzipHeader);
+
+        const verifyOperationOutcomeData = function(body) {
+          const operationOutcomeBlocks = body.trim().split('\n');
+          if (operationOutcomeBlocks.length != 1) return false;
+          let pass = true;
+          operationOutcomeBlocks.forEach((block) => {
+            const blockData = JSON.parse(block);
+            if (blockData.resourceType != 'OperationOutcome') pass = false;
+            const issue = blockData.issue[0];
+            if (issue.details.text != 'Unable to retrieve patient data due to internal error') {
+              pass = false;
+            }
+            if (!issue.location.includes('0S80C00AA00')) pass = false;
+          });
+          const checksum  = crypto.sha256(body, 'hex');
+          if (`sha256:${checksum}` != operationOutcomeChecksum) pass = false;
+          return pass;
+        }
+        const checkOperationOutcomeDataResponse = check(
+          operationOutcomeDataResponse,
+          {
+            'response code was 200': res => res.status === 200,
+            'has content type ndjson': res => res.headers['Content-Type'] === 'application/ndjson',
+            'has correct operationOutcome data': res => verifyOperationOutcomeData(res.body),
+          }
+        );
+        if (!checkOperationOutcomeDataResponse){
+          console.error('OperationOutcome data response failure');
+        }
       }
+
+      // Check job with and without gzip compression
+      checkJobResponse(jobResponse, false);
+      checkJobResponse(jobResponse, true);
     }  else {
       console.error('Failed job response check; skipping data checks');
     }

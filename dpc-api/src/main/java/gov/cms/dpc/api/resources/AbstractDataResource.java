@@ -23,5 +23,5 @@ public abstract class AbstractDataResource {
 
     @Path("/{fileID}/")
     @GET
-    public abstract Response downloadExportFile(OrganizationPrincipal organizationPrincipal, RangeHeader range, Optional<String> fileChecksum, Optional<String> modifiedHeader, @NoHtml String fileID);
+    public abstract Response downloadExportFile(OrganizationPrincipal organizationPrincipal, RangeHeader range, Optional<String> fileChecksum, Optional<String> modifiedHeader, Optional<String> acceptEncoding, @NoHtml String fileID);
 }
