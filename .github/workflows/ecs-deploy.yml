@@ -231,9 +231,10 @@ jobs:
         id: notify-new-relic
         run: |
           counter=0
+          cli_version=v0.111-arm64
           for service in dpc-api-${{ inputs.env }} dpc-attribution-${{ inputs.env }} dpc-aggregation-${{ inputs.env }}  dpc-web-${{ inputs.env }} dpc-web-admin-${{ inputs.env }} dpc-web-portal-${{ inputs.env }}
           do
-            application_stanza=`docker run --rm -e NEW_RELIC_API_KEY="$NEW_RELIC_API_KEY" -e NEW_RELIC_REGION="US" newrelic/cli:latest-arm64 apm application search --name $service`
+            application_stanza=`docker run --rm -e NEW_RELIC_API_KEY="$NEW_RELIC_API_KEY" -e NEW_RELIC_REGION="US" newrelic/cli:"$cli_version" apm application search --name $service`
             if [ -z "$application_stanza" ] || [ "$application_stanza" = "null" ]; then
               echo "Service $service not found in New Relic, skipping gracefully."
             else
@@ -242,7 +243,7 @@ jobs:
                  echo "Service $service not found in New Relic, skipping gracefully."
               else
                 echo "Notifying New Relic about deployment of $service to ${{ inputs.env }}"
-                docker run --rm -e NEW_RELIC_API_KEY="$NEW_RELIC_API_KEY" -e NEW_RELIC_REGION="US" newrelic/cli:latest-arm64 apm deployment create --applicationId "$application_id" --revision "${{ needs.deploy.outputs.image_tag }}" --user jenkins
+                docker run --rm -e NEW_RELIC_API_KEY="$NEW_RELIC_API_KEY" -e NEW_RELIC_REGION="US" newrelic/cli:"$cli_version" apm deployment create --applicationId "$application_id" --revision "${{ needs.deploy.outputs.image_tag }}" --user jenkins
                 counter=$((counter+1))
               fi
             fi
