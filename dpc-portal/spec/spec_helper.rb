@@ -6,7 +6,7 @@ require 'axe-rspec'
 require 'capybara/rspec'
 
 # Accessibility tests are run separately and should not be subject to simplecov constraints
-unless ENV['ACCESSIBILITY'] == 'true' || ENV['SYSTEM_TEST'] == 'true'
+unless ENV['SKIP_SIMPLE_COV'] == 'true'
   SimpleCov.start 'rails' do
     add_group 'Serializers', 'app/serializers'
     add_group 'Services', 'app/services'
@@ -33,7 +33,7 @@ unless ENV['ACCESSIBILITY'] == 'true' || ENV['SYSTEM_TEST'] == 'true'
 end
 
 require 'webmock/rspec'
-WebMock.disable_net_connect!(allow_localhost: true, allow: ['github.com', 'release-assets.githubusercontent.com'])
+WebMock.disable_net_connect!(allow_localhost: true)
 
 require 'support/fake_cpi_gateway'
 
@@ -54,6 +54,7 @@ require 'support/fake_cpi_gateway'
 # See https://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
   config.filter_run_excluding type: :system
+  config.filter_run_excluding :integration
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
   # assertions if you prefer.
