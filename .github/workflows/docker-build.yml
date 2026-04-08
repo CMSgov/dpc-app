@@ -116,6 +116,9 @@ jobs:
       - name: Build specified app
         run: ${{ matrix.make_command }}
 
+      - name: Attribution Logs
+        if: ${{ failure() }}
+        run: docker logs start-v1-portals-attribution-1
       - name: gzip the image
         run: docker save dpc-${{ matrix.ecr_repository }}:latest | gzip > ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
       - name: upload tar artifact
@@ -126,6 +129,7 @@ jobs:
           retention-days: 1
 
   docker_build_java: # builds dpc-api, dpc-attribution, and dpc-aggregation
+    needs: [ docker_build_rails_apps ]
     permissions:
       contents: read
       id-token: write
