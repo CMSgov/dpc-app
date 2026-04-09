@@ -120,7 +120,10 @@ jobs:
           wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -O ${{ matrix.app_dir }}/config/bundle.pem
 
       - name: Build specified app
-        run: ${{ matrix.make_command }}
+        run:
+          mkdir jacoco-reports
+          sudo chmod -R 777 .
+          ${{ matrix.make_command }}
 
       - name: Attribution Logs
         if: ${{ failure() }}
