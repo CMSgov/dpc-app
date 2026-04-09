@@ -82,12 +82,15 @@ jobs:
           - app_dir: dpc-portal
             ecr_repository: web-portal
             make_command: make ci-portal
+            need_java: true
           - app_dir: dpc-admin
             ecr_repository: web-admin
             make_command: make ci-admin-portal
+            need_java: false
           - app_dir: dpc-web
             ecr_repository: web
             make_command: make ci-web-portal
+            need_java: false
     steps:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
@@ -97,36 +100,34 @@ jobs:
         run: ./scripts/cleanup-docker.sh
 
       - name: Install docker compose manually
+        if: ${{ matrix.need_java == 'true' }}
         run: |
           mkdir -p /usr/local/lib/docker/cli-plugins
           curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-aarch64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
       - name: "Set up Python and install Ansible"
+        if: ${{ matrix.need_java == 'true' }}
         run: |
           sudo dnf -y install python3 python3-pip
           pip install ansible
       - name: "Set up JDK 17"
+        if: ${{ matrix.need_java == 'true' }}
         uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
           java-version: "17"
           distribution: "corretto"
           cache: maven
       - name: Clean maven
+        if: ${{ matrix.need_java == 'true' }}
         run: mvn -ntp -U clean
       - name: wget amazon pem bundle
         run: |
           wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -O ${{ matrix.app_dir }}/config/bundle.pem
 
       - name: Build specified app
-        run: |
-          mkdir jacoco-reports
-          sudo chmod -R 777 .
-          ${{ matrix.make_command }}
+        run: ${{ matrix.make_command }}
 
-      - name: Attribution Logs
-        if: ${{ failure() }}
-        run: docker logs start-v1-portals-attribution-1
       - name: gzip the image
         run: docker save dpc-${{ matrix.ecr_repository }}:latest | gzip > ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
       - name: upload tar artifact
