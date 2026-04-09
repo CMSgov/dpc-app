@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'support/login_support'
 
 RSpec.describe 'Organizations', type: :request do
   include DpcClientSupport
   include ComponentSupport
+  include LoginSupport
 
   describe 'GET /index' do
     context 'not logged in' do

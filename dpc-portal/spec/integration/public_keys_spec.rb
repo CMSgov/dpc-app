@@ -3,8 +3,11 @@
 require 'base64'
 require 'openssl'
 require 'rails_helper'
+require 'support/login_support'
 
 RSpec.describe 'PublicKeys', type: :request do
+  include LoginSupport
+
   before(:example) { WebMock.disable_net_connect!(allow_localhost: true, allow: ['api']) }
   after(:example) { WebMock.disable_net_connect!(allow_localhost: true) }
 

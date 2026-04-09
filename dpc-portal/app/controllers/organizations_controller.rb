@@ -14,7 +14,7 @@ class OrganizationsController < ApplicationController
 
   def index
     @links = current_user.provider_links
-    ao_or_cd = @links.any? { |link| link.is_a?(AoOrgLink) }
+    ao_or_cd = @links.any?(AoOrgLink)
     render(Page::Organization::OrganizationListComponent.new(ao_or_cd:, links: @links))
   end
 

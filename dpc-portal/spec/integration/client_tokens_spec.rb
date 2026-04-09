@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'support/login_support'
 
 RSpec.describe 'ClientTokens', type: :request do
+  include LoginSupport
+
   before(:example) { WebMock.disable_net_connect!(allow_localhost: true, allow: ['api']) }
   after(:example) { WebMock.disable_net_connect!(allow_localhost: true) }
 
