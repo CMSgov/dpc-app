@@ -28,7 +28,6 @@ permissions:
 
 env:
   VAULT_PW: ${{ secrets.VAULT_PW }}
-  REPORT_COVERAGE: true
   DPC_CA_CERT: ${{ secrets.DPC_CA_CERT }}
   ENV: "github-ci"
 
@@ -171,6 +170,7 @@ jobs:
       - name: Build ci app
         env:
           PACE_CERT: ${{ secrets.PACE_CERT }}
+          REPORT_COVERAGE: true
         id: api-build
         run: |
           export PATH=$PATH:~/.local/bin
