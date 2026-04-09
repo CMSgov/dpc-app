@@ -100,7 +100,6 @@ jobs:
         run: ./scripts/cleanup-docker.sh
 
       - name: Install docker compose manually
-        if: ${{ matrix.need_java == 'true' }}
         run: |
           mkdir -p /usr/local/lib/docker/cli-plugins
           curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-aarch64 -o /usr/local/lib/docker/cli-plugins/docker-compose
