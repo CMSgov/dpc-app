@@ -29,8 +29,8 @@ export const options = {
       executor: 'per-vu-iterations',
       vus: 3, // This has to stay at three to ensure even distribution of organizations.
       iterations: 1,
-      exec: "runSmokeTests",
-      maxDuration: '5m'
+      exec: "runSmokeTests"
+
     }
   }
 };
