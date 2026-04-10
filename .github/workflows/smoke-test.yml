@@ -30,10 +30,11 @@ jobs:
       run:
         working-directory: ./dpc-load-testing
     name: Smoke Test
-    runs-on: >-
-      codebuild-dpc-app${{
-        contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
-      }}-${{ github.run_id }}-${{ github.run_attempt }}
+    #runs-on: >-
+    #  codebuild-dpc-app${{
+    #    contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
+    #  }}-${{ github.run_id }}-${{ github.run_attempt }}
+    runs-on: codebuild-dpc-app-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
         name: Slack Starting
