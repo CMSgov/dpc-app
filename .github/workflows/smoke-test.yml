@@ -76,7 +76,7 @@ jobs:
       - name: Build K6
         run: |
           # Install xk6
-          go install go.k6.io/xk6/cmd/xk6@v1.1.5
+          go install go.k6.io/xk6/cmd/xk6@v1.3.7
 
           # Build the k6 binary
           xk6 build
