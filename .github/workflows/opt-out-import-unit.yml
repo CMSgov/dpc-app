@@ -12,7 +12,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: codebuild-dpc-app-non-prod-${{ github.run_id }}-${{ github.run_attempt }}
     defaults:
       run:
         working-directory: ./lambda/opt-out-import
