@@ -57,7 +57,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: Install AWS Session Manager Plugin
         run: |
-          sudo dnf install -y https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm
+          sudo dnf install -y https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_arm64/session-manager-plugin.rpm
       - name: Set cluster and service names
         run: |
           echo "CLUSTER_NAME=dpc-${{ inputs.env }}-frontend" >> $GITHUB_ENV
