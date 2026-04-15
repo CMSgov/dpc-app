@@ -30,8 +30,8 @@ if [[ -z "${TOKEN}" ]]; then
   exit 1
 fi
 
-if ! echo "${TOKEN}" | base64 --decode > /dev/null 2>&1; then
-  echo "ERROR: Token is not valid base64." >&2
+if [[ -z "${TOKEN}" ]]; then
+  echo "ERROR: Token is empty." >&2
   exit 1
 fi
 
