@@ -120,7 +120,7 @@ jobs:
           fi
           echo $image_tag
 
-      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
+      - uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
         name: Slack Starting
         with:
           method: chat.postMessage
@@ -170,7 +170,7 @@ jobs:
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
           tofu apply dpc-release-${{ inputs.env }}.tfplan
-      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
+      - uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
         name: Slack failure
         if: ${{ failure() }}
         with:
@@ -251,7 +251,7 @@ jobs:
           echo "counter=$counter" >> "$GITHUB_OUTPUT"
       - name: Slack if nothing to New Relic
         if: ${{ failure() || steps.notify-new-relic.outputs.counter == 0 }}
-        uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
         with:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -281,7 +281,7 @@ jobs:
         contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
       }}-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
-      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
+      - uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
         name: Slack Success
         if: ${{ needs.services-up.result == 'success' }}
         with:
@@ -299,7 +299,7 @@ jobs:
                 fields:
                   - title: Image Tag
                     value: ${{ needs.deploy.outputs.image_tag }}
-      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
+      - uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
         name: Slack failure
         if: ${{ needs.services-up.result != 'success' }}
         with:
