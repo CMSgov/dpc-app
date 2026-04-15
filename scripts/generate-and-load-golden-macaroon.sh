@@ -3,6 +3,7 @@ set -euo pipefail
 
 ENV="${1:?Usage: $0 <env>}"
 
+echo "Retrieving ${ENV} ALB name"
 ALB_URL=$(aws elbv2 describe-load-balancers \
   --names "dpc-${ENV}-frontend-internal" \
   | jq -r '.LoadBalancers[0].DNSName')
@@ -17,7 +18,8 @@ echo "Generating token"
 TOKEN=""
 for attempt in 1 2 3; do
   TOKEN=$(curl --fail --silent --show-error --max-time 30 \
-    -X POST "http://${ALB_URL}:9900/tasks/generate-token") && break
+    -X POST "http://${ALB_URL}:9900/tasks/generate-token" \
+    | tr -d '[:space:]') && break
   echo "Attempt ${attempt} failed. Retrying in 5s..." >&2
   sleep 5
 done
@@ -32,7 +34,7 @@ if ! echo "${TOKEN}" | base64 --decode > /dev/null 2>&1; then
   exit 1
 fi
 
-echo "Storing token in ssm"
+echo "Storing token in SSM"
 
 aws ssm put-parameter \
   --name "/dpc/${ENV}/web/golden_macaroon" \
