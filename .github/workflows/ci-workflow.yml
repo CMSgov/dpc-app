@@ -292,6 +292,10 @@ jobs:
           params: |
             SONAR_HOST_URL=/sonarqube/url
             SONAR_TOKEN=/sonarqube/token
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
       - name: Run quality gate scan
         uses: sonarsource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
         with:
@@ -340,6 +344,10 @@ jobs:
           params: |
             SONAR_HOST_URL=/sonarqube/url
             SONAR_TOKEN=/sonarqube/token
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
       - name: Run quality gate scan
         uses: sonarsource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
         with:
@@ -388,6 +396,10 @@ jobs:
           params: |
             SONAR_HOST_URL=/sonarqube/url
             SONAR_TOKEN=/sonarqube/token
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
       - name: Install Maven 3.6.3
         run: |
           export PATH="$PATH:/opt/maven/bin"
