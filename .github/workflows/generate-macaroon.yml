@@ -42,4 +42,5 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: Get and load Golden Macaroon
-        run:  bash ./dpc-app/scripts/generate-and-load-golden-macaroon.sh ${{ inputs.env }}
+        run:  |
+          ./dpc-app/scripts/generate-and-load-golden-macaroon.sh ${{ inputs.env }}
