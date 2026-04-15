@@ -45,7 +45,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: "Set up JDK 17"
@@ -113,7 +113,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Install docker compose manually
@@ -145,7 +145,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Install docker compose manually
@@ -175,7 +175,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Install docker compose manually
@@ -217,7 +217,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Install docker compose manually
@@ -264,7 +264,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
         with:
           fetch-depth: 0
       - name: Cleanup Runner
@@ -290,7 +290,7 @@ jobs:
             SONAR_HOST_URL=/sonarqube/url
             SONAR_TOKEN=/sonarqube/token
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: 24
       - name: Run quality gate scan
@@ -318,7 +318,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: "Checkout code"
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
         with:
           fetch-depth: 0
       - name: Cleanup Runner
@@ -339,7 +339,7 @@ jobs:
             SONAR_HOST_URL=/sonarqube/url
             SONAR_TOKEN=/sonarqube/token
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: 24
       - name: Run quality gate scan
@@ -368,7 +368,7 @@ jobs:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
       - name: Checkout Code
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
         with:
           fetch-depth: 0
       - name: Cleanup Runner
@@ -388,7 +388,7 @@ jobs:
             SONAR_HOST_URL=/sonarqube/url
             SONAR_TOKEN=/sonarqube/token
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: 24
       - name: Install Maven 3.6.3
