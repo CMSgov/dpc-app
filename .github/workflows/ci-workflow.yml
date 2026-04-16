@@ -259,10 +259,7 @@ jobs:
   sonar-quality-gate-dpc-web-and-admin:
     name: Sonarqube Quality Gate for dpc-web and dpc-admin
     needs: [build-dpc-admin, build-dpc-web]
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    env:
-      # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
+    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
@@ -292,6 +289,10 @@ jobs:
           params: |
             SONAR_HOST_URL=/sonarqube/url
             SONAR_TOKEN=/sonarqube/token
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
       - name: Run quality gate scan
         uses: sonarsource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
         with:
@@ -312,10 +313,7 @@ jobs:
   sonar-quality-gate-dpc-portal:
     name: Sonarqube Quality Gate for dpc-portal
     needs: build-dpc-portal
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    env:
-      # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
+    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
@@ -340,6 +338,10 @@ jobs:
           params: |
             SONAR_HOST_URL=/sonarqube/url
             SONAR_TOKEN=/sonarqube/token
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
       - name: Run quality gate scan
         uses: sonarsource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
         with:
@@ -361,10 +363,7 @@ jobs:
   sonar-quality-gate-dpc-api:
     name: Sonarqube Quality Gate for dpc-api
     needs: build-api
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
-    env:
-      # Workaround until https://jira.cms.gov/browse/PLT-338 is implemented.
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - name: Assert Ownership
         run: sudo chmod -R 777 .
@@ -388,6 +387,10 @@ jobs:
           params: |
             SONAR_HOST_URL=/sonarqube/url
             SONAR_TOKEN=/sonarqube/token
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
       - name: Install Maven 3.6.3
         run: |
           export PATH="$PATH:/opt/maven/bin"
