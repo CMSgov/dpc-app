@@ -51,7 +51,7 @@ jobs:
                   - footer
             text: "Smoke test of `${{ inputs.env }}` has started"
       - name: "Checkout code"
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
       - name: AWS Credentials (non-prod)
         if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
         uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
