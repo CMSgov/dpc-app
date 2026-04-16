@@ -112,7 +112,7 @@ jobs:
           role-to-assume: ${{ env.BFD_BUCKET_ROLE }}
           role-chaining: true
           role-skip-session-tagging: true
-      - name: Verify confirmation file not put in bucket
+      - name: Verify confirmation file put in bucket
         env:
           STARTTIME: ${{needs.trigger.outputs.start_time}}
         run: |
@@ -120,8 +120,9 @@ jobs:
             filedate_s=`echo $line | awk '{print $1 " " $2}'`
             filedate=`date -d "$filedate_s" +%s`
             if [[ $((filedate > STARTTIME)) == 1 ]]; then
-              echo "we have a loser!"
-              exit 1
+              echo "we have a winner!"
+              exit 0
             fi
           done < <(aws s3 ls s3://bfd-test-eft/bfdeft01/dpc/out/ | grep REQ)
           echo "no new file found"
+          exit 1
