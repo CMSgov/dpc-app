@@ -36,7 +36,10 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: >-
+      codebuild-dpc-app${{
+        contains(fromJSON('["prod"]'), inputs.env) && '-prod' || '-non-prod'
+      }}-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: Fail if not test or prod
         if: ${{ inputs.env == 'dev' || inputs.env == 'sandbox' }}
