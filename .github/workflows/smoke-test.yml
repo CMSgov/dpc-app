@@ -81,7 +81,7 @@ jobs:
           # Build the k6 binary
           xk6 build
       - name: Set env vars from AWS params
-        uses: cmsgov/cdap/actions/aws-params-env-action@8343fb96563ce4b74c4dececee9b268f42bd4a40
+        uses: cmsgov/cdap/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
