@@ -42,9 +42,9 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
       - uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 #v4.1.1
-      - uses: cmsgov/cdap/actions/setup-tenv@8343fb96563ce4b74c4dececee9b268f42bd4a40
-      - uses: cmsgov/cdap/actions/setup-sops@84a6bcee5b70d63c44f8fec4f9b542cb5ec29a54
-      - uses: cmsgov/cdap/actions/setup-yq@328406d6e1d435b4e3da598bcdab22e576c3945e
+      - uses: cmsgov/cdap/actions/setup-tenv@main
+      - uses: cmsgov/cdap/actions/setup-sops@main
+      - uses: cmsgov/cdap/actions/setup-yq@main
       - uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:
           role-to-assume: arn:aws:iam::${{ contains(fromJSON('["dev", "test"]'), inputs.environment) && secrets.NON_PROD_ACCOUNT_ID || secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.environment }}-github-actions
