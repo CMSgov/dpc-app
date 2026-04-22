@@ -838,7 +838,7 @@ end
 def user_info_template(overrides = {})
   {
     'sub' => '097d06f7-e9ad-4327-8db3-0ba193b7a2c2',
-    'iss' => 'https://idp.int.identitysandbox.gov/',
+    'iss' => 'https://api.idmelabs.com/oidc',
     'email' => 'bob@testy.com',
     'email_verified' => true,
     'all_emails' => [

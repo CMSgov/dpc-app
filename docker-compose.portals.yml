@@ -142,7 +142,7 @@ services:
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
       - CPI_API_GW_BASE_URL=http://localhost:4567/
       - CMS_IDM_OAUTH_URL=http://localhost:4567/
-      - IDP_HOST=idp.int.identitysandbox.gov
+      - IDP_HOST=api.idmelabs.com
       - RUBY_YJIT_ENABLE=1
       - ENV=local
       - NEW_RELIC_MONITOR_MODE=false
@@ -150,12 +150,12 @@ services:
       - RAILS_DEVELOPMENT_HOSTS=host.docker.internal
       - SKIP_SIMPLE_COV=${SKIP_SIMPLE_COV:-}
     ports:
-      - "3100:3100"
+      - "3000:3000"
     depends_on:
       db:
         condition: service_healthy
     healthcheck:
-      test: curl --fail http://localhost:3100/health_check || exit 1
+      test: curl --fail http://localhost:3000/health_check || exit 1
       interval: 10s
       timeout: 5s
       start_period: 30s
