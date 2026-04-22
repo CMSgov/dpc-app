@@ -49,7 +49,7 @@ jobs:
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: "Set up JDK 17"
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           java-version: "17"
           distribution: "corretto"
@@ -98,7 +98,7 @@ jobs:
           sudo cp ./dpc-macaroons/target/site/jacoco/jacoco.xml jacoco-reports/dpc-macaroons-jacoco.xml
           sudo cp ./dpc-queue/target/site/jacoco/jacoco.xml jacoco-reports/dpc-queue-jacoco.xml
       - name: Upload jacoco reports
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: code-coverage-report-dpc-api
           path: ./jacoco-reports
@@ -130,7 +130,7 @@ jobs:
       - name: "Copy test results"
         run: sudo cp dpc-web/coverage/.resultset.json web-resultset-raw.json
       - name: Archive code coverage results
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: code-coverage-report-dpc-web
           path: ./web-resultset-raw.json
@@ -160,7 +160,7 @@ jobs:
       - name: "Copy test results"
         run: sudo cp dpc-admin/coverage/.resultset.json admin-resultset-raw.json
       - name: Archive code coverage results
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: code-coverage-report-dpc-admin
           path: ./admin-resultset-raw.json
@@ -189,7 +189,7 @@ jobs:
           sudo dnf -y install python3 python3-pip
           pip install ansible
       - name: "Set up JDK 17"
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           java-version: "17"
           distribution: "corretto"
@@ -202,7 +202,7 @@ jobs:
       - name: "Copy test results"
         run: sudo cp dpc-portal/coverage/.resultset.json portal-resultset-raw.json
       - name: Archive code coverage results
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: code-coverage-report-dpc-portal
           path: ./portal-resultset-raw.json
@@ -233,7 +233,7 @@ jobs:
           sudo dnf -y install python3 python3-pip
           pip install ansible
       - name: "Set up JDK 17"
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           java-version: "17"
           distribution: "corretto"
@@ -270,11 +270,11 @@ jobs:
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Download web code coverage
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: code-coverage-report-dpc-web
       - name: Download admin code coverage
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: code-coverage-report-dpc-admin
       - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
@@ -294,7 +294,7 @@ jobs:
         with:
           node-version: 24
       - name: Run quality gate scan
-        uses: sonarsource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
+        uses: sonarsource/sonarqube-scan-action@299e4b793aaa83bf2aba7c9c14bedbb485688ec4 # v7.1.0
         with:
           args:
             -Dsonar.projectKey=bcda-dpc-web
@@ -324,7 +324,7 @@ jobs:
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Download code coverage
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: code-coverage-report-dpc-portal
       - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
@@ -343,7 +343,7 @@ jobs:
         with:
           node-version: 24
       - name: Run quality gate scan
-        uses: sonarsource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
+        uses: sonarsource/sonarqube-scan-action@299e4b793aaa83bf2aba7c9c14bedbb485688ec4 # v7.1.0
         with:
           args:
             -Dsonar.projectKey=bcda-dpc-portal
@@ -374,7 +374,7 @@ jobs:
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
       - name: Setup Java
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           java-version: '17'
           distribution: temurin
@@ -407,7 +407,7 @@ jobs:
         run: |
           mvn clean compile -Perror-prone -B -V -ntp
       - name: Download code coverage
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: code-coverage-report-dpc-api
           path: jacoco-reports
