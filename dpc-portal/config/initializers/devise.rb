@@ -26,7 +26,7 @@ Devise.setup do |config|
                       port: 443,
                       scheme: 'https',
                       host: idp_host,
-                      identifier: "925bb2985ccf623114359caa76228919",
+                      identifier: '925bb2985ccf623114359caa76228919',
                       redirect_uri: "#{my_protocol_host}"
                     }
                   }
