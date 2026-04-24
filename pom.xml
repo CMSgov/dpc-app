@@ -454,6 +454,16 @@
                 <artifactId>aws-advanced-jdbc-wrapper</artifactId>
                 <version>2.6.6</version>
             </dependency>
+            <dependency>
+                <groupId>${hapi.fhir.groupID}</groupId>
+                <artifactId>org.hl7.fhir.validation</artifactId>
+                <version>6.9.6</version>
+            </dependency>
+            <dependency>
+                <groupId>${hapi.fhir.groupID}</groupId>
+                <artifactId>org.hl7.fhir.utilities</artifactId>
+                <version>6.9.6</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
