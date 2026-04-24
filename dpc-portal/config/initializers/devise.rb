@@ -18,7 +18,7 @@ Devise.setup do |config|
                     name: :openid_connect,
                     issuer: "https://#{idp_host}/oidc",
                     discovery: true,
-                    scope: %i[openid http://idmanagement.gov/ns/assurance/ial/1/aal/1],
+                    scope: %i[openid http://idmanagement.gov/ns/assurance/ial/2/aal/2],
                     response_type: :code,
                     acr_values: 'http://idmanagement.gov/ns/assurance/ial/1',
                     client_auth_method: :jwt_bearer,
