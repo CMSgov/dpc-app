@@ -20,14 +20,13 @@ Devise.setup do |config|
                     discovery: true,
                     scope: %i[openid http://idmanagement.gov/ns/assurance/ial/2/aal/2],
                     response_type: :code,
-                    acr_values: 'http://idmanagement.gov/ns/assurance/ial/1',
                     client_auth_method: :jwt_bearer,
                     client_options: {
                       port: 443,
                       scheme: 'https',
                       host: idp_host,
                       identifier: '925bb2985ccf623114359caa76228919',
-                      redirect_uri: "#{my_protocol_host}"
+                      redirect_uri: "#{my_protocol_host}/auth/id_me/callback"
                     }
                   }
   # The secret key used by Devise. Devise uses this key to generate
