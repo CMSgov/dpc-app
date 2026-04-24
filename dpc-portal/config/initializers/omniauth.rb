@@ -29,7 +29,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
                       host: idp_host,
                       identifier: "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
                       private_key: private_key,
-                      redirect_uri: "#{my_protocol_host}/portal/auth/login_dot_gov/callback"
+                      redirect_uri: "#{my_protocol_host}/auth/login_dot_gov/callback"
                     }
                   }
 end
