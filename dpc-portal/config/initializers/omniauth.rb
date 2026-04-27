@@ -10,7 +10,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
   OmniAuth.config.logger = Rails.logger
   idp_host = ENV.fetch('IDP_HOST', 'api.idmelabs.com')
   client_id = ENV.fetch('IDP_CLIENT_ID', '925bb2985ccf623114359caa76228919')
-  client_secret = ENV['IDP_CLIENT_SECRET']
+  client_secret = ENV.fetch('IDP_CLIENT_SECRET')
   provider :openid_connect, {
                     name: :id_me,
                     issuer: "https://#{idp_host}/oidc",
