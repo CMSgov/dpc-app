@@ -79,7 +79,7 @@ class InvitationsController < ApplicationController
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
     url = URI::HTTPS.build(host: IDP_HOST,
-                           path: '/openid_connect/authorize',
+                           path: '/oauth/authorize',
                            query: { acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
                                     client_id: IDP_CLIENT_ID,
                                     redirect_uri: "#{my_protocol_host}/users/auth/login_dot_gov/callback",
