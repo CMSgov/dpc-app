@@ -2,9 +2,9 @@
 
 # Handles interactions with login.gov
 class LoginDotGovController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: :openid_connect
+  skip_before_action :verify_authenticity_token, only: :id_me
 
-  def openid_connect
+  def id_me
     auth = request.env['omniauth.auth']
 
     user = User.find_by(provider: auth.provider, uid: auth.uid)
