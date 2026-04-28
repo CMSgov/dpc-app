@@ -7,7 +7,8 @@ class LoginDotGovController < ApplicationController
   def openid_connect
     auth = request.env['omniauth.auth']
 
-    user = IdpUid.find_by(provider: auth.provider, uid: auth.uid)&.user
+    csp = Csp.find_by(name: :login_dot_gov)
+    user = CspUser.find_by(uuid: auth.uid, csp: csp)&.user
     if user
       sign_in(user)
       session[:logged_in_at] = Time.now

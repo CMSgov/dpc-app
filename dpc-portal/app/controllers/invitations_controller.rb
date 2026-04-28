@@ -82,7 +82,7 @@ class InvitationsController < ApplicationController
                            path: '/openid_connect/authorize',
                            query: { acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
                                     client_id: IDP_CLIENT_ID,
-                                    redirect_uri: "#{my_protocol_host}/users/auth/login_dot_gov/callback",
+                                    redirect_uri: "#{my_protocol_host}/auth/login_dot_gov/callback",
                                     response_type: 'code',
                                     scope: 'openid email all_emails profile social_security_number',
                                     nonce: @nonce,
@@ -209,6 +209,7 @@ class InvitationsController < ApplicationController
 
   def user
     user_info = UserInfoService.new.user_info(session)
+
     # Unique PacIds only available in prod
     @user = if @invitation.authorized_official? && (ENV['ENV'] == 'prod' || Rails.env.test?)
               ao_user(user_info)
@@ -218,7 +219,9 @@ class InvitationsController < ApplicationController
                 log_create_user
               end
             end
-    IdpUid.find_or_create_by!(user: @user, provider: :login_dot_gov, uid: user_info['sub'])
+    csp = Csp.find_by(name: @user.provider)
+    CspUser.find_or_create_by!(user: @user, csp: csp)
+    # IdpUid.find_or_create_by!(user: @user, provider: :login_dot_gov, uid: user_info['sub'])
     update_user(user_info)
     @user
   end
