@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'securerandom'
 
 RSpec.describe 'Accessibility', type: :system do
   include DpcClientSupport
@@ -10,7 +11,8 @@ RSpec.describe 'Accessibility', type: :system do
   end
   let(:dpc_api_organization_id) { 'some-gnarly-guid' }
   let(:axe_standard) { %w[best-practice wcag21aa] }
-  let(:uid) { '12345' }
+  let(:uid) { SecureRandom.uuid }
+  let!(:csp) { create(:csp, name: :login_dot_gov) }
 
   before do
     OmniAuth.config.test_mode = true
@@ -44,7 +46,7 @@ RSpec.describe 'Accessibility', type: :system do
       end
       it 'shows sanctioned ao page' do
         user = create(:user, verification_status: 'rejected', verification_reason: 'ao_med_sanctions')
-        create(:idp_uid, user_id: user.id, provider: :login_dot_gov, uid: '12345')
+        create(:csp_user, user:, csp:, uuid: uid)
         visit '/auth/login_dot_gov/callback'
         expect(page).to have_text(I18n.t('verification.ao_med_sanctions_status'))
         expect(page).to be_axe_clean.according_to axe_standard
@@ -54,7 +56,7 @@ RSpec.describe 'Accessibility', type: :system do
     context 'valid user tries to log in' do
       it 'shows success page' do
         user = create(:user, verification_status: 'approved')
-        create(:idp_uid, user_id: user.id, provider: :login_dot_gov, uid: '12345')
+        create(:csp_user, user:, csp:, uuid: uid)
         visit '/auth/login_dot_gov/callback'
         expect(page).to have_text("You don't have any organizations to show.")
         expect(page).to be_axe_clean.according_to axe_standard
@@ -64,7 +66,7 @@ RSpec.describe 'Accessibility', type: :system do
 
   context 'organizations' do
     let!(:user) { create(:user, verification_status: :approved) }
-    let!(:idp_uid) { create(:idp_uid, user_id: user.id, uid:, provider: :login_dot_gov) }
+    let!(:csp_user) { create(:csp_user, user:, csp:, uuid: uid) }
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let(:mock_client_token_manager) { instance_double(ClientTokenManager) }
     let(:mock_public_key_manager) { instance_double(PublicKeyManager) }

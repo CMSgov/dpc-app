@@ -15,7 +15,6 @@ Rails.application.routes.draw do
   get '/users/sign_in', to: 'users/sessions#new', as: 'sign_in'
   delete '/users/sign_out', to: 'users/sessions#destroy', as: 'destroy_user_session'
   get '/auth/login_dot_gov/callback', to: 'login_dot_gov#openid_connect'
-  get '/users/auth/login_dot_gov/callback', to: 'login_dot_gov#openid_connect'
 
   # Defines the root path route ("/")
   root 'organizations#index'

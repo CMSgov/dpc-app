@@ -2,10 +2,6 @@
 
 # Class for defining CSPs
 class Csp < ApplicationRecord
-  # The portal should not be able to modify CSPs
-  def readonly?
-    true
-  end
-
-  before_destroy { raise ActiveRecord::ReadOnlyRecord }
+  has_many :csp_users
+  has_many :users, through: :csp_users
 end

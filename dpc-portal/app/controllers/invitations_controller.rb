@@ -209,7 +209,14 @@ class InvitationsController < ApplicationController
 
   def user
     user_info = UserInfoService.new.user_info(session)
+    find_or_create_user(user_info)
+    csp = Csp.find_by(name: @user.provider)
+    CspUser.find_or_create_by!(user: @user, csp: csp)
+    update_user(user_info)
+    @user
+  end
 
+  def find_or_create_user(user_info)
     # Unique PacIds only available in prod
     @user = if @invitation.authorized_official? && (ENV['ENV'] == 'prod' || Rails.env.test?)
               ao_user(user_info)
@@ -219,11 +226,6 @@ class InvitationsController < ApplicationController
                 log_create_user
               end
             end
-    csp = Csp.find_by(name: @user.provider)
-    CspUser.find_or_create_by!(user: @user, csp: csp)
-    # IdpUid.find_or_create_by!(user: @user, provider: :login_dot_gov, uid: user_info['sub'])
-    update_user(user_info)
-    @user
   end
 
   def ao_user(user_info)
@@ -244,6 +246,7 @@ class InvitationsController < ApplicationController
     user_to_create.given_name = user_info['given_name']
     user_to_create.family_name = user_info['family_name']
     user_to_create.pac_id = session.delete(:user_pac_id)
+    user_to_create.provider = :login_dot_gov
   end
 
   def update_user(user_info)
