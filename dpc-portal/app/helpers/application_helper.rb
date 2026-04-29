@@ -7,6 +7,6 @@ module ApplicationHelper
   end
 
   def omniauth_authorize_path(service)
-    "/portal/auth/#{service}"
+    "/auth/#{service}"
   end
 end
