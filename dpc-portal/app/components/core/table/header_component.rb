@@ -6,8 +6,7 @@ module Core
     class HeaderComponent < ViewComponent::Base
       Column = Struct.new(
         :label,
-        :sortable,
-        keyword_init: true
+        :sortable
       )
       attr_reader :caption, :columns
 

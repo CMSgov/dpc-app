@@ -5,6 +5,7 @@ require 'support/credential_resource_shared_examples'
 
 RSpec.describe 'IpAddresses', type: :request do
   include DpcClientSupport
+  include LoginSupport
 
   let(:terms_of_service_accepted_by) { create(:user) }
 

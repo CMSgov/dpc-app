@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Handles interactions with login.gov
-class LoginDotGovController < Devise::OmniauthCallbacksController
+class LoginDotGovController < ApplicationController
   skip_before_action :verify_authenticity_token, only: :openid_connect
 
   def openid_connect
@@ -9,7 +9,7 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
 
     user = User.find_by(provider: auth.provider, uid: auth.uid)
     if user
-      sign_in(:user, user)
+      sign_in(user)
       session[:logged_in_at] = Time.now
       Rails.logger.info(['User logged in',
                          { actionContext: LoggingConstants::ActionContext::Authentication,
@@ -46,11 +46,6 @@ class LoginDotGovController < Devise::OmniauthCallbacksController
     end
 
     redirect_to url_for_login_dot_gov_logout, allow_other_host: true
-  end
-
-  # Return from login.gov
-  def logged_out
-    redirect_to session.delete(:user_return_to) || new_user_session_path
   end
 
   private
