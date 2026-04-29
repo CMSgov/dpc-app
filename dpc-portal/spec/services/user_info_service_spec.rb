@@ -14,7 +14,7 @@ describe UserInfoService do
     let(:response) do
       {
         'sub' => '097d06f7-e9ad-4327-8db3-0ba193b7a2c2',
-        'iss' => 'https://idp.int.identitysandbox.gov/',
+        'iss' => 'https://api.idmelabs.com/oidc',
         'email' => 'david@example.com',
         'email_verified' => true,
         'all_emails' => [
