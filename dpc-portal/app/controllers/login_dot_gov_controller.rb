@@ -6,9 +6,9 @@ class LoginDotGovController < ApplicationController
 
   def openid_connect
     auth = request.env['omniauth.auth']
+    return unless (csp = csp())
 
-    csp = Csp.find_by(name: :login_dot_gov)
-    user = CspUser.find_by(uuid: auth.uid, csp: csp)&.user
+    user = CspUser.find_by(uuid: auth.uid, csp:)&.user
     if user
       sign_in(user)
       session[:logged_in_at] = Time.now
@@ -87,5 +87,16 @@ class LoginDotGovController < ApplicationController
       return no_account_url
     end
     session.delete(:user_return_to) || organizations_path
+  end
+
+  def csp
+    csp = Csp.active.find_by(name: :login_dot_gov)
+    return csp if csp
+
+    Rails.logger.info(['User attempted to login with Login.gov but no active CSP found',
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::InvalidCsp }])
+    render(Page::Utility::ErrorComponent.new(nil, 'login_gov_signin_fail'))
+    nil
   end
 end

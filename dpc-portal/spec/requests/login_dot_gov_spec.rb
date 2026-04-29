@@ -4,10 +4,11 @@ require 'rails_helper'
 require 'securerandom'
 
 RSpec.describe 'LoginDotGov', type: :request do
-  let!(:csp) { create(:csp, name: :login_dot_gov) }
   let(:uuid) { SecureRandom.uuid }
 
   describe 'POST /auth/login_dot_gov' do
+    let!(:csp) { create(:csp, name: :login_dot_gov) }
+
     RSpec.shared_examples 'an openid client' do
       context 'user exists' do
         before do
@@ -210,6 +211,32 @@ RSpec.describe 'LoginDotGov', type: :request do
     it 'should show logout button' do
       get '/auth/no_account'
       expect(response.body).to include 'Sign out of Login.gov'
+    end
+  end
+
+  describe 'CSP inactive' do
+    before do
+      inactive_csp = create(:csp, :inactive)
+      user = create(:user, email: 'bob5@example.com', provider: :login_dot_gov)
+      create(:csp_user, user:, uuid:, csp: inactive_csp)
+
+      OmniAuth.config.test_mode = true
+      OmniAuth.config.add_mock(:login_dot_gov,
+                               { uid: uuid,
+                                 info: { email: 'bob4@example.com' },
+                                 extra: { raw_info: { all_emails: %w[bob4@example.com bobby@example.com],
+                                                      ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
+    end
+
+    it 'should log error' do
+      allow(Rails.logger).to receive(:info)
+      expect(Rails.logger).to receive(:info).with(
+        ['User attempted to login with Login.gov but no active CSP found',
+         { actionContext: LoggingConstants::ActionContext::Authentication,
+           actionType: LoggingConstants::ActionType::InvalidCsp }]
+      )
+      post '/auth/login_dot_gov'
+      follow_redirect!
     end
   end
 end

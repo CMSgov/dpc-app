@@ -246,6 +246,8 @@ class InvitationsController < ApplicationController
     user_to_create.given_name = user_info['given_name']
     user_to_create.family_name = user_info['family_name']
     user_to_create.pac_id = session.delete(:user_pac_id)
+
+    # For now we force login.gov, this will have to change once we support multi-CSP.
     user_to_create.provider = :login_dot_gov
   end
 
