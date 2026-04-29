@@ -15,7 +15,7 @@ RSpec.describe ApplicationHelper, type: :helper do
   end
   describe 'omniauth_authorize_path' do
     it 'should return path to service' do
-      expect(omniauth_authorize_path(:foo)).to eq '/portal/auth/foo'
+      expect(omniauth_authorize_path(:foo)).to eq '/auth/foo'
     end
   end
 end
