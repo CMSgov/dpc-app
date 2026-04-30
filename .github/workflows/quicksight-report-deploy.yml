@@ -29,7 +29,6 @@ on:
         description: Double check for environment
         required: true
         type: 'string'
-        default: 'test'
       ops-ref:
         description: Branch of dpc-ops to use
         required: false

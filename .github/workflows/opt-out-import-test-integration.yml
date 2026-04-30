@@ -24,6 +24,7 @@ jobs:
     uses: ./.github/workflows/opt-out-import-deploy.yml
     with:
       env: test
+      confirm_env: test
     secrets: inherit
 
   trigger:
