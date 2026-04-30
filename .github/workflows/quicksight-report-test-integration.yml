@@ -1,0 +1,108 @@
+name: Quicksight Reports Integration Tests
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/quicksight-report-test-integration.yml
+      - .github/workflows/quicksight-report-deploy.yml
+      - .github/workflows/deploy_go_lambda.yml
+  workflow_dispatch:
+  push:
+
+# Ensure we have only one integration test running at a time
+concurrency:
+  group: quicksight-reports-test-integration
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  S3_BUCKET: 's3://dpc-test-aurora-export/'
+
+jobs:
+  # Deploy first if triggered by pull_request
+  deploy:
+    # if: ${{ github.event_name == 'pull_request' }}
+    uses: ./.github/workflows/quicksight-report-deploy.yml
+    with:
+      env: test
+    secrets: inherit
+
+  trigger:
+    needs: deploy
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+    outputs:
+      filename: ${{ steps.createfile.outputs.FILENAME }}
+    steps:
+      - uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
+      - name: Upload test file to S3
+        id: createfile
+        run: |
+          FILENAME="manual_testing_$(date -u '+%Y-%m-%d_%H-%M-%S').txt"
+          echo "test" > "$FILENAME"
+          echo "FILENAME=$FILENAME" >> $GITHUB_OUTPUT
+
+          aws s3 cp "$FILENAME" ${{ env.S3_BUCKET }} \
+            --sse aws:kms \
+            --sse-kms-key-id alias/aurora_export
+
+  verify:
+    needs: trigger
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+    steps:
+      - uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
+      - name: Verify test file still in bucket
+        run: |
+          aws s3api head-object \
+            --bucket ${{ env.S3_BUCKET }} \
+            --key ${{ needs.trigger.outputs.filename }}
+            - name: Wait for Lambda to process
+
+      - name: Wait for logs
+        run: sleep 15
+
+      - name: Verify Lambda logs
+        run: |
+          LOG_GROUP="/aws/lambda/dpc-test-quicksight-reports"
+          FUNCTION_NAME="dpc-test-quicksight-reports"
+          FILENAME="${{ needs.trigger.outputs.filename }}"
+
+          # Fetch the most recent log stream
+          LOG_STREAM=$(aws logs describe-log-streams \
+            --log-group-name "$LOG_GROUP" \
+            --order-by LastEventTime \
+            --descending \
+            --max-items 1 \
+            --query 'logStreams[0].logStreamName' \
+            --output text)
+          
+          START_TIME=$(( ($(date -u +%s) - 120) * 1000 ))
+
+          LOGS=$(aws logs get-log-events \
+            --log-group-name "$LOG_GROUP" \
+            --log-stream-name "$LOG_STREAM" \
+            --start-time "$START_TIME" \
+            --query 'events[*].message' \
+            --output text)
+
+          echo "Lambda logs:"
+          echo "$LOGS"
+
+          echo "$LOGS" | grep -q "START RequestId"
+          echo "$LOGS" | grep -q "Skipping manual_testing"
+          echo "$LOGS" | grep -q "END RequestId"
+          
+      
