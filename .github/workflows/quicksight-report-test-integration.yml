@@ -27,6 +27,7 @@ jobs:
     uses: ./.github/workflows/quicksight-report-deploy.yml
     with:
       env: test
+      confirm_env: test
     secrets: inherit
 
   trigger:
