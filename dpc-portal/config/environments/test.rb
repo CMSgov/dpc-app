@@ -8,6 +8,7 @@ require 'active_support/core_ext/integer/time'
 # and recreated between test runs. Don't rely on the data there!
 
 Rails.application.configure do
+  config.colorize_logging = false
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Turn false under Spring and add config.action_view.cache_template_loading = true.
@@ -69,4 +70,4 @@ Rails.application.configure do
 end
 ENV['CPI_API_GW_BASE_URL'] = 'https://val.cpiapi.cms.gov/'
 ENV['CMS_IDM_OAUTH_URL'] = 'https://impl.idp.idm.cms.gov/'
-ENV['IDP_HOST'] = 'idp.int.identitysandbox.gov'
+ENV['IDP_HOST'] = 'api.idmelabs.com'

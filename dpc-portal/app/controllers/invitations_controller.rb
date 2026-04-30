@@ -62,7 +62,7 @@ class InvitationsController < ApplicationController
     return unless create_link
 
     session.delete("invitation_status_#{@invitation.id}")
-    sign_in(:user, @user)
+    sign_in(@user)
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::UserLoggedIn,
@@ -79,12 +79,11 @@ class InvitationsController < ApplicationController
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
     url = URI::HTTPS.build(host: IDP_HOST,
-                           path: '/openid_connect/authorize',
-                           query: { acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
-                                    client_id: IDP_CLIENT_ID,
-                                    redirect_uri: "#{my_protocol_host}/users/auth/openid_connect/callback",
+                           path: '/oauth/authorize',
+                           query: { client_id: IDP_CLIENT_ID,
+                                    redirect_uri: "#{my_protocol_host}/auth/id_me/callback",
                                     response_type: 'code',
-                                    scope: 'openid email all_emails profile social_security_number',
+                                    scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',
                                     nonce: @nonce,
                                     state: @state }.to_query)
     redirect_to url, allow_other_host: true
@@ -203,7 +202,7 @@ class InvitationsController < ApplicationController
 
   def user
     user_info = UserInfoService.new.user_info(session)
-    @user = User.find_or_create_by!(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
+    @user = User.find_or_create_by!(provider: :id_me, uid: user_info['sub']) do |user_to_create|
       assign_user_attributes(user_to_create, user_info)
       log_create_user
     end
