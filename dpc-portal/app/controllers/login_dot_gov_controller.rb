@@ -8,15 +8,10 @@ class LoginDotGovController < ApplicationController
     auth = request.env['omniauth.auth']
     return unless (csp = csp())
 
-    user = CspUser.find_by(uuid: auth.uid, csp:)&.user
-    if user
-      sign_in(user)
-      session[:logged_in_at] = Time.now
-      Rails.logger.info(['User logged in',
-                         { actionContext: LoggingConstants::ActionContext::Authentication,
-                           actionType: LoggingConstants::ActionType::UserLoggedIn }])
-    end
-    ial_2_actions(user, auth)
+    csp_user = CspUser.find_by(uuid: auth.uid, csp:)
+    user = csp_user&.user
+    sign_in_and_log(user)
+    ial_2_actions(user, csp_user, auth)
     redirect_to path(user, auth)
   end
 
@@ -51,6 +46,16 @@ class LoginDotGovController < ApplicationController
 
   private
 
+  def sign_in_and_log(user)
+    return unless user
+
+    sign_in(user)
+    session[:logged_in_at] = Time.now
+    Rails.logger.info(['User logged in',
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::UserLoggedIn }])
+  end
+
   def handle_invitation_flow_failure(invitation_id)
     Rails.logger.info(['Failed invitation flow',
                        { actionContext: LoggingConstants::ActionContext::Registration,
@@ -65,16 +70,60 @@ class LoginDotGovController < ApplicationController
     end
   end
 
-  def maybe_update_user(user, data)
+  def maybe_update_user(user, csp_user, data)
     user&.update(given_name: data.given_name, family_name: data.family_name)
+    update_email(csp_user, data.all_emails)
   end
 
-  def ial_2_actions(user, auth)
+  def update_email(csp_user, new_emails)
+    return unless csp_user
+
+    existing_emails = csp_user.user_emails
+
+    # Scan through all of the email from the CSP and add or update as necesssary.
+    ActiveRecord::Base.transaction do
+      add_or_activate_new_email(csp_user, new_emails, existing_emails)
+      deactivate_old_email(new_emails, existing_emails)
+    end
+  end
+
+  def add_or_activate_new_email(csp_user, new_emails, existing_emails)
+    new_emails&.each do |new_email|
+      existing_email = existing_emails.find do |existing_email|
+        existing_email.email == new_email
+      end
+
+      if existing_email.nil?
+        # Add this email
+        UserEmail.create!(csp_user:, email: new_email, active: true)
+      else
+        # Potentially activate this email
+        activate_email(existing_email)
+      end
+    end
+  end
+
+  def deactivate_old_email(new_emails, existing_emails)
+    # If an existing email is no longer in the list provided by the CSP, deactivate it.
+    existing_emails&.each do |existing_email|
+      unless new_emails&.include?(existing_email.email)
+        existing_email.update!(active: false, deactivated_at: Time.current, reactivated_at: nil)
+      end
+    end
+  end
+
+  def activate_email(user_email)
+    return unless user_email.active == false
+
+    user_email.update!(active: true, deactivated_at: nil, reactivated_at: Time.current)
+  end
+
+  def ial_2_actions(user, csp_user, auth)
     data = auth.extra.raw_info
 
     return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
 
-    maybe_update_user(user, data)
+    maybe_update_user(user, csp_user, data)
     session[:login_dot_gov_token] = auth.credentials.token
     session[:login_dot_gov_token_exp] = auth.credentials.expires_in.seconds.from_now
   end

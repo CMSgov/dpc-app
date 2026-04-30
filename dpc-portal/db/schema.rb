@@ -76,6 +76,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_24_194005) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["csp_id"], name: "index_csp_users_on_csp_id"
+    t.index ["user_id", "csp_id"], name: "index_csp_users_on_user_id_and_csp_id", unique: true
     t.index ["user_id"], name: "index_csp_users_on_user_id"
   end
 
@@ -251,6 +252,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_24_194005) do
     t.datetime "reactivated_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["csp_user_id", "email"], name: "index_user_emails_on_csp_user_id_and_email", unique: true
     t.index ["csp_user_id"], name: "index_user_emails_on_csp_user_id"
   end
 

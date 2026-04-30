@@ -8,6 +8,8 @@ class CreateCspUsers < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
+    add_index :csp_users, [:user_id, :csp_id], unique: true
+
     # Populate existing users with login_dot_gov
     User.find_each do |user|
       CspUser.create!(user: user, csp: Csp.find_by(name: :login_dot_gov))

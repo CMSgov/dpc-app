@@ -9,5 +9,7 @@ class CreateUserEmails < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
+
+    add_index :user_emails, [:csp_user_id, :email], unique: true
   end
 end
