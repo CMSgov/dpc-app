@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-# Handles interactions with login.gov
+# Handles interactions with login.gov.
+# This class is > 100 lines and my attempts to refactor made it uglier and too complex to pass the ABC
+# check, so I disabled the class length check.  When we create controllers for the other CSPs we can pull
+# out common code and turn the check back on.
+
+# rubocop:disable Metrics/ClassLength
 class LoginDotGovController < ApplicationController
   skip_before_action :verify_authenticity_token, only: :openid_connect
 
@@ -11,13 +16,13 @@ class LoginDotGovController < ApplicationController
     csp_user = CspUser.find_by(uuid: auth.uid, csp:)
     user = csp_user&.user
     sign_in_and_log(user)
-    ial_2_actions(user, csp_user, auth)
+    ial_2_actions(user, auth)
+    update_email(csp_user, auth.extra.raw_info.all_emails)
     redirect_to path(user, auth)
   end
 
   def no_account
-    render(Page::Utility::ErrorComponent.new(nil, 'no_account'),
-           status: :forbidden)
+    render(Page::Utility::ErrorComponent.new(nil, 'no_account'), status: :forbidden)
   end
 
   def failure
@@ -62,17 +67,14 @@ class LoginDotGovController < ApplicationController
                          actionType: LoggingConstants::ActionType::FailedLogin }])
     invitation = Invitation.find(invitation_id)
     if invitation.credential_delegate?
-      render(Page::Utility::ErrorComponent.new(invitation, 'fail_to_proof'),
-             status: :forbidden)
+      render(Page::Utility::ErrorComponent.new(invitation, 'fail_to_proof'), status: :forbidden)
     else
-      render(Page::Invitations::AoFlowFailComponent.new(invitation, 'fail_to_proof', 1),
-             status: :forbidden)
+      render(Page::Invitations::AoFlowFailComponent.new(invitation, 'fail_to_proof', 1), status: :forbidden)
     end
   end
 
-  def maybe_update_user(user, csp_user, data)
+  def maybe_update_user(user, data)
     user&.update(given_name: data.given_name, family_name: data.family_name)
-    update_email(csp_user, data.all_emails)
   end
 
   def update_email(csp_user, new_emails)
@@ -118,12 +120,12 @@ class LoginDotGovController < ApplicationController
     user_email.update!(active: true, deactivated_at: nil, reactivated_at: Time.current)
   end
 
-  def ial_2_actions(user, csp_user, auth)
+  def ial_2_actions(user, auth)
     data = auth.extra.raw_info
 
     return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
 
-    maybe_update_user(user, csp_user, data)
+    maybe_update_user(user, data)
     session[:login_dot_gov_token] = auth.credentials.token
     session[:login_dot_gov_token_exp] = auth.credentials.expires_in.seconds.from_now
   end
@@ -149,3 +151,4 @@ class LoginDotGovController < ApplicationController
     nil
   end
 end
+# rubocop:enable Metrics/ClassLength

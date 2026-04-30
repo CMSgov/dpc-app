@@ -253,7 +253,7 @@ RSpec.describe 'LoginDotGov', type: :request do
 
         user = create(:user, email: 'email1@example.com', provider: :login_dot_gov)
         csp_user = create(:csp_user, user:, uuid:, csp:)
-        create(:user_email, csp_user:, email: 'email1@example.com', active: false, deactivated_at: 1.day.ago, 
+        create(:user_email, csp_user:, email: 'email1@example.com', active: false, deactivated_at: 1.day.ago,
                             reactivated_at: nil)
       end
 
