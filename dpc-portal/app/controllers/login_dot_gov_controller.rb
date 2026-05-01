@@ -14,10 +14,11 @@ class LoginDotGovController < ApplicationController
     return unless (csp = csp())
 
     csp_user = CspUser.find_by(uuid: auth.uid, csp:)
+    csp_user ||= port_old_user(auth, csp) # TODO: Remove before deploying to prod.
+
     user = csp_user&.user
     sign_in_and_log(user)
-    ial_2_actions(user, auth)
-    update_email(csp_user, auth.extra.raw_info.all_emails)
+    post_signin_actions(user, csp_user, auth)
     redirect_to path(user, auth)
   end
 
@@ -149,6 +150,29 @@ class LoginDotGovController < ApplicationController
                          actionType: LoggingConstants::ActionType::InvalidCsp }])
     render(Page::Utility::ErrorComponent.new(nil, 'login_gov_signin_fail'))
     nil
+  end
+
+  def port_old_user(auth, csp)
+    # TODO: Remove before deploying to prod.
+
+    # This is for porting users that were created before we had the CSPUser model.  We normally search for users by
+    # uuid, but we don't know their uuid until they log in for the first timeand login.gov sends it to us.  Instead we
+    # find them by email and update their provider and uuid.
+    #
+    # In a perfect world, we'd just drop the DB and force all of our dev and test users to create new accounts, but this
+    # is a lot less of a hassle.
+
+    old_user = User.find_by(email: auth.info.email)
+    old_csp_user = CspUser.find_by(user: old_user, csp:)
+
+    old_csp_user&.update(uuid: auth.uid)
+    old_user&.update(provider: auth.provider)
+    old_csp_user
+  end
+
+  def post_signin_actions(user, csp_user, auth)
+    ial_2_actions(user, auth)
+    update_email(csp_user, auth.extra.raw_info.all_emails)
   end
 end
 # rubocop:enable Metrics/ClassLength
