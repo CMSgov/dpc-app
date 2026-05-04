@@ -2,7 +2,7 @@
 
 # A service that verifies generates an ao invitation
 class UserInfoService
-  USER_INFO_URI = URI("https://#{ENV.fetch('IDP_HOST')}/api/public/v3/userinfo")
+  USER_INFO_URI = URI("https://#{ENV.fetch('IDP_HOST')}/api/public/v3/attributes.json")
 
   def user_info(session)
     validate_session(session)
