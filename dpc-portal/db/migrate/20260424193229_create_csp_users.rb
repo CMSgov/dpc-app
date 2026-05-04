@@ -12,7 +12,7 @@ class CreateCspUsers < ActiveRecord::Migration[8.0]
 
     # Populate existing users with login_dot_gov
     User.find_each do |user|
-      CspUser.create!(user: user, csp: Csp.find_by(name: :login_dot_gov))
+      CspUser.create!(user: user, uuid: user.uid, csp: Csp.find_by(name: :login_dot_gov))
     end
   end
 end
