@@ -53,7 +53,7 @@ RSpec.describe 'Accessibility', type: :system do
 
     context 'valid user tries to log in' do
       it 'shows success page' do
-        create(:user, provider: :login_dot_gov, uid: '12345',
+        create(:user, provider: :id_me, uid: '12345',
                       verification_status: 'approved')
         visit '/auth/id_me/callback'
         expect(page).to have_text("You don't have any organizations to show.")
