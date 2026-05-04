@@ -51,10 +51,10 @@ jobs:
       - name: Upload test file to S3
         id: createfile
         run: |
-          FILENAME="manual_testing_$(date -u '+%Y-%m-%d_%H-%M-%S').txt"
+          FILENAME=manual_testing_$(date -u '+%Y-%m-%d_%H-%M-%S').txt
           echo "test" > "$FILENAME"
 
-          aws s3 cp "$FILENAME" $S3_BUCKET \
+          aws s3 cp --no-progress "./$FILENAME" $S3_BUCKET \
             --sse aws:kms \
             --sse-kms-key-id alias/aurora_export
 
