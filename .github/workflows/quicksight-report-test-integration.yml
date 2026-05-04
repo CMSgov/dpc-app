@@ -89,7 +89,7 @@ jobs:
             --descending \
             --max-items 1 \
             --query 'logStreams[0].logStreamName' \
-            --output text)
+            --output text | head -n 1)
           
           START_TIME=$(( ($(date -u +%s) - 120) * 1000 ))
 
