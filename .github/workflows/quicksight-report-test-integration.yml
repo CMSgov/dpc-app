@@ -17,9 +17,6 @@ permissions:
   id-token: write
   contents: read
 
-env:
-  S3_BUCKET: 's3://dpc-test-aurora-export/'
-
 jobs:
   # Deploy first if triggered by pull_request
   deploy:
@@ -38,21 +35,31 @@ jobs:
     runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
     outputs:
       filename: ${{ steps.createfile.outputs.FILENAME }}
+      s3Bucket: ${{ steps.createfile.outputs.S3_BUCKET }}
     steps:
       - uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-opt-out-import-function
+      - name: Get S3_BUCKET
+        uses: cmsgov/cdap/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            S3_BUCKET=/dpc/test/aurora-export-bucket
       - name: Upload test file to S3
         id: createfile
         run: |
           FILENAME="manual_testing_$(date -u '+%Y-%m-%d_%H-%M-%S').txt"
           echo "test" > "$FILENAME"
-          echo "FILENAME=$FILENAME" >> $GITHUB_OUTPUT
 
-          aws s3 cp "$FILENAME" ${{ env.S3_BUCKET }} \
+          aws s3 cp "$FILENAME" $S3_BUCKET \
             --sse aws:kms \
             --sse-kms-key-id alias/aurora_export
+
+          echo "FILENAME=$FILENAME" >> $GITHUB_OUTPUT
+          echo "S3_BUCKET=$S3_BUCKET" >> $GITHUB_OUTPUT
 
   verify:
     needs: trigger
@@ -68,7 +75,7 @@ jobs:
       - name: Verify test file still in bucket
         run: |
           aws s3api head-object \
-            --bucket ${{ env.S3_BUCKET }} \
+            --bucket ${{ needs.trigger.outputs.s3Bucket }} \
             --key ${{ needs.trigger.outputs.filename }}
             - name: Wait for Lambda to process
 
