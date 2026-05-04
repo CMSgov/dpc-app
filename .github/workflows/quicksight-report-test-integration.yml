@@ -54,7 +54,7 @@ jobs:
           FILENAME=manual_testing_$(date -u '+%Y-%m-%d_%H-%M-%S').txt
           echo "test" > "$FILENAME"
 
-          aws s3 cp --no-progress $FILENAME $S3_BUCKET/$FILENAME \
+          aws s3 cp --no-progress $FILENAME s3://$S3_BUCKET/$FILENAME \
             --sse aws:kms \
             --sse-kms-key-id alias/aurora_export
 
