@@ -23,7 +23,8 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :system, 
   end
   context 'CD invite' do
     let(:dpc_api_organization_id) { 'some-gnarly-guid' }
-    let!(:user) { create(:user, provider: :login_dot_gov, uid: '12345') }
+    let!(:user) { create(:user) }
+    let!(:idp_uid) { create(:idp_uid, user_id: user.id, provider: :login_dot_gov, uid: '12345') }
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let!(:ao_org_link) { create(:ao_org_link, user:, provider_organization: org) }
 
