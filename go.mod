@@ -1,8 +1,6 @@
 module github.com/CMSgov/dpc-app
 
-go 1.22
-
-toolchain go1.24.4
+go 1.25.9
 
 require (
 	github.com/BurntSushi/toml v0.4.1
