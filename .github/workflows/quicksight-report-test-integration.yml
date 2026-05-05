@@ -7,6 +7,9 @@ on:
       - .github/workflows/quicksight-report-deploy.yml
       - .github/workflows/deploy_go_lambda.yml
   workflow_dispatch:
+  # for enabling dpc-ops to call
+  workflow_call:
+  # temporary push trigger for testing - DELETE before merging
   push:
 
 # Ensure we have only one integration test running at a time
