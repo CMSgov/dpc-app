@@ -619,6 +619,9 @@ RSpec.describe 'Invitations', type: :request do
           user = User.last
           expect(user.given_name).to eq user_info_template['given_name']
           expect(user.family_name).to eq user_info_template['family_name']
+          expect(user.email).to eq user_info_template['email']
+          expect(user.uid).to eq user_info_template['sub']
+          expect(user.provider).to eq 'login_dot_gov'
         end
 
         it 'should log when user is created' do

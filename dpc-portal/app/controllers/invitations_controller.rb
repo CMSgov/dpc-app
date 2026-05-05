@@ -211,7 +211,7 @@ class InvitationsController < ApplicationController
     user_info = UserInfoService.new.user_info(session)
     find_or_create_user(user_info)
     csp = Csp.find_by(name: @user.provider)
-    CspUser.find_or_create_by!(user: @user, csp: csp)
+    CspUser.find_or_create_by!(user: @user, csp: csp, uuid: user_info['sub'])
     update_user(user_info)
     @user
   end
@@ -221,7 +221,7 @@ class InvitationsController < ApplicationController
     @user = if @invitation.authorized_official? && (ENV['ENV'] == 'prod' || Rails.env.test?)
               ao_user(user_info)
             else
-              User.find_or_create_by(email: @invitation.invited_email) do |user_to_create|
+              User.find_or_create_by!(email: @invitation.invited_email) do |user_to_create|
                 assign_user_attributes(user_to_create, user_info)
                 log_create_user
               end
@@ -249,6 +249,7 @@ class InvitationsController < ApplicationController
 
     # For now we force login.gov, this will have to change once we support multi-CSP.
     user_to_create.provider = :login_dot_gov
+    user_to_create.uid = user_info['sub']
   end
 
   def update_user(user_info)
