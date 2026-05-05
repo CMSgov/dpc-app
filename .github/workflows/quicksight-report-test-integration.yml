@@ -5,10 +5,15 @@ on:
     paths:
       - .github/workflows/quicksight-report-test-integration.yml
       - .github/workflows/quicksight-report-deploy.yml
-      - .github/workflows/deploy_go_lambda.yml
   workflow_dispatch:
   # for enabling dpc-ops to call
   workflow_call:
+    inputs:
+      ops-ref:
+        description: Branch of dpc-ops to use
+        required: false
+        type: 'string'
+        default: 'main'
   # temporary push trigger for testing - DELETE before merging
   push:
 
@@ -28,6 +33,7 @@ jobs:
     with:
       env: test
       confirm_env: test
+      ops-ref: ${ inputs.ops-ref || 'main' }
     secrets: inherit
 
   trigger:
