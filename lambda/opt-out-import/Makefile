@@ -2,7 +2,7 @@ AWS_ACCESS_KEY_ID ?= 1234
 AWS_SECRET_ACCESS_KEY ?= 1234
 
 build: export GOOS=linux
-build: export GOARCH=amd64
+build: export GOARCH=arm64
 build: 
 	go build -o bin/bootstrap main.go parsers.go models.go db.go
 	@du -h bin/bootstrap
