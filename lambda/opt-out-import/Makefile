@@ -30,3 +30,5 @@ run-local:
 	ENV="local" DB_USER_DPC_CONSENT="postgres" DB_PASS_DPC_CONSENT="dpc-safe" DB_HOST="localhost" IS_TESTING=true go run main.go parsers.go models.go db.go
 run:
 	IS_TESTING=false go run main.go parsers.go models.go db.go
+
+
