@@ -6,7 +6,7 @@ on:
       - .github/workflows/quicksight-report-test-integration.yml
       - .github/workflows/quicksight-report-deploy.yml
   workflow_dispatch:
-  # for enabling dpc-ops to call
+  # for enabling dpc-ops to call, remove after quicksights lambda terraform is moved to dpc-app/
   workflow_call:
     inputs:
       ops-ref:
@@ -14,10 +14,7 @@ on:
         required: false
         type: 'string'
         default: 'main'
-  # temporary push trigger for testing - DELETE before merging
-  push:
 
-# Ensure we have only one integration test running at a time
 concurrency:
   group: quicksight-reports-test-integration
 
@@ -28,7 +25,7 @@ permissions:
 jobs:
   # Deploy first if triggered by pull_request
   deploy:
-    # if: ${{ github.event_name == 'pull_request' }}
+    if: ${{ github.event_name == 'pull_request' }}
     uses: ./.github/workflows/quicksight-report-deploy.yml
     with:
       env: test
@@ -90,8 +87,6 @@ jobs:
           LOG_GROUP="/aws/lambda/dpc-test-quicksight-reports"
           FUNCTION_NAME="dpc-test-quicksight-reports"
           FILENAME="${{ needs.trigger.outputs.filename }}"
-
-          # Fetch the most recent log stream
           LOG_STREAM=$(aws logs describe-log-streams \
             --log-group-name "$LOG_GROUP" \
             --order-by LastEventTime \
@@ -100,6 +95,7 @@ jobs:
             --query 'logStreams[0].logStreamName' \
             --output text | head -n 1)
           
+          # Set 2 min threshold for checking CloudWatch logs
           START_TIME=$(( ($(date -u +%s) - 120) * 1000 ))
 
           LOGS=$(aws logs get-log-events \
@@ -109,11 +105,9 @@ jobs:
             --query 'events[*].message' \
             --output text)
 
-          echo "Lambda logs:"
+          echo "Checking logs for expected outputs"
           echo "$LOGS"
 
           echo "$LOGS" | grep -q "START RequestId"
           echo "$LOGS" | grep -q "Skipping manual_testing"
           echo "$LOGS" | grep -q "END RequestId"
-          
-      
