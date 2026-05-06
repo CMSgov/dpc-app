@@ -14,6 +14,11 @@ on:
         required: false
         type: 'string'
         default: 'main'
+      runner:
+        description: Which runner to use
+        required: true
+        default: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+        type: 'string'
 
 concurrency:
   group: quicksight-reports-test-integration
@@ -38,7 +43,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: ${{ inputs.runner }}
     outputs:
       filename: ${{ steps.createfile.outputs.FILENAME }}
       s3Bucket: ${{ steps.createfile.outputs.S3_BUCKET }}
