@@ -33,7 +33,7 @@ jobs:
     with:
       env: test
       confirm_env: test
-      ops-ref: ${ inputs.ops-ref || 'main' }
+      ops-ref: ${{ inputs.ops-ref || 'main' }}
     secrets: inherit
 
   trigger:
