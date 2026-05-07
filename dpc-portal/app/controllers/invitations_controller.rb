@@ -84,8 +84,7 @@ class InvitationsController < ApplicationController
                                     redirect_uri: "#{my_protocol_host}/auth/id_me/callback",
                                     response_type: 'code',
                                     scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',
-                                    nonce: @nonce,
-                                    state: @state }.to_query)
+                                    nonce: @nonce }.to_query)
     redirect_to url, allow_other_host: true
   end
 

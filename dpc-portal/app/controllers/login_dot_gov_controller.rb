@@ -70,12 +70,14 @@ class LoginDotGovController < ApplicationController
 
   def ial_2_actions(user, auth)
     data = auth.extra.raw_info
+    Rails.logger.info data.to_json
 
-    return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
+    # return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
+    return unless data.identity_assurance_level == 2
 
     maybe_update_user(user, data)
-    session[:login_dot_gov_token] = auth.credentials.token
-    session[:login_dot_gov_token_exp] = auth.credentials.expires_in.seconds.from_now
+    session[:login_dot_gov_token] = auth.jti #auth.credentials.token
+    session[:login_dot_gov_token_exp] = auth.exp #auth.credentials.expires_in.seconds.from_now
   end
 
   def path(user, auth)

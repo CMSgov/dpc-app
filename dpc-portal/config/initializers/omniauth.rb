@@ -11,23 +11,22 @@ Rails.application.config.middleware.use OmniAuth::Builder do
   idp_host = ENV.fetch('IDP_HOST', 'api.idmelabs.com')
   client_id = ENV.fetch('IDP_CLIENT_ID', '925bb2985ccf623114359caa76228919')
   client_secret = ENV['IDP_CLIENT_SECRET']
-  provider :openid_connect, {
+  provider :oidc, {
                     name: :id_me,
                     issuer: "https://#{idp_host}/oidc",
                     scope: %i[openid http://idmanagement.gov/ns/assurance/ial/2/aal/2],
                     response_type: :code,
                     client_auth_method: :client_secret_post,
+                    fetch_user_info: false,
+                    require_state: false,
                     client_options: {
                       port: 443,
                       scheme: 'https',
                       host: idp_host,
                       identifier: client_id,
                       secret: client_secret,
-                      redirect_uri: "#{my_protocol_host}/auth/id_me/callback",
-                      authorization_endpoint: "https://#{idp_host}/oauth/authorize",
-                      token_endpoint: "https://#{idp_host}/oauth/token",
-                      userinfo_endpoint: "https://#{idp_host}/api/public/v3/attributes.json",
-                      jwks_uri: "https://#{idp_host}/oidc/.well-known/jwks"
+                      config_endpoint: "https://#{idp_host}/oidc/.well-known/openid-configuration",
+                      end_session_endpoint: "https://#{idp_host}/id_me/logout"
                     }
                   }
 end
