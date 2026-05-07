@@ -36,6 +36,7 @@ jobs:
       env: test
       confirm_env: test
       ops-ref: ${{ inputs.ops-ref || 'main' }}
+      runner: ${{ inputs.runner || format('codebuild-dpc-app-non-prod-{0}-{1}', github.run_id, github.run_attempt) }}
     secrets: inherit
 
   trigger:
@@ -43,7 +44,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: ${{ inputs.runner }}
+    runs-on: ${{ inputs.runner || format('codebuild-dpc-app-non-prod-{0}-{1}', github.run_id, github.run_attempt) }}
     outputs:
       filename: ${{ steps.createfile.outputs.FILENAME }}
       s3Bucket: ${{ steps.createfile.outputs.S3_BUCKET }}
@@ -77,7 +78,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+    runs-on: ${{ inputs.runner || format('codebuild-dpc-app-non-prod-{0}-{1}', github.run_id, github.run_attempt) }}
     steps:
       - uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:

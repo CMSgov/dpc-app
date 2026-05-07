@@ -18,6 +18,7 @@ on:
         required: false
         type: 'string'
         default: 'main'
+  # for enabling dpc-ops to call, remove after quicksights lambda terraform is moved to dpc-app/
   workflow_call:
     inputs:
       env:
@@ -34,6 +35,11 @@ on:
         required: false
         type: 'string'
         default: 'main'
+      runner:
+        description: Which runner to use
+        required: true
+        default: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+        type: 'string'
 
 
 concurrency:
@@ -54,9 +60,15 @@ jobs:
       contents: read
       id-token: write
     runs-on: >-
-      codebuild-dpc-app${{
-        contains(fromJSON('["prod"]'), inputs.env) && '-prod' || '-non-prod'
-      }}-${{ github.run_id }}-${{ github.run_attempt }}
+      ${{
+        inputs.runner ||
+        format(
+          'codebuild-dpc-app{0}-{1}-{2}',
+          contains(fromJSON('["prod"]'), inputs.env) && '-prod' || '-non-prod',
+          github.run_id,
+          github.run_attempt
+        )
+      }}
     steps:
       - name: Fail if not test or prod
         if: ${{ inputs.env == 'dev' || inputs.env == 'sandbox' }}
