@@ -11,6 +11,26 @@ class ApplicationController < ActionController::Base
 
   auto_session_timeout User.timeout_in
 
+  def active_url
+    '/active'
+  end
+
+  def current_user
+    @current_user ||= User.where(id: session['user']).first
+  end
+
+  def authenticate_user!
+    return if current_user
+
+    flash[:alert] = t('devise.failure.unauthenticated')
+    session[:user_return_to] = request.path
+    redirect_to sign_in_path
+  end
+
+  def sign_in(user)
+    session['user'] = user.id
+  end
+
   private
 
   def check_user_verification
@@ -37,7 +57,7 @@ class ApplicationController < ActionController::Base
     URI::HTTPS.build(host: IDP_HOST,
                      path: '/openid_connect/logout',
                      query: { client_id: IDP_CLIENT_ID,
-                              post_logout_redirect_uri: "#{root_url}users/auth/logged_out",
+                              post_logout_redirect_uri: "#{root_url}auth/logged_out",
                               state: }.to_query)
   end
 

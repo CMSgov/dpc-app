@@ -62,7 +62,7 @@ class InvitationsController < ApplicationController
     return unless create_link
 
     session.delete("invitation_status_#{@invitation.id}")
-    sign_in(:user, @user)
+    sign_in(@user)
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::UserLoggedIn,
@@ -82,7 +82,7 @@ class InvitationsController < ApplicationController
                            path: '/openid_connect/authorize',
                            query: { acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
                                     client_id: IDP_CLIENT_ID,
-                                    redirect_uri: "#{my_protocol_host}/users/auth/openid_connect/callback",
+                                    redirect_uri: "#{my_protocol_host}/users/auth/login_dot_gov/callback",
                                     response_type: 'code',
                                     scope: 'openid email all_emails profile social_security_number',
                                     nonce: @nonce,
@@ -179,6 +179,12 @@ class InvitationsController < ApplicationController
              status: :unprocessable_entity)
       false
     end
+  rescue MultiUserMatchError => e
+    logger.error(['User matches too many existing users',
+                  { actionContext: LoggingConstants::ActionContext::Registration, error: e.message }])
+
+    render(Page::Utility::ErrorComponent.new(@invitation, 'multi_user_match'))
+    nil
   end
 
   def create_cd_org_link
@@ -203,12 +209,31 @@ class InvitationsController < ApplicationController
 
   def user
     user_info = UserInfoService.new.user_info(session)
-    @user = User.find_or_create_by!(provider: :openid_connect, uid: user_info['sub']) do |user_to_create|
-      assign_user_attributes(user_to_create, user_info)
-      log_create_user
-    end
+    # Unique PacIds only available in prod
+    @user = if @invitation.authorized_official? && (ENV['ENV'] == 'prod' || Rails.env.test?)
+              ao_user(user_info)
+            else
+              User.find_or_create_by(email: @invitation.invited_email) do |user_to_create|
+                assign_user_attributes(user_to_create, user_info)
+                log_create_user
+              end
+            end
+    IdpUid.find_or_create_by!(user: @user, provider: :login_dot_gov, uid: user_info['sub'])
     update_user(user_info)
     @user
+  end
+
+  def ao_user(user_info)
+    matching_users = User.where('email = ? OR pac_id = ?', @invitation.invited_email, session[:user_pac_id])
+    raise MultiUserMatchError, "too many matching users | pac_id: #{session[:user_pac_id]}" if matching_users.size > 1
+
+    return matching_users.first if matching_users.present?
+
+    user = User.new
+    assign_user_attributes(user, user_info)
+    user.save!
+    log_create_user
+    user
   end
 
   def assign_user_attributes(user_to_create, user_info)
@@ -357,4 +382,6 @@ class InvitationsController < ApplicationController
                          actionType: LoggingConstants::ActionType::AoHasWaiver,
                          invitation: @invitation.id }])
   end
+
+  class MultiUserMatchError < StandardError; end
 end
