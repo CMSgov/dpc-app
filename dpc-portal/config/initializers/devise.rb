@@ -13,28 +13,20 @@ require "dpc_portal_utils"
 
 Devise.setup do |config|
   include DpcPortalUtils
-  begin
-    private_key = OpenSSL::PKey::RSA.new(ENV['LOGIN_GOV_PRIVATE_KEY'])
-  rescue TypeError, OpenSSL::PKey::RSAError => e
-    Rails.logger.error("Unable to create private key for omniauth: #{e}")
-    private_key = OpenSSL::PKey::RSA.new(1024)
-  end
-  idp_host = ENV.fetch('IDP_HOST', 'idp.int.identitysandbox.gov')
+  idp_host = ENV.fetch('IDP_HOST', 'api.idmelabs.com')
   config.omniauth :openid_connect, {
                     name: :openid_connect,
-                    issuer: "https://#{idp_host}/",
+                    issuer: "https://#{idp_host}/oidc",
                     discovery: true,
-                    scope: %i[openid email all_emails],
+                    scope: %i[openid http://idmanagement.gov/ns/assurance/ial/2/aal/2],
                     response_type: :code,
-                    acr_values: 'http://idmanagement.gov/ns/assurance/ial/1',
                     client_auth_method: :jwt_bearer,
                     client_options: {
                       port: 443,
                       scheme: 'https',
                       host: idp_host,
-                      identifier: "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
-                      private_key: private_key,
-                      redirect_uri: "#{my_protocol_host}/users/auth/openid_connect/callback"
+                      identifier: '925bb2985ccf623114359caa76228919',
+                      redirect_uri: "#{my_protocol_host}/auth/id_me/callback"
                     }
                   }
   # The secret key used by Devise. Devise uses this key to generate

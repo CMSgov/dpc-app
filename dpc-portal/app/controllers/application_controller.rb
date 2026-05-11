@@ -3,7 +3,7 @@
 # Parent class of all controllers
 class ApplicationController < ActionController::Base
   IDP_HOST = ENV.fetch('IDP_HOST')
-  IDP_CLIENT_ID = "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV.fetch('ENV')}".freeze
+  IDP_CLIENT_ID = '925bb2985ccf623114359caa76228919'
 
   before_action :check_session_length
   before_action :set_current_request_attributes
