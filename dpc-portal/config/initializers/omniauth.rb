@@ -14,6 +14,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
   provider :openid_connect, {
                     name: :id_me,
                     issuer: "https://#{idp_host}/oidc",
+                    discovery: true,
                     scope: %i[openid http://idmanagement.gov/ns/assurance/ial/2/aal/2],
                     response_type: :code,
                     client_auth_method: :client_secret_post,

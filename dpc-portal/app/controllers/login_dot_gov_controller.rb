@@ -122,7 +122,6 @@ class LoginDotGovController < ApplicationController
 
   def ial_2_actions(user, auth)
     data = auth.extra.raw_info
-    Rails.logger.info data.to_json
 
     # return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
     return unless data.identity_assurance_level == 2
