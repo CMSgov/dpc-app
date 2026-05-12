@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_19_165916) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_24_194005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -67,6 +67,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_19_165916) do
     t.datetime "updated_at", null: false
     t.index ["dpc_api_credential_id"], name: "index_credential_audit_logs_on_dpc_api_credential_id"
     t.index ["user_id"], name: "index_credential_audit_logs_on_user_id"
+  end
+
+  create_table "csp_users", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "csp_id", null: false
+    t.uuid "uuid"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["csp_id"], name: "index_csp_users_on_csp_id"
+    t.index ["user_id", "csp_id"], name: "index_csp_users_on_user_id_and_csp_id", unique: true
+    t.index ["user_id"], name: "index_csp_users_on_user_id"
+  end
+
+  create_table "csps", force: :cascade do |t|
+    t.string "name"
+    t.datetime "start_date"
+    t.datetime "end_date"
   end
 
   create_table "invitations", force: :cascade do |t|
@@ -227,6 +244,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_19_165916) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
+  create_table "user_emails", force: :cascade do |t|
+    t.bigint "csp_user_id", null: false
+    t.string "email"
+    t.boolean "active"
+    t.datetime "deactivated_at"
+    t.datetime "reactivated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["csp_user_id", "email"], name: "index_user_emails_on_csp_user_id_and_email", unique: true
+    t.index ["csp_user_id"], name: "index_user_emails_on_csp_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -253,6 +282,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_19_165916) do
   add_foreign_key "cd_org_links", "invitations"
   add_foreign_key "cd_org_links", "provider_organizations"
   add_foreign_key "cd_org_links", "users"
+  add_foreign_key "csp_users", "csps"
+  add_foreign_key "csp_users", "users"
   add_foreign_key "invitations", "provider_organizations"
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "provider_organizations", "users", column: "terms_of_service_accepted_by_id"
@@ -262,4 +293,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_19_165916) do
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "user_emails", "csp_users"
 end

@@ -4,6 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'CredentialDelegateInvitations', type: :request do
   include DpcClientSupport
+  include LoginSupport
 
   describe 'GET /new' do
     context 'not logged in' do

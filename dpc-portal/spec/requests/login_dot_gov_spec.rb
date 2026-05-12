@@ -1,14 +1,22 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'securerandom'
 
 RSpec.describe 'LoginDotGov', type: :request do
-  describe 'POST /users/auth/openid_connect' do
+  let(:uuid) { SecureRandom.uuid }
+
+  describe 'POST /auth/login_dot_gov' do
+    let!(:csp) { create(:csp, name: :login_dot_gov) }
+
     RSpec.shared_examples 'an openid client' do
       context 'user exists' do
-        before { create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com') }
+        before do
+          user = create(:user, email: 'bob1@example.com', provider: :login_dot_gov)
+          create(:csp_user, user:, uuid:, csp:)
+        end
         it 'should sign in a user' do
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(response.location).to eq organizations_url
           expect(response).to be_redirect
@@ -20,22 +28,22 @@ RSpec.describe 'LoginDotGov', type: :request do
           expect(Rails.logger).to receive(:info).with(['User logged in',
                                                        { actionContext: LoggingConstants::ActionContext::Authentication,
                                                          actionType: LoggingConstants::ActionType::UserLoggedIn }])
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
         end
-        it 'should not add another user' do
-          expect(User.where(uid: '12345', provider: 'openid_connect').count).to eq 1
+        it 'should not add another user credential' do
+          expect(CspUser.where(uuid:, csp:).count).to eq 1
           expect do
-            post '/users/auth/openid_connect'
+            post '/auth/login_dot_gov'
             follow_redirect!
-          end.to change { User.count }.by(0)
+          end.to change { CspUser.count }.by(0)
         end
       end
 
       context 'user does not exist' do
         it 'should not persist user' do
           expect do
-            post '/users/auth/openid_connect'
+            post '/auth/login_dot_gov'
             follow_redirect!
           end.to change { User.count }.by(0)
         end
@@ -46,35 +54,38 @@ RSpec.describe 'LoginDotGov', type: :request do
     context 'IAL/2' do
       before do
         OmniAuth.config.test_mode = true
-        OmniAuth.config.add_mock(:openid_connect,
-                                 { uid: '12345',
+        OmniAuth.config.add_mock(:login_dot_gov,
+                                 { uid: uuid,
                                    credentials: { expires_in: 899,
                                                   token: },
-                                   info: { email: 'bob@example.com' },
+                                   info: { email: 'bob2@example.com' },
                                    extra: { raw_info: { given_name: 'Bob',
                                                         family_name: 'Hoskins',
                                                         social_security_number: '1-2-3',
-                                                        all_emails: %w[bob@example.com bob2@example.com],
+                                                        all_emails: %w[bob2@example.com bobby@example.com],
                                                         ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
       end
 
       it_behaves_like 'an openid client'
 
       context :user_exists do
-        before { create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com') }
+        before do
+          user = create(:user, email: 'bob2@example.com')
+          create(:csp_user, user:, uuid:, csp:)
+        end
         it 'updates user names' do
           expect do
-            post '/users/auth/openid_connect'
+            post '/auth/login_dot_gov'
             follow_redirect!
           end.to change {
-                   User.where(uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
+                   User.where(email: 'bob2@example.com', given_name: 'Bob',
                               family_name: 'Hoskins').count
                  }.by 1
           expect(response.location).to eq organizations_url
         end
 
         it 'sets authentication token' do
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(request.session[:login_dot_gov_token]).to eq token
           expect(request.session[:login_dot_gov_token_exp]).to_not be_nil
@@ -84,7 +95,7 @@ RSpec.describe 'LoginDotGov', type: :request do
 
       context :user_does_not_exist do
         it 'does not sign in user' do
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(response.location).to eq organizations_url
           expect(response).to be_redirect
@@ -93,7 +104,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         end
 
         it 'sets authentication token' do
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(request.session[:login_dot_gov_token]).to eq token
           expect(request.session[:login_dot_gov_token_exp]).to_not be_nil
@@ -105,10 +116,10 @@ RSpec.describe 'LoginDotGov', type: :request do
     context 'IAL/1' do
       before do
         OmniAuth.config.test_mode = true
-        OmniAuth.config.add_mock(:openid_connect,
-                                 { uid: '12345',
-                                   info: { email: 'bob@example.com' },
-                                   extra: { raw_info: { all_emails: %w[bob@example.com bob2@example.com],
+        OmniAuth.config.add_mock(:login_dot_gov,
+                                 { uid: uuid,
+                                   info: { email: 'bob3@example.com' },
+                                   extra: { raw_info: { all_emails: %w[bob3@example.com bobby@example.com],
                                                         ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
       end
 
@@ -116,21 +127,22 @@ RSpec.describe 'LoginDotGov', type: :request do
 
       context :user_exists do
         before do
-          create(:user, uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
-                        family_name: 'Hoskins')
+          user = create(:user, email: 'bob3@example.com', given_name: 'Bob',
+                               family_name: 'Hoskins')
+          create(:csp_user, user:, uuid:, csp:)
         end
         it 'does not update user names' do
-          expect(User.where(uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
+          expect(User.where(email: 'bob3@example.com', given_name: 'Bob',
                             family_name: 'Hoskins').count).to eq 1
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(response.location).to eq organizations_url
-          expect(User.where(uid: '12345', provider: 'openid_connect', email: 'bob@example.com', given_name: 'Bob',
+          expect(User.where(email: 'bob3@example.com', given_name: 'Bob',
                             family_name: 'Hoskins').count).to eq 1
         end
 
         it 'does not set authentication token' do
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(request.session[:login_dot_gov_token]).to be_nil
           expect(request.session[:login_dot_gov_token_exp]).to be_nil
@@ -139,7 +151,7 @@ RSpec.describe 'LoginDotGov', type: :request do
 
       context 'user does not exist' do
         it 'does not sign in user' do
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(response.location).to eq no_account_url
           expect(response).to be_redirect
@@ -152,21 +164,112 @@ RSpec.describe 'LoginDotGov', type: :request do
              { actionContext: LoggingConstants::ActionContext::Authentication,
                actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }]
           )
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
         end
 
         it 'does not set authentication token' do
-          post '/users/auth/openid_connect'
+          post '/auth/login_dot_gov'
           follow_redirect!
           expect(request.session[:login_dot_gov_token]).to be_nil
           expect(request.session[:login_dot_gov_token_exp]).to be_nil
         end
       end
     end
+
+    context 'should add emails' do
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.add_mock(:login_dot_gov,
+                                 { uid: uuid,
+                                   credentials: { expires_in: 899,
+                                                  token: },
+                                   info: { email: 'email1@example.com' },
+                                   extra: { raw_info: { given_name: 'Bob',
+                                                        family_name: 'Hoskins',
+                                                        social_security_number: '1-2-3',
+                                                        all_emails: %w[email1@example.com email2@example.com],
+                                                        ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
+
+        user = create(:user, email: 'email1@example.com', provider: :login_dot_gov)
+        create(:csp_user, user:, uuid:, csp:)
+      end
+
+      it 'adds emails' do
+        expect do
+          post '/auth/login_dot_gov'
+          follow_redirect!
+        end.to change { UserEmail.count }.by(2)
+
+        emails = UserEmail.last(2).pluck(:email)
+        expect(emails).to match_array(%w[email1@example.com email2@example.com])
+        expect(UserEmail.pluck(:active)).to all(be true)
+      end
+    end
+
+    context 'should deactivate emails' do
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.add_mock(:login_dot_gov,
+                                 { uid: uuid,
+                                   credentials: { expires_in: 899,
+                                                  token: },
+                                   info: { email: 'email1@example.com' },
+                                   extra: { raw_info: { given_name: 'Bob',
+                                                        family_name: 'Hoskins',
+                                                        social_security_number: '1-2-3',
+                                                        all_emails: nil,
+                                                        ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
+
+        user = create(:user, email: 'email1@example.com', provider: :login_dot_gov)
+        csp_user = create(:csp_user, user:, uuid:, csp:)
+        create(:user_email, csp_user:, email: 'email@example.com', active: true)
+      end
+
+      it 'deactivates email' do
+        post '/auth/login_dot_gov'
+        follow_redirect!
+
+        email = UserEmail.find_by(csp_user: CspUser.last, email: 'email@example.com')
+        expect(email.active).to eq false
+        expect(email.deactivated_at).to_not be_nil
+        expect(email.reactivated_at).to be_nil
+      end
+    end
+
+    context 'should reactivate emails' do
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.add_mock(:login_dot_gov,
+                                 { uid: uuid,
+                                   credentials: { expires_in: 899,
+                                                  token: },
+                                   info: { email: 'email1@example.com' },
+                                   extra: { raw_info: { given_name: 'Bob',
+                                                        family_name: 'Hoskins',
+                                                        social_security_number: '1-2-3',
+                                                        all_emails: %w[email1@example.com],
+                                                        ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
+
+        user = create(:user, email: 'email1@example.com', provider: :login_dot_gov)
+        csp_user = create(:csp_user, user:, uuid:, csp:)
+        create(:user_email, csp_user:, email: 'email1@example.com', active: false, deactivated_at: 1.day.ago,
+                            reactivated_at: nil)
+      end
+
+      it 'reactivates emails' do
+        post '/auth/login_dot_gov'
+        follow_redirect!
+
+        email = UserEmail.find_by(csp_user: CspUser.last, email: 'email1@example.com')
+        expect(email.active).to eq true
+        expect(email.deactivated_at).to be_nil
+        expect(email.reactivated_at).to_not be_nil
+      end
+    end
   end
 
-  describe 'Get /users/auth/failure' do
+  describe 'Get /auth/failure' do
     it 'should succeed' do
       get '/users/auth/failure'
       expect(response).to be_ok
@@ -195,24 +298,36 @@ RSpec.describe 'LoginDotGov', type: :request do
     end
   end
 
-  describe 'Get /users/auth/logged_out' do
-    it 'should redirect to user_return_to' do
-      get '/organizations'
-      expect(request.session[:user_return_to]).to eq organizations_path
-      get '/users/auth/logged_out'
-      expect(response).to redirect_to(organizations_path)
-    end
-
-    it 'should redirect to new session if no user_return_to set' do
-      get '/users/auth/logged_out'
-      expect(response).to redirect_to(new_user_session_path)
+  describe 'Get /auth/no_account' do
+    it 'should show logout button' do
+      get '/auth/no_account'
+      expect(response.body).to include 'Sign out of Login.gov'
     end
   end
 
-  describe 'Get /users/auth/no_account' do
-    it 'should show logout button' do
-      get '/users/auth/no_account'
-      expect(response.body).to include 'Sign out of Login.gov'
+  describe 'CSP inactive' do
+    before do
+      inactive_csp = create(:csp, :inactive)
+      user = create(:user, email: 'bob5@example.com', provider: :login_dot_gov)
+      create(:csp_user, user:, uuid:, csp: inactive_csp)
+
+      OmniAuth.config.test_mode = true
+      OmniAuth.config.add_mock(:login_dot_gov,
+                               { uid: uuid,
+                                 info: { email: 'bob4@example.com' },
+                                 extra: { raw_info: { all_emails: %w[bob4@example.com bobby@example.com],
+                                                      ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
+    end
+
+    it 'should log error' do
+      allow(Rails.logger).to receive(:info)
+      expect(Rails.logger).to receive(:info).with(
+        ['User attempted to login with Login.gov but no active CSP found',
+         { actionContext: LoggingConstants::ActionContext::Authentication,
+           actionType: LoggingConstants::ActionType::InvalidCsp }]
+      )
+      post '/auth/login_dot_gov'
+      follow_redirect!
     end
   end
 end
