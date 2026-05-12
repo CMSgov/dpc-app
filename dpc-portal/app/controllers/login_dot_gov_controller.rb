@@ -19,6 +19,23 @@ class LoginDotGovController < ApplicationController
     redirect_to path(user, auth)
   end
 
+  def clear
+    auth = request.env['omniauth.auth']
+
+    user = User.find_by(provider: auth.provider, uid: auth.uid)
+    if user
+      sign_in(user)
+      session[:logged_in_at] = Time.now
+      Rails.logger.info(['User logged in',
+                         { actionContext: LoggingConstants::ActionContext::Authentication,
+                           actionType: LoggingConstants::ActionType::UserLoggedIn }])
+    end
+
+    # this will probably fail
+    ial_2_actions(user, auth)
+    redirect_to path(user, auth)
+  end
+
   def no_account
     render(Page::Utility::ErrorComponent.new(nil, 'no_account'),
            status: :forbidden)

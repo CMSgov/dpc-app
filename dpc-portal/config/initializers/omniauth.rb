@@ -9,9 +9,9 @@ include DpcPortalUtils
 Rails.application.config.middleware.use OmniAuth::Builder do
   OmniAuth.config.logger = Rails.logger
   # idp_host = ENV.fetch('IDP_HOST', 'api.idmelabs.com')
-  idp_host = ENV.fetch('CLEAR_IDP_HOST')
+  idp_host = ENV['CLEAR_IDP_HOST']
   # client_id = ENV.fetch('IDP_CLIENT_ID', '925bb2985ccf623114359caa76228919')
-  client_id = ENV.fetch('CLEAR_IDP_CLIENT_ID')
+  client_id = ENV['CLEAR_IDP_CLIENT_ID']
   # client_secret = ENV['IDP_CLIENT_SECRET']
   client_secret = ENV['CLEAR_IDP_CLIENT_SECRET']
   provider :openid_connect, {

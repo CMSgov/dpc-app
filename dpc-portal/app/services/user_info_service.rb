@@ -2,6 +2,7 @@
 
 # A service that verifies generates an ao invitation
 class UserInfoService
+  # TODO: figure out CLEAR equivalent
   USER_INFO_URI = URI("https://#{ENV.fetch('IDP_HOST')}/api/public/v3/attributes.json")
 
   def user_info(session)
@@ -25,6 +26,8 @@ class UserInfoService
   def request_info(token)
     start_tracking
     response = Net::HTTP.get_response(USER_INFO_URI, auth_header(token))
+    puts "response:"
+    puts response
     code = response.code.to_i
     case code
     when 200...299

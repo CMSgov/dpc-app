@@ -78,12 +78,13 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
-    url = URI::HTTPS.build(host: IDP_HOST,
+    url = URI::HTTPS.build(host: CLEAR_IDP_HOST,
                            path: '/oauth/authorize',
-                           query: { client_id: IDP_CLIENT_ID,
-                                    redirect_uri: "#{my_protocol_host}/auth/id_me/callback",
+                           # query: { client_id: IDP_CLIENT_ID,
+                           query: { client_id: CLEAR_IDP_CLIENT_ID,
+                                    redirect_uri: "#{my_protocol_host}/auth/clear/callback",
                                     response_type: 'code',
-                                    scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',
+                                    scope: 'openid profile email',
                                     nonce: @nonce,
                                     state: @state }.to_query)
     redirect_to url, allow_other_host: true
@@ -202,7 +203,8 @@ class InvitationsController < ApplicationController
 
   def user
     user_info = UserInfoService.new.user_info(session)
-    @user = User.find_or_create_by!(provider: :id_me, uid: user_info['sub']) do |user_to_create|
+    # @user = User.find_or_create_by!(provider: :id_me, uid: user_info['sub']) do |user_to_create|
+    @user = User.find_or_create_by!(provider: :clear, uid: user_info['sub']) do |user_to_create|
       assign_user_attributes(user_to_create, user_info)
       log_create_user
     end

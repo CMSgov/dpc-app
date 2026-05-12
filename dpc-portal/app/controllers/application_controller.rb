@@ -2,9 +2,10 @@
 
 # Parent class of all controllers
 class ApplicationController < ActionController::Base
-  IDP_HOST = ENV.fetch('IDP_HOST')
+  # IDP_HOST = ENV.fetch('IDP_HOST')
+  CLEAR_IDP_HOST = ENV.fetch('CLEAR_IDP_HOST')
   # IDP_CLIENT_ID = ENV.fetch('IDP_CLIENT_ID')
-  IDP_CLIENT_ID = ENV.fetch('CLEAR_IDP_CLIENT_ID')
+  CLEAR_IDP_CLIENT_ID = ENV.fetch('CLEAR_IDP_CLIENT_ID')
 
   before_action :check_session_length
   before_action :set_current_request_attributes
@@ -55,9 +56,9 @@ class ApplicationController < ActionController::Base
   def url_for_login_dot_gov_logout
     state = SecureRandom.hex(16)
     session['omniauth.state'] = state
-    URI::HTTPS.build(host: IDP_HOST,
-                     path: '/id_me/logout',
-                     query: { client_id: IDP_CLIENT_ID,
+    URI::HTTPS.build(host: CLEAR_IDP_HOST,
+                     path: '/clear/logout',
+                     query: { client_id: CLEAR_IDP_CLIENT_ID,
                               post_logout_redirect_uri: "#{root_url}auth/logged_out",
                               state: }.to_query)
   end

@@ -71,3 +71,4 @@ end
 ENV['CPI_API_GW_BASE_URL'] = 'https://val.cpiapi.cms.gov/'
 ENV['CMS_IDM_OAUTH_URL'] = 'https://impl.idp.idm.cms.gov/'
 ENV['IDP_HOST'] = 'api.idmelabs.com'
+ENV['CLEAR_IDP_HOST'] = 'verified.clearme.com'
