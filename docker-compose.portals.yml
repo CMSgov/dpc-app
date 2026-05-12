@@ -142,8 +142,9 @@ services:
       - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
       - CPI_API_GW_BASE_URL=http://localhost:4567/
       - CMS_IDM_OAUTH_URL=http://localhost:4567/
-      - IDP_HOST=api.idmelabs.com
-      - IDP_CLIENT_ID=925bb2985ccf623114359caa76228919
+      # - IDP_HOST=api.idmelabs.com
+      - CLEAR_IDP_HOST=verified.clearme.com
+      - CLEAR_IDP_CLIENT_ID=${CLEAR_IDP_CLIENT_ID}
       - RUBY_YJIT_ENABLE=1
       - ENV=local
       - NEW_RELIC_MONITOR_MODE=false

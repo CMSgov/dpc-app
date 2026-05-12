@@ -3,7 +3,8 @@
 # Parent class of all controllers
 class ApplicationController < ActionController::Base
   IDP_HOST = ENV.fetch('IDP_HOST')
-  IDP_CLIENT_ID = ENV.fetch('IDP_CLIENT_ID')
+  # IDP_CLIENT_ID = ENV.fetch('IDP_CLIENT_ID')
+  IDP_CLIENT_ID = ENV.fetch('CLEAR_IDP_CLIENT_ID')
 
   before_action :check_session_length
   before_action :set_current_request_attributes
