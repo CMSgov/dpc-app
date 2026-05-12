@@ -304,7 +304,7 @@ GEM
       bigdecimal (>= 3.1, < 5)
     net-http (0.9.1)
       uri (>= 0.11.1)
-    net-imap (0.5.8)
+    net-imap (0.6.4)
       date
       net-protocol
     net-pop (0.1.2)
@@ -315,7 +315,7 @@ GEM
       net-protocol
     newrelic_rpm (8.16.0)
     nio4r (2.7.3)
-    nokogiri (1.19.1)
+    nokogiri (1.19.3)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     oauth2 (2.0.18)
@@ -565,9 +565,9 @@ DEPENDENCIES
   lograge (>= 0.12.0)
   luhnacy (~> 0.2.1)
   macaroons
-  net-imap (>= 0.5.8)
+  net-imap (>= 0.5.14)
   newrelic_rpm (~> 8.10)
-  nokogiri (>= 1.18.9)
+  nokogiri (>= 1.19.3)
   pg (>= 0.18, < 2.0)
   pg-aws_rds_iam
   pry
