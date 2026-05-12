@@ -31,7 +31,8 @@ RSpec.describe 'Sessions', type: :request do
 
       it 'should redirect to login.gov' do
         delete '/users/sign_out'
-        expect(response.location).to include(ENV.fetch('IDP_HOST'))
+        # expect(response.location).to include(ENV.fetch('IDP_HOST'))
+        expect(response.location).to include(ENV.fetch('CLEAR_IDP_HOST'))
       end
     end
 

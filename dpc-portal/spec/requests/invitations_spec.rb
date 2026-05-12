@@ -839,7 +839,8 @@ def log_in
                              extra: { raw_info: { given_name: 'Bob',
                                                   family_name: 'Hoskins',
                                                   ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
-  post '/auth/id_me'
+  # post '/auth/id_me'
+  post '/auth/clear'
   follow_redirect!
 end
 
