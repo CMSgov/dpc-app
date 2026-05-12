@@ -127,8 +127,8 @@ class LoginDotGovController < ApplicationController
     return unless data.identity_assurance_level == 2
 
     maybe_update_user(user, data)
-    session[:login_dot_gov_token] = auth.jti #auth.credentials.token
-    session[:login_dot_gov_token_exp] = auth.exp #auth.credentials.expires_in.seconds.from_now
+    session[:login_dot_gov_token] = auth.jti # auth.credentials.token
+    session[:login_dot_gov_token_exp] = auth.exp # auth.credentials.expires_in.seconds.from_now
   end
 
   def path(user, auth)
