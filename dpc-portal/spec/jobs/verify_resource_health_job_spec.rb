@@ -86,6 +86,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
   context 'not connected to AWS' do
     it 'should ignore connection error and move on gracefully' do
       stub_request(:get, 'https://api.idmelabs.com').to_return(status: 200)
+      stub_request(:get, 'https://verified.clearme.com').to_return(status: 200)
 
       expect(mock_dpc_client).to receive(:healthcheck)
       expect(mock_dpc_client).to receive(:response_successful?).and_return(true).twice
@@ -150,6 +151,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
 
   def expect_idp(site_status: 200, metric: 1)
     stub_request(:get, 'https://api.idmelabs.com').to_return(status: site_status)
+    stub_request(:get, 'https://verified.clearme.com').to_return(status: site_status)
     expect_put_metric('PortalConnectedToIdp', metric)
   end
 

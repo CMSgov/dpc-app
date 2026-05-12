@@ -14,14 +14,16 @@ RSpec.describe 'Accessibility', type: :system do
 
   before do
     OmniAuth.config.test_mode = true
-    OmniAuth.config.add_mock(:id_me,
+    # OmniAuth.config.add_mock(:id_me,
+    OmniAuth.config.add_mock(:clear,
                              { uid:,
                                info: { email: 'bob@example.com' },
                                extra: { raw_info: { all_emails: %w[bob@example.com bob2@example.com],
                                                     ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
   end
   def sign_in
-    visit '/auth/id_me/callback'
+    # visit '/auth/id_me/callback'
+    visit '/auth/clear/callback'
   end
   context 'login' do
     it 'shows login page ok' do
@@ -38,14 +40,17 @@ RSpec.describe 'Accessibility', type: :system do
 
     context 'bad user tries to log in' do
       it 'shows no such user page' do
-        visit '/auth/id_me/callback'
+        # visit '/auth/id_me/callback'
+        visit '/auth/clear/callback'
         expect(page).to have_text('The email you used is not associated with a DPC account.')
         expect(page).to be_axe_clean.according_to axe_standard
       end
       it 'shows sanctioned ao page' do
-        create(:user, provider: :id_me, uid: '12345',
+        # create(:user, provider: :id_me, uid: '12345',
+        create(:user, provider: :clear, uid: '12345',
                       verification_status: 'rejected', verification_reason: 'ao_med_sanctions')
-        visit '/auth/id_me/callback'
+        # visit '/auth/id_me/callback'
+        visit '/auth/clear/callback'
         expect(page).to have_text(I18n.t('verification.ao_med_sanctions_status'))
         expect(page).to be_axe_clean.according_to axe_standard
       end
@@ -53,9 +58,11 @@ RSpec.describe 'Accessibility', type: :system do
 
     context 'valid user tries to log in' do
       it 'shows success page' do
-        create(:user, provider: :id_me, uid: '12345',
+        # create(:user, provider: :id_me, uid: '12345',
+        create(:user, provider: :clear, uid: '12345',
                       verification_status: 'approved')
-        visit '/auth/id_me/callback'
+        # visit '/auth/id_me/callback'
+        visit '/auth/clear/callback'
         expect(page).to have_text("You don't have any organizations to show.")
         expect(page).to be_axe_clean.according_to axe_standard
       end
@@ -63,7 +70,8 @@ RSpec.describe 'Accessibility', type: :system do
   end
 
   context 'organizations' do
-    let!(:user) { create(:user, uid:, provider: :id_me, verification_status: :approved) }
+    # let!(:user) { create(:user, uid:, provider: :id_me, verification_status: :approved) }
+    let!(:user) { create(:user, uid:, provider: :clear, verification_status: :approved) }
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let(:mock_client_token_manager) { instance_double(ClientTokenManager) }
     let(:mock_public_key_manager) { instance_double(PublicKeyManager) }

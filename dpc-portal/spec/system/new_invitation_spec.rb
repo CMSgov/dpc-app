@@ -12,18 +12,21 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :system, 
 
   before do
     OmniAuth.config.test_mode = true
-    OmniAuth.config.add_mock(:id_me,
+    # OmniAuth.config.add_mock(:id_me,
+    OmniAuth.config.add_mock(:clear,
                              { uid:,
                                info: { email: 'bob@example.com' },
                                extra: { raw_info: { all_emails: %w[bob@example.com bob2@example.com],
                                                     ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
   end
   def sign_in
-    visit '/auth/id_me/callback'
+    # visit '/auth/id_me/callback'
+    visit '/auth/clear/callback'
   end
   context 'CD invite' do
     let(:dpc_api_organization_id) { 'some-gnarly-guid' }
-    let!(:user) { create(:user, provider: :id_me, uid: '12345') }
+    # let!(:user) { create(:user, provider: :id_me, uid: '12345') }
+    let!(:user) { create(:user, provider: :clear, uid: '12345') }
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let!(:ao_org_link) { create(:ao_org_link, user:, provider_organization: org) }
 

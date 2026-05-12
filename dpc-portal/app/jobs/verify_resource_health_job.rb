@@ -9,9 +9,9 @@ class VerifyResourceHealthJob < ApplicationJob
   METRIC_NAMESPACE = 'DPC'
   REGION = 'us-east-1'
   ENVIRONMENT = ENV.fetch('ENV', 'none')
-  IDP_HOST = ENV.fetch('IDP_HOST', nil)
-  #   # will fail, not used
-  #   CLEAR_IDP_HOST = ENV.fetch('CLEAR_IDP_HOST', nil)
+  # IDP_HOST = ENV.fetch('IDP_HOST', nil)
+  # will fail, not used
+  CLEAR_IDP_HOST = ENV.fetch('CLEAR_IDP_HOST', nil)
 
   # Runs all healthchecks if no args provided
   def perform(args = {})
@@ -37,10 +37,10 @@ class VerifyResourceHealthJob < ApplicationJob
   end
 
   def idp_healthcheck
-    return log_healthcheck('PortalConnectedToIdp', false) if IDP_HOST.nil?
+    return log_healthcheck('PortalConnectedToIdp', false) if CLEAR_IDP_HOST.nil?
 
     # Login.gov doesn't have a /healthcheck, so we look for a 200 to verify connectivity.
-    response = Net::HTTP.get_response(URI("https://#{IDP_HOST}"))
+    response = Net::HTTP.get_response(URI("https://#{CLEAR_IDP_HOST}"))
     log_healthcheck(
       'PortalConnectedToIdp',
       response.code.to_i.between?(200, 299)

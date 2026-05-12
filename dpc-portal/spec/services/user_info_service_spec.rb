@@ -8,12 +8,14 @@ describe UserInfoService do
   let(:service) { UserInfoService.new }
   let(:token) { 'bearer-token' }
   let(:exp) { 2.hours.from_now }
+  # TODO rename login_do_gov_token
   let(:valid_session) { { login_dot_gov_token: token, login_dot_gov_token_exp: exp } }
 
   context :valid_session do
     let(:response) do
       {
         'sub' => '097d06f7-e9ad-4327-8db3-0ba193b7a2c2',
+        # 'iss' => 'https://api.idmelabs.com/oidc',
         'iss' => 'https://api.idmelabs.com/oidc',
         'email' => 'david@example.com',
         'email_verified' => true,
