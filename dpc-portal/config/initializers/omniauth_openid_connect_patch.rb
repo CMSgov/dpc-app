@@ -40,19 +40,12 @@ module OmniAuth
           nil,
           { 'Authorization' => "Bearer #{access_token.access_token}" }
         )
-
         body = response.body.to_s.strip
-        body = body[1..-2] if body.start_with?('"') && body.end_with?('"')
-
         ct_header = Array(response.headers['Content-Type']).first.to_s
         content_type = ct_header.split(';').first.to_s.strip.downcase
 
-        # Some IdPs JSON-encode the JWT, so the body arrives as `"<jwt>"`
-        # rather than a raw compact JWS. Unwrap the JSON-string envelope
-        # before attempting to decode.
-        body = JSON.parse(body) if body.start_with?('"') && body.end_with?('"')
-
         if content_type == 'application/jwt' || looks_like_jwt?(body)
+          body = body[1..-2] if body.start_with?('"') && body.end_with?('"')
           ## TODO - consider verifying the JWT signature using the provider's JWKS keys
           JSON::JWT.decode(body, :skip_verification).to_h.with_indifferent_access
         else
