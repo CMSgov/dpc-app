@@ -74,11 +74,11 @@ class Invitation < ApplicationRecord
   end
 
   def ao_match?(user_info)
-    check_missing_user_info(user_info, 'social_security_number')
-
+    check_missing_user_info(user_info, 'social_security_number', 'SSN')
+    ssn = user_info['social_security_number']&.tr('-', '') || user_info['SSN']
     service = AoVerificationService.new
-    result = service.check_eligibility(provider_organization.npi,
-                                       user_info['social_security_number'].tr('-', ''))
+    result = service.check_eligibility(provider_organization.npi, ssn)
+
     raise VerificationError, result[:failure_reason] unless result[:success]
 
     result
@@ -138,10 +138,11 @@ class Invitation < ApplicationRecord
     end
   end
 
-  def check_missing_user_info(user_info, key)
-    return if user_info[key].present?
-
-    Rails.logger.error("User Info Missing: #{key}")
+  def check_missing_user_info(user_info, *keys)
+    keys.each do |key|
+      return if user_info[key].present?
+    end
+    Rails.logger.error("User Info Missing: #{keys}")
     raise UserInfoServiceError, 'missing_info'
   end
 

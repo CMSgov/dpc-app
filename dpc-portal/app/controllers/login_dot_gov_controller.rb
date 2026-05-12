@@ -71,20 +71,31 @@ class LoginDotGovController < ApplicationController
   def ial_2_actions(user, auth)
     data = auth.extra.raw_info
 
-    return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
+    return if ial_1_user?(auth)
 
     maybe_update_user(user, data)
-    session[:login_dot_gov_token] = auth.credentials.token
-    session[:login_dot_gov_token_exp] = auth.credentials.expires_in.seconds.from_now
+    session[:csp] = auth.provider
+    session["#{auth.provider}_token"] = auth.credentials.token
+    session["#{auth.provider}_token_exp"] = auth.credentials.expires_in.seconds.from_now
   end
 
   def path(user, auth)
-    if user.blank? && auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
+    if user.blank? && ial_1_user?(auth)
+
       Rails.logger.info(['User logged in without account',
                          { actionContext: LoggingConstants::ActionContext::Authentication,
                            actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }])
       return no_account_url
     end
     session.delete(:user_return_to) || organizations_path
+  end
+
+  def ial_1_user?(auth)
+    data = auth.extra.raw_info
+    return true if  data.ial == 'http://idmanagement.gov/ns/assurance/ial/1' &&
+                    auth.provider == :login_dot_gov
+    return true if data.identity_assurance_level == 1 && auth.provider == :id_me
+
+    false
   end
 end

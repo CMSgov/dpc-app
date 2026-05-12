@@ -273,9 +273,11 @@ class InvitationsController < ApplicationController
   end
 
   def check_for_token
-    if session[:login_dot_gov_token].present? &&
-       session[:login_dot_gov_token_exp].present? &&
-       session[:login_dot_gov_token_exp] > Time.now
+    csp = session[:csp]
+    if csp && !csp.empty? &&
+       session["#{csp}_token"].present? &&
+       session["#{csp}_token_exp"].present? &&
+       session["#{csp}_token_exp"] > Time.now
       return
     end
 
