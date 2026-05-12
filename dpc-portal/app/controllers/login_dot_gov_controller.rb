@@ -2,7 +2,8 @@
 
 # Handles interactions with login.gov
 class LoginDotGovController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: :id_me
+  # skip_before_action :verify_authenticity_token, only: :id_me
+  skip_before_action :verify_authenticity_token, only: :clear
 
   def id_me
     auth = request.env['omniauth.auth']
@@ -20,20 +21,8 @@ class LoginDotGovController < ApplicationController
   end
 
   def clear
-    auth = request.env['omniauth.auth']
-
-    user = User.find_by(provider: auth.provider, uid: auth.uid)
-    if user
-      sign_in(user)
-      session[:logged_in_at] = Time.now
-      Rails.logger.info(['User logged in',
-                         { actionContext: LoggingConstants::ActionContext::Authentication,
-                           actionType: LoggingConstants::ActionType::UserLoggedIn }])
-    end
-
     # this will probably fail
-    ial_2_actions(user, auth)
-    redirect_to path(user, auth)
+    id_me
   end
 
   def no_account
