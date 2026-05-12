@@ -18,6 +18,24 @@ on:
         required: false
         type: 'string'
         default: 'main'
+  # for enabling dpc-ops to call, remove after quicksights lambda terraform is moved to dpc-app/
+  workflow_call:
+    inputs:
+      env:
+        description: AWS environment to deploy to
+        required: true
+        type: 'string'
+        default: 'test'
+      confirm_env:
+        description: Double check for environment
+        required: true
+        type: 'string'
+      ops-ref:
+        description: Branch of dpc-ops to use
+        required: false
+        type: 'string'
+        default: 'main'
+
 
 concurrency:
   group: deploy-quicksight-report-to-${{ inputs.env }}

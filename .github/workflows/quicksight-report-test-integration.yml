@@ -1,0 +1,113 @@
+name: Quicksight Reports Integration Tests
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/quicksight-report-test-integration.yml
+      - .github/workflows/quicksight-report-deploy.yml
+  workflow_dispatch:
+  # for enabling dpc-ops to call, remove after quicksights lambda terraform is moved to dpc-app/
+  workflow_call:
+    inputs:
+      ops-ref:
+        description: Branch of dpc-ops to use
+        required: false
+        type: 'string'
+        default: 'main'
+
+concurrency:
+  group: quicksight-reports-test-integration
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # Deploy first if triggered by pull_request
+  deploy:
+    if: ${{ github.event_name == 'pull_request' }}
+    uses: ./.github/workflows/quicksight-report-deploy.yml
+    with:
+      env: test
+      confirm_env: test
+      ops-ref: ${{ inputs.ops-ref || 'main' }}
+    secrets: inherit
+
+  trigger:
+    needs: deploy
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+    outputs:
+      filename: ${{ steps.createfile.outputs.FILENAME }}
+      s3Bucket: ${{ steps.createfile.outputs.S3_BUCKET }}
+    steps:
+      - uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+      - name: Get S3_BUCKET
+        uses: cmsgov/cdap/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            S3_BUCKET=/dpc/test/aurora-export-bucket
+      - name: Upload test file to S3
+        id: createfile
+        run: |
+          FILENAME=manual_testing_$(date -u '+%Y-%m-%d_%H-%M-%S').txt
+          echo "test" > "$FILENAME"
+
+          aws s3 cp --no-progress $FILENAME s3://$S3_BUCKET/$FILENAME \
+            --sse aws:kms \
+            --sse-kms-key-id alias/aurora_export
+
+          echo "FILENAME=$FILENAME" >> $GITHUB_OUTPUT
+          echo "S3_BUCKET=$S3_BUCKET" >> $GITHUB_OUTPUT
+
+  verify:
+    needs: trigger
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+    steps:
+      - uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+
+      - name: Wait for Lambda to process and update logs
+        run: sleep 15
+
+      - name: Verify Lambda logs
+        run: |
+          LOG_GROUP="/aws/lambda/dpc-test-quicksight-reports"
+          FUNCTION_NAME="dpc-test-quicksight-reports"
+          FILENAME="${{ needs.trigger.outputs.filename }}"
+          LOG_STREAM=$(aws logs describe-log-streams \
+            --log-group-name "$LOG_GROUP" \
+            --order-by LastEventTime \
+            --descending \
+            --max-items 1 \
+            --query 'logStreams[0].logStreamName' \
+            --output text | head -n 1)
+          
+          # Set 2 min threshold for checking CloudWatch logs
+          START_TIME=$(( ($(date -u +%s) - 120) * 1000 ))
+
+          LOGS=$(aws logs get-log-events \
+            --log-group-name "$LOG_GROUP" \
+            --log-stream-name "$LOG_STREAM" \
+            --start-time "$START_TIME" \
+            --query 'events[*].message' \
+            --output text)
+
+          echo "Checking logs for expected outputs"
+          echo "$LOGS"
+
+          echo "$LOGS" | grep -q "START RequestId"
+          echo "$LOGS" | grep -q "Skipping manual_testing"
+          echo "$LOGS" | grep -q "END RequestId"
