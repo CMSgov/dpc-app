@@ -177,6 +177,12 @@ class InvitationsController < ApplicationController
              status: :unprocessable_entity)
       false
     end
+  rescue MultiUserMatchError => e
+    logger.error(['User matches too many existing users',
+                  { actionContext: LoggingConstants::ActionContext::Registration, error: e.message }])
+
+    render(Page::Utility::ErrorComponent.new(@invitation, 'multi_user_match'))
+    nil
   end
 
   def create_cd_org_link
@@ -201,12 +207,36 @@ class InvitationsController < ApplicationController
 
   def user
     user_info = UserInfoService.new.user_info(session)
-    @user = User.find_or_create_by!(provider: :id_me, uid: user_info['sub']) do |user_to_create|
-      assign_user_attributes(user_to_create, user_info)
-      log_create_user
-    end
+    find_or_create_user(user_info)
+    csp = Csp.find_by(name: @user.provider)
+    CspUser.find_or_create_by!(user: @user, csp: csp, uuid: user_info['sub'])
     update_user(user_info)
     @user
+  end
+
+  def find_or_create_user(user_info)
+    # Unique PacIds only available in prod
+    @user = if @invitation.authorized_official? && (ENV['ENV'] == 'prod' || Rails.env.test?)
+              ao_user(user_info)
+            else
+              User.find_or_create_by!(email: @invitation.invited_email) do |user_to_create|
+                assign_user_attributes(user_to_create, user_info)
+                log_create_user
+              end
+            end
+  end
+
+  def ao_user(user_info)
+    matching_users = User.where('email = ? OR pac_id = ?', @invitation.invited_email, session[:user_pac_id])
+    raise MultiUserMatchError, "too many matching users | pac_id: #{session[:user_pac_id]}" if matching_users.size > 1
+
+    return matching_users.first if matching_users.present?
+
+    user = User.new
+    assign_user_attributes(user, user_info)
+    user.save!
+    log_create_user
+    user
   end
 
   def assign_user_attributes(user_to_create, user_info)
@@ -214,6 +244,10 @@ class InvitationsController < ApplicationController
     user_to_create.given_name = user_info['given_name']
     user_to_create.family_name = user_info['family_name']
     user_to_create.pac_id = session.delete(:user_pac_id)
+
+    # For now we force login.gov, this will have to change once we support multi-CSP.
+    user_to_create.provider = :login_dot_gov
+    user_to_create.uid = user_info['sub']
   end
 
   def update_user(user_info)
@@ -355,4 +389,6 @@ class InvitationsController < ApplicationController
                          actionType: LoggingConstants::ActionType::AoHasWaiver,
                          invitation: @invitation.id }])
   end
+
+  class MultiUserMatchError < StandardError; end
 end
