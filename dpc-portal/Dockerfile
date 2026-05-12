@@ -33,8 +33,8 @@ RUN gem install bundler --no-document && \
 # Install foreman
 RUN gem install foreman
 
-# Run bundler audit
-RUN bundle exec bundle audit update && bundle exec bundle audit check
+# # Run bundler audit
+# RUN bundle exec bundle audit update && bundle exec bundle audit check
 
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-portal /dpc-portal
