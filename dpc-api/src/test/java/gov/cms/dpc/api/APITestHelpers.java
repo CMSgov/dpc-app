@@ -166,7 +166,7 @@ public class APITestHelpers {
                     new DefaultProfileValidationSupport(ctx),
                     new InMemoryTerminologyServerValidationSupport(ctx));
             final InjectingConstraintValidatorFactory constraintFactory = new InjectingConstraintValidatorFactory(
-                Set.of(new ProfileValidator(new FHIRValidationModule(config).provideFhirValidator(ctx, config, support))));
+                Set.of(new ProfileValidator(new FHIRValidationModule(config).provideFhirValidator(ctx, support))));
 
             builder.setValidator(provideValidator(constraintFactory));
         }
