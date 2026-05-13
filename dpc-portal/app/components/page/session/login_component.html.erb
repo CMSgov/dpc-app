@@ -10,6 +10,10 @@
         <%= button_to @login_path, class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
           Sign in with <span class="login-button__logo">Login.gov</span>
         <% end %>
+        <p>Sign in with your DPC Portal CLEAR account</p>
+        <%= button_to @clear_login_path, class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
+          Sign in with CLEAR
+        <% end %>
         <%= render(Core::Navigation::SystemUseAgreementLinkComponent.new) %>
         <div class="line-separator"></div>
         <p>
