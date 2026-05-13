@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'support/login_support'
 require 'support/credential_resource_shared_examples'
 
 RSpec.describe 'ClientTokens', type: :request do
   include DpcClientSupport
+  include LoginSupport
 
   let(:terms_of_service_accepted_by) { create(:user) }
 

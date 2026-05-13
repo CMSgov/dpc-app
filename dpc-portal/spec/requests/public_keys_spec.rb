@@ -2,9 +2,11 @@
 
 require 'rails_helper'
 require 'support/credential_resource_shared_examples'
+require 'support/login_support'
 
 RSpec.describe 'PublicKeys', type: :request do
   include DpcClientSupport
+  include LoginSupport
 
   let(:terms_of_service_accepted_by) { create(:user) }
 
