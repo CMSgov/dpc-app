@@ -5,7 +5,7 @@ module Core
     # Render a USWDS-styled combo box.
     class ComboBoxComponent < ViewComponent::Base
       def initialize(label:, id:, options:, on_change:)
-        super
+        super()
         @label = label
         @id = id
         @options = options

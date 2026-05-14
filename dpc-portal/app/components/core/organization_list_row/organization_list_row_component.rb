@@ -9,7 +9,7 @@ module Core
       with_collection_parameter :link
 
       def initialize(link:)
-        super
+        super()
         @link = link
         @organization = link.provider_organization
       end

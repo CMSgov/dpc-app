@@ -5,7 +5,7 @@ module Page
     # First page the user sees when accepting a valid invitation
     class StartComponent < ViewComponent::Base
       def initialize(organization, invitation)
-        super
+        super()
         @organization = organization
         @invitation = invitation
         @hours, @minutes = invitation.expires_in

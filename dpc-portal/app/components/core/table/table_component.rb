@@ -7,7 +7,7 @@ module Core
       attr_accessor :id, :sortable
 
       def initialize(id: nil, additional_classes: nil, sortable: false)
-        super
+        super()
         @id = id
         @additional_classes = additional_classes
         @sortable = sortable

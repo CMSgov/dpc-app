@@ -165,7 +165,7 @@ GEM
     date_time_precision (0.8.1)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
-    devise (5.0.3)
+    devise (5.0.4)
       bcrypt (~> 3.0)
       orm_adapter (~> 0.1)
       railties (>= 7.0)
@@ -548,7 +548,7 @@ DEPENDENCIES
   climate_control
   coffee-rails (~> 5.0, >= 5.0.0)
   csv
-  devise (>= 5.0.3)
+  devise (>= 5.0.4)
   devise-async (>= 1.0.0)
   devise-security (>= 0.17.0)
   dotenv-rails (>= 2.8.1)

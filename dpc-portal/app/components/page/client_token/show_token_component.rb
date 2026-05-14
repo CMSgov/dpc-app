@@ -7,7 +7,7 @@ module Page
       attr_accessor :organization, :client_token
 
       def initialize(organization, client_token)
-        super
+        super()
         @organization = organization
         @client_token = client_token
       end
