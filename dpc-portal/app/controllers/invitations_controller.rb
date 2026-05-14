@@ -79,7 +79,7 @@ class InvitationsController < ApplicationController
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
     url = URI::HTTPS.build(host: CLEAR_IDP_HOST,
-                           path: '/oauth/authorize',
+                           path: '/integrations/oauth2/auth',
                            # query: { client_id: IDP_CLIENT_ID,
                            query: { client_id: CLEAR_IDP_CLIENT_ID,
                                     redirect_uri: "#{my_protocol_host}/auth/clear/callback",

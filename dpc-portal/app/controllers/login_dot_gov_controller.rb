@@ -85,6 +85,7 @@ class LoginDotGovController < ApplicationController
   end
 
   def path(user, auth)
+    puts "auth extra raw_info response: #{auth.extra.raw_info}"
     if user.blank? && auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
       Rails.logger.info(['User logged in without account',
                          { actionContext: LoggingConstants::ActionContext::Authentication,
