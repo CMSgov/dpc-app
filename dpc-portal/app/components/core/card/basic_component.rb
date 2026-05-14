@@ -7,7 +7,7 @@ module Core
       attr_accessor :text_content, :button_params
 
       def initialize(text_content: '<h1>Welcome</h1>', button_params: nil)
-        super
+        super()
         @text_content = text_content
         @button_params = button_params&.merge({
                                                 class: ['usa-button', button_params[:class]].join(' ').strip

@@ -9,7 +9,7 @@ module Core
     #
     class StepIndicatorComponent < ViewComponent::Base
       def initialize(steps, index)
-        super
+        super()
         @steps = steps
         @index = index
       end

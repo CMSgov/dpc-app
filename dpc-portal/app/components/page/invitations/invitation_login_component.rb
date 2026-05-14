@@ -5,7 +5,7 @@ module Page
     # Component for Invitatation login (IAL/2 flow)
     class InvitationLoginComponent < ViewComponent::Base
       def initialize(invitation)
-        super
+        super()
         @invitation = invitation
         @musts = [
           'The email address your invite was sent to',

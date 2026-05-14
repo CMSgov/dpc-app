@@ -7,7 +7,7 @@ module Core
       attr_accessor :logged_in, :border
 
       def initialize(logged_in: false, border: true)
-        super
+        super()
         @logged_in = logged_in
         @border = border
       end

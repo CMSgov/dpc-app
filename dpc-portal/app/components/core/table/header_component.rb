@@ -11,7 +11,7 @@ module Core
       attr_reader :caption, :columns
 
       def initialize(caption: '', columns: [])
-        super
+        super()
         @caption = caption
         @columns = columns.map do |col|
           Column.new(

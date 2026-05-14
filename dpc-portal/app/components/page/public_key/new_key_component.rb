@@ -7,7 +7,7 @@ module Page
       attr_accessor :organization, :obj_name
 
       def initialize(organization, errors: {})
-        super
+        super()
         @organization = organization
         @errors = errors
         @obj_name = 'public key'
