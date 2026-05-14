@@ -57,7 +57,7 @@ class ApplicationController < ActionController::Base
     state = SecureRandom.hex(16)
     session['omniauth.state'] = state
     URI::HTTPS.build(host: CLEAR_IDP_HOST,
-                     path: '/clear/logout',
+                     path: '/integrations/oauth2/sessions/logout',
                      query: { client_id: CLEAR_IDP_CLIENT_ID,
                               post_logout_redirect_uri: "#{root_url}auth/logged_out",
                               state: }.to_query)

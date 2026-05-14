@@ -38,28 +38,26 @@ Rails.application.config.middleware.use OmniAuth::Builder do
                       end_session_endpoint: "https://#{idp_host}/logout"
                     }
                   }
+  clear_issuer = "https://#{clear_idp_host}/integrations"
   provider :openid_connect, {
                     name: :clear,
-                    issuer: "https://#{clear_idp_host}/oidc",
+                    issuer: clear_issuer,
                     scope: "openid",
                     response_type: :code,
                     client_auth_method: :client_secret_post,
+                    client_signing_alg: :RS256,
                     client_options: {
                       port: 443,
                       scheme: 'https',
                       host: clear_idp_host,
                       identifier: clear_client_id,
                       secret: clear_client_secret,
-                      # redirect_uri: "#{my_protocol_host}/auth/id_me/callback",
                       redirect_uri: "#{my_protocol_host}/auth/clear/callback",
-                      # authorization_endpoint: "https://#{idp_host}/oauth/authorize",
-                      authorization_endpoint: "https://#{clear_idp_host}/integrations/oauth2/auth",
-                      # token_endpoint: "https://#{idp_host}/oauth/token",
-                      token_endpoint: "https://#{clear_idp_host}/integrations/oauth2/token",
-                      # tbd
-                      userinfo_endpoint: "https://#{clear_idp_host}/api/public/v3/attributes.json",
-                      jwks_uri: "https://#{clear_idp_host}/oidc/.well-known/jwks",
-                      end_session_endpoint: "https://#{clear_idp_host}/logout"
+                      authorization_endpoint: "#{clear_issuer}/oauth2/auth",
+                      token_endpoint: "#{clear_issuer}/oauth2/token",
+                      userinfo_endpoint: "#{clear_issuer}/userinfo",
+                      jwks_uri: "#{clear_issuer}/.well-known/jwks.json",
+                      end_session_endpoint: "#{clear_issuer}/oauth2/sessions/logout"
                     }
                   }
 end

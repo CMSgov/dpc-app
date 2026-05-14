@@ -76,6 +76,7 @@ class LoginDotGovController < ApplicationController
 
   def ial_2_actions(user, auth)
     data = auth.extra.raw_info
+    puts "raw_info: #{data}"
 
     return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
 

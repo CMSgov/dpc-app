@@ -2,10 +2,7 @@
 
 # A service that verifies generates an ao invitation
 class UserInfoService
-  # TODO: figure out CLEAR equivalent
-  # USER_INFO_URI = URI("https://#{ENV.fetch('IDP_HOST')}/api/public/v3/attributes.json")
-  # this feels fraught and there should be a standardized way do this across idp's
-  USER_INFO_URI = "https://verified.clearme.com/integrations/.well-known/openid-configuration"
+  USER_INFO_URI = "https://#{ENV.fetch('CLEAR_IDP_HOST')}/integrations/userinfo"
 
   def user_info(session)
     validate_session(session)
