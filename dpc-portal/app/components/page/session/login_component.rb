@@ -5,7 +5,7 @@ module Page
     # Renders the log in page
     class LoginComponent < ViewComponent::Base
       def initialize(login_path)
-        super
+        super()
         @login_path = login_path
       end
     end

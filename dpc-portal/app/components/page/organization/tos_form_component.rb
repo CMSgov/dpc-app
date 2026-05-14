@@ -7,7 +7,7 @@ module Page
       attr_reader :organization
 
       def initialize(organization)
-        super
+        super()
         @organization = organization
       end
     end

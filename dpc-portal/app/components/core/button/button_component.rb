@@ -7,7 +7,7 @@ module Core
       attr_accessor :label, :destination, :method, :additional_classes
 
       def initialize(label:, destination:, method: :post, additional_classes: nil, disabled: false)
-        super
+        super()
         @label = label
         @destination = destination
         @method = method

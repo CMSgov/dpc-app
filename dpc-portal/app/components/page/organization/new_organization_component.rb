@@ -7,7 +7,7 @@ module Page
       attr_reader :npi_error
 
       def initialize(npi_error = '')
-        super
+        super()
         @npi_error = npi_error
       end
     end

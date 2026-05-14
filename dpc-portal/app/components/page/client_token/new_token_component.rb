@@ -7,7 +7,7 @@ module Page
       attr_accessor :organization, :obj_name
 
       def initialize(organization, errors: {})
-        super
+        super()
         @organization = organization
         @obj_name = 'client token'
         @errors = errors

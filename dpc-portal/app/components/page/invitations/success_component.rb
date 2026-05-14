@@ -5,7 +5,7 @@ module Page
     # Displays successful registration message
     class SuccessComponent < ViewComponent::Base
       def initialize(organization, invitation, given_name, family_name)
-        super
+        super()
         @organization = organization
         @invitation = invitation
         @name = "#{given_name} #{family_name}"
