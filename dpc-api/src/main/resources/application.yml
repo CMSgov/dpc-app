@@ -139,8 +139,6 @@ httpClient:
 fhir:
   validation:
     enabled: true
-    schemaValidation: false
-    schematronValidation: false # Schematron has been deprecated, we should remove this in the future.
 
 tokens:
   versionPolicy:

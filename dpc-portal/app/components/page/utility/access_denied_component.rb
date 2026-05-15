@@ -5,7 +5,7 @@ module Page
     # Shows Access denied reason
     class AccessDeniedComponent < ViewComponent::Base
       def initialize(failure_code:, organization: nil)
-        super
+        super()
         @organization = organization
         @failure_code = failure_code
       end

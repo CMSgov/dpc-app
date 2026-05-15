@@ -9,7 +9,7 @@ module Core
       VALID_STATUSES = %i[info warning error success notice alert].freeze
 
       def initialize(status: '', heading: '', include_icon: true)
-        super
+        super()
 
         @valid = VALID_STATUSES.include?(status.to_sym) || status.blank?
         log_error(status) unless @valid

@@ -5,7 +5,7 @@ module Page
     # Displays unfixable error message in accept invitation process
     class AoFlowFailComponent < ViewComponent::Base
       def initialize(invitation, reason, step)
-        super
+        super()
         @invitation = invitation
         @step = step.to_i
         @org_name = invitation&.provider_organization&.name

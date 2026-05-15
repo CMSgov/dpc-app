@@ -5,7 +5,7 @@ module Page
     # Displays unfixable error message in accept invitation process
     class ErrorComponent < ViewComponent::Base
       def initialize(invitation, reason)
-        super
+        super()
         @invitation = invitation
         @org_name = invitation&.provider_organization&.name
         @ao_full_name = invitation&.invited_by_full_name

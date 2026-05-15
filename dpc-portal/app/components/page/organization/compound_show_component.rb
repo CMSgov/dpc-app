@@ -5,7 +5,7 @@ module Page
     # Shows tabbed credential delegates and credentials
     class CompoundShowComponent < ViewComponent::Base
       def initialize(organization, delegate_information, credential_start, role, status_display)
-        super
+        super()
         @links = [['Credential Delegates', '#credential_delegates', !credential_start],
                   ['API setup', '#credentials', credential_start]]
         @organization = organization
