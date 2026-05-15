@@ -31,8 +31,6 @@ public class PractitionerValidationTest {
         final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 
         fhirValidator = ctx.newValidator();
-        fhirValidator.setValidateAgainstStandardSchematron(false);
-        fhirValidator.setValidateAgainstStandardSchema(false);
         fhirValidator.registerValidatorModule(instanceValidator);
 
 

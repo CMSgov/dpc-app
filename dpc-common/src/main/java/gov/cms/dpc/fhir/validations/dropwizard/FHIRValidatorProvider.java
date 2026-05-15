@@ -53,10 +53,8 @@ public class FHIRValidatorProvider implements Provider<FhirValidator> {
 
     @Override
     public FhirValidator get() {
-        logger.debug("Schema validation enabled: {}", validationConfiguration.isSchemaValidation());
         final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
         final FhirValidator fhirValidator = ctx.newValidator();
-        fhirValidator.setValidateAgainstStandardSchema(validationConfiguration.isSchemaValidation());
         fhirValidator.registerValidatorModule(instanceValidator);
 
         instanceValidator.setValidationSupport(this.supportChain);

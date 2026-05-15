@@ -7,7 +7,7 @@ import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class FHIRValidatorProviderTest {
 
@@ -17,14 +17,12 @@ class FHIRValidatorProviderTest {
 
         DPCFHIRConfiguration.FHIRValidationConfiguration config = new DPCFHIRConfiguration.FHIRValidationConfiguration();
         config.setEnabled(true);
-        config.setSchematronValidation(true);
-        config.setSchemaValidation(true);
 
         ValidationSupportChain supportChain = new ValidationSupportChain(new DPCProfileSupport(ctx));
 
         FHIRValidatorProvider provider = new FHIRValidatorProvider(ctx, config, supportChain);
 
         FhirValidator validator = provider.get();
-        assertTrue(validator.isValidateAgainstStandardSchema());
+        assertFalse(validator.isValidateAgainstStandardSchema());
     }
 }

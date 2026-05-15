@@ -160,8 +160,6 @@ public class APITestHelpers {
             // Validation config
             final DPCFHIRConfiguration.FHIRValidationConfiguration config = new DPCFHIRConfiguration.FHIRValidationConfiguration();
             config.setEnabled(true);
-            config.setSchematronValidation(true);
-            config.setSchemaValidation(true);
 
             final ValidationSupportChain support = new ValidationSupportChain(
                     new DPCProfileSupport(ctx),
