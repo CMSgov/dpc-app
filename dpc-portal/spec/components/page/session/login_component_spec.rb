@@ -14,11 +14,18 @@ RSpec.describe Page::Session::LoginComponent, type: :component do
       expect(page).to have_selector('section.usa-section')
     end
 
-    it 'should have a login button' do
-      expect(page).to have_selector('button.usa-button')
-      expect(page.find('button.usa-button.width-full')).to have_content('Sign in with')
-      expect(page).to have_selector('button.usa-button span.login-button__logo')
-      expect(page.find('button.usa-button span.login-button__logo')).to have_content('Login.gov')
+    it 'should have login buttons' do
+      # login.gov
+      expect(page).to have_selector('button.usa-button span.lg-login-button__logo')
+      expect(page.find('button.usa-button span.lg-login-button__logo')).to have_content('Login.gov')
+
+      # Clear
+      expect(page).to have_selector('button.usa-button span.clear-login-button__logo')
+      expect(page.find('button.usa-button span.clear-login-button__logo')).to have_content('CLEAR')
+
+      # ID.me
+      expect(page).to have_selector('button.usa-button span.idme-login-button__logo')
+      expect(page.find('button.usa-button span.idme-login-button__logo')).to have_content('ID.me')
     end
 
     it 'should render a link to the System Use Agreement' do

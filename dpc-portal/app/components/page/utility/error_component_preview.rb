@@ -59,6 +59,13 @@ module Page
         render(Page::Utility::ErrorComponent.new(invitation, reason))
       end
 
+      def ao_accepted
+        invitation = Invitation.new(id: 9, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
+                                    invitation_type: :authorized_official, status: :renewed)
+        reason = 'ao_accepted'
+        render(Page::Utility::ErrorComponent.new(invitation, reason))
+      end
+
       def server_error
         invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'))
         reason = 'server_error'
