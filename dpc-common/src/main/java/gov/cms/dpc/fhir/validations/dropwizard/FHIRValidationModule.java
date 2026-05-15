@@ -93,10 +93,6 @@ public class FHIRValidationModule extends AbstractModule {
         final FhirValidator fhirValidator = ctx.newValidator();
         final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(supportChain);
 
-        // Turn off the old validators.  They were failing things for field order, which shouldn't matter.
-        fhirValidator.setValidateAgainstStandardSchema(config.isSchemaValidation());
-        fhirValidator.setValidateAgainstStandardSchematron(config.isSchematronValidation());
-
         fhirValidator.registerValidatorModule(instanceValidator);
         primeValidator(fhirValidator);
 
