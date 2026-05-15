@@ -74,11 +74,12 @@ class Invitation < ApplicationRecord
   end
 
   def ao_match?(user_info)
-    check_missing_user_info(user_info, 'social_security_number')
+    ssn = user_info['social_security_number'].presence || user_info['ssn9']
+    raise UserInfoServiceError, 'missing_info' if ssn.blank?
 
     service = AoVerificationService.new
     result = service.check_eligibility(provider_organization.npi,
-                                       user_info['social_security_number'].tr('-', ''))
+                                       ssn.tr('-', ''))
     raise VerificationError, result[:failure_reason] unless result[:success]
 
     result

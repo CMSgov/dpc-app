@@ -60,7 +60,8 @@ class ApplicationController < ActionController::Base
                      path: '/integrations/oauth2/sessions/logout',
                      query: { client_id: CLEAR_IDP_CLIENT_ID,
                               post_logout_redirect_uri: "#{root_url}auth/logged_out",
-                              state: }.to_query)
+                              id_token_hint: session[:login_dot_gov_id_token],
+                              }.to_query)
   end
 
   # rubocop:disable Metrics/AbcSize

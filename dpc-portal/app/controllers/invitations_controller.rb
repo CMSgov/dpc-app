@@ -78,12 +78,17 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
+    claims = {
+      id_token: { ssn9: nil },
+      userinfo: { ssn9: nil }
+    }.to_json
     url = URI::HTTPS.build(host: CLEAR_IDP_HOST,
                            path: '/integrations/oauth2/auth',
                            query: { client_id: CLEAR_IDP_CLIENT_ID,
                                     redirect_uri: "#{my_protocol_host}/auth/clear/callback",
                                     response_type: 'code',
                                     scope: 'openid',
+                                    claims:,
                                     nonce: @nonce,
                                     state: @state }.to_query)
     puts "redirecting to: #{url}"
@@ -132,6 +137,7 @@ class InvitationsController < ApplicationController
 
   def verify_user_is_ao
     user_info = UserInfoService.new.user_info(session)
+    puts "user_info: #{user_info}"
     result = @invitation.ao_match?(user_info) # raises if does not match
     session[:user_pac_id] = result.dig(:ao_role, 'pacId')
     log_waivers(result)

@@ -8,6 +8,8 @@ class LoginDotGovController < ApplicationController
   def id_me
     auth = request.env['omniauth.auth']
 
+    puts "provider: #{auth.provider}"
+    puts "uid: #{auth.uid}"
     user = User.find_by(provider: auth.provider, uid: auth.uid)
     if user
       sign_in(user)
@@ -78,16 +80,19 @@ class LoginDotGovController < ApplicationController
     data = auth.extra.raw_info
     puts "raw_info: #{data}"
 
-    return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
+    # assume that assurance level is ial2 if using CLEAR
+    # return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
 
     maybe_update_user(user, data)
     session[:login_dot_gov_token] = auth.credentials.token
+    session[:login_dot_gov_id_token] = auth.credentials.id_token
     session[:login_dot_gov_token_exp] = auth.credentials.expires_in.seconds.from_now
   end
 
   def path(user, auth)
     puts "auth extra raw_info response: #{auth.extra.raw_info}"
-    if user.blank? && auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
+    # if user.blank? && auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
+    if user.blank?
       Rails.logger.info(['User logged in without account',
                          { actionContext: LoggingConstants::ActionContext::Authentication,
                            actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }])
