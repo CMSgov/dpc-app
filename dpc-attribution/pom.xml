@@ -57,6 +57,10 @@
             <artifactId>dropwizard-guicey</artifactId>
         </dependency>
         <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-caching-caffeine</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
         </dependency>
