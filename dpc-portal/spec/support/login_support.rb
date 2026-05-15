@@ -14,7 +14,7 @@ module LoginSupport
                                info: { email: user.email },
                                extra: { raw_info: { all_emails: [user.email],
                                                     ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
-    post '/auth/login_dot_gov'
+    post '/auth/id_me'
     follow_redirect!
   end
 
@@ -23,6 +23,6 @@ module LoginSupport
   # Sets default values required for auth if not already set.
   def defaults(user)
     user.uid = SecureRandom.uuid if user.uid.nil?
-    user.provider = :login_dot_gov if user.provider.nil?
+    user.provider = :id_me if user.provider.nil?
   end
 end
