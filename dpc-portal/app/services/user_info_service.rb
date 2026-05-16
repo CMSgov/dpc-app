@@ -2,7 +2,8 @@
 
 # A service that verifies generates an ao invitation
 class UserInfoService
-  USER_INFO_URI = "https://#{ENV.fetch('CLEAR_IDP_HOST')}/integrations/userinfo"
+  USER_INFO_URI = URI("https://#{ENV.fetch('CLEAR_IDP_HOST')}/integrations/userinfo")
+  USER_INFO_URI_WITH_CLAIMS_QUERY = URI("#{USER_INFO_URI}?claims=ssn9")
 
   def user_info(session)
     validate_session(session)
@@ -24,7 +25,7 @@ class UserInfoService
 
   def request_info(token)
     start_tracking
-    response = Net::HTTP.get_response(USER_INFO_URI, auth_header(token))
+    response = Net::HTTP.get_response(USER_INFO_URI_WITH_CLAIMS_QUERY, auth_header(token))
     puts "request_info response: #{response}"
     code = response.code.to_i
     case code

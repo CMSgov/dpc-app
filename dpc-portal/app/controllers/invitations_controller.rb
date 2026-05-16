@@ -79,8 +79,8 @@ class InvitationsController < ApplicationController
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
     claims = {
-      id_token: { ssn9: nil },
-      userinfo: { ssn9: nil }
+      id_token: { ssn9: nil, email: nil, email_verified: nil },
+      userinfo: { ssn9: nil, email: nil, email_verified: nil }
     }.to_json
     url = URI::HTTPS.build(host: CLEAR_IDP_HOST,
                            path: '/integrations/oauth2/auth',

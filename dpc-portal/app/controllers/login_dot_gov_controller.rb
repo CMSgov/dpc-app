@@ -91,6 +91,9 @@ class LoginDotGovController < ApplicationController
 
   def path(user, auth)
     puts "auth extra raw_info response: #{auth.extra.raw_info}"
+    return_to = session.delete(:user_return_to)
+    return return_to if return_to&.match?(%r{/organizations/[0-9]+/invitations/[0-9]+})
+
     # if user.blank? && auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
     if user.blank?
       Rails.logger.info(['User logged in without account',
@@ -98,6 +101,6 @@ class LoginDotGovController < ApplicationController
                            actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }])
       return no_account_url
     end
-    session.delete(:user_return_to) || organizations_path
+    return_to || organizations_path
   end
 end
