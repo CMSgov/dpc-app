@@ -7,7 +7,9 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 gemspec
 
 gem 'active_model_serializers'
+gem 'faraday', '>= 2.14.2'
 gem 'fhir_models'
+gem 'jwt', '>= 3.2.0'
 gem 'macaroons'
 gem 'nokogiri', '>= 1.19.3'
 gem 'oauth2'
