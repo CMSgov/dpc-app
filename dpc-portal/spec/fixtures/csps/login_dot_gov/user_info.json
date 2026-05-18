@@ -1,0 +1,19 @@
+{
+  "sub": "097d06f7-e9ad-4327-8db3-0ba193b7a2c2",
+  "iss": "https://api.idmelabs.com/oidc",
+  "email": "david@example.com",
+  "email_verified": true,
+  "all_emails": [
+    "david@example.com",
+    "david2@example.com"
+  ],
+  "given_name": "David",
+  "family_name": "Davis",
+  "birthdate": "1938-10-06",
+  "social_security_number": "900888888",
+  "phone": "+19174216435",
+  "phone_verified": true,
+  "verified_at": 1704834157,
+  "ial": "http://idmanagement.gov/ns/assurance/ial/2",
+  "aal": "urn:gov:gsa:ac:classes:sp:PasswordProtectedTransport:duo"
+}
