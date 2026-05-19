@@ -36,7 +36,7 @@ gem 'macaroons'
 gem 'net-imap', '>= 0.5.14'
 gem 'newrelic_rpm', '~> 8.10'
 gem 'nokogiri', '>= 1.19.3'
-gem 'omniauth_openid_connect'
+gem 'omniauth_openid_connect', '~> 0.8.0'
 gem 'omniauth-rails_csrf_protection'
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'puma', '~> 6.4.3'
@@ -78,6 +78,8 @@ group :development do
   gem 'rubocop-performance', require: false
 
   # Version 0.18 has a breaking change for sonarqube
+  gem 'debug', '~> 1.6.0', require: false
+  gem 'httplog'
   gem 'simplecov', '<= 0.17'
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.1.0'

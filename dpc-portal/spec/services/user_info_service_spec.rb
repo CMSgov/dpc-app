@@ -4,44 +4,19 @@ require 'spec_helper'
 require 'rails_helper'
 
 describe UserInfoService do
-  let(:user_info_url) { UserInfoService::USER_INFO_URI }
   let(:service) { UserInfoService.new }
   let(:token) { 'bearer-token' }
   let(:exp) { 2.hours.from_now }
-  let(:valid_session) { { login_dot_gov_token: token, login_dot_gov_token_exp: exp } }
-
   context :valid_session do
-    let(:response) do
-      {
-        'sub' => '097d06f7-e9ad-4327-8db3-0ba193b7a2c2',
-        'iss' => 'https://api.idmelabs.com/oidc',
-        'email' => 'david@example.com',
-        'email_verified' => true,
-        'all_emails' => [
-          'david@example.com',
-          'david2@example.com'
-        ],
-        'given_name' => 'David',
-        'family_name' => 'Davis',
-        'birthdate' => '1938-10-06',
-        'social_security_number' => '900888888',
-        'phone' => '+19174216435',
-        'phone_verified' => true,
-        'verified_at' => 1_704_834_157,
-        'ial' => 'http://idmanagement.gov/ns/assurance/ial/2',
-        'aal' => 'urn:gov:gsa:ac:classes:sp:PasswordProtectedTransport:duo'
-      }
-    end
-
     before do
-      stub_request(:get, user_info_url)
+      stub_request(:get, user_info_url(:login_dot_gov))
         .with(headers: { Authorization: "Bearer #{token}" })
-        .to_return(body: response.to_json, status: 200)
+        .to_return(body: csp_response(:login_dot_gov).to_json, status: 200)
     end
 
     it 'should return info with valid session' do
       verify_logs(status: 200)
-      expect(service.user_info(valid_session)).to eq response
+      expect(service.user_info(valid_csp_session(:login_dot_gov))).to eq csp_response(:login_dot_gov)
     end
   end
 
@@ -49,43 +24,43 @@ describe UserInfoService do
     it 'should throw error if status is 401' do
       verify_logs(status: 401)
       error = '{"error":"No can do"}'
-      stub_request(:get, user_info_url)
+      stub_request(:get, user_info_url(:login_dot_gov))
         .with(headers: { Authorization: "Bearer #{token}" })
         .to_return(body: error, status: 401)
       expect do
-        service.user_info(valid_session)
+        service.user_info(valid_csp_session(:login_dot_gov))
       end.to raise_error(UserInfoServiceError, 'unauthorized')
     end
     it 'should throw error if status is 500' do
       verify_logs(status: 500)
       error = '{"error":"shrug"}'
-      stub_request(:get, user_info_url)
+      stub_request(:get, user_info_url(:login_dot_gov))
         .with(headers: { Authorization: "Bearer #{token}" })
         .to_return(body: error, status: 500)
       expect do
-        service.user_info(valid_session)
+        service.user_info(valid_csp_session(:login_dot_gov))
       end.to raise_error(UserInfoServiceError, 'server_error')
     end
     it 'should throw error if cannot connect' do
       verify_logs(status: 503)
-      stub_request(:get, user_info_url)
+      stub_request(:get, user_info_url(:login_dot_gov))
         .with(headers: { Authorization: "Bearer #{token}" })
         .to_raise(Errno::ECONNREFUSED)
       expect do
-        service.user_info(valid_session)
+        service.user_info(valid_csp_session(:login_dot_gov))
       end.to raise_error(UserInfoServiceError, 'server_error')
     end
   end
 
   context :invalid_session do
     it 'should throw error if no token' do
-      invalid = valid_session.merge(login_dot_gov_token: nil)
+      invalid = valid_csp_session(:login_dot_gov).merge(login_dot_gov_token: nil)
       expect do
         service.user_info(invalid)
       end.to raise_error(UserInfoServiceError, 'no_token')
     end
     it 'should throw error if no token expiration' do
-      invalid = valid_session.merge(login_dot_gov_token_exp: nil)
+      invalid = valid_csp_session(:login_dot_gov).merge(login_dot_gov_token_exp: nil)
       expect do
         service.user_info(invalid)
       end.to raise_error(UserInfoServiceError, 'no_token_exp')
@@ -94,39 +69,65 @@ describe UserInfoService do
       let(:exp) { 1.second.ago }
       it 'should throw error' do
         expect do
-          service.user_info(valid_session)
+          service.user_info(valid_csp_session(:login_dot_gov))
         end.to raise_error(UserInfoServiceError, 'expired_token')
       end
     end
   end
-  def verify_logs(status:)
-    verify_new_relic
-    verify_rails(status)
+  def verify_logs(status:, csp: 'login_dot_gov')
+    verify_new_relic(csp)
+    verify_rails(status: status, csp: csp)
   end
 
-  def verify_new_relic
+  def verify_new_relic(csp)
     new_relic_tracer = instance_double(NewRelic::Agent::Transaction::ExternalRequestSegment)
     expect(NewRelic::Agent::Tracer).to receive(:start_external_request_segment)
-      .with(library: 'Net::HTTP', uri: user_info_url, procedure: :get)
+      .with(library: 'Net::HTTP', uri: user_info_url(csp), procedure: :get)
       .and_return(new_relic_tracer)
     expect(new_relic_tracer).to receive(:finish)
   end
 
-  def verify_rails(status)
+  def verify_rails(status:, csp:)
     allow(Rails.logger).to receive(:info)
     expect(Rails.logger).to receive(:info).with(
-      ['Calling Login.gov user_info',
-       { login_dot_gov_request_method: :get,
-         login_dot_gov_request_url: user_info_url,
-         login_dot_gov_request_method_name: :request_info }]
+      ['Calling CSP user_info',
+       { csp: csp,
+         csp_request_method: :get,
+         csp_request_url: user_info_url(csp),
+         csp_request_method_name: :request_info }]
     )
     expect(Rails.logger).to receive(:info).with(
-      ['Login.gov user_info response info',
-       { login_dot_gov_request_method: :get,
-         login_dot_gov_request_url: user_info_url,
-         login_dot_gov_request_method_name: :request_info,
-         login_dot_gov_response_status_code: status,
-         login_dot_gov_response_duration: anything }]
+      ['CSP user_info response info',
+       { csp: csp,
+         csp_request_method: :get,
+         csp_request_url: user_info_url(csp),
+         csp_request_method_name: :request_info,
+         csp_response_status_code: status,
+         csp_response_duration: anything }]
     )
+  end
+
+  def valid_csp_session(csp)
+    csp = csp.to_s
+    session = ActiveSupport::HashWithIndifferentAccess.new
+    session[:csp] = csp
+    session["#{csp}_token"] = token
+    session["#{csp}_token_exp"] = exp
+    session
+  end
+
+  def csp_response(csp)
+    file_path_components = ['csps', csp.to_s, 'user_info.json']
+    file_path = File.join(*file_path_components)
+    json_fixture(file_path)
+  end
+
+  def user_info_url(csp)
+    case csp.to_s
+    when 'login_dot_gov' then LOGIN_DOT_GOV_CLIENT_CONFIG[:client_options][:userinfo_endpoint]
+    when 'id_me' then ID_ME_CLIENT_CONFIG[:client_options][:userinfo_endpoint]
+    # when 'clear' then CspConfig::CLEAR.user_info_endpoint
+    else raise ArgumentError, "Unknown CSP code: #{csp}"
+    end
   end
 end
