@@ -78,7 +78,13 @@ class LoginDotGovController < ApplicationController
 
   def ial_2_actions(user, auth)
     data = auth.extra.raw_info
-    puts "raw_info: #{data}"
+    Rails.logger.info(['CLEAR auth callback user info',
+                       { provider: auth.provider,
+                         uid: auth.uid,
+                         omniauth_email: auth.info.email,
+                         raw_info_sub: data['sub'],
+                         raw_info_email: data['email'],
+                         raw_info_email_verified: data['email_verified'] }])
 
     # assume that assurance level is ial2 if using CLEAR
     # return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'

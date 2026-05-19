@@ -3,7 +3,21 @@
 # A service that verifies generates an ao invitation
 class UserInfoService
   USER_INFO_URI = URI("https://#{ENV.fetch('CLEAR_IDP_HOST')}/integrations/userinfo")
-  USER_INFO_URI_WITH_CLAIMS_QUERY = URI("#{USER_INFO_URI}?claims=ssn9")
+  USER_INFO_CLAIMS = {
+    id_token: {
+      ssn9: nil,
+      email: nil,
+      email_verified: nil
+    },
+    userinfo: {
+      ssn9: nil,
+      email: nil,
+      email_verified: nil,
+      given_name: nil,
+      family_name: nil
+    }
+  }.to_json
+  USER_INFO_CLAIMS_URI = URI("#{USER_INFO_URI}?#{ { claims: USER_INFO_CLAIMS }.to_query }")
 
   def user_info(session)
     validate_session(session)
@@ -25,12 +39,20 @@ class UserInfoService
 
   def request_info(token)
     start_tracking
-    response = Net::HTTP.get_response(USER_INFO_URI_WITH_CLAIMS_QUERY, auth_header(token))
-    puts "request_info response: #{response}"
+    response = Net::HTTP.get_response(USER_INFO_CLAIMS_URI, auth_header(token))
     code = response.code.to_i
     case code
     when 200...299
-      parsed_response(response)
+      user_info = parsed_response(response)
+      Rails.logger.info(['CLEAR userinfo response',
+                         { sub: user_info&.dig('sub'),
+                           email: user_info&.dig('email'),
+                           email_verified: user_info&.dig('email_verified'),
+                           given_name_present: user_info&.dig('given_name').present?,
+                           family_name_present: user_info&.dig('family_name').present?,
+                           ssn9_present: user_info&.dig('ssn9').present?,
+                           social_security_number_present: user_info&.dig('social_security_number').present? }])
+      user_info
     when 401
       raise UserInfoServiceError, 'unauthorized'
     else
@@ -56,10 +78,10 @@ class UserInfoService
     Rails.logger.info(
       ['Calling Login.gov user_info',
        { login_dot_gov_request_method: :get,
-         login_dot_gov_request_url: USER_INFO_URI,
+         login_dot_gov_request_url: USER_INFO_CLAIMS_URI,
          login_dot_gov_request_method_name: :request_info }]
     )
-    @tracker = NewRelic::Agent::Tracer.start_external_request_segment(library: 'Net::HTTP', uri: USER_INFO_URI,
+    @tracker = NewRelic::Agent::Tracer.start_external_request_segment(library: 'Net::HTTP', uri: USER_INFO_CLAIMS_URI,
                                                                       procedure: :get)
   end
 
@@ -68,7 +90,7 @@ class UserInfoService
     Rails.logger.info(
       ['Login.gov user_info response info',
        { login_dot_gov_request_method: :get,
-         login_dot_gov_request_url: USER_INFO_URI,
+         login_dot_gov_request_url: USER_INFO_CLAIMS_URI,
          login_dot_gov_request_method_name: :request_info,
          login_dot_gov_response_status_code: code,
          login_dot_gov_response_duration: Time.now - @start }]
