@@ -5,7 +5,7 @@
 # check, so I disabled the class length check.  When we create controllers for the other CSPs we can pull
 # out common code and turn the check back on.
 
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable Metrics/ClassLength, Metrics/AbcSize
 class LoginDotGovController < ApplicationController
   skip_before_action :verify_authenticity_token, only: :id_me
 
@@ -143,7 +143,7 @@ class LoginDotGovController < ApplicationController
   end
 
   def csp
-    csp = Csp.active.find_by(name: :login_dot_gov)
+    csp = Csp.active.find_by(name: :id_me)
     return csp if csp
 
     Rails.logger.info(['User attempted to login with Login.gov but no active CSP found',
@@ -160,10 +160,8 @@ class LoginDotGovController < ApplicationController
 
   def ial_1_user?(auth)
     data = auth.extra.raw_info
-    return true if  data.ial == 'http://idmanagement.gov/ns/assurance/ial/1' &&
-      auth.provider == :login_dot_gov
-    return true if data.identity_assurance_level == 1 && auth.provider == :id_me
-
-    false
+    (auth.provider == :login_dot_gov && data.ial == 'http://idmanagement.gov/ns/assurance/ial/1') ||
+      (auth.provider == :id_me && data.identity_assurance_level == 1)
   end
 end
+# rubocop:enable Metrics/ClassLength, Metrics/AbcSize

@@ -167,6 +167,9 @@ GEM
       addressable
     date (3.5.1)
     date_time_precision (0.8.1)
+    debug (1.6.3)
+      irb (>= 1.3.6)
+      reline (>= 0.3.1)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     diff-lcs (1.5.1)
@@ -217,6 +220,10 @@ GEM
       railties (>= 5.0)
     htmlbeautifier (1.4.3)
     htmlentities (4.3.4)
+    httplog (1.8.0)
+      benchmark
+      rack (>= 2.0)
+      rainbow (>= 2.0.0)
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
     ice_nine (0.11.2)
@@ -610,11 +617,13 @@ DEPENDENCIES
   byebug
   capybara
   climate_control
+  debug (~> 1.6.0)
   dotenv-rails
   factory_bot_rails
   fakefs
   fhir_models
   health_check
+  httplog
   jbuilder (~> 2.7)
   json-jwt (>= 1.16.6)
   kaminari
@@ -626,7 +635,7 @@ DEPENDENCIES
   newrelic_rpm (~> 8.10)
   nokogiri (>= 1.19.3)
   omniauth-rails_csrf_protection
-  omniauth_openid_connect
+  omniauth_openid_connect (~> 0.8.0)
   pg (>= 0.18, < 2.0)
   pg-aws_rds_iam
   pry

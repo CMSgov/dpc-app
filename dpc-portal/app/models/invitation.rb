@@ -139,10 +139,10 @@ class Invitation < ApplicationRecord
   end
 
   def check_missing_user_info(user_info, *keys)
-    keys.each do |key|
-      return if user_info[key].present?
-    end
-    Rails.logger.error("User Info Missing: #{keys}")
+    missing_keys = keys.reject { |key| user_info[key].present? }
+    return unless missing_keys.any?
+
+    Rails.logger.error("User Info Missing: #{missing_keys}")
     raise UserInfoServiceError, 'missing_info'
   end
 
