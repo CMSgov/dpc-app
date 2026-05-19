@@ -77,7 +77,7 @@ GEM
     drb (2.2.3)
     erb (6.0.4)
     erubi (1.13.1)
-    faraday (2.14.1)
+    faraday (2.14.2)
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
@@ -102,7 +102,7 @@ GEM
       reline (>= 0.4.2)
     json (2.19.4)
     jsonapi-renderer (0.2.2)
-    jwt (3.1.2)
+    jwt (3.2.0)
       base64
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
@@ -262,7 +262,9 @@ PLATFORMS
 DEPENDENCIES
   active_model_serializers
   api_client!
+  faraday (>= 2.14.2)
   fhir_models
+  jwt (>= 3.2.0)
   macaroons
   nokogiri (>= 1.19.3)
   oauth2
