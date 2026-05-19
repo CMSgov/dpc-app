@@ -10,7 +10,11 @@ module Users
                          { actionContext: LoggingConstants::ActionContext::Authentication,
                            actionType: LoggingConstants::ActionType::UserLoggedOut }])
       session.delete('user')
-      redirect_to url_for_login_dot_gov_logout, allow_other_host: true
+      csp = session.delete(:csp)
+      session.delete("#{csp}_token") if csp
+      session.delete("#{csp}_token_exp") if csp
+
+      redirect_to url_for_logout(csp), allow_other_host: true
     end
 
     def logged_out

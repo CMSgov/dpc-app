@@ -9,7 +9,7 @@ class LoginDotGovController < ApplicationController
 
     user = User.find_by(provider: auth.provider, uid: auth.uid)
     if user
-      sign_in(user)
+      sign_in(user, csp: auth.provider)
       session[:logged_in_at] = Time.now
       Rails.logger.info(['User logged in',
                          { actionContext: LoggingConstants::ActionContext::Authentication,
@@ -45,7 +45,7 @@ class LoginDotGovController < ApplicationController
       session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id, invitation.id)
     end
 
-    redirect_to url_for_login_dot_gov_logout, allow_other_host: true
+    redirect_to url_for_logout(session[:csp]), allow_other_host: true
   end
 
   private
@@ -93,8 +93,8 @@ class LoginDotGovController < ApplicationController
   def ial_1_user?(auth)
     data = auth.extra.raw_info
     return true if  data.ial == 'http://idmanagement.gov/ns/assurance/ial/1' &&
-                    auth.provider == :login_dot_gov
-    return true if data.identity_assurance_level == 1 && auth.provider == :id_me
+                    auth.provider == :login_dot_gov.to_s
+    return true if data.identity_assurance_level == 1 && auth.provider == :id_me.to_s
 
     false
   end

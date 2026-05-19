@@ -78,9 +78,10 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
-    url = URI::HTTPS.build(host: IDP_HOST,
+    csp_config = CspConfig.for(:id_me)
+    url = URI::HTTPS.build(host: csp_config.host,
                            path: '/oauth/authorize',
-                           query: { client_id: IDP_CLIENT_ID,
+                           query: { client_id: csp_config.identifier,
                                     redirect_uri: "#{my_protocol_host}/auth/id_me/callback",
                                     response_type: 'code',
                                     scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',

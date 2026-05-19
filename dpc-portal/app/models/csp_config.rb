@@ -6,7 +6,9 @@ class CspConfig
   ENV_NAME = ENV.fetch('ENV', 'local')
   CONFIG = Rails.application.config_for(:csp).freeze
 
-  def initialize(code, user_info_endpoint, log_out_path, token_expiration_interval)
+  def initialize(code, host, identifier, user_info_endpoint, log_out_path, token_expiration_interval) # rubocop:disable Metrics/ParameterLists
+    @host = host
+    @identifier = identifier
     @code = code
     @user_info_endpoint = user_info_endpoint
     @log_out_path = log_out_path
@@ -14,35 +16,41 @@ class CspConfig
   end
 
   LOGIN_DOT_GOV = new('login_dot_gov',
-                      CONFIG['login_dot_gov']['user_info_path'],
-                      CONFIG['login_dot_gov']['log_out_path'],
-                      CONFIG['login_dot_gov']['token_expiration_interval'])
+                      CONFIG[:login_dot_gov][:host],
+                      CONFIG[:login_dot_gov][:identifier],
+                      CONFIG[:login_dot_gov][:user_info_path],
+                      CONFIG[:login_dot_gov][:log_out_path],
+                      CONFIG[:login_dot_gov][:token_expiration_interval])
   ID_ME = new('id_me',
-              CONFIG['id_me']['user_info_path'],
-              CONFIG['id_me']['log_out_path'],
-              CONFIG['id_me']['token_expiration_interval'])
+              CONFIG[:id_me][:host],
+              CONFIG[:id_me][:identifier],
+              CONFIG[:id_me][:user_info_path],
+              CONFIG[:id_me][:log_out_path],
+              CONFIG[:id_me][:token_expiration_interval])
   #   CLEAR = new('clear',
-  #               CONFIG['clear']['user_info_path'],
-  #               CONFIG['clear']['log_out_path'],
-  #               CONFIG['clear']['token_expiration_interval'])
+  #               CONFIG[:clear][:host],
+  #               CONFIG[:clear][:identifier],
+  #               CONFIG[:clear][:user_info_path],
+  #               CONFIG[:clear][:log_out_path],
+  #               CONFIG[:clear][:token_expiration_interval])
   private_class_method :new
 
-  attr_reader :user_info_endpoint
+  attr_reader :user_info_endpoint, :log_out_path, :token_expiration_interval, :host, :identifier
 
-  def logout_uri
-    @log_out_path
-  end
-
-  def self.from(code)
+  def self.for(code)
     case code.to_s
-    when 'LOGIN_DOT_GOV' then LOGIN_DOT_GOV
-    when 'ID_ME' then ID_ME
-    # when 'CLEAR' then CLEAR
+    when 'login_dot_gov' then LOGIN_DOT_GOV
+    when 'id_me' then ID_ME
+    # when 'clear' then CLEAR
     else raise ArgumentError, "Unknown CSP code: #{code}"
     end
   end
 
   def self.[](code)
     from(code)
+  end
+
+  def self.list
+    [LOGIN_DOT_GOV.code, ID_ME.code] # CLEAR
   end
 end
