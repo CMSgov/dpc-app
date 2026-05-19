@@ -8,7 +8,13 @@
         <h1 class="margin-bottom-0">DPC Portal sign in</h1>
         <p>Sign in with your DPC Portal Login.gov account</p>
         <%= button_to @login_path, class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
-          Sign in with <span class="login-button__logo">Login.gov</span>
+          <span class="clear-login-button__logo">CLEAR</span>
+        <% end %>
+        <%= button_to @login_path, class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
+          <span class="idme-login-button__logo">ID.me</span>
+        <% end %>
+        <%= button_to @login_path, class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
+          <span class="lg-login-button__logo">Login.gov</span>
         <% end %>
         <%= render(Core::Navigation::SystemUseAgreementLinkComponent.new) %>
         <div class="line-separator"></div>

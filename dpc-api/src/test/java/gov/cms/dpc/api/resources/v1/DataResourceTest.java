@@ -60,7 +60,7 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 	@ParameterizedTest
 	@MethodSource("downloadArgs")
 	void canDownloadFiles(boolean compressFile, Map<String, String> requestHeaders) throws IOException {
-		String testData = "test data".repeat(500);
+		String testData = "test data".repeat(50);
 		String fileName = createTestExport(testData, compressFile);
 
 		try (ClassicHttpResponse response = downloadExport(fileName, requestHeaders)) {

@@ -1,7 +1,26 @@
-.login-button__logo {
+.lg-login-button__logo {
     vertical-align: middle;
     color: #0000;
-    background: url(asset_path('lg-logo-white.svg')) 100% no-repeat;
+    background: url(asset_path('lg-logo-white.svg')) center / contain no-repeat;
+    margin-left: 2px;
+    font-size: 1.45rem
+}
+
+.clear-login-button__logo {
+    vertical-align: middle;
+    color: #0000;
+    background: url(asset_path('clear-logo-white.svg')) center / contain no-repeat;
+    margin-left: 2px;
+    font-size: 1.45rem
+}
+
+.idme-login-button__logo {
+    display: inline-block;
+    vertical-align: middle;
+    color: #0000;
+    background: url(asset_path('idme-logo-white.svg')) center / contain no-repeat;
+    width: 2.5rem;
+    height: 1rem;
     margin-left: 2px;
     font-size: 1.45rem
 }

@@ -23,7 +23,7 @@ import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandler;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
-import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidatorProvider;
+import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
@@ -63,7 +63,6 @@ public class APITestHelpers {
     private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
     private static final String CONSENT_TRUNCATE_TASK = "http://localhost:9901/tasks/truncate";
     public static String ORGANIZATION_NPI = "1111111112";
-
     private static final String configPath = "src/test/resources/test.application.yml";
 
     private APITestHelpers() {
@@ -166,7 +165,7 @@ public class APITestHelpers {
                     new DefaultProfileValidationSupport(ctx),
                     new InMemoryTerminologyServerValidationSupport(ctx));
             final InjectingConstraintValidatorFactory constraintFactory = new InjectingConstraintValidatorFactory(
-                    Set.of(new ProfileValidator(new FHIRValidatorProvider(ctx, config, support).get())));
+                Set.of(new ProfileValidator(new FHIRValidationModule(config).provideFhirValidator(ctx, support))));
 
             builder.setValidator(provideValidator(constraintFactory));
         }
