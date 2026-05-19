@@ -121,10 +121,9 @@ class LoginDotGovController < ApplicationController
   end
 
   def ial_2_actions(user, auth)
-    data = auth.extra.raw_info
-
     return if ial_1_user?(auth)
 
+    data = auth.extra.raw_info
     maybe_update_user(user, data)
     session[:csp] = auth.provider
     session["#{auth.provider}_token"] = auth.credentials.token
