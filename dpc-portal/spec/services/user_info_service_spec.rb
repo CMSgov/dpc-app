@@ -4,7 +4,7 @@ require 'spec_helper'
 require 'rails_helper'
 
 describe UserInfoService do
-  let(:user_info_url) { UserInfoService::USER_INFO_URI }
+  let(:user_info_url) { UserInfoService::USER_INFO_CLAIMS_URI }
   let(:service) { UserInfoService.new }
   let(:token) { 'bearer-token' }
   let(:exp) { 2.hours.from_now }

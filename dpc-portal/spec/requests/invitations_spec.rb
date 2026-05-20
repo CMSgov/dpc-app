@@ -140,8 +140,11 @@ RSpec.describe 'Invitations', type: :request do
       it 'should redirect to login.gov' do
         org_id = invitation.provider_organization.id
         post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
-        redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
-        expect(redirect_params['redirect_uri']).to start_with('http://localhost:3100/')
+        redirect_url = URI.parse(response.location)
+        redirect_params = Rack::Utils.parse_query(redirect_url.query)
+        expect(redirect_url.host).to eq ENV.fetch('CLEAR_IDP_HOST')
+        expect(redirect_url.path).to eq '/integrations/oauth2/auth'
+        expect(redirect_params['redirect_uri']).to start_with('http://localhost:3100/auth/clear/callback')
         expect(request.session[:user_return_to]).to eq expected_redirect
       end
 
