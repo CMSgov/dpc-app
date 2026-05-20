@@ -22,8 +22,6 @@ public class DPCFHIRConfiguration {
     public static class FHIRValidationConfiguration {
 
         private boolean enabled;
-        private boolean schemaValidation;
-        private boolean schematronValidation;
         private boolean debugValidation;
 
         public FHIRValidationConfiguration() {
@@ -41,36 +39,6 @@ public class DPCFHIRConfiguration {
          */
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
-        }
-
-        public boolean isSchemaValidation() {
-            return schemaValidation;
-        }
-
-        /**
-         * Enable or disable FHIR schema validation
-         * <p>
-         * Note: If enabled, FHIR validation resource JARs must be in classpath.
-         *
-         * @param schemaValidation - {@code true} validation is enabled. {@code false} validation is disabled
-         */
-        public void setSchemaValidation(boolean schemaValidation) {
-            this.schemaValidation = schemaValidation;
-        }
-
-        public boolean isSchematronValidation() {
-            return schematronValidation;
-        }
-
-        /**
-         * Enable or disable Schematron validation
-         * <p>
-         * Note: If enabled, ph-schematron jar must be in classpath
-         *
-         * @param schematronValidation - {@code true} validation is enabled. {@code false} validation is disabled
-         */
-        public void setSchematronValidation(boolean schematronValidation) {
-            this.schematronValidation = schematronValidation;
         }
 
         public boolean isDebugValidation() {

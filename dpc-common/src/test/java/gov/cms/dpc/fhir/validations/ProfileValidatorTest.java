@@ -35,8 +35,6 @@ class ProfileValidatorTest {
         ctx = FhirContext.forDstu3();
 
         fhirValidator = ctx.newValidator();
-        fhirValidator.setValidateAgainstStandardSchematron(false);
-        fhirValidator.setValidateAgainstStandardSchema(false);
         FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
         fhirValidator.registerValidatorModule(instanceValidator);
 

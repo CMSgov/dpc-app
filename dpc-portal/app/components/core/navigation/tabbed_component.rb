@@ -13,7 +13,7 @@ module Core
       # Note: if no link is current, no linked content will show on page load
       #       if more than one link is current, the content linked to the last link will show
       def initialize(header_id, links)
-        super
+        super()
         @header_id = header_id
         @start_index = -1
         links.each_with_index do |link, index|

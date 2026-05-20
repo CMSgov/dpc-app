@@ -1,13 +1,13 @@
 package gov.cms.dpc.fhir.dropwizard.filters;
 
 import gov.cms.dpc.fhir.FHIRMediaTypes;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.UriInfo;
-import org.eclipse.jetty.server.Response;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -43,7 +43,7 @@ public class FHIRRequestFilterTest {
         Mockito.when(request.getHeaders()).thenReturn(headerMap);
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> filter.filter(request));
-        assertEquals(Response.SC_BAD_REQUEST, exception.getResponse().getStatus(), "Should have 400 error");
+        assertEquals(HttpServletResponse.SC_BAD_REQUEST, exception.getResponse().getStatus(), "Should have 400 error");
     }
 
     @Test
@@ -55,7 +55,7 @@ public class FHIRRequestFilterTest {
         Mockito.when(request.getHeaders()).thenReturn(headerMap);
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> filter.filter(request));
-        assertEquals(Response.SC_UNSUPPORTED_MEDIA_TYPE, exception.getResponse().getStatus(), "Should have 415 error");
+        assertEquals(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, exception.getResponse().getStatus(), "Should have 415 error");
     }
 
     @Test
@@ -67,7 +67,7 @@ public class FHIRRequestFilterTest {
         Mockito.when(request.getHeaders()).thenReturn(headerMap);
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> filter.filter(request));
-        assertEquals(Response.SC_UNSUPPORTED_MEDIA_TYPE, exception.getResponse().getStatus(), "Should have 415 error");
+        assertEquals(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, exception.getResponse().getStatus(), "Should have 415 error");
     }
 
     @Test
@@ -92,7 +92,7 @@ public class FHIRRequestFilterTest {
         Mockito.when(request.getHeaders()).thenReturn(headerMap);
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> filter.filter(request));
-        assertEquals(Response.SC_BAD_REQUEST, exception.getResponse().getStatus(), "Should have 400 error");
+        assertEquals(HttpServletResponse.SC_BAD_REQUEST, exception.getResponse().getStatus(), "Should have 400 error");
     }
 
     @Test
@@ -104,7 +104,7 @@ public class FHIRRequestFilterTest {
         Mockito.when(request.getHeaders()).thenReturn(headerMap);
 
         final WebApplicationException exception = assertThrows(WebApplicationException.class, () -> filter.filter(request));
-        assertEquals(Response.SC_UNSUPPORTED_MEDIA_TYPE, exception.getResponse().getStatus(), "Should have 415 error");
+        assertEquals(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, exception.getResponse().getStatus(), "Should have 415 error");
     }
 
     @Test

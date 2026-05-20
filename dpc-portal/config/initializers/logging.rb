@@ -50,5 +50,7 @@ module LoggingConstants
     UnacceptableInvitation = 'UnacceptableInvitation'
 
     InvalidFlashStatus = 'InvalidFlashStatus'
+
+    InvalidCsp = 'InvalidCsp'
   end
 end

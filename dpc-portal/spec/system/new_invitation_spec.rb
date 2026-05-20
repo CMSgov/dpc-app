@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'securerandom'
 
 RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :system, js: true do
   include DpcClientSupport
@@ -8,7 +9,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :system, 
   before do
     driven_by(:selenium_headless)
   end
-  let(:uid) { '12345' }
+  let(:uid) { SecureRandom.uuid }
 
   before do
     OmniAuth.config.test_mode = true
@@ -23,7 +24,9 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :system, 
   end
   context 'CD invite' do
     let(:dpc_api_organization_id) { 'some-gnarly-guid' }
-    let!(:user) { create(:user, provider: :id_me, uid: '12345') }
+    let!(:user) { create(:user) }
+    let!(:csp) { create(:csp, name: :id_me) }
+    let!(:csp_user) { create(:csp_user, user_id: user.id, csp:, uuid: uid) }
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let!(:ao_org_link) { create(:ao_org_link, user:, provider_organization: org) }
 

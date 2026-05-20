@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'securerandom'
+
 module LoginSupport
   def sign_in(user, csp: :id_me)
     OmniAuth.config.test_mode = true

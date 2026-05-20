@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'securerandom'
 
 RSpec.describe 'Accessibility', type: :system do
   include DpcClientSupport
@@ -10,7 +11,8 @@ RSpec.describe 'Accessibility', type: :system do
   end
   let(:dpc_api_organization_id) { 'some-gnarly-guid' }
   let(:axe_standard) { %w[best-practice wcag21aa] }
-  let(:uid) { '12345' }
+  let(:uid) { SecureRandom.uuid }
+  let!(:csp) { create(:csp, name: :id_me) }
 
   before do
     OmniAuth.config.test_mode = true
@@ -43,8 +45,8 @@ RSpec.describe 'Accessibility', type: :system do
         expect(page).to be_axe_clean.according_to axe_standard
       end
       it 'shows sanctioned ao page' do
-        create(:user, provider: :id_me, uid: '12345',
-                      verification_status: 'rejected', verification_reason: 'ao_med_sanctions')
+        user = create(:user, verification_status: 'rejected', verification_reason: 'ao_med_sanctions')
+        create(:csp_user, user:, csp:, uuid: uid)
         visit '/auth/id_me/callback'
         expect(page).to have_text(I18n.t('verification.ao_med_sanctions_status'))
         expect(page).to be_axe_clean.according_to axe_standard
@@ -53,8 +55,8 @@ RSpec.describe 'Accessibility', type: :system do
 
     context 'valid user tries to log in' do
       it 'shows success page' do
-        create(:user, provider: :id_me, uid: '12345',
-                      verification_status: 'approved')
+        user = create(:user, verification_status: 'approved')
+        create(:csp_user, user:, csp:, uuid: uid)
         visit '/auth/id_me/callback'
         expect(page).to have_text("You don't have any organizations to show.")
         expect(page).to be_axe_clean.according_to axe_standard
@@ -63,7 +65,8 @@ RSpec.describe 'Accessibility', type: :system do
   end
 
   context 'organizations' do
-    let!(:user) { create(:user, uid:, provider: :id_me, verification_status: :approved) }
+    let!(:user) { create(:user, verification_status: :approved) }
+    let!(:csp_user) { create(:csp_user, user:, csp:, uuid: uid) }
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let(:mock_client_token_manager) { instance_double(ClientTokenManager) }
     let(:mock_public_key_manager) { instance_double(PublicKeyManager) }

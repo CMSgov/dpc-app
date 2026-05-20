@@ -7,8 +7,8 @@ require "dpc_portal_utils"
 include DpcPortalUtils
 
 PORTAL_CSP_CONFIG = Rails.application.config_for(:csp).freeze
-ID_ME_CONFIG = PORTAL_CSP_CONFIG[:id_me].freeze 
-LOGIN_DOT_GOV_CONFIG = PORTAL_CSP_CONFIG[:login_dot_gov].freeze  
+ID_ME_CONFIG = PORTAL_CSP_CONFIG[:id_me].freeze
+LOGIN_DOT_GOV_CONFIG = PORTAL_CSP_CONFIG[:login_dot_gov].freeze
 
 ID_ME_CLIENT_CONFIG = {
   name: :id_me,
@@ -57,7 +57,6 @@ LOGIN_DOT_GOV_CLIENT_CONFIG = {
 
 Rails.application.config.middleware.use OmniAuth::Builder do
   OmniAuth.config.logger = Rails.logger
-  
 
   ## ID.me
   provider :openid_connect, ID_ME_CLIENT_CONFIG

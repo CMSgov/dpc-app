@@ -8,7 +8,7 @@ module Core
 
       # rubocop:disable Metrics/ParameterLists
       def initialize(label:, attribute:, default: '', input_options: {}, hint: '', error_msg: '')
-        super
+        super()
         @label = label
         @attribute = attribute
         @input_options = input_options

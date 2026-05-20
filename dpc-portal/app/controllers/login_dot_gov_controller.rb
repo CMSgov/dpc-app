@@ -1,11 +1,17 @@
 # frozen_string_literal: true
 
-# Handles interactions with login.gov
+# Handles interactions with login.gov.
+# This class is > 100 lines and my attempts to refactor made it uglier and too complex to pass the ABC
+# check, so I disabled the class length check.  When we create controllers for the other CSPs we can pull
+# out common code and turn the check back on.
+
+# rubocop:disable Metrics/ClassLength, Metrics/AbcSize
 class LoginDotGovController < ApplicationController
   skip_before_action :verify_authenticity_token, only: :id_me
 
   def id_me
     auth = request.env['omniauth.auth']
+    return unless (csp = csp())
 
     user = User.find_by(provider: auth.provider, uid: auth.uid)
     if user
@@ -20,8 +26,7 @@ class LoginDotGovController < ApplicationController
   end
 
   def no_account
-    render(Page::Utility::ErrorComponent.new(nil, 'no_account'),
-           status: :forbidden)
+    render(Page::Utility::ErrorComponent.new(nil, 'no_account'), status: :forbidden)
   end
 
   def failure
@@ -50,17 +55,25 @@ class LoginDotGovController < ApplicationController
 
   private
 
+  def sign_in_and_log(user)
+    return unless user
+
+    sign_in(user)
+    session[:logged_in_at] = Time.now
+    Rails.logger.info(['User logged in',
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::UserLoggedIn }])
+  end
+
   def handle_invitation_flow_failure(invitation_id)
     Rails.logger.info(['Failed invitation flow',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::FailedLogin }])
     invitation = Invitation.find(invitation_id)
     if invitation.credential_delegate?
-      render(Page::Utility::ErrorComponent.new(invitation, 'fail_to_proof'),
-             status: :forbidden)
+      render(Page::Utility::ErrorComponent.new(invitation, 'fail_to_proof'), status: :forbidden)
     else
-      render(Page::Invitations::AoFlowFailComponent.new(invitation, 'fail_to_proof', 1),
-             status: :forbidden)
+      render(Page::Invitations::AoFlowFailComponent.new(invitation, 'fail_to_proof', 1), status: :forbidden)
     end
   end
 
@@ -68,11 +81,53 @@ class LoginDotGovController < ApplicationController
     user&.update(given_name: data.given_name, family_name: data.family_name)
   end
 
-  def ial_2_actions(user, auth)
-    data = auth.extra.raw_info
+  def update_email(csp_user, new_emails)
+    return unless csp_user
 
+    existing_emails = csp_user.user_emails
+
+    # Scan through all of the email from the CSP and add or update as necesssary.
+    ActiveRecord::Base.transaction do
+      add_or_activate_new_email(csp_user, new_emails, existing_emails)
+      deactivate_old_email(new_emails, existing_emails)
+    end
+  end
+
+  def add_or_activate_new_email(csp_user, new_emails, existing_emails)
+    new_emails&.each do |new_email|
+      existing_email = existing_emails.find do |existing_email|
+        existing_email.email == new_email
+      end
+
+      if existing_email.nil?
+        # Add this email
+        UserEmail.create!(csp_user:, email: new_email, active: true)
+      else
+        # Potentially activate this email
+        activate_email(existing_email)
+      end
+    end
+  end
+
+  def deactivate_old_email(new_emails, existing_emails)
+    # If an existing email is no longer in the list provided by the CSP, deactivate it.
+    existing_emails&.each do |existing_email|
+      unless new_emails&.include?(existing_email.email)
+        existing_email.update!(active: false, deactivated_at: Time.current, reactivated_at: nil)
+      end
+    end
+  end
+
+  def activate_email(user_email)
+    return unless user_email.active == false
+
+    user_email.update!(active: true, deactivated_at: nil, reactivated_at: Time.current)
+  end
+
+  def ial_2_actions(user, auth)
     return if ial_1_user?(auth)
 
+    data = auth.extra.raw_info
     maybe_update_user(user, data)
     session[:csp] = auth.provider
     session["#{auth.provider}_token"] = auth.credentials.token
@@ -90,12 +145,29 @@ class LoginDotGovController < ApplicationController
     session.delete(:user_return_to) || organizations_path
   end
 
+  def csp
+    csp = Csp.active.find_by(name: :id_me)
+    return csp if csp
+
+    Rails.logger.info(['User attempted to login with Login.gov but no active CSP found',
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::InvalidCsp }])
+    render(Page::Utility::ErrorComponent.new(nil, 'login_gov_signin_fail'))
+    nil
+  end
+
+  def post_signin_actions(user, csp_user, auth)
+    ial_2_actions(user, auth)
+    update_email(csp_user, auth.extra.raw_info.all_emails)
+  end
+
   def ial_1_user?(auth)
     data = auth.extra.raw_info
-    return true if  data.ial == 'http://idmanagement.gov/ns/assurance/ial/1' &&
-                    auth.provider == :login_dot_gov.to_s
-    return true if data.identity_assurance_level == 1 && auth.provider == :id_me.to_s
-
-    false
+    case auth.provider
+    when :login_dot_gov then data.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
+    when :id_me         then data.identity_assurance_level == 1
+    else false
+    end
   end
 end
+# rubocop:enable Metrics/ClassLength, Metrics/AbcSize
