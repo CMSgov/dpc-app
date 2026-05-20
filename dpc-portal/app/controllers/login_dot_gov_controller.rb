@@ -13,11 +13,15 @@ class LoginDotGovController < ApplicationController
     auth = request.env['omniauth.auth']
     return unless (csp = csp())
 
-    csp_user = CspUser.find_by(uuid: auth.uid, csp:)
-
-    user = csp_user&.user
-    sign_in_and_log(user)
-    post_signin_actions(user, csp_user, auth)
+    user = User.find_by(provider: auth.provider, uid: auth.uid)
+    if user
+      sign_in(user, csp: auth.provider)
+      session[:logged_in_at] = Time.now
+      Rails.logger.info(['User logged in',
+                         { actionContext: LoggingConstants::ActionContext::Authentication,
+                           actionType: LoggingConstants::ActionType::UserLoggedIn }])
+    end
+    ial_2_actions(user, auth)
     redirect_to path(user, auth)
   end
 
@@ -46,7 +50,7 @@ class LoginDotGovController < ApplicationController
       session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id, invitation.id)
     end
 
-    redirect_to url_for_login_dot_gov_logout, allow_other_host: true
+    redirect_to url_for_logout(session[:csp]), allow_other_host: true
   end
 
   private
@@ -159,8 +163,11 @@ class LoginDotGovController < ApplicationController
 
   def ial_1_user?(auth)
     data = auth.extra.raw_info
-    (auth.provider == :login_dot_gov && data.ial == 'http://idmanagement.gov/ns/assurance/ial/1') ||
-      (auth.provider == :id_me && data.identity_assurance_level == 1)
+    case auth.provider
+    when :login_dot_gov then data.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
+    when :id_me         then data.identity_assurance_level == 1
+    else false
+    end
   end
 end
 # rubocop:enable Metrics/ClassLength, Metrics/AbcSize
