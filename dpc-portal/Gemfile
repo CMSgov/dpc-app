@@ -83,6 +83,8 @@ group :development do
   gem 'simplecov', '<= 0.17'
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.1.0'
+
+  gem 'ruby-lsp-rspec'
 end
 
 group :test do
