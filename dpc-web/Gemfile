@@ -48,6 +48,8 @@ gem 'rack-session', '>= 2.1.2'
 gem 'bootstrap-table-rails'
 gem 'nokogiri', '>= 1.19.3'
 gem 'net-imap', '>= 0.5.14'
+gem 'jwt', '>= 3.2.0'
+gem 'faraday', '>= 2.14.2'
 
 gem 'api_client', path: 'vendor/api_client'
 
