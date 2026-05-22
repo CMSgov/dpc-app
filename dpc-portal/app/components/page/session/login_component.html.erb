@@ -7,15 +7,39 @@
       <div class="bg-white padding-y-3 padding-x-5 border border-base-lighter">
         <h1 class="margin-bottom-0">DPC Portal sign in</h1>
         <p>Sign in with your DPC Portal Login.gov account</p>
-        <%= button_to @login_path, class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
-          <span class="clear-login-button__logo">CLEAR</span>
+        <% if @last_used_csp == :clear %>
+        <div class="last-used-login-wrapper margin-bottom-1">
         <% end %>
-        <%= button_to @login_path, class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
-          <span class="idme-login-button__logo">ID.me</span>
+            <%= button_to @login_path, class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
+            <span class="clear-login-button__logo">CLEAR</span>
+            <% end %>
+        <% if @last_used_csp == :clear%>
+            <span class="last-used-login-wrapper__badge">LAST USED</span>
+        </div>
         <% end %>
-        <%= button_to @login_path, class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
-          <span class="lg-login-button__logo">Login.gov</span>
+
+        <% if @last_used_csp == :id_me %>
+        <div class="last-used-login-wrapper margin-bottom-1">
         <% end %>
+            <%= button_to @login_path, class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
+            <span class="idme-login-button__logo">ID.me</span>
+            <% end %>
+        <% if @last_used_csp == :id_me%>
+            <span class="last-used-login-wrapper__badge">LAST USED</span>
+        </div>
+        <% end %>
+        
+        <% if @last_used_csp == :login_dot_gov %>
+        <div class="last-used-login-wrapper margin-bottom-1">
+        <% end %>
+            <%= button_to @login_path, class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
+            <span class="lg-login-button__logo">Login.gov</span>
+            <% end %>
+        <% if @last_used_csp == :login_dot_gov%>
+            <span class="last-used-login-wrapper__badge">LAST USED</span>
+        </div>
+        <% end %>
+
         <%= render(Core::Navigation::SystemUseAgreementLinkComponent.new) %>
         <div class="line-separator"></div>
         <p>
