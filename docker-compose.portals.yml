@@ -145,7 +145,7 @@ services:
       - IDP_ID_ME_HOST=api.idmelabs.com
       - IDP_ID_ME_CLIENT_ID=925bb2985ccf623114359caa76228919
       - CLEAR_IDP_HOST=verified.clearme.com
-      - CLEAR_IDP_CLIENT_ID=${CLEAR_IDP_CLIENT_ID}
+      - CLEAR_IDP_CLIENT_ID=d3ca98c2-c43c-4065-8f82-ce9958b4e6d4
       - RUBY_YJIT_ENABLE=1
       - ENV=local
       - NEW_RELIC_MONITOR_MODE=false
