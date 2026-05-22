@@ -24,10 +24,12 @@ gem 'aws-sdk-cloudwatch'
 gem 'bootsnap', '>= 1.4.2', require: false
 gem 'bundler', '>= 1.15.0'
 gem 'dotenv-rails', groups: %i[development test]
+gem 'faraday', '>= 2.14.2'
 gem 'fhir_models'
 gem 'health_check'
 gem 'jbuilder', '~> 2.7'
 gem 'json-jwt', '>= 1.16.6'
+gem 'jwt', '>= 3.2.0'
 gem 'kaminari'
 gem 'lograge'
 gem 'lookbook', '>= 2.3.3' # install lookbook so it can be deployed in lower environments.
