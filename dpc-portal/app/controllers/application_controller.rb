@@ -3,9 +3,9 @@
 # Parent class of all controllers
 class ApplicationController < ActionController::Base
   # IDP_HOST = ENV.fetch('IDP_HOST')
-  CLEAR_IDP_HOST = ENV.fetch('CLEAR_IDP_HOST')
+  # CLEAR_IDP_HOST = ENV.fetch('CLEAR_IDP_HOST')
   # IDP_CLIENT_ID = ENV.fetch('IDP_CLIENT_ID')
-  CLEAR_IDP_CLIENT_ID = ENV.fetch('CLEAR_IDP_CLIENT_ID')
+  # CLEAR_IDP_CLIENT_ID = ENV.fetch('CLEAR_IDP_CLIENT_ID')
 
   before_action :check_session_length
   before_action :set_current_request_attributes
@@ -29,13 +29,16 @@ class ApplicationController < ActionController::Base
     redirect_to sign_in_path
   end
 
-  def sign_in(user)
+  def sign_in(user, csp: :login_dot_gov)
     session['user'] = user.id
+    session[:csp] = csp
   end
 
   private
 
   def check_user_verification
+    # puts current_user.inspect
+    # puts "Current user verification status: #{current_user.verification_status}" if current_user
     return unless current_user&.rejected?
 
     render(Page::Utility::AccessDeniedComponent.new(failure_code: "verification.#{current_user.verification_reason}"))
@@ -52,8 +55,41 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def url_for_logout(csp)
+    case csp.to_s
+    when :id_me.to_s
+      url_for_id_me_logout
+    when :login_dot_gov.to_s
+      url_for_login_dot_gov_logout
+    when :clear.to_s
+      url_for_clear_logout
+    else
+      raise "Unsupported CSP: #{csp}"
+    end
+  end
+
   # Documentation at https://developers.login.gov/oidc/logout/
   def url_for_login_dot_gov_logout
+    state = SecureRandom.hex(16)
+    session['omniauth.state'] = state
+    csp_config = CspConfig.for(:login_dot_gov)
+    URI::HTTPS.build(host: csp_config.host,
+                     path: csp_config.log_out_path,
+                     query: { client_id: csp_config.identifier,
+                              post_logout_redirect_uri: "#{root_url}auth/logged_out",
+                              state: }.to_query)
+  end
+
+  def url_for_id_me_logout
+    state = SecureRandom.hex(16)
+    session['omniauth.state'] = state
+    URI::HTTPS.build(host: CspConfig.for(:id_me).host,
+                     path: CspConfig.for(:id_me).log_out_path,
+                     query: { client_id: CspConfig.for(:id_me).identifier,
+                              redirect_uri: "#{root_url}auth/logged_out" }.to_query)
+  end
+
+  def url_for_clear_logout
     state = SecureRandom.hex(16)
     session['omniauth.state'] = state
     URI::HTTPS.build(host: CLEAR_IDP_HOST,

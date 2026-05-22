@@ -5,7 +5,7 @@ module Page
     # Render a USWDS-styled organization list for an implementer.
     class OrganizationListComponent < ViewComponent::Base
       def initialize(ao_or_cd:, links:)
-        super
+        super()
         @ao = ao_or_cd == :ao
         @links = links
       end

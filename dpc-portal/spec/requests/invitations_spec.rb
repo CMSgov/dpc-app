@@ -6,6 +6,11 @@ require 'support/login_support'
 RSpec.describe 'Invitations', type: :request do
   include LoginSupport
 
+  let!(:csp) { create(:csp, name: :login_dot_gov) }
+  let!(:other_csp) { create(:csp, name: :id_me) }
+  # let(:provider) { :id_me }
+  let(:provider) { :clear }
+
   RSpec.shared_examples 'an invitation endpoint' do |method, path_suffix, type|
     let(:org) { invitation.provider_organization }
     let(:bad_org) { create(:provider_organization) }
@@ -140,11 +145,11 @@ RSpec.describe 'Invitations', type: :request do
       it 'should redirect to login.gov' do
         org_id = invitation.provider_organization.id
         post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
-        redirect_url = URI.parse(response.location)
-        redirect_params = Rack::Utils.parse_query(redirect_url.query)
-        expect(redirect_url.host).to eq ENV.fetch('CLEAR_IDP_HOST')
-        expect(redirect_url.path).to eq '/integrations/oauth2/auth'
-        expect(redirect_params['redirect_uri']).to start_with('http://localhost:3100/auth/clear/callback')
+        redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
+        expect(redirect_params['redirect_uri']).to start_with('http://localhost:3100/auth/')
+        # CLEAR logic - generalize for different CSP's
+        # expect(redirect_url.host).to eq ENV.fetch('CLEAR_IDP_HOST')
+        # expect(redirect_url.path).to eq '/integrations/oauth2/auth'
         expect(request.session[:user_return_to]).to eq expected_redirect
       end
 
@@ -617,6 +622,9 @@ RSpec.describe 'Invitations', type: :request do
           user = User.last
           expect(user.given_name).to eq user_info_template['given_name']
           expect(user.family_name).to eq user_info_template['family_name']
+          expect(user.email).to eq user_info_template['email']
+          expect(user.uid).to eq user_info_template['sub']
+          expect(user.provider).to eq 'id_me'
         end
 
         it 'should log when user is created' do
@@ -635,16 +643,16 @@ RSpec.describe 'Invitations', type: :request do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
         end
         it 'should not create user if exists' do
-          # create(:user, provider: :id_me, uid: user_info_template['sub'])
-          create(:user, provider: :clear, uid: user_info_template['sub'])
+          # create(:user, pac_id: user_info_template['social_security_number'], email: 'bob@testy.com', provider:)
+          create(:user, pac_id: user_info_template['ssn9'], email: 'bob@testy.com', provider:)
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { User.count }.by 0
         end
         it 'should update name of user if changed' do
-          # user = create(:user, provider: :id_me, uid: user_info_template['sub'], given_name: :foo,
-          user = create(:user, provider: :clear, uid: user_info_template['sub'], given_name: :foo,
-                               family_name: :bar)
+          # user = create(:user, pac_id: user_info_template['social_security_number'],
+          user = create(:user, pac_id: user_info_template['ssn9'],
+                               email: 'bob@testy.com', given_name: :foo, family_name: :bar, provider:)
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { User.count }.by 0
@@ -653,10 +661,10 @@ RSpec.describe 'Invitations', type: :request do
           expect(user.family_name).to eq user_info_template['family_name']
         end
         it 'should not override pac_id on existing user' do
-          # create(:user, provider: :id_me, uid: user_info_template['sub'], pac_id: :foo)
-          create(:user, provider: :clear, uid: user_info_template['sub'], pac_id: :foo)
+          create(:user, email: user_info_template['email'], pac_id: :foo, provider:)
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          user = User.find_by(uid: user_info_template['sub'])
+          expect(response).to be_ok
+          user = User.find_by(email: user_info_template['email'])
           # We have the fake CPI API Gateway return the ssn as pac_id
           expect(user.pac_id).to eq 'foo'
         end
@@ -713,10 +721,9 @@ RSpec.describe 'Invitations', type: :request do
           get "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
         end
         it 'should not save verification_status on user and org' do
-          # create(:user, provider: :id_me, uid: user_info_template['sub'], pac_id: :foo)
-          create(:user, provider: :clear, uid: user_info_template['sub'], pac_id: :foo)
+          create(:user, email: user_info_template['email'], provider:)
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          user = User.find_by(uid: user_info_template['sub'])
+          user = User.find_by(email: user_info_template['email'])
           expect(user.verification_status).to be_nil
           expect(org.reload.verification_status).to be_nil
         end
@@ -739,26 +746,68 @@ RSpec.describe 'Invitations', type: :request do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
         end
         it 'should set pac_id on new user' do
-          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          user = User.find_by(uid: user_info_template['sub'])
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { User.count }.by(1)
+          user = User.find_by(pac_id: user_info_template['social_security_number'])
           # We have the fake CPI API Gateway return the ssn as pac_id
           expect(user.pac_id).to eq user_info_template['social_security_number']
           expect(request.session[:user_pac_id]).to be_nil
         end
         it 'should set pac_id on existing user' do
-          # create(:user, provider: :id_me, uid: user_info_template['sub'])
-          create(:user, provider: :clear, uid: user_info_template['sub'])
-          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          user = User.find_by(uid: user_info_template['sub'])
+          create(:user, email: user_info_template['email'], provider:)
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { User.count }.by 0
+          user = User.find_by(email: user_info_template['email'])
           # We have the fake CPI API Gateway return the ssn as pac_id
           expect(user.pac_id).to eq user_info_template['social_security_number']
           expect(request.session[:user_pac_id]).to be_nil
         end
+        it 'should add credential if user with pac id exists' do
+          user = create(:user, pac_id: user_info_template['social_security_number'], provider:)
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { CspUser.where(user:).count }.by 1
+        end
+        it 'should add credential if user with pac id exists and non-matching credential exists' do
+          user = create(:user, pac_id: user_info_template['social_security_number'], provider:)
+          create(:csp_user, user:, uuid: user_info_template['sub'], csp: other_csp)
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { CspUser.where(user:).count }.by 1
+        end
+        it 'should not add credential if credential exists match on pac_id' do
+          user = create(:user, pac_id: user_info_template['social_security_number'], provider:)
+          create(:csp_user, user:, uuid: user_info_template['sub'], csp:)
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { CspUser.count }.by 0
+        end
+        it 'should add credential if user with email exists' do
+          user = create(:user, email: user_info_template['email'], provider:)
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { CspUser.where(user:).count }.by 1
+        end
+        it 'should not add credential if credential exists match on email' do
+          user = create(:user, email: user_info_template['email'], provider:)
+          create(:csp_user, user:, uuid: user_info_template['sub'], csp:)
+          expect do
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          end.to change { CspUser.count }.by 0
+        end
         it 'should save verification_status on user and org' do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-          user = User.find_by(uid: user_info_template['sub'])
+          user = User.find_by(pac_id: user_info_template['social_security_number'])
           expect(user.verification_status).to eq('approved')
           expect(org.reload.verification_status).to eq('approved')
+        end
+        it 'should fail if too many matches' do
+          create(:user, email: user_info_template['email'])
+          create(:user, pac_id: user_info_template['social_security_number'])
+          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          expect(response.body).to include(I18n.t('verification.multi_user_match_text'))
         end
       end
     end

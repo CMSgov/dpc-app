@@ -4,8 +4,8 @@ module Page
   module Invitations
     # Displays accept invitation form
     class AcceptInvitationComponent < ViewComponent::Base
-      def initialize(organization, invitation, given_name, family_name)
-        super
+      def initialize(organization, invitation, _given_name, _family_name)
+        super()
         @organization = organization
         @invitation = invitation
         @musts = [

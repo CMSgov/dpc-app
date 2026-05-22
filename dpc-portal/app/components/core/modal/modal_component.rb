@@ -8,7 +8,7 @@ module Core
 
       # prompt: text on button on page
       def initialize(heading, description, yes_action, no_message, modal_id)
-        super
+        super()
         @heading = heading
         @description = description
         @yes_action = yes_action

@@ -5,7 +5,7 @@ module Page
     # Page shown after successful completion of adding new organization.
     class NewOrganizationSuccessComponent < ViewComponent::Base
       def initialize(organization)
-        super
+        super()
         @organization = organization
       end
     end

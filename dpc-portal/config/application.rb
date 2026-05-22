@@ -32,7 +32,7 @@ module DpcPortal
     config.action_mailer.deliver_later_queue_name = "portal"
 
     # Look up previews directly in the path and set default layout
-    config.view_component.preview_paths << Rails.root.join("app", "components")
+    config.view_component.previews.paths << Rails.root.join("app", "components")
     config.view_component.default_preview_layout = "component_preview"
 
     # Use DpcJsonLogger unless disabled
