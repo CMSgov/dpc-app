@@ -49,4 +49,25 @@ RSpec.describe 'Sessions', type: :request do
       end
     end
   end
+
+  describe 'loads last_used_csp from cookies' do
+    let(:last_used_csp) { :login_dot_gov }
+    before do
+      cookies[:last_used_csp] = last_used_csp.to_s
+      get sign_in_path
+    end
+
+    # The functionality of which button is wrapped is handled in spec/components/page/session/login_component_spec.rb.
+    # Here I just wanted to make sure the cookie is read and the value is passed.
+    it 'should set last_used_csp' do
+      expect(response.body).to include('last-used-login-wrapper')
+    end
+  end
+
+  describe 'handles no last_used_csp cookie set' do
+    it 'should not wrap a csp button' do
+      get sign_in_path
+      expect(response.body).not_to include('last-used-login-wrapper')
+    end
+  end
 end
