@@ -145,6 +145,7 @@ class LoginDotGovController < ApplicationController
 
     maybe_update_user(user, data)
     session[:csp] = auth.provider
+    session["#{auth.provider}_id_token"] = auth.credentials.id_token # required for CLEAR logout
     session["#{auth.provider}_token"] = auth.credentials.token
     session["#{auth.provider}_token_exp"] = auth.credentials.expires_in.seconds.from_now
   end

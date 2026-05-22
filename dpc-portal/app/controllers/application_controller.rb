@@ -92,7 +92,7 @@ class ApplicationController < ActionController::Base
                      path: csp_config.log_out_path,
                      query: { client_id: csp_config.identifier,
                               post_logout_redirect_uri: "#{root_url}auth/logged_out",
-                              id_token_hint: session[:login_dot_gov_id_token]
+                              id_token_hint: session['clear_id_token']
                               }.to_query)
   end
 
