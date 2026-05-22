@@ -41,26 +41,6 @@ class UserInfoService
     parts.length == 3 && parts.all? { |p| p.match?(/\A[A-Za-z0-9_-]+\z/) }
   end
 
-  # def jwt_content_type?(response)
-  #   response.content_type.to_s.split(';').first.strip.downcase == 'application/jwt'
-  # end
-
-  # def normalize_jwt_body(body)
-  #   parsed_body = JSON.parse(body)
-  #   return parsed_body.strip if parsed_body.is_a?(String)
-
-  #   body
-  # rescue JSON::ParserError
-  #   strip_wrapping_quotes(body)
-  # end
-
-  # def strip_wrapping_quotes(body)
-  #   body = body.to_s.strip
-  #   return body[1..-2] if body.start_with?('"') && body.end_with?('"')
-
-  #   body
-  # end
-
   def decode_jwt(body)
     JSON::JWT.decode(body, :skip_verification).to_h.with_indifferent_access
   end

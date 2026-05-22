@@ -78,16 +78,6 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
-    # TODO moe to config and also move redirect
-    # csp_config = CspConfig.for(:id_me)
-    # url = URI::HTTPS.build(host: csp_config.host,
-    #                        path: '/oauth/authorize',
-    #                        query: { client_id: csp_config.identifier,
-    #                                 redirect_uri: "#{my_protocol_host}/auth/id_me/callback",
-    #                                 response_type: 'code',
-    #                                 scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',
-    #                                 nonce: @nonce,
-    #                                 state: @state }.to_query)
     claims = {
       id_token: {
         ssn9: nil,

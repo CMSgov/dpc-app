@@ -32,7 +32,7 @@ development: &development
     authorization_endpoint: <%= "https://#{ENV['CLEAR_IDP_HOST']}/integrations/oauth2/auth" %>
     token_endpoint: <%= "https://#{ENV['CLEAR_IDP_HOST']}/integrations/oauth2/token" %>
     # user_info_endpoint: <%= "https://#{ENV['CLEAR_IDP_HOST']}/integrations/userinfo" %>
-    # user_info_endpoint: <%= "https://#{ENV['CLEAR_IDP_HOST']}/integrations/userinfo" %>?claims={"id_token":{"ssn9":null,"email":null,"email_verified":null},"userinfo":{"ssn9":null,"email":null,"email_verified":null,"given_name":null,"family_name":null}}"
+    # includes URL-encoded claims parameter for specifying required fields to verify
     user_info_endpoint: "<%= "https://#{ENV['CLEAR_IDP_HOST']}/integrations/userinfo" %>?claims=%7B%22id_token%22%3A%7B%22ssn9%22%3Anull%2C%22email%22%3Anull%2C%22email_verified%22%3Anull%7D%2C%22userinfo%22%3A%7B%22ssn9%22%3Anull%2C%22email%22%3Anull%2C%22email_verified%22%3Anull%2C%22given_name%22%3Anull%2C%22family_name%22%3Anull%7D%7D"
     jwks_uri: <%= "https://#{ENV['CLEAR_IDP_HOST']}/integrations/.well-known/jwks.json" %>
     redirect_path: '/auth/clear/callback'
