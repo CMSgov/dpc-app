@@ -2,11 +2,6 @@
 
 # Parent class of all controllers
 class ApplicationController < ActionController::Base
-  # IDP_HOST = ENV.fetch('IDP_HOST')
-  # CLEAR_IDP_HOST = ENV.fetch('CLEAR_IDP_HOST')
-  # IDP_CLIENT_ID = ENV.fetch('IDP_CLIENT_ID')
-  # CLEAR_IDP_CLIENT_ID = ENV.fetch('CLEAR_IDP_CLIENT_ID')
-
   before_action :check_session_length
   before_action :set_current_request_attributes
   before_action :no_store
@@ -92,11 +87,12 @@ class ApplicationController < ActionController::Base
   def url_for_clear_logout
     state = SecureRandom.hex(16)
     session['omniauth.state'] = state
-    URI::HTTPS.build(host: CLEAR_IDP_HOST,
-                     path: '/integrations/oauth2/sessions/logout',
-                     query: { client_id: CLEAR_IDP_CLIENT_ID,
+    csp_config = CspConfig.for(:clear)
+    URI::HTTPS.build(host: csp_config.host,
+                     path: csp_config.log_out_path,
+                     query: { client_id: csp_config.identifier,
                               post_logout_redirect_uri: "#{root_url}auth/logged_out",
-                              id_token_hint: session[:login_dot_gov_id_token],
+                              id_token_hint: session[:login_dot_gov_id_token]
                               }.to_query)
   end
 

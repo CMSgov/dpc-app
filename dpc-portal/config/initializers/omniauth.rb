@@ -9,6 +9,7 @@ include DpcPortalUtils
 PORTAL_CSP_CONFIG = Rails.application.config_for(:csp).freeze
 ID_ME_CONFIG = PORTAL_CSP_CONFIG[:id_me].freeze
 LOGIN_DOT_GOV_CONFIG = PORTAL_CSP_CONFIG[:login_dot_gov].freeze
+CLEAR_CONFIG = PORTAL_CSP_CONFIG[:clear].freeze
 
 ID_ME_CLIENT_CONFIG = {
   name: :id_me,
@@ -54,32 +55,27 @@ LOGIN_DOT_GOV_CLIENT_CONFIG = {
     jwks_uri:      LOGIN_DOT_GOV_CONFIG[:jwks_uri],
   }
 }
-# clear stuff
-clear_idp_host = ENV['CLEAR_IDP_HOST']
-clear_client_id = ENV['CLEAR_IDP_CLIENT_ID']
-clear_client_secret = ENV['CLEAR_IDP_CLIENT_SECRET']
-clear_issuer = "https://#{clear_idp_host}/integrations"
 CLEAR_CLIENT_CONFIG = {
-                  name: :clear,
-                  issuer: clear_issuer,
-                  scope: "openid",
-                  response_type: :code,
-                  client_auth_method: :client_secret_post,
-                  client_signing_alg: :RS256,
-                  client_options: {
-                    port: 443,
-                    scheme: 'https',
-                    host: clear_idp_host,
-                    identifier: clear_client_id,
-                    secret: clear_client_secret,
-                    redirect_uri: "#{my_protocol_host}/auth/clear/callback",
-                    authorization_endpoint: "#{clear_issuer}/oauth2/auth",
-                    token_endpoint: "#{clear_issuer}/oauth2/token",
-                    userinfo_endpoint: "#{clear_issuer}/userinfo",
-                    jwks_uri: "#{clear_issuer}/.well-known/jwks.json",
-                    end_session_endpoint: "#{clear_issuer}/oauth2/sessions/logout"
-                  }
-                }
+  name: :clear,
+  issuer: "https://#{CLEAR_CONFIG[:host]}/integrations",
+  scope: 'openid',
+  response_type: :code,
+  client_auth_method: :client_secret_post,
+  client_signing_alg: :RS256,
+  client_options: {
+    port: 443,
+    scheme: 'https',
+    host: CLEAR_CONFIG[:host],
+    identifier: CLEAR_CONFIG[:identifier],
+    secret: CLEAR_CONFIG[:client_secret],
+    redirect_uri: "#{my_protocol_host}#{CLEAR_CONFIG[:redirect_path]}",
+    authorization_endpoint: CLEAR_CONFIG[:authorization_endpoint],
+    token_endpoint: CLEAR_CONFIG[:token_endpoint],
+    userinfo_endpoint: CLEAR_CONFIG[:user_info_endpoint],
+    jwks_uri: CLEAR_CONFIG[:jwks_uri],
+    end_session_endpoint: "https://#{CLEAR_CONFIG[:host]}#{CLEAR_CONFIG[:log_out_path]}"
+  }
+}.freeze
 
 Rails.application.config.middleware.use OmniAuth::Builder do
   OmniAuth.config.logger = Rails.logger

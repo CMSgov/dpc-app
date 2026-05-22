@@ -31,7 +31,8 @@ class UserInfoService
     if response.content_type.to_s.strip.downcase == 'application/jwt' || looks_like_jwt?(body)
       decode_jwt(body)
     else
-      JSON.parse(body).with_indifferent_access
+      # JSON.parse(body).with_indifferent_access
+      JSON.parse response.body
     end
   end
 
@@ -40,62 +41,33 @@ class UserInfoService
     parts.length == 3 && parts.all? { |p| p.match?(/\A[A-Za-z0-9_-]+\z/) }
   end
 
+  # def jwt_content_type?(response)
+  #   response.content_type.to_s.split(';').first.strip.downcase == 'application/jwt'
+  # end
+
+  # def normalize_jwt_body(body)
+  #   parsed_body = JSON.parse(body)
+  #   return parsed_body.strip if parsed_body.is_a?(String)
+
+  #   body
+  # rescue JSON::ParserError
+  #   strip_wrapping_quotes(body)
+  # end
+
+  # def strip_wrapping_quotes(body)
+  #   body = body.to_s.strip
+  #   return body[1..-2] if body.start_with?('"') && body.end_with?('"')
+
+  #   body
+  # end
+
   def decode_jwt(body)
-    body = body[1..-2] if body.start_with?('"') && body.end_with?('"')
     JSON::JWT.decode(body, :skip_verification).to_h.with_indifferent_access
   end
 
   def oidc_client_config(csp)
     return ID_ME_CLIENT_CONFIG if csp.to_s == :id_me.to_s
     return LOGIN_DOT_GOV_CLIENT_CONFIG if csp.to_s == :login_dot_gov.to_s
-
-    # TODO: Add CLEAR_CONFIG here
-    USER_INFO_URI = URI("https://#{ENV.fetch('CLEAR_IDP_HOST')}/integrations/userinfo")
-    USER_INFO_CLAIMS = {
-      id_token: {
-        ssn9: nil,
-        email: nil,
-        email_verified: nil
-      },
-      userinfo: {
-        ssn9: nil,
-        email: nil,
-        email_verified: nil,
-        given_name: nil,
-        family_name: nil
-      }
-    }.to_json
-    USER_INFO_CLAIMS_URI = URI("#{USER_INFO_URI}?#{ { claims: USER_INFO_CLAIMS }.to_query }")
-
-    # TODO move to initializers
-    clear_idp_host = ENV['CLEAR_IDP_HOST']
-    # move "client_id" to "identifier" for CLEAR_CONFIG
-    # clear_client_id = ENV['CLEAR_IDP_CLIENT_ID']
-    clear_issuer = "https://#{clear_idp_host}/integrations"
-    CLEAR_CLIENT_CONFIG = {
-      name: :clear,
-      issuer: clear_issuer,
-      # discovery: false,
-      scope: "openid",
-      response_type: :code,
-      # acr_values: 'http://idmanagement.gov/ns/assurance/ial/1',
-      # client_auth_method: :jwt_bearer,
-      client_auth_method: :client_secret_post,
-      client_options: {
-        port: 443,
-        scheme: 'https',
-        host: "https://#{clear_idp_host}/",
-        identifier: "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
-        # private_key: ENV['LOGIN_DOT_GOV_CLIENT_PRIVATE_KEY'],
-        secret: ENV['CLEAR_IDP_CLIENT_SECRET'],
-        redirect_uri: "#{my_protocol_host}/auth/clear/callback",
-
-        authorization_endpoint: "#{clear_issuer}/oauth2/auth",
-        token_endpoint: "#{clear_issuer}/oauth2/token",
-        userinfo_endpoint: USER_INFO_CLAIMS_URI.to_s,
-        jwks_uri: "#{clear_issuer}/.well-known/jwks.json"
-      }
-    }
     return CLEAR_CLIENT_CONFIG if csp.to_s == :clear.to_s
 
     raise UserInfoServiceError, 'invalid_csp'
@@ -127,6 +99,13 @@ class UserInfoService
   rescue Errno::ECONNREFUSED
     code = 503
     Rails.logger.error 'Could not connect to login.gov'
+    raise UserInfoServiceError, 'server_error'
+  rescue JSON::ParserError => e
+    puts "error: #{e}"
+    Rails.logger.error(['Could not parse CSP user_info response',
+                        { csp:,
+                          content_type: response&.content_type,
+                          error: e.message }])
     raise UserInfoServiceError, 'server_error'
   ensure
     finish_tracking(code, csp, csp_config[:client_options][:userinfo_endpoint])

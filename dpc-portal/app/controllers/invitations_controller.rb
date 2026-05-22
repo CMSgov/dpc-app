@@ -100,10 +100,12 @@ class InvitationsController < ApplicationController
         email_verified: nil
       }
     }.to_json
-    url = URI::HTTPS.build(host: CLEAR_IDP_HOST,
-                           path: '/integrations/oauth2/auth',
-                           query: { client_id: CLEAR_IDP_CLIENT_ID,
-                                    redirect_uri: "#{my_protocol_host}/auth/clear/callback",
+    csp_config = CspConfig.for(:clear)
+    authorization_uri = URI(csp_config.authorization_endpoint)
+    url = URI::HTTPS.build(host: authorization_uri.host,
+                           path: authorization_uri.path,
+                           query: { client_id: csp_config.identifier,
+                                    redirect_uri: "#{my_protocol_host}#{csp_config.redirect_path}",
                                     response_type: 'code',
                                     scope: 'openid',
                                     claims:,

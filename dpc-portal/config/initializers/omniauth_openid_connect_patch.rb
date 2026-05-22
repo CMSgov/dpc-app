@@ -49,7 +49,8 @@ module OmniAuth
           ## TODO - consider verifying the JWT signature using the provider's JWKS keys
           JSON::JWT.decode(body, :skip_verification).to_h.with_indifferent_access
         else
-          JSON.parse(body).with_indifferent_access
+          # JSON.parse(body).with_indifferent_access
+          response.body.with_indifferent_access
         end
       end
 
