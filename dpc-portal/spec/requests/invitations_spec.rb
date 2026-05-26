@@ -8,7 +8,7 @@ RSpec.describe 'Invitations', type: :request do
 
   let!(:csp) { create(:csp, name: :login_dot_gov) }
   let!(:other_csp) { create(:csp, name: :id_me) }
-  let(:provider) { :login_dot_gov }
+  let(:provider) { :id_me }
 
   RSpec.shared_examples 'an invitation endpoint' do |method, path_suffix, type|
     let(:org) { invitation.provider_organization }
@@ -145,7 +145,6 @@ RSpec.describe 'Invitations', type: :request do
         org_id = invitation.provider_organization.id
         post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
         redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
-        expect(redirect_params['acr_values']).to eq('http://idmanagement.gov/ns/assurance/ial/2')
         expect(redirect_params['redirect_uri']).to start_with('http://localhost:3100/auth/')
         expect(request.session[:user_return_to]).to eq expected_redirect
       end
@@ -621,7 +620,7 @@ RSpec.describe 'Invitations', type: :request do
           expect(user.family_name).to eq user_info_template['family_name']
           expect(user.email).to eq user_info_template['email']
           expect(user.uid).to eq user_info_template['sub']
-          expect(user.provider).to eq 'login_dot_gov'
+          expect(user.provider).to eq 'id_me'
         end
 
         it 'should log when user is created' do
@@ -877,7 +876,7 @@ end
 
 def log_in
   OmniAuth.config.test_mode = true
-  OmniAuth.config.add_mock(:login_dot_gov,
+  OmniAuth.config.add_mock(:id_me,
                            { uid: '12345',
                              credentials: { expires_in: 899,
                                             token: 'bearer-token' },
@@ -885,14 +884,14 @@ def log_in
                              extra: { raw_info: { given_name: 'Bob',
                                                   family_name: 'Hoskins',
                                                   ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
-  post '/auth/login_dot_gov'
+  post '/auth/id_me'
   follow_redirect!
 end
 
 def user_info_template(overrides = {})
   {
     'sub' => '097d06f7-e9ad-4327-8db3-0ba193b7a2c2',
-    'iss' => 'https://idp.int.identitysandbox.gov/',
+    'iss' => 'https://api.idmelabs.com/oidc',
     'email' => 'bob@testy.com',
     'email_verified' => true,
     'all_emails' => [

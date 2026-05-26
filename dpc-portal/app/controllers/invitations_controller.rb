@@ -78,13 +78,13 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
-    url = URI::HTTPS.build(host: IDP_HOST,
-                           path: '/openid_connect/authorize',
-                           query: { acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
-                                    client_id: IDP_CLIENT_ID,
-                                    redirect_uri: "#{my_protocol_host}/auth/login_dot_gov/callback",
+    csp_config = CspConfig.for(:id_me)
+    url = URI::HTTPS.build(host: csp_config.host,
+                           path: '/oauth/authorize',
+                           query: { client_id: csp_config.identifier,
+                                    redirect_uri: "#{my_protocol_host}/auth/id_me/callback",
                                     response_type: 'code',
-                                    scope: 'openid email all_emails profile social_security_number',
+                                    scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',
                                     nonce: @nonce,
                                     state: @state }.to_query)
     redirect_to url, allow_other_host: true
@@ -308,9 +308,11 @@ class InvitationsController < ApplicationController
   end
 
   def check_for_token
-    if session[:login_dot_gov_token].present? &&
-       session[:login_dot_gov_token_exp].present? &&
-       session[:login_dot_gov_token_exp] > Time.now
+    csp = session[:csp]
+    if csp && !csp.empty? &&
+       session["#{csp}_token"].present? &&
+       session["#{csp}_token_exp"].present? &&
+       session["#{csp}_token_exp"] > Time.now
       return
     end
 
