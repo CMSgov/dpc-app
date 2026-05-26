@@ -77,13 +77,13 @@ module Page
         render(Page::Utility::ErrorComponent.new(nil, reason))
       end
 
-      def login_gov_signin_cancel
-        reason = 'login_gov_signin_cancel'
+      def csp_signin_cancel
+        reason = 'csp_signin_cancel'
         render(Page::Utility::ErrorComponent.new(nil, reason))
       end
 
-      def login_gov_signin_fail
-        reason = 'login_gov_signin_fail'
+      def csp_signin_fail
+        reason = 'csp_signin_fail'
         render(Page::Utility::ErrorComponent.new(nil, reason))
       end
     end

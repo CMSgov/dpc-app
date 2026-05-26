@@ -5,17 +5,21 @@
 # and config.ru via config.relative_url_root.
 #
 Rails.application.routes.draw do
-  # Former devise routes
-  get '/users/auth/failure', to: 'login_dot_gov#failure', as: 'login_dot_gov_failure'
+  # User session
   get '/auth/logged_out', to: 'users/sessions#logged_out'
-  get '/auth/no_account', to: 'login_dot_gov#no_account', as: 'no_account'
-  delete '/logout', to: 'login_dot_gov#logout', as: 'login_dot_gov_logout'
   get 'active', to: 'users/sessions#active', as: 'active'
   get 'timeout', to: 'users/sessions#timeout', as: 'timeout'
   get '/users/sign_in', to: 'users/sessions#new', as: 'sign_in'
   delete '/users/sign_out', to: 'users/sessions#destroy', as: 'destroy_user_session'
-  get '/auth/id_me/callback', to: 'login_dot_gov#id_me'
-  get '/auth/login_dot_gov/callback', to: 'login_dot_gov#id_me'
+
+  # CSP controller
+  get '/users/auth/failure', to: 'csp#failure', as: 'csp_failure'
+  get '/auth/no_account', to: 'csp#no_account', as: 'no_account'
+  delete '/logout', to: 'csp#logout', as: 'csp_logout'
+
+  # CSPs
+  get '/auth/login_dot_gov/callback', to: 'login_dot_gov#openid_connect'
+  get '/auth/id_me/callback', to: 'id_me#openid_connect'
 
   # Defines the root path route ("/")
   root 'organizations#index'

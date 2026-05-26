@@ -54,13 +54,13 @@ describe UserInfoService do
 
   context :invalid_session do
     it 'should throw error if no token' do
-      invalid = valid_csp_session(:login_dot_gov).merge(login_dot_gov_token: nil)
+      invalid = valid_csp_session(:login_dot_gov).merge(login_token: nil)
       expect do
         service.user_info(invalid)
       end.to raise_error(UserInfoServiceError, 'no_token')
     end
     it 'should throw error if no token expiration' do
-      invalid = valid_csp_session(:login_dot_gov).merge(login_dot_gov_token_exp: nil)
+      invalid = valid_csp_session(:login_dot_gov).merge(login_token_exp: nil)
       expect do
         service.user_info(invalid)
       end.to raise_error(UserInfoServiceError, 'no_token_exp')

@@ -100,8 +100,8 @@ class InvitationsController < ApplicationController
   end
 
   def set_idp_token
-    session[:login_dot_gov_token] = 'token'
-    session[:login_dot_gov_token_exp] = 2.days.from_now
+    session[:login_token] = 'token'
+    session[:login_token_exp] = 2.days.from_now
     head :ok
   end
 
@@ -208,6 +208,7 @@ class InvitationsController < ApplicationController
   end
 
   def user
+    Rail.logger.info 'INVITATIONS CONTROLLER USER'
     user_info = UserInfoService.new.user_info(session)
     find_or_create_user(user_info)
     csp = Csp.find_by(name: @user.provider)

@@ -4,6 +4,6 @@ FactoryBot.define do
   factory :csp_user do
     user { nil }
     csp { nil }
-    uuid { '' }
+    uuid { nil }
   end
 end
