@@ -11,7 +11,7 @@ class LoginDotGovController < ApplicationController
 
   def id_me
     auth = request.env['omniauth.auth']
-    return unless (csp = csp())
+    return unless csp
 
     user = User.find_by(provider: auth.provider, uid: auth.uid)
     if user

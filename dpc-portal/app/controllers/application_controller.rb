@@ -2,7 +2,6 @@
 
 # Parent class of all controllers
 class ApplicationController < ActionController::Base
-
   before_action :check_session_length
   before_action :set_current_request_attributes
   before_action :no_store
