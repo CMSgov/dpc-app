@@ -154,4 +154,11 @@ class ApplicationController < ActionController::Base
 
     logger.error(['CredentialAuditLog failure', { action:, credential_type:, dpc_api_credential_id: }])
   end
+
+  # Helper method for logging csp with actionContext and actionType whenever it's available on the session
+  def csp_log_context
+    return {} if session[:csp].blank?
+
+    { csp: session[:csp] }
+  end
 end
