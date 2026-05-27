@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Parent class of all controllers
-class ApplicationController < ActionController::Base
+class ApplicationController < ActionController::Base # rubocop:disable Metrics/ClassLength
   before_action :check_session_length
   before_action :set_current_request_attributes
   before_action :no_store

@@ -55,7 +55,7 @@ class InvitationsController < ApplicationController
   end
 
   # Everybody
-  def register
+  def register # rubocop:disable Metrics/AbcSize
     unless session["invitation_status_#{@invitation.id}"] == 'verification_complete'
       return redirect_to organization_invitation_url(@organization, @invitation)
     end
