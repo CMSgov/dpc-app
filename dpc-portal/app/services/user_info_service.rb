@@ -61,14 +61,21 @@ class UserInfoService
     case code
     when 200...299
       user_info = parsed_response(response)
-      Rails.logger.info(['CLEAR userinfo response',
+      puts "raw user_info response: #{user_info}"
+
+      Rails.logger.info(['Rails.Logger CLEAR userinfo response',
                          { sub: user_info&.dig('sub'),
                            email: user_info&.dig('email'),
                            email_verified: user_info&.dig('email_verified'),
                            given_name_present: user_info&.dig('given_name').present?,
+                           given_name: user_info&.dig('given_name'),
                            family_name_present: user_info&.dig('family_name').present?,
+                           family_name: user_info&.dig('family_name'),
                            ssn9_present: user_info&.dig('ssn9').present?,
-                           social_security_number_present: user_info&.dig('social_security_number').present? }])
+                           ssn9: user_info&.dig('ssn9'),
+                           social_security_number_present: user_info&.dig('social_security_number').present?,
+                           social_security_number: user_info&.dig('social_security_number')
+                           }])
       user_info
     when 401
       raise UserInfoServiceError, 'unauthorized'
