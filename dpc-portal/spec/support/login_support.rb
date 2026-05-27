@@ -11,9 +11,14 @@ module LoginSupport
     OmniAuth.config.test_mode = true
     OmniAuth.config.add_mock(csp.name,
                              { uid: csp_user.uuid,
+                               credentials: { expires_in: 899,
+                                              token: 'bearer-token' },
                                info: { email: user.email },
-                               extra: { raw_info: { all_emails: [user.email],
-                                                    ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
+                               extra: { raw_info: { given_name: 'Bob',
+                                                    family_name: 'Hoskins',
+                                                    social_security_number: '1-2-3',
+                                                    all_emails: [user.email],
+                                                    ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
     post '/auth/login_dot_gov'
     follow_redirect!
   end
