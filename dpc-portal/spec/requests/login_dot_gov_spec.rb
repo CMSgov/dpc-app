@@ -204,6 +204,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         emails = UserEmail.last(2).pluck(:email)
         expect(emails).to match_array(%w[email1@example.com email2@example.com])
         expect(UserEmail.pluck(:active)).to all(be true)
+        expect(UserEmail.find(&:primary?).email).to eq 'email1@example.com'
       end
     end
 
@@ -265,6 +266,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         expect(email.active).to eq true
         expect(email.deactivated_at).to be_nil
         expect(email.reactivated_at).to_not be_nil
+        expect(email.primary).to eq true
       end
     end
   end
