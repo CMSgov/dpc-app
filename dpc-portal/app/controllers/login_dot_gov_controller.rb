@@ -7,12 +7,14 @@
 
 # rubocop:disable Metrics/ClassLength, Metrics/AbcSize
 class LoginDotGovController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: :id_me
+  skip_before_action :verify_authenticity_token, only: [:id_me, :clear]
 
   def id_me
     auth = request.env['omniauth.auth']
     return unless (csp = csp())
 
+    puts "provider: #{auth.provider}"
+    puts "uid: #{auth.uid}"
     user = User.find_by(provider: auth.provider, uid: auth.uid)
     if user
       sign_in(user, csp: auth.provider)
@@ -23,6 +25,11 @@ class LoginDotGovController < ApplicationController
     end
     ial_2_actions(user, auth)
     redirect_to path(user, auth)
+  end
+
+  def clear
+    # this will probably fail
+    id_me
   end
 
   def no_account
@@ -128,13 +135,23 @@ class LoginDotGovController < ApplicationController
     return if ial_1_user?(auth)
 
     data = auth.extra.raw_info
+    Rails.logger.info(['CLEAR auth callback user info',
+                       { provider: auth.provider,
+                         uid: auth.uid,
+                         omniauth_email: auth.info.email,
+                         raw_info_sub: data['sub'],
+                         raw_info_email: data['email'],
+                         raw_info_email_verified: data['email_verified'] }])
+
     maybe_update_user(user, data)
     session[:csp] = auth.provider
+    session["#{auth.provider}_id_token"] = auth.credentials.id_token # required for CLEAR logout
     session["#{auth.provider}_token"] = auth.credentials.token
     session["#{auth.provider}_token_exp"] = auth.credentials.expires_in.seconds.from_now
   end
 
   def path(user, auth)
+    puts "auth extra raw_info response: #{auth.extra.raw_info}"
     if user.blank? && ial_1_user?(auth)
 
       Rails.logger.info(['User logged in without account',

@@ -78,15 +78,30 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
-    csp_config = CspConfig.for(:id_me)
-    url = URI::HTTPS.build(host: csp_config.host,
-                           path: '/oauth/authorize',
+    claims = {
+      id_token: {
+        ssn9: nil,
+        email: nil,
+        email_verified: nil
+      },
+      userinfo: {
+        ssn9: nil,
+        email: nil,
+        email_verified: nil
+      }
+    }.to_json
+    csp_config = CspConfig.for(:clear)
+    authorization_uri = URI(csp_config.authorization_endpoint)
+    url = URI::HTTPS.build(host: authorization_uri.host,
+                           path: authorization_uri.path,
                            query: { client_id: csp_config.identifier,
-                                    redirect_uri: "#{my_protocol_host}/auth/id_me/callback",
+                                    redirect_uri: "#{my_protocol_host}#{csp_config.redirect_path}",
                                     response_type: 'code',
-                                    scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',
+                                    scope: 'openid',
+                                    claims:,
                                     nonce: @nonce,
                                     state: @state }.to_query)
+    puts "redirecting to: #{url}"
     redirect_to url, allow_other_host: true
   end
 
@@ -132,6 +147,7 @@ class InvitationsController < ApplicationController
 
   def verify_user_is_ao
     user_info = UserInfoService.new.user_info(session)
+    puts "user_info: #{user_info}"
     result = @invitation.ao_match?(user_info) # raises if does not match
     session[:user_pac_id] = result.dig(:ao_role, 'pacId')
     log_waivers(result)

@@ -2,7 +2,6 @@
 
 # Parent class of all controllers
 class ApplicationController < ActionController::Base
-
   before_action :check_session_length
   before_action :set_current_request_attributes
   before_action :no_store
@@ -57,6 +56,8 @@ class ApplicationController < ActionController::Base
       url_for_id_me_logout
     when :login_dot_gov.to_s
       url_for_login_dot_gov_logout
+    when :clear.to_s
+      url_for_clear_logout
     else
       raise "Unsupported CSP: #{csp}"
     end
@@ -81,6 +82,18 @@ class ApplicationController < ActionController::Base
                      path: CspConfig.for(:id_me).log_out_path,
                      query: { client_id: CspConfig.for(:id_me).identifier,
                               redirect_uri: "#{root_url}auth/logged_out" }.to_query)
+  end
+
+  def url_for_clear_logout
+    state = SecureRandom.hex(16)
+    session['omniauth.state'] = state
+    csp_config = CspConfig.for(:clear)
+    URI::HTTPS.build(host: csp_config.host,
+                     path: csp_config.log_out_path,
+                     query: { client_id: csp_config.identifier,
+                              post_logout_redirect_uri: "#{root_url}auth/logged_out",
+                              id_token_hint: session['clear_id_token']
+                              }.to_query)
   end
 
   # rubocop:disable Metrics/AbcSize

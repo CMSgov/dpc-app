@@ -74,8 +74,11 @@ class Invitation < ApplicationRecord
   end
 
   def ao_match?(user_info)
-    check_missing_user_info(user_info, 'social_security_number', 'SSN')
-    ssn = user_info['social_security_number']&.tr('-', '') || user_info['SSN']
+    # check_missing_user_info(user_info, 'social_security_number', 'SSN')
+    # ssn = user_info['social_security_number']&.tr('-', '') || user_info['SSN']
+    # probably a cleaner way to pull from 3+ keys here
+    check_missing_user_info(user_info, 'social_security_number', 'ssn9')
+    ssn = user_info['social_security_number']&.tr('-', '') || user_info['ssn9']
     service = AoVerificationService.new
     result = service.check_eligibility(provider_organization.npi, ssn)
 

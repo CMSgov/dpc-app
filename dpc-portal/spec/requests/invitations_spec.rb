@@ -8,7 +8,8 @@ RSpec.describe 'Invitations', type: :request do
 
   let!(:csp) { create(:csp, name: :login_dot_gov) }
   let!(:other_csp) { create(:csp, name: :id_me) }
-  let(:provider) { :id_me }
+  # let(:provider) { :id_me }
+  let(:provider) { :clear }
 
   RSpec.shared_examples 'an invitation endpoint' do |method, path_suffix, type|
     let(:org) { invitation.provider_organization }
@@ -146,6 +147,9 @@ RSpec.describe 'Invitations', type: :request do
         post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
         redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
         expect(redirect_params['redirect_uri']).to start_with('http://localhost:3100/auth/')
+        # CLEAR logic - generalize for different CSP's
+        # expect(redirect_url.host).to eq ENV.fetch('CLEAR_IDP_HOST')
+        # expect(redirect_url.path).to eq '/integrations/oauth2/auth'
         expect(request.session[:user_return_to]).to eq expected_redirect
       end
 
@@ -639,13 +643,15 @@ RSpec.describe 'Invitations', type: :request do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
         end
         it 'should not create user if exists' do
-          create(:user, pac_id: user_info_template['social_security_number'], email: 'bob@testy.com', provider:)
+          # create(:user, pac_id: user_info_template['social_security_number'], email: 'bob@testy.com', provider:)
+          create(:user, pac_id: user_info_template['ssn9'], email: 'bob@testy.com', provider:)
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { User.count }.by 0
         end
         it 'should update name of user if changed' do
-          user = create(:user, pac_id: user_info_template['social_security_number'],
+          # user = create(:user, pac_id: user_info_template['social_security_number'],
+          user = create(:user, pac_id: user_info_template['ssn9'],
                                email: 'bob@testy.com', given_name: :foo, family_name: :bar, provider:)
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
@@ -876,7 +882,8 @@ end
 
 def log_in
   OmniAuth.config.test_mode = true
-  OmniAuth.config.add_mock(:id_me,
+  # OmniAuth.config.add_mock(:id_me,
+  OmniAuth.config.add_mock(:clear,
                            { uid: '12345',
                              credentials: { expires_in: 899,
                                             token: 'bearer-token' },
@@ -884,7 +891,8 @@ def log_in
                              extra: { raw_info: { given_name: 'Bob',
                                                   family_name: 'Hoskins',
                                                   ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
-  post '/auth/id_me'
+  # post '/auth/id_me'
+  post '/auth/clear'
   follow_redirect!
 end
 
