@@ -47,6 +47,8 @@ gem 'sprockets-rails', '>= 3.4.2'
 gem 'truemail'
 gem 'nokogiri', '>= 1.19.3'
 gem 'net-imap', '>= 0.5.14'
+gem 'faraday', '>= 2.14.2'
+gem 'jwt', '>= 3.2.0'
 
 gem 'api_client', path: 'vendor/api_client'
 
