@@ -97,64 +97,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         it 'does not sign in user' do
           post '/auth/login_dot_gov'
           follow_redirect!
-          expect(response.location).to eq organizations_url
-          expect(response).to be_redirect
-          follow_redirect!
-          expect(response).to be_redirect
-        end
-
-        it 'sets authentication token' do
-          post '/auth/login_dot_gov'
-          follow_redirect!
-          expect(request.session[:login_dot_gov_token]).to eq token
-          expect(request.session[:login_dot_gov_token_exp]).to_not be_nil
-          expect(request.session[:login_dot_gov_token_exp]).to be_within(1.second).of 899.seconds.from_now
-        end
-      end
-    end
-
-    context 'IAL/1' do
-      before do
-        OmniAuth.config.test_mode = true
-        OmniAuth.config.add_mock(:login_dot_gov,
-                                 { uid: uuid,
-                                   info: { email: 'bob3@example.com' },
-                                   extra: { raw_info: { all_emails: %w[bob3@example.com bobby@example.com],
-                                                        ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
-      end
-
-      it_behaves_like 'an openid client'
-
-      context :user_exists do
-        before do
-          user = create(:user, email: 'bob3@example.com', given_name: 'Bob',
-                               family_name: 'Hoskins')
-          create(:csp_user, user:, uuid:, csp:)
-        end
-        it 'does not update user names' do
-          expect(User.where(email: 'bob3@example.com', given_name: 'Bob',
-                            family_name: 'Hoskins').count).to eq 1
-          post '/auth/login_dot_gov'
-          follow_redirect!
-          expect(response.location).to eq organizations_url
-          expect(User.where(email: 'bob3@example.com', given_name: 'Bob',
-                            family_name: 'Hoskins').count).to eq 1
-        end
-
-        it 'does not set authentication token' do
-          post '/auth/login_dot_gov'
-          follow_redirect!
-          expect(request.session[:login_dot_gov_token]).to be_nil
-          expect(request.session[:login_dot_gov_token_exp]).to be_nil
-        end
-      end
-
-      context 'user does not exist' do
-        it 'does not sign in user' do
-          post '/auth/login_dot_gov'
-          follow_redirect!
           expect(response.location).to eq no_account_url
-          expect(response).to be_redirect
         end
 
         it 'should log' do
@@ -168,11 +111,12 @@ RSpec.describe 'LoginDotGov', type: :request do
           follow_redirect!
         end
 
-        it 'does not set authentication token' do
+        it 'sets authentication token' do
           post '/auth/login_dot_gov'
           follow_redirect!
-          expect(request.session[:login_dot_gov_token]).to be_nil
-          expect(request.session[:login_dot_gov_token_exp]).to be_nil
+          expect(request.session[:login_dot_gov_token]).to eq token
+          expect(request.session[:login_dot_gov_token_exp]).to_not be_nil
+          expect(request.session[:login_dot_gov_token_exp]).to be_within(1.second).of 899.seconds.from_now
         end
       end
     end
@@ -316,7 +260,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                                { uid: uuid,
                                  info: { email: 'bob4@example.com' },
                                  extra: { raw_info: { all_emails: %w[bob4@example.com bobby@example.com],
-                                                      ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
+                                                      ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
     end
 
     it 'should log error' do
