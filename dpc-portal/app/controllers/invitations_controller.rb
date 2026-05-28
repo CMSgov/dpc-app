@@ -256,7 +256,8 @@ class InvitationsController < ApplicationController
     user_to_create.pac_id = session.delete(:user_pac_id)
 
     # For now we force login.gov, this will have to change once we support multi-CSP.
-    user_to_create.provider = session[:csp] || 'login_dot_gov'
+    # TODO: parametrize on provider -acw
+    user_to_create.provider = session[:csp] || 'id_me'
     user_to_create.uid = user_info['sub']
   end
 

@@ -6,3 +6,7 @@
 #
 #   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
 #   Character.create(name: "Luke", movie: movies.first)
+
+Csp.create!(name: :login_dot_gov, start_date: Time.current)
+Csp.create!(name: :id_me, start_date: Time.current)
+Csp.create!(name: :clear, start_date: Time.current)
