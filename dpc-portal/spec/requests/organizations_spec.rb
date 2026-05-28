@@ -19,7 +19,7 @@ RSpec.describe 'Organizations', type: :request do
     describe 'logged in' do
       let!(:user) { create_user_with_csp }
       let!(:org) { create(:provider_organization) }
-      before { sign_in user, csp: :login_dot_gov }
+      before { sign_in user, :login_dot_gov }
 
       it 'returns success if no orgs associated with user' do
         get '/organizations'
@@ -46,7 +46,7 @@ RSpec.describe 'Organizations', type: :request do
       end
 
       let!(:org) { create(:provider_organization) }
-      before { sign_in user, csp: :login_dot_gov }
+      before { sign_in user, :login_dot_gov }
 
       it 'should show access denied page' do
         create(:ao_org_link, provider_organization: org, user:)
@@ -68,7 +68,7 @@ RSpec.describe 'Organizations', type: :request do
 
     context 'no link to org' do
       let!(:user) { create_user_with_csp }
-      before { sign_in user, csp: :login_dot_gov }
+      before { sign_in user, :login_dot_gov }
       it 'redirects to organizations page' do
         org = create(:provider_organization)
         get "/organizations/#{org.id}"
@@ -83,7 +83,7 @@ RSpec.describe 'Organizations', type: :request do
           create(:provider_organization, verification_status: 'rejected',
                                          verification_reason: 'org_med_sanctions')
         end
-        before { sign_in user, csp: :login_dot_gov }
+        before { sign_in user, :login_dot_gov }
 
         it 'should show access denied page' do
           create(:ao_org_link, provider_organization: org, user:)
@@ -98,7 +98,7 @@ RSpec.describe 'Organizations', type: :request do
           create(:provider_organization, verification_status: 'rejected',
                                          verification_reason: 'no_approved_enrollment')
         end
-        before { sign_in user, csp: :login_dot_gov }
+        before { sign_in user, :login_dot_gov }
 
         it 'should show access denied page' do
           create(:ao_org_link, provider_organization: org, user:)
@@ -110,7 +110,7 @@ RSpec.describe 'Organizations', type: :request do
       context 'user no longer ao' do
         let!(:user) { create_user_with_csp }
         let!(:org) { create(:provider_organization) }
-        before { sign_in user, csp: :login_dot_gov }
+        before { sign_in user, :login_dot_gov }
 
         it 'should show access denied page' do
           create(:ao_org_link, provider_organization: org, user:, verification_status: false,
@@ -127,7 +127,7 @@ RSpec.describe 'Organizations', type: :request do
           create(:provider_organization, verification_status: 'rejected',
                                          verification_reason: 'org_med_sanctions')
         end
-        before { sign_in user, csp: :login_dot_gov }
+        before { sign_in user, :login_dot_gov }
 
         it 'should show access denied page' do
           create(:cd_org_link, provider_organization: org, user:)
@@ -142,7 +142,7 @@ RSpec.describe 'Organizations', type: :request do
           create(:provider_organization, verification_status: 'rejected',
                                          verification_reason: 'no_approved_enrollment')
         end
-        before { sign_in user, csp: :login_dot_gov }
+        before { sign_in user, :login_dot_gov }
 
         it 'should show access denied page' do
           create(:cd_org_link, provider_organization: org, user:)
@@ -156,7 +156,7 @@ RSpec.describe 'Organizations', type: :request do
       let!(:user) { create_user_with_csp }
       let!(:org) { create(:provider_organization) }
       let!(:link) { create(:cd_org_link, user:, provider_organization: org) }
-      before { sign_in user, csp: :login_dot_gov }
+      before { sign_in user, :login_dot_gov }
 
       context :not_signed_tos do
         it 'should redirect' do
@@ -212,7 +212,7 @@ RSpec.describe 'Organizations', type: :request do
       let!(:org) { create(:provider_organization) }
       before do
         create(:ao_org_link, user:, provider_organization: org)
-        sign_in user, csp: :login_dot_gov
+        sign_in user, :login_dot_gov
       end
 
       context :not_signed_tos do
@@ -338,7 +338,7 @@ RSpec.describe 'Organizations', type: :request do
 
   describe 'AO org flow' do
     let!(:user) { create_user_with_csp }
-    before { sign_in user, csp: :login_dot_gov }
+    before { sign_in user, :login_dot_gov }
 
     context 'GET /organizations/new' do
       it 'returns success' do

@@ -21,7 +21,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
 
       before do
         create(:ao_org_link, provider_organization: org, user:)
-        sign_in user, csp: :login_dot_gov
+        sign_in user, :login_dot_gov
       end
 
       it 'returns success' do
@@ -51,7 +51,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
                              verification_reason: 'ao_med_sanctions')
       end
       let!(:org) { create(:provider_organization) }
-      before { sign_in user, csp: :login_dot_gov }
+      before { sign_in user, :login_dot_gov }
 
       it 'should show access denied page' do
         create(:ao_org_link, provider_organization: org, user:)
@@ -67,7 +67,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         create(:provider_organization, terms_of_service_accepted_by: user, verification_status: 'rejected',
                                        verification_reason: 'org_med_sanctions')
       end
-      before { sign_in user, csp: :login_dot_gov }
+      before { sign_in user, :login_dot_gov }
 
       it 'should show access denied page' do
         create(:ao_org_link, provider_organization: org, user:)
@@ -82,7 +82,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
         create(:provider_organization, terms_of_service_accepted_by: user, verification_status: 'rejected',
                                        verification_reason: 'no_approved_enrollment')
       end
-      before { sign_in user, csp: :login_dot_gov }
+      before { sign_in user, :login_dot_gov }
 
       it 'should show access denied page' do
         create(:ao_org_link, provider_organization: org, user:)
@@ -94,7 +94,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     context 'user no longer ao' do
       let!(:user) { create_user_with_csp }
       let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
-      before { sign_in user, csp: :login_dot_gov }
+      before { sign_in user, :login_dot_gov }
 
       it 'should show access denied page' do
         create(:ao_org_link, provider_organization: org, user:, verification_status: false,
@@ -109,7 +109,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       let!(:org) { create(:provider_organization) }
       before do
         create(:cd_org_link, provider_organization: org, user:)
-        sign_in user, csp: :login_dot_gov
+        sign_in user, :login_dot_gov
       end
       it 'redirects to organizations' do
         get "/organizations/#{org.id}/credential_delegate_invitations/new"
@@ -132,7 +132,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       let(:api_id) { org.id }
       before do
         create(:ao_org_link, provider_organization: org, user:)
-        sign_in user, csp: :login_dot_gov
+        sign_in user, :login_dot_gov
       end
 
       it 'creates invitation record on success' do
@@ -202,7 +202,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     context 'as cd' do
       before do
         create(:cd_org_link, provider_organization: org, user:)
-        sign_in user, csp: :login_dot_gov
+        sign_in user, :login_dot_gov
       end
 
       it 'fails even with good parameters' do
@@ -222,7 +222,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     context 'as cd' do
       before do
         create(:cd_org_link, provider_organization: org, user:)
-        sign_in(user, csp: :login_dot_gov)
+        sign_in(user, :login_dot_gov)
       end
       it 'fails' do
         delete "/organizations/#{org.id}/credential_delegate_invitations/#{invitation.id}"
@@ -234,7 +234,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     context 'as ao' do
       before do
         create(:ao_org_link, provider_organization: org, user:)
-        sign_in(user, csp: :login_dot_gov)
+        sign_in(user, :login_dot_gov)
       end
       it 'soft deletes invitation' do
         expect do

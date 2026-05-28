@@ -17,7 +17,7 @@ module LoginSupport
     user
   end
 
-  def sign_in(user, csp: :id_me)
+  def sign_in(user, csp)
     OmniAuth.config.test_mode = true
     case csp.to_s
     when 'id_me'
