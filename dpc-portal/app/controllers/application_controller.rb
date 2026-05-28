@@ -30,6 +30,25 @@ class ApplicationController < ActionController::Base
     session[:csp] = csp
   end
 
+  private
+
+  def check_user_verification
+    return unless current_user&.rejected?
+
+    render(Page::Utility::AccessDeniedComponent.new(failure_code: "verification.#{current_user.verification_reason}"))
+  end
+
+  def tos_accepted
+    return if @organization.terms_of_service_accepted_by.present?
+
+    if current_user.ao?(@organization)
+      render(Page::Organization::TosFormComponent.new(@organization))
+    else
+      flash[:notice] = 'Organization is not ready for credential management'
+      redirect_to organizations_path
+    end
+  end
+
   def url_for_logout(csp)
     case csp
     when :id_me.to_s
@@ -60,25 +79,6 @@ class ApplicationController < ActionController::Base
                      path: CspConfig.for(:id_me).log_out_path,
                      query: { client_id: CspConfig.for(:id_me).identifier,
                               redirect_uri: "#{root_url}oauth/logged_out" }.to_query)
-  end
-
-  private
-
-  def check_user_verification
-    return unless current_user&.rejected?
-
-    render(Page::Utility::AccessDeniedComponent.new(failure_code: "verification.#{current_user.verification_reason}"))
-  end
-
-  def tos_accepted
-    return if @organization.terms_of_service_accepted_by.present?
-
-    if current_user.ao?(@organization)
-      render(Page::Organization::TosFormComponent.new(@organization))
-    else
-      flash[:notice] = 'Organization is not ready for credential management'
-      redirect_to organizations_path
-    end
   end
 
   # rubocop:disable Metrics/AbcSize

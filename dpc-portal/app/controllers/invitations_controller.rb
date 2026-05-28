@@ -54,8 +54,11 @@ class InvitationsController < ApplicationController
   end
 
   # Everybody
+  # rubocop:disable Metrics/AbcSize
   def register
-    return redirect_to organization_invitation_url(@organization, @invitation) unless verification_complete?
+    unless session["invitation_status_#{@invitation.id}"] == 'verification_complete'
+      return redirect_to organization_invitation_url(@organization, @invitation)
+    end
 
     return unless create_link
 
@@ -69,6 +72,7 @@ class InvitationsController < ApplicationController
   rescue UserInfoServiceError => e
     handle_user_info_service_error(e, 2)
   end
+  # rubocop:enable Metrics/AbcSize
 
   def login
     login_session
@@ -76,11 +80,11 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
-    csp_config = CspConfig.for(:id_me)
+    csp_config = CspConfig.for(session[:csp])
     url = URI::HTTPS.build(host: csp_config.host,
                            path: '/oauth/authorize',
                            query: { client_id: csp_config.identifier,
-                                    redirect_uri: "#{my_protocol_host}/auth/id_me/callback",
+                                    redirect_uri: "#{my_protocol_host}/auth/#{csp_config.code}/callback",
                                     response_type: 'code',
                                     scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',
                                     nonce: @nonce,
@@ -105,10 +109,6 @@ class InvitationsController < ApplicationController
   end
 
   private
-
-  def verification_complete?
-    session["invitation_status_#{@invitation.id}"] == 'verification_complete'
-  end
 
   def invitation_matches_user
     user_info = UserInfoService.new.user_info(session)
@@ -213,8 +213,8 @@ class InvitationsController < ApplicationController
   def user
     user_info = UserInfoService.new.user_info(session)
     find_or_create_user(user_info)
-    @csp = Csp.find_by(name: @user.provider)
-    csp_user = CspUser.find_or_create_by!(user: @user, csp: @csp, uuid: user_info['sub'])
+    csp = Csp.find_by(name: @user.provider)
+    csp_user = CspUser.find_or_create_by!(user: @user, csp:, uuid: user_info['sub'])
 
     # Update emails based upon the latest information in user info.
     new_emails = user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed']
@@ -255,9 +255,7 @@ class InvitationsController < ApplicationController
     user_to_create.family_name = user_info['family_name']
     user_to_create.pac_id = session.delete(:user_pac_id)
 
-    # For now we force login.gov, this will have to change once we support multi-CSP.
-    # TODO: parametrize on provider -acw
-    user_to_create.provider = session[:csp] || 'id_me'
+    user_to_create.provider = session[:csp]
     user_to_create.uid = user_info['sub']
   end
 

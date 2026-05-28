@@ -877,7 +877,7 @@ RSpec.describe 'Invitations', type: :request do
   end
 end
 
-def log_in(template = user_info_template, provider: 'login_dot_gov')
+def log_in(template: user_info_template, provider: 'login_dot_gov')
   OmniAuth.config.test_mode = true
   OmniAuth.config.add_mock(provider.to_sym,
                            { uid: template['sub'],
