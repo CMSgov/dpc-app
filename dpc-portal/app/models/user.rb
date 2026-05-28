@@ -9,11 +9,23 @@ class User < ApplicationRecord
   validates :verification_status, allow_nil: true,
                                   inclusion: { in: :verification_status }
 
+  has_many :csp_users
+  has_many :csps, through: :csp_users
+  # has_many :user_emails
   has_many :ao_org_links
   has_many :cd_org_links
 
   enum :verification_reason, %i[ao_med_sanction_waived ao_med_sanctions]
   enum :verification_status, %i[approved rejected]
+
+  def csp_user_for(name)
+    csp_users.joins(:csp).where(csps: { name: name }).first
+  end
+
+  def self.find_by_csp_uid(name:, csp_uid:)
+    id_to_find = csp_uid
+    joins(csp_users: :csp).where(csp_users: { uuid: id_to_find }, csps: { name: name }).first
+  end
 
   def self.remember_for
     12.hours

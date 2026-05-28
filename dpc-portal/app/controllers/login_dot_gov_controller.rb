@@ -11,16 +11,13 @@ class LoginDotGovController < ApplicationController
 
   def id_me
     auth = request.env['omniauth.auth']
-    return unless (csp = csp())
+    return unless (csp = csp(auth.provider))
 
-    user = User.find_by(provider: auth.provider, uid: auth.uid)
-    if user
-      sign_in(user, csp: auth.provider)
-      session[:logged_in_at] = Time.now
-      Rails.logger.info(['User logged in',
-                         { actionContext: LoggingConstants::ActionContext::Authentication,
-                           actionType: LoggingConstants::ActionType::UserLoggedIn }])
-    end
+    csp_user = CspUser.find_by(uuid: auth.uid, csp:)
+
+    user = csp_user&.user
+    sign_in_and_log(user, csp: csp.name)
+    post_signin_actions(user, csp_user, auth)
     ial_2_actions(user, auth)
     redirect_to path(user, auth)
   end
@@ -55,10 +52,10 @@ class LoginDotGovController < ApplicationController
 
   private
 
-  def sign_in_and_log(user)
+  def sign_in_and_log(user, csp: 'login_dot_gov')
     return unless user
 
-    sign_in(user)
+    sign_in(user, csp: csp)
     session[:logged_in_at] = Time.now
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Authentication,
@@ -145,8 +142,8 @@ class LoginDotGovController < ApplicationController
     session.delete(:user_return_to) || organizations_path
   end
 
-  def csp
-    csp = Csp.active.find_by(name: :id_me)
+  def csp(name)
+    csp = Csp.active.find_by(name:)
     return csp if csp
 
     Rails.logger.info(['User attempted to login with Login.gov but no active CSP found',
@@ -163,7 +160,7 @@ class LoginDotGovController < ApplicationController
 
   def ial_1_user?(auth)
     data = auth.extra.raw_info
-    case auth.provider
+    case auth.provider.to_sym
     when :login_dot_gov then data.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
     when :id_me         then data.identity_assurance_level == 1
     else false

@@ -25,9 +25,9 @@ RSpec.describe 'ClientTokens', type: :request do
 
     context 'ao access denied' do
       context 'user has sanctions' do
-        let!(:user) { create(:user, verification_status: 'rejected', verification_reason: 'ao_med_sanctions') }
+        let!(:user) { create_user_with_csp(verification_status: 'rejected', verification_reason: 'ao_med_sanctions') }
         let!(:org) { create(:provider_organization, terms_of_service_accepted_by:) }
-        before { sign_in user }
+        before { sign_in user, csp: :login_dot_gov }
 
         it 'should show access denied page' do
           create(:ao_org_link, provider_organization: org, user:)
@@ -38,12 +38,12 @@ RSpec.describe 'ClientTokens', type: :request do
       end
 
       context 'org has sanctions' do
-        let!(:user) { create(:user) }
+        let!(:user) { create_user_with_csp }
         let!(:org) do
           create(:provider_organization, terms_of_service_accepted_by:, verification_status: 'rejected',
                                          verification_reason: 'org_med_sanctions')
         end
-        before { sign_in user }
+        before { sign_in user, csp: :login_dot_gov }
 
         it 'should show access denied page' do
           create(:ao_org_link, provider_organization: org, user:)
@@ -53,12 +53,12 @@ RSpec.describe 'ClientTokens', type: :request do
       end
 
       context 'org not approved' do
-        let!(:user) { create(:user) }
+        let!(:user) { create_user_with_csp }
         let!(:org) do
           create(:provider_organization, terms_of_service_accepted_by:, verification_status: 'rejected',
                                          verification_reason: 'no_approved_enrollment')
         end
-        before { sign_in user }
+        before { sign_in user, csp: :login_dot_gov }
 
         it 'should show access denied page' do
           create(:ao_org_link, provider_organization: org, user:)
@@ -68,9 +68,9 @@ RSpec.describe 'ClientTokens', type: :request do
       end
 
       context 'user no longer ao' do
-        let!(:user) { create(:user) }
+        let!(:user) { create_user_with_csp }
         let!(:org) { create(:provider_organization, terms_of_service_accepted_by:) }
-        before { sign_in user }
+        before { sign_in user, csp: :login_dot_gov }
 
         it 'should show access denied page' do
           create(:ao_org_link, provider_organization: org, user:, verification_status: false,
@@ -82,12 +82,12 @@ RSpec.describe 'ClientTokens', type: :request do
     end
     context 'cd access denied' do
       context 'org has sanctions' do
-        let!(:user) { create(:user) }
+        let!(:user) { create_user_with_csp }
         let!(:org) do
           create(:provider_organization, terms_of_service_accepted_by:, verification_status: 'rejected',
                                          verification_reason: 'org_med_sanctions')
         end
-        before { sign_in user }
+        before { sign_in user, csp: :login_dot_gov }
 
         it 'should show access denied page' do
           create(:cd_org_link, provider_organization: org, user:)
@@ -97,12 +97,12 @@ RSpec.describe 'ClientTokens', type: :request do
       end
 
       context 'org not approved' do
-        let!(:user) { create(:user) }
+        let!(:user) { create_user_with_csp }
         let!(:org) do
           create(:provider_organization, terms_of_service_accepted_by:, verification_status: 'rejected',
                                          verification_reason: 'no_approved_enrollment')
         end
-        before { sign_in user }
+        before { sign_in user, csp: :login_dot_gov }
 
         it 'should show access denied page' do
           create(:cd_org_link, provider_organization: org, user:)
@@ -113,9 +113,9 @@ RSpec.describe 'ClientTokens', type: :request do
     end
 
     context 'no link to org' do
-      let!(:user) { create(:user) }
+      let!(:user) { create_user_with_csp }
       let!(:org) { create(:provider_organization, terms_of_service_accepted_by:) }
-      before { sign_in user }
+      before { sign_in user, csp: :login_dot_gov }
       it 'redirects to organizations' do
         get "/organizations/#{org.id}/client_tokens/new"
         expect(response).to redirect_to('/organizations')
@@ -123,12 +123,12 @@ RSpec.describe 'ClientTokens', type: :request do
     end
 
     context :not_signed_tos do
-      let!(:user) { create(:user) }
+      let!(:user) { create_user_with_csp }
       let!(:org) { create(:provider_organization) }
 
       before do
         create(:cd_org_link, provider_organization: org, user:)
-        sign_in user
+        sign_in user, csp: :login_dot_gov
       end
 
       it 'redirects to organizations page' do
@@ -139,12 +139,12 @@ RSpec.describe 'ClientTokens', type: :request do
     end
 
     context 'as cd' do
-      let!(:user) { create(:user) }
+      let!(:user) { create_user_with_csp }
       let!(:org) { create(:provider_organization, terms_of_service_accepted_by:) }
 
       before do
         create(:cd_org_link, provider_organization: org, user:)
-        sign_in user
+        sign_in user, csp: :login_dot_gov
       end
 
       it 'returns success' do
@@ -164,13 +164,13 @@ RSpec.describe 'ClientTokens', type: :request do
     end
 
     context 'as cd' do
-      let!(:user) { create(:user) }
+      let!(:user) { create_user_with_csp }
       let(:org_api_id) { SecureRandom.uuid }
       let!(:org) { create(:provider_organization, terms_of_service_accepted_by:, dpc_api_organization_id: org_api_id) }
 
       before do
         create(:cd_org_link, provider_organization: org, user:)
-        sign_in user
+        sign_in user, csp: :login_dot_gov
       end
 
       it 'succeeds if label' do
@@ -229,13 +229,13 @@ RSpec.describe 'ClientTokens', type: :request do
     end
 
     context 'as cd' do
-      let!(:user) { create(:user) }
+      let!(:user) { create_user_with_csp }
       let(:org_api_id) { SecureRandom.uuid }
       let!(:org) { create(:provider_organization, terms_of_service_accepted_by:, dpc_api_organization_id: org_api_id) }
 
       before do
         create(:cd_org_link, provider_organization: org, user:)
-        sign_in user
+        sign_in user, csp: :login_dot_gov
       end
 
       it 'flashes success if succeeds' do

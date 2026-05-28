@@ -8,7 +8,13 @@ RSpec.describe 'Sessions', type: :request do
 
   describe 'logout' do
     context 'logged in' do
-      let!(:user) { create(:user, provider: :login_dot_gov) }
+      let(:uuid) { SecureRandom.uuid }
+      let!(:user) do
+        csp = create(:csp, :login_dot_gov)
+        user = create(:user, provider: :login_dot_gov)
+        create(:csp_user, user:, uuid:, csp:)
+        user
+      end
       before do
         sign_in user, csp: :login_dot_gov
       end

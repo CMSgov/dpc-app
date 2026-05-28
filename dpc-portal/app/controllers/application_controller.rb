@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 # Parent class of all controllers
-class ApplicationController < ActionController::Base
-
+class ApplicationController < ActionController::Base # rubocop:disable Metrics/ClassLength
   before_action :check_session_length
   before_action :set_current_request_attributes
   before_action :no_store
@@ -25,9 +24,9 @@ class ApplicationController < ActionController::Base
     redirect_to sign_in_path
   end
 
-  def sign_in(user, csp: :login_dot_gov)
+  def sign_in(user, csp: 'login_dot_gov')
     session['user'] = user.id
-    session[:csp] = csp
+    session[:csp] = csp.to_s
   end
 
   private
