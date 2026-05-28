@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # Parent class of all controllers
-class ApplicationController < ActionController::Base # rubocop:disable Metrics/ClassLength
+# rubocop:disable Metrics/ClassLength
+class ApplicationController < ActionController::Base
   before_action :check_session_length
   before_action :set_current_request_attributes
   before_action :no_store
@@ -24,34 +25,13 @@ class ApplicationController < ActionController::Base # rubocop:disable Metrics/C
     redirect_to sign_in_path
   end
 
-  def sign_in(user, csp: 'login_dot_gov')
-    session['user'] = user.id
-    session[:csp] = csp.to_s
-  end
-
-  private
-
-  def check_user_verification
-    # puts current_user.inspect
-    # puts "Current user verification status: #{current_user.verification_status}" if current_user
-    return unless current_user&.rejected?
-
-    render(Page::Utility::AccessDeniedComponent.new(failure_code: "verification.#{current_user.verification_reason}"))
-  end
-
-  def tos_accepted
-    return if @organization.terms_of_service_accepted_by.present?
-
-    if current_user.ao?(@organization)
-      render(Page::Organization::TosFormComponent.new(@organization))
-    else
-      flash[:notice] = 'Organization is not ready for credential management'
-      redirect_to organizations_path
-    end
+  def sign_in(user, csp)
+    session[:user] = user.id
+    session[:csp] = csp
   end
 
   def url_for_logout(csp)
-    case csp.to_s
+    case csp
     when :id_me.to_s
       url_for_id_me_logout
     when :login_dot_gov.to_s
@@ -79,7 +59,26 @@ class ApplicationController < ActionController::Base # rubocop:disable Metrics/C
     URI::HTTPS.build(host: CspConfig.for(:id_me).host,
                      path: CspConfig.for(:id_me).log_out_path,
                      query: { client_id: CspConfig.for(:id_me).identifier,
-                              redirect_uri: "#{root_url}auth/logged_out" }.to_query)
+                              redirect_uri: "#{root_url}oauth/logged_out" }.to_query)
+  end
+
+  private
+
+  def check_user_verification
+    return unless current_user&.rejected?
+
+    render(Page::Utility::AccessDeniedComponent.new(failure_code: "verification.#{current_user.verification_reason}"))
+  end
+
+  def tos_accepted
+    return if @organization.terms_of_service_accepted_by.present?
+
+    if current_user.ao?(@organization)
+      render(Page::Organization::TosFormComponent.new(@organization))
+    else
+      flash[:notice] = 'Organization is not ready for credential management'
+      redirect_to organizations_path
+    end
   end
 
   # rubocop:disable Metrics/AbcSize
@@ -154,3 +153,4 @@ class ApplicationController < ActionController::Base # rubocop:disable Metrics/C
     logger.error(['CredentialAuditLog failure', { action:, credential_type:, dpc_api_credential_id: }])
   end
 end
+# rubocop:enable Metrics/ClassLength

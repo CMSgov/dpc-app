@@ -55,14 +55,12 @@ class InvitationsController < ApplicationController
 
   # Everybody
   def register
-    unless session["invitation_status_#{@invitation.id}"] == 'verification_complete'
-      return redirect_to organization_invitation_url(@organization, @invitation)
-    end
+    return redirect_to organization_invitation_url(@organization, @invitation) unless verification_complete?
 
     return unless create_link
 
     session.delete("invitation_status_#{@invitation.id}")
-    sign_in(@user)
+    sign_in(@user, session[:csp])
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::UserLoggedIn,
@@ -100,12 +98,17 @@ class InvitationsController < ApplicationController
   end
 
   def set_idp_token
-    session[:login_dot_gov_token] = 'token'
-    session[:login_dot_gov_token_exp] = 2.days.from_now
+    csp = session[:csp]
+    session["#{csp}_token"] = 'token'
+    session["#{csp}_token_exp"] = 2.days.from_now
     head :ok
   end
 
   private
+
+  def verification_complete?
+    session["invitation_status_#{@invitation.id}"] == 'verification_complete'
+  end
 
   def invitation_matches_user
     user_info = UserInfoService.new.user_info(session)
@@ -210,8 +213,8 @@ class InvitationsController < ApplicationController
   def user
     user_info = UserInfoService.new.user_info(session)
     find_or_create_user(user_info)
-    csp = Csp.find_by(name: @user.provider)
-    csp_user = CspUser.find_or_create_by!(user: @user, csp: csp, uuid: user_info['sub'])
+    @csp = Csp.find_by(name: @user.provider)
+    csp_user = CspUser.find_or_create_by!(user: @user, csp: @csp, uuid: user_info['sub'])
 
     # Update emails based upon the latest information in user info.
     new_emails = user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed']

@@ -8,36 +8,43 @@ RSpec.describe 'Sessions', type: :request do
 
   describe 'logout' do
     context 'logged in' do
-      let(:uuid) { SecureRandom.uuid }
-      let!(:user) do
-        csp = create(:csp, :login_dot_gov)
-        user = create(:user, provider: :login_dot_gov)
-        create(:csp_user, user:, uuid:, csp:)
-        user
-      end
-      before do
-        sign_in user, csp: :login_dot_gov
-      end
-      it 'should prevent access' do
-        delete '/users/sign_out'
-        get '/organizations'
-        expect(response).to redirect_to('/users/sign_in')
-        expect(flash[:alert]).to be_present
+      shared_examples 'logout actions' do |provider|
+        let!(:user) do
+          csp = create(:csp, provider)
+          user = create(:user, provider:)
+          create(:csp_user, user:, uuid: SecureRandom.uuid, csp:)
+          user
+        end
+        before { sign_in user, provider }
+        it 'should prevent access' do
+          delete '/users/sign_out'
+          get '/organizations'
+          expect(response).to redirect_to('/users/sign_in')
+          expect(flash[:alert]).to be_present
+        end
+
+        it 'should log action' do
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(
+            ['User logged out',
+             { actionContext: LoggingConstants::ActionContext::Authentication,
+               actionType: LoggingConstants::ActionType::UserLoggedOut }]
+          )
+          delete '/users/sign_out'
+        end
+
+        it 'should redirect to the provider host' do
+          delete '/users/sign_out'
+          expect(response.location).to include(ENV.fetch("IDP_#{provider.to_s.upcase}_HOST"))
+        end
       end
 
-      it 'should log action' do
-        allow(Rails.logger).to receive(:info)
-        expect(Rails.logger).to receive(:info).with(
-          ['User logged out',
-           { actionContext: LoggingConstants::ActionContext::Authentication,
-             actionType: LoggingConstants::ActionType::UserLoggedOut }]
-        )
-        delete '/users/sign_out'
+      context 'using Login.gov' do
+        include_examples 'logout actions', :login_dot_gov
       end
 
-      it 'should redirect to login.gov' do
-        delete '/users/sign_out'
-        expect(response.location).to include(ENV.fetch('IDP_LOGIN_DOT_GOV_HOST'))
+      context 'using ID.me' do
+        include_examples 'logout actions', :id_me
       end
     end
 
