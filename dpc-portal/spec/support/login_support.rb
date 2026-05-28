@@ -3,6 +3,20 @@
 require 'securerandom'
 
 module LoginSupport
+  def create_user_with_csp(given_name: 'John', family_name: 'Smith', csp: :login_dot_gov,
+                           uuid: SecureRandom.uuid, **user_attrs)
+    csp = create(:csp, csp)
+    user = create(:user, given_name:, family_name:, **user_attrs)
+    create(:csp_user, user:, uuid:, csp:)
+    user
+  end
+
+  def create_user_and_sign_in(given_name: 'John', family_name: 'Smith', csp: :login_dot_gov, uuid: SecureRandom.uuid)
+    user = create_user_with_csp(given_name:, family_name:, csp:, uuid:)
+    sign_in user, csp:
+    user
+  end
+
   def sign_in(user, csp: :id_me)
     OmniAuth.config.test_mode = true
     case csp.to_s
@@ -19,7 +33,7 @@ module LoginSupport
   end
 
   def login_dot_gov_auth_hash(user)
-    { uid: user.uid,
+    { uid: user.csp_user_for('login_dot_gov')&.uuid || user.uid,
       info: { email: user.email },
       # credentials: { token: 'mock_token', expires_in: 300 },
       extra: {
@@ -31,7 +45,7 @@ module LoginSupport
   end
 
   def id_me_auth_hash(user)
-    { uid: user.uid,
+    { uid: user.csp_user_for('id_me')&.uuid || user.uid,
       info: { email: user.email },
       # credentials: { token: 'mock_token', expires_in: 300 },
       extra: {
@@ -45,7 +59,7 @@ module LoginSupport
   end
 
   def clear_auth_hash(user)
-    { uid: user.uid,
+    { uid: user.csp_user_for('clear')&.uuid || user.uid,
       info: { email: user.email },
       extra: {
         raw_info: {

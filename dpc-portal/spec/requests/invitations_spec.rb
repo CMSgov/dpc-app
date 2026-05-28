@@ -8,7 +8,7 @@ RSpec.describe 'Invitations', type: :request do
 
   let!(:csp) { create(:csp, name: :login_dot_gov) }
   let!(:other_csp) { create(:csp, name: :id_me) }
-  let(:provider) { :id_me }
+  let(:provider) { :login_dot_gov }
 
   RSpec.shared_examples 'an invitation endpoint' do |method, path_suffix, type|
     let(:org) { invitation.provider_organization }
@@ -620,7 +620,10 @@ RSpec.describe 'Invitations', type: :request do
           expect(user.family_name).to eq user_info_template['family_name']
           expect(user.email).to eq user_info_template['email']
           expect(user.uid).to eq user_info_template['sub']
-          expect(user.provider).to eq 'id_me'
+          expect(user.csp_user_for('login_dot_gov')).to be_present
+          expect(user.csp_user_for('login_dot_gov').user_emails.map(&:email)).not_to be_empty
+          expect(user.csp_user_for('login_dot_gov')
+                  .user_emails.map(&:email)).to include(*user_info_template['all_emails'])
         end
 
         it 'should log when user is created' do
@@ -749,11 +752,11 @@ RSpec.describe 'Invitations', type: :request do
           expect(request.session[:user_pac_id]).to be_nil
         end
         it 'should set pac_id on existing user' do
-          create(:user, email: user_info_template['email'], provider:)
+          create_invitation_user_with_csp(csp: provider)
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { User.count }.by 0
-          user = User.find_by(email: user_info_template['email'])
+          user = User.find_by_csp_uid(name: provider, csp_uid: user_info_template['sub'])
           # We have the fake CPI API Gateway return the ssn as pac_id
           expect(user.pac_id).to eq user_info_template['social_security_number']
           expect(request.session[:user_pac_id]).to be_nil
@@ -874,17 +877,17 @@ RSpec.describe 'Invitations', type: :request do
   end
 end
 
-def log_in
+def log_in(template = user_info_template, provider: 'login_dot_gov')
   OmniAuth.config.test_mode = true
-  OmniAuth.config.add_mock(:id_me,
-                           { uid: '12345',
+  OmniAuth.config.add_mock(provider.to_sym,
+                           { uid: template['sub'],
                              credentials: { expires_in: 899,
                                             token: 'bearer-token' },
-                             info: { email: 'bob@example.com' },
-                             extra: { raw_info: { given_name: 'Bob',
-                                                  family_name: 'Hoskins',
+                             info: { email: template['email'] },
+                             extra: { raw_info: { given_name: template['given_name'],
+                                                  family_name: template['family_name'],
                                                   ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
-  post '/auth/id_me'
+  post "/auth/#{provider}"
   follow_redirect!
 end
 
@@ -915,4 +918,11 @@ def stub_user_info(overrides: {})
   expect(user_service_class).to receive(:new).at_least(:once).and_return(user_service)
 
   expect(user_service).to receive(:user_info).at_least(:once).and_return(user_info_template(overrides))
+end
+
+def create_invitation_user_with_csp(csp:)
+  template = user_info_template
+  create_user_with_csp(given_name: template['given_name'], family_name: template['family_name'],
+                       email: template['email'],
+                       csp:, uuid: template['sub'])
 end
