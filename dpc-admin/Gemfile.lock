@@ -108,8 +108,8 @@ GEM
     bootsnap (1.18.3)
       msgpack (~> 1.2)
     builder (3.3.0)
-    bundler-audit (0.9.1)
-      bundler (>= 1.2.0, < 3)
+    bundler-audit (0.9.3)
+      bundler (>= 1.2.0)
       thor (~> 1.0)
     byebug (11.1.3)
     capybara (3.40.0)
@@ -586,7 +586,7 @@ DEPENDENCIES
   webmock
 
 RUBY VERSION
-   ruby 3.3.1p55
+  ruby 3.3.1p55
 
 BUNDLED WITH
-   2.5.9
+  4.0.10
