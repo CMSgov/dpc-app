@@ -6,8 +6,8 @@ require 'support/login_support'
 RSpec.describe 'Application', type: :request do
   include LoginSupport
 
-  let!(:user) { create(:user) }
-  before { sign_in user }
+  let!(:user) { create_user_with_csp }
+  before { sign_in user, csp: :login_dot_gov }
 
   it 'sets cache control to no-store' do
     get '/'

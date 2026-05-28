@@ -11,13 +11,13 @@ RSpec.describe 'IpAddresses', type: :request do
 
   describe 'IP Addresses', :integration do
     let(:dpc_api_organization_id) { SecureRandom.uuid }
-    let!(:user) { create(:user) }
+    let!(:user) { create_user_with_csp }
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let!(:link) { create(:cd_org_link, user:, provider_organization: org) }
     let(:ipv4_address) { '136.226.19.87' }
     before do
       org.update!(terms_of_service_accepted_by: user)
-      sign_in user
+      sign_in user, csp: :login_dot_gov
     end
     it 'should create an ip address, show on org page, and delete it' do
       get "/organizations/#{org.id}"

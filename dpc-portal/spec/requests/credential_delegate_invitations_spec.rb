@@ -16,7 +16,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     end
 
     context 'as ao' do
-      let!(:user) { create(:user, provider: :login_dot_gov) }
+      let!(:user) { create_user_with_csp }
       let!(:org) { create(:provider_organization) }
 
       before do
@@ -46,8 +46,9 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
 
     context 'user has sanctions' do
       let!(:user) do
-        create(:user, provider: :login_dot_gov, verification_status: 'rejected',
-                      verification_reason: 'ao_med_sanctions')
+        create_user_with_csp(given_name: 'John', family_name: 'Smith', csp: :login_dot_gov,
+                             verification_status: 'rejected',
+                             verification_reason: 'ao_med_sanctions')
       end
       let!(:org) { create(:provider_organization) }
       before { sign_in user, csp: :login_dot_gov }
@@ -61,7 +62,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     end
 
     context 'org has sanctions' do
-      let!(:user) { create(:user, provider: :login_dot_gov) }
+      let!(:user) { create_user_with_csp }
       let!(:org) do
         create(:provider_organization, terms_of_service_accepted_by: user, verification_status: 'rejected',
                                        verification_reason: 'org_med_sanctions')
@@ -76,7 +77,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     end
 
     context 'org not approved' do
-      let!(:user) { create(:user, provider: :login_dot_gov) }
+      let!(:user) { create_user_with_csp }
       let!(:org) do
         create(:provider_organization, terms_of_service_accepted_by: user, verification_status: 'rejected',
                                        verification_reason: 'no_approved_enrollment')
@@ -91,7 +92,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     end
 
     context 'user no longer ao' do
-      let!(:user) { create(:user, provider: :login_dot_gov) }
+      let!(:user) { create_user_with_csp }
       let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
       before { sign_in user, csp: :login_dot_gov }
 
@@ -104,7 +105,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
     end
 
     context 'as cd' do
-      let!(:user) { create(:user, provider: :login_dot_gov) }
+      let!(:user) { create_user_with_csp }
       let!(:org) { create(:provider_organization) }
       before do
         create(:cd_org_link, provider_organization: org, user:)
@@ -118,7 +119,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
   end
 
   describe 'POST /create' do
-    let!(:user) { create(:user, provider: :login_dot_gov) }
+    let!(:user) { create_user_with_csp }
     let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
     let!(:successful_parameters) do
       { invited_given_name: 'Bob',
@@ -214,7 +215,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
   end
 
   describe 'Delete /destroy' do
-    let!(:user) { create(:user, provider: :login_dot_gov) }
+    let!(:user) { create_user_with_csp }
     let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
     let!(:invitation) { create(:invitation, :cd, provider_organization: org) }
 

@@ -220,7 +220,12 @@ class InvitationsController < ApplicationController
     user_info = UserInfoService.new.user_info(session)
     find_or_create_user(user_info)
     csp = Csp.find_by(name: @user.provider)
-    CspUser.find_or_create_by!(user: @user, csp: csp, uuid: user_info['sub'])
+    csp_user = CspUser.find_or_create_by!(user: @user, csp: csp, uuid: user_info['sub'])
+
+    # Update emails based upon the latest information in user info.
+    new_emails = user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed']
+    csp_user.add_or_activate_new_email(new_emails)
+    csp_user.deactivate_old_email(new_emails)
     update_user(user_info)
     @user
   end
@@ -257,7 +262,7 @@ class InvitationsController < ApplicationController
     user_to_create.pac_id = session.delete(:user_pac_id)
 
     # For now we force login.gov, this will have to change once we support multi-CSP.
-    user_to_create.provider = :login_dot_gov
+    user_to_create.provider = session[:csp] || 'login_dot_gov'
     user_to_create.uid = user_info['sub']
   end
 

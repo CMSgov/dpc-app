@@ -24,9 +24,9 @@ class ApplicationController < ActionController::Base # rubocop:disable Metrics/C
     redirect_to sign_in_path
   end
 
-  def sign_in(user, csp: :login_dot_gov)
+  def sign_in(user, csp: 'login_dot_gov')
     session['user'] = user.id
-    session[:csp] = csp
+    session[:csp] = csp.to_s
   end
 
   private
