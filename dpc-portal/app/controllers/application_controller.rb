@@ -25,7 +25,7 @@ class ApplicationController < ActionController::Base
     redirect_to sign_in_path
   end
 
-  def sign_in(user, csp)
+  def sign_in(user:, csp:)
     session[:user] = user.id
     session[:csp] = csp
   end

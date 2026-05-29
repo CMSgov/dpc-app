@@ -14,6 +14,7 @@ RSpec.describe 'Invitations', type: :request do
     let(:org) { invitation.provider_organization }
     let(:bad_org) { create(:provider_organization) }
     let(:expected_success_status) { 200 }
+    before { log_in }
     it 'should be ok or redirect' do
       send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
       expect(response.status).to eq(expected_success_status)

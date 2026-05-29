@@ -11,7 +11,7 @@ RSpec.shared_examples 'a credential resource' do
 
       before do
         create(:cd_org_link, provider_organization: org, user:)
-        sign_in user, :login_dot_gov
+        sign_in(user:, csp: :login_dot_gov)
       end
       it 'adds a credential audit log record on success' do
         token_guid = SecureRandom.uuid
@@ -47,7 +47,7 @@ RSpec.shared_examples 'a credential resource' do
 
       before do
         create(:cd_org_link, provider_organization: org, user:)
-        sign_in user, :login_dot_gov
+        sign_in(user:, csp: :login_dot_gov)
       end
 
       it 'adds a credential audit log record on success' do

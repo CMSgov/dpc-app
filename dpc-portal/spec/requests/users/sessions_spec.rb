@@ -9,13 +9,13 @@ RSpec.describe 'Sessions', type: :request do
   describe 'logout' do
     context 'logged in' do
       shared_examples 'logout actions' do |provider|
+        let!(:csp) { create(:csp, provider) }
         let!(:user) do
-          csp = create(:csp, provider)
           user = create(:user, provider:)
           create(:csp_user, user:, uuid: SecureRandom.uuid, csp:)
           user
         end
-        before { sign_in user, provider }
+        before { sign_in user:, csp: provider }
         it 'should prevent access' do
           delete '/users/sign_out'
           get '/organizations'

@@ -13,11 +13,11 @@ module LoginSupport
 
   def create_user_and_sign_in(given_name: 'John', family_name: 'Smith', csp: :login_dot_gov, uuid: SecureRandom.uuid)
     user = create_user_with_csp(given_name:, family_name:, csp:, uuid:)
-    sign_in user, csp:
+    sign_in user:, csp:
     user
   end
 
-  def sign_in(user, csp)
+  def sign_in(user:, csp:)
     OmniAuth.config.test_mode = true
     case csp.to_s
     when 'id_me'

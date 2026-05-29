@@ -50,7 +50,7 @@ class CspController < ApplicationController
   def sign_in_and_log(user, csp)
     return unless user
 
-    sign_in(user, csp)
+    sign_in(user:, csp:)
     session[:logged_in_at] = Time.now
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Authentication,

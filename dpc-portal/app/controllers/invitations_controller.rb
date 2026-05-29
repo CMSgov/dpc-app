@@ -63,7 +63,7 @@ class InvitationsController < ApplicationController
     return unless create_link
 
     session.delete("invitation_status_#{@invitation.id}")
-    sign_in(@user, session[:csp])
+    sign_in(user: @user, csp: session[:csp])
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::UserLoggedIn,
@@ -80,11 +80,12 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
+    puts "SESSION CSP: #{session[:csp].class}:#{session[:csp]}"
     csp_config = CspConfig.for(session[:csp])
     url = URI::HTTPS.build(host: csp_config.host,
                            path: '/oauth/authorize',
                            query: { client_id: csp_config.identifier,
-                                    redirect_uri: "#{my_protocol_host}/auth/#{csp_config.code}/callback",
+                                    redirect_uri: "#{my_protocol_host}/auth/#{session[:csp]}/callback",
                                     response_type: 'code',
                                     scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',
                                     nonce: @nonce,
@@ -255,7 +256,7 @@ class InvitationsController < ApplicationController
     user_to_create.family_name = user_info['family_name']
     user_to_create.pac_id = session.delete(:user_pac_id)
 
-    user_to_create.provider = session[:csp]
+    user_to_create.provider = session[:csp] || :login_dot_gov
     user_to_create.uid = user_info['sub']
   end
 
