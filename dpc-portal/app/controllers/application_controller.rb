@@ -57,7 +57,7 @@ class ApplicationController < ActionController::Base # rubocop:disable Metrics/C
     when :login_dot_gov.to_s
       url_for_login_dot_gov_logout
     else
-      raise "Unsupported CSP: #{csp}"
+      raise UnknownCSPError, csp
     end
   end
 
@@ -152,5 +152,12 @@ class ApplicationController < ActionController::Base # rubocop:disable Metrics/C
     return if log.save
 
     logger.error(['CredentialAuditLog failure', { action:, credential_type:, dpc_api_credential_id: }])
+  end
+end
+
+# Error class to handle unknow CSP
+class UnknownCSPError < StandardError # rubocop:disable Style/OneClassPerFile
+  def initialize(provider)
+    super("Unknown CSP: #{provider}")
   end
 end
