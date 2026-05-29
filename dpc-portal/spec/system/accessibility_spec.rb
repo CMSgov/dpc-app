@@ -19,8 +19,8 @@ RSpec.describe 'Accessibility', type: :system do
     OmniAuth.config.add_mock(:id_me,
                              { uid:,
                                info: { email: 'bob@example.com' },
-                               extra: { raw_info: { all_emails: %w[bob@example.com bob2@example.com],
-                                                    ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
+                               extra: { raw_info: { emails_confirmed: %w[bob@example.com bob2@example.com],
+                                                    identity_assurance_level: 1 } } })
   end
   def sign_in
     visit '/auth/id_me/callback'
@@ -310,7 +310,7 @@ RSpec.describe 'Accessibility', type: :system do
             it 'should show error page' do
               visit "/organizations/#{org.id}/credential_delegate_invitations/new"
               page.find_button(value: 'Send invite').click
-              expect(page).to have_text("can't be blank")
+              expect(page).to have_text("Can't be blank")
               expect(page).to be_axe_clean.according_to axe_standard
             end
             it 'should show success page' do
@@ -320,7 +320,8 @@ RSpec.describe 'Accessibility', type: :system do
               page.fill_in 'invited_email', with: 'john@beatles.com'
               page.fill_in 'invited_email_confirmation', with: 'john@beatles.com'
               page.find_button(value: 'Send invite').click
-              expect(page).to_not have_text("can't be blank")
+              expect(page).to_not have_text("Can't be blank")
+              page.find_button('Yes, I acknowledge').click
               expect(page).to have_text('Credential Delegate invited successfully')
               expect(page).to be_axe_clean.according_to axe_standard
             end
@@ -332,7 +333,8 @@ RSpec.describe 'Accessibility', type: :system do
               page.fill_in 'invited_email', with: invitation.invited_email
               page.fill_in 'invited_email_confirmation', with: invitation.invited_email
               page.find_button(value: 'Send invite').click
-              expect(page).to_not have_text("can't be blank")
+              expect(page).to_not have_text("Can't be blank")
+              page.find_button('Yes, I acknowledge').click
               expect(page).to have_text(I18n.t('errors.attributes.base.duplicate_cd.status'))
               expect(page).to be_axe_clean.according_to axe_standard
             end
@@ -399,20 +401,28 @@ RSpec.describe 'Accessibility', type: :system do
     end
     it 'should show login page' do
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-      expect(page).to have_text('Step 2')
+      expect(page).to have_text(:all, 'Step 2 of 5')
+      expect(page).to have_css('.usa-step-indicator__heading',
+                               text: '2 of 5 Verify my identity')
+      # expect(page).to have_text('Step 2')
       expect(page).to be_axe_clean.according_to axe_standard
     end
     it 'should show accept page' do
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-      expect(page).to have_text('Step 3')
+      # expect(page).to have_text('Step 3')
+      expect(page).to have_text(:all, 'Step 3 of 5')
+      expect(page).to have_css('.usa-step-indicator__heading',
+                               text: '3 of 5 Verify Medicare enrollment information')
       expect(page).to be_axe_clean.according_to axe_standard
     end
     it 'should show register page' do
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
       page.find('.usa-button', text: 'Verify information').click
-      expect(page).to have_text('Step 4')
+      expect(page).to have_text(:all, 'Step 4 of 5')
+      expect(page).to have_css('.usa-step-indicator__heading',
+                               text: '4 of 5 Submit registration')
       expect(page).to be_axe_clean.according_to axe_standard
     end
     it 'should show success page' do
@@ -420,7 +430,7 @@ RSpec.describe 'Accessibility', type: :system do
       visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
       page.find('.usa-button', text: 'Verify information').click
       page.find('.usa-button', text: 'Submit registration').click
-      expect(page).to have_text('Step 5')
+      expect(page).to have_text(:all, 'Step 5')
       expect(page).to be_axe_clean.according_to axe_standard
     end
     context :failure do
@@ -471,7 +481,8 @@ RSpec.describe 'Accessibility', type: :system do
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token"
         visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
         page.find('.usa-button', text: 'Verify information').click
-        expect(page).to have_text('Step 3')
+        expect(page).to have_css('.usa-step-indicator__heading',
+                                 text: '3 of 5 Verify Medicare enrollment information')
         expect(page).to have_text('You’re not the Authorized Official.')
         expect(page).to be_axe_clean.according_to axe_standard
       end
