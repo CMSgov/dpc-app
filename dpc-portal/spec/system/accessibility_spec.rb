@@ -310,7 +310,7 @@ RSpec.describe 'Accessibility', type: :system do
             it 'should show error page' do
               visit "/organizations/#{org.id}/credential_delegate_invitations/new"
               page.find_button(value: 'Send invite').click
-              expect(page).to have_text("Can't be blank")
+              expect(page).to have_text(/can't be blank/i)
               expect(page).to be_axe_clean.according_to axe_standard
             end
             it 'should show success page' do
@@ -320,8 +320,10 @@ RSpec.describe 'Accessibility', type: :system do
               page.fill_in 'invited_email', with: 'john@beatles.com'
               page.fill_in 'invited_email_confirmation', with: 'john@beatles.com'
               page.find_button(value: 'Send invite').click
-              expect(page).to_not have_text("Can't be blank")
-              page.find_button('Yes, I acknowledge').click
+              expect(page).to_not have_text(/can't be blank/i)
+              within('#verify-modal', visible: true) do
+                click_button 'Yes, I acknowledge'
+              end
               expect(page).to have_text('Credential Delegate invited successfully')
               expect(page).to be_axe_clean.according_to axe_standard
             end
@@ -333,8 +335,10 @@ RSpec.describe 'Accessibility', type: :system do
               page.fill_in 'invited_email', with: invitation.invited_email
               page.fill_in 'invited_email_confirmation', with: invitation.invited_email
               page.find_button(value: 'Send invite').click
-              expect(page).to_not have_text("Can't be blank")
-              page.find_button('Yes, I acknowledge').click
+              expect(page).to_not have_text(/can't be blank/i)
+              within('#verify-modal', visible: true) do
+                click_button 'Yes, I acknowledge'
+              end
               expect(page).to have_text(I18n.t('errors.attributes.base.duplicate_cd.status'))
               expect(page).to be_axe_clean.according_to axe_standard
             end
