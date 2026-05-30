@@ -321,7 +321,9 @@ RSpec.describe 'Accessibility', type: :system do
               page.fill_in 'invited_email_confirmation', with: 'john@beatles.com'
               page.find_button(value: 'Send invite').click
               expect(page).to_not have_text(/can't be blank/i)
-              within('#verify-modal', visible: true) do
+              expect(page).to have_selector('#verify-modal', visible: true, wait: 10)
+
+              within('#verify-modal') do
                 click_button 'Yes, I acknowledge'
               end
               expect(page).to have_text('Credential Delegate invited successfully')
@@ -336,7 +338,9 @@ RSpec.describe 'Accessibility', type: :system do
               page.fill_in 'invited_email_confirmation', with: invitation.invited_email
               page.find_button(value: 'Send invite').click
               expect(page).to_not have_text(/can't be blank/i)
-              within('#verify-modal', visible: true) do
+              expect(page).to have_selector('#verify-modal', visible: true, wait: 10)
+
+              within('#verify-modal') do
                 click_button 'Yes, I acknowledge'
               end
               expect(page).to have_text(I18n.t('errors.attributes.base.duplicate_cd.status'))
