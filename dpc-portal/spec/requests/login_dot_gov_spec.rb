@@ -30,7 +30,12 @@ RSpec.describe 'LoginDotGov', type: :request do
           post '/auth/login_dot_gov'
           follow_redirect!
         end
-        it 'should not add another user' do
+        it 'should write a cookie with the last used csp' do
+          post '/auth/login_dot_gov'
+          follow_redirect!
+          expect(cookies[:last_used_csp]).to eq 'login_dot_gov'
+        end
+        it 'should not add another user credential' do
           expect(CspUser.where(uuid:, csp:).count).to eq 1
           expect do
             post '/auth/login_dot_gov'
