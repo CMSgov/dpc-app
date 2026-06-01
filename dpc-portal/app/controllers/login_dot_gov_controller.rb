@@ -77,7 +77,7 @@ class LoginDotGovController < ApplicationController
     user&.update(given_name: data.given_name, family_name: data.family_name)
   end
 
-  def update_email(csp_user, new_emails, primary_email)
+  def update_email(csp_user, new_emails, verified_email)
     return unless csp_user
 
     existing_emails = csp_user.user_emails
@@ -88,8 +88,8 @@ class LoginDotGovController < ApplicationController
       deactivate_old_email(new_emails, existing_emails)
 
       # Set their primary email, which should now exist in the user_emails table
-      primary_email = csp_user.user_emails.find_by(email: primary_email)
-      primary_email.update(primary: true) if primary_email && !primary_email.primary?
+      verified_email = csp_user.user_emails.find_by(email: verified_email)
+      verified_email.update(primary: true) if verified_email && !verified_email.primary?
     end
   end
 
@@ -157,7 +157,15 @@ class LoginDotGovController < ApplicationController
 
   def post_signin_actions(user, csp_user, auth)
     ial_2_actions(user, auth)
-    update_email(csp_user, auth.extra.raw_info.all_emails, auth.info.email)
+    update_email(csp_user, all_emails(auth), verified_email(auth))
+  end
+
+  def verified_email(auth)
+    auth.info.email
+  end
+
+  def all_emails(auth)
+    auth.extra.raw_info.all_emails
   end
 end
 # rubocop:enable Metrics/ClassLength
