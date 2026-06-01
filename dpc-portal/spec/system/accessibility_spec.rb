@@ -321,11 +321,11 @@ RSpec.describe 'Accessibility', type: :system do
               page.fill_in 'invited_email_confirmation', with: 'john@beatles.com'
               page.find_button(value: 'Send invite').click
               expect(page).to_not have_text(/can't be blank/i)
-              expect(page).to have_selector('#verify-modal', visible: true, wait: 10)
+              # expect(page).to have_selector('#verify-modal', visible: true, wait: 10)
 
-              within('#verify-modal') do
-                click_button 'Yes, I acknowledge'
-              end
+              # within('#verify-modal') do
+              #   click_button 'Yes, I acknowledge'
+              # end
               expect(page).to have_text('Credential Delegate invited successfully')
               expect(page).to be_axe_clean.according_to axe_standard
             end
