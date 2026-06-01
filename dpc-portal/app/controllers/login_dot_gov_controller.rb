@@ -87,9 +87,9 @@ class LoginDotGovController < ApplicationController
       add_or_activate_new_email(csp_user, new_emails, existing_emails)
       deactivate_old_email(new_emails, existing_emails)
 
-      # Set their primary email, which should now exist in the user_emails table
+      # Set their verified email, which should now exist in the user_emails table
       verified_email = csp_user.user_emails.find_by(email: verified_email)
-      verified_email.update(primary: true) if verified_email && !verified_email.primary?
+      verified_email.update(verified: true) if verified_email && !verified_email.verified?
     end
   end
 
