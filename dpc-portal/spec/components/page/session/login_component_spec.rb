@@ -46,4 +46,61 @@ RSpec.describe Page::Session::LoginComponent, type: :component do
       expect(page.find_all('.grid-col-12').size).to eq 2
     end
   end
+
+  describe 'last used csp was CLEAR' do
+    let(:url) { '/' }
+    let(:component) { described_class.new(url, last_used_csp: :clear) }
+    before { render_inline(component) }
+
+    it 'wraps only the CLEAR button' do
+      # Check that the right button has the "last used" wrapper.
+      expect(page).to have_css('.last-used-login-wrapper .clear-login-button__logo')
+
+      # Make sure the other two don't.
+      expect(page).not_to have_css('.last-used-login-wrapper .idme-login-button__logo')
+      expect(page).not_to have_css('.last-used-login-wrapper .lg-login-button__logo')
+    end
+  end
+
+  describe 'last used csp was ID.me' do
+    let(:url) { '/' }
+    let(:component) { described_class.new(url, last_used_csp: :id_me) }
+    before { render_inline(component) }
+
+    it 'wraps only the ID.me button' do
+      # Check that the right button has the "last used" wrapper.
+      expect(page).to have_css('.last-used-login-wrapper .idme-login-button__logo')
+
+      # Make sure the other two don't.
+      expect(page).not_to have_css('.last-used-login-wrapper .clear-login-button__logo')
+      expect(page).not_to have_css('.last-used-login-wrapper .lg-login-button__logo')
+    end
+  end
+
+  describe 'last used csp was Login.gov' do
+    let(:url) { '/' }
+    let(:component) { described_class.new(url, last_used_csp: :login_dot_gov) }
+    before { render_inline(component) }
+
+    it 'wraps only the Login.gov button' do
+      # Check that the right button has the "last used" wrapper.
+      expect(page).to have_css('.last-used-login-wrapper .lg-login-button__logo')
+
+      # Make sure the other two don't.
+      expect(page).not_to have_css('.last-used-login-wrapper .clear-login-button__logo')
+      expect(page).not_to have_css('.last-used-login-wrapper .idme-login-button__logo')
+    end
+
+    describe 'no last used csp' do
+      let(:url) { '/' }
+      let(:component) { described_class.new(url, last_used_csp: nil) }
+      before { render_inline(component) }
+
+      it "doesn't wrap any buttons" do
+        expect(page).not_to have_css('.last-used-login-wrapper .clear-login-button__logo')
+        expect(page).not_to have_css('.last-used-login-wrapper .idme-login-button__logo')
+        expect(page).not_to have_css('.last-used-login-wrapper .lg-login-button__logo')
+      end
+    end
+  end
 end
