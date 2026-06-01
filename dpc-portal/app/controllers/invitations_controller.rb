@@ -243,11 +243,11 @@ class InvitationsController < ApplicationController
 
     return matching_users.first if matching_users.present?
 
-    user = User.new
-    assign_user_attributes(user, user_info)
-    user.save!
-    log_create_user
-    user
+    User.new.tap do |user|
+      assign_user_attributes(user, user_info)
+      user.save!
+      log_create_user
+    end
   end
 
   def assign_user_attributes(user_to_create, user_info)
@@ -261,7 +261,7 @@ class InvitationsController < ApplicationController
   end
 
   def update_user(user_info)
-    @user.pac_id = session.delete(:user_pac_id) unless @user.pac_id
+    @user.pac_id ||= session.delete(:user_pac_id)
     @user.given_name = user_info['given_name']
     @user.family_name = user_info['family_name']
     @user.save
@@ -280,7 +280,7 @@ class InvitationsController < ApplicationController
   def validate_invitation
     return unless @invitation.unacceptable_reason
 
-    err_msg, action_type = get_invitation_log_data(@invitation.unacceptable_reason)
+    err_msg, action_type = invitation_log_data(@invitation.unacceptable_reason)
     Rails.logger.info([err_msg, { actionContext: LoggingConstants::ActionContext::Registration,
                                   actionType: action_type,
                                   invitation: @invitation.id }])
@@ -289,22 +289,10 @@ class InvitationsController < ApplicationController
            status: :forbidden)
   end
 
-  def get_invitation_log_data(reason)
-    unacceptable_reason_map = {
-      ao_invalid: ['AO Invalid Invitation', LoggingConstants::ActionType::InvalidInvitation],
-      cd_invalid: ['CD Invalid Invitation', LoggingConstants::ActionType::InvalidInvitation],
-      ao_renewed: ['Ao Renewed Expired Invitation', LoggingConstants::ActionType::AoRenewedExpiredInvitation],
-      ao_accepted: ['Authorized Official Invitation already accepted',
-                    LoggingConstants::ActionType::AoAlreadyRegistered],
-      cd_accepted: ['Credential Delegate Invitation already accepted',
-                    LoggingConstants::ActionType::CdAlreadyRegistered],
-      ao_expired: ['Authorized Official Invitation expired', LoggingConstants::ActionType::AoInvitationExpired],
-      cd_expired: ['Credential Delegate Invitation expired', LoggingConstants::ActionType::CdInvitationExpired]
-    }
-    unacceptable_reason_map.default = ["Invitation unacceptable: #{reason}",
-                                       LoggingConstants::ActionType::UnacceptableInvitation]
-
-    unacceptable_reason_map[reason.to_sym]
+  def invitation_log_data(reason)
+    UNACCEPTABLE_REASON_MAP.fetch(reason.to_sym) do
+      ["Invitation unacceptable: #{reason}", LoggingConstants::ActionType::UnacceptableInvitation]
+    end
   end
 
   def verify_ao_invitation
@@ -401,6 +389,18 @@ class InvitationsController < ApplicationController
                          actionType: LoggingConstants::ActionType::AoHasWaiver,
                          invitation: @invitation.id }])
   end
+
+  UNACCEPTABLE_REASON_MAP = {
+    ao_invalid: ['AO Invalid Invitation', LoggingConstants::ActionType::InvalidInvitation],
+    cd_invalid: ['CD Invalid Invitation', LoggingConstants::ActionType::InvalidInvitation],
+    ao_renewed: ['Ao Renewed Expired Invitation', LoggingConstants::ActionType::AoRenewedExpiredInvitation],
+    ao_accepted: ['Authorized Official Invitation already accepted',
+                  LoggingConstants::ActionType::AoAlreadyRegistered],
+    cd_accepted: ['Credential Delegate Invitation already accepted',
+                  LoggingConstants::ActionType::CdAlreadyRegistered],
+    ao_expired: ['Authorized Official Invitation expired', LoggingConstants::ActionType::AoInvitationExpired],
+    cd_expired: ['Credential Delegate Invitation expired', LoggingConstants::ActionType::CdInvitationExpired]
+  }.freeze
 
   class MultiUserMatchError < StandardError; end
 end

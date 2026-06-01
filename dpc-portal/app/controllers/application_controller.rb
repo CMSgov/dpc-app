@@ -14,7 +14,7 @@ class ApplicationController < ActionController::Base
   end
 
   def current_user
-    @current_user ||= User.where(id: session['user']).first
+    @current_user ||= User.find_by(id: session[:user])
   end
 
   def authenticate_user!
@@ -51,19 +51,15 @@ class ApplicationController < ActionController::Base
 
   def url_for_logout(csp)
     case csp
-    when :id_me.to_s
-      url_for_id_me_logout
-    when :login_dot_gov.to_s
-      url_for_login_dot_gov_logout
-    else
-      raise "Unsupported CSP: #{csp}"
+    when :id_me.to_s then url_for_id_me_logout
+    when :login_dot_gov.to_s then url_for_login_dot_gov_logout
+    else raise "Unsupported CSP: #{csp}"
     end
   end
 
   # Documentation at https://developers.login.gov/oidc/logout/
   def url_for_login_dot_gov_logout
-    state = SecureRandom.hex(16)
-    session['omniauth.state'] = state
+    session['omniauth.state'] = state = SecureRandom.hex(16)
     csp_config = CspConfig.for(:login_dot_gov)
     URI::HTTPS.build(host: csp_config.host,
                      path: csp_config.log_out_path,
@@ -73,19 +69,17 @@ class ApplicationController < ActionController::Base
   end
 
   def url_for_id_me_logout
-    state = SecureRandom.hex(16)
-    session['omniauth.state'] = state
-    URI::HTTPS.build(host: CspConfig.for(:id_me).host,
-                     path: CspConfig.for(:id_me).log_out_path,
-                     query: { client_id: CspConfig.for(:id_me).identifier,
+    csp_config = CspConfig.for(:id_me)
+    URI::HTTPS.build(host: csp_config.host,
+                     path: csp_config.log_out_path,
+                     query: { client_id: csp_config.identifier,
                               redirect_uri: "#{root_url}oauth/logged_out" }.to_query)
   end
 
   # rubocop:disable Metrics/AbcSize
   def check_session_length
-    session[:logged_in_at] = Time.now if session[:logged_in_at].nil?
-    max_session = User.remember_for.to_i / 60
-    return unless max_session.minutes.ago > session[:logged_in_at]
+    session[:logged_in_at] ||= Time.now
+    return unless session_expired?
 
     reset_session
     flash[:notice] = t('devise.failure.max_session_timeout', default: 'Your session has timed out.')
@@ -95,6 +89,10 @@ class ApplicationController < ActionController::Base
     redirect_to sign_in_path
   end
   # rubocop:enable Metrics/AbcSize
+  def session_expired?
+    max_session = User.remember_for.to_i / 60
+    max_session.minutes.ago > session[:logged_in_at]
+  end
 
   def organization_id
     params[:organization_id]

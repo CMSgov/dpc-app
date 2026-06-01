@@ -108,16 +108,22 @@ class CspController < ApplicationController
   def deactivate_old_email(new_emails, existing_emails)
     # If an existing email is no longer in the list provided by the CSP, deactivate it.
     existing_emails&.each do |existing_email|
-      unless new_emails&.include?(existing_email.email)
-        existing_email.update!(active: false, deactivated_at: Time.current, reactivated_at: nil)
-      end
+      next if new_emails.include?(existing_email.email)
+      existing_email.update!(active: false, deactivated_at: Time.current, reactivated_at: nil)
     end
   end
 
   def activate_email(user_email)
-    return unless user_email.active == false
+    return if user_email.active?
 
     user_email.update!(active: true, deactivated_at: nil, reactivated_at: Time.current)
+  end
+
+  def ial_2_actions(user, auth)
+    return if ial_1_user?(auth)
+
+    update_csp_tokens(auth)
+    maybe_update_user(user, auth.extra.raw_info)
   end
 
   def path(user, auth)
@@ -142,19 +148,14 @@ class CspController < ApplicationController
     nil
   end
 
-  def ial_2_actions(user, auth)
-    return if ial_1_user?(auth) # TODO: are 1 and 2 the only options for levels?
-
-    update_csp_tokens(auth)
-    maybe_update_user(user, auth.extra.raw_info)
-  end
-
   def update_csp_tokens(auth)
     session[:csp] = auth.provider
     session["#{auth.provider}_token"] = auth.credentials.token
     session["#{auth.provider}_token_exp"] = auth.credentials.expires_in.seconds.from_now
   end
 end
+
+protected
 
 # Abstract methods for specific CSPs
 def not_implemented(method) = raise NotImplementedError, "Method not implemented: #{method}"
