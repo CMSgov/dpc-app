@@ -103,8 +103,9 @@ class InvitationsController < ApplicationController
   end
 
   def set_idp_token
-    session[:login_dot_gov_token] = 'token'
-    session[:login_dot_gov_token_exp] = 2.days.from_now
+    session[:csp] = 'id_me'
+    session[:id_me_token] = 'token'
+    session[:id_me_token_exp] = 2.days.from_now
     head :ok
   end
 
