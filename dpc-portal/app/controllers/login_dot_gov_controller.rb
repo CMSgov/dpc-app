@@ -56,6 +56,7 @@ class LoginDotGovController < ApplicationController
 
     sign_in(user)
     session[:logged_in_at] = Time.now
+    cookies.permanent[:last_used_csp] = :login_dot_gov
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::UserLoggedIn }])
