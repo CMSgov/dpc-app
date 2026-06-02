@@ -80,7 +80,6 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
-    puts "SESSION CSP: #{session[:csp].class}:#{session[:csp]}"
     csp_config = CspConfig.for(session[:csp])
     url = URI::HTTPS.build(host: csp_config.host,
                            path: '/oauth/authorize',

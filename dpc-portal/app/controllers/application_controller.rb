@@ -126,7 +126,7 @@ class ApplicationController < ActionController::Base
     links = current_user.ao_org_links.where(provider_organization: @organization)
     return if links.empty? || links.any?(&:verification_status?)
 
-    failure_code = "verification.#{links.first.verification_reason}"
+    failure_code = "verification.#{links.first.&verification_reason}"
     render(Page::Utility::AccessDeniedComponent.new(organization: @organization, failure_code:))
   end
 
