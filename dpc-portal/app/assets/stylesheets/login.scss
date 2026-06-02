@@ -34,3 +34,29 @@
         line-height: 1.8;
     }
 }
+
+.last-used-login-wrapper {
+  display: block;
+  text-align: center;
+  padding: 0.5rem;
+  background-color: #e1f3f8; 
+  border: 1px solid #a8ddec;   
+  border-radius: 4px;                    
+  box-sizing: border-box;
+  width: 100%;             
+
+  // Make the button stretch across the full with.
+  .usa-button {
+    width: 100%;
+    margin-bottom: 0.5rem; 
+  }
+
+  .last-used-login-wrapper__badge {
+    font-size: 0.875rem;      
+    font-weight: bold;
+    color: #005ea2;           
+    letter-spacing: 0.5px;
+    margin: 0;
+    line-height: 1;
+  }
+}

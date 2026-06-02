@@ -1,1 +1,1 @@
-<%= render(Page::Session::LoginComponent.new(omniauth_authorize_path(session[:csp]))) %>
+<%= render(Page::Session::LoginComponent.new(omniauth_authorize_path(session[:csp]), last_used_csp: cookies[:last_used_csp]&.to_sym)) %>
