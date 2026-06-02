@@ -76,10 +76,9 @@ class ApplicationController < ActionController::Base
                               redirect_uri: "#{root_url}oauth/logged_out" }.to_query)
   end
 
-  # rubocop:disable Metrics/AbcSize
   def check_session_length
     session[:logged_in_at] ||= Time.now
-    return unless session_expired?
+    return unless session_timed_out?
 
     reset_session
     flash[:notice] = t('devise.failure.max_session_timeout', default: 'Your session has timed out.')
@@ -88,8 +87,8 @@ class ApplicationController < ActionController::Base
                          actionType: LoggingConstants::ActionType::SessionTimedOut }])
     redirect_to sign_in_path
   end
-  # rubocop:enable Metrics/AbcSize
-  def session_expired?
+
+  def session_timed_out?
     max_session = User.remember_for.to_i / 60
     max_session.minutes.ago > session[:logged_in_at]
   end
@@ -126,7 +125,7 @@ class ApplicationController < ActionController::Base
     links = current_user.ao_org_links.where(provider_organization: @organization)
     return if links.empty? || links.any?(&:verification_status?)
 
-    failure_code = "verification.#{links.first.&verification_reason}"
+    failure_code = "verification.#{links.first.verification_reason}"
     render(Page::Utility::AccessDeniedComponent.new(organization: @organization, failure_code:))
   end
 

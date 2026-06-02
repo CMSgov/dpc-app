@@ -108,8 +108,9 @@ class CspController < ApplicationController
   def deactivate_old_email(new_emails, existing_emails)
     # If an existing email is no longer in the list provided by the CSP, deactivate it.
     existing_emails&.each do |existing_email|
-      next if new_emails.include?(existing_email.email)
-      existing_email.update!(active: false, deactivated_at: Time.current, reactivated_at: nil)
+      unless new_emails&.include?(existing_email.email)
+        existing_email.update!(active: false, deactivated_at: Time.current, reactivated_at: nil)
+      end
     end
   end
 
@@ -154,8 +155,6 @@ class CspController < ApplicationController
     session["#{auth.provider}_token_exp"] = auth.credentials.expires_in.seconds.from_now
   end
 end
-
-protected
 
 # Abstract methods for specific CSPs
 def not_implemented(method) = raise NotImplementedError, "Method not implemented: #{method}"

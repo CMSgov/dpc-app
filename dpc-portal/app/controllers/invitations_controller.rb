@@ -101,8 +101,8 @@ class InvitationsController < ApplicationController
     redirect_to accept_organization_invitation_url(@organization, @invitation)
   end
 
-  def set_idp_token
-    csp = session[:csp]
+  def set_idp_token(name)
+    csp = session[:csp] || name
     session["#{csp}_token"] = 'token'
     session["#{csp}_token_exp"] = 2.days.from_now
     head :ok
@@ -289,7 +289,18 @@ class InvitationsController < ApplicationController
   end
 
   def invitation_log_data(reason)
-    UNACCEPTABLE_REASON_MAP.fetch(reason.to_sym) do
+    unacceptable_reason_map = {
+      ao_invalid: ['AO Invalid Invitation', LoggingConstants::ActionType::InvalidInvitation],
+      cd_invalid: ['CD Invalid Invitation', LoggingConstants::ActionType::InvalidInvitation],
+      ao_renewed: ['Ao Renewed Expired Invitation', LoggingConstants::ActionType::AoRenewedExpiredInvitation],
+      ao_accepted: ['Authorized Official Invitation already accepted',
+                    LoggingConstants::ActionType::AoAlreadyRegistered],
+      cd_accepted: ['Credential Delegate Invitation already accepted',
+                    LoggingConstants::ActionType::CdAlreadyRegistered],
+      ao_expired: ['Authorized Official Invitation expired', LoggingConstants::ActionType::AoInvitationExpired],
+      cd_expired: ['Credential Delegate Invitation expired', LoggingConstants::ActionType::CdInvitationExpired]
+    }
+    unacceptable_reason_map.fetch(reason.to_sym) do
       ["Invitation unacceptable: #{reason}", LoggingConstants::ActionType::UnacceptableInvitation]
     end
   end
@@ -388,18 +399,6 @@ class InvitationsController < ApplicationController
                          actionType: LoggingConstants::ActionType::AoHasWaiver,
                          invitation: @invitation.id }])
   end
-
-  UNACCEPTABLE_REASON_MAP = {
-    ao_invalid: ['AO Invalid Invitation', LoggingConstants::ActionType::InvalidInvitation],
-    cd_invalid: ['CD Invalid Invitation', LoggingConstants::ActionType::InvalidInvitation],
-    ao_renewed: ['Ao Renewed Expired Invitation', LoggingConstants::ActionType::AoRenewedExpiredInvitation],
-    ao_accepted: ['Authorized Official Invitation already accepted',
-                  LoggingConstants::ActionType::AoAlreadyRegistered],
-    cd_accepted: ['Credential Delegate Invitation already accepted',
-                  LoggingConstants::ActionType::CdAlreadyRegistered],
-    ao_expired: ['Authorized Official Invitation expired', LoggingConstants::ActionType::AoInvitationExpired],
-    cd_expired: ['Credential Delegate Invitation expired', LoggingConstants::ActionType::CdInvitationExpired]
-  }.freeze
 
   class MultiUserMatchError < StandardError; end
 end
