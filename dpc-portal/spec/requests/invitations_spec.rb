@@ -16,6 +16,7 @@ RSpec.describe 'Invitations', type: :request do
     let(:expected_success_status) { 200 }
     before { log_in }
     it 'should be ok or redirect' do
+      stub_user_info
       send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
       expect(response.status).to eq(expected_success_status)
     end
@@ -142,8 +143,9 @@ RSpec.describe 'Invitations', type: :request do
 
   describe 'POST /login' do
     RSpec.shared_examples 'a login endpoint' do
+      let(:org_id) { invitation.provider_organization.id }
+      before { get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token" }
       it 'should redirect to login.gov' do
-        org_id = invitation.provider_organization.id
         post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
         redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
         expect(redirect_params['redirect_uri']).to start_with('http://localhost:3100/auth/')
@@ -182,8 +184,9 @@ RSpec.describe 'Invitations', type: :request do
       end
       context 'fail to proof' do
         let(:invitation) { create(:invitation, :cd) }
+        let(:org_id) { invitation.provider_organization.id }
+        before { get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token" }
         it 'should not show step navigation' do
-          org_id = invitation.provider_organization.id
           post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
           get '/users/auth/failure'
           expect(response).to be_forbidden
@@ -202,8 +205,9 @@ RSpec.describe 'Invitations', type: :request do
       end
       context 'fail to proof' do
         let(:invitation) { create(:invitation, :ao) }
+        let(:org_id) { invitation.provider_organization.id }
+        before { get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token" }
         it 'should show step 2' do
-          org_id = invitation.provider_organization.id
           post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
           get '/users/auth/failure'
           expect(response).to be_forbidden
@@ -217,9 +221,9 @@ RSpec.describe 'Invitations', type: :request do
     it_behaves_like 'an invitation endpoint', :get, 'accept', :ao do
       let(:invitation) { create(:invitation, :ao) }
     end
+
     let(:invitation) { create(:invitation, :ao) }
     let(:org) { invitation.provider_organization }
-
     context 'not logged in' do
       it 'should show login if valid invitation' do
         get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
@@ -291,6 +295,7 @@ RSpec.describe 'Invitations', type: :request do
   describe 'POST /confirm' do
     it_behaves_like 'an invitation endpoint', :post, 'confirm', :ao do
       let(:invitation) { create(:invitation, :ao) }
+      let(:expected_success_status) { 302 }
     end
     context :success do
       let(:invitation) { create(:invitation, :ao) }
@@ -621,9 +626,9 @@ RSpec.describe 'Invitations', type: :request do
           expect(user.family_name).to eq user_info_template['family_name']
           expect(user.email).to eq user_info_template['email']
           expect(user.uid).to eq user_info_template['sub']
-          expect(user.csp_user_for('login_dot_gov')).to be_present
-          expect(user.csp_user_for('login_dot_gov').user_emails.map(&:email)).not_to be_empty
-          expect(user.csp_user_for('login_dot_gov')
+          expect(user.csp_user_for('id_me')).to be_present
+          expect(user.csp_user_for('id_me').user_emails.map(&:email)).not_to be_empty
+          expect(user.csp_user_for('id_me')
                   .user_emails.map(&:email)).to include(*user_info_template['all_emails'])
         end
 
@@ -706,6 +711,7 @@ RSpec.describe 'Invitations', type: :request do
     context :cd do
       it_behaves_like 'an invitation endpoint', :post, 'register', :cd do
         let(:invitation) { create(:invitation, :cd) }
+        let(:expected_success_status) { 302 }
       end
       it_behaves_like 'a register endpoint' do
         let(:invitation) { create(:invitation, :cd) }
@@ -730,6 +736,7 @@ RSpec.describe 'Invitations', type: :request do
     context :ao do
       it_behaves_like 'an invitation endpoint', :post, 'register', :ao do
         let(:invitation) { create(:invitation, :ao) }
+        let(:expected_success_status) { 302 }
       end
       it_behaves_like 'a register endpoint' do
         let(:invitation) { create(:invitation, :ao) }
@@ -878,7 +885,7 @@ RSpec.describe 'Invitations', type: :request do
   end
 end
 
-def log_in(template: user_info_template, provider: 'login_dot_gov')
+def log_in(template: user_info_template, provider: 'id_me')
   OmniAuth.config.test_mode = true
   OmniAuth.config.add_mock(provider.to_sym,
                            { uid: template['sub'],
@@ -887,7 +894,7 @@ def log_in(template: user_info_template, provider: 'login_dot_gov')
                              info: { email: template['email'] },
                              extra: { raw_info: { given_name: template['given_name'],
                                                   family_name: template['family_name'],
-                                                  ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
+                                                  identity_assurance_level: 2 } } })
   post "/auth/#{provider}"
   follow_redirect!
 end
@@ -898,11 +905,7 @@ def user_info_template(overrides = {})
     'iss' => 'https://api.idmelabs.com/oidc',
     'email' => 'bob@testy.com',
     'email_verified' => true,
-    'all_emails' => [
-      'bob@testy.com',
-      'david@example.com',
-      'david2@example.com'
-    ],
+    'all_emails' => %w[bob@testy.com david@example.com david2@example.com],
     'given_name' => 'Bob',
     'family_name' => 'Hodges',
     'birthdate' => '1938-10-06',
@@ -916,9 +919,9 @@ end
 def stub_user_info(overrides: {})
   user_service_class = class_double(UserInfoService).as_stubbed_const
   user_service = double(UserInfoService)
-  expect(user_service_class).to receive(:new).at_least(:once).and_return(user_service)
+  allow(user_service_class).to receive(:new).and_return(user_service)
 
-  expect(user_service).to receive(:user_info).at_least(:once).and_return(user_info_template(overrides))
+  allow(user_service).to receive(:user_info).and_return(user_info_template(overrides))
 end
 
 def create_invitation_user_with_csp(csp:)

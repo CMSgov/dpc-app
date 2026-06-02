@@ -102,7 +102,7 @@ class InvitationsController < ApplicationController
   end
 
   def set_idp_token
-    csp = session[:csp]
+    session[:csp] = csp = :id_me # TODO -acw
     session["#{csp}_token"] = 'token'
     session["#{csp}_token_exp"] = 2.days.from_now
     head :ok

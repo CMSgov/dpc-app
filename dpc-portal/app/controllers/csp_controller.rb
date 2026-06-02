@@ -51,6 +51,7 @@ class CspController < ApplicationController
     return unless user
 
     sign_in(user:, csp:)
+    cookies.permanent[:last_used_csp] = csp
     session[:logged_in_at] = Time.now
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Authentication,

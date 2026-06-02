@@ -50,13 +50,13 @@ class ApplicationController < ActionController::Base
   end
 
   def url_for_logout(csp)
-    case csp
-    when :id_me
+    case csp.to_s
+    when 'id_me'
       url_for_id_me_logout
-    when :login_dot_gov
+    when 'login_dot_gov'
       url_for_login_dot_gov_logout
     else
-      raise UnknownCSPError, csp
+      raise "Unknown CSP: #{csp}"
     end
   end
 
@@ -153,10 +153,4 @@ class ApplicationController < ActionController::Base
     logger.error(['CredentialAuditLog failure', { action:, credential_type:, dpc_api_credential_id: }])
   end
 end
-
-# Error class to handle unknown CSP
-class UnknownCSPError < StandardError # rubocop:disable Style/OneClassPerFile
-  def initialize(provider)
-    super("Unknown CSP: #{provider}")
-  end
-end
+# rubocop:enable Metrics/ClassLength
