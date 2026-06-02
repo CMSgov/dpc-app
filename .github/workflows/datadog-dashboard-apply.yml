@@ -28,7 +28,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-non-prod
+    runs-on: codebuild-dpc-app-non-prod-${{ github.run_id }}-${{ github.run_attempt }}
     env:
       APP: dpc
       ENV: test
