@@ -130,8 +130,8 @@ class LoginDotGovController < ApplicationController
     session[:login_dot_gov_token_exp] = auth.credentials.expires_in.seconds.from_now
   end
 
-  def path(user, auth)
-    if user.blank? 
+  def path(user, _auth)
+    if user.blank?
       Rails.logger.info(['User logged in without account',
                          { actionContext: LoggingConstants::ActionContext::Authentication,
                            actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }])
