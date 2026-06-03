@@ -18,15 +18,15 @@
       <% when :cd_accepted %>
         <%= link_to 'Go to DPC home', root_url, class: 'usa-button margin-right-0' %>
       <% when :pii_mismatch %>
-        <%= render Core::Button::ButtonComponent.new(label: "Sign out of CSP",
+        <%= render Core::Button::ButtonComponent.new(label: "Sign out of #{@csp_display_name}",
             destination: csp_logout_path(invitation_id: @invitation.id),
             method: :delete) %>
       <% when :email_mismatch %>
-        <%= render Core::Button::ButtonComponent.new(label: "Sign out of CSP",
+        <%= render Core::Button::ButtonComponent.new(label: "Sign out of #{@csp_display_name}",
             destination: csp_logout_path(invitation_id: @invitation.id),
             method: :delete) %>
       <% when :no_account %>
-        <%= render Core::Button::ButtonComponent.new(label: "Sign out of CSP",
+        <%= render Core::Button::ButtonComponent.new(label: "Sign out of #{@csp_display_name}",
             destination: csp_logout_path,
             method: :delete) %>
       <% when :csp_signin_cancel %>

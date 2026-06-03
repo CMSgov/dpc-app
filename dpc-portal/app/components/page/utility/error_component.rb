@@ -4,7 +4,7 @@ module Page
   module Utility
     # Displays unfixable error message in accept invitation process
     class ErrorComponent < ViewComponent::Base
-      def initialize(invitation, reason)
+      def initialize(invitation, reason, csp: :login_dot_gov)# TODO: remove default -acw
         super()
         @invitation = invitation
         @org_name = invitation&.provider_organization&.name
@@ -15,6 +15,12 @@ module Page
                   else
                     reason.to_sym
                   end
+        @csp = csp.to_s
+        @csp_display_name = case @csp
+                            when 'login_dot_gov' then 'Login.gov'
+                            when 'id_me' then 'ID.me'
+                            else 'CSP'
+                            end
         @status = "verification.#{@reason}_status"
         @text = "verification.#{@reason}_text"
       end

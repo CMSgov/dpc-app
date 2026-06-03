@@ -12,10 +12,10 @@ class CspController < ApplicationController
   end
 
   def no_account
-    render(Page::Utility::ErrorComponent.new(nil, 'no_account'), status: :forbidden)
+    render(Page::Utility::ErrorComponent.new(nil, 'no_account', csp: session[:csp]), status: :forbidden)
   end
 
-  def failure
+  def failure # rubocop:disable Metrics/AbcSize
     invitation_flow_match = session[:user_return_to]&.match(%r{/organizations/([0-9]+)/invitations/([0-9]+)})
     if invitation_flow_match
       handle_invitation_flow_failure(invitation_flow_match[2])
@@ -107,7 +107,7 @@ class CspController < ApplicationController
     active_csp = Csp.active.find_by(name:)
     return active_csp if active_csp
 
-    Rails.logger.info(['User attempted to login but no active CSP found',
+    csp_config = CspConfig.for(name)
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::InvalidCsp }])
     render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail'))
@@ -124,5 +124,5 @@ class CspController < ApplicationController
   def not_implemented(method) = raise NotImplementedError, "Method not implemented: #{method}"
   def name = not_implemented('name')
   def display_name = not_implemented('display_name')
-  def ial_1_user? = not_implemented('ial_1_user?')
+  def ial_1_user?(_auth) = not_implemented('ial_1_user?')
 end

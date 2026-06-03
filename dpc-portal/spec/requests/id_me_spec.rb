@@ -325,7 +325,7 @@ RSpec.describe 'IdMe', type: :request do
 
   describe 'CSP inactive' do
     before do
-      inactive_csp = create(:csp, :id_me, :inactive)
+      inactive_csp = create(:csp, :inactive)
       user = create(:user, email: 'bob5@example.com', provider: :id_me)
       create(:csp_user, user:, uuid:, csp: inactive_csp)
 
@@ -339,7 +339,7 @@ RSpec.describe 'IdMe', type: :request do
     it 'should log error' do
       allow(Rails.logger).to receive(:info)
       expect(Rails.logger).to receive(:info).with(
-        ['User attempted to login but no active CSP found',
+        ['User attempted to login with ID.me but no active CSP found',
          { actionContext: LoggingConstants::ActionContext::Authentication,
            actionType: LoggingConstants::ActionType::InvalidCsp }]
       )

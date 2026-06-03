@@ -339,8 +339,8 @@ RSpec.describe 'LoginDotGov', type: :request do
 
   describe 'CSP inactive' do
     before do
-      inactive_csp = create(:csp, :id_me, :inactive)
-      user = create(:user, email: 'bob5@example.com', provider: :id_me)
+      inactive_csp = create(:csp, :inactive)
+      user = create(:user, email: 'bob5@example.com', provider: :login_dot_gov)
       create(:csp_user, user:, uuid:, csp: inactive_csp)
 
       OmniAuth.config.test_mode = true
@@ -354,7 +354,7 @@ RSpec.describe 'LoginDotGov', type: :request do
     it 'should log error' do
       allow(Rails.logger).to receive(:info)
       expect(Rails.logger).to receive(:info).with(
-        ['User attempted to login but no active CSP found',
+        ['User attempted to login with Login.gov but no active CSP found',
          { actionContext: LoggingConstants::ActionContext::Authentication,
            actionType: LoggingConstants::ActionType::InvalidCsp }]
       )
