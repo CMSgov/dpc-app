@@ -72,35 +72,13 @@ class InvitationsController < ApplicationController
     handle_user_info_service_error(e, 2)
   end
 
-  def login_with_csp(csp)
+  def login
     login_session
     Rails.logger.info(['User began login flow',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
-    csp_config = CspConfig.for(csp)
-    url = URI(csp_config.authorization_endpoint)
-    url.query = { client_id: csp_config.identifier,
-                  redirect_uri: "#{my_protocol_host}#{csp_config.redirect_path}",
-                  response_type: 'code',
-                  acr_values: csp_config.acr_values,
-                  scope: csp_config.authorize_scope,
-                  nonce: @nonce,
-                  state: @state }.compact.to_query
-
-    redirect_to url, allow_other_host: true
-  end
-
-  def login_id_me
-    login_with_csp(:id_me)
-  end
-
-  def login_login_dot_gov
-    login_with_csp(:login_dot_gov)
-  end
-
-  def login_clear
-    login_with_csp(:clear) # this is WIP pending DPC-5401
+    csp_login_actions(params[:provider])
   end
 
   def renew
@@ -120,6 +98,21 @@ class InvitationsController < ApplicationController
   end
 
   private
+
+  def csp_login_actions(csp)
+    csp_config = CspConfig.for(csp)
+    url = URI(csp_config.authorization_endpoint)
+    url.query = { client_id: csp_config.identifier,
+                  redirect_uri: "#{my_protocol_host}#{csp_config.redirect_path}",
+                  response_type: 'code',
+                  acr_values: csp_config.acr_values,
+                  scope: csp_config.authorize_scope,
+                  nonce: @nonce,
+                  state: @state }.compact.to_query
+
+
+    redirect_to url, allow_other_host: true
+  end
 
   def invitation_matches_user
     user_info = UserInfoService.new.user_info(session)
