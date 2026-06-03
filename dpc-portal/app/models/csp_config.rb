@@ -6,10 +6,10 @@ class CspConfig
   ENV_NAME = ENV.fetch('ENV', 'local')
   CONFIG = Rails.application.config_for(:csp).freeze
 
-  def initialize(code, host, identifier, config)
-    @host = host
-    @identifier = identifier
+  def initialize(code, config)
     @code = code
+    @host = config[:host]
+    @identifier = config[:identifier]
     @user_info_endpoint = config[:user_info_endpoint]
     @log_out_path = config[:log_out_path]
     @token_expiration_interval = config[:token_expiration_interval]
@@ -20,12 +20,8 @@ class CspConfig
   end
 
   LOGIN_DOT_GOV = new('login_dot_gov',
-                      CONFIG[:login_dot_gov][:host],
-                      CONFIG[:login_dot_gov][:identifier],
                       CONFIG[:login_dot_gov])
   ID_ME = new('id_me',
-              CONFIG[:id_me][:host],
-              CONFIG[:id_me][:identifier],
               CONFIG[:id_me])
   #   CLEAR = new('clear',
   #               CONFIG[:clear][:host],
