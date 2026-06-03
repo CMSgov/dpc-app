@@ -54,7 +54,6 @@ class InvitationsController < ApplicationController
   end
 
   # Everybody
-  # rubocop:disable Metrics/AbcSize
   def register
     unless session["invitation_status_#{@invitation.id}"] == 'verification_complete'
       return redirect_to organization_invitation_url(@organization, @invitation)
@@ -62,17 +61,10 @@ class InvitationsController < ApplicationController
 
     return unless create_link
 
-    session.delete("invitation_status_#{@invitation.id}")
-    sign_in(user: @user, csp: session[:csp])
-    Rails.logger.info(['User logged in',
-                       { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::UserLoggedIn,
-                         invitation: @invitation.id }])
-    render(Page::Invitations::SuccessComponent.new(@organization, @invitation, @given_name, @family_name))
+    complete_registration
   rescue UserInfoServiceError => e
     handle_user_info_service_error(e, 2)
   end
-  # rubocop:enable Metrics/AbcSize
 
   def login
     login_session
@@ -109,6 +101,16 @@ class InvitationsController < ApplicationController
   end
 
   private
+
+  def complete_registration
+    session.delete("invitation_status_#{@invitation.id}")
+    sign_in(user: @user, csp: session[:csp])
+    Rails.logger.info(['User logged in',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::UserLoggedIn,
+                         invitation: @invitation.id }])
+    render(Page::Invitations::SuccessComponent.new(@organization, @invitation, @given_name, @family_name))
+  end
 
   def invitation_matches_user
     user_info = UserInfoService.new.user_info(session)
@@ -218,8 +220,7 @@ class InvitationsController < ApplicationController
 
     # Update emails based upon the latest information in user info.
     new_emails = user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed']
-    csp_user.add_or_activate_new_email(new_emails)
-    csp_user.deactivate_old_email(new_emails)
+    CspEmailSyncService.new(csp_user).sync(new_emails, user_info['emails'])
     update_user(user_info)
     @user
   end
@@ -255,7 +256,7 @@ class InvitationsController < ApplicationController
     user_to_create.family_name = user_info['family_name']
     user_to_create.pac_id = session.delete(:user_pac_id)
 
-    user_to_create.provider = session[:csp] || :login_dot_gov
+    user_to_create.provider = session[:csp] || :id_me # TODO: fix -acw
     user_to_create.uid = user_info['sub']
   end
 
@@ -315,14 +316,11 @@ class InvitationsController < ApplicationController
 
   def check_for_token
     csp = session[:csp]
-    if csp && !csp.empty? &&
-       session["#{csp}_token"].present? &&
-       session["#{csp}_token_exp"].present? &&
-       session["#{csp}_token_exp"] > Time.now
-      return
-    end
-
-    render(Page::Invitations::InvitationLoginComponent.new(@invitation))
+    valid_tokens = csp&.present? &&
+                   session["#{csp}_token"].present? &&
+                   session["#{csp}_token_exp"].present? &&
+                   session["#{csp}_token_exp"] > Time.now
+    render(Page::Invitations::InvitationLoginComponent.new(@invitation)) unless valid_tokens
   end
 
   def block_test_utilities

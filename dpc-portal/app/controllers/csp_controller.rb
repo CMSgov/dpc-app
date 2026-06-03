@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # Base controller to handle interactions with CSPs.
-# rubocop:disable Metrics/ClassLength
 class CspController < ApplicationController
   skip_before_action :verify_authenticity_token, only: :openid_connect
 
@@ -9,12 +8,7 @@ class CspController < ApplicationController
     auth = request.env['omniauth.auth']
     return unless (active_csp = csp(auth.provider))
 
-    csp_user = CspUser.find_by(uuid: auth.uid, csp: active_csp)
-    user = csp_user&.user
-    sign_in_and_log(user, auth.provider)
-    ial_2_actions(user, auth)
-    update_email(csp_user, all_emails(auth), primary_email(auth))
-    redirect_to path(user, auth)
+    user_actions(auth, active_csp)
   end
 
   def no_account
@@ -46,6 +40,15 @@ class CspController < ApplicationController
   end
 
   private
+
+  def user_actions(auth, csp)
+    csp_user = CspUser.find_by(uuid: auth.uid, csp:)
+    user = csp_user&.user
+    sign_in_and_log(user, auth.provider)
+    ial_2_actions(user, auth)
+    CspEmailSyncService.new(csp_user).sync(all_emails(auth), primary_email(auth))
+    redirect_to path(user, auth)
+  end
 
   def sign_in_and_log(user, csp)
     return unless user
@@ -82,46 +85,6 @@ class CspController < ApplicationController
     user&.update(given_name: data.given_name, family_name: data.family_name)
   end
 
-  def update_email(csp_user, new_emails, primary_email)
-    return unless csp_user
-
-    existing_emails = csp_user.user_emails
-
-    # Scan through all of the email from the CSP and add or update as necessary.
-    ActiveRecord::Base.transaction do
-      add_or_activate_new_email(csp_user, new_emails, existing_emails)
-      deactivate_old_email(new_emails, existing_emails)
-      update_primary_email(csp_user, primary_email)
-    end
-  end
-
-  def update_primary_email(csp_user, primary_email)
-    current_email = csp_user.user_emails.find_by(email: primary_email)
-    current_email&.update!(primary: true) unless current_email&.primary?
-  end
-
-  def add_or_activate_new_email(csp_user, new_emails, existing_emails)
-    new_emails&.each do |new_email|
-      existing_email = existing_emails.find { |e| e.email == new_email }
-      existing_email ? activate_email(existing_email) : UserEmail.create!(csp_user:, email: new_email, active: true)
-    end
-  end
-
-  def deactivate_old_email(new_emails, existing_emails)
-    # If an existing email is no longer in the list provided by the CSP, deactivate it.
-    existing_emails&.each do |existing_email|
-      next if new_emails&.include?(existing_email.email)
-
-      existing_email.update!(active: false, deactivated_at: Time.current, reactivated_at: nil)
-    end
-  end
-
-  def activate_email(user_email)
-    return if user_email.active?
-
-    user_email.update!(active: true, deactivated_at: nil, reactivated_at: Time.current)
-  end
-
   def ial_2_actions(user, auth)
     return if ial_1_user?(auth)
 
@@ -156,11 +119,10 @@ class CspController < ApplicationController
     session["#{auth.provider}_token"] = auth.credentials.token
     session["#{auth.provider}_token_exp"] = auth.credentials.expires_in.seconds.from_now
   end
-end
 
-# CSP-specific methods
-def not_implemented(method) = raise NotImplementedError, "Method not implemented: #{method}"
-def name = not_implemented('name')
-def display_name = not_implemented('display_name')
-def ial_1_user?(_auth) = true
-# rubocop:enable Metrics/ClassLength
+  # CSP-specific methods
+  def not_implemented(method) = raise NotImplementedError, "Method not implemented: #{method}"
+  def name = not_implemented('name')
+  def display_name = not_implemented('display_name')
+  def ial_1_user?(_auth) = true
+end

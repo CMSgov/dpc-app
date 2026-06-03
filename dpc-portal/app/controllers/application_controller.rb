@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 # Parent class of all controllers
-# rubocop:disable Metrics/ClassLength
 class ApplicationController < ActionController::Base
+  include CspLogout
+  include OrganizationAccess
+
   before_action :check_session_length
   before_action :set_current_request_attributes
   before_action :no_store
@@ -38,47 +40,6 @@ class ApplicationController < ActionController::Base
     render(Page::Utility::AccessDeniedComponent.new(failure_code: "verification.#{current_user.verification_reason}"))
   end
 
-  def tos_accepted
-    return if @organization.terms_of_service_accepted_by.present?
-
-    if current_user.ao?(@organization)
-      render(Page::Organization::TosFormComponent.new(@organization))
-    else
-      flash[:notice] = 'Organization is not ready for credential management'
-      redirect_to organizations_path
-    end
-  end
-
-  def url_for_logout(csp)
-    case csp.to_s
-    when 'id_me'
-      url_for_id_me_logout
-    when 'login_dot_gov'
-      url_for_login_dot_gov_logout
-    else
-      raise "Unknown CSP: #{csp}"
-    end
-  end
-
-  # Documentation at https://developers.login.gov/oidc/logout/
-  def url_for_login_dot_gov_logout
-    session['omniauth.state'] = state = SecureRandom.hex(16)
-    csp_config = CspConfig.for(:login_dot_gov)
-    URI::HTTPS.build(host: csp_config.host,
-                     path: csp_config.log_out_path,
-                     query: { client_id: csp_config.identifier,
-                              post_logout_redirect_uri: "#{root_url}auth/logged_out",
-                              state: }.to_query)
-  end
-
-  def url_for_id_me_logout
-    csp_config = CspConfig.for(:id_me)
-    URI::HTTPS.build(host: csp_config.host,
-                     path: csp_config.log_out_path,
-                     query: { client_id: csp_config.identifier,
-                              redirect_uri: "#{root_url}oauth/logged_out" }.to_query)
-  end
-
   def check_session_length
     session[:logged_in_at] ||= Time.now
     return unless session_timed_out?
@@ -94,47 +55,6 @@ class ApplicationController < ActionController::Base
   def session_timed_out?
     max_session = User.remember_for.to_i / 60
     max_session.minutes.ago > session[:logged_in_at]
-  end
-
-  def organization_id
-    params[:organization_id]
-  end
-
-  def load_organization
-    @organization = ProviderOrganization.find(organization_id)
-    CurrentAttributes.save_organization_attributes(@organization, current_user)
-  rescue ActiveRecord::RecordNotFound
-    render file: "#{Rails.root}/public/404.html", layout: false, status: :not_found
-  end
-
-  def require_can_access
-    redirect_to organizations_path unless current_user.can_access?(@organization)
-
-    verify_status
-  end
-
-  def require_ao
-    redirect_to organizations_path unless current_user.ao?(@organization)
-
-    verify_status
-  end
-
-  def verify_status
-    if @organization.rejected?
-      failure_code = "#{code_prefix}.#{@organization.verification_reason}"
-      return render(Page::Utility::AccessDeniedComponent.new(organization: @organization, failure_code:))
-    end
-
-    links = current_user.ao_org_links.where(provider_organization: @organization)
-    return if links.empty? || links.any?(&:verification_status?)
-
-    failure_code = "verification.#{links.first.verification_reason}"
-    render(Page::Utility::AccessDeniedComponent.new(organization: @organization, failure_code:))
-  end
-
-  def code_prefix
-    has_ao_link = current_user.ao_org_links.where(provider_organization: @organization).exists?
-    has_ao_link ? 'verification' : 'cd_access'
   end
 
   def set_current_request_attributes
@@ -153,4 +73,3 @@ class ApplicationController < ActionController::Base
     logger.error(['CredentialAuditLog failure', { action:, credential_type:, dpc_api_credential_id: }])
   end
 end
-# rubocop:enable Metrics/ClassLength
