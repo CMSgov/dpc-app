@@ -8,7 +8,7 @@ module CspLogout
     case csp.to_s
     when 'id_me'         then url_for_id_me_logout
     when 'login_dot_gov' then url_for_login_dot_gov_logout
-    else                 raise "Unknown CSP: #{csp}"
+    else                 raise UnknownCspError, "Unknown CSP: #{csp}"
     end
   end
 
@@ -30,4 +30,6 @@ module CspLogout
                      query: { client_id: csp_config.identifier,
                               redirect_uri: "#{root_url}oauth/logged_out" }.to_query)
   end
+
+  class UnknownCspError < StandardError; end
 end
