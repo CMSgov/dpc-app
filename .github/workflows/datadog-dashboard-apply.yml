@@ -1,5 +1,5 @@
-name: datadog-dashboard-apply
-run-name: datadog-dashboard-apply
+name: datadog-dashboard
+run-name: datadog-dashboard
 
 on:
   workflow_dispatch:
@@ -12,12 +12,12 @@ on:
           - plan
           - apply
       
-  # push:
-  #   branches:
-  #     - main
-  #     - jscott/DPC-5482
-  #   paths:
-  #     - ops/services/00-datadog-dashboard/**
+  push:
+    branches:
+      - main
+      - jscott/DPC-5482
+    paths:
+      - ops/services/00-datadog-dashboard/**
 
 concurrency:
   group: tofu-plan-or-apply
@@ -51,11 +51,11 @@ jobs:
           tofu plan -var="env=${{ env.ENV }}" -out=tfplan
 
   apply:
-    if: ${{ inputs.tofu_action == 'apply' }}
+    if: ${{ inputs.tofu_action == 'apply' || github.ref == 'refs/heads/main' }}
     permissions:
       contents: read
       id-token: write
-    runs-on: codebuild-dpc-app-non-prod
+    runs-on: codebuild-dpc-app-non-prod-${{ github.run_id }}-${{ github.run_attempt }}
     env:
       APP: dpc
       ENV: test
