@@ -15,9 +15,9 @@ on:
   push:
     branches:
       - main
-      - "jscott/DPC-5482"
-    paths:
-      - ops/services/00-datadog-dashboard/**
+      - jscott/DPC-5482
+    # paths:
+    #   - ops/services/00-datadog-dashboard/**
 
 concurrency:
   group: tofu-plan-or-apply
