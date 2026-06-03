@@ -14,8 +14,10 @@ RSpec.describe 'Invitations', type: :request do
     let(:org) { invitation.provider_organization }
     let(:bad_org) { create(:provider_organization) }
     let(:expected_success_status) { 200 }
+    let(:request_params) { {} }
     it 'should be ok or redirect' do
-      send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+      # Most calls will be empty params, but for /login, param required to specify which IDP to use
+      send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}", params: request_params)
       expect(response.status).to eq(expected_success_status)
     end
     it 'should show warning page with 404 if missing' do
@@ -143,9 +145,19 @@ RSpec.describe 'Invitations', type: :request do
     RSpec.shared_examples 'a login endpoint' do
       it 'should redirect to login.gov' do
         org_id = invitation.provider_organization.id
-        post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/login",
+             params: { provider: :login_dot_gov }
         redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
-        expect(redirect_params['redirect_uri']).to start_with('http://localhost:3100/auth/')
+        expect(redirect_params['redirect_uri']).to eq('http://localhost:3100/auth/login_dot_gov/callback')
+        expect(request.session[:user_return_to]).to eq expected_redirect
+      end
+
+      it 'should redirect to ID.me' do
+        org_id = invitation.provider_organization.id
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/login",
+             params: { provider: :id_me }
+        redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
+        expect(redirect_params['redirect_uri']).to eq('http://localhost:3100/auth/id_me/callback')
         expect(request.session[:user_return_to]).to eq expected_redirect
       end
 
@@ -156,12 +168,14 @@ RSpec.describe 'Invitations', type: :request do
                                                        actionType: LoggingConstants::ActionType::BeginLogin,
                                                        invitation: invitation.id }])
         org_id = invitation.provider_organization.id
-        post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/login",
+             params: { provider: :login_dot_gov }
       end
 
       it 'should show error page if fail to proof' do
         org_id = invitation.provider_organization.id
-        post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/login",
+             params: { provider: :login_dot_gov }
         get '/users/auth/failure'
         expect(response).to be_forbidden
         expect(response.body).to include(I18n.t('verification.fail_to_proof_text'))
@@ -172,6 +186,7 @@ RSpec.describe 'Invitations', type: :request do
       it_behaves_like 'an invitation endpoint', :post, 'login', :cd do
         let(:invitation) { create(:invitation, :cd) }
         let(:expected_success_status) { 302 }
+        let(:request_params) { { provider: :login_dot_gov } }
       end
       it_behaves_like 'a login endpoint', :post, 'register' do
         let(:invitation) { create(:invitation, :cd) }
@@ -183,7 +198,8 @@ RSpec.describe 'Invitations', type: :request do
         let(:invitation) { create(:invitation, :cd) }
         it 'should not show step navigation' do
           org_id = invitation.provider_organization.id
-          post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/login",
+               params: { provider: :login_dot_gov }
           get '/users/auth/failure'
           expect(response).to be_forbidden
           expect(response.body).to_not include('<span class="usa-step-indicator__current-step">')
@@ -194,6 +210,7 @@ RSpec.describe 'Invitations', type: :request do
       it_behaves_like 'an invitation endpoint', :post, 'login', :ao do
         let(:invitation) { create(:invitation, :ao) }
         let(:expected_success_status) { 302 }
+        let(:request_params) { { provider: :login_dot_gov } }
       end
       it_behaves_like 'a login endpoint', :post, 'register' do
         let(:invitation) { create(:invitation, :ao) }
@@ -203,7 +220,8 @@ RSpec.describe 'Invitations', type: :request do
         let(:invitation) { create(:invitation, :ao) }
         it 'should show step 2' do
           org_id = invitation.provider_organization.id
-          post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/login",
+               params: { provider: :login_dot_gov }
           get '/users/auth/failure'
           expect(response).to be_forbidden
           expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
