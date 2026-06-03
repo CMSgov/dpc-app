@@ -2,7 +2,7 @@
 
 # Handles interactions with ID.me
 class IdMeController < CspController
-  def name         = :id_me
+  def csp_code     = :id_me
   def display_name = 'ID.me'
 
   def ial_1_user?(auth)

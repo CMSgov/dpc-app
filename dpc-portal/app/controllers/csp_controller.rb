@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Base controller to handle interactions with CSPs.
-class CspController < ApplicationController # rubocop:disable Metrics/ClassLength
+class CspController < ApplicationController
   skip_before_action :verify_authenticity_token, only: :openid_connect
 
   def openid_connect
@@ -107,8 +107,7 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
     active_csp = Csp.active.find_by(name:)
     return active_csp if active_csp
 
-    csp_config = CspConfig.for(name)
-    Rails.logger.info(["User attempted to login with #{csp_config.display} but no active CSP found",
+    Rails.logger.info(["User attempted to login with #{display_name} but no active CSP found",
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::InvalidCsp }])
     render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail'))
