@@ -31,7 +31,9 @@ Rails.application.routes.draw do
       get 'accept', on: :member
       post 'confirm', on: :member
       post 'register', on: :member
-      post 'login', on: :member
+      post 'login_id_me', on: :member
+      post 'login_login_dot_gov', on: :member
+      post 'login_clear', on: :member
       post 'renew', on: :member
       get 'confirm_cd', on: :member
       get 'set_idp_token', on: :member

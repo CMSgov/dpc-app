@@ -9,10 +9,12 @@ development: &development
     log_out_path: '/openid_connect/logout'
     token_expiration_interval: 300
     redirect_path: '/auth/login_dot_gov/callback'
+    acr_values: 'http://idmanagement.gov/ns/assurance/ial/2'
+    authorize_scope: 'openid email all_emails profile social_security_number'
     authorization_endpoint: <%= "https://#{ENV['IDP_LOGIN_DOT_GOV_HOST']}/openid_connect/authorize" %>
     token_endpoint: <%= "https://#{ENV['IDP_LOGIN_DOT_GOV_HOST']}/api/openid_connect/token" %>
     jwks_uri: <%= "https://#{ENV['IDP_LOGIN_DOT_GOV_HOST']}/api/openid_connect/certs" %>
-    
+
   id_me:
     host: <%= ENV['IDP_ID_ME_HOST'] %>
     identifier: <%= ENV['IDP_ID_ME_CLIENT_ID'] %>
@@ -22,6 +24,7 @@ development: &development
     user_info_endpoint: <%= "https://#{ENV['IDP_ID_ME_HOST']}/api/public/v3/userinfo" %>
     jwks_uri: <%= "https://#{ENV['IDP_ID_ME_HOST']}/oidc/.well-known/jwks" %> 
     redirect_path: '/auth/id_me/callback'
+    authorize_scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2'
     log_out_path: '/oauth/logout'
     token_expiration_interval: 300
 
