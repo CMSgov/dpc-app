@@ -94,7 +94,7 @@ class InvitationsController < ApplicationController
   end
 
   def set_idp_token
-    session[:csp] = csp = :id_me # TODO: remove default -acw
+    session[:csp] = csp = params[:provider]
     session["#{csp}_token"] = 'token'
     session["#{csp}_token_exp"] = 2.days.from_now
     head :ok
@@ -256,7 +256,7 @@ class InvitationsController < ApplicationController
     user_to_create.family_name = user_info['family_name']
     user_to_create.pac_id = session.delete(:user_pac_id)
 
-    user_to_create.provider = session[:csp] || :id_me # TODO: fix -acw
+    user_to_create.provider = session[:csp]
     user_to_create.uid = user_info['sub']
   end
 
