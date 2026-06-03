@@ -1,8 +1,5 @@
 variable "env" {
-  description = "The application environment (dev, test, sandbox, prod)"
+  default     = "test"
+  description = "The application environment; restricted to test in the case of the Datadog dashboard."
   type        = string
-  validation {
-    condition     = contains(["dev", "test", "sandbox", "prod"], var.env)
-    error_message = "Valid value for env is dev, test, sandbox, or prod."
-  }
 }

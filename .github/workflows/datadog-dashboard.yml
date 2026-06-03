@@ -31,10 +31,6 @@ jobs:
       contents: read
       id-token: write
     runs-on: codebuild-dpc-app-non-prod-${{ github.run_id }}-${{ github.run_attempt }}
-    env:
-      APP: dpc
-      ENV: test
-      BOOTSTRAP_ENV: test
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
       - uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 #v4.1.1
@@ -46,8 +42,8 @@ jobs:
       - name: tofu plan
         working-directory: ops/services/00-datadog-dashboard/
         run: |
-          tofu init -var="env=${{ env.ENV }}" -reconfigure
-          tofu plan -var="env=${{ env.ENV }}" -out=tfplan
+          tofu init -reconfigure
+          tofu plan -out=tfplan
 
   apply:
     if: ${{ inputs.tofu_action == 'apply' || github.ref == 'refs/heads/main' }}
