@@ -13,7 +13,7 @@ class CspController < ApplicationController
     user = csp_user&.user
     sign_in_and_log(user, auth.provider)
     ial_2_actions(user, auth)
-    update_email(csp_user, user_emails(auth))
+    update_email(csp_user, all_emails(auth), primary_email(auth))
     redirect_to path(user, auth)
   end
 
@@ -70,7 +70,11 @@ class CspController < ApplicationController
     end
   end
 
-  def user_emails(auth)
+  def primary_email(auth)
+    auth.info.email
+  end
+
+  def all_emails(auth)
     auth.extra.raw_info.all_emails
   end
 
@@ -78,7 +82,7 @@ class CspController < ApplicationController
     user&.update(given_name: data.given_name, family_name: data.family_name)
   end
 
-  def update_email(csp_user, new_emails)
+  def update_email(csp_user, new_emails, primary_email)
     return unless csp_user
 
     existing_emails = csp_user.user_emails
@@ -87,31 +91,28 @@ class CspController < ApplicationController
     ActiveRecord::Base.transaction do
       add_or_activate_new_email(csp_user, new_emails, existing_emails)
       deactivate_old_email(new_emails, existing_emails)
+      update_primary_email(csp_user, primary_email)
     end
+  end
+
+  def update_primary_email(csp_user, primary_email)
+    current_email = csp_user.user_emails.find_by(email: primary_email)
+    current_email&.update!(primary: true) unless current_email&.primary?
   end
 
   def add_or_activate_new_email(csp_user, new_emails, existing_emails)
     new_emails&.each do |new_email|
-      existing_email = existing_emails.find do |existing_email|
-        existing_email.email == new_email
-      end
-
-      if existing_email.nil?
-        # Add this email
-        UserEmail.create!(csp_user:, email: new_email, active: true)
-      else
-        # Potentially activate this email
-        activate_email(existing_email)
-      end
+      existing_email = existing_emails.find { |e| e.email == new_email }
+      existing_email ? activate_email(existing_email) : UserEmail.create!(csp_user:, email: new_email, active: true)
     end
   end
 
   def deactivate_old_email(new_emails, existing_emails)
     # If an existing email is no longer in the list provided by the CSP, deactivate it.
     existing_emails&.each do |existing_email|
-      unless new_emails&.include?(existing_email.email)
-        existing_email.update!(active: false, deactivated_at: Time.current, reactivated_at: nil)
-      end
+      next if new_emails&.include?(existing_email.email)
+
+      existing_email.update!(active: false, deactivated_at: Time.current, reactivated_at: nil)
     end
   end
 
@@ -157,7 +158,7 @@ class CspController < ApplicationController
   end
 end
 
-# Abstract methods for specific CSPs
+# CSP-specific methods
 def not_implemented(method) = raise NotImplementedError, "Method not implemented: #{method}"
 def name = not_implemented('name')
 def display_name = not_implemented('display_name')

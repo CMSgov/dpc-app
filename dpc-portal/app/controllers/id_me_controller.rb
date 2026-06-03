@@ -9,7 +9,7 @@ class IdMeController < CspController
     auth.extra.raw_info.identity_assurance_level == 1
   end
 
-  def user_emails(auth)
+  def all_emails(auth)
     [auth.info.email]
   end
 end
