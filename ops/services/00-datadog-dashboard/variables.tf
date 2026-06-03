@@ -1,5 +1,4 @@
 variable "env" {
-  default     = "test"
   description = "The application environment (dev, test, sandbox, prod)"
   type        = string
   validation {

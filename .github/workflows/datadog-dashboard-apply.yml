@@ -4,17 +4,20 @@ run-name: datadog-dashboard-apply
 on:
   workflow_dispatch:
     inputs:
-      skip_tofu_apply:
-        default: true
-        description: Leave as true to skip tofu apply job.
-        type: boolean
+      tofu_action:
+        description: 'Choose whether to run a tofu plan or apply'
+        default: 'plan'
+        type: choice
+        options:
+          - plan
+          - apply
       
-  push:
-    branches:
-      - main
-      - jscott/DPC-5482
-    paths:
-      - ops/services/00-datadog-dashboard/**
+  # push:
+  #   branches:
+  #     - main
+  #     - jscott/DPC-5482
+  #   paths:
+  #     - ops/services/00-datadog-dashboard/**
 
 concurrency:
   group: tofu-plan-or-apply
@@ -24,7 +27,7 @@ env:
 
 jobs:
   plan:
-    if: ${{ inputs.skip_tofu_apply == true }}
+    if: ${{ inputs.tofu_action == 'plan' }}
     permissions:
       contents: read
       id-token: write
@@ -45,10 +48,10 @@ jobs:
         working-directory: ops/services/00-datadog-dashboard/
         run: |
           tofu init -reconfigure
-          tofu plan -out=tfplan
+          tofu plan -var="env=${{ env.ENV }}" -out=tfplan
 
   apply:
-    if: ${{ inputs.skip_tofu_apply == false }}
+    if: ${{ inputs.tofu_action == 'apply' }}
     permissions:
       contents: read
       id-token: write
@@ -69,5 +72,5 @@ jobs:
         working-directory: ops/services/00-datadog-dashboard/
         run: |
           tofu init -reconfigure
-          tofu plan -out=tfplan
+          tofu plan -var="env=${{ env.ENV }}" -out=tfplan
           tofu apply -input=false tfplan
