@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Handles CSP logout for application controllers
 module CspLogout
   extend ActiveSupport::Concern
 

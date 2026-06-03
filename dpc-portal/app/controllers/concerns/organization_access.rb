@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Handles organization access for application controllers
 module OrganizationAccess
   extend ActiveSupport::Concern
 
