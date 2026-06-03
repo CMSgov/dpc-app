@@ -3,7 +3,6 @@ shared:
   scheme: 'https'
 development: &development
   login_dot_gov:
-    display: 'Login.gov'
     host: <%= ENV['IDP_LOGIN_DOT_GOV_HOST'] %>
     identifier: '<%= "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}" %>'
     user_info_endpoint: <%= "https://#{ENV['IDP_ID_ME_HOST']}/api/openid_connect/userinfo" %>
@@ -15,7 +14,6 @@ development: &development
     jwks_uri: <%= "https://#{ENV['IDP_LOGIN_DOT_GOV_HOST']}/api/openid_connect/certs" %>
     
   id_me:
-    display: 'ID.me'
     host: <%= ENV['IDP_ID_ME_HOST'] %>
     identifier: <%= ENV['IDP_ID_ME_CLIENT_ID'] %>
     client_secret: <%= ENV['IDP_ID_ME_CLIENT_SECRET'] %>

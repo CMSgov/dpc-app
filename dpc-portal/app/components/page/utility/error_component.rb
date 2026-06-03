@@ -16,8 +16,7 @@ module Page
                   else
                     reason.to_sym
                   end
-        @csp = csp.to_s
-        @csp_display_name = case @csp
+        @csp_display_name = case csp.to_s
                             when 'login_dot_gov' then 'Login.gov'
                             when 'id_me' then 'ID.me'
                             else 'CSP'

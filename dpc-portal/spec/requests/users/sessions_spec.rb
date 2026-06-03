@@ -15,7 +15,7 @@ RSpec.describe 'Sessions', type: :request do
           create(:csp_user, user:, uuid: SecureRandom.uuid, csp:)
           user
         end
-        before { sign_in user:, csp: provider }
+        before { sign_in user, csp: provider }
         it 'should prevent access' do
           delete '/users/sign_out'
           get '/organizations'

@@ -7,7 +7,7 @@ RSpec.describe 'AutoSessionLogoutService', type: :request do
   include LoginSupport
 
   let(:user) { create(:user) }
-  before { sign_in(user:, csp: :login_dot_gov) }
+  before { sign_in user, csp: :login_dot_gov }
 
   it 'is active' do
     get '/active'

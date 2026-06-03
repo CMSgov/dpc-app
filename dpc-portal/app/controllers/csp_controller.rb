@@ -122,7 +122,7 @@ class CspController < ApplicationController
 
   # CSP-specific methods
   def not_implemented(method) = raise NotImplementedError, "Method not implemented: #{method}"
-  def name = not_implemented('name')
+  def csp_code = not_implemented('csp_code')
   def display_name = not_implemented('display_name')
   def ial_1_user?(_auth) = not_implemented('ial_1_user?')
 end
