@@ -15,7 +15,7 @@ on:
   push:
     branches:
       - main
-      - jscott/DPC-5482
+      - "jscott/DPC-5482"
     paths:
       - ops/services/00-datadog-dashboard/**
 
