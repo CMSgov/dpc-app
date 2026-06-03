@@ -44,10 +44,10 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
           aws-region: ${{ vars.AWS_REGION }}
-      - name: tofu apply
+      - name: tofu plan
         working-directory: ops/services/00-datadog-dashboard/
         run: |
-          tofu init -reconfigure
+          tofu init -var="env=${{ env.ENV }}" -reconfigure
           tofu plan -var="env=${{ env.ENV }}" -out=tfplan
 
   apply:
@@ -71,6 +71,6 @@ jobs:
       - name: tofu apply
         working-directory: ops/services/00-datadog-dashboard/
         run: |
-          tofu init -reconfigure
+          tofu init -var="env=${{ env.ENV }}" -reconfigure
           tofu plan -var="env=${{ env.ENV }}" -out=tfplan
           tofu apply -input=false tfplan
