@@ -4,7 +4,8 @@ module Page
   module Utility
     # Displays unfixable error message in accept invitation process
     class ErrorComponent < ViewComponent::Base
-      def initialize(invitation, reason, csp: :login_dot_gov)# TODO: remove default -acw
+      # TODO: remove default -acw
+      def initialize(invitation, reason, csp: :login_dot_gov)
         super()
         @invitation = invitation
         @org_name = invitation&.provider_organization&.name
