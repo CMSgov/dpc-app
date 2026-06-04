@@ -24,13 +24,26 @@ services:
       start_period: 30s
       retries: 5
 
+  datadog-agent:
+    image: public.ecr.aws/datadog/agent:7.50.0
+    container_name: datadog-agent
+    ports:
+      - "8126:8126" # Port for incoming APM traces
+    env_file:
+      - ops/config/decrypted/local.env
+    environment:
+      - DD_SITE=ddog-gov.com
+      - DD_APM_ENABLED=true
+      - DD_APM_NON_LOCAL_TRAFFIC=true
+      - DD_HOSTNAME=local-dev
+
   aggregation:
     image: dpc-aggregation:latest
     platform: linux/arm64
     ports:
       - "9901:9901"
     env_file:
-      - ./ops/config/decrypted/local.env
+      - ops/config/decrypted/local.env
     environment:
       - ENV=local
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
@@ -40,6 +53,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      datadog-agent:
+        condition: service_started
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-aggregation:/jacoco-report
@@ -56,6 +71,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      datadog-agent:
+        condition: service_started
     environment:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE:-}
@@ -79,7 +96,7 @@ services:
       - "3002:3002"
       - "9903:9900"
     env_file:
-      - ./ops/config/decrypted/local.env
+      - ops/config/decrypted/local.env
     environment:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE:-}
@@ -90,6 +107,8 @@ services:
     depends_on:
       attribution:
         condition: service_healthy
+      datadog-agent:
+        condition: service_started
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-api:/jacoco-report
@@ -104,7 +123,7 @@ services:
     image: maven:3.9.9-amazoncorretto-17
     platform: linux/arm64
     env_file:
-      - ./ops/config/decrypted/local.env
+      - ops/config/decrypted/local.env
     volumes:
       - export-volume:/tmp
       - ./:/usr/src/mymaven
