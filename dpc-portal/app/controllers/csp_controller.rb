@@ -21,12 +21,12 @@ class CspController < ApplicationController
       handle_invitation_flow_failure(invitation_flow_match[2])
     elsif params[:code]
       logger.error 'CSP Configuration error'
-      render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail'))
+      render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp: session[:csp]))
     else
       Rails.logger.info(['User cancelled login',
                          { actionContext: LoggingConstants::ActionContext::Authentication,
                            actionType: LoggingConstants::ActionType::UserCancelledLogin }])
-      render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_cancel'))
+      render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_cancel', csp: session[:csp]))
     end
   end
 
@@ -110,7 +110,7 @@ class CspController < ApplicationController
     Rails.logger.info(["User attempted to login with #{display_name} but no active CSP found",
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::InvalidCsp }])
-    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail'))
+    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp: name.to_sym))
     nil
   end
 
