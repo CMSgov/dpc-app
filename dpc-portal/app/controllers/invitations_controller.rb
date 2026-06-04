@@ -110,7 +110,6 @@ class InvitationsController < ApplicationController
                   nonce: @nonce,
                   state: @state }.compact.to_query
 
-
     redirect_to url, allow_other_host: true
   end
 
