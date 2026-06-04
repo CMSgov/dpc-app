@@ -7,7 +7,7 @@ RSpec.describe 'Invitations', type: :request do
   include LoginSupport
 
   RSpec.shared_examples 'invitations controller' do |provider|
-    let!(:csp) { Csp.find(name: provider) || create(:csp, name: provider) }
+    let!(:csp) { Csp.find_by(name: provider) || create(:csp, name: provider) }
     let!(:other_csp_name) { provider == :login_dot_gov ? :id_me : :login_dot_gov }
     let!(:other_csp) { Csp.find_by(name: other_csp_name) || create(:csp, name: other_csp_name) }
 

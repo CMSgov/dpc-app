@@ -331,9 +331,17 @@ RSpec.describe 'LoginDotGov', type: :request do
   end
 
   describe 'Get /auth/no_account' do
+    before do
+      OmniAuth.config.test_mode = true
+      OmniAuth.config.add_mock(:login_dot_gov,
+                               { uid: uuid,
+                                 info: { email: 'example1@example.com' },
+                                 extra: { raw_info: { all_emails: %w[bob4@example.com bobby@example.com],
+                                                      ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
+    end
     it 'should show logout button' do
       get '/auth/no_account'
-      expect(response.body).to include 'Sign out of Login.gov'
+      expect(response.body).to include 'Sign out of CSP'
     end
   end
 
