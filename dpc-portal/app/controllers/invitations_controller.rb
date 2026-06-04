@@ -4,6 +4,7 @@ require 'dpc_portal_utils'
 
 # Handles acceptance of invitations
 class InvitationsController < ApplicationController
+  include CspEmailSync
   include DpcPortalUtils
 
   before_action :load_organization
@@ -222,7 +223,7 @@ class InvitationsController < ApplicationController
 
     # Update emails based upon the latest information in user info.
     new_emails = user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed']
-    CspEmailSyncService.new(csp_user).sync(new_emails, user_info['emails'])
+    sync_csp_emails(csp_user, new_emails, user_info['emails'])
     update_user(user_info)
     @user
   end

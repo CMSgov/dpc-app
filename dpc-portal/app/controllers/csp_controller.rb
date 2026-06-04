@@ -2,6 +2,8 @@
 
 # Base controller to handle interactions with CSPs.
 class CspController < ApplicationController # rubocop:disable Metrics/ClassLength
+  include CspEmailSync
+
   skip_before_action :verify_authenticity_token, only: :openid_connect
 
   def openid_connect
@@ -47,7 +49,7 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
     user = csp_user&.user
     sign_in_and_log(user, auth.provider)
     ial_2_actions(user, auth)
-    CspEmailSyncService.new(csp_user).sync(all_emails(auth), primary_email(auth))
+    sync_csp_emails(csp_user, all_emails(auth), primary_email(auth))
     redirect_to path(user, auth)
   end
 
