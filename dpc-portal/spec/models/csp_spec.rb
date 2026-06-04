@@ -14,19 +14,19 @@ RSpec.describe Csp, type: :model do
   context 'csp is active' do
     it 'active scope finds CSP' do
       csp = create(:csp, :login_dot_gov)
-      expect(Csp.active.find_by(name: 'login_dot_gov')).to eq csp
+      expect(Csp.active.where(name: 'login_dot_gov').last).to eq csp
     end
 
     it 'active scope finds CSP with end date in the future' do
       csp = create(:csp, :active_with_end_date)
-      expect(Csp.active.find_by(name: 'login_dot_gov')).to eq csp
+      expect(Csp.active.where(name: 'login_dot_gov').last).to eq csp
     end
   end
 
   context 'csp is inactive' do
     it 'active scope does not find CSP' do
       create(:csp, :inactive)
-      expect(Csp.active.find_by(name: 'inactive')).to eq nil
+      expect(Csp.active.where(name: 'inactive').last).to eq nil
     end
   end
 end

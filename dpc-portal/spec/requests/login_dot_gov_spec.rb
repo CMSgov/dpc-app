@@ -6,7 +6,7 @@ require 'securerandom'
 RSpec.describe 'LoginDotGov', type: :request do
   let(:uuid) { SecureRandom.uuid }
   describe 'POST /auth/login_dot_gov' do
-    let!(:csp) { create(:csp, :login_dot_gov) }
+    let!(:csp) { Csp.find_by(name: 'login_dot_gov') || create(:csp, :login_dot_gov) }
     RSpec.shared_examples 'a login.gov client' do
       context 'user exists' do
         before do
