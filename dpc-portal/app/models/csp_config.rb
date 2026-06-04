@@ -44,7 +44,7 @@ class CspConfig
   end
 
   def self.[](code)
-    from(code)
+    self.for(code)
   end
 
   def self.list
