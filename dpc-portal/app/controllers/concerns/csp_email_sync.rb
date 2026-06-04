@@ -2,7 +2,6 @@
 
 # Handles CSP emails
 module CspEmailSync
-
   def sync_csp_emails(csp_user, new_emails, primary_email)
     return unless csp_user
 

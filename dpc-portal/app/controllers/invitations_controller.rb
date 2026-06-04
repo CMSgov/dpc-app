@@ -166,14 +166,18 @@ class InvitationsController < ApplicationController
   end
 
   def login_session(csp)
-    session[:user_return_to] = if @invitation.authorized_official?
-                                 accept_organization_invitation_url(@organization, params[:id])
-                               else
-                                 confirm_cd_organization_invitation_url(@organization, params[:id])
-                               end
+    session[:user_return_to] = invitation_return_url
     session['omniauth.nonce'] = @nonce = SecureRandom.hex(16)
     session['omniauth.state'] = @state = SecureRandom.hex(16)
     session[:csp] = csp.to_sym
+  end
+
+  def invitation_return_url
+    if @invitation.authorized_official?
+      accept_organization_invitation_url(@organization, params[:id])
+    else
+      confirm_cd_organization_invitation_url(@organization, params[:id])
+    end
   end
 
   def create_link

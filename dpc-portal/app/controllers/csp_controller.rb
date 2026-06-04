@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Base controller to handle interactions with CSPs.
-class CspController < ApplicationController # rubocop:disable Metrics/ClassLength
+class CspController < ApplicationController
   include CspEmailSync
 
   skip_before_action :verify_authenticity_token, only: :openid_connect
@@ -17,20 +17,13 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
     render(Page::Utility::ErrorComponent.new(nil, 'no_account', csp: session[:csp]), status: :forbidden)
   end
 
-  def failure # rubocop:disable Metrics/AbcSize
+  def failure
     csp = session[:csp]
     invitation_flow_match = session[:user_return_to]&.match(%r{/organizations/([0-9]+)/invitations/([0-9]+)})
-    if invitation_flow_match
-      handle_invitation_flow_failure(invitation_flow_match[2])
-    elsif params[:code]
-      logger.error 'CSP Configuration error'
-      render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp:))
-    else
-      Rails.logger.info(['User cancelled login',
-                         { actionContext: LoggingConstants::ActionContext::Authentication,
-                           actionType: LoggingConstants::ActionType::UserCancelledLogin }])
-      render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_cancel', csp:))
-    end
+    return handle_invitation_flow_failure(invitation_flow_match[2]) if invitation_flow_match
+    return handle_signin_fail(csp) if params[:code]
+
+    handle_signin_cancel(csp)
   end
 
   def logout
@@ -76,23 +69,23 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
     end
   end
 
-  def primary_email(auth)
-    auth.info.email
+  def handle_signin_fail(csp)
+    logger.error 'CSP Configuration error'
+    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp:))
   end
 
-  def all_emails(auth)
-    auth.extra.raw_info.all_emails
-  end
-
-  def maybe_update_user(user, data)
-    user&.update(given_name: data.given_name, family_name: data.family_name)
+  def handle_signin_cancel(csp)
+    Rails.logger.info(['User cancelled login',
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::UserCancelledLogin }])
+    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_cancel', csp:))
   end
 
   def ial_2_actions(user, auth)
     return if ial_1_user?(auth)
 
     update_csp_tokens(auth)
-    maybe_update_user(user, auth.extra.raw_info)
+    user&.update(given_name: auth.extra.raw_info.given_name, family_name: auth.extra.raw_info.family_name)
   end
 
   def path(user, auth)
@@ -123,9 +116,13 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
     session["#{auth.provider}_token_exp"] = auth.credentials.expires_in.seconds.from_now
   end
 
-  # CSP-specific methods
-  def not_implemented(method) = raise NotImplementedError, "Method not implemented: #{method}"
+  # Can be overridden
+  def primary_email(auth) = auth.info.email
+  def all_emails(auth) = auth.extra.raw_info.all_emails
+
+  # Must be implemented
   def csp_code = not_implemented('csp_code')
   def display_name = not_implemented('display_name')
   def ial_1_user?(_auth) = not_implemented('ial_1_user?')
+  def not_implemented(method) = raise NotImplementedError, "Method not implemented: #{method}"
 end
