@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Base controller to handle interactions with CSPs.
-class CspController < ApplicationController
+class CspController < ApplicationController # rubocop:disable Metrics/ClassLength
   skip_before_action :verify_authenticity_token, only: :openid_connect
 
   def openid_connect
@@ -15,7 +15,7 @@ class CspController < ApplicationController
     render(Page::Utility::ErrorComponent.new(nil, 'no_account', csp: session[:csp]), status: :forbidden)
   end
 
-  def failure
+  def failure # rubocop:disable Metrics/AbcSize
     csp = session[:csp]
     invitation_flow_match = session[:user_return_to]&.match(%r{/organizations/([0-9]+)/invitations/([0-9]+)})
     if invitation_flow_match
