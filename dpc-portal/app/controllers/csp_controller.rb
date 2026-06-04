@@ -16,17 +16,18 @@ class CspController < ApplicationController
   end
 
   def failure
+    csp = session[:csp]
     invitation_flow_match = session[:user_return_to]&.match(%r{/organizations/([0-9]+)/invitations/([0-9]+)})
     if invitation_flow_match
       handle_invitation_flow_failure(invitation_flow_match[2])
     elsif params[:code]
       logger.error 'CSP Configuration error'
-      render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp: session[:csp]))
+      render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp:))
     else
       Rails.logger.info(['User cancelled login',
                          { actionContext: LoggingConstants::ActionContext::Authentication,
                            actionType: LoggingConstants::ActionType::UserCancelledLogin }])
-      render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_cancel', csp: session[:csp]))
+      render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_cancel', csp:))
     end
   end
 
