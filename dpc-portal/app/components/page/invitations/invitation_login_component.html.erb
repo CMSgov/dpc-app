@@ -1,13 +1,13 @@
 <%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::AO_STEPS, 1)) if @invitation.authorized_official? %>
 <%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::CD_STEPS, 1)) if @invitation.credential_delegate? %>
 <div>
-  <p>You'll need to verify your identity before accessing this organization.  You can choose from any of the supported government-approved identity verification services, including Login.gov, ID.me, and CLEAR. <br><br> Info to have ready:
+  <p>You'll need to verify your identity before accessing this organization.  You can choose from any of the supported government-approved identity verification services, including Login.gov, ID.me, and CLEAR. <br><br> Info to have ready:</p>
     <ul>
       <% @musts.each do |must| %>
       <li class="margin-top-2"><%= must %></li>
       <% end %>
     </ul>
-  </p>
-    <%= button_to 'Verify my identity', login_organization_invitation_url(@invitation.provider_organization, @invitation), class: 'usa-button margin-bottom-1 margin-top-2', data: { turbo: false } %>
+    <%# TODO: hook up to buttons properly %>
+    <%= button_to 'Verify my identity', login_organization_invitation_url(@invitation.provider_organization, @invitation, provider: :login_dot_gov), class: 'usa-button margin-bottom-1 margin-top-2', data: { turbo: false } %>
   <div><%= link_to 'How to verify your identity', 'https://login.gov/help/verify-your-identity/how-to-verify-your-identity/', target: :_blank %> <%= link_to 'Login.gov FAQ', 'https://www.login.gov/help/', target: :_blank, class: 'margin-left-2' %></div>
 </div>

@@ -9,6 +9,7 @@ RSpec.describe Page::Invitations::InvitationLoginComponent, type: :component do
     let(:provider_organization) { build(:provider_organization, dpc_api_organization_id: 'foo') }
     let(:invitation) { create(:invitation, :cd, provider_organization:) }
     let(:component) { described_class.new(invitation) }
+    let(:csp_name) { 'login_dot_gov' }
     before { render_inline(component) }
     it 'should have a verify identity button' do
       expect(page).to have_selector('button.usa-button')
@@ -21,7 +22,7 @@ RSpec.describe Page::Invitations::InvitationLoginComponent, type: :component do
     end
 
     it 'should post to appropriate url' do
-      path = "organizations/#{provider_organization.id}/invitations/#{invitation.id}/login"
+      path = "organizations/#{provider_organization.id}/invitations/#{invitation.id}/login?provider=#{csp_name}"
       url = "http://test.host/#{path}"
       expect(page.find('form')[:action]).to eq url
       expect(page.find('form')[:method]).to eq 'post'

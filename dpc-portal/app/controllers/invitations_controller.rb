@@ -67,16 +67,17 @@ class InvitationsController < ApplicationController
   end
 
   def login
-    login_session
+    csp_name = params[:provider] || 'login_dot_gov'
+    login_session(csp_name)
     Rails.logger.info(['User began login flow',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
-    csp_config = CspConfig.for(session[:csp])
+    csp_config = CspConfig.for(csp_name)
     url = URI::HTTPS.build(host: csp_config.host,
                            path: '/oauth/authorize',
                            query: { client_id: csp_config.identifier,
-                                    redirect_uri: "#{my_protocol_host}/auth/#{session[:csp]}/callback",
+                                    redirect_uri: "#{my_protocol_host}/auth/#{csp_name}/callback",
                                     response_type: 'code',
                                     scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',
                                     nonce: @nonce,
@@ -163,7 +164,7 @@ class InvitationsController < ApplicationController
     end
   end
 
-  def login_session
+  def login_session(csp)
     session[:user_return_to] = if @invitation.authorized_official?
                                  accept_organization_invitation_url(@organization, params[:id])
                                else
@@ -171,6 +172,7 @@ class InvitationsController < ApplicationController
                                end
     session['omniauth.nonce'] = @nonce = SecureRandom.hex(16)
     session['omniauth.state'] = @state = SecureRandom.hex(16)
+    session[:csp] = csp.to_sym
   end
 
   def create_link

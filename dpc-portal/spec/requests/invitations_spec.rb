@@ -147,7 +147,7 @@ RSpec.describe 'Invitations', type: :request do
         let(:org_id) { invitation.provider_organization.id }
         before { get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token?provider=#{provider}" }
         it 'should redirect to login.gov' do
-          post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/login?provider=#{provider}"
           redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
           expect(redirect_params['redirect_uri']).to start_with('http://localhost:3100/auth/')
           expect(request.session[:user_return_to]).to eq expected_redirect
@@ -160,12 +160,12 @@ RSpec.describe 'Invitations', type: :request do
                                                          actionType: LoggingConstants::ActionType::BeginLogin,
                                                          invitation: invitation.id }])
           org_id = invitation.provider_organization.id
-          post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/login?provider=#{provider}"
         end
 
         it 'should show error page if fail to proof' do
           org_id = invitation.provider_organization.id
-          post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/login?provider=#{provider}"
           get '/users/auth/failure'
           expect(response).to be_forbidden
           expect(response.body).to include(I18n.t('verification.fail_to_proof_text'))
@@ -186,9 +186,8 @@ RSpec.describe 'Invitations', type: :request do
         context 'fail to proof' do
           let(:invitation) { create(:invitation, :cd) }
           let(:org_id) { invitation.provider_organization.id }
-          before { get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token?provider=#{provider}" }
           it 'should not show step navigation' do
-            post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+            post "/organizations/#{org_id}/invitations/#{invitation.id}/login?provider=#{provider}"
             get '/users/auth/failure'
             expect(response).to be_forbidden
             expect(response.body).to_not include('<span class="usa-step-indicator__current-step">')
@@ -209,9 +208,8 @@ RSpec.describe 'Invitations', type: :request do
         context 'fail to proof' do
           let(:invitation) { create(:invitation, :ao) }
           let(:org_id) { invitation.provider_organization.id }
-          before { get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token?provider=#{provider}" }
           it 'should show step 2' do
-            post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+            post "/organizations/#{org_id}/invitations/#{invitation.id}/login?provider=#{provider}"
             get '/users/auth/failure'
             expect(response).to be_forbidden
             expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
