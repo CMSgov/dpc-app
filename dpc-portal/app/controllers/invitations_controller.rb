@@ -90,8 +90,8 @@ class InvitationsController < ApplicationController
     redirect_to accept_organization_invitation_url(@organization, @invitation)
   end
 
-  def set_idp_token
-    session[:csp] = 'id_me'
+  def set_idp_token(csp: :id_me)
+    session[:csp] = csp.to_s
     session[:id_me_token] = 'token'
     session[:id_me_token_exp] = 2.days.from_now
     head :ok
