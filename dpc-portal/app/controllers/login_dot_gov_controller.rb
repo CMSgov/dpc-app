@@ -2,7 +2,7 @@
 
 # Handles interactions with login.gov.
 class LoginDotGovController < CspController
-  def name         = :login_dot_gov
+  def csp_code     = :login_dot_gov
   def display_name = 'Login.gov'
 
   def ial_1_user?(auth)
