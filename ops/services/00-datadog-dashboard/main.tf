@@ -8,17 +8,17 @@ terraform {
 }
 
 provider "datadog" {
-  api_key = sensitive(module.platform.ssm.datadog.api_key.value)
-  app_key = sensitive(module.platform.ssm.datadog.application_key.value)
+  api_key = sensitive(module.standards.ssm.datadog.api_key.value)
+  app_key = sensitive(module.standards.ssm.datadog.application_key.value)
   api_url = "https://api.ddog-gov.com"
 }
 
 locals {
-  default_tags = module.platform.default_tags
+  default_tags = module.standards.default_tags
   service      = "datadog-dashboard"
 }
 
-module "platform" {
+module "standards" {
   source    = "github.com/CMSgov/cdap//terraform/modules/standards?ref=cbf179cb8c6707c92ad475560a54c061d00f75ff"
   providers = { aws = aws, aws.secondary = aws.secondary }
 
@@ -31,7 +31,7 @@ module "platform" {
 
 module "datadog_dashboard" {
   source       = "github.com/CMSgov/cdap//terraform/modules/datadog_dashboard?ref=cbf179cb8c6707c92ad475560a54c061d00f75ff"
-  app          = module.platform.app
+  app          = module.standards.app
   name_rewrite = "DPC"
   runbook_url  = "https://thisisatest.cdap.internal.cms.gov"
 
@@ -40,21 +40,21 @@ module "datadog_dashboard" {
       # Standard timeseries showing average CPU utilization across all ECS clusters for the application
       type         = "timeseries"
       title        = "TEST DYNAMIC WIDGET ecs.cpuutilization"
-      query        = "avg:aws.ecs.cpuutilization{application:${module.platform.app}, $env} by {clustername}" #include $env for filtering provided by default dashboard template
+      query        = "avg:aws.ecs.cpuutilization{application:${module.standards.app}, $env} by {clustername}" #include $env for filtering provided by default dashboard template
       display_type = "line"
     },
     {
       # A big number widget showing the total number of running services across all clusters
       type      = "query_value"
       title     = "Total Running Services"
-      query     = "avg:aws.ecs.service.running{application:${module.platform.app}, $env}" #include $env for filtering provided by default dashboard template
+      query     = "avg:aws.ecs.service.running{application:${module.standards.app}, $env}" #include $env for filtering provided by default dashboard template
       precision = 0
     },
     {
       # A ranked list of the top s3 buckets by object count for the application
       type  = "toplist"
       title = "Top s3 Buckets by Object Count"
-      query = "avg:aws.s3.number_of_objects{application:${module.platform.app}, $env} by {bucketname}" #include $env for filtering provided by default dashboard template
+      query = "avg:aws.s3.number_of_objects{application:${module.standards.app}, $env} by {bucketname}" #include $env for filtering provided by default dashboard template
     }
   ]
 
