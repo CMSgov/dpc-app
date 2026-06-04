@@ -32,8 +32,6 @@ class ApplicationController < ActionController::Base # rubocop:disable Metrics/C
   private
 
   def check_user_verification
-    # puts current_user.inspect
-    # puts "Current user verification status: #{current_user.verification_status}" if current_user
     return unless current_user&.rejected?
 
     render(Page::Utility::AccessDeniedComponent.new(failure_code: "verification.#{current_user.verification_reason}"))

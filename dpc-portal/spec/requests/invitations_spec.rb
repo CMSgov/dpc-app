@@ -6,8 +6,9 @@ require 'support/login_support'
 RSpec.describe 'Invitations', type: :request do
   include LoginSupport
 
-  let!(:csp) { create(:csp, name: :login_dot_gov) }
-  let!(:other_csp) { create(:csp, name: :id_me) }
+  let!(:csp) { Csp.find_by(name: 'login_dot_gov') || create(:csp, name: :login_dot_gov) }
+
+  let!(:other_csp) { Csp.find_by(name: 'id_me') || create(:csp, name: :id_me) }
   let(:provider) { :login_dot_gov }
 
   RSpec.shared_examples 'an invitation endpoint' do |method, path_suffix, type|

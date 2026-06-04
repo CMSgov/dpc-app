@@ -6,7 +6,7 @@ require 'securerandom'
 RSpec.describe 'LoginDotGov', type: :request do
   let(:uuid) { SecureRandom.uuid }
   describe 'POST /auth/login_dot_gov' do
-    let!(:csp) { create(:csp, :login_dot_gov) }
+    let!(:csp) { Csp.find_by(name: 'login_dot_gov') || create(:csp, name: :login_dot_gov) }
     RSpec.shared_examples 'an openid client' do
       context 'user exists' do
         before do
@@ -214,6 +214,8 @@ RSpec.describe 'LoginDotGov', type: :request do
         emails = UserEmail.last(2).pluck(:email)
         expect(emails).to match_array(%w[email1@example.com email2@example.com])
         expect(UserEmail.pluck(:active)).to all(be true)
+        expect(UserEmail.find(&:primary?).email).to eq 'email1@example.com'
+        expect(UserEmail.count(&:primary?)).to eq 1
       end
     end
 
@@ -275,6 +277,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         expect(email.active).to eq true
         expect(email.deactivated_at).to be_nil
         expect(email.reactivated_at).to_not be_nil
+        expect(email.primary).to eq true
       end
     end
   end
