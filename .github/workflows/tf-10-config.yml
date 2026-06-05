@@ -2,6 +2,9 @@ name: tf-10-config
 run-name: tf-10-config ${{ inputs.env }}
 
 on:
+
+  pull_request:
+
   workflow_dispatch:
     inputs:
       branch_ref:
