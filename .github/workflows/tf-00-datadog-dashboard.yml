@@ -1,5 +1,5 @@
-name: tf-datadog-dashboard
-run-name: tf-datadog-dashboard
+name: tf-00-datadog-dashboard
+run-name: tf-00-datadog-dashboard
 
 on:
   workflow_dispatch:
