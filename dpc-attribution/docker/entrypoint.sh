@@ -46,9 +46,6 @@ if [ -n "$SEED" ]; then
   eval java ${JVM_FLAGS} ${JAVA_CLASSES} seed ${CONF_FILE}
 fi
 
-# Make sure volumes in our persisted environments are writeable by nobody
-if [ -d "/tmp" ]; then chown nobody:nobody /tmp; fi
-
 echo "Running server via entrypoint as nobody!"
 # Note: -E preserves "most" env variables, but not all.  Ones deemed sensitive, like ENV need to be passed explicitly.
 exec sudo -E ENV=$ENV -u nobody ${CMDLINE} "$@" ${CONF_FILE}
