@@ -6,9 +6,8 @@ RSpec.describe Page::Session::LoginComponent, type: :component do
   include ComponentSupport
 
   describe 'login component' do
-    let(:url) { '/' }
     let(:sandbox_url) { 'https://sandbox.dpc.cms.gov/' }
-    let(:component) { described_class.new(url) }
+    let(:component) { described_class.new }
     before { render_inline(component) }
     it 'should be a usa section' do
       expect(page).to have_selector('section.usa-section')
@@ -33,9 +32,10 @@ RSpec.describe Page::Session::LoginComponent, type: :component do
                                 href: Rails.application.routes.url_helpers.system_use_agreement_path)
     end
 
-    it 'login.gov button should post to appropriate url' do
-      expect(page.find('form', match: :first)[:action]).to eq url
-      expect(page.find('form', match: :first)[:method]).to eq 'post'
+    it 'CSP buttons should post to appropriate urls' do
+      expect(page.find('form[action="/auth/login_dot_gov"]')[:method]).to eq 'post'
+      expect(page.find('form[action="/auth/clear"]')[:method]).to eq 'post'
+      expect(page.find('form[action="/auth/id_me"]')[:method]).to eq 'post'
     end
 
     it 'test data button should link to sandbox url' do
@@ -48,8 +48,7 @@ RSpec.describe Page::Session::LoginComponent, type: :component do
   end
 
   describe 'last used csp was CLEAR' do
-    let(:url) { '/' }
-    let(:component) { described_class.new(url, last_used_csp: :clear) }
+    let(:component) { described_class.new(last_used_csp: :clear) }
     before { render_inline(component) }
 
     it 'wraps only the CLEAR button' do
@@ -63,8 +62,7 @@ RSpec.describe Page::Session::LoginComponent, type: :component do
   end
 
   describe 'last used csp was ID.me' do
-    let(:url) { '/' }
-    let(:component) { described_class.new(url, last_used_csp: :id_me) }
+    let(:component) { described_class.new(last_used_csp: :id_me) }
     before { render_inline(component) }
 
     it 'wraps only the ID.me button' do
@@ -78,8 +76,7 @@ RSpec.describe Page::Session::LoginComponent, type: :component do
   end
 
   describe 'last used csp was Login.gov' do
-    let(:url) { '/' }
-    let(:component) { described_class.new(url, last_used_csp: :login_dot_gov) }
+    let(:component) { described_class.new(last_used_csp: :login_dot_gov) }
     before { render_inline(component) }
 
     it 'wraps only the Login.gov button' do
@@ -92,8 +89,7 @@ RSpec.describe Page::Session::LoginComponent, type: :component do
     end
 
     describe 'no last used csp' do
-      let(:url) { '/' }
-      let(:component) { described_class.new(url, last_used_csp: nil) }
+      let(:component) { described_class.new(last_used_csp: nil) }
       before { render_inline(component) }
 
       it "doesn't wrap any buttons" do

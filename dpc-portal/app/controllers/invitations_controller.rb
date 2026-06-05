@@ -74,16 +74,7 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
-    csp_config = CspConfig.for(csp_name)
-    url = URI::HTTPS.build(host: csp_config.host,
-                           path: '/oauth/authorize',
-                           query: { client_id: csp_config.identifier,
-                                    redirect_uri: "#{my_protocol_host}/auth/#{csp_name}/callback",
-                                    response_type: 'code',
-                                    scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',
-                                    nonce: @nonce,
-                                    state: @state }.to_query)
-    redirect_to url, allow_other_host: true
+    csp_login_actions(params[:provider])
   end
 
   def renew
@@ -112,6 +103,19 @@ class InvitationsController < ApplicationController
                          actionType: LoggingConstants::ActionType::UserLoggedIn,
                          invitation: @invitation.id }])
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation, @given_name, @family_name))
+  end
+
+  def csp_login_actions(csp)
+    csp_config = CspConfig.for(csp)
+    url = URI::HTTPS.build(host: csp_config.host,
+                           path: csp_config.authorization_endpoint,
+                           query: { client_id: csp_config.identifier,
+                                    redirect_uri: "#{my_protocol_host}/auth/#{csp_name}/callback",
+                                    response_type: 'code',
+                                    scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',
+                                    nonce: @nonce,
+                                    state: @state }.to_query)
+    redirect_to url, allow_other_host: true
   end
 
   def invitation_matches_user
@@ -324,9 +328,9 @@ class InvitationsController < ApplicationController
   def check_for_token
     csp = session[:csp]
     valid_tokens = csp&.present? &&
-                   session["#{csp}_token"].present? &&
-                   session["#{csp}_token_exp"].present? &&
-                   session["#{csp}_token_exp"] > Time.now
+      session["#{csp}_token"].present? &&
+      session["#{csp}_token_exp"].present? &&
+      session["#{csp}_token_exp"] > Time.now
     render(Page::Invitations::InvitationLoginComponent.new(@invitation)) unless valid_tokens
   end
 
