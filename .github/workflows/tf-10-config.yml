@@ -71,7 +71,7 @@ jobs:
           tofu plan -var 'env=${{ inputs.env}}' -out=tfplan
 
   apply:
-    if: ${{ inputs.tofu_action == 'plan' }}
+    if: ${{ inputs.tofu_action == 'apply' }}
     permissions:
       contents: read
       id-token: write
