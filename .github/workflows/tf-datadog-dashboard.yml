@@ -17,13 +17,7 @@ on:
           - plan
           - apply
       
-  push:
-    branches:
-      - main
-      - jscott/DPC-5482
-    
-    paths:
-      - ops/services/00-datadog-dashboard/**
+  pull_request:
 
 concurrency:
   group: tofu-plan-or-apply
