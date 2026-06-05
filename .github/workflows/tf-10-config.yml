@@ -52,6 +52,8 @@ jobs:
           ref: ${{ inputs.branch_ref }}
       - uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 #v4.1.1
       - uses: cmsgov/cdap/actions/setup-tenv@f4c14d47cc20e7f6de9112d7155af1213c9bca5a
+      - uses: cmsgov/cdap/actions/setup-sops@f4c14d47cc20e7f6de9112d7155af1213c9bca5a
+      - uses: cmsgov/cdap/actions/setup-yq@f4c14d47cc20e7f6de9112d7155af1213c9bca5a
       - name: AWS Credentials (non-prod)
         if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
         uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
@@ -85,6 +87,8 @@ jobs:
           ref: ${{ inputs.branch_ref }}
       - uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 #v4.1.1
       - uses: cmsgov/cdap/actions/setup-tenv@f4c14d47cc20e7f6de9112d7155af1213c9bca5a
+      - uses: cmsgov/cdap/actions/setup-sops@f4c14d47cc20e7f6de9112d7155af1213c9bca5a
+      - uses: cmsgov/cdap/actions/setup-yq@f4c14d47cc20e7f6de9112d7155af1213c9bca5a
       - name: AWS Credentials (non-prod)
         if: ${{ inputs.env == 'dev' || inputs.env == 'test' }}
         uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
