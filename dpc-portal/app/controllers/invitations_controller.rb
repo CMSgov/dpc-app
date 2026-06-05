@@ -74,7 +74,7 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
-    csp_login_actions(params[:provider])
+    csp_login_actions(csp_name)
   end
 
   def renew
@@ -108,6 +108,7 @@ class InvitationsController < ApplicationController
   def csp_login_actions(csp)
     csp_config = CspConfig.for(csp)
     url = URI(csp_config.authorization_endpoint)
+    url.query = { client_id: csp_config.identifier,
                   redirect_uri: "#{my_protocol_host}/auth/#{csp}/callback",
                   response_type: 'code',
                   scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',

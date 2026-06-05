@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Base controller to handle interactions with CSPs.
-class CspController < ApplicationController
+class CspController < ApplicationController # rubocop:disable Metrics/ClassLength
   include CspEmailSync
 
   skip_before_action :verify_authenticity_token, only: :openid_connect
@@ -38,6 +38,7 @@ class CspController < ApplicationController
   private
 
   def user_actions(auth, csp)
+    session[:csp] = auth.provider
     csp_user = CspUser.find_by(uuid: auth.uid, csp:)
     user = csp_user&.user
     sign_in_and_log(user, auth.provider)
@@ -70,7 +71,7 @@ class CspController < ApplicationController
   end
 
   def handle_signin_fail(csp)
-    logger.error 'CSP Configuration error'
+    Rails.logger.error 'CSP Configuration error'
     render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp:))
   end
 
@@ -111,7 +112,6 @@ class CspController < ApplicationController
   end
 
   def update_csp_tokens(auth)
-    session[:csp] = auth.provider
     session["#{auth.provider}_token"] = auth.credentials.token
     session["#{auth.provider}_token_exp"] = auth.credentials.expires_in.seconds.from_now
   end
@@ -121,8 +121,8 @@ class CspController < ApplicationController
   def all_emails(auth) = auth.extra.raw_info.all_emails
 
   # Must be implemented
-  def csp_code = not_implemented('csp_code')
-  def display_name = not_implemented('display_name')
-  def ial_1_user?(_auth) = not_implemented('ial_1_user?')
-  def not_implemented(method) = raise NotImplementedError, "Method not implemented: #{method}"
+  # @abstract
+  def csp_code = raise NotImplementedError, "#{self.class}#csp_code not implemented"
+  def display_name = raise NotImplementedError, "#{self.class}#display_name not implemented"
+  def ial_1_user?(_auth) = raise NotImplementedError, "#{self.class}#ial_1_user? not implemented"
 end
