@@ -1,6 +1,5 @@
 package gov.cms.dpc.aggregation.engine;
 
-import com.newrelic.api.agent.Trace;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.logging.SplunkTimestamp;
@@ -159,7 +158,7 @@ public class AggregationEngine implements Runnable {
      *
      * @param job - the job to process
      */
-    @Trace
+    // @Trace
     protected void processJobBatch(JobQueueBatch job) {
         this.currentBatch.set(Optional.of(job));
 
