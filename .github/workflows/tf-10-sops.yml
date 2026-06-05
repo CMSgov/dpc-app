@@ -1,5 +1,5 @@
-name: tf-10-config
-run-name: tf-10-config ${{ inputs.env }}
+name: tf-10-sops
+run-name: tf-10-sops ${{ inputs.env }}
 
 on:
 
@@ -67,7 +67,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: tofu plan
-        working-directory: ops/services/10-config/
+        working-directory: ops/services/10-sops/
         run: |
           tofu init -var 'env=${{ inputs.env}}' -reconfigure
           tofu plan -var 'env=${{ inputs.env}}' -out=tfplan
@@ -102,7 +102,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: tofu plan
-        working-directory: ops/services/10-config/
+        working-directory: ops/services/10-sops/
         run: |
           tofu init -var 'env=${{ inputs.env}}' -reconfigure
           tofu plan -var 'env=${{ inputs.env}}' -out=tfplan
