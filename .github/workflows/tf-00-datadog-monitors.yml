@@ -1,5 +1,5 @@
-name: 00-datadog-monitors
-run-name: 00-datadog-monitors
+name: tf-00-datadog-monitors
+run-name: tf-00-datadog-monitors
 
 on:
   workflow_dispatch:
