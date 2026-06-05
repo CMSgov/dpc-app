@@ -60,8 +60,8 @@ jobs:
       - name: tofu plan
         working-directory: ops/services/00-datadog-monitors/
         run: |
-          tofu init -reconfigure
-          tofu plan -out=tfplan
+          tofu init -var 'env=${{ inputs.env}}' -reconfigure
+          tofu plan -var 'env=${{ inputs.env}}' -out=tfplan
 
   apply:
     if: ${{ inputs.tofu_action == 'apply' || github.ref == 'refs/heads/main' }}
@@ -98,6 +98,6 @@ jobs:
       - name: tofu apply
         working-directory: ops/services/00-datadog-monitors/
         run: |
-          tofu init -reconfigure
-          tofu plan -out=tfplan
-          tofu apply -input=false tfplan
+          tofu init -var 'env=${{ inputs.env}}' -reconfigure
+          tofu plan -var 'env=${{ inputs.env}}' -out=tfplan
+          tofu apply -var 'env=${{ inputs.env}}' -input=false tfplan

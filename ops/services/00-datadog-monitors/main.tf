@@ -14,8 +14,8 @@ provider "datadog" {
 }
 
 locals {
-  defaults   = yamldecode(file("config/defaults.yml"))
-  env_config = yamldecode(file("config/${var.env}.yml"))
+  defaults     = yamldecode(file("config/defaults.yml"))
+  env_config   = yamldecode(file("config/${var.env}.yml"))
   default_tags = module.standards.default_tags
   service      = "datadog-monitors"
 
