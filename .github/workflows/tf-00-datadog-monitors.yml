@@ -22,8 +22,6 @@ on:
         options:
           - plan
           - apply
-      
-  pull_request:
 
 concurrency:
   group: tofu-plan-or-apply
