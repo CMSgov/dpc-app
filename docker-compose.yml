@@ -27,8 +27,6 @@ services:
   datadog-agent:
     image: public.ecr.aws/datadog/agent:7.50.0
     container_name: datadog-agent
-    ports:
-      - "8126:8126" # Port for incoming APM traces
     env_file:
       - ops/config/decrypted/local.env
     environment:
@@ -51,7 +49,6 @@ services:
       - JACOCO=${REPORT_COVERAGE:-}
       - DEBUG_MODE=${DEBUG_MODE:-false}
       - DD_AGENT_HOST=datadog-agent
-      - DD_TRACE_AGENT_PORT=8126
       - DD_SERVICE=dpc-aggregation
       - DD_ENV=local-dev
       - DD_VERSION=0.4.0-SNAPSHOT
@@ -86,7 +83,6 @@ services:
       - JACOCO=${REPORT_COVERAGE:-}
       - DEBUG_MODE=${DEBUG_MODE:-false}
       - DD_AGENT_HOST=datadog-agent
-      - DD_TRACE_AGENT_PORT=8126
       - DD_SERVICE=dpc-attribution
       - DD_ENV=local-dev
       - DD_VERSION=0.4.0-SNAPSHOT
@@ -119,7 +115,6 @@ services:
       - DEBUG_MODE=${DEBUG_MODE:-false}
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
       - DD_AGENT_HOST=datadog-agent
-      - DD_TRACE_AGENT_PORT=8126
       - DD_SERVICE=dpc-api
       - DD_ENV=local-dev
       - DD_VERSION=0.4.0-SNAPSHOT
