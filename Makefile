@@ -26,8 +26,7 @@ smoke/local: start-dpc
 
 api: ## Builds the Java API services
 api: secure-envs
-	mvn clean compile -Perror-prone -B -V -ntp -T 4 -DskipTests
-	mvn package -Pci -ntp -T 4 -DskipTests
+	mvn clean package -Perror-prone,ci -B -V -ntp -T 4 -DskipTests
 
 website: ## Builds the sandbox portal website
 website:

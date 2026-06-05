@@ -294,8 +294,8 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
+                <groupId>io.github.download-maven-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
@@ -320,6 +320,10 @@
                             <path>${project.basedir}/docker</path>
                             <path>${project.basedir}/../src/main/resources/keypair</path>
                             <path>${project.basedir}/target/newrelic-agent</path>
+                            <path>
+                                <from>${project.build.directory}/datadog-agent</from>
+                                <into>/opt</into>
+                            </path>
                         </paths>
                         <permissions>
                             <permission>

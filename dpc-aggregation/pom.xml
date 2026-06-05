@@ -206,6 +206,10 @@
                 <artifactId>maven-dependency-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>io.github.download-maven-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
@@ -215,6 +219,10 @@
                             <path>${project.basedir}/target/jacoco-agent</path>
                             <path>${project.basedir}/docker</path>
                             <path>${project.basedir}/target/newrelic-agent</path>
+                            <path>
+                                <from>${project.build.directory}/datadog-agent</from>
+                                <into>/opt</into>
+                            </path>
                         </paths>
                         <permissions>
                             <permission>
