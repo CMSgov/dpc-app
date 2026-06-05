@@ -1,5 +1,5 @@
 locals {
-  service = "sops"
+  service = "config"
 }
 
 module "platform" {
@@ -7,7 +7,7 @@ module "platform" {
   providers = { aws = aws, aws.secondary = aws.secondary }
 
   app         = local.app
-  env         = local.env
+  env         = var.env
   root_module = "https://github.com/CMSgov/bcda-app/tree/main/ops/services/10-sops"
   service     = local.service
 }
