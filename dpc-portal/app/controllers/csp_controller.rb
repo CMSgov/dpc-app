@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Base controller to handle interactions with CSPs.
-class CspController < ApplicationController # rubocop:disable Metrics/ClassLength
+class CspController < ApplicationController
   include CspEmailSync
 
   skip_before_action :verify_authenticity_token, only: :openid_connect
