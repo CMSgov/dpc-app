@@ -46,7 +46,7 @@ LOGIN_DOT_GOV_CLIENT_CONFIG = {
     host: "https://#{LOGIN_DOT_GOV_CONFIG[:host]}/",
     identifier: "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
     private_key: ENV['LOGIN_DOT_GOV_CLIENT_PRIVATE_KEY'],
-    redirect_uri: "#{my_protocol_host}/portal/auth/login_dot_gov/callback",
+    redirect_uri: "#{my_protocol_host}/auth/login_dot_gov/callback",
 
     authorization_endpoint: LOGIN_DOT_GOV_CONFIG[:authorization_endpoint],
     token_endpoint: LOGIN_DOT_GOV_CONFIG[:token_endpoint],

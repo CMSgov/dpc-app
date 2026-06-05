@@ -6,27 +6,23 @@ class CspConfig
   ENV_NAME = ENV.fetch('ENV', 'local')
   CONFIG = Rails.application.config_for(:csp).freeze
 
-  def initialize(code, host, identifier, user_info_endpoint, log_out_path, token_expiration_interval) # rubocop:disable Metrics/ParameterLists
-    @host = host
-    @identifier = identifier
+  def initialize(code, config)
     @code = code
-    @user_info_endpoint = user_info_endpoint
-    @log_out_path = log_out_path
-    @token_expiration_interval = token_expiration_interval
+    @host = config[:host]
+    @identifier = config[:identifier]
+    @user_info_endpoint = config[:user_info_endpoint]
+    @log_out_path = config[:log_out_path]
+    @token_expiration_interval = config[:token_expiration_interval]
+    @authorization_endpoint = config[:authorization_endpoint]
+    @redirect_path = config[:redirect_path]
+    @authorize_scope = config[:authorize_scope]
+    @acr_values = config[:acr_values]
   end
 
   LOGIN_DOT_GOV = new('login_dot_gov',
-                      CONFIG[:login_dot_gov][:host],
-                      CONFIG[:login_dot_gov][:identifier],
-                      CONFIG[:login_dot_gov][:user_info_path],
-                      CONFIG[:login_dot_gov][:log_out_path],
-                      CONFIG[:login_dot_gov][:token_expiration_interval])
+                      CONFIG[:login_dot_gov])
   ID_ME = new('id_me',
-              CONFIG[:id_me][:host],
-              CONFIG[:id_me][:identifier],
-              CONFIG[:id_me][:user_info_path],
-              CONFIG[:id_me][:log_out_path],
-              CONFIG[:id_me][:token_expiration_interval])
+              CONFIG[:id_me])
   #   CLEAR = new('clear',
   #               CONFIG[:clear][:host],
   #               CONFIG[:clear][:identifier],
@@ -35,7 +31,8 @@ class CspConfig
   #               CONFIG[:clear][:token_expiration_interval])
   private_class_method :new
 
-  attr_reader :user_info_endpoint, :log_out_path, :token_expiration_interval, :host, :identifier
+  attr_reader :code, :user_info_endpoint, :log_out_path, :token_expiration_interval, :host, :identifier,
+              :authorization_endpoint, :redirect_path, :authorize_scope, :acr_values
 
   def self.for(code)
     case code.to_s
