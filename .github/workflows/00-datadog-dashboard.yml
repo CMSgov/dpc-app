@@ -1,9 +1,14 @@
-name: datadog-dashboard
-run-name: datadog-dashboard
+name: 00-datadog-dashboard
+run-name: 00-datadog-dashboard
 
 on:
   workflow_dispatch:
     inputs:
+      branch_ref:
+        description: 'Ref of the branch to be checked out'
+        type: 'string'
+        default: 'main'
+
       tofu_action:
         description: 'Choose whether to run a tofu plan or apply'
         default: 'plan'
