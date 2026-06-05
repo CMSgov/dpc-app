@@ -43,7 +43,7 @@ CMDLINE="java ${CONF_FLAGS} ${DEBUG_FLAGS} ${JACOCO} ${DD_AGENT} ${JAVA_CLASSES}
 
 if [ -n "$SEED" ]; then
   echo "Loading seeds"
-  eval java ${JVM_FLAGS} ${JAVA_CLASSES} seed ${CONF_FILE}
+  eval java ${JAVA_CLASSES} seed ${CONF_FILE}
 fi
 
 echo "Running server via entrypoint as nobody!"
