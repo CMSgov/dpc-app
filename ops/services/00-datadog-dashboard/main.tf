@@ -33,7 +33,7 @@ module "datadog_dashboard" {
   source       = "github.com/CMSgov/cdap//terraform/modules/datadog_dashboard?ref=cbf179cb8c6707c92ad475560a54c061d00f75ff"
   app          = module.standards.app
   name_rewrite = "DPC"
-  runbook_url  = "https://thisisatest.cdap.internal.cms.gov"
+  runbook_url  = "https://confluence.cms.gov/spaces/DAPC/pages/1013329542/DPC+Operations"
 
   custom_widgets = [
     {
