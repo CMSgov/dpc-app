@@ -53,7 +53,6 @@ logging:
           # List any env vars that contain secrets that should be filtered out of the logs
           secrets:
             - ATTRIBUTION_DB_PASS
-            - NEW_RELIC_LICENSE_KEY
       timeZone: UTC
       layout:
         type: json-dpc

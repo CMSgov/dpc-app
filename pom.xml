@@ -45,8 +45,6 @@
         <jooq.version>3.19.19</jooq.version>
         <bouncey.version>1.84</bouncey.version>
         <pitest.version>1.22.0</pitest.version>
-        <newrelic.agent.version>8.21.0</newrelic.agent.version>
-        <newrelic.agent.type>zip</newrelic.agent.type>
         <h2.version>2.3.232</h2.version>
         <aws.java.sdk.version>2.42.38</aws.java.sdk.version>
         <sonar.coverage.exclusions>**/MockBlueButton*.java</sonar.coverage.exclusions>
@@ -337,13 +335,6 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>33.4.8-jre</version>
-            </dependency>
-            <dependency>
-                <groupId>com.newrelic.agent.java</groupId>
-                <artifactId>newrelic-java</artifactId>
-                <version>${newrelic.agent.version}</version>
-                <scope>provided</scope>
-                <type>${newrelic.agent.type}</type>
             </dependency>
             <dependency>
                 <groupId>com.google.re2j</groupId>
@@ -791,28 +782,6 @@
                     <version>3.14.1</version>
                 </plugin>
                 <!-- Base configuration for Docker images -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.9.0</version>
-                    <executions>
-                        <execution>
-                            <id>unpack-newrelic</id>
-                            <phase>prepare-package</phase>
-                            <goals>
-                                <goal>unpack-dependencies</goal>
-                            </goals>
-                            <configuration>
-                                <includeGroupIds>com.newrelic.agent.java</includeGroupIds>
-                                <includeArtifactIds>newrelic-java</includeArtifactIds>
-                                <overWriteReleases>false</overWriteReleases>
-                                <overWriteSnapshots>false</overWriteSnapshots>
-                                <overWriteIfNewer>true</overWriteIfNewer>
-                                <outputDirectory>${project.build.directory}/newrelic-agent</outputDirectory>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
                 <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>

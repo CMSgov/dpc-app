@@ -77,12 +77,6 @@
             <groupId>com.smoketurner</groupId>
             <artifactId>dropwizard-swagger</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.newrelic.agent.java</groupId>
-            <artifactId>newrelic-java</artifactId>
-            <version>${newrelic.agent.version}</version>
-            <type>${newrelic.agent.type}</type>
-        </dependency>
         <!--Testing dependencies-->
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -228,7 +222,6 @@
                         <paths>
                             <path>${project.basedir}/docker</path>
                             <path>${project.basedir}/target/jacoco-agent</path>
-                            <path>${project.basedir}/target/newrelic-agent</path>
                             <path>
                                 <from>${project.build.directory}/datadog-agent</from>
                                 <into>/opt</into>

@@ -135,12 +135,6 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.newrelic.agent.java</groupId>
-            <artifactId>newrelic-java</artifactId>
-            <version>${newrelic.agent.version}</version>
-            <type>${newrelic.agent.type}</type>
-        </dependency>
-        <dependency>
             <groupId>com.auth0</groupId>
             <artifactId>java-jwt</artifactId>
         </dependency>
@@ -319,7 +313,6 @@
                             <path>${project.basedir}/target/jacoco-agent</path>
                             <path>${project.basedir}/docker</path>
                             <path>${project.basedir}/../src/main/resources/keypair</path>
-                            <path>${project.basedir}/target/newrelic-agent</path>
                             <path>
                                 <from>${project.build.directory}/datadog-agent</from>
                                 <into>/opt</into>

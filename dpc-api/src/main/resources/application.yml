@@ -77,7 +77,6 @@ logging:
             - AUTH_DB_PASS
             - BB_KEYSTORE_PASS
             - BFD_HASH_PEPPER
-            - NEW_RELIC_LICENSE_KEY
       timeZone: UTC
       layout:
         type: json-dpc
