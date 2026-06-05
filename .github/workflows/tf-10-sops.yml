@@ -2,9 +2,6 @@ name: tf-10-sops
 run-name: tf-10-sops ${{ inputs.env }}
 
 on:
-
-  pull_request:
-
   workflow_dispatch:
     inputs:
       branch_ref:

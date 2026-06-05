@@ -1,5 +1,5 @@
 locals {
-  service = "config"
+  service = "sops"
 }
 
 module "platform" {
@@ -8,7 +8,7 @@ module "platform" {
 
   app         = local.app
   env         = local.env
-  root_module = "https://github.com/CMSgov/bcda-app/tree/main/ops/services/10-config"
+  root_module = "https://github.com/CMSgov/bcda-app/tree/main/ops/services/10-sops"
   service     = local.service
 }
 
