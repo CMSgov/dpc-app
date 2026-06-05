@@ -1,7 +1,10 @@
-name: tf-00-datadog-monitors
-run-name: tf-00-datadog-monitors ${{ inputs.env }}
+name: tf-10-config
+run-name: tf-10-config ${{ inputs.env }}
 
 on:
+
+  pull_request:
+
   workflow_dispatch:
     inputs:
       branch_ref:
@@ -18,7 +21,7 @@ on:
           - test
           - sandbox
           - prod
-  
+
       tofu_action:
         description: 'Choose whether to run a tofu plan or apply'
         default: 'plan'
@@ -62,13 +65,13 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
       - name: tofu plan
-        working-directory: ops/services/00-datadog-monitors/
+        working-directory: ops/services/10-config/
         run: |
           tofu init -var 'env=${{ inputs.env}}' -reconfigure
           tofu plan -var 'env=${{ inputs.env}}' -out=tfplan
 
   apply:
-    if: ${{ inputs.tofu_action == 'apply' || github.ref == 'refs/heads/main' }}
+    if: ${{ inputs.tofu_action == 'plan' }}
     permissions:
       contents: read
       id-token: write
@@ -94,10 +97,9 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: arn:aws:iam::${{ secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
-  
-      - name: tofu apply
-        working-directory: ops/services/00-datadog-monitors/
+      - name: tofu plan
+        working-directory: ops/services/10-config/
         run: |
           tofu init -var 'env=${{ inputs.env}}' -reconfigure
           tofu plan -var 'env=${{ inputs.env}}' -out=tfplan
-          tofu apply -var 'env=${{ inputs.env}}' -input=false tfplan
+          tofu apply tfplan
