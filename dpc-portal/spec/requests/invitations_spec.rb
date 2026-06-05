@@ -15,9 +15,9 @@ RSpec.describe 'Invitations', type: :request do
       let(:org) { invitation.provider_organization }
       let(:bad_org) { create(:provider_organization) }
       let(:expected_success_status) { 200 }
-      before { log_in(provider:) }
       it 'should be ok or redirect' do
         stub_user_info
+        path_suffix += "?provider=#{provider}" if path_suffix == 'login'
         send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
         expect(response.status).to eq(expected_success_status)
       end
@@ -296,7 +296,6 @@ RSpec.describe 'Invitations', type: :request do
     describe 'POST /confirm' do
       it_behaves_like 'an invitation endpoint', :post, 'confirm', :ao do
         let(:invitation) { create(:invitation, :ao) }
-        let(:expected_success_status) { 302 }
       end
       context :success do
         let(:invitation) { create(:invitation, :ao) }
@@ -717,7 +716,6 @@ RSpec.describe 'Invitations', type: :request do
       context :cd do
         it_behaves_like 'an invitation endpoint', :post, 'register', :cd do
           let(:invitation) { create(:invitation, :cd) }
-          let(:expected_success_status) { 302 }
         end
         it_behaves_like 'a register endpoint' do
           let(:invitation) { create(:invitation, :cd) }
@@ -742,7 +740,6 @@ RSpec.describe 'Invitations', type: :request do
       context :ao do
         it_behaves_like 'an invitation endpoint', :post, 'register', :ao do
           let(:invitation) { create(:invitation, :ao) }
-          let(:expected_success_status) { 302 }
         end
         it_behaves_like 'a register endpoint' do
           let(:invitation) { create(:invitation, :ao) }

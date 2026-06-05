@@ -107,14 +107,12 @@ class InvitationsController < ApplicationController
 
   def csp_login_actions(csp)
     csp_config = CspConfig.for(csp)
-    url = URI::HTTPS.build(host: csp_config.host,
-                           path: csp_config.authorization_endpoint,
-                           query: { client_id: csp_config.identifier,
-                                    redirect_uri: "#{my_protocol_host}/auth/#{csp_name}/callback",
-                                    response_type: 'code',
-                                    scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',
-                                    nonce: @nonce,
-                                    state: @state }.to_query)
+    url = URI(csp_config.authorization_endpoint)
+                  redirect_uri: "#{my_protocol_host}/auth/#{csp}/callback",
+                  response_type: 'code',
+                  scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',
+                  nonce: @nonce,
+                  state: @state }.compact.to_query
     redirect_to url, allow_other_host: true
   end
 
@@ -328,9 +326,9 @@ class InvitationsController < ApplicationController
   def check_for_token
     csp = session[:csp]
     valid_tokens = csp&.present? &&
-      session["#{csp}_token"].present? &&
-      session["#{csp}_token_exp"].present? &&
-      session["#{csp}_token_exp"] > Time.now
+                   session["#{csp}_token"].present? &&
+                   session["#{csp}_token_exp"].present? &&
+                   session["#{csp}_token_exp"] > Time.now
     render(Page::Invitations::InvitationLoginComponent.new(@invitation)) unless valid_tokens
   end
 
