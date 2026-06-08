@@ -24,9 +24,9 @@ fi
 
 JAVA_CLASSES="-cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.aggregation.DPCAggregationService"
 
-# If we have a DD license, enable the agent
+# If we have a DD license, enable the agent and turn on open telemetry
 if [ -n "$DD_API_KEY" ]; then
-  DD_AGENT="-javaagent:/opt/dd-java-agent.jar"
+  DD_AGENT="-javaagent:/opt/dd-java-agent.jar -Ddd.trace.otel.enabled=true"
 else
   DD_AGENT=""
 fi

@@ -6,6 +6,8 @@ import gov.cms.dpc.common.logging.SplunkTimestamp;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.annotations.AggregatorID;
 import gov.cms.dpc.queue.models.JobQueueBatch;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.exceptions.UndeliverableException;
@@ -158,9 +160,15 @@ public class AggregationEngine implements Runnable {
      *
      * @param job - the job to process
      */
-    // @Trace
+    @WithSpan(inheritContext = false)
     protected void processJobBatch(JobQueueBatch job) {
         this.currentBatch.set(Optional.of(job));
+
+        // Add values to DataDog span
+        Span currentSpan = Span.current();
+        currentSpan.setAttribute("aggregatorID", this.aggregatorID.toString());
+        currentSpan.setAttribute("jobId", job.getJobID().toString());
+        currentSpan.setAttribute("batchId", job.getBatchID().toString());
 
         final String queueCompleteTime = SplunkTimestamp.getSplunkTimestamp();
         try {

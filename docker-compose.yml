@@ -53,6 +53,8 @@ services:
       - DD_ENV=local-dev
       - DD_VERSION=0.4.0-SNAPSHOT
       - DD_PROFILING_ENABLED=true
+      - DD_TRACE_OTEL_ENABLED=true
+      - DD_INSTRUMENTATION_TELEMETRY_ENABLED=false
     depends_on:
       db:
         condition: service_healthy
@@ -87,6 +89,7 @@ services:
       - DD_ENV=local-dev
       - DD_VERSION=0.4.0-SNAPSHOT
       - DD_PROFILING_ENABLED=true
+      - DD_INSTRUMENTATION_TELEMETRY_ENABLED=false
     ports:
       - "3500:8080"
       - "9902:9902"
@@ -111,7 +114,8 @@ services:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE:-}
       - EXPORT_PATH=/app/data
-      - AUTH_DISABLED=${AUTH_DISABLED:-false}
+      #- AUTH_DISABLED=${AUTH_DISABLED:-false}
+      - AUTH_DISABLED=true
       - DEBUG_MODE=${DEBUG_MODE:-false}
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
       - DD_AGENT_HOST=datadog-agent
@@ -119,6 +123,7 @@ services:
       - DD_ENV=local-dev
       - DD_VERSION=0.4.0-SNAPSHOT
       - DD_PROFILING_ENABLED=true
+      - DD_INSTRUMENTATION_TELEMETRY_ENABLED=false
     depends_on:
       attribution:
         condition: service_healthy
