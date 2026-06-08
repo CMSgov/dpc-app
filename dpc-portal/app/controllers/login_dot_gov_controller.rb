@@ -22,6 +22,27 @@ class LoginDotGovController < ApplicationController
     redirect_to path(user, auth)
   end
 
+  def callback
+    logger.error 'callback received'
+    auth = request.env['omniauth.auth']
+    logger.error 'callback received: auth = request.env[omniauth.auth]'
+    return unless (csp = csp(auth.provider))
+
+    logger.error 'callback: before csp_user]'
+    csp_user = CspUser.find_by(uuid: auth.uid, csp:)
+    logger.error 'callback: after csp_user]'
+
+    user = csp_user&.user
+    logger.error 'callback: after csp_user 1]'
+    sign_in_and_log(user, csp: csp.name)
+    logger.error 'callback: after csp_user 2]'
+    post_signin_actions(user, csp_user, auth)
+    logger.error 'callback: after csp_user 3]'
+    ial_2_actions(user, auth)
+    logger.error 'callback: after csp_user 4]'
+    redirect_to path(user, auth)
+  end
+
   def no_account
     render(Page::Utility::ErrorComponent.new(nil, 'no_account'), status: :forbidden)
   end
