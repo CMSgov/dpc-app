@@ -136,16 +136,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>org.hl7.fhir.validation</artifactId>
-                <version>6.9.9</version>
-            </dependency>
-            <dependency>
-                <groupId>ca.uhn.hapi.fhir</groupId>
-                <artifactId>org.hl7.fhir.utilities</artifactId>
-                <version>6.9.9</version>
-            </dependency>
-            <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-bom</artifactId>
                 <version>12.1.10</version>
