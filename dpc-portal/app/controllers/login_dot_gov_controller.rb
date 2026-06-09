@@ -22,19 +22,6 @@ class LoginDotGovController < ApplicationController
     redirect_to path(user, auth)
   end
 
-  def callback
-    auth = request.env['omniauth.auth']
-    return unless (csp = csp(auth.provider))
-
-    csp_user = CspUser.find_by(uuid: auth.uid, csp:)
-
-    user = csp_user&.user
-    sign_in_and_log(user, csp: csp.name)
-    post_signin_actions(user, csp_user, auth)
-    ial_2_actions(user, auth)
-    redirect_to path(user, auth)
-  end
-
   def no_account
     render(Page::Utility::ErrorComponent.new(nil, 'no_account'), status: :forbidden)
   end
