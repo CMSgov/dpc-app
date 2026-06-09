@@ -114,7 +114,7 @@ services:
       - ENV=local
       - JACOCO=${REPORT_COVERAGE:-}
       - EXPORT_PATH=/app/data
-      #- AUTH_DISABLED=${AUTH_DISABLED:-false}
+      - AUTH_DISABLED=${AUTH_DISABLED:-false}
       - AUTH_DISABLED=true
       - DEBUG_MODE=${DEBUG_MODE:-false}
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
