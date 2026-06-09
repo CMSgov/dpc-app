@@ -32,11 +32,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <dropwizard.version>5.0.1</dropwizard.version>
+        <dropwizard.version>5.0.2</dropwizard.version>
         <junit.jupiter.version>5.12.1</junit.jupiter.version>
         <slf4j.version>2.0.17</slf4j.version>
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
-        <hapi.fhir.version>8.4.0</hapi.fhir.version>
+        <hapi.fhir.version>8.4.3</hapi.fhir.version>
         <pgsql.version>42.7.11</pgsql.version>
         <java.version>17</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
@@ -48,7 +48,7 @@
         <newrelic.agent.version>8.21.0</newrelic.agent.version>
         <newrelic.agent.type>zip</newrelic.agent.type>
         <h2.version>2.3.232</h2.version>
-        <aws.java.sdk.version>2.42.38</aws.java.sdk.version>
+        <aws.java.sdk.version>2.44.14</aws.java.sdk.version>
         <sonar.coverage.exclusions>**/MockBlueButton*.java</sonar.coverage.exclusions>
     </properties>
 
@@ -138,7 +138,7 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-bom</artifactId>
-                <version>12.1.6</version>
+                <version>12.1.10</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
