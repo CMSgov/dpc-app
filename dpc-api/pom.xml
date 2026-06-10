@@ -305,6 +305,10 @@
                         <environment>
                             <DB_MIGRATION>1</DB_MIGRATION>
                         </environment>
+                        <!-- Writing to /tmp is tricky because it's read only on Fargate.  We need a volume over top of it -->
+                        <volumes>
+                            <volume>/tmp</volume>
+                        </volumes>
                         <entrypoint>/entrypoint.sh</entrypoint>
                     </container>
                     <extraDirectories>

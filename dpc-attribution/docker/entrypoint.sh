@@ -47,6 +47,7 @@ if [ -n "$SEED" ]; then
 fi
 
 # Make sure volumes in our persisted environments are writeable by nobody
+if [ -d "/tmp" ]; then chown nobody:nobody /tmp; fi
 if [ -d "/tmp/ddprof_nobody" ]; then chown nobody:nobody /tmp/ddprof_nobody; fi
 
 echo "Running server via entrypoint as nobody!"
