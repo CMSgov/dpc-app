@@ -2,6 +2,7 @@
 # ==============
 
 SMOKE_THREADS ?= 10
+SHELL := /bin/bash
 
 venv: venv/bin/activate
 
@@ -17,6 +18,12 @@ smoke/local: export AUTH_DISABLED=false
 smoke/local: start-dpc
 	@echo "Running Smoke Tests against Local env"
 	docker run --rm -v $(shell pwd)/dpc-load-testing:/src -e ENVIRONMENT=local -i grafana/k6:1.4.2 run /src/smoke-test.js
+
+
+.PHONY: it/local
+it/local: 
+	. ./scripts/export_ssm_parameters.sh && \
+	docker run --rm -v $(shell pwd)/dpc-load-testing:/src -e ENVIRONMENT=local -e CLIENT_ID -e CLIENT_SECRET -e CPI_API_GW_TESTDATA -i grafana/k6:1.4.2 run /src/integration_test/cpi_gateway_test.js
 
 # Build commands
 #

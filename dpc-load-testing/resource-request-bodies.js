@@ -103,12 +103,12 @@ export function generateBundle(entries) {
     "resourceType": "Parameters",
     "parameter": [
       {
-	"name": "resource",
-	"resource": {
+        "name": "resource",
+        "resource": {
           "resourceType": "Bundle",
           "type": "collection",
           "entry": entries,
-	}
+        }
       }
     ]
   }
