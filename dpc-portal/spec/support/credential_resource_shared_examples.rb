@@ -5,13 +5,13 @@ require 'spec_helper'
 RSpec.shared_examples 'a credential resource' do
   describe 'Post /create' do
     context 'as cd' do
-      let!(:user) { create(:user) }
+      let!(:user) { create_user_with_csp }
       let(:org_api_id) { SecureRandom.uuid }
       let!(:org) { create(:provider_organization, terms_of_service_accepted_by:, dpc_api_organization_id: org_api_id) }
 
       before do
         create(:cd_org_link, provider_organization: org, user:)
-        sign_in user
+        sign_in user, csp: :login_dot_gov
       end
       it 'adds a credential audit log record on success' do
         token_guid = SecureRandom.uuid
@@ -41,13 +41,13 @@ RSpec.shared_examples 'a credential resource' do
 
   describe 'Delete /destroy' do
     context 'as cd' do
-      let!(:user) { create(:user) }
+      let!(:user) { create_user_with_csp }
       let(:org_api_id) { SecureRandom.uuid }
       let!(:org) { create(:provider_organization, terms_of_service_accepted_by:, dpc_api_organization_id: org_api_id) }
 
       before do
         create(:cd_org_link, provider_organization: org, user:)
-        sign_in user
+        sign_in user, csp: :login_dot_gov
       end
 
       it 'adds a credential audit log record on success' do

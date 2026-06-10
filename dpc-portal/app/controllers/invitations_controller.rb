@@ -4,6 +4,7 @@ require 'dpc_portal_utils'
 
 # Handles acceptance of invitations
 class InvitationsController < ApplicationController
+  include CspEmailSync
   include DpcPortalUtils
 
   before_action :load_organization
@@ -61,33 +62,19 @@ class InvitationsController < ApplicationController
 
     return unless create_link
 
-    session.delete("invitation_status_#{@invitation.id}")
-    sign_in(@user)
-    Rails.logger.info(['User logged in',
-                       { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::UserLoggedIn,
-                         invitation: @invitation.id }])
-    render(Page::Invitations::SuccessComponent.new(@organization, @invitation, @given_name, @family_name))
+    complete_registration
   rescue UserInfoServiceError => e
     handle_user_info_service_error(e, 2)
   end
 
   def login
-    login_session
+    csp_name = params[:provider] || 'login_dot_gov'
+    login_session(csp_name)
     Rails.logger.info(['User began login flow',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id }])
-    url = URI::HTTPS.build(host: IDP_HOST,
-                           path: '/openid_connect/authorize',
-                           query: { acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
-                                    client_id: IDP_CLIENT_ID,
-                                    redirect_uri: "#{my_protocol_host}/auth/login_dot_gov/callback",
-                                    response_type: 'code',
-                                    scope: 'openid email all_emails profile social_security_number',
-                                    nonce: @nonce,
-                                    state: @state }.to_query)
-    redirect_to url, allow_other_host: true
+    csp_login_actions(csp_name)
   end
 
   def renew
@@ -100,12 +87,35 @@ class InvitationsController < ApplicationController
   end
 
   def set_idp_token
-    session[:login_dot_gov_token] = 'token'
-    session[:login_dot_gov_token_exp] = 2.days.from_now
+    session[:csp] = csp = params[:provider]
+    session["#{csp}_token"] = 'token'
+    session["#{csp}_token_exp"] = 2.days.from_now
     head :ok
   end
 
   private
+
+  def complete_registration
+    session.delete("invitation_status_#{@invitation.id}")
+    sign_in(user: @user, csp: session[:csp])
+    Rails.logger.info(['User logged in',
+                       { actionContext: LoggingConstants::ActionContext::Registration,
+                         actionType: LoggingConstants::ActionType::UserLoggedIn,
+                         invitation: @invitation.id }])
+    render(Page::Invitations::SuccessComponent.new(@organization, @invitation, @given_name, @family_name))
+  end
+
+  def csp_login_actions(csp)
+    csp_config = CspConfig.for(csp)
+    url = URI(csp_config.authorization_endpoint)
+    url.query = { client_id: csp_config.identifier,
+                  redirect_uri: "#{my_protocol_host}/auth/#{csp}/callback",
+                  response_type: 'code',
+                  scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',
+                  nonce: @nonce,
+                  state: @state }.compact.to_query
+    redirect_to url, allow_other_host: true
+  end
 
   def invitation_matches_user
     user_info = UserInfoService.new.user_info(session)
@@ -121,11 +131,11 @@ class InvitationsController < ApplicationController
   def render_bad_invitation?(user_info)
     if @invitation.credential_delegate? && !@invitation.cd_match?(user_info)
       log_pii_mismatch
-      render(Page::Utility::ErrorComponent.new(@invitation, 'pii_mismatch'),
+      render(Page::Utility::ErrorComponent.new(@invitation, 'pii_mismatch', csp: session[:csp]),
              status: :forbidden)
     elsif !@invitation.email_match?(user_info)
       log_pii_mismatch
-      render(Page::Utility::ErrorComponent.new(@invitation, 'email_mismatch'),
+      render(Page::Utility::ErrorComponent.new(@invitation, 'email_mismatch', csp: session[:csp]),
              status: :forbidden)
     end
   end
@@ -158,14 +168,19 @@ class InvitationsController < ApplicationController
     end
   end
 
-  def login_session
-    session[:user_return_to] = if @invitation.authorized_official?
-                                 accept_organization_invitation_url(@organization, params[:id])
-                               else
-                                 confirm_cd_organization_invitation_url(@organization, params[:id])
-                               end
+  def login_session(csp)
+    session[:user_return_to] = invitation_return_url
     session['omniauth.nonce'] = @nonce = SecureRandom.hex(16)
     session['omniauth.state'] = @state = SecureRandom.hex(16)
+    session[:csp] = csp.to_sym
+  end
+
+  def invitation_return_url
+    if @invitation.authorized_official?
+      accept_organization_invitation_url(@organization, params[:id])
+    else
+      confirm_cd_organization_invitation_url(@organization, params[:id])
+    end
   end
 
   def create_link
@@ -211,7 +226,11 @@ class InvitationsController < ApplicationController
     user_info = UserInfoService.new.user_info(session)
     find_or_create_user(user_info)
     csp = Csp.find_by(name: @user.provider)
-    CspUser.find_or_create_by!(user: @user, csp: csp, uuid: user_info['sub'])
+    csp_user = CspUser.find_or_create_by!(user: @user, csp:, uuid: user_info['sub'])
+
+    # Update emails based upon the latest information in user info.
+    new_emails = user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed']
+    sync_csp_emails(csp_user, new_emails, user_info['emails'])
     update_user(user_info)
     @user
   end
@@ -234,11 +253,11 @@ class InvitationsController < ApplicationController
 
     return matching_users.first if matching_users.present?
 
-    user = User.new
-    assign_user_attributes(user, user_info)
-    user.save!
-    log_create_user
-    user
+    User.new.tap do |user|
+      assign_user_attributes(user, user_info)
+      user.save!
+      log_create_user
+    end
   end
 
   def assign_user_attributes(user_to_create, user_info)
@@ -247,13 +266,12 @@ class InvitationsController < ApplicationController
     user_to_create.family_name = user_info['family_name']
     user_to_create.pac_id = session.delete(:user_pac_id)
 
-    # For now we force login.gov, this will have to change once we support multi-CSP.
-    user_to_create.provider = :login_dot_gov
+    user_to_create.provider = session[:csp]
     user_to_create.uid = user_info['sub']
   end
 
   def update_user(user_info)
-    @user.pac_id = session.delete(:user_pac_id) unless @user.pac_id
+    @user.pac_id ||= session.delete(:user_pac_id)
     @user.given_name = user_info['given_name']
     @user.family_name = user_info['family_name']
     @user.save
@@ -272,7 +290,7 @@ class InvitationsController < ApplicationController
   def validate_invitation
     return unless @invitation.unacceptable_reason
 
-    err_msg, action_type = get_invitation_log_data(@invitation.unacceptable_reason)
+    err_msg, action_type = invitation_log_data(@invitation.unacceptable_reason)
     Rails.logger.info([err_msg, { actionContext: LoggingConstants::ActionContext::Registration,
                                   actionType: action_type,
                                   invitation: @invitation.id }])
@@ -281,7 +299,7 @@ class InvitationsController < ApplicationController
            status: :forbidden)
   end
 
-  def get_invitation_log_data(reason)
+  def invitation_log_data(reason)
     unacceptable_reason_map = {
       ao_invalid: ['AO Invalid Invitation', LoggingConstants::ActionType::InvalidInvitation],
       cd_invalid: ['CD Invalid Invitation', LoggingConstants::ActionType::InvalidInvitation],
@@ -293,10 +311,9 @@ class InvitationsController < ApplicationController
       ao_expired: ['Authorized Official Invitation expired', LoggingConstants::ActionType::AoInvitationExpired],
       cd_expired: ['Credential Delegate Invitation expired', LoggingConstants::ActionType::CdInvitationExpired]
     }
-    unacceptable_reason_map.default = ["Invitation unacceptable: #{reason}",
-                                       LoggingConstants::ActionType::UnacceptableInvitation]
-
-    unacceptable_reason_map[reason.to_sym]
+    unacceptable_reason_map.fetch(reason.to_sym) do
+      ["Invitation unacceptable: #{reason}", LoggingConstants::ActionType::UnacceptableInvitation]
+    end
   end
 
   def verify_ao_invitation
@@ -308,13 +325,12 @@ class InvitationsController < ApplicationController
   end
 
   def check_for_token
-    if session[:login_dot_gov_token].present? &&
-       session[:login_dot_gov_token_exp].present? &&
-       session[:login_dot_gov_token_exp] > Time.now
-      return
-    end
-
-    render(Page::Invitations::InvitationLoginComponent.new(@invitation))
+    csp = session[:csp]
+    valid_tokens = csp&.present? &&
+                   session["#{csp}_token"].present? &&
+                   session["#{csp}_token_exp"].present? &&
+                   session["#{csp}_token_exp"] > Time.now
+    render(Page::Invitations::InvitationLoginComponent.new(@invitation)) unless valid_tokens
   end
 
   def block_test_utilities

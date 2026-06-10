@@ -1,13 +1,32 @@
 <%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::AO_STEPS, 1)) if @invitation.authorized_official? %>
 <%= render(Core::Navigation::StepIndicatorComponent.new(Invitation::CD_STEPS, 1)) if @invitation.credential_delegate? %>
 <div>
-  <p>You'll need to verify your identity before accessing this organization.  You can choose from any of the supported government-approved identity verification services, including Login.gov, ID.me, and CLEAR. <br><br> Info to have ready:
+  <p>You'll need to verify your identity before accessing this organization.  You can choose from any of the supported government-approved identity verification services, including Login.gov, ID.me, and CLEAR. <br><br> Info to have ready:</p>
     <ul>
       <% @musts.each do |must| %>
       <li class="margin-top-2"><%= must %></li>
       <% end %>
     </ul>
   </p>
-    <%= button_to 'Verify my identity', login_organization_invitation_url(@invitation.provider_organization, @invitation), class: 'usa-button margin-bottom-1 margin-top-2', data: { turbo: false } %>
+  <div class="grid-row margin-x-neg-205">
+    <div class="grid-col-12 mobile-lg:grid-col-10 tablet:grid-col-8 desktop:grid-col-6 padding-x-205 margin-bottom-3">
+      <div class="padding-y-3">
+        <h2 class="font-body-sm">Choose one of the following</h2>
+        </p>
+        <%
+          csps = [
+            { id: :clear, logo_class: 'clear-login-button__logo', text: 'Verify with CLEAR', verify_path: login_organization_invitation_url(@invitation.provider_organization, @invitation, provider: :clear) },
+            { id: :id_me, logo_class: 'idme-login-button__logo', text: 'Verify with ID.me', verify_path: login_organization_invitation_url(@invitation.provider_organization, @invitation, provider: :id_me) },
+            { id: :login_dot_gov, logo_class: 'lg-login-button__logo', text: 'Verify with Login.gov', verify_path: login_organization_invitation_url(@invitation.provider_organization, @invitation, provider: :login_dot_gov) },
+          ]
+        %>
+        <% csps.each do |csp| %>
+          <%= button_to csp[:verify_path], class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
+            <span class="<%= csp[:logo_class] %>"><%= csp[:text] %></span>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
   <div><%= link_to 'How to verify your identity', 'https://login.gov/help/verify-your-identity/how-to-verify-your-identity/', target: :_blank %> <%= link_to 'Login.gov FAQ', 'https://www.login.gov/help/', target: :_blank, class: 'margin-left-2' %></div>
 </div>
