@@ -354,7 +354,7 @@ GEM
     omniauth_openid_connect (0.8.0)
       omniauth (>= 1.9, < 3)
       openid_connect (~> 2.2)
-    openid_connect (2.3.1)
+    openid_connect (2.3.0)
       activemodel
       attr_required (>= 1.0.0)
       email_validator
@@ -394,7 +394,7 @@ GEM
     raabro (1.4.0)
     racc (1.8.1)
     rack (3.2.6)
-    rack-oauth2 (2.3.0)
+    rack-oauth2 (2.2.1)
       activesupport
       attr_required
       faraday (~> 2.0)
