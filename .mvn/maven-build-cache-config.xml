@@ -13,8 +13,10 @@
                 <exclude>pom.xml</exclude>
             </excludes>
 
-            <!-- Changes to the entrypoint script should trigger creating a new docker image -->
-            <glob>**/entrypoint.sh</glob>
+            <includes>
+                <include>src/</include>
+                <include>docker/</include>
+            </includes>
         </global>
     </input>
     <executionControl>
