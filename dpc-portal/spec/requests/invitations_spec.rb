@@ -277,6 +277,7 @@ RSpec.describe 'Invitations', type: :request do
             ['AO PII Check Fail',
              { actionContext: LoggingConstants::ActionContext::Registration,
                actionType: LoggingConstants::ActionType::FailAoPiiCheck,
+               csp: 'login_dot_gov',
                invitation: invitation.id }]
           )
           stub_user_info(overrides: { 'email' => 'another@example.com' })
@@ -342,6 +343,7 @@ RSpec.describe 'Invitations', type: :request do
             .with(['Authorized official has a waiver',
                    { actionContext: LoggingConstants::ActionContext::Registration,
                      actionType: LoggingConstants::ActionType::AoHasWaiver,
+                     csp: 'login_dot_gov',
                      invitation: invitation.id }])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
         end
@@ -358,6 +360,7 @@ RSpec.describe 'Invitations', type: :request do
             .with(['Organization has a waiver',
                    { actionContext: LoggingConstants::ActionContext::Registration,
                      actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                     csp: 'login_dot_gov',
                      invitation: invitation.id }])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
         end
@@ -403,6 +406,7 @@ RSpec.describe 'Invitations', type: :request do
           expect(Rails.logger).to receive(:info).with(['AO Check Fail',
                                                        { actionContext: LoggingConstants::ActionContext::Registration,
                                                          actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
+                                                         csp: 'login_dot_gov',
                                                          verificationReason: 'user_not_authorized_official',
                                                          invitation: invitation.id }])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
@@ -510,6 +514,7 @@ RSpec.describe 'Invitations', type: :request do
               'Approved access authorization occurred for the Credential Delegate',
               { actionContext: LoggingConstants::ActionContext::Registration,
                 actionType: LoggingConstants::ActionType::CdConfirmed,
+                csp: 'login_dot_gov',
                 invitation: cd_invite.id }
             ]
             expect(Rails.logger).to receive(:info).with(approved_access_log_message)
@@ -529,6 +534,7 @@ RSpec.describe 'Invitations', type: :request do
               ['CD PII Check Fail',
                { actionContext: LoggingConstants::ActionContext::Registration,
                  actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                 csp: 'login_dot_gov',
                  invitation: cd_invite.id }]
             )
             stub_user_info(overrides: { 'email' => 'another@example.com' })
@@ -544,6 +550,7 @@ RSpec.describe 'Invitations', type: :request do
               ['CD PII Check Fail',
                { actionContext: LoggingConstants::ActionContext::Registration,
                  actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                 csp: 'login_dot_gov',
                  invitation: cd_invite.id }]
             )
             stub_user_info(overrides: { 'family_name' => 'Something Else' })
@@ -611,11 +618,13 @@ RSpec.describe 'Invitations', type: :request do
             expect(Rails.logger).to receive(:info).with(['Authorized Official linked to organization',
                                                          { actionContext: LoggingConstants::ActionContext::Registration,
                                                            actionType: LoggingConstants::ActionType::AoLinkedToOrg,
+                                                           csp: 'login_dot_gov',
                                                            invitation: invitation.id }])
           else
             expect(Rails.logger).to receive(:info).with(['Credential Delegate linked to organization',
                                                          { actionContext: LoggingConstants::ActionContext::Registration,
                                                            actionType: LoggingConstants::ActionType::CdLinkedToOrg,
+                                                           csp: 'login_dot_gov',
                                                            invitation: invitation.id }])
           end
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
@@ -626,6 +635,7 @@ RSpec.describe 'Invitations', type: :request do
           expect(Rails.logger).to receive(:info).with(['User logged in',
                                                        { actionContext: LoggingConstants::ActionContext::Registration,
                                                          actionType: LoggingConstants::ActionType::UserLoggedIn,
+                                                         csp: 'login_dot_gov',
                                                          invitation: invitation.id }])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
         end
@@ -651,11 +661,13 @@ RSpec.describe 'Invitations', type: :request do
             expect(Rails.logger).to receive(:info).with(['Authorized Official user created,',
                                                          { actionContext: LoggingConstants::ActionContext::Registration,
                                                            actionType: LoggingConstants::ActionType::AoCreated,
+                                                           csp: 'login_dot_gov',
                                                            invitation: invitation.id }])
           else
             expect(Rails.logger).to receive(:info).with(['Credential Delegate user created,',
                                                          { actionContext: LoggingConstants::ActionContext::Registration,
                                                            actionType: LoggingConstants::ActionType::CdCreated,
+                                                           csp: 'login_dot_gov',
                                                            invitation: invitation.id }])
           end
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"

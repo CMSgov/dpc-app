@@ -66,7 +66,8 @@ class LoginDotGovController < ApplicationController
   def handle_invitation_flow_failure(invitation_id)
     Rails.logger.info(['Failed invitation flow',
                        { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::FailedLogin }])
+                         actionType: LoggingConstants::ActionType::FailedLogin,
+                         **csp_log_context }])
     invitation = Invitation.find(invitation_id)
     if invitation.credential_delegate?
       render(Page::Utility::ErrorComponent.new(invitation, 'fail_to_proof'), status: :forbidden)
