@@ -28,10 +28,10 @@ echo "│  Running DPC Portal Unit Tests │"
 echo "│                                │"
 echo "└────────────────────────-----───┘"
 
-#docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rubocop" dpc_portal
+docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rubocop" dpc_portal
 docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "rails assets:clobber tmp:clear" dpc_portal
-#docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rspec" dpc_portal
-#docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint docker/system-tests.sh dpc_portal
+docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rspec" dpc_portal
+docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint docker/system-tests.sh dpc_portal
 echo "┌────────────────────────────────┐"
 echo "│                                │"
 echo "│      Portal Tests Complete     │"
