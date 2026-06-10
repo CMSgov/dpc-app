@@ -86,7 +86,7 @@ class FakeCpiGateway < Sinatra::Base
         }
       }.to_json
     else
-      ao_ssns = %w[900111111 900666666 900777777 900888888 666222222]
+      ao_ssns = %w[900111111 900666666 900777777 900888888 666222222 111887777]
       roles = ao_ssns.map { |ssn| { pacId: ssn, roleCode: '10', ssn: } }
       roles << { pacId: 'validPacId', roleCode: '10', ssn: '900428421' }
       provider = {

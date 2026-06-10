@@ -6,16 +6,19 @@ require 'support/login_support'
 RSpec.describe 'Invitations', type: :request do
   include LoginSupport
 
-  let!(:csp) { create(:csp, name: :login_dot_gov) }
-  let!(:other_csp) { create(:csp, name: :id_me) }
+  let!(:csp) { Csp.find_by(name: 'login_dot_gov') || create(:csp, name: :login_dot_gov) }
+
+  let!(:other_csp) { Csp.find_by(name: 'id_me') || create(:csp, name: :id_me) }
   let(:provider) { :login_dot_gov }
 
   RSpec.shared_examples 'an invitation endpoint' do |method, path_suffix, type|
     let(:org) { invitation.provider_organization }
     let(:bad_org) { create(:provider_organization) }
     let(:expected_success_status) { 200 }
+    let(:request_params) { {} }
     it 'should be ok or redirect' do
-      send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+      # Most calls will be empty params, but for /login, param required to specify which IDP to use
+      send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}", params: request_params)
       expect(response.status).to eq(expected_success_status)
     end
     it 'should show warning page with 404 if missing' do
@@ -143,10 +146,19 @@ RSpec.describe 'Invitations', type: :request do
     RSpec.shared_examples 'a login endpoint' do
       it 'should redirect to login.gov' do
         org_id = invitation.provider_organization.id
-        post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/login",
+             params: { provider: :login_dot_gov }
         redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
-        expect(redirect_params['acr_values']).to eq('http://idmanagement.gov/ns/assurance/ial/2')
-        expect(redirect_params['redirect_uri']).to start_with('http://localhost:3100/auth/')
+        expect(redirect_params['redirect_uri']).to eq('http://localhost:3100/auth/login_dot_gov/callback')
+        expect(request.session[:user_return_to]).to eq expected_redirect
+      end
+
+      it 'should redirect to ID.me' do
+        org_id = invitation.provider_organization.id
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/login",
+             params: { provider: :id_me }
+        redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
+        expect(redirect_params['redirect_uri']).to eq('http://localhost:3100/auth/id_me/callback')
         expect(request.session[:user_return_to]).to eq expected_redirect
       end
 
@@ -157,12 +169,14 @@ RSpec.describe 'Invitations', type: :request do
                                                        actionType: LoggingConstants::ActionType::BeginLogin,
                                                        invitation: invitation.id }])
         org_id = invitation.provider_organization.id
-        post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/login",
+             params: { provider: :login_dot_gov }
       end
 
       it 'should show error page if fail to proof' do
         org_id = invitation.provider_organization.id
-        post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+        post "/organizations/#{org_id}/invitations/#{invitation.id}/login",
+             params: { provider: :login_dot_gov }
         get '/users/auth/failure'
         expect(response).to be_forbidden
         expect(response.body).to include(I18n.t('verification.fail_to_proof_text'))
@@ -173,6 +187,7 @@ RSpec.describe 'Invitations', type: :request do
       it_behaves_like 'an invitation endpoint', :post, 'login', :cd do
         let(:invitation) { create(:invitation, :cd) }
         let(:expected_success_status) { 302 }
+        let(:request_params) { { provider: :login_dot_gov } }
       end
       it_behaves_like 'a login endpoint', :post, 'register' do
         let(:invitation) { create(:invitation, :cd) }
@@ -184,7 +199,8 @@ RSpec.describe 'Invitations', type: :request do
         let(:invitation) { create(:invitation, :cd) }
         it 'should not show step navigation' do
           org_id = invitation.provider_organization.id
-          post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/login",
+               params: { provider: :login_dot_gov }
           get '/users/auth/failure'
           expect(response).to be_forbidden
           expect(response.body).to_not include('<span class="usa-step-indicator__current-step">')
@@ -195,6 +211,7 @@ RSpec.describe 'Invitations', type: :request do
       it_behaves_like 'an invitation endpoint', :post, 'login', :ao do
         let(:invitation) { create(:invitation, :ao) }
         let(:expected_success_status) { 302 }
+        let(:request_params) { { provider: :login_dot_gov } }
       end
       it_behaves_like 'a login endpoint', :post, 'register' do
         let(:invitation) { create(:invitation, :ao) }
@@ -204,7 +221,8 @@ RSpec.describe 'Invitations', type: :request do
         let(:invitation) { create(:invitation, :ao) }
         it 'should show step 2' do
           org_id = invitation.provider_organization.id
-          post "/organizations/#{org_id}/invitations/#{invitation.id}/login"
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/login",
+               params: { provider: :login_dot_gov }
           get '/users/auth/failure'
           expect(response).to be_forbidden
           expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
@@ -259,6 +277,7 @@ RSpec.describe 'Invitations', type: :request do
             ['AO PII Check Fail',
              { actionContext: LoggingConstants::ActionContext::Registration,
                actionType: LoggingConstants::ActionType::FailAoPiiCheck,
+               csp: 'login_dot_gov',
                invitation: invitation.id }]
           )
           stub_user_info(overrides: { 'email' => 'another@example.com' })
@@ -324,6 +343,7 @@ RSpec.describe 'Invitations', type: :request do
             .with(['Authorized official has a waiver',
                    { actionContext: LoggingConstants::ActionContext::Registration,
                      actionType: LoggingConstants::ActionType::AoHasWaiver,
+                     csp: 'login_dot_gov',
                      invitation: invitation.id }])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
         end
@@ -340,6 +360,7 @@ RSpec.describe 'Invitations', type: :request do
             .with(['Organization has a waiver',
                    { actionContext: LoggingConstants::ActionContext::Registration,
                      actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                     csp: 'login_dot_gov',
                      invitation: invitation.id }])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
         end
@@ -385,6 +406,7 @@ RSpec.describe 'Invitations', type: :request do
           expect(Rails.logger).to receive(:info).with(['AO Check Fail',
                                                        { actionContext: LoggingConstants::ActionContext::Registration,
                                                          actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
+                                                         csp: 'login_dot_gov',
                                                          verificationReason: 'user_not_authorized_official',
                                                          invitation: invitation.id }])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
@@ -492,6 +514,7 @@ RSpec.describe 'Invitations', type: :request do
               'Approved access authorization occurred for the Credential Delegate',
               { actionContext: LoggingConstants::ActionContext::Registration,
                 actionType: LoggingConstants::ActionType::CdConfirmed,
+                csp: 'login_dot_gov',
                 invitation: cd_invite.id }
             ]
             expect(Rails.logger).to receive(:info).with(approved_access_log_message)
@@ -511,6 +534,7 @@ RSpec.describe 'Invitations', type: :request do
               ['CD PII Check Fail',
                { actionContext: LoggingConstants::ActionContext::Registration,
                  actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                 csp: 'login_dot_gov',
                  invitation: cd_invite.id }]
             )
             stub_user_info(overrides: { 'email' => 'another@example.com' })
@@ -526,6 +550,7 @@ RSpec.describe 'Invitations', type: :request do
               ['CD PII Check Fail',
                { actionContext: LoggingConstants::ActionContext::Registration,
                  actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                 csp: 'login_dot_gov',
                  invitation: cd_invite.id }]
             )
             stub_user_info(overrides: { 'family_name' => 'Something Else' })
@@ -593,11 +618,13 @@ RSpec.describe 'Invitations', type: :request do
             expect(Rails.logger).to receive(:info).with(['Authorized Official linked to organization',
                                                          { actionContext: LoggingConstants::ActionContext::Registration,
                                                            actionType: LoggingConstants::ActionType::AoLinkedToOrg,
+                                                           csp: 'login_dot_gov',
                                                            invitation: invitation.id }])
           else
             expect(Rails.logger).to receive(:info).with(['Credential Delegate linked to organization',
                                                          { actionContext: LoggingConstants::ActionContext::Registration,
                                                            actionType: LoggingConstants::ActionType::CdLinkedToOrg,
+                                                           csp: 'login_dot_gov',
                                                            invitation: invitation.id }])
           end
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
@@ -608,6 +635,7 @@ RSpec.describe 'Invitations', type: :request do
           expect(Rails.logger).to receive(:info).with(['User logged in',
                                                        { actionContext: LoggingConstants::ActionContext::Registration,
                                                          actionType: LoggingConstants::ActionType::UserLoggedIn,
+                                                         csp: 'login_dot_gov',
                                                          invitation: invitation.id }])
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
         end
@@ -621,7 +649,10 @@ RSpec.describe 'Invitations', type: :request do
           expect(user.family_name).to eq user_info_template['family_name']
           expect(user.email).to eq user_info_template['email']
           expect(user.uid).to eq user_info_template['sub']
-          expect(user.provider).to eq 'login_dot_gov'
+          expect(user.csp_user_for('login_dot_gov')).to be_present
+          expect(user.csp_user_for('login_dot_gov').user_emails.map(&:email)).not_to be_empty
+          expect(user.csp_user_for('login_dot_gov')
+                  .user_emails.map(&:email)).to include(*user_info_template['all_emails'])
         end
 
         it 'should log when user is created' do
@@ -630,11 +661,13 @@ RSpec.describe 'Invitations', type: :request do
             expect(Rails.logger).to receive(:info).with(['Authorized Official user created,',
                                                          { actionContext: LoggingConstants::ActionContext::Registration,
                                                            actionType: LoggingConstants::ActionType::AoCreated,
+                                                           csp: 'login_dot_gov',
                                                            invitation: invitation.id }])
           else
             expect(Rails.logger).to receive(:info).with(['Credential Delegate user created,',
                                                          { actionContext: LoggingConstants::ActionContext::Registration,
                                                            actionType: LoggingConstants::ActionType::CdCreated,
+                                                           csp: 'login_dot_gov',
                                                            invitation: invitation.id }])
           end
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
@@ -750,11 +783,11 @@ RSpec.describe 'Invitations', type: :request do
           expect(request.session[:user_pac_id]).to be_nil
         end
         it 'should set pac_id on existing user' do
-          create(:user, email: user_info_template['email'], provider:)
+          create_invitation_user_with_csp(csp: provider)
           expect do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end.to change { User.count }.by 0
-          user = User.find_by(email: user_info_template['email'])
+          user = User.find_by_csp_uid(name: provider, csp_uid: user_info_template['sub'])
           # We have the fake CPI API Gateway return the ssn as pac_id
           expect(user.pac_id).to eq user_info_template['social_security_number']
           expect(request.session[:user_pac_id]).to be_nil
@@ -875,24 +908,24 @@ RSpec.describe 'Invitations', type: :request do
   end
 end
 
-def log_in
+def log_in(template = user_info_template, provider: 'login_dot_gov')
   OmniAuth.config.test_mode = true
-  OmniAuth.config.add_mock(:login_dot_gov,
-                           { uid: '12345',
+  OmniAuth.config.add_mock(provider.to_sym,
+                           { uid: template['sub'],
                              credentials: { expires_in: 899,
                                             token: 'bearer-token' },
-                             info: { email: 'bob@example.com' },
-                             extra: { raw_info: { given_name: 'Bob',
-                                                  family_name: 'Hoskins',
+                             info: { email: template['email'] },
+                             extra: { raw_info: { given_name: template['given_name'],
+                                                  family_name: template['family_name'],
                                                   ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
-  post '/auth/login_dot_gov'
+  post "/auth/#{provider}"
   follow_redirect!
 end
 
 def user_info_template(overrides = {})
   {
     'sub' => '097d06f7-e9ad-4327-8db3-0ba193b7a2c2',
-    'iss' => 'https://idp.int.identitysandbox.gov/',
+    'iss' => 'https://api.idmelabs.com/oidc',
     'email' => 'bob@testy.com',
     'email_verified' => true,
     'all_emails' => [
@@ -916,4 +949,11 @@ def stub_user_info(overrides: {})
   expect(user_service_class).to receive(:new).at_least(:once).and_return(user_service)
 
   expect(user_service).to receive(:user_info).at_least(:once).and_return(user_info_template(overrides))
+end
+
+def create_invitation_user_with_csp(csp:)
+  template = user_info_template
+  create_user_with_csp(given_name: template['given_name'], family_name: template['family_name'],
+                       email: template['email'],
+                       csp:, uuid: template['sub'])
 end

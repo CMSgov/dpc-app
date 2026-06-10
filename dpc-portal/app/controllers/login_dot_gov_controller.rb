@@ -5,19 +5,20 @@
 # check, so I disabled the class length check.  When we create controllers for the other CSPs we can pull
 # out common code and turn the check back on.
 
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable Metrics/ClassLength, Metrics/AbcSize
 class LoginDotGovController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: :openid_connect
+  skip_before_action :verify_authenticity_token, only: :id_me
 
-  def openid_connect
+  def id_me
     auth = request.env['omniauth.auth']
-    return unless (csp = csp())
+    return unless (csp = csp(auth.provider))
 
     csp_user = CspUser.find_by(uuid: auth.uid, csp:)
 
     user = csp_user&.user
-    sign_in_and_log(user)
+    sign_in_and_log(user, csp: csp.name)
     post_signin_actions(user, csp_user, auth)
+    ial_2_actions(user, auth)
     redirect_to path(user, auth)
   end
 
@@ -46,15 +47,15 @@ class LoginDotGovController < ApplicationController
       session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id, invitation.id)
     end
 
-    redirect_to url_for_login_dot_gov_logout, allow_other_host: true
+    redirect_to url_for_logout(session[:csp]), allow_other_host: true
   end
 
   private
 
-  def sign_in_and_log(user)
+  def sign_in_and_log(user, csp: 'login_dot_gov')
     return unless user
 
-    sign_in(user)
+    sign_in(user, csp: csp)
     session[:logged_in_at] = Time.now
     cookies.permanent[:last_used_csp] = :login_dot_gov
     Rails.logger.info(['User logged in',
@@ -65,7 +66,8 @@ class LoginDotGovController < ApplicationController
   def handle_invitation_flow_failure(invitation_id)
     Rails.logger.info(['Failed invitation flow',
                        { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::FailedLogin }])
+                         actionType: LoggingConstants::ActionType::FailedLogin,
+                         **csp_log_context }])
     invitation = Invitation.find(invitation_id)
     if invitation.credential_delegate?
       render(Page::Utility::ErrorComponent.new(invitation, 'fail_to_proof'), status: :forbidden)
@@ -126,17 +128,18 @@ class LoginDotGovController < ApplicationController
   end
 
   def ial_2_actions(user, auth)
+    return if ial_1_user?(auth)
+
     data = auth.extra.raw_info
-
-    return unless data.ial == 'http://idmanagement.gov/ns/assurance/ial/2'
-
     maybe_update_user(user, data)
-    session[:login_dot_gov_token] = auth.credentials.token
-    session[:login_dot_gov_token_exp] = auth.credentials.expires_in.seconds.from_now
+    session[:csp] = auth.provider
+    session["#{auth.provider}_token"] = auth.credentials.token
+    session["#{auth.provider}_token_exp"] = auth.credentials.expires_in.seconds.from_now
   end
 
   def path(user, auth)
-    if user.blank? && auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
+    if user.blank? && ial_1_user?(auth)
+
       Rails.logger.info(['User logged in without account',
                          { actionContext: LoggingConstants::ActionContext::Authentication,
                            actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }])
@@ -145,8 +148,8 @@ class LoginDotGovController < ApplicationController
     session.delete(:user_return_to) || organizations_path
   end
 
-  def csp
-    csp = Csp.active.find_by(name: :login_dot_gov)
+  def csp(name)
+    csp = Csp.active.find_by(name:)
     return csp if csp
 
     Rails.logger.info(['User attempted to login with Login.gov but no active CSP found',
@@ -168,5 +171,14 @@ class LoginDotGovController < ApplicationController
   def all_emails(auth)
     auth.extra.raw_info.all_emails
   end
+
+  def ial_1_user?(auth)
+    data = auth.extra.raw_info
+    case auth.provider.to_sym
+    when :login_dot_gov then data.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
+    when :id_me         then data.identity_assurance_level == 1
+    else false
+    end
+  end
 end
-# rubocop:enable Metrics/ClassLength
+# rubocop:enable Metrics/ClassLength, Metrics/AbcSize

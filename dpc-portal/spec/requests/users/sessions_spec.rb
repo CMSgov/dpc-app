@@ -8,9 +8,10 @@ RSpec.describe 'Sessions', type: :request do
 
   describe 'logout' do
     context 'logged in' do
-      let!(:user) { create(:user) }
+      let(:uuid) { SecureRandom.uuid }
+      let!(:user) { create_user_with_csp(csp: :login_dot_gov) }
       before do
-        sign_in user
+        sign_in user, csp: :login_dot_gov
       end
       it 'should prevent access' do
         delete '/users/sign_out'
@@ -31,7 +32,7 @@ RSpec.describe 'Sessions', type: :request do
 
       it 'should redirect to login.gov' do
         delete '/users/sign_out'
-        expect(response.location).to include(ENV.fetch('IDP_HOST'))
+        expect(response.location).to include(ENV.fetch('IDP_LOGIN_DOT_GOV_HOST'))
       end
     end
 

@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
 # Parent class of all controllers
-class ApplicationController < ActionController::Base
-  IDP_HOST = ENV.fetch('IDP_HOST')
-  IDP_CLIENT_ID = "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV.fetch('ENV')}".freeze
-
+class ApplicationController < ActionController::Base # rubocop:disable Metrics/ClassLength
   before_action :check_session_length
   before_action :set_current_request_attributes
   before_action :no_store
@@ -27,8 +24,9 @@ class ApplicationController < ActionController::Base
     redirect_to sign_in_path
   end
 
-  def sign_in(user)
+  def sign_in(user, csp: 'login_dot_gov')
     session['user'] = user.id
+    session[:csp] = csp.to_s
   end
 
   private
@@ -50,15 +48,36 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def url_for_logout(csp)
+    case csp.to_s
+    when :id_me.to_s
+      url_for_id_me_logout
+    when :login_dot_gov.to_s
+      url_for_login_dot_gov_logout
+    else
+      raise UnknownCSPError, csp
+    end
+  end
+
   # Documentation at https://developers.login.gov/oidc/logout/
   def url_for_login_dot_gov_logout
     state = SecureRandom.hex(16)
     session['omniauth.state'] = state
-    URI::HTTPS.build(host: IDP_HOST,
-                     path: '/openid_connect/logout',
-                     query: { client_id: IDP_CLIENT_ID,
+    csp_config = CspConfig.for(:login_dot_gov)
+    URI::HTTPS.build(host: csp_config.host,
+                     path: csp_config.log_out_path,
+                     query: { client_id: csp_config.identifier,
                               post_logout_redirect_uri: "#{root_url}auth/logged_out",
                               state: }.to_query)
+  end
+
+  def url_for_id_me_logout
+    state = SecureRandom.hex(16)
+    session['omniauth.state'] = state
+    URI::HTTPS.build(host: CspConfig.for(:id_me).host,
+                     path: CspConfig.for(:id_me).log_out_path,
+                     query: { client_id: CspConfig.for(:id_me).identifier,
+                              redirect_uri: "#{root_url}auth/logged_out" }.to_query)
   end
 
   # rubocop:disable Metrics/AbcSize
@@ -131,5 +150,19 @@ class ApplicationController < ActionController::Base
     return if log.save
 
     logger.error(['CredentialAuditLog failure', { action:, credential_type:, dpc_api_credential_id: }])
+  end
+
+  # Helper method for logging csp with actionContext and actionType whenever it's available on the session
+  def csp_log_context
+    return {} if session[:csp].blank?
+
+    { csp: session[:csp] }
+  end
+end
+
+# Error class to handle unknow CSP
+class UnknownCSPError < StandardError # rubocop:disable Style/OneClassPerFile
+  def initialize(provider)
+    super("Unknown CSP: #{provider}")
   end
 end
