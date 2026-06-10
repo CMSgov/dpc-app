@@ -58,14 +58,15 @@ CMDLINE="java ${CONF_FLAGS} ${DEBUG_FLAGS} ${JACOCO} ${DD_AGENT} ${JAVA_CLASSES}
 
 # Make sure volumes in our persisted environments are writeable by nobody
 echo "before!"
-ls -l /tmp
-ls -l /tmp/ddprof_nobody
+ls -ld /tmp
+ls -ld /tmp/ddprof_nobody
 if [ -d "/app/data" ]; then chown nobody:nobody /app/data; fi
 if [ -d "/config" ]; then chown nobody:nobody /config; fi
+if [ -d "/tmp" ]; then chown nobody:nobody /tmp; fi
 if [ -d "/tmp/ddprof_nobody" ]; then chown nobody:nobody /tmp/ddprof_nobody; fi
 echo "after!"
-ls -l /tmp
-ls -l /tmp/ddprof_nobody
+ls -ld /tmp
+ls -ld /tmp/ddprof_nobody
 
 echo "Running server via entrypoint as nobody user!"
 # Note: -E preserves "most" env variables, but not all.  Ones deemed sensitive, like ENV need to be passed explicitly.
