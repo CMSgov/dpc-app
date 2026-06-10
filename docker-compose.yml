@@ -49,7 +49,7 @@ services:
       - JACOCO=${REPORT_COVERAGE:-}
       - DEBUG_MODE=${DEBUG_MODE:-false}
       - DD_AGENT_HOST=datadog-agent
-      - DD_SERVICE=dpc-aggregation
+      - DD_SERVICE=dpc-local-aggregation
       - DD_ENV=local-dev
       - DD_VERSION=0.4.0-SNAPSHOT
       - DD_PROFILING_ENABLED=true
@@ -85,7 +85,7 @@ services:
       - JACOCO=${REPORT_COVERAGE:-}
       - DEBUG_MODE=${DEBUG_MODE:-false}
       - DD_AGENT_HOST=datadog-agent
-      - DD_SERVICE=dpc-attribution
+      - DD_SERVICE=dpc-local-attribution
       - DD_ENV=local-dev
       - DD_VERSION=0.4.0-SNAPSHOT
       - DD_PROFILING_ENABLED=true
@@ -119,7 +119,7 @@ services:
       - DEBUG_MODE=${DEBUG_MODE:-false}
       - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
       - DD_AGENT_HOST=datadog-agent
-      - DD_SERVICE=dpc-api
+      - DD_SERVICE=dpc-local-api
       - DD_ENV=local-dev
       - DD_VERSION=0.4.0-SNAPSHOT
       - DD_PROFILING_ENABLED=true
