@@ -60,45 +60,45 @@ jobs:
           echo $DOCKER_TAG
           echo "docker_tag=$DOCKER_TAG" >> $GITHUB_OUTPUT
 
-#  docker_build_rails_apps:
-#    needs: set-parameters
-#    permissions:
-#      contents: read
-#      id-token: write
-#    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
-#    strategy:
-#      matrix:
-#        app_dir: [ dpc-portal, dpc-admin, dpc-web ]
-#        include:
-#          - app_dir: dpc-portal
-#            ecr_repository: web-portal
-#            make_command: make ci-portal
-#          - app_dir: dpc-admin
-#            ecr_repository: web-admin
-#            make_command: make ci-admin-portal
-#          - app_dir: dpc-web
-#            ecr_repository: web
-#            make_command: make ci-web-portal
-#    steps:
-#      - name: Assert Ownership
-#        run: sudo chmod -R 777 .
-#      - name: "Checkout code"
-#        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
-#      - name: Cleanup Runner
-#        run: ./scripts/cleanup-docker.sh
-#      - name: wget amazon pem bundle
-#        run: |
-#          wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -O ${{ matrix.app_dir }}/config/bundle.pem
-#      - name: Build specified app
-#        run: ${{ matrix.make_command }}
-#      - name: gzip the image
-#        run: docker save dpc-${{ matrix.ecr_repository }}:latest | gzip > ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
-#      - name: upload tar artifact
-#        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-#        with:
-#          name: dpc-${{ matrix.ecr_repository }}
-#          path: ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
-#          retention-days: 1
+  docker_build_rails_apps:
+    needs: set-parameters
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
+    strategy:
+      matrix:
+        app_dir: [ dpc-portal, dpc-admin, dpc-web ]
+        include:
+          - app_dir: dpc-portal
+            ecr_repository: web-portal
+            make_command: make ci-portal
+          - app_dir: dpc-admin
+            ecr_repository: web-admin
+            make_command: make ci-admin-portal
+          - app_dir: dpc-web
+            ecr_repository: web
+            make_command: make ci-web-portal
+    steps:
+      - name: Assert Ownership
+        run: sudo chmod -R 777 .
+      - name: "Checkout code"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
+      - name: Cleanup Runner
+        run: ./scripts/cleanup-docker.sh
+      - name: wget amazon pem bundle
+        run: |
+          wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -O ${{ matrix.app_dir }}/config/bundle.pem
+      - name: Build specified app
+        run: ${{ matrix.make_command }}
+      - name: gzip the image
+        run: docker save dpc-${{ matrix.ecr_repository }}:latest | gzip > ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
+      - name: upload tar artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dpc-${{ matrix.ecr_repository }}
+          path: ${{ runner.temp }}/dpc_${{ matrix.ecr_repository }}_latest.tar.gz
+          retention-days: 1
 
   docker_build_java: # builds dpc-api, dpc-attribution, and dpc-aggregation
     needs: set-parameters
@@ -161,12 +161,10 @@ jobs:
     runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
     strategy:
       matrix:
-        #ecr_repository: [ web-portal, web-admin, web, api, attribution, aggregation ]
-        ecr_repository: [ api, attribution, aggregation ]
+        ecr_repository: [ web-portal, web-admin, web, api, attribution, aggregation ]
     env:
       ECR_REPOSITORY: ${{ matrix.ecr_repository }}
-    #needs: [ docker_build_rails_apps, docker_build_java, set-parameters ]
-    needs: [ docker_build_java, set-parameters ]
+    needs: [ docker_build_rails_apps, docker_build_java, set-parameters ]
     steps:
       - name: Download artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
