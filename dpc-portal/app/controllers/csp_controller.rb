@@ -14,7 +14,7 @@ class CspController < ApplicationController
   end
 
   def no_account
-    render(Page::Utility::ErrorComponent.new(nil, 'no_account', csp: session[:csp]), status: :forbidden)
+    render(Page::Utility::ErrorComponent.new(nil, 'no_account'), status: :forbidden)
   end
 
   def failure
@@ -107,7 +107,7 @@ class CspController < ApplicationController
     Rails.logger.info(["User attempted to login with #{display_name} but no active CSP found",
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::InvalidCsp }])
-    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp: name.to_sym))
+    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail'))
     nil
   end
 

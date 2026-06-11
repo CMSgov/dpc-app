@@ -131,11 +131,11 @@ class InvitationsController < ApplicationController
   def render_bad_invitation?(user_info)
     if @invitation.credential_delegate? && !@invitation.cd_match?(user_info)
       log_pii_mismatch
-      render(Page::Utility::ErrorComponent.new(@invitation, 'pii_mismatch', csp: session[:csp]),
+      render(Page::Utility::ErrorComponent.new(@invitation, 'pii_mismatch'),
              status: :forbidden)
     elsif !@invitation.email_match?(user_info)
       log_pii_mismatch
-      render(Page::Utility::ErrorComponent.new(@invitation, 'email_mismatch', csp: session[:csp]),
+      render(Page::Utility::ErrorComponent.new(@invitation, 'email_mismatch'),
              status: :forbidden)
     end
   end
