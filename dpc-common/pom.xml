@@ -41,10 +41,6 @@
             <artifactId>hapi-fhir-structures-dstu3</artifactId>
         </dependency>
         <dependency>
-            <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>org.hl7.fhir.dstu3.support</artifactId>
-        </dependency>
-        <dependency>
             <groupId>jakarta.ws.rs</groupId>
             <artifactId>jakarta.ws.rs-api</artifactId>
         </dependency>
