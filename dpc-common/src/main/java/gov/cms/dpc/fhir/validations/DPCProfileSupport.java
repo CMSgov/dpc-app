@@ -9,7 +9,7 @@ import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.fhir.helpers.ServiceLoaderHelpers;
 import gov.cms.dpc.fhir.validations.profiles.IProfileLoader;
 import jakarta.inject.Inject;
-import org.hl7.fhir.dstu3.support.conformance.ProfileUtilities;
+import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
