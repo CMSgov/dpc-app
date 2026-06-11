@@ -18,7 +18,7 @@ class CspController < ApplicationController
   end
 
   def failure
-    csp = session[:csp]
+    csp = session[:csp] || :login_dot_gov # TODO: remove default - acw
     invitation_flow_match = session[:user_return_to]&.match(%r{/organizations/([0-9]+)/invitations/([0-9]+)})
     return handle_invitation_flow_failure(invitation_flow_match[2]) if invitation_flow_match
     return handle_signin_fail(csp) if params[:code]
@@ -72,14 +72,14 @@ class CspController < ApplicationController
 
   def handle_signin_fail(csp)
     Rails.logger.error 'CSP Configuration error'
-    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp:))
+    render(Page::Utility::ErrorComponent.new(nil, "#{csp}_signin_fail"))
   end
 
   def handle_signin_cancel(csp)
     Rails.logger.info(['User cancelled login',
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::UserCancelledLogin }])
-    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_cancel', csp:))
+    render(Page::Utility::ErrorComponent.new(nil, "#{csp}_signin_cancel"))
   end
 
   def ial_2_actions(user, auth)
