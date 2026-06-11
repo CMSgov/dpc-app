@@ -150,8 +150,17 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
   end
 
   def expect_idp(site_status: 200, metric: 1)
-    stub_request(:get, 'https://idp.int.identitysandbox.gov').to_return(status: site_status)
+    expect_id_me(site_status:, metric:)
+    expect_login_dot_gov(site_status:, metric:)
+  end
+
+  def expect_id_me(site_status: 200, metric: 1)
     stub_request(:get, 'https://api.idmelabs.com').to_return(status: site_status)
+    expect_put_metric('PortalConnectedToIdp', metric)
+  end
+
+  def expect_login_dot_gov(site_status: 200, metric: 1)
+    stub_request(:get, 'https://idp.int.identitysandbox.gov').to_return(status: site_status)
     expect_put_metric('PortalConnectedToIdp', metric)
   end
 

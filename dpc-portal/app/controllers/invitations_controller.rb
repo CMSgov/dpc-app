@@ -50,12 +50,13 @@ class InvitationsController < ApplicationController
     Rails.logger.info(['Approved access authorization occurred for the Credential Delegate',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::CdConfirmed,
-                         invitation: @invitation.id }])
+                         invitation: @invitation.id,
+                         **csp_log_context }])
     render(Page::Invitations::AcceptInvitationComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
   # Everybody
-  def register
+  def register # rubocop:disable Metrics/AbcSize
     unless session["invitation_status_#{@invitation.id}"] == 'verification_complete'
       return redirect_to organization_invitation_url(@organization, @invitation)
     end
@@ -68,12 +69,13 @@ class InvitationsController < ApplicationController
   end
 
   def login
-    csp_name = params[:provider] || 'login_dot_gov'
+    csp_name = params[:provider]
     login_session(csp_name)
     Rails.logger.info(['User began login flow',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
-                         invitation: @invitation.id }])
+                         invitation: @invitation.id,
+                         **csp_log_context}])
     csp_login_actions(csp_name)
   end
 
@@ -101,7 +103,8 @@ class InvitationsController < ApplicationController
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::UserLoggedIn,
-                         invitation: @invitation.id }])
+                         invitation: @invitation.id,
+                         **csp_log_context }])
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
@@ -109,9 +112,10 @@ class InvitationsController < ApplicationController
     csp_config = CspConfig.for(csp)
     url = URI(csp_config.authorization_endpoint)
     url.query = { client_id: csp_config.identifier,
-                  redirect_uri: "#{my_protocol_host}/auth/#{csp}/callback",
+                  redirect_uri: "#{my_protocol_host}#{csp_config.redirect_path}",
                   response_type: 'code',
-                  scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2',
+                  acr_values: csp_config.acr_values,
+                  scope: csp_config.authorize_scope,
                   nonce: @nonce,
                   state: @state }.compact.to_query
     redirect_to url, allow_other_host: true
@@ -155,7 +159,9 @@ class InvitationsController < ApplicationController
 
   def handle_user_info_service_error(error, step)
     logger.error(['User Info Service unavailable',
-                  { actionContext: LoggingConstants::ActionContext::Registration, error: error.message }])
+                  { actionContext: LoggingConstants::ActionContext::Registration,
+                    error: error.message,
+                    **csp_log_context }])
 
     if error.message == 'unauthorized'
       render(Page::Invitations::InvitationLoginComponent.new(@invitation))
@@ -196,7 +202,9 @@ class InvitationsController < ApplicationController
     end
   rescue MultiUserMatchError => e
     logger.error(['User matches too many existing users',
-                  { actionContext: LoggingConstants::ActionContext::Registration, error: e.message }])
+                  { actionContext: LoggingConstants::ActionContext::Registration,
+                    error: e.message,
+                    **csp_log_context }])
 
     render(Page::Utility::ErrorComponent.new(@invitation, 'multi_user_match'))
     nil
@@ -207,7 +215,8 @@ class InvitationsController < ApplicationController
     Rails.logger.info(['Credential Delegate linked to organization',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::CdLinkedToOrg,
-                         invitation: @invitation.id }])
+                         invitation: @invitation.id,
+                         **csp_log_context }])
     @invitation.accept!
   end
 
@@ -216,7 +225,8 @@ class InvitationsController < ApplicationController
     Rails.logger.info(['Authorized Official linked to organization',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::AoLinkedToOrg,
-                         invitation: @invitation.id }])
+                         invitation: @invitation.id,
+                         **csp_log_context }])
     @invitation.accept!
     @user.update(verification_status: 'approved')
     @organization.update(verification_status: 'approved')
@@ -265,7 +275,6 @@ class InvitationsController < ApplicationController
     user_to_create.given_name = user_info['given_name']
     user_to_create.family_name = user_info['family_name']
     user_to_create.pac_id = session.delete(:user_pac_id)
-
     user_to_create.provider = session[:csp]
     user_to_create.uid = user_info['sub']
   end
@@ -293,7 +302,8 @@ class InvitationsController < ApplicationController
     err_msg, action_type = invitation_log_data(@invitation.unacceptable_reason)
     Rails.logger.info([err_msg, { actionContext: LoggingConstants::ActionContext::Registration,
                                   actionType: action_type,
-                                  invitation: @invitation.id }])
+                                  invitation: @invitation.id,
+                                  **csp_log_context }])
 
     render(Page::Utility::ErrorComponent.new(@invitation, @invitation.unacceptable_reason),
            status: :forbidden)
@@ -342,12 +352,14 @@ class InvitationsController < ApplicationController
       Rails.logger.info(['Credential Delegate invitation flow started,',
                          { actionContext: LoggingConstants::ActionContext::Registration,
                            actionType: LoggingConstants::ActionType::CdInvitationFlowStarted,
-                           invitation: @invitation.id }])
+                           invitation: @invitation.id,
+                           **csp_log_context }])
     elsif @invitation.authorized_official?
       Rails.logger.info(['Authorized Official invitation flow started,',
                          { actionContext: LoggingConstants::ActionContext::Registration,
                            actionType: LoggingConstants::ActionType::AoInvitationFlowStarted,
-                           invitation: @invitation.id }])
+                           invitation: @invitation.id,
+                           **csp_log_context }])
     end
   end
 
@@ -355,13 +367,15 @@ class InvitationsController < ApplicationController
     if service_unavailable
       logger.error(['CPI API Gateway unavailable',
                     { actionContext: LoggingConstants::ActionContext::Registration, error: error.message,
-                      invitation: @invitation.id }])
+                      invitation: @invitation.id,
+                      **csp_log_context }])
     else
       logger.info(['AO Check Fail',
                    { actionContext: LoggingConstants::ActionContext::Registration,
                      actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
                      verificationReason: error.message,
-                     invitation: @invitation.id }])
+                     invitation: @invitation.id,
+                     **csp_log_context }])
     end
   end
 
@@ -370,12 +384,14 @@ class InvitationsController < ApplicationController
       Rails.logger.info(['Credential Delegate user created,',
                          { actionContext: LoggingConstants::ActionContext::Registration,
                            actionType: LoggingConstants::ActionType::CdCreated,
-                           invitation: @invitation.id }])
+                           invitation: @invitation.id,
+                           **csp_log_context }])
     elsif @invitation.authorized_official?
       Rails.logger.info(['Authorized Official user created,',
                          { actionContext: LoggingConstants::ActionContext::Registration,
                            actionType: LoggingConstants::ActionType::AoCreated,
-                           invitation: @invitation.id }])
+                           invitation: @invitation.id,
+                           **csp_log_context }])
     end
   end
 
@@ -384,12 +400,14 @@ class InvitationsController < ApplicationController
       Rails.logger.info(['CD PII Check Fail',
                          { actionContext: LoggingConstants::ActionContext::Registration,
                            actionType: LoggingConstants::ActionType::FailCdPiiCheck,
-                           invitation: @invitation.id }])
+                           invitation: @invitation.id,
+                           **csp_log_context }])
     else
       logger.info(['AO PII Check Fail',
                    { actionContext: LoggingConstants::ActionContext::Registration,
                      actionType: LoggingConstants::ActionType::FailAoPiiCheck,
-                     invitation: @invitation.id }])
+                     invitation: @invitation.id,
+                     **csp_log_context }])
     end
   end
 
@@ -398,14 +416,16 @@ class InvitationsController < ApplicationController
       Rails.logger.info(['Organization has a waiver',
                          { actionContext: LoggingConstants::ActionContext::Registration,
                            actionType: LoggingConstants::ActionType::OrgHasWaiver,
-                           invitation: @invitation.id }])
+                           invitation: @invitation.id,
+                           **csp_log_context }])
     end
     return unless role_and_waivers[:has_ao_waiver]
 
     Rails.logger.info(['Authorized official has a waiver',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::AoHasWaiver,
-                         invitation: @invitation.id }])
+                         invitation: @invitation.id,
+                         **csp_log_context }])
   end
 
   class MultiUserMatchError < StandardError; end
