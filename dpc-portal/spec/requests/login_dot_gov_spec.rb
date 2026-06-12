@@ -13,6 +13,7 @@ RSpec.describe 'LoginDotGov', type: :request do
           user = create(:user, email: 'bob1@example.com', provider: :login_dot_gov)
           create(:csp_user, user:, uuid:, csp:)
         end
+        # before { create(:user, uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com') }
         it 'should sign in a user' do
           post '/auth/login_dot_gov'
           follow_redirect!
