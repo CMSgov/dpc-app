@@ -1,6 +1,5 @@
 package gov.cms.dpc.aggregation.engine;
 
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -164,7 +163,7 @@ class ResourceFetcher {
         bundle.getEntry().forEach((entry) -> {
             final var resource = entry.getResource();
             if (!resource.getResourceType().getPath().equals(resourceType.getPath())) {
-                throw new DataFormatException(String.format("Unexpected resource type: got %s expected: %s", resource.getResourceType().toString(), resourceType.toString()));
+                throw new IllegalStateException(String.format("Unexpected resource type: got %s expected: %s", resource.getResourceType().toString(), resourceType.toString()));
             }
             resources.add(resource);
         });
