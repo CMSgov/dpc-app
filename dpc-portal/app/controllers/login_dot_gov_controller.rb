@@ -14,7 +14,20 @@ class LoginDotGovController < ApplicationController
     return unless (csp = csp(auth.provider))
 
     csp_user = CspUser.find_by(uuid: auth.uid, csp:)
+    user = csp_user&.user
+    sign_in_and_log(user, csp: csp.name)
+    post_signin_actions(user, csp_user, auth)
+    ial_2_actions(user, auth)
+    redirect_to path(user, auth)
+  end
 
+  def callback
+    auth = request.env['omniauth.auth']
+    return render_ial1_blocked if login_dot_gov_ial1?(auth)
+
+    return unless (csp = csp(auth.provider))
+
+    csp_user = CspUser.find_by(uuid: auth.uid, csp:)
     user = csp_user&.user
     sign_in_and_log(user, csp: csp.name)
     post_signin_actions(user, csp_user, auth)
@@ -51,6 +64,17 @@ class LoginDotGovController < ApplicationController
   end
 
   private
+
+  def login_dot_gov_ial1?(auth)
+    auth.provider.to_sym == :login_dot_gov && ial_1_user?(auth)
+  end
+
+  def render_ial1_blocked
+    Rails.logger.info(['User attempted IAL1 login with Login.gov — not permitted',
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }])
+    render(Page::Utility::ErrorComponent.new(nil, 'login_gov_signin_fail'), status: :forbidden)
+  end
 
   def sign_in_and_log(user, csp: 'login_dot_gov')
     return unless user
