@@ -14,6 +14,8 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import io.reactivex.Flowable;
 import jakarta.inject.Inject;
 import org.apache.commons.lang3.time.StopWatch;
@@ -69,8 +71,10 @@ public class JobBatchProcessor {
      * @param mbi          the current patient mbi to process
      * @return A list of batch files {@link JobQueueBatchFile}
      */
+    @WithSpan()
     public List<JobQueueBatchFile> processJobBatchPartial(UUID aggregatorID, IJobQueue queue, JobQueueBatch job, String mbi) {
         StopWatch stopWatch = StopWatch.createStarted();
+
         Optional<OutcomeReason> failReason = Optional.empty();
         Optional<Flowable<Resource>> flowable = Optional.empty();
 
@@ -81,6 +85,9 @@ public class JobBatchProcessor {
             failReason = Optional.of(OutcomeReason.INTERNAL_ERROR);
             flowable = Optional.of(Flowable.just(AggregationUtils.toOperationOutcome(failReason.get(), mbi)));
         }
+
+        // Add patientId to DataDog span
+        optPatient.ifPresent(patient -> Span.current().setAttribute("patient", patient.getIdElement().getIdPart()));
 
         // Check if the patient has opted out
         if(flowable.isEmpty()) {

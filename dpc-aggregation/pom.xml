@@ -101,17 +101,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.newrelic.agent.java</groupId>
-            <artifactId>newrelic-java</artifactId>
-            <version>${newrelic.agent.version}</version>
-            <type>${newrelic.agent.type}</type>
-        </dependency>
-        <dependency>
-            <groupId>com.newrelic.agent.java</groupId>
-            <artifactId>newrelic-api</artifactId>
-            <version>${newrelic.agent.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
@@ -134,6 +123,15 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>aws-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.datadoghq</groupId>
+            <artifactId>dd-trace-api</artifactId>
+            <version>1.38.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-instrumentation-annotations</artifactId>
         </dependency>
     </dependencies>
 
@@ -206,6 +204,10 @@
                 <artifactId>maven-dependency-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>io.github.download-maven-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
@@ -214,7 +216,10 @@
                             <path>${project.basedir}/../bbcerts</path>
                             <path>${project.basedir}/target/jacoco-agent</path>
                             <path>${project.basedir}/docker</path>
-                            <path>${project.basedir}/target/newrelic-agent</path>
+                            <path>
+                                <from>${project.build.directory}/datadog-agent</from>
+                                <into>/opt</into>
+                            </path>
                         </paths>
                         <permissions>
                             <permission>
@@ -233,6 +238,10 @@
                         <environment>
                             <DB_MIGRATION>1</DB_MIGRATION>
                         </environment>
+                        <!-- Writing to /tmp is tricky because it's read only on Fargate.  We need a volume over top of it -->
+                        <volumes>
+                            <volume>/tmp</volume>
+                        </volumes>
                         <entrypoint>/entrypoint.sh</entrypoint>
                     </container>
                 </configuration>
