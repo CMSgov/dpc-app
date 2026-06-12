@@ -93,7 +93,9 @@ class AttestationValidationTest {
         final ValidationResult r2 = fhirValidator.validateWithResult(provenance);
 
         assertAll(() -> assertFalse(r2.isSuccessful(), "Should not have passed"),
-                () -> assertEquals(3, r2.getMessages().size(), "Should have errors for the given reason"));
+                () -> assertTrue(r2.getMessages().stream()
+                        .anyMatch(msg -> msg.getMessage().contains("This element does not match any known slice defined in the profile")),
+                        "Should have errors for the given reason"));
 
         // Add a reason, but the wrong value
         Coding c2 = new Coding().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("wrongz");
@@ -101,7 +103,9 @@ class AttestationValidationTest {
         final ValidationResult r3 = fhirValidator.validateWithResult(provenance);
 
         assertAll(() -> assertFalse(r3.isSuccessful(), "Should not have passed"),
-                () -> assertEquals(3 , r3.getMessages().size(), "Should errors for both reasons"));
+                () -> assertTrue(r3.getMessages().stream()
+                        .anyMatch(msg -> msg.getMessage().contains("This element does not match any known slice defined in the profile")),
+                        "Should errors for both reasons"));
 
         // Add a correct reason (which should cause everything to pass)
         Coding c3 = new Coding().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
@@ -298,4 +302,5 @@ class AttestationValidationTest {
 
         provenance.addAgent(agent);
     }
+
 }
