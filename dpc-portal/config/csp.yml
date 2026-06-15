@@ -3,17 +3,17 @@ shared:
   scheme: 'https'
 development: &development
   login_dot_gov:
-    host: <%= ENV['IDP_LOGIN_DOT_GOV_HOST'] %>
-    identifier: '<%= "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}" %>'
-    user_info_endpoint: <%= "https://#{ENV['IDP_ID_ME_HOST']}/api/openid_connect/userinfo" %>
+    host: 'idp.int.identitysandbox.gov'
+    identifier: '<%= "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:test" %>'
+    user_info_endpoint: <%= "https://idp.int.identitysandbox.gov/api/openid_connect/userinfo" %>
     log_out_path: '/openid_connect/logout'
     token_expiration_interval: 300
     redirect_path: '/auth/login_dot_gov/callback'
     acr_values: 'http://idmanagement.gov/ns/assurance/ial/2'
     authorize_scope: 'openid email all_emails profile social_security_number'
-    authorization_endpoint: <%= "https://#{ENV['IDP_LOGIN_DOT_GOV_HOST']}/openid_connect/authorize" %>
-    token_endpoint: <%= "https://#{ENV['IDP_LOGIN_DOT_GOV_HOST']}/api/openid_connect/token" %>
-    jwks_uri: <%= "https://#{ENV['IDP_LOGIN_DOT_GOV_HOST']}/api/openid_connect/certs" %>
+    authorization_endpoint: <%= "https://idp.int.identitysandbox.gov/openid_connect/authorize" %>
+    token_endpoint: <%= "https://idp.int.identitysandbox.gov/api/openid_connect/token" %>
+    jwks_uri: <%= "https://idp.int.identitysandbox.gov/api/openid_connect/certs" %>
 
   id_me:
     host: <%= ENV['IDP_ID_ME_HOST'] %>
