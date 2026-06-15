@@ -8,7 +8,7 @@ RSpec.describe 'Sessions', type: :request do
 
   describe 'logout' do
     context 'logged in' do
-      shared_examples 'logout actions' do |provider|
+      RSpec.shared_examples 'logout actions' do |provider|
         let(:uuid) { SecureRandom.uuid }
         let!(:user) { create_user_with_csp(csp: provider) }
         before do
@@ -38,11 +38,11 @@ RSpec.describe 'Sessions', type: :request do
       end
 
       context 'using Login.gov' do
-        include_examples 'logout actions', :login_dot_gov
+        it_behaves_like 'logout actions', :login_dot_gov
       end
 
       context 'using ID.me' do
-        include_examples 'logout actions', :id_me
+        it_behaves_like 'logout actions', :id_me
       end
     end
 

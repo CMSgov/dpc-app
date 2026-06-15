@@ -569,10 +569,10 @@ RSpec.describe 'Accessibility', type: :system do
   end
 
   describe 'with id_me' do
-    include_examples 'accessibility tests', :id_me
+    it_behaves_like 'accessibility tests', :id_me
   end
 
   describe 'with login_dot_gov' do
-    include_examples 'accessibility tests', :login_dot_gov
+    it_behaves_like 'accessibility tests', :login_dot_gov
   end
 end

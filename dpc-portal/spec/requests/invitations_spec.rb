@@ -579,7 +579,7 @@ RSpec.describe 'Invitations', type: :request do
     end
 
     describe 'POST /register' do
-      shared_examples 'a register endpoint' do
+      RSpec.shared_examples 'a register endpoint' do
         let(:org) { invitation.provider_organization }
         before { log_in(provider:) }
         context :success do
@@ -918,11 +918,11 @@ RSpec.describe 'Invitations', type: :request do
   end
 
   describe 'with ID.me' do
-    include_examples 'invitations controller', :id_me
+    it_behaves_like 'invitations controller', :id_me
   end
 
   describe 'with Login.gov' do
-    include_examples 'invitations controller', :login_dot_gov
+    it_behaves_like 'invitations controller', :login_dot_gov
   end
 end
 
