@@ -720,7 +720,6 @@ RSpec.describe 'Invitations', type: :request do
               stub_user_info
               get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
             end
-            get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
           end
           it 'should redirect if not confirmed' do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
