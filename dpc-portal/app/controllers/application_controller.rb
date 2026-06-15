@@ -29,7 +29,7 @@ class ApplicationController < ActionController::Base
 
   def sign_in(user:, csp:)
     session[:user] = user.id
-    session[:csp] = csp.to_sym
+    session[:csp] = csp.to_s
   end
 
   private
@@ -77,6 +77,6 @@ class ApplicationController < ActionController::Base
   def csp_log_context
     return {} if session[:csp].blank?
 
-    { csp: session[:csp].to_s }
+    { csp: session[:csp] }
   end
 end

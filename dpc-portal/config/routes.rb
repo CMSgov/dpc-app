@@ -14,8 +14,8 @@ Rails.application.routes.draw do
   get 'timeout', to: 'users/sessions#timeout', as: 'timeout'
   get '/users/sign_in', to: 'users/sessions#new', as: 'sign_in'
   delete '/users/sign_out', to: 'users/sessions#destroy', as: 'destroy_user_session'
-  get '/auth/login_dot_gov/callback', to: 'login_dot_gov#openid_connect'
   get '/auth/id_me/callback', to: 'id_me#openid_connect'
+  get '/auth/login_dot_gov/callback', to: 'login_dot_gov#openid_connect'
 
   # Defines the root path route ("/")
   root 'organizations#index'

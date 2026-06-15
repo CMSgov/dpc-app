@@ -118,6 +118,7 @@ class InvitationsController < ApplicationController
                   scope: csp_config.authorize_scope,
                   nonce: @nonce,
                   state: @state }.compact.to_query
+
     redirect_to url, allow_other_host: true
   end
 
@@ -178,7 +179,7 @@ class InvitationsController < ApplicationController
     session[:user_return_to] = invitation_return_url
     session['omniauth.nonce'] = @nonce = SecureRandom.hex(16)
     session['omniauth.state'] = @state = SecureRandom.hex(16)
-    session[:csp] = csp_name.to_sym
+    session[:csp] = csp_name.to_s
   end
 
   def invitation_return_url
@@ -240,7 +241,8 @@ class InvitationsController < ApplicationController
 
     # Update emails based upon the latest information in user info.
     new_emails = user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed']
-    sync_csp_emails(csp_user, new_emails, user_info['email'])
+    primary_email = user_info['email']
+    sync_csp_emails(csp_user, new_emails, primary_email)
     update_user(user_info)
     @user
   end
