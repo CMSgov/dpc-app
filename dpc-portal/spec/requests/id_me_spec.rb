@@ -25,7 +25,8 @@ RSpec.describe 'IdMe', type: :request do
           allow(Rails.logger).to receive(:info)
           expect(Rails.logger).to receive(:info).with(['User logged in',
                                                        { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                         actionType: LoggingConstants::ActionType::UserLoggedIn }])
+                                                         actionType: LoggingConstants::ActionType::UserLoggedIn,
+                                                         csp: 'id_me' }])
           post '/auth/id_me'
           follow_redirect!
         end

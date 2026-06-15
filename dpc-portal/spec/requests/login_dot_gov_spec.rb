@@ -25,7 +25,8 @@ RSpec.describe 'LoginDotGov', type: :request do
           allow(Rails.logger).to receive(:info)
           expect(Rails.logger).to receive(:info).with(['User logged in',
                                                        { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                         actionType: LoggingConstants::ActionType::UserLoggedIn }])
+                                                         actionType: LoggingConstants::ActionType::UserLoggedIn,
+                                                         csp: 'login_dot_gov' }])
           post '/auth/login_dot_gov'
           follow_redirect!
         end

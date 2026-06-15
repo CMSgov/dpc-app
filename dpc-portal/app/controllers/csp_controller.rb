@@ -14,7 +14,7 @@ class CspController < ApplicationController
   end
 
   def no_account
-    render(Page::Utility::ErrorComponent.new(nil, 'no_account'), status: :forbidden)
+    render(Page::Utility::ErrorComponent.new(nil, 'no_account', csp: session[:csp]), status: :forbidden)
   end
 
   def failure
@@ -38,10 +38,9 @@ class CspController < ApplicationController
   private
 
   def user_actions(auth, csp)
-    session[:csp] = auth.provider
     csp_user = CspUser.find_by(uuid: auth.uid, csp:)
     user = csp_user&.user
-    sign_in_and_log(user, auth.provider)
+    sign_in_and_log(user, csp.name)
     ial_2_actions(user, auth)
     sync_csp_emails(csp_user, all_emails(auth), primary_email(auth))
     redirect_to path(user, auth)
@@ -51,17 +50,19 @@ class CspController < ApplicationController
     return unless user
 
     sign_in(user:, csp:)
-    cookies.permanent[:last_used_csp] = csp
     session[:logged_in_at] = Time.now
+    cookies.permanent[:last_used_csp] = csp
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::UserLoggedIn }])
+                         actionType: LoggingConstants::ActionType::UserLoggedIn,
+                         **csp_log_context }])
   end
 
   def handle_invitation_flow_failure(invitation_id)
     Rails.logger.info(['Failed invitation flow',
                        { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::FailedLogin }])
+                         actionType: LoggingConstants::ActionType::FailedLogin,
+                         **csp_log_context }])
     invitation = Invitation.find(invitation_id)
     if invitation.credential_delegate?
       render(Page::Utility::ErrorComponent.new(invitation, 'fail_to_proof'), status: :forbidden)
@@ -78,7 +79,8 @@ class CspController < ApplicationController
   def handle_signin_cancel(csp)
     Rails.logger.info(['User cancelled login',
                        { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::UserCancelledLogin }])
+                         actionType: LoggingConstants::ActionType::UserCancelledLogin,
+                         **csp_log_context }])
     render(Page::Utility::ErrorComponent.new(nil, "#{csp}_signin_cancel"))
   end
 
@@ -94,7 +96,8 @@ class CspController < ApplicationController
 
       Rails.logger.info(['User logged in without account',
                          { actionContext: LoggingConstants::ActionContext::Authentication,
-                           actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }])
+                           actionType: LoggingConstants::ActionType::UserLoginWithoutAccount,
+                           **csp_log_context }])
       return no_account_url
     end
     session.delete(:user_return_to) || organizations_path
@@ -106,7 +109,8 @@ class CspController < ApplicationController
 
     Rails.logger.info(["User attempted to login with #{display_name} but no active CSP found",
                        { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::InvalidCsp }])
+                         actionType: LoggingConstants::ActionType::InvalidCsp,
+                         **csp_log_context }])
     render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail'))
     nil
   end
