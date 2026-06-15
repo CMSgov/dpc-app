@@ -18,7 +18,7 @@ class CspController < ApplicationController
   end
 
   def failure
-    csp = session[:csp] || :login_dot_gov # TODO: remove default - acw
+    csp = session[:csp]
     invitation_flow_match = session[:user_return_to]&.match(%r{/organizations/([0-9]+)/invitations/([0-9]+)})
     return handle_invitation_flow_failure(invitation_flow_match[2]) if invitation_flow_match
     return handle_signin_fail(csp) if params[:code]
@@ -123,10 +123,4 @@ class CspController < ApplicationController
   # Can be overridden
   def primary_email(auth) = auth.info.email
   def all_emails(auth) = auth.extra.raw_info.all_emails
-
-  # Must be implemented
-  # @abstract
-  def csp_code = raise NotImplementedError, "#{self.class}#csp_code not implemented"
-  def display_name = raise NotImplementedError, "#{self.class}#display_name not implemented"
-  def ial_1_user?(_auth) = raise NotImplementedError, "#{self.class}#ial_1_user? not implemented"
 end
