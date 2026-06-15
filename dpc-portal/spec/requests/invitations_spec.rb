@@ -799,7 +799,6 @@ RSpec.describe 'Invitations', type: :request do
             end.to change { User.count }.by 0
             user = User.find_by_csp_uid(name: provider, csp_uid: user_info_template['sub'])
             # We have the fake CPI API Gateway return the ssn as pac_id
-            puts user.to_json
             expect(user.pac_id).to eq user_info_template['social_security_number']
             expect(request.session[:user_pac_id]).to be_nil
           end
