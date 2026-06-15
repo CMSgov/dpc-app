@@ -716,6 +716,7 @@ RSpec.describe 'Invitations', type: :request do
 
         context 'failure' do
           before do
+            get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
             if invitation.authorized_official?
               stub_user_info
               get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
