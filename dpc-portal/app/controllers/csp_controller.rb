@@ -111,7 +111,7 @@ class CspController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::InvalidCsp,
                          **csp_log_context }])
-    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail'))
+    render(Page::Utility::ErrorComponent.new(nil, "#{csp_code}_signin_fail"))
     nil
   end
 
