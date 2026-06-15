@@ -10,15 +10,17 @@ RSpec.describe 'Invitations', type: :request do
     let!(:csp) { Csp.find_by(name: provider) || create(:csp, name: provider) }
     let!(:other_csp_name) { provider == :login_dot_gov ? :id_me : :login_dot_gov }
     let!(:other_csp) { Csp.find_by(name: other_csp_name) || create(:csp, name: other_csp_name) }
+    let!(:provider_params) { { provider: provider } }
 
     RSpec.shared_examples 'an invitation endpoint' do |method, path_suffix, type|
       let(:org) { invitation.provider_organization }
       let(:bad_org) { create(:provider_organization) }
       let(:expected_success_status) { 200 }
+      let(:request_params) { {} }
       it 'should be ok or redirect' do
         stub_user_info
-        path_suffix += "?provider=#{provider}" if path_suffix == 'login'
-        send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+        # Most calls will be empty params, but for /login, param required to specify which IDP to use
+        send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}", params: request_params)
         expect(response.status).to eq(expected_success_status)
       end
       it 'should show warning page with 404 if missing' do
@@ -145,11 +147,12 @@ RSpec.describe 'Invitations', type: :request do
     describe 'POST /login' do
       RSpec.shared_examples 'a login endpoint' do
         let(:org_id) { invitation.provider_organization.id }
-        before { get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token?provider=#{provider}" }
-        it 'should redirect to login.gov' do
-          post "/organizations/#{org_id}/invitations/#{invitation.id}/login?provider=#{provider}"
+        let(:provider_params) { { provider: provider } }
+        before { get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token", params: provider_params }
+        it 'should redirect to provider callback' do
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
           redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
-          expect(redirect_params['redirect_uri']).to start_with('http://localhost:3100/auth/')
+          expect(redirect_params['redirect_uri']).to eq("http://localhost:3100/auth/#{provider}/callback")
           expect(request.session[:user_return_to]).to eq expected_redirect
         end
 
@@ -158,14 +161,15 @@ RSpec.describe 'Invitations', type: :request do
           expect(Rails.logger).to receive(:info).with(['User began login flow',
                                                        { actionContext: LoggingConstants::ActionContext::Registration,
                                                          actionType: LoggingConstants::ActionType::BeginLogin,
+                                                         csp: provider.to_s,
                                                          invitation: invitation.id }])
           org_id = invitation.provider_organization.id
-          post "/organizations/#{org_id}/invitations/#{invitation.id}/login?provider=#{provider}"
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
         end
 
         it 'should show error page if fail to proof' do
           org_id = invitation.provider_organization.id
-          post "/organizations/#{org_id}/invitations/#{invitation.id}/login?provider=#{provider}"
+          post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
           get '/users/auth/failure'
           expect(response).to be_forbidden
           expect(response.body).to include(I18n.t('verification.fail_to_proof_text'))
@@ -176,6 +180,7 @@ RSpec.describe 'Invitations', type: :request do
         it_behaves_like 'an invitation endpoint', :post, 'login', :cd do
           let(:invitation) { create(:invitation, :cd) }
           let(:expected_success_status) { 302 }
+          let(:request_params) { provider_params }
         end
         it_behaves_like 'a login endpoint', :post, 'register' do
           let(:invitation) { create(:invitation, :cd) }
@@ -187,7 +192,7 @@ RSpec.describe 'Invitations', type: :request do
           let(:invitation) { create(:invitation, :cd) }
           let(:org_id) { invitation.provider_organization.id }
           it 'should not show step navigation' do
-            post "/organizations/#{org_id}/invitations/#{invitation.id}/login?provider=#{provider}"
+            post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
             get '/users/auth/failure'
             expect(response).to be_forbidden
             expect(response.body).to_not include('<span class="usa-step-indicator__current-step">')
@@ -198,6 +203,7 @@ RSpec.describe 'Invitations', type: :request do
         it_behaves_like 'an invitation endpoint', :post, 'login', :ao do
           let(:invitation) { create(:invitation, :ao) }
           let(:expected_success_status) { 302 }
+          let(:request_params) { provider_params }
         end
         it_behaves_like 'a login endpoint', :post, 'register' do
           let(:invitation) { create(:invitation, :ao) }
@@ -209,7 +215,7 @@ RSpec.describe 'Invitations', type: :request do
           let(:invitation) { create(:invitation, :ao) }
           let(:org_id) { invitation.provider_organization.id }
           it 'should show step 2' do
-            post "/organizations/#{org_id}/invitations/#{invitation.id}/login?provider=#{provider}"
+            post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
             get '/users/auth/failure'
             expect(response).to be_forbidden
             expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
@@ -225,6 +231,7 @@ RSpec.describe 'Invitations', type: :request do
 
       let(:invitation) { create(:invitation, :ao) }
       let(:org) { invitation.provider_organization }
+      before { stub_user_info }
       context 'not logged in' do
         it 'should show login if valid invitation' do
           get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
@@ -234,7 +241,10 @@ RSpec.describe 'Invitations', type: :request do
       end
 
       context 'logged in' do
-        before { log_in(provider:) }
+        before do
+          log_in(provider:)
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
+        end
         it 'should show login if token expired' do
           user_service_class = class_double(UserInfoService).as_stubbed_const
           allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'unauthorized')
@@ -264,6 +274,7 @@ RSpec.describe 'Invitations', type: :request do
               ['AO PII Check Fail',
                { actionContext: LoggingConstants::ActionContext::Registration,
                  actionType: LoggingConstants::ActionType::FailAoPiiCheck,
+                 csp: provider.to_s,
                  invitation: invitation.id }]
             )
             stub_user_info(overrides: { 'email' => 'another@example.com' })
@@ -303,6 +314,7 @@ RSpec.describe 'Invitations', type: :request do
         before do
           stub_user_info
           log_in(provider:)
+          get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
           get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
         end
         it 'should set session status to conditions verified' do
@@ -329,6 +341,7 @@ RSpec.describe 'Invitations', type: :request do
               .with(['Authorized official has a waiver',
                      { actionContext: LoggingConstants::ActionContext::Registration,
                        actionType: LoggingConstants::ActionType::AoHasWaiver,
+                       csp: provider.to_s,
                        invitation: invitation.id }])
             post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
           end
@@ -345,6 +358,7 @@ RSpec.describe 'Invitations', type: :request do
               .with(['Organization has a waiver',
                      { actionContext: LoggingConstants::ActionContext::Registration,
                        actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                       csp: provider.to_s,
                        invitation: invitation.id }])
             post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
           end
@@ -353,6 +367,7 @@ RSpec.describe 'Invitations', type: :request do
       context :failure do
         let(:invitation) { create(:invitation, :ao) }
         let(:org) { invitation.provider_organization }
+        before { get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params }
         context :process do
           before { log_in(provider:) }
           it 'should fail if cd invitation' do
@@ -390,13 +405,14 @@ RSpec.describe 'Invitations', type: :request do
             expect(Rails.logger).to receive(:info).with(['AO Check Fail',
                                                          { actionContext: LoggingConstants::ActionContext::Registration,
                                                            actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
+                                                           csp: provider.to_s,
                                                            verificationReason: 'user_not_authorized_official',
                                                            invitation: invitation.id }])
             post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
           end
         end
 
-        context 'login.gov server error' do
+        context 'CSP server error' do
           before do
             user_service_class = class_double(UserInfoService).as_stubbed_const
             user_service = double(UserInfoService)
@@ -422,7 +438,7 @@ RSpec.describe 'Invitations', type: :request do
           end
         end
 
-        context 'login.gov missing ssn' do
+        context 'CSP missing ssn' do
           before do
             stub_user_info(overrides: { 'social_security_number' => '' })
             log_in(provider:)
@@ -477,7 +493,10 @@ RSpec.describe 'Invitations', type: :request do
       context 'logged in' do
         let(:cd_invite) { create(:invitation, :cd) }
         let(:org) { cd_invite.provider_organization }
-        before { log_in(provider:) }
+        before do
+          log_in(provider:)
+          get "/organizations/#{org.id}/invitations/#{cd_invite.id}/set_idp_token", params: provider_params
+        end
         context 'passed identity confirmation' do
           context :success do
             it 'should show register' do
@@ -497,6 +516,7 @@ RSpec.describe 'Invitations', type: :request do
                 'Approved access authorization occurred for the Credential Delegate',
                 { actionContext: LoggingConstants::ActionContext::Registration,
                   actionType: LoggingConstants::ActionType::CdConfirmed,
+                  csp: provider.to_s,
                   invitation: cd_invite.id }
               ]
               expect(Rails.logger).to receive(:info).with(approved_access_log_message)
@@ -516,6 +536,7 @@ RSpec.describe 'Invitations', type: :request do
                 ['CD PII Check Fail',
                  { actionContext: LoggingConstants::ActionContext::Registration,
                    actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                   csp: provider.to_s,
                    invitation: cd_invite.id }]
               )
               stub_user_info(overrides: { 'email' => 'another@example.com' })
@@ -531,6 +552,7 @@ RSpec.describe 'Invitations', type: :request do
                 ['CD PII Check Fail',
                  { actionContext: LoggingConstants::ActionContext::Registration,
                    actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                   csp: provider.to_s,
                    invitation: cd_invite.id }]
               )
               stub_user_info(overrides: { 'family_name' => 'Something Else' })
@@ -563,6 +585,7 @@ RSpec.describe 'Invitations', type: :request do
         context :success do
           before do
             stub_user_info
+            get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
             if invitation.authorized_official?
               get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
               post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
@@ -598,11 +621,13 @@ RSpec.describe 'Invitations', type: :request do
               expect(Rails.logger).to receive(:info).with(['Authorized Official linked to organization',
                                                            { actionContext: LoggingConstants::ActionContext::Registration,
                                                              actionType: LoggingConstants::ActionType::AoLinkedToOrg,
+                                                             csp: provider.to_s,
                                                              invitation: invitation.id }])
             else
               expect(Rails.logger).to receive(:info).with(['Credential Delegate linked to organization',
                                                            { actionContext: LoggingConstants::ActionContext::Registration,
                                                              actionType: LoggingConstants::ActionType::CdLinkedToOrg,
+                                                             csp: provider.to_s,
                                                              invitation: invitation.id }])
             end
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
@@ -613,6 +638,7 @@ RSpec.describe 'Invitations', type: :request do
             expect(Rails.logger).to receive(:info).with(['User logged in',
                                                          { actionContext: LoggingConstants::ActionContext::Registration,
                                                            actionType: LoggingConstants::ActionType::UserLoggedIn,
+                                                           csp: provider.to_s,
                                                            invitation: invitation.id }])
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
           end
@@ -643,11 +669,13 @@ RSpec.describe 'Invitations', type: :request do
               expect(Rails.logger).to receive(:info).with(['Authorized Official user created,',
                                                            { actionContext: LoggingConstants::ActionContext::Registration,
                                                              actionType: LoggingConstants::ActionType::AoCreated,
+                                                             csp: provider.to_s,
                                                              invitation: invitation.id }])
             else
               expect(Rails.logger).to receive(:info).with(['Credential Delegate user created,',
                                                            { actionContext: LoggingConstants::ActionContext::Registration,
                                                              actionType: LoggingConstants::ActionType::CdCreated,
+                                                             csp: provider.to_s,
                                                              invitation: invitation.id }])
             end
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
@@ -692,6 +720,7 @@ RSpec.describe 'Invitations', type: :request do
               stub_user_info
               get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
             end
+            get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
           end
           it 'should redirect if not confirmed' do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
@@ -750,6 +779,7 @@ RSpec.describe 'Invitations', type: :request do
           before do
             log_in(provider:)
             stub_user_info
+            get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
             get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
             post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
           end
@@ -763,12 +793,13 @@ RSpec.describe 'Invitations', type: :request do
             expect(request.session[:user_pac_id]).to be_nil
           end
           it 'should set pac_id on existing user' do
-            create_invitation_user_with_csp(csp: provider)
+            create_invitation_user_with_csp(csp: provider.to_sym)
             expect do
               post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
             end.to change { User.count }.by 0
             user = User.find_by_csp_uid(name: provider, csp_uid: user_info_template['sub'])
             # We have the fake CPI API Gateway return the ssn as pac_id
+            puts user.to_json
             expect(user.pac_id).to eq user_info_template['social_security_number']
             expect(request.session[:user_pac_id]).to be_nil
           end
@@ -875,23 +906,23 @@ RSpec.describe 'Invitations', type: :request do
       end
 
       it 'should succeed in Rails.test' do
-        get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token?provider=#{provider}"
+        get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
         expect(response).to be_ok
         expect(response.body).to be_blank
       end
       it 'should fail outside Rails.test' do
         allow(Rails.env).to receive(:test?).and_return false
-        get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token?provider=#{provider}"
+        get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
         expect(response).to be_forbidden
       end
     end
   end
 
-  describe 'with id_me' do
+  describe 'with ID.me' do
     include_examples 'invitations controller', :id_me
   end
 
-  describe 'with login_dot_gov' do
+  describe 'with Login.gov' do
     include_examples 'invitations controller', :login_dot_gov
   end
 end

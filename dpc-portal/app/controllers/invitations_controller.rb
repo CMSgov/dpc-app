@@ -56,7 +56,7 @@ class InvitationsController < ApplicationController
   end
 
   # Everybody
-  def register # rubocop:disable Metrics/AbcSize
+  def register
     unless session["invitation_status_#{@invitation.id}"] == 'verification_complete'
       return redirect_to organization_invitation_url(@organization, @invitation)
     end
@@ -75,7 +75,7 @@ class InvitationsController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::BeginLogin,
                          invitation: @invitation.id,
-                         **csp_log_context}])
+                         **csp_log_context }])
     csp_login_actions(csp_name)
   end
 
@@ -174,11 +174,11 @@ class InvitationsController < ApplicationController
     end
   end
 
-  def login_session(csp)
+  def login_session(csp_name)
     session[:user_return_to] = invitation_return_url
     session['omniauth.nonce'] = @nonce = SecureRandom.hex(16)
     session['omniauth.state'] = @state = SecureRandom.hex(16)
-    session[:csp] = csp.to_sym
+    session[:csp] = csp_name.to_sym
   end
 
   def invitation_return_url
@@ -240,7 +240,7 @@ class InvitationsController < ApplicationController
 
     # Update emails based upon the latest information in user info.
     new_emails = user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed']
-    sync_csp_emails(csp_user, new_emails, user_info['emails'])
+    sync_csp_emails(csp_user, new_emails, user_info['email'])
     update_user(user_info)
     @user
   end
@@ -321,9 +321,10 @@ class InvitationsController < ApplicationController
       ao_expired: ['Authorized Official Invitation expired', LoggingConstants::ActionType::AoInvitationExpired],
       cd_expired: ['Credential Delegate Invitation expired', LoggingConstants::ActionType::CdInvitationExpired]
     }
-    unacceptable_reason_map.fetch(reason.to_sym) do
-      ["Invitation unacceptable: #{reason}", LoggingConstants::ActionType::UnacceptableInvitation]
-    end
+    unacceptable_reason_map.default = ["Invitation unacceptable: #{reason}",
+                                       LoggingConstants::ActionType::UnacceptableInvitation]
+
+    unacceptable_reason_map[reason.to_sym]
   end
 
   def verify_ao_invitation
@@ -336,11 +337,14 @@ class InvitationsController < ApplicationController
 
   def check_for_token
     csp = session[:csp]
-    valid_tokens = csp&.present? &&
-                   session["#{csp}_token"].present? &&
-                   session["#{csp}_token_exp"].present? &&
-                   session["#{csp}_token_exp"] > Time.now
-    render(Page::Invitations::InvitationLoginComponent.new(@invitation)) unless valid_tokens
+    if csp && !csp.empty? &&
+       session["#{csp}_token"].present? &&
+       session["#{csp}_token_exp"].present? &&
+       session["#{csp}_token_exp"] > Time.now
+      return
+    end
+
+    render(Page::Invitations::InvitationLoginComponent.new(@invitation))
   end
 
   def block_test_utilities
