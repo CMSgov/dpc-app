@@ -338,15 +338,18 @@ class InvitationsController < ApplicationController
   end
 
   def check_for_token
-    csp = session[:csp]
-    if csp && !csp.empty? &&
-       session["#{csp}_token"].present? &&
-       session["#{csp}_token_exp"].present? &&
-       session["#{csp}_token_exp"] > Time.now
-      return
-    end
+    return if valid_csp_token?
 
     render(Page::Invitations::InvitationLoginComponent.new(@invitation))
+  end
+
+  def valid_csp_token?
+    csp = session[:csp]
+    return false if csp.blank?
+
+    session["#{csp}_token"].present? &&
+      session["#{csp}_token_exp"].present? &&
+      session["#{csp}_token_exp"] > Time.now
   end
 
   def block_test_utilities

@@ -47,6 +47,8 @@ en:
     configuration_complete: Setup complete
     api_disabled: API disabled
     access_denied: Access denied
+    csp_signin_fail_status: CSP sign-in failed
+    csp_signin_fail_text: Something went wrong while trying to sign-in with your CSP. Please try again.
     login_dot_gov_signin_cancel_status: Login.gov sign-in incomplete
     login_dot_gov_signin_cancel_text: Login.gov sign-in was unsuccessful. If this was an error, try signing in again.
     login_dot_gov_signin_fail_status: Login.gov sign-in failed

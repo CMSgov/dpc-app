@@ -4,12 +4,16 @@
 module CspLogout
   extend ActiveSupport::Concern
 
+  LOGOUT_URLS = {
+    'login_dot_gov' => :url_for_login_dot_gov_logout,
+    'id_me' => :url_for_id_me_logout
+  }.freeze
+
   def url_for_logout(csp)
-    case csp.to_s
-    when 'id_me'         then url_for_id_me_logout
-    when 'login_dot_gov' then url_for_login_dot_gov_logout
-    else                 raise UnknownCspError, "Unknown CSP: #{csp}"
-    end
+    csp_logout_url = LOGOUT_URLS[csp.to_s]
+    raise UnknownCspError, "Unknown CSP: #{csp}" unless csp_logout_url
+
+    send(csp_logout_url)
   end
 
   # Documentation at https://developers.login.gov/oidc/logout/

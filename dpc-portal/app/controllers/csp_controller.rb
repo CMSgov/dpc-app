@@ -107,11 +107,11 @@ class CspController < ApplicationController
     active_csp = Csp.active.find_by(name:)
     return active_csp if active_csp
 
-    Rails.logger.info(["User attempted to login with #{display_name} but no active CSP found",
+    Rails.logger.info(["User attempted to login with #{display_name || name} but no active CSP found",
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::InvalidCsp,
                          **csp_log_context }])
-    render(Page::Utility::ErrorComponent.new(nil, "#{csp_code}_signin_fail"))
+    render(Page::Utility::ErrorComponent.new(nil, "#{csp_code || 'csp'}_signin_fail"))
     nil
   end
 

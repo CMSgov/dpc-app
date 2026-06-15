@@ -53,8 +53,7 @@ class ApplicationController < ActionController::Base
   end
 
   def session_timed_out?
-    max_session = User.remember_for.to_i / 60
-    max_session.minutes.ago > session[:logged_in_at]
+    User.remember_for.ago > session[:logged_in_at]
   end
 
   def set_current_request_attributes
@@ -75,8 +74,6 @@ class ApplicationController < ActionController::Base
 
   # Helper method for logging csp with actionContext and actionType whenever it's available on the session
   def csp_log_context
-    return {} if session[:csp].blank?
-
-    { csp: session[:csp] }
+    session[:csp].present? ? { csp: session[:csp] } : {}
   end
 end
