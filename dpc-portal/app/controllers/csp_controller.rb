@@ -73,7 +73,7 @@ class CspController < ApplicationController
 
   def handle_signin_fail(csp)
     Rails.logger.error 'CSP Configuration error'
-    render(Page::Utility::ErrorComponent.new(nil, "#{csp}_signin_fail"))
+    render(Page::Utility::ErrorComponent.new(nil, "#{csp || 'csp'}_signin_fail"))
   end
 
   def handle_signin_cancel(csp)
@@ -81,7 +81,7 @@ class CspController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::UserCancelledLogin,
                          **csp_log_context }])
-    render(Page::Utility::ErrorComponent.new(nil, "#{csp}_signin_cancel"))
+    render(Page::Utility::ErrorComponent.new(nil, "#{csp || 'csp'}_signin_cancel"))
   end
 
   def ial_2_actions(user, auth)
