@@ -116,6 +116,7 @@ class CspController < ApplicationController
   end
 
   def update_csp_tokens(auth)
+    session[:csp] = auth.provider.to_s
     session["#{auth.provider}_token"] = auth.credentials.token
     session["#{auth.provider}_token_exp"] = auth.credentials.expires_in.seconds.from_now
   end
