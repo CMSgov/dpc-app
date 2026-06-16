@@ -11,6 +11,6 @@ class IdMeController < CspController
 
   # ID.me only provides the primary email
   def all_emails(auth)
-    [auth.info.email]
+    auth.extra.raw_info.emails_confirmed
   end
 end
