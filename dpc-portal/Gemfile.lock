@@ -360,7 +360,7 @@ GEM
     omniauth_openid_connect (0.8.0)
       omniauth (>= 1.9, < 3)
       openid_connect (~> 2.2)
-    openid_connect (2.3.0)
+    openid_connect (2.3.1)
       activemodel
       attr_required (>= 1.0.0)
       email_validator
@@ -400,7 +400,7 @@ GEM
     raabro (1.4.0)
     racc (1.8.1)
     rack (3.2.6)
-    rack-oauth2 (2.2.1)
+    rack-oauth2 (2.3.0)
       activesupport
       attr_required
       faraday (~> 2.0)
@@ -649,7 +649,7 @@ DEPENDENCIES
   lookbook (>= 2.3.3)
   luhnacy (~> 0.2.1)
   macaroons
-  net-imap (>= 0.5.14)
+  net-imap (>= 0.6.4.1)
   newrelic_rpm (~> 8.10)
   nokogiri (>= 1.19.3)
   omniauth-rails_csrf_protection
