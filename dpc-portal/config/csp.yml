@@ -25,7 +25,7 @@ development: &development
     jwks_uri: <%= "https://#{ENV['IDP_ID_ME_HOST']}/oidc/.well-known/jwks" %> 
     redirect_path: '/auth/id_me/callback'
     authorize_scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2'
-    log_out_path: '/oauth/logout'
+    log_out_path: '/auth/logout'
     token_expiration_interval: 300
 
 local:

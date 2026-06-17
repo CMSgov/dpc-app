@@ -140,7 +140,7 @@ class InvitationsController < ApplicationController
              status: :forbidden)
     elsif !@invitation.email_match?(user_info)
       log_pii_mismatch
-      render(Page::Utility::ErrorComponent.new(@invitation, 'email_mismatch'),
+      render(Page::Utility::ErrorComponent.new(@invitation, 'email_mismatch', csp: session[:csp].to_sym),
              status: :forbidden)
     end
   end
