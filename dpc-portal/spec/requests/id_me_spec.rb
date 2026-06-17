@@ -191,6 +191,7 @@ RSpec.describe 'IdMe', type: :request do
                                    extra: { raw_info: { given_name: 'Bob',
                                                         family_name: 'Hoskins',
                                                         social_security_number: '1-2-3',
+                                                        emails_confirmed: %w[email1@example.com email2@example.com],
                                                         identity_assurance_level: 2 } } })
 
         user = create(:user, provider: :id_me)
@@ -201,11 +202,13 @@ RSpec.describe 'IdMe', type: :request do
         expect do
           post '/auth/id_me'
           follow_redirect!
-        end.to change { UserEmail.count }.by(1)
+        end.to change { UserEmail.count }.by(2)
 
-        last_email = UserEmail.last(1)
-        expect(last_email.pluck(:email)).to match_array(%w[email1@example.com])
-        expect(last_email.pluck(:active)).to all(be true)
+        emails = UserEmail.last(2).pluck(:email)
+        expect(emails).to match_array(%w[email1@example.com email2@example.com])
+        expect(UserEmail.pluck(:active)).to all(be true)
+        expect(UserEmail.find(&:primary?).email).to eq 'email1@example.com'
+        expect(UserEmail.count(&:primary?)).to eq 1
       end
     end
 
@@ -220,6 +223,7 @@ RSpec.describe 'IdMe', type: :request do
                                    extra: { raw_info: { given_name: 'Bob',
                                                         family_name: 'Hoskins',
                                                         social_security_number: '1-2-3',
+                                                        emails_confirmed: %w[email1@example.com email2@example.com],
                                                         identity_assurance_level: 2 } } })
 
         user = create(:user, email: 'email1@example.com', provider: :id_me)
@@ -249,6 +253,7 @@ RSpec.describe 'IdMe', type: :request do
                                    extra: { raw_info: { given_name: 'Bob',
                                                         family_name: 'Hoskins',
                                                         social_security_number: '1-2-3',
+                                                        emails_confirmed: %w[email1@example.com email2@example.com],
                                                         identity_assurance_level: 2 } } })
 
         user = create(:user, email: 'email1@example.com', provider: :id_me)
