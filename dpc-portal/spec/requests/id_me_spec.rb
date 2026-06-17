@@ -61,6 +61,7 @@ RSpec.describe 'IdMe', type: :request do
                                    extra: { raw_info: { given_name: 'Bob',
                                                         family_name: 'Hoskins',
                                                         social_security_number: '1-2-3',
+                                                        emails_confirmed: %w[email1@example.com email2@example.com],
                                                         identity_assurance_level: 2 } } })
       end
 
@@ -124,13 +125,13 @@ RSpec.describe 'IdMe', type: :request do
 
       context :user_exists do
         before do
-          create(:user, provider: 'id_me', given_name: 'Bob', family_name: 'Hoskins')
+          create(:user, provider: 'id_me', given_name: 'Bob', family_name: 'Hoskins', email: 'bob@example.com')
           create(:csp_user, user: User.last, uuid:, csp:)
         end
         it 'does not update user names' do
           expect(CspUser.where(uuid:).count).to eq 1
-          # expect(User.where(uid: '12345', provider: 'id_me', email: 'bob@example.com', given_name: 'Bob',
-          #                  family_name: 'Hoskins').count).to eq 1
+          expect(User.where(provider: 'id_me', email: 'bob@example.com', given_name: 'Bob',
+                            family_name: 'Hoskins').count).to eq 1
           post '/auth/id_me'
           follow_redirect!
           expect(response.location).to eq organizations_url
@@ -139,8 +140,8 @@ RSpec.describe 'IdMe', type: :request do
           expect(db_user).to be_present
           expect(db_user.given_name).to eq 'Bob'
           expect(db_user.family_name).to eq 'Hoskins'
-          # expect(User.where(uid: '12345', provider: 'id_me', email: 'bob@example.com', given_name: 'Bob',
-          #                  family_name: 'Hoskins').count).to eq 1
+          expect(User.where(provider: 'id_me', email: 'bob@example.com', given_name: 'Bob',
+                            family_name: 'Hoskins').count).to eq 1
         end
 
         it 'does not set authentication token' do
@@ -301,6 +302,7 @@ RSpec.describe 'IdMe', type: :request do
                                  extra: { raw_info: { given_name: 'Bob',
                                                       family_name: 'Hoskins',
                                                       social_security_number: '1-2-3',
+                                                      emails_confirmed: %w[email1@example.com email2@example.com],
                                                       identity_assurance_level: 2 } } })
 
       user = create(:user, provider: :id_me)
