@@ -8,6 +8,8 @@ class CspController < ApplicationController
 
   def openid_connect
     auth = request.env['omniauth.auth']
+    return render_ial1_blocked if ial_1_user?
+
     return unless (active_csp = csp(auth.provider))
 
     user_actions(auth, active_csp)
@@ -41,9 +43,16 @@ class CspController < ApplicationController
     csp_user = CspUser.find_by(uuid: auth.uid, csp:)
     user = csp_user&.user
     sign_in_and_log(user, csp.name)
-    ial_2_actions(user, auth)
     sync_csp_emails(csp_user, all_emails(auth), primary_email(auth))
+    ial_2_actions(user, auth)
     redirect_to path(user, auth)
+  end
+
+  def render_ial1_blocked
+    Rails.logger.info(["User attempted IAL1 login with #{display_name || 'CSP'} — not permitted",
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }])
+    render(Page::Utility::ErrorComponent.new(nil, "#{csp_code}_signin_fail"), status: :forbidden)
   end
 
   def sign_in_and_log(user, csp)
@@ -124,4 +133,6 @@ class CspController < ApplicationController
   # Can be overridden
   def primary_email(auth) = auth.info.email
   def all_emails(auth) = auth.extra.raw_info.all_emails
+
+  def ial_1_user?(auth) = auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
 end
