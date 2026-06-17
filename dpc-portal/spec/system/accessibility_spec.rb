@@ -22,7 +22,7 @@ RSpec.describe 'Accessibility', type: :system do
   end
 
   RSpec.shared_examples 'accessibility tests' do |provider|
-    let!(:csp) { create(:csp, name: provider) }
+    let!(:csp) { Csp.find_by(name: provider) || create(:csp, name: provider) }
     before do
       OmniAuth.config.test_mode = true
       OmniAuth.config.add_mock(provider,
