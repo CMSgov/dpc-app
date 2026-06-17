@@ -131,13 +131,13 @@ RSpec.describe 'LoginDotGov', type: :request do
 
       context :user_exists do
         before do
-          create(:user, provider: 'login_dot_gov', given_name: 'Bob', family_name: 'Hoskins')
+          create(:user, provider: 'login_dot_gov', given_name: 'Bob', family_name: 'Hoskins', email: 'bob@example.com')
           create(:csp_user, user: User.last, uuid:, csp:)
         end
         it 'does not update user names' do
           expect(CspUser.where(uuid:).count).to eq 1
-          # expect(User.where(uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com', given_name: 'Bob',
-          #                  family_name: 'Hoskins').count).to eq 1
+          expect(User.where(provider: 'login_dot_gov', email: 'bob@example.com', given_name: 'Bob',
+                            family_name: 'Hoskins').count).to eq 1
           post '/auth/login_dot_gov'
           follow_redirect!
           expect(response.location).to eq organizations_url
@@ -146,8 +146,8 @@ RSpec.describe 'LoginDotGov', type: :request do
           expect(db_user).to be_present
           expect(db_user.given_name).to eq 'Bob'
           expect(db_user.family_name).to eq 'Hoskins'
-          # expect(User.where(uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com', given_name: 'Bob',
-          #                  family_name: 'Hoskins').count).to eq 1
+          expect(User.where(provider: 'login_dot_gov', email: 'bob@example.com', given_name: 'Bob',
+                            family_name: 'Hoskins').count).to eq 1
         end
 
         it 'does not set authentication token' do
