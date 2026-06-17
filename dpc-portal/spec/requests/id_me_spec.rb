@@ -6,7 +6,7 @@ require 'securerandom'
 RSpec.describe 'IdMe', type: :request do
   let(:uuid) { SecureRandom.uuid }
   describe 'POST /auth/id_me' do
-    let!(:csp) { create(:csp, :id_me) }
+    let!(:csp) { Csp.find_by(name: 'id_me') || create(:csp, :id_me) }
     RSpec.shared_examples 'an id.me client' do
       context 'user exists' do
         before do
@@ -30,7 +30,12 @@ RSpec.describe 'IdMe', type: :request do
           post '/auth/id_me'
           follow_redirect!
         end
-        it 'should not add another user' do
+        it 'should write a cookie with the last used csp' do
+          post '/auth/id_me'
+          follow_redirect!
+          expect(cookies[:last_used_csp]).to eq 'id_me'
+        end
+        it 'should not add another user credential' do
           expect(CspUser.where(uuid:, csp:).count).to eq 1
           expect do
             post '/auth/id_me'
@@ -86,6 +91,7 @@ RSpec.describe 'IdMe', type: :request do
         it 'sets authentication token' do
           post '/auth/id_me'
           follow_redirect!
+          expect(request.session[:csp]).to eq 'id_me'
           expect(request.session[:id_me_token]).to eq token
           expect(request.session[:id_me_token_exp]).to_not be_nil
           expect(request.session[:id_me_token_exp]).to be_within(1.second).of 899.seconds.from_now
@@ -105,6 +111,7 @@ RSpec.describe 'IdMe', type: :request do
         it 'sets authentication token' do
           post '/auth/id_me'
           follow_redirect!
+          expect(request.session[:csp]).to eq 'id_me'
           expect(request.session[:id_me_token]).to eq token
           expect(request.session[:id_me_token_exp]).to_not be_nil
           expect(request.session[:id_me_token_exp]).to be_within(1.second).of 899.seconds.from_now
@@ -180,7 +187,7 @@ RSpec.describe 'IdMe', type: :request do
       end
     end
 
-    context 'should add email' do
+    context 'should add emails' do
       before do
         uuid = SecureRandom.uuid
         OmniAuth.config.test_mode = true
@@ -224,7 +231,7 @@ RSpec.describe 'IdMe', type: :request do
                                    extra: { raw_info: { given_name: 'Bob',
                                                         family_name: 'Hoskins',
                                                         social_security_number: '1-2-3',
-                                                        emails_confirmed: %w[email1@example.com email2@example.com],
+                                                        emails_confirmed: nil,
                                                         identity_assurance_level: 2 } } })
 
         user = create(:user, email: 'email1@example.com', provider: :id_me)
@@ -254,7 +261,7 @@ RSpec.describe 'IdMe', type: :request do
                                    extra: { raw_info: { given_name: 'Bob',
                                                         family_name: 'Hoskins',
                                                         social_security_number: '1-2-3',
-                                                        emails_confirmed: %w[email1@example.com email2@example.com],
+                                                        emails_confirmed: %w[email1@example.com],
                                                         identity_assurance_level: 2 } } })
 
         user = create(:user, email: 'email1@example.com', provider: :id_me)
@@ -271,6 +278,7 @@ RSpec.describe 'IdMe', type: :request do
         expect(email.active).to eq true
         expect(email.deactivated_at).to be_nil
         expect(email.reactivated_at).to_not be_nil
+        expect(email.primary).to eq true
       end
     end
   end
@@ -325,6 +333,14 @@ RSpec.describe 'IdMe', type: :request do
   end
 
   describe 'Get /auth/no_account' do
+    before do
+      OmniAuth.config.test_mode = true
+      OmniAuth.config.add_mock(:id_me,
+                               { uid: uuid,
+                                 info: { email: 'example1@example.com' },
+                                 extra: { raw_info: { emails_confirmed: %w[bob4@example.com bobby@example.com],
+                                                      identity_assurance_level: 1 } } })
+    end
     it 'should show logout button' do
       get '/auth/no_account'
       expect(response.body).to include 'Sign out of CSP'
@@ -333,15 +349,21 @@ RSpec.describe 'IdMe', type: :request do
 
   describe 'CSP inactive' do
     before do
-      inactive_csp = create(:csp, :inactive)
+      csp = Csp.find_by(name: 'id_me')
+      csp.end_date = DateTime.current - 1.year
+      csp.save!
+
       user = create(:user, email: 'bob5@example.com', provider: :id_me)
-      create(:csp_user, user:, uuid:, csp: inactive_csp)
+      create(:csp_user, user:, uuid:, csp:)
 
       OmniAuth.config.test_mode = true
       OmniAuth.config.add_mock(:id_me,
                                { uid: uuid,
+                                 credentials: { expires_in: 899,
+                                                token: 'bearer-token' },
                                  info: { email: 'bob4@example.com' },
-                                 extra: { raw_info: { identity_assurance_level: 1 } } })
+                                 extra: { raw_info: { emails_confirmed: %w[bob4@example.com bobby@example.com],
+                                                      identity_assurance_level: 2 } } })
     end
 
     it 'should log error' do

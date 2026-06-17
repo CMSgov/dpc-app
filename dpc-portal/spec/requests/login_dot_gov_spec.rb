@@ -91,6 +91,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         it 'sets authentication token' do
           post '/auth/login_dot_gov'
           follow_redirect!
+          expect(request.session[:csp]).to eq 'login_dot_gov'
           expect(request.session[:login_dot_gov_token]).to eq token
           expect(request.session[:login_dot_gov_token_exp]).to_not be_nil
           expect(request.session[:login_dot_gov_token_exp]).to be_within(1.second).of 899.seconds.from_now
@@ -110,6 +111,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         it 'sets authentication token' do
           post '/auth/login_dot_gov'
           follow_redirect!
+          expect(request.session[:csp]).to eq 'login_dot_gov'
           expect(request.session[:login_dot_gov_token]).to eq token
           expect(request.session[:login_dot_gov_token_exp]).to_not be_nil
           expect(request.session[:login_dot_gov_token_exp]).to be_within(1.second).of 899.seconds.from_now
@@ -348,16 +350,21 @@ RSpec.describe 'LoginDotGov', type: :request do
 
   describe 'CSP inactive' do
     before do
-      inactive_csp = create(:csp, :inactive)
+      csp = Csp.find_by(name: 'login_dot_gov')
+      csp.end_date = DateTime.current - 1.year
+      csp.save!
+
       user = create(:user, email: 'bob5@example.com', provider: :login_dot_gov)
-      create(:csp_user, user:, uuid:, csp: inactive_csp)
+      create(:csp_user, user:, uuid:, csp:)
 
       OmniAuth.config.test_mode = true
       OmniAuth.config.add_mock(:login_dot_gov,
                                { uid: uuid,
+                                 credentials: { expires_in: 899,
+                                                token: 'bearer-token' },
                                  info: { email: 'bob4@example.com' },
                                  extra: { raw_info: { all_emails: %w[bob4@example.com bobby@example.com],
-                                                      ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
+                                                      ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
     end
 
     it 'should log error' do
