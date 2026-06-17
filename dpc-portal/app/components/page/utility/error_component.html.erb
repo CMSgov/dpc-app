@@ -18,20 +18,20 @@
       <% when :cd_accepted %>
         <%= link_to 'Go to DPC home', root_url, class: 'usa-button margin-right-0' %>
       <% when :pii_mismatch %>
-        <%= render Core::Button::ButtonComponent.new(label: "Sign out of Login.gov",
-            destination: login_dot_gov_logout_path(invitation_id: @invitation.id),
+        <%= render Core::Button::ButtonComponent.new(label: "Sign out of #{@csp_display_name}",
+            destination: csp_logout_path(invitation_id: @invitation.id),
             method: :delete) %>
       <% when :email_mismatch %>
-        <%= render Core::Button::ButtonComponent.new(label: "Sign out of Login.gov",
-            destination: login_dot_gov_logout_path(invitation_id: @invitation.id),
+        <%= render Core::Button::ButtonComponent.new(label: "Sign out of #{@csp_display_name}",
+            destination: csp_logout_path(invitation_id: @invitation.id),
             method: :delete) %>
       <% when :no_account %>
-        <%= render Core::Button::ButtonComponent.new(label: "Sign out of Login.gov",
-            destination: login_dot_gov_logout_path,
+        <%= render Core::Button::ButtonComponent.new(label: "Sign out of #{@csp_display_name}",
+            destination: csp_logout_path,
             method: :delete) %>
-      <% when :login_gov_signin_cancel %>
+      <% when /signin_cancel/ %>
         <%= link_to 'Back to portal home', sign_in_path, class: 'usa-button usa-button--outline', data: { turbo: false }%>
-      <% when :login_gov_signin_fail %>
+      <% when /signin_fail/ %>
         <%= link_to 'Back to portal home', sign_in_path, class: 'usa-button usa-button--outline', data: { turbo: false }%>
     <% end %>
 </div>

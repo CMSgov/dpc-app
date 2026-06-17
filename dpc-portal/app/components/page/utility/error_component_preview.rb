@@ -77,13 +77,15 @@ module Page
         render(Page::Utility::ErrorComponent.new(nil, reason))
       end
 
-      def login_gov_signin_cancel
-        reason = 'login_gov_signin_cancel'
+      # @param csp select { choices: [:login_dot_gov, :id_me] }
+      def csp_signin_cancel(csp)
+        reason = "#{csp}_signin_cancel"
         render(Page::Utility::ErrorComponent.new(nil, reason))
       end
 
-      def login_gov_signin_fail
-        reason = 'login_gov_signin_fail'
+      # @param csp select { choices: [:login_dot_gov, :id_me] }
+      def csp_signin_fail(csp)
+        reason = "#{csp}_signin_fail"
         render(Page::Utility::ErrorComponent.new(nil, reason))
       end
     end
