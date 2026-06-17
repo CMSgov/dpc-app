@@ -46,7 +46,7 @@ LOGIN_DOT_GOV_CLIENT_CONFIG = {
   discovery: true,
   scope: %i[openid email all_emails],
   response_type: :code,
-  acr_values: 'http://idmanagement.gov/ns/assurance/ial/1',
+  acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
   client_auth_method: :jwt_bearer,
   client_options: {
     port:        443,
