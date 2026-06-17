@@ -9,7 +9,6 @@ class IdMeController < CspController
     auth.extra.raw_info.identity_assurance_level.to_i == 1
   end
 
-  # ID.me only provides the primary email
   def all_emails(auth)
     auth.extra.raw_info.emails_confirmed
   end

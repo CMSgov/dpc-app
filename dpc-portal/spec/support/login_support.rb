@@ -51,11 +51,11 @@ module LoginSupport
     all_emails = user.csp_user_for('id_me')&.user_emails&.map(&:email).presence || [user.email]
     { uid: user.csp_user_for('id_me')&.uuid || user.uid,
       info: { email: user.email },
-      # credentials: { token: 'mock_token', expires_in: 300 },
+      credentials: { token: 'mock_token', expires_in: 300 },
       extra: {
         raw_info: {
           SSN: 111_887_777,
-          identity_assurance_level: 1,
+          identity_assurance_level: 2,
           emails_confirmed: all_emails,
           email: user.email
         }

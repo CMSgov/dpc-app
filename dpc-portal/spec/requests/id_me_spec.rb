@@ -119,70 +119,68 @@ RSpec.describe 'IdMe', type: :request do
       end
     end
 
+    # IAL1 is no longer allowed should now be blocked entirely
     context 'IAL/1' do
       before do
         OmniAuth.config.test_mode = true
         OmniAuth.config.add_mock(:id_me,
                                  { uid: uuid,
                                    info: { email: 'bob@example.com' },
-                                   extra: { raw_info: { identity_assurance_level: 1 } } })
+                                   extra: { raw_info: { emails_confirmed: %w[bob@example.com bob2@example.com],
+                                                        identity_assurance_level: 1 } } })
       end
 
-      it_behaves_like 'an id.me client'
+      it 'returns 403 forbidden' do
+        post '/auth/id_me'
+        follow_redirect!
+        expect(response).to have_http_status(:forbidden)
+      end
 
-      context :user_exists do
+      it 'renders the id_me_signin_fail error component' do
+        post '/auth/id_me'
+        follow_redirect!
+        expect(response.body).to include('ID.me sign-in failed')
+      end
+
+      it 'logs the IAL1 blocked attempt' do
+        allow(Rails.logger).to receive(:info)
+        post '/auth/id_me'
+        follow_redirect!
+        expect(Rails.logger).to have_received(:info).with(
+          ['User attempted IAL1 login with ID.me — not permitted',
+           { actionContext: LoggingConstants::ActionContext::Authentication,
+             actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }]
+        )
+      end
+
+      it 'does not sign in the user' do
+        post '/auth/id_me'
+        follow_redirect!
+        expect(response).to be_forbidden
+      end
+
+      it 'does not set an authentication token' do
+        post '/auth/id_me'
+        expect(request.session[:id_me_token]).to be_nil
+        expect(request.session[:id_me_token_exp]).to be_nil
+      end
+
+      context 'when a matching user account exists' do
         before do
-          create(:user, provider: 'id_me', given_name: 'Bob', family_name: 'Hoskins', email: 'bob@example.com')
-          create(:csp_user, user: User.last, uuid:, csp:)
-        end
-        it 'does not update user names' do
-          expect(CspUser.where(uuid:).count).to eq 1
-          expect(User.where(provider: 'id_me', email: 'bob@example.com', given_name: 'Bob',
-                            family_name: 'Hoskins').count).to eq 1
-          post '/auth/id_me'
-          follow_redirect!
-          expect(response.location).to eq organizations_url
-          expect(CspUser.where(uuid:, csp: csp).count).to eq 1
-          db_user = CspUser.find_by(uuid:, csp: csp)&.user
-          expect(db_user).to be_present
-          expect(db_user.given_name).to eq 'Bob'
-          expect(db_user.family_name).to eq 'Hoskins'
-          expect(User.where(provider: 'id_me', email: 'bob@example.com', given_name: 'Bob',
-                            family_name: 'Hoskins').count).to eq 1
+          user = create(:user, provider: 'id_me', given_name: 'Bob', family_name: 'Hoskins')
+          create(:csp_user, user:, uuid:, csp:)
         end
 
-        it 'does not set authentication token' do
+        it 'still returns 403 forbidden' do
           post '/auth/id_me'
           follow_redirect!
-          expect(request.session[:id_me_token]).to be_nil
-          expect(request.session[:id_me_token_exp]).to be_nil
-        end
-      end
-
-      context 'user does not exist' do
-        it 'does not sign in user' do
-          post '/auth/id_me'
-          follow_redirect!
-          expect(response.location).to eq no_account_url
-          expect(response).to be_redirect
+          expect(response).to have_http_status(:forbidden)
         end
 
-        it 'should log' do
-          allow(Rails.logger).to receive(:info)
-          expect(Rails.logger).to receive(:info).with(
-            ['User logged in without account',
-             { actionContext: LoggingConstants::ActionContext::Authentication,
-               actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }]
-          )
+        it 'does not sign in the user' do
           post '/auth/id_me'
           follow_redirect!
-        end
-
-        it 'does not set authentication token' do
-          post '/auth/id_me'
-          follow_redirect!
-          expect(request.session[:id_me_token]).to be_nil
-          expect(request.session[:id_me_token_exp]).to be_nil
+          expect(response).to be_forbidden
         end
       end
     end
