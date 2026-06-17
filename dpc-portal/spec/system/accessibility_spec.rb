@@ -13,17 +13,26 @@ RSpec.describe 'Accessibility', type: :system do
   let(:axe_standard) { %w[best-practice wcag21aa] }
   let(:uid) { SecureRandom.uuid }
 
+  let(:raw_info) do
+    emails = %w[bob@example.com bob2@example.com]
+    {
+      login_dot_gov: { all_emails: emails, ial: 'http://idmanagement.gov/ns/assurance/ial/2' },
+      id_me: { emails_confirmed: emails, identity_assurance_level: 2 }
+    }
+  end
+
   RSpec.shared_examples 'accessibility tests' do |provider|
     let!(:csp) { create(:csp, name: provider) }
-
-    ial = provider == :id_me ? { identity_assurance_level: 1 } : { ial: 'http://idmanagement.gov/ns/assurance/ial/1' }
     before do
       OmniAuth.config.test_mode = true
       OmniAuth.config.add_mock(provider,
                                { uid:,
+                                 credentials: { expires_in: 899,
+                                                token: 'bearer-token' },
                                  info: { email: 'bob@example.com' },
-                                 extra: { raw_info: { emails_confirmed: %w[bob@example.com
-                                                                           bob2@example.com] }.merge(ial) } })
+                                 extra: { raw_info: { given_name: 'Bob',
+                                                      family_name: 'Hoskins',
+                                                      social_security_number: '1-2-3' }.merge(raw_info[provider]) } })
     end
     def sign_in
       visit "/auth/#{csp.name}/callback"
