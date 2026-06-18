@@ -52,8 +52,19 @@ RSpec.describe 'Accessibility', type: :system do
 
       context 'bad user tries to log in' do
         it 'shows no such user page' do
+          ial1_raw_info = if provider == :id_me
+                            { identity_assurance_level: 1}
+                          else
+                            { ial: 'http://idmanagement.gov/ns/assurance/ial/1'}
+                          end
+          
+          OmniAuth.config.add_mock(provider,
+                               { uid:,
+                                 info: { email: 'bob@example.com' },
+                                 extra: { raw_info:  ial1_raw_info } })
+
           visit "/auth/#{provider}/callback"
-          expect(page).to have_text('The email you used is not associated with a DPC account.')
+          expect(page).to have_text(I18n.t("verification.#{provider}_signin_fail_text"))
           expect(page).to be_axe_clean.according_to axe_standard
         end
         it 'shows sanctioned ao page' do
