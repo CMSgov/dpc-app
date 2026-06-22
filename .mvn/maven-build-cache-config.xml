@@ -12,6 +12,11 @@
             <excludes>
                 <exclude>pom.xml</exclude>
             </excludes>
+
+            <includes>
+                <include>src/</include>
+                <include>docker/</include>
+            </includes>
         </global>
     </input>
     <executionControl>

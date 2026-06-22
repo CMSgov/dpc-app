@@ -71,7 +71,6 @@ logging:
             - BB_KEYSTORE_PASS
             - BFD_HASH_PEPPER
             - QUEUE_DB_PASS
-            - NEW_RELIC_LICENSE_KEY
             - CONSENT_DB_PASS
       timeZone: UTC
       layout:
