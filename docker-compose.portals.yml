@@ -126,34 +126,37 @@ services:
       - ./tmp:/dpc-portal/tmp
     env_file:
       - ./ops/config/decrypted/local.env
+      - dd.docker-compose.env
     environment:
       # Misc. non-application settings
-      - TERM=${TERM:-xterm-256color}
-      - 'PS1=${DOCKER_PS1:-[docker] \w: }'
-      - "LSCOLORS=${DOCKER_LSCOLORS:- }"
+      TERM: ${TERM:-xterm-256color}
+      PS1: '${DOCKER_PS1:-[docker] \w: }'
+      LSCOLORS: "${DOCKER_LSCOLORS:- }"
       # Application settings
-      - DATABASE_URL=postgresql://db/dpc-portal_development
-      - TEST_DATABASE_URL=postgresql://db/dpc-portal_test
-      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
-      - API_METADATA_URL=http://api:3002/api/v1
-      - API_ADMIN_URL=http://api:9900
-      - DB_USER=postgres
-      - DB_PASS=dpc-safe
-      - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
-      - CPI_API_GW_BASE_URL=http://localhost:4567/
-      - CMS_IDM_OAUTH_URL=http://localhost:4567/
-      - IDP_HOST=idp.int.identitysandbox.gov
-      - RUBY_YJIT_ENABLE=1
-      - ENV=local
-      - NEW_RELIC_MONITOR_MODE=false
-      - DISABLE_JSON_LOGGER=true
-      - RAILS_DEVELOPMENT_HOSTS=host.docker.internal
-      - SKIP_SIMPLE_COV=${SKIP_SIMPLE_COV:-}
+      DATABASE_URL: postgresql://db/dpc-portal_development
+      TEST_DATABASE_URL: postgresql://db/dpc-portal_test
+      GOLDEN_MACAROON: ${GOLDEN_MACAROON}
+      API_METADATA_URL: http://api:3002/api/v1
+      API_ADMIN_URL: http://api:9900
+      DB_USER: postgres
+      DB_PASS: dpc-safe
+      DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: true
+      CPI_API_GW_BASE_URL: http://localhost:4567/
+      CMS_IDM_OAUTH_URL: http://localhost:4567/
+      IDP_HOST: idp.int.identitysandbox.gov
+      RUBY_YJIT_ENABLE: 1
+      ENV: local
+      NEW_RELIC_MONITOR_MODE: false
+      DISABLE_JSON_LOGGER: true
+      RAILS_DEVELOPMENT_HOSTS: host.docker.internal
+      SKIP_SIMPLE_COV: ${SKIP_SIMPLE_COV:-}
     ports:
       - "3100:3100"
     depends_on:
       db:
         condition: service_healthy
+      datadog-agent:
+        condition: service_started
     healthcheck:
       test: curl --fail http://localhost:3100/health_check || exit 1
       interval: 10s
