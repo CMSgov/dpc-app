@@ -416,7 +416,7 @@ RSpec.describe 'Accessibility', type: :system do
       let(:user_info) do
         {
           'sub' => 'some-guid',
-          'all_emails' => [invitation.invited_email],
+          'all_emails' => [invitation.invited_email, 'bob2@example.com'],
           'email' => invitation.invited_email,
           'social_security_number' => '900111111'
         }
@@ -462,6 +462,17 @@ RSpec.describe 'Accessibility', type: :system do
         page.find('.usa-button', text: 'Verify information').click
         page.find('.usa-button', text: 'Submit registration').click
         expect(page).to have_text(:all, 'Step 5')
+        expect(page).to be_axe_clean.according_to axe_standard
+      end
+      it 'should not show error for confirmed email' do
+        secondary_invitation = create(:invitation, :ao, provider_organization: org,
+                                      invited_email: 'bob2@example.com',
+                                      invited_email_confirmation: 'bob2@example.com')
+        visit "/organizations/#{org.id}/invitations/#{secondary_invitation.id}/set_idp_token?provider=#{provider}"
+        visit "/organizations/#{org.id}/invitations/#{secondary_invitation.id}/accept"
+        expect(page).to have_text(:all, 'Step 3 of 5')
+        expect(page).to have_css('.usa-step-indicator__heading',
+                                 text: '3 of 5 Verify Medicare enrollment information')
         expect(page).to be_axe_clean.according_to axe_standard
       end
       context :failure do
