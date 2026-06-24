@@ -1,18 +1,7 @@
 volumes:
   coverage:
 
-
 services:
-
-  redis:
-    image: artifactory.cloud.cms.gov/docker/redis:latest
-    platform: linux/arm64
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      start_period: 30s
-      retries: 5
 
   dpc_web:
     build:
@@ -146,10 +135,11 @@ services:
       IDP_HOST: idp.int.identitysandbox.gov
       RUBY_YJIT_ENABLE: 1
       ENV: local
-      NEW_RELIC_MONITOR_MODE: false
       DISABLE_JSON_LOGGER: true
       RAILS_DEVELOPMENT_HOSTS: host.docker.internal
       SKIP_SIMPLE_COV: ${SKIP_SIMPLE_COV:-}
+      DD_LOGS_INJECTION: false
+
     ports:
       - "3100:3100"
     depends_on:
