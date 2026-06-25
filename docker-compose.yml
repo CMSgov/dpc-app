@@ -25,7 +25,6 @@ services:
 
   datadog-agent:
     image: public.ecr.aws/datadog/agent:7.50.0
-    container_name: datadog-agent
     env_file:
       - ops/config/decrypted/local.env
     environment:
