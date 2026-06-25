@@ -139,6 +139,7 @@ services:
       RAILS_DEVELOPMENT_HOSTS: host.docker.internal
       SKIP_SIMPLE_COV: ${SKIP_SIMPLE_COV:-}
       DD_LOGS_INJECTION: false
+      DD_SERVICE: dpc-local-portal
 
     ports:
       - "3100:3100"
