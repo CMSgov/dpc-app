@@ -466,8 +466,8 @@ RSpec.describe 'Accessibility', type: :system do
       end
       it 'should not show error for confirmed email' do
         secondary_invitation = create(:invitation, :ao, provider_organization: org,
-                                      invited_email: 'bob2@example.com',
-                                      invited_email_confirmation: 'bob2@example.com')
+                                                        invited_email: 'bob2@example.com',
+                                                        invited_email_confirmation: 'bob2@example.com')
         visit "/organizations/#{org.id}/invitations/#{secondary_invitation.id}/set_idp_token?provider=#{provider}"
         visit "/organizations/#{org.id}/invitations/#{secondary_invitation.id}/accept"
         expect(page).to have_text(:all, 'Step 3 of 5')
