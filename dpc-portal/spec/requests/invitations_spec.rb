@@ -285,7 +285,7 @@ RSpec.describe 'Invitations', type: :request do
                  csp: provider.to_s,
                  invitation: invitation.id }]
             )
-            stub_user_info(overrides: { 'email' => 'another@example.com', 'all_emails' => %w[another@example.com] })
+            stub_user_info(overrides: { 'email' => 'another@example.com', 'all_emails' => ['another@example.com'] })
             get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
             expect(assigns(:given_name)).to be_nil
             expect(response).to be_forbidden
@@ -547,7 +547,7 @@ RSpec.describe 'Invitations', type: :request do
                    csp: provider.to_s,
                    invitation: cd_invite.id }]
               )
-              stub_user_info(overrides: { 'email' => 'another@example.com', 'all_emails' => %w[one@example.com another@example.com] })
+              stub_user_info(overrides: { 'email' => 'another@example.com', 'all_emails' => ['another@example.com'] })
               get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
               expect(assigns(:given_name)).to be_nil
               expect(response).to be_forbidden
