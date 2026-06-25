@@ -24,10 +24,11 @@ fi
 
 JAVA_CLASSES="-cp /app/resources:/app/classes:/app/libs/* gov.cms.dpc.aggregation.DPCAggregationService"
 
-if [ -n "$NEW_RELIC_LICENSE_KEY" ]; then
-  NR_AGENT="-javaagent:/newrelic/newrelic.jar"
+# If we have a DD license, enable the agent and turn on open telemetry
+if [ -n "$DD_API_KEY" ]; then
+  DD_AGENT="-javaagent:/opt/dd-java-agent.jar -Ddd.trace.otel.enabled=true"
 else
-  NR_AGENT=""
+  DD_AGENT=""
 fi
 
 # set env vars for Dropwizard application
@@ -53,13 +54,13 @@ else
   DEBUG_FLAGS=""
 fi
 
-CMDLINE="java ${DEBUG_FLAGS} ${JACOCO} ${NR_AGENT} ${JAVA_CLASSES}"
+CMDLINE="java ${CONF_FLAGS} ${DEBUG_FLAGS} ${JACOCO} ${DD_AGENT} ${JAVA_CLASSES}"
 
 # Make sure volumes in our persisted environments are writeable by nobody
 if [ -d "/app/data" ]; then chown nobody:nobody /app/data; fi
 if [ -d "/config" ]; then chown nobody:nobody /config; fi
 if [ -d "/tmp" ]; then chown nobody:nobody /tmp; fi
-if [ -d "/newrelic/logs" ]; then chown nobody:nobody /newrelic/logs; fi
+if [ -d "/tmp/ddprof_nobody" ]; then chown nobody:nobody /tmp/ddprof_nobody; fi
 
 echo "Running server via entrypoint as nobody user!"
 # Note: -E preserves "most" env variables, but not all.  Ones deemed sensitive, like ENV need to be passed explicitly.
