@@ -345,10 +345,12 @@ RSpec.describe 'LoginDotGov', type: :request do
 
   describe 'CSP inactive' do
     before do
-      inactive_csp = create(:csp, :inactive, name: 'login_dot_gov')
+      csp = Csp.find_by(name: 'login_dot_gov')
+      csp.end_date = DateTime.current - 1.year
+      csp.save!
 
       user = create(:user, email: 'bob5@example.com', provider: :login_dot_gov)
-      create(:csp_user, user:, uuid:, csp: inactive_csp)
+      create(:csp_user, user:, uuid:, csp:)
 
       OmniAuth.config.test_mode = true
       OmniAuth.config.add_mock(:login_dot_gov,
