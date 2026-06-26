@@ -3,11 +3,14 @@
 # Base controller to handle interactions with CSPs.
 class CspController < ApplicationController
   include CspEmailSync
+  include CspErrorHandling
 
   skip_before_action :verify_authenticity_token, only: :openid_connect
 
   def openid_connect
     auth = request.env['omniauth.auth']
+    return render_ial1_blocked if ial_1_user?(auth)
+
     return unless (active_csp = csp(auth.provider))
 
     user_actions(auth, active_csp)
@@ -41,9 +44,16 @@ class CspController < ApplicationController
     csp_user = CspUser.find_by(uuid: auth.uid, csp:)
     user = csp_user&.user
     sign_in_and_log(user, csp.name)
-    ial_2_actions(user, auth)
     sync_csp_emails(csp_user, all_emails(auth), primary_email(auth))
+    ial_2_actions(user, auth)
     redirect_to path(user, auth)
+  end
+
+  def render_ial1_blocked
+    Rails.logger.info(["User attempted IAL1 login with #{display_name || 'CSP'} — not permitted",
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }])
+    render(Page::Utility::ErrorComponent.new(nil, "#{csp_code}_signin_fail"), status: :forbidden)
   end
 
   def sign_in_and_log(user, csp)
@@ -56,32 +66,6 @@ class CspController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::UserLoggedIn,
                          **csp_log_context }])
-  end
-
-  def handle_invitation_flow_failure(invitation_id)
-    Rails.logger.info(['Failed invitation flow',
-                       { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::FailedLogin,
-                         **csp_log_context }])
-    invitation = Invitation.find(invitation_id)
-    if invitation.credential_delegate?
-      render(Page::Utility::ErrorComponent.new(invitation, 'fail_to_proof'), status: :forbidden)
-    else
-      render(Page::Invitations::AoFlowFailComponent.new(invitation, 'fail_to_proof', 1), status: :forbidden)
-    end
-  end
-
-  def handle_signin_fail(csp)
-    Rails.logger.error 'CSP Configuration error'
-    render(Page::Utility::ErrorComponent.new(nil, "#{csp || 'csp'}_signin_fail"))
-  end
-
-  def handle_signin_cancel(csp)
-    Rails.logger.info(['User cancelled login',
-                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::UserCancelledLogin,
-                         **csp_log_context }])
-    render(Page::Utility::ErrorComponent.new(nil, "#{csp || 'csp'}_signin_cancel"))
   end
 
   def ial_2_actions(user, auth)
@@ -124,4 +108,6 @@ class CspController < ApplicationController
   # Can be overridden
   def primary_email(auth) = auth.info.email
   def all_emails(auth) = auth.extra.raw_info.all_emails
+
+  def ial_1_user?(auth) = auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
 end

@@ -28,6 +28,12 @@ module Page
       def resolve_reason(reason)
         AoVerificationService::SERVER_ERRORS.include?(reason) ? :server_error : reason.to_sym
       end
+
+      private
+
+      def resolve_reason(reason)
+        AoVerificationService::SERVER_ERRORS.include?(reason) ? :server_error : reason.to_sym
+      end
     end
   end
 end

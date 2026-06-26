@@ -13,17 +13,26 @@ RSpec.describe 'Accessibility', type: :system do
   let(:axe_standard) { %w[best-practice wcag21aa] }
   let(:uid) { SecureRandom.uuid }
 
-  RSpec.shared_examples 'accessibility tests' do |provider|
-    let!(:csp) { create(:csp, name: provider) }
+  let(:raw_info) do
+    emails = %w[bob@example.com bob2@example.com]
+    {
+      login_dot_gov: { all_emails: emails, ial: 'http://idmanagement.gov/ns/assurance/ial/2' },
+      id_me: { emails_confirmed: emails, identity_assurance_level: 2 }
+    }
+  end
 
-    ial = provider == :id_me ? { identity_assurance_level: 1 } : { ial: 'http://idmanagement.gov/ns/assurance/ial/1' }
+  RSpec.shared_examples 'accessibility tests' do |provider|
+    let!(:csp) { Csp.find_by(name: provider) || create(:csp, name: provider) }
     before do
       OmniAuth.config.test_mode = true
       OmniAuth.config.add_mock(provider,
                                { uid:,
+                                 credentials: { expires_in: 899,
+                                                token: 'bearer-token' },
                                  info: { email: 'bob@example.com' },
-                                 extra: { raw_info: { emails_confirmed: %w[bob@example.com
-                                                                           bob2@example.com] }.merge(ial) } })
+                                 extra: { raw_info: { given_name: 'Bob',
+                                                      family_name: 'Hoskins',
+                                                      social_security_number: '1-2-3' }.merge(raw_info[provider]) } })
     end
     def sign_in
       visit "/auth/#{csp.name}/callback"
@@ -43,8 +52,19 @@ RSpec.describe 'Accessibility', type: :system do
 
       context 'bad user tries to log in' do
         it 'shows no such user page' do
+          ial1_raw_info = if provider == :id_me
+                            { identity_assurance_level: 1 }
+                          else
+                            { ial: 'http://idmanagement.gov/ns/assurance/ial/1' }
+                          end
+
+          OmniAuth.config.add_mock(provider,
+                                   { uid:,
+                                     info: { email: 'bob@example.com' },
+                                     extra: { raw_info: ial1_raw_info } })
+
           visit "/auth/#{provider}/callback"
-          expect(page).to have_text('The email you used is not associated with a DPC account.')
+          expect(page).to have_text(I18n.t("verification.#{provider}_signin_fail_text"))
           expect(page).to be_axe_clean.according_to axe_standard
         end
         it 'shows sanctioned ao page' do
@@ -396,7 +416,7 @@ RSpec.describe 'Accessibility', type: :system do
       let(:user_info) do
         {
           'sub' => 'some-guid',
-          'all_emails' => [invitation.invited_email],
+          'all_emails' => [invitation.invited_email, 'bob2@example.com'],
           'email' => invitation.invited_email,
           'social_security_number' => '900111111'
         }
@@ -442,6 +462,17 @@ RSpec.describe 'Accessibility', type: :system do
         page.find('.usa-button', text: 'Verify information').click
         page.find('.usa-button', text: 'Submit registration').click
         expect(page).to have_text(:all, 'Step 5')
+        expect(page).to be_axe_clean.according_to axe_standard
+      end
+      it 'should not show error for confirmed email' do
+        secondary_invitation = create(:invitation, :ao, provider_organization: org,
+                                                        invited_email: 'bob2@example.com',
+                                                        invited_email_confirmation: 'bob2@example.com')
+        visit "/organizations/#{org.id}/invitations/#{secondary_invitation.id}/set_idp_token?provider=#{provider}"
+        visit "/organizations/#{org.id}/invitations/#{secondary_invitation.id}/accept"
+        expect(page).to have_text(:all, 'Step 3 of 5')
+        expect(page).to have_css('.usa-step-indicator__heading',
+                                 text: '3 of 5 Verify Medicare enrollment information')
         expect(page).to be_axe_clean.according_to axe_standard
       end
       context :failure do

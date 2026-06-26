@@ -253,12 +253,20 @@ RSpec.describe 'Invitations', type: :request do
           expect(response.body).to include(login_organization_invitation_path(org, invitation))
         end
         context :success do
-          before { stub_user_info }
           it 'should show confirm form if valid invitation' do
+            stub_user_info
             get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
             expect(response).to be_ok
             expect(response.body).to include(confirm_organization_invitation_path(org, invitation))
             expect(request.session["invitation_status_#{invitation.id}"]).to eq 'identity_verified'
+          end
+          it 'should not show error page if confirmed email' do
+            stub_user_info(overrides: { 'email' => 'david2@example.com' })
+            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+            expect(response).to be_ok
+            expect(response.body).to include(confirm_organization_invitation_path(org, invitation))
+            expect(request.session["invitation_status_#{invitation.id}"]).to eq 'identity_verified'
+            expect(assigns(:given_name)).to_not be_nil
           end
         end
         context :failure do
@@ -277,7 +285,7 @@ RSpec.describe 'Invitations', type: :request do
                  csp: provider.to_s,
                  invitation: invitation.id }]
             )
-            stub_user_info(overrides: { 'email' => 'another@example.com' })
+            stub_user_info(overrides: { 'email' => 'another@example.com', 'all_emails' => ['another@example.com'] })
             get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
             expect(assigns(:given_name)).to be_nil
             expect(response).to be_forbidden
@@ -539,7 +547,7 @@ RSpec.describe 'Invitations', type: :request do
                    csp: provider.to_s,
                    invitation: cd_invite.id }]
               )
-              stub_user_info(overrides: { 'email' => 'another@example.com' })
+              stub_user_info(overrides: { 'email' => 'another@example.com', 'all_emails' => ['another@example.com'] })
               get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
               expect(assigns(:given_name)).to be_nil
               expect(response).to be_forbidden

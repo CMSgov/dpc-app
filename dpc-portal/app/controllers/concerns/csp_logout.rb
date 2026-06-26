@@ -32,7 +32,7 @@ module CspLogout
     URI::HTTPS.build(host: csp_config.host,
                      path: csp_config.log_out_path,
                      query: { client_id: csp_config.identifier,
-                              redirect_uri: "#{root_url}auth/logged_out" }.to_query)
+                              redirect_uri: "#{root_url}oauth/logged_out" }.to_query)
   end
 
   class UnknownCspError < StandardError; end

@@ -36,11 +36,13 @@ module LoginSupport
     all_emails = user.csp_user_for('login_dot_gov')&.user_emails&.map(&:email).presence || [user.email]
     { uid: user.csp_user_for('login_dot_gov')&.uuid || user.uid,
       info: { email: user.email },
-      # credentials: { token: 'mock_token', expires_in: 300 },
+      credentials: { token: 'mock_token', expires_in: 899 },
       extra: {
         raw_info: {
+          given_name: user.given_name,
+          family_name: user.family_name,
           all_emails:,
-          ial: 'http://idmanagement.gov/ns/assurance/ial/1'
+          ial: 'http://idmanagement.gov/ns/assurance/ial/2'
         }
       } }
   end
@@ -49,11 +51,11 @@ module LoginSupport
     all_emails = user.csp_user_for('id_me')&.user_emails&.map(&:email).presence || [user.email]
     { uid: user.csp_user_for('id_me')&.uuid || user.uid,
       info: { email: user.email },
-      # credentials: { token: 'mock_token', expires_in: 300 },
+      credentials: { token: 'mock_token', expires_in: 300 },
       extra: {
         raw_info: {
           SSN: 111_887_777,
-          identity_assurance_level: 1,
+          identity_assurance_level: 2,
           emails_confirmed: all_emails,
           email: user.email
         }
