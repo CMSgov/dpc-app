@@ -138,7 +138,7 @@ class InvitationsController < ApplicationController
       log_pii_mismatch
       render(Page::Utility::ErrorComponent.new(@invitation, 'pii_mismatch'),
              status: :forbidden)
-    elsif !@invitation.email_match?(user_info)
+    elsif !@invitation.email_match?(user_info) && !confirmed_email?(user_info)
       log_pii_mismatch
       render(Page::Utility::ErrorComponent.new(@invitation, 'email_mismatch'),
              status: :forbidden)
@@ -240,11 +240,19 @@ class InvitationsController < ApplicationController
     csp_user = CspUser.find_or_create_by!(user: @user, csp:, uuid: user_info['sub'])
 
     # Update emails based upon the latest information in user info.
-    new_emails = user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed']
+    new_emails = user_emails(user_info)
     primary_email = user_info['email']
     sync_csp_emails(csp_user, new_emails, primary_email)
     update_user(user_info)
     @user
+  end
+
+  def user_emails(user_info)
+    user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed']
+  end
+
+  def confirmed_email?(user_info)
+    user_emails(user_info).include?(@invitation.invited_email)
   end
 
   def find_or_create_user(user_info)
