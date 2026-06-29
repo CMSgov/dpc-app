@@ -5,7 +5,6 @@ class UserInfoService
   def user_info(session)
     validate_session(session)
 
-    # request_info(session[:login_dot_gov_token])
     request_info(session[:csp], session["#{session[:csp]}_token"])
   end
 
@@ -24,6 +23,13 @@ class UserInfoService
     raise UserInfoServiceError, 'expired_token' unless session["#{csp}_token_exp"] > Time.now
   end
 
+  def oidc_client_config(csp)
+    return ID_ME_CLIENT_CONFIG if csp.to_s == :id_me.to_s
+    return LOGIN_DOT_GOV_CLIENT_CONFIG if csp.to_s == :login_dot_gov.to_s
+
+    raise UnknownCSPError, csp
+  end
+
   def parsed_response(response)
     return if response.body.blank?
 
@@ -31,8 +37,7 @@ class UserInfoService
     if response.content_type.to_s.strip.downcase == 'application/jwt' || looks_like_jwt?(body)
       decode_jwt(body)
     else
-      # JSON.parse(body).with_indifferent_access
-      JSON.parse response.body
+      JSON.parse(body).with_indifferent_access
     end
   end
 
@@ -42,15 +47,8 @@ class UserInfoService
   end
 
   def decode_jwt(body)
+    body = body[1..-2] if body.start_with?('"') && body.end_with?('"')
     JSON::JWT.decode(body, :skip_verification).to_h.with_indifferent_access
-  end
-
-  def oidc_client_config(csp)
-    return ID_ME_CLIENT_CONFIG if csp.to_s == :id_me.to_s
-    return LOGIN_DOT_GOV_CLIENT_CONFIG if csp.to_s == :login_dot_gov.to_s
-    return CLEAR_CLIENT_CONFIG if csp.to_s == :clear.to_s
-
-    raise UserInfoServiceError, 'invalid_csp'
   end
 
   def request_info(csp, token) # rubocop:disable Metrics/AbcSize
@@ -60,23 +58,7 @@ class UserInfoService
     code = response.code.to_i
     case code
     when 200...299
-      user_info = parsed_response(response)
-      puts "raw user_info response: #{user_info}"
-
-      Rails.logger.info(['Rails.Logger CLEAR userinfo response',
-                         { sub: user_info&.dig('sub'),
-                           email: user_info&.dig('email'),
-                           email_verified: user_info&.dig('email_verified'),
-                           given_name_present: user_info&.dig('given_name').present?,
-                           given_name: user_info&.dig('given_name'),
-                           family_name_present: user_info&.dig('family_name').present?,
-                           family_name: user_info&.dig('family_name'),
-                           ssn9_present: user_info&.dig('ssn9').present?,
-                           ssn9: user_info&.dig('ssn9'),
-                           social_security_number_present: user_info&.dig('social_security_number').present?,
-                           social_security_number: user_info&.dig('social_security_number')
-                           }])
-      user_info
+      parsed_response(response)
     when 401
       raise UserInfoServiceError, 'unauthorized'
     else
@@ -86,13 +68,6 @@ class UserInfoService
   rescue Errno::ECONNREFUSED
     code = 503
     Rails.logger.error 'Could not connect to login.gov'
-    raise UserInfoServiceError, 'server_error'
-  rescue JSON::ParserError => e
-    puts "error: #{e}"
-    Rails.logger.error(['Could not parse CSP user_info response',
-                        { csp:,
-                          content_type: response&.content_type,
-                          error: e.message }])
     raise UserInfoServiceError, 'server_error'
   ensure
     finish_tracking(code, csp, csp_config[:client_options][:userinfo_endpoint])

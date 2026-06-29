@@ -7,23 +7,27 @@
       <div class="bg-white padding-y-3 padding-x-5 border border-base-lighter">
         <h1 class="margin-bottom-0">DPC Portal sign in</h1>
         <p>Sign in with your DPC Portal Login.gov account</p>
-        <%= button_to @login_path, class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
-          <span class="clear-login-button__logo">CLEAR</span>
+        
+        <%# Build a login button for each CSP %>
+        <%
+          csps = [
+            { id: :clear, logo_class: 'clear-login-button__logo', text: 'CLEAR', login_path: helpers.omniauth_authorize_path(:clear) },
+            { id: :id_me, logo_class: 'idme-login-button__logo', text: 'ID.me', login_path: helpers.omniauth_authorize_path(:id_me) },
+            { id: :login_dot_gov, logo_class: 'lg-login-button__logo', text: 'Login.gov', login_path: helpers.omniauth_authorize_path(:login_dot_gov) }
+          ]
+        %>
+        <% csps.each do |csp| %>
+          <% is_last_used = (@last_used_csp == csp[:id]) %>
+          <div class="<%= class_names('last-used-login-wrapper margin-bottom-1': is_last_used) %>">
+            <%= button_to csp[:login_path], class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
+              <span class="<%= csp[:logo_class] %>"><%= csp[:text] %></span>
+            <% end %>
+            <%= content_tag(:span, 'LAST USED', class: 'last-used-login-wrapper__badge') if is_last_used %>
+          </div>
         <% end %>
-        <%= button_to @login_path, class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
-          <span class="idme-login-button__logo">ID.me</span>
-        <% end %>
-        <%= button_to @login_path, class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
-          <span class="lg-login-button__logo">Login.gov</span>
-        <% end %>
+
+        <div class="line-separator margin-bottom-2 margin-top-2"></div>
         <%= render(Core::Navigation::SystemUseAgreementLinkComponent.new) %>
-        <div class="line-separator"></div>
-        <p>
-          <strong>You must use your unique DPC Portal username and password to sign in.</strong>
-        </p>
-        <p>
-          You will have received an invite to set up these credentials.
-        </p>
       </div>
     </div>
     <div class="grid-col-12 mobile-lg:grid-col-10 tablet:grid-col-8 desktop:grid-col-6 padding-x-205">

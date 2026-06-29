@@ -74,11 +74,10 @@ class Invitation < ApplicationRecord
   end
 
   def ao_match?(user_info)
-    # check_missing_user_info(user_info, 'social_security_number', 'SSN')
     # ssn = user_info['social_security_number']&.tr('-', '') || user_info['SSN']
     # probably a cleaner way to pull from 3+ keys here
-    check_missing_user_info(user_info, 'social_security_number', 'ssn9')
-    ssn = user_info['social_security_number']&.tr('-', '') || user_info['ssn9']
+    check_missing_user_info(user_info, 'social_security_number', 'SSN', 'ssn9', check_all_keys: false)
+    ssn = user_info['social_security_number']&.tr('-', '') || user_info['SSN'] || user_info['ssn9']
     service = AoVerificationService.new
     result = service.check_eligibility(provider_organization.npi, ssn)
 
@@ -141,9 +140,10 @@ class Invitation < ApplicationRecord
     end
   end
 
-  def check_missing_user_info(user_info, *keys)
+  def check_missing_user_info(user_info, *keys, check_all_keys: true)
     missing_keys = keys.reject { |key| user_info[key].present? }
-    return unless missing_keys.any?
+    return if missing_keys.empty?
+    return if !check_all_keys && missing_keys.size < keys.size
 
     Rails.logger.error("User Info Missing: #{missing_keys}")
     raise UserInfoServiceError, 'missing_info'

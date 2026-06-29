@@ -77,12 +77,6 @@
             <groupId>com.smoketurner</groupId>
             <artifactId>dropwizard-swagger</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.newrelic.agent.java</groupId>
-            <artifactId>newrelic-java</artifactId>
-            <version>${newrelic.agent.version}</version>
-            <type>${newrelic.agent.type}</type>
-        </dependency>
         <!--Testing dependencies-->
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -205,13 +199,16 @@
                 <artifactId>maven-dependency-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>io.github.download-maven-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <configuration>
                     <container>
                         <args>
                             <arg>server</arg>
-                            <!--<arg>${jib.container.appRoot}/resources/application.yml</arg>-->
                         </args>
                         <ports>
                             <port>8080</port>
@@ -219,13 +216,20 @@
                         <environment>
                             <DB_MIGRATION>1</DB_MIGRATION>
                         </environment>
+                        <!-- Writing to /tmp is tricky because it's read only on Fargate.  We need a volume over top of it -->
+                        <volumes>
+                            <volume>/tmp</volume>
+                        </volumes>
                         <entrypoint>/entrypoint.sh</entrypoint>
                     </container>
                     <extraDirectories>
                         <paths>
                             <path>${project.basedir}/docker</path>
                             <path>${project.basedir}/target/jacoco-agent</path>
-                            <path>${project.basedir}/target/newrelic-agent</path>
+                            <path>
+                                <from>${project.build.directory}/datadog-agent</from>
+                                <into>/opt</into>
+                            </path>
                         </paths>
                         <permissions>
                             <permission>

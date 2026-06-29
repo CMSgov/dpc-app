@@ -32,11 +32,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <dropwizard.version>5.0.1</dropwizard.version>
+        <dropwizard.version>5.0.2</dropwizard.version>
         <junit.jupiter.version>5.12.1</junit.jupiter.version>
         <slf4j.version>2.0.17</slf4j.version>
         <hapi.fhir.groupID>ca.uhn.hapi.fhir</hapi.fhir.groupID>
-        <hapi.fhir.version>8.4.0</hapi.fhir.version>
+        <hapi.fhir.version>8.10.0</hapi.fhir.version>
         <pgsql.version>42.7.11</pgsql.version>
         <java.version>17</java.version>
         <jib.container.appRoot>/app</jib.container.appRoot>
@@ -45,11 +45,10 @@
         <jooq.version>3.19.19</jooq.version>
         <bouncey.version>1.84</bouncey.version>
         <pitest.version>1.22.0</pitest.version>
-        <newrelic.agent.version>8.21.0</newrelic.agent.version>
-        <newrelic.agent.type>zip</newrelic.agent.type>
         <h2.version>2.3.232</h2.version>
-        <aws.java.sdk.version>2.42.38</aws.java.sdk.version>
+        <aws.java.sdk.version>2.46.15</aws.java.sdk.version>
         <sonar.coverage.exclusions>**/MockBlueButton*.java</sonar.coverage.exclusions>
+        <maven.build.cache.processPlugins>false</maven.build.cache.processPlugins>
     </properties>
 
     <developers>
@@ -138,7 +137,7 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-bom</artifactId>
-                <version>12.1.6</version>
+                <version>12.1.10</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -338,13 +337,6 @@
                 <version>33.4.8-jre</version>
             </dependency>
             <dependency>
-                <groupId>com.newrelic.agent.java</groupId>
-                <artifactId>newrelic-java</artifactId>
-                <version>${newrelic.agent.version}</version>
-                <scope>provided</scope>
-                <type>${newrelic.agent.type}</type>
-            </dependency>
-            <dependency>
                 <groupId>com.google.re2j</groupId>
                 <artifactId>re2j</artifactId>
                 <version>1.6</version>
@@ -460,6 +452,13 @@
                 <groupId>software.amazon.jdbc</groupId>
                 <artifactId>aws-advanced-jdbc-wrapper</artifactId>
                 <version>2.6.6</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry.instrumentation</groupId>
+                <artifactId>opentelemetry-instrumentation-bom</artifactId>
+                <version>2.28.1</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -791,28 +790,6 @@
                 </plugin>
                 <!-- Base configuration for Docker images -->
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.9.0</version>
-                    <executions>
-                        <execution>
-                            <id>unpack-newrelic</id>
-                            <phase>prepare-package</phase>
-                            <goals>
-                                <goal>unpack-dependencies</goal>
-                            </goals>
-                            <configuration>
-                                <includeGroupIds>com.newrelic.agent.java</includeGroupIds>
-                                <includeArtifactIds>newrelic-java</includeArtifactIds>
-                                <overWriteReleases>false</overWriteReleases>
-                                <overWriteSnapshots>false</overWriteSnapshots>
-                                <overWriteIfNewer>true</overWriteIfNewer>
-                                <outputDirectory>${project.build.directory}/newrelic-agent</outputDirectory>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
                     <version>3.5.1</version>
@@ -855,6 +832,26 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>3.1.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>io.github.download-maven-plugin</groupId>
+                    <artifactId>download-maven-plugin</artifactId>
+                    <version>2.0.0</version>
+                    <executions>
+                        <execution>
+                            <id>download-datadog-agent</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>wget</goal>
+                            </goals>
+                            <configuration>
+                                <url>https://dtdg.co/latest-java-tracer</url>
+                                <outputFileName>dd-java-agent.jar</outputFileName>
+                                <outputDirectory>${project.build.directory}/datadog-agent</outputDirectory>
+                                <skipCache>true</skipCache>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

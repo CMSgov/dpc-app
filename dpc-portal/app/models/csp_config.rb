@@ -10,24 +10,25 @@ class CspConfig
     @code = code
     @host = config[:host]
     @identifier = config[:identifier]
-    @client_secret = config[:client_secret]
-    @client_auth_method = config[:client_auth_method]
-    @authorization_endpoint = config[:authorization_endpoint]
-    @token_endpoint = config[:token_endpoint]
     @user_info_endpoint = config[:user_info_endpoint]
-    @jwks_uri = config[:jwks_uri]
-    @redirect_path = config[:redirect_path]
     @log_out_path = config[:log_out_path]
     @token_expiration_interval = config[:token_expiration_interval]
+    @authorization_endpoint = config[:authorization_endpoint]
+    @redirect_path = config[:redirect_path]
+    @authorize_scope = config[:authorize_scope]
+    @acr_values = config[:acr_values]
   end
 
-  LOGIN_DOT_GOV = new('login_dot_gov', CONFIG[:login_dot_gov])
-  ID_ME = new('id_me', CONFIG[:id_me])
-  CLEAR = new('clear', CONFIG[:clear])
+  LOGIN_DOT_GOV = new('login_dot_gov',
+                      CONFIG[:login_dot_gov])
+  ID_ME = new('id_me',
+              CONFIG[:id_me])
+  CLEAR = new('clear',
+              CONFIG[:clear])
   private_class_method :new
 
-  attr_reader :authorization_endpoint, :client_auth_method, :client_secret, :code, :host, :identifier, :jwks_uri, :log_out_path,
-              :redirect_path, :token_endpoint, :token_expiration_interval, :user_info_endpoint
+  attr_reader :code, :user_info_endpoint, :log_out_path, :token_expiration_interval, :host, :identifier,
+              :authorization_endpoint, :redirect_path, :authorize_scope, :acr_values
 
   def self.for(code)
     case code.to_s

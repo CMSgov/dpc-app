@@ -17,9 +17,9 @@ RSpec.describe 'Organizations', type: :request do
     end
 
     describe 'logged in' do
-      let!(:user) { create(:user) }
+      let!(:user) { create_user_with_csp }
       let!(:org) { create(:provider_organization) }
-      before { sign_in user }
+      before { sign_in user, csp: :login_dot_gov }
 
       it 'returns success if no orgs associated with user' do
         get '/organizations'
@@ -40,9 +40,13 @@ RSpec.describe 'Organizations', type: :request do
     end
 
     context 'user has sanctions' do
-      let!(:user) { create(:user, verification_status: 'rejected', verification_reason: 'ao_med_sanctions') }
+      let!(:user) do
+        create_user_with_csp(given_name: 'John', family_name: 'Smith', csp: :login_dot_gov,
+                             verification_status: 'rejected', verification_reason: 'ao_med_sanctions')
+      end
+
       let!(:org) { create(:provider_organization) }
-      before { sign_in user }
+      before { sign_in user, csp: :login_dot_gov }
 
       it 'should show access denied page' do
         create(:ao_org_link, provider_organization: org, user:)
@@ -63,8 +67,8 @@ RSpec.describe 'Organizations', type: :request do
     end
 
     context 'no link to org' do
-      let!(:user) { create(:user) }
-      before { sign_in user }
+      let!(:user) { create_user_with_csp }
+      before { sign_in user, csp: :login_dot_gov }
       it 'redirects to organizations page' do
         org = create(:provider_organization)
         get "/organizations/#{org.id}"
@@ -74,12 +78,12 @@ RSpec.describe 'Organizations', type: :request do
 
     context 'ao access denied' do
       context 'org has sanctions' do
-        let!(:user) { create(:user) }
+        let!(:user) { create_user_with_csp }
         let!(:org) do
           create(:provider_organization, verification_status: 'rejected',
                                          verification_reason: 'org_med_sanctions')
         end
-        before { sign_in user }
+        before { sign_in user, csp: :login_dot_gov }
 
         it 'should show access denied page' do
           create(:ao_org_link, provider_organization: org, user:)
@@ -89,12 +93,12 @@ RSpec.describe 'Organizations', type: :request do
       end
 
       context 'org not approved' do
-        let!(:user) { create(:user) }
+        let!(:user) { create_user_with_csp }
         let!(:org) do
           create(:provider_organization, verification_status: 'rejected',
                                          verification_reason: 'no_approved_enrollment')
         end
-        before { sign_in user }
+        before { sign_in user, csp: :login_dot_gov }
 
         it 'should show access denied page' do
           create(:ao_org_link, provider_organization: org, user:)
@@ -104,9 +108,9 @@ RSpec.describe 'Organizations', type: :request do
       end
 
       context 'user no longer ao' do
-        let!(:user) { create(:user) }
+        let!(:user) { create_user_with_csp }
         let!(:org) { create(:provider_organization) }
-        before { sign_in user }
+        before { sign_in user, csp: :login_dot_gov }
 
         it 'should show access denied page' do
           create(:ao_org_link, provider_organization: org, user:, verification_status: false,
@@ -118,12 +122,12 @@ RSpec.describe 'Organizations', type: :request do
     end
     context 'cd access denied' do
       context 'org has sanctions' do
-        let!(:user) { create(:user) }
+        let!(:user) { create_user_with_csp }
         let!(:org) do
           create(:provider_organization, verification_status: 'rejected',
                                          verification_reason: 'org_med_sanctions')
         end
-        before { sign_in user }
+        before { sign_in user, csp: :login_dot_gov }
 
         it 'should show access denied page' do
           create(:cd_org_link, provider_organization: org, user:)
@@ -133,12 +137,12 @@ RSpec.describe 'Organizations', type: :request do
       end
 
       context 'org not approved' do
-        let!(:user) { create(:user) }
+        let!(:user) { create_user_with_csp }
         let!(:org) do
           create(:provider_organization, verification_status: 'rejected',
                                          verification_reason: 'no_approved_enrollment')
         end
-        before { sign_in user }
+        before { sign_in user, csp: :login_dot_gov }
 
         it 'should show access denied page' do
           create(:cd_org_link, provider_organization: org, user:)
@@ -149,10 +153,10 @@ RSpec.describe 'Organizations', type: :request do
     end
 
     context 'as cd' do
-      let!(:user) { create(:user) }
+      let!(:user) { create_user_with_csp }
       let!(:org) { create(:provider_organization) }
       let!(:link) { create(:cd_org_link, user:, provider_organization: org) }
-      before { sign_in user }
+      before { sign_in user, csp: :login_dot_gov }
 
       context :not_signed_tos do
         it 'should redirect' do
@@ -204,11 +208,11 @@ RSpec.describe 'Organizations', type: :request do
     end
 
     context 'as ao' do
-      let!(:user) { create(:user) }
+      let!(:user) { create_user_with_csp }
       let!(:org) { create(:provider_organization) }
       before do
         create(:ao_org_link, user:, provider_organization: org)
-        sign_in user
+        sign_in user, csp: :login_dot_gov
       end
 
       context :not_signed_tos do
@@ -333,8 +337,8 @@ RSpec.describe 'Organizations', type: :request do
   end
 
   describe 'AO org flow' do
-    let!(:user) { create(:user) }
-    before { sign_in user }
+    let!(:user) { create_user_with_csp }
+    before { sign_in user, csp: :login_dot_gov }
 
     context 'GET /organizations/new' do
       it 'returns success' do

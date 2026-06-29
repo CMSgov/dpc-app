@@ -18,7 +18,8 @@ make portal
 
 # Prepare the environment 
 docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml up db --wait
-docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails db:create db:migrate RAILS_ENV=test" dpc_portal
+docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails db:create db:migrate db:seed RAILS_ENV=test" dpc_portal
+docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rails assets:clobber" dpc_portal
 
 # Run the tests
 echo "┌─────────────────────────------─┐"
@@ -28,6 +29,7 @@ echo "│                                │"
 echo "└────────────────────────-----───┘"
 
 docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rubocop" dpc_portal
+docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "rails assets:clobber tmp:clear" dpc_portal
 docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint "bundle exec rspec" dpc_portal
 docker compose -p start-v1-portals -f docker-compose.yml -f docker-compose.portals.yml run --entrypoint docker/system-tests.sh dpc_portal
 echo "┌────────────────────────────────┐"

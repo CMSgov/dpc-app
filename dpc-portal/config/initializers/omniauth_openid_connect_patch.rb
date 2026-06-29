@@ -40,6 +40,10 @@ module OmniAuth
           nil,
           { 'Authorization' => "Bearer #{access_token.access_token}" }
         )
+
+        # If already parsed into a Hash upstream, return it directly
+        return response.body.with_indifferent_access if response.body.is_a?(Hash)
+
         body = response.body.to_s.strip
         ct_header = Array(response.headers['Content-Type']).first.to_s
         content_type = ct_header.split(';').first.to_s.strip.downcase
@@ -49,8 +53,7 @@ module OmniAuth
           ## TODO - consider verifying the JWT signature using the provider's JWKS keys
           JSON::JWT.decode(body, :skip_verification).to_h.with_indifferent_access
         else
-          # JSON.parse(body).with_indifferent_access
-          response.body.with_indifferent_access
+          JSON.parse(body).with_indifferent_access
         end
       end
 

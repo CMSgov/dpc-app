@@ -11,6 +11,14 @@ ID_ME_CONFIG = PORTAL_CSP_CONFIG[:id_me].freeze
 LOGIN_DOT_GOV_CONFIG = PORTAL_CSP_CONFIG[:login_dot_gov].freeze
 CLEAR_CONFIG = PORTAL_CSP_CONFIG[:clear].freeze
 
+## Build Login.gov RSA private key object before defining the config constant
+LOGIN_DOT_GOV_PRIVATE_KEY = begin
+  OpenSSL::PKey::RSA.new(ENV['LOGIN_DOT_GOV_CLIENT_PRIVATE_KEY'])
+rescue TypeError, OpenSSL::PKey::RSAError => e
+  Rails.logger.error("Unable to create Login.gov private key for omniauth: #{e}")
+  OpenSSL::PKey::RSA.new(1024)
+end
+
 ID_ME_CLIENT_CONFIG = {
   name: :id_me,
   issuer: "https://#{ID_ME_CONFIG[:host]}/oidc",
@@ -25,9 +33,9 @@ ID_ME_CLIENT_CONFIG = {
     secret:       ID_ME_CONFIG[:client_secret],
     redirect_uri: "#{my_protocol_host}#{ID_ME_CONFIG[:redirect_path]}",
     authorization_endpoint: ID_ME_CONFIG[:authorization_endpoint],
-    token_endpoint: ID_ME_CONFIG[:token_endpoint],
-    userinfo_endpoint: ID_ME_CONFIG[:user_info_endpoint],
-    jwks_uri:      ID_ME_CONFIG[:jwks_uri],
+    token_endpoint:         ID_ME_CONFIG[:token_endpoint],
+    userinfo_endpoint:      ID_ME_CONFIG[:user_info_endpoint],
+    jwks_uri:               ID_ME_CONFIG[:jwks_uri],
     userinfo_signed_response_alg: 'RS256',
     id_token_signed_response_alg: 'RS256'
   }
@@ -36,25 +44,25 @@ ID_ME_CLIENT_CONFIG = {
 LOGIN_DOT_GOV_CLIENT_CONFIG = {
   name: :login_dot_gov,
   issuer: "https://#{LOGIN_DOT_GOV_CONFIG[:host]}/",
-  discovery: false,
+  discovery: true,
   scope: %i[openid email all_emails],
   response_type: :code,
-  acr_values: 'http://idmanagement.gov/ns/assurance/ial/1',
+  acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
   client_auth_method: :jwt_bearer,
   client_options: {
-    port: 443,
-    scheme: 'https',
-    host: "https://#{LOGIN_DOT_GOV_CONFIG[:host]}/",
-    identifier: "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
-    private_key: ENV['LOGIN_DOT_GOV_CLIENT_PRIVATE_KEY'],
-    redirect_uri: "#{my_protocol_host}/portal/auth/login_dot_gov/callback",
-
+    port:        443,
+    scheme:      'https',
+    host:        LOGIN_DOT_GOV_CONFIG[:host],
+    identifier:  "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
+    private_key: LOGIN_DOT_GOV_PRIVATE_KEY,
+    redirect_uri: "#{my_protocol_host}/auth/login_dot_gov/callback",
     authorization_endpoint: LOGIN_DOT_GOV_CONFIG[:authorization_endpoint],
-    token_endpoint: LOGIN_DOT_GOV_CONFIG[:token_endpoint],
-    userinfo_endpoint: LOGIN_DOT_GOV_CONFIG[:user_info_endpoint],
-    jwks_uri:      LOGIN_DOT_GOV_CONFIG[:jwks_uri],
+    token_endpoint:         LOGIN_DOT_GOV_CONFIG[:token_endpoint],
+    userinfo_endpoint:      LOGIN_DOT_GOV_CONFIG[:user_info_endpoint],
+    jwks_uri:               LOGIN_DOT_GOV_CONFIG[:jwks_uri]
   }
-}
+}.freeze
+
 CLEAR_CLIENT_CONFIG = {
   name: :clear,
   issuer: "https://#{CLEAR_CONFIG[:host]}/integrations",
@@ -77,8 +85,10 @@ CLEAR_CLIENT_CONFIG = {
   }
 }.freeze
 
+
 Rails.application.config.middleware.use OmniAuth::Builder do
   OmniAuth.config.logger = Rails.logger
+
   ## CLEAR
   provider :openid_connect, CLEAR_CLIENT_CONFIG
 

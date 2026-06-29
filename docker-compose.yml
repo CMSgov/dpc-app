@@ -1,5 +1,21 @@
-services:
+x-dd-config:
+  environment: &dd-default-env
+    DD_AGENT_HOST: datadog-agent
+    DD_ENV: local-dev
+    DD_VERSION: 0.4.0-SNAPSHOT
+    DD_PROFILING_ENABLED: true
+    DD_TRACE_OTEL_ENABLED: true
+    DD_INSTRUMENTATION_TELEMETRY_ENABLED: false
+    DD_TRACE_SAMPLING_RULES: |
+      [
+        {"resource":"GET /healthcheck","sample_rate":0.0},
+        {"resource":"GET /v1/version","sample_rate":0.0},
+        {"resource":"GET /v1/fhir/metadata","sample_rate":0.0},
+        {"resource":"GET /api/v1/version","sample_rate":0.0},
+        {"resource":"GET GET /ping","sample_rate":0.0}
+      ]
 
+services:
   db:
     image: artifactory.cloud.cms.gov/docker/postgres:16.4
     command: postgres -c 'max_connections=250'
@@ -24,22 +40,37 @@ services:
       start_period: 30s
       retries: 5
 
+  datadog-agent:
+    image: public.ecr.aws/datadog/agent:7.50.0
+    container_name: datadog-agent
+    env_file:
+      - ops/config/decrypted/local.env
+    environment:
+      - DD_SITE=ddog-gov.com
+      - DD_APM_ENABLED=true
+      - DD_APM_NON_LOCAL_TRAFFIC=true
+      - DD_HOSTNAME=local-dev
+
   aggregation:
     image: dpc-aggregation:latest
     platform: linux/arm64
     ports:
       - "9901:9901"
     env_file:
-      - ./ops/config/decrypted/local.env
+      - ops/config/decrypted/local.env
     environment:
-      - ENV=local
-      - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
-      - EMIT_AWS_METRICS=${EMIT_AWS_METRICS:-false}
-      - JACOCO=${REPORT_COVERAGE:-}
-      - DEBUG_MODE=${DEBUG_MODE:-false}
+      <<: *dd-default-env
+      ENV: local
+      USE_BFD_MOCK: ${USE_BFD_MOCK:-true}
+      EMIT_AWS_METRICS: ${EMIT_AWS_METRICS:-false}
+      JACOCO: ${REPORT_COVERAGE:-}
+      DEBUG_MODE: ${DEBUG_MODE:-false}
+      DD_SERVICE: dpc-local-aggregation
     depends_on:
       db:
         condition: service_healthy
+      datadog-agent:
+        condition: service_started
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-aggregation:/jacoco-report
@@ -56,10 +87,16 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      datadog-agent:
+        condition: service_started
+    env_file:
+      - ops/config/decrypted/local.env
     environment:
-      - ENV=local
-      - JACOCO=${REPORT_COVERAGE:-}
-      - DEBUG_MODE=${DEBUG_MODE:-false}
+      <<: *dd-default-env
+      ENV: local
+      JACOCO: ${REPORT_COVERAGE:-}
+      DEBUG_MODE: ${DEBUG_MODE:-false}
+      DD_SERVICE: dpc-local-attribution
     ports:
       - "3500:8080"
       - "9902:9902"
@@ -79,17 +116,21 @@ services:
       - "3002:3002"
       - "9903:9900"
     env_file:
-      - ./ops/config/decrypted/local.env
+      - ops/config/decrypted/local.env
     environment:
-      - ENV=local
-      - JACOCO=${REPORT_COVERAGE:-}
-      - EXPORT_PATH=/app/data
-      - AUTH_DISABLED=${AUTH_DISABLED:-false}
-      - DEBUG_MODE=${DEBUG_MODE:-false}
-      - USE_BFD_MOCK=${USE_BFD_MOCK:-true}
+      <<: *dd-default-env
+      ENV: local
+      JACOCO: ${REPORT_COVERAGE:-}
+      EXPORT_PATH: /app/data
+      AUTH_DISABLED: ${AUTH_DISABLED:-false}
+      DEBUG_MODE: ${DEBUG_MODE:-false}
+      USE_BFD_MOCK: ${USE_BFD_MOCK:-true}
+      DD_AGENT_HOST: datadog-agent
     depends_on:
       attribution:
         condition: service_healthy
+      datadog-agent:
+        condition: service_started
     volumes:
       - export-volume:/app/data
       - ./jacocoReport/dpc-api:/jacoco-report
@@ -104,7 +145,7 @@ services:
     image: maven:3.9.9-amazoncorretto-17
     platform: linux/arm64
     env_file:
-      - ./ops/config/decrypted/local.env
+      - ops/config/decrypted/local.env
     volumes:
       - export-volume:/tmp
       - ./:/usr/src/mymaven

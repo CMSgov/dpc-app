@@ -2,39 +2,36 @@
 
 require 'rails_helper'
 require 'securerandom'
+require 'support/login_support'
 
 RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :system, js: true do
   include DpcClientSupport
+  include LoginSupport
 
   before do
     driven_by(:selenium_headless)
   end
+
+  before(:each) do
+    @user = create_user_with_csp
+    @ldg_auth_hash = login_dot_gov_auth_hash(@user)
+    OmniAuth.config.test_mode = true
+    OmniAuth.config.add_mock(:login_dot_gov, @ldg_auth_hash)
+  end
+
   let(:uid) { SecureRandom.uuid }
 
-  before do
-    OmniAuth.config.test_mode = true
-    # OmniAuth.config.add_mock(:id_me,
-    OmniAuth.config.add_mock(:clear,
-                             { uid:,
-                               info: { email: 'bob@example.com' },
-                               extra: { raw_info: { all_emails: %w[bob@example.com bob2@example.com],
-                                                    ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
-  end
-  def sign_in
-    # visit '/auth/id_me/callback'
-    visit '/auth/clear/callback'
+  def sign_in(csp: :id_me)
+    visit "/auth/#{csp}/callback"
   end
   context 'CD invite' do
     let(:dpc_api_organization_id) { 'some-gnarly-guid' }
-    let!(:user) { create(:user) }
-    # let!(:csp) { create(:csp, name: :id_me) }
-    let!(:csp) { create(:csp, name: :clear) }
-    let!(:csp_user) { create(:csp_user, user_id: user.id, csp:, uuid: uid) }
+    let!(:user) { @user }
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let!(:ao_org_link) { create(:ao_org_link, user:, provider_organization: org) }
 
     before do
-      sign_in
+      sign_in csp: :login_dot_gov
       org.update!(terms_of_service_accepted_by: user)
     end
 
