@@ -25,6 +25,21 @@
     font-size: 1.45rem
 }
 
+// Use navy logos on white buttons
+.usa-button--outline {
+    .lg-login-button__logo {
+        background: url(asset_path('lg-logo-navy.svg')) center / contain no-repeat;
+    }
+
+    .clear-login-button__logo {
+        background: url(asset_path('clear-logo-navy.svg')) center / contain no-repeat;
+    }
+
+    .idme-login-button__logo {
+        background: url(asset_path('idme-logo-navy.svg')) center / contain no-repeat;
+    }
+}
+
 .line-separator {
     border-top: 1px solid #e6e6e6;
 }
