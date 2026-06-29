@@ -82,12 +82,16 @@ class InvitationsController < ApplicationController
       id_token: {
         ssn9: nil,
         email: nil,
-        email_verified: nil
+        email_verified: nil,
+        given_name: nil,
+        family_name: nil
       },
       userinfo: {
         ssn9: nil,
         email: nil,
-        email_verified: nil
+        email_verified: nil,
+        given_name: nil,
+        family_name: nil
       }
     }.to_json
     csp_config = CspConfig.for(:clear)
