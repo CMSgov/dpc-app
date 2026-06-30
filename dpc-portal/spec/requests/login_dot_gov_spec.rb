@@ -128,36 +128,16 @@ RSpec.describe 'LoginDotGov', type: :request do
                                                         ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
       end
 
-      it_behaves_like 'an openid client'
+      it 'returns 403 forbidden' do
+        post '/auth/login_dot_gov'
+        follow_redirect!
+        expect(response).to have_http_status(:forbidden)
+      end
 
-      context :user_exists do
-        before do
-          create(:user, provider: 'login_dot_gov', given_name: 'Bob',
-                        family_name: 'Hoskins')
-          create(:csp_user, user: User.last, uuid:, csp:)
-        end
-        it 'does not update user names' do
-          expect(CspUser.where(uuid: uuid).count).to eq 1
-          # expect(User.where(uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com', given_name: 'Bob',
-          #                  family_name: 'Hoskins').count).to eq 1
-          post '/auth/login_dot_gov'
-          follow_redirect!
-          expect(response.location).to eq organizations_url
-          expect(CspUser.where(uuid: uuid, csp: csp).count).to eq 1
-          db_user = CspUser.find_by(uuid: uuid, csp: csp)&.user
-          expect(db_user).to be_present
-          expect(db_user.given_name).to eq 'Bob'
-          expect(db_user.family_name).to eq 'Hoskins'
-          # expect(User.where(uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com', given_name: 'Bob',
-          #                  family_name: 'Hoskins').count).to eq 1
-        end
-
-        it 'does not set authentication token' do
-          post '/auth/login_dot_gov'
-          follow_redirect!
-          expect(request.session[:login_dot_gov_token]).to be_nil
-          expect(request.session[:login_dot_gov_token_exp]).to be_nil
-        end
+      it 'renders the login_gov_signin_fail error component' do
+        post '/auth/login_dot_gov'
+        follow_redirect!
+        expect(response.body).to include('Login.gov sign-in failed')
       end
 
       it 'logs the IAL1 blocked attempt' do
@@ -365,9 +345,11 @@ RSpec.describe 'LoginDotGov', type: :request do
 
   describe 'CSP inactive' do
     before do
-      inactive_csp = create(:csp, :id_me, :inactive)
-      user = create(:user, email: 'bob5@example.com', provider: :id_me)
-      create(:csp_user, user:, uuid:, csp: inactive_csp)
+      Csp.where(name: 'login_dot_gov').update_all(end_date: DateTime.current - 1.year)
+      csp = Csp.where(name: 'login_dot_gov').first
+
+      user = create(:user, email: 'bob5@example.com', provider: :login_dot_gov)
+      create(:csp_user, user:, uuid:, csp:)
 
       OmniAuth.config.test_mode = true
       OmniAuth.config.add_mock(:login_dot_gov,

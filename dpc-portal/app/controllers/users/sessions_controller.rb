@@ -11,7 +11,7 @@ module Users
       Rails.logger.info(['User logged out',
                          { actionContext: LoggingConstants::ActionContext::Authentication,
                            actionType: LoggingConstants::ActionType::UserLoggedOut }])
-      redirect_to url_for_logout(csp), allow_other_host: true if redirect
+      redirect_to url_for_logout(csp), allow_other_host: true
     end
 
     def logged_out
