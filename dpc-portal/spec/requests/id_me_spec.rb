@@ -346,8 +346,8 @@ RSpec.describe 'IdMe', type: :request do
   end
 
   describe 'CSP inactive' do
+    let!(:csp) { Csp.find_by(name: 'id_me') || create(:csp, :id_me) }
     before do
-      csp = Csp.find_by(name: 'id_me')
       csp.end_date = DateTime.current - 1.year
       csp.save!
 

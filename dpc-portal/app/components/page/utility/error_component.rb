@@ -19,6 +19,8 @@ module Page
         @reason = resolve_reason(reason)
         @status = "verification.#{@reason}_status"
         @text = "verification.#{@reason}_text"
+        @show_alert = true if @reason.in?(%i[email_mismatch])
+        @alert_type = 'error' if @reason.in?(%i[email_mismatch])
       end
 
       private
