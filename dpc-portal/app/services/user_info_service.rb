@@ -26,6 +26,7 @@ class UserInfoService
   def oidc_client_config(csp)
     return ID_ME_CLIENT_CONFIG if csp.to_s == :id_me.to_s
     return LOGIN_DOT_GOV_CLIENT_CONFIG if csp.to_s == :login_dot_gov.to_s
+    return CLEAR_CLIENT_CONFIG if csp.to_s == :clear.to_s
 
     raise UnknownCSPError, csp
   end

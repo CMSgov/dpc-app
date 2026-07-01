@@ -109,42 +109,16 @@ class InvitationsController < ApplicationController
   end
 
   def csp_login_actions(csp)
-#     csp_config = CspConfig.for(csp)
-#     url = URI(csp_config.authorization_endpoint)
-#     url.query = { client_id: csp_config.identifier,
-#                   redirect_uri: "#{my_protocol_host}#{csp_config.redirect_path}",
-#                   response_type: 'code',
-#                   acr_values: csp_config.acr_values,
-#                   scope: csp_config.authorize_scope,
-#                   nonce: @nonce,
-#                   state: @state }.compact.to_query
-    claims = {
-      id_token: {
-        ssn9: nil,
-        email: nil,
-        email_verified: nil,
-        given_name: nil,
-        family_name: nil
-      },
-      userinfo: {
-        ssn9: nil,
-        email: nil,
-        email_verified: nil,
-        given_name: nil,
-        family_name: nil
-      }
-    }.to_json
-    csp_config = CspConfig.for(:clear)
-    authorization_uri = URI(csp_config.authorization_endpoint)
-    url = URI::HTTPS.build(host: authorization_uri.host,
-                           path: authorization_uri.path,
-                           query: { client_id: csp_config.identifier,
-                                    redirect_uri: "#{my_protocol_host}#{csp_config.redirect_path}",
-                                    response_type: 'code',
-                                    scope: 'openid',
-                                    claims:,
-                                    nonce: @nonce,
-                                    state: @state }.to_query)
+    csp_config = CspConfig.for(csp)
+    url = URI(csp_config.authorization_endpoint)
+    url.query = { client_id: csp_config.identifier,
+                  redirect_uri: "#{my_protocol_host}#{csp_config.redirect_path}",
+                  response_type: 'code',
+                  acr_values: csp_config.acr_values.presence,
+                  scope: csp_config.authorize_scope,
+                  nonce: @nonce,
+                  state: @state }.compact.to_query
+    # params[:acr_values] = csp_config.acr_values if csp_config.respond_to?(:acr_values) && csp_config.acr_values.present?
     puts "redirecting to: #{url}"
 
     redirect_to url, allow_other_host: true
@@ -277,7 +251,7 @@ class InvitationsController < ApplicationController
   end
 
   def user_emails(user_info)
-    user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed']
+    user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed'] || [user_info['email']]
   end
 
   def confirmed_email?(user_info)
