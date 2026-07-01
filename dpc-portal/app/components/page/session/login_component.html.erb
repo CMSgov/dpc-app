@@ -19,7 +19,9 @@
         <% csps.each do |csp| %>
           <% is_last_used = (@last_used_csp == csp[:id]) %>
           <div class="<%= class_names('last-used-login-wrapper margin-bottom-1': is_last_used) %>">
-            <%= button_to csp[:login_path], class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
+            <%= button_to csp[:login_path],
+                          class: class_names('usa-button width-full margin-bottom-1', 'usa-button--outline': @last_used_csp.present? && !is_last_used),
+                          data: { turbo: false } do %>
               <span class="<%= csp[:logo_class] %>"><%= csp[:text] %></span>
             <% end %>
             <%= content_tag(:span, 'LAST USED', class: 'last-used-login-wrapper__badge') if is_last_used %>
