@@ -27,6 +27,6 @@ module CspErrorHandling
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::UserCancelledLogin,
                          **csp_log_context }])
-    render(Page::Utility::ErrorComponent.new(nil, "csp_signin_cancel", csp))
+    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_cancel', csp))
   end
 end

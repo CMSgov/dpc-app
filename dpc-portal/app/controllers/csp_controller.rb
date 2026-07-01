@@ -53,7 +53,7 @@ class CspController < ApplicationController
     Rails.logger.info(["User attempted IAL1 login with #{display_name || 'CSP'} — not permitted",
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }])
-    render(Page::Utility::ErrorComponent.new(nil, "csp_signin_fail", csp_code), status: :forbidden)
+    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp_code), status: :forbidden)
   end
 
   def sign_in_and_log(user, csp)
@@ -95,7 +95,7 @@ class CspController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::InvalidCsp,
                          **csp_log_context }])
-    render(Page::Utility::ErrorComponent.new(nil, "csp_signin_fail", csp_code))
+    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp_code))
     nil
   end
 

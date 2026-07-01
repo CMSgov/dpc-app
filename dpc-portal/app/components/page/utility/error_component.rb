@@ -26,6 +26,7 @@ module Page
       def resolve_reason(reason, csp)
         return :server_error if AoVerificationService::SERVER_ERRORS.include?(reason)
         return reason.to_sym unless reason.start_with?('csp') && DISPLAY_NAMES.key?(csp)
+
         reason.sub! 'csp', csp
       end
     end

@@ -94,6 +94,11 @@ describe UserInfoService do
 
   def verify_rails(status:, csp:)
     allow(Rails.logger).to receive(:info)
+    verify_call_log(csp:)
+    verify_response_log(status:, csp:)
+  end
+
+  def verify_call_log(csp:)
     expect(Rails.logger).to receive(:info).with(
       ['Calling CSP user_info',
        { csp: csp.to_s,
@@ -101,6 +106,9 @@ describe UserInfoService do
          csp_request_url: user_info_url(csp),
          csp_request_method_name: :request_info }]
     )
+  end
+
+  def verify_response_log(status:, csp:)
     expect(Rails.logger).to receive(:info).with(
       ['CSP user_info response info',
        { csp: csp.to_s,
