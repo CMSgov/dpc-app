@@ -15,8 +15,11 @@ RSpec.describe 'Application', type: :request do
     expect(response.headers['cache-control']).to eq 'no-store'
   end
 
-  it 'logs user_id to new relic' do
-    expect(NewRelic::Agent).to receive(:add_custom_attributes).with({ user_id: user.id })
+  it 'logs user_id to datadog' do
+    mock_span = double('datadog_span')
+    expect(mock_span).to receive(:set_tag).with('usr.id', user.id)
+    allow(Datadog::Tracing).to receive(:active_span).and_return(mock_span)
+
     get '/'
     expect(response).to be_ok
   end

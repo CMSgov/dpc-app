@@ -170,6 +170,14 @@ GEM
     crass (1.0.7)
     css_parser (2.1.0)
       addressable
+    datadog (2.35.0)
+      cgi
+      datadog-ruby_core_source (~> 3.5, >= 3.5.2)
+      libdatadog (~> 33.0.0.1.0)
+      libddwaf (~> 1.30.0.0.0)
+      logger
+      msgpack
+    datadog-ruby_core_source (3.5.2)
     date (3.5.1)
     date_time_precision (0.8.1)
     descendants_tracker (0.0.4)
@@ -262,6 +270,9 @@ GEM
       kaminari-core (= 1.2.2)
     kaminari-core (1.2.2)
     language_server-protocol (3.17.0.5)
+    libdatadog (33.0.0.1.0)
+    libddwaf (1.30.0.0.2)
+      ffi (~> 1.0)
     lint_roller (1.1.0)
     listen (3.9.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
@@ -616,6 +627,7 @@ DEPENDENCIES
   byebug
   capybara
   climate_control
+  datadog
   dotenv-rails
   factory_bot_rails
   fakefs
