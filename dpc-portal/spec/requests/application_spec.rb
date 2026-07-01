@@ -8,7 +8,7 @@ RSpec.describe 'Application', type: :request do
 
   LoginSupport::CSP_MAP.each do |provider, display_name|
     context "using #{display_name}" do
-      let!(:user) { create_user_with_csp(csp: provider) }
+      let!(:user) { create_user_with_csp(provider) }
       before { sign_in user, csp: provider }
 
       it 'sets cache control to no-store' do
@@ -31,7 +31,7 @@ RSpec.describe 'Application', type: :request do
           Timecop.travel(31.minutes.from_now)
           get '/'
           expect(response).to redirect_to('/users/sign_in')
-          expect(flash[:notice] = 'Your session expired. Please sign in again to continue.')
+          expect(flash[:notice]).to eq 'Your session expired. Please sign in again to continue.'
         end
 
         it 'redirects to login after session time elapses' do
@@ -49,7 +49,7 @@ RSpec.describe 'Application', type: :request do
           end
           get '/'
           expect(response).to redirect_to('/users/sign_in')
-          expect(flash[:notice] = 'You have exceeded the maximum session length. Please sign in again to continue.')
+          expect(flash[:notice]).to eq 'You have exceeded the maximum session length. Please sign in again to continue.'
         end
       end
     end

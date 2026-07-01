@@ -973,9 +973,9 @@ def stub_user_info(overrides: {})
   allow(user_service).to receive(:user_info).and_return(user_info_template(overrides))
 end
 
-def create_invitation_user_with_csp(csp:)
+def create_invitation_user_with_csp(csp)
   template = user_info_template
-  create_user_with_csp(given_name: template['given_name'], family_name: template['family_name'],
+  create_user_with_csp(csp, given_name: template['given_name'], family_name: template['family_name'],
                        email: template['email'],
-                       csp:, uuid: template['sub'])
+                       uuid: template['sub'])
 end

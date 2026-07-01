@@ -72,7 +72,7 @@ RSpec.describe 'PublicKeys', type: :request do
           end
         end
         context 'as cd' do
-          let!(:user) { create_user_with_csp(csp: provider) }
+          let!(:user) { create_user_with_csp(provider) }
           let(:org_api_id) { SecureRandom.uuid }
           let!(:org) do
             create(:provider_organization, terms_of_service_accepted_by:, dpc_api_organization_id: org_api_id)
@@ -174,7 +174,7 @@ RSpec.describe 'PublicKeys', type: :request do
           end
         end
         context 'as cd' do
-          let!(:user) { create_user_with_csp(csp: provider) }
+          let!(:user) { create_user_with_csp(provider) }
           let(:org_api_id) { SecureRandom.uuid }
           let!(:org) do
             create(:provider_organization, terms_of_service_accepted_by:, dpc_api_organization_id: org_api_id)

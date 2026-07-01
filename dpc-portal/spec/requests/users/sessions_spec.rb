@@ -10,7 +10,7 @@ RSpec.describe 'Sessions', type: :request do
     context 'logged in' do
       RSpec.shared_examples 'logout actions' do |provider|
         let(:uuid) { SecureRandom.uuid }
-        let!(:user) { create_user_with_csp(csp: provider) }
+        let!(:user) { create_user_with_csp(provider) }
         before do
           sign_in user, csp: provider
         end

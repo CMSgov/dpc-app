@@ -11,14 +11,14 @@ RSpec.describe 'ClientTokens', type: :request do
 
   describe 'Client Tokens', :integration do
     let(:dpc_api_organization_id) { SecureRandom.uuid }
-    let!(:user) { create_user_with_csp }
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
-    let!(:link) { create(:cd_org_link, user:, provider_organization: org) }
     let(:label) { 'New Client Token' }
 
     LoginSupport::CSP_MAP.each do |provider, display_name|
       context "using #{display_name}" do
         before do
+          user = create_user_with_csp(provider)
+          create(:cd_org_link, user:, provider_organization: org)
           org.update!(terms_of_service_accepted_by: user)
           sign_in user, csp: provider
         end
