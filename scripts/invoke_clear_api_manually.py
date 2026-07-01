@@ -134,7 +134,7 @@ def main() -> int:
     token_body = token_response.json()
     print_id_token(token_body)
     access_token = token_body["access_token"]
-    print_response(label, fetch_userinfo(config, access_token, OIDC_CLAIMS))
+    print_response("/userinfo", fetch_userinfo(config, access_token, OIDC_CLAIMS))
 
     return 0
 
