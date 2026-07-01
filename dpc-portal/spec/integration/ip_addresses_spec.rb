@@ -15,33 +15,38 @@ RSpec.describe 'IpAddresses', type: :request do
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let!(:link) { create(:cd_org_link, user:, provider_organization: org) }
     let(:ipv4_address) { '136.226.19.87' }
-    before do
-      org.update!(terms_of_service_accepted_by: user)
-      sign_in user, csp: :login_dot_gov
-    end
-    it 'should create an ip address, show on org page, and delete it' do
-      get "/organizations/#{org.id}"
-      expect(response.body).to include('You have no public IP addresses.')
 
-      post "/organizations/#{org.id}/ip_addresses", params: { ip_address: ipv4_address }
-      expect(response).to redirect_to(organization_path(org, credential_start: true))
-      expect(assigns(:organization)).to eq org
-      expect(flash[:success]).to eq('Public IP address created successfully.')
+    LoginSupport::CSP_MAP.each do |provider, display_name|
+      context "using #{display_name}" do
+        before do
+          org.update!(terms_of_service_accepted_by: user)
+          sign_in user, csp: provider
+        end
+        it 'should create an ip address, show on org page, and delete it' do
+          get "/organizations/#{org.id}"
+          expect(response.body).to include('You have no public IP addresses.')
 
-      get "/organizations/#{org.id}"
-      expect(response.body).to_not include('You have no public IP addresses.')
-      expect(response.body).to include(ipv4_address)
+          post "/organizations/#{org.id}/ip_addresses", params: { ip_address: ipv4_address }
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+          expect(assigns(:organization)).to eq org
+          expect(flash[:success]).to eq('Public IP address created successfully.')
 
-      delete_path_match = %r{action="(/organizations/#{org.id}/ip_addresses/[^"]+)}.match(response.body)
-      expect(delete_path_match).to be_truthy
+          get "/organizations/#{org.id}"
+          expect(response.body).to_not include('You have no public IP addresses.')
+          expect(response.body).to include(ipv4_address)
 
-      delete delete_path_match[1]
+          delete_path_match = %r{action="(/organizations/#{org.id}/ip_addresses/[^"]+)}.match(response.body)
+          expect(delete_path_match).to be_truthy
 
-      expect(flash[:success]).to eq('Public IP address deleted successfully.')
-      expect(response).to redirect_to(organization_path(org, credential_start: true))
+          delete delete_path_match[1]
 
-      get "/organizations/#{org.id}"
-      expect(response.body).to include('You have no public IP addresses.')
+          expect(flash[:success]).to eq('Public IP address deleted successfully.')
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+
+          get "/organizations/#{org.id}"
+          expect(response.body).to include('You have no public IP addresses.')
+        end
+      end
     end
   end
 end
