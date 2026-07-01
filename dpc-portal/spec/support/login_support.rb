@@ -8,15 +8,14 @@ module LoginSupport
     id_me: 'ID.me'
   }.freeze
 
-  def create_user_with_csp(given_name: 'John', family_name: 'Smith', csp: :login_dot_gov,
-                           uuid: SecureRandom.uuid, **user_attrs)
+  def create_user_with_csp(csp:, given_name: 'John', family_name: 'Smith', uuid: SecureRandom.uuid, **user_attrs)
     csp = Csp.find_by(name: csp.to_s) || create(:csp, csp)
     user = create(:user, given_name:, family_name:, **user_attrs)
     create(:csp_user, user:, uuid:, csp:)
     user
   end
 
-  def create_user_and_sign_in(given_name: 'John', family_name: 'Smith', csp: :login_dot_gov, uuid: SecureRandom.uuid)
+  def create_user_and_sign_in(csp:, given_name: 'John', family_name: 'Smith', uuid: SecureRandom.uuid)
     user = create_user_with_csp(given_name:, family_name:, csp:, uuid:)
     sign_in user, csp:
     user

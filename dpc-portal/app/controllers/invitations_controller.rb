@@ -134,13 +134,14 @@ class InvitationsController < ApplicationController
   end
 
   def render_bad_invitation?(user_info)
+    csp = session[:csp]
     if @invitation.credential_delegate? && !@invitation.cd_match?(user_info)
       log_pii_mismatch
-      render(Page::Utility::ErrorComponent.new(@invitation, 'pii_mismatch'),
+      render(Page::Utility::ErrorComponent.new(@invitation, 'pii_mismatch', csp),
              status: :forbidden)
     elsif !@invitation.email_match?(user_info) && !confirmed_email?(user_info)
       log_pii_mismatch
-      render(Page::Utility::ErrorComponent.new(@invitation, 'email_mismatch'),
+      render(Page::Utility::ErrorComponent.new(@invitation, 'email_mismatch', csp),
              status: :forbidden)
     end
   end
@@ -167,7 +168,7 @@ class InvitationsController < ApplicationController
     if error.message == 'unauthorized'
       render(Page::Invitations::InvitationLoginComponent.new(@invitation))
     elsif @invitation.credential_delegate?
-      render(Page::Utility::ErrorComponent.new(@invitation, error.message),
+      render(Page::Utility::ErrorComponent.new(@invitation, error.message, session[:csp]),
              status: :service_unavailable)
     else
       render(Page::Invitations::AoFlowFailComponent.new(@invitation, error.message, step),
@@ -191,13 +192,14 @@ class InvitationsController < ApplicationController
   end
 
   def create_link
+    csp = session[:csp]
     if @invitation.credential_delegate?
       create_cd_org_link
     elsif @invitation.authorized_official?
       create_ao_org_link
     else
       invalid_status = @invitation.credential_delegate? ? 'cd_invalid' : 'ao_invalid'
-      render(Page::Utility::ErrorComponent.new(@invitation, invalid_status),
+      render(Page::Utility::ErrorComponent.new(@invitation, invalid_status, csp),
              status: :unprocessable_entity)
       false
     end
@@ -207,7 +209,7 @@ class InvitationsController < ApplicationController
                     error: e.message,
                     **csp_log_context }])
 
-    render(Page::Utility::ErrorComponent.new(@invitation, 'multi_user_match'))
+    render(Page::Utility::ErrorComponent.new(@invitation, 'multi_user_match', csp))
     nil
   end
 
@@ -297,13 +299,14 @@ class InvitationsController < ApplicationController
   end
 
   def load_invitation
+    csp = session[:csp]
     @invitation = Invitation.find(params[:id])
     if @organization != @invitation.provider_organization
       invalid_status = @invitation.credential_delegate? ? 'cd_invalid' : 'ao_invalid'
-      render(Page::Utility::ErrorComponent.new(@invitation, invalid_status), status: :not_found)
+      render(Page::Utility::ErrorComponent.new(@invitation, invalid_status, csp), status: :not_found)
     end
   rescue ActiveRecord::RecordNotFound
-    render(Page::Utility::ErrorComponent.new(@invitation, 'ao_invalid'), status: :not_found)
+    render(Page::Utility::ErrorComponent.new(@invitation, 'ao_invalid', csp), status: :not_found)
   end
 
   def validate_invitation
@@ -315,7 +318,7 @@ class InvitationsController < ApplicationController
                                   invitation: @invitation.id,
                                   **csp_log_context }])
 
-    render(Page::Utility::ErrorComponent.new(@invitation, @invitation.unacceptable_reason),
+    render(Page::Utility::ErrorComponent.new(@invitation, @invitation.unacceptable_reason, session[:csp]),
            status: :forbidden)
   end
 
