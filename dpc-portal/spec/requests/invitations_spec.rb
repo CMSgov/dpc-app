@@ -976,6 +976,6 @@ end
 def create_invitation_user_with_csp(csp)
   template = user_info_template
   create_user_with_csp(csp, given_name: template['given_name'], family_name: template['family_name'],
-                       email: template['email'],
-                       uuid: template['sub'])
+                            email: template['email'],
+                            uuid: template['sub'])
 end

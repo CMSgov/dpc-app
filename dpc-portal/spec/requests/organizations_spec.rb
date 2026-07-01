@@ -45,7 +45,7 @@ RSpec.describe 'Organizations', type: :request do
         context 'user has sanctions' do
           let!(:user) do
             create_user_with_csp(provider, given_name: 'John', family_name: 'Smith',
-                                 verification_status: 'rejected', verification_reason: 'ao_med_sanctions')
+                                           verification_status: 'rejected', verification_reason: 'ao_med_sanctions')
           end
 
           let!(:org) { create(:provider_organization) }

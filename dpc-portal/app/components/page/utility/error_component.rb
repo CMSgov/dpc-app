@@ -5,8 +5,8 @@ module Page
     # Displays unfixable error message in accept invitation process
     class ErrorComponent < ViewComponent::Base
       DISPLAY_NAMES = {
-        "login_dot_gov": 'Login.gov',
-        "id_me": 'ID.me'
+        login_dot_gov: 'Login.gov',
+        id_me: 'ID.me'
       }.freeze
 
       def initialize(invitation, reason, csp)
