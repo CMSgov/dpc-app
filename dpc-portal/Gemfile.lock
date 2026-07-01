@@ -167,7 +167,7 @@ GEM
     crack (1.0.0)
       bigdecimal
       rexml
-    crass (1.0.6)
+    crass (1.0.7)
     css_parser (2.1.0)
       addressable
     date (3.5.1)
@@ -317,7 +317,7 @@ GEM
     minitest (6.0.5)
       drb (~> 2.0)
       prism (~> 1.5)
-    msgpack (1.7.2)
+    msgpack (1.8.3)
     multi_json (1.20.1)
     multi_xml (0.9.1)
       bigdecimal (>= 3.1, < 5)
@@ -601,7 +601,7 @@ GEM
     websocket (1.2.11)
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    yard (0.9.43)
+    yard (0.9.44)
     zeitwerk (2.7.5)
 
 PLATFORMS
@@ -684,7 +684,7 @@ DEPENDENCIES
   view_component (~> 4.9)
   webmock
   webrick
-  yard (>= 0.9.36)
+  yard (>= 0.9.44)
 
 RUBY VERSION
    ruby 3.3.1p55
