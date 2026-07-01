@@ -6,7 +6,8 @@ module CspLogout
 
   LOGOUT_URLS = {
     'login_dot_gov' => :url_for_login_dot_gov_logout,
-    'id_me' => :url_for_id_me_logout
+    'id_me' => :url_for_id_me_logout,
+    'clear' => :url_for_clear_logout,
   }.freeze
 
   def url_for_logout(csp)
@@ -32,8 +33,17 @@ module CspLogout
     URI::HTTPS.build(host: csp_config.host,
                      path: csp_config.log_out_path,
                      query: { client_id: csp_config.identifier,
-                              redirect_uri: "#{root_url}oauth/logged_out" }.to_query)
+                              redirect_uri: "#{root_url}auth/logged_out" }.to_query)
   end
+
+  def url_for_clear_logout
+    csp_config = CspConfig.for(:clear)
+    URI::HTTPS.build(host: csp_config.host,
+                     path: csp_config.log_out_path,
+                     query: { client_id: csp_config.identifier,
+                              redirect_uri: "#{root_url}auth/logged_out" }.to_query)
+  end
+
 
   class UnknownCspError < StandardError; end
 end
