@@ -1,5 +1,13 @@
-#ENC[AES256_GCM,data:JEo66l9bUOZFRTCJw3J0+//193ausCFO1qC+1BtsN4HyuxkYRAdCgJTXnrHRMyf8ZjAnZDLjMaGGQ5JESyyIBQYEb1kl0A8zBWc2,iv:YnrbpIRnaf+TI+y4Lg0oLXZr7LP1EXgjgmhFVUPVAi8=,tag:75eVmVtCbzRG1jbxmP+loQ==,type:comment]
-/dpc/sandbox/example_sops_key: ""
+#ENC[AES256_GCM,data:OK2ejrGu+7ifnqKInCNJv+Ii+lRHBV8MCaor75zug3orYFushZL3zBmYkojAMgN2amHnyvK/6dvjZ5k27pile4TmlGLd79229SYRmW8jJAHKQBW4HBDzVg==,iv:1n0WWqD2L4yQkpBVUZtsbuKhUiFgFblP3WO0M8770ps=,tag:l69edEMSucXMK5Rhkg1odw==,type:comment]
+#ENC[AES256_GCM,data:oAanVDRCXMZfbFis246t3gS9/4rJizf+y80aoopoXb55yPSg,iv:oqPhlMiuPbjUa45wdoJDiYb3zqsd0U81S+4KYkU3ylA=,tag:jxB8TP5svwYRcATopYsF5w==,type:comment]
+/dpc/sandbox/web-portal/idp_id_me_host: ""
+/dpc/sandbox/web-portal/idp_id_me_client_id: ""
+/dpc/sandbox/web-portal/idp_id_me_client_secret: ""
+/dpc/sandbox/web-portal/clear_idp_host: ""
+/dpc/sandbox/web-portal/clear_idp_client_id: ""
+/dpc/sandbox/web-portal/clear_idp_client_secret: ""
+/dpc/sandbox/web-portal/idp_login_dot_gov_host: ""
+/dpc/sandbox/web-portal/login_dot_gov_client_private_key: ""
 sops:
   kms:
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/dpc-sandbox

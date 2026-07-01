@@ -1,5 +1,13 @@
-#ENC[AES256_GCM,data:CA2IVf6dZ2wt5LoFy3e5q+OjY9vrND8gmvvof7NMG+x5fv6+rwLf8WV7FjoQa0JLR9cMjW2qzWZ9IB61U5WWhfX+7wxEMMOXdV97XgLUJrvAKNc=,iv:kQ2HFyc3dbHW2gcF60RMvvu6OLHgj97D7eeqf3AUa0E=,tag:BzzkUBdwffcaxu6adRiTHw==,type:comment]
-/dpc/prod/example_sops_key: ""
+#ENC[AES256_GCM,data:pOUXpOwt62d4wtXd3fVMfHxlHELE6Elzgdbw6aX5JtWWkWNBlrR/T8QDHPF3RD7EItzhhIrovrF54XlqRZQMoZhrNfyyeJPqj8c5vNeuCQNX/Lauk0AUGw==,iv:r/Yy1JF/tGqveO1B+bGckszQwUGs9bQO08Zfbt43Wc4=,tag:eEghxxNdEw21nGyA9/JQKQ==,type:comment]
+#ENC[AES256_GCM,data:hWuD+XMQo29F1GJ9V1G9ogf5ucpprR9M3ShkLkufIQKs9UQ=,iv:LCJbBd21BCaQS3BdBm6Pcf8jeA1Eb65CJP7UYGS8EJ0=,tag:XSJpz0wm3zsxmVSfJ8I/8A==,type:comment]
+/dpc/prod/web-portal/idp_id_me_host: ""
+/dpc/prod/web-portal/idp_id_me_client_id: ""
+/dpc/prod/web-portal/idp_id_me_client_secret: ""
+/dpc/prod/web-portal/clear_idp_host: ""
+/dpc/prod/web-portal/clear_idp_client_id: ""
+/dpc/prod/web-portal/clear_idp_client_secret: ""
+/dpc/prod/web-portal/idp_login_dot_gov_host: ""
+/dpc/prod/web-portal/login_dot_gov_client_private_key: ""
 sops:
   kms:
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/dpc-prod
