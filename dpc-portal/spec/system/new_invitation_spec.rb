@@ -29,7 +29,6 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :system, 
         let!(:ao_org_link) { create(:ao_org_link, user:, provider_organization: org) }
 
         before do
-          sign_in csp: provider
           org.update!(terms_of_service_accepted_by: user)
         end
 
