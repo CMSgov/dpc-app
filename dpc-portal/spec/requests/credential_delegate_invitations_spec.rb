@@ -10,7 +10,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
   let(:terms_of_service_accepted_by) { nil }
 
   RSpec.shared_context 'as ao' do |provider|
-    let!(:user) { create_user_with_csp(provider) }
+    let!(:user) { create_user_with_csp(csp: provider) }
     let!(:org)  { create(:provider_organization) }
 
     before do
@@ -20,7 +20,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
   end
 
   RSpec.shared_context 'as cd' do |provider|
-    let!(:user) { create_user_with_csp(provider) }
+    let!(:user) { create_user_with_csp(csp: provider) }
     let!(:org)  { create(:provider_organization) }
 
     before do
@@ -86,7 +86,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       end
       describe 'POST /create' do
         context 'as ao' do
-          let!(:user) { create_user_with_csp(provider) }
+          let!(:user) { create_user_with_csp(csp: provider) }
           let!(:org)  { create(:provider_organization, terms_of_service_accepted_by: user) }
           let!(:successful_parameters) do
             { invited_given_name: 'Bob',
@@ -167,7 +167,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
           end
         end
         context 'as cd' do
-          let!(:user) { create_user_with_csp(provider) }
+          let!(:user) { create_user_with_csp(csp: provider) }
           let!(:org)  { create(:provider_organization, terms_of_service_accepted_by: user) }
           let!(:successful_parameters) do
             { invited_given_name: 'Bob',
@@ -191,7 +191,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
       end
       describe 'DELETE /destroy' do
         context 'as cd' do
-          let!(:user) { create_user_with_csp(provider) }
+          let!(:user) { create_user_with_csp(csp: provider) }
           let!(:org)        { create(:provider_organization, terms_of_service_accepted_by: user) }
           let!(:invitation) { create(:invitation, :cd, provider_organization: org) }
 
@@ -207,7 +207,7 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
           end
         end
         context 'as ao' do
-          let!(:user) { create_user_with_csp(provider) }
+          let!(:user) { create_user_with_csp(csp: provider) }
           let!(:org)        { create(:provider_organization, terms_of_service_accepted_by: user) }
           let!(:invitation) { create(:invitation, :cd, provider_organization: org) }
 

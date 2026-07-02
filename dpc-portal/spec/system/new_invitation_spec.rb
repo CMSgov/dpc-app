@@ -15,7 +15,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :system, 
   LoginSupport::CSP_MAP.each do |provider, display_name|
     context "using #{display_name}" do
       before(:each) do
-        @user = create_user_with_csp(provider)
+        @user = create_user_with_csp(csp: provider)
         auth_hash = send(:"#{provider}_auth_hash", @user)
         OmniAuth.config.test_mode = true
         OmniAuth.config.add_mock(provider, auth_hash)

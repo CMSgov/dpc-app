@@ -20,7 +20,7 @@ RSpec.describe 'Organizations', type: :request do
         end
 
         context 'logged in' do
-          let!(:user) { create_user_with_csp(provider) }
+          let!(:user) { create_user_with_csp(csp: provider) }
           let!(:org) { create(:provider_organization) }
           before { sign_in user, csp: provider }
 
@@ -44,8 +44,8 @@ RSpec.describe 'Organizations', type: :request do
 
         context 'user has sanctions' do
           let!(:user) do
-            create_user_with_csp(provider, given_name: 'John', family_name: 'Smith',
-                                           verification_status: 'rejected', verification_reason: 'ao_med_sanctions')
+            create_user_with_csp(csp: provider, given_name: 'John', family_name: 'Smith',
+                                 verification_status: 'rejected', verification_reason: 'ao_med_sanctions')
           end
 
           let!(:org) { create(:provider_organization) }
@@ -70,7 +70,7 @@ RSpec.describe 'Organizations', type: :request do
         end
 
         context 'no link to org' do
-          let!(:user) { create_user_with_csp(provider) }
+          let!(:user) { create_user_with_csp(csp: provider) }
           before { sign_in user, csp: provider }
           it 'redirects to organizations page' do
             org = create(:provider_organization)
@@ -79,7 +79,7 @@ RSpec.describe 'Organizations', type: :request do
           end
         end
         context 'as cd' do
-          let!(:user) { create_user_with_csp(provider) }
+          let!(:user) { create_user_with_csp(csp: provider) }
           let!(:org) { create(:provider_organization) }
           let!(:link) { create(:cd_org_link, user:, provider_organization: org) }
           before { sign_in user, csp: provider }
@@ -133,7 +133,7 @@ RSpec.describe 'Organizations', type: :request do
           end
         end
         context 'as ao' do
-          let!(:user) { create_user_with_csp(provider) }
+          let!(:user) { create_user_with_csp(csp: provider) }
           let!(:org) { create(:provider_organization) }
           before do
             create(:ao_org_link, user:, provider_organization: org)
@@ -282,7 +282,7 @@ RSpec.describe 'Organizations', type: :request do
         end
 
         describe 'AO org flow' do
-          let!(:user) { create_user_with_csp(provider) }
+          let!(:user) { create_user_with_csp(csp: provider) }
           before { sign_in user, csp: provider }
 
           context 'GET /organizations/new' do

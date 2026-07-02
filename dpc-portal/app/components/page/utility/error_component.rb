@@ -15,8 +15,8 @@ module Page
         @org_name = invitation&.provider_organization&.name
         @ao_full_name = invitation&.invited_by_full_name
         @ao_email = invitation&.invited_by&.email
-        @csp_display_name = DISPLAY_NAMES.fetch(csp.to_s, 'CSP')
-        @reason = resolve_reason(reason.to_s, csp.to_s)
+        @csp_display_name = DISPLAY_NAMES.fetch(csp, 'CSP')
+        @reason = resolve_reason(reason, csp)
         @status = "verification.#{@reason}_status"
         @text = "verification.#{@reason}_text"
       end
@@ -27,7 +27,7 @@ module Page
         return :server_error if AoVerificationService::SERVER_ERRORS.include?(reason)
         return reason.to_sym unless reason.start_with?('csp') && DISPLAY_NAMES.key?(csp)
 
-        reason.sub('csp', csp).to_sym
+        reason.sub('csp', csp.to_s).to_sym
       end
     end
   end

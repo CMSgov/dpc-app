@@ -801,7 +801,7 @@ RSpec.describe 'Invitations', type: :request do
             expect(request.session[:user_pac_id]).to be_nil
           end
           it 'should set pac_id on existing user' do
-            create_invitation_user_with_csp(csp: provider.to_sym)
+            create_invitation_user_with_csp(provider.to_sym)
             expect do
               post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
             end.to change { User.count }.by 0
@@ -925,12 +925,10 @@ RSpec.describe 'Invitations', type: :request do
     end
   end
 
-  describe 'with ID.me' do
-    it_behaves_like 'invitations controller', :id_me
-  end
-
-  describe 'with Login.gov' do
-    it_behaves_like 'invitations controller', :login_dot_gov
+  LoginSupport::CSP_MAP.each do |provider, display_name|
+    describe "with #{display_name}" do
+      it_behaves_like 'invitations controller', provider
+    end
   end
 end
 
@@ -975,7 +973,7 @@ end
 
 def create_invitation_user_with_csp(csp)
   template = user_info_template
-  create_user_with_csp(csp, given_name: template['given_name'], family_name: template['family_name'],
-                            email: template['email'],
-                            uuid: template['sub'])
+  create_user_with_csp(csp:, given_name: template['given_name'], family_name: template['family_name'],
+                       email: template['email'],
+                       uuid: template['sub'])
 end

@@ -3,7 +3,7 @@
 # AO access denied
 RSpec.shared_examples 'ao access denied with user sanctions' do |provider, new_path|
   let!(:user) do
-    create_user_with_csp(provider, verification_status: 'rejected', verification_reason: 'ao_med_sanctions')
+    create_user_with_csp(csp: provider, verification_status: 'rejected', verification_reason: 'ao_med_sanctions')
   end
   let!(:org) { create(:provider_organization, terms_of_service_accepted_by: user) }
 
@@ -18,7 +18,7 @@ RSpec.shared_examples 'ao access denied with user sanctions' do |provider, new_p
 end
 
 RSpec.shared_examples 'ao access denied with org sanctions' do |provider, new_path|
-  let!(:user) { create_user_with_csp(provider) }
+  let!(:user) { create_user_with_csp(csp: provider) }
   let!(:org) do
     create(:provider_organization, terms_of_service_accepted_by: user,
                                    verification_status: 'rejected',
@@ -35,7 +35,7 @@ RSpec.shared_examples 'ao access denied with org sanctions' do |provider, new_pa
 end
 
 RSpec.shared_examples 'ao access denied with org not approved' do |provider, new_path|
-  let!(:user) { create_user_with_csp(provider) }
+  let!(:user) { create_user_with_csp(csp: provider) }
   let!(:org) do
     create(:provider_organization, terms_of_service_accepted_by: user,
                                    verification_status: 'rejected',
@@ -52,7 +52,7 @@ RSpec.shared_examples 'ao access denied with org not approved' do |provider, new
 end
 
 RSpec.shared_examples 'ao access denied user no longer ao' do |provider, new_path|
-  let!(:user) { create_user_with_csp(provider) }
+  let!(:user) { create_user_with_csp(csp: provider) }
   let!(:org)  { create(:provider_organization, terms_of_service_accepted_by: user) }
 
   before { sign_in user, csp: provider }
@@ -69,7 +69,7 @@ end
 # CD access denied
 
 RSpec.shared_examples 'cd access denied with org sanctions' do |provider, new_path|
-  let!(:user) { create_user_with_csp(provider) }
+  let!(:user) { create_user_with_csp(csp: provider) }
   let!(:org) do
     create(:provider_organization, terms_of_service_accepted_by: user,
                                    verification_status: 'rejected',
@@ -86,7 +86,7 @@ RSpec.shared_examples 'cd access denied with org sanctions' do |provider, new_pa
 end
 
 RSpec.shared_examples 'cd access denied with org not approved' do |provider, new_path|
-  let!(:user) { create_user_with_csp(provider) }
+  let!(:user) { create_user_with_csp(csp: provider) }
   let!(:org) do
     create(:provider_organization, terms_of_service_accepted_by: user,
                                    verification_status: 'rejected',
@@ -105,7 +105,7 @@ end
 # GET /new
 
 RSpec.shared_examples 'GET /new with no link to org' do |provider, new_path|
-  let!(:user) { create_user_with_csp(provider) }
+  let!(:user) { create_user_with_csp(csp: provider) }
   let!(:org)  { create(:provider_organization, terms_of_service_accepted_by: user) }
 
   before { sign_in user, csp: provider }
@@ -117,7 +117,7 @@ RSpec.shared_examples 'GET /new with no link to org' do |provider, new_path|
 end
 
 RSpec.shared_examples 'GET /new with unsigned tos' do |provider, new_path|
-  let!(:user) { create_user_with_csp(provider) }
+  let!(:user) { create_user_with_csp(csp: provider) }
   let!(:org)  { create(:provider_organization) }
 
   before do
@@ -133,7 +133,7 @@ RSpec.shared_examples 'GET /new with unsigned tos' do |provider, new_path|
 end
 
 RSpec.shared_examples 'GET /new as cd returns success' do |provider, new_path|
-  let!(:user) { create_user_with_csp(provider) }
+  let!(:user) { create_user_with_csp(csp: provider) }
   let!(:org)  { create(:provider_organization, terms_of_service_accepted_by: user) }
 
   before do

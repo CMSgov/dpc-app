@@ -71,7 +71,7 @@ RSpec.describe 'ClientTokens', type: :request do
         end
 
         context 'as cd' do
-          let!(:user)      { create_user_with_csp(provider) }
+          let!(:user)      { create_user_with_csp(csp: provider) }
           let(:org_api_id) { SecureRandom.uuid }
           let!(:org) do
             create(:provider_organization, terms_of_service_accepted_by:,
@@ -142,7 +142,7 @@ RSpec.describe 'ClientTokens', type: :request do
         end
 
         context 'as cd' do
-          let!(:user)      { create_user_with_csp(provider) }
+          let!(:user)      { create_user_with_csp(csp: provider) }
           let(:org_api_id) { SecureRandom.uuid }
           let!(:org) do
             create(:provider_organization, terms_of_service_accepted_by:,
