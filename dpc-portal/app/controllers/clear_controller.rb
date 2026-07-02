@@ -6,6 +6,6 @@ class ClearController < CspController
   def display_name = 'CLEAR'
 
   def all_emails(auth)
-    auth.extra.raw_info.email
+    [auth.extra.raw_info.email]
   end
 end
