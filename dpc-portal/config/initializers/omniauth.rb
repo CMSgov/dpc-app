@@ -2,6 +2,7 @@
 
 # Configure omniauth providers
 
+require 'json'
 require "dpc_portal_utils"
 
 include DpcPortalUtils
@@ -10,6 +11,23 @@ PORTAL_CSP_CONFIG = Rails.application.config_for(:csp).freeze
 ID_ME_CONFIG = PORTAL_CSP_CONFIG[:id_me].freeze
 LOGIN_DOT_GOV_CONFIG = PORTAL_CSP_CONFIG[:login_dot_gov].freeze
 CLEAR_CONFIG = PORTAL_CSP_CONFIG[:clear].freeze
+CLEAR_OIDC_CLAIMS = {
+  id_token: {
+    ssn9: nil,
+    email: nil,
+    email_verified: nil,
+    given_name: nil,
+    family_name: nil
+  },
+  userinfo: {
+    ssn9: nil,
+    email: nil,
+    email_verified: nil,
+    given_name: nil,
+    family_name: nil
+  }
+}.freeze
+CLEAR_OIDC_CLAIMS_PARAM = JSON.generate(CLEAR_OIDC_CLAIMS).freeze
 
 ## Build Login.gov RSA private key object before defining the config constant
 LOGIN_DOT_GOV_PRIVATE_KEY = begin

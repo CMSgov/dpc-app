@@ -111,17 +111,23 @@ class InvitationsController < ApplicationController
   def csp_login_actions(csp)
     csp_config = CspConfig.for(csp)
     url = URI(csp_config.authorization_endpoint)
-    url.query = { client_id: csp_config.identifier,
-                  redirect_uri: "#{my_protocol_host}#{csp_config.redirect_path}",
-                  response_type: 'code',
-                  acr_values: csp_config.acr_values.presence,
-                  scope: csp_config.authorize_scope,
-                  nonce: @nonce,
-                  state: @state }.compact.to_query
+    query = { client_id: csp_config.identifier,
+              redirect_uri: "#{my_protocol_host}#{csp_config.redirect_path}",
+              response_type: 'code',
+              acr_values: csp_config.acr_values.presence,
+              scope: csp_config.authorize_scope,
+              nonce: @nonce,
+              state: @state }
+    add_clear_oidc_claims(query, csp)
+    url.query = query.compact.to_query
     # params[:acr_values] = csp_config.acr_values if csp_config.respond_to?(:acr_values) && csp_config.acr_values.present?
     puts "redirecting to: #{url}"
 
     redirect_to url, allow_other_host: true
+  end
+
+  def add_clear_oidc_claims(query, csp)
+    query[:claims] = CLEAR_OIDC_CLAIMS_PARAM if csp.to_s == 'clear' && @invitation.authorized_official?
   end
 
   def invitation_matches_user
