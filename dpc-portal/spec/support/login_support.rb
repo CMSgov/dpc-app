@@ -32,10 +32,19 @@ module LoginSupport
     follow_redirect!
   end
 
+  def fetch_csp_user!(user, csp_name)
+    user.csp_user_for(csp_name.to_s) ||
+      raise(ArgumentError, "No csp_user found for user ##{user.id} with CSP '#{csp_name}'")
+  end
+
   def login_dot_gov_auth_hash(user)
-    all_emails = user.csp_user_for('login_dot_gov')&.user_emails&.map(&:email).presence || [user.email]
-    { uid: user.csp_user_for('login_dot_gov')&.uuid || user.uid,
-      info: { email: user.email },
+    csp_user   = fetch_csp_user!(user, 'login_dot_gov')
+    all_emails = csp_user.user_emails.map(&:email)
+    primary_email = all_emails.first
+
+    # all_emails = user.csp_user_for('login_dot_gov')&.user_emails&.map(&:email).presence || [user.email]
+    { uid: csp_user.uuid,
+      info: { email: primary_email },
       credentials: { token: 'mock_token', expires_in: 899 },
       extra: {
         raw_info: {
@@ -48,9 +57,12 @@ module LoginSupport
   end
 
   def id_me_auth_hash(user)
-    all_emails = user.csp_user_for('id_me')&.user_emails&.map(&:email).presence || [user.email]
-    { uid: user.csp_user_for('id_me')&.uuid || user.uid,
-      info: { email: user.email },
+    csp_user   = fetch_csp_user!(user, 'id_me')
+    all_emails = csp_user.user_emails.map(&:email)
+    primary_email = all_emails.first
+
+    { uid: csp_user.uuid,
+      info: { email: primary_email },
       credentials: { token: 'mock_token', expires_in: 300 },
       extra: {
         raw_info: {
@@ -63,9 +75,13 @@ module LoginSupport
   end
 
   def clear_auth_hash(user)
-    all_emails = user.csp_user_for('clear')&.user_emails&.map(&:email).presence || [user.email]
-    { uid: user.csp_user_for('clear')&.uuid || user.uid,
-      info: { email: user.email },
+    csp_user   = fetch_csp_user!(user, 'login_dot_gov')
+    all_emails = csp_user.user_emails.map(&:email)
+    primary_email = all_emails.first
+    
+    # all_emails = user.csp_user_for('clear')&.user_emails&.map(&:email).presence || [user.email]
+    { uid: csp_user.uuid,
+      info: { email: primary_email },
       extra: {
         raw_info: {
           all_emails: all_emails,
