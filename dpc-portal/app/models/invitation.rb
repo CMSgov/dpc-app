@@ -74,10 +74,8 @@ class Invitation < ApplicationRecord
   end
 
   def ao_match?(user_info)
-    # ssn = user_info['social_security_number']&.tr('-', '') || user_info['SSN']
-    # probably a cleaner way to pull from 3+ keys here
     check_missing_user_info(user_info, 'social_security_number', 'SSN', 'ssn9', check_all_keys: false)
-    ssn = user_info['social_security_number']&.tr('-', '') || user_info['SSN'] || user_info['ssn9']
+    ssn = ssn_from_user_info(user_info)
     service = AoVerificationService.new
     result = service.check_eligibility(provider_organization.npi, ssn)
 
@@ -138,6 +136,18 @@ class Invitation < ApplicationRecord
     %w[given_name family_name].each do |key|
       check_missing_user_info(user_info, key)
     end
+  end
+
+  def ssn_from_user_info(user_info)
+    return user_info['social_security_number'].tr('-', '') if user_info['social_security_number'].present?
+    return user_info['SSN'] if user_info['SSN'].present?
+
+    ssn9 = user_info['ssn9']
+    return decrypt_ssn(ssn9) if ssn9.is_a?(Hash)
+  end
+
+  def decrypt_ssn(encrypted_ssn)
+    raise NotImplementedError, "ssn9 decryption unavailable - awaiting instructions from CLEAR team"
   end
 
   def check_missing_user_info(user_info, *keys, check_all_keys: true)

@@ -932,6 +932,31 @@ RSpec.describe 'Invitations', type: :request do
   describe 'with Login.gov' do
     it_behaves_like 'invitations controller', :login_dot_gov
   end
+
+  describe 'with CLEAR claims' do
+    let!(:csp) { Csp.find_by(name: :clear) || create(:csp, name: :clear) }
+
+    it 'adds claims to AO invitation authorization URLs' do
+      invitation = create(:invitation, :ao)
+      org_id = invitation.provider_organization.id
+
+      post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: { provider: :clear }
+
+      redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
+      expect(JSON.parse(redirect_params['claims'])).to eq(JSON.parse(CLEAR_OIDC_CLAIMS_PARAM))
+      expect(JSON.parse(redirect_params['claims'])['userinfo']).to have_key('ssn9')
+    end
+
+    it 'does not add claims to CD invitation authorization URLs' do
+      invitation = create(:invitation, :cd)
+      org_id = invitation.provider_organization.id
+
+      post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: { provider: :clear }
+
+      redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
+      expect(redirect_params).not_to have_key('claims')
+    end
+  end
 end
 
 def log_in(provider:, template: user_info_template)
