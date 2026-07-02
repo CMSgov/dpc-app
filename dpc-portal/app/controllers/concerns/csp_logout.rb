@@ -41,7 +41,9 @@ module CspLogout
     URI::HTTPS.build(host: csp_config.host,
                      path: csp_config.log_out_path,
                      query: { client_id: csp_config.identifier,
-                              redirect_uri: "#{root_url}auth/logged_out" }.to_query)
+                              post_logout_redirect_uri: "#{root_url}auth/logged_out",
+                              id_token_hint: session['clear_id_token']
+                              }.to_query)
   end
 
 
