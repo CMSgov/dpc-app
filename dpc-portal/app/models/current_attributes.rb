@@ -22,7 +22,7 @@ class CurrentAttributes < ActiveSupport::CurrentAttributes
 
     CurrentAttributes.current_user = {
       id: user.id,
-      external_id: user.uid,
+      # external_id: user.uid,
       pac_id: user.pac_id
     }
   end

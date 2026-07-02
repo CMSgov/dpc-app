@@ -11,7 +11,7 @@ class User < ApplicationRecord
 
   has_many :csp_users
   has_many :csps, through: :csp_users
-  # has_many :user_emails
+  has_many :user_emails, through: :csp_users
   has_many :ao_org_links
   has_many :cd_org_links
 
@@ -55,4 +55,16 @@ class User < ApplicationRecord
   def cd?(organization)
     CdOrgLink.where(user: self, provider_organization: organization, disabled_at: nil).exists?
   end
+
+  # Returns the primary email across all CSPs
+  def email
+    user_emails.find_by(primary: true)&.email ||
+      user_emails.first&.email
+  end
+
+  # Returns all emails across all CSPs
+  def all_emails
+    user_emails.map(&:email)
+  end
+
 end

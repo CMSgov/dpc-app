@@ -3,7 +3,7 @@
 # Class for holding user email information from a CSP
 class UserEmail < ApplicationRecord
   belongs_to :csp_user
-  has_one :user, through: :csp_users
+  has_one :user, through: :csp_user
 
   # If we update this email to primary, make sure the others aren't.
   before_save :ensure_only_one_primary, if: -> { primary? && primary_changed? }

@@ -42,7 +42,6 @@ module LoginSupport
     all_emails = csp_user.user_emails.map(&:email)
     primary_email = all_emails.first
 
-    # all_emails = user.csp_user_for('login_dot_gov')&.user_emails&.map(&:email).presence || [user.email]
     { uid: csp_user.uuid,
       info: { email: primary_email },
       credentials: { token: 'mock_token', expires_in: 899 },
@@ -79,7 +78,6 @@ module LoginSupport
     all_emails = csp_user.user_emails.map(&:email)
     primary_email = all_emails.first
     
-    # all_emails = user.csp_user_for('clear')&.user_emails&.map(&:email).presence || [user.email]
     { uid: csp_user.uuid,
       info: { email: primary_email },
       extra: {

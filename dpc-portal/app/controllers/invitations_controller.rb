@@ -236,10 +236,9 @@ class InvitationsController < ApplicationController
   def user
     user_info = UserInfoService.new.user_info(session)
     find_or_create_user(user_info)
-    csp = Csp.find_by(name: @user.provider)
+    csp = Csp.find_by(name: session[:csp]) 
     csp_user = CspUser.find_or_create_by!(user: @user, csp:, uuid: user_info['sub'])
 
-    # Update emails based upon the latest information in user info.
     new_emails = user_emails(user_info)
     primary_email = user_info['email']
     sync_csp_emails(csp_user, new_emails, primary_email)
@@ -260,18 +259,33 @@ class InvitationsController < ApplicationController
     @user = if @invitation.authorized_official? && (ENV['ENV'] == 'prod' || Rails.env.test?)
               ao_user(user_info)
             else
-              User.find_or_create_by!(email: @invitation.invited_email) do |user_to_create|
-                assign_user_attributes(user_to_create, user_info)
-                log_create_user
-              end
+              find_or_create_cd_user(user_info)
             end
   end
 
-  def ao_user(user_info)
-    matching_users = User.where('email = ? OR pac_id = ?', @invitation.invited_email, session[:user_pac_id])
-    raise MultiUserMatchError, "too many matching users | pac_id: #{session[:user_pac_id]}" if matching_users.size > 1
+  def find_or_create_cd_user(user_info)
+    csp = Csp.find_by(name: session[:csp])
+    csp_user = CspUser.find_by(uuid: user_info['sub'], csp:)
 
-    return matching_users.first if matching_users.present?
+    if csp_user
+      csp_user.user
+    else
+      User.new.tap do |user|
+        assign_user_attributes(user, user_info)
+        user.save!
+        log_create_user
+      end
+    end
+  end
+
+  def ao_user(user_info)
+    csp = Csp.find_by(name: session[:csp])
+    csp_user = CspUser.find_by(uuid: user_info['sub'], csp:)
+    by_pac_id = User.where(pac_id: session[:user_pac_id])
+
+    candidates = [csp_user&.user, by_pac_id.first].compact.uniq
+    raise MultiUserMatchError, "too many matching users | pac_id: #{session[:user_pac_id]}" if candidates.size > 1
+    return candidates.first if candidates.present?
 
     User.new.tap do |user|
       assign_user_attributes(user, user_info)
@@ -281,12 +295,9 @@ class InvitationsController < ApplicationController
   end
 
   def assign_user_attributes(user_to_create, user_info)
-    user_to_create.email = @invitation.invited_email
     user_to_create.given_name = user_info['given_name']
     user_to_create.family_name = user_info['family_name']
     user_to_create.pac_id = session.delete(:user_pac_id)
-    user_to_create.provider = session[:csp]
-    user_to_create.uid = user_info['sub']
   end
 
   def update_user(user_info)

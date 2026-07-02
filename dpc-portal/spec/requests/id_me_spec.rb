@@ -10,7 +10,7 @@ RSpec.describe 'IdMe', type: :request do
     RSpec.shared_examples 'an id.me client' do
       context 'user exists' do
         before do
-          user = create(:user, email: 'bob1@example.com', provider: :id_me)
+          user = create(:user)
           create(:csp_user, user:, uuid:, csp:)
         end
         it 'should sign in a user' do
@@ -73,7 +73,7 @@ RSpec.describe 'IdMe', type: :request do
       it_behaves_like 'an id.me client'
 
       context :user_exists do
-        let(:db_user) { create(:user, uid: '12345', provider: 'id_me', email: 'bob@example.com') }
+        let(:db_user) { create(:user) }
         before do
           create(:csp_user, user: db_user, uuid:, csp:)
         end
@@ -200,7 +200,7 @@ RSpec.describe 'IdMe', type: :request do
                                                         emails_confirmed: %w[email1@example.com email2@example.com],
                                                         identity_assurance_level: 2 } } })
 
-        user = create(:user, provider: :id_me)
+        user = create(:user)
         create(:csp_user, user:, uuid:, csp:)
       end
 
@@ -232,7 +232,7 @@ RSpec.describe 'IdMe', type: :request do
                                                         emails_confirmed: nil,
                                                         identity_assurance_level: 2 } } })
 
-        user = create(:user, email: 'email1@example.com', provider: :id_me)
+        user = create(:user)
         csp_user = create(:csp_user, user:, uuid:, csp:)
         create(:user_email, csp_user:, email: 'email@example.com', active: true)
       end
@@ -262,7 +262,7 @@ RSpec.describe 'IdMe', type: :request do
                                                         emails_confirmed: %w[email1@example.com],
                                                         identity_assurance_level: 2 } } })
 
-        user = create(:user, email: 'email1@example.com', provider: :id_me)
+        user = create(:user)
         csp_user = create(:csp_user, user:, uuid:, csp:)
         create(:user_email, csp_user:, email: 'email1@example.com', active: false, deactivated_at: 1.day.ago,
                             reactivated_at: nil)
@@ -311,7 +311,7 @@ RSpec.describe 'IdMe', type: :request do
                                                       emails_confirmed: %w[email1@example.com email2@example.com],
                                                       identity_assurance_level: 2 } } })
 
-      user = create(:user, provider: :id_me)
+      user = create(:user)
       csp = create(:csp, :id_me)
       create(:csp_user, user:, uuid:, csp:)
       post '/auth/id_me'
@@ -351,7 +351,7 @@ RSpec.describe 'IdMe', type: :request do
       csp.end_date = DateTime.current - 1.year
       csp.save!
 
-      user = create(:user, email: 'bob5@example.com', provider: :id_me)
+      user = create(:user)
       create(:csp_user, user:, uuid:, csp:)
 
       OmniAuth.config.test_mode = true
