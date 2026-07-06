@@ -57,7 +57,9 @@ class ApplicationController < ActionController::Base
   end
 
   def set_current_request_attributes
-    ::NewRelic::Agent.add_custom_attributes({ user_id: current_user.id }) if current_user
+    # I hate naming this "usr.id", but that's DataDog's standard
+    Datadog::Tracing.active_span&.set_tag('usr.id', current_user.id) if current_user
+
     CurrentAttributes.save_request_attributes(request)
     CurrentAttributes.save_user_attributes(current_user)
   end
