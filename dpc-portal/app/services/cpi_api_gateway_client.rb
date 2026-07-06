@@ -63,16 +63,14 @@ class CpiApiGatewayClient
   # end points and see if we get a response.  Don't over use this, as it counts against our rate limit.
   def healthy_api?
     # We'll get a 400 because the npi is bad, but any response indicates they're up and we're connected.
-    org_info('fake_npi')
-    true
+    org_info('fake_npi') && true
   rescue StandardError
     false
   end
 
   def healthy_auth?
     # Check if we can get a token
-    fetch_token
-    true
+    fetch_token && true
   rescue StandardError
     false
   end
@@ -91,15 +89,24 @@ class CpiApiGatewayClient
   def fetch_provider_info(body)
     url = "#{@cpi_api_gateway_url}api/1.0/ppr/providers"
     start_tracking(:fetch_provider_info, url)
-    response = request_client.post(url,
-                                   headers: { 'Content-Type': 'application/json' },
-                                   body:)
+
+    # Build a custom span around the request for DD APM
+    response = Datadog::Tracing.trace('cpi_api_gateway.request', resource: 'fetch_provider_info') do |span|
+      span.type = 'http'
+      span.set_tag('http.url', url)
+      span.set_tag('http.method', 'POST')
+      raw_response = request_client.post(url,
+                                         headers: { 'Content-Type': 'application/json' },
+                                         body:)
+      span.set_tag('http.status_code', raw_response.status)
+      raw_response
+    end
+
     stop_tracking(:fetch_provider_info, url, response.status)
     response.parsed
   end
 
   def start_tracking(method_name, url)
-    @tracker = NewRelic::Agent::Tracer.start_external_request_segment(library: 'Net::HTTP', uri: url, procedure: :post)
     @start = Time.now
     Rails.logger.info(
       ['Calling CPI API Gateway',
@@ -118,6 +125,5 @@ class CpiApiGatewayClient
          cpi_api_gateway_response_status_code: code,
          cpi_api_gateway_response_duration: Time.now - @start }]
     )
-    @tracker.finish
   end
 end
