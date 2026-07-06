@@ -143,11 +143,11 @@ class Invitation < ApplicationRecord
     return user_info['SSN'] if user_info['SSN'].present?
 
     ssn9 = user_info['ssn9']
-    return decrypt_ssn(ssn9) if ssn9.is_a?(Hash)
+    decrypt_ssn(ssn9) if ssn9.is_a?(Hash)
   end
 
   def decrypt_ssn(encrypted_ssn)
-    raise NotImplementedError, "ssn9 decryption unavailable - awaiting instructions from CLEAR team"
+    raise NotImplementedError, 'ssn9 decryption unavailable - awaiting instructions from CLEAR team'
   end
 
   def check_missing_user_info(user_info, *keys, check_all_keys: true)

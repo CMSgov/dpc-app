@@ -52,7 +52,7 @@ class UserInfoService
     JSON::JWT.decode(body, :skip_verification).to_h.with_indifferent_access
   end
 
-  def request_info(csp, token)
+  def request_info(csp, token) # rubocop:disable Metrics/AbcSize
     csp_config = oidc_client_config csp
     start_tracking csp, csp_config[:client_options][:userinfo_endpoint]
 

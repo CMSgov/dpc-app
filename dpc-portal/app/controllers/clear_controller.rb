@@ -7,7 +7,7 @@ class ClearController < CspController
 
   def update_csp_tokens(auth)
     super
-    session["clear_id_token"] = auth.credentials.id_token # required for CLEAR logout
+    session['clear_id_token'] = auth.credentials.id_token # required for CLEAR logout
   end
 
   def all_emails(auth)

@@ -116,7 +116,7 @@ class InvitationsController < ApplicationController
               response_type: 'code',
               acr_values: csp_config.acr_values.presence,
               # only request ssn for AO's when using CLEAR
-              claims: (csp.to_s == 'clear' && @invitation.authorized_official?) ? CLEAR_OIDC_CLAIMS_PARAM : nil,
+              claims: csp.to_s == 'clear' && @invitation.authorized_official? ? CLEAR_OIDC_CLAIMS_PARAM : nil,
               scope: csp_config.authorize_scope,
               nonce: @nonce,
               state: @state }
