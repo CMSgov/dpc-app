@@ -820,36 +820,40 @@ RSpec.describe 'Invitations', type: :request do
             expect(request.session[:user_pac_id]).to be_nil
           end
           it 'should add credential if user with pac id exists' do
-            user = create(:user, pac_id: user_info_template['social_security_number'], provider:)
+            user = create(:user, pac_id: user_info_template['social_security_number'])
             expect do
               post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
             end.to change { CspUser.where(user:).count }.by 1
           end
           it 'should add credential if user with pac id exists and non-matching credential exists' do
-            user = create(:user, pac_id: user_info_template['social_security_number'], provider:)
+            user = create(:user, pac_id: user_info_template['social_security_number'])
             create(:csp_user, user:, uuid: user_info_template['sub'], csp: other_csp)
             expect do
               post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
             end.to change { CspUser.where(user:).count }.by 1
           end
           it 'should not add credential if credential exists match on pac_id' do
-            user = create(:user, pac_id: user_info_template['social_security_number'], provider:)
+            user = create(:user, pac_id: user_info_template['social_security_number'])
             create(:csp_user, user:, uuid: user_info_template['sub'], csp:)
             expect do
               post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
             end.to change { CspUser.count }.by 0
           end
           it 'should add credential if user with email exists' do
+            # Use the OTHER csp so the user is found by email, not by existing csp_user uuid
             user = create(:user)
+            other_csp_user = create(:csp_user, user:, csp: other_csp, uuid: SecureRandom.uuid)
+            create(:user_email, csp_user: other_csp_user, email: user_info_template['email'], primary: true)
+
             expect do
               post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
             end.to change { CspUser.where(user:).count }.by 1
           end
           it 'should not add credential if credential exists match on email' do
-              user = create(:user)
-              csp_user = create(:csp_user, user:, uuid: user_info_template['sub'], csp:)
-              create(:user_email, csp_user:, email: user_info_template['email'], primary: true)
-            create(:csp_user, user:, uuid: user_info_template['sub'], csp:)
+            user = create(:user)
+            csp_user = create(:csp_user, user:, uuid: user_info_template['sub'], csp:)
+            create(:user_email, csp_user:, email: user_info_template['email'], primary: true)
+
             expect do
               post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
             end.to change { CspUser.count }.by 0
@@ -986,7 +990,10 @@ end
 
 def create_invitation_user_with_csp(csp:)
   template = user_info_template
-  create_user_with_csp(given_name: template['given_name'], family_name: template['family_name'],
-                       email: template['email'],
-                       csp:, uuid: template['sub'])
+  user = create_user_with_csp(given_name: template['given_name'], family_name: template['family_name'],
+                               csp:, uuid: template['sub'])
+  csp_record = Csp.find_by(name: csp.to_s) || create(:csp, csp)
+  csp_user = user.csp_user_for(csp.to_s)
+  create(:user_email, csp_user:, email: template['email'], primary: true)
+  user
 end

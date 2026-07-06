@@ -104,8 +104,12 @@ RSpec.describe Invitation, type: :model do
 
         it 'fails on existing cd with same email' do
           user = create(:user)
+          csp = Csp.find_by(name: 'login_dot_gov') || create(:csp, :login_dot_gov)
+          csp_user = create(:csp_user, user:, csp:, uuid: SecureRandom.uuid)
+          create(:user_email, csp_user:, email: 'bob@example.com', primary: true)
+
           new_cd_invite = build(:invitation, :cd, provider_organization: organization, invited_by: ao_user,
-                                                  invited_email: user.email, invited_email_confirmation: user.email)
+                                                  invited_email: 'bob@example.com', invited_email_confirmation: 'bob@example.com')
           expect(new_cd_invite.valid?).to eq true
 
           create(:cd_org_link, user:, provider_organization: organization, invitation: valid_new_cd_invite)
