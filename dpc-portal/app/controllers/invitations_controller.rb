@@ -115,19 +115,14 @@ class InvitationsController < ApplicationController
               redirect_uri: "#{my_protocol_host}#{csp_config.redirect_path}",
               response_type: 'code',
               acr_values: csp_config.acr_values.presence,
+              # only request ssn for AO's when using CLEAR
+              claims: (csp.to_s == 'clear' && @invitation.authorized_official?) ? CLEAR_OIDC_CLAIMS_PARAM : nil,
               scope: csp_config.authorize_scope,
               nonce: @nonce,
               state: @state }
-    add_clear_oidc_claims(query, csp)
     url.query = query.compact.to_query
-    # params[:acr_values] = csp_config.acr_values if csp_config.respond_to?(:acr_values) && csp_config.acr_values.present?
-    puts "redirecting to: #{url}"
 
     redirect_to url, allow_other_host: true
-  end
-
-  def add_clear_oidc_claims(query, csp)
-    query[:claims] = CLEAR_OIDC_CLAIMS_PARAM if csp.to_s == 'clear' && @invitation.authorized_official?
   end
 
   def invitation_matches_user
@@ -155,7 +150,6 @@ class InvitationsController < ApplicationController
 
   def verify_user_is_ao
     user_info = UserInfoService.new.user_info(session)
-    puts "user_info: #{user_info}"
     result = @invitation.ao_match?(user_info) # raises if does not match
     session[:user_pac_id] = result.dig(:ao_role, 'pacId')
     log_waivers(result)

@@ -4,7 +4,6 @@ FactoryBot.define do
   factory :user, aliases: %i[invited_by] do
     sequence(:uid) { |n| n }
     # provider { :id_me }
-    # provider { :id_me }
     provider { :clear }
     email { "user#{rand(0..100_000)}@example.com" }
   end
