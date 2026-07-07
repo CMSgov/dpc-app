@@ -865,8 +865,13 @@ RSpec.describe 'Invitations', type: :request do
             expect(org.reload.verification_status).to eq('approved')
           end
           it 'should fail if too many matches' do
-            create(:user)
             create(:user, pac_id: user_info_template['social_security_number'])
+            
+            dup_user = create(:user)
+            csp = Csp.find_by(name: provider.to_s) || create(:csp, provider)
+            dup_csp_user = create(:csp_user, user: dup_user, csp:, uuid: SecureRandom.uuid)
+            create(:user_email, csp_user: dup_csp_user, email: user_info_template['email'], primary: true)
+
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
             expect(response.body).to include(I18n.t('verification.multi_user_match_text'))
           end
