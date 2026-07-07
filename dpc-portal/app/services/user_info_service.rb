@@ -106,14 +106,13 @@ class UserInfoService
   end
 
   def finish_tracking(code, csp, user_info_uri)
-    @tracker.finish
     Rails.logger.info(
       ['CSP user_info response info',
        { csp: csp,
          csp_request_method: :get,
          csp_request_url: user_info_uri,
          csp_request_method_name: :request_info,
-         csp_response_status_code: code,
+         csp_response_status_code: code&.to_i,
          csp_response_duration: Time.now - @start }]
     )
   end
