@@ -72,12 +72,14 @@ class UserInfoService
       Net::HTTP.get_response(URI(user_info_uri), auth_header(token))
     end
 
+    code = response.code
     handle_response(response)
   rescue Errno::ECONNREFUSED
+    code = 503
     Rails.logger.error 'Could not connect to login.gov'
     raise UserInfoServiceError, 'server_error'
   ensure
-    finish_tracking(response.code, csp, user_info_uri)
+    finish_tracking(code, csp, user_info_uri)
   end
 
   def trace_request(user_info_uri)
