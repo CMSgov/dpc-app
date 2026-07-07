@@ -170,11 +170,16 @@ GEM
     crass (1.0.7)
     css_parser (2.1.0)
       addressable
+    datadog (2.35.0)
+      cgi
+      datadog-ruby_core_source (~> 3.5, >= 3.5.2)
+      libdatadog (~> 33.0.0.1.0)
+      libddwaf (~> 1.30.0.0.0)
+      logger
+      msgpack
+    datadog-ruby_core_source (3.5.2)
     date (3.5.1)
     date_time_precision (0.8.1)
-    debug (1.6.3)
-      irb (>= 1.3.6)
-      reline (>= 0.3.1)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     diff-lcs (1.5.1)
@@ -225,10 +230,6 @@ GEM
       railties (>= 5.0)
     htmlbeautifier (1.4.3)
     htmlentities (4.3.4)
-    httplog (1.8.0)
-      benchmark
-      rack (>= 2.0)
-      rainbow (>= 2.0.0)
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
     ice_nine (0.11.2)
@@ -269,6 +270,9 @@ GEM
       kaminari-core (= 1.2.2)
     kaminari-core (1.2.2)
     language_server-protocol (3.17.0.5)
+    libdatadog (33.0.0.1.0)
+    libddwaf (1.30.0.0.2)
+      ffi (~> 1.0)
     lint_roller (1.1.0)
     listen (3.9.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
@@ -360,7 +364,7 @@ GEM
     omniauth_openid_connect (0.8.0)
       omniauth (>= 1.9, < 3)
       openid_connect (~> 2.2)
-    openid_connect (2.3.1)
+    openid_connect (2.3.0)
       activemodel
       attr_required (>= 1.0.0)
       email_validator
@@ -400,7 +404,7 @@ GEM
     raabro (1.4.0)
     racc (1.8.1)
     rack (3.2.6)
-    rack-oauth2 (2.3.0)
+    rack-oauth2 (2.2.1)
       activesupport
       attr_required
       faraday (~> 2.0)
@@ -447,10 +451,6 @@ GEM
       ffi
     rbnacl-libsodium (1.0.16)
       rbnacl (>= 3.0.1)
-    rbs (4.0.2)
-      logger
-      prism (>= 1.6.0)
-      tsort
     rdoc (7.2.0)
       erb
       psych (>= 4.0.0)
@@ -498,12 +498,6 @@ GEM
     rubocop-performance (1.23.0)
       rubocop (>= 1.48.1, < 2.0)
       rubocop-ast (>= 1.31.1, < 2.0)
-    ruby-lsp (0.26.9)
-      language_server-protocol (~> 3.17.0)
-      prism (>= 1.2, < 2.0)
-      rbs (>= 3, < 5)
-    ruby-lsp-rspec (0.1.29)
-      ruby-lsp (~> 0.26.0)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
     rubyzip (2.3.2)
@@ -633,14 +627,13 @@ DEPENDENCIES
   byebug
   capybara
   climate_control
-  debug (~> 1.6.0)
+  datadog
   dotenv-rails
   factory_bot_rails
   fakefs
   faraday (>= 2.14.2)
   fhir_models
   health_check
-  httplog
   jbuilder (~> 2.7)
   json-jwt (>= 1.16.6)
   jwt (>= 3.2.0)
@@ -649,11 +642,11 @@ DEPENDENCIES
   lookbook (>= 2.3.3)
   luhnacy (~> 0.2.1)
   macaroons
-  net-imap (>= 0.6.4.1)
+  net-imap (>= 0.5.14)
   newrelic_rpm (~> 8.10)
   nokogiri (>= 1.19.3)
   omniauth-rails_csrf_protection
-  omniauth_openid_connect (~> 0.8.0)
+  omniauth_openid_connect
   pg (>= 0.18, < 2.0)
   pg-aws_rds_iam
   pry
@@ -669,7 +662,6 @@ DEPENDENCIES
   rspec-rails
   rubocop
   rubocop-performance
-  ruby-lsp-rspec
   sassc-rails (>= 2.1.2)
   selenium-webdriver
   simplecov (<= 0.17)
