@@ -54,25 +54,27 @@ class UserInfoService
 
   def request_info(csp, token) # rubocop:disable Metrics/AbcSize
     csp_config = oidc_client_config csp
-    start_tracking csp, csp_config[:client_options][:userinfo_endpoint]
+    user_info_uri = csp_config[:client_options][:userinfo_endpoint]
+    start_tracking csp, user_info_uri
 
-    response = trace_request do
-      Net::HTTP.get_response(URI(csp_config[:client_options][:userinfo_endpoint]), auth_header(token))
+    response = trace_request(user_info_uri) do
+      Net::HTTP.get_response(URI(user_info_uri), auth_header(token))
     end
 
+    code = response.code
     handle_response(response)
   rescue Errno::ECONNREFUSED
     code = 503
     Rails.logger.error 'Could not connect to login.gov'
     raise UserInfoServiceError, 'server_error'
   ensure
-    finish_tracking(code, csp, csp_config[:client_options][:userinfo_endpoint])
+    finish_tracking(code, csp, user_info_uri)
   end
 
-  def trace_request
+  def trace_request(user_info_uri)
     Datadog::Tracing.trace('user_info_service.request', resource: 'request_info') do |span|
       span.type = 'http'
-      span.set_tag('http.url', USER_INFO_URI)
+      span.set_tag('http.url', user_info_uri)
       span.set_tag('http.method', 'GET')
 
       raw_response = yield
