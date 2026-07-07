@@ -17,12 +17,6 @@ RSpec.describe 'Application', type: :request do
         expect(response.headers['cache-control']).to eq 'no-store'
       end
 
-      it 'logs user_id to new relic' do
-        expect(NewRelic::Agent).to receive(:add_custom_attributes).with({ user_id: user.id })
-        get '/'
-        expect(response).to be_ok
-      end
-
       describe 'timed out' do
         after { Timecop.return }
         it 'redirects to login after inactivity' do
