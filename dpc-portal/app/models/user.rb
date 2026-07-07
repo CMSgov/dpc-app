@@ -66,5 +66,4 @@ class User < ApplicationRecord
   def all_emails
     user_emails.map(&:email)
   end
-
 end

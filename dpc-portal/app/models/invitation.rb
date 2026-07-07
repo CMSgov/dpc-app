@@ -125,11 +125,13 @@ class Invitation < ApplicationRecord
   end
 
   def existing_credential_delegate?
+    return false unless provider_organization
+
     provider_organization
-    &.cd_org_links
-    &.joins(user: { csp_users: :user_emails })
-    &.where(disabled_at: nil, user_emails: { email: invited_email })
-    &.exists?
+      .cd_org_links
+      .joins(user: { csp_users: :user_emails })
+      .where(disabled_at: nil, user_emails: { email: invited_email })
+      .exists?
   end
 
   private

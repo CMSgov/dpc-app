@@ -77,7 +77,7 @@ module LoginSupport
     csp_user   = fetch_csp_user!(user, 'login_dot_gov')
     all_emails = csp_user.user_emails.map(&:email)
     primary_email = all_emails.first
-    
+
     { uid: csp_user.uuid,
       info: { email: primary_email },
       extra: {

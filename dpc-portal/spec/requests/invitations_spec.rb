@@ -866,7 +866,7 @@ RSpec.describe 'Invitations', type: :request do
           end
           it 'should fail if too many matches' do
             create(:user, pac_id: user_info_template['social_security_number'])
-            
+
             dup_user = create(:user)
             csp = Csp.find_by(name: provider.to_s) || create(:csp, provider)
             dup_csp_user = create(:csp_user, user: dup_user, csp:, uuid: SecureRandom.uuid)
@@ -996,8 +996,8 @@ end
 def create_invitation_user_with_csp(csp:)
   template = user_info_template
   user = create_user_with_csp(given_name: template['given_name'], family_name: template['family_name'],
-                               csp:, uuid: template['sub'])
-  csp_record = Csp.find_by(name: csp.to_s) || create(:csp, csp)
+                              csp:, uuid: template['sub'])
+  Csp.find_by(name: csp.to_s) || create(:csp, csp)
   csp_user = user.csp_user_for(csp.to_s)
   create(:user_email, csp_user:, email: template['email'], primary: true)
   user
