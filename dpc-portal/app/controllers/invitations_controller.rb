@@ -271,10 +271,14 @@ class InvitationsController < ApplicationController
   def find_or_create_cd_user(user_info)
     csp = Csp.find_by(name: session[:csp])
     csp_user = CspUser.find_by(uuid: user_info['sub'], csp:)
-
     return csp_user.user if csp_user
+
     existing_user = find_user_by_email(user_info['email'])
     return existing_user if existing_user
+
+    ssn = user_info['social_security_number']&.tr('-', '')
+    by_pac_id = User.find_by(pac_id: ssn) if ssn.present?
+    return by_pac_id if by_pac_id
 
     User.new.tap do |user|
       assign_user_attributes(user, user_info)
@@ -307,7 +311,8 @@ class InvitationsController < ApplicationController
   end
 
   def update_user(user_info)
-    @user.pac_id ||= session.delete(:user_pac_id)
+    pac_id = session.delete(:user_pac_id)
+    @user.pac_id ||= pac_id 
     @user.given_name = user_info['given_name']
     @user.family_name = user_info['family_name']
     @user.save

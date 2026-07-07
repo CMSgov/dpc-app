@@ -705,7 +705,7 @@ RSpec.describe 'Invitations', type: :request do
           end
           it 'should not override pac_id on existing user' do
             csp = Csp.find_by(name: provider.to_s) || create(:csp, provider)
-            user = create(:user)
+            user = create(:user, pac_id: 'foo')
             csp_user = create(:csp_user, user:, csp:, uuid: user_info_template['sub'])
             create(:user_email, csp_user:, email: user_info_template['email'], primary: true)
 
