@@ -9,6 +9,7 @@
   },
   "version": "0.1.0",
   "devDependencies": {
+    "http-proxy-middleware" : "^2.0.10",
     "sass": "^1.86.3",
     "uuid": "^14.0.1",
     "webpack-dev-server": "^5.2.5"

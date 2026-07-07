@@ -47,6 +47,7 @@
         <pitest.version>1.22.0</pitest.version>
         <h2.version>2.3.232</h2.version>
         <aws.java.sdk.version>2.46.15</aws.java.sdk.version>
+        <logback.version>1.5.33</logback.version>
         <sonar.coverage.exclusions>**/MockBlueButton*.java</sonar.coverage.exclusions>
         <maven.build.cache.processPlugins>false</maven.build.cache.processPlugins>
     </properties>
@@ -314,17 +315,17 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-access</artifactId>
-                <version>1.5.25</version>
+                <version>${logback.version}</version>
             </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.5.25</version>
+                <version>${logback.version}</version>
             </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
-                <version>1.5.25</version>
+                <version>${logback.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>

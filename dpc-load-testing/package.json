@@ -13,7 +13,7 @@
   },
   "resolutions": {
     "eslint/js-yaml": "^4.1.1",
-    "jest/js-yaml": "^3.14.2"
+    "jest/js-yaml": "^4.2.0"
   },
   "scripts": {
     "test": "NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' jest",
