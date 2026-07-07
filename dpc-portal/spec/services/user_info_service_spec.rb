@@ -75,28 +75,28 @@ describe UserInfoService do
     end
   end
 
-  def verify_logs(status:, connection_fails: false)
-    verify_dd(connection_fails:)
+  def verify_logs(status:, csp: 'login_dot_gov', connection_fails: false)
+    verify_dd(csp:, connection_fails:)
     verify_rails(status: status, csp: csp)
   end
 
-  def verify_dd(connection_fails:)
+  def verify_dd(csp:, connection_fails:)
     span = instance_double(Datadog::Tracing::Span)
-    expect_span_tags(span, connection_fails:)
+    expect_span_tags(span, csp:, connection_fails:)
     expect(Datadog::Tracing).to receive(:trace)
       .with('user_info_service.request', resource: 'request_info') do |&block|
       block.call(span)
     end
   end
 
-  def expect_span_tags(span, connection_fails:)
-    expect_http_metadata(span)
+  def expect_span_tags(span, csp:, connection_fails:)
+    expect_http_metadata(span, csp)
     expect(span).to receive(:set_tag).with('http.status_code', anything) unless connection_fails
   end
 
-  def expect_http_metadata(span)
+  def expect_http_metadata(span, csp)
     expect(span).to receive(:type=).with('http')
-    expect(span).to receive(:set_tag).with('http.url', UserInfoService::USER_INFO_URI)
+    expect(span).to receive(:set_tag).with('http.url', user_info_url(csp))
     expect(span).to receive(:set_tag).with('http.method', 'GET')
   end
 
