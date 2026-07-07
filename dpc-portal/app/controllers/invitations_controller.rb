@@ -97,6 +97,11 @@ class InvitationsController < ApplicationController
 
   private
 
+  def find_user_by_email(email)
+    return nil if email.blank?
+    UserEmail.find_by(email:)&.csp_user&.user
+  end
+
   def complete_registration
     session.delete("invitation_status_#{@invitation.id}")
     sign_in(user: @user, csp: session[:csp])
@@ -267,14 +272,14 @@ class InvitationsController < ApplicationController
     csp = Csp.find_by(name: session[:csp])
     csp_user = CspUser.find_by(uuid: user_info['sub'], csp:)
 
-    if csp_user
-      csp_user.user
-    else
-      User.new.tap do |user|
-        assign_user_attributes(user, user_info)
-        user.save!
-        log_create_user
-      end
+    return csp_user.user if csp_user
+    existing_user = find_user_by_email(user_info['email'])
+    return existing_user if existing_user
+
+    User.new.tap do |user|
+      assign_user_attributes(user, user_info)
+      user.save!
+      log_create_user
     end
   end
 
@@ -282,8 +287,9 @@ class InvitationsController < ApplicationController
     csp = Csp.find_by(name: session[:csp])
     csp_user = CspUser.find_by(uuid: user_info['sub'], csp:)
     by_pac_id = User.where(pac_id: session[:user_pac_id])
+    by_email = find_user_by_email(user_info['email'])
 
-    candidates = [csp_user&.user, by_pac_id.first].compact.uniq
+    candidates = [csp_user&.user, by_pac_id.first, by_email].compact.uniq
     raise MultiUserMatchError, "too many matching users | pac_id: #{session[:user_pac_id]}" if candidates.size > 1
     return candidates.first if candidates.present?
 
