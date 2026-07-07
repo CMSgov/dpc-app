@@ -167,7 +167,7 @@ RSpec.describe 'IdMe', type: :request do
 
       context 'when a matching user account exists' do
         before do
-          user = create(:user, provider: 'id_me', given_name: 'Bob', family_name: 'Hoskins')
+          user = create(:user, given_name: 'Bob', family_name: 'Hoskins')
           create(:csp_user, user:, uuid:, csp:)
         end
 

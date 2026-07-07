@@ -264,14 +264,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_01_200404) do
     t.datetime "updated_at", null: false
     t.string "given_name"
     t.string "family_name"
-    t.string "provider", limit: 50, default: "", null: false
     t.string "pac_id"
     t.integer "verification_status"
     t.integer "verification_reason"
     t.datetime "last_checked_at"
-    t.datetime "reset_password_sent_at"
-    t.string "reset_password_token"
-    t.string "encrypted_password"
   end
 
   add_foreign_key "ao_org_links", "invitations"
