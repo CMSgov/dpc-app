@@ -46,7 +46,13 @@ RSpec.describe 'Application', type: :request do
           get '/'
           expect(response).to be_ok
           until Time.now > logged_in_at + 12.hours
+            get '/'
+            expect(response).to be_ok
+            Timecop.travel(29.minutes.from_now)
           end
+          get '/'
+          expect(response).to redirect_to('/users/sign_in')
+          expect(flash[:notice] = 'You have exceeded the maximum session length. Please sign in again to continue.')
         end
       end
     end
