@@ -427,9 +427,11 @@ RSpec.describe Invitation, type: :model do
         user_info = { 'social_security_number' => '900-11-1111' }
         expect(ao_invite.ao_match?(user_info)).to be_truthy
       end
-      it 'should pass with CLEAR ssn9' do
-        user_info = { 'ssn9' => '900111111' }
-        expect(ao_invite.ao_match?(user_info)).to be_truthy
+      it 'should decrypt CLEAR ssn9' do
+        encrypted_ssn = { 'ciphertext' => 'blahblahblah' }
+        { 'ssn9' => encrypted_ssn }
+
+        expect(ao_invite).to receive(:decrypt_ssn).with(encrypted_ssn)
       end
       it 'should raise with bad ssn' do
         user_info = { 'social_security_number' => '900666666' }
