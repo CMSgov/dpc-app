@@ -132,6 +132,11 @@ services:
       DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: true
       CPI_API_GW_BASE_URL: http://localhost:4567/
       CMS_IDM_OAUTH_URL: http://localhost:4567/
+      IDP_LOGIN_DOT_GOV_HOST: idp.int.identitysandbox.gov
+      IDP_ID_ME_HOST: api.idmelabs.com
+      IDP_ID_ME_CLIENT_ID: 925bb2985ccf623114359caa76228919
+      CLEAR_IDP_HOST: verified.clearme.com
+      CLEAR_IDP_CLIENT_ID: d3ca98c2-c43c-4065-8f82-ce9958b4e6d4
       IDP_HOST: idp.int.identitysandbox.gov
       RUBY_YJIT_ENABLE: 1
       ENV: local
