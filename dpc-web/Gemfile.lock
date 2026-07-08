@@ -164,7 +164,7 @@ GEM
     crack (1.0.1)
       bigdecimal
       rexml
-    crass (1.0.6)
+    crass (1.0.7)
     csv (3.3.0)
     date (3.5.1)
     date_time_precision (0.8.1)
@@ -303,7 +303,7 @@ GEM
     minitest (6.0.5)
       drb (~> 2.0)
       prism (~> 1.5)
-    msgpack (1.7.2)
+    msgpack (1.8.3)
     multi_json (1.17.0)
     multi_xml (0.9.1)
       bigdecimal (>= 3.1, < 5)

@@ -47,26 +47,48 @@ class UserInfoService
     JSON::JWT.decode(body, :skip_verification).to_h.with_indifferent_access
   end
 
-  def request_info(csp, token) # rubocop:disable Metrics/AbcSize
-    csp_config = oidc_client_config csp
-    start_tracking csp, csp_config[:client_options][:userinfo_endpoint]
-    response = Net::HTTP.get_response(URI(csp_config[:client_options][:userinfo_endpoint]), auth_header(token))
-    code = response.code.to_i
-    case code
-    when 200...299
+  def handle_response(response)
+    case response
+    when Net::HTTPSuccess
       parsed_response(response)
-    when 401
+    when Net::HTTPUnauthorized
       raise UserInfoServiceError, 'unauthorized'
     else
       Rails.logger.error "User Info Error: #{response.body}"
       raise UserInfoServiceError, 'server_error'
     end
+  end
+
+  def request_info(csp, token)
+    csp_config = oidc_client_config csp
+    user_info_uri = csp_config[:client_options][:userinfo_endpoint]
+    start_tracking csp, user_info_uri
+
+    response = trace_request(user_info_uri) do
+      Net::HTTP.get_response(URI(user_info_uri), auth_header(token))
+    end
+
+    code = response.code
+    handle_response(response)
   rescue Errno::ECONNREFUSED
     code = 503
     Rails.logger.error 'Could not connect to login.gov'
     raise UserInfoServiceError, 'server_error'
   ensure
-    finish_tracking(code, csp, csp_config[:client_options][:userinfo_endpoint])
+    finish_tracking(code, csp, user_info_uri)
+  end
+
+  def trace_request(user_info_uri)
+    Datadog::Tracing.trace('user_info_service.request', resource: 'request_info') do |span|
+      span.type = 'http'
+      span.set_tag('http.url', user_info_uri)
+      span.set_tag('http.method', 'GET')
+
+      raw_response = yield
+
+      span.set_tag('http.status_code', raw_response.code)
+      raw_response
+    end
   end
 
   def start_tracking(csp, user_info_uri)
@@ -78,19 +100,16 @@ class UserInfoService
          csp_request_url: user_info_uri,
          csp_request_method_name: :request_info }]
     )
-    @tracker = NewRelic::Agent::Tracer.start_external_request_segment(library: 'Net::HTTP', uri: user_info_uri,
-                                                                      procedure: :get)
   end
 
   def finish_tracking(code, csp, user_info_uri)
-    @tracker.finish
     Rails.logger.info(
       ['CSP user_info response info',
        { csp: csp,
          csp_request_method: :get,
          csp_request_url: user_info_uri,
          csp_request_method_name: :request_info,
-         csp_response_status_code: code,
+         csp_response_status_code: code&.to_i,
          csp_response_duration: Time.now - @start }]
     )
   end

@@ -34,7 +34,10 @@ RUN gem install bundler --no-document && \
 RUN gem install foreman
 
 # Run bundler audit
-RUN bundle exec bundle audit update && bundle exec bundle audit check
+# CVE-2026-38969 is for webrick, which is only used in our fake_cpi_gateway client and never exposed to the outside
+# world.  There's currently no fix, and the recommended solution is to remove or disable it.  That would break
+# the fake_cpi_gateway, though, so we can't do that.
+RUN bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2026-38969
 
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-portal /dpc-portal

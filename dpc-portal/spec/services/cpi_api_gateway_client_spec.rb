@@ -140,16 +140,19 @@ describe CpiApiGatewayClient do
   end
 
   def verify_logs(status:, url:, method_name:, method: :get)
-    verify_new_relic(url, method)
+    verify_dd(method_name, status)
     verify_rails(status:, url:, method_name:, method:)
   end
 
-  def verify_new_relic(uri, procedure)
-    new_relic_tracer = instance_double(NewRelic::Agent::Transaction::ExternalRequestSegment)
-    expect(NewRelic::Agent::Tracer).to receive(:start_external_request_segment)
-      .with(library: 'Net::HTTP', uri:, procedure:)
-      .and_return(new_relic_tracer)
-    expect(new_relic_tracer).to receive(:finish)
+  def verify_dd(method_name, status)
+    allow(Datadog::Tracing).to receive(:trace).and_call_original
+
+    if method_name == :fetch_provider_info
+      expect_datadog_trace_fetch_provider_info(status)
+    else
+      # We'll still get internal datadog traces from the oauth process, but we shouldn't get any CPI API Gateway traces
+      expect(Datadog::Tracing).not_to receive(:trace).with('cpi_api_gateway.request', anything)
+    end
   end
 
   def verify_rails(status:, url:, method_name:, method:)
@@ -168,5 +171,24 @@ describe CpiApiGatewayClient do
          cpi_api_gateway_response_status_code: status,
          cpi_api_gateway_response_duration: anything }]
     )
+  end
+
+  private
+
+  def expect_datadog_trace_fetch_provider_info(status)
+    span = double('span')
+    expect_span_tags(span, status)
+
+    expect(Datadog::Tracing).to receive(:trace)
+      .with('cpi_api_gateway.request', resource: 'fetch_provider_info') do |&block|
+      block.call(span)
+    end
+  end
+
+  def expect_span_tags(span, status)
+    expect(span).to receive(:type=).with('http')
+    expect(span).to receive(:set_tag).with('http.url', anything)
+    expect(span).to receive(:set_tag).with('http.method', 'POST')
+    expect(span).to receive(:set_tag).with('http.status_code', status)
   end
 end
