@@ -4,100 +4,111 @@ module Page
   module Utility
     # Displays unfixable error message in accept invitation process
     class ErrorComponentPreview < ViewComponent::Preview
-      # @param csp select { choices: [:login_dot_gov, :id_me] }
-      def invalid_invitation(csp)
+      DEFAULT_CSP = :login_dot_gov
+      def ao_invalid
         invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'))
-        reason = 'invalid'
-        render(Page::Utility::ErrorComponent.new(invitation, reason, csp))
+        reason = 'ao_invalid'
+        render(Page::Utility::ErrorComponent.new(invitation, reason))
       end
 
-      # @param csp select { choices: [:login_dot_gov, :id_me] }
-      def pii_mismatch(csp)
+      def cd_invalid
+        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'))
+        reason = 'cd_invalid'
+        render(Page::Utility::ErrorComponent.new(invitation, reason))
+      end
+
+      # @param csp select :csp_codes
+      def pii_mismatch(csp: DEFAULT_CSP)
         user = User.new(email: 'bilbo.baggins@cms.hms.gov')
         invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'),
                                     invited_by: user)
         reason = 'pii_mismatch'
-        render(Page::Utility::ErrorComponent.new(invitation, reason, csp))
+        render(Page::Utility::ErrorComponent.new(invitation, reason, csp:))
       end
 
-      # @param csp select { choices: [:login_dot_gov, :id_me] }
-      def email_mismatch(csp)
+      # @param csp select :csp_codes
+      def email_mismatch(csp: DEFAULT_CSP)
         invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'))
         reason = 'email_mismatch'
-        render(Page::Utility::ErrorComponent.new(invitation, reason, csp))
+        render(Page::Utility::ErrorComponent.new(invitation, reason, csp:))
       end
 
-      # @param error_code
-      # @param csp select { choices: [:login_dot_gov, :id_me] }
-      def verification_failure(csp, error_code: :user_not_authorized_official)
+      # @param error_code select :error_codes
+      def verification_failure(error_code: :user_not_authorized_official)
         invitation = Invitation.new(id: 3, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'))
-        render(Page::Utility::ErrorComponent.new(invitation, error_code, csp))
+        render(Page::Utility::ErrorComponent.new(invitation, error_code))
       end
 
-      # @param csp select { choices: [:login_dot_gov, :id_me] }
-      def ao_expired(csp)
+      def ao_expired
         invitation = Invitation.new(id: 5, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
                                     invitation_type: :authorized_official, created_at: 49.hours.ago)
         reason = 'ao_expired'
-        render(Page::Utility::ErrorComponent.new(invitation, reason, csp))
+        render(Page::Utility::ErrorComponent.new(invitation, reason))
       end
 
-      # @param csp select { choices: [:login_dot_gov, :id_me] }
-      def cd_expired(csp)
+      def cd_expired
         user = User.new(email: 'bilbo.baggins@cms.hms.gov')
         invitation = Invitation.new(id: 6, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
                                     invited_by: user, invitation_type: :credential_delegate, created_at: 49.hours.ago)
         reason = 'cd_expired'
-        render(Page::Utility::ErrorComponent.new(invitation, reason, csp))
+        render(Page::Utility::ErrorComponent.new(invitation, reason))
       end
 
-      # @param csp select { choices: [:login_dot_gov, :id_me] }
-      def ao_renewed(csp)
+      def ao_renewed
         invitation = Invitation.new(id: 7, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
                                     status: :renewed)
         reason = 'ao_renewed'
-        render(Page::Utility::ErrorComponent.new(invitation, reason, csp))
+        render(Page::Utility::ErrorComponent.new(invitation, reason))
       end
 
-      # @param csp select { choices: [:login_dot_gov, :id_me] }
-      def cd_accepted(csp)
+      def cd_accepted
         invitation = Invitation.new(id: 8, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
                                     invitation_type: :credential_delegate, status: :renewed)
         reason = 'cd_accepted'
-        render(Page::Utility::ErrorComponent.new(invitation, reason, csp))
+        render(Page::Utility::ErrorComponent.new(invitation, reason))
       end
 
-      # @param csp select { choices: [:login_dot_gov, :id_me] }
-      def ao_accepted(csp)
+      # @param csp select :csp_codes
+      def ao_accepted(csp: DEFAULT_CSP)
         invitation = Invitation.new(id: 9, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
                                     invitation_type: :authorized_official, status: :renewed)
         reason = 'ao_accepted'
-        render(Page::Utility::ErrorComponent.new(invitation, reason, csp))
+        render(Page::Utility::ErrorComponent.new(invitation, reason, csp:))
       end
 
-      # @param csp select { choices: [:login_dot_gov, :id_me] }
-      def server_error(csp)
+      def server_error
         invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'))
         reason = 'server_error'
-        render(Page::Utility::ErrorComponent.new(invitation, reason, csp))
+        render(Page::Utility::ErrorComponent.new(invitation, reason))
       end
 
-      # @param csp select { choices: [:login_dot_gov, :id_me] }
-      def no_account(csp)
+      # @param csp select :csp_codes
+      def no_account(csp: DEFAULT_CSP)
         reason = 'no_account'
-        render(Page::Utility::ErrorComponent.new(nil, reason, csp))
+        render(Page::Utility::ErrorComponent.new(nil, reason, csp:))
       end
 
-      # @param csp select { choices: [:login_dot_gov, :id_me] }
-      def csp_signin_cancel(csp)
-        reason = "#{csp}_signin_cancel"
-        render(Page::Utility::ErrorComponent.new(nil, reason, csp))
+      # @param csp select :csp_codes
+      def csp_signin_cancel(csp: DEFAULT_CSP)
+        reason = 'csp_signin_cancel'
+        render(Page::Utility::ErrorComponent.new(nil, reason, csp:))
       end
 
-      # @param csp select { choices: [:login_dot_gov, :id_me] }
-      def csp_signin_fail(csp)
-        reason = "#{csp}_signin_fail"
-        render(Page::Utility::ErrorComponent.new(nil, reason, csp))
+      # @param csp select :csp_codes
+      def csp_signin_fail(csp: DEFAULT_CSP)
+        reason = 'csp_signin_fail'
+        render(Page::Utility::ErrorComponent.new(nil, reason, csp:))
+      end
+
+      private
+
+      def csp_codes
+        { choices: %i[login_dot_gov id_me] }
+      end
+
+      def error_codes
+        { choices: %i[user_not_authorized_official no_approved_enrollment bad_npi org_med_sanctions ao_med_sanctions
+                      missing_info server_error fail_to_proof] }
       end
     end
   end
