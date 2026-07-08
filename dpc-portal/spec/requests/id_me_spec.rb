@@ -91,10 +91,11 @@ RSpec.describe 'IdMe', type: :request do
         it 'sets authentication token' do
           post '/auth/id_me'
           follow_redirect!
-          expect(request.session[:csp]).to eq 'id_me'
-          expect(request.session[:id_me_token]).to eq token
-          expect(request.session[:id_me_token_exp]).to_not be_nil
-          expect(request.session[:id_me_token_exp]).to be_within(1.second).of 899.seconds.from_now
+
+          csp_session = CspSession.new(request.session)
+          expect(csp_session.current).to eq 'id_me'
+          expect(csp_session.token).to eq token
+          expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
         end
       end
 
@@ -111,10 +112,13 @@ RSpec.describe 'IdMe', type: :request do
         it 'sets authentication token' do
           post '/auth/id_me'
           follow_redirect!
-          expect(request.session[:csp]).to eq 'id_me'
-          expect(request.session[:id_me_token]).to eq token
-          expect(request.session[:id_me_token_exp]).to_not be_nil
-          expect(request.session[:id_me_token_exp]).to be_within(1.second).of 899.seconds.from_now
+
+          csp_session = CspSession.new(request.session)
+          expect(csp_session.current).to eq 'id_me'
+          expect(csp_session.token).to eq token
+          expect(csp_session.token_exp).to_not be_nil
+          expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
+          expect(csp_session.user).to be_nil
         end
       end
     end
@@ -161,8 +165,11 @@ RSpec.describe 'IdMe', type: :request do
 
       it 'does not set an authentication token' do
         post '/auth/id_me'
-        expect(request.session[:id_me_token]).to be_nil
-        expect(request.session[:id_me_token_exp]).to be_nil
+        csp_session = CspSession.new(request.session)
+        expect(csp_session.current).to be_nil
+        expect(csp_session.token).to be_nil
+        expect(csp_session.token_exp).to be_nil
+        expect(csp_session.user).to be_nil
       end
 
       context 'when a matching user account exists' do

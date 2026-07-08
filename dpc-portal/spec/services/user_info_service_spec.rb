@@ -16,7 +16,7 @@ describe UserInfoService do
 
     it 'should return info with valid session' do
       verify_logs(status: 200)
-      expect(service.user_info(valid_csp_session(:login_dot_gov))).to eq csp_response(:login_dot_gov)
+      expect(service.user_info(build_csp_session(:login_dot_gov))).to eq csp_response(:login_dot_gov)
     end
   end
 
@@ -28,7 +28,7 @@ describe UserInfoService do
         .with(headers: { Authorization: "Bearer #{token}" })
         .to_return(body: error, status: 401)
       expect do
-        service.user_info(valid_csp_session(:login_dot_gov))
+        service.user_info(build_csp_session(:login_dot_gov))
       end.to raise_error(UserInfoServiceError, 'unauthorized')
     end
     it 'should throw error if status is 500' do
@@ -38,7 +38,7 @@ describe UserInfoService do
         .with(headers: { Authorization: "Bearer #{token}" })
         .to_return(body: error, status: 500)
       expect do
-        service.user_info(valid_csp_session(:login_dot_gov))
+        service.user_info(build_csp_session(:login_dot_gov))
       end.to raise_error(UserInfoServiceError, 'server_error')
     end
     it 'should throw error if cannot connect' do
@@ -47,29 +47,31 @@ describe UserInfoService do
         .with(headers: { Authorization: "Bearer #{token}" })
         .to_raise(Errno::ECONNREFUSED)
       expect do
-        service.user_info(valid_csp_session(:login_dot_gov))
+        service.user_info(build_csp_session(:login_dot_gov))
       end.to raise_error(UserInfoServiceError, 'server_error')
     end
   end
 
   context :invalid_session do
     it 'should throw error if no token' do
-      invalid = valid_csp_session(:login_dot_gov).merge(login_dot_gov_token: nil)
+      csp_session_with_nil_token = build_csp_session(:login_dot_gov, token: nil)
       expect do
-        service.user_info(invalid)
+        service.user_info(csp_session_with_nil_token)
       end.to raise_error(UserInfoServiceError, 'no_token')
     end
     it 'should throw error if no token expiration' do
-      invalid = valid_csp_session(:login_dot_gov).merge(login_dot_gov_token_exp: nil)
+      csp_session_with_nil_exp_token = build_csp_session(:login_dot_gov, token_exp: nil)
       expect do
-        service.user_info(invalid)
+        service.user_info(csp_session_with_nil_exp_token)
       end.to raise_error(UserInfoServiceError, 'no_token_exp')
     end
     context :expired_session do
       let(:exp) { 1.second.ago }
       it 'should throw error' do
         expect do
-          service.user_info(valid_csp_session(:login_dot_gov))
+          # csp_session_with_exp_token = build_csp_session(:login_dot_gov, token_exp: exp)
+          # service.user_info(csp_session_with_exp_token)
+          service.user_info(build_csp_session(:login_dot_gov))
         end.to raise_error(UserInfoServiceError, 'expired_token')
       end
     end
@@ -107,13 +109,11 @@ describe UserInfoService do
     )
   end
 
-  def valid_csp_session(csp)
-    csp = csp.to_s
-    session = ActiveSupport::HashWithIndifferentAccess.new
-    session[:csp] = csp
-    session["#{csp}_token"] = token
-    session["#{csp}_token_exp"] = exp
-    session
+  def build_csp_session(csp, token: self.token, token_exp: exp)
+    rails_session = ActiveSupport::HashWithIndifferentAccess.new
+    cs = CspSession.new(rails_session)
+    cs.store(csp: csp, token: token, token_exp: token_exp)
+    cs
   end
 
   def csp_response(csp)

@@ -19,6 +19,11 @@ class ApplicationController < ActionController::Base
     @current_user ||= User.find_by(id: session[:user])
   end
 
+  def csp_session
+    @csp_session ||= CspSession.new(session)
+  end
+  helper_method :csp_session
+
   def authenticate_user!
     return if current_user
 
@@ -28,8 +33,8 @@ class ApplicationController < ActionController::Base
   end
 
   def sign_in(user:, csp:)
-    session[:user] = user.id
-    session[:csp] = csp.to_s
+    csp_session.store_user(user.id)
+    csp_session.activate(csp)
   end
 
   private
