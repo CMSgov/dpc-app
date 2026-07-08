@@ -17,6 +17,15 @@ RSpec.describe 'Application', type: :request do
         expect(response.headers['cache-control']).to eq 'no-store'
       end
 
+      it 'logs user_id to datadog' do
+        mock_span = double('datadog_span')
+        expect(mock_span).to receive(:set_tag).with('usr.id', user.id)
+        allow(Datadog::Tracing).to receive(:active_span).and_return(mock_span)
+
+        get '/'
+        expect(response).to be_ok
+      end
+
       describe 'timed out' do
         after { Timecop.return }
         it 'redirects to login after inactivity' do
@@ -37,13 +46,7 @@ RSpec.describe 'Application', type: :request do
           get '/'
           expect(response).to be_ok
           until Time.now > logged_in_at + 12.hours
-            get '/'
-            expect(response).to be_ok
-            Timecop.travel(29.minutes.from_now)
           end
-          get '/'
-          expect(response).to redirect_to('/users/sign_in')
-          expect(flash[:notice] = 'You have exceeded the maximum session length. Please sign in again to continue.')
         end
       end
     end

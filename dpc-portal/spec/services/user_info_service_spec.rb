@@ -27,30 +27,30 @@ describe UserInfoService do
         it 'should throw error if status is 401' do
           verify_logs(status: 401, csp: provider)
           error = '{"error":"No can do"}'
-          stub_request(:get, user_info_url(provider))
+          stub_request(:get, user_info_url(:login_dot_gov))
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: error, status: 401)
           expect do
-            service.user_info(valid_csp_session(provider))
+            service.user_info(valid_csp_session(:login_dot_gov))
           end.to raise_error(UserInfoServiceError, 'unauthorized')
         end
         it 'should throw error if status is 500' do
           verify_logs(status: 500, csp: provider)
           error = '{"error":"shrug"}'
-          stub_request(:get, user_info_url(provider))
+          stub_request(:get, user_info_url(:login_dot_gov))
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: error, status: 500)
           expect do
-            service.user_info(valid_csp_session(provider))
+            service.user_info(valid_csp_session(:login_dot_gov))
           end.to raise_error(UserInfoServiceError, 'server_error')
         end
         it 'should throw error if cannot connect' do
-          verify_logs(status: 503, csp: provider)
-          stub_request(:get, user_info_url(provider))
+          verify_logs(status: 503, csp: provider, connection_fails: true)
+          stub_request(:get, user_info_url(:login_dot_gov))
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_raise(Errno::ECONNREFUSED)
           expect do
-            service.user_info(valid_csp_session(provider))
+            service.user_info(valid_csp_session(:login_dot_gov))
           end.to raise_error(UserInfoServiceError, 'server_error')
         end
       end
@@ -79,17 +79,29 @@ describe UserInfoService do
       end
     end
   end
-  def verify_logs(status:, csp:)
-    verify_new_relic(csp)
+  def verify_logs(status:, csp:, connection_fails: false)
+    verify_dd(csp:, connection_fails:)
     verify_rails(status: status, csp: csp)
   end
 
-  def verify_new_relic(csp)
-    new_relic_tracer = instance_double(NewRelic::Agent::Transaction::ExternalRequestSegment)
-    expect(NewRelic::Agent::Tracer).to receive(:start_external_request_segment)
-      .with(library: 'Net::HTTP', uri: user_info_url(csp), procedure: :get)
-      .and_return(new_relic_tracer)
-    expect(new_relic_tracer).to receive(:finish)
+  def verify_dd(csp:, connection_fails:)
+    span = instance_double(Datadog::Tracing::Span)
+    expect_span_tags(span, csp:, connection_fails:)
+    expect(Datadog::Tracing).to receive(:trace)
+      .with('user_info_service.request', resource: 'request_info') do |&block|
+      block.call(span)
+    end
+  end
+
+  def expect_span_tags(span, csp:, connection_fails:)
+    expect_http_metadata(span, csp)
+    expect(span).to receive(:set_tag).with('http.status_code', anything) unless connection_fails
+  end
+
+  def expect_http_metadata(span, csp)
+    expect(span).to receive(:type=).with('http')
+    expect(span).to receive(:set_tag).with('http.url', user_info_url(csp))
+    expect(span).to receive(:set_tag).with('http.method', 'GET')
   end
 
   def verify_rails(status:, csp:)

@@ -1,18 +1,7 @@
 volumes:
   coverage:
 
-
 services:
-
-  redis:
-    image: artifactory.cloud.cms.gov/docker/redis:latest
-    platform: linux/arm64
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      start_period: 30s
-      retries: 5
 
   dpc_web:
     build:
@@ -126,36 +115,41 @@ services:
       - ./tmp:/dpc-portal/tmp
     env_file:
       - ./ops/config/decrypted/local.env
+      - dd.docker-compose.env
     environment:
       # Misc. non-application settings
-      - TERM=${TERM:-xterm-256color}
-      - 'PS1=${DOCKER_PS1:-[docker] \w: }'
-      - "LSCOLORS=${DOCKER_LSCOLORS:- }"
+      TERM: ${TERM:-xterm-256color}
+      PS1: '${DOCKER_PS1:-[docker] \w: }'
+      LSCOLORS: "${DOCKER_LSCOLORS:- }"
       # Application settings
-      - DATABASE_URL=postgresql://db/dpc-portal_development
-      - TEST_DATABASE_URL=postgresql://db/dpc-portal_test
-      - GOLDEN_MACAROON=${GOLDEN_MACAROON}
-      - API_METADATA_URL=http://api:3002/api/v1
-      - API_ADMIN_URL=http://api:9900
-      - DB_USER=postgres
-      - DB_PASS=dpc-safe
-      - DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL=true
-      - CPI_API_GW_BASE_URL=http://localhost:4567/
-      - CMS_IDM_OAUTH_URL=http://localhost:4567/
-      - IDP_LOGIN_DOT_GOV_HOST=idp.int.identitysandbox.gov
-      - IDP_ID_ME_HOST=api.idmelabs.com
-      - IDP_ID_ME_CLIENT_ID=925bb2985ccf623114359caa76228919
-      - RUBY_YJIT_ENABLE=1
-      - ENV=local
-      - NEW_RELIC_MONITOR_MODE=false
-      - DISABLE_JSON_LOGGER=true
-      - RAILS_DEVELOPMENT_HOSTS=host.docker.internal
-      - SKIP_SIMPLE_COV=${SKIP_SIMPLE_COV:-}
+      DATABASE_URL: postgresql://db/dpc-portal_development
+      TEST_DATABASE_URL: postgresql://db/dpc-portal_test
+      GOLDEN_MACAROON: ${GOLDEN_MACAROON}
+      API_METADATA_URL: http://api:3002/api/v1
+      API_ADMIN_URL: http://api:9900
+      DB_USER: postgres
+      DB_PASS: dpc-safe
+      DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: true
+      CPI_API_GW_BASE_URL: http://localhost:4567/
+      CMS_IDM_OAUTH_URL: http://localhost:4567/
+      IDP_LOGIN_DOT_GOV_HOST: idp.int.identitysandbox.gov
+      IDP_ID_ME_HOST: api.idmelabs.com
+      IDP_ID_ME_CLIENT_ID: 925bb2985ccf623114359caa76228919
+      IDP_HOST: idp.int.identitysandbox.gov
+      RUBY_YJIT_ENABLE: 1
+      ENV: local
+      DISABLE_JSON_LOGGER: true
+      RAILS_DEVELOPMENT_HOSTS: host.docker.internal
+      SKIP_SIMPLE_COV: ${SKIP_SIMPLE_COV:-}
+      DD_LOGS_INJECTION: false
+      DD_SERVICE: dpc-local-portal
     ports:
       - "3100:3100"
     depends_on:
       db:
         condition: service_healthy
+      datadog-agent:
+        condition: service_started
     healthcheck:
       test: curl --fail http://localhost:3100/health_check || exit 1
       interval: 10s
