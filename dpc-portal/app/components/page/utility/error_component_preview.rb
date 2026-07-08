@@ -5,14 +5,15 @@ module Page
     # Displays unfixable error message in accept invitation process
     class ErrorComponentPreview < ViewComponent::Preview
       DEFAULT_CSP = :login_dot_gov
+      ORG_NAME = 'Health Hut'
       def ao_invalid
-        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'))
+        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: ORG_NAME))
         reason = 'ao_invalid'
         render(Page::Utility::ErrorComponent.new(invitation, reason))
       end
 
       def cd_invalid
-        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'))
+        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: ORG_NAME))
         reason = 'cd_invalid'
         render(Page::Utility::ErrorComponent.new(invitation, reason))
       end
@@ -20,7 +21,7 @@ module Page
       # @param csp select :csp_codes
       def pii_mismatch(csp: DEFAULT_CSP)
         user = User.new(email: 'bilbo.baggins@cms.hms.gov')
-        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'),
+        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: ORG_NAME),
                                     invited_by: user)
         reason = 'pii_mismatch'
         render(Page::Utility::ErrorComponent.new(invitation, reason, csp:))
@@ -28,19 +29,19 @@ module Page
 
       # @param csp select :csp_codes
       def email_mismatch(csp: DEFAULT_CSP)
-        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'))
+        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: ORG_NAME))
         reason = 'email_mismatch'
         render(Page::Utility::ErrorComponent.new(invitation, reason, csp:))
       end
 
       # @param error_code select :error_codes
       def verification_failure(error_code: :user_not_authorized_official)
-        invitation = Invitation.new(id: 3, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'))
+        invitation = Invitation.new(id: 3, provider_organization: ProviderOrganization.new(id: 1, name: ORG_NAME))
         render(Page::Utility::ErrorComponent.new(invitation, error_code))
       end
 
       def ao_expired
-        invitation = Invitation.new(id: 5, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
+        invitation = Invitation.new(id: 5, provider_organization: ProviderOrganization.new(id: 1, name: ORG_NAME),
                                     invitation_type: :authorized_official, created_at: 49.hours.ago)
         reason = 'ao_expired'
         render(Page::Utility::ErrorComponent.new(invitation, reason))
@@ -48,21 +49,21 @@ module Page
 
       def cd_expired
         user = User.new(email: 'bilbo.baggins@cms.hms.gov')
-        invitation = Invitation.new(id: 6, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
+        invitation = Invitation.new(id: 6, provider_organization: ProviderOrganization.new(id: 1, name: ORG_NAME),
                                     invited_by: user, invitation_type: :credential_delegate, created_at: 49.hours.ago)
         reason = 'cd_expired'
         render(Page::Utility::ErrorComponent.new(invitation, reason))
       end
 
       def ao_renewed
-        invitation = Invitation.new(id: 7, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
+        invitation = Invitation.new(id: 7, provider_organization: ProviderOrganization.new(id: 1, name: ORG_NAME),
                                     status: :renewed)
         reason = 'ao_renewed'
         render(Page::Utility::ErrorComponent.new(invitation, reason))
       end
 
       def cd_accepted
-        invitation = Invitation.new(id: 8, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
+        invitation = Invitation.new(id: 8, provider_organization: ProviderOrganization.new(id: 1, name: ORG_NAME),
                                     invitation_type: :credential_delegate, status: :renewed)
         reason = 'cd_accepted'
         render(Page::Utility::ErrorComponent.new(invitation, reason))
@@ -70,14 +71,14 @@ module Page
 
       # @param csp select :csp_codes
       def ao_accepted(csp: DEFAULT_CSP)
-        invitation = Invitation.new(id: 9, provider_organization: ProviderOrganization.new(id: 1, name: 'Health Hut'),
+        invitation = Invitation.new(id: 9, provider_organization: ProviderOrganization.new(id: 1, name: ORG_NAME),
                                     invitation_type: :authorized_official, status: :renewed)
         reason = 'ao_accepted'
         render(Page::Utility::ErrorComponent.new(invitation, reason, csp:))
       end
 
       def server_error
-        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: 'Health Hut'))
+        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: ORG_NAME))
         reason = 'server_error'
         render(Page::Utility::ErrorComponent.new(invitation, reason))
       end
