@@ -73,7 +73,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
 
     describe 'idp is not configured' do
       it 'should emit an unhealthy metric when url is not configured' do
-        stub_const('VerifyResourceHealthJob::IDP_HOST', nil)
+        stub_const('VerifyResourceHealthJob::IDP_HOSTS', [nil, nil, nil])
         expect_dpc_api
         expect_cpi
         expect_idp(metric: 0)
@@ -85,7 +85,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
 
   context 'not connected to AWS' do
     it 'should ignore connection error and move on gracefully' do
-      # stub_request(:get, 'https://idp.int.identitysandbox.gov').to_return(status: 200)
+      stub_request(:get, 'https://idp.int.identitysandbox.gov').to_return(status: 200)
       stub_request(:get, 'https://api.idmelabs.com').to_return(status: 200)
       stub_request(:get, 'https://verified.clearme.com').to_return(status: 200)
 
@@ -94,7 +94,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
       expect(mock_cpi_client).to receive(:healthy_auth?).and_return(true)
       expect(mock_cpi_client).to receive(:healthy_api?).and_return(true)
 
-      expect(mock_cloudwatch_client).to receive(:put_metric_data).and_raise(StandardError).thrice
+      expect(mock_cloudwatch_client).to receive(:put_metric_data).and_raise(StandardError).exactly(5).times
       job.perform
     end
   end
@@ -151,10 +151,10 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
   end
 
   def expect_idp(site_status: 200, metric: 1)
-    # stub_request(:get, 'https://idp.int.identitysandbox.gov').to_return(status: site_status)
+    stub_request(:get, 'https://idp.int.identitysandbox.gov').to_return(status: site_status)
     stub_request(:get, 'https://api.idmelabs.com').to_return(status: site_status)
     stub_request(:get, 'https://verified.clearme.com').to_return(status: site_status)
-    expect_put_metric('PortalConnectedToIdp', metric)
+    expect_put_metric('PortalConnectedToIdp', metric).exactly(3).times
   end
 
   def expect_put_metric(name, value)
