@@ -27,30 +27,30 @@ describe UserInfoService do
         it 'should throw error if status is 401' do
           verify_logs(status: 401, csp: provider)
           error = '{"error":"No can do"}'
-          stub_request(:get, user_info_url(:login_dot_gov))
+          stub_request(:get, user_info_url(provider))
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: error, status: 401)
           expect do
-            service.user_info(valid_csp_session(:login_dot_gov))
+            service.user_info(valid_csp_session(provider))
           end.to raise_error(UserInfoServiceError, 'unauthorized')
         end
         it 'should throw error if status is 500' do
           verify_logs(status: 500, csp: provider)
           error = '{"error":"shrug"}'
-          stub_request(:get, user_info_url(:login_dot_gov))
+          stub_request(:get, user_info_url(provider))
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: error, status: 500)
           expect do
-            service.user_info(valid_csp_session(:login_dot_gov))
+            service.user_info(valid_csp_session(provider))
           end.to raise_error(UserInfoServiceError, 'server_error')
         end
         it 'should throw error if cannot connect' do
           verify_logs(status: 503, csp: provider, connection_fails: true)
-          stub_request(:get, user_info_url(:login_dot_gov))
+          stub_request(:get, user_info_url(provider))
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_raise(Errno::ECONNREFUSED)
           expect do
-            service.user_info(valid_csp_session(:login_dot_gov))
+            service.user_info(valid_csp_session(provider))
           end.to raise_error(UserInfoServiceError, 'server_error')
         end
       end
