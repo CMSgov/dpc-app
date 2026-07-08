@@ -90,11 +90,11 @@ describe UserInfoService do
   end
 
   def expect_span_tags(span, csp:, connection_fails:)
-    expect_http_metadata(span, csp:)
+    expect_http_metadata(span, csp)
     expect(span).to receive(:set_tag).with('http.status_code', anything) unless connection_fails
   end
 
-  def expect_http_metadata(span, csp:)
+  def expect_http_metadata(span, csp)
     expect(span).to receive(:type=).with('http')
     expect(span).to receive(:set_tag).with('http.url', user_info_url(csp))
     expect(span).to receive(:set_tag).with('http.method', 'GET')

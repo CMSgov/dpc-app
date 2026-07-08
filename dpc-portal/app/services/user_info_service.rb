@@ -52,6 +52,18 @@ class UserInfoService
     JSON::JWT.decode(body, :skip_verification).to_h.with_indifferent_access
   end
 
+  def handle_response(response)
+    case response
+    when Net::HTTPSuccess
+      parsed_response(response)
+    when Net::HTTPUnauthorized
+      raise UserInfoServiceError, 'unauthorized'
+    else
+      Rails.logger.error "User Info Error: #{response.body}"
+      raise UserInfoServiceError, 'server_error'
+    end
+  end
+
   def request_info(csp, token)
     csp_config = oidc_client_config csp
     user_info_uri = csp_config[:client_options][:userinfo_endpoint]
@@ -81,18 +93,6 @@ class UserInfoService
 
       span.set_tag('http.status_code', raw_response.code)
       raw_response
-    end
-  end
-
-  def handle_response(response)
-    case response
-    when Net::HTTPSuccess
-      parsed_response(response)
-    when Net::HTTPUnauthorized
-      raise UserInfoServiceError, 'unauthorized'
-    else
-      Rails.logger.error "User Info Error: #{response.body}"
-      raise UserInfoServiceError, 'server_error'
     end
   end
 
