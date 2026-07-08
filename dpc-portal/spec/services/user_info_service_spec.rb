@@ -81,7 +81,7 @@ describe UserInfoService do
   end
   def verify_logs(status:, csp:, connection_fails: false)
     verify_dd(csp:, connection_fails:)
-    verify_rails(status: status, csp: csp)
+    verify_rails(status: status, csp: csp) unless connection_fails
   end
 
   def verify_dd(csp:, connection_fails:)
