@@ -39,8 +39,8 @@ class CspSession
   end
 
   # CSP session could result in a user being logged in, so we store the user in the session as well.
-  def store_user(user)
-    @session[USER_KEY] = user
+  def store_user(user_id)
+    @session[USER_KEY] = user_id
   end
 
   def clear_user
