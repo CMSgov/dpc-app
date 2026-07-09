@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'support/login_support'
 
 RSpec.describe Page::Utility::ErrorComponent, type: :component do
   include ComponentSupport
@@ -33,45 +34,6 @@ RSpec.describe Page::Utility::ErrorComponent, type: :component do
       it 'should match header' do
         header = <<~HTML
           <h1>#{I18n.t('verification.cd_invalid_status')}</h1>
-        HTML
-        is_expected.to include(normalize_space(header))
-      end
-    end
-
-    context 'PII mismatch' do
-      let(:component) { described_class.new(invitation, 'pii_mismatch') }
-      it 'should match header' do
-        header = <<~HTML
-          <h1>#{CGI.escapeHTML(I18n.t('verification.pii_mismatch_status'))}</h1>
-        HTML
-        is_expected.to include(normalize_space(header))
-      end
-      it 'should have logout button' do
-        button_url = "/logout?invitation_id=#{invitation.id}"
-        is_expected.to include(button_url)
-      end
-    end
-
-    context 'Email mismatch' do
-      let(:invitation) { create(:invitation, :cd, provider_organization:) }
-      let(:component) { described_class.new(invitation, 'email_mismatch') }
-      it 'should match header' do
-        header = <<~HTML
-          <h1 class="usa-alert__heading">#{CGI.escapeHTML(I18n.t('verification.email_mismatch_status'))}</h1>
-        HTML
-        is_expected.to include(normalize_space(header))
-      end
-      it 'should have logout button' do
-        button_url = "/logout?invitation_id=#{invitation.id}"
-        is_expected.to include(button_url)
-      end
-    end
-
-    context 'AO already accepted' do
-      let(:component) { described_class.new(invitation, 'ao_accepted') }
-      it 'should match header' do
-        header = <<~HTML
-          <h1>#{I18n.t('verification.ao_accepted_status')}</h1>
         HTML
         is_expected.to include(normalize_space(header))
       end
@@ -141,6 +103,56 @@ RSpec.describe Page::Utility::ErrorComponent, type: :component do
           <h1>#{I18n.t('verification.server_error_status')}</h1>
         HTML
         is_expected.to include(normalize_space(header))
+      end
+    end
+
+    LoginSupport::CSP_MAP.each do |csp, display_name|
+      context "using #{display_name}" do
+        context 'AO already accepted' do
+          let(:component) { described_class.new(invitation, 'ao_accepted', csp:) }
+          it 'should match header' do
+            header = <<~HTML
+              <h1>#{I18n.t('verification.ao_accepted_status')}</h1>
+            HTML
+            is_expected.to include(normalize_space(header))
+          end
+          it 'should have login button' do
+            button_url = '/users/sign_in'
+            is_expected.to include(button_url)
+            is_expected.to include("Sign in with <span class=\"login-button__logo\">#{display_name}</span>")
+          end
+        end
+
+        context 'PII mismatch' do
+          let(:component) { described_class.new(invitation, 'pii_mismatch', csp:) }
+          it 'should match header' do
+            header = <<~HTML
+              <h1>#{CGI.escapeHTML(I18n.t('verification.pii_mismatch_status'))}</h1>
+            HTML
+            is_expected.to include(normalize_space(header))
+          end
+          it 'should have logout button' do
+            button_url = "/logout?invitation_id=#{invitation.id}"
+            is_expected.to include(button_url)
+            is_expected.to include("Sign out of #{display_name}")
+          end
+        end
+
+        context 'Email mismatch' do
+          let(:invitation) { create(:invitation, :cd, provider_organization:) }
+          let(:component) { described_class.new(invitation, 'email_mismatch', csp:) }
+          it 'should match header' do
+            header = <<~HTML
+              <h1>#{CGI.escapeHTML(I18n.t('verification.email_mismatch_status'))}</h1>
+            HTML
+            is_expected.to include(normalize_space(header))
+          end
+          it 'should have logout button' do
+            button_url = "/logout?invitation_id=#{invitation.id}"
+            is_expected.to include(button_url)
+            is_expected.to include("Sign out of #{display_name}")
+          end
+        end
       end
     end
   end

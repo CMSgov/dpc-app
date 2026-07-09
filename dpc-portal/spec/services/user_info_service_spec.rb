@@ -2,84 +2,86 @@
 
 require 'spec_helper'
 require 'rails_helper'
+require 'support/login_support'
 
 describe UserInfoService do
   let(:service) { UserInfoService.new }
   let(:token) { 'bearer-token' }
   let(:exp) { 2.hours.from_now }
-  context :valid_session do
-    before do
-      stub_request(:get, user_info_url(:login_dot_gov))
-        .with(headers: { Authorization: "Bearer #{token}" })
-        .to_return(body: csp_response(:login_dot_gov).to_json, status: 200)
-    end
+  LoginSupport::CSP_MAP.each do |provider, display_name|
+    context "with #{display_name}" do
+      context :valid_session do
+        before do
+          stub_request(:get, user_info_url(provider))
+            .with(headers: { Authorization: "Bearer #{token}" })
+            .to_return(body: csp_response(provider).to_json, status: 200)
+        end
 
-    it 'should return info with valid session' do
-      verify_logs(status: 200)
-      expect(service.user_info(build_csp_session(:login_dot_gov))).to eq csp_response(:login_dot_gov)
-    end
-  end
+        it 'should return info with valid session' do
+          verify_logs(status: 200, csp: provider)
+          expect(service.user_info(build_csp_session(provider))).to eq csp_response(provider)
+        end
+      end
 
-  context :bad_request do
-    it 'should throw error if status is 401' do
-      verify_logs(status: 401)
-      error = '{"error":"No can do"}'
-      stub_request(:get, user_info_url(:login_dot_gov))
-        .with(headers: { Authorization: "Bearer #{token}" })
-        .to_return(body: error, status: 401)
-      expect do
-        service.user_info(build_csp_session(:login_dot_gov))
-      end.to raise_error(UserInfoServiceError, 'unauthorized')
-    end
-    it 'should throw error if status is 500' do
-      verify_logs(status: 500)
-      error = '{"error":"shrug"}'
-      stub_request(:get, user_info_url(:login_dot_gov))
-        .with(headers: { Authorization: "Bearer #{token}" })
-        .to_return(body: error, status: 500)
-      expect do
-        service.user_info(build_csp_session(:login_dot_gov))
-      end.to raise_error(UserInfoServiceError, 'server_error')
-    end
-    it 'should throw error if cannot connect' do
-      verify_logs(status: 503, connection_fails: true)
-      stub_request(:get, user_info_url(:login_dot_gov))
-        .with(headers: { Authorization: "Bearer #{token}" })
-        .to_raise(Errno::ECONNREFUSED)
-      expect do
-        service.user_info(build_csp_session(:login_dot_gov))
-      end.to raise_error(UserInfoServiceError, 'server_error')
-    end
-  end
+      context :bad_request do
+        it 'should throw error if status is 401' do
+          verify_logs(status: 401, csp: provider)
+          error = '{"error":"No can do"}'
+          stub_request(:get, user_info_url(provider))
+            .with(headers: { Authorization: "Bearer #{token}" })
+            .to_return(body: error, status: 401)
+          expect do
+            service.user_info(build_csp_session(provider))
+          end.to raise_error(UserInfoServiceError, 'unauthorized')
+        end
+        it 'should throw error if status is 500' do
+          verify_logs(status: 500, csp: provider)
+          error = '{"error":"shrug"}'
+          stub_request(:get, user_info_url(provider))
+            .with(headers: { Authorization: "Bearer #{token}" })
+            .to_return(body: error, status: 500)
+          expect do
+            service.user_info(build_csp_session(provider))
+          end.to raise_error(UserInfoServiceError, 'server_error')
+        end
+        it 'should throw error if cannot connect' do
+          verify_logs(status: 503, csp: provider, connection_fails: true)
+          stub_request(:get, user_info_url(provider))
+            .with(headers: { Authorization: "Bearer #{token}" })
+            .to_raise(Errno::ECONNREFUSED)
+          expect do
+            service.user_info(build_csp_session(provider))
+          end.to raise_error(UserInfoServiceError, 'server_error')
+        end
+      end
 
-  context :invalid_session do
-    it 'should throw error if no token' do
-      csp_session_with_nil_token = build_csp_session(:login_dot_gov, token: nil)
-      expect do
-        service.user_info(csp_session_with_nil_token)
-      end.to raise_error(UserInfoServiceError, 'no_token')
-    end
-    it 'should throw error if no token expiration' do
-      csp_session_with_nil_exp_token = build_csp_session(:login_dot_gov, token_exp: nil)
-      expect do
-        service.user_info(csp_session_with_nil_exp_token)
-      end.to raise_error(UserInfoServiceError, 'no_token_exp')
-    end
-    context :expired_session do
-      let(:exp) { 1.second.ago }
-      it 'should throw error' do
-        expect do
-          # csp_session_with_exp_token = build_csp_session(:login_dot_gov, token_exp: exp)
-          # service.user_info(csp_session_with_exp_token)
-          service.user_info(build_csp_session(:login_dot_gov))
-        end.to raise_error(UserInfoServiceError, 'expired_token')
+      context :invalid_session do
+        it 'should throw error if no token' do
+          csp_session_with_nil_token = build_csp_session(:login_dot_gov, token: nil)
+          expect do
+            service.user_info(csp_session_with_nil_token)
+          end.to raise_error(UserInfoServiceError, 'no_token')
+        end
+        it 'should throw error if no token expiration' do
+          csp_session_with_nil_token_exp = build_csp_session(provider, token_exp: nil)
+          expect do
+            service.user_info(csp_session_with_nil_token_exp)
+          end.to raise_error(UserInfoServiceError, 'no_token_exp')
+        end
+        context :expired_session do
+          let(:exp) { 1.second.ago }
+          it 'should throw error' do
+            expect do
+              service.user_info(build_csp_session(:login_dot_gov))
+            end.to raise_error(UserInfoServiceError, 'expired_token')
+          end
+        end
       end
     end
   end
-
-  def verify_logs(status:, csp: 'login_dot_gov', connection_fails: false)
+  def verify_logs(status:, csp:, connection_fails: false)
     verify_dd(csp:, connection_fails:)
-    verify_rails(status: status, csp: csp)
+    verify_rails(status: status, csp: csp) unless connection_fails
   end
 
   def verify_dd(csp:, connection_fails:)
@@ -104,16 +106,24 @@ describe UserInfoService do
 
   def verify_rails(status:, csp:)
     allow(Rails.logger).to receive(:info)
+    verify_call_log(csp:)
+    verify_response_log(status:, csp:)
+  end
+
+  def verify_call_log(csp:)
     expect(Rails.logger).to receive(:info).with(
       ['Calling CSP user_info',
-       { csp: csp,
+       { csp: csp.to_s,
          csp_request_method: :get,
          csp_request_url: user_info_url(csp),
          csp_request_method_name: :request_info }]
     )
+  end
+
+  def verify_response_log(status:, csp:)
     expect(Rails.logger).to receive(:info).with(
       ['CSP user_info response info',
-       { csp: csp,
+       { csp: csp.to_s,
          csp_request_method: :get,
          csp_request_url: user_info_url(csp),
          csp_request_method_name: :request_info,

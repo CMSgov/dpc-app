@@ -2,17 +2,17 @@
    <% if @show_alert %>
     <div class="margin-bottom-4 usa-alert usa-alert--<%= @alert_type || 'error' %>">
       <div class="usa-alert__body">
-        <h1 class="usa-alert__heading"><%= t(@status) %></h1>
+        <h1 class="usa-alert__heading"><%= t(key=@status, csp_display_name: @csp_display_name) %></h1>
         <p class="usa-alert__text">
           <%=raw t(key=@text, org_name: @org_name, ao_full_name: @ao_full_name, ao_email: @ao_email) %>
         </p>
       </div>
     </div>
    <% else %>
-    <h1><%= t(@status) %></h1>
+    <h1><%= t(key=@status, csp_display_name: @csp_display_name) %></h1>
     <div>
       <p>
-        <%=raw t(key=@text, org_name: @org_name, ao_full_name: @ao_full_name, ao_email: @ao_email) %>
+        <%=raw t(key=@text, org_name: @org_name, ao_full_name: @ao_full_name, ao_email: @ao_email, csp_display_name: @csp_display_name) %>
       </p>
     </div>   
    <% end %>
@@ -25,7 +25,7 @@
             destination: renew_organization_invitation_path(@invitation.provider_organization, @invitation)) %>
       <% when :ao_accepted %>
         <%= link_to sign_in_path, class: 'usa-button', data: { turbo: false } do %>
-          Sign in with <span class="login-button__logo">Login.gov</span>
+          Sign in with <span class="login-button__logo"><%= @csp_display_name %></span>
         <% end %>
       <% when :cd_accepted %>
         <%= link_to 'Go to DPC home', root_url, class: 'usa-button margin-right-0' %>

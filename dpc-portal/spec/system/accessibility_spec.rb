@@ -21,7 +21,7 @@ RSpec.describe 'Accessibility', type: :system do
     }
   end
 
-  RSpec.shared_examples 'accessibility tests' do |provider|
+  RSpec.shared_examples 'accessibility tests' do |provider, display_name|
     let!(:csp) { Csp.find_by(name: provider) || create(:csp, name: provider) }
     before do
       OmniAuth.config.test_mode = true
@@ -64,7 +64,8 @@ RSpec.describe 'Accessibility', type: :system do
                                      extra: { raw_info: ial1_raw_info } })
 
           visit "/auth/#{provider}/callback"
-          expect(page).to have_text(I18n.t("verification.#{provider}_signin_fail_text"))
+          expect(page).to have_text("#{display_name} sign-in failed")
+          expect(page).to have_text("Something went wrong while trying to sign-in with #{display_name}")
           expect(page).to be_axe_clean.according_to axe_standard
         end
         it 'shows sanctioned ao page' do
@@ -599,11 +600,11 @@ RSpec.describe 'Accessibility', type: :system do
     end
   end
 
-  describe 'with id_me' do
-    it_behaves_like 'accessibility tests', :id_me
+  describe 'with ID.me' do
+    it_behaves_like 'accessibility tests', :id_me, 'ID.me'
   end
 
-  describe 'with login_dot_gov' do
-    it_behaves_like 'accessibility tests', :login_dot_gov
+  describe 'with Login.gov' do
+    it_behaves_like 'accessibility tests', :login_dot_gov, 'Login.gov'
   end
 end
