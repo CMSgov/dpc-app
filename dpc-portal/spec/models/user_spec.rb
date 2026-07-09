@@ -165,8 +165,13 @@ RSpec.describe User, type: :model do
 
   describe :audits do
     let(:user) { create(:user) }
-    it 'should not audit email' do
-      # user.update(email: 'new_email@test.com')
+    it 'should not audit user_email changes' do
+      csp = Csp.find_by(name: 'login_dot_gov') || create(:csp, :login_dot_gov)
+      csp_user = create(:csp_user, user:, csp:, uuid: SecureRandom.uuid)
+      create(:user_email, csp_user:, email: 'original@example.com', primary: true)
+
+      # Updating email on user_emails should not create an audit on User
+      UserEmail.find_by(csp_user:)&.update(email: 'new_email@test.com')
       expect(user.audits.count).to eq 0
     end
     it 'should not audit given_name' do
