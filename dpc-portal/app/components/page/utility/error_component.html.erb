@@ -4,7 +4,7 @@
       <div class="usa-alert__body">
         <h1 class="usa-alert__heading"><%= t(key=@status, csp_display_name: @csp_display_name) %></h1>
         <p class="usa-alert__text">
-          <%=raw t(key=@text, org_name: @org_name, ao_full_name: @ao_full_name, ao_email: @ao_email) %>
+          <%=raw t(key=@text, org_name: @org_name, ao_full_name: @ao_full_name, ao_email: @ao_email, csp_display_name: @csp_display_name) %>
         </p>
       </div>
     </div>
