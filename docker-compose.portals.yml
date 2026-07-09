@@ -134,7 +134,6 @@ services:
       CMS_IDM_OAUTH_URL: http://localhost:4567/
       IDP_LOGIN_DOT_GOV_HOST: idp.int.identitysandbox.gov
       IDP_ID_ME_HOST: api.idmelabs.com
-      IDP_HOST: idp.int.identitysandbox.gov
       RUBY_YJIT_ENABLE: 1
       ENV: local
       DISABLE_JSON_LOGGER: true
