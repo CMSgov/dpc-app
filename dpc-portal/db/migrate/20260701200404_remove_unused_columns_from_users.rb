@@ -2,15 +2,16 @@ class RemoveUnusedColumnsFromUsers < ActiveRecord::Migration[8.0]
   def up
     # Backfill user_emails from existing user.email before dropping the column
     User.find_each do |user|
-      next if user.email.blank?
+      raw_email = user.read_attribute(:email)
+      next if raw_email.blank?
 
       csp_user = CspUser.find_by(user: user)
       next if csp_user.nil?
 
       # Create the primary email record if it doesn't already exist
-      UserEmail.find_or_create_by!(csp_user: csp_user, email: user.email) do |user_email|
-        user_email.active    = true
-        user_email.primary   = true
+      UserEmail.find_or_create_by!(csp_user: csp_user, email: raw_email) do |user_email|
+        user_email.active  = true
+        user_email.primary = true
       end
     end
 
