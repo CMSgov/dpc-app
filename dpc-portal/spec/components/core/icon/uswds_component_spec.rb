@@ -4,6 +4,10 @@ require 'rails_helper'
 
 RSpec.describe Core::Icon::UswdsComponent, type: :component do
   describe 'html' do
+    # Resolve the sprite path with the same helper the component uses so the
+    # expectation matches whether or not the asset pipeline fingerprints it.
+    let(:sprite_path) { ActionController::Base.helpers.asset_path('@uswds/uswds/dist/img/sprite.svg') }
+
     subject(:html) do
       render_inline(component)
       rendered_content
@@ -13,7 +17,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
     let(:expected_html) do
       <<~HTML
         <svg class="usa-icon" aria-hidden="true">
-          <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#lock></use>
+          <use xlink:href=#{sprite_path}#lock></use>
         </svg>
       HTML
     end
@@ -29,7 +33,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <svg class="usa-icon usa-icon--size-3" aria-hidden="true">
-            <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#circle_check></use>
+            <use xlink:href=#{sprite_path}#circle_check></use>
           </svg>
         HTML
       end
@@ -42,7 +46,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <svg class="usa-icon" aria-hidden="true">
-            <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#circle_check></use>
+            <use xlink:href=#{sprite_path}#circle_check></use>
           </svg>
         HTML
       end
@@ -55,7 +59,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <svg class="usa-icon" aria-hidden="true">
-            <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#circle_check></use>
+            <use xlink:href=#{sprite_path}#circle_check></use>
           </svg>
         HTML
       end
@@ -68,7 +72,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <svg class="usa-icon" aria-hidden="true">
-            <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#circle_check></use>
+            <use xlink:href=#{sprite_path}#circle_check></use>
           </svg>
         HTML
       end
@@ -81,7 +85,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <svg class="foo bar usa-icon" aria-hidden="true">
-            <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#lock></use>
+            <use xlink:href=#{sprite_path}#lock></use>
           </svg>
         HTML
       end
