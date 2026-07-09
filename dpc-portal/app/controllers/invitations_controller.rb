@@ -100,7 +100,10 @@ class InvitationsController < ApplicationController
   def find_user_by_email(email)
     return nil if email.blank?
 
-    UserEmail.find_by(email:)&.csp_user&.user
+    users = User.joins(csp_users: :user_emails).where(user_emails: { email: email }).distinct
+    raise MultiUserMatchError, "too many matching users | email: #{email}" if users.size > 1
+
+    users.first
   end
 
   def complete_registration

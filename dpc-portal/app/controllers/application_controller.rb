@@ -61,7 +61,7 @@ class ApplicationController < ActionController::Base
     Datadog::Tracing.active_span&.set_tag('usr.id', current_user.id) if current_user
 
     CurrentAttributes.save_request_attributes(request)
-    CurrentAttributes.save_user_attributes(current_user)
+    CurrentAttributes.save_user_attributes(current_user, csp_name: session[:csp])
   end
 
   def log_credential_action(credential_type, dpc_api_credential_id, action)

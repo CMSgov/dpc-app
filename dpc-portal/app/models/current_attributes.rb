@@ -17,12 +17,12 @@ class CurrentAttributes < ActiveSupport::CurrentAttributes
     CurrentAttributes.path = request.path
   end
 
-  def save_user_attributes(user)
+  def save_user_attributes(user, csp_name: nil)
     return unless user
 
     CurrentAttributes.current_user = {
       id: user.id,
-      external_id: user.csp_users.first&.uuid,
+      external_id: resolve_external_id(user, csp_name),
       pac_id: user.pac_id
     }
   end
@@ -59,5 +59,16 @@ class CurrentAttributes < ActiveSupport::CurrentAttributes
       current_user: CurrentAttributes.current_user,
       organization: CurrentAttributes.organization
     }
+  end
+
+  private
+
+  def resolve_external_id(user, csp_name)
+    return user.csp_users.first&.uuid if csp_name.blank?
+
+    user.csp_users
+        .joins(:csp)
+        .find_by(csps: { name: csp_name.to_s })
+        &.uuid
   end
 end

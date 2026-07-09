@@ -875,6 +875,20 @@ RSpec.describe 'Invitations', type: :request do
             post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
             expect(response.body).to include(I18n.t('verification.multi_user_match_text'))
           end
+          it 'should fail if too many users share the same email' do
+            csp = Csp.find_by(name: provider.to_s) || create(:csp, provider)
+
+            user1 = create(:user)
+            csp_user1 = create(:csp_user, user: user1, csp:, uuid: SecureRandom.uuid)
+            create(:user_email, csp_user: csp_user1, email: user_info_template['email'], primary: true)
+
+            user2 = create(:user)
+            csp_user2 = create(:csp_user, user: user2, csp: other_csp, uuid: SecureRandom.uuid)
+            create(:user_email, csp_user: csp_user2, email: user_info_template['email'], primary: true)
+
+            post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+            expect(response.body).to include(I18n.t('verification.multi_user_match_text'))
+          end
         end
       end
     end
