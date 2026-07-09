@@ -344,13 +344,9 @@ class InvitationsController < ApplicationController
   end
 
   def check_for_token
-    return if valid_csp_token?
+    return if csp_session.active?
 
     render(Page::Invitations::InvitationLoginComponent.new(@invitation))
-  end
-
-  def valid_csp_token?
-    csp_session.active?
   end
 
   def block_test_utilities
