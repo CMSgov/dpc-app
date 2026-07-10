@@ -26,7 +26,7 @@ class CspSession
   # Store (or replace) a CSP session and mark it current. Returns the CSP code.
   def store(csp:, token:, token_exp:)
     code = csp.to_s
-    data = sessions
+    data = sessions!
     data[code] = { 'token' => token, 'token_exp' => token_exp }
     @session[SESSIONS_KEY] = data
     @session[CURRENT_KEY] = code
@@ -99,9 +99,8 @@ class CspSession
   # another still-active CSP (or nil).
   def clear(csp)
     code = csp.to_s
-    data = sessions
-    data.delete(code)
-    @session[SESSIONS_KEY] = data
+    return if sessions.delete(code).blank?
+
     @session[CURRENT_KEY] = active_csps.last if current == code
     nil
   end
@@ -116,6 +115,10 @@ class CspSession
   private
 
   def sessions
+    @session[SESSIONS_KEY] || {}
+  end
+
+  def sessions!
     @session[SESSIONS_KEY] ||= {}
   end
 end

@@ -51,8 +51,6 @@ RSpec.describe CspSession do
       expect(csp_session.current).to eq 'id_me'
       expect(csp_session.token).to eq 'a'
     end
-    # Consider: what if you activate an unstored CSP? Current impl silently accepts.
-    # Add an example that pins the behavior you decide on.
   end
 
   describe 'user helpers' do
