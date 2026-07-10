@@ -6,51 +6,55 @@ require 'support/login_support'
 RSpec.describe 'Application', type: :request do
   include LoginSupport
 
-  let!(:user) { create_user_with_csp }
-  before { sign_in user, csp: :login_dot_gov }
+  LoginSupport::CSP_MAP.each do |provider, display_name|
+    context "using #{display_name}" do
+      let!(:user) { create_user_with_csp(csp: provider) }
+      before { sign_in user, csp: provider }
 
-  it 'sets cache control to no-store' do
-    get '/'
-    expect(response).to be_ok
-    expect(response.headers['cache-control']).to eq 'no-store'
-  end
-
-  it 'logs user_id to datadog' do
-    mock_span = double('datadog_span')
-    expect(mock_span).to receive(:set_tag).with('usr.id', user.id)
-    allow(Datadog::Tracing).to receive(:active_span).and_return(mock_span)
-
-    get '/'
-    expect(response).to be_ok
-  end
-
-  describe 'timed out' do
-    after { Timecop.return }
-    it 'redirects to login after inactivity' do
-      get '/'
-      expect(response).to be_ok
-      Timecop.travel(31.minutes.from_now)
-      get '/'
-      expect(response).to redirect_to('/users/sign_in')
-      expect(flash[:notice] = 'Your session expired. Please sign in again to continue.')
-    end
-
-    it 'redirects to login after session time elapses' do
-      allow(Rails.logger).to receive(:info)
-      expect(Rails.logger).to receive(:info).with(['User session timed out',
-                                                   { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                     actionType: LoggingConstants::ActionType::SessionTimedOut }])
-      logged_in_at = Time.now
-      get '/'
-      expect(response).to be_ok
-      until Time.now > logged_in_at + 12.hours
+      it 'sets cache control to no-store' do
         get '/'
         expect(response).to be_ok
-        Timecop.travel(29.minutes.from_now)
+        expect(response.headers['cache-control']).to eq 'no-store'
       end
-      get '/'
-      expect(response).to redirect_to('/users/sign_in')
-      expect(flash[:notice] = 'You have exceeded the maximum session length. Please sign in again to continue.')
+
+      it 'logs user_id to datadog' do
+        mock_span = double('datadog_span')
+        expect(mock_span).to receive(:set_tag).with('usr.id', user.id)
+        allow(Datadog::Tracing).to receive(:active_span).and_return(mock_span)
+
+        get '/'
+        expect(response).to be_ok
+      end
+
+      describe 'timed out' do
+        after { Timecop.return }
+        it 'redirects to login after inactivity' do
+          get '/'
+          expect(response).to be_ok
+          Timecop.travel(31.minutes.from_now)
+          get '/'
+          expect(response).to redirect_to('/users/sign_in')
+          expect(flash[:notice] = 'Your session expired. Please sign in again to continue.')
+        end
+
+        it 'redirects to login after session time elapses' do
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(['User session timed out',
+                                                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                         actionType: LoggingConstants::ActionType::SessionTimedOut }])
+          logged_in_at = Time.now
+          get '/'
+          expect(response).to be_ok
+          until Time.now > logged_in_at + 12.hours
+            get '/'
+            expect(response).to be_ok
+            Timecop.travel(29.minutes.from_now)
+          end
+          get '/'
+          expect(response).to redirect_to('/users/sign_in')
+          expect(flash[:notice] = 'You have exceeded the maximum session length. Please sign in again to continue.')
+        end
+      end
     end
   end
 end

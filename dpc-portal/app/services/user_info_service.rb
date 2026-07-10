@@ -28,7 +28,7 @@ class UserInfoService
     return LOGIN_DOT_GOV_CLIENT_CONFIG if csp.to_s == :login_dot_gov.to_s
     return CLEAR_CLIENT_CONFIG if csp.to_s == :clear.to_s
 
-    raise UnknownCSPError, csp
+    raise CspLogout::UnknownCspError, csp
   end
 
   def parsed_response(response)
@@ -77,7 +77,7 @@ class UserInfoService
     handle_response(response)
   rescue Errno::ECONNREFUSED
     code = 503
-    Rails.logger.error 'Could not connect to login.gov'
+    Rails.logger.error "Could not connect to CSP userinfo endpoint (csp=#{csp})"
     raise UserInfoServiceError, 'server_error'
   ensure
     finish_tracking(code, csp, user_info_uri)
