@@ -4,8 +4,8 @@ import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
-import gov.cms.dpc.common.utils.GzipUtil;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
+import gov.cms.dpc.common.utils.GzipUtil;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.DistributedBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -216,6 +217,12 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 		UUID aggregatorID = UUID.randomUUID();
 		batch.setRunningStatus(aggregatorID);
 		queue.completeBatch(batch, aggregatorID);
+
+		// Wait for the OS to release its lock on the file
+		Awaitility.await()
+			.atMost(java.time.Duration.ofSeconds(5))
+			.pollInterval(java.time.Duration.ofMillis(100))
+			.until(() -> Files.exists(path) && path.toFile().length() > 0);
 
 		return fileName;
 	}
