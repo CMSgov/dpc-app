@@ -27,7 +27,7 @@ class UserInfoService
     return ID_ME_CLIENT_CONFIG if csp.to_s == :id_me.to_s
     return LOGIN_DOT_GOV_CLIENT_CONFIG if csp.to_s == :login_dot_gov.to_s
 
-    raise UnknownCSPError, csp
+    raise CspLogout::UnknownCspError, csp
   end
 
   def parsed_response(response)
