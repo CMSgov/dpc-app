@@ -74,10 +74,9 @@ class Invitation < ApplicationRecord
   end
 
   def ao_match?(user_info)
-    check_missing_user_info(user_info, 'social_security_number', 'SSN', 'ssn9', check_all_keys: false)
-    ssn = ssn_from_user_info(user_info)
+    check_missing_user_info(user_info, 'SSN')
     service = AoVerificationService.new
-    result = service.check_eligibility(provider_organization.npi, ssn)
+    result = service.check_eligibility(provider_organization.npi, user_info['SSN'])
 
     raise VerificationError, result[:failure_reason] unless result[:success]
 
@@ -136,18 +135,6 @@ class Invitation < ApplicationRecord
     %w[given_name family_name].each do |key|
       check_missing_user_info(user_info, key)
     end
-  end
-
-  def ssn_from_user_info(user_info)
-    return user_info['social_security_number'].tr('-', '') if user_info['social_security_number'].present?
-    return user_info['SSN'] if user_info['SSN'].present?
-
-    ssn9 = user_info['ssn9']
-    decrypt_ssn(ssn9) if ssn9.is_a?(Hash)
-  end
-
-  def decrypt_ssn(encrypted_ssn)
-    raise NotImplementedError, 'ssn9 decryption unavailable - awaiting instructions from CLEAR team'
   end
 
   def check_missing_user_info(user_info, *keys, check_all_keys: true)
