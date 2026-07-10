@@ -84,6 +84,14 @@ jobs:
       - name: "Debug api"
         if: ${{ failure() && steps.ci-app.outcome == 'failure' }}
         run: docker logs start-v1-app-api-1
+      - name: "Save debug reports"
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: maven-test-reports
+          path: |
+            **/target/surefire-reports/*
+            **/target/failsafe-reports/*
       - name: "Move jacoco reports"
         run: |
           sudo mkdir jacoco-reports
