@@ -76,7 +76,7 @@ class UserInfoService
     handle_response(response)
   rescue Errno::ECONNREFUSED
     code = 503
-    Rails.logger.error 'Could not connect to login.gov'
+    Rails.logger.error "Could not connect to CSP userinfo endpoint (csp=#{csp})"
     raise UserInfoServiceError, 'server_error'
   ensure
     finish_tracking(code, csp, user_info_uri)
