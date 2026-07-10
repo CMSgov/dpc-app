@@ -19,8 +19,14 @@ module Page
         @reason = AoVerificationService::SERVER_ERRORS.include?(reason) ? :server_error : reason.to_sym
         @status = "verification.#{@reason}_status"
         @text = "verification.#{@reason}_text"
-        @show_alert = @reason.in?(%i[email_mismatch])
-        @alert_type = 'error' if @reason.in?(%i[email_mismatch])
+        @show_alert = show_alert?
+        @alert_type = 'error' if show_alert?
+      end
+
+      private
+
+      def show_alert?
+        @reason.in?(%i[email_mismatch])
       end
     end
   end
