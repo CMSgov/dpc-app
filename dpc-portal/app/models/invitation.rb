@@ -74,13 +74,14 @@ class Invitation < ApplicationRecord
   end
 
   def ao_match?(user_info)
-    check_missing_user_info(user_info, 'SSN')
-    service = AoVerificationService.new
-    result = service.check_eligibility(provider_organization.npi, user_info['SSN'])
+      check_missing_user_info(user_info, 'social_security_number', 'SSN', check_all_keys: false)
+      ssn = user_info['social_security_number']&.tr('-', '') || user_info['SSN']
+      service = AoVerificationService.new
+      result = service.check_eligibility(provider_organization.npi, ssn)
 
-    raise VerificationError, result[:failure_reason] unless result[:success]
+      raise VerificationError, result[:failure_reason] unless result[:success]
 
-    result
+      result
   end
 
   def unacceptable_reason # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity,Metrics/AbcSize
