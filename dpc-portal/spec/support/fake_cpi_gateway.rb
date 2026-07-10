@@ -24,7 +24,11 @@ require 'webrick'
 #      3782297014: has no valid enrollments
 #   Enrollment Roles
 #     Valid for testing in Login.gov
-#     AO SSNS: 900111111, 999999999
+#     AO SSNS: 900111111
+#     Valid for testing in ID.me
+#     AO SSNS: 512111111
+#     Valid for testing in CLEAR
+#     AO SSNS: 999999999
 class FakeCpiGateway < Sinatra::Base
   set :server, 'webrick'
 
