@@ -20,10 +20,8 @@ module Users
     end
 
     def clean_session
-      session.delete('user')
-      csp = session.delete(:csp)
-      session.delete("#{csp}_token") if csp
-      session.delete("#{csp}_token_exp") if csp
+      csp_session.clear_user
+      csp_session.clear_all
     end
   end
 end

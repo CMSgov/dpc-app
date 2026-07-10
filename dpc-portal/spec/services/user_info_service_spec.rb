@@ -57,7 +57,7 @@ describe UserInfoService do
 
       context :invalid_session do
         it 'should throw error if no token' do
-          csp_session_with_nil_token = build_csp_session(:login_dot_gov, token: nil)
+          csp_session_with_nil_token = build_csp_session(provider, token: nil)
           expect do
             service.user_info(csp_session_with_nil_token)
           end.to raise_error(UserInfoServiceError, 'no_token')
