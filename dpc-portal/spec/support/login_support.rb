@@ -68,14 +68,12 @@ module LoginSupport
   end
 
   def clear_auth_hash(user)
-    all_emails = user.csp_user_for('clear')&.user_emails&.map(&:email).presence || [user.email]
+    user.csp_user_for('clear')&.user_emails&.map(&:email).presence || [user.email]
     { uid: user.csp_user_for('clear')&.uuid || user.uid,
       info: { email: user.email },
+      credentials: { token: 'mock_token', expires_in: 300 },
       extra: {
-        raw_info: {
-          all_emails: all_emails,
-          ial: 'http://idmanagement.gov/ns/assurance/ial/1'
-        }
+        raw_info: {}
       } }
   end
 end
