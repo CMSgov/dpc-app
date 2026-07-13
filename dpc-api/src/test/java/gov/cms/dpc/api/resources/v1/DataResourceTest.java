@@ -12,6 +12,7 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.core5.http.*;
 import org.apache.hc.core5.net.URIBuilder;
@@ -64,7 +65,10 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 		String testData = "test data".repeat(50);
 		String fileName = createTestExport(testData, compressFile);
 
-		try (ClassicHttpResponse response = downloadExport(fileName, requestHeaders)) {
+		String token = getAccessToken();
+		waitForFileReady(fileName, token);
+
+		try (ClassicHttpResponse response = downloadExport(fileName, token, requestHeaders)) {
 			assertNotNull(response);
 
 			boolean expectGzipCompressed =
@@ -108,11 +112,14 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 		String testData = "uncompressed_data";
 		String fileName = createTestExport("12345_" + testData + "_54321", compressFile);
 
+		String token = getAccessToken();
+		waitForFileReady(fileName, token);
+
 		// Add range header
 		Map<String, String> requestHeaders = new HashMap<>(requestHeadersIn);
 		requestHeaders.put(HttpHeaders.RANGE, String.format("bytes=%d-%d", 6, 6 + testData.length()));
 
-		try (ClassicHttpResponse response = downloadExport(fileName, requestHeaders))
+		try (ClassicHttpResponse response = downloadExport(fileName, token, requestHeaders))
 		{
 			assertNotNull(response);
 
@@ -138,15 +145,13 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 
 	// Downloads a file from the Data endpoint.
 	// Turns off auto-handling of gzip compression so each test can verify the data is or isn't compressed.
-	private ClassicHttpResponse downloadExport(String fileName, Map<String, String> headers) {
+	private ClassicHttpResponse downloadExport(String fileName, String token, Map<String, String> headers) {
 		// Create client and call Data end point
 		try {
-			APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
-
 			try (final CloseableHttpClient client = APIAuthHelpers.createCustomHttpClient().disableCompression().trusting().build()) {
 				final URIBuilder builder = new URIBuilder(String.format("%s/Data/%s", getBaseURL(), fileName));
 				final HttpGet httpGet = new HttpGet(builder.build());
-				httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + auth.accessToken);
+				httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
 
 				for (Map.Entry<String, String> header : headers.entrySet()) {
 					httpGet.addHeader(header.getKey(), header.getValue());
@@ -218,12 +223,40 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 		batch.setRunningStatus(aggregatorID);
 		queue.completeBatch(batch, aggregatorID);
 
-		// Wait for the OS to release its lock on the file
-		Awaitility.await()
-			.atMost(java.time.Duration.ofSeconds(5))
-			.pollInterval(java.time.Duration.ofMillis(100))
-			.until(() -> Files.exists(path) && path.toFile().length() > 0);
-
 		return fileName;
+	}
+
+	// We're having intermittent test failures because the file isn't ready when we attempt to download it.  This
+	// continuously makes HEAD requests to get the file metadata until we get a successful response.  Then it lets the
+	// test proceed.
+	private void waitForFileReady(String fileName, String token) {
+		try {
+			Awaitility.await()
+				.atMost(java.time.Duration.ofSeconds(10))
+				.pollInterval(java.time.Duration.ofMillis(200))
+				.until(() -> {
+					try (final CloseableHttpClient client = APIAuthHelpers.createCustomHttpClient().disableCompression().trusting().build()) {
+						final URIBuilder builder = new URIBuilder(String.format("%s/Data/%s", getBaseURL(), fileName));
+						final HttpHead httpHead = new HttpHead(builder.build());
+						httpHead.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+						return client.execute(httpHead, response -> response.getCode() == HttpStatus.SC_OK);
+					} catch (Exception e) {
+						// On fail try again
+						return false;
+					}
+				});
+		} catch (Exception e) {
+			fail("File not ready for download: " + e.getMessage());
+		}
+	}
+
+	private String getAccessToken() {
+		try {
+			APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+			return auth.accessToken;
+		} catch (IOException | URISyntaxException e) {
+			fail("Failed to generate access token");
+			return null;
+		}
 	}
 }
