@@ -132,7 +132,9 @@ services:
       DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: true
       CPI_API_GW_BASE_URL: http://localhost:4567/
       CMS_IDM_OAUTH_URL: http://localhost:4567/
-      IDP_HOST: idp.int.identitysandbox.gov
+      IDP_LOGIN_DOT_GOV_HOST: idp.int.identitysandbox.gov
+      IDP_ID_ME_HOST: api.idmelabs.com
+      IDP_ID_ME_CLIENT_ID: 925bb2985ccf623114359caa76228919
       RUBY_YJIT_ENABLE: 1
       ENV: local
       DISABLE_JSON_LOGGER: true
@@ -140,7 +142,6 @@ services:
       SKIP_SIMPLE_COV: ${SKIP_SIMPLE_COV:-}
       DD_LOGS_INJECTION: false
       DD_SERVICE: dpc-local-portal
-
     ports:
       - "3100:3100"
     depends_on:

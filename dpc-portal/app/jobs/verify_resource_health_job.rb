@@ -9,7 +9,7 @@ class VerifyResourceHealthJob < ApplicationJob
   METRIC_NAMESPACE = 'DPC'
   REGION = 'us-east-1'
   ENVIRONMENT = ENV.fetch('ENV', 'none')
-  IDP_HOST = ENV.fetch('IDP_HOST', nil)
+  IDP_HOST = ENV.fetch('IDP_ID_ME_HOST', nil)
 
   # Runs all healthchecks if no args provided
   def perform(args = {})

@@ -10,9 +10,11 @@ RSpec.describe Page::Invitations::InvitationLoginComponent, type: :component do
     let(:invitation) { create(:invitation, :cd, provider_organization:) }
     let(:component) { described_class.new(invitation) }
     before { render_inline(component) }
-    it 'should have a verify identity button' do
-      expect(page).to have_selector('button.usa-button')
-      expect(page.find('button.usa-button')).to have_content('Verify my identity')
+
+    it 'should have verify identity buttons for all csps' do
+      expect(page).to have_selector('button.usa-button span.lg-login-button__logo', text: 'Verify with Login.gov')
+      expect(page).to have_selector('button.usa-button span.clear-login-button__logo', text: 'Verify with CLEAR')
+      expect(page).to have_selector('button.usa-button span.idme-login-button__logo', text: 'Verify with ID.me')
     end
 
     it 'should render a link to the How to verify your identity url' do
@@ -20,11 +22,10 @@ RSpec.describe Page::Invitations::InvitationLoginComponent, type: :component do
                                 href: 'https://login.gov/help/verify-your-identity/how-to-verify-your-identity/')
     end
 
-    it 'should post to appropriate url' do
-      path = "organizations/#{provider_organization.id}/invitations/#{invitation.id}/login"
-      url = "http://test.host/#{path}"
-      expect(page.find('form')[:action]).to eq url
-      expect(page.find('form')[:method]).to eq 'post'
+    it 'should post each CSP to the appropriate url' do
+      expect(page).to have_selector("form[action*='?provider=clear'][method='post']")
+      expect(page).to have_selector("form[action*='?provider=id_me'][method='post']")
+      expect(page).to have_selector("form[action*='?provider=login_dot_gov'][method='post']")
     end
   end
 
