@@ -279,14 +279,13 @@ class InvitationsController < ApplicationController
   end
 
   def find_existing_cd_user(user_info)
-    find_cd_user_by_uuid(user_info) ||
+    find_user_by_csp_uid(user_info) ||
       find_user_by_email(user_info['email']) ||
       find_user_by_ssn(user_info)
   end
 
-  def find_cd_user_by_uuid(user_info)
-    csp = Csp.find_by(name: session[:csp])
-    CspUser.find_by(uuid: user_info['sub'], csp:)&.user
+  def find_user_by_csp_uid(user_info)
+    User.find_by_csp_uid(name: session[:csp], csp_uid: user_info['sub'])
   end
 
   def find_user_by_ssn(user_info)
@@ -311,7 +310,7 @@ class InvitationsController < ApplicationController
 
   def find_ao_candidates(user_info)
     [
-      find_cd_user_by_uuid(user_info),
+      find_user_by_csp_uid(user_info),
       find_user_by_pac_id,
       find_user_by_email(user_info['email'])
     ].compact.uniq

@@ -64,11 +64,7 @@ class CurrentAttributes < ActiveSupport::CurrentAttributes
   private
 
   def resolve_external_id(user, csp_name)
-    return user.csp_users.first&.uuid if csp_name.blank?
-
-    user.csp_users
-        .joins(:csp)
-        .find_by(csps: { name: csp_name.to_s })
+    user.csp_user_for(csp_name)
         &.uuid
   end
 end
