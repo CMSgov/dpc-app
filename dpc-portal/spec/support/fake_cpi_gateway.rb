@@ -25,6 +25,10 @@ require 'webrick'
 #   Enrollment Roles
 #     Valid for testing in Login.gov
 #     AO SSNS: 900111111
+#     Valid for testing in ID.me
+#     AO SSNS: 512111111
+#     Valid for testing in CLEAR
+#     AO SSNS: 999999999
 class FakeCpiGateway < Sinatra::Base
   set :server, 'webrick'
 
@@ -86,7 +90,7 @@ class FakeCpiGateway < Sinatra::Base
         }
       }.to_json
     else
-      ao_ssns = %w[900111111 900666666 900777777 900888888 666222222 111887777 512111111]
+      ao_ssns = %w[900111111 900666666 900777777 900888888 666222222 111887777 512111111 999999999]
       roles = ao_ssns.map { |ssn| { pacId: ssn, roleCode: '10', ssn: } }
       roles << { pacId: 'validPacId', roleCode: '10', ssn: '900428421' }
       provider = {
@@ -167,7 +171,7 @@ class FakeCpiGateway < Sinatra::Base
   # Enrollment Roles
   get '/api/1.0/ppr/providers/enrollments/:enrollmentID/roles' do
     headers['content-type'] = 'application/json; charset=UTF-8'
-    ao_ssns = %w[900111111 900666666 900777777 900888888 666222222]
+    ao_ssns = %w[900111111 900666666 900777777 900888888 666222222 999999999]
     roles = ao_ssns.map { |ssn| { pacId: ssn, roleCode: '10', ssn: } }
     roles << { pacId: 'validPacId', roleCode: '10', ssn: '900428421' }
     {
