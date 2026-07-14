@@ -11,6 +11,7 @@ require 'capybara/rails'
 require 'support/component_support'
 require 'support/dpc_client_support'
 require 'support/match_html_fragment'
+require 'support/fixture_helper'
 # Add additional requires below this line. Rails is not loaded until this point!
 require 'view_component/test_helpers'
 # Requires supporting ruby files with custom matchers and macros, etc, in
@@ -37,6 +38,7 @@ rescue ActiveRecord::PendingMigrationError => e
 end
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
+  config.include FixtureHelper
 
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = ["#{Rails.root}/spec/fixtures"]

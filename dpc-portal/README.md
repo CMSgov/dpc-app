@@ -25,7 +25,7 @@ The following commands can be useful for manual interaction:
 
     ```sh
     $ make portal-sh
-    > rails db:create db:migrate RAILS_ENV=test # Create the test database
+    > rails db:create db:migrate db:seed RAILS_ENV=test # Create the test database
     > bundle exec rspec path/to/test # Run individual test files
     ```
 

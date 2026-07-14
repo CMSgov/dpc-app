@@ -13,7 +13,7 @@ module Page
         # Make sure if the user selects "None" that the value passed is actually nil and not "".
         csp_value = last_used_csp.presence
 
-        render(Page::Session::LoginComponent.new(root_path, last_used_csp: csp_value&.to_sym))
+        render(Page::Session::LoginComponent.new(last_used_csp: csp_value&.to_sym))
       end
     end
   end

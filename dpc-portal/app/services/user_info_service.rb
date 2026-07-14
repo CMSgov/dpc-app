@@ -2,12 +2,10 @@
 
 # A service that verifies generates an ao invitation
 class UserInfoService
-  USER_INFO_URI = URI("https://#{ENV.fetch('IDP_HOST')}/api/openid_connect/userinfo")
-
   def user_info(session)
     validate_session(session)
 
-    request_info(session[:login_dot_gov_token])
+    request_info(session[:csp], session["#{session[:csp]}_token"])
   end
 
   private
@@ -17,38 +15,40 @@ class UserInfoService
   end
 
   def validate_session(session)
-    raise UserInfoServiceError, 'no_token' unless session[:login_dot_gov_token].present?
-    raise UserInfoServiceError, 'no_token_exp' unless session[:login_dot_gov_token_exp].present?
-    raise UserInfoServiceError, 'expired_token' unless session[:login_dot_gov_token_exp] > Time.now
+    raise UserInfoServiceError, 'no_session' unless session[:csp].present?
+
+    csp = session[:csp]
+    raise UserInfoServiceError, 'no_token' unless session["#{csp}_token"].present?
+    raise UserInfoServiceError, 'no_token_exp' unless session["#{csp}_token_exp"].present?
+    raise UserInfoServiceError, 'expired_token' unless session["#{csp}_token_exp"] > Time.now
   end
 
-  def request_info(token)
-    start_tracking
+  def oidc_client_config(csp)
+    return ID_ME_CLIENT_CONFIG if csp.to_s == :id_me.to_s
+    return LOGIN_DOT_GOV_CLIENT_CONFIG if csp.to_s == :login_dot_gov.to_s
 
-    response = trace_request do
-      Net::HTTP.get_response(USER_INFO_URI, auth_header(token))
-    end
-
-    handle_response(response)
-  rescue Errno::ECONNREFUSED
-    @error_code = 503
-    Rails.logger.error 'Could not connect to login.gov'
-    raise UserInfoServiceError, 'server_error'
-  ensure
-    finish_tracking(@error_code || response&.code)
+    raise CspLogout::UnknownCspError, csp
   end
 
-  def trace_request
-    Datadog::Tracing.trace('user_info_service.request', resource: 'request_info') do |span|
-      span.type = 'http'
-      span.set_tag('http.url', USER_INFO_URI)
-      span.set_tag('http.method', 'GET')
+  def parsed_response(response)
+    return if response.body.blank?
 
-      raw_response = yield
-
-      span.set_tag('http.status_code', raw_response.code)
-      raw_response
+    body = response.body.to_s.strip
+    if response.content_type.to_s.strip.downcase == 'application/jwt' || looks_like_jwt?(body)
+      decode_jwt(body)
+    else
+      JSON.parse(body).with_indifferent_access
     end
+  end
+
+  def looks_like_jwt?(body)
+    parts = body.to_s.strip.split('.')
+    parts.length == 3 && parts.all? { |p| p.match?(/\A[A-Za-z0-9_-]+\z/) }
+  end
+
+  def decode_jwt(body)
+    body = body[1..-2] if body.start_with?('"') && body.end_with?('"')
+    JSON::JWT.decode(body, :skip_verification).to_h.with_indifferent_access
   end
 
   def handle_response(response)
@@ -63,30 +63,58 @@ class UserInfoService
     end
   end
 
-  def parsed_response(response)
-    return if response.body.blank?
+  def request_info(csp, token)
+    csp_config = oidc_client_config csp
+    user_info_uri = csp_config[:client_options][:userinfo_endpoint]
+    start_tracking csp, user_info_uri
 
-    JSON.parse response.body
+    response = trace_request(user_info_uri) do
+      Net::HTTP.get_response(URI(user_info_uri), auth_header(token))
+    end
+
+    code = response.code
+    handle_response(response)
+  rescue Errno::ECONNREFUSED
+    code = 503
+    Rails.logger.error "Could not connect to CSP userinfo endpoint (csp=#{csp})"
+    raise UserInfoServiceError, 'server_error'
+  ensure
+    finish_tracking(code, csp, user_info_uri)
   end
 
-  def start_tracking
+  def trace_request(user_info_uri)
+    Datadog::Tracing.trace('user_info_service.request', resource: 'request_info') do |span|
+      span.type = 'http'
+      span.set_tag('http.url', user_info_uri)
+      span.set_tag('http.method', 'GET')
+
+      raw_response = yield
+
+      span.set_tag('http.status_code', raw_response.code)
+      raw_response
+    end
+  end
+
+  def start_tracking(csp, user_info_uri)
     @start = Time.now
     Rails.logger.info(
-      ['Calling Login.gov user_info',
-       { login_dot_gov_request_method: :get,
-         login_dot_gov_request_url: USER_INFO_URI,
-         login_dot_gov_request_method_name: :request_info }]
+      ['Calling CSP user_info',
+       { csp: csp,
+         csp_request_method: :get,
+         csp_request_url: user_info_uri,
+         csp_request_method_name: :request_info }]
     )
   end
 
-  def finish_tracking(code)
+  def finish_tracking(code, csp, user_info_uri)
     Rails.logger.info(
-      ['Login.gov user_info response info',
-       { login_dot_gov_request_method: :get,
-         login_dot_gov_request_url: USER_INFO_URI,
-         login_dot_gov_request_method_name: :request_info,
-         login_dot_gov_response_status_code: code&.to_i,
-         login_dot_gov_response_duration: Time.now - @start }]
+      ['CSP user_info response info',
+       { csp: csp,
+         csp_request_method: :get,
+         csp_request_url: user_info_uri,
+         csp_request_method_name: :request_info,
+         csp_response_status_code: code&.to_i,
+         csp_response_duration: Time.now - @start }]
     )
   end
 end

@@ -1,1 +1,1 @@
-<%= render(Page::Session::LoginComponent.new(omniauth_authorize_path(:login_dot_gov), last_used_csp: cookies[:last_used_csp]&.to_sym)) %>
+<%= render(Page::Session::LoginComponent.new(last_used_csp: cookies[:last_used_csp]&.to_sym)) %>

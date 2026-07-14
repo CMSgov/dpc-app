@@ -13,47 +13,52 @@ RSpec.describe 'PublicKeys', type: :request do
 
   describe 'Public Keys', :integration do
     let(:dpc_api_organization_id) { SecureRandom.uuid }
-    let!(:user) { create(:user) }
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
-    let!(:link) { create(:cd_org_link, user:, provider_organization: org) }
     let(:label) { 'New Public Key' }
-    before do
-      org.update!(terms_of_service_accepted_by: user)
-      sign_in user
-    end
-    it 'should generate a public key, show on org page, and delete it' do
-      get "/organizations/#{org.id}"
-      expect(response.body).to include('You have no public keys.')
-      expect(response.body).to_not include(label)
 
-      rsa_key = OpenSSL::PKey::RSA.new(4096)
-      public_key = rsa_key.public_key.to_pem
-      message = 'This is the snippet used to verify a key pair in DPC.'
-      digest = OpenSSL::Digest.new('SHA256')
-      signature_binary = rsa_key.sign(digest, message)
-      snippet_signature = Base64.encode64(signature_binary)
-      params = { label:, public_key:, snippet_signature: }
+    LoginSupport::CSP_MAP.each do |display_name, provider|
+      context "using #{display_name}" do
+        before do
+          user = create_user_with_csp(csp: provider)
+          create(:cd_org_link, user:, provider_organization: org)
+          org.update!(terms_of_service_accepted_by: user)
+          sign_in user, csp: provider
+        end
+        it 'should generate a public key, show on org page, and delete it' do
+          get "/organizations/#{org.id}"
+          expect(response.body).to include('You have no public keys.')
+          expect(response.body).to_not include(label)
 
-      post "/organizations/#{org.id}/public_keys", params: params
-      expect(response).to redirect_to(organization_path(org, credential_start: true))
-      expect(assigns(:organization)).to eq org
-      expect(flash[:success]).to eq('Public key created successfully.')
+          rsa_key = OpenSSL::PKey::RSA.new(4096)
+          public_key = rsa_key.public_key.to_pem
+          message = 'This is the snippet used to verify a key pair in DPC.'
+          digest = OpenSSL::Digest.new('SHA256')
+          signature_binary = rsa_key.sign(digest, message)
+          snippet_signature = Base64.encode64(signature_binary)
+          params = { label:, public_key:, snippet_signature: }
 
-      get "/organizations/#{org.id}"
-      expect(response.body).to_not include('You have no public keys.')
-      expect(response.body).to include(label)
+          post "/organizations/#{org.id}/public_keys", params: params
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+          expect(assigns(:organization)).to eq org
+          expect(flash[:success]).to eq('Public key created successfully.')
 
-      delete_path_match = %r{action="(/organizations/#{org.id}/public_keys/[^"]+)}.match(response.body)
-      expect(delete_path_match).to be_truthy
+          get "/organizations/#{org.id}"
+          expect(response.body).to_not include('You have no public keys.')
+          expect(response.body).to include(label)
 
-      delete delete_path_match[1]
+          delete_path_match = %r{action="(/organizations/#{org.id}/public_keys/[^"]+)}.match(response.body)
+          expect(delete_path_match).to be_truthy
 
-      expect(flash[:success]).to eq('Public key deleted successfully.')
-      expect(response).to redirect_to(organization_path(org, credential_start: true))
+          delete delete_path_match[1]
 
-      get "/organizations/#{org.id}"
-      expect(response.body).to include('You have no public keys.')
-      expect(response.body).to_not include(label)
+          expect(flash[:success]).to eq('Public key deleted successfully.')
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+
+          get "/organizations/#{org.id}"
+          expect(response.body).to include('You have no public keys.')
+          expect(response.body).to_not include(label)
+        end
+      end
     end
   end
 end
