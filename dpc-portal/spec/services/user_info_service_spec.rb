@@ -151,7 +151,7 @@ describe UserInfoService do
     case csp.to_s
     when 'login_dot_gov' then LOGIN_DOT_GOV_CLIENT_CONFIG[:client_options][:userinfo_endpoint]
     when 'id_me' then ID_ME_CLIENT_CONFIG[:client_options][:userinfo_endpoint]
-    # when 'clear' then CspConfig::CLEAR.user_info_endpoint
+    when 'clear' then CLEAR_CLIENT_CONFIG[:client_options][:userinfo_endpoint]
     else raise ArgumentError, "Unknown CSP code: #{csp}"
     end
   end

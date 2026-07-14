@@ -111,13 +111,14 @@ class InvitationsController < ApplicationController
   def csp_login_actions(csp)
     csp_config = CspConfig.for(csp)
     url = URI(csp_config.authorization_endpoint)
-    url.query = { client_id: csp_config.identifier,
-                  redirect_uri: "#{my_protocol_host}#{csp_config.redirect_path}",
-                  response_type: 'code',
-                  acr_values: csp_config.acr_values,
-                  scope: csp_config.authorize_scope,
-                  nonce: @nonce,
-                  state: @state }.compact.to_query
+    query = { client_id: csp_config.identifier,
+              redirect_uri: "#{my_protocol_host}#{csp_config.redirect_path}",
+              response_type: 'code',
+              acr_values: csp_config.acr_values.presence,
+              scope: csp_config.authorize_scope,
+              nonce: @nonce,
+              state: @state }
+    url.query = query.compact.to_query
 
     redirect_to url, allow_other_host: true
   end
@@ -250,7 +251,7 @@ class InvitationsController < ApplicationController
   end
 
   def user_emails(user_info)
-    user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed']
+    user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed'] || [user_info['email']]
   end
 
   def confirmed_email?(user_info)

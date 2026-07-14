@@ -2,6 +2,7 @@
 
 # Configure omniauth providers
 
+require 'json'
 require "dpc_portal_utils"
 
 include DpcPortalUtils
@@ -9,6 +10,24 @@ include DpcPortalUtils
 PORTAL_CSP_CONFIG = Rails.application.config_for(:csp).freeze
 ID_ME_CONFIG = PORTAL_CSP_CONFIG[:id_me].freeze
 LOGIN_DOT_GOV_CONFIG = PORTAL_CSP_CONFIG[:login_dot_gov].freeze
+CLEAR_CONFIG = PORTAL_CSP_CONFIG[:clear].freeze
+CLEAR_OIDC_CLAIMS = {
+  id_token: {
+    ssn9: nil,
+    email: nil,
+    email_verified: nil,
+    given_name: nil,
+    family_name: nil
+  },
+  userinfo: {
+    ssn9: nil,
+    email: nil,
+    email_verified: nil,
+    given_name: nil,
+    family_name: nil
+  }
+}.freeze
+CLEAR_OIDC_CLAIMS_PARAM = JSON.generate(CLEAR_OIDC_CLAIMS).freeze
 
 ## Build Login.gov RSA private key object before defining the config constant
 LOGIN_DOT_GOV_PRIVATE_KEY = begin
@@ -51,9 +70,9 @@ LOGIN_DOT_GOV_CLIENT_CONFIG = {
   client_options: {
     port:        443,
     scheme:      'https',
-    host:        LOGIN_DOT_GOV_CONFIG[:host],  
+    host:        LOGIN_DOT_GOV_CONFIG[:host],
     identifier:  "urn:gov:cms:openidconnect.profiles:sp:sso:cms:dpc:#{ENV['ENV']}",
-    private_key: LOGIN_DOT_GOV_PRIVATE_KEY,  
+    private_key: LOGIN_DOT_GOV_PRIVATE_KEY,
     redirect_uri: "#{my_protocol_host}/auth/login_dot_gov/callback",
     authorization_endpoint: LOGIN_DOT_GOV_CONFIG[:authorization_endpoint],
     token_endpoint:         LOGIN_DOT_GOV_CONFIG[:token_endpoint],
@@ -62,8 +81,34 @@ LOGIN_DOT_GOV_CLIENT_CONFIG = {
   }
 }.freeze
 
+CLEAR_CLIENT_CONFIG = {
+  name: :clear,
+  issuer: "https://#{CLEAR_CONFIG[:host]}/integrations",
+  scope: 'openid',
+  response_type: :code,
+  client_auth_method: :client_secret_post,
+  client_signing_alg: :RS256,
+  client_options: {
+    port: 443,
+    scheme: 'https',
+    host: CLEAR_CONFIG[:host],
+    identifier: CLEAR_CONFIG[:identifier],
+    secret: CLEAR_CONFIG[:client_secret],
+    redirect_uri: "#{my_protocol_host}#{CLEAR_CONFIG[:redirect_path]}",
+    authorization_endpoint: CLEAR_CONFIG[:authorization_endpoint],
+    token_endpoint: CLEAR_CONFIG[:token_endpoint],
+    userinfo_endpoint: CLEAR_CONFIG[:user_info_endpoint],
+    jwks_uri: CLEAR_CONFIG[:jwks_uri],
+    end_session_endpoint: "https://#{CLEAR_CONFIG[:host]}#{CLEAR_CONFIG[:log_out_path]}"
+  }
+}.freeze
+
+
 Rails.application.config.middleware.use OmniAuth::Builder do
   OmniAuth.config.logger = Rails.logger
+
+  ## CLEAR
+  provider :openid_connect, CLEAR_CLIENT_CONFIG
 
   ## ID.me
   provider :openid_connect, ID_ME_CLIENT_CONFIG
