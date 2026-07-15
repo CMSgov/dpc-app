@@ -12,6 +12,8 @@ import org.mockito.MockedStatic;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,9 +42,10 @@ class FileManagerUnitTest {
 		when(batch.getStartTime()).thenReturn(Optional.of(OffsetDateTime.now()));
 
 		FileManager fileManager = new FileManager(exportPath, queue);
+		Path path = Paths.get(String.format("%s/%s.ndjson.gz", exportPath, fileName));
 
 		try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
-			mockedFiles.when(() -> Files.exists(any())).thenReturn(true);
+			mockedFiles.when(() -> Files.exists(path)).thenReturn(true);
 			FileManager.FilePointer filePointer = fileManager.getFile(organizationID, fileId);
 			assertEquals(fileName + ".ndjson.gz", filePointer.getFile().getName());
 		}
@@ -62,9 +65,10 @@ class FileManagerUnitTest {
 		when(batch.getStartTime()).thenReturn(Optional.of(OffsetDateTime.now()));
 
 		FileManager fileManager = new FileManager(exportPath, queue);
+		Path path = Paths.get(String.format("%s/%s.ndjson", exportPath, fileName));
 
 		try (MockedStatic<Files> mockedFiles = mockStatic(Files.class)) {
-			mockedFiles.when(() -> Files.exists(any())).thenReturn(false);
+			mockedFiles.when(() -> Files.exists(path)).thenReturn(true);
 			FileManager.FilePointer filePointer = fileManager.getFile(organizationID, fileId);
 			assertEquals(fileName + ".ndjson", filePointer.getFile().getName());
 		}
@@ -88,6 +92,21 @@ class FileManagerUnitTest {
 		FileManager fileManager = new FileManager(exportPath, queue);
 		WebApplicationException e = assertThrows(WebApplicationException.class, () -> fileManager.getFile(organizationID, fileId));
 		assertEquals(Response.Status.NOT_FOUND.getStatusCode(), e.getResponse().getStatus());
+	}
+
+	@Test
+	void handlesMissingFile() {
+		String fileName = "fileName";
+		JobQueueBatch batch = mock(JobQueueBatch.class);
+		JobQueueBatchFile batchFile = mock(JobQueueBatchFile.class);
+
+		when(queue.getBatch(batchID)).thenReturn(Optional.of(batch));
+		when(batchFile.getFileName()).thenReturn(fileName);
+		when(batchFile.getBatchID()).thenReturn(batchID);
+
+		FileManager fileManager = new FileManager(exportPath, queue);
+		WebApplicationException e = assertThrows(WebApplicationException.class, () -> fileManager.getFile(batchFile));
+		assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getResponse().getStatus());
 	}
 
 	@Test
