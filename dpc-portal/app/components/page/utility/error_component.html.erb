@@ -1,10 +1,22 @@
 <div>
-  <h1><%= t(key=@status, csp_display_name: @csp_display_name) %></h1>
-  <div>
-    <p>
-      <%=raw t(key=@text, org_name: @org_name, ao_full_name: @ao_full_name, ao_email: @ao_email, csp_display_name: @csp_display_name) %>
-    </p>
-  </div>
+   <% if @show_alert %>
+    <div class="margin-bottom-4 usa-alert usa-alert--<%= @alert_type || 'error' %>">
+      <div class="usa-alert__body">
+        <h1 class="usa-alert__heading"><%= t(key=@status, csp_display_name: @csp_display_name) %></h1>
+        <p class="usa-alert__text">
+          <%=raw t(key=@text, org_name: @org_name, ao_full_name: @ao_full_name, ao_email: @ao_email, csp_display_name: @csp_display_name) %>
+        </p>
+      </div>
+    </div>
+   <% else %>
+    <h1><%= t(key=@status, csp_display_name: @csp_display_name) %></h1>
+    <div>
+      <p>
+        <%=raw t(key=@text, org_name: @org_name, ao_full_name: @ao_full_name, ao_email: @ao_email, csp_display_name: @csp_display_name) %>
+      </p>
+    </div>   
+   <% end %>
+  
   <% 'have to put the case statement here, as do not have route helper in ViewComponent'
     case(@reason)
       when :ao_expired %>

@@ -121,7 +121,7 @@ jobs:
         # curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-aarch64 -o /usr/local/lib/docker/cli-plugins/docker-compose
         run: |
           mkdir -p /usr/local/lib/docker/cli-plugins
-          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-aarch64 -o /usr/local/lib/docker/cli-plugins/docker-compose
+          curl -fSL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-aarch64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
       - name: "DPC Web Build"
@@ -151,9 +151,13 @@ jobs:
       - name: Install docker compose manually
         run: |
           mkdir -p /usr/local/lib/docker/cli-plugins
-          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-aarch64 -o /usr/local/lib/docker/cli-plugins/docker-compose
+          curl -fSL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-aarch64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+          # Fail fast if the plugin didn't install correctly (e.g. bad download or arch mismatch),
+          # otherwise `docker compose -p ...` silently falls back to `docker` and errors on -p.
+          file /usr/local/lib/docker/cli-plugins/docker-compose
+          docker compose version
       - name: "DPC Admin Portal Build"
         run: |
           make ci-admin-portal
@@ -181,7 +185,7 @@ jobs:
       - name: Install docker compose manually
         run: |
           mkdir -p /usr/local/lib/docker/cli-plugins
-          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-aarch64 -o /usr/local/lib/docker/cli-plugins/docker-compose
+          curl -fSL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-aarch64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
       - name: "Set up Python and install Ansible"
@@ -223,7 +227,7 @@ jobs:
       - name: Install docker compose manually
         run: |
           mkdir -p /usr/local/lib/docker/cli-plugins
-          curl -SL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-aarch64 -o /usr/local/lib/docker/cli-plugins/docker-compose
+          curl -fSL https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-aarch64 -o /usr/local/lib/docker/cli-plugins/docker-compose
           chown root:root /usr/local/lib/docker/cli-plugins/docker-compose
           chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
       - name: "API Client Unit Tests"

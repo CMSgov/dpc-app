@@ -17,11 +17,11 @@ class CspController < ApplicationController
   end
 
   def no_account
-    render(Page::Utility::ErrorComponent.new(nil, 'no_account', csp: session[:csp]), status: :forbidden)
+    render(Page::Utility::ErrorComponent.new(nil, 'no_account', csp: csp_session.current), status: :forbidden)
   end
 
   def failure
-    csp = session[:csp]
+    csp = csp_session.current
     invitation_flow_match = session[:user_return_to]&.match(%r{/organizations/([0-9]+)/invitations/([0-9]+)})
     return handle_invitation_flow_failure(invitation_flow_match[2]) if invitation_flow_match
     return handle_signin_fail(csp) if params[:code]
@@ -35,7 +35,7 @@ class CspController < ApplicationController
       session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id, invitation.id)
     end
 
-    redirect_to url_for_logout(session[:csp]), allow_other_host: true
+    redirect_to url_for_logout(csp_session.current), allow_other_host: true
   end
 
   private
@@ -100,9 +100,10 @@ class CspController < ApplicationController
   end
 
   def update_csp_tokens(auth)
-    session[:csp] = auth.provider.to_s
-    session["#{auth.provider}_token"] = auth.credentials.token
-    session["#{auth.provider}_token_exp"] = auth.credentials.expires_in.seconds.from_now
+    csp_session.store(csp: auth.provider,
+                      token: auth.credentials.token,
+                      token_exp: auth.credentials.expires_in.seconds.from_now,
+                      id_token: store_id_token? ? auth.credentials.id_token : nil)
   end
 
   # Can be overridden
@@ -110,4 +111,5 @@ class CspController < ApplicationController
   def all_emails(auth) = auth.extra.raw_info.all_emails
 
   def ial_1_user?(auth) = auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
+  def store_id_token? = false
 end

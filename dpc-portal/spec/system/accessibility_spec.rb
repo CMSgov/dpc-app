@@ -517,7 +517,7 @@ RSpec.describe 'Accessibility', type: :system do
                                                            invited_email_confirmation: 'somethingelse@example.com')
           visit "/organizations/#{org.id}/invitations/#{mismatched_invitation.id}/set_idp_token?provider=#{provider}"
           visit "/organizations/#{org.id}/invitations/#{mismatched_invitation.id}/accept"
-          expect(page).to have_text("The email you used to sign in doesn't match your invite.")
+          expect(page).to have_text('The email you used to sign in doesn\'t match your invite.')
           expect(page).to be_axe_clean.according_to axe_standard
         end
         it 'should show failed ao check' do

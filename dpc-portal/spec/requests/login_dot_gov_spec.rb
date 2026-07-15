@@ -89,10 +89,13 @@ RSpec.describe 'LoginDotGov', type: :request do
         it 'sets authentication token' do
           post '/auth/login_dot_gov'
           follow_redirect!
-          expect(request.session[:csp]).to eq 'login_dot_gov'
-          expect(request.session[:login_dot_gov_token]).to eq token
-          expect(request.session[:login_dot_gov_token_exp]).to_not be_nil
-          expect(request.session[:login_dot_gov_token_exp]).to be_within(1.second).of 899.seconds.from_now
+
+          csp_session = CspSession.new(request.session)
+          expect(csp_session.current).to eq 'login_dot_gov'
+          expect(csp_session.token).to eq token
+          expect(csp_session.token_exp).to_not be_nil
+          expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
+          expect(csp_session.id_token).to be_nil
         end
       end
 
@@ -109,10 +112,13 @@ RSpec.describe 'LoginDotGov', type: :request do
         it 'sets authentication token' do
           post '/auth/login_dot_gov'
           follow_redirect!
-          expect(request.session[:csp]).to eq 'login_dot_gov'
-          expect(request.session[:login_dot_gov_token]).to eq token
-          expect(request.session[:login_dot_gov_token_exp]).to_not be_nil
-          expect(request.session[:login_dot_gov_token_exp]).to be_within(1.second).of 899.seconds.from_now
+          csp_session = CspSession.new(request.session)
+          expect(csp_session.current).to eq 'login_dot_gov'
+          expect(csp_session.token).to eq token
+          expect(csp_session.token_exp).to_not be_nil
+          expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
+          expect(csp_session.user).to be_nil
+          expect(csp_session.id_token).to be_nil
         end
       end
     end
@@ -159,8 +165,12 @@ RSpec.describe 'LoginDotGov', type: :request do
 
       it 'does not set an authentication token' do
         post '/auth/login_dot_gov'
-        expect(request.session[:login_dot_gov_token]).to be_nil
-        expect(request.session[:login_dot_gov_token_exp]).to be_nil
+        csp_session = CspSession.new(request.session)
+        expect(csp_session.current).to be_nil
+        expect(csp_session.token).to be_nil
+        expect(csp_session.token_exp).to be_nil
+        expect(csp_session.id_token).to be_nil
+        expect(csp_session.user).to be_nil
       end
 
       context 'when a matching user account exists' do
@@ -345,9 +355,8 @@ RSpec.describe 'LoginDotGov', type: :request do
 
   describe 'CSP inactive' do
     before do
-      csp = Csp.find_by(name: 'login_dot_gov')
-      csp.end_date = DateTime.current - 1.year
-      csp.save!
+      Csp.where(name: 'login_dot_gov').update_all(end_date: DateTime.current - 1.year)
+      csp = Csp.where(name: 'login_dot_gov').first
 
       user = create(:user, email: 'bob5@example.com', provider: :login_dot_gov)
       create(:csp_user, user:, uuid:, csp:)
