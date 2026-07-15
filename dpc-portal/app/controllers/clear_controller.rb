@@ -13,4 +13,6 @@ class ClearController < CspController
   def all_emails(auth)
     [auth.extra.raw_info.email]
   end
+
+  def store_id_token? = true
 end

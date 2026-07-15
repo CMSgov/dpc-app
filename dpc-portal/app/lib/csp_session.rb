@@ -24,10 +24,11 @@ class CspSession
   # --- writing -------------------------------------------------------------
 
   # Store (or replace) a CSP session and mark it current. Returns the CSP code.
-  def store(csp:, token:, token_exp:)
+  def store(csp:, token:, token_exp:, id_token: nil)
     code = csp.to_s
     data = sessions!
     data[code] = { 'token' => token, 'token_exp' => token_exp }
+    data[code]['id_token'] = id_token if id_token.present?
     @session[SESSIONS_KEY] = data
     @session[CURRENT_KEY] = code
     code
@@ -63,6 +64,10 @@ class CspSession
 
   def token_exp(csp = current)
     sessions.dig(csp.to_s, 'token_exp')
+  end
+
+  def id_token(csp = current)
+    sessions.dig(csp.to_s, 'id_token')
   end
 
   # A CSP is "active" when it has a token that has not yet expired.

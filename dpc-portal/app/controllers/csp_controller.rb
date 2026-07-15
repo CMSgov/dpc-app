@@ -102,7 +102,8 @@ class CspController < ApplicationController
   def update_csp_tokens(auth)
     csp_session.store(csp: auth.provider,
                       token: auth.credentials.token,
-                      token_exp: auth.credentials.expires_in.seconds.from_now)
+                      token_exp: auth.credentials.expires_in.seconds.from_now,
+                      id_token: store_id_token? ? auth.credentials.id_token : nil)
   end
 
   # Can be overridden
@@ -110,4 +111,5 @@ class CspController < ApplicationController
   def all_emails(auth) = auth.extra.raw_info.all_emails
 
   def ial_1_user?(auth) = auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
+  def store_id_token? = false
 end

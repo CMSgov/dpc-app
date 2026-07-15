@@ -95,7 +95,9 @@ RSpec.describe 'IdMe', type: :request do
           csp_session = CspSession.new(request.session)
           expect(csp_session.current).to eq 'id_me'
           expect(csp_session.token).to eq token
+          expect(csp_session.token_exp).to_not be_nil
           expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
+          expect(csp_session.id_token).to be_nil
         end
       end
 
@@ -118,6 +120,7 @@ RSpec.describe 'IdMe', type: :request do
           expect(csp_session.token).to eq token
           expect(csp_session.token_exp).to_not be_nil
           expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
+          expect(csp_session.id_token).to be_nil
           expect(csp_session.user).to be_nil
         end
       end
@@ -169,6 +172,7 @@ RSpec.describe 'IdMe', type: :request do
         expect(csp_session.current).to be_nil
         expect(csp_session.token).to be_nil
         expect(csp_session.token_exp).to be_nil
+        expect(csp_session.id_token).to be_nil
         expect(csp_session.user).to be_nil
       end
 

@@ -94,11 +94,13 @@ RSpec.describe 'Clear', type: :request do
         it 'sets authentication token' do
           post '/auth/clear'
           follow_redirect!
-          expect(request.session[:csp]).to eq 'clear'
-          expect(request.session[:clear_token]).to eq token
-          expect(request.session[:clear_token_exp]).to_not be_nil
-          expect(request.session[:clear_token_exp]).to be_within(1.second).of 899.seconds.from_now
-          expect(request.session[:clear_id_token]).to eq id_token
+
+          csp_session = CspSession.new(request.session)
+          expect(csp_session.current).to eq 'clear'
+          expect(csp_session.token).to eq token
+          expect(csp_session.token_exp).to_not be_nil
+          expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
+          expect(csp_session.id_token).to eq id_token
         end
       end
 
@@ -115,11 +117,14 @@ RSpec.describe 'Clear', type: :request do
         it 'sets authentication token' do
           post '/auth/clear'
           follow_redirect!
-          expect(request.session[:csp]).to eq 'clear'
-          expect(request.session[:clear_token]).to eq token
-          expect(request.session[:clear_token_exp]).to_not be_nil
-          expect(request.session[:clear_token_exp]).to be_within(1.second).of 899.seconds.from_now
-          expect(request.session[:clear_id_token]).to eq id_token
+
+          csp_session = CspSession.new(request.session)
+          expect(csp_session.current).to eq 'clear'
+          expect(csp_session.token).to eq token
+          expect(csp_session.token_exp).to_not be_nil
+          expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
+          expect(csp_session.id_token).to eq id_token
+          expect(csp_session.user).to be_nil
         end
       end
     end
