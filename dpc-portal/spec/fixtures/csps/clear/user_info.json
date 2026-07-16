@@ -1,0 +1,33 @@
+{
+  "SSN": "999999999",
+  "SSN_Last_four_digits": "9999",
+  "address": {
+    "country": "US",
+    "formatted": "124 LAKE STREET, VERNON, CT 06066 US",
+    "locality": "VERNON",
+    "postal_code": "06066",
+    "region": "CT",
+    "street_address": "124 LAKE STREET"
+  },
+  "amr": [
+    "selfie",
+    "sms"
+  ],
+  "aud": [
+    "d3ca98c2-c43c-4065-8f82-ce9958b4e6d4"
+  ],
+  "auth_time": 1783971780,
+  "birthdate": "1985-11-24",
+  "email": "dogbeaker@aol.com",
+  "email_verified": false,
+  "family_name": "BEAKER",
+  "gender": "M",
+  "given_name": "DOG",
+  "iat": 1783971781,
+  "iss": "https://verified.clearme.com/integrations",
+  "nickname": "Unknown",
+  "phone_number": "+14107072690",
+  "phone_number_verified": true,
+  "rat": 1783971734,
+  "sub": "XYNiberHyjRlz6JLxet7jTN2svQErnV65U8kP35oFP"
+}

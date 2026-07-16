@@ -89,9 +89,7 @@ class InvitationsController < ApplicationController
   end
 
   def set_idp_token
-    session[:csp] = csp = params[:provider]
-    session["#{csp}_token"] = 'token'
-    session["#{csp}_token_exp"] = 2.days.from_now
+    csp_session.store(csp: params[:provider], token: 'token', token_exp: 2.days.from_now)
     head :ok
   end
 
@@ -108,7 +106,7 @@ class InvitationsController < ApplicationController
 
   def complete_registration
     session.delete("invitation_status_#{@invitation.id}")
-    sign_in(user: @user, csp: session[:csp])
+    sign_in(user: @user, csp: csp_session.current)
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Registration,
                          actionType: LoggingConstants::ActionType::UserLoggedIn,
@@ -120,19 +118,20 @@ class InvitationsController < ApplicationController
   def csp_login_actions(csp)
     csp_config = CspConfig.for(csp)
     url = URI(csp_config.authorization_endpoint)
-    url.query = { client_id: csp_config.identifier,
-                  redirect_uri: "#{my_protocol_host}#{csp_config.redirect_path}",
-                  response_type: 'code',
-                  acr_values: csp_config.acr_values,
-                  scope: csp_config.authorize_scope,
-                  nonce: @nonce,
-                  state: @state }.compact.to_query
+    query = { client_id: csp_config.identifier,
+              redirect_uri: "#{my_protocol_host}#{csp_config.redirect_path}",
+              response_type: 'code',
+              acr_values: csp_config.acr_values.presence,
+              scope: csp_config.authorize_scope,
+              nonce: @nonce,
+              state: @state }
+    url.query = query.compact.to_query
 
     redirect_to url, allow_other_host: true
   end
 
   def invitation_matches_user
-    user_info = UserInfoService.new.user_info(session)
+    user_info = UserInfoService.new.user_info(csp_session)
     return if render_bad_invitation?(user_info)
 
     session["invitation_status_#{@invitation.id}"] = 'identity_verified'
@@ -156,7 +155,7 @@ class InvitationsController < ApplicationController
   end
 
   def verify_user_is_ao
-    user_info = UserInfoService.new.user_info(session)
+    user_info = UserInfoService.new.user_info(csp_session)
     result = @invitation.ao_match?(user_info) # raises if does not match
     session[:user_pac_id] = result.dig(:ao_role, 'pacId')
     log_waivers(result)
@@ -189,7 +188,7 @@ class InvitationsController < ApplicationController
     session[:user_return_to] = invitation_return_url
     session['omniauth.nonce'] = @nonce = SecureRandom.hex(16)
     session['omniauth.state'] = @state = SecureRandom.hex(16)
-    session[:csp] = csp_name.to_s
+    csp_session.activate(csp_name)
   end
 
   def invitation_return_url
@@ -245,7 +244,7 @@ class InvitationsController < ApplicationController
   end
 
   def user
-    user_info = UserInfoService.new.user_info(session)
+    user_info = UserInfoService.new.user_info(csp_session)
     find_or_create_user(user_info)
     csp = Csp.find_by(name: session[:csp])
     csp_user = CspUser.find_or_create_by!(user: @user, csp:, uuid: user_info['sub'])
@@ -258,7 +257,7 @@ class InvitationsController < ApplicationController
   end
 
   def user_emails(user_info)
-    user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed']
+    user_info['all_emails'] || user_info['emails'] || user_info['emails_confirmed'] || [user_info['email']]
   end
 
   def confirmed_email?(user_info)
@@ -384,18 +383,9 @@ class InvitationsController < ApplicationController
   end
 
   def check_for_token
-    return if valid_csp_token?
+    return if csp_session.active?
 
     render(Page::Invitations::InvitationLoginComponent.new(@invitation))
-  end
-
-  def valid_csp_token?
-    csp = session[:csp]
-    return false if csp.blank?
-
-    session["#{csp}_token"].present? &&
-      session["#{csp}_token_exp"].present? &&
-      session["#{csp}_token_exp"] > Time.now
   end
 
   def block_test_utilities

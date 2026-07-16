@@ -5,7 +5,8 @@ require 'securerandom'
 module LoginSupport
   CSP_MAP = {
     login_dot_gov: 'Login.gov',
-    id_me: 'ID.me'
+    id_me: 'ID.me',
+    clear: 'CLEAR'
   }.freeze
 
   def create_user_with_csp(csp:, given_name: 'John', family_name: 'Smith', uuid: SecureRandom.uuid, **user_attrs)
@@ -78,17 +79,12 @@ module LoginSupport
   end
 
   def clear_auth_hash(user)
-    csp_user   = fetch_csp_user!(user, 'login_dot_gov')
-    all_emails = csp_user.user_emails.map(&:email)
-    primary_email = all_emails.first
-
-    { uid: csp_user.uuid,
-      info: { email: primary_email },
+    user.csp_user_for('clear')&.user_emails&.map(&:email).presence || [user.email]
+    { uid: user.csp_user_for('clear')&.uuid || user.uid,
+      info: { email: user.email },
+      credentials: { token: 'mock_token', expires_in: 300 },
       extra: {
-        raw_info: {
-          all_emails: all_emails,
-          ial: 'http://idmanagement.gov/ns/assurance/ial/1'
-        }
+        raw_info: {}
       } }
   end
 end

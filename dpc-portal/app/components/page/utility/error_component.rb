@@ -6,7 +6,8 @@ module Page
     class ErrorComponent < ViewComponent::Base
       DISPLAY_NAMES = {
         login_dot_gov: 'Login.gov',
-        id_me: 'ID.me'
+        id_me: 'ID.me',
+        clear: 'CLEAR'
       }.freeze
 
       def initialize(invitation, reason, csp: '')
@@ -19,6 +20,14 @@ module Page
         @reason = AoVerificationService::SERVER_ERRORS.include?(reason) ? :server_error : reason.to_sym
         @status = "verification.#{@reason}_status"
         @text = "verification.#{@reason}_text"
+        @show_alert = show_alert?
+        @alert_type = 'error' if show_alert?
+      end
+
+      private
+
+      def show_alert?
+        @reason.in?(%i[email_mismatch])
       end
     end
   end

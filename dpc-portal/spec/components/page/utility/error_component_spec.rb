@@ -143,7 +143,7 @@ RSpec.describe Page::Utility::ErrorComponent, type: :component do
           let(:component) { described_class.new(invitation, 'email_mismatch', csp:) }
           it 'should match header' do
             header = <<~HTML
-              <h1>#{CGI.escapeHTML(I18n.t('verification.email_mismatch_status'))}</h1>
+              <h1 class="usa-alert__heading">#{CGI.escapeHTML(I18n.t('verification.email_mismatch_status'))}</h1>
             HTML
             is_expected.to include(normalize_space(header))
           end

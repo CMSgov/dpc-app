@@ -8,6 +8,6 @@
 #   Character.create(name: "Luke", movie: movies.first)
 
 # Insert default rows for CSPs
-Csp.create!(name: :login_dot_gov, start_date: Time.current)
-Csp.create!(name: :id_me, start_date: Time.current)
-Csp.create!(name: :clear, start_date: Time.current)
+Csp.find_or_create_by!(name: :login_dot_gov) { |csp| csp.start_date = Time.current }
+Csp.find_or_create_by!(name: :id_me) { |csp| csp.start_date = Time.current }
+Csp.find_or_create_by!(name: :clear) { |csp| csp.start_date = Time.current }

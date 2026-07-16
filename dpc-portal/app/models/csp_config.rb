@@ -23,12 +23,8 @@ class CspConfig
                       CONFIG[:login_dot_gov])
   ID_ME = new('id_me',
               CONFIG[:id_me])
-  #   CLEAR = new('clear',
-  #               CONFIG[:clear][:host],
-  #               CONFIG[:clear][:identifier],
-  #               CONFIG[:clear][:user_info_path],
-  #               CONFIG[:clear][:log_out_path],
-  #               CONFIG[:clear][:token_expiration_interval])
+  CLEAR = new('clear',
+              CONFIG[:clear])
   private_class_method :new
 
   attr_reader :code, :user_info_endpoint, :log_out_path, :token_expiration_interval, :host, :identifier,
@@ -38,7 +34,7 @@ class CspConfig
     case code.to_s
     when 'login_dot_gov' then LOGIN_DOT_GOV
     when 'id_me' then ID_ME
-    # when 'clear' then CLEAR
+    when 'clear' then CLEAR
     else raise ArgumentError, "Unknown CSP code: #{code}"
     end
   end
@@ -48,6 +44,6 @@ class CspConfig
   end
 
   def self.list
-    [LOGIN_DOT_GOV.code, ID_ME.code] # CLEAR
+    [LOGIN_DOT_GOV.code, ID_ME.code, CLEAR.code]
   end
 end

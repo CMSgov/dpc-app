@@ -2,10 +2,10 @@
 
 # A service that verifies generates an ao invitation
 class UserInfoService
-  def user_info(session)
-    validate_session(session)
+  def user_info(csp_session)
+    validate_session(csp_session)
 
-    request_info(session[:csp], session["#{session[:csp]}_token"])
+    request_info(csp_session.current, csp_session.token)
   end
 
   private
@@ -14,18 +14,15 @@ class UserInfoService
     { Authorization: "Bearer #{token}" }
   end
 
-  def validate_session(session)
-    raise UserInfoServiceError, 'no_session' unless session[:csp].present?
-
-    csp = session[:csp]
-    raise UserInfoServiceError, 'no_token' unless session["#{csp}_token"].present?
-    raise UserInfoServiceError, 'no_token_exp' unless session["#{csp}_token_exp"].present?
-    raise UserInfoServiceError, 'expired_token' unless session["#{csp}_token_exp"] > Time.now
+  def validate_session(csp_session)
+    reason = csp_session.inactive_reason
+    raise UserInfoServiceError, reason.to_s if reason
   end
 
   def oidc_client_config(csp)
     return ID_ME_CLIENT_CONFIG if csp.to_s == :id_me.to_s
     return LOGIN_DOT_GOV_CLIENT_CONFIG if csp.to_s == :login_dot_gov.to_s
+    return CLEAR_CLIENT_CONFIG if csp.to_s == :clear.to_s
 
     raise CspLogout::UnknownCspError, csp
   end

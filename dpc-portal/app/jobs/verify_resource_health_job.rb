@@ -9,7 +9,11 @@ class VerifyResourceHealthJob < ApplicationJob
   METRIC_NAMESPACE = 'DPC'
   REGION = 'us-east-1'
   ENVIRONMENT = ENV.fetch('ENV', 'none')
-  IDP_HOST = ENV.fetch('IDP_ID_ME_HOST', nil)
+  IDP_HOSTS = [
+    ENV.fetch('IDP_LOGIN_DOT_GOV_HOST', nil),
+    ENV.fetch('IDP_ID_ME_HOST', nil),
+    ENV.fetch('CLEAR_IDP_HOST', nil)
+  ].freeze
 
   # Runs all healthchecks if no args provided
   def perform(args = {})
@@ -35,14 +39,19 @@ class VerifyResourceHealthJob < ApplicationJob
   end
 
   def idp_healthcheck
-    return log_healthcheck('PortalConnectedToIdp', false) if IDP_HOST.nil?
-
-    # Login.gov doesn't have a /healthcheck, so we look for a 200 to verify connectivity.
-    response = Net::HTTP.get_response(URI("https://#{IDP_HOST}"))
-    log_healthcheck(
-      'PortalConnectedToIdp',
-      response.code.to_i.between?(200, 299)
-    )
+    IDP_HOSTS.each do |idp_host|
+      if idp_host.nil?
+        log_healthcheck('PortalConnectedToIdp', false, csp: idp_host)
+      else
+        # Login.gov doesn't have a /healthcheck, so we look for a 200 to verify connectivity.
+        response = Net::HTTP.get_response(URI("https://#{idp_host}"))
+        log_healthcheck(
+          'PortalConnectedToIdp',
+          response.code.to_i.between?(200, 299),
+          csp: idp_host
+        )
+      end
+    end
   end
 
   def cpi_gateway_healthcheck
@@ -65,7 +74,7 @@ class VerifyResourceHealthJob < ApplicationJob
     )
   end
 
-  def log_healthcheck(check_name, healthy)
+  def log_healthcheck(check_name, healthy, csp: nil)
     action_type = if healthy
                     LoggingConstants::ActionType::HealthCheckPassed
                   else
@@ -73,7 +82,8 @@ class VerifyResourceHealthJob < ApplicationJob
                   end
     Rails.logger.info(["Healthcheck #{check_name}",
                        { actionContext: LoggingConstants::ActionContext::HealthCheck,
-                         actionType: action_type }])
+                         actionType: action_type,
+                         csp: }.compact])
     emit_cloudwatch_metric(check_name, healthy)
   end
 

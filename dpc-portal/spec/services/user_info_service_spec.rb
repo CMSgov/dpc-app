@@ -19,7 +19,7 @@ describe UserInfoService do
 
         it 'should return info with valid session' do
           verify_logs(status: 200, csp: provider)
-          expect(service.user_info(valid_csp_session(provider))).to eq csp_response(provider)
+          expect(service.user_info(build_csp_session(provider))).to eq csp_response(provider)
         end
       end
 
@@ -31,7 +31,7 @@ describe UserInfoService do
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: error, status: 401)
           expect do
-            service.user_info(valid_csp_session(provider))
+            service.user_info(build_csp_session(provider))
           end.to raise_error(UserInfoServiceError, 'unauthorized')
         end
         it 'should throw error if status is 500' do
@@ -41,7 +41,7 @@ describe UserInfoService do
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: error, status: 500)
           expect do
-            service.user_info(valid_csp_session(provider))
+            service.user_info(build_csp_session(provider))
           end.to raise_error(UserInfoServiceError, 'server_error')
         end
         it 'should throw error if cannot connect' do
@@ -50,29 +50,29 @@ describe UserInfoService do
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_raise(Errno::ECONNREFUSED)
           expect do
-            service.user_info(valid_csp_session(provider))
+            service.user_info(build_csp_session(provider))
           end.to raise_error(UserInfoServiceError, 'server_error')
         end
       end
 
       context :invalid_session do
         it 'should throw error if no token' do
-          invalid = valid_csp_session(provider).merge("#{provider}_token": nil)
+          csp_session_with_nil_token = build_csp_session(provider, token: nil)
           expect do
-            service.user_info(invalid)
+            service.user_info(csp_session_with_nil_token)
           end.to raise_error(UserInfoServiceError, 'no_token')
         end
         it 'should throw error if no token expiration' do
-          invalid = valid_csp_session(provider).merge("#{provider}_token_exp": nil)
+          csp_session_with_nil_token_exp = build_csp_session(provider, token_exp: nil)
           expect do
-            service.user_info(invalid)
+            service.user_info(csp_session_with_nil_token_exp)
           end.to raise_error(UserInfoServiceError, 'no_token_exp')
         end
         context :expired_session do
           let(:exp) { 1.second.ago }
           it 'should throw error' do
             expect do
-              service.user_info(valid_csp_session(provider))
+              service.user_info(build_csp_session(:login_dot_gov))
             end.to raise_error(UserInfoServiceError, 'expired_token')
           end
         end
@@ -132,13 +132,11 @@ describe UserInfoService do
     )
   end
 
-  def valid_csp_session(csp)
-    csp = csp.to_s
-    session = ActiveSupport::HashWithIndifferentAccess.new
-    session[:csp] = csp
-    session["#{csp}_token"] = token
-    session["#{csp}_token_exp"] = exp
-    session
+  def build_csp_session(csp, token: self.token, token_exp: exp)
+    rails_session = ActiveSupport::HashWithIndifferentAccess.new
+    cs = CspSession.new(rails_session)
+    cs.store(csp: csp, token: token, token_exp: token_exp)
+    cs
   end
 
   def csp_response(csp)
@@ -151,7 +149,7 @@ describe UserInfoService do
     case csp.to_s
     when 'login_dot_gov' then LOGIN_DOT_GOV_CLIENT_CONFIG[:client_options][:userinfo_endpoint]
     when 'id_me' then ID_ME_CLIENT_CONFIG[:client_options][:userinfo_endpoint]
-    # when 'clear' then CspConfig::CLEAR.user_info_endpoint
+    when 'clear' then CLEAR_CLIENT_CONFIG[:client_options][:userinfo_endpoint]
     else raise ArgumentError, "Unknown CSP code: #{csp}"
     end
   end
