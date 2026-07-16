@@ -23,7 +23,7 @@ gem 'auto-session-timeout'
 gem 'aws-sdk-cloudwatch'
 gem 'bootsnap', '>= 1.4.2', require: false
 gem 'bundler', '>= 1.15.0'
-gem 'datadog', require: 'datadog/auto_instrument'
+gem 'datadog', require: false
 gem 'dotenv-rails', groups: %i[development test]
 gem 'faraday', '>= 2.14.2'
 gem 'fhir_models'

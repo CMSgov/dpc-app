@@ -7,6 +7,7 @@ require './app/lib/dpc_json_logger'
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
+require 'datadog/auto_instrument'
 
 module DpcPortal
   class Application < Rails::Application
