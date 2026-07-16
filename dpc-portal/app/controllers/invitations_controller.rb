@@ -95,15 +95,6 @@ class InvitationsController < ApplicationController
 
   private
 
-  def find_user_by_email(email)
-    return nil if email.blank?
-
-    users = User.joins(csp_users: :user_emails).where(user_emails: { email: email }).distinct
-    raise MultiUserMatchError, "too many matching users | email: #{email}" if users.size > 1
-
-    users.first
-  end
-
   def complete_registration
     session.delete("invitation_status_#{@invitation.id}")
     sign_in(user: @user, csp: csp_session.current)
@@ -246,9 +237,10 @@ class InvitationsController < ApplicationController
   def user
     user_info = UserInfoService.new.user_info(csp_session)
     find_or_create_user(user_info)
-    csp = Csp.find_by(name: session[:csp])
+    csp = Csp.find_by(name: @user.provider)
     csp_user = CspUser.find_or_create_by!(user: @user, csp:, uuid: user_info['sub'])
 
+    # Update emails based upon the latest information in user info.
     new_emails = user_emails(user_info)
     primary_email = user_info['email']
     sync_csp_emails(csp_user, new_emails, primary_email)
@@ -269,30 +261,19 @@ class InvitationsController < ApplicationController
     @user = if @invitation.authorized_official? && (ENV['ENV'] == 'prod' || Rails.env.test?)
               ao_user(user_info)
             else
-              find_or_create_cd_user(user_info)
+              User.find_or_create_by!(email: @invitation.invited_email) do |user_to_create|
+                assign_user_attributes(user_to_create, user_info)
+                log_create_user
+              end
             end
   end
 
-  def find_or_create_cd_user(user_info)
-    find_existing_cd_user(user_info) || create_new_user(user_info)
-  end
+  def ao_user(user_info)
+    matching_users = User.where('email = ? OR pac_id = ?', @invitation.invited_email, session[:user_pac_id])
+    raise MultiUserMatchError, "too many matching users | pac_id: #{session[:user_pac_id]}" if matching_users.size > 1
 
-  def find_existing_cd_user(user_info)
-    find_user_by_csp_uid(user_info) ||
-      find_user_by_email(user_info['email']) ||
-      find_user_by_ssn(user_info)
-  end
+    return matching_users.first if matching_users.present?
 
-  def find_user_by_csp_uid(user_info)
-    User.find_by_csp_uid(name: session[:csp], csp_uid: user_info['sub'])
-  end
-
-  def find_user_by_ssn(user_info)
-    ssn = user_info['social_security_number']&.tr('-', '')
-    User.find_by(pac_id: ssn) if ssn.present?
-  end
-
-  def create_new_user(user_info)
     User.new.tap do |user|
       assign_user_attributes(user, user_info)
       user.save!
@@ -300,34 +281,17 @@ class InvitationsController < ApplicationController
     end
   end
 
-  def ao_user(user_info)
-    candidates = find_ao_candidates(user_info)
-    raise MultiUserMatchError, "too many matching users | pac_id: #{session[:user_pac_id]}" if candidates.size > 1
-
-    candidates.first || create_new_user(user_info)
-  end
-
-  def find_ao_candidates(user_info)
-    [
-      find_user_by_csp_uid(user_info),
-      find_user_by_pac_id,
-      find_user_by_email(user_info['email'])
-    ].compact.uniq
-  end
-
-  def find_user_by_pac_id
-    User.find_by(pac_id: session[:user_pac_id]) if session[:user_pac_id].present?
-  end
-
   def assign_user_attributes(user_to_create, user_info)
+    user_to_create.email = @invitation.invited_email
     user_to_create.given_name = user_info['given_name']
     user_to_create.family_name = user_info['family_name']
     user_to_create.pac_id = session.delete(:user_pac_id)
+    user_to_create.provider = session[:csp]
+    user_to_create.uid = user_info['sub']
   end
 
   def update_user(user_info)
-    pac_id = session.delete(:user_pac_id)
-    @user.pac_id ||= pac_id
+    @user.pac_id ||= session.delete(:user_pac_id)
     @user.given_name = user_info['given_name']
     @user.family_name = user_info['family_name']
     @user.save
