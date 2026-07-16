@@ -67,9 +67,7 @@ group :development, :test do
   gem 'pry'
   gem 'pry-nav'
   gem 'rspec-rails'
-  gem 'sinatra', '>= 4.2.0'
   gem 'webmock'
-  gem 'webrick'
 end
 
 group :development do
@@ -87,6 +85,9 @@ group :development do
   gem 'spring-watcher-listen', '~> 2.1.0'
 
   gem 'ruby-lsp-rspec'
+
+  gem 'sinatra', '>= 4.2.0'
+  gem 'webrick'
 end
 
 group :test do
