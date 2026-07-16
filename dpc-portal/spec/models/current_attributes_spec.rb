@@ -15,14 +15,11 @@ RSpec.describe CurrentAttributes do
 
     it 'records user attributes when user exists without csp_name' do
       user = create(:user, id: rand(0..100_000), pac_id: rand(0..100_000).to_s)
-      csp = Csp.find_by(name: 'login_dot_gov') || create(:csp, :login_dot_gov)
-      csp_user = create(:csp_user, user:, csp:, uuid: SecureRandom.uuid)
-
       CurrentAttributes.save_user_attributes(user)
       expect(CurrentAttributes.current_user).to eq(
         {
           id: user.id,
-          external_id: csp_user.uuid,
+          external_id: nil,
           pac_id: user.pac_id
         }
       )

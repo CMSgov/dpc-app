@@ -354,9 +354,10 @@ RSpec.describe 'LoginDotGov', type: :request do
   end
 
   describe 'CSP inactive' do
+    let!(:csp) { Csp.find_by(name: 'login_dot_gov') || create(:csp, :id_me) }
     before do
-      Csp.where(name: 'login_dot_gov').update_all(end_date: DateTime.current - 1.year)
-      csp = Csp.where(name: 'login_dot_gov').first
+      csp.end_date = DateTime.current - 1.year
+      csp.save!
 
       user = create(:user)
       create(:csp_user, user:, uuid:, csp:)
