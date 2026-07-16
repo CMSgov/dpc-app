@@ -17,7 +17,6 @@ if [ "$1" == "portal" ]; then
 
   echo "Migrating the database..."
   bundle exec rails db:migrate db:seed
-  echo "Database migrated."
 
   if [[ "$ENV" == "production" ]]; then
     echo "Starting in production"
@@ -29,8 +28,6 @@ if [ "$1" == "portal" ]; then
     echo "Starting in non-production"
     ./bin/nonprod
   fi
-
-  echo "Rails server started."
 elif [ "$1" == "async" ]; then
   echo "Starting Solid Queue..."
   if [[ "$ENV" == "production" ]]; then
