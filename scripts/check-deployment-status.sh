@@ -68,7 +68,7 @@ if [ "$DEPLOYMENT_STATUS" == "FAILURE" ]; then
     # Get ECS event dump
     aws ecs describe-services \
       --cluster "$CLUSTER_NAME" \
-      --services "$SERVICE_NAME" \
+      --services "$SVC_NAME" \
       --query "services[0].events[0:10]" \
       --output table
     exit 1 # Terminate the entire script if a terminal failure was detected.
@@ -80,7 +80,7 @@ if [ "$DEPLOYMENT_STATUS" == "TIMEOUT" ]; then
     # Get ECS event dump
     aws ecs describe-services \
       --cluster "$CLUSTER_NAME" \
-      --services "$SERVICE_NAME" \
+      --services "$SVC_NAME" \
       --query "services[0].events[0:10]" \
       --output table
     exit 1
