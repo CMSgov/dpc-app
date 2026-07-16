@@ -65,12 +65,24 @@ done
 
 # Check the deployment status flag set inside the loop.
 if [ "$DEPLOYMENT_STATUS" == "FAILURE" ]; then
+    # Get ECS event dump
+    aws ecs describe-services \
+      --cluster "$CLUSTER_NAME" \
+      --services "$SERVICE_NAME" \
+      --query "services[0].events[0:10]" \
+      --output table
     exit 1 # Terminate the entire script if a terminal failure was detected.
 fi
 
 if [ "$DEPLOYMENT_STATUS" == "TIMEOUT" ]; then
     # If the status is still TIMEOUT, it means the loop completed 60 attempts without breaking.
     echo "TIMEOUT ERROR: Deployment did not stabilize or failed within ${TOTAL_TIMEOUT} seconds."
+    # Get ECS event dump
+    aws ecs describe-services \
+      --cluster "$CLUSTER_NAME" \
+      --services "$SERVICE_NAME" \
+      --query "services[0].events[0:10]" \
+      --output table
     exit 1
 fi
 
