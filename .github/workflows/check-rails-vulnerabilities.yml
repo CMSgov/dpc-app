@@ -4,6 +4,7 @@ on:
   schedule:
     - cron: '0 7 * * 1,4' # "7am on Monday Thursday
   workflow_dispatch:
+  push:
 
 permissions:
   id-token: write
