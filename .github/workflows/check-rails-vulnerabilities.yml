@@ -4,12 +4,6 @@ on:
   schedule:
     - cron: '0 7 * * 1,4' # "7am on Monday Thursday
   workflow_dispatch:
-    inputs:
-      branch:
-        description: branch to test
-        required: true
-        type: 'string'
-        default: 'main'
 
 permissions:
   id-token: write
@@ -22,7 +16,6 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
         with:
-          ref: ${{ inputs.branch || 'main' }}
           path: dpc-app
 
 
@@ -51,8 +44,8 @@ jobs:
             text:  "GHA Deployment to `${{ inputs.env }}` has failed in Deploy Job"
             attachments:
               - color: warning
-                text: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Bundle audit check failed on branch ${{ inputs.branch || 'main' }}>"
-                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Bundle audit check failed on branch ${{ inputs.branch || 'main' }}>"
+                text: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Bundle audit check failed>"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Bundle audit check failed>"
                 mrkdown_in:
                   - footer
             text: "Bundle audit check has failed"
