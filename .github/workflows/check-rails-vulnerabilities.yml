@@ -16,6 +16,18 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
+
+
+      # TODO remove these and just add it to the base image
+      - name: "Install Ruby build dependencies"
+        run: |
+          sudo dnf install -y autoconf gcc rust patch make bzip2 openssl-devel libyaml-devel libffi-devel readline-devel gdbm-devel ncurses-devel perl-FindBin
+      - name: "Install ruby-build"
+        run: |
+          git clone https://github.com/rbenv/ruby-build.git
+          sudo ./ruby-build/install.sh 
+
+
       - name: "Set up Ruby"
         uses: ruby/setup-ruby@003a5c4d8d6321bd302e38f6f0ec593f77f06600 # v1.319.0
         with:
