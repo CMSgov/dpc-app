@@ -22,15 +22,19 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
         with:
+          ref: ${{ inputs.branch || 'main' }}
           path: dpc-app
 
 
+      # CVE-2026-38969 is for webrick, which is only used in our fake_cpi_gateway client and never exposed to the outside
+      # world.  There's currently no fix, and the recommended solution is to remove or disable it.  That would break
+      # the fake_cpi_gateway, though, so we can't do that.
       - name: "audit dpc-portal"
         run: cd dpc-portal && bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2026-38969
       - name: "audit dpc-web"
         run: cd dpc-web && bundle exec bundle audit update && bundle exec bundle audit check
       - name: "audit dpc-admin"
-        run: cd dpc-admin && bundle exec bundle audit update && bundle exec bundle audit check  # ✅ Fixed: was pointing to dpc-portal and had duplicate update
+        run: cd dpc-admin && bundle exec bundle audit update && bundle exec bundle audit check
 
 
       - uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
