@@ -82,9 +82,12 @@ module LoginSupport
   end
 
   def clear_auth_hash(user)
-    user.csp_user_for('clear')&.user_emails&.map(&:email).presence || [user.email]
-    { uid: user.csp_user_for('clear')&.uuid || user.uid,
-      info: { email: user.email },
+    csp_user   = fetch_csp_user!(user, 'clear')
+    all_emails = csp_user.user_emails.map(&:email)
+    primary_email = all_emails.first
+
+    { uid: csp_user.uuid,
+      info: { email: primary_email },
       credentials: { token: 'mock_token', expires_in: 300 },
       extra: {
         raw_info: {}
