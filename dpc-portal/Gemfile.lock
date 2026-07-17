@@ -533,10 +533,11 @@ GEM
       sprockets-rails
       tilt
     securerandom (0.4.1)
-    selenium-webdriver (4.20.1)
+    selenium-webdriver (4.46.0)
       base64 (~> 0.2)
+      logger (~> 1.4)
       rexml (~> 3.2, >= 3.2.5)
-      rubyzip (>= 1.2.2, < 3.0)
+      rubyzip (>= 1.2.2, < 4.0)
       websocket (~> 1.0)
     simplecov (0.17.0)
       docile (~> 1.1)
@@ -690,7 +691,7 @@ DEPENDENCIES
   rubocop-performance
   ruby-lsp-rspec
   sassc-rails (>= 2.1.2)
-  selenium-webdriver (= 4.20.1)
+  selenium-webdriver
   simplecov (<= 0.17)
   sinatra (>= 4.2.0)
   solid_queue (~> 1.2)

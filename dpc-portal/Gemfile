@@ -96,7 +96,7 @@ group :test do
   gem 'climate_control'
   gem 'fakefs', require: 'fakefs/safe'
   gem 'rails-controller-testing'
-  gem 'selenium-webdriver', '4.20.1'
+  gem 'selenium-webdriver'
   gem 'timecop'
 end
 
