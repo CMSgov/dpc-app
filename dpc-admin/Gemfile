@@ -92,7 +92,7 @@ group :test do
   gem 'capybara', '>= 2.15'
   gem 'climate_control'
   gem 'rails-controller-testing'
-  gem 'selenium-webdriver'
+  gem 'selenium-webdriver', '>= 4.14.0'
   gem 'fakefs', require: 'fakefs/safe'
   # Easy installation and use of web drivers to run system tests with browsers
   gem 'webdrivers'
