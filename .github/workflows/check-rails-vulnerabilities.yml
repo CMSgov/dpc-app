@@ -20,6 +20,7 @@ jobs:
         uses: ruby/setup-ruby@003a5c4d8d6321bd302e38f6f0ec593f77f06600 # v1.319.0
         with:
           ruby-version: '3.3.7'
+          self-hosted: true
 
 
       # CVE-2026-38969 is for webrick, which is only used in our fake_cpi_gateway client and never exposed to the outside
