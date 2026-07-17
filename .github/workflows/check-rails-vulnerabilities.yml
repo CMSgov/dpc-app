@@ -1,0 +1,54 @@
+name: "DPC - Check Rails Dependencies for Vulnerabilities"
+
+on:
+  schedule:
+    - cron: '0 7 * * 1,4' # "7am on Monday Thursday
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: branch to test
+        required: true
+        type: 'string'
+        default: 'main'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  bundler-audit:
+    runs-on: codebuild-dpc-app-non-prod-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
+        with:
+          path: dpc-app
+
+
+      - name: "audit dpc-portal"
+        run: cd dpc-portal && bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2026-38969
+      - name: "audit dpc-web"
+        run: cd dpc-web && bundle exec bundle audit update && bundle exec bundle audit check
+      - name: "audit dpc-admin"
+        run: cd dpc-admin && bundle exec bundle audit update && bundle exec bundle audit check  # ✅ Fixed: was pointing to dpc-portal and had duplicate update
+
+
+      - uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
+        name: Slack failure
+        if: ${{ failure() }}
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+
+          # TODO update to point to dpc-alerts
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            text:  "GHA Deployment to `${{ inputs.env }}` has failed in Deploy Job"
+            attachments:
+              - color: warning
+                text: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Bundle audit check failed on branch ${{ inputs.branch || 'main' }}>"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Bundle audit check failed on branch ${{ inputs.branch || 'main' }}>"
+                mrkdown_in:
+                  - footer
+            text: "Bundle audit check has failed"
