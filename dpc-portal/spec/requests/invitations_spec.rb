@@ -201,20 +201,21 @@ RSpec.describe 'Invitations', type: :request do
         post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
       end
 
-      xit 'should create user if not exist' do
+      it 'should create user if not exist' do
         expect do
           post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
         end.to change { User.count }.by 1
 
-        user = User.find_by!(
-          given_name: user_info_template['given_name'],
-          family_name: user_info_template['family_name'],
-          email: user_info_template['email']
-        )
-        expect(user.uid).to eq user_info_template['sub']
+        user_email = UserEmail.find_by(email: user_info_template['email'])
+        expect(user_email).to be_present
+
+        user = user_email.csp_user.user
+        expect(user.given_name).to eq user_info_template['given_name']
+        expect(user.family_name).to eq user_info_template['family_name']
 
         csp_user = user.csp_user_for(provider.to_s)
         expect(csp_user).to be_present
+        expect(csp_user.uuid).to eq user_info_template['sub']
 
         csp_emails = csp_user.user_emails.map(&:email)
         expect(csp_emails).not_to be_empty
@@ -817,21 +818,22 @@ RSpec.describe 'Invitations', type: :request do
               post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
             end
 
-            xit 'should create user if not exist' do
-              csp = Csp.find_by(name: provider.to_s) || create(:csp, provider)
+            it 'should create user if not exist' do
+              Csp.find_by(name: provider.to_s) || create(:csp, name: provider.to_s)
               expect do
                 post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
               end.to change { User.count }.by 1
 
-              user = User.find_by!(
-                given_name: user_info_template['given_name'],
-                family_name: user_info_template['family_name'],
-                email: user_info_template['email']
-              )
-              expect(user.uid).to eq user_info_template['sub']
+              user_email = UserEmail.find_by(email: user_info_template['email'])
+              expect(user_email).to be_present
+
+              user = user_email.csp_user.user
+              expect(user.given_name).to eq user_info_template['given_name']
+              expect(user.family_name).to eq user_info_template['family_name']
 
               csp_user = user.csp_user_for(provider.to_s)
               expect(csp_user).to be_present
+              expect(csp_user.uuid).to eq user_info_template['sub']
 
               csp_emails = csp_user.user_emails.map(&:email)
               expect(csp_emails).not_to be_empty
