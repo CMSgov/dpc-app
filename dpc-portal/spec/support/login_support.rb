@@ -10,9 +10,12 @@ module LoginSupport
   }.freeze
 
   def create_user_with_csp(csp:, given_name: 'John', family_name: 'Smith', uuid: SecureRandom.uuid, **user_attrs)
-    csp = Csp.find_by(name: csp.to_s) || create(:csp, csp)
+    csp_name = csp.to_s
+    csp_record = Csp.find_by(name: csp_name) || create(:csp, name: csp_name)
     user = create(:user, given_name:, family_name:, **user_attrs)
-    create(:csp_user, user:, uuid:, csp:)
+    csp_user = create(:csp_user, user:, uuid:, csp: csp_record)
+    create(:user_email, csp_user:, email: "#{given_name.downcase}.#{family_name.downcase}@example.com",
+                        primary: true, active: true)
     user
   end
 
