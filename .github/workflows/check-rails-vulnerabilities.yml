@@ -40,7 +40,6 @@ jobs:
           # Sends to dpc-deploys
           payload: |
             channel: "CMC1E4AEQ"
-            text:  "GHA Deployment to `${{ inputs.env }}` has failed in Deploy Job"
             attachments:
               - color: warning
                 text: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Bundle audit check failed>"
