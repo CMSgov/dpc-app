@@ -274,7 +274,7 @@ class InvitationsController < ApplicationController
   end
 
   def find_user_by_ssn(user_info)
-    ssn = user_info['social_security_number']&.tr('-', '')
+    ssn = user_info['social_security_number']&.tr('-', '') || user_info['SSN']&.tr('-', '')
     User.find_by(pac_id: ssn) if ssn.present?
   end
 
