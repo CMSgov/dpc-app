@@ -255,15 +255,15 @@ class InvitationsController < ApplicationController
     @user = if @invitation.authorized_official? && (ENV['ENV'] == 'prod' || Rails.env.test?)
               ao_user(user_info)
             else
-              find_or_create_cd_user(user_info)
+              find_or_create_new_user(user_info)
             end
   end
 
-  def find_or_create_cd_user(user_info)
-    find_existing_cd_user(user_info) || create_new_user(user_info)
+  def find_or_create_new_user(user_info)
+    find_existing_user(user_info) || create_new_user(user_info)
   end
 
-  def find_existing_cd_user(user_info)
+  def find_existing_user(user_info)
     find_user_by_uuid(user_info) ||
       find_user_by_email(user_info['email']) ||
       find_user_by_ssn(user_info)
