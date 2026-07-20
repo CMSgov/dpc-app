@@ -12,6 +12,7 @@ require 'support/component_support'
 require 'support/dpc_client_support'
 require 'support/match_html_fragment'
 require 'support/fixture_helper'
+require 'support/selenium_driver'
 # Add additional requires below this line. Rails is not loaded until this point!
 require 'view_component/test_helpers'
 # Requires supporting ruby files with custom matchers and macros, etc, in
