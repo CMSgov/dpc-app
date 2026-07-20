@@ -302,7 +302,6 @@ RSpec.describe 'Invitations', type: :request do
   end
 
   LoginSupport::CSP_MAP.each do |provider, display_name|
-    # before { skip 'Temporarily disabled' }
     describe "with #{display_name}" do
       let!(:csp) { Csp.find_by(name: provider) || create(:csp, name: provider) }
       let!(:other_csp_name) { LoginSupport::CSP_MAP.keys.reject { |k| k == provider }.sample }
