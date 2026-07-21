@@ -56,7 +56,7 @@ class User < ApplicationRecord
     CdOrgLink.where(user: self, provider_organization: organization, disabled_at: nil).exists?
   end
 
-  # Returns the primary email across all CSPs
+  # NOTE: will provide non-deterministic results in some scenarios - see DPC-5564
   def email
     user_emails.find_by(primary: true, active: true)&.email ||
       user_emails.find_by(active: true)&.email
