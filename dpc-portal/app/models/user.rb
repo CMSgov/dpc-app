@@ -66,4 +66,10 @@ class User < ApplicationRecord
   def all_emails
     user_emails.map(&:email)
   end
+
+  def self.find_by_email_in_user_emails(email)
+    joins(csp_users: :user_emails)
+      .where(user_emails: { email: })
+      .distinct
+  end
 end

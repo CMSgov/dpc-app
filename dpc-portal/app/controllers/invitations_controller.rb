@@ -252,11 +252,16 @@ class InvitationsController < ApplicationController
   end
 
   def find_or_create_user(user_info)
-    @user = if @invitation.authorized_official? && (ENV['ENV'] == 'prod' || Rails.env.test?)
-              ao_user(user_info)
+    # Unique PacIds only available in prod
+    @user = if @invitation.authorized_official? && fake_cpi_gateway?
+              find_or_create_ao_user(user_info)
             else
               find_or_create_new_user(user_info)
             end
+  end
+
+  def fake_cpi_gateway?
+    ENV['ENV'] == 'prod' || Rails.env.test?
   end
 
   def find_or_create_new_user(user_info)
@@ -278,7 +283,7 @@ class InvitationsController < ApplicationController
     User.find_by(pac_id: ssn) if ssn.present?
   end
 
-  def ao_user(user_info)
+  def find_or_create_ao_user(user_info)
     candidates = find_ao_candidates(user_info)
     raise MultiUserMatchError, "too many matching users | pac_id: #{session[:user_pac_id]}" if candidates.size > 1
 
@@ -301,9 +306,7 @@ class InvitationsController < ApplicationController
   def find_user_by_email(email)
     return nil if email.blank?
 
-    users = User.joins(csp_users: :user_emails)
-                .where(user_emails: { email: })
-                .distinct
+    users = User.find_by_email_in_user_emails(email)
     raise MultiUserMatchError, "too many matching users | email: #{email}" if users.size > 1
 
     users.first
