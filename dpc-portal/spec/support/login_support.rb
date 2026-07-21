@@ -48,7 +48,7 @@ module LoginSupport
   def login_dot_gov_auth_hash(user)
     csp_user   = fetch_csp_user!(user, 'login_dot_gov')
     all_emails = csp_user.user_emails.map(&:email)
-    primary_email = all_emails.first
+    primary_email = csp_user.user_emails.find_by(primary: true)&.email || all_emails.first
 
     { uid: csp_user.uuid,
       info: { email: primary_email },
@@ -66,7 +66,7 @@ module LoginSupport
   def id_me_auth_hash(user)
     csp_user   = fetch_csp_user!(user, 'id_me')
     all_emails = csp_user.user_emails.map(&:email)
-    primary_email = all_emails.first
+    primary_email = csp_user.user_emails.find_by(primary: true)&.email || all_emails.first
 
     { uid: csp_user.uuid,
       info: { email: primary_email },
@@ -76,7 +76,7 @@ module LoginSupport
           SSN: 111_887_777,
           identity_assurance_level: 2,
           emails_confirmed: all_emails,
-          email: user.email
+          email: primary_email
         }
       } }
   end
@@ -84,7 +84,7 @@ module LoginSupport
   def clear_auth_hash(user)
     csp_user   = fetch_csp_user!(user, 'clear')
     all_emails = csp_user.user_emails.map(&:email)
-    primary_email = all_emails.first
+    primary_email = csp_user.user_emails.find_by(primary: true)&.email || all_emails.first
 
     { uid: csp_user.uuid,
       info: { email: primary_email },
