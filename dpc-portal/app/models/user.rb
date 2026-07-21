@@ -58,8 +58,8 @@ class User < ApplicationRecord
 
   # Returns the primary email across all CSPs
   def email
-    user_emails.find_by(primary: true)&.email ||
-      user_emails.first&.email
+    user_emails.find_by(primary: true, active: true)&.email ||
+      user_emails.find_by(active: true)&.email
   end
 
   # Returns all emails across all CSPs
