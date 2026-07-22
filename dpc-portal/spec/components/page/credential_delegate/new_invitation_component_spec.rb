@@ -13,8 +13,9 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
 
     let(:org) { ComponentSupport::MockOrg.new }
     let(:cd_invite) { Invitation.new(invitation_type: :credential_delegate) }
-
     let(:component) { described_class.new(org, cd_invite) }
+
+    let(:sprite_path) { ActionController::Base.helpers.asset_path('@uswds/uswds/dist/img/sprite.svg') }
 
     before do
       render_inline(component)
@@ -118,7 +119,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
               </div>
               <button type="button" class="usa-button usa-modal__close" aria-label="Close this window" data-close-modal>
                   <svg class="usa-icon" aria-hidden="true">
-                    <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#close></use>
+                    <use xlink:href=#{sprite_path}#close></use>
                   </svg>
               </button>
           </div></div>
