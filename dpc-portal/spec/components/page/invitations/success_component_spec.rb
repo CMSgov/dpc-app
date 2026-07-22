@@ -22,6 +22,11 @@ RSpec.describe Page::Invitations::SuccessComponent, type: :component do
     it "should not have the invited user's name" do
       expect(page).not_to have_text('Paola Pineiro')
     end
+
+    it 'should link to portal homepage' do
+      go_to_dpc_path = URI(page.find_link('Go to DPC Portal')[:href]).path
+      expect(go_to_dpc_path).to eq('/')
+    end
   end
 
   describe 'cd' do
@@ -42,6 +47,11 @@ RSpec.describe Page::Invitations::SuccessComponent, type: :component do
 
     it "should not have the invited user's name" do
       expect(page).not_to have_text('Paola Pineiro')
+    end
+
+    it 'should link to portal homepage' do
+      go_to_dpc_path = URI(page.find_link('Go to DPC Portal')[:href]).path
+      expect(go_to_dpc_path).to eq('/')
     end
   end
 end
