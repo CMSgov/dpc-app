@@ -252,16 +252,16 @@ class InvitationsController < ApplicationController
   end
 
   def find_or_create_user(user_info)
-    # Unique PacIds only available in prod
-    @user = if @invitation.authorized_official? && fake_cpi_gateway?
+    # Unique PacIds only available in prod. This will be revisited in DPC-5566
+    @user = if @invitation.authorized_official? && pac_id_available?
               find_or_create_ao_user(user_info)
             else
               find_or_create_new_user(user_info)
             end
   end
 
-  def fake_cpi_gateway?
-    ENV['ENV'] == 'prod' || Rails.env.test?
+  def pac_id_available?
+    ENV['ENV'] == 'prod' || Rails.env.test? # CPI API Gateway mocked in tests
   end
 
   def find_or_create_new_user(user_info)
