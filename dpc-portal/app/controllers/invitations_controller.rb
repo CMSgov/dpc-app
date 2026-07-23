@@ -41,7 +41,6 @@ class InvitationsController < ApplicationController
   end
 
   # CD Flow
-
   def confirm_cd
     invitation_matches_user
     return if performed?
@@ -117,7 +116,6 @@ class InvitationsController < ApplicationController
               nonce: @nonce,
               state: @state }
     url.query = query.compact.to_query
-
     redirect_to url, allow_other_host: true
   end
 
@@ -133,7 +131,7 @@ class InvitationsController < ApplicationController
   end
 
   def render_bad_invitation?(user_info)
-    csp = session[:csp]
+    csp = csp_session.current
     if @invitation.credential_delegate? && !@invitation.cd_match?(user_info)
       log_pii_mismatch
       render(Page::Utility::ErrorComponent.new(@invitation, 'pii_mismatch', csp:),
@@ -147,7 +145,7 @@ class InvitationsController < ApplicationController
 
   def verify_user_is_ao
     user_info = UserInfoService.new.user_info(csp_session)
-    result = @invitation.ao_match?(user_info) # raises if does not match
+    result = @invitation.ao_match?(user_info)
     session[:user_pac_id] = result.dig(:ao_role, 'pacId')
     log_waivers(result)
   rescue VerificationError => e
@@ -167,7 +165,7 @@ class InvitationsController < ApplicationController
     if error.message == 'unauthorized'
       render(Page::Invitations::InvitationLoginComponent.new(@invitation))
     elsif @invitation.credential_delegate?
-      render(Page::Utility::ErrorComponent.new(@invitation, error.message, csp: session[:csp]),
+      render(Page::Utility::ErrorComponent.new(@invitation, error.message, csp: csp_session.current),
              status: :service_unavailable)
     else
       render(Page::Invitations::AoFlowFailComponent.new(@invitation, error.message, step),
@@ -191,7 +189,6 @@ class InvitationsController < ApplicationController
   end
 
   def create_link
-    csp = session[:csp]
     if @invitation.credential_delegate?
       create_cd_org_link
     elsif @invitation.authorized_official?
@@ -207,8 +204,7 @@ class InvitationsController < ApplicationController
                   { actionContext: LoggingConstants::ActionContext::Registration,
                     error: e.message,
                     **csp_log_context }])
-
-    render(Page::Utility::ErrorComponent.new(@invitation, 'multi_user_match', csp:))
+    render(Page::Utility::ErrorComponent.new(@invitation, 'multi_user_match', csp: csp_session.current))
     nil
   end
 
@@ -237,10 +233,9 @@ class InvitationsController < ApplicationController
   def user
     user_info = UserInfoService.new.user_info(csp_session)
     find_or_create_user(user_info)
-    csp = Csp.find_by(name: @user.provider)
+    csp = Csp.find_by(name: csp_session.current)
     csp_user = CspUser.find_or_create_by!(user: @user, csp:, uuid: user_info['sub'])
 
-    # Update emails based upon the latest information in user info.
     new_emails = user_emails(user_info)
     primary_email = user_info['email']
     sync_csp_emails(csp_user, new_emails, primary_email)
@@ -257,23 +252,62 @@ class InvitationsController < ApplicationController
   end
 
   def find_or_create_user(user_info)
-    # Unique PacIds only available in prod
-    @user = if @invitation.authorized_official? && (ENV['ENV'] == 'prod' || Rails.env.test?)
-              ao_user(user_info)
+    # Unique PacIds only available in prod. This will be revisited in DPC-5566
+    @user = if @invitation.authorized_official? && pac_id_available?
+              find_or_create_ao_user(user_info)
             else
-              User.find_or_create_by!(email: @invitation.invited_email) do |user_to_create|
-                assign_user_attributes(user_to_create, user_info)
-                log_create_user
-              end
+              find_or_create_new_user(user_info)
             end
   end
 
-  def ao_user(user_info)
-    matching_users = User.where('email = ? OR pac_id = ?', @invitation.invited_email, session[:user_pac_id])
-    raise MultiUserMatchError, "too many matching users | pac_id: #{session[:user_pac_id]}" if matching_users.size > 1
+  def pac_id_available?
+    ENV['ENV'] == 'prod' || Rails.env.test? # CPI API Gateway mocked in tests
+  end
 
-    return matching_users.first if matching_users.present?
+  def find_or_create_new_user(user_info)
+    find_existing_user(user_info) || create_new_user(user_info)
+  end
 
+  def find_existing_user(user_info)
+    find_user_by_uuid(user_info) ||
+      find_user_by_email(user_info['email'])
+  end
+
+  def find_user_by_uuid(user_info)
+    User.find_by_csp_uid(name: csp_session.current, csp_uid: user_info['sub'])
+  end
+
+  def find_or_create_ao_user(user_info)
+    candidates = find_ao_candidates(user_info)
+    raise MultiUserMatchError, "too many matching users | pac_id: #{session[:user_pac_id]}" if candidates.size > 1
+
+    candidates.first || create_new_user(user_info)
+  end
+
+  def find_ao_candidates(user_info)
+    [
+      find_user_by_pac_id,
+      find_user_by_uuid(user_info),
+      find_user_by_email(user_info['email'])
+    ].compact.uniq
+  end
+
+  def find_user_by_pac_id
+    User.find_by(pac_id: session[:user_pac_id]) if session[:user_pac_id].present?
+  end
+
+  # Queries through user_emails table, raises on multiple matches
+  def find_user_by_email(email)
+    return nil if email.blank?
+
+    users = User.find_by_email_in_user_emails(email)
+    raise MultiUserMatchError, "too many matching users | email: #{email}" if users.size > 1
+
+    users.first
+  end
+
+  # Shared helper: create new user for both CD and AO flows
+  def create_new_user(user_info)
     User.new.tap do |user|
       assign_user_attributes(user, user_info)
       user.save!
@@ -282,16 +316,14 @@ class InvitationsController < ApplicationController
   end
 
   def assign_user_attributes(user_to_create, user_info)
-    user_to_create.email = @invitation.invited_email
     user_to_create.given_name = user_info['given_name']
     user_to_create.family_name = user_info['family_name']
-    user_to_create.pac_id = session.delete(:user_pac_id)
-    user_to_create.provider = session[:csp]
-    user_to_create.uid = user_info['sub']
+    user_to_create.pac_id = session[:user_pac_id]
   end
 
   def update_user(user_info)
-    @user.pac_id ||= session.delete(:user_pac_id)
+    pac_id = session.delete(:user_pac_id)
+    @user.pac_id ||= pac_id
     @user.given_name = user_info['given_name']
     @user.family_name = user_info['family_name']
     @user.save
@@ -334,7 +366,6 @@ class InvitationsController < ApplicationController
     }
     unacceptable_reason_map.default = ["Invitation unacceptable: #{reason}",
                                        LoggingConstants::ActionType::UnacceptableInvitation]
-
     unacceptable_reason_map[reason.to_sym]
   end
 

@@ -10,7 +10,7 @@ RSpec.describe 'LoginDotGov', type: :request do
     RSpec.shared_examples 'a login.gov client' do
       context 'user exists' do
         before do
-          user = create(:user, email: 'bob1@example.com', provider: :login_dot_gov)
+          user = create(:user)
           create(:csp_user, user:, uuid:, csp:)
         end
         it 'should sign in a user' do
@@ -73,7 +73,7 @@ RSpec.describe 'LoginDotGov', type: :request do
       it_behaves_like 'a login.gov client'
 
       context :user_exists do
-        let(:db_user) { create(:user, uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com') }
+        let(:db_user) { create(:user) }
         before { create(:csp_user, user: db_user, uuid:, csp:) }
 
         it 'updates user names' do
@@ -175,7 +175,7 @@ RSpec.describe 'LoginDotGov', type: :request do
 
       context 'when a matching user account exists' do
         before do
-          user = create(:user, provider: 'login_dot_gov', given_name: 'Bob', family_name: 'Hoskins')
+          user = create(:user, given_name: 'Bob', family_name: 'Hoskins')
           create(:csp_user, user:, uuid:, csp:)
         end
 
@@ -208,7 +208,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                                  all_emails: %w[email1@example.com email2@example.com],
                                  ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } }
         )
-        user = create(:user, provider: :login_dot_gov)
+        user = create(:user)
         create(:csp_user, user:, uuid:, csp:)
       end
 
@@ -240,7 +240,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                                  all_emails: nil,
                                  ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } }
         )
-        user = create(:user, email: 'email1@example.com', provider: :login_dot_gov)
+        user = create(:user)
         csp_user = create(:csp_user, user:, uuid:, csp:)
         create(:user_email, csp_user:, email: 'email@example.com', active: true)
       end
@@ -270,7 +270,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                                  all_emails: %w[email1@example.com],
                                  ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } }
         )
-        user = create(:user, email: 'email1@example.com', provider: :login_dot_gov)
+        user = create(:user)
         csp_user = create(:csp_user, user:, uuid:, csp:)
         create(:user_email, csp_user:, email: 'email1@example.com', active: false,
                             deactivated_at: 1.day.ago, reactivated_at: nil)
@@ -319,7 +319,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                                                       all_emails: %w[email1@example.com email2@example.com],
                                                       ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
 
-      user = create(:user, provider: :login_dot_gov)
+      user = create(:user)
       csp = create(:csp, :login_dot_gov)
       create(:csp_user, user:, uuid:, csp:)
       post '/auth/login_dot_gov'
@@ -354,11 +354,12 @@ RSpec.describe 'LoginDotGov', type: :request do
   end
 
   describe 'CSP inactive' do
+    let!(:csp) { Csp.find_by(name: 'login_dot_gov') || create(:csp, :login_dot_gov) }
     before do
-      Csp.where(name: 'login_dot_gov').update_all(end_date: DateTime.current - 1.year)
-      csp = Csp.where(name: 'login_dot_gov').first
+      csp.end_date = DateTime.current - 1.year
+      csp.save!
 
-      user = create(:user, email: 'bob5@example.com', provider: :login_dot_gov)
+      user = create(:user)
       create(:csp_user, user:, uuid:, csp:)
 
       OmniAuth.config.test_mode = true

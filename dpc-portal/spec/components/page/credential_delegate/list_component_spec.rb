@@ -71,7 +71,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
     end
 
     context 'Active credential delegate' do
-      let(:user) { User.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com') }
+      let(:user) { User.new(given_name: 'Bob', family_name: 'Hodges') }
       let(:invitation) do
         Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com')
       end

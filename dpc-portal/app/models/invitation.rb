@@ -75,7 +75,7 @@ class Invitation < ApplicationRecord
 
   def ao_match?(user_info)
     check_missing_user_info(user_info, 'social_security_number', 'SSN', check_all_keys: false)
-    ssn = user_info['social_security_number']&.tr('-', '') || user_info['SSN']
+    ssn = user_info['social_security_number']&.tr('-', '') || user_info['SSN']&.tr('-', '')
     service = AoVerificationService.new
     result = service.check_eligibility(provider_organization.npi, ssn)
 
@@ -125,9 +125,13 @@ class Invitation < ApplicationRecord
   end
 
   def existing_credential_delegate?
-    return false unless provider_organization&.cd_org_links&.any?
+    return false unless provider_organization
 
-    provider_organization.cd_org_links.any? { |link| link.disabled_at.nil? && link.user.email == invited_email }
+    provider_organization
+      .cd_org_links
+      .joins(user: { csp_users: :user_emails })
+      .where(disabled_at: nil, user_emails: { email: invited_email })
+      .exists?
   end
 
   private
