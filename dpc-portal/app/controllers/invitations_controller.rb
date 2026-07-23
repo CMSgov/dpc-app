@@ -270,17 +270,11 @@ class InvitationsController < ApplicationController
 
   def find_existing_user(user_info)
     find_user_by_uuid(user_info) ||
-      find_user_by_email(user_info['email']) ||
-      find_user_by_ssn(user_info)
+      find_user_by_email(user_info['email'])
   end
 
   def find_user_by_uuid(user_info)
     User.find_by_csp_uid(name: csp_session.current, csp_uid: user_info['sub'])
-  end
-
-  def find_user_by_ssn(user_info)
-    ssn = user_info['social_security_number']&.tr('-', '') || user_info['SSN']&.tr('-', '')
-    User.find_by(pac_id: ssn) if ssn.present?
   end
 
   def find_or_create_ao_user(user_info)
@@ -292,8 +286,8 @@ class InvitationsController < ApplicationController
 
   def find_ao_candidates(user_info)
     [
-      find_user_by_uuid(user_info),
       find_user_by_pac_id,
+      find_user_by_uuid(user_info),
       find_user_by_email(user_info['email'])
     ].compact.uniq
   end

@@ -857,7 +857,7 @@ RSpec.describe 'Invitations', type: :request do
               post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
             end
             it 'should not create user if exists' do
-              create(:user, pac_id: user_info_template['social_security_number'])
+              create_invitation_user_with_csp(csp: provider.to_sym)
               expect do
                 post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
               end.to change { User.count }.by 0
@@ -865,6 +865,9 @@ RSpec.describe 'Invitations', type: :request do
             it 'should update name of user if changed' do
               user = create(:user, pac_id: user_info_template['social_security_number'],
                                    given_name: :foo, family_name: :bar)
+              csp = Csp.find_by(name: provider.to_s) || create(:csp, provider)
+              csp_user = create(:csp_user, user:, csp:, uuid: user_info_template['sub'])
+              create(:user_email, csp_user:, email: user_info_template['email'], primary: true)
               expect do
                 post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
               end.to change { User.count }.by 0
