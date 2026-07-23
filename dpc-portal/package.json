@@ -5,14 +5,14 @@
     "@uswds/uswds": "^3.13.0",
     "ssri": "^6.0.2",
     "svg4everybody": "^2.1.9",
-    "tar": "7.5.16"
+    "tar": "7.5.19"
   },
   "version": "0.1.0",
   "devDependencies": {
     "http-proxy-middleware" : "^2.0.10",
     "sass": "^1.86.3",
     "uuid": "^14.0.1",
-    "webpack-dev-server": "^5.2.5"
+    "webpack-dev-server": "^5.2.6"
   },
   "scripts": {
     "build:css": "sass ./app/assets/stylesheets/application.sass.scss:./app/assets/builds/application.css --no-source-map --load-path=node_modules --load-path=node_modules/@uswds/uswds/packages"
