@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
-# Sets up the application's routes. Note that this is served
-# under the /portal prefix, as configured in the application.rb
-# and config.ru via config.relative_url_root.
-#
+# Sets up the application's routes.
 Rails.application.routes.draw do
   # Former devise routes
   get '/users/auth/failure', to: 'csp#failure', as: 'csp_failure'
