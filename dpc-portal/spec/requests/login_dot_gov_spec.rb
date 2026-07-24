@@ -9,73 +9,19 @@ RSpec.describe 'LoginDotGov', type: :request do
   describe 'POST /auth/login_dot_gov' do
     let!(:csp) { Csp.find_by(name: 'login_dot_gov') || create(:csp, :login_dot_gov) }
     let(:token) { 'bearer-token' }
-    context 'IAL/2' do
-      before do
-        OmniAuth.config.test_mode = true
-        OmniAuth.config.add_mock(:login_dot_gov,
-                                 { uid: uuid,
-                                   credentials: { expires_in: 899,
-                                                  token: },
-                                   info: { email: 'bob2@example.com' },
-                                   extra: { raw_info: { given_name: 'Bob',
-                                                        family_name: 'Hoskins',
-                                                        social_security_number: '1-2-3',
-                                                        all_emails: %w[bob2@example.com bobby@example.com],
-                                                        ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
-      end
-
-      it_behaves_like 'a CSP client', :login_dot_gov, '/auth/login_dot_gov'
-
-      context :user_exists do
-        let(:db_user) { create(:user) }
-        before { create(:csp_user, user: db_user, uuid:, csp:) }
-
-        it 'updates user names' do
-          expect do
-            post '/auth/login_dot_gov'
-            follow_redirect!
-          end.to change {
-            User.where(id: db_user.id, given_name: 'Bob', family_name: 'Hoskins').count
-          }.by 1
-          expect(response.location).to eq organizations_url
-        end
-
-        it 'sets authentication token' do
-          post '/auth/login_dot_gov'
-          follow_redirect!
-
-          csp_session = CspSession.new(request.session)
-          expect(csp_session.current).to eq 'login_dot_gov'
-          expect(csp_session.token).to eq token
-          expect(csp_session.token_exp).to_not be_nil
-          expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
-          expect(csp_session.id_token).to be_nil
-        end
-      end
-
-      context :user_does_not_exist do
-        it 'does not sign in user' do
-          post '/auth/login_dot_gov'
-          follow_redirect!
-          expect(response.location).to eq organizations_url
-          expect(response).to be_redirect
-          follow_redirect!
-          expect(response).to be_redirect
-        end
-
-        it 'sets authentication token' do
-          post '/auth/login_dot_gov'
-          follow_redirect!
-          csp_session = CspSession.new(request.session)
-          expect(csp_session.current).to eq 'login_dot_gov'
-          expect(csp_session.token).to eq token
-          expect(csp_session.token_exp).to_not be_nil
-          expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
-          expect(csp_session.user).to be_nil
-          expect(csp_session.id_token).to be_nil
-        end
-      end
+    let(:csp_auth_response) do
+      { uid: uuid,
+        credentials: { expires_in: 899,
+                       token: },
+        info: { email: 'bob2@example.com' },
+        extra: { raw_info: { given_name: 'Bob',
+                             family_name: 'Hoskins',
+                             social_security_number: '1-2-3',
+                             all_emails: %w[bob2@example.com bobby@example.com],
+                             ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } }
     end
+
+    it_behaves_like 'a CSP client', :login_dot_gov, '/auth/login_dot_gov'
 
     # IAL1 is no longer allowed should now be blocked entirely
     context 'IAL/1' do

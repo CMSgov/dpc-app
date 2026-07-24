@@ -9,76 +9,19 @@ RSpec.describe 'IdMe', type: :request do
   describe 'POST /auth/id_me' do
     let!(:csp) { Csp.find_by(name: 'id_me') || create(:csp, :id_me) }
     let(:token) { 'bearer-token' }
-    context 'IAL/2' do
-      before do
-        OmniAuth.config.test_mode = true
-        OmniAuth.config.add_mock(:id_me,
-                                 { uid: uuid,
-                                   credentials: { expires_in: 899,
-                                                  token: },
-                                   info: { email: 'bob2@example.com' },
-                                   extra: { raw_info: { given_name: 'Bob',
-                                                        family_name: 'Hoskins',
-                                                        social_security_number: '1-2-3',
-                                                        emails_confirmed: %w[email1@example.com email2@example.com],
-                                                        identity_assurance_level: 2 } } })
-      end
-
-      it_behaves_like 'a CSP client', :id_me, '/auth/id_me'
-
-      context :user_exists do
-        let(:db_user) { create(:user) }
-        before do
-          create(:csp_user, user: db_user, uuid:, csp:)
-        end
-        it 'updates user names' do
-          expect do
-            post '/auth/id_me'
-            follow_redirect!
-          end.to change {
-            User.where(id: db_user.id, given_name: 'Bob',
-                       family_name: 'Hoskins').count
-          }.by 1
-          expect(response.location).to eq organizations_url
-        end
-
-        it 'sets authentication token' do
-          post '/auth/id_me'
-          follow_redirect!
-
-          csp_session = CspSession.new(request.session)
-          expect(csp_session.current).to eq 'id_me'
-          expect(csp_session.token).to eq token
-          expect(csp_session.token_exp).to_not be_nil
-          expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
-          expect(csp_session.id_token).to be_nil
-        end
-      end
-
-      context :user_does_not_exist do
-        it 'does not sign in user' do
-          post '/auth/id_me'
-          follow_redirect!
-          expect(response.location).to eq organizations_url
-          expect(response).to be_redirect
-          follow_redirect!
-          expect(response).to be_redirect
-        end
-
-        it 'sets authentication token' do
-          post '/auth/id_me'
-          follow_redirect!
-
-          csp_session = CspSession.new(request.session)
-          expect(csp_session.current).to eq 'id_me'
-          expect(csp_session.token).to eq token
-          expect(csp_session.token_exp).to_not be_nil
-          expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
-          expect(csp_session.id_token).to be_nil
-          expect(csp_session.user).to be_nil
-        end
-      end
+    let(:csp_auth_response) do
+      { uid: uuid,
+        credentials: { expires_in: 899,
+                       token: },
+        info: { email: 'bob2@example.com' },
+        extra: { raw_info: { given_name: 'Bob',
+                             family_name: 'Hoskins',
+                             social_security_number: '1-2-3',
+                             emails_confirmed: %w[email1@example.com email2@example.com],
+                             identity_assurance_level: 2 } } }
     end
+
+    it_behaves_like 'a CSP client', :id_me, '/auth/id_me'
 
     # IAL1 is no longer allowed should now be blocked entirely
     context 'IAL/1' do
