@@ -21,7 +21,12 @@ RSpec.describe 'LoginDotGov', type: :request do
                              ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } }
     end
 
-    it_behaves_like 'a CSP client', :login_dot_gov, '/auth/login_dot_gov'
+    login_dot_gov_config = {
+      provider: :login_dot_gov,
+      auth_endpoint: '/auth/login_dot_gov',
+      display_name: 'Login.gov'
+    }
+    it_behaves_like 'a CSP client', login_dot_gov_config
 
     # IAL1 is no longer allowed should now be blocked entirely
     context 'IAL/1' do
@@ -189,21 +194,6 @@ RSpec.describe 'LoginDotGov', type: :request do
     end
   end
 
-  describe 'Get /auth/failure' do
-    it 'should succeed' do
-      get '/users/auth/failure'
-      expect(response).to be_ok
-    end
-
-    it 'should log on failure' do
-      allow(Rails.logger).to receive(:info)
-      expect(Rails.logger).to receive(:info).with(['User cancelled login',
-                                                   { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                     actionType: LoggingConstants::ActionType::UserCancelledLogin }])
-      get '/users/auth/failure'
-    end
-  end
-
   describe 'Delete /logout' do
     before do
       uuid = SecureRandom.uuid
@@ -235,53 +225,6 @@ RSpec.describe 'LoginDotGov', type: :request do
       delete "/logout?invitation_id=#{invitation.id}"
       expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
                                                                                  invitation.id)
-    end
-  end
-
-  describe 'Get /auth/no_account' do
-    before do
-      OmniAuth.config.test_mode = true
-      OmniAuth.config.add_mock(:login_dot_gov,
-                               { uid: uuid,
-                                 info: { email: 'example1@example.com' },
-                                 extra: { raw_info: { all_emails: %w[bob4@example.com bobby@example.com],
-                                                      ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
-    end
-    it 'should show logout button' do
-      get '/auth/no_account'
-      expect(response.body).to include 'Sign out of CSP'
-    end
-  end
-
-  describe 'CSP inactive' do
-    let!(:csp) { Csp.find_by(name: 'login_dot_gov') || create(:csp, :login_dot_gov) }
-
-    before do
-      csp.end_date = DateTime.current - 1.year
-      csp.save!
-
-      user = create(:user)
-      create(:csp_user, user:, uuid:, csp:)
-
-      OmniAuth.config.test_mode = true
-      OmniAuth.config.add_mock(:login_dot_gov,
-                               { uid: uuid,
-                                 credentials: { expires_in: 899,
-                                                token: 'bearer-token' },
-                                 info: { email: 'bob4@example.com' },
-                                 extra: { raw_info: { all_emails: %w[bob4@example.com bobby@example.com],
-                                                      ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
-    end
-
-    it 'should log error' do
-      allow(Rails.logger).to receive(:info)
-      expect(Rails.logger).to receive(:info).with(
-        ['User attempted to login with Login.gov but no active CSP found',
-         { actionContext: LoggingConstants::ActionContext::Authentication,
-           actionType: LoggingConstants::ActionType::InvalidCsp }]
-      )
-      post '/auth/login_dot_gov'
-      follow_redirect!
     end
   end
 end

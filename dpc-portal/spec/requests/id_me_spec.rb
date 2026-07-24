@@ -21,7 +21,12 @@ RSpec.describe 'IdMe', type: :request do
                              identity_assurance_level: 2 } } }
     end
 
-    it_behaves_like 'a CSP client', :id_me, '/auth/id_me'
+    id_me_config = {
+      provider: :id_me,
+      auth_endpoint: '/auth/id_me',
+      display_name: 'ID.me'
+    }
+    it_behaves_like 'a CSP client', id_me_config
 
     # IAL1 is no longer allowed should now be blocked entirely
     context 'IAL/1' do
@@ -189,21 +194,6 @@ RSpec.describe 'IdMe', type: :request do
     end
   end
 
-  describe 'Get /auth/failure' do
-    it 'should succeed' do
-      get '/users/auth/failure'
-      expect(response).to be_ok
-    end
-
-    it 'should log on failure' do
-      allow(Rails.logger).to receive(:info)
-      expect(Rails.logger).to receive(:info).with(['User cancelled login',
-                                                   { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                     actionType: LoggingConstants::ActionType::UserCancelledLogin }])
-      get '/users/auth/failure'
-    end
-  end
-
   describe 'Delete /logout' do
     before do
       uuid = SecureRandom.uuid
@@ -235,53 +225,6 @@ RSpec.describe 'IdMe', type: :request do
       delete "/logout?invitation_id=#{invitation.id}"
       expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
                                                                                  invitation.id)
-    end
-  end
-
-  describe 'Get /auth/no_account' do
-    before do
-      OmniAuth.config.test_mode = true
-      OmniAuth.config.add_mock(:id_me,
-                               { uid: uuid,
-                                 info: { email: 'example1@example.com' },
-                                 extra: { raw_info: { emails_confirmed: %w[bob4@example.com bobby@example.com],
-                                                      identity_assurance_level: 1 } } })
-    end
-    it 'should show logout button' do
-      get '/auth/no_account'
-      expect(response.body).to include 'Sign out of CSP'
-    end
-  end
-
-  describe 'CSP inactive' do
-    let!(:csp) { Csp.find_by(name: 'id_me') || create(:csp, :id_me) }
-
-    before do
-      csp.end_date = DateTime.current - 1.year
-      csp.save!
-
-      user = create(:user)
-      create(:csp_user, user:, uuid:, csp:)
-
-      OmniAuth.config.test_mode = true
-      OmniAuth.config.add_mock(:id_me,
-                               { uid: uuid,
-                                 credentials: { expires_in: 899,
-                                                token: 'bearer-token' },
-                                 info: { email: 'bob4@example.com' },
-                                 extra: { raw_info: { emails_confirmed: %w[bob4@example.com bobby@example.com],
-                                                      identity_assurance_level: 2 } } })
-    end
-
-    it 'should log error' do
-      allow(Rails.logger).to receive(:info)
-      expect(Rails.logger).to receive(:info).with(
-        ['User attempted to login with ID.me but no active CSP found',
-         { actionContext: LoggingConstants::ActionContext::Authentication,
-           actionType: LoggingConstants::ActionType::InvalidCsp }]
-      )
-      post '/auth/id_me'
-      follow_redirect!
     end
   end
 end

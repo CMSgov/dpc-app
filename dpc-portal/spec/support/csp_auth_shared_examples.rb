@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'a CSP client' do |provider, auth_endpoint, expected_id_token: nil|
+RSpec.shared_examples 'a CSP client' do |config|
+  provider = config[:provider]
+  auth_endpoint = config[:auth_endpoint]
+  display_name = config[:display_name]
+  expected_id_token = config[:expected_id_token]
   csp_name = provider.to_s
 
   context 'IAL/2' do
@@ -109,6 +113,30 @@ RSpec.shared_examples 'a CSP client' do |provider, auth_endpoint, expected_id_to
         expect(csp_session.id_token).to eq expected_id_token
         expect(csp_session.user).to be_nil
       end
+    end
+  end
+
+  describe 'CSP inactive' do
+    before do
+      csp.end_date = DateTime.current - 1.year
+      csp.save!
+
+      user = create(:user)
+      create(:csp_user, user:, uuid:, csp:)
+
+      OmniAuth.config.test_mode = true
+      OmniAuth.config.add_mock(provider, csp_auth_response)
+    end
+
+    it 'should log error' do
+      allow(Rails.logger).to receive(:info)
+      expect(Rails.logger).to receive(:info).with(
+        ["User attempted to login with #{display_name} but no active CSP found",
+         { actionContext: LoggingConstants::ActionContext::Authentication,
+           actionType: LoggingConstants::ActionType::InvalidCsp }]
+      )
+      post auth_endpoint
+      follow_redirect!
     end
   end
 end
