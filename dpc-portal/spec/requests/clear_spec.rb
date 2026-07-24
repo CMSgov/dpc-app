@@ -2,58 +2,12 @@
 
 require 'rails_helper'
 require 'securerandom'
+require 'support/csp_auth_shared_examples'
 
 RSpec.describe 'Clear', type: :request do
   let(:uuid) { SecureRandom.uuid }
   describe 'POST /auth/clear' do
     let!(:csp) { Csp.find_by(name: 'clear') || create(:csp, :clear) }
-    RSpec.shared_examples 'a clear client' do
-      context 'user exists' do
-        before do
-          user = create(:user)
-          create(:csp_user, user:, uuid:, csp:)
-        end
-        it 'should sign in a user' do
-          post '/auth/clear'
-          follow_redirect!
-          expect(response.location).to eq organizations_url
-          expect(response).to be_redirect
-          follow_redirect!
-          expect(response).to be_ok
-        end
-        it 'should log on successful sign in' do
-          allow(Rails.logger).to receive(:info)
-          expect(Rails.logger).to receive(:info).with(['User logged in',
-                                                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                         actionType: LoggingConstants::ActionType::UserLoggedIn,
-                                                         csp: 'clear' }])
-          post '/auth/clear'
-          follow_redirect!
-        end
-        it 'should write a cookie with the last used csp' do
-          post '/auth/clear'
-          follow_redirect!
-          expect(cookies[:last_used_csp]).to eq 'clear'
-        end
-        it 'should not add another user credential' do
-          expect(CspUser.where(uuid:, csp:).count).to eq 1
-          expect do
-            post '/auth/clear'
-            follow_redirect!
-          end.to change { CspUser.count }.by(0)
-        end
-      end
-
-      context 'user does not exist' do
-        it 'should not persist user' do
-          expect do
-            post '/auth/clear'
-            follow_redirect!
-          end.to change { User.count }.by(0)
-        end
-      end
-    end
-
     let(:token) { 'bearer-token' }
     let(:id_token) { 'id-token' }
     context 'IAL/2' do
@@ -73,7 +27,7 @@ RSpec.describe 'Clear', type: :request do
                                                         ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
       end
 
-      it_behaves_like 'a clear client'
+      it_behaves_like 'a CSP client', :clear, '/auth/clear'
 
       context :user_exists do
         let(:db_user) { create(:user) }
@@ -370,8 +324,9 @@ RSpec.describe 'Clear', type: :request do
   end
 
   describe 'CSP inactive' do
+    let!(:csp) { Csp.find_by(name: 'clear') || create(:csp, :clear) }
+
     before do
-      csp = Csp.find_by(name: 'clear') || create(:csp, :clear)
       csp.end_date = DateTime.current - 1.year
       csp.save!
 

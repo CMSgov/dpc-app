@@ -2,58 +2,12 @@
 
 require 'rails_helper'
 require 'securerandom'
+require 'support/csp_auth_shared_examples'
 
 RSpec.describe 'IdMe', type: :request do
   let(:uuid) { SecureRandom.uuid }
   describe 'POST /auth/id_me' do
     let!(:csp) { Csp.find_by(name: 'id_me') || create(:csp, :id_me) }
-    RSpec.shared_examples 'an id.me client' do
-      context 'user exists' do
-        before do
-          user = create(:user)
-          create(:csp_user, user:, uuid:, csp:)
-        end
-        it 'should sign in a user' do
-          post '/auth/id_me'
-          follow_redirect!
-          expect(response.location).to eq organizations_url
-          expect(response).to be_redirect
-          follow_redirect!
-          expect(response).to be_ok
-        end
-        it 'should log on successful sign in' do
-          allow(Rails.logger).to receive(:info)
-          expect(Rails.logger).to receive(:info).with(['User logged in',
-                                                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                         actionType: LoggingConstants::ActionType::UserLoggedIn,
-                                                         csp: 'id_me' }])
-          post '/auth/id_me'
-          follow_redirect!
-        end
-        it 'should write a cookie with the last used csp' do
-          post '/auth/id_me'
-          follow_redirect!
-          expect(cookies[:last_used_csp]).to eq 'id_me'
-        end
-        it 'should not add another user credential' do
-          expect(CspUser.where(uuid:, csp:).count).to eq 1
-          expect do
-            post '/auth/id_me'
-            follow_redirect!
-          end.to change { CspUser.count }.by(0)
-        end
-      end
-
-      context 'user does not exist' do
-        it 'should not persist user' do
-          expect do
-            post '/auth/id_me'
-            follow_redirect!
-          end.to change { User.count }.by(0)
-        end
-      end
-    end
-
     let(:token) { 'bearer-token' }
     context 'IAL/2' do
       before do
@@ -70,7 +24,7 @@ RSpec.describe 'IdMe', type: :request do
                                                         identity_assurance_level: 2 } } })
       end
 
-      it_behaves_like 'an id.me client'
+      it_behaves_like 'a CSP client', :id_me, '/auth/id_me'
 
       context :user_exists do
         let(:db_user) { create(:user) }
@@ -358,6 +312,7 @@ RSpec.describe 'IdMe', type: :request do
 
   describe 'CSP inactive' do
     let!(:csp) { Csp.find_by(name: 'id_me') || create(:csp, :id_me) }
+
     before do
       csp.end_date = DateTime.current - 1.year
       csp.save!
