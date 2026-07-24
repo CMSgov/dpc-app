@@ -24,79 +24,17 @@ RSpec.describe 'IdMe', type: :request do
     id_me_config = {
       provider: :id_me,
       auth_endpoint: '/auth/id_me',
-      display_name: 'ID.me'
+      display_name: 'ID.me',
+      ial1_auth_response: lambda {
+        {
+          uid: uuid,
+          info: { email: 'bob@example.com' },
+          extra: { raw_info: { emails_confirmed: %w[bob@example.com bob2@example.com],
+                               identity_assurance_level: 1 } }
+        }
+      }
     }
     it_behaves_like 'a CSP client', id_me_config
-
-    # IAL1 is no longer allowed should now be blocked entirely
-    context 'IAL/1' do
-      before do
-        OmniAuth.config.test_mode = true
-        OmniAuth.config.add_mock(:id_me,
-                                 { uid: uuid,
-                                   info: { email: 'bob@example.com' },
-                                   extra: { raw_info: { emails_confirmed: %w[bob@example.com bob2@example.com],
-                                                        identity_assurance_level: 1 } } })
-      end
-
-      it 'returns 403 forbidden' do
-        post '/auth/id_me'
-        follow_redirect!
-        expect(response).to have_http_status(:forbidden)
-      end
-
-      it 'renders the id_me_signin_fail error component' do
-        post '/auth/id_me'
-        follow_redirect!
-        expect(response.body).to include('ID.me sign-in failed')
-      end
-
-      it 'logs the IAL1 blocked attempt' do
-        allow(Rails.logger).to receive(:info)
-        post '/auth/id_me'
-        follow_redirect!
-        expect(Rails.logger).to have_received(:info).with(
-          ['User attempted IAL1 login with ID.me — not permitted',
-           { actionContext: LoggingConstants::ActionContext::Authentication,
-             actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }]
-        )
-      end
-
-      it 'does not sign in the user' do
-        post '/auth/id_me'
-        follow_redirect!
-        expect(response).to be_forbidden
-      end
-
-      it 'does not set an authentication token' do
-        post '/auth/id_me'
-        csp_session = CspSession.new(request.session)
-        expect(csp_session.current).to be_nil
-        expect(csp_session.token).to be_nil
-        expect(csp_session.token_exp).to be_nil
-        expect(csp_session.id_token).to be_nil
-        expect(csp_session.user).to be_nil
-      end
-
-      context 'when a matching user account exists' do
-        before do
-          user = create(:user, given_name: 'Bob', family_name: 'Hoskins')
-          create(:csp_user, user:, uuid:, csp:)
-        end
-
-        it 'still returns 403 forbidden' do
-          post '/auth/id_me'
-          follow_redirect!
-          expect(response).to have_http_status(:forbidden)
-        end
-
-        it 'does not sign in the user' do
-          post '/auth/id_me'
-          follow_redirect!
-          expect(response).to be_forbidden
-        end
-      end
-    end
 
     context 'should add emails' do
       before do

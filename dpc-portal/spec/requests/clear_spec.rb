@@ -28,78 +28,9 @@ RSpec.describe 'Clear', type: :request do
       provider: :clear,
       auth_endpoint: '/auth/clear',
       display_name: 'CLEAR',
-      expected_id_token: 'id-token'
+      expected_id_token: 'id-token' # covers store_id_token = true for clear_controller
     }
     it_behaves_like 'a CSP client', clear_config
-
-    # IAL1 is no longer allowed should now be blocked entirely
-    context 'IAL/1' do
-      before do
-        OmniAuth.config.test_mode = true
-        OmniAuth.config.add_mock(:clear,
-                                 { uid: uuid,
-                                   info: { email: 'bob@example.com' },
-                                   extra: { raw_info: { sub: uuid,
-                                                        email: 'bob@example.com',
-                                                        SSN: '123456789',
-                                                        ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
-      end
-
-      it 'returns 403 forbidden' do
-        post '/auth/clear'
-        follow_redirect!
-        expect(response).to have_http_status(:forbidden)
-      end
-
-      it 'renders the clear_signin_fail error component' do
-        post '/auth/clear'
-        follow_redirect!
-        expect(response.body).to include('CLEAR sign-in failed')
-      end
-
-      it 'logs the IAL1 blocked attempt' do
-        allow(Rails.logger).to receive(:info)
-        post '/auth/clear'
-        follow_redirect!
-        expect(Rails.logger).to have_received(:info).with(
-          ['User attempted IAL1 login with CLEAR — not permitted',
-           { actionContext: LoggingConstants::ActionContext::Authentication,
-             actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }]
-        )
-      end
-
-      it 'does not sign in the user' do
-        post '/auth/clear'
-        follow_redirect!
-        expect(response).to be_forbidden
-      end
-
-      it 'does not set an authentication token' do
-        post '/auth/clear'
-        expect(request.session[:clear_token]).to be_nil
-        expect(request.session[:clear_token_exp]).to be_nil
-        expect(request.session[:clear_id_token]).to be_nil
-      end
-
-      context 'when a matching user account exists' do
-        before do
-          user = create(:user, given_name: 'Bob', family_name: 'Hoskins')
-          create(:csp_user, user:, uuid:, csp:)
-        end
-
-        it 'still returns 403 forbidden' do
-          post '/auth/clear'
-          follow_redirect!
-          expect(response).to have_http_status(:forbidden)
-        end
-
-        it 'does not sign in the user' do
-          post '/auth/clear'
-          follow_redirect!
-          expect(response).to be_forbidden
-        end
-      end
-    end
 
     context 'should add emails' do
       before do

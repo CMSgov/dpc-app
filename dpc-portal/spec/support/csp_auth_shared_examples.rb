@@ -5,6 +5,7 @@ RSpec.shared_examples 'a CSP client' do |config|
   auth_endpoint = config[:auth_endpoint]
   display_name = config[:display_name]
   expected_id_token = config[:expected_id_token]
+  ial1_auth_response = config[:ial1_auth_response]
   csp_name = provider.to_s
 
   context 'IAL/2' do
@@ -112,6 +113,75 @@ RSpec.shared_examples 'a CSP client' do |config|
         expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
         expect(csp_session.id_token).to eq expected_id_token
         expect(csp_session.user).to be_nil
+      end
+    end
+  end
+
+  # Login.gov and ID.me allow users to request assurance level based on input parameters
+  # IAL1 is no longer allowed across dpc-portal and should now be blocked
+  if ial1_auth_response
+    context 'IAL/1' do
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.add_mock(provider, instance_exec(&ial1_auth_response))
+      end
+
+      it 'returns 403 forbidden' do
+        post auth_endpoint
+        follow_redirect!
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      it 'renders the csp_signin_fail error component' do
+        post auth_endpoint
+        follow_redirect!
+        expect(response.body).to include("#{display_name} sign-in failed")
+      end
+
+      it 'logs the IAL1 blocked attempt' do
+        allow(Rails.logger).to receive(:info)
+        post auth_endpoint
+        follow_redirect!
+        expect(Rails.logger).to have_received(:info).with(
+          ["User attempted IAL1 login with #{display_name} — not permitted",
+           { actionContext: LoggingConstants::ActionContext::Authentication,
+             actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }]
+        )
+      end
+
+      it 'does not sign in the user' do
+        post auth_endpoint
+        follow_redirect!
+        expect(response).to be_forbidden
+      end
+
+      it 'does not set an authentication token' do
+        post auth_endpoint
+        csp_session = CspSession.new(request.session)
+        expect(csp_session.current).to be_nil
+        expect(csp_session.token).to be_nil
+        expect(csp_session.token_exp).to be_nil
+        expect(csp_session.id_token).to be_nil
+        expect(csp_session.user).to be_nil
+      end
+
+      context 'when a matching user account exists' do
+        before do
+          user = create(:user, given_name: 'Bob', family_name: 'Hoskins')
+          create(:csp_user, user:, uuid:, csp:)
+        end
+
+        it 'still returns 403 forbidden' do
+          post auth_endpoint
+          follow_redirect!
+          expect(response).to have_http_status(:forbidden)
+        end
+
+        it 'does not sign in the user' do
+          post auth_endpoint
+          follow_redirect!
+          expect(response).to be_forbidden
+        end
       end
     end
   end

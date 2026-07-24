@@ -24,79 +24,17 @@ RSpec.describe 'LoginDotGov', type: :request do
     login_dot_gov_config = {
       provider: :login_dot_gov,
       auth_endpoint: '/auth/login_dot_gov',
-      display_name: 'Login.gov'
+      display_name: 'Login.gov',
+      ial1_auth_response: lambda {
+        {
+          uid: uuid,
+          info: { email: 'bob@example.com' },
+          extra: { raw_info: { all_emails: %w[bob@example.com bob2@example.com],
+                               ial: 'http://idmanagement.gov/ns/assurance/ial/1' } }
+        }
+      }
     }
     it_behaves_like 'a CSP client', login_dot_gov_config
-
-    # IAL1 is no longer allowed should now be blocked entirely
-    context 'IAL/1' do
-      before do
-        OmniAuth.config.test_mode = true
-        OmniAuth.config.add_mock(:login_dot_gov,
-                                 { uid: uuid,
-                                   info: { email: 'bob@example.com' },
-                                   extra: { raw_info: { all_emails: %w[bob@example.com bob2@example.com],
-                                                        ial: 'http://idmanagement.gov/ns/assurance/ial/1' } } })
-      end
-
-      it 'returns 403 forbidden' do
-        post '/auth/login_dot_gov'
-        follow_redirect!
-        expect(response).to have_http_status(:forbidden)
-      end
-
-      it 'renders the login_gov_signin_fail error component' do
-        post '/auth/login_dot_gov'
-        follow_redirect!
-        expect(response.body).to include('Login.gov sign-in failed')
-      end
-
-      it 'logs the IAL1 blocked attempt' do
-        allow(Rails.logger).to receive(:info)
-        post '/auth/login_dot_gov'
-        follow_redirect!
-        expect(Rails.logger).to have_received(:info).with(
-          ['User attempted IAL1 login with Login.gov — not permitted',
-           { actionContext: LoggingConstants::ActionContext::Authentication,
-             actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }]
-        )
-      end
-
-      it 'does not sign in the user' do
-        post '/auth/login_dot_gov'
-        follow_redirect!
-        expect(response).to be_forbidden
-      end
-
-      it 'does not set an authentication token' do
-        post '/auth/login_dot_gov'
-        csp_session = CspSession.new(request.session)
-        expect(csp_session.current).to be_nil
-        expect(csp_session.token).to be_nil
-        expect(csp_session.token_exp).to be_nil
-        expect(csp_session.id_token).to be_nil
-        expect(csp_session.user).to be_nil
-      end
-
-      context 'when a matching user account exists' do
-        before do
-          user = create(:user, given_name: 'Bob', family_name: 'Hoskins')
-          create(:csp_user, user:, uuid:, csp:)
-        end
-
-        it 'still returns 403 forbidden' do
-          post '/auth/login_dot_gov'
-          follow_redirect!
-          expect(response).to have_http_status(:forbidden)
-        end
-
-        it 'does not sign in the user' do
-          post '/auth/login_dot_gov'
-          follow_redirect!
-          expect(response).to be_forbidden
-        end
-      end
-    end
 
     context 'should add emails' do
       before do
