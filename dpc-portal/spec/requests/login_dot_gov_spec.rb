@@ -2,58 +2,12 @@
 
 require 'rails_helper'
 require 'securerandom'
+require 'support/csp_auth_shared_examples'
 
 RSpec.describe 'LoginDotGov', type: :request do
   let(:uuid) { SecureRandom.uuid }
   describe 'POST /auth/login_dot_gov' do
     let!(:csp) { Csp.find_by(name: 'login_dot_gov') || create(:csp, :login_dot_gov) }
-    RSpec.shared_examples 'a login.gov client' do
-      context 'user exists' do
-        before do
-          user = create(:user, email: 'bob1@example.com', provider: :login_dot_gov)
-          create(:csp_user, user:, uuid:, csp:)
-        end
-        it 'should sign in a user' do
-          post '/auth/login_dot_gov'
-          follow_redirect!
-          expect(response.location).to eq organizations_url
-          expect(response).to be_redirect
-          follow_redirect!
-          expect(response).to be_ok
-        end
-        it 'should log on successful sign in' do
-          allow(Rails.logger).to receive(:info)
-          expect(Rails.logger).to receive(:info).with(['User logged in',
-                                                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                         actionType: LoggingConstants::ActionType::UserLoggedIn,
-                                                         csp: 'login_dot_gov' }])
-          post '/auth/login_dot_gov'
-          follow_redirect!
-        end
-        it 'should write a cookie with the last used csp' do
-          post '/auth/login_dot_gov'
-          follow_redirect!
-          expect(cookies[:last_used_csp]).to eq 'login_dot_gov'
-        end
-        it 'should not add another user credential' do
-          expect(CspUser.where(uuid:, csp:).count).to eq 1
-          expect do
-            post '/auth/login_dot_gov'
-            follow_redirect!
-          end.to change { CspUser.count }.by(0)
-        end
-      end
-
-      context 'user does not exist' do
-        it 'should not persist user' do
-          expect do
-            post '/auth/login_dot_gov'
-            follow_redirect!
-          end.to change { User.count }.by(0)
-        end
-      end
-    end
-
     let(:token) { 'bearer-token' }
     context 'IAL/2' do
       before do
@@ -70,7 +24,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                                                         ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
       end
 
-      it_behaves_like 'a login.gov client'
+      it_behaves_like 'a CSP client', :login_dot_gov, '/auth/login_dot_gov'
 
       context :user_exists do
         let(:db_user) { create(:user, uid: '12345', provider: 'login_dot_gov', email: 'bob@example.com') }
@@ -354,9 +308,11 @@ RSpec.describe 'LoginDotGov', type: :request do
   end
 
   describe 'CSP inactive' do
+    let!(:csp) { Csp.find_by(name: 'login_dot_gov') || create(:csp, :login_dot_gov) }
+
     before do
-      Csp.where(name: 'login_dot_gov').update_all(end_date: DateTime.current - 1.year)
-      csp = Csp.where(name: 'login_dot_gov').first
+      csp.end_date = DateTime.current - 1.year
+      csp.save!
 
       user = create(:user, email: 'bob5@example.com', provider: :login_dot_gov)
       create(:csp_user, user:, uuid:, csp:)
