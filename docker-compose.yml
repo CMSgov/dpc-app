@@ -47,7 +47,7 @@ services:
       EMIT_AWS_METRICS: ${EMIT_AWS_METRICS:-false}
       JACOCO: ${REPORT_COVERAGE:-}
       DEBUG_MODE: ${DEBUG_MODE:-false}
-      DD_SERVICE: dpc-local-aggregation
+      DD_SERVICE: dpc-aggregation
     depends_on:
       db:
         condition: service_healthy
@@ -78,7 +78,7 @@ services:
       ENV: local
       JACOCO: ${REPORT_COVERAGE:-}
       DEBUG_MODE: ${DEBUG_MODE:-false}
-      DD_SERVICE: dpc-local-attribution
+      DD_SERVICE: dpc-attribution
     ports:
       - "3500:8080"
       - "9902:9902"
@@ -107,7 +107,7 @@ services:
       AUTH_DISABLED: ${AUTH_DISABLED:-false}
       DEBUG_MODE: ${DEBUG_MODE:-false}
       USE_BFD_MOCK: ${USE_BFD_MOCK:-true}
-      DD_AGENT_HOST: datadog-agent
+      DD_SERVICE: dpc-api
     depends_on:
       attribution:
         condition: service_healthy

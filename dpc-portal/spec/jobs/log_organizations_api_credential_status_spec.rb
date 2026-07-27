@@ -11,8 +11,7 @@ RSpec.describe LogOrganizationsApiCredentialStatusJob, type: :job do
   end
 
   let(:user) do
-    create(:user, provider: :openid_connect, uid: '12345',
-                  verification_status: 'rejected', verification_reason: 'ao_med_sanctions')
+    create(:user, verification_status: 'rejected', verification_reason: 'ao_med_sanctions')
   end
   let(:provider_organization) do
     create(

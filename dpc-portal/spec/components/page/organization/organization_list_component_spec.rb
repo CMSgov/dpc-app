@@ -50,6 +50,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
         link = CdOrgLink.new(provider_organization: org)
         described_class.new(ao_or_cd: :cd, links: [link])
       end
+      let(:sprite_path) { ActionController::Base.helpers.asset_path('@uswds/uswds/dist/img/sprite.svg') }
       let(:expected_html) do
         <<~HTML
           <div class="usa-table-container--scrollable" tabindex="0">
@@ -79,7 +80,7 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
                   <td style="width: 25%;">
                       <div class="clearfix">
                         <div class="float-left">  <svg class="text-gold usa-icon" aria-hidden="true">
-                          <use xlink:href=/assets/@uswds/uswds/dist/img/sprite-9865eea7b251e43137fb770626d6cd51c474a3a436678a6e66cafce50968076f.svg#warning></use>
+                          <use xlink:href=#{sprite_path}#warning></use>
                         </svg>
                         </div>
                       <div class="float-left margin-left-1 margin-top-neg-2px">Setup needed</div>

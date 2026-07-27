@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe CdOrgLink, type: :model do
   let(:provider_organization) { build(:provider_organization) }
   let(:user) do
-    User.new(given_name: 'Bob', family_name: 'Hodges', email: 'bob@example.com')
+    User.new(given_name: 'Bob', family_name: 'Hodges')
   end
   let(:invitation) do
     Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com')

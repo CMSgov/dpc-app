@@ -31,7 +31,7 @@ CLEAR_OIDC_CLAIMS_PARAM = JSON.generate(CLEAR_OIDC_CLAIMS).freeze
 
 ## Build Login.gov RSA private key object before defining the config constant
 LOGIN_DOT_GOV_PRIVATE_KEY = begin
-  OpenSSL::PKey::RSA.new(ENV['LOGIN_DOT_GOV_CLIENT_PRIVATE_KEY'])
+  OpenSSL::PKey::RSA.new(ENV['LOGIN_DOT_GOV_CLIENT_PRIVATE_KEY']&.gsub('\\n', "\n"))
 rescue TypeError, OpenSSL::PKey::RSAError => e
   Rails.logger.error("Unable to create Login.gov private key for omniauth: #{e}")
   OpenSSL::PKey::RSA.new(1024)

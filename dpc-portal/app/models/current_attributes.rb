@@ -17,12 +17,12 @@ class CurrentAttributes < ActiveSupport::CurrentAttributes
     CurrentAttributes.path = request.path
   end
 
-  def save_user_attributes(user)
+  def save_user_attributes(user, csp_name: nil)
     return unless user
 
     CurrentAttributes.current_user = {
       id: user.id,
-      external_id: user.uid,
+      external_id: resolve_external_id(user, csp_name),
       pac_id: user.pac_id
     }
   end
@@ -59,5 +59,12 @@ class CurrentAttributes < ActiveSupport::CurrentAttributes
       current_user: CurrentAttributes.current_user,
       organization: CurrentAttributes.organization
     }
+  end
+
+  private
+
+  def resolve_external_id(user, csp_name)
+    user.csp_user_for(csp_name)
+        &.uuid
   end
 end

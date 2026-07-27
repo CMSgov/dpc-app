@@ -13,16 +13,46 @@ RSpec.describe CurrentAttributes do
       expect(CurrentAttributes.current_user).to eq(nil)
     end
 
-    it 'records user attributes when user exists' do
-      user = build(:user, id: rand(0..100_000), pac_id: rand(0..100_000).to_s)
+    it 'records user attributes when user exists without csp_name' do
+      user = create(:user, id: rand(0..100_000), pac_id: rand(0..100_000).to_s)
       CurrentAttributes.save_user_attributes(user)
       expect(CurrentAttributes.current_user).to eq(
         {
           id: user.id,
-          external_id: user.uid,
+          external_id: nil,
           pac_id: user.pac_id
         }
       )
+    end
+
+    it 'uses the correct csp_user uuid when csp_name is provided' do
+      user = create(:user, pac_id: rand(0..100_000).to_s)
+
+      login_gov_csp = Csp.find_by(name: 'login_dot_gov') || create(:csp, :login_dot_gov)
+      id_me_csp = Csp.find_by(name: 'id_me') || create(:csp, :id_me)
+
+      create(:csp_user, user:, csp: login_gov_csp, uuid: 'login-gov-uuid')
+      id_me_csp_user = create(:csp_user, user:, csp: id_me_csp, uuid: 'id-me-uuid')
+
+      CurrentAttributes.save_user_attributes(user, csp_name: 'id_me')
+
+      expect(CurrentAttributes.current_user).to eq(
+        {
+          id: user.id,
+          external_id: id_me_csp_user.uuid,
+          pac_id: user.pac_id
+        }
+      )
+    end
+
+    it 'falls back to first csp_user when csp_name does not match any csp' do
+      user = create(:user, pac_id: rand(0..100_000).to_s)
+      csp = Csp.find_by(name: 'login_dot_gov') || create(:csp, :login_dot_gov)
+      create(:csp_user, user:, csp:, uuid: SecureRandom.uuid)
+
+      CurrentAttributes.save_user_attributes(user, csp_name: 'unknown_csp')
+
+      expect(CurrentAttributes.current_user[:external_id]).to be_nil
     end
   end
 

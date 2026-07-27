@@ -119,7 +119,7 @@ RSpec.describe Page::Utility::ErrorComponent, type: :component do
           it 'should have login button' do
             button_url = '/users/sign_in'
             is_expected.to include(button_url)
-            is_expected.to include("Sign in with <span class=\"login-button__logo\">#{display_name}</span>")
+            is_expected.to include('Sign in to DPC Portal')
           end
         end
 

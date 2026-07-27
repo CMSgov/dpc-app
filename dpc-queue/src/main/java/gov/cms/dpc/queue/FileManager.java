@@ -54,9 +54,12 @@ public class FileManager {
         if (Files.exists(compressedPath)) {
             path = compressedPath;
             compressed = true;
-        } else {
+        } else if(Files.exists(nonCompressedPath)) {
             path = nonCompressedPath;
             compressed = false;
+        } else {
+            logger.error("Unable to find compressed or non-compressed file: {}", batchFile.getFileName());
+            throw new WebApplicationException("Cannot find file", Response.Status.INTERNAL_SERVER_ERROR);
         }
         logger.debug("Streaming file {}", path);
 

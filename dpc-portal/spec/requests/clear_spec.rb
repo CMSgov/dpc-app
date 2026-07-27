@@ -10,7 +10,7 @@ RSpec.describe 'Clear', type: :request do
     RSpec.shared_examples 'a clear client' do
       context 'user exists' do
         before do
-          user = create(:user, email: 'bob1@example.com', provider: :clear)
+          user = create(:user)
           create(:csp_user, user:, uuid:, csp:)
         end
         it 'should sign in a user' do
@@ -76,7 +76,7 @@ RSpec.describe 'Clear', type: :request do
       it_behaves_like 'a clear client'
 
       context :user_exists do
-        let(:db_user) { create(:user, uid: '12345', provider: 'clear', email: 'bob@example.com') }
+        let(:db_user) { create(:user) }
         before do
           create(:csp_user, user: db_user, uuid:, csp:)
         end
@@ -180,7 +180,7 @@ RSpec.describe 'Clear', type: :request do
 
       context 'when a matching user account exists' do
         before do
-          user = create(:user, provider: 'clear', given_name: 'Bob', family_name: 'Hoskins')
+          user = create(:user, given_name: 'Bob', family_name: 'Hoskins')
           create(:csp_user, user:, uuid:, csp:)
         end
 
@@ -215,7 +215,7 @@ RSpec.describe 'Clear', type: :request do
                                                         SSN: '123456789',
                                                         ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
 
-        user = create(:user, provider: :clear)
+        user = create(:user)
         create(:csp_user, user:, uuid:, csp:)
       end
 
@@ -248,7 +248,7 @@ RSpec.describe 'Clear', type: :request do
                                                         SSN: '123456789',
                                                         ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
 
-        user = create(:user, email: 'email1@example.com', provider: :clear)
+        user = create(:user)
         csp_user = create(:csp_user, user:, uuid:, csp:)
         create(:user_email, csp_user:, email: 'email@example.com', active: true)
       end
@@ -280,7 +280,7 @@ RSpec.describe 'Clear', type: :request do
                                                         SSN: '123456789',
                                                         ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
 
-        user = create(:user, email: 'email1@example.com', provider: :clear)
+        user = create(:user)
         csp_user = create(:csp_user, user:, uuid:, csp:)
         create(:user_email, csp_user:, email: 'email1@example.com', active: false, deactivated_at: 1.day.ago,
                             reactivated_at: nil)
@@ -332,7 +332,7 @@ RSpec.describe 'Clear', type: :request do
                                                       SSN: '123456789',
                                                       ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
 
-      user = create(:user, provider: :clear)
+      user = create(:user)
       csp = create(:csp, :clear)
       create(:csp_user, user:, uuid:, csp:)
       post '/auth/clear'
@@ -371,11 +371,11 @@ RSpec.describe 'Clear', type: :request do
 
   describe 'CSP inactive' do
     before do
-      csp = Csp.find_by(name: 'clear')
+      csp = Csp.find_by(name: 'clear') || create(:csp, :clear)
       csp.end_date = DateTime.current - 1.year
       csp.save!
 
-      user = create(:user, email: 'bob5@example.com', provider: :clear)
+      user = create(:user)
       create(:csp_user, user:, uuid:, csp:)
 
       OmniAuth.config.test_mode = true
