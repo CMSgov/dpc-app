@@ -71,17 +71,17 @@ RSpec.describe Page::ExistingAccount::LinkAccountComponent, type: :component do
       it 'should render a button targeting the omniauth authorize path' do
         is_expected.to include(%(action="/auth/#{csp_name}"))
       end
-    end
 
-    context 'with a different email address' do
-      let(:email) { 'different@example.com' }
+      context 'with a different email address' do
+        let(:email) { 'different@example.com' }
 
-      it 'should render the updated email address' do
-        is_expected.to include('different@example.com')
-      end
+        it 'should render the updated email address' do
+          is_expected.to include('different@example.com')
+        end
 
-      it 'should not include the default email address' do
-        is_expected.not_to include('bob@example.com')
+        it 'should not include the default email address' do
+          is_expected.not_to include('bob@example.com')
+        end
       end
     end
   end
