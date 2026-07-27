@@ -1,0 +1,21 @@
+<div>
+    <h1>Existing account found</h1>
+    <div class="usa-alert usa-alert--info margin-bottom-4">
+        <div class="usa-alert__body">
+            <p class="usa-alert__text">This account was already created using:</p>
+            <p><strong><%= @orig_email %></strong> and <strong><%= @orig_csp_display %></strong></p>
+        </div>
+    </div>
+    <div>
+        <p>To continue, either:</p>
+        <ul class="merge-options">
+            <li>Add the new email address you just used to your DPC account.</li>
+            <li>Sign in with an email already associated with your account. To do this, you'll need to sign out of both the DPC Portal and your identity provider (such as CLEAR, ID.me, or Login.gov). If you only sign out of the portal, your identity provider will sign you back in with the same email.</li>
+        </ul>
+    </div>
+    <div>
+        <%= button_to helpers.omniauth_authorize_path(@orig_csp_code), class: 'usa-button margin-bottom-1', data: { turbo: false } do %>
+            <span>Add new email</span>
+        <% end %>
+    </div>
+</div>

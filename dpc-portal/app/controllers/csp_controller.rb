@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Base controller to handle interactions with CSPs.
-class CspController < ApplicationController
+class CspController < ApplicationController # rubocop:disable Metrics/ClassLength
   include CspEmailSync
   include CspErrorHandling
 
@@ -40,13 +40,35 @@ class CspController < ApplicationController
 
   private
 
-  def user_actions(auth, csp)
-    csp_user = CspUser.find_by(uuid: auth.uid, csp:)
+  def user_actions(auth, csp) # rubocop:disable Metrics/AbcSize
+    csp_user = CspUser.find_by(uuid: auth.uid)
     user = csp_user&.user
+
+    if csp_user
+      return render_account_merge(user&.email, csp_code) unless csp_match?(csp_user)
+      return render_add_email(user&.email, csp_code) unless email_match?(user, primary_email(auth))
+    end
+
     sign_in_and_log(user, csp.name)
     sync_csp_emails(csp_user, all_emails(auth), primary_email(auth))
     ial_2_actions(user, auth)
     redirect_to path(user, auth)
+  end
+
+  def csp_match?(csp_user)
+    csp_user.csp.name == csp_code.to_s
+  end
+
+  def email_match?(user, email)
+    user.email == email
+  end
+
+  def render_account_merge(email, csp)
+    render(Page::ExistingAccount::LinkAccountComponent.new(email, csp))
+  end
+
+  def render_add_email(email, csp)
+    render(Page::ExistingAccount::AddEmailComponent.new(email, csp))
   end
 
   def render_ial1_blocked
