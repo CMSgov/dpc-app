@@ -39,7 +39,7 @@ To support manual workflows, the system offers rake commands that perform admini
     $ rails dpc:invite_ao INVITE=Bob,Hoskins,bob@example.com,7838426501
 
     Invitation created for Bob Hoskins for Organization 7838426501
-    http://localhost:3100/portal/organizations/2/invitations/4/accept
+    http://localhost:3100/organizations/2/invitations/4/accept
     ```
 
 ## Local AO Verification Scenarios
@@ -69,11 +69,11 @@ Most generated NPIs will return a successful AO/organization verification when r
 
 ### Lookbook / View Components
 
-We utilize the [ViewComponent](https://viewcomponent.org/) library to create custom components. These components are documented and viewable within [Lookbook](http://localhost:3100/portal/lookbook).
+We utilize the [ViewComponent](https://viewcomponent.org/) library to create custom components. These components are documented and viewable within [Lookbook](http://localhost:3100/lookbook).
 
 ### Email Mailers
 
-Emails are not viewable in lookbook, but can be found [here](http://localhost:3100/portal/rails/mailers/).
+Emails are not viewable in lookbook, but can be found [here](http://localhost:3100/rails/mailers/).
 
 ## Accessing the VAL CPI API Gateway from Local Dev
 
