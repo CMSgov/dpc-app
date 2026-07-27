@@ -25,6 +25,7 @@ RSpec.describe 'LoginDotGov', type: :request do
       provider: :login_dot_gov,
       auth_endpoint: '/auth/login_dot_gov',
       display_name: 'Login.gov',
+      logout_host: ENV.fetch('IDP_LOGIN_DOT_GOV_HOST'),
       ial1_auth_response: lambda {
         {
           uid: uuid,
@@ -129,40 +130,6 @@ RSpec.describe 'LoginDotGov', type: :request do
         expect(email.reactivated_at).to_not be_nil
         expect(email.primary).to eq true
       end
-    end
-  end
-
-  describe 'Delete /logout' do
-    before do
-      uuid = SecureRandom.uuid
-      OmniAuth.config.test_mode = true
-      OmniAuth.config.add_mock(:login_dot_gov,
-                               { uid: uuid,
-                                 credentials: { expires_in: 899,
-                                                token: 'bearer-token' },
-                                 info: { email: 'email1@example.com' },
-                                 extra: { raw_info: { given_name: 'Bob',
-                                                      family_name: 'Hoskins',
-                                                      social_security_number: '1-2-3',
-                                                      all_emails: %w[email1@example.com email2@example.com],
-                                                      ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
-
-      user = create(:user)
-      csp = create(:csp, :login_dot_gov)
-      create(:csp_user, user:, uuid:, csp:)
-      post '/auth/login_dot_gov'
-      follow_redirect!
-    end
-    it 'should redirect to login.gov' do
-      delete '/logout'
-      expect(response.location).to include(ENV.fetch('IDP_LOGIN_DOT_GOV_HOST'))
-      expect(request.session[:user_return_to]).to be_nil
-    end
-    it 'should set return to invitation flow if invitation sent' do
-      invitation = create(:invitation, :ao)
-      delete "/logout?invitation_id=#{invitation.id}"
-      expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
-                                                                                 invitation.id)
     end
   end
 end

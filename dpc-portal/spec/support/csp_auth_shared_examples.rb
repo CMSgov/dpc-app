@@ -4,6 +4,7 @@ RSpec.shared_examples 'a CSP client' do |config|
   provider = config[:provider]
   auth_endpoint = config[:auth_endpoint]
   display_name = config[:display_name]
+  logout_host = config[:logout_host]
   expected_id_token = config[:expected_id_token]
   ial1_auth_response = config[:ial1_auth_response]
   csp_name = provider.to_s
@@ -207,6 +208,33 @@ RSpec.shared_examples 'a CSP client' do |config|
       )
       post auth_endpoint
       follow_redirect!
+    end
+  end
+
+  describe 'Delete /logout' do
+    before do
+      OmniAuth.config.test_mode = true
+      OmniAuth.config.add_mock(provider, csp_auth_response)
+
+      user = create(:user)
+      create(:csp_user, user:, uuid:, csp:)
+      post auth_endpoint
+      follow_redirect!
+    end
+
+    it "should redirect to #{display_name}" do
+      delete '/logout'
+      expect(response.location).to include(logout_host)
+      # id_token_hint for CLEAR csp only
+      expect(response.location).to include("id_token_hint=#{expected_id_token}") if expected_id_token
+      expect(request.session[:user_return_to]).to be_nil
+    end
+
+    it 'should set return to invitation flow if invitation sent' do
+      invitation = create(:invitation, :ao)
+      delete "/logout?invitation_id=#{invitation.id}"
+      expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
+                                                                                 invitation.id)
     end
   end
 end

@@ -28,6 +28,7 @@ RSpec.describe 'Clear', type: :request do
       provider: :clear,
       auth_endpoint: '/auth/clear',
       display_name: 'CLEAR',
+      logout_host: ENV.fetch('CLEAR_IDP_HOST'),
       expected_id_token: 'id-token' # covers store_id_token = true for clear_controller
     }
     it_behaves_like 'a CSP client', clear_config
@@ -130,44 +131,6 @@ RSpec.describe 'Clear', type: :request do
         expect(email.reactivated_at).to_not be_nil
         expect(email.primary).to eq true
       end
-    end
-  end
-
-  describe 'Delete /logout' do
-    let(:id_token) { 'id-token' }
-    before do
-      uuid = SecureRandom.uuid
-      OmniAuth.config.test_mode = true
-      OmniAuth.config.add_mock(:clear,
-                               { uid: uuid,
-                                 credentials: { expires_in: 899,
-                                                token: 'bearer-token',
-                                                id_token: },
-                                 info: { email: 'email1@example.com' },
-                                 extra: { raw_info: { sub: uuid,
-                                                      email: 'email1@example.com',
-                                                      given_name: 'Bob',
-                                                      family_name: 'Hoskins',
-                                                      SSN: '123456789',
-                                                      ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
-
-      user = create(:user)
-      csp = create(:csp, :clear)
-      create(:csp_user, user:, uuid:, csp:)
-      post '/auth/clear'
-      follow_redirect!
-    end
-    it 'should redirect to CLEAR' do
-      delete '/logout'
-      expect(response.location).to include(ENV.fetch('CLEAR_IDP_HOST'))
-      expect(response.location).to include("id_token_hint=#{id_token}")
-      expect(request.session[:user_return_to]).to be_nil
-    end
-    it 'should set return to invitation flow if invitation sent' do
-      invitation = create(:invitation, :ao)
-      delete "/logout?invitation_id=#{invitation.id}"
-      expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
-                                                                                 invitation.id)
     end
   end
 end

@@ -25,6 +25,7 @@ RSpec.describe 'IdMe', type: :request do
       provider: :id_me,
       auth_endpoint: '/auth/id_me',
       display_name: 'ID.me',
+      logout_host: ENV.fetch('IDP_ID_ME_HOST'),
       ial1_auth_response: lambda {
         {
           uid: uuid,
@@ -129,40 +130,6 @@ RSpec.describe 'IdMe', type: :request do
         expect(email.reactivated_at).to_not be_nil
         expect(email.primary).to eq true
       end
-    end
-  end
-
-  describe 'Delete /logout' do
-    before do
-      uuid = SecureRandom.uuid
-      OmniAuth.config.test_mode = true
-      OmniAuth.config.add_mock(:id_me,
-                               { uid: uuid,
-                                 credentials: { expires_in: 899,
-                                                token: 'bearer-token' },
-                                 info: { email: 'email1@example.com' },
-                                 extra: { raw_info: { given_name: 'Bob',
-                                                      family_name: 'Hoskins',
-                                                      social_security_number: '1-2-3',
-                                                      emails_confirmed: %w[email1@example.com email2@example.com],
-                                                      identity_assurance_level: 2 } } })
-
-      user = create(:user)
-      csp = create(:csp, :id_me)
-      create(:csp_user, user:, uuid:, csp:)
-      post '/auth/id_me'
-      follow_redirect!
-    end
-    it 'should redirect to ID.me' do
-      delete '/logout'
-      expect(response.location).to include(ENV.fetch('IDP_ID_ME_HOST'))
-      expect(request.session[:user_return_to]).to be_nil
-    end
-    it 'should set return to invitation flow if invitation sent' do
-      invitation = create(:invitation, :ao)
-      delete "/logout?invitation_id=#{invitation.id}"
-      expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
-                                                                                 invitation.id)
     end
   end
 end
