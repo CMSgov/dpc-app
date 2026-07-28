@@ -5,7 +5,9 @@ require 'securerandom'
 require 'support/csp_auth_shared_examples'
 
 RSpec.describe 'LoginDotGov', type: :request do
-  let(:uuid) { SecureRandom.uuid }
+  auth_uid = SecureRandom.uuid
+  let(:uuid) { auth_uid }
+
   describe 'POST /auth/login_dot_gov' do
     let!(:csp) { Csp.find_by(name: 'login_dot_gov') || create(:csp, :login_dot_gov) }
     let(:token) { 'bearer-token' }
@@ -26,13 +28,11 @@ RSpec.describe 'LoginDotGov', type: :request do
       auth_endpoint: '/auth/login_dot_gov',
       display_name: 'Login.gov',
       logout_host: ENV.fetch('IDP_LOGIN_DOT_GOV_HOST'),
-      ial1_auth_response: lambda {
-        {
-          uid: uuid,
-          info: { email: 'bob@example.com' },
-          extra: { raw_info: { all_emails: %w[bob@example.com bob2@example.com],
-                               ial: 'http://idmanagement.gov/ns/assurance/ial/1' } }
-        }
+      ial1_auth_response: {
+        uid: auth_uid,
+        info: { email: 'bob@example.com' },
+        extra: { raw_info: { all_emails: %w[bob@example.com bob2@example.com],
+                             ial: 'http://idmanagement.gov/ns/assurance/ial/1' } }
       }
     }
     it_behaves_like 'a CSP client', login_dot_gov_config

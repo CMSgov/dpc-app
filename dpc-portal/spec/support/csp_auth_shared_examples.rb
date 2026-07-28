@@ -124,7 +124,7 @@ RSpec.shared_examples 'a CSP client' do |config|
     context 'IAL/1' do
       before do
         OmniAuth.config.test_mode = true
-        OmniAuth.config.add_mock(provider, instance_exec(&ial1_auth_response))
+        OmniAuth.config.add_mock(provider, ial1_auth_response)
       end
 
       it 'returns 403 forbidden' do
@@ -170,6 +170,7 @@ RSpec.shared_examples 'a CSP client' do |config|
         before do
           user = create(:user, given_name: 'Bob', family_name: 'Hoskins')
           create(:csp_user, user:, uuid:, csp:)
+          # create(:csp_user, user:, uuid: ial1_auth_response[:uid], csp:)
         end
 
         it 'still returns 403 forbidden' do

@@ -5,7 +5,9 @@ require 'securerandom'
 require 'support/csp_auth_shared_examples'
 
 RSpec.describe 'IdMe', type: :request do
-  let(:uuid) { SecureRandom.uuid }
+  auth_uid = SecureRandom.uuid
+  let(:uuid) { auth_uid }
+
   describe 'POST /auth/id_me' do
     let!(:csp) { Csp.find_by(name: 'id_me') || create(:csp, :id_me) }
     let(:token) { 'bearer-token' }
@@ -26,13 +28,11 @@ RSpec.describe 'IdMe', type: :request do
       auth_endpoint: '/auth/id_me',
       display_name: 'ID.me',
       logout_host: ENV.fetch('IDP_ID_ME_HOST'),
-      ial1_auth_response: lambda {
-        {
-          uid: uuid,
-          info: { email: 'bob@example.com' },
-          extra: { raw_info: { emails_confirmed: %w[bob@example.com bob2@example.com],
-                               identity_assurance_level: 1 } }
-        }
+      ial1_auth_response: {
+        uid: auth_uid,
+        info: { email: 'bob@example.com' },
+        extra: { raw_info: { emails_confirmed: %w[bob@example.com bob2@example.com],
+                             identity_assurance_level: 1 } }
       }
     }
     it_behaves_like 'a CSP client', id_me_config
