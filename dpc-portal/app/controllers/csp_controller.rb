@@ -43,10 +43,11 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
   def user_actions(auth, csp) # rubocop:disable Metrics/AbcSize
     csp_user = CspUser.find_by(uuid: auth.uid)
     user = csp_user&.user
+    orig_csp_name = csp_user&.csp&.name
 
-    if csp_user
-      return render_account_merge(user&.email, csp_code) unless csp_match?(csp_user)
-      return render_add_email(user&.email, csp_code) unless email_match?(user, primary_email(auth))
+    if user
+      return render_account_merge(user.email, orig_csp_name) unless csp_match?(orig_csp_name)
+      return render_add_email(user.email, orig_csp_name) unless email_match?(user, primary_email(auth))
     end
 
     sign_in_and_log(user, csp.name)
@@ -55,8 +56,8 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
     redirect_to path(user, auth)
   end
 
-  def csp_match?(csp_user)
-    csp_user.csp.name == csp_code.to_s
+  def csp_match?(csp)
+    csp.to_sym == csp_code
   end
 
   def email_match?(user, email)

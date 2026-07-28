@@ -11,7 +11,8 @@ RSpec.describe 'LoginDotGov', type: :request do
       context 'user exists' do
         before do
           user = create(:user)
-          create(:csp_user, user:, uuid:, csp:)
+          csp_user = create(:csp_user, user:, uuid:, csp:)
+          create(:user_email, csp_user:, email: 'bob@example.com', active: true)
         end
         it 'should sign in a user' do
           post '/auth/login_dot_gov'
@@ -44,6 +45,36 @@ RSpec.describe 'LoginDotGov', type: :request do
         end
       end
 
+      context 'user exists with different CSP' do
+        before do
+          user = create(:user)
+          orig_csp = Csp.find_by(name: 'id_me') || create(:csp, :id_me)
+          csp_user = create(:csp_user, user:, uuid:, csp: orig_csp)
+          create(:user_email, csp_user:, email: 'original@example.com', active: true)
+        end
+
+        it 'renders the link account component' do
+          post '/auth/login_dot_gov'
+          follow_redirect!
+          expect(response).to be_ok
+          expect(response.body).to include('original@example.com')
+          expect(response.body).to include('ID.me')
+          expect(response.body).to include('/auth/id_me')
+          expect(response.body).not_to include('Login.gov')
+        end
+      end
+
+      context 'user exists with different email' do
+        it 'renders the add email component' do
+          post '/auth/login_dot_gov'
+          follow_redirect!
+          expect(response).to be_ok
+          expect(response.body).to include('original@example.com')
+          expect(response.body).to include('ID.me')
+          expect(response.body).to include('/auth/id_me')
+        end
+      end
+
       context 'user does not exist' do
         it 'should not persist user' do
           expect do
@@ -62,7 +93,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                                  { uid: uuid,
                                    credentials: { expires_in: 899,
                                                   token: },
-                                   info: { email: 'bob2@example.com' },
+                                   info: { email: 'bob@example.com' },
                                    extra: { raw_info: { given_name: 'Bob',
                                                         family_name: 'Hoskins',
                                                         social_security_number: '1-2-3',
@@ -74,7 +105,10 @@ RSpec.describe 'LoginDotGov', type: :request do
 
       context :user_exists do
         let(:db_user) { create(:user) }
-        before { create(:csp_user, user: db_user, uuid:, csp:) }
+        before do
+          csp_user = create(:csp_user, user: db_user, uuid:, csp:)
+          create(:user_email, csp_user:, email: 'bob@example.com', active: true)
+        end
 
         it 'updates user names' do
           expect do
@@ -312,7 +346,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                                { uid: uuid,
                                  credentials: { expires_in: 899,
                                                 token: 'bearer-token' },
-                                 info: { email: 'email1@example.com' },
+                                 info: { email: 'bob@example.com' },
                                  extra: { raw_info: { given_name: 'Bob',
                                                       family_name: 'Hoskins',
                                                       social_security_number: '1-2-3',
@@ -321,7 +355,8 @@ RSpec.describe 'LoginDotGov', type: :request do
 
       user = create(:user)
       csp = create(:csp, :login_dot_gov)
-      create(:csp_user, user:, uuid:, csp:)
+      csp_user = create(:csp_user, user:, uuid:, csp:)
+      create(:user_email, csp_user:, email: 'bob@example.com', active: true)
       post '/auth/login_dot_gov'
       follow_redirect!
     end

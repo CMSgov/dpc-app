@@ -14,7 +14,7 @@ module Page
       private
 
       def display_name(csp_code)
-        case csp_code
+        case csp_code.to_sym
         when :login_dot_gov
           'Login.gov'
         when :id_me
