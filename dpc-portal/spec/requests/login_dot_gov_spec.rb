@@ -57,21 +57,27 @@ RSpec.describe 'LoginDotGov', type: :request do
           post '/auth/login_dot_gov'
           follow_redirect!
           expect(response).to be_ok
+          expect(response.body).to include('Existing account found')
           expect(response.body).to include('original@example.com')
-          expect(response.body).to include('ID.me')
+          expect(response.body).to include('Link to existing account')
           expect(response.body).to include('/auth/id_me')
-          expect(response.body).not_to include('Login.gov')
         end
       end
 
       context 'user exists with different email' do
+        before do
+          user = create(:user)
+          csp_user = create(:csp_user, user:, uuid:, csp:)
+          create(:user_email, csp_user:, email: 'original@example.com', active: true)
+        end
         it 'renders the add email component' do
           post '/auth/login_dot_gov'
           follow_redirect!
           expect(response).to be_ok
+          expect(response.body).to include('Existing account found')
           expect(response.body).to include('original@example.com')
-          expect(response.body).to include('ID.me')
-          expect(response.body).to include('/auth/id_me')
+          expect(response.body).to include('Add new email')
+          expect(response.body).to include('/auth/login_dot_gov')
         end
       end
 
