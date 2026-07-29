@@ -22,11 +22,14 @@ RSpec.describe 'IdMe', type: :request do
           expect(response).to be_ok
         end
         it 'should log on successful sign in' do
+          frozen_time = Time.now.utc
           allow(Rails.logger).to receive(:info)
           expect(Rails.logger).to receive(:info).with(['User logged in',
                                                        { actionContext: LoggingConstants::ActionContext::Authentication,
                                                          actionType: LoggingConstants::ActionType::UserLoggedIn,
-                                                         csp: 'id_me' }])
+                                                         csp: 'id_me',
+                                                         user_identifier: uuid,
+                                                         timestamp: frozen_time.iso8601 }])
           post '/auth/id_me'
           follow_redirect!
         end

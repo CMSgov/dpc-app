@@ -41,12 +41,29 @@ class CspController < ApplicationController
   private
 
   def user_actions(auth, csp)
-    csp_user = CspUser.find_by(uuid: auth.uid, csp:)
+    csp_user = find_csp_user(auth, csp)
     user = csp_user&.user
-    sign_in_and_log(user, csp.name)
+    sign_in_and_log(user, auth.uid, csp.name)
     sync_csp_emails(csp_user, all_emails(auth), primary_email(auth))
     ial_2_actions(user, auth)
     redirect_to path(user, auth)
+  end
+
+  def find_csp_user(auth, csp)
+    csp_user = CspUser.find_by(uuid: auth.uid, csp:)
+
+    if csp_user.nil?
+      Rails.logger.warn(['No CspUser found for CSP authentication',
+                         {
+                           actionContext: LoggingConstants::ActionContext::Authentication,
+                           actionType: LoggingConstants::ActionType::CspUserNotFound,
+                           **csp_log_context,
+                           user_identifier: auth.uid,
+                           timestamp: Time.now.utc.iso8601
+                         }])
+    end
+
+    csp_user
   end
 
   def render_ial1_blocked
@@ -56,7 +73,7 @@ class CspController < ApplicationController
     render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp: csp_code), status: :forbidden)
   end
 
-  def sign_in_and_log(user, csp)
+  def sign_in_and_log(user, uid, csp)
     return unless user
 
     sign_in(user:, csp:)
@@ -65,7 +82,9 @@ class CspController < ApplicationController
     Rails.logger.info(['User logged in',
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::UserLoggedIn,
-                         **csp_log_context }])
+                         **csp_log_context,
+                         user_identifier: uid,
+                         timestamp: Time.now.utc.iso8601 }])
   end
 
   def ial_2_actions(user, auth)

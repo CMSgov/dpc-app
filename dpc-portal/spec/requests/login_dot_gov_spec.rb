@@ -22,11 +22,14 @@ RSpec.describe 'LoginDotGov', type: :request do
           expect(response).to be_ok
         end
         it 'should log on successful sign in' do
+          frozen_time = Time.now.utc
           allow(Rails.logger).to receive(:info)
           expect(Rails.logger).to receive(:info).with(['User logged in',
                                                        { actionContext: LoggingConstants::ActionContext::Authentication,
                                                          actionType: LoggingConstants::ActionType::UserLoggedIn,
-                                                         csp: 'login_dot_gov' }])
+                                                         csp: 'login_dot_gov',
+                                                         user_identifier: uuid,
+                                                         timestamp: frozen_time.iso8601 }])
           post '/auth/login_dot_gov'
           follow_redirect!
         end
