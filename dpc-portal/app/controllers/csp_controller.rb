@@ -65,10 +65,17 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
   end
 
   def render_account_merge(email, csp)
+    Rails.logger.info(["User has existing account associated with different CSP",
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::MergeUserAccountCsp,
+                         **csp_log_context }])
     render(Page::ExistingAccount::LinkAccountComponent.new(email, csp))
   end
 
   def render_add_email(email, csp)
+    Rails.logger.info(["User has existing account associated with different email",
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::MergeUserAccountEmail }])
     render(Page::ExistingAccount::AddEmailComponent.new(email, csp))
   end
 

@@ -35,6 +35,8 @@ module LoggingConstants
     UserCancelledLogin = 'UserCancelledLogin'
     FailedLogin = 'FailedLogin'
     UserLoginWithoutAccount = 'UserLoginWithoutAccount'
+    MergeUserAccountCsp = 'MergeUserAccountCsp'
+    MergeUserAccountEmail = 'MergeUserAccountEmail'
 
     FailAoPiiCheck = 'FailAoPiiCheck'
     FailCdPiiCheck = 'FailCdPiiCheck'
