@@ -55,6 +55,42 @@ RSpec.shared_examples 'a CSP client' do |config|
       end
     end
 
+    context 'user exists with different CSP' do
+      before do
+        user = create(:user)
+        orig_csp = create(:csp, name: 'original')
+        csp_user = create(:csp_user, user:, uuid:, csp: orig_csp)
+        create(:user_email, csp_user:, email: 'original@example.com', active: true)
+      end
+
+      it 'renders the link account component' do
+        post auth_endpoint
+        follow_redirect!
+        expect(response).to be_ok
+        expect(response.body).to include('Existing account found')
+        expect(response.body).to include('original@example.com')
+        expect(response.body).to include('Link to existing account')
+        expect(response.body).to include('/auth/original')
+      end
+    end
+
+    context 'user exists with different email' do
+      before do
+        user = create(:user)
+        csp_user = create(:csp_user, user:, uuid:, csp:)
+        create(:user_email, csp_user:, email: 'original@example.com', active: true)
+      end
+      it 'renders the add email component' do
+        post auth_endpoint
+        follow_redirect!
+        expect(response).to be_ok
+        expect(response.body).to include('Existing account found')
+        expect(response.body).to include('original@example.com')
+        expect(response.body).to include('Add new email')
+        expect(response.body).to include('/auth/original')
+      end
+    end
+
     context 'user does not exist' do
       it 'should not persist user' do
         expect do
