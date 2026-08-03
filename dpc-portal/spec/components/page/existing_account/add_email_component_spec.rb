@@ -5,7 +5,6 @@ require 'support/login_support'
 
 RSpec.describe Page::ExistingAccount::AddEmailComponent, type: :component do
   include ComponentSupport
-  include EmailMask
   include LoginSupport
 
   LoginSupport::CSP_MAP.each do |csp_name, display|
@@ -42,7 +41,7 @@ RSpec.describe Page::ExistingAccount::AddEmailComponent, type: :component do
 
       it 'should include the email address in the alert' do
         alert_email = <<~HTML
-          <p><strong>#{masked(email)}</strong> and <strong>#{display}</strong></p>
+          <p><strong>#{EmailMask.masked(email)}</strong> and <strong>#{display}</strong></p>
         HTML
         is_expected.to include(normalize_space(alert_email))
       end

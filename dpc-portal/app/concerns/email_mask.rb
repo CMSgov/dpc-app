@@ -2,7 +2,7 @@
 
 # Shared email masking function
 module EmailMask
-  def masked(email)
+  def self.masked(email)
     return email if email.blank?
 
     name, domain = email.split('@')
@@ -10,5 +10,4 @@ module EmailMask
 
     "#{name[0, 4]}#{'*' * 6}@#{domain}"
   end
-  module_function :masked
 end
