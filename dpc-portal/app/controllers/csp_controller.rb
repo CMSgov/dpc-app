@@ -41,7 +41,7 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
   private
 
   def user_actions(auth, csp) # rubocop:disable Metrics/AbcSize
-    csp_user = CspUser.find_by(uuid: auth.uid)
+    csp_user = CspUser.find_by(uuid: auth.uid, csp:) || CspUser.find_by(uuid: auth.uid)
     user = csp_user&.user
     orig_csp_name = csp_user&.csp&.name
 
