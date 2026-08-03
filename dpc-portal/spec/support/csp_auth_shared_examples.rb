@@ -101,8 +101,7 @@ RSpec.shared_examples 'a CSP client' do |config|
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(['User has existing account associated with different CSP',
                                                      { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                       actionType: LoggingConstants::ActionType::MergeUserAccountCsp,
-                                                       csp: csp_name }])
+                                                       actionType: LoggingConstants::ActionType::MergeUserAccountCsp }])
         post auth_endpoint
         follow_redirect!
       end
@@ -128,9 +127,10 @@ RSpec.shared_examples 'a CSP client' do |config|
       it 'logs about existing account' do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(['User has existing account associated with different email',
-                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                       actionType: LoggingConstants::ActionType::MergeUserAccountEmail,
-                                                       csp: csp_name }])
+                                                     {
+                                                       actionContext: LoggingConstants::ActionContext::Authentication,
+                                                       actionType: LoggingConstants::ActionType::MergeUserAccountEmail
+                                                     }])
         post auth_endpoint
         follow_redirect!
       end
