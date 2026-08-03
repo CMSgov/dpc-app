@@ -75,7 +75,7 @@ RSpec.describe 'Clear', type: :request do
                                    credentials: { expires_in: 899,
                                                   token:,
                                                   id_token: },
-                                   info: { email: 'email1@example.com' },
+                                   info: { email: 'email@example.com' },
                                    extra: { raw_info: { sub: uuid,
                                                         email: 'email1@example.com',
                                                         given_name: 'Bob',
