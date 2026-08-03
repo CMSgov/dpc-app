@@ -61,7 +61,9 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
   end
 
   def email_match?(user, email)
-    user.email == email
+    puts "user.email=#{user.email}"
+    puts "email=#{email}"
+    user.email.nil? || user.email == email
   end
 
   def render_account_merge(email, csp)
@@ -73,6 +75,7 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
   end
 
   def render_add_email(email, csp)
+    puts 'render_add_email'
     Rails.logger.info(['User has existing account associated with different email',
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::MergeUserAccountEmail }])
