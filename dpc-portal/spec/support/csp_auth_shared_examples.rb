@@ -16,8 +16,8 @@ RSpec.shared_examples 'a CSP client' do |config|
     end
 
     context 'user exists' do
+      let!(:user) { create(:user) }
       before do
-        user = create(:user)
         csp = Csp.find_by(name: csp_name) || create(:csp, name: csp_name)
         csp_user = create(:csp_user, user:, uuid:, csp:)
         create(:user_email, csp_user:, email: 'bob@example.com', primary: true, active: true)
@@ -54,6 +54,28 @@ RSpec.shared_examples 'a CSP client' do |config|
           post auth_endpoint
           follow_redirect!
         end.to change { CspUser.count }.by(0)
+      end
+
+      it 'updates user names' do
+        expect do
+          post auth_endpoint
+          follow_redirect!
+        end.to change {
+          User.where(id: user.id, given_name: 'Bob', family_name: 'Hoskins').count
+        }.by 1
+        expect(response.location).to eq organizations_url
+      end
+
+      it 'sets authentication token' do
+        post auth_endpoint
+        follow_redirect!
+
+        csp_session = CspSession.new(request.session)
+        expect(csp_session.current).to eq csp_name
+        expect(csp_session.token).to eq token
+        expect(csp_session.token_exp).to_not be_nil
+        expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
+        expect(csp_session.id_token).to eq expected_id_token
       end
     end
 
@@ -100,40 +122,7 @@ RSpec.shared_examples 'a CSP client' do |config|
           follow_redirect!
         end.to change { User.count }.by(0)
       end
-    end
 
-    context :user_exists do
-      let(:db_user) { create(:user) }
-
-      before do
-        csp_user = create(:csp_user, user: db_user, uuid:, csp:)
-        create(:user_email, csp_user:, email: 'bob@example.com', primary: true, active: true)
-      end
-
-      it 'updates user names' do
-        expect do
-          post auth_endpoint
-          follow_redirect!
-        end.to change {
-          User.where(id: db_user.id, given_name: 'Bob', family_name: 'Hoskins').count
-        }.by 1
-        expect(response.location).to eq organizations_url
-      end
-
-      it 'sets authentication token' do
-        post auth_endpoint
-        follow_redirect!
-
-        csp_session = CspSession.new(request.session)
-        expect(csp_session.current).to eq csp_name
-        expect(csp_session.token).to eq token
-        expect(csp_session.token_exp).to_not be_nil
-        expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
-        expect(csp_session.id_token).to eq expected_id_token
-      end
-    end
-
-    context :user_does_not_exist do
       it 'does not sign in user' do
         post auth_endpoint
         follow_redirect!
