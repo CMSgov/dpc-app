@@ -96,6 +96,16 @@ RSpec.shared_examples 'a CSP client' do |config|
         expect(response.body).to include('Link to existing account')
         expect(response.body).to include('/auth/original')
       end
+
+      it 'logs about existing account' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(['User has existing account associated with different CSP',
+                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                       actionType: LoggingConstants::ActionType::MergeUserAccountCsp,
+                                                       csp: csp_name }])
+        post auth_endpoint
+        follow_redirect!
+      end
     end
 
     context 'user exists with different email' do
@@ -104,6 +114,7 @@ RSpec.shared_examples 'a CSP client' do |config|
         csp_user = create(:csp_user, user:, uuid:, csp:)
         create(:user_email, csp_user:, email: 'original@example.com', active: true)
       end
+
       it 'renders the add email component' do
         post auth_endpoint
         follow_redirect!
@@ -112,6 +123,16 @@ RSpec.shared_examples 'a CSP client' do |config|
         expect(response.body).to include(EmailMask.masked('original@example.com'))
         expect(response.body).to include('Add new email')
         expect(response.body).to include(auth_endpoint)
+      end
+
+      it 'logs about existing account' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(['User has existing account associated with different email',
+                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                       actionType: LoggingConstants::ActionType::MergeUserAccountEmail,
+                                                       csp: csp_name }])
+        post auth_endpoint
+        follow_redirect!
       end
     end
 
