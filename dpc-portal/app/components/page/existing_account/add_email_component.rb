@@ -4,9 +4,11 @@ module Page
   module ExistingAccount
     # Render the screen to allow for adding a new email
     class AddEmailComponent < ViewComponent::Base
+      include EmailMask
+
       def initialize(orig_email, orig_csp)
         super()
-        @orig_email = orig_email
+        @masked_email = masked(orig_email)
         @orig_csp_code = orig_csp
         @orig_csp_display = display_name(orig_csp)
       end

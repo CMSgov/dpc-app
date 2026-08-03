@@ -9,7 +9,7 @@ RSpec.describe Page::ExistingAccount::LinkAccountComponent, type: :component do
 
   LoginSupport::CSP_MAP.each do |csp_name, display|
     context "as #{display}" do
-      let(:email) { 'bob@example.com' }
+      let(:email) { 'bobhoskins@example.com' }
       let(:component) { described_class.new(email, csp_name) }
 
       subject(:html) do
@@ -41,7 +41,7 @@ RSpec.describe Page::ExistingAccount::LinkAccountComponent, type: :component do
 
       it 'should include the email address in the alert' do
         alert_email = <<~HTML
-          <p><strong>#{email}</strong> and <strong>#{display}</strong></p>
+          <p><strong>#{EmailMask.masked(email)}</strong> and <strong>#{display}</strong></p>
         HTML
         is_expected.to include(normalize_space(alert_email))
       end
@@ -76,11 +76,11 @@ RSpec.describe Page::ExistingAccount::LinkAccountComponent, type: :component do
         let(:email) { 'different@example.com' }
 
         it 'should render the updated email address' do
-          is_expected.to include('different@example.com')
+          is_expected.to include(EmailMask.masked('different@example.com'))
         end
 
         it 'should not include the default email address' do
-          is_expected.not_to include('bob@example.com')
+          is_expected.not_to include(EmailMask.masked('bob@example.com'))
         end
       end
     end

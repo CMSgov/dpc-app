@@ -41,7 +41,7 @@ RSpec.describe Page::ExistingAccount::AddEmailComponent, type: :component do
 
       it 'should include the email address in the alert' do
         alert_email = <<~HTML
-          <p><strong>#{email}</strong> and <strong>#{display}</strong></p>
+          <p><strong>#{EmailMask.masked(email)}</strong> and <strong>#{display}</strong></p>
         HTML
         is_expected.to include(normalize_space(alert_email))
       end

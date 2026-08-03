@@ -92,7 +92,7 @@ RSpec.shared_examples 'a CSP client' do |config|
         follow_redirect!
         expect(response).to be_ok
         expect(response.body).to include('Existing account found')
-        expect(response.body).to include('original@example.com')
+        expect(response.body).to include(EmailMask.masked('original@example.com'))
         expect(response.body).to include('Link to existing account')
         expect(response.body).to include('/auth/original')
       end
@@ -109,7 +109,7 @@ RSpec.shared_examples 'a CSP client' do |config|
         follow_redirect!
         expect(response).to be_ok
         expect(response.body).to include('Existing account found')
-        expect(response.body).to include('original@example.com')
+        expect(response.body).to include(EmailMask.masked('original@example.com'))
         expect(response.body).to include('Add new email')
         expect(response.body).to include(auth_endpoint)
       end
