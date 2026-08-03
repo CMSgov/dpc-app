@@ -58,7 +58,7 @@ RSpec.describe Page::ExistingAccount::AddEmailComponent, type: :component do
       end
 
       it 'should include the sign in with existing email option' do
-        is_expected.to include("Sign in with an email already associated with your account.")
+        is_expected.to include('Sign in with an email already associated with your account.')
       end
 
       it 'should render the add new email button' do
