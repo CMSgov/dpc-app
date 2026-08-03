@@ -68,7 +68,7 @@ RSpec.describe Page::ExistingAccount::LinkAccountComponent, type: :component do
         is_expected.to include(normalize_space(button))
       end
 
-      it 'should render a button targeting the omniauth authorize path' do
+      it "should render a button to sign in with #{display}" do
         is_expected.to include(%(action="/auth/#{csp_name}"))
       end
 

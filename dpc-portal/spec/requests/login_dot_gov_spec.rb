@@ -15,7 +15,7 @@ RSpec.describe 'LoginDotGov', type: :request do
       { uid: uuid,
         credentials: { expires_in: 899,
                        token: },
-        info: { email: 'bob2@example.com' },
+        info: { email: 'bob@example.com' },
         extra: { raw_info: { given_name: 'Bob',
                              family_name: 'Hoskins',
                              social_security_number: '1-2-3',

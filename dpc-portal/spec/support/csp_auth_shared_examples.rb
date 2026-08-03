@@ -18,7 +18,9 @@ RSpec.shared_examples 'a CSP client' do |config|
     context 'user exists' do
       before do
         user = create(:user)
-        create(:csp_user, user:, uuid:, csp:)
+        csp = Csp.find_by(name: csp_name) || create(:csp, name: csp_name)
+        csp_user = create(:csp_user, user:, uuid:, csp:)
+        create(:user_email, csp_user:, email: 'bob@example.com', primary: true, active: true)
       end
 
       it 'should sign in a user' do
@@ -87,7 +89,7 @@ RSpec.shared_examples 'a CSP client' do |config|
         expect(response.body).to include('Existing account found')
         expect(response.body).to include('original@example.com')
         expect(response.body).to include('Add new email')
-        expect(response.body).to include('/auth/original')
+        expect(response.body).to include(auth_endpoint)
       end
     end
 
@@ -104,7 +106,8 @@ RSpec.shared_examples 'a CSP client' do |config|
       let(:db_user) { create(:user) }
 
       before do
-        create(:csp_user, user: db_user, uuid:, csp:)
+        csp_user = create(:csp_user, user: db_user, uuid:, csp:)
+        create(:user_email, csp_user:, email: 'bob@example.com', primary: true, active: true)
       end
 
       it 'updates user names' do
@@ -254,7 +257,8 @@ RSpec.shared_examples 'a CSP client' do |config|
       OmniAuth.config.add_mock(provider, csp_auth_response)
 
       user = create(:user)
-      create(:csp_user, user:, uuid:, csp:)
+      csp_user = create(:csp_user, user:, uuid:, csp:)
+      create(:user_email, csp_user:, email: 'bob@example.com', primary: true, active: true)
       post auth_endpoint
       follow_redirect!
     end
