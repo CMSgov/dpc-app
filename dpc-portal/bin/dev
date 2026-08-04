@@ -3,6 +3,12 @@
 # Default to port 3000 if not specified
 export PORT="${PORT:-3000}"
 
+if [ "$AUTH_DISABLED" = "true" ]; then
+  echo "Cannot start dpc-portal locally with dpc-api AUTH_DISABLED=true."
+  echo "Needs auth enabled so API credentials are scoped to organization in the portal"
+  exit 99
+fi
+
 if [ -z "$GOLDEN_MACAROON" ]; then
   echo "No golden macaroon found. Attempting to generate a new one..."
   export GOLDEN_MACAROON=$(curl -X POST -w '\n' ${API_ADMIN_URL}/tasks/generate-token || echo '')

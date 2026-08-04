@@ -12,6 +12,8 @@ import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Organization;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 /**
@@ -22,6 +24,7 @@ import org.slf4j.MDC;
  */
 @Priority(Priorities.AUTHENTICATION)
 public class StaticAuthFilter extends AuthFilter<DPCAuthCredentials, OrganizationPrincipal> {
+    private static final Logger logger = LoggerFactory.getLogger(StaticAuthFilter.class);
 
     // Default organization ID to use, if no override is passed
     private static final String DEFAULT_ORG_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
@@ -38,6 +41,9 @@ public class StaticAuthFilter extends AuthFilter<DPCAuthCredentials, Organizatio
 
         final String headerString = requestContext.getHeaderString(ORG_HEADER);
         final String orgID = headerString == null ? DEFAULT_ORG_ID : headerString;
+        if (headerString == null) {
+            logger.warn("AUTHENTICATION IS DISABLED - do not use in production");
+        }
 
         // Now that we have the organization_id, set it in the logging context
         MDC.clear();
