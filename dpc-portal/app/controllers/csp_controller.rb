@@ -64,6 +64,11 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
     user.email.nil? || user.email == email
   end
 
+  def user_match?(user, auth)
+    auth.info.given_name == user.given_name &&
+      auth.info.family_name == user.family_name
+  end
+
   def render_account_merge(email, csp)
     Rails.logger.info(['User has existing account associated with different CSP',
                        { actionContext: LoggingConstants::ActionContext::Authentication,
