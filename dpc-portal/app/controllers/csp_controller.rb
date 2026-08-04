@@ -40,15 +40,11 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
 
   private
 
-  def user_actions(auth, csp) # rubocop:disable Metrics/AbcSize
+  def user_actions(auth, csp)
     csp_user = CspUser.find_by(uuid: auth.uid, csp:)
     user = csp_user&.user
-    orig_csp_name = csp_user&.csp&.name
 
-    if user
-      return render_account_merge(user.email, orig_csp_name) unless csp_match?(orig_csp_name)
-      return render_add_email(user.email, orig_csp_name) unless email_match?(user, primary_email(auth))
-    end
+    return render_add_email(user.email, csp.name) if user && !email_match?(user, auth)
 
     sign_in_and_log(user, csp.name)
     sync_csp_emails(csp_user, all_emails(auth), primary_email(auth))
@@ -60,8 +56,8 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
     csp.to_sym == csp_code
   end
 
-  def email_match?(user, email)
-    user.email.nil? || user.email == email
+  def email_match?(user, auth)
+    user.email == primary_email(auth) || all_emails(auth).include?(user.email)
   end
 
   def user_match?(user, auth)

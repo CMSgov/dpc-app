@@ -79,34 +79,6 @@ RSpec.shared_examples 'a CSP client' do |config|
       end
     end
 
-    context 'user exists with different CSP' do
-      before do
-        user = create(:user)
-        orig_csp = create(:csp, name: 'original')
-        csp_user = create(:csp_user, user:, uuid:, csp: orig_csp)
-        create(:user_email, csp_user:, email: 'original@example.com', active: true)
-      end
-
-      it 'renders the link account component' do
-        post auth_endpoint
-        follow_redirect!
-        expect(response).to be_ok
-        expect(response.body).to include('Existing account found')
-        expect(response.body).to include(EmailMask.masked('original@example.com'))
-        expect(response.body).to include('Link to existing account')
-        expect(response.body).to include('/auth/original')
-      end
-
-      it 'logs about existing account' do
-        allow(Rails.logger).to receive(:info)
-        expect(Rails.logger).to receive(:info).with(['User has existing account associated with different CSP',
-                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                       actionType: LoggingConstants::ActionType::MergeUserAccountCsp }])
-        post auth_endpoint
-        follow_redirect!
-      end
-    end
-
     context 'user exists with different email' do
       before do
         user = create(:user)
