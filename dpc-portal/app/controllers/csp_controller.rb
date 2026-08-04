@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Base controller to handle interactions with CSPs.
-class CspController < ApplicationController # rubocop:disable Metrics/ClassLength
+class CspController < ApplicationController
   include CspEmailSync
   include CspErrorHandling
 
@@ -44,7 +44,7 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
     csp_user = CspUser.find_by(uuid: auth.uid, csp:)
     user = csp_user&.user
 
-    return render_add_email(user.email, csp.name) if user && !email_match?(user, auth)
+    return render_add_email(user.email, csp.name) if user && !email_match?(csp_user, auth)
 
     sign_in_and_log(user, csp.name)
     sync_csp_emails(csp_user, all_emails(auth), primary_email(auth))
@@ -56,21 +56,8 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
     csp.to_sym == csp_code
   end
 
-  def email_match?(user, auth)
-    user.email == primary_email(auth) || all_emails(auth).include?(user.email)
-  end
-
-  def user_match?(user, auth)
-    auth.info.given_name == user.given_name &&
-      auth.info.family_name == user.family_name
-  end
-
-  def render_account_merge(email, csp)
-    Rails.logger.info(['User has existing account associated with different CSP',
-                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::MergeUserAccountCsp,
-                         **csp_log_context }])
-    render(Page::ExistingAccount::LinkAccountComponent.new(email, csp))
+  def email_match?(csp_user, auth)
+    csp_user.user_emails.empty? || csp_user.user_emails.map(&:email).include?(primary_email(auth))
   end
 
   def render_add_email(email, csp)
