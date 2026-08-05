@@ -68,7 +68,7 @@ RSpec.describe Page::ExistingAccount::AddEmailComponent, type: :component do
       end
 
       it 'should render a button to go to account' do
-        is_expected.to include(%(action="#{path}"))
+        is_expected.to include(%(href="#{path}"))
       end
     end
   end
