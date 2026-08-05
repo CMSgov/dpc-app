@@ -93,7 +93,7 @@ RSpec.shared_examples 'a CSP client' do |config|
         expect(response.body).to include('Existing account found')
         expect(response.body).to include(EmailMask.masked('original@example.com'))
         expect(response.body).to include('Add new email')
-        expect(response.body).to include(auth_endpoint)
+        expect(response.body).to include(organizations_path)
       end
 
       it 'logs about existing account' do
