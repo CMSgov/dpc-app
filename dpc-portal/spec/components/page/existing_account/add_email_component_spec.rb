@@ -8,7 +8,7 @@ RSpec.describe Page::ExistingAccount::AddEmailComponent, type: :component do
   CspUtils::CODES_TO_DISPLAY.each do |csp_name, display|
     context "as #{display}" do
       let(:email) { 'bob@example.com' }
-      let(:path) { '/organizations/1' }
+      let(:path) { '/' }
       let(:component) { described_class.new(email, csp_name, path) }
 
       subject(:html) do
