@@ -9,7 +9,7 @@ RSpec.describe 'Organizations', type: :request do
   include ComponentSupport
   include LoginSupport
 
-  LoginSupport::CSP_MAP.each do |provider, display_name|
+  CspUtils::CODES_TO_DISPLAY.each do |provider, display_name|
     context "using #{display_name}" do
       describe 'GET /index' do
         context 'not logged in' do

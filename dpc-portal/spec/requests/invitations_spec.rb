@@ -301,10 +301,10 @@ RSpec.describe 'Invitations', type: :request do
     end
   end
 
-  LoginSupport::CSP_MAP.each do |provider, display_name|
+  CspUtils::CODES_TO_DISPLAY.each do |provider, display_name|
     describe "with #{display_name}" do
       let!(:csp) { Csp.find_by(name: provider) || create(:csp, name: provider) }
-      let!(:other_csp_name) { LoginSupport::CSP_MAP.keys.reject { |k| k == provider }.sample }
+      let!(:other_csp_name) { CspUtils::CODES_TO_DISPLAY.keys.reject { |k| k == provider }.sample }
       let!(:other_csp) { Csp.find_by(name: other_csp_name) || create(:csp, name: other_csp_name) }
       let!(:provider_params) { { provider: provider } }
 

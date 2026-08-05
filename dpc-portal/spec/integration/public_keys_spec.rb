@@ -16,7 +16,7 @@ RSpec.describe 'PublicKeys', type: :request do
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let(:label) { 'New Public Key' }
 
-    LoginSupport::CSP_MAP.each do |display_name, provider|
+    CspUtils::CODES_TO_DISPLAY.each do |display_name, provider|
       context "using #{display_name}" do
         before do
           user = create_user_with_csp(csp: provider)

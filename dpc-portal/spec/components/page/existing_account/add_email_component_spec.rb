@@ -1,13 +1,11 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require 'support/login_support'
 
 RSpec.describe Page::ExistingAccount::AddEmailComponent, type: :component do
   include ComponentSupport
-  include LoginSupport
 
-  LoginSupport::CSP_MAP.each do |csp_name, display|
+  CspUtils::CODES_TO_DISPLAY.each do |csp_name, display|
     context "as #{display}" do
       let(:email) { 'bob@example.com' }
       let(:component) { described_class.new(email, csp_name) }

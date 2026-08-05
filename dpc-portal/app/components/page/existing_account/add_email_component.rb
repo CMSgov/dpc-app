@@ -8,22 +8,7 @@ module Page
         super()
         @masked_email = EmailMask.masked(orig_email)
         @orig_csp_code = orig_csp
-        @orig_csp_display = display_name(orig_csp)
-      end
-
-      private
-
-      def display_name(csp_code)
-        case csp_code.to_sym
-        when :login_dot_gov
-          'Login.gov'
-        when :id_me
-          'ID.me'
-        when :clear
-          'CLEAR'
-        else
-          'CSP'
-        end
+        @orig_csp_display = CspUtils.display_name(orig_csp)
       end
     end
   end
