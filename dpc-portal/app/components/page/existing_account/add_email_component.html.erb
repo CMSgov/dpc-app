@@ -3,7 +3,7 @@
     <div class="usa-alert usa-alert--info margin-bottom-4">
         <div class="usa-alert__body">
             <p class="usa-alert__text">This account was already created using:</p>
-            <p><strong><%= @masked_email %></strong> and <strong><%= @orig_csp_display %></strong></p>
+            <p><strong><%= @masked_email %></strong> and <strong><%= @display_name %></strong></p>
         </div>
     </div>
     <div>
@@ -14,7 +14,7 @@
         </ul>
     </div>
     <div>
-        <%= button_to helpers.omniauth_authorize_path(@orig_csp_code), class: 'usa-button margin-bottom-1', data: { turbo: false } do %>
+        <%= button_to @path, class: 'usa-button margin-bottom-1', data: { turbo: false } do %>
             <span>Add new email</span>
         <% end %>
     </div>

@@ -8,7 +8,8 @@ RSpec.describe Page::ExistingAccount::AddEmailComponent, type: :component do
   CspUtils::CODES_TO_DISPLAY.each do |csp_name, display|
     context "as #{display}" do
       let(:email) { 'bob@example.com' }
-      let(:component) { described_class.new(email, csp_name) }
+      let(:path) { '/organizations/1' }
+      let(:component) { described_class.new(email, csp_name, path) }
 
       subject(:html) do
         render_inline(component)
@@ -66,8 +67,8 @@ RSpec.describe Page::ExistingAccount::AddEmailComponent, type: :component do
         is_expected.to include(normalize_space(button))
       end
 
-      it "should render a button to sign in with #{display}" do
-        is_expected.to include(%(action="/auth/#{csp_name}"))
+      it 'should render a button to go to account' do
+        is_expected.to include(%(action="#{path}"))
       end
     end
   end

@@ -52,10 +52,6 @@ class CspController < ApplicationController
     redirect_to path(user, auth)
   end
 
-  def csp_match?(csp)
-    csp.to_sym == csp_code
-  end
-
   def email_match?(csp_user, auth)
     csp_user.user_emails.empty? || csp_user.user_emails.map(&:email).include?(primary_email(auth))
   end
@@ -65,7 +61,7 @@ class CspController < ApplicationController
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::MergeUserAccountEmail,
                          **csp_log_context }])
-    render(Page::ExistingAccount::AddEmailComponent.new(email, csp))
+    render(Page::ExistingAccount::AddEmailComponent.new(email, csp, session.delete(:user_return_to)))
   end
 
   def render_ial1_blocked
