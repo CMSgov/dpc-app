@@ -65,6 +65,16 @@ RSpec.describe 'Clear', type: :request do
         expect(email.active).to eq true
         expect(email.primary).to eq true
       end
+
+      it 'logs added emails' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(['New user email created',
+                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                       actionType: LoggingConstants::ActionType::AddNewUserEmail,
+                                                       csp: 'clear' }])
+        post '/auth/clear'
+        follow_redirect!
+      end
     end
 
     context 'should deactivate emails' do
@@ -96,6 +106,16 @@ RSpec.describe 'Clear', type: :request do
         expect(email.active).to eq false
         expect(email.deactivated_at).to_not be_nil
         expect(email.reactivated_at).to be_nil
+      end
+
+      it 'logs deactivated email' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(['User email deactivated',
+                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                       actionType: LoggingConstants::ActionType::DeactivateUserEmail,
+                                                       csp: 'clear' }])
+        post '/auth/clear'
+        follow_redirect!
       end
     end
 
@@ -130,6 +150,16 @@ RSpec.describe 'Clear', type: :request do
         expect(email.deactivated_at).to be_nil
         expect(email.reactivated_at).to_not be_nil
         expect(email.primary).to eq true
+      end
+
+      it 'logs reactivated email' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(['User email reactivated',
+                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                       actionType: LoggingConstants::ActionType::ReactivateUserEmail,
+                                                       csp: 'clear' }])
+        post '/auth/clear'
+        follow_redirect!
       end
     end
   end
