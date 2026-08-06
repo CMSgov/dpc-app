@@ -7,6 +7,7 @@ module CspEmailSync
   # Alternative to login for add email flow
   def update
     csp_user = CspUser.find_by(id: params[:id], csp: params[:csp])
+    current_user = User.find_by(id: session[:user])
     return render plain: :forbidden, status: :forbidden unless csp_user&.user == current_user
 
     sync_csp_emails(csp_user, params[:all_emails], params[:primary_email])
