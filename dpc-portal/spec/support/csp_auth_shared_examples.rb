@@ -82,6 +82,7 @@ RSpec.shared_examples 'a CSP client' do |config|
     context 'user exists with different email' do
       before do
         user = create(:user)
+        csp = Csp.find_by(name: csp_name) || create(:csp, name: csp_name)
         csp_user = create(:csp_user, user:, uuid:, csp:)
         create(:user_email, csp_user:, email: 'original@example.com', active: true)
       end

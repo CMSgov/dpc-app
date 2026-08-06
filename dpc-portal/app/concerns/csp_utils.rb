@@ -11,6 +11,6 @@ module CspUtils
   }.freeze
 
   def self.display_name(csp_code)
-    CODES_TO_DISPLAY.fetch(csp_code.to_sym, 'CSP')
+    CODES_TO_DISPLAY.fetch(csp_code.to_sym)
   end
 end
