@@ -16,8 +16,7 @@ class ClientTokensController < ApplicationController
 
   def create
     manager = ClientTokenManager.new(@organization.dpc_api_organization_id)
-    sanitized_label = sanitize_label(params[:label])
-    new_token = manager.create_client_token(label: sanitized_label)
+    new_token = manager.create_client_token(label: params[:label])
     if new_token[:response]
       @client_token = new_token[:message]
       creation_side_effects

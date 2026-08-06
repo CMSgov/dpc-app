@@ -6,11 +6,11 @@ class IpAddressManager
   include CredentialManager
 
   def create_ip_address(ip_address:)
-    sanitized_ip = validate_ip(ip_address)
-    return { response: false, errors: @errors } if @errors.present?
+    ip_address = strip_carriage_returns(ip_address)
+    return { response: false, errors: @errors } if invalid_input?(ip_address)
 
     api_client = DpcClient.new
-    api_client.create_ip_address(api_id, params: { ip_address: sanitized_ip })
+    api_client.create_ip_address(api_id, params: { ip_address: })
 
     unless api_client.response_successful?
       Rails.logger.error "Failed to create IP address: #{api_client.response_body}"
@@ -22,12 +22,9 @@ class IpAddressManager
       errors: }
   end
 
-  def delete_ip_address(params)
-    sanitized_id = validate_uid(params[:id])
-    return false if sanitized_id.nil?
-
+  def delete_ip_address(ip_address_id)
     api_client = DpcClient.new
-    api_client.delete_ip_address(api_id, sanitized_id)
+    api_client.delete_ip_address(api_id, ip_address_id)
 
     unless api_client.response_successful?
       Rails.logger.error "Failed to delete IP address: #{api_client.response_body}"
@@ -54,28 +51,25 @@ class IpAddressManager
 
   private
 
-  def validate_ip(addr_string)
-    addr_string = addr_string&.gsub("\r", '')&.strip
-    
-    if addr_string.blank?
-      @errors[:ip_address] = "IP address can't be blank."
-      return nil
-    end
-
-    parsed = IPAddr.new(addr_string)
+  def invalid_input?(ip_address)
+    validate_ip_address(ip_address)
     handle_root_errors if @root_errors.present?
-    parsed.to_s
-  rescue IPAddr::InvalidAddressError
-    @errors[:ip_address] = 'Invalid IP address.'
-    @errors[:root] = 'Invalid IP address.'
-    nil
+    @errors.present?
   end
 
-  def validate_uid(id_param)
-    return nil if id_param.blank?
+  def validate_ip_address(addr_string)
+    if addr_string.blank?
+      @errors[:ip_address] = "IP address can't be blank."
+    else
+      IPAddr.new(addr_string).blank?
+    end
+  rescue IPAddr::InvalidAddressError
+    @errors[:ip_address] = 'Invalid IP address.'
+    @root_errors << 'Invalid IP address.'
+  end
 
-    sanitized = id_param.to_s.strip
-    sanitized if sanitized.match?(/\A[a-zA-Z0-9\-]{1,64}\z/)
+  def strip_carriage_returns(str)
+    str&.gsub("\r", '')
   end
 
   def parse_errors(error_msg)
