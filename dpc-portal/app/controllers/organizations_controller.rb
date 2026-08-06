@@ -8,7 +8,6 @@ class OrganizationsController < ApplicationController
   before_action :check_user_verification
   before_action :load_organization, only: %i[show tos_form sign_tos success]
   before_action :require_can_access, only: %i[show]
-  before_action :check_npi, only: %i[create]
   before_action :require_ao, only: %i[tos_form sign_tos success]
   before_action :tos_accepted, only: %i[show]
 
@@ -49,16 +48,6 @@ class OrganizationsController < ApplicationController
 
   def success
     render(Page::Organization::NewOrganizationSuccessComponent.new(@organization))
-  end
-
-  def check_npi
-    @npi_error = if params[:npi].blank?
-                   "Can't be blank"
-                 elsif params[:npi].length != 10
-                   'length has to be 10'
-                 end
-
-    render(Page::Organization::NewOrganizationComponent.new(@npi_error), status: :bad_request) if @npi_error.present?
   end
 
   private
