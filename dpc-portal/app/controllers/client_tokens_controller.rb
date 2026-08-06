@@ -2,6 +2,8 @@
 
 # Hanles client token requests
 class ClientTokensController < ApplicationController
+  include InputSanitization
+
   before_action :authenticate_user!
   before_action :check_user_verification
   before_action :load_organization
@@ -14,7 +16,8 @@ class ClientTokensController < ApplicationController
 
   def create
     manager = ClientTokenManager.new(@organization.dpc_api_organization_id)
-    new_token = manager.create_client_token(label: params[:label])
+    sanitized_label = sanitize_label(params[:label])
+    new_token = manager.create_client_token(label: sanitized_label)
     if new_token[:response]
       @client_token = new_token[:message]
       creation_side_effects
@@ -27,9 +30,10 @@ class ClientTokensController < ApplicationController
 
   def destroy
     manager = ClientTokenManager.new(@organization.dpc_api_organization_id)
-    if manager.delete_client_token(id: params[:id])
+    sanitized_id = sanitize_uid(params[:id])
+    if manager.delete_client_token(id: sanitized_id)
       flash[:success] = 'Client token deleted successfully.'
-      log_credential_action(:client_token, params[:id], :remove)
+      log_credential_action(:client_token, sanitized_id, :remove)
     else
       flash[:alert] = 'Client token could not be deleted.'
     end

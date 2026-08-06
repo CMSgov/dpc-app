@@ -2,6 +2,8 @@
 
 # Handles public key requests
 class PublicKeysController < ApplicationController
+  include InputSanitization
+
   before_action :authenticate_user!
   before_action :check_user_verification
   before_action :load_organization
@@ -36,8 +38,9 @@ class PublicKeysController < ApplicationController
 
   def destroy
     manager = PublicKeyManager.new(@organization.dpc_api_organization_id)
-    if manager.delete_public_key(params)
-      log_credential_action(:public_key, params[:id], :remove)
+    sanitized_id = sanitize_uid(params[:id])
+    if manager.delete_public_key(sanitized_id)
+      log_credential_action(:public_key, sanitized_id, :remove)
       flash[:success] = 'Public key deleted successfully.'
       redirect_to organization_path(@organization, credential_start: true)
     else
