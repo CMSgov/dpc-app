@@ -67,11 +67,6 @@ class OrganizationsController < ApplicationController
     params[:id]
   end
 
-  def log_link_error
-    errors = @ao_org_link.errors.messages.map { |k, v| "#{k}: #{v.join(',')}" }.join(' | ')
-    logger.error("Unable to create AoOrgLink: #{errors}")
-  end
-
   def cur_org_status
     cur_link = current_user.provider_links.find { |link| link.provider_organization_id == @organization.id }
     org_status(@organization, cur_link)
