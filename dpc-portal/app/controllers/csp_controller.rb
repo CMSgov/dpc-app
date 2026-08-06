@@ -65,7 +65,7 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
                          **csp_log_context }])
     render(Page::ExistingAccount::AddEmailComponent.new(csp_user.user.email, csp_user.csp.name,
                                                         update_path(id: csp_user.id,
-                                                                    csp: csp_user.csp.name,
+                                                                    csp: csp_user.csp.id,
                                                                     all_emails: all_emails(auth),
                                                                     primary_email: primary_email(auth))))
   end
