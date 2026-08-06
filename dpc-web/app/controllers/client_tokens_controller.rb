@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class ClientTokensController < ApplicationController
-  include InputSanitization
-
   before_action :authenticate_user!
   before_action :organization_enabled?
   rescue_from ActiveRecord::RecordNotFound, with: :unauthorized
@@ -13,16 +11,15 @@ class ClientTokensController < ApplicationController
 
   def create
     @organization = current_user.organizations.find(org_id)
+
     reg_org = @organization.registered_organization
     manager = ClientTokenManager.new(registered_organization: reg_org)
 
-    sanitized_label = sanitize_label(params[:label])
-
-    if sanitized_label.present? && manager.create_client_token(label: sanitized_label)
+    if params_present? && manager.create_client_token(label: params[:label])
       @client_token = manager.client_token
       render :show
     else
-      return render_error 'Label required.' unless sanitized_label.present?
+      return render_error 'Label required.' unless params_present?
 
       render_error 'Client token could not be created.'
     end
@@ -31,16 +28,9 @@ class ClientTokensController < ApplicationController
   def destroy
     @organization = current_user.organizations.find(org_id)
     reg_org = @organization.registered_organization
+
     manager = ClientTokenManager.new(registered_organization: reg_org)
-
-    sanitized_id = sanitize_uid(params[:id])
-
-    unless sanitized_id
-      render_error 'Invalid token ID.'
-      return
-    end
-
-    if manager.delete_client_token(id: sanitized_id)
+    if manager.delete_client_token(id: params[:id])
       flash[:notice] = 'Client token successfully deleted.'
       redirect_to root_path
     else
@@ -66,6 +56,10 @@ class ClientTokensController < ApplicationController
   def render_error(msg)
     flash[:alert] = msg
     render :new
+  end
+
+  def params_present?
+    params[:label].present?
   end
 
   def unauthorized
