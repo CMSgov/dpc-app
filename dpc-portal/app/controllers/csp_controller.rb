@@ -43,7 +43,6 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
   def user_actions(auth, csp)
     csp_user = CspUser.find_by(uuid: auth.uid, csp:)
     user = csp_user&.user
-    user_path = path(user, auth)
 
     sign_in_and_log(user, csp.name)
     ial_2_actions(user, auth)
@@ -51,7 +50,7 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
     return render_add_email(csp_user, auth) if csp_user && !email_match?(csp_user, auth)
 
     sync_csp_emails(csp_user, all_emails(auth), primary_email(auth))
-    redirect_to user_path
+    redirect_to path(user, auth)
   end
 
   def email_match?(csp_user, auth)
