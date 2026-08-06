@@ -2,6 +2,11 @@
 
 # Handles CSP emails
 module CspEmailSync
+  def update(csp_user, all_emails, primary_email)
+    sync_csp_emails(csp_user, all_emails, primary_email)
+    redirect_to root_url
+  end
+
   def sync_csp_emails(csp_user, new_emails, primary_email)
     return unless csp_user
 

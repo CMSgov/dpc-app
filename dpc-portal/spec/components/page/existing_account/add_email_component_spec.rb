@@ -8,7 +8,7 @@ RSpec.describe Page::ExistingAccount::AddEmailComponent, type: :component do
   CspUtils::CODES_TO_DISPLAY.each do |csp_name, display|
     context "as #{display}" do
       let(:email) { 'bob@example.com' }
-      let(:path) { '/organizations' }
+      let(:path) { '/' }
       let(:component) { described_class.new(email, csp_name, path) }
 
       subject(:html) do
@@ -68,7 +68,7 @@ RSpec.describe Page::ExistingAccount::AddEmailComponent, type: :component do
       end
 
       it 'should render a button to go to account' do
-        is_expected.to include(%(href="#{path}"))
+        is_expected.to include(%(action="#{path}"))
       end
     end
   end

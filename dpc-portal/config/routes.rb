@@ -15,6 +15,8 @@ Rails.application.routes.draw do
   get '/auth/login_dot_gov/callback', to: 'login_dot_gov#openid_connect'
   get '/auth/clear/callback', to: 'clear#openid_connect'
 
+  post '/update', to: 'csp#update'
+
   # Defines the root path route ("/")
   root 'organizations#index'
 
