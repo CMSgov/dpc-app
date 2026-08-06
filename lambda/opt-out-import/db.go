@@ -75,6 +75,7 @@ func insertResponseFileMetadata(db *sql.DB, optOutMetadata *ResponseFileMetadata
 func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutRecord) ([]*OptOutRecord, error) {
 	createdRecords := []*OptOutRecord{}
 
+	// If there aren't any rows, skip this and update the import_status of the file
 	if len(records) > 0 {
 		query := `INSERT INTO consent (id, mbi, effective_date, policy_code, loinc_code, opt_out_file_id, created_at, updated_at) 
 				VALUES `
@@ -94,7 +95,7 @@ func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutReco
 		}
 		query += "RETURNING id, mbi, effective_date, policy_code, opt_out_file_id"
 
-		// Pass args to db.Query — values never interpolated into SQL
+		// Pass args to db.Query so values never interpolated into SQL
 		rows, err := db.Query(query, args...)
 		if err != nil {
 			if err := updateResponseFileImportStatus(db, optOutFileId, ImportFail); err != nil {
@@ -113,6 +114,7 @@ func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutReco
 			createdRecords = append(createdRecords, &record)
 		}
 
+		// We're inserting all records in one batch, so if there wasn't an error they were all processed successfully
 		for _, record := range records {
 			record.Status = Accepted
 		}
