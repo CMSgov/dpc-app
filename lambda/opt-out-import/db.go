@@ -75,22 +75,27 @@ func insertResponseFileMetadata(db *sql.DB, optOutMetadata *ResponseFileMetadata
 func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutRecord) ([]*OptOutRecord, error) {
 	createdRecords := []*OptOutRecord{}
 
-	// If there aren't any rows, skip this and update the import_status of the file
 	if len(records) > 0 {
 		query := `INSERT INTO consent (id, mbi, effective_date, policy_code, loinc_code, opt_out_file_id, created_at, updated_at) 
 				VALUES `
+
+		// Build args slice instead of interpolating values into the query string
+		args := []interface{}{}
 		for i, rec := range records {
-			query += fmt.Sprintf("('%s', '%s', NOW()::date, '%s', '64292-6', '%s', 'NOW()', 'NOW()')",
-				rec.ID, rec.MBI, rec.PolicyCode, optOutFileId)
+			paramOffset := i * 4
+			query += fmt.Sprintf("($%d, $%d, NOW()::date, $%d, '64292-6', $%d, NOW(), NOW())",
+				paramOffset+1, paramOffset+2, paramOffset+3, paramOffset+4)
 			if i < len(records)-1 {
 				query += ", "
 			} else {
 				query += "\n"
 			}
+			args = append(args, rec.ID, rec.MBI, rec.PolicyCode, optOutFileId)
 		}
 		query += "RETURNING id, mbi, effective_date, policy_code, opt_out_file_id"
 
-		rows, err := db.Query(query)
+		// Pass args to db.Query — values never interpolated into SQL
+		rows, err := db.Query(query, args...)
 		if err != nil {
 			if err := updateResponseFileImportStatus(db, optOutFileId, ImportFail); err != nil {
 				return createdRecords, fmt.Errorf(
@@ -108,7 +113,6 @@ func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutReco
 			createdRecords = append(createdRecords, &record)
 		}
 
-		// We're inserting all records in one batch, so if there wasn't an error they were all processed successfully
 		for _, record := range records {
 			record.Status = Accepted
 		}
