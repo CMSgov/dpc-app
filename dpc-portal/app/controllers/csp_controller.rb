@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Base controller to handle interactions with CSPs.
-class CspController < ApplicationController
+class CspController < ApplicationController # rubocop:disable Metrics/ClassLength
   include CspEmailSync
   include CspErrorHandling
 
@@ -64,7 +64,10 @@ class CspController < ApplicationController
                          actionType: LoggingConstants::ActionType::MergeUserAccountEmail,
                          **csp_log_context }])
     render(Page::ExistingAccount::AddEmailComponent.new(csp_user.user.email, csp_user.csp.name,
-                                                        update_path(csp_user, all_emails(auth), primary_email(auth))))
+                                                        update_path(id: csp_user.id,
+                                                                    csp: csp_user.csp.name,
+                                                                    all_emails: all_emails(auth),
+                                                                    primary_email: primary_email(auth))))
   end
 
   def render_ial1_blocked

@@ -2,8 +2,14 @@
 
 # Handles CSP emails
 module CspEmailSync
-  def update(csp_user, all_emails, primary_email)
-    sync_csp_emails(csp_user, all_emails, primary_email)
+  def update
+    all_params = %i[id csp all_emails primary_email]
+
+    if all_params.all? { |key| params.key?(key) }
+      csp_user = CspUser.find_by(id: params[:id], csp: params[:csp])
+      sync_csp_emails(csp_user, params[:all_emails], params[:primary_email])
+    end
+
     redirect_to root_url
   end
 
