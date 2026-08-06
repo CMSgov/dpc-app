@@ -43,6 +43,7 @@ module LoggingConstants
     ApiBlocked = 'ApiBlocked'
     AoHasWaiver = 'AoHasWaiver'
     OrgHasWaiver = 'OrgHasWaiver'
+    MultiUserMatch = 'MultiUserMatch'
 
     HealthCheckPassed = 'HealthCheckPassed'
     HealthCheckFailed = 'HealthCheckFailed'
