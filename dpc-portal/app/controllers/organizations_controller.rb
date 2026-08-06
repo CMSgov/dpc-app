@@ -33,10 +33,6 @@ class OrganizationsController < ApplicationController
                                                          cur_org_status))
   end
 
-  def new
-    render(Page::Organization::NewOrganizationComponent.new)
-  end
-
   def create
     @organization = ProviderOrganization.find_or_create_by(npi: params[:npi]) do |org|
       org.name = CpiApiGatewayClient.new.org_info(params[:npi]).dig('provider', 'orgName')
