@@ -33,16 +33,6 @@ class OrganizationsController < ApplicationController
                                                          cur_org_status))
   end
 
-  def create
-    @organization = ProviderOrganization.find_or_create_by(npi: params[:npi]) do |org|
-      org.name = CpiApiGatewayClient.new.org_info(params[:npi]).dig('provider', 'orgName')
-    end
-
-    @ao_org_link = AoOrgLink.find_or_create_by(user: current_user, provider_organization: @organization)
-
-    create_response
-  end
-
   def tos_form
     render(Page::Organization::TosFormComponent.new(@organization))
   end
@@ -75,18 +65,6 @@ class OrganizationsController < ApplicationController
 
   def organization_id
     params[:id]
-  end
-
-  def create_response
-    if @ao_org_link.errors.present?
-      log_link_error
-      flash[:alert] = 'System Error: unable to create link'
-      redirect_to organizations_path
-    elsif @organization.terms_of_service_accepted_at.present?
-      redirect_to success_organization_path(@organization)
-    else
-      redirect_to tos_form_organization_path(@organization)
-    end
   end
 
   def log_link_error
