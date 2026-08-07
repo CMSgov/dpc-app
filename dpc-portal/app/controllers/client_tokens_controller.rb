@@ -30,7 +30,7 @@ class ClientTokensController < ApplicationController
   def destroy
     manager = ClientTokenManager.new(@organization.dpc_api_organization_id)
     sanitized_id = sanitize_uid(params[:id])
-    if manager.delete_client_token(id: sanitized_id)
+    if sanitized_id && manager.delete_client_token(id: sanitized_id)
       flash[:success] = 'Client token deleted successfully.'
       log_credential_action(:client_token, sanitized_id, :remove)
     else

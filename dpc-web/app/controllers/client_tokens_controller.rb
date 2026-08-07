@@ -33,7 +33,7 @@ class ClientTokensController < ApplicationController
 
     manager = ClientTokenManager.new(registered_organization: reg_org)
     sanitized_id = sanitize_uid(params[:id])
-    if manager.delete_client_token(id: sanitized_id)
+    if sanitized_id && manager.delete_client_token(id: sanitized_id)
       flash[:notice] = 'Client token successfully deleted.'
       redirect_to root_path
     else

@@ -18,11 +18,11 @@ class PublicKeysController < ApplicationController
 
     manager = PublicKeyManager.new(registered_organization: reg_org)
     sanitized_id = sanitize_uid(params[:id])
-    if manager.delete_public_key(id: sanitized_id)
+    if sanitized_id && manager.delete_public_key(id: sanitized_id)
       flash[:notice] = 'Public token successfully deleted.'
       redirect_to root_path
     else
-      render_error 'Public token could not be deleted.'
+      render_error 'Public key could not be deleted.'
     end
   end
 

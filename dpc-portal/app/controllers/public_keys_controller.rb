@@ -39,13 +39,13 @@ class PublicKeysController < ApplicationController
   def destroy
     manager = PublicKeyManager.new(@organization.dpc_api_organization_id)
     sanitized_id = sanitize_uid(params[:id])
-    if manager.delete_public_key(sanitized_id)
+    if sanitized_id && manager.delete_public_key(sanitized_id)
       log_credential_action(:public_key, sanitized_id, :remove)
       flash[:success] = 'Public key deleted successfully.'
-      redirect_to organization_path(@organization, credential_start: true)
     else
       flash[:alert] = 'Public key could not be deleted.'
     end
+    redirect_to organization_path(@organization, credential_start: true)
   end
 
   def download_snippet
