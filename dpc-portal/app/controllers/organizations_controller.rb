@@ -46,10 +46,6 @@ class OrganizationsController < ApplicationController
     redirect_to organization_path(@organization)
   end
 
-  def success
-    render(Page::Organization::NewOrganizationSuccessComponent.new(@organization))
-  end
-
   private
 
   def organization_id
