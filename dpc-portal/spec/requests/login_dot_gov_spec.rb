@@ -15,7 +15,7 @@ RSpec.describe 'LoginDotGov', type: :request do
       { uid: uuid,
         credentials: { expires_in: 899,
                        token: },
-        info: { email: 'bob2@example.com' },
+        info: { email: 'bob@example.com' },
         extra: { raw_info: { given_name: 'Bob',
                              family_name: 'Hoskins',
                              social_security_number: '1-2-3',
@@ -68,6 +68,17 @@ RSpec.describe 'LoginDotGov', type: :request do
         expect(UserEmail.find(&:primary?).email).to eq 'email1@example.com'
         expect(UserEmail.count(&:primary?)).to eq 1
       end
+
+      it 'logs added emails' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(['New user email created',
+                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                       actionType: LoggingConstants::ActionType::AddNewUserEmail,
+                                                       csp: 'login_dot_gov' }])
+                                              .twice
+        post '/auth/login_dot_gov'
+        follow_redirect!
+      end
     end
 
     context 'should deactivate emails' do
@@ -77,7 +88,7 @@ RSpec.describe 'LoginDotGov', type: :request do
           :login_dot_gov,
           { uid: uuid,
             credentials: { expires_in: 899, token: },
-            info: { email: 'email1@example.com' },
+            info: { email: 'email@example.com' },
             extra: { raw_info: { given_name: 'Bob',
                                  family_name: 'Hoskins',
                                  social_security_number: '1-2-3',
@@ -97,6 +108,16 @@ RSpec.describe 'LoginDotGov', type: :request do
         expect(email.active).to eq false
         expect(email.deactivated_at).to_not be_nil
         expect(email.reactivated_at).to be_nil
+      end
+
+      it 'logs deactivated email' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(['User email deactivated',
+                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                       actionType: LoggingConstants::ActionType::DeactivateUserEmail,
+                                                       csp: 'login_dot_gov' }])
+        post '/auth/login_dot_gov'
+        follow_redirect!
       end
     end
 
@@ -129,6 +150,16 @@ RSpec.describe 'LoginDotGov', type: :request do
         expect(email.deactivated_at).to be_nil
         expect(email.reactivated_at).to_not be_nil
         expect(email.primary).to eq true
+      end
+
+      it 'logs reactivated email' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(['User email reactivated',
+                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                       actionType: LoggingConstants::ActionType::ReactivateUserEmail,
+                                                       csp: 'login_dot_gov' }])
+        post '/auth/login_dot_gov'
+        follow_redirect!
       end
     end
   end

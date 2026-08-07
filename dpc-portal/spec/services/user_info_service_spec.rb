@@ -2,13 +2,12 @@
 
 require 'spec_helper'
 require 'rails_helper'
-require 'support/login_support'
 
 describe UserInfoService do
   let(:service) { UserInfoService.new }
   let(:token) { 'bearer-token' }
   let(:exp) { 2.hours.from_now }
-  LoginSupport::CSP_MAP.each do |provider, display_name|
+  CspUtils::CODES_TO_DISPLAY.each do |provider, display_name|
     context "with #{display_name}" do
       context :valid_session do
         before do

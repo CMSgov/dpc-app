@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Base controller to handle interactions with CSPs.
-class CspController < ApplicationController
+class CspController < ApplicationController # rubocop:disable Metrics/ClassLength
   include CspEmailSync
   include CspErrorHandling
 
@@ -43,10 +43,30 @@ class CspController < ApplicationController
   def user_actions(auth, csp)
     csp_user = CspUser.find_by(uuid: auth.uid, csp:)
     user = csp_user&.user
+
     sign_in_and_log(user, csp.name)
-    sync_csp_emails(csp_user, all_emails(auth), primary_email(auth))
     ial_2_actions(user, auth)
+
+    return render_add_email(csp_user, auth) if csp_user && !email_match?(csp_user, auth)
+
+    sync_csp_emails(csp_user, all_emails(auth), primary_email(auth))
     redirect_to path(user, auth)
+  end
+
+  def email_match?(csp_user, auth)
+    csp_user.user_emails.empty? || csp_user.user_emails.map(&:email).include?(primary_email(auth))
+  end
+
+  def render_add_email(csp_user, auth)
+    Rails.logger.info(['User has existing account associated with different email',
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::MergeUserAccountEmail,
+                         **csp_log_context }])
+    render(Page::ExistingAccount::AddEmailComponent.new(csp_user.user.email, csp_user.csp.name,
+                                                        update_path(id: csp_user.id,
+                                                                    csp: csp_user.csp.id,
+                                                                    all_emails: all_emails(auth),
+                                                                    primary_email: primary_email(auth))))
   end
 
   def render_ial1_blocked
