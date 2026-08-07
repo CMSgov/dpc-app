@@ -2,13 +2,9 @@
 
 # Handles CSP emails
 module CspEmailSync
-  include ApplicationHelper
-
   # Alternative to login for add email flow
   def update
-    csp_user = CspUser.find_by(id: params[:id], csp: params[:csp])
-    current_user = User.find_by(id: session[:user])
-    return render plain: :forbidden, status: :forbidden unless csp_user&.user == current_user
+    return render plain: :forbidden, status: :forbidden unless authorized?
 
     sync_csp_emails(csp_user, params[:all_emails], params[:primary_email])
     redirect_to root_url
@@ -28,6 +24,15 @@ module CspEmailSync
   end
 
   private
+
+  def authorized?
+    current_user = User.find_by(id: session[:user])
+    csp_user&.user == current_user
+  end
+
+  def csp_user
+    @csp_user ||= CspUser.find_by(id: params[:id], csp: params[:csp])
+  end
 
   def add_or_activate_new_email(csp_user, new_emails, existing_emails)
     new_emails&.each do |new_email|
