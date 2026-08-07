@@ -27,7 +27,7 @@ module CspEmailSync
 
   def authorized?
     current_user = User.find_by(id: session[:user])
-    csp_user&.user == current_user
+    current_user == csp_user&.user
   end
 
   def csp_user

@@ -260,4 +260,47 @@ RSpec.shared_examples 'a CSP client' do |config|
                                                                                  invitation.id)
     end
   end
+
+  describe 'Post /update' do
+    context 'when user is not authorized' do
+      let(:user) { create(:user) }
+      let(:csp_user) { create(:csp_user, user:, uuid:, csp:) }
+      let(:params) { { id: csp_user.id, csp: csp.id, all_emails: %w[alice1@example.com alice2@example.com], primary_email: 'alice1@example.com' } }
+
+      context 'not logged in' do
+        it 'returns forbidden' do
+          post '/update', params: params
+          expect(response.status).to eq 403
+        end
+
+        it 'does not add emails' do
+          expect do
+            post '/update', params: params
+          end.to change { UserEmail.count }.by(0)
+        end
+      end
+
+      context 'different user logged in' do
+        before do
+          OmniAuth.config.test_mode = true
+          OmniAuth.config.add_mock(provider, csp_auth_response)
+
+          other_user = create(:user)
+          create(:csp_user, user: other_user, uuid: SecureRandom.uuid, csp:)
+          post auth_endpoint
+          follow_redirect!
+        end
+        it 'returns forbidden' do
+          post '/update', params: params
+          expect(response.status).to eq 403
+        end
+
+        it 'does not add emails' do
+          expect do
+            post '/update', params: params
+          end.to change { UserEmail.count }.by(0)
+        end
+      end
+    end
+  end
 end
