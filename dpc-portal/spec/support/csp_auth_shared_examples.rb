@@ -265,7 +265,10 @@ RSpec.shared_examples 'a CSP client' do |config|
     context 'when user is not authorized' do
       let(:user) { create(:user) }
       let(:csp_user) { create(:csp_user, user:, uuid:, csp:) }
-      let(:params) { { id: csp_user.id, csp: csp.id, all_emails: %w[alice1@example.com alice2@example.com], primary_email: 'alice1@example.com' } }
+      let(:params) do
+        { id: csp_user.id, csp: csp.id, all_emails: %w[alice1@example.com alice2@example.com],
+          primary_email: 'alice1@example.com' }
+      end
 
       context 'not logged in' do
         it 'returns forbidden' do
