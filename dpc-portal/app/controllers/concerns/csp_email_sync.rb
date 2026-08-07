@@ -2,6 +2,14 @@
 
 # Handles CSP emails
 module CspEmailSync
+  # Alternative to login for add email flow
+  def update
+    return render plain: :forbidden, status: :forbidden unless authorized?
+
+    sync_csp_emails(csp_user, params[:all_emails], params[:primary_email])
+    redirect_to root_url
+  end
+
   def sync_csp_emails(csp_user, new_emails, primary_email)
     return unless csp_user
 
@@ -17,11 +25,28 @@ module CspEmailSync
 
   private
 
+  def authorized?
+    current_user = User.find_by(id: session[:user])
+    current_user == csp_user&.user
+  end
+
+  def csp_user
+    @csp_user ||= CspUser.find_by(id: params[:id], csp: params[:csp])
+  end
+
   def add_or_activate_new_email(csp_user, new_emails, existing_emails)
     new_emails&.each do |new_email|
       existing_email = existing_emails.find { |e| e.email == new_email }
-      existing_email ? activate_email(existing_email) : UserEmail.create!(csp_user:, email: new_email, active: true)
+      existing_email ? activate_email(existing_email) : create_new_email(csp_user, new_email)
     end
+  end
+
+  def create_new_email(csp_user, email)
+    Rails.logger.info(['New user email created',
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::AddNewUserEmail,
+                         **csp_log_context }])
+    UserEmail.create!(csp_user:, email:, active: true)
   end
 
   def deactivate_old_email(new_emails, existing_emails)
@@ -29,6 +54,10 @@ module CspEmailSync
     existing_emails&.each do |existing_email|
       next if new_emails&.include?(existing_email.email)
 
+      Rails.logger.info(['User email deactivated',
+                         { actionContext: LoggingConstants::ActionContext::Authentication,
+                           actionType: LoggingConstants::ActionType::DeactivateUserEmail,
+                           **csp_log_context }])
       existing_email.update!(active: false, deactivated_at: Time.current, reactivated_at: nil)
     end
   end
@@ -36,11 +65,21 @@ module CspEmailSync
   def activate_email(user_email)
     return if user_email.active?
 
+    Rails.logger.info(['User email reactivated',
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::ReactivateUserEmail,
+                         **csp_log_context }])
     user_email.update!(active: true, deactivated_at: nil, reactivated_at: Time.current)
   end
 
   def update_primary_email(csp_user, primary_email)
     current_email = csp_user.user_emails.find_by(email: primary_email)
-    current_email&.update!(primary: true) unless current_email&.primary?
+    return if current_email&.primary?
+
+    Rails.logger.info(['User primary email updated',
+                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                         actionType: LoggingConstants::ActionType::UpdatePrimaryUserEmail,
+                         **csp_log_context }])
+    current_email&.update!(primary: true)
   end
 end

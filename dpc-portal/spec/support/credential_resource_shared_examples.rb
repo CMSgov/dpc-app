@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'support/login_support'
 
 RSpec.shared_examples 'a credential resource' do
-  LoginSupport::CSP_MAP.each do |provider, display_name|
+  CspUtils::CODES_TO_DISPLAY.each do |provider, display_name|
     describe 'POST /create' do
       context "using #{display_name}" do
         context 'as cd' do
