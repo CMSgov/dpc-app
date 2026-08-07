@@ -7,7 +7,7 @@ module OmniAuth
       def user_info
         @user_info ||= ::OpenIDConnect::ResponseObject::UserInfo.new(fetch_userinfo_payload)
       rescue => e
-        Rails.logger.error "[OIDC Patch Error] #{e.class}: #{e.message}"
+        Rails.logger.error('OIDC userinfo processing failed', exception_class: e.class.name)
         fail!(:user_info_failed, e)
         nil
       end
