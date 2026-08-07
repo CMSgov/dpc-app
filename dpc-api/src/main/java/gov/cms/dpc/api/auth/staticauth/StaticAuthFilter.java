@@ -38,6 +38,9 @@ public class StaticAuthFilter extends AuthFilter<DPCAuthCredentials, Organizatio
 
         final String headerString = requestContext.getHeaderString(ORG_HEADER);
         final String orgID = headerString == null ? DEFAULT_ORG_ID : headerString;
+        if (headerString == null) {
+            logger.warn("AUTHENTICATION IS DISABLED - do not use in production");
+        }
 
         // Now that we have the organization_id, set it in the logging context
         MDC.clear();
