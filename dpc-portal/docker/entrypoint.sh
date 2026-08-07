@@ -30,7 +30,7 @@ if [ "$1" == "portal" ]; then
   fi
 elif [ "$1" == "async" ]; then
   echo "Starting Solid Queue..."
-  if [[ "$ENV" == "production" ]]; then
+  if [[ "$ENV" == "prod" ]]; then
     echo "Starting in production"
     bundle exec rails solid_queue:start
   # For local, SolidQueue starts in same container
