@@ -52,6 +52,12 @@ Rails.application.configure do
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   config.force_ssl = true
+  # The load balancer health check comes in over http, so we need to exclude it.
+  config.ssl_options = {
+    redirect: {
+      exclude: ->(request) { request.path == "/health_check" }
+    }
+  }
 
   ## Disables log coloration
   config.colorize_logging = false
