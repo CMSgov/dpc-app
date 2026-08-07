@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require 'support/login_support'
 
 RSpec.describe Page::Utility::ErrorComponent, type: :component do
   include ComponentSupport
@@ -106,7 +105,7 @@ RSpec.describe Page::Utility::ErrorComponent, type: :component do
       end
     end
 
-    LoginSupport::CSP_MAP.each do |csp, display_name|
+    CspUtils::CODES_TO_DISPLAY.each do |csp, display_name|
       context "using #{display_name}" do
         context 'AO already accepted' do
           let(:component) { described_class.new(invitation, 'ao_accepted', csp:) }

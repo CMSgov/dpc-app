@@ -16,7 +16,7 @@ RSpec.describe 'ClientTokens', type: :request do
     let(:credential) { 'client_token' }
   end
 
-  LoginSupport::CSP_MAP.each do |provider, display_name|
+  CspUtils::CODES_TO_DISPLAY.each do |provider, display_name|
     context "using #{display_name}" do
       describe 'GET /new' do
         new_path = ->(org) { "/organizations/#{org.id}/client_tokens/new" }

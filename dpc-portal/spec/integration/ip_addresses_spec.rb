@@ -14,7 +14,7 @@ RSpec.describe 'IpAddresses', type: :request do
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let(:ipv4_address) { '136.226.19.87' }
 
-    LoginSupport::CSP_MAP.each do |provider, display_name|
+    CspUtils::CODES_TO_DISPLAY.each do |provider, display_name|
       context "using #{display_name}" do
         before do
           user = create_user_with_csp(csp: provider)

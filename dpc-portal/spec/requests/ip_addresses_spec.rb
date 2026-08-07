@@ -15,7 +15,7 @@ RSpec.describe 'IpAddresses', type: :request do
     let(:create_params) { { ip_address: '136.226.19.87' } }
   end
 
-  LoginSupport::CSP_MAP.each do |provider, display_name|
+  CspUtils::CODES_TO_DISPLAY.each do |provider, display_name|
     context "using #{display_name}" do
       describe 'GET /new' do
         new_path = ->(org) { "/organizations/#{org.id}/ip_addresses/new" }

@@ -2,11 +2,11 @@
   <div class="grid-row margin-x-neg-205 flex-justify-center">
     <div class="grid-col-12 mobile-lg:grid-col-10 tablet:grid-col-8 desktop:grid-col-6 padding-x-205 margin-bottom-4">
       <h1 class="desktop:display-none font-sans-lg margin-bottom-4 tablet:margin-top-neg-3">
-        Welcome to the DPC API Portal.
+        Welcome to the DPC Portal.
       </h1>
       <div class="bg-white padding-y-3 padding-x-5 border border-base-lighter">
         <h1 class="margin-bottom-0">DPC Portal sign in</h1>
-        <p>Sign in with your DPC Portal Login.gov account</p>
+        <p>You can access your account by signing in with one of the options below.</p>
         
         <%# Build a login button for each CSP %>
         <%
@@ -35,19 +35,20 @@
     <div class="grid-col-12 mobile-lg:grid-col-10 tablet:grid-col-8 desktop:grid-col-6 padding-x-205">
       <div class="border-top border-base-lighter padding-top-4 desktop:border-0 desktop:padding-top-0">
         <h2 class="display-none desktop:display-block margin-top-0">
-	  Welcome to the DPC API Portal.
-	</h2>
+          Welcome to the DPC Portal.
+        </h2>
         <div class="usa-prose">
-          <p>Have an invite?</p>
-          <ul class="sign-in-instructions">
-            <li>Sign in using the account you created from your invitation. We recommend choosing the same identity provider you used when you set up your account.</li>
-            <li>Be sure to use the same email address the invite was sent to.</li>
-          </ul>
-          <div class="line-separator margin-y-3"></div>
-          <p>New to DPC?</p>
-          <ul class="sign-in-instructions">
-            <li>Production access is invite-only, but you can start exploring right away with our Sandbox — a publicly available environment with synthetic test data and no invite required.</li>
-          </ul>
+          <p>Sign in with the email address you used when you registered for the DPC Portal. We recommend choosing the same identity provider you used when you set up your account.</p>
+        </div>
+        <div class="line-separator margin-y-3"></div>
+
+        <h3>Need help signing in?</h3>
+        <%= render(Core::Navigation::CspHelpLinksComponent.new) %>
+        <div class="line-separator margin-y-3"></div>
+
+        <h3>New to DPC?</h3>
+        <div class="usa-prose">
+          <p>Access to the DPC Portal is invite-only. Start exploring realistic test data now with the publicly available DPC Sandbox.</p>
           <div class="margin-top-3">
             <a href="https://sandbox.dpc.cms.gov/" class="usa-button--outline usa-button">Sign up for DPC Sandbox</a>
           </div>

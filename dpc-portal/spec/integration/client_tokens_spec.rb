@@ -14,7 +14,7 @@ RSpec.describe 'ClientTokens', type: :request do
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let(:label) { 'New Client Token' }
 
-    LoginSupport::CSP_MAP.each do |provider, display_name|
+    CspUtils::CODES_TO_DISPLAY.each do |provider, display_name|
       context "using #{display_name}" do
         before do
           user = create_user_with_csp(csp: provider)

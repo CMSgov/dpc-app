@@ -21,7 +21,7 @@ RSpec.describe 'PublicKeys', type: :request do
     let(:credential) { 'public_key' }
   end
 
-  LoginSupport::CSP_MAP.each do |provider, display_name|
+  CspUtils::CODES_TO_DISPLAY.each do |provider, display_name|
     context "using #{display_name}" do
       describe 'GET /new' do
         new_path = ->(org) { "/organizations/#{org.id}/public_keys/new" }
