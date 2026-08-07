@@ -105,6 +105,8 @@ func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutReco
 			return createdRecords, fmt.Errorf("insertConsentRecords: failed to insert to consent table: %w", err)
 		}
 
+		defer rows.Close()
+
 		for rows.Next() {
 			record := OptOutRecord{}
 			if err := rows.Scan(&record.ID, &record.MBI, &record.EffectiveDt, &record.PolicyCode, &record.OptOutFileID); err != nil {
@@ -117,6 +119,10 @@ func insertConsentRecords(db *sql.DB, optOutFileId string, records []*OptOutReco
 		// We're inserting all records in one batch, so if there wasn't an error they were all processed successfully
 		for _, record := range records {
 			record.Status = Accepted
+		}
+
+		if err := rows.Err(); err != nil {
+			return createdRecords, fmt.Errorf("insertConsentRecords: error iterating consent records: %w", err)
 		}
 
 		log.Info("Successfully inserted consent records.")
