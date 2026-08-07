@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   scheduled-code-checks:
-    name: 'Scheduled Code Checks for CDAP'
+    name: 'Scheduled Code Checks for DPC'
     uses: CMSGov/CDAP/.github/workflows/code-checks-snyk.yml@028524afd97e26370e0dd812faad64b9a2ad558b
     with:
       app: dpc
