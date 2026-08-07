@@ -61,10 +61,6 @@ class OrganizationsController < ApplicationController
     redirect_to organization_path(@organization)
   end
 
-  def success
-    render(Page::Organization::NewOrganizationSuccessComponent.new(@organization))
-  end
-
   def check_npi
     @npi_error = if params[:npi].blank?
                    "Can't be blank"

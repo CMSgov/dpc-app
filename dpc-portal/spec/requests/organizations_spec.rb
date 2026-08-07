@@ -285,14 +285,6 @@ RSpec.describe 'Organizations', type: :request do
           let!(:user) { create_user_with_csp(csp: provider) }
           before { sign_in user, csp: provider }
 
-          context 'GET /organizations/new' do
-            it 'returns success' do
-              SecureRandom.uuid
-              get '/organizations/new'
-              expect(response).to be_ok
-            end
-          end
-
           context 'POST /organizations' do
             context 'with valid input' do
               it 'creates new org if none exists' do
@@ -413,19 +405,6 @@ RSpec.describe 'Organizations', type: :request do
             end
           end
 
-          context 'GET /organizations/[organization_id]/success' do
-            it 'shows success page' do
-              org = create(:provider_organization)
-              create(:ao_org_link, provider_organization: org, user:)
-              get "/organizations/#{org.id}/success"
-              expect(response).to be_ok
-            end
-
-            it 'fails if no org' do
-              get '/organizations/fake-org/success'
-              expect(response).to be_not_found
-            end
-          end
         end
       end
     end
