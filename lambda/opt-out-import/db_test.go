@@ -338,105 +338,105 @@ func TestIntegrationToken(t *testing.T) {
 }
 
 func TestInsertConsentRecords_ParameterizedArgs(t *testing.T) {
-    db, mock, err := sqlmock.New()
-    if err != nil {
-        t.Fatalf("Unexpected error when opening a mock database %s", err)
-    }
-    defer db.Close()
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Unexpected error when opening a mock database %s", err)
+	}
+	defer db.Close()
 
-    fileId := "test_id"
-    records := []*OptOutRecord{
-        {ID: "rec-1", MBI: "1SJ0A00AA00", PolicyCode: "OPTOUT"},
-    }
+	fileId := "test_id"
+	records := []*OptOutRecord{
+		{ID: "rec-1", MBI: "1SJ0A00AA00", PolicyCode: "OPTOUT"},
+	}
 
-    rows := []string{"id", "mbi", "effective_date", "policy_code", "opt_out_file_id"}
-    // Verify the query receives args and does NOT have raw values in the SQL string
-    mock.ExpectQuery("INSERT INTO consent").
-        WithArgs("rec-1", "1SJ0A00AA00", "OPTOUT", fileId).
-        WillReturnRows(sqlmock.NewRows(rows).
-            AddRow("rec-1", "1SJ0A00AA00", time.Date(2019, 7, 1, 0, 0, 0, 0, time.UTC), "OPTOUT", fileId))
+	rows := []string{"id", "mbi", "effective_date", "policy_code", "opt_out_file_id"}
+	// Verify the query receives args and does NOT have raw values in the SQL string
+	mock.ExpectQuery("INSERT INTO consent").
+		WithArgs("rec-1", "1SJ0A00AA00", "OPTOUT", fileId).
+		WillReturnRows(sqlmock.NewRows(rows).
+			AddRow("rec-1", "1SJ0A00AA00", time.Date(2019, 7, 1, 0, 0, 0, 0, time.UTC), "OPTOUT", fileId))
 
-    rows2 := []string{"id", "import_status"}
-    mock.ExpectQuery("UPDATE opt_out_file").
-        WithArgs(ImportComplete, fileId).
-        WillReturnRows(sqlmock.NewRows(rows2).AddRow(fileId, ImportComplete))
+	rows2 := []string{"id", "import_status"}
+	mock.ExpectQuery("UPDATE opt_out_file").
+		WithArgs(ImportComplete, fileId).
+		WillReturnRows(sqlmock.NewRows(rows2).AddRow(fileId, ImportComplete))
 
-    results, err := insertConsentRecords(db, fileId, records)
-    assert.NoError(t, err)
-    assert.Equal(t, 1, len(results))
-    assert.Equal(t, Accepted, results[0].Status)
+	results, err := insertConsentRecords(db, fileId, records)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(results))
+	assert.Equal(t, Accepted, results[0].Status)
 }
 
 func TestInsertConsentRecords_SQLInjectionAttempt(t *testing.T) {
-    db, mock, err := sqlmock.New()
-    if err != nil {
-        t.Fatalf("Unexpected error when opening a mock database %s", err)
-    }
-    defer db.Close()
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Unexpected error when opening a mock database %s", err)
+	}
+	defer db.Close()
 
-    fileId := "test_id"
-    // Malicious input that would break a string-interpolated query
-    records := []*OptOutRecord{
-        {ID: "rec-1", MBI: "'); DROP TABLE consent;--", PolicyCode: "OPTOUT"},
-    }
+	fileId := "test_id"
+	// Malicious input that would break a string-interpolated query
+	records := []*OptOutRecord{
+		{ID: "rec-1", MBI: "'); DROP TABLE consent;--", PolicyCode: "OPTOUT"},
+	}
 
-    rows := []string{"id", "mbi", "effective_date", "policy_code", "opt_out_file_id"}
-    // With parameterized queries the malicious string is treated as a plain value
-    mock.ExpectQuery("INSERT INTO consent").
-        WithArgs("rec-1", "'); DROP TABLE consent;--", "OPTOUT", fileId).
-        WillReturnRows(sqlmock.NewRows(rows).
-            AddRow("rec-1", "'); DROP TABLE consent;--", time.Now(), "OPTOUT", fileId))
+	rows := []string{"id", "mbi", "effective_date", "policy_code", "opt_out_file_id"}
+	// With parameterized queries the malicious string is treated as a plain value
+	mock.ExpectQuery("INSERT INTO consent").
+		WithArgs("rec-1", "'); DROP TABLE consent;--", "OPTOUT", fileId).
+		WillReturnRows(sqlmock.NewRows(rows).
+			AddRow("rec-1", "'); DROP TABLE consent;--", time.Now(), "OPTOUT", fileId))
 
-    rows2 := []string{"id", "import_status"}
-    mock.ExpectQuery("UPDATE opt_out_file").
-        WithArgs(ImportComplete, fileId).
-        WillReturnRows(sqlmock.NewRows(rows2).AddRow(fileId, ImportComplete))
+	rows2 := []string{"id", "import_status"}
+	mock.ExpectQuery("UPDATE opt_out_file").
+		WithArgs(ImportComplete, fileId).
+		WillReturnRows(sqlmock.NewRows(rows2).AddRow(fileId, ImportComplete))
 
-    results, err := insertConsentRecords(db, fileId, records)
-    assert.NoError(t, err)
-    assert.Equal(t, 1, len(results))
-    assert.Equal(t, Accepted, results[0].Status)
+	results, err := insertConsentRecords(db, fileId, records)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(results))
+	assert.Equal(t, Accepted, results[0].Status)
 }
 
 func TestInsertConsentRecords_MultipleRecordsParamOffsets(t *testing.T) {
-    db, mock, err := sqlmock.New()
-    if err != nil {
-        t.Fatalf("Unexpected error when opening a mock database %s", err)
-    }
-    defer db.Close()
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Unexpected error when opening a mock database %s", err)
+	}
+	defer db.Close()
 
-    fileId := "test_id"
-    records := []*OptOutRecord{
-        {ID: "rec-1", MBI: "1SJ0A00AA00", PolicyCode: "OPTOUT"},
-        {ID: "rec-2", MBI: "2SJ0A00AA00", PolicyCode: "OPTIN"},
-        {ID: "rec-3", MBI: "3SJ0A00AA00", PolicyCode: "OPTOUT"},
-    }
+	fileId := "test_id"
+	records := []*OptOutRecord{
+		{ID: "rec-1", MBI: "1SJ0A00AA00", PolicyCode: "OPTOUT"},
+		{ID: "rec-2", MBI: "2SJ0A00AA00", PolicyCode: "OPTIN"},
+		{ID: "rec-3", MBI: "3SJ0A00AA00", PolicyCode: "OPTOUT"},
+	}
 
-    rows := []string{"id", "mbi", "effective_date", "policy_code", "opt_out_file_id"}
-    // All 3 records' args passed in order: rec1 args, rec2 args, rec3 args
-    mock.ExpectQuery("INSERT INTO consent").
-        WithArgs(
-            "rec-1", "1SJ0A00AA00", "OPTOUT", fileId,
-            "rec-2", "2SJ0A00AA00", "OPTIN", fileId,
-            "rec-3", "3SJ0A00AA00", "OPTOUT", fileId,
-        ).
-        WillReturnRows(sqlmock.NewRows(rows).
-            AddRow("rec-1", "1SJ0A00AA00", time.Now(), "OPTOUT", fileId).
-            AddRow("rec-2", "2SJ0A00AA00", time.Now(), "OPTIN", fileId).
-            AddRow("rec-3", "3SJ0A00AA00", time.Now(), "OPTOUT", fileId))
+	rows := []string{"id", "mbi", "effective_date", "policy_code", "opt_out_file_id"}
+	// All 3 records' args passed in order: rec1 args, rec2 args, rec3 args
+	mock.ExpectQuery("INSERT INTO consent").
+		WithArgs(
+			"rec-1", "1SJ0A00AA00", "OPTOUT", fileId,
+			"rec-2", "2SJ0A00AA00", "OPTIN", fileId,
+			"rec-3", "3SJ0A00AA00", "OPTOUT", fileId,
+		).
+		WillReturnRows(sqlmock.NewRows(rows).
+			AddRow("rec-1", "1SJ0A00AA00", time.Now(), "OPTOUT", fileId).
+			AddRow("rec-2", "2SJ0A00AA00", time.Now(), "OPTIN", fileId).
+			AddRow("rec-3", "3SJ0A00AA00", time.Now(), "OPTOUT", fileId))
 
-    rows2 := []string{"id", "import_status"}
-    mock.ExpectQuery("UPDATE opt_out_file").
-        WithArgs(ImportComplete, fileId).
-        WillReturnRows(sqlmock.NewRows(rows2).AddRow(fileId, ImportComplete))
+	rows2 := []string{"id", "import_status"}
+	mock.ExpectQuery("UPDATE opt_out_file").
+		WithArgs(ImportComplete, fileId).
+		WillReturnRows(sqlmock.NewRows(rows2).AddRow(fileId, ImportComplete))
 
-    results, err := insertConsentRecords(db, fileId, records)
-    assert.NoError(t, err)
-    assert.Equal(t, 3, len(results))
-    for _, result := range results {
-        assert.Equal(t, Accepted, result.Status)
-    }
-    for _, record := range records {
-        assert.Equal(t, Accepted, record.Status)
-    }
+	results, err := insertConsentRecords(db, fileId, records)
+	assert.NoError(t, err)
+	assert.Equal(t, 3, len(results))
+	for _, result := range results {
+		assert.Equal(t, Accepted, result.Status)
+	}
+	for _, record := range records {
+		assert.Equal(t, Accepted, record.Status)
+	}
 }
