@@ -18,7 +18,7 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root 'organizations#index'
 
-  resources :organizations, only: [:index, :show, :new, :create] do
+  resources :organizations, only: [:index, :show] do
     resources :client_tokens, only: [:new, :create, :destroy]
     resources :public_keys, only: [:new, :create, :destroy]
     resources :ip_addresses, only: [:new, :create, :destroy]
