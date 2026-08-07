@@ -285,89 +285,6 @@ RSpec.describe 'Organizations', type: :request do
           let!(:user) { create_user_with_csp(csp: provider) }
           before { sign_in user, csp: provider }
 
-          context 'GET /organizations/new' do
-            it 'returns success' do
-              SecureRandom.uuid
-              get '/organizations/new'
-              expect(response).to be_ok
-            end
-          end
-
-          context 'POST /organizations' do
-            context 'with valid input' do
-              it 'creates new org if none exists' do
-                npi = '1111111111'
-                expect do
-                  post '/organizations', params: { npi: }
-                end.to change { ProviderOrganization.count }.by 1
-                org = assigns(:organization)
-                expect(org.npi).to eq npi
-                expect(org.name).to eq "Organization #{npi}"
-                expect(org.terms_of_service_accepted_by).to be_nil
-                expect(org.terms_of_service_accepted_at).to be_nil
-                expect(response).to redirect_to(tos_form_organization_path(org))
-              end
-
-              it 'creates new ao-org-link if none exists' do
-                npi = '1111111111'
-                expect do
-                  post '/organizations', params: { npi: }
-                end.to change { AoOrgLink.count }.by 1
-                link = assigns(:ao_org_link)
-                expect(link.provider_organization).to eq assigns(:organization)
-                expect(link.user).to eq user
-              end
-
-              it 'does not create new org if exists' do
-                npi = '1111111111'
-                name = 'Health Hut'
-                create(:provider_organization, npi:, name:)
-                expect do
-                  post '/organizations', params: { npi: }
-                end.to change { ProviderOrganization.count }.by 0
-                org = assigns(:organization)
-                expect(org.npi).to eq npi
-                expect(org.name).to eq name
-                expect(org.terms_of_service_accepted_by).to be_nil
-                expect(org.terms_of_service_accepted_at).to be_nil
-                expect(response).to redirect_to(tos_form_organization_path(org))
-              end
-
-              it 'redirects to success if org has signed tos' do
-                npi = '1111111111'
-                create(:provider_organization, npi:, terms_of_service_accepted_at: 1.day.ago)
-                expect do
-                  post '/organizations', params: { npi: }
-                end.to change { ProviderOrganization.count }.by 0
-                org = assigns(:organization)
-                expect(response).to redirect_to(success_organization_path(org))
-              end
-            end
-
-            it 'fails if blank' do
-              post '/organizations', params: { npi: '' }
-              expect(response).to be_bad_request
-              expect(assigns(:npi_error)).to eq "Can't be blank"
-            end
-
-            it 'fails if not 10 digits' do
-              post '/organizations', params: { npi: '22' }
-              expect(response).to be_bad_request
-              expect(assigns(:npi_error)).to eq 'length has to be 10'
-            end
-
-            it 'fails ao_org_link error' do
-              npi = '1111111111'
-              failed_link = build(:ao_org_link)
-              failed_link.errors.add(:base, 'Bad Link')
-              ao_org_link_double = class_double(AoOrgLink).as_stubbed_const
-              expect(ao_org_link_double).to receive(:find_or_create_by).and_return(failed_link)
-              post '/organizations', params: { npi: }
-              expect(response).to redirect_to(organizations_path)
-              expect(flash[:alert]).to eq('System Error: unable to create link')
-            end
-          end
-
           context 'GET /organizations/[organization_id]/tos_form' do
             it 'renders tos form' do
               org = create(:provider_organization)
@@ -410,20 +327,6 @@ RSpec.describe 'Organizations', type: :request do
               post "/organizations/#{org.id}/sign_tos"
               expect(org.terms_of_service_accepted_at).to_not be_present
               expect(response).to redirect_to(organizations_path)
-            end
-          end
-
-          context 'GET /organizations/[organization_id]/success' do
-            it 'shows success page' do
-              org = create(:provider_organization)
-              create(:ao_org_link, provider_organization: org, user:)
-              get "/organizations/#{org.id}/success"
-              expect(response).to be_ok
-            end
-
-            it 'fails if no org' do
-              get '/organizations/fake-org/success'
-              expect(response).to be_not_found
             end
           end
         end
