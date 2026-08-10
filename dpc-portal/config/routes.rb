@@ -15,10 +15,12 @@ Rails.application.routes.draw do
   get '/auth/login_dot_gov/callback', to: 'login_dot_gov#openid_connect'
   get '/auth/clear/callback', to: 'clear#openid_connect'
 
+  post '/update', to: 'csp#update'
+
   # Defines the root path route ("/")
   root 'organizations#index'
 
-  resources :organizations, only: [:index, :show, :new, :create] do
+  resources :organizations, only: [:index, :show] do
     resources :client_tokens, only: [:new, :create, :destroy]
     resources :public_keys, only: [:new, :create, :destroy]
     resources :ip_addresses, only: [:new, :create, :destroy]
@@ -36,7 +38,6 @@ Rails.application.routes.draw do
     end
     get 'tos_form', on: :member
     post 'sign_tos', on: :member
-    get 'success', on: :member
   end
 
   match '/download_snippet', to: 'public_keys#download_snippet', as: 'download_snippet', via: :post
