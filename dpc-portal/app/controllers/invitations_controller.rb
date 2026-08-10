@@ -284,6 +284,7 @@ class InvitationsController < ApplicationController
       logger.error(['Multiple user matches', {
                      actionContext: LoggingConstants::ActionContext::Registration,
                      actionType: LoggingConstants::ActionType::MultiUserMatch,
+                     invitation: @invitation.id,
                      **csp_log_context
                    }])
       raise MultiUserMatchError, 'too many matching users'
@@ -314,6 +315,7 @@ class InvitationsController < ApplicationController
       logger.error(['Multiple user matches', {
                      actionContext: LoggingConstants::ActionContext::Registration,
                      actionType: LoggingConstants::ActionType::MultiUserMatch,
+                     invitation: @invitation.id,
                      **csp_log_context
                    }])
       raise MultiUserMatchError, 'too many matching users'

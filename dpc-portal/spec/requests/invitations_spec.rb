@@ -1041,6 +1041,22 @@ RSpec.describe 'Invitations', type: :request do
               dup_csp_user = create(:csp_user, user: dup_user, csp:, uuid: SecureRandom.uuid)
               create(:user_email, csp_user: dup_csp_user, email: user_info_template['email'], primary: true)
 
+              expect(Rails.logger).to receive(:error).with(
+                ['Multiple user matches', {
+                  actionContext: LoggingConstants::ActionContext::Registration,
+                  actionType: LoggingConstants::ActionType::MultiUserMatch,
+                  csp: provider.to_s,
+                  invitation: invitation.id
+                }]
+              )
+
+              expect(Rails.logger).to receive(:error).with(
+                ['User matches too many existing users', hash_including(
+                  actionContext: LoggingConstants::ActionContext::Registration,
+                  error: 'too many matching users'
+                )]
+              )
+
               post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
               expect(response.body).to include(I18n.t('verification.multi_user_match_text'))
             end
