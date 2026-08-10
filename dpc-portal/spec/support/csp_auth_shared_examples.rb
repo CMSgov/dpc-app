@@ -116,6 +116,16 @@ RSpec.shared_examples 'a CSP client' do |config|
         orig_csp = Csp.find_by(name: orig_csp_name) || create(:csp, name: orig_csp_name)
         csp_user = create(:csp_user, user:, uuid:, csp: orig_csp)
         create(:user_email, csp_user:, email:, primary: true, active: true)
+
+        OmniAuth.config.add_mock(orig_csp_name, csp_auth_response)
+        stub_request(:get, CspUtils.user_info_url(provider))
+          .with(headers: { Authorization: "Bearer #{token}" })
+          .to_return(body: csp_auth_response.to_json, status: 200)
+        stub_request(:get, CspUtils.user_info_url(orig_csp_name))
+          .with(headers: { Authorization: "Bearer #{token}" })
+          .to_return(body: csp_auth_response.to_json, status: 200)
+        post "/auth/#{orig_csp_name}"
+        follow_redirect!
       end
       context 'SSN matches' do
         it 'renders the link account component' do
@@ -125,7 +135,7 @@ RSpec.shared_examples 'a CSP client' do |config|
           expect(response.body).to include('Existing account found')
           expect(response.body).to include(EmailMask.masked(email))
           expect(response.body).to include(CspUtils.display_name(orig_csp_name))
-          expect(response.body).to include('Add new email')
+          expect(response.body).to include('Link to existing account')
           expect(response.body).to include("/auth/#{orig_csp_name}")
         end
 
@@ -134,7 +144,7 @@ RSpec.shared_examples 'a CSP client' do |config|
           expect(Rails.logger).to receive(:info).with(['User has existing account associated with different CSP',
                                                        { actionContext: LoggingConstants::ActionContext::Authentication,
                                                          actionType: LoggingConstants::ActionType::MergeUserAccountCsp,
-                                                         csp: csp_name }])
+                                                         csp: orig_csp_name }])
           post auth_endpoint
           follow_redirect!
         end

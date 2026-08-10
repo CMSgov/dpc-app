@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Handles merging existing emails and accounts
 module CspExistingAccount
   extend ActiveSupport::Concern
 
@@ -9,11 +10,9 @@ module CspExistingAccount
     return render_add_email(csp_user, auth) if csp_user && !email_match?(csp_user, auth)
 
     orig_csp_user = existing_account(auth)
-    return render_link_account(primary_email(auth), orig_csp_user.csp) if orig_csp_user.present?
+    return render_link_account(primary_email(auth), orig_csp_user.csp.name) if orig_csp_user.present?
 
-    # check for other active CSPs, fetch userinfo for each and verify all SSNs match, create CspUser for current_user
-    check_csp_session(orig_csp_user, auth.uid)
-
+    check_csp_session(orig_csp_user&.user, auth.uid)
     sync_and_redirect(csp_user, auth)
   end
 
@@ -31,7 +30,7 @@ module CspExistingAccount
     return nil unless email
 
     csp_user = email.csp_user
-    return nil unless csp_user.csp == auth.provider.to_sym
+    return nil if csp_user.csp.name == auth.provider.to_s
 
     csp_user if name_match?(csp_user.user, auth)
   end
@@ -52,7 +51,7 @@ module CspExistingAccount
     Rails.logger.info(['User has existing account associated with different CSP',
                        { actionContext: LoggingConstants::ActionContext::Authentication,
                          actionType: LoggingConstants::ActionType::MergeUserAccountCsp,
-                         **csp_log_context }])
+                         csp: }])
     render(Page::ExistingAccount::LinkAccountComponent.new(email, csp))
   end
 
@@ -70,10 +69,12 @@ module CspExistingAccount
   end
 
   def ssn(user_info)
-    user_info['social_security_number'] || user_info['ssn']
+    user_info.dig('extra', 'raw_info', 'social_security_number') ||
+      user_info.dig('extra', 'raw_info', 'ssn')
   end
 
   def create_csp_user(user, uuid)
-    CspUser.find_or_create_by!(user:, csp: csp_session.current, uuid:)
+    csp = Csp.find_by(name: csp_session.current)
+    CspUser.find_or_create_by!(user:, csp:, uuid:)
   end
 end

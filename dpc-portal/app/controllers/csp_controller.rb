@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Base controller to handle interactions with CSPs.
-class CspController < ApplicationController # rubocop:disable Metrics/ClassLength
+class CspController < ApplicationController
   include CspEmailSync
   include CspErrorHandling
   include CspExistingAccount
