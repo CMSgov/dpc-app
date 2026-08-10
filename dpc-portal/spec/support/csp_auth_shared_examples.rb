@@ -111,23 +111,23 @@ RSpec.shared_examples 'a CSP client' do |config|
     context 'user exists with different CSP' do
       let(:email) { 'bob@example.com' }
       let(:orig_csp_name) { (CspUtils::CODES_TO_DISPLAY.keys - [provider]).sample.to_s }
-      before do
-        user = create(:user)
-        orig_csp = Csp.find_by(name: orig_csp_name) || create(:csp, name: orig_csp_name)
-        csp_user = create(:csp_user, user:, uuid:, csp: orig_csp)
-        create(:user_email, csp_user:, email:, primary: true, active: true)
-
-        OmniAuth.config.add_mock(orig_csp_name, csp_auth_response)
-        stub_request(:get, CspUtils.user_info_url(provider))
-          .with(headers: { Authorization: "Bearer #{token}" })
-          .to_return(body: csp_auth_response.to_json, status: 200)
-        stub_request(:get, CspUtils.user_info_url(orig_csp_name))
-          .with(headers: { Authorization: "Bearer #{token}" })
-          .to_return(body: csp_auth_response.to_json, status: 200)
-        post "/auth/#{orig_csp_name}"
-        follow_redirect!
-      end
       context 'SSN matches' do
+        before do
+          user = create(:user)
+          orig_csp = Csp.find_by(name: orig_csp_name) || create(:csp, name: orig_csp_name)
+          csp_user = create(:csp_user, user:, uuid:, csp: orig_csp)
+          create(:user_email, csp_user:, email:, primary: true, active: true)
+
+          stub_request(:get, CspUtils.user_info_url(provider))
+            .with(headers: { Authorization: "Bearer #{token}" })
+            .to_return(body: csp_auth_response.to_json, status: 200)
+          stub_request(:get, CspUtils.user_info_url(orig_csp_name))
+            .with(headers: { Authorization: "Bearer #{token}" })
+            .to_return(body: csp_auth_response.to_json, status: 200)
+          OmniAuth.config.add_mock(orig_csp_name, csp_auth_response)
+          post "/auth/#{orig_csp_name}"
+          follow_redirect!
+        end
         it 'renders the link account component' do
           post auth_endpoint
           follow_redirect!
@@ -148,19 +148,63 @@ RSpec.shared_examples 'a CSP client' do |config|
           post auth_endpoint
           follow_redirect!
         end
+
+        it 'creates a new CspUser for the current CSP' do
+          expect { post auth_endpoint }.to change(CspUser, :count).by(1)
+        end
+
+        it 'redirects to organizations path' do
+          post auth_endpoint
+          follow_redirect!
+          expect(response).to be_ok
+          post "/auth/#{orig_csp_name}"
+          follow_redirect!
+          expect(response).to redirect_to(organizations_path)
+        end
+
+        it 'should sign in a user' do
+          post auth_endpoint
+          follow_redirect!
+          post "/auth/#{orig_csp_name}"
+          follow_redirect!
+          expect(response.location).to eq organizations_url
+          expect(response).to be_redirect
+          follow_redirect!
+          expect(response).to be_ok
+        end
       end
 
       context 'SSN does not match' do
+        let(:social_security_number) { '4-5-6' }
+        let(:ssn_mismatch_response) { csp_auth_response.deep_merge(extra: { raw_info: { social_security_number: } }) }
         before do
           user = create(:user)
-          orig_csp = create(:csp, name: orig_csp_name)
+          orig_csp = Csp.find_by(name: orig_csp_name) || create(:csp, name: orig_csp_name)
           csp_user = create(:csp_user, user:, uuid:, csp: orig_csp)
-          create(:user_email, csp_user:, email: 'original@example.com', active: true)
+          create(:user_email, csp_user:, email:, primary: true, active: true)
 
-          puts csp_auth_response.inspect
-          csp_auth_response.extra.raw_info.social_security_number = '4-5-6'
-          OmniAuth.config.add_mock(orig_csp_name, csp_auth_response)
-          csp_session.store(csp: orig_csp_name, token: 'original-token', token_exp: 2.days.from_now)
+          stub_request(:get, CspUtils.user_info_url(provider))
+            .with(headers: { Authorization: "Bearer #{token}" })
+            .to_return(body: csp_auth_response.to_json, status: 200)
+          stub_request(:get, CspUtils.user_info_url(orig_csp_name))
+            .with(headers: { Authorization: "Bearer #{token}" })
+            .to_return(body: ssn_mismatch_response.to_json, status: 200)
+          OmniAuth.config.add_mock(orig_csp_name, ssn_mismatch_response)
+          post "/auth/#{orig_csp_name}"
+          follow_redirect!
+        end
+
+        it 'does not redirect to organizations path' do
+          expect { post auth_endpoint }.to raise_error('SSN mismatch')
+          expect(response).not_to redirect_to(organizations_path)
+        end
+
+        it 'does not create a new CspUser' do
+          expect { post auth_endpoint }.not_to change(CspUser, :count)
+        end
+
+        it 'raises an SSN mismatch error' do
+          expect { post auth_endpoint }.to raise_error('SSN mismatch')
         end
       end
     end

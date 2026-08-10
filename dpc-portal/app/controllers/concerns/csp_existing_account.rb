@@ -26,12 +26,12 @@ module CspExistingAccount
   end
 
   def existing_account(auth)
-    email = UserEmail.includes(csp_user: :user).find_by(email: primary_email(auth))
+    email = UserEmail.includes(csp_user: :user)
+                     .where(email: [primary_email(auth), *all_emails(auth)])
+                     .find { |email| email.csp_user.csp.name != auth.provider.to_s }
     return nil unless email
 
     csp_user = email.csp_user
-    return nil if csp_user.csp.name == auth.provider.to_s
-
     csp_user if name_match?(csp_user.user, auth)
   end
 
@@ -75,6 +75,6 @@ module CspExistingAccount
 
   def create_csp_user(user, uuid)
     csp = Csp.find_by(name: csp_session.current)
-    CspUser.find_or_create_by!(user:, csp:, uuid:)
+    CspUser.create!(user:, csp:, uuid:)
   end
 end
