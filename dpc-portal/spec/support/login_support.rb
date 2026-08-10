@@ -3,12 +3,6 @@
 require 'securerandom'
 
 module LoginSupport
-  CSP_MAP = {
-    login_dot_gov: 'Login.gov',
-    id_me: 'ID.me',
-    clear: 'CLEAR'
-  }.freeze
-
   def create_user_with_csp(csp:, given_name: 'John', family_name: 'Smith', uuid: SecureRandom.uuid, **user_attrs)
     csp_name = csp.to_s
     csp_record = Csp.find_by(name: csp_name) || create(:csp, name: csp_name)

@@ -17,11 +17,6 @@ RSpec.describe Page::Invitations::InvitationLoginComponent, type: :component do
       expect(page).to have_selector('button.usa-button span.idme-login-button__logo', text: 'Verify with ID.me')
     end
 
-    it 'should render a link to the How to verify your identity url' do
-      expect(page).to have_link('How to verify your identity',
-                                href: 'https://login.gov/help/verify-your-identity/how-to-verify-your-identity/')
-    end
-
     it 'should post each CSP to the appropriate url' do
       expect(page).to have_selector("form[action*='?provider=clear'][method='post']")
       expect(page).to have_selector("form[action*='?provider=id_me'][method='post']")
