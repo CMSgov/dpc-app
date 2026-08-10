@@ -42,6 +42,8 @@ module LoggingConstants
     ReactivateUserEmail = 'ReactivateUserEmail'
     UpdatePrimaryUserEmail = 'UpdatePrimaryUserEmail'
 
+    MergeUserAccountCsp = 'MergeUserAccountCsp'
+
     FailAoPiiCheck = 'FailAoPiiCheck'
     FailCdPiiCheck = 'FailCdPiiCheck'
     FailCpiApiGwCheck = 'FailCpiApiGatewayCheck'

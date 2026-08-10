@@ -108,6 +108,53 @@ RSpec.shared_examples 'a CSP client' do |config|
       end
     end
 
+    context 'user exists with different CSP' do
+      let(:email) { 'bob@example.com' }
+      let(:orig_csp_name) { (CspUtils::CODES_TO_DISPLAY.keys - [provider]).sample.to_s }
+      before do
+        user = create(:user)
+        orig_csp = Csp.find_by(name: orig_csp_name) || create(:csp, name: orig_csp_name)
+        csp_user = create(:csp_user, user:, uuid:, csp: orig_csp)
+        create(:user_email, csp_user:, email:, primary: true, active: true)
+      end
+      context 'SSN matches' do
+        it 'renders the link account component' do
+          post auth_endpoint
+          follow_redirect!
+          expect(response).to be_ok
+          expect(response.body).to include('Existing account found')
+          expect(response.body).to include(EmailMask.masked(email))
+          expect(response.body).to include(CspUtils.display_name(orig_csp_name))
+          expect(response.body).to include('Add new email')
+          expect(response.body).to include("/auth/#{orig_csp_name}")
+        end
+
+        it 'logs about existing account' do
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(['User has existing account associated with different CSP',
+                                                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                         actionType: LoggingConstants::ActionType::MergeUserAccountCsp,
+                                                         csp: csp_name }])
+          post auth_endpoint
+          follow_redirect!
+        end
+      end
+
+      context 'SSN does not match' do
+        before do
+          user = create(:user)
+          orig_csp = create(:csp, name: orig_csp_name)
+          csp_user = create(:csp_user, user:, uuid:, csp: orig_csp)
+          create(:user_email, csp_user:, email: 'original@example.com', active: true)
+
+          puts csp_auth_response.inspect
+          csp_auth_response.extra.raw_info.social_security_number = '4-5-6'
+          OmniAuth.config.add_mock(orig_csp_name, csp_auth_response)
+          csp_session.store(csp: orig_csp_name, token: 'original-token', token_exp: 2.days.from_now)
+        end
+      end
+    end
+
     context 'user does not exist' do
       it 'should not persist user' do
         expect do

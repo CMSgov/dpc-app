@@ -8,6 +8,14 @@ class UserInfoService
     request_info(csp_session.current, csp_session.token)
   end
 
+  def all_user_info(csp_session)
+    validate_session(csp_session)
+
+    csp_session.active_csps.to_h do |csp|
+      [csp, request_info(csp, csp_session.token(csp))]
+    end
+  end
+
   private
 
   def auth_header(token)
