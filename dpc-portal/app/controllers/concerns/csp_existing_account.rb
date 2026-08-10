@@ -12,7 +12,7 @@ module CspExistingAccount
     orig_csp_user = existing_account(auth)
     return render_link_account(primary_email(auth), orig_csp_user.csp.name) if orig_csp_user.present?
 
-    check_csp_session(orig_csp_user&.user, auth.uid)
+    check_csp_session(auth)
     sync_and_redirect(csp_user, auth)
   end
 
@@ -55,11 +55,11 @@ module CspExistingAccount
     render(Page::ExistingAccount::LinkAccountComponent.new(email, csp))
   end
 
-  def check_csp_session(user, uid)
+  def check_csp_session(auth)
     return if csp_session.active_csps.one?
 
     verify_account_match
-    create_csp_user(user, uid)
+    create_csp_user(auth.uid)
   end
 
   def verify_account_match
@@ -73,10 +73,10 @@ module CspExistingAccount
       user_info.dig('extra', 'raw_info', 'ssn')
   end
 
-  def create_csp_user(user, uuid)
+  def create_csp_user(uuid)
     csp_session.active_csps.each do |csp_name|
       csp = Csp.find_by(name: csp_name)
-      CspUser.find_or_create_by(user:, csp:, uuid:)
+      CspUser.find_or_create_by(user: current_user, csp:, uuid:)
     end
   end
 end
