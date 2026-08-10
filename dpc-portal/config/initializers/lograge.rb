@@ -19,7 +19,7 @@ Rails.application.configure do
 
     if exception
       info[:exception_class] = exception.class
-      info[:exception_reference] = SecureRandom.uuid
+      info[:exception_reference] = info[:request_id]
     end
     
     info

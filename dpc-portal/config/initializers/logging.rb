@@ -41,6 +41,7 @@ module LoggingConstants
     DeactivateUserEmail = 'DeactivateUserEmail'
     ReactivateUserEmail = 'ReactivateUserEmail'
     UpdatePrimaryUserEmail = 'UpdatePrimaryUserEmail'
+    OidcUserInfoFailed = 'OidcUserInfoFailed'
 
     FailAoPiiCheck = 'FailAoPiiCheck'
     FailCdPiiCheck = 'FailCdPiiCheck'
