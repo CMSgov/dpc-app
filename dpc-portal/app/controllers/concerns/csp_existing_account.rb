@@ -74,7 +74,9 @@ module CspExistingAccount
   end
 
   def create_csp_user(user, uuid)
-    csp = Csp.find_by(name: csp_session.current)
-    CspUser.create!(user:, csp:, uuid:)
+    csp_session.active_csps.each do |csp_name|
+      csp = Csp.find_by(name: csp_name)
+      CspUser.find_or_create_by(user:, csp:, uuid:)
+    end
   end
 end

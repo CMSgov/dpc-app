@@ -149,8 +149,15 @@ RSpec.shared_examples 'a CSP client' do |config|
           follow_redirect!
         end
 
-        it 'creates a new CspUser for the current CSP' do
-          expect { post auth_endpoint }.to change(CspUser, :count).by(1)
+        it 'signs in a user' do
+          post auth_endpoint
+          follow_redirect!
+          post "/auth/#{orig_csp_name}"
+          follow_redirect!
+          expect(response.location).to eq organizations_url
+          expect(response).to be_redirect
+          follow_redirect!
+          expect(response).to be_ok
         end
 
         it 'redirects to organizations path' do
@@ -162,15 +169,13 @@ RSpec.shared_examples 'a CSP client' do |config|
           expect(response).to redirect_to(organizations_path)
         end
 
-        it 'should sign in a user' do
-          post auth_endpoint
-          follow_redirect!
-          post "/auth/#{orig_csp_name}"
-          follow_redirect!
-          expect(response.location).to eq organizations_url
-          expect(response).to be_redirect
-          follow_redirect!
-          expect(response).to be_ok
+        it 'creates a new CspUser for the current CSP' do
+          expect do
+            post auth_endpoint
+            follow_redirect!
+            post "/auth/#{orig_csp_name}"
+            follow_redirect!
+          end.to change { CspUser.count }.by(1)
         end
       end
 
@@ -195,16 +200,18 @@ RSpec.shared_examples 'a CSP client' do |config|
         end
 
         it 'does not redirect to organizations path' do
-          expect { post auth_endpoint }.to raise_error('SSN mismatch')
+          expect do
+            post auth_endpoint
+            follow_redirect!
+            post "/auth/#{orig_csp_name}"
+          end.to raise_error('SSN mismatch')
           expect(response).not_to redirect_to(organizations_path)
         end
 
         it 'does not create a new CspUser' do
-          expect { post auth_endpoint }.not_to change(CspUser, :count)
-        end
-
-        it 'raises an SSN mismatch error' do
-          expect { post auth_endpoint }.to raise_error('SSN mismatch')
+          expect do
+            post auth_endpoint
+          end.to change { CspUser.count}.by(0)
         end
       end
     end
