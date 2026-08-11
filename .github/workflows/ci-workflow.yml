@@ -1,6 +1,9 @@
 name: "DPC CI Workflow"
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     paths:
       - .github/workflows/ci-workflow.yml
@@ -313,11 +316,8 @@ jobs:
             -Dsonar.sources=./dpc-web/app,./dpc-web/lib,./dpc-admin/app,./dpc-admin/lib
             -Dsonar.ruby.coverage.reportPaths=./web-resultset.json,./admin-resultset.json
             -Dsonar.working.directory=./sonar_workspace
-            -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
             -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
             -Dsonar.qualitygate.wait=true
-            -Dsonar.ci.autoconfig.disabled=true
-            -Dsonar.branch.target=${{ github.base_ref }}
       - name: Cleanup
         if: ${{ always() }}
         run: ./scripts/cleanup-docker.sh
@@ -363,11 +363,8 @@ jobs:
             -Dsonar.coverage.exclusions=**/*_preview.rb,**/*html.erb,**/application_*
             -Dsonar.ruby.coverage.reportPaths=./portal-resultset.json
             -Dsonar.working.directory=./sonar_workspace
-            -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
             -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }}
             -Dsonar.qualitygate.wait=true
-            -Dsonar.ci.autoconfig.disabled=true
-            -Dsonar.branch.target=${{ github.base_ref }}
       - name: Cleanup
         if: ${{ always() }}
         run: ./scripts/cleanup-docker.sh
@@ -428,7 +425,7 @@ jobs:
           find . -name dpc-api-jacoco.xml
       - name: Run quality gate scan
         run: |
-          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.event_name == 'pull_request' && github.head_ref || github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }} -Dsonar.qualitygate.wait=true -Dsonar.coverage.jacoco.xmlReportPaths="../jacoco-reports/*.xml" -Dsonar.ci.autoconfig.disabled=true -Dsonar.branch.target=${{ github.base_ref }}
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }} -Dsonar.qualitygate.wait=true -Dsonar.coverage.jacoco.xmlReportPaths="../jacoco-reports/*.xml"
       - name: Cleanup
         if: ${{ always() }}
         run: ./scripts/cleanup-docker.sh
