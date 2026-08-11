@@ -13,7 +13,7 @@ namespace :dpc do
     ao_given_name, ao_family_name, ao_email, org_npi = ENV['INVITE'].split(',')
     service = AoInvitationService.new
     invitation = service.create_invitation(ao_given_name, ao_family_name, ao_email, org_npi)
-    puts "Invitation created for #{ao_given_name} #{ao_family_name} for #{invitation.provider_organization.name}"
+    puts "Invitation created successfully for #{invitation.provider_organization.name}"
     if Rails.env.development?
       puts "http://localhost:3100/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/accept"
     end
