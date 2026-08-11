@@ -173,6 +173,29 @@ RSpec.describe 'IpAddresses', type: :request do
             expect(flash[:alert]).to eq('Public IP address could not be deleted.')
             expect(response).to redirect_to(organization_path(org, credential_start: true))
           end
+
+          it 'redirects with alert and does not call API for id with special characters' do
+            expect_any_instance_of(IpAddressManager).not_to receive(:delete_ip_address)
+            malicious_id = CGI.escape('<script>alert(1)</script>')
+            delete "/organizations/#{org.id}/ip_addresses/#{malicious_id}"
+            expect(flash[:alert]).to eq('Public IP address could not be deleted.')
+            expect(response).to redirect_to(organization_path(org, credential_start: true))
+          end
+
+          it 'redirects with alert and does not call API for id exceeding 64 characters' do
+            expect_any_instance_of(IpAddressManager).not_to receive(:delete_ip_address)
+            long_id = 'a' * 65
+            delete "/organizations/#{org.id}/ip_addresses/#{long_id}"
+            expect(flash[:alert]).to eq('Public IP address could not be deleted.')
+            expect(response).to redirect_to(organization_path(org, credential_start: true))
+          end
+
+          it 'redirects with alert and does not call API for blank id' do
+            expect_any_instance_of(IpAddressManager).not_to receive(:delete_ip_address)
+            delete "/organizations/#{org.id}/ip_addresses/%20"
+            expect(flash[:alert]).to eq('Public IP address could not be deleted.')
+            expect(response).to redirect_to(organization_path(org, credential_start: true))
+          end
         end
       end
     end
