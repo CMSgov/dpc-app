@@ -287,7 +287,7 @@ class InvitationsController < ApplicationController
                      invitation: @invitation.id,
                      **csp_log_context
                    }])
-      raise MultiUserMatchError, 'too many matching users'
+      raise MultiUserMatchError, 'too many users matching pac_id'
     end
 
     candidates.first || create_new_user(user_info)
@@ -306,6 +306,7 @@ class InvitationsController < ApplicationController
   end
 
   # Queries through user_emails table, raises on multiple matches
+  # Additional updates to this logic will be handled in DPC-5564
   def find_user_by_email(email)
     return nil if email.blank?
 
@@ -318,7 +319,7 @@ class InvitationsController < ApplicationController
                      invitation: @invitation.id,
                      **csp_log_context
                    }])
-      raise MultiUserMatchError, 'too many matching users'
+      raise MultiUserMatchError, 'too many users matching email'
     end
 
     users.first
