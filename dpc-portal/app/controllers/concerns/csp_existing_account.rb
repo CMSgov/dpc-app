@@ -4,6 +4,8 @@
 module CspExistingAccount
   extend ActiveSupport::Concern
 
+  class SsnMismatchError < StandardError; end
+
   private
 
   def handle_csp_user_response(csp_user, auth)
@@ -65,7 +67,7 @@ module CspExistingAccount
   def verify_account_match
     all_user_info = UserInfoService.new.all_user_info(csp_session)
     all_ssns = all_user_info.values.map { |user_info| ssn(user_info) }
-    raise 'SSN mismatch' unless all_ssns.uniq.one?
+    raise SsnMismatchError, 'SSN mismatch' unless all_ssns.uniq.one?
   end
 
   def ssn(user_info)

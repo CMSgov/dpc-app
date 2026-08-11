@@ -210,7 +210,7 @@ RSpec.shared_examples 'a CSP client' do |config|
           expect do
             post "/auth/#{orig_csp_name}"
             follow_redirect!
-          end.to raise_error('SSN mismatch')
+          end.to raise_error(CspExistingAccount::SsnMismatchError, 'SSN mismatch')
           expect(response).not_to redirect_to(organizations_path)
         end
 
@@ -218,10 +218,10 @@ RSpec.shared_examples 'a CSP client' do |config|
           post auth_endpoint
           follow_redirect!
           expect do
-            post "/auth/#{orig_csp_name}"
             begin
+              post "/auth/#{orig_csp_name}"
               follow_redirect!
-            rescue RuntimeError # SSN mismatch
+            rescue CspExistingAccount::SsnMismatchError
               nil
             end
           end.to change { CspUser.count }.by(0)
