@@ -37,6 +37,12 @@ module LoggingConstants
     UserLoginWithoutAccount = 'UserLoginWithoutAccount'
     CspUserNotFound = 'CspUserNotFound'
 
+    MergeUserAccountEmail = 'MergeUserAccountEmail'
+    AddNewUserEmail = 'AddNewUserEmail'
+    DeactivateUserEmail = 'DeactivateUserEmail'
+    ReactivateUserEmail = 'ReactivateUserEmail'
+    UpdatePrimaryUserEmail = 'UpdatePrimaryUserEmail'
+
     FailAoPiiCheck = 'FailAoPiiCheck'
     FailCdPiiCheck = 'FailCdPiiCheck'
     FailCpiApiGwCheck = 'FailCpiApiGatewayCheck'

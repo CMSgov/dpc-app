@@ -16,9 +16,11 @@ RSpec.shared_examples 'a CSP client' do |config|
     end
 
     context 'user exists' do
+      let!(:user) { create(:user) }
       before do
-        user = create(:user)
-        create(:csp_user, user:, uuid:, csp:)
+        csp = Csp.find_by(name: csp_name) || create(:csp, name: csp_name)
+        csp_user = create(:csp_user, user:, uuid:, csp:)
+        create(:user_email, csp_user:, email: 'bob@example.com', primary: true, active: true)
       end
 
       it 'should sign in a user' do
@@ -31,14 +33,11 @@ RSpec.shared_examples 'a CSP client' do |config|
       end
 
       it 'should log on successful sign in' do
-        frozen_time = Time.now.utc
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(['User logged in',
                                                      { actionContext: LoggingConstants::ActionContext::Authentication,
                                                        actionType: LoggingConstants::ActionType::UserLoggedIn,
-                                                       csp: csp_name,
-                                                       user_identifier: uuid,
-                                                       timestamp: frozen_time.iso8601 }])
+                                                       csp: csp_name }])
         post auth_endpoint
         follow_redirect!
       end
@@ -56,30 +55,13 @@ RSpec.shared_examples 'a CSP client' do |config|
           follow_redirect!
         end.to change { CspUser.count }.by(0)
       end
-    end
-
-    context 'user does not exist' do
-      it 'should not persist user' do
-        expect do
-          post auth_endpoint
-          follow_redirect!
-        end.to change { User.count }.by(0)
-      end
-    end
-
-    context :user_exists do
-      let(:db_user) { create(:user) }
-
-      before do
-        create(:csp_user, user: db_user, uuid:, csp:)
-      end
 
       it 'updates user names' do
         expect do
           post auth_endpoint
           follow_redirect!
         end.to change {
-          User.where(id: db_user.id, given_name: 'Bob', family_name: 'Hoskins').count
+          User.where(id: user.id, given_name: 'Bob', family_name: 'Hoskins').count
         }.by 1
         expect(response.location).to eq organizations_url
       end
@@ -97,7 +79,43 @@ RSpec.shared_examples 'a CSP client' do |config|
       end
     end
 
-    context :user_does_not_exist do
+    context 'user exists with different email' do
+      before do
+        user = create(:user)
+        csp = Csp.find_by(name: csp_name) || create(:csp, name: csp_name)
+        csp_user = create(:csp_user, user:, uuid:, csp:)
+        create(:user_email, csp_user:, email: 'original@example.com', active: true)
+      end
+
+      it 'renders the add email component' do
+        post auth_endpoint
+        follow_redirect!
+        expect(response).to be_ok
+        expect(response.body).to include('Existing account found')
+        expect(response.body).to include(EmailMask.masked('original@example.com'))
+        expect(response.body).to include('Add new email')
+        expect(response.body).to include(root_path)
+      end
+
+      it 'logs about existing account' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(['User has existing account associated with different email',
+                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                       actionType: LoggingConstants::ActionType::MergeUserAccountEmail,
+                                                       csp: csp_name }])
+        post auth_endpoint
+        follow_redirect!
+      end
+    end
+
+    context 'user does not exist' do
+      it 'should not persist user' do
+        expect do
+          post auth_endpoint
+          follow_redirect!
+        end.to change { User.count }.by(0)
+      end
+
       it 'does not sign in user' do
         post auth_endpoint
         follow_redirect!
@@ -143,17 +161,13 @@ RSpec.shared_examples 'a CSP client' do |config|
       end
 
       it 'logs the IAL1 blocked attempt' do
-        frozen_time = Time.now.utc
         allow(Rails.logger).to receive(:info)
         post auth_endpoint
         follow_redirect!
         expect(Rails.logger).to have_received(:info).with(
           ["User attempted IAL1 login with #{display_name} — not permitted",
            { actionContext: LoggingConstants::ActionContext::Authentication,
-             actionType: LoggingConstants::ActionType::UserLoginWithoutAccount,
-             csp: csp_name,
-             user_identifier: uuid,
-             timestamp: frozen_time.iso8601 }]
+             actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }]
         )
       end
 
@@ -208,15 +222,11 @@ RSpec.shared_examples 'a CSP client' do |config|
     end
 
     it 'should log error' do
-      frozen_time = Time.now.utc
       allow(Rails.logger).to receive(:info)
       expect(Rails.logger).to receive(:info).with(
         ["User attempted to login with #{display_name} but no active CSP found",
          { actionContext: LoggingConstants::ActionContext::Authentication,
-           actionType: LoggingConstants::ActionType::InvalidCsp,
-           csp: csp_name,
-           user_identifier: uuid,
-           timestamp: frozen_time.iso8601 }]
+           actionType: LoggingConstants::ActionType::InvalidCsp }]
       )
       post auth_endpoint
       follow_redirect!
@@ -229,7 +239,8 @@ RSpec.shared_examples 'a CSP client' do |config|
       OmniAuth.config.add_mock(provider, csp_auth_response)
 
       user = create(:user)
-      create(:csp_user, user:, uuid:, csp:)
+      csp_user = create(:csp_user, user:, uuid:, csp:)
+      create(:user_email, csp_user:, email: 'bob@example.com', primary: true, active: true)
       post auth_endpoint
       follow_redirect!
     end
@@ -247,6 +258,52 @@ RSpec.shared_examples 'a CSP client' do |config|
       delete "/logout?invitation_id=#{invitation.id}"
       expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
                                                                                  invitation.id)
+    end
+  end
+
+  describe 'Post /update' do
+    context 'when user is not authorized' do
+      let(:user) { create(:user) }
+      let(:csp_user) { create(:csp_user, user:, uuid:, csp:) }
+      let(:params) do
+        { id: csp_user.id, csp: csp.id, all_emails: %w[alice1@example.com alice2@example.com],
+          primary_email: 'alice1@example.com' }
+      end
+
+      context 'not logged in' do
+        it 'returns forbidden' do
+          post '/update', params: params
+          expect(response.status).to eq 403
+        end
+
+        it 'does not add emails' do
+          expect do
+            post '/update', params: params
+          end.to change { UserEmail.count }.by(0)
+        end
+      end
+
+      context 'different user logged in' do
+        before do
+          OmniAuth.config.test_mode = true
+          OmniAuth.config.add_mock(provider, csp_auth_response)
+
+          other_user = create(:user)
+          create(:csp_user, user: other_user, uuid: SecureRandom.uuid, csp:)
+          post auth_endpoint
+          follow_redirect!
+        end
+        it 'returns forbidden' do
+          post '/update', params: params
+          expect(response.status).to eq 403
+        end
+
+        it 'does not add emails' do
+          expect do
+            post '/update', params: params
+          end.to change { UserEmail.count }.by(0)
+        end
+      end
     end
   end
 end

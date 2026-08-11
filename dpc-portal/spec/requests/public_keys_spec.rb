@@ -4,6 +4,7 @@ require 'rails_helper'
 require 'support/credential_resource_shared_examples'
 require 'support/login_support'
 require 'support/user_access_shared_examples'
+require 'cgi'
 
 RSpec.describe 'PublicKeys', type: :request do
   include DpcClientSupport
@@ -20,7 +21,7 @@ RSpec.describe 'PublicKeys', type: :request do
     let(:credential) { 'public_key' }
   end
 
-  LoginSupport::CSP_MAP.each do |provider, display_name|
+  CspUtils::CODES_TO_DISPLAY.each do |provider, display_name|
     context "using #{display_name}" do
       describe 'GET /new' do
         new_path = ->(org) { "/organizations/#{org.id}/public_keys/new" }
@@ -209,6 +210,29 @@ RSpec.describe 'PublicKeys', type: :request do
                                            api_client:)
             delete "/organizations/#{org.id}/public_keys/#{key_guid}"
             expect(flash[:alert]).to eq('Public key could not be deleted.')
+          end
+
+          it 'redirects with alert and does not call API for id with special characters' do
+            expect_any_instance_of(PublicKeyManager).not_to receive(:delete_public_key)
+            malicious_id = CGI.escape('<script>alert(1)</script>')
+            delete "/organizations/#{org.id}/public_keys/#{malicious_id}"
+            expect(flash[:alert]).to eq('Public key could not be deleted.')
+            expect(response).to redirect_to(organization_path(org, credential_start: true))
+          end
+
+          it 'redirects with alert and does not call API for id exceeding 64 characters' do
+            expect_any_instance_of(PublicKeyManager).not_to receive(:delete_public_key)
+            long_id = 'a' * 65
+            delete "/organizations/#{org.id}/public_keys/#{long_id}"
+            expect(flash[:alert]).to eq('Public key could not be deleted.')
+            expect(response).to redirect_to(organization_path(org, credential_start: true))
+          end
+
+          it 'redirects with alert and does not call API for blank id' do
+            expect_any_instance_of(PublicKeyManager).not_to receive(:delete_public_key)
+            delete "/organizations/#{org.id}/public_keys/%20"
+            expect(flash[:alert]).to eq('Public key could not be deleted.')
+            expect(response).to redirect_to(organization_path(org, credential_start: true))
           end
         end
       end

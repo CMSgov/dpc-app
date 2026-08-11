@@ -12,7 +12,7 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :system, 
     driven_by(:selenium_headless)
   end
 
-  LoginSupport::CSP_MAP.each do |provider, display_name|
+  CspUtils::CODES_TO_DISPLAY.each do |provider, display_name|
     context "using #{display_name}" do
       before(:each) do
         @user = create_user_with_csp(csp: provider)

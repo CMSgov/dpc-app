@@ -16,7 +16,7 @@ RSpec.describe 'ClientTokens', type: :request do
     let(:credential) { 'client_token' }
   end
 
-  LoginSupport::CSP_MAP.each do |provider, display_name|
+  CspUtils::CODES_TO_DISPLAY.each do |provider, display_name|
     context "using #{display_name}" do
       describe 'GET /new' do
         new_path = ->(org) { "/organizations/#{org.id}/client_tokens/new" }
@@ -179,6 +179,29 @@ RSpec.describe 'ClientTokens', type: :request do
             delete "/organizations/#{org.id}/client_tokens/#{token_guid}"
             expect(flash[:alert]).to eq('Client token could not be deleted.')
             expect(response).to redirect_to(organization_path(org.id, credential_start: true))
+          end
+
+          it 'redirects with alert and does not call API for id with special characters' do
+            expect_any_instance_of(ClientTokenManager).not_to receive(:delete_client_token)
+            malicious_id = CGI.escape('<script>alert(1)</script>')
+            delete "/organizations/#{org.id}/client_tokens/#{malicious_id}"
+            expect(flash[:alert]).to eq('Client token could not be deleted.')
+            expect(response).to redirect_to(organization_path(org, credential_start: true))
+          end
+
+          it 'redirects with alert and does not call API for id exceeding 64 characters' do
+            expect_any_instance_of(ClientTokenManager).not_to receive(:delete_client_token)
+            long_id = 'a' * 65
+            delete "/organizations/#{org.id}/client_tokens/#{long_id}"
+            expect(flash[:alert]).to eq('Client token could not be deleted.')
+            expect(response).to redirect_to(organization_path(org, credential_start: true))
+          end
+
+          it 'redirects with alert and does not call API for blank id' do
+            expect_any_instance_of(ClientTokenManager).not_to receive(:delete_client_token)
+            delete "/organizations/#{org.id}/client_tokens/%20"
+            expect(flash[:alert]).to eq('Client token could not be deleted.')
+            expect(response).to redirect_to(organization_path(org, credential_start: true))
           end
         end
       end

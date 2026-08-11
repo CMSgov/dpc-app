@@ -14,7 +14,7 @@ RSpec.describe 'ClientTokens', type: :request do
     let!(:org) { create(:provider_organization, dpc_api_organization_id:, name: 'Health Hut') }
     let(:label) { 'New Client Token' }
 
-    LoginSupport::CSP_MAP.each do |provider, display_name|
+    CspUtils::CODES_TO_DISPLAY.each do |provider, display_name|
       context "using #{display_name}" do
         before do
           user = create_user_with_csp(csp: provider)
@@ -47,6 +47,36 @@ RSpec.describe 'ClientTokens', type: :request do
           get "/organizations/#{org.id}"
           expect(response.body).to include('You have no client tokens.')
           expect(response.body).to_not include(label)
+        end
+
+        it 'redirects with alert when id contains path traversal' do
+          delete "/organizations/#{org.id}/client_tokens/../../etc/passwd"
+          expect(flash[:alert]).to eq('Public key could not be deleted.')
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+        end
+
+        it 'redirects with alert when id contains special characters' do
+          delete "/organizations/#{org.id}/client_tokens/<script>alert(1)</script>"
+          expect(flash[:alert]).to eq('Public key could not be deleted.')
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+        end
+
+        it 'redirects with alert when id is blank' do
+          delete "/organizations/#{org.id}/client_tokens/%20"
+          expect(flash[:alert]).to eq('Public key could not be deleted.')
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+        end
+
+        it 'redirects with alert when id exceeds 64 characters' do
+          long_id = 'a' * 65
+          delete "/organizations/#{org.id}/client_tokens/#{long_id}"
+          expect(flash[:alert]).to eq('Public key could not be deleted.')
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+        end
+
+        it 'does not call the API when id is invalid' do
+          expect_any_instance_of(ClientTokenManager).not_to receive(:delete_client_token)
+          delete "/organizations/#{org.id}/client_tokens/../../etc/passwd"
         end
       end
     end

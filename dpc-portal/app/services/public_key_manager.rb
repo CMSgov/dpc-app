@@ -25,9 +25,9 @@ class PublicKeyManager
       errors: }
   end
 
-  def delete_public_key(params)
+  def delete_public_key(public_key_id)
     api_client = DpcClient.new
-    api_client.delete_public_key(api_id, params[:id])
+    api_client.delete_public_key(api_id, public_key_id)
     Rails.logger.error "Failed to delete public key: #{api_client.response_body}" unless api_client.response_successful?
     api_client.response_successful?
   end
