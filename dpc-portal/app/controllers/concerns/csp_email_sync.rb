@@ -25,11 +25,6 @@ module CspEmailSync
 
   private
 
-  def authorized?
-    current_user = User.find_by(id: session[:user])
-    current_user == csp_user&.user
-  end
-
   def csp_user
     @csp_user ||= CspUser.find_by(id: params[:id], csp: params[:csp])
   end
