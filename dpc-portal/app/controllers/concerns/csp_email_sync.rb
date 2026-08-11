@@ -4,7 +4,7 @@
 module CspEmailSync
   # Alternative to login for add email flow
   def update
-    return render plain: :forbidden, status: :forbidden unless authorized?
+    return render plain: :forbidden, status: :forbidden unless current_user == csp_user&.user
 
     sync_csp_emails(csp_user, params[:all_emails], params[:primary_email])
     redirect_to root_url
