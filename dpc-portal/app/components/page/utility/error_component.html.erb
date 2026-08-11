@@ -30,7 +30,7 @@
       <% when :cd_accepted %>
         <%= link_to 'Go to DPC home', root_url, class: 'usa-button margin-right-0' %>
       <% when :pii_mismatch %>
-        <%= render Core::Button::ButtonComponent.new(label: "Sign out of #{@csp_display_name}",
+        <%= render Core::Button::ButtonComponent.new(label: "Back to sign in",
             destination: csp_logout_path(invitation_id: @invitation.id),
             method: :delete) %>
       <% when :email_mismatch %>
