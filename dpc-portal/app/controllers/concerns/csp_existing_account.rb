@@ -14,7 +14,7 @@ module CspExistingAccount
     orig_csp_user = existing_account(auth)
     return render_link_account(primary_email(auth), orig_csp_user.csp.name) if orig_csp_user.present?
 
-    check_csp_session(auth)
+    check_csp_session
     sync_and_redirect(csp_user, auth)
   end
 
@@ -28,7 +28,7 @@ module CspExistingAccount
   end
 
   def existing_account(auth)
-    email = UserEmail.includes(csp_user: :user)
+    email = UserEmail.includes(csp_user: %i[user csp])
                      .where(email: [primary_email(auth), *all_emails(auth)])
                      .find { |email| email.csp_user.csp.name != auth.provider.to_s }
     return nil unless email
@@ -57,15 +57,18 @@ module CspExistingAccount
     render(Page::ExistingAccount::LinkAccountComponent.new(email, csp))
   end
 
-  def check_csp_session(auth)
+  def check_csp_session
     return if csp_session.active_csps.one?
 
     verify_account_match
-    create_csp_user(auth.uid)
+    create_csp_user
+  end
+
+  def all_user_info
+    @all_user_info ||= UserInfoService.new.all_user_info(csp_session)
   end
 
   def verify_account_match
-    all_user_info = UserInfoService.new.all_user_info(csp_session)
     all_ssns = all_user_info.values.map { |user_info| ssn(user_info) }
     raise SsnMismatchError, 'SSN mismatch' unless all_ssns.uniq.one?
   end
@@ -76,9 +79,10 @@ module CspExistingAccount
       user_info.dig('extra', 'raw_info', 'ssn')
   end
 
-  def create_csp_user(uuid)
+  def create_csp_user
     csp_session.active_csps.each do |csp_name|
-      csp = Csp.find_by(name: csp_name)
+      csp = Csp.find_by!(name: csp_name)
+      uuid = all_user_info[csp_name]['uid']
       CspUser.find_or_create_by(user: current_user, csp:, uuid:)
     end
   end

@@ -74,11 +74,11 @@ RSpec.describe Page::ExistingAccount::LinkAccountComponent, type: :component do
         let(:email) { 'different@example.com' }
 
         it 'should render the updated email address' do
-          is_expected.to include(EmailMask.masked('different@example.com'))
+          is_expected.to include(EmailMask.masked(email))
         end
 
         it 'should not include the default email address' do
-          is_expected.not_to include(EmailMask.masked('bob@example.com'))
+          is_expected.not_to include(EmailMask.masked('bobhoskins@example.com'))
         end
       end
     end
