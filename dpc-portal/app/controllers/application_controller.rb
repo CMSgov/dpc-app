@@ -4,6 +4,7 @@
 class ApplicationController < ActionController::Base
   include CspLogout
   include OrganizationAccess
+  include StructuredLogging
 
   before_action :check_session_length
   before_action :set_current_request_attributes

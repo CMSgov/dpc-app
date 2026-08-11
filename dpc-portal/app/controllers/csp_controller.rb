@@ -9,7 +9,7 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
 
   def openid_connect
     auth = request.env['omniauth.auth']
-    return render_ial1_blocked if ial_1_user?(auth)
+    return render_ial1_blocked(auth) if ial_1_user?(auth)
 
     return unless (active_csp = csp(auth.provider))
 
@@ -41,7 +41,7 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
   private
 
   def user_actions(auth, csp)
-    csp_user = CspUser.find_by(uuid: auth.uid, csp:)
+    csp_user = find_csp_user(auth, csp)
     user = csp_user&.user
 
     sign_in_and_log(user, csp.name)
@@ -53,15 +53,30 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
     redirect_to path(user, auth)
   end
 
+  def find_csp_user(auth, csp)
+    csp_user = CspUser.find_by(uuid: auth.uid, csp:)
+
+    if csp_user.nil?
+      log_event(:error, 'No CspUser found for CSP authentication',
+                action_context: LoggingConstants::ActionContext::Authentication,
+                action_type: LoggingConstants::ActionType::CspUserNotFound,
+                user_identifier: auth.uid,
+                csp: csp.name)
+    end
+
+    csp_user
+  end
+
   def email_match?(csp_user, auth)
     csp_user.user_emails.empty? || csp_user.user_emails.map(&:email).include?(primary_email(auth))
   end
 
   def render_add_email(csp_user, auth)
-    Rails.logger.info(['User has existing account associated with different email',
-                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::MergeUserAccountEmail,
-                         **csp_log_context }])
+    log_event(:info, 'User has existing account associated with different email',
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::MergeUserAccountEmail,
+              user_identifier: auth.uid,
+              csp: auth.provider)
     render(Page::ExistingAccount::AddEmailComponent.new(csp_user.user.email, csp_user.csp.name,
                                                         update_path(id: csp_user.id,
                                                                     csp: csp_user.csp.id,
@@ -69,10 +84,12 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
                                                                     primary_email: primary_email(auth))))
   end
 
-  def render_ial1_blocked
-    Rails.logger.info(["User attempted IAL1 login with #{display_name || 'CSP'} — not permitted",
-                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }])
+  def render_ial1_blocked(auth)
+    log_event(:info, "User attempted IAL1 login with #{display_name || 'CSP'} — not permitted",
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::UserLoginWithoutAccount,
+              user_identifier: auth.uid,
+              csp: auth.provider)
     render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp: csp_code), status: :forbidden)
   end
 

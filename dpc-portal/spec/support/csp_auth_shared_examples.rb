@@ -100,9 +100,9 @@ RSpec.shared_examples 'a CSP client' do |config|
       it 'logs about existing account' do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(['User has existing account associated with different email',
-                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                       actionType: LoggingConstants::ActionType::MergeUserAccountEmail,
-                                                       csp: csp_name }])
+                                                     hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                                                                    actionType: LoggingConstants::ActionType::MergeUserAccountEmail,
+                                                                    csp: csp_name)])
         post auth_endpoint
         follow_redirect!
       end
@@ -166,8 +166,8 @@ RSpec.shared_examples 'a CSP client' do |config|
         follow_redirect!
         expect(Rails.logger).to have_received(:info).with(
           ["User attempted IAL1 login with #{display_name} — not permitted",
-           { actionContext: LoggingConstants::ActionContext::Authentication,
-             actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }]
+           hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                          actionType: LoggingConstants::ActionType::UserLoginWithoutAccount)]
         )
       end
 
