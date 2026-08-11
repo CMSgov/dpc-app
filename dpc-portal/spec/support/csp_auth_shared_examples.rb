@@ -124,6 +124,7 @@ RSpec.shared_examples 'a CSP client' do |config|
           stub_request(:get, CspUtils.user_info_url(orig_csp_name))
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: csp_auth_response.to_json, status: 200)
+
           OmniAuth.config.add_mock(orig_csp_name, csp_auth_response)
           post "/auth/#{orig_csp_name}"
           follow_redirect!
@@ -181,37 +182,42 @@ RSpec.shared_examples 'a CSP client' do |config|
 
       context 'SSN does not match' do
         let(:social_security_number) { '4-5-6' }
-        let(:ssn_mismatch_response) { csp_auth_response.deep_merge(extra: { raw_info: { social_security_number: } }) }
+        let(:ssn_mismatch_response) { csp_auth_response.deep_dup.deep_merge(extra: { raw_info: { social_security_number: } }) }
         before do
           user = create(:user)
           orig_csp = Csp.find_by(name: orig_csp_name) || create(:csp, name: orig_csp_name)
           csp_user = create(:csp_user, user:, uuid:, csp: orig_csp)
           create(:user_email, csp_user:, email:, primary: true, active: true)
 
-          stub_request(:get, CspUtils.user_info_url(provider))
-            .with(headers: { Authorization: "Bearer #{token}" })
-            .to_return(body: csp_auth_response.to_json, status: 200)
           stub_request(:get, CspUtils.user_info_url(orig_csp_name))
             .with(headers: { Authorization: "Bearer #{token}" })
+            .to_return(body: csp_auth_response.to_json, status: 200)
+          stub_request(:get, CspUtils.user_info_url(provider))
+            .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: ssn_mismatch_response.to_json, status: 200)
-          OmniAuth.config.add_mock(orig_csp_name, ssn_mismatch_response)
+
+          OmniAuth.config.add_mock(orig_csp_name, csp_auth_response)
           post "/auth/#{orig_csp_name}"
           follow_redirect!
         end
 
-        it 'does not redirect to organizations path' do
+        it 'does not sign in a user' do
+          post auth_endpoint
+          follow_redirect!
           expect do
-            post auth_endpoint
-            follow_redirect!
             post "/auth/#{orig_csp_name}"
+            follow_redirect!
           end.to raise_error('SSN mismatch')
           expect(response).not_to redirect_to(organizations_path)
         end
 
         it 'does not create a new CspUser' do
+          post auth_endpoint
+          follow_redirect!
           expect do
-            post auth_endpoint
-          end.to change { CspUser.count}.by(0)
+            post "/auth/#{orig_csp_name}"
+            follow_redirect! rescue nil
+          end.to change { CspUser.count }.by(0)
         end
       end
     end
