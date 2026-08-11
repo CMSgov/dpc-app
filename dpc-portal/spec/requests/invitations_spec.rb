@@ -1080,7 +1080,7 @@ RSpec.describe 'Invitations', type: :request do
               expect(Rails.logger).to receive(:error).with(
                 ['User matches too many existing users', hash_including(
                   actionContext: LoggingConstants::ActionContext::Registration,
-                  error: 'too many users matching pac_id'
+                  error: 'too many matching AO users'
                 )]
               )
 

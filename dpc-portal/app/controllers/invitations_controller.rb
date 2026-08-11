@@ -287,7 +287,7 @@ class InvitationsController < ApplicationController
                      invitation: @invitation.id,
                      **csp_log_context
                    }])
-      raise MultiUserMatchError, 'too many users matching pac_id'
+      raise MultiUserMatchError, 'too many matching AO users'
     end
 
     candidates.first || create_new_user(user_info)
