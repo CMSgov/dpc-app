@@ -180,6 +180,29 @@ RSpec.describe 'ClientTokens', type: :request do
             expect(flash[:alert]).to eq('Client token could not be deleted.')
             expect(response).to redirect_to(organization_path(org.id, credential_start: true))
           end
+
+          it 'redirects with alert and does not call API for id with special characters' do
+            expect_any_instance_of(ClientTokenManager).not_to receive(:delete_client_token)
+            malicious_id = CGI.escape('<script>alert(1)</script>')
+            delete "/organizations/#{org.id}/client_tokens/#{malicious_id}"
+            expect(flash[:alert]).to eq('Client token could not be deleted.')
+            expect(response).to redirect_to(organization_path(org, credential_start: true))
+          end
+
+          it 'redirects with alert and does not call API for id exceeding 64 characters' do
+            expect_any_instance_of(ClientTokenManager).not_to receive(:delete_client_token)
+            long_id = 'a' * 65
+            delete "/organizations/#{org.id}/client_tokens/#{long_id}"
+            expect(flash[:alert]).to eq('Client token could not be deleted.')
+            expect(response).to redirect_to(organization_path(org, credential_start: true))
+          end
+
+          it 'redirects with alert and does not call API for blank id' do
+            expect_any_instance_of(ClientTokenManager).not_to receive(:delete_client_token)
+            delete "/organizations/#{org.id}/client_tokens/%20"
+            expect(flash[:alert]).to eq('Client token could not be deleted.')
+            expect(response).to redirect_to(organization_path(org, credential_start: true))
+          end
         end
       end
     end
