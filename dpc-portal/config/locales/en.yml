@@ -5,7 +5,7 @@ en:
     email_mismatch_status: The email you used to sign in doesn't match your invite.
     email_mismatch_text: "<p>Please <b>sign out</b> of %{csp_display_name} and either:<ul><li>Create an account.</li><li>Add an alternate email to your current %{csp_display_name} account.</li></ul></p>"
     pii_mismatch_status: The name you used does not match your invite.
-    pii_mismatch_text: "Contact the designated Authorized Official (AO) at %{ao_email}. The AO will need to sign in to the DPC Portal and create a new invite."
+    pii_mismatch_text: "Contact the Authorized Official (AO) that invited you. The AO will need to sign in to the DPC Portal and create a new invite."
     ao_accepted_status: Organization already registered.
     ao_accepted_text: If you meant to register a different organization, check your inbox for the correct request. Sign in to access details for this organization.
     cd_accepted_status: You already accepted your invite.

@@ -20,9 +20,8 @@ module Page
 
       # @param csp select :csp_codes
       def pii_mismatch(csp: DEFAULT_CSP)
-        user = User.new(email: 'bilbo.baggins@cms.hms.gov')
-        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: ORG_NAME),
-                                    invited_by: user)
+        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: ORG_NAME))
+
         reason = 'pii_mismatch'
         render(Page::Utility::ErrorComponent.new(invitation, reason, csp:))
       end
