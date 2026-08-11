@@ -47,9 +47,8 @@ module Page
       end
 
       def cd_expired
-        user = User.new(email: 'bilbo.baggins@cms.hms.gov')
         invitation = Invitation.new(id: 6, provider_organization: ProviderOrganization.new(id: 1, name: ORG_NAME),
-                                    invited_by: user, invitation_type: :credential_delegate, created_at: 49.hours.ago)
+                                    invitation_type: :credential_delegate, created_at: 49.hours.ago)
         reason = 'cd_expired'
         render(Page::Utility::ErrorComponent.new(invitation, reason))
       end

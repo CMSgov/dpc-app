@@ -13,7 +13,7 @@ en:
     ao_expired_status:  Your registration link has expired.
     ao_expired_text: You've exceeded the 48-hour expiration period.
     cd_expired_status: Your invite link has expired.
-    cd_expired_text: "<p>You've exceeded the 48 hour expiration period.</p><p>Contact the designated Authorized Official (AO) to create a new invite (<a href=\"%{ao_email}\">%{ao_email}</a>). The AO will need to sign in to the DPC Portal to complete this step.</p>"
+    cd_expired_text: "<p>You've exceeded the 48 hour expiration period.</p><p>Contact the Authorized Official (AO) that invited you to create a new invite. The AO will need to sign in to the DPC Portal to complete this step.</p>"
     ao_renewed_status: You already requested a new invite.
     ao_renewed_text: Please check your email. We sent you a message which includes a new link.
     ao_invalid_status: Your registration link is invalid.
