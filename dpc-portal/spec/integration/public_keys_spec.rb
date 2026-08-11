@@ -58,6 +58,36 @@ RSpec.describe 'PublicKeys', type: :request do
           expect(response.body).to include('You have no public keys.')
           expect(response.body).to_not include(label)
         end
+
+        it 'redirects with alert when id contains path traversal' do
+          delete "/organizations/#{org.id}/public_keys/../../etc/passwd"
+          expect(flash[:alert]).to eq('Public key could not be deleted.')
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+        end
+
+        it 'redirects with alert when id contains special characters' do
+          delete "/organizations/#{org.id}/public_keys/<script>alert(1)</script>"
+          expect(flash[:alert]).to eq('Public key could not be deleted.')
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+        end
+
+        it 'redirects with alert when id is blank' do
+          delete "/organizations/#{org.id}/public_keys/%20"
+          expect(flash[:alert]).to eq('Public key could not be deleted.')
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+        end
+
+        it 'redirects with alert when id exceeds 64 characters' do
+          long_id = 'a' * 65
+          delete "/organizations/#{org.id}/public_keys/#{long_id}"
+          expect(flash[:alert]).to eq('Public key could not be deleted.')
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+        end
+
+        it 'does not call the API when id is invalid' do
+          expect_any_instance_of(PublicKeyManager).not_to receive(:delete_public_key)
+          delete "/organizations/#{org.id}/public_keys/../../etc/passwd"
+        end
       end
     end
   end

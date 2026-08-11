@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ClientTokensController < ApplicationController
+  include InputSanitization
+
   before_action :authenticate_user!
   before_action :organization_enabled?
   rescue_from ActiveRecord::RecordNotFound, with: :unauthorized
@@ -30,7 +32,8 @@ class ClientTokensController < ApplicationController
     reg_org = @organization.registered_organization
 
     manager = ClientTokenManager.new(registered_organization: reg_org)
-    if manager.delete_client_token(id: params[:id])
+    sanitized_id = sanitize_uid(params[:id])
+    if sanitized_id && manager.delete_client_token(id: sanitized_id)
       flash[:notice] = 'Client token successfully deleted.'
       redirect_to root_path
     else
