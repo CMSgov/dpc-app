@@ -182,7 +182,9 @@ RSpec.shared_examples 'a CSP client' do |config|
 
       context 'SSN does not match' do
         let(:social_security_number) { '4-5-6' }
-        let(:ssn_mismatch_response) { csp_auth_response.deep_dup.deep_merge(extra: { raw_info: { social_security_number: } }) }
+        let(:ssn_mismatch_response) do
+          csp_auth_response.deep_dup.deep_merge(extra: { raw_info: { social_security_number: } })
+        end
         before do
           user = create(:user)
           orig_csp = Csp.find_by(name: orig_csp_name) || create(:csp, name: orig_csp_name)
@@ -216,7 +218,11 @@ RSpec.shared_examples 'a CSP client' do |config|
           follow_redirect!
           expect do
             post "/auth/#{orig_csp_name}"
-            follow_redirect! rescue nil
+            begin
+              follow_redirect!
+            rescue RuntimeError # SSN mismatch
+              nil
+            end
           end.to change { CspUser.count }.by(0)
         end
       end
