@@ -310,6 +310,8 @@ jobs:
           node-version: 24
       - name: Run quality gate scan
         uses: sonarsource/sonarqube-scan-action@299e4b793aaa83bf2aba7c9c14bedbb485688ec4 # v7.1.0
+        env:
+          CODEBUILD_BUILD_ID: "" # When SonarQube sees CodeBuild and GHA env vars auto config gets confused and fails.
         with:
           args:
             -Dsonar.projectKey=bcda-dpc-web
@@ -356,6 +358,8 @@ jobs:
           node-version: 24
       - name: Run quality gate scan
         uses: sonarsource/sonarqube-scan-action@299e4b793aaa83bf2aba7c9c14bedbb485688ec4 # v7.1.0
+        env:
+          CODEBUILD_BUILD_ID: "" # When SonarQube sees CodeBuild and GHA env vars auto config gets confused and fails.
         with:
           args:
             -Dsonar.projectKey=bcda-dpc-portal
@@ -424,6 +428,8 @@ jobs:
         run: |
           find . -name dpc-api-jacoco.xml
       - name: Run quality gate scan
+        env:
+          CODEBUILD_BUILD_ID: "" # When SonarQube sees CodeBuild and GHA env vars auto config gets confused and fails.
         run: |
           mvn org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }} -Dsonar.qualitygate.wait=true -Dsonar.coverage.jacoco.xmlReportPaths="../jacoco-reports/*.xml"
       - name: Cleanup
