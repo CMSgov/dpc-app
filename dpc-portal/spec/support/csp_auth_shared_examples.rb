@@ -182,8 +182,9 @@ RSpec.shared_examples 'a CSP client' do |config|
 
       context 'SSN does not match' do
         let(:social_security_number) { '4-5-6' }
+        let(:ssn_field) { provider == :clear ? :SSN : :social_security_number }
         let(:ssn_mismatch_response) do
-          csp_auth_response.deep_dup.deep_merge(extra: { raw_info: { social_security_number: } })
+          csp_auth_response.deep_dup.deep_merge(extra: { raw_info: { ssn_field => social_security_number } })
         end
         before do
           user = create(:user)

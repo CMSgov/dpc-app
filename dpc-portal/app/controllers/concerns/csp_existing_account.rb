@@ -70,7 +70,8 @@ module CspExistingAccount
 
   def ssn(user_info)
     user_info.dig('extra', 'raw_info', 'social_security_number') ||
-      user_info.dig('extra', 'raw_info', 'ssn')
+      user_info.dig('extra', 'raw_info', 'SSN') ||
+    user_info.dig('extra', 'raw_info', 'ssn')
   end
 
   def create_csp_user(uuid)
