@@ -42,6 +42,7 @@ module LoggingConstants
     DeactivateUserEmail = 'DeactivateUserEmail'
     ReactivateUserEmail = 'ReactivateUserEmail'
     UpdatePrimaryUserEmail = 'UpdatePrimaryUserEmail'
+    OidcUserInfoFailed = 'OidcUserInfoFailed'
 
     FailAoPiiCheck = 'FailAoPiiCheck'
     FailCdPiiCheck = 'FailCdPiiCheck'
@@ -52,6 +53,7 @@ module LoggingConstants
 
     HealthCheckPassed = 'HealthCheckPassed'
     HealthCheckFailed = 'HealthCheckFailed'
+    MultiUserMatch = 'MultiUserMatch'
 
     InvalidInvitation = 'InvalidInvitation'
     UnacceptableInvitation = 'UnacceptableInvitation'
