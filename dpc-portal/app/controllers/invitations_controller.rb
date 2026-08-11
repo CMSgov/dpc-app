@@ -145,11 +145,7 @@ class InvitationsController < ApplicationController
 
   def verify_user_is_ao
     user_info = UserInfoService.new.user_info(csp_session)
-<<<<<<< HEAD
-    result = @invitation.ao_match?(user_info) # raises if does not match
-=======
     result = @invitation.ao_match?(user_info)
->>>>>>> origin/main
     session[:user_pac_id] = result.dig(:ao_role, 'pacId')
     log_waivers(result)
   rescue VerificationError => e
