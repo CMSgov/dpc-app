@@ -10,7 +10,7 @@ module Core
 
       def initialize(status: '', heading: '', include_icon: true, message_key: '', **options)
         if heading.present? && message_key.present?
-          raise ArgumentError, 'Either heading or message_key must be present, but not both.'
+          raise ArgumentError, 'Provide either heading or message_key, but not both.'
         end
 
         super()
