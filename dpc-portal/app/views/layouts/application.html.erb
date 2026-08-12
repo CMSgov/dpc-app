@@ -17,7 +17,9 @@
         <div class="grid-col-fill">
 	      <% flash.each do |key, message| %>
             <% if message.is_a?(Hash) %>
-              <%= render Core::Alert::Component.new(status: key, message_key: message[:key], **message[:options]) %>
+              <% msg = message.with_indifferent_access %>
+              <% opts = (msg[:options] || {}).to_h.symbolize_keys %>
+              <%= render Core::Alert::Component.new(status: key, message_key: msg[:key], **opts) %>
             <% else %>
               <%= render Core::Alert::Component.new(status: key) do %>
                 <%=raw message %>
