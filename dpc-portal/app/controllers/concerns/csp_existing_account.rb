@@ -9,8 +9,10 @@ module CspExistingAccount
   def handle_csp_user_response(csp_user, auth)
     return render_add_email(csp_user, auth) if csp_user && !email_match?(csp_user, auth)
 
-    orig_csp_user = existing_account(auth)
-    return render_link_account(primary_email(auth), orig_csp_user.csp.name) if orig_csp_user.present?
+    if csp_user.nil?
+      orig_csp_user = existing_account(auth)
+      return render_link_account(primary_email(auth), orig_csp_user.csp.name) if orig_csp_user.present?
+    end
 
     check_csp_session
     sync_and_redirect(csp_user, auth)
@@ -85,7 +87,7 @@ module CspExistingAccount
   end
 
   def check_csp_session
-    return if csp_session.active_csps.one?
+    return if current_user.nil? || csp_session.active_csps.one?
 
     verify_account_match
     create_csp_user
