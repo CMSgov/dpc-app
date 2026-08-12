@@ -182,7 +182,7 @@ RSpec.describe Core::Alert::Component, type: :component do
 
           expect(page.find('h2.usa-alert__heading'))
             .to have_content(I18n.t('errors.email_not_found.status'))
-          expect(page.find('p.usa-alert__text'))
+          expect(page.find('.usa-alert__text'))
             .to have_content('To try again with a different email:')
         end
 
