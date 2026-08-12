@@ -149,7 +149,7 @@ RSpec.describe Page::Utility::ErrorComponent, type: :component do
           it 'should have logout button' do
             button_url = "/logout?invitation_id=#{invitation.id}"
             is_expected.to include(button_url)
-            is_expected.to include('Back to sign in')
+            is_expected.to include("Sign out of #{display_name}")
           end
         end
       end
