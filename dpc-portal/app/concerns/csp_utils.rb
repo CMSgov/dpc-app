@@ -4,6 +4,12 @@
 module CspUtils
   extend ActiveSupport::Concern
 
+  class MultiUserMatchError < StandardError; end
+
+  class NameMismatchError < StandardError; end
+
+  class SsnMismatchError < StandardError; end
+
   CODES_TO_DISPLAY = {
     login_dot_gov: 'Login.gov',
     id_me: 'ID.me',

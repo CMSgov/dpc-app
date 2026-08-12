@@ -5,6 +5,7 @@ require 'dpc_portal_utils'
 # Handles acceptance of invitations
 class InvitationsController < ApplicationController
   include CspEmailSync
+  include CspUtils
   include DpcPortalUtils
 
   before_action :load_organization
@@ -467,6 +468,4 @@ class InvitationsController < ApplicationController
                          invitation: @invitation.id,
                          **csp_log_context }])
   end
-
-  class MultiUserMatchError < StandardError; end
 end

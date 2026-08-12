@@ -4,8 +4,6 @@
 module CspExistingAccount
   extend ActiveSupport::Concern
 
-  class SsnMismatchError < StandardError; end
-
   private
 
   def handle_csp_user_response(csp_user, auth)
@@ -28,13 +26,42 @@ module CspExistingAccount
   end
 
   def existing_account(auth)
-    email = UserEmail.includes(csp_user: %i[user csp])
-                     .where(email: [primary_email(auth), *all_emails(auth)])
-                     .find { |email| email.csp_user.csp.name != auth.provider.to_s }
-    return nil unless email
+    csp_users = matching_csp_users(auth)
+    return nil if csp_users.empty?
 
-    csp_user = email.csp_user
-    csp_user if name_match?(csp_user.user, auth)
+    csp_users.first
+  end
+
+  def matching_csp_users(auth)
+    emails = other_csp_emails(auth)
+    return [] if emails.empty?
+
+    matching, mismatched = emails.map(&:csp_user).uniq.partition { |c| name_match?(c.user, auth) }
+    log_name_mismatch(mismatched) if mismatched.any?
+    validate_unique_match(matching, emails)
+    matching
+  end
+
+  def other_csp_emails(auth)
+    UserEmail.includes(csp_user: %i[user csp])
+             .where(email: [primary_email(auth), *all_emails(auth)])
+             .reject { |e| e.csp_user.csp.name == auth.provider.to_s }
+  end
+
+  def log_name_mismatch(csp_users)
+    csp_users.each do |csp_user|
+      Rails.logger.info(['Email match found but name does not match',
+                         { actionContext: LoggingConstants::ActionContext::Authentication,
+                           actionType: LoggingConstants::ActionType::NameMismatch,
+                           csp: csp_user.csp.name }])
+    end
+  end
+
+  def validate_unique_match(csp_users, emails)
+    return unless csp_users.many?
+
+    matching_emails = emails.map(&:email).uniq.join(',')
+    raise CspUtils::MultiUserMatchError, "too many matching users | #{matching_emails}"
   end
 
   def render_add_email(csp_user, auth)
@@ -70,7 +97,7 @@ module CspExistingAccount
 
   def verify_account_match
     all_ssns = all_user_info.values.map { |user_info| ssn(user_info) }
-    raise SsnMismatchError, 'SSN mismatch' unless all_ssns.uniq.one?
+    raise CspUtils::SsnMismatchError, 'SSN mismatch' unless all_ssns.uniq.one?
   end
 
   def ssn(user_info)

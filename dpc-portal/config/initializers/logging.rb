@@ -43,6 +43,7 @@ module LoggingConstants
     UpdatePrimaryUserEmail = 'UpdatePrimaryUserEmail'
 
     MergeUserAccountCsp = 'MergeUserAccountCsp'
+    NameMismatch = 'NameMismatch'
 
     FailAoPiiCheck = 'FailAoPiiCheck'
     FailCdPiiCheck = 'FailCdPiiCheck'
