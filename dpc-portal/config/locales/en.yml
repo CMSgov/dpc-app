@@ -67,8 +67,8 @@ en:
     duplicate_key:
       text: This public key is already in use. Choose a new public key.
     email_not_found:
-      status: The email you used to sign in was not recognized
-      text: To try again with a different email:<ol><li>Sign out of your identity provider(CLEAR, ID.me or Login.gov). Signing out of the DPC Portal alone won't switch your email.</li><li>Return here and sign in with the email your invitation was sent to.</li></ol>
+      status: The email you used to sign in was not recognized.
+      text: "To try again with a different email:<ol><li>Sign out of your identity provider (CLEAR, ID.me, or Login.gov). Signing out of the DPC Portal alone won't switch your email.</li><li>Return here and sign in with the email your invitation was sent to.</li></ol>"
 
     attributes:
       base:
