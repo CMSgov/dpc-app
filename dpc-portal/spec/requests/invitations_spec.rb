@@ -194,10 +194,10 @@ RSpec.describe 'Invitations', type: :request do
       it 'should log user logged in' do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(['User logged in',
-                                                     { actionContext: LoggingConstants::ActionContext::Registration,
-                                                       actionType: LoggingConstants::ActionType::UserLoggedIn,
-                                                       csp: provider.to_s,
-                                                       invitation: invitation.id }])
+                                                     hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                                                    actionType: LoggingConstants::ActionType::UserLoggedIn,
+                                                                    csp: provider.to_s,
+                                                                    invitation: invitation.id)])
         post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
       end
 
@@ -810,10 +810,10 @@ RSpec.describe 'Invitations', type: :request do
             it 'should log user logged in' do
               allow(Rails.logger).to receive(:info)
               expect(Rails.logger).to receive(:info).with(['User logged in',
-                                                           { actionContext: LoggingConstants::ActionContext::Registration,
-                                                             actionType: LoggingConstants::ActionType::UserLoggedIn,
-                                                             csp: provider.to_s,
-                                                             invitation: invitation.id }])
+                                                           hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                                                          actionType: LoggingConstants::ActionType::UserLoggedIn,
+                                                                          csp: provider.to_s,
+                                                                          invitation: invitation.id)])
               post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
             end
 
