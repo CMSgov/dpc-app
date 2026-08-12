@@ -54,17 +54,19 @@ RSpec.describe 'Invitations', type: :request do
           allow(Rails.logger).to receive(:info)
           expect(Rails.logger).to receive(:info).with(
             ['Credential Delegate Invitation expired',
-             { actionContext: LoggingConstants::ActionContext::Registration,
-               actionType: LoggingConstants::ActionType::CdInvitationExpired,
-               invitation: invitation.id }]
+             hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                            actionType: LoggingConstants::ActionType::CdInvitationExpired,
+                            organization_npi: org.npi,
+                            invitation: invitation.id)]
           )
         elsif invitation.authorized_official?
           allow(Rails.logger).to receive(:info)
           expect(Rails.logger).to receive(:info).with(
             ['Authorized Official Invitation expired',
-             { actionContext: LoggingConstants::ActionContext::Registration,
-               actionType: LoggingConstants::ActionType::AoInvitationExpired,
-               invitation: invitation.id }]
+             hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                            actionType: LoggingConstants::ActionType::AoInvitationExpired,
+                            organization_npi: org.npi,
+                            invitation: invitation.id)]
           )
         end
         send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
@@ -82,17 +84,19 @@ RSpec.describe 'Invitations', type: :request do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(
           ['Authorized Official Invitation already accepted',
-           { actionContext: LoggingConstants::ActionContext::Registration,
-             actionType: LoggingConstants::ActionType::AoAlreadyRegistered,
-             invitation: invitation.id }]
+           hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                          actionType: LoggingConstants::ActionType::AoAlreadyRegistered,
+                          organization_npi: org.npi,
+                          invitation: invitation.id)]
         )
       elsif invitation.credential_delegate?
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(
           ['Credential Delegate Invitation already accepted',
-           { actionContext: LoggingConstants::ActionContext::Registration,
-             actionType: LoggingConstants::ActionType::CdAlreadyRegistered,
-             invitation: invitation.id }]
+           hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                          actionType: LoggingConstants::ActionType::CdAlreadyRegistered,
+                          organization_npi: org.npi,
+                          invitation: invitation.id)]
         )
       end
 
@@ -120,10 +124,10 @@ RSpec.describe 'Invitations', type: :request do
     it 'should log that user has begun login' do
       allow(Rails.logger).to receive(:info)
       expect(Rails.logger).to receive(:info).with(['User began login flow',
-                                                   { actionContext: LoggingConstants::ActionContext::Registration,
-                                                     actionType: LoggingConstants::ActionType::BeginLogin,
-                                                     csp: provider.to_s,
-                                                     invitation: invitation.id }])
+                                                   hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                                                  actionType: LoggingConstants::ActionType::BeginLogin,
+                                                                  csp: provider.to_s,
+                                                                  invitation: invitation.id)])
       org_id = invitation.provider_organization.id
       post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
     end
@@ -177,16 +181,18 @@ RSpec.describe 'Invitations', type: :request do
         allow(Rails.logger).to receive(:info)
         if invitation.authorized_official?
           expect(Rails.logger).to receive(:info).with(['Authorized Official linked to organization',
-                                                       { actionContext: LoggingConstants::ActionContext::Registration,
-                                                         actionType: LoggingConstants::ActionType::AoLinkedToOrg,
-                                                         csp: provider.to_s,
-                                                         invitation: invitation.id }])
+                                                       hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                                                      actionType: LoggingConstants::ActionType::AoLinkedToOrg,
+                                                                      csp: provider.to_s,
+                                                                      organization_npi: org.npi,
+                                                                      invitation: invitation.id)])
         else
           expect(Rails.logger).to receive(:info).with(['Credential Delegate linked to organization',
-                                                       { actionContext: LoggingConstants::ActionContext::Registration,
-                                                         actionType: LoggingConstants::ActionType::CdLinkedToOrg,
-                                                         csp: provider.to_s,
-                                                         invitation: invitation.id }])
+                                                       hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                                                      actionType: LoggingConstants::ActionType::CdLinkedToOrg,
+                                                                      csp: provider.to_s,
+                                                                      organization_npi: org.npi,
+                                                                      invitation: invitation.id)])
         end
         post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
       end
@@ -226,16 +232,18 @@ RSpec.describe 'Invitations', type: :request do
         allow(Rails.logger).to receive(:info)
         if invitation.authorized_official?
           expect(Rails.logger).to receive(:info).with(['Authorized Official user created,',
-                                                       { actionContext: LoggingConstants::ActionContext::Registration,
-                                                         actionType: LoggingConstants::ActionType::AoCreated,
-                                                         csp: provider.to_s,
-                                                         invitation: invitation.id }])
+                                                       hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                                                      actionType: LoggingConstants::ActionType::AoCreated,
+                                                                      csp: provider.to_s,
+                                                                      organization_npi: org.npi,
+                                                                      invitation: invitation.id)])
         else
           expect(Rails.logger).to receive(:info).with(['Credential Delegate user created,',
-                                                       { actionContext: LoggingConstants::ActionContext::Registration,
-                                                         actionType: LoggingConstants::ActionType::CdCreated,
-                                                         csp: provider.to_s,
-                                                         invitation: invitation.id }])
+                                                       hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                                                      actionType: LoggingConstants::ActionType::CdCreated,
+                                                                      csp: provider.to_s,
+                                                                      organization_npi: org.npi,
+                                                                      invitation: invitation.id)])
         end
         post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
       end
@@ -444,10 +452,10 @@ RSpec.describe 'Invitations', type: :request do
               allow(Rails.logger).to receive(:info)
               expect(Rails.logger).to receive(:info).with(
                 ['AO PII Check Fail',
-                 { actionContext: LoggingConstants::ActionContext::Registration,
-                   actionType: LoggingConstants::ActionType::FailAoPiiCheck,
-                   csp: provider.to_s,
-                   invitation: invitation.id }]
+                 hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                actionType: LoggingConstants::ActionType::FailAoPiiCheck,
+                                csp: provider.to_s,
+                                invitation: invitation.id)]
               )
               stub_user_info(overrides: { 'email' => 'another@example.com', 'all_emails' => ['another@example.com'] })
               get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
@@ -511,10 +519,10 @@ RSpec.describe 'Invitations', type: :request do
               allow(Rails.logger).to receive(:info)
               expect(Rails.logger).to receive(:info)
                 .with(['Authorized official has a waiver',
-                       { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::AoHasWaiver,
-                         csp: provider.to_s,
-                         invitation: invitation.id }])
+                       hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                      actionType: LoggingConstants::ActionType::AoHasWaiver,
+                                      csp: provider.to_s,
+                                      invitation: invitation.id)])
               post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
             end
           end
@@ -528,10 +536,10 @@ RSpec.describe 'Invitations', type: :request do
               allow(Rails.logger).to receive(:info)
               expect(Rails.logger).to receive(:info)
                 .with(['Organization has a waiver',
-                       { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::OrgHasWaiver,
-                         csp: provider.to_s,
-                         invitation: invitation.id }])
+                       hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                      actionType: LoggingConstants::ActionType::OrgHasWaiver,
+                                      csp: provider.to_s,
+                                      invitation: invitation.id)])
               post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
             end
           end
@@ -573,13 +581,15 @@ RSpec.describe 'Invitations', type: :request do
               expect(response.body).to include('<span class="usa-step-indicator__current-step">3</span>')
             end
             it 'logs failure' do
+              verification_reason = 'user_not_authorized_official'
               allow(Rails.logger).to receive(:info)
               expect(Rails.logger).to receive(:info).with(['AO Check Fail',
-                                                           { actionContext: LoggingConstants::ActionContext::Registration,
-                                                             actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
-                                                             csp: provider.to_s,
-                                                             verificationReason: 'user_not_authorized_official',
-                                                             invitation: invitation.id }])
+                                                           hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                                                          actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
+                                                                          csp: provider.to_s,
+                                                                          verificationReason: verification_reason,
+                                                                          organization_npi: org.npi,
+                                                                          invitation: invitation.id)])
               post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
             end
           end
@@ -688,10 +698,10 @@ RSpec.describe 'Invitations', type: :request do
                 allow(Rails.logger).to receive(:info)
                 approved_access_log_message = [
                   'Approved access authorization occurred for the Credential Delegate',
-                  { actionContext: LoggingConstants::ActionContext::Registration,
-                    actionType: LoggingConstants::ActionType::CdConfirmed,
-                    csp: provider.to_s,
-                    invitation: cd_invite.id }
+                  hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                 actionType: LoggingConstants::ActionType::CdConfirmed,
+                                 csp: provider.to_s,
+                                 invitation: cd_invite.id)
                 ]
                 expect(Rails.logger).to receive(:info).with(approved_access_log_message)
                 get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
@@ -708,10 +718,10 @@ RSpec.describe 'Invitations', type: :request do
                 allow(Rails.logger).to receive(:info)
                 expect(Rails.logger).to receive(:info).with(
                   ['CD PII Check Fail',
-                   { actionContext: LoggingConstants::ActionContext::Registration,
-                     actionType: LoggingConstants::ActionType::FailCdPiiCheck,
-                     csp: provider.to_s,
-                     invitation: cd_invite.id }]
+                   hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                  actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                                  csp: provider.to_s,
+                                  invitation: cd_invite.id)]
                 )
                 stub_user_info(overrides: { 'email' => 'another@example.com', 'all_emails' => ['another@example.com'] })
                 get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
@@ -724,10 +734,10 @@ RSpec.describe 'Invitations', type: :request do
                 allow(Rails.logger).to receive(:info)
                 expect(Rails.logger).to receive(:info).with(
                   ['CD PII Check Fail',
-                   { actionContext: LoggingConstants::ActionContext::Registration,
-                     actionType: LoggingConstants::ActionType::FailCdPiiCheck,
-                     csp: provider.to_s,
-                     invitation: cd_invite.id }]
+                   hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                  actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                                  csp: provider.to_s,
+                                  invitation: cd_invite.id)]
                 )
                 stub_user_info(overrides: { 'family_name' => 'Something Else' })
                 get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
@@ -793,16 +803,18 @@ RSpec.describe 'Invitations', type: :request do
               allow(Rails.logger).to receive(:info)
               if invitation.authorized_official?
                 expect(Rails.logger).to receive(:info).with(['Authorized Official linked to organization',
-                                                             { actionContext: LoggingConstants::ActionContext::Registration,
-                                                               actionType: LoggingConstants::ActionType::AoLinkedToOrg,
-                                                               csp: provider.to_s,
-                                                               invitation: invitation.id }])
+                                                             hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                                                            actionType: LoggingConstants::ActionType::AoLinkedToOrg,
+                                                                            csp: provider.to_s,
+                                                                            organization_npi: org.npi,
+                                                                            invitation: invitation.id)])
               else
                 expect(Rails.logger).to receive(:info).with(['Credential Delegate linked to organization',
-                                                             { actionContext: LoggingConstants::ActionContext::Registration,
-                                                               actionType: LoggingConstants::ActionType::CdLinkedToOrg,
-                                                               csp: provider.to_s,
-                                                               invitation: invitation.id }])
+                                                             hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                                                            actionType: LoggingConstants::ActionType::CdLinkedToOrg,
+                                                                            csp: provider.to_s,
+                                                                            organization_npi: org.npi,
+                                                                            invitation: invitation.id)])
               end
               post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
             end
@@ -843,16 +855,18 @@ RSpec.describe 'Invitations', type: :request do
               allow(Rails.logger).to receive(:info)
               if invitation.authorized_official?
                 expect(Rails.logger).to receive(:info).with(['Authorized Official user created,',
-                                                             { actionContext: LoggingConstants::ActionContext::Registration,
-                                                               actionType: LoggingConstants::ActionType::AoCreated,
-                                                               csp: provider.to_s,
-                                                               invitation: invitation.id }])
+                                                             hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                                                            actionType: LoggingConstants::ActionType::AoCreated,
+                                                                            csp: provider.to_s,
+                                                                            organization_npi: org.npi,
+                                                                            invitation: invitation.id)])
               else
                 expect(Rails.logger).to receive(:info).with(['Credential Delegate user created,',
-                                                             { actionContext: LoggingConstants::ActionContext::Registration,
-                                                               actionType: LoggingConstants::ActionType::CdCreated,
-                                                               csp: provider.to_s,
-                                                               invitation: invitation.id }])
+                                                             hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                                                            actionType: LoggingConstants::ActionType::CdCreated,
+                                                                            csp: provider.to_s,
+                                                                            organization_npi: org.npi,
+                                                                            invitation: invitation.id)])
               end
               post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
             end
@@ -968,6 +982,9 @@ RSpec.describe 'Invitations', type: :request do
                 ['Multiple user matches', hash_including(
                   actionContext: LoggingConstants::ActionContext::Registration,
                   actionType: LoggingConstants::ActionType::MultiUserMatch,
+                  organization_npi: org.npi,
+                  user_identifier: user_info_template['sub'],
+                  csp: provider.to_s,
                   invitation: invitation.id
                 )]
               )
@@ -1069,12 +1086,14 @@ RSpec.describe 'Invitations', type: :request do
               create(:user_email, csp_user: dup_csp_user, email: user_info_template['email'], primary: true)
 
               expect(Rails.logger).to receive(:error).with(
-                ['Multiple user matches', {
+                ['Multiple user matches', hash_including(
                   actionContext: LoggingConstants::ActionContext::Registration,
                   actionType: LoggingConstants::ActionType::MultiUserMatch,
+                  organization_npi: org.npi,
+                  user_identifier: user_info_template['sub'],
                   csp: provider.to_s,
                   invitation: invitation.id
-                }]
+                )]
               )
 
               expect(Rails.logger).to receive(:error).with(

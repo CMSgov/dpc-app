@@ -52,9 +52,11 @@ class ApplicationController < ActionController::Base
 
     reset_session
     flash[:notice] = t('devise.failure.max_session_timeout', default: 'Your session has timed out.')
-    Rails.logger.info(['User session timed out',
-                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::SessionTimedOut }])
+    log_event(:info, 'User session timed out',
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::SessionTimedOut,
+              user_identifier: @auth_details&.uid,
+              csp: @auth_details&.provider)
     redirect_to sign_in_path
   end
 
