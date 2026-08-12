@@ -280,7 +280,16 @@ class InvitationsController < ApplicationController
 
   def find_or_create_ao_user(user_info)
     candidates = find_ao_candidates(user_info)
-    raise MultiUserMatchError, "too many matching users | pac_id: #{session[:user_pac_id]}" if candidates.size > 1
+
+    if candidates.size > 1
+      logger.error(['Multiple user matches', {
+                     actionContext: LoggingConstants::ActionContext::Registration,
+                     actionType: LoggingConstants::ActionType::MultiUserMatch,
+                     invitation: @invitation.id,
+                     **csp_log_context
+                   }])
+      raise MultiUserMatchError, 'too many matching AO users'
+    end
 
     candidates.first || create_new_user(user_info)
   end
@@ -298,11 +307,21 @@ class InvitationsController < ApplicationController
   end
 
   # Queries through user_emails table, raises on multiple matches
+  # Additional updates to this logic will be handled in DPC-5564
   def find_user_by_email(email)
     return nil if email.blank?
 
     users = User.find_by_email_in_user_emails(email)
-    raise MultiUserMatchError, "too many matching users | email: #{email}" if users.size > 1
+
+    if users.size > 1
+      logger.error(['Multiple user matches', {
+                     actionContext: LoggingConstants::ActionContext::Registration,
+                     actionType: LoggingConstants::ActionType::MultiUserMatch,
+                     invitation: @invitation.id,
+                     **csp_log_context
+                   }])
+      raise MultiUserMatchError, 'too many users matching email'
+    end
 
     users.first
   end

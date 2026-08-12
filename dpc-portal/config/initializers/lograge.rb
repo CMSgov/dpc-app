@@ -18,9 +18,8 @@ Rails.application.configure do
     exception = event.payload[:exception_object]
 
     if exception
-      info[:exception_message] = exception.message
       info[:exception_class] = exception.class
-      info[:exception_backtrace] = Rails.backtrace_cleaner.clean(exception.backtrace)
+      info[:exception_reference] = info[:request_id]
     end
     
     info
