@@ -63,7 +63,7 @@ LOGIN_DOT_GOV_CLIENT_CONFIG = {
   name: :login_dot_gov,
   issuer: "https://#{LOGIN_DOT_GOV_CONFIG[:host]}/",
   discovery: true,
-  scope: %i[openid email all_emails],
+  scope: %i[openid email all_emails profile:name],
   response_type: :code,
   acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
   client_auth_method: :jwt_bearer,
