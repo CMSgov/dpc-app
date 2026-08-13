@@ -25,8 +25,9 @@ RSpec.describe 'Sessions', type: :request do
           allow(Rails.logger).to receive(:info)
           expect(Rails.logger).to receive(:info).with(
             ['User logged out',
-             { actionContext: LoggingConstants::ActionContext::Authentication,
-               actionType: LoggingConstants::ActionType::UserLoggedOut }]
+             hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                            actionType: LoggingConstants::ActionType::UserLoggedOut,
+                            csp: provider.to_s)]
           )
           delete '/users/sign_out'
         end

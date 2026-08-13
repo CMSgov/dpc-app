@@ -8,9 +8,10 @@ module Users
     def destroy
       csp = session[:csp]
       clean_session
-      Rails.logger.info(['User logged out',
-                         { actionContext: LoggingConstants::ActionContext::Authentication,
-                           actionType: LoggingConstants::ActionType::UserLoggedOut }])
+      log_event(:info, 'User logged out',
+                action_context: LoggingConstants::ActionContext::Authentication,
+                action_type: LoggingConstants::ActionType::UserLoggedOut,
+                csp: csp)
       redirect_to url_for_logout(csp), allow_other_host: true
     end
 

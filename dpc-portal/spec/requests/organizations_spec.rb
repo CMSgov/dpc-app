@@ -312,12 +312,13 @@ RSpec.describe 'Organizations', type: :request do
             end
 
             it 'logs if successful' do
-              allow(Rails.logger).to receive(:info)
-              expect(Rails.logger).to receive(:info).with(['Authorized Official signed Terms of Service',
-                                                           { actionContext: LoggingConstants::ActionContext::Registration,
-                                                             actionType: LoggingConstants::ActionType::AoSignedToS }])
               org = create(:provider_organization)
               create(:ao_org_link, provider_organization: org, user:)
+              allow(Rails.logger).to receive(:info)
+              expect(Rails.logger).to receive(:info).with(['Authorized Official signed Terms of Service',
+                                                           hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                                                                          actionType: LoggingConstants::ActionType::AoSignedToS,
+                                                                          organization_npi: org.npi)])
               post "/organizations/#{org.id}/sign_tos"
             end
 
