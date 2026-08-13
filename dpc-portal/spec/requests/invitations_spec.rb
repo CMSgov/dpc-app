@@ -955,6 +955,33 @@ RSpec.describe 'Invitations', type: :request do
               expect(user.verification_status).to be_nil
               expect(org.reload.verification_status).to be_nil
             end
+            it 'should fail if too many users matching email' do
+              dup_user1 = create(:user)
+              dup_csp_user1 = create(:csp_user, user: dup_user1, csp:, uuid: SecureRandom.uuid)
+              create(:user_email, csp_user: dup_csp_user1, email: user_info_template['email'], primary: true)
+
+              dup_user2 = create(:user)
+              dup_csp_user2 = create(:csp_user, user: dup_user2, csp:, uuid: SecureRandom.uuid)
+              create(:user_email, csp_user: dup_csp_user2, email: user_info_template['email'], primary: true)
+
+              expect(Rails.logger).to receive(:error).with(
+                ['Multiple user matches', hash_including(
+                  actionContext: LoggingConstants::ActionContext::Registration,
+                  actionType: LoggingConstants::ActionType::MultiUserMatch,
+                  invitation: invitation.id
+                )]
+              )
+
+              expect(Rails.logger).to receive(:error).with(
+                ['User matches too many existing users', hash_including(
+                  actionContext: LoggingConstants::ActionContext::Registration,
+                  error: 'too many users matching email'
+                )]
+              )
+
+              post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+              expect(response.body).to include(I18n.t('verification.multi_user_match_text'))
+            end
           end
         end
         context :ao do
@@ -1040,6 +1067,22 @@ RSpec.describe 'Invitations', type: :request do
               dup_user = create(:user)
               dup_csp_user = create(:csp_user, user: dup_user, csp:, uuid: SecureRandom.uuid)
               create(:user_email, csp_user: dup_csp_user, email: user_info_template['email'], primary: true)
+
+              expect(Rails.logger).to receive(:error).with(
+                ['Multiple user matches', {
+                  actionContext: LoggingConstants::ActionContext::Registration,
+                  actionType: LoggingConstants::ActionType::MultiUserMatch,
+                  csp: provider.to_s,
+                  invitation: invitation.id
+                }]
+              )
+
+              expect(Rails.logger).to receive(:error).with(
+                ['User matches too many existing users', hash_including(
+                  actionContext: LoggingConstants::ActionContext::Registration,
+                  error: 'too many matching AO users'
+                )]
+              )
 
               post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
               expect(response.body).to include(I18n.t('verification.multi_user_match_text'))
