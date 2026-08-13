@@ -57,14 +57,15 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
   end
 
   def find_csp_user(csp)
-    csp_user = CspUser.find_by(uuid: @auth_details&.uid, csp:)
+    auth = auth_details
+    csp_user = CspUser.find_by(uuid: auth&.uid, csp: csp)
 
     if csp_user.nil?
       log_event(:error, 'No CspUser found for CSP authentication',
                 action_context: LoggingConstants::ActionContext::Authentication,
                 action_type: LoggingConstants::ActionType::CspUserNotFound,
-                user_identifier: @auth_details&.uid,
-                csp: csp)
+                user_identifier: auth&.uid,
+                csp: auth&.provider || csp.name)
     end
 
     csp_user

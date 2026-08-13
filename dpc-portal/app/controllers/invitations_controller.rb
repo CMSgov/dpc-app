@@ -363,7 +363,7 @@ class InvitationsController < ApplicationController
     err_msg, action_type = invitation_log_data(@invitation.unacceptable_reason)
     log_event(:info, err_msg,
               action_context: LoggingConstants::ActionContext::Registration,
-              actionType: action_type,
+              action_type: action_type,
               organization_npi: @organization.npi,
               invitation: @invitation.id)
 
@@ -410,13 +410,13 @@ class InvitationsController < ApplicationController
     if @invitation.credential_delegate?
       log_event(:info, 'Credential Delegate invitation flow started,',
                 action_context: LoggingConstants::ActionContext::Registration,
-                actionType: LoggingConstants::ActionType::CdInvitationFlowStarted,
+                action_type: LoggingConstants::ActionType::CdInvitationFlowStarted,
                 organization_npi: @organization.npi,
                 invitation: @invitation.id)
     elsif @invitation.authorized_official?
       log_event(:info, 'Authorized Official invitation flow started,',
                 action_context: LoggingConstants::ActionContext::Registration,
-                actionType: LoggingConstants::ActionType::AoInvitationFlowStarted,
+                action_type: LoggingConstants::ActionType::AoInvitationFlowStarted,
                 organization_npi: @organization.npi,
                 invitation: @invitation.id)
     end
@@ -426,14 +426,14 @@ class InvitationsController < ApplicationController
     if service_unavailable
       log_event(:error, 'CPI API Gateway unavailable',
                 action_context: LoggingConstants::ActionContext::Registration,
-                actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
+                action_type: LoggingConstants::ActionType::FailCpiApiGwCheck,
                 error: error.message,
                 organization_npi: @organization.npi,
                 invitation: @invitation.id)
     else
       log_event(:info, 'AO Check Fail',
                 action_context: LoggingConstants::ActionContext::Registration,
-                actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
+                action_type: LoggingConstants::ActionType::FailCpiApiGwCheck,
                 verificationReason: error.message,
                 organization_npi: @organization.npi,
                 invitation: @invitation.id)
