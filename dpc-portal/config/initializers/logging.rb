@@ -9,6 +9,7 @@ module LoggingConstants
     BatchVerificationCheck = 'BatchVerificationCheck'
     HealthCheck = 'HealthCheck'
     Rendering = 'Rendering'
+    CredentialManagement = 'CredentialManagement'
   end
 
   module ActionType

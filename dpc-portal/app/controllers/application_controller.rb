@@ -80,9 +80,10 @@ class ApplicationController < ActionController::Base
     return if log.save
 
     log_event(:error, 'CredentialAuditLog failure',
+              action_context: LoggingConstants::ActionContext::CredentialManagement,
               action:, credential_type:, dpc_api_credential_id:,
               user_identifier: @auth_details&.uid,
-              csp: @auth_details&.provider)
+              csp: csp = @auth_details&.provider)
   end
 
   # Helper method for logging csp with actionContext and actionType whenever it's available on the session
