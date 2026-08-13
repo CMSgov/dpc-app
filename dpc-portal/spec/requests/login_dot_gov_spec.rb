@@ -115,6 +115,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         expect(Rails.logger).to receive(:info).with(['User email deactivated',
                                                      hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
                                                                     actionType: LoggingConstants::ActionType::DeactivateUserEmail,
+                                                                    user_identifier: uuid,
                                                                     csp: 'login_dot_gov')])
         post '/auth/login_dot_gov'
         follow_redirect!

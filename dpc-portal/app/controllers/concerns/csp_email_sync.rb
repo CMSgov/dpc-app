@@ -18,7 +18,7 @@ module CspEmailSync
     # Scan through all of the emails from the CSP and add or update as necessary.
     ActiveRecord::Base.transaction do
       add_or_activate_new_email(csp_user, new_emails, existing_emails)
-      deactivate_old_email(new_emails, existing_emails)
+      deactivate_old_email(csp_user, new_emails, existing_emails)
       update_primary_email(csp_user, primary_email)
     end
   end
@@ -37,35 +37,38 @@ module CspEmailSync
   def add_or_activate_new_email(csp_user, new_emails, existing_emails)
     new_emails&.each do |new_email|
       existing_email = existing_emails.find { |e| e.email == new_email }
-      existing_email ? activate_email(existing_email) : create_new_email(csp_user, new_email)
+      existing_email ? activate_email(csp_user, existing_email) : create_new_email(csp_user, new_email)
     end
   end
 
   def create_new_email(csp_user, email)
     log_event(:info, 'New user email created',
               action_context: LoggingConstants::ActionContext::Authentication,
-              action_type: LoggingConstants::ActionType::AddNewUserEmail)
+              action_type: LoggingConstants::ActionType::AddNewUserEmail,
+              user_identifier: csp_user&.uuid)
     UserEmail.create!(csp_user:, email:, active: true)
   end
 
-  def deactivate_old_email(new_emails, existing_emails)
+  def deactivate_old_email(csp_user, new_emails, existing_emails)
     # If an existing email is no longer in the list provided by the CSP, deactivate it.
     existing_emails&.each do |existing_email|
       next if new_emails&.include?(existing_email.email)
 
       log_event(:info, 'User email deactivated',
                 action_context: LoggingConstants::ActionContext::Authentication,
-                action_type: LoggingConstants::ActionType::DeactivateUserEmail)
+                action_type: LoggingConstants::ActionType::DeactivateUserEmail,
+                user_identifier: csp_user&.uuid)
       existing_email.update!(active: false, deactivated_at: Time.current, reactivated_at: nil)
     end
   end
 
-  def activate_email(user_email)
+  def activate_email(csp_user, user_email)
     return if user_email.active?
 
     log_event(:info, 'User email reactivated',
               action_context: LoggingConstants::ActionContext::Authentication,
-              action_type: LoggingConstants::ActionType::ReactivateUserEmail)
+              action_type: LoggingConstants::ActionType::ReactivateUserEmail,
+              user_identifier: csp_user&.uuid)
     user_email.update!(active: true, deactivated_at: nil, reactivated_at: Time.current)
   end
 
@@ -75,7 +78,8 @@ module CspEmailSync
 
     log_event(:info, 'User primary email updated',
               action_context: LoggingConstants::ActionContext::Authentication,
-              action_type: LoggingConstants::ActionType::UpdatePrimaryUserEmail)
+              action_type: LoggingConstants::ActionType::UpdatePrimaryUserEmail,
+              user_identifier: csp_user&.uuid)
     current_email&.update!(primary: true)
   end
 end

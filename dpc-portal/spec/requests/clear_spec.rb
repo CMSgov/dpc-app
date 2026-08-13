@@ -113,6 +113,7 @@ RSpec.describe 'Clear', type: :request do
         expect(Rails.logger).to receive(:info).with(['User email deactivated',
                                                      hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
                                                                     actionType: LoggingConstants::ActionType::DeactivateUserEmail,
+                                                                    user_identifier: uuid,
                                                                     csp: 'clear')])
         post '/auth/clear'
         follow_redirect!
