@@ -16,7 +16,7 @@ module CspAccountLookup
     return [] if emails.empty?
 
     csp_users = filter_active_csp_users(emails)
-    matching, mismatched = csp_users.partition { |csp_user| name_match?(csp_user&.user, auth) }
+    matching, mismatched = csp_users.partition { |csp_user| name_match?(csp_user.user, auth) }
 
     log_name_mismatch(mismatched) if mismatched.any?
     validate_unique_match(matching, emails)
