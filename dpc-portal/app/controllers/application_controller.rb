@@ -50,13 +50,17 @@ class ApplicationController < ActionController::Base
     session[:logged_in_at] ||= Time.now
     return unless session_timed_out?
 
+    timed_out_user_identifier = current_csp_user_identifier
+    timed_out_csp             = csp_session.current
+
     reset_session
     flash[:notice] = t('devise.failure.max_session_timeout', default: 'Your session has timed out.')
     log_event(:info, 'User session timed out',
               action_context: LoggingConstants::ActionContext::Authentication,
               action_type: LoggingConstants::ActionType::SessionTimedOut,
-              user_identifier: @auth_details&.uid,
-              csp: @auth_details&.provider)
+              user_identifier: timed_out_user_identifier,
+              csp: timed_out_csp)
+
     redirect_to sign_in_path
   end
 
@@ -82,12 +86,19 @@ class ApplicationController < ActionController::Base
     log_event(:error, 'CredentialAuditLog failure',
               action_context: LoggingConstants::ActionContext::CredentialManagement,
               action:, credential_type:, dpc_api_credential_id:,
-              user_identifier: @auth_details&.uid,
-              csp: csp = @auth_details&.provider)
+              user_identifier: current_csp_user_identifier,
+              csp: csp_session.current)
   end
 
   # Helper method for logging csp with actionContext and actionType whenever it's available on the session
   def csp_log_context
     session[:csp].present? ? { csp: session[:csp] } : {}
+  end
+
+  def current_csp_user_identifier
+    csp = csp_session.current
+    return nil unless csp
+
+    current_user&.csp_user_for(csp)&.uuid
   end
 end

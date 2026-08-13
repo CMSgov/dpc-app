@@ -22,16 +22,15 @@ module StructuredLogging
   end
 
   def optional_log_fields(action_type, extras)
+    csp_value = extras[:csp] || extras[:csp_name]
     known = {
       actionType: action_type,
       user_identifier: extras[:user_identifier],
       invitation: extras[:invitation],
-      csp: extras[:csp_name],
+      csp: csp_value,
       error: extras[:error]
     }.compact
-
-    remaining = extras.except(:user_identifier, :invitation, :csp_name, :error)
-
+    remaining = extras.except(:user_identifier, :invitation, :csp, :csp_name, :error)
     known.merge(remaining)
   end
 end
