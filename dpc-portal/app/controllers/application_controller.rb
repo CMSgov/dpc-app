@@ -28,8 +28,10 @@ class ApplicationController < ActionController::Base
   def authenticate_user!
     return if current_user
 
-    set_authentication_flash_alert
     session[:user_return_to] = request.path
+    return if render_unauthenticated_error
+
+    flash[:alert] = t('devise.failure.unauthenticated')
     redirect_to sign_in_path
   end
 
@@ -40,15 +42,10 @@ class ApplicationController < ActionController::Base
 
   private
 
-  def set_authentication_flash_alert
-    flash[:alert] = if csp_session.current && csp_session.user.blank?
-                      {
-                        key: 'email_not_found',
-                        options: { csp_display_name: CspUtils.display_name(csp_session.current) }
-                      }
-                    else
-                      t('devise.failure.unauthenticated')
-                    end
+  def render_unauthenticated_error
+    return unless csp_session.current && csp_session.user.blank?
+
+    render(Page::Utility::ErrorComponent.new(nil, 'email_mismatch', csp: csp_session.current), status: :forbidden)
   end
 
   def check_user_verification
