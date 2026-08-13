@@ -10,7 +10,7 @@ RSpec.describe 'Sessions', type: :request do
     context 'logged in' do
       RSpec.shared_examples 'logout actions' do |provider|
         let(:uuid) { SecureRandom.uuid }
-        let!(:user) { create_user_with_csp(csp: provider) }
+        let!(:user) { create_user_with_csp(csp: provider, uuid: uuid) }
         before do
           sign_in user, csp: provider
         end
@@ -27,6 +27,7 @@ RSpec.describe 'Sessions', type: :request do
             ['User logged out',
              hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
                             actionType: LoggingConstants::ActionType::UserLoggedOut,
+                            user_identifier: uuid,
                             csp: provider.to_s)]
           )
           delete '/users/sign_out'
