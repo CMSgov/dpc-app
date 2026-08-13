@@ -12,15 +12,18 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       render_inline(component)
       rendered_content
     end
-
     let(:component) { described_class.new('lock') }
 
     let(:expected_html) do
       <<~HTML
         <svg class="usa-icon" aria-hidden="true">
-          <use xlink:href="#{sprite_path}#lock"></use>
+          <use xlink:href=#{sprite_path}#lock></use>
         </svg>
       HTML
+    end
+
+    before do
+      render_inline(component)
     end
 
     it { is_expected.to match_html_fragment(expected_html) }
@@ -30,7 +33,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <svg class="usa-icon usa-icon--size-3" aria-hidden="true">
-            <use xlink:href="#{sprite_path}#circle_check"></use>
+            <use xlink:href=#{sprite_path}#circle_check></use>
           </svg>
         HTML
       end
@@ -43,7 +46,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <svg class="usa-icon" aria-hidden="true">
-            <use xlink:href="#{sprite_path}#circle_check"></use>
+            <use xlink:href=#{sprite_path}#circle_check></use>
           </svg>
         HTML
       end
@@ -56,7 +59,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <svg class="usa-icon" aria-hidden="true">
-            <use xlink:href="#{sprite_path}#circle_check"></use>
+            <use xlink:href=#{sprite_path}#circle_check></use>
           </svg>
         HTML
       end
@@ -69,7 +72,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <svg class="usa-icon" aria-hidden="true">
-            <use xlink:href="#{sprite_path}#circle_check"></use>
+            <use xlink:href=#{sprite_path}#circle_check></use>
           </svg>
         HTML
       end
@@ -82,7 +85,7 @@ RSpec.describe Core::Icon::UswdsComponent, type: :component do
       let(:expected_html) do
         <<~HTML
           <svg class="foo bar usa-icon" aria-hidden="true">
-            <use xlink:href="#{sprite_path}#lock"></use>
+            <use xlink:href=#{sprite_path}#lock></use>
           </svg>
         HTML
       end
