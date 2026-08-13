@@ -43,6 +43,8 @@ class OrganizationsController < ApplicationController
     log_event(:info, 'Authorized Official signed Terms of Service',
               action_context: LoggingConstants::ActionContext::Registration,
               action_type: LoggingConstants::ActionType::AoSignedToS,
+              user_identifier: current_csp_user_identifier,
+              csp: csp_session.current,
               organization_npi: @organization.npi)
     redirect_to organization_path(@organization)
   end

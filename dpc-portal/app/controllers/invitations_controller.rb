@@ -208,7 +208,7 @@ class InvitationsController < ApplicationController
               action_context: LoggingConstants::ActionContext::Registration,
               action_type: LoggingConstants::ActionType::MultiUserMatch,
               user_identifier: user_info['sub'],
-              csp_name: csp_session.current,
+              csp: csp_session.current,
               invitation: @invitation.id,
               error: error.message)
     render(Page::Utility::ErrorComponent.new(@invitation, 'multi_user_match', csp: csp_session.current))
