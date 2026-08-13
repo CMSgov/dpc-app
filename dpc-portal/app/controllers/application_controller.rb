@@ -18,6 +18,7 @@ class ApplicationController < ActionController::Base
   def current_user
     @current_user ||= User.find_by(id: session[:user])
   end
+  helper_method :current_user
 
   def csp_session
     @csp_session ||= CspSession.new(session)
