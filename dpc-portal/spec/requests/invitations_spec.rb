@@ -202,6 +202,7 @@ RSpec.describe 'Invitations', type: :request do
         expect(Rails.logger).to receive(:info).with(['User logged in',
                                                      hash_including(actionContext: LoggingConstants::ActionContext::Registration,
                                                                     actionType: LoggingConstants::ActionType::UserLoggedIn,
+                                                                    user_identifier: user_info_template['sub'],
                                                                     csp: provider.to_s,
                                                                     invitation: invitation.id)])
         post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
@@ -234,6 +235,7 @@ RSpec.describe 'Invitations', type: :request do
           expect(Rails.logger).to receive(:info).with(['Authorized Official user created,',
                                                        hash_including(actionContext: LoggingConstants::ActionContext::Registration,
                                                                       actionType: LoggingConstants::ActionType::AoCreated,
+                                                                      user_identifier: user_info_template['sub'],
                                                                       csp: provider.to_s,
                                                                       organization_npi: org.npi,
                                                                       invitation: invitation.id)])
@@ -241,6 +243,7 @@ RSpec.describe 'Invitations', type: :request do
           expect(Rails.logger).to receive(:info).with(['Credential Delegate user created,',
                                                        hash_including(actionContext: LoggingConstants::ActionContext::Registration,
                                                                       actionType: LoggingConstants::ActionType::CdCreated,
+                                                                      user_identifier: user_info_template['sub'],
                                                                       csp: provider.to_s,
                                                                       organization_npi: org.npi,
                                                                       invitation: invitation.id)])
@@ -586,6 +589,7 @@ RSpec.describe 'Invitations', type: :request do
               expect(Rails.logger).to receive(:info).with(['AO Check Fail',
                                                            hash_including(actionContext: LoggingConstants::ActionContext::Registration,
                                                                           actionType: LoggingConstants::ActionType::FailCpiApiGwCheck,
+                                                                          user_identifier: user_info_template['sub'],
                                                                           csp: provider.to_s,
                                                                           verificationReason: verification_reason,
                                                                           organization_npi: org.npi,
@@ -720,6 +724,7 @@ RSpec.describe 'Invitations', type: :request do
                   ['CD PII Check Fail',
                    hash_including(actionContext: LoggingConstants::ActionContext::Registration,
                                   actionType: LoggingConstants::ActionType::FailCdPiiCheck,
+                                  user_identifier: user_info_template['sub'],
                                   csp: provider.to_s,
                                   invitation: cd_invite.id)]
                 )
@@ -825,6 +830,7 @@ RSpec.describe 'Invitations', type: :request do
                                                            hash_including(actionContext: LoggingConstants::ActionContext::Registration,
                                                                           actionType: LoggingConstants::ActionType::UserLoggedIn,
                                                                           csp: provider.to_s,
+                                                                          user_identifier: user_info_template['sub'],
                                                                           invitation: invitation.id)])
               post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
             end
@@ -992,6 +998,9 @@ RSpec.describe 'Invitations', type: :request do
               expect(Rails.logger).to receive(:error).with(
                 ['User matches too many existing users', hash_including(
                   actionContext: LoggingConstants::ActionContext::Registration,
+                  actionType: LoggingConstants::ActionType::MultiUserMatch,
+                  user_identifier: user_info_template['sub'],
+                  csp: provider.to_s,
                   error: 'too many users matching email'
                 )]
               )

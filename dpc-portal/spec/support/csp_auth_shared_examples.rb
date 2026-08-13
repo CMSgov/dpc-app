@@ -37,6 +37,7 @@ RSpec.shared_examples 'a CSP client' do |config|
         expect(Rails.logger).to receive(:info).with(['User logged in',
                                                      hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
                                                                     actionType: LoggingConstants::ActionType::UserLoggedIn,
+                                                                    user_identifier: uuid,
                                                                     csp: csp_name)])
         post auth_endpoint
         follow_redirect!

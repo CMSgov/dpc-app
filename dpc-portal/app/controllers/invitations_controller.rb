@@ -98,6 +98,7 @@ class InvitationsController < ApplicationController
     log_event(:info, 'User logged in',
               action_context: LoggingConstants::ActionContext::Registration,
               action_type: LoggingConstants::ActionType::UserLoggedIn,
+              user_identifier: current_csp_user_identifier,
               invitation: @invitation.id)
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation, @given_name, @family_name))
   end
@@ -130,11 +131,11 @@ class InvitationsController < ApplicationController
   def render_bad_invitation?(user_info)
     csp = csp_session.current
     if @invitation.credential_delegate? && !@invitation.cd_match?(user_info)
-      log_pii_mismatch
+      log_pii_mismatch(user_info)
       render(Page::Utility::ErrorComponent.new(@invitation, 'pii_mismatch', csp:),
              status: :forbidden)
     elsif !@invitation.email_match?(user_info) && !confirmed_email?(user_info)
-      log_pii_mismatch
+      log_pii_mismatch(user_info)
       render(Page::Utility::ErrorComponent.new(@invitation, 'email_mismatch', csp:),
              status: :forbidden)
     end
@@ -147,7 +148,7 @@ class InvitationsController < ApplicationController
     log_waivers(result)
   rescue VerificationError => e
     status = AoVerificationService::SERVER_ERRORS.include?(e.message) ? :service_unavailable : :forbidden
-    log_ao_verification_error(e, status == :service_unavailable)
+    log_ao_verification_error(user_info, e, status == :service_unavailable)
     render(Page::Invitations::AoFlowFailComponent.new(@invitation, e.message, 2), status:)
   rescue UserInfoServiceError => e
     handle_user_info_service_error(e, 2)
@@ -198,11 +199,18 @@ class InvitationsController < ApplicationController
       false
     end
   rescue MultiUserMatchError => e
+    handle_multi_user_match_error(e)
+  end
+
+  def handle_multi_user_match_error(error)
+    user_info = UserInfoService.new.user_info(csp_session)
     log_event(:error, 'User matches too many existing users',
               action_context: LoggingConstants::ActionContext::Registration,
               action_type: LoggingConstants::ActionType::MultiUserMatch,
+              user_identifier: user_info['sub'],
+              csp_name: csp_session.current,
               invitation: @invitation.id,
-              error: e.message)
+              error: error.message)
     render(Page::Utility::ErrorComponent.new(@invitation, 'multi_user_match', csp: csp_session.current))
     nil
   end
@@ -329,7 +337,7 @@ class InvitationsController < ApplicationController
     User.new.tap do |user|
       assign_user_attributes(user, user_info)
       user.save!
-      log_create_user
+      log_create_user(user_info)
     end
   end
 
@@ -422,11 +430,12 @@ class InvitationsController < ApplicationController
     end
   end
 
-  def log_ao_verification_error(error, service_unavailable)
+  def log_ao_verification_error(user_info, error, service_unavailable)
     if service_unavailable
       log_event(:error, 'CPI API Gateway unavailable',
                 action_context: LoggingConstants::ActionContext::Registration,
                 action_type: LoggingConstants::ActionType::FailCpiApiGwCheck,
+                user_identifier: user_info&.dig('sub'),
                 error: error.message,
                 organization_npi: @organization.npi,
                 invitation: @invitation.id)
@@ -434,38 +443,43 @@ class InvitationsController < ApplicationController
       log_event(:info, 'AO Check Fail',
                 action_context: LoggingConstants::ActionContext::Registration,
                 action_type: LoggingConstants::ActionType::FailCpiApiGwCheck,
+                user_identifier: user_info&.dig('sub'),
                 verificationReason: error.message,
                 organization_npi: @organization.npi,
                 invitation: @invitation.id)
     end
   end
 
-  def log_create_user
+  def log_create_user(user_info)
     if @invitation.credential_delegate?
       log_event(:info, 'Credential Delegate user created,',
                 action_context: LoggingConstants::ActionContext::Registration,
                 action_type: LoggingConstants::ActionType::CdCreated,
+                user_identifier: user_info&.dig('sub'),
                 organization_npi: @organization.npi,
                 invitation: @invitation.id)
     elsif @invitation.authorized_official?
       log_event(:info, 'Authorized Official user created,',
                 action_context: LoggingConstants::ActionContext::Registration,
                 action_type: LoggingConstants::ActionType::AoCreated,
+                user_identifier: user_info&.dig('sub'),
                 organization_npi: @organization.npi,
                 invitation: @invitation.id)
     end
   end
 
-  def log_pii_mismatch
+  def log_pii_mismatch(user_info)
     if @invitation.credential_delegate?
       log_event(:info, 'CD PII Check Fail',
                 action_context: LoggingConstants::ActionContext::Registration,
                 action_type: LoggingConstants::ActionType::FailCdPiiCheck,
+                user_identifier: user_info&.dig('sub'),
                 invitation: @invitation.id)
     else
       log_event(:info, 'AO PII Check Fail',
                 action_context: LoggingConstants::ActionContext::Registration,
                 action_type: LoggingConstants::ActionType::FailAoPiiCheck,
+                user_identifier: user_info&.dig('sub'),
                 invitation: @invitation.id)
     end
   end
