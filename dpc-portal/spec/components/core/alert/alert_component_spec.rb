@@ -184,7 +184,7 @@ RSpec.describe Core::Alert::Component, type: :component do
         expect(page.find('h2.usa-alert__heading'))
           .to have_content(I18n.t('errors.email_not_found.status'))
         expect(page.find('.usa-alert__text'))
-          .to have_content('To try again with a different email:')
+          .to have_content('Try again with a different email:')
       end
 
       it 'renders the translated message as html rather than escaping it' do
