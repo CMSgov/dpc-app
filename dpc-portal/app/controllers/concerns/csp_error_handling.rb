@@ -4,8 +4,10 @@
 module CspErrorHandling
   extend ActiveSupport::Concern
 
+  CSP_AUTH_ERROR_MESSAGES = %w[server_error service_unavailable connection_failed internal_server_error timeout].freeze
+
   def csp_auth_error?
-    params[:message].present? && params[:strategy].present?
+    CSP_AUTH_ERROR_MESSAGES.include?(params[:message])
   end
 
   def handle_invitation_flow_failure(invitation_id)
@@ -22,18 +24,19 @@ module CspErrorHandling
   end
 
   def handle_csp_auth_error
+    csp = params[:strategy]
     Rails.logger.error(['CSP Authentication error',
                         { actionContext: LoggingConstants::ActionContext::Authentication,
                           actionType: LoggingConstants::ActionType::CspUnavailable,
                           error: params[:message],
-                          csp: params[:strategy] }])
+                          csp: }])
 
-    render(Page::Utility::ErrorComponent.new(nil, 'server_error'), status: :service_unavailable)
+    render(Page::Utility::ErrorComponent.new(nil, 'server_error', csp:), status: :service_unavailable)
   end
 
-  def handle_signin_fail(csp)
+  def handle_signin_fail
     Rails.logger.error 'CSP Configuration error'
-    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp:))
+    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp: params['strategy']))
   end
 
   def handle_signin_cancel(csp)
