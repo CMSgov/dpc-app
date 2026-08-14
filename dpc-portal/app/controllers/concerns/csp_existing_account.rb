@@ -68,16 +68,21 @@ module CspExistingAccount
   end
 
   def ssn(user_info)
-    user_info.dig('extra', 'raw_info', 'social_security_number') ||
-      user_info.dig('extra', 'raw_info', 'SSN') ||
-      user_info.dig('extra', 'raw_info', 'ssn')
+    user_info['social_security_number'] || user_info['SSN'] || user_info['ssn']
   end
 
   def create_csp_user
     csp_session.active_csps.each do |csp_name|
+      next if csp_name == csp_session.current
+
       csp = Csp.find_by!(name: csp_name)
       uuid = all_user_info[csp_name]['uid']
-      CspUser.find_or_create_by(user: current_user, csp:, uuid:)
+      CspUser.find_or_create_by(user: current_user, csp:, uuid:) do |new_user|
+        Rails.logger.info(['Credential Delegate user created,',
+                           { actionContext: LoggingConstants::ActionContext::Registration,
+                             actionType: LoggingConstants::ActionType::CdCreated,
+                             user_identifier: new_user&.uuid }])
+      end
     end
   end
 end
