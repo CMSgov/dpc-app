@@ -45,6 +45,7 @@ module LoggingConstants
 
     MergeUserAccountCsp = 'MergeUserAccountCsp'
     NameMismatch = 'NameMismatch'
+    CspUserCreated = 'CspUserCreated'
 
     FailAoPiiCheck = 'FailAoPiiCheck'
     FailCdPiiCheck = 'FailCdPiiCheck'
