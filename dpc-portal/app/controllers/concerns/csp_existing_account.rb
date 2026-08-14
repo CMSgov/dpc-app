@@ -72,7 +72,7 @@ module CspExistingAccount
   end
 
   def auth_hash?(info)
-    info.dig('extra').present? && info['extra'].dig('raw_info').present?
+    info.dig('extra', 'raw_info').present?
   end
 
   def ssn_from_auth_hash(auth)
