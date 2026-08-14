@@ -4,9 +4,9 @@ require 'rails_helper'
 
 # These responses are the same across all CSP's.
 RSpec.describe 'CSP', type: :request do
-  describe 'Get /users/auth/failure' do
+  describe 'Get /auth/failure' do
     it 'should succeed' do
-      get '/users/auth/failure'
+      get '/auth/failure'
       expect(response).to be_ok
     end
 
@@ -15,7 +15,7 @@ RSpec.describe 'CSP', type: :request do
       expect(Rails.logger).to receive(:info).with(['User cancelled login',
                                                    { actionContext: LoggingConstants::ActionContext::Authentication,
                                                      actionType: LoggingConstants::ActionType::UserCancelledLogin }])
-      get '/users/auth/failure'
+      get '/auth/failure'
     end
   end
 
