@@ -4,6 +4,10 @@
 module CspErrorHandling
   extend ActiveSupport::Concern
 
+  def csp_auth_error?
+    params[:message].present? && params[:strategy].present?
+  end
+
   def handle_invitation_flow_failure(invitation_id)
     Rails.logger.info(['Failed invitation flow',
                        { actionContext: LoggingConstants::ActionContext::Registration,
@@ -15,6 +19,16 @@ module CspErrorHandling
     else
       render(Page::Invitations::AoFlowFailComponent.new(invitation, 'fail_to_proof', 1), status: :forbidden)
     end
+  end
+
+  def handle_csp_auth_error
+    Rails.logger.error(['CSP Authentication error',
+                        { actionContext: LoggingConstants::ActionContext::Authentication,
+                          actionType: LoggingConstants::ActionType::CspUnavailable,
+                          error: params[:message],
+                          csp: params[:strategy] }])
+
+    render(Page::Utility::ErrorComponent.new(nil, 'server_error'), status: :service_unavailable)
   end
 
   def handle_signin_fail(csp)

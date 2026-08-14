@@ -233,6 +233,57 @@ RSpec.shared_examples 'a CSP client' do |config|
     end
   end
 
+  describe 'CSP API errors' do
+    context "when #{display_name} returns 500 server error" do
+      let(:error) { :server_error }
+      let(:attempt_sign_in) do
+        post auth_endpoint
+        follow_redirect!
+        expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
+        follow_redirect!
+      end
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.mock_auth[provider] = error
+      end
+
+      it 'returns 503 service unavailable' do
+        attempt_sign_in
+        expect(response).to have_http_status(:service_unavailable)
+      end
+
+      it 'renders the server error component' do
+        attempt_sign_in
+        expect(response.body).to include(I18n.t('verification.server_error_status'))
+      end
+
+      it 'does not sign in the user' do
+        attempt_sign_in
+        csp_session = CspSession.new(request.session)
+        expect(csp_session.user).to be_nil
+        expect(csp_session.token).to be_nil
+      end
+
+      it 'does not create a CspUser' do
+        expect do
+          attempt_sign_in
+        end.to change { CspUser.count }.by(0)
+      end
+
+      it 'logs the CSP authentication error' do
+        allow(Rails.logger).to receive(:error)
+        expect(Rails.logger).to receive(:error).with(
+          ['CSP Authentication error',
+           { actionContext: LoggingConstants::ActionContext::Authentication,
+             actionType: LoggingConstants::ActionType::CspUnavailable,
+             error: error.to_s,
+             csp: csp_name }]
+        )
+        attempt_sign_in
+      end
+    end
+  end
+
   describe 'Delete /logout' do
     before do
       OmniAuth.config.test_mode = true
