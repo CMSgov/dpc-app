@@ -80,6 +80,16 @@ Rails.application.configure do
 
   # Uncomment if you wish to allow Action Cable access from any origin.
   # config.action_cable.disable_request_forgery_protection = true
+
+  config.after_initialize do
+    ActiveSupport::Notifications.unsubscribe('sql.active_record')
+    ActiveSupport::Notifications.subscribe('sql.active_record') do |*args|
+      event = ActiveSupport::Notifications::Event.new(*args)
+      unless event.payload[:sql].include?('schema_migrations')
+        ActiveRecord::LogSubscriber.new.sql(event)
+      end
+    end
+  end
 end
 # Session serializer
 ActiveRecord::SessionStore::Session.serializer = :json
