@@ -76,13 +76,18 @@ module CspExistingAccount
       next if csp_name == csp_session.current
 
       csp = Csp.find_by!(name: csp_name)
-      uuid = all_user_info[csp_name]['uid']
+      uuid = auth_uuid(csp_name)
       CspUser.find_or_create_by(user: current_user, csp:, uuid:) do |new_user|
-        Rails.logger.info(['Credential Delegate user created,',
+        Rails.logger.info(['CSP user created',
                            { actionContext: LoggingConstants::ActionContext::Registration,
-                             actionType: LoggingConstants::ActionType::CdCreated,
+                             actionType: LoggingConstants::ActionType::CspUserCreated,
+                             csp: csp_name,
                              user_identifier: new_user&.uuid }])
       end
     end
+  end
+
+  def auth_uuid(csp_name)
+    all_user_info[csp_name]['uid'] || all_user_info[csp_name]['sub']
   end
 end
