@@ -24,9 +24,9 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
     invitation_flow_match = session[:user_return_to]&.match(%r{/organizations/([0-9]+)/invitations/([0-9]+)})
     return handle_invitation_flow_failure(invitation_flow_match[2]) if invitation_flow_match
     return handle_csp_auth_error if csp_auth_error?
-    return handle_signin_cancel if csp_user_error?
+    return handle_signin_fail unless csp_user_error?
 
-    handle_signin_fail
+    handle_signin_cancel
   end
 
   def logout
