@@ -303,8 +303,8 @@ RSpec.shared_examples 'a CSP client' do |config|
       it 'renders the CSP sign-in fail component' do
         attempt_sign_in
         expect(response.body).not_to include(I18n.t('verification.server_error_status'))
-        expect(response.body).to include("#{display_name} sign-in failed")
-        expect(response.body).to include("Something went wrong while trying to sign-in with #{display_name}.")
+        expect(response.body).to include(I18n.t('verification.csp_signin_fail_status', csp_display_name: display_name))
+        expect(response.body).to include(I18n.t('verification.csp_signin_fail_text', csp_display_name: display_name))
       end
 
       it 'does not sign in the user' do
@@ -323,6 +323,57 @@ RSpec.shared_examples 'a CSP client' do |config|
       it 'logs the CSP authentication error' do
         allow(Rails.logger).to receive(:error)
         expect(Rails.logger).to receive(:error).with('CSP Configuration error')
+        attempt_sign_in
+      end
+    end
+
+    context "when #{display_name} returns 403 access denied" do
+      let(:error) { :access_denied }
+      let(:attempt_sign_in) do
+        post auth_endpoint
+        follow_redirect!
+        expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
+        follow_redirect!
+      end
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.mock_auth[provider] = error
+      end
+
+      it 'does not return 503 service unavailable' do
+        attempt_sign_in
+        expect(response).to be_ok
+      end
+
+      it 'renders the CSP sign-in cancel component' do
+        attempt_sign_in
+        expect(response.body).not_to include(I18n.t('verification.server_error_status'))
+        expect(response.body).to include(I18n.t('verification.csp_signin_cancel_status',
+                                                csp_display_name: display_name))
+        expect(response.body).to include(I18n.t('verification.csp_signin_cancel_text', csp_display_name: display_name))
+      end
+
+      it 'does not sign in the user' do
+        attempt_sign_in
+        csp_session = CspSession.new(request.session)
+        expect(csp_session.user).to be_nil
+        expect(csp_session.token).to be_nil
+      end
+
+      it 'does not create a CspUser' do
+        expect do
+          attempt_sign_in
+        end.to change { CspUser.count }.by(0)
+      end
+
+      it 'logs the CSP authentication error' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(
+          ['User cancelled login',
+           { actionContext: LoggingConstants::ActionContext::Authentication,
+             actionType: LoggingConstants::ActionType::UserCancelledLogin,
+             csp: csp_name }]
+        )
         attempt_sign_in
       end
     end
