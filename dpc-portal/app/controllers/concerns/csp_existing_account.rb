@@ -63,11 +63,25 @@ module CspExistingAccount
   end
 
   def verify_account_match
-    all_ssns = all_user_info.values.map { |user_info| ssn(user_info) }
+    all_ssns = all_user_info.values.map { |info| ssn(info) }
     raise CspUtils::SsnMismatchError, 'SSN mismatch' unless all_ssns.uniq.one?
   end
 
-  def ssn(user_info)
+  def ssn(info)
+    auth_hash?(info) ? ssn_from_auth_hash(info) : ssn_from_user_info(info)
+  end
+
+  def auth_hash?(info)
+    info.dig('extra').present? && info['extra'].dig('raw_info').present?
+  end
+
+  def ssn_from_auth_hash(auth)
+    auth.dig('extra', 'raw_info', 'social_security_number') ||
+      auth.dig('extra', 'raw_info', 'SSN') ||
+      auth.dig('extra', 'raw_info', 'ssn')
+  end
+
+  def ssn_from_user_info(user_info)
     user_info['social_security_number'] || user_info['SSN'] || user_info['ssn']
   end
 
