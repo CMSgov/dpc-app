@@ -109,6 +109,13 @@ module Page
         render(Page::Utility::ErrorComponent.new(nil, reason, csp:))
       end
 
+      # @param csp select :csp_codes
+      def multi_user_match(csp: DEFAULT_CSP)
+        invitation = Invitation.new(id: 10, provider_organization: ProviderOrganization.new(id: 1, name: ORG_NAME))
+        reason = 'multi_user_match'
+        render(Page::Utility::ErrorComponent.new(invitation, reason, csp:))
+      end
+
       private
 
       def csp_codes
