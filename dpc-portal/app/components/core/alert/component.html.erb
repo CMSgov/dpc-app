@@ -1,11 +1,19 @@
 <% if @valid %>
-<div class="usa-alert usa-alert--<%= status %> <%= heading.present? ? '' : ' usa-alert--slim' %> <%= include_icon ? '' : 'usa-alert--no-icon' %>">
+<div class="usa-alert usa-alert--<%= status %> 
+  <%= (heading.present? || message_key.present? ) ? '' : ' usa-alert--slim' %> 
+  <%= include_icon ? '' : 'usa-alert--no-icon' %>">
     <div class="usa-alert__body" role="complementary">
       <% if heading.present? %>
         <h2 class="usa-alert__heading"><%= heading %></h2>
+      <% elsif message_key.present? %>
+        <h2 class="usa-alert__heading"><%= raw t("errors.#{message_key}.status", **options) %></h2>
       <% end %>
       <p class="usa-alert__text">
-        <%= content %>
+        <% if !message_key.present? %>
+         <%= content %>
+        <% else %>
+         <%= raw t("errors.#{message_key}.text", **options) %>
+        <% end %>
       </p>
     </div>
 </div>

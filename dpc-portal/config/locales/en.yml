@@ -2,8 +2,8 @@ en:
   verification:
     no_account_status: The email you used is not associated with a DPC account.
     no_account_text: Please sign out and log back in with the email associated with your DPC account.
-    email_mismatch_status: The email you used to sign in doesn't match your invite.
-    email_mismatch_text: "<p>Please <b>sign out</b> of %{csp_display_name} and either:<ul><li>Create an account.</li><li>Add an alternate email to your current %{csp_display_name} account.</li></ul></p>"
+    email_mismatch_status: The email you used to sign in was not recognized.
+    email_mismatch_text: "Try again with a different email:<ol><li>Sign out of your identity provider (CLEAR, ID.me, or Login.gov). Signing out of the DPC Portal alone won't switch your email.</li><li>Return here and sign in with the email your invitation was sent to.</li></ol>"
     pii_mismatch_status: The name you used does not match your invite.
     pii_mismatch_text: "Contact the designated Authorized Official (AO) at %{ao_email}. The AO will need to sign in to the DPC Portal and create a new invite."
     ao_accepted_status: Organization already registered.
@@ -38,8 +38,8 @@ en:
     missing_info_text: Something happened on our end and we're unable to continue. Please contact <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
     server_error_status: "Registration unavailable: external system error."
     server_error_text: We're unable to complete your request right now because a required external system is unavailable. Please try again later.
-    multi_user_match_status: multi_user_match_status
-    multi_user_match_text: multi_user_match_text
+    multi_user_match_status: Can't complete your registration.
+    multi_user_match_text: More than one account matches the information you entered. Sign out and try again.
     manage_org: Manage your organization.
     tos_not_signed: You must sign DPC Terms of Service.
     sign_tos: Sign Terms of Service
@@ -66,6 +66,10 @@ en:
   errors:
     duplicate_key:
       text: This public key is already in use. Choose a new public key.
+    email_not_found:
+      status: The email you used to sign in was not recognized.
+      text: "Try again with a different email:<ol><li>Sign out of your identity provider (CLEAR, ID.me, or Login.gov). Signing out of the DPC Portal alone won't switch your email.</li><li>Return here and sign in with the email your invitation was sent to.</li></ol>"
+
     attributes:
       base:
         duplicate_cd:

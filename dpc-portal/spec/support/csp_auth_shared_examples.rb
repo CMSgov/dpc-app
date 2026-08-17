@@ -93,8 +93,8 @@ RSpec.shared_examples 'a CSP client' do |config|
         expect(response).to be_ok
         expect(response.body).to include('Existing account found')
         expect(response.body).to include(EmailMask.masked('original@example.com'))
-        expect(response.body).to include('Add new email')
-        expect(response.body).to include(root_path)
+        expect(response.body).to include('Link to existing account')
+        expect(response.body).to include('Start over')
       end
 
       it 'logs about existing account' do
@@ -242,10 +242,11 @@ RSpec.shared_examples 'a CSP client' do |config|
       it 'does not sign in user' do
         post auth_endpoint
         follow_redirect!
+        expect(response).to be_redirect
         expect(response.location).to eq organizations_url
-        expect(response).to be_redirect
         follow_redirect!
-        expect(response).to be_redirect
+        expect(response.body).to include('The email you used to sign in was not recognized')
+        expect(response.body).to include('Back to sign in')
       end
 
       it 'sets authentication token' do
