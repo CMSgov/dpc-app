@@ -18,6 +18,7 @@ class ApplicationController < ActionController::Base
   def current_user
     @current_user ||= User.find_by(id: session[:user])
   end
+  helper_method :current_user
 
   def csp_session
     @csp_session ||= CspSession.new(session)
@@ -27,8 +28,10 @@ class ApplicationController < ActionController::Base
   def authenticate_user!
     return if current_user
 
-    flash[:alert] = t('devise.failure.unauthenticated')
     session[:user_return_to] = request.path
+    return if render_unauthenticated_error
+
+    flash[:alert] = t('devise.failure.unauthenticated')
     redirect_to sign_in_path
   end
 
@@ -38,6 +41,12 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  def render_unauthenticated_error
+    return unless csp_session.current && csp_session.user.blank?
+
+    render(Page::Utility::ErrorComponent.new(nil, 'email_mismatch', csp: csp_session.current), status: :forbidden)
+  end
 
   def check_user_verification
     return unless current_user&.rejected?
