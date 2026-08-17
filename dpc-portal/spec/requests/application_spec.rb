@@ -40,8 +40,8 @@ RSpec.describe 'Application', type: :request do
         it 'redirects to login after session time elapses' do
           allow(Rails.logger).to receive(:info)
           expect(Rails.logger).to receive(:info).with(['User session timed out',
-                                                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                         actionType: LoggingConstants::ActionType::SessionTimedOut }])
+                                                       hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                                                                      actionType: LoggingConstants::ActionType::SessionTimedOut)])
           logged_in_at = Time.now
           get '/'
           expect(response).to be_ok

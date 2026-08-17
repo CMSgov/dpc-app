@@ -5,10 +5,10 @@ module CspErrorHandling
   extend ActiveSupport::Concern
 
   def handle_invitation_flow_failure(invitation_id)
-    Rails.logger.info(['Failed invitation flow',
-                       { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::FailedLogin,
-                         **csp_log_context }])
+    log_event(:info, 'Failed invitation flow',
+              action_context: LoggingConstants::ActionContext::Registration,
+              action_type: LoggingConstants::ActionType::FailedLogin,
+              invitation: invitation_id)
     invitation = Invitation.find(invitation_id)
     if invitation.credential_delegate?
       render(Page::Utility::ErrorComponent.new(invitation, 'fail_to_proof'), status: :forbidden)
@@ -18,15 +18,18 @@ module CspErrorHandling
   end
 
   def handle_signin_fail(csp)
-    Rails.logger.error 'CSP Configuration error'
+    log_event(:error, 'CSP Configuration error',
+              action_context: LoggingConstants::ActionContext::Registration,
+              action_type: LoggingConstants::ActionType::FailedLogin,
+              csp: csp)
     render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp:))
   end
 
   def handle_signin_cancel(csp)
-    Rails.logger.info(['User cancelled login',
-                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::UserCancelledLogin,
-                         **csp_log_context }])
+    log_event(:info, 'User cancelled login',
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::UserCancelledLogin,
+              csp: csp)
     render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_cancel', csp:))
   end
 end
