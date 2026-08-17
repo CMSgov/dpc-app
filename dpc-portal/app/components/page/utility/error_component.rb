@@ -24,6 +24,12 @@ module Page
         @alert_type = 'error' if show_alert?
       end
 
+      def log_out_path
+        return destroy_user_session_path unless @invitation&.id
+
+        csp_logout_path(invitation_id: @invitation.id)
+      end
+
       private
 
       def show_alert?

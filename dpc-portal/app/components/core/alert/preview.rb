@@ -21,6 +21,17 @@ module Core
           body
         end
       end
+
+      # To source the heading and body from the i18n translation files, use the message_key parameter.
+      #
+      # @param status [Symbol] select [info, warning, error, success]
+      # @param icon toggle
+      # @param message_key
+      def keyed_message(status: :error, icon: true,
+                        message_key: 'email_not_found', csp_display_name: 'Login.gov')
+        render Core::Alert::Component.new(status:, message_key:,
+                                          include_icon: icon, csp_display_name:)
+      end
     end
   end
 end

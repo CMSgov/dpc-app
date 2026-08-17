@@ -15,14 +15,20 @@
     <div class="grid-container margin-top-5 margin-bottom-8">
       <div class="grid-row">
         <div class="grid-col-fill">
-	  <% flash.each do |key, message| %>
-            <%= render Core::Alert::Component.new(status: key) do %>
-              <%=raw message %>
+	      <% flash.each do |key, message| %>
+            <% if message.is_a?(Hash) %>
+              <% msg = message.with_indifferent_access %>
+              <% opts = (msg[:options] || {}).to_h.symbolize_keys %>
+              <%= render Core::Alert::Component.new(status: key, message_key: msg[:key], **opts) %>
+            <% else %>
+              <%= render Core::Alert::Component.new(status: key) do %>
+                <%=raw message %>
+              <% end %>
             <% end %>
-          <% end %>
-          <main class="<%= 'margin-top-5' if notice or alert %>">
-            <%= yield %>
-          </main>
+        <% end %>
+        <main class="<%= 'margin-top-5' if notice or alert %>">
+        <%= yield %>
+        </main>
         </div>
       </div>
     </div>

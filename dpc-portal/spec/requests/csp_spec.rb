@@ -22,7 +22,7 @@ RSpec.describe 'CSP', type: :request do
   describe 'Get /auth/no_account' do
     it 'should show logout button' do
       get '/auth/no_account'
-      expect(response.body).to include 'Sign out of CSP'
+      expect(response.body).to include 'Back to sign in'
     end
   end
 end
