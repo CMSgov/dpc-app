@@ -33,6 +33,10 @@
         <%= render Core::Button::ButtonComponent.new(label: "Back to sign in",
             destination: csp_logout_path(invitation_id: @invitation.id),
             method: :delete) %>
+      <% when :multi_user_match %>
+        <%= render Core::Button::ButtonComponent.new(label: "Back to sign in",
+            destination: csp_logout_path(invitation_id: @invitation.id),
+            method: :delete) %>
       <% when :email_mismatch %>
         <%= render Core::Button::ButtonComponent.new(label: "Back to sign in",
             destination: log_out_path,

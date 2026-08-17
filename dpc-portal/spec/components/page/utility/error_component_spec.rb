@@ -137,6 +137,21 @@ RSpec.describe Page::Utility::ErrorComponent, type: :component do
           end
         end
 
+        context 'Multi-user match' do
+          let(:component) { described_class.new(invitation, 'multi_user_match', csp:) }
+          it 'should match header' do
+            header = <<~HTML
+              <h1>#{CGI.escapeHTML(I18n.t('verification.multi_user_match_status'))}</h1>
+            HTML
+            is_expected.to include(normalize_space(header))
+          end
+          it 'should have logout button' do
+            button_url = "/logout?invitation_id=#{invitation.id}"
+            is_expected.to include(button_url)
+            is_expected.to include('Back to sign in')
+          end
+        end
+
         context 'Email mismatch' do
           let(:invitation) { create(:invitation, :cd, provider_organization:) }
           let(:component) { described_class.new(invitation, 'email_mismatch', csp:) }
