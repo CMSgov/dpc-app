@@ -47,7 +47,7 @@ RSpec.describe 'Accessibility', type: :system do
       it 'shows login failure' do
         OmniAuth.config.mock_auth[provider] = :access_denied
 
-        visit "/auth/failure?message=access_denied&strategy=#{provider.to_s}"
+        visit "/auth/failure?message=access_denied&strategy=#{provider}"
         expect(page).to have_text('sign-in was unsuccessful')
         expect(page).to be_axe_clean.according_to axe_standard
       end
