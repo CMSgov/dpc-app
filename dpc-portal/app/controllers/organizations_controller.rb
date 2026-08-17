@@ -19,11 +19,7 @@ class OrganizationsController < ApplicationController
 
   def show
     @delegate_information = {}
-    role = 'Credential Delegate'
-    if current_user.ao?(@organization)
-      @delegate_information = ao_delegate_information
-      role = 'Authorized Official'
-    end
+    @delegate_information = ao_delegate_information if current_user.ao?(@organization)
 
     render(Page::Organization::CompoundShowComponent.new(@organization,
                                                          @delegate_information,
@@ -50,11 +46,6 @@ class OrganizationsController < ApplicationController
 
   def organization_id
     params[:id]
-  end
-
-  def cur_org_status
-    cur_link = current_user.provider_links.find { |link| link.provider_organization_id == @organization.id }
-    org_status(@organization, cur_link)
   end
 
   def ao_delegate_information
