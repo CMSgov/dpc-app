@@ -62,9 +62,13 @@ RSpec.describe Page::ExistingAccount::AddEmailComponent, type: :component do
 
       it 'should render the add new email button' do
         button = <<~HTML
-          <span>Add new email</span>
+          <span>Link to existing account</span>
         HTML
         is_expected.to include(normalize_space(button))
+      end
+
+      it 'should render the start over button' do
+        is_expected.to include('Start over')
       end
 
       it 'should render a button to go to account' do
