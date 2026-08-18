@@ -35,9 +35,10 @@ RSpec.shared_examples 'a CSP client' do |config|
       it 'should log on successful sign in' do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(['User logged in',
-                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                       actionType: LoggingConstants::ActionType::UserLoggedIn,
-                                                       csp: csp_name }])
+                                                     hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                                                                    actionType: LoggingConstants::ActionType::UserLoggedIn,
+                                                                    user_identifier: uuid,
+                                                                    csp: csp_name)])
         post auth_endpoint
         follow_redirect!
       end
@@ -93,16 +94,16 @@ RSpec.shared_examples 'a CSP client' do |config|
         expect(response).to be_ok
         expect(response.body).to include('Existing account found')
         expect(response.body).to include(EmailMask.masked('original@example.com'))
-        expect(response.body).to include('Add new email')
-        expect(response.body).to include(root_path)
+        expect(response.body).to include('Link to existing account')
+        expect(response.body).to include('Start over')
       end
 
       it 'logs about existing account' do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(['User has existing account associated with different email',
-                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                       actionType: LoggingConstants::ActionType::MergeUserAccountEmail,
-                                                       csp: csp_name }])
+                                                     hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                                                                    actionType: LoggingConstants::ActionType::MergeUserAccountEmail,
+                                                                    csp: csp_name)])
         post auth_endpoint
         follow_redirect!
       end
@@ -119,10 +120,11 @@ RSpec.shared_examples 'a CSP client' do |config|
       it 'does not sign in user' do
         post auth_endpoint
         follow_redirect!
+        expect(response).to be_redirect
         expect(response.location).to eq organizations_url
-        expect(response).to be_redirect
         follow_redirect!
-        expect(response).to be_redirect
+        expect(response.body).to include('The email you used to sign in was not recognized')
+        expect(response.body).to include('Back to sign in')
       end
 
       it 'sets authentication token' do
@@ -166,8 +168,8 @@ RSpec.shared_examples 'a CSP client' do |config|
         follow_redirect!
         expect(Rails.logger).to have_received(:info).with(
           ["User attempted IAL1 login with #{display_name} — not permitted",
-           { actionContext: LoggingConstants::ActionContext::Authentication,
-             actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }]
+           hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                          actionType: LoggingConstants::ActionType::UserLoginWithoutAccount)]
         )
       end
 
@@ -225,8 +227,8 @@ RSpec.shared_examples 'a CSP client' do |config|
       allow(Rails.logger).to receive(:info)
       expect(Rails.logger).to receive(:info).with(
         ["User attempted to login with #{display_name} but no active CSP found",
-         { actionContext: LoggingConstants::ActionContext::Authentication,
-           actionType: LoggingConstants::ActionType::InvalidCsp }]
+         hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                        actionType: LoggingConstants::ActionType::InvalidCsp)]
       )
       post auth_endpoint
       follow_redirect!

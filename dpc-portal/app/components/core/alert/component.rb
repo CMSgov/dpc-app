@@ -4,11 +4,15 @@ module Core
   module Alert
     # Render a USWDS-styled alert.
     class Component < ViewComponent::Base
-      attr_accessor :status, :include_icon, :heading
+      attr_accessor :status, :include_icon, :heading, :message_key, :options
 
       VALID_STATUSES = %i[info warning error success notice alert].freeze
 
-      def initialize(status: '', heading: '', include_icon: true)
+      def initialize(status: '', heading: '', include_icon: true, message_key: '', **options)
+        if heading.present? && message_key.present?
+          raise ArgumentError, 'Provide either heading or message_key, but not both.'
+        end
+
         super()
 
         @valid = VALID_STATUSES.include?(status.to_sym) || status.blank?
@@ -24,6 +28,8 @@ module Core
                   end
         @include_icon = include_icon
         @heading = heading
+        @message_key = message_key
+        @options = options.symbolize_keys
       end
 
       def log_error(status)

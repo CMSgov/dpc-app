@@ -9,6 +9,7 @@ module LoggingConstants
     BatchVerificationCheck = 'BatchVerificationCheck'
     HealthCheck = 'HealthCheck'
     Rendering = 'Rendering'
+    CredentialManagement = 'CredentialManagement'
   end
 
   module ActionType
@@ -35,6 +36,7 @@ module LoggingConstants
     UserCancelledLogin = 'UserCancelledLogin'
     FailedLogin = 'FailedLogin'
     UserLoginWithoutAccount = 'UserLoginWithoutAccount'
+    CspUserNotFound = 'CspUserNotFound'
 
     MergeUserAccountEmail = 'MergeUserAccountEmail'
     AddNewUserEmail = 'AddNewUserEmail'

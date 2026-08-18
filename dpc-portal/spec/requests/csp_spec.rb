@@ -13,8 +13,8 @@ RSpec.describe 'CSP', type: :request do
     it 'should log on failure' do
       allow(Rails.logger).to receive(:info)
       expect(Rails.logger).to receive(:info).with(['User cancelled login',
-                                                   { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                     actionType: LoggingConstants::ActionType::UserCancelledLogin }])
+                                                   hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                                                                  actionType: LoggingConstants::ActionType::UserCancelledLogin)])
       get '/users/auth/failure'
     end
   end
@@ -22,7 +22,7 @@ RSpec.describe 'CSP', type: :request do
   describe 'Get /auth/no_account' do
     it 'should show logout button' do
       get '/auth/no_account'
-      expect(response.body).to include 'Sign out of CSP'
+      expect(response.body).to include 'Back to sign in'
     end
   end
 end

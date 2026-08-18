@@ -2,10 +2,10 @@ en:
   verification:
     no_account_status: The email you used is not associated with a DPC account.
     no_account_text: Please sign out and log back in with the email associated with your DPC account.
-    email_mismatch_status: The email you used to sign in doesn't match your invite.
-    email_mismatch_text: "<p>Please <b>sign out</b> of %{csp_display_name} and either:<ul><li>Create an account.</li><li>Add an alternate email to your current %{csp_display_name} account.</li></ul></p>"
+    email_mismatch_status: The email you used to sign in was not recognized.
+    email_mismatch_text: "Try again with a different email:<ol><li>Sign out of your identity provider (CLEAR, ID.me, or Login.gov). Signing out of the DPC Portal alone won't switch your email.</li><li>Return here and sign in with the email your invitation was sent to.</li></ol>"
     pii_mismatch_status: The name you used does not match your invite.
-    pii_mismatch_text: "Contact the designated Authorized Official (AO) at %{ao_email}. The AO will need to sign in to the DPC Portal and create a new invite."
+    pii_mismatch_text: "Contact the Authorized Official (AO) that invited you. The AO will need to sign in to the DPC Portal and create a new invite."
     ao_accepted_status: Organization already registered.
     ao_accepted_text: If you meant to register a different organization, check your inbox for the correct request. Sign in to access details for this organization.
     cd_accepted_status: You already accepted your invite.
@@ -13,7 +13,7 @@ en:
     ao_expired_status:  Your registration link has expired.
     ao_expired_text: You've exceeded the 48-hour expiration period.
     cd_expired_status: Your invite link has expired.
-    cd_expired_text: "<p>You've exceeded the 48 hour expiration period.</p><p>Contact the designated Authorized Official (AO) to create a new invite (<a href=\"%{ao_email}\">%{ao_email}</a>). The AO will need to sign in to the DPC Portal to complete this step.</p>"
+    cd_expired_text: "<p>You've exceeded the 48 hour expiration period.</p><p>Contact the Authorized Official (AO) that invited you. The AO will need to sign in to the DPC Portal and create a new invite.</p>"
     ao_renewed_status: You already requested a new invite.
     ao_renewed_text: Please check your email. We sent you a message which includes a new link.
     ao_invalid_status: Your registration link is invalid.
@@ -26,8 +26,6 @@ en:
     ao_med_sanctions_invitation_text: You are listed as an excluded individual by the Office of Inspector General (OIG), which prohibits you from acting as this organization's Authorized Official. For more information, contact the <a href="https://oig.hhs.gov/about-oig/contact-us/#exclusions">OIG Exclusions Branch</a>.
     org_med_sanctions_status: Your organization is in the Medicare Exclusions Database.
     org_med_sanctions_text: Your organization is listed as an excluded entity by the Office of Inspector General (OIG), which prohibits it from accessing beneficiary claims data. For more information, contact the <a href="https://oig.hhs.gov/about-oig/contact-us/#exclusions">OIG Exclusions Branch</a>.
-    max_tries_exceeded_status: Your access is locked due to too many attempts.
-    max_tries_exceeded_text: "You have made too many attempts. Please request a new invite from %{ao_full_name}."
     no_approved_enrollment_status: Your organization is not currently approved by Medicare.
     no_approved_enrollment_text: Your organization must have an approved enrollment status with Medicare to access beneficiary claims data. Your organization may need to <a href="https://www.cms.gov/medicare/enrollment-renewal/providers-suppliers/chain-ownership-system-pecos/manage-your-enrollment">manage its enrollment</a> in PECOS, the Medicare enrollment system.
     bad_npi_status: Your organization is not currently approved by Medicare.
@@ -42,8 +40,8 @@ en:
     missing_info_text: Something happened on our end and we're unable to continue. Please contact <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
     server_error_status: "Registration unavailable: external system error."
     server_error_text: We're unable to complete your request right now because a required external system is unavailable. Please try again later.
-    multi_user_match_status: multi_user_match_status
-    multi_user_match_text: multi_user_match_text
+    multi_user_match_status: Can't complete your registration.
+    multi_user_match_text: More than one account matches the information you entered. Sign out and try again.
     manage_org: Manage your organization.
     tos_not_signed: You must sign DPC Terms of Service.
     sign_tos: Sign Terms of Service
@@ -70,6 +68,10 @@ en:
   errors:
     duplicate_key:
       text: This public key is already in use. Choose a new public key.
+    email_not_found:
+      status: The email you used to sign in was not recognized.
+      text: "Try again with a different email:<ol><li>Sign out of your identity provider (CLEAR, ID.me, or Login.gov). Signing out of the DPC Portal alone won't switch your email.</li><li>Return here and sign in with the email your invitation was sent to.</li></ol>"
+
     attributes:
       base:
         duplicate_cd:
