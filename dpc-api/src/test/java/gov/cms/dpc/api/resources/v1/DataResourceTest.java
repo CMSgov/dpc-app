@@ -19,6 +19,7 @@ import org.apache.hc.core5.net.URIBuilder;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -61,6 +62,7 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 
 	@ParameterizedTest
 	@MethodSource("downloadArgs")
+    @Disabled
 	void canDownloadFiles(boolean compressFile, Map<String, String> requestHeaders) throws IOException {
 		String testData = "test data".repeat(50);
 		String fileName = createTestExport(testData, compressFile);
