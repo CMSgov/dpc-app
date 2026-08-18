@@ -11,12 +11,12 @@ if [ -f tmp/solid_queue_pidfile ]; then
   rm tmp/solid_queue_pidfile
 fi
 
+echo "Migrating the database..."
+bundle exec rails db:migrate db:seed
+
 if [ "$1" == "portal" ]; then
   # Start the database service (and make accessible outside the Docker container)
   echo "Starting Rails server..."
-
-  echo "Migrating the database..."
-  bundle exec rails db:migrate db:seed
 
   if [[ "$ENV" == "prod" ]]; then
     echo "Starting in production"
