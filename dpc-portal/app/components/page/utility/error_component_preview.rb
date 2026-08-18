@@ -20,13 +20,8 @@ module Page
 
       # @param csp select :csp_codes
       def pii_mismatch(csp: DEFAULT_CSP)
-        user = User.new
-        # workaround to avoid having to save User for preview
-        user.define_singleton_method(:email) do
-          'bilbo.baggins@cms.hms.gov'
-        end
-        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: ORG_NAME),
-                                    invited_by: user)
+        invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: ORG_NAME))
+
         reason = 'pii_mismatch'
         render(Page::Utility::ErrorComponent.new(invitation, reason, csp:))
       end
@@ -52,13 +47,8 @@ module Page
       end
 
       def cd_expired
-        user = User.new
-        # workaround to avoid having to save User for preview
-        user.define_singleton_method(:email) do
-          'bilbo.baggins@cms.hms.gov'
-        end
         invitation = Invitation.new(id: 6, provider_organization: ProviderOrganization.new(id: 1, name: ORG_NAME),
-                                    invited_by: user, invitation_type: :credential_delegate, created_at: 49.hours.ago)
+                                    invitation_type: :credential_delegate, created_at: 49.hours.ago)
         reason = 'cd_expired'
         render(Page::Utility::ErrorComponent.new(invitation, reason))
       end
