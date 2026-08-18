@@ -3,7 +3,7 @@
 # Sets up the application's routes.
 Rails.application.routes.draw do
   # Former devise routes
-  get '/users/auth/failure', to: 'csp#failure', as: 'csp_failure'
+  get '/auth/failure', to: 'csp#failure', as: 'csp_failure'
   get '/auth/logged_out', to: 'users/sessions#logged_out'
   get '/auth/no_account', to: 'csp#no_account', as: 'no_account'
   delete '/logout', to: 'csp#logout', as: 'csp_logout'

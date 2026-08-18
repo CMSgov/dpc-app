@@ -66,5 +66,6 @@ module LoggingConstants
     InvalidFlashStatus = 'InvalidFlashStatus'
 
     InvalidCsp = 'InvalidCsp'
+    CspUnavailable = 'CspUnavailable'
   end
 end
