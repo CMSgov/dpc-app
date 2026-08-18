@@ -550,7 +550,7 @@ RSpec.describe 'Accessibility', type: :system do
       end
       it 'should show intro page' do
         visit "/organizations/#{org.id}/invitations/#{invitation.id}"
-        expect(page).to have_text('assigned you as a Credential Delegate')
+        expect(page).to have_text('To accept your invitation as a Credential Delegate you must:')
         expect(page).to be_axe_clean.according_to axe_standard
       end
       it 'should show login page' do
