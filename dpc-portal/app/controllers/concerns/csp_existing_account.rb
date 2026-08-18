@@ -20,7 +20,7 @@ module CspExistingAccount
 
   def handle_unlinked_account(auth)
     orig_csp_user = existing_account(auth)
-    return render_link_account(primary_email(auth), orig_csp_user.csp.name) if orig_csp_user.present?
+    return render_link_account(primary_email(auth), orig_csp_user) if orig_csp_user.present?
 
     check_csp_session
     csp_user = current_user&.csp_user_for(auth.provider)
@@ -44,12 +44,14 @@ module CspExistingAccount
                                                                     primary_email: primary_email(auth))))
   end
 
-  def render_link_account(email, csp)
-    Rails.logger.info(['User has existing account associated with different CSP',
-                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::MergeUserAccountCsp,
-                         csp: }])
-    render(Page::ExistingAccount::LinkAccountComponent.new(email, csp))
+  def render_link_account(email, csp_user)
+    original_csp = csp_user.csp.name
+    log_event(:info, 'User has existing account associated with different CSP',
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::MergeUserAccountCsp,
+              user_identifier: csp_user.uuid,
+              csp: original_csp)
+    render(Page::ExistingAccount::LinkAccountComponent.new(email, original_csp))
   end
 
   def check_csp_session
@@ -92,13 +94,14 @@ module CspExistingAccount
 
       csp = Csp.find_by!(name: csp_name)
       uuid = auth_uuid(csp_name)
-      CspUser.find_or_create_by(user: current_user, csp:, uuid:) do |new_user|
-        Rails.logger.info(['CSP user created',
-                           { actionContext: LoggingConstants::ActionContext::Registration,
-                             actionType: LoggingConstants::ActionType::CspUserCreated,
-                             csp: csp_name,
-                             user_identifier: new_user&.uuid }])
-      end
+      csp_user = CspUser.find_or_create_by(user: current_user, csp:, uuid:)
+      next unless csp_user.previously_new_record?
+
+      log_event(:info, 'CSP user created',
+                action_context: LoggingConstants::ActionContext::Registration,
+                action_type: LoggingConstants::ActionType::CspUserCreated,
+                csp: csp_name,
+                user_identifier: csp_user.uuid)
     end
   end
 

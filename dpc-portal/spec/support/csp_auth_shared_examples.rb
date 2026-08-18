@@ -143,7 +143,9 @@ RSpec.shared_examples 'a CSP client' do |config|
           expect(Rails.logger).to receive(:info).with(['User has existing account associated with different CSP',
                                                        { actionContext: LoggingConstants::ActionContext::Authentication,
                                                          actionType: LoggingConstants::ActionType::MergeUserAccountCsp,
-                                                         csp: orig_csp_name }])
+                                                         csp: orig_csp_name,
+                                                         timestamp: a_kind_of(String),
+                                                         user_identifier: uuid.to_s }])
           post auth_endpoint
           follow_redirect!
         end

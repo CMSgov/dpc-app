@@ -33,7 +33,7 @@ module CspAccountLookup
     csp_users = filter_active_csp_users(emails)
     matching, mismatched = csp_users.partition { |csp_user| name_match?(csp_user.user, auth) }
 
-    log_name_mismatch(mismatched) if mismatched.any?
+    log_name_mismatch(auth) if mismatched.any?
     validate_unique_match(matching, emails)
     matching
   end
@@ -61,12 +61,11 @@ module CspAccountLookup
     raise CspUtils::MultiUserMatchError, "too many matching users | #{matching_emails}"
   end
 
-  def log_name_mismatch(csp_users)
-    csp_users.each do |csp_user|
-      Rails.logger.info(['Email match found but name does not match',
-                         { actionContext: LoggingConstants::ActionContext::Authentication,
-                           actionType: LoggingConstants::ActionType::NameMismatch,
-                           csp: csp_user.csp.name }])
-    end
+  def log_name_mismatch(auth)
+    log_event(:info, 'Email match found but name does not match',
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::NameMismatch,
+              user_identifier: auth&.uid,
+              csp: auth&.provider)
   end
 end
