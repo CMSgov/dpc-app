@@ -40,9 +40,12 @@ class OrganizationsController < ApplicationController
     @organization.terms_of_service_accepted_at = DateTime.now
     @organization.terms_of_service_accepted_by = current_user
     @organization.save!
-    Rails.logger.info(['Authorized Official signed Terms of Service',
-                       { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::AoSignedToS }])
+    log_event(:info, 'Authorized Official signed Terms of Service',
+              action_context: LoggingConstants::ActionContext::Registration,
+              action_type: LoggingConstants::ActionType::AoSignedToS,
+              user_identifier: current_csp_user_identifier,
+              csp: csp_session.current,
+              organization_npi: @organization.npi)
     redirect_to organization_path(@organization)
   end
 

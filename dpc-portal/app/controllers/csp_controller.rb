@@ -9,12 +9,10 @@ class CspController < ApplicationController
   skip_before_action :verify_authenticity_token, only: :openid_connect
 
   def openid_connect
-    auth = request.env['omniauth.auth']
-    return render_ial1_blocked if ial_1_user?(auth)
+    return render_ial1_blocked if ial_1_user?(auth_details)
+    return unless (active_csp = csp(auth_details.provider))
 
-    return unless (active_csp = csp(auth.provider))
-
-    user_actions(auth, active_csp)
+    user_actions(auth_details, active_csp)
   end
 
   def no_account
@@ -41,8 +39,12 @@ class CspController < ApplicationController
 
   private
 
+  def auth_details
+    @auth_details ||= request.env['omniauth.auth']
+  end
+
   def user_actions(auth, csp)
-    csp_user = CspUser.find_by(uuid: auth.uid, csp:)
+    csp_user = find_csp_user(csp)
     user = csp_user&.user
 
     sign_in_and_log(user, csp.name)
@@ -56,9 +58,11 @@ class CspController < ApplicationController
   end
 
   def render_ial1_blocked
-    Rails.logger.info(["User attempted IAL1 login with #{display_name || 'CSP'} — not permitted",
-                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }])
+    log_event(:info, "User attempted IAL1 login with #{display_name || 'CSP'} — not permitted",
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::UserLoginWithoutAccount,
+              user_identifier: @auth_details&.uid,
+              csp: @auth_details&.provider)
     render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp: csp_code), status: :forbidden)
   end
 
@@ -68,10 +72,11 @@ class CspController < ApplicationController
     sign_in(user:, csp:)
     session[:logged_in_at] = Time.now
     cookies.permanent[:last_used_csp] = csp
-    Rails.logger.info(['User logged in',
-                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::UserLoggedIn,
-                         **csp_log_context }])
+    log_event(:info, 'User logged in',
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::UserLoggedIn,
+              user_identifier: @auth_details&.uid,
+              csp: @auth_details&.provider)
   end
 
   def ial_2_actions(user, auth)
@@ -83,11 +88,11 @@ class CspController < ApplicationController
 
   def path(user, auth)
     if user.blank? && ial_1_user?(auth)
-
-      Rails.logger.info(['User logged in without account',
-                         { actionContext: LoggingConstants::ActionContext::Authentication,
-                           actionType: LoggingConstants::ActionType::UserLoginWithoutAccount,
-                           **csp_log_context }])
+      log_event(:info, 'User logged in without account',
+                action_context: LoggingConstants::ActionContext::Authentication,
+                action_type: LoggingConstants::ActionType::UserLoginWithoutAccount,
+                user_identifier: auth.uid,
+                csp: auth.provider)
       return no_account_url
     end
     session.delete(:user_return_to) || organizations_path
@@ -97,10 +102,11 @@ class CspController < ApplicationController
     active_csp = Csp.active.find_by(name:)
     return active_csp if active_csp
 
-    Rails.logger.info(["User attempted to login with #{display_name || name} but no active CSP found",
-                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::InvalidCsp,
-                         **csp_log_context }])
+    log_event(:info, "User attempted to login with #{display_name || name} but no active CSP found",
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::InvalidCsp,
+              user_identifier: @auth_details&.uid,
+              csp: @auth_details&.provider)
     render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp: csp_code))
     nil
   end

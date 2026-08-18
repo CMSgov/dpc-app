@@ -32,10 +32,11 @@ module CspExistingAccount
   end
 
   def render_add_email(csp_user, auth)
-    Rails.logger.info(['User has existing account associated with different email',
-                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::MergeUserAccountEmail,
-                         **csp_log_context }])
+    log_event(:info, 'User has existing account associated with different email',
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::MergeUserAccountEmail,
+              user_identifier: auth.uid,
+              csp: auth.provider)
     render(Page::ExistingAccount::AddEmailComponent.new(csp_user.user.email, csp_user.csp.name,
                                                         update_path(id: csp_user.id,
                                                                     csp: csp_user.csp.id,
