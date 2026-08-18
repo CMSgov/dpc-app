@@ -135,7 +135,7 @@ RSpec.describe 'Invitations', type: :request do
     it 'should show error page if fail to proof' do
       org_id = invitation.provider_organization.id
       post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
-      get '/users/auth/failure'
+      get '/auth/failure'
       expect(response).to be_forbidden
       expect(response.body).to include(I18n.t('verification.fail_to_proof_text'))
     end
@@ -368,7 +368,7 @@ RSpec.describe 'Invitations', type: :request do
             let(:org_id) { invitation.provider_organization.id }
             it 'should not show step navigation' do
               post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
-              get '/users/auth/failure'
+              get '/auth/failure'
               expect(response).to be_forbidden
               expect(response.body).to_not include('<span class="usa-step-indicator__current-step">')
             end
@@ -391,7 +391,7 @@ RSpec.describe 'Invitations', type: :request do
             let(:org_id) { invitation.provider_organization.id }
             it 'should show step 2' do
               post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
-              get '/users/auth/failure'
+              get '/auth/failure'
               expect(response).to be_forbidden
               expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
             end
