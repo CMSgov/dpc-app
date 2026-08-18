@@ -248,7 +248,7 @@ GEM
       multi_json (~> 1.10)
       rbnacl (~> 5.0)
       rbnacl-libsodium (~> 1.0)
-    mail (2.9.0)
+    mail (2.9.1)
       logger
       mini_mime (>= 0.1.1)
       net-imap
@@ -550,6 +550,7 @@ DEPENDENCIES
   lograge
   luhnacy (~> 0.2.1)
   macaroons
+  mail (~> 2.9.1)
   net-imap (>= 0.5.14)
   newrelic_rpm (~> 8.10)
   nokogiri (>= 1.19.3)
