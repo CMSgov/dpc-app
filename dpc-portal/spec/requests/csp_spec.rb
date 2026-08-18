@@ -16,7 +16,8 @@ RSpec.describe 'CSP', type: :request do
       expect(Rails.logger).to receive(:info).with(['User cancelled login',
                                                    hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
                                                                   actionType: LoggingConstants::ActionType::UserCancelledLogin,
-                                                                  csp: 'csp')])
+                                                                  csp: 'csp',
+                                                                  timestamp: a_kind_of(String))])
       get auth_failure_path
     end
   end

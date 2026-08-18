@@ -276,10 +276,11 @@ RSpec.shared_examples 'a CSP client' do |config|
         allow(Rails.logger).to receive(:error)
         expect(Rails.logger).to receive(:error).with(
           ['CSP Authentication error',
-           { actionContext: LoggingConstants::ActionContext::Authentication,
-             actionType: LoggingConstants::ActionType::CspUnavailable,
-             error: error.to_s,
-             csp: csp_name }]
+           hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                          actionType: LoggingConstants::ActionType::CspUnavailable,
+                          error: error.to_s,
+                          csp: csp_name,
+                          timestamp: a_kind_of(String))]
         )
         attempt_sign_in
       end
@@ -324,7 +325,13 @@ RSpec.shared_examples 'a CSP client' do |config|
 
       it 'logs the CSP authentication error' do
         allow(Rails.logger).to receive(:error)
-        expect(Rails.logger).to receive(:error).with('CSP Configuration error')
+        expect(Rails.logger).to receive(:error).with(
+          ['CSP Configuration error',
+           hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                          actionType: LoggingConstants::ActionType::FailedLogin,
+                          csp: csp_name,
+                          timestamp: a_kind_of(String))]
+        )
         attempt_sign_in
       end
     end
@@ -372,9 +379,10 @@ RSpec.shared_examples 'a CSP client' do |config|
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(
           ['User cancelled login',
-           { actionContext: LoggingConstants::ActionContext::Authentication,
-             actionType: LoggingConstants::ActionType::UserCancelledLogin,
-             csp: csp_name }]
+           hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                          actionType: LoggingConstants::ActionType::UserCancelledLogin,
+                          csp: csp_name,
+                          timestamp: a_kind_of(String))]
         )
         attempt_sign_in
       end

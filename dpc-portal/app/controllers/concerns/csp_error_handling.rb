@@ -34,8 +34,8 @@ module CspErrorHandling
 
   def handle_csp_auth_error
     log_event(:error, 'CSP Authentication error',
-              actionContext: LoggingConstants::ActionContext::Authentication,
-              actionType: LoggingConstants::ActionType::CspUnavailable,
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::CspUnavailable,
               error: params[:message],
               csp: csp_param)
     render(Page::Utility::ErrorComponent.new(nil, 'server_error', csp: csp_param),
