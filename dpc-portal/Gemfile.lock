@@ -317,7 +317,7 @@ GEM
       multi_json (~> 1.10)
       rbnacl (~> 5.0)
       rbnacl-libsodium (~> 1.0)
-    mail (2.8.1)
+    mail (2.9.1)
       mini_mime (>= 0.1.1)
       net-imap
       net-pop
