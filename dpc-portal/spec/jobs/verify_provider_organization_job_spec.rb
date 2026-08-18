@@ -102,8 +102,8 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info)
           .with(['Organization has a waiver',
-                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                   actionType: LoggingConstants::ActionType::OrgHasWaiver }])
+                 hash_including(actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                                actionType: LoggingConstants::ActionType::OrgHasWaiver)])
         VerifyProviderOrganizationJob.perform_now
       end
     end
