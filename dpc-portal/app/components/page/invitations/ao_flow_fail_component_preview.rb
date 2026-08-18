@@ -14,8 +14,8 @@ module Page
       private
 
       def error_codes
-        { choices: %i[user_not_authorized_official no_approved_enrollment bad_npi org_med_sanctions
-                      ao_med_sanctions missing_info server_error fail_to_proof] }
+        { choices: %i[user_not_authorized_official no_approved_enrollment bad_npi org_med_sanctions ao_med_sanctions
+                      missing_info server_error fail_to_proof] }
       end
     end
   end
