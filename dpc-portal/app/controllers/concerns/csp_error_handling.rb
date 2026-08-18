@@ -16,14 +16,14 @@ module CspErrorHandling
   end
 
   def csp_param
-    params[:strategy]
+    params[:strategy] || csp_session.current
   end
 
   def handle_invitation_flow_failure(invitation_id)
-    Rails.logger.info(['Failed invitation flow',
-                       { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::FailedLogin,
-                         **csp_log_context }])
+    log_event(:info, 'Failed invitation flow',
+              action_context: LoggingConstants::ActionContext::Registration,
+              action_type: LoggingConstants::ActionType::FailedLogin,
+              invitation: invitation_id)
     invitation = Invitation.find(invitation_id)
     if invitation.credential_delegate?
       render(Page::Utility::ErrorComponent.new(invitation, 'fail_to_proof'), status: :forbidden)
@@ -33,26 +33,28 @@ module CspErrorHandling
   end
 
   def handle_csp_auth_error
-    Rails.logger.error(['CSP Authentication error',
-                        { actionContext: LoggingConstants::ActionContext::Authentication,
-                          actionType: LoggingConstants::ActionType::CspUnavailable,
-                          error: params[:message],
-                          csp: csp_param }])
-
+    log_event(:error, 'CSP Authentication error',
+              actionContext: LoggingConstants::ActionContext::Authentication,
+              actionType: LoggingConstants::ActionType::CspUnavailable,
+              error: params[:message],
+              csp: csp_param)
     render(Page::Utility::ErrorComponent.new(nil, 'server_error', csp: csp_param),
            status: :service_unavailable)
   end
 
   def handle_signin_fail
-    Rails.logger.error 'CSP Configuration error'
+    log_event(:error, 'CSP Configuration error',
+              action_context: LoggingConstants::ActionContext::Registration,
+              action_type: LoggingConstants::ActionType::FailedLogin,
+              csp: csp_param)
     render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp: csp_param))
   end
 
   def handle_signin_cancel
-    Rails.logger.info(['User cancelled login',
-                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::UserCancelledLogin,
-                         csp: csp_param }])
+    log_event(:info, 'User cancelled login',
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::UserCancelledLogin,
+              csp: csp_param)
     render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_cancel', csp: csp_param))
   end
 end

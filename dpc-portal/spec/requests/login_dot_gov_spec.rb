@@ -72,9 +72,9 @@ RSpec.describe 'LoginDotGov', type: :request do
       it 'logs added emails' do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(['New user email created',
-                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                       actionType: LoggingConstants::ActionType::AddNewUserEmail,
-                                                       csp: 'login_dot_gov' }])
+                                                     hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                                                                    actionType: LoggingConstants::ActionType::AddNewUserEmail,
+                                                                    csp: 'login_dot_gov')])
                                               .twice
         post '/auth/login_dot_gov'
         follow_redirect!
@@ -113,9 +113,10 @@ RSpec.describe 'LoginDotGov', type: :request do
       it 'logs deactivated email' do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(['User email deactivated',
-                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                       actionType: LoggingConstants::ActionType::DeactivateUserEmail,
-                                                       csp: 'login_dot_gov' }])
+                                                     hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                                                                    actionType: LoggingConstants::ActionType::DeactivateUserEmail,
+                                                                    user_identifier: uuid,
+                                                                    csp: 'login_dot_gov')])
         post '/auth/login_dot_gov'
         follow_redirect!
       end
@@ -155,9 +156,9 @@ RSpec.describe 'LoginDotGov', type: :request do
       it 'logs reactivated email' do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(['User email reactivated',
-                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                       actionType: LoggingConstants::ActionType::ReactivateUserEmail,
-                                                       csp: 'login_dot_gov' }])
+                                                     hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                                                                    actionType: LoggingConstants::ActionType::ReactivateUserEmail,
+                                                                    csp: 'login_dot_gov')])
         post '/auth/login_dot_gov'
         follow_redirect!
       end
