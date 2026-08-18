@@ -302,8 +302,8 @@ jobs:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
           params: |
-            SONAR_HOST_URL=/cdap/test/common/nonsensitive/sonarqube/url
-            SONAR_TOKEN=/cdap/test/common/sensitive/sonarqube/token
+            SONAR_HOST_URL=/sonarqube/url
+            SONAR_TOKEN=/sonarqube/token
       - name: Setup Node
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
@@ -351,8 +351,8 @@ jobs:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
           params: |
-            SONAR_HOST_URL=/cdap/test/common/nonsensitive/sonarqube/url
-            SONAR_TOKEN=/cdap/test/common/sensitive/sonarqube/token
+            SONAR_HOST_URL=/sonarqube/url
+            SONAR_TOKEN=/sonarqube/token
       - name: Setup Node
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
@@ -400,8 +400,8 @@ jobs:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
           params: |
-            SONAR_HOST_URL=/cdap/test/common/nonsensitive/sonarqube/url
-            SONAR_TOKEN=/cdap/test/common/sensitive/sonarqube/token
+            SONAR_HOST_URL=/sonarqube/url
+            SONAR_TOKEN=/sonarqube/token
       - name: Setup Node
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
