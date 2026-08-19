@@ -33,7 +33,7 @@ RSpec.describe CdOrgLinksController, type: :request do
           end.to change { CdOrgLink.count }.by(-1)
         end
 
-        it 'shows a success flash with full name' do
+        it 'shows a success flash' do
           delete "/organizations/#{organization.path_id}/cd_org_links/#{cd_org_link.id}"
           expect(flash[:success]).to eq('Successfully removed Credential Delegate.')
         end

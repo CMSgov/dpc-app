@@ -3,7 +3,9 @@
 # Handles deletion of CdOrgLinks
 class CdOrgLinksController < ApplicationController
   before_action :authenticate_user!
-  before_action :verify_ao_for_organization
+  before_action :check_user_verification
+  before_action :load_organization
+  before_action :require_ao
 
   def destroy
     cd_org_link.destroy!
@@ -12,13 +14,13 @@ class CdOrgLinksController < ApplicationController
               action_type: LoggingConstants::ActionType::CdRemovedFromOrg,
               **csp_log_context)
     flash[:success] = 'Successfully removed Credential Delegate.'
+    redirect_to organization_path(organization)
   rescue ActiveRecord::RecordNotDestroyed
     log_event(:error, 'Credential Delegate not removed from organization',
               action_context: LoggingConstants::ActionContext::Registration,
               action_type: LoggingConstants::ActionType::CdNotRemovedFromOrg,
               **csp_log_context)
     flash[:alert] = 'Failed to remove Credential Delegate. Please try again later.'
-  ensure
     redirect_to organization_path(organization)
   end
 
@@ -30,11 +32,5 @@ class CdOrgLinksController < ApplicationController
 
   def cd_org_link
     @cd_org_link ||= organization.cd_org_links.find(params[:id])
-  end
-
-  def verify_ao_for_organization
-    return if current_user.ao?(organization)
-
-    redirect_to organization_path(organization)
   end
 end
