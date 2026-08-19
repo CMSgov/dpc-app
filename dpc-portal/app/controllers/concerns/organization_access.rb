@@ -3,6 +3,7 @@
 # Handles organization access for application controllers
 module OrganizationAccess
   extend ActiveSupport::Concern
+  include OrganizationUtils
 
   def require_can_access
     redirect_to organizations_path unless current_user.can_access?(@organization)
@@ -27,6 +28,11 @@ module OrganizationAccess
     end
   end
 
+  def cur_org_status
+    cur_link = current_user.provider_links.find { |link| link.provider_organization_id == @organization.id }
+    org_status(@organization, cur_link)
+  end
+
   private
 
   def organization_id
@@ -39,16 +45,21 @@ module OrganizationAccess
   end
 
   def verify_status
-    if @organization.rejected?
-      failure_code = "#{code_prefix}.#{@organization.verification_reason}"
-      return render(Page::Utility::AccessDeniedComponent.new(organization: @organization, failure_code:))
-    end
+    return render_access_denied("#{code_prefix}.#{@organization.verification_reason}") if @organization.rejected?
 
     links = current_user.ao_org_links.where(provider_organization: @organization)
     return if links.empty? || links.any?(&:verification_status?)
 
-    failure_code = "verification.#{links.first.verification_reason}"
-    render(Page::Utility::AccessDeniedComponent.new(organization: @organization, failure_code:))
+    render_access_denied("verification.#{links.first.verification_reason}")
+  end
+
+  def render_access_denied(failure_code)
+    render(Page::Utility::AccessDeniedComponent.new(
+             organization: @organization,
+             failure_code:,
+             status_display: cur_org_status,
+             role:
+           ))
   end
 
   def load_organization
@@ -56,5 +67,13 @@ module OrganizationAccess
     CurrentAttributes.save_organization_attributes(@organization, current_user)
   rescue ActiveRecord::RecordNotFound
     render file: "#{Rails.root}/public/404.html", layout: false, status: :not_found
+  end
+
+  def role
+    if current_user.ao?(@organization)
+      'Authorized Official'
+    else
+      'Credential Delegate'
+    end
   end
 end
