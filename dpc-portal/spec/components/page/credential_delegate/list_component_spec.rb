@@ -73,7 +73,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
     context 'Active credential delegate' do
       let(:user) { User.new(given_name: 'Bob', family_name: 'Hodges') }
       let(:invitation) do
-        Invitation.new(invited_given_name: 'Bob', invited_family_name: 'Hodges', invited_email: 'bob@example.com')
+        Invitation.new(invited_given_name: nil, invited_family_name: nil, invited_email: nil)
       end
       let(:pending_invitations) { [] }
       let(:expired_invitations) { [] }
@@ -89,9 +89,6 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
                   Name
                 </th>
                 <th data-sortable scope="col" aria-sort="descending">
-                  Email
-                </th>
-                <th data-sortable scope="col" aria-sort="descending">
                   Active since
                 </th>
               </tr>
@@ -105,7 +102,6 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
         expected_html = <<~HTML
           <tr>
             <td data-sort-value="Bob Hodges">Bob Hodges</td>
-            <td data-sort-value="bob@example.com">bob@example.com</td>
             <td data-sort-value="#{activated}">#{activated}</td>
           </tr>
         HTML

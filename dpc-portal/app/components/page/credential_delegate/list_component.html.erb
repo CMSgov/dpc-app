@@ -7,13 +7,12 @@
             <%= render(Core::Table::HeaderComponent.new(
                     caption: 'Active Credential Delegates',
                     columns: [
-                        { label: 'Name', sortable: true }, 
-                        { label: 'Email', sortable: true }, 
+                        { label: 'Name', sortable: true },
                         { label: 'Active since', sortable: true }
                     ]
                 )
             ) %>
-            <%= render(Core::Table::RowComponent.with_collection(@active_credential_delegates, keys: ['full_name', 'email', 'activated_at'])) %>
+            <%= render(Core::Table::RowComponent.with_collection(@active_credential_delegates, keys: ['full_name', 'activated_at'])) %>
           <% end %>
         <% else %>
           <p>You have no active Credential Delegates.</p>
