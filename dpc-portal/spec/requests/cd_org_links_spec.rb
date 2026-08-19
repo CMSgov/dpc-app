@@ -11,7 +11,7 @@ RSpec.describe CdOrgLinksController, type: :request do
   let(:ao_user) { create_user_with_csp(csp: provider, given_name: 'Bob', family_name: 'Hoskins') }
   let(:cd_user) { create_user_with_csp(csp: provider, given_name: 'Lisa', family_name: 'Franklin') }
   let(:invitation) { create(:invitation, :cd, provider_organization: organization, invited_by: ao_user) }
-  let(:cd_org_link) do
+  let!(:cd_org_link) do
     create(:cd_org_link, user: cd_user, provider_organization: organization, invitation: invitation)
   end
 
@@ -24,7 +24,6 @@ RSpec.describe CdOrgLinksController, type: :request do
       context 'when the AO is authorized' do
         before do
           create(:ao_org_link, user: ao_user, provider_organization: organization)
-          cd_org_link
         end
 
         it 'destroys the CdOrgLink' do
@@ -60,7 +59,6 @@ RSpec.describe CdOrgLinksController, type: :request do
 
         before do
           create(:ao_org_link, user: ao_user, provider_organization: organization)
-          cd_org_link
         end
 
         it 'raises a record not found error' do
@@ -71,10 +69,6 @@ RSpec.describe CdOrgLinksController, type: :request do
       end
 
       context 'when the user is not an AO for the organization' do
-        before do
-          cd_org_link
-        end
-
         it 'does not destroy the CdOrgLink' do
           expect do
             delete "/organizations/#{organization.path_id}/cd_org_links/#{cd_org_link.id}"
@@ -90,7 +84,6 @@ RSpec.describe CdOrgLinksController, type: :request do
       context 'when the destruction fails' do
         before do
           create(:ao_org_link, user: ao_user, provider_organization: organization)
-          cd_org_link
           allow_any_instance_of(CdOrgLink).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
         end
 
@@ -127,7 +120,6 @@ RSpec.describe CdOrgLinksController, type: :request do
       end
 
       it 'does not destroy the CdOrgLink' do
-        cd_org_link
         expect do
           delete "/organizations/#{organization.path_id}/cd_org_links/#{cd_org_link.id}"
         end.to change { CdOrgLink.count }.by(0)
