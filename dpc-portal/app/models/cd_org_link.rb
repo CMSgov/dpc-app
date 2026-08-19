@@ -7,7 +7,8 @@ class CdOrgLink < ApplicationRecord
   belongs_to :invitation, required: true
 
   def show_attributes
-    { full_name: "#{user.given_name} #{user.family_name}",
+    { id: id,
+      full_name: "#{user.given_name} #{user.family_name}",
       email: invitation&.invited_email,
       activated_at: created_at.to_s }.with_indifferent_access
   end

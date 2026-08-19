@@ -14,6 +14,12 @@
           button_to("Yes, delete invite", "#{delete_path}/#{obj['id']}", method: :delete, class: 'usa-button'),
           'No, go back',
           "delete-modal-#{obj['id']}")) %>
+    <% elsif obj_name == 'Credential Delegate' %>
+      <%= render(Core::Modal::ModalComponent.new("Remove [#{obj['full_name']}] as a #{obj_name}?",
+          "This person will immediately lose access to the DPC Portal, where they set up and manage your organization's API credentials. Any credentials they already created will keep working — removing them from the Portal doesn't rotate keys or revoke tokens.",
+          button_to("Yes, remove #{obj_name}", delete_path, method: :delete, class: 'usa-button'),
+          'No, go back',
+          "delete-modal-#{obj['id']}")) %>
     <% else %>
       <%= render(Core::Modal::ModalComponent.new("Permanently revoke #{obj_name}?",
           "Once revoked, the #{obj_name} will not work to access production data.",
