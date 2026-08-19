@@ -7,6 +7,7 @@
       </p>
     </div>
   </div>
+  <p class='text-bold'>We couldn't complete your registration request for <%= @org_name %>.</p>
   <p><%=raw t(key=@text, org_name: @org_name) %></p>
   <%= render Core::Button::ButtonComponent.new(label: "Back to sign in",
       destination: csp_logout_path(invitation_id: @invitation.id),
