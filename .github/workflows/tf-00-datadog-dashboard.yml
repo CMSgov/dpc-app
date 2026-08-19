@@ -1,0 +1,66 @@
+name: tf-00-datadog-dashboard
+run-name: tf-00-datadog-dashboard
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch_ref:
+        description: 'Ref of the branch to be checked out'
+        type: 'string'
+        default: 'main'
+
+      tofu_action:
+        description: 'Choose whether to run a tofu plan or apply'
+        default: 'plan'
+        type: choice
+        options:
+          - plan
+          - apply
+
+concurrency:
+  group: tofu-plan-or-apply
+
+env:
+  TENV_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  plan:
+    if: ${{ inputs.tofu_action == 'plan' }}
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-non-prod-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
+      - uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 #v4.1.1
+      - uses: cmsgov/cdap/actions/setup-tenv@f4c14d47cc20e7f6de9112d7155af1213c9bca5a
+      - uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: tofu plan
+        working-directory: ops/services/00-datadog-dashboard/
+        run: |
+          tofu init -reconfigure
+          tofu plan -out=tfplan
+
+  apply:
+    if: ${{ inputs.tofu_action == 'apply' || github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: codebuild-dpc-app-non-prod-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
+      - uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 #v4.1.1
+      - uses: cmsgov/cdap/actions/setup-tenv@f4c14d47cc20e7f6de9112d7155af1213c9bca5a
+      - uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: tofu apply
+        working-directory: ops/services/00-datadog-dashboard/
+        run: |
+          tofu init -reconfigure
+          tofu plan -out=tfplan
+          tofu apply -input=false tfplan
