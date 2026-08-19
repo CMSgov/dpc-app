@@ -1,0 +1,66 @@
+name: "DPC - Check Rails Dependencies for Vulnerabilities"
+
+on:
+  schedule:
+    - cron: '0 7 * * 1,4' # "7am on Monday Thursday
+  workflow_dispatch:
+  push:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  bundler-audit:
+    runs-on: codebuild-dpc-app-non-prod-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
+
+
+      # TODO remove these and just add it to the base image
+      - name: "Install Ruby build dependencies"
+        run: |
+          sudo dnf install -y autoconf gcc rust patch make bzip2 openssl-devel libyaml-devel libffi-devel readline-devel gdbm-devel ncurses-devel perl-FindBin
+      - name: "Install ruby-build"
+        run: |
+          git clone https://github.com/rbenv/ruby-build.git
+          sudo ./ruby-build/install.sh 
+
+
+      - name: "Set up Ruby"
+        uses: ruby/setup-ruby@003a5c4d8d6321bd302e38f6f0ec593f77f06600 # v1.319.0
+        with:
+          ruby-version: '3.3.7'
+          self-hosted: true
+
+
+      # CVE-2026-38969 is for webrick, which is only used in our fake_cpi_gateway client and never exposed to the outside
+      # world.  There's currently no fix, and the recommended solution is to remove or disable it.  That would break
+      # the fake_cpi_gateway, though, so we can't do that.
+      - name: "audit dpc-portal"
+        run: cd dpc-portal && bundle exec bundle audit update && bundle exec bundle audit check --ignore CVE-2026-38969
+      - name: "audit dpc-web"
+        run: cd dpc-web && bundle exec bundle audit update && bundle exec bundle audit check
+      - name: "audit dpc-admin"
+        run: cd dpc-admin && bundle exec bundle audit update && bundle exec bundle audit check
+
+
+      - uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
+        name: Slack failure
+        if: ${{ failure() }}
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+
+          # TODO update to point to dpc-alerts
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            attachments:
+              - color: warning
+                text: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Bundle audit check failed>"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Bundle audit check failed>"
+                mrkdown_in:
+                  - footer
+            text: "Bundle audit check has failed"
