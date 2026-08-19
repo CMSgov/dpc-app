@@ -117,6 +117,15 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
         is_expected.to include(normalize_space(remove_cd))
       end
 
+      it 'has a delete modal with the CD full name' do
+        expected_html = <<~HTML
+          <h2 class="usa-modal__heading" id="delete-modal-1-heading">
+            Remove [Bob Hodges] as a Credential Delegate?
+          </h2>
+        HTML
+        is_expected.to include(normalize_space(expected_html))
+      end
+
       it 'has no pending credential delegates' do
         expected_html = '<p>You have no pending invites.</p>'
         is_expected.to include(normalize_space(expected_html))
