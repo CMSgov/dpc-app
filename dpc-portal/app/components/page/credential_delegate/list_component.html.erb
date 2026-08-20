@@ -8,11 +8,15 @@
                     caption: 'Active Credential Delegates',
                     columns: [
                         { label: 'Name', sortable: true },
-                        { label: 'Active since', sortable: true }
+                        { label: 'Active since', sortable: true },
+                        { label: '<span class="usa-sr-only">Actions</span>'.html_safe }
                     ]
                 )
             ) %>
-            <%= render(Core::Table::RowComponent.with_collection(@active_credential_delegates, keys: ['full_name', 'activated_at'])) %>
+            <%= render(Core::Table::RowComponent.with_collection(@active_credential_delegates,
+                                                                 keys: ['full_name', 'activated_at'],
+                                                                 delete_path: ->(cd) { organization_cd_org_link_path(@organization.path_id, cd[:id]) },
+                                                                 obj_name: 'Credential Delegate')) %>
           <% end %>
         <% else %>
           <p>You have no active Credential Delegates.</p>

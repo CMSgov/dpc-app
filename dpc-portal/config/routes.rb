@@ -24,6 +24,7 @@ Rails.application.routes.draw do
     resources :client_tokens, only: [:new, :create, :destroy]
     resources :public_keys, only: [:new, :create, :destroy]
     resources :ip_addresses, only: [:new, :create, :destroy]
+    resources :cd_org_links, only: [:destroy]
     resources :credential_delegate_invitations, only: [:new, :create, :destroy] do
       get 'success', on: :member
     end

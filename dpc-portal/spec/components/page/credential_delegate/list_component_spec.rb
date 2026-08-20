@@ -77,7 +77,7 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
       end
       let(:pending_invitations) { [] }
       let(:expired_invitations) { [] }
-      let(:credential_delegates) { [CdOrgLink.new(user:, invitation:)] }
+      let(:credential_delegates) { [CdOrgLink.new(id: 1, user:, invitation:)] }
 
       it 'has a table' do
         expected_html = <<~HTML
@@ -91,6 +91,9 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
                 <th data-sortable scope="col" aria-sort="descending">
                   Active since
                 </th>
+                <th scope="col">
+                    <span class="usa-sr-only">Actions</span>
+                </th>
               </tr>
             </thead>
         HTML
@@ -103,7 +106,22 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
           <tr>
             <td data-sort-value="Bob Hodges">Bob Hodges</td>
             <td data-sort-value="#{activated}">#{activated}</td>
-          </tr>
+        HTML
+        is_expected.to include(normalize_space(expected_html))
+        remove_cd = <<~HTML
+          <form class="button_to" method="post" action="/organizations/2/cd_org_links/1">
+           <input type="hidden" name="_method" value="delete" autocomplete="off" />
+           <button class="usa-button" type="submit">Yes, remove Credential Delegate</button>
+          </form>
+        HTML
+        is_expected.to include(normalize_space(remove_cd))
+      end
+
+      it 'has a delete modal with the CD full name' do
+        expected_html = <<~HTML
+          <h2 class="usa-modal__heading" id="delete-modal-1-heading">
+            Remove [Bob Hodges] as a Credential Delegate?
+          </h2>
         HTML
         is_expected.to include(normalize_space(expected_html))
       end
