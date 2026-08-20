@@ -27,10 +27,9 @@ RSpec.describe CdOrgLinksController, type: :request do
               create(:ao_org_link, user: ao_user, provider_organization: organization)
             end
 
-            it 'destroys the CdOrgLink' do
-              expect do
-                delete "/organizations/#{organization.path_id}/cd_org_links/#{cd_org_link.id}"
-              end.to change { CdOrgLink.count }.by(-1)
+            it 'disables the CdOrgLink' do
+              delete "/organizations/#{organization.path_id}/cd_org_links/#{cd_org_link.id}"
+              expect(cd_org_link.reload.disabled_at).not_to be_nil
             end
 
             it 'shows a success flash' do
@@ -70,10 +69,9 @@ RSpec.describe CdOrgLinksController, type: :request do
           end
 
           context 'when the user is not an AO for the organization' do
-            it 'does not destroy the CdOrgLink' do
-              expect do
-                delete "/organizations/#{organization.path_id}/cd_org_links/#{cd_org_link.id}"
-              end.to change { CdOrgLink.count }.by(0)
+            it 'does not disable the CdOrgLink' do
+              delete "/organizations/#{organization.path_id}/cd_org_links/#{cd_org_link.id}"
+              expect(cd_org_link.reload.disabled_at).to be_nil
             end
 
             it 'redirects with an error' do
@@ -82,10 +80,10 @@ RSpec.describe CdOrgLinksController, type: :request do
             end
           end
 
-          context 'when the destruction fails' do
+          context 'when the removal fails' do
             before do
               create(:ao_org_link, user: ao_user, provider_organization: organization)
-              allow_any_instance_of(CdOrgLink).to receive(:destroy!).and_raise(ActiveRecord::RecordNotDestroyed)
+              allow_any_instance_of(CdOrgLink).to receive(:update!).and_raise(ActiveRecord::RecordInvalid)
             end
 
             it 'shows an alert on failure' do
@@ -106,10 +104,9 @@ RSpec.describe CdOrgLinksController, type: :request do
               delete "/organizations/#{organization.path_id}/cd_org_links/#{cd_org_link.id}"
             end
 
-            it 'does not destroy the CdOrgLink' do
-              expect do
-                delete "/organizations/#{organization.path_id}/cd_org_links/#{cd_org_link.id}"
-              end.to change { CdOrgLink.count }.by(0)
+            it 'does not disable the CdOrgLink' do
+              delete "/organizations/#{organization.path_id}/cd_org_links/#{cd_org_link.id}"
+              expect(cd_org_link.reload.disabled_at).to be_nil
             end
           end
         end
@@ -117,16 +114,21 @@ RSpec.describe CdOrgLinksController, type: :request do
     end
 
     context 'when the user is not signed in' do
-      let(:cd_org_link_id) { 1 }
+      let(:ao_user) { create(:user) }
+      let(:cd_user) { create(:user) }
+      let(:invitation) { create(:invitation, :cd, provider_organization: organization, invited_by: ao_user) }
+      let!(:cd_org_link) do
+        create(:cd_org_link, user: cd_user, provider_organization: organization, invitation: invitation)
+      end
+
       it 'redirects to the sign in page' do
-        delete "/organizations/#{organization.path_id}/cd_org_links/#{cd_org_link_id}"
+        delete "/organizations/#{organization.path_id}/cd_org_links/#{cd_org_link.id}"
         expect(response).to redirect_to(sign_in_path)
       end
 
-      it 'does not destroy the CdOrgLink' do
-        expect do
-          delete "/organizations/#{organization.path_id}/cd_org_links/#{cd_org_link_id}"
-        end.to change { CdOrgLink.count }.by(0)
+      it 'does not remove the CdOrgLink' do
+        delete "/organizations/#{organization.path_id}/cd_org_links/#{cd_org_link.id}"
+        expect(cd_org_link.reload.disabled_at).to be_nil
       end
     end
   end

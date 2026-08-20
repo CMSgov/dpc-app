@@ -8,14 +8,14 @@ class CdOrgLinksController < ApplicationController
   before_action :require_ao
 
   def destroy
-    cd_org_link.destroy!
+    cd_org_link.disable!
     log_event(:info, 'Credential Delegate removed from organization',
               action_context: LoggingConstants::ActionContext::Registration,
               action_type: LoggingConstants::ActionType::CdRemovedFromOrg,
               **csp_log_context)
     flash[:success] = 'Successfully removed Credential Delegate.'
     redirect_to organization_path(organization)
-  rescue ActiveRecord::RecordNotDestroyed
+  rescue ActiveRecord::RecordInvalid
     log_event(:error, 'Credential Delegate not removed from organization',
               action_context: LoggingConstants::ActionContext::Registration,
               action_type: LoggingConstants::ActionType::CdNotRemovedFromOrg,

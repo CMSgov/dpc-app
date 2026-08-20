@@ -20,4 +20,8 @@ class CdOrgLink < ApplicationRecord
   def ao?
     false
   end
+
+  def disable!
+    update!(disabled_at: Time.now)
+  end
 end
