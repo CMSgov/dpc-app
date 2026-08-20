@@ -11,7 +11,7 @@ describe UserInfoService do
     context "with #{display_name}" do
       context :valid_session do
         before do
-          stub_request(:get, user_info_url(provider))
+          stub_request(:get, CspUtils.user_info_url(provider))
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: csp_response(provider).to_json, status: 200)
         end
@@ -26,7 +26,7 @@ describe UserInfoService do
         it 'should throw error if status is 401' do
           verify_logs(status: 401, csp: provider)
           error = '{"error":"No can do"}'
-          stub_request(:get, user_info_url(provider))
+          stub_request(:get, CspUtils.user_info_url(provider))
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: error, status: 401)
           expect do
@@ -36,7 +36,7 @@ describe UserInfoService do
         it 'should throw error if status is 500' do
           verify_logs(status: 500, csp: provider)
           error = '{"error":"shrug"}'
-          stub_request(:get, user_info_url(provider))
+          stub_request(:get, CspUtils.user_info_url(provider))
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: error, status: 500)
           expect do
@@ -45,7 +45,7 @@ describe UserInfoService do
         end
         it 'should throw error if cannot connect' do
           verify_logs(status: 503, csp: provider, connection_fails: true)
-          stub_request(:get, user_info_url(provider))
+          stub_request(:get, CspUtils.user_info_url(provider))
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_raise(Errno::ECONNREFUSED)
           expect do
@@ -99,7 +99,7 @@ describe UserInfoService do
 
   def expect_http_metadata(span, csp)
     expect(span).to receive(:type=).with('http')
-    expect(span).to receive(:set_tag).with('http.url', user_info_url(csp))
+    expect(span).to receive(:set_tag).with('http.url', CspUtils.user_info_url(csp))
     expect(span).to receive(:set_tag).with('http.method', 'GET')
   end
 
@@ -114,7 +114,7 @@ describe UserInfoService do
       ['Calling CSP user_info',
        { csp: csp.to_s,
          csp_request_method: :get,
-         csp_request_url: user_info_url(csp),
+         csp_request_url: CspUtils.user_info_url(csp),
          csp_request_method_name: :request_info }]
     )
   end
@@ -124,7 +124,7 @@ describe UserInfoService do
       ['CSP user_info response info',
        { csp: csp.to_s,
          csp_request_method: :get,
-         csp_request_url: user_info_url(csp),
+         csp_request_url: CspUtils.user_info_url(csp),
          csp_request_method_name: :request_info,
          csp_response_status_code: status,
          csp_response_duration: anything }]
@@ -142,14 +142,5 @@ describe UserInfoService do
     file_path_components = ['csps', csp.to_s, 'user_info.json']
     file_path = File.join(*file_path_components)
     json_fixture(file_path)
-  end
-
-  def user_info_url(csp)
-    case csp.to_s
-    when 'login_dot_gov' then LOGIN_DOT_GOV_CLIENT_CONFIG[:client_options][:userinfo_endpoint]
-    when 'id_me' then ID_ME_CLIENT_CONFIG[:client_options][:userinfo_endpoint]
-    when 'clear' then CLEAR_CLIENT_CONFIG[:client_options][:userinfo_endpoint]
-    else raise ArgumentError, "Unknown CSP code: #{csp}"
-    end
   end
 end

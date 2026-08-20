@@ -47,6 +47,10 @@ module LoggingConstants
     UpdatePrimaryUserEmail = 'UpdatePrimaryUserEmail'
     OidcUserInfoFailed = 'OidcUserInfoFailed'
 
+    MergeUserAccountCsp = 'MergeUserAccountCsp'
+    NameMismatch = 'NameMismatch'
+    CspUserCreated = 'CspUserCreated'
+
     FailAoPiiCheck = 'FailAoPiiCheck'
     FailCdPiiCheck = 'FailCdPiiCheck'
     FailCpiApiGwCheck = 'FailCpiApiGatewayCheck'

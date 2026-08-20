@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 # Base controller to handle interactions with CSPs.
-class CspController < ApplicationController # rubocop:disable Metrics/ClassLength
+class CspController < ApplicationController
   include CspEmailSync
   include CspErrorHandling
+  include CspExistingAccount
 
   skip_before_action :verify_authenticity_token, only: :openid_connect
 
   def openid_connect
     return render_ial1_blocked if ial_1_user?(auth_details)
-
     return unless (active_csp = csp(auth_details.provider))
 
     user_actions(auth_details, active_csp)
@@ -49,43 +49,12 @@ class CspController < ApplicationController # rubocop:disable Metrics/ClassLengt
 
     sign_in_and_log(user, csp.name)
     ial_2_actions(user, auth)
+    handle_csp_user_response(csp_user, auth)
+  end
 
-    return render_add_email(csp_user, auth) if csp_user && !email_match?(csp_user, auth)
-
+  def sync_and_redirect(csp_user, auth)
     sync_csp_emails(csp_user, all_emails(auth), primary_email(auth))
-    redirect_to path(user, auth)
-  end
-
-  def find_csp_user(csp)
-    auth = auth_details
-    csp_user = CspUser.find_by(uuid: auth&.uid, csp: csp)
-
-    if csp_user.nil?
-      log_event(:error, 'No CspUser found for CSP authentication',
-                action_context: LoggingConstants::ActionContext::Authentication,
-                action_type: LoggingConstants::ActionType::CspUserNotFound,
-                user_identifier: auth&.uid,
-                csp: auth&.provider || csp.name)
-    end
-
-    csp_user
-  end
-
-  def email_match?(csp_user, auth)
-    csp_user.user_emails.empty? || csp_user.user_emails.map(&:email).include?(primary_email(auth))
-  end
-
-  def render_add_email(csp_user, auth)
-    log_event(:info, 'User has existing account associated with different email',
-              action_context: LoggingConstants::ActionContext::Authentication,
-              action_type: LoggingConstants::ActionType::MergeUserAccountEmail,
-              user_identifier: auth.uid,
-              csp: auth.provider)
-    render(Page::ExistingAccount::AddEmailComponent.new(csp_user.user.email, csp_user.csp.name,
-                                                        update_path(id: csp_user.id,
-                                                                    csp: csp_user.csp.id,
-                                                                    all_emails: all_emails(auth),
-                                                                    primary_email: primary_email(auth))))
+    redirect_to path(csp_user&.user, auth)
   end
 
   def render_ial1_blocked
