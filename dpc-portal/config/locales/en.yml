@@ -3,7 +3,7 @@ en:
     no_account_status: The email you used is not associated with a DPC account.
     no_account_text: Please sign out and log back in with the email associated with your DPC account.
     email_mismatch_status: The email you used to sign in was not recognized.
-    email_mismatch_text: "Try again with a different email:<ol><li>Sign out of your identity provider (CLEAR, ID.me, or Login.gov). Signing out of the DPC Portal alone won't switch your email.</li><li>Return here and sign in with the email your invitation was sent to.</li></ol>"
+    email_mismatch_text: Already have a CLEAR, ID.me, or Login.gov account under a different email? You'll need to add your invited email to that account. You may also need to sign out of your identity provider's session before trying again.
     pii_mismatch_status: The name you used does not match your invite.
     pii_mismatch_text: "Contact the Authorized Official (AO) that invited you. The AO will need to sign in to the DPC Portal and create a new invite."
     ao_accepted_status: Organization already registered.
