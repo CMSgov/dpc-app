@@ -6,7 +6,7 @@ module Core
     class TextAreaComponent < ViewComponent::Base
       attr_accessor :label, :attribute, :default, :input_options, :hint
 
-      # rubocop:disable Metrics/ParameterLists
+      # rubocop:disable-next Metrics/ParameterLists
       def initialize(label:, attribute:, default: '', input_options: {}, hint: '', error_msg: '')
         super()
         @label = label
@@ -19,7 +19,6 @@ module Core
         input_options[:class] << 'usa-textarea'
         @input_options[:class] << 'usa-input--error' if error_msg.present?
       end
-      # rubocop:enable Metrics/ParameterLists
     end
   end
 end
