@@ -4,7 +4,7 @@
 class SyncOrganizationJob < ApplicationJob
   queue_as :portal
 
-  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable-next Metrics/AbcSize
   def perform(provider_organization_id)
     begin
       po = ProviderOrganization.find(provider_organization_id)
@@ -25,7 +25,6 @@ class SyncOrganizationJob < ApplicationJob
       raise SyncOrganizationJobError, "multiple orgs found for NPI #{po.npi} in dpc_attribution"
     end
   end
-  # rubocop:enable Metrics/AbcSize
 
   private
 

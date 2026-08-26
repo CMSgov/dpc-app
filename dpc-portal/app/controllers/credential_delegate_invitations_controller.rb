@@ -13,7 +13,7 @@ class CredentialDelegateInvitationsController < ApplicationController
     render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, Invitation.new))
   end
 
-  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable-next Metrics/AbcSize
   def create
     @cd_invitation = build_invitation
 
@@ -33,7 +33,6 @@ class CredentialDelegateInvitationsController < ApplicationController
       render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, @cd_invitation), status: :bad_request)
     end
   end
-  # rubocop:enable Metrics/AbcSize
 
   def destroy
     if @invitation.update(status: :cancelled)

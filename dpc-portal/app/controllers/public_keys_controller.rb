@@ -14,7 +14,7 @@ class PublicKeysController < ApplicationController
     render Page::PublicKey::NewKeyComponent.new(@organization)
   end
 
-  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable-next Metrics/AbcSize
   def create
     manager = PublicKeyManager.new(@organization.dpc_api_organization_id)
 
@@ -34,7 +34,6 @@ class PublicKeysController < ApplicationController
       render_error @errors[:root] || 'Invalid encoding'
     end
   end
-  # rubocop:enable Metrics/AbcSize
 
   def destroy
     manager = PublicKeyManager.new(@organization.dpc_api_organization_id)
