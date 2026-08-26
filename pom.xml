@@ -43,7 +43,7 @@
         <timestamp>${maven.build.timestamp}</timestamp>
         <jacoco.version>0.8.12</jacoco.version>
         <jooq.version>3.19.19</jooq.version>
-        <bouncey.version>1.84</bouncey.version>
+        <bouncey.version>1.85</bouncey.version>
         <pitest.version>1.22.0</pitest.version>
         <h2.version>2.3.232</h2.version>
         <aws.java.sdk.version>2.46.15</aws.java.sdk.version>
