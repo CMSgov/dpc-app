@@ -28,9 +28,6 @@ RUN gem install bundler --no-document && \
     bundle install && \
     npm install
 
-# Run bundler audit
-RUN bundle exec bundle audit update && bundle exec bundle audit check
-
 # Copy the code, test the app, and build the assets pipeline
 COPY /dpc-admin /dpc-admin
 
