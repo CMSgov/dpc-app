@@ -559,6 +559,58 @@ RSpec.describe Invitation, type: :model do
     end
   end
 
+  describe :token do
+    it 'is generated on initialize' do
+      expect(Invitation.new.token).to match Invitation::TOKEN_FORMAT
+    end
+
+    it 'is persisted on create' do
+      invitation = create(:invitation, :ao)
+      expect(invitation.reload.token).to match Invitation::TOKEN_FORMAT
+    end
+
+    it 'is unique per invitation' do
+      tokens = create_list(:invitation, 3, :ao).map(&:token)
+      expect(tokens.uniq.size).to eq 3
+    end
+
+    it 'is not regenerated on update' do
+      invitation = create(:invitation, :ao)
+      expect { invitation.update!(status: :cancelled) }.to_not change(invitation, :token)
+    end
+
+    it 'survives accept!, which clears the invitee PII' do
+      invitation = create(:invitation, :cd)
+      expect { invitation.accept! }.to_not change(invitation, :token)
+    end
+
+    it 'fails validation if blank' do
+      invitation = build(:invitation, :ao, token: nil)
+      expect(invitation).to_not be_valid
+      expect(invitation.errors[:token]).to include "can't be blank"
+    end
+
+    it 'fails validation if malformed' do
+      invitation = build(:invitation, :ao, token: 'too-short')
+      expect(invitation).to_not be_valid
+      expect(invitation.errors[:token]).to include 'is invalid'
+    end
+
+    it 'fails validation if taken' do
+      existing = create(:invitation, :ao)
+      invitation = build(:invitation, :ao, token: existing.token)
+      expect(invitation).to_not be_valid
+      expect(invitation.errors[:token]).to include 'has already been taken'
+    end
+
+    it 'gives a renewed invitation its own token' do
+      invitation = create(:invitation, :ao, created_at: 49.hours.ago)
+      new_invitation = invitation.renew
+      expect(new_invitation.token).to match Invitation::TOKEN_FORMAT
+      expect(new_invitation.token).to_not eq invitation.token
+    end
+  end
+
   describe :expires_in do
     after { Timecop.return }
     let!(:invitation) { create(:invitation, :cd, created_at: 24.hours.ago) }

@@ -13,7 +13,7 @@ class InvitationsController < ApplicationController
   before_action :validate_invitation, except: %i[renew]
   before_action :verify_ao_invitation, only: %i[accept confirm]
   before_action :verify_cd_invitation, only: %i[code verify_code confirm_cd]
-  before_action :check_for_token, only: %i[accept confirm confirm_cd register]
+  before_action :check_for_csp_token, only: %i[accept confirm confirm_cd register]
   before_action :block_test_utilities, only: %i[set_idp_token]
 
   def show
@@ -30,14 +30,14 @@ class InvitationsController < ApplicationController
   end
 
   def confirm
-    unless session["invitation_status_#{@invitation.id}"] == 'identity_verified'
-      return redirect_to accept_organization_invitation_url(@organization, @invitation)
+    unless session[invitation_status_key] == 'identity_verified'
+      return redirect_to accept_organization_invitation_url(*invitation_url_args)
     end
 
     verify_user_is_ao
     return if performed?
 
-    session["invitation_status_#{@invitation.id}"] = 'verification_complete'
+    session[invitation_status_key] = 'verification_complete'
     render(Page::Invitations::RegisterComponent.new(@organization, @invitation))
   end
 
@@ -46,7 +46,7 @@ class InvitationsController < ApplicationController
     invitation_matches_user
     return if performed?
 
-    session["invitation_status_#{@invitation.id}"] = 'verification_complete'
+    session[invitation_status_key] = 'verification_complete'
     log_event(:info, 'Approved access authorization occurred for the Credential Delegate',
               action_context: LoggingConstants::ActionContext::Registration,
               action_type: LoggingConstants::ActionType::CdConfirmed,
@@ -56,8 +56,8 @@ class InvitationsController < ApplicationController
 
   # Everybody
   def register
-    unless session["invitation_status_#{@invitation.id}"] == 'verification_complete'
-      return redirect_to organization_invitation_url(@organization, @invitation)
+    unless session[invitation_status_key] == 'verification_complete'
+      return redirect_to organization_invitation_url(*invitation_url_args)
     end
 
     return unless create_link
@@ -83,7 +83,7 @@ class InvitationsController < ApplicationController
     else
       flash[:alert] = 'Unable to create new invitation'
     end
-    redirect_to accept_organization_invitation_url(@organization, @invitation)
+    redirect_to accept_organization_invitation_url(*invitation_url_args)
   end
 
   def set_idp_token
@@ -93,8 +93,16 @@ class InvitationsController < ApplicationController
 
   private
 
+  def invitation_url_args
+    [@organization, @invitation, @invitation.token]
+  end
+
+  def invitation_status_key
+    "invitation_status_#{@invitation.id}"
+  end
+
   def complete_registration
-    session.delete("invitation_status_#{@invitation.id}")
+    session.delete(invitation_status_key)
     sign_in(user: @user, csp: csp_session.current)
     log_event(:info, 'User logged in',
               action_context: LoggingConstants::ActionContext::Registration,
@@ -122,7 +130,7 @@ class InvitationsController < ApplicationController
     user_info = UserInfoService.new.user_info(csp_session)
     return if render_bad_invitation?(user_info)
 
-    session["invitation_status_#{@invitation.id}"] = 'identity_verified'
+    session[invitation_status_key] = 'identity_verified'
     @given_name = user_info['given_name']
     @family_name = user_info['family_name']
   rescue UserInfoServiceError => e
@@ -182,9 +190,9 @@ class InvitationsController < ApplicationController
 
   def invitation_return_url
     if @invitation.authorized_official?
-      accept_organization_invitation_url(@organization, params[:id])
+      accept_organization_invitation_url(*invitation_url_args)
     else
-      confirm_cd_organization_invitation_url(@organization, params[:id])
+      confirm_cd_organization_invitation_url(*invitation_url_args)
     end
   end
 
@@ -357,13 +365,22 @@ class InvitationsController < ApplicationController
   end
 
   def load_invitation
-    @invitation = Invitation.find(params[:id])
-    if @organization != @invitation.provider_organization
-      invalid_status = @invitation.credential_delegate? ? 'cd_invalid' : 'ao_invalid'
-      render(Page::Utility::ErrorComponent.new(@invitation, invalid_status), status: :not_found)
-    end
-  rescue ActiveRecord::RecordNotFound
-    render(Page::Utility::ErrorComponent.new(@invitation, 'ao_invalid'), status: :not_found)
+    @invitation = Invitation.find_by(id: params[:id], token: params[:token])
+    return render_invitation_not_found if @invitation.nil?
+
+    return if @organization == @invitation.provider_organization
+
+    invalid_status = @invitation.credential_delegate? ? 'cd_invalid' : 'ao_invalid'
+    render(Page::Utility::ErrorComponent.new(@invitation, invalid_status), status: :not_found)
+  end
+
+  # No invitation matched the id/token pair, so we cannot say anything about the invitation itself.
+  def render_invitation_not_found
+    log_event(:info, 'Invitation not found',
+              action_context: LoggingConstants::ActionContext::Registration,
+              action_type: LoggingConstants::ActionType::InvalidInvitation,
+              invitation: params[:id])
+    render(Page::Utility::ErrorComponent.new(nil, 'ao_invalid'), status: :not_found)
   end
 
   def validate_invitation
@@ -398,14 +415,14 @@ class InvitationsController < ApplicationController
   end
 
   def verify_ao_invitation
-    redirect_to organization_invitation_url(@organization, @invitation) unless @invitation.authorized_official?
+    redirect_to organization_invitation_url(*invitation_url_args) unless @invitation.authorized_official?
   end
 
   def verify_cd_invitation
-    redirect_to organization_invitation_url(@organization, @invitation) unless @invitation.credential_delegate?
+    redirect_to organization_invitation_url(*invitation_url_args) unless @invitation.credential_delegate?
   end
 
-  def check_for_token
+  def check_for_csp_token
     return if csp_session.active?
 
     render(Page::Invitations::InvitationLoginComponent.new(@invitation))

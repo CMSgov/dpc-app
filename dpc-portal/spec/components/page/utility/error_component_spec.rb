@@ -64,7 +64,7 @@ RSpec.describe Page::Utility::ErrorComponent, type: :component do
         is_expected.to include(normalize_space(header))
       end
       it 'should have renew button' do
-        button_url = "/organizations/#{provider_organization.id}/invitations/#{invitation.id}/renew"
+        button_url = invitation_url_for(provider_organization, invitation, 'renew')
         is_expected.to include(button_url)
       end
       context 'already renewed' do
@@ -77,7 +77,7 @@ RSpec.describe Page::Utility::ErrorComponent, type: :component do
           is_expected.to include(normalize_space(header))
         end
         it 'should have no renew button' do
-          button_url = "/organizations/#{provider_organization.id}/invitations/#{invitation.id}/renew"
+          button_url = invitation_url_for(provider_organization, invitation, 'renew')
           is_expected.not_to include(button_url)
         end
       end

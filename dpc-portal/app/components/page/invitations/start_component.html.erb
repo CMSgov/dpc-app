@@ -35,6 +35,6 @@
     </div>
   </div>
 
-  <%= link_to 'Begin registration', accept_organization_invitation_path(@organization, @invitation), class: 'usa-button margin-y-3' if @invitation.authorized_official? %>
-  <%= link_to 'Get started', confirm_cd_organization_invitation_path(@organization, @invitation), class: 'usa-button margin-y-3' if @invitation.credential_delegate? %>
+  <%= link_to 'Begin registration', accept_organization_invitation_path(@organization, @invitation, @invitation.token), class: 'usa-button margin-y-3' if @invitation.authorized_official? %>
+  <%= link_to 'Get started', confirm_cd_organization_invitation_path(@organization, @invitation, @invitation.token), class: 'usa-button margin-y-3' if @invitation.credential_delegate? %>
 </section>

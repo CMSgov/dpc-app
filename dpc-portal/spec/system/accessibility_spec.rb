@@ -429,12 +429,12 @@ RSpec.describe 'Accessibility', type: :system do
         allow(mock_uis).to receive(:user_info).and_return(user_info)
       end
       it 'should show intro page' do
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}"
+        visit invitation_url_for(org.id, invitation)
         expect(page).to have_text('Not be listed on the Medicare Exclusions Database')
         expect(page).to be_axe_clean.according_to axe_standard
       end
       it 'should show login page' do
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+        visit invitation_url_for(org.id, invitation, 'accept')
         expect(page).to have_text(:all, 'Step 2 of 5')
         expect(page).to have_css('.usa-step-indicator__heading',
                                  text: '2 of 5 Verify my identity')
@@ -442,8 +442,8 @@ RSpec.describe 'Accessibility', type: :system do
         expect(page).to be_axe_clean.according_to axe_standard
       end
       it 'should show accept page' do
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token?provider=#{provider}"
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+        visit invitation_url_for(org.id, invitation, "set_idp_token?provider=#{provider}")
+        visit invitation_url_for(org.id, invitation, 'accept')
         # expect(page).to have_text('Step 3')
         expect(page).to have_text(:all, 'Step 3 of 5')
         expect(page).to have_css('.usa-step-indicator__heading',
@@ -451,8 +451,8 @@ RSpec.describe 'Accessibility', type: :system do
         expect(page).to be_axe_clean.according_to axe_standard
       end
       it 'should show register page' do
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token?provider=#{provider}"
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+        visit invitation_url_for(org.id, invitation, "set_idp_token?provider=#{provider}")
+        visit invitation_url_for(org.id, invitation, 'accept')
         page.find('.usa-button', text: 'Verify information').click
         expect(page).to have_text(:all, 'Step 4 of 5')
         expect(page).to have_css('.usa-step-indicator__heading',
@@ -460,8 +460,8 @@ RSpec.describe 'Accessibility', type: :system do
         expect(page).to be_axe_clean.according_to axe_standard
       end
       it 'should show success page' do
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token?provider=#{provider}"
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+        visit invitation_url_for(org.id, invitation, "set_idp_token?provider=#{provider}")
+        visit invitation_url_for(org.id, invitation, 'accept')
         page.find('.usa-button', text: 'Verify information').click
         page.find('.usa-button', text: 'Submit registration').click
         expect(page).to have_text(:all, 'Step 5')
@@ -471,8 +471,8 @@ RSpec.describe 'Accessibility', type: :system do
         secondary_invitation = create(:invitation, :ao, provider_organization: org,
                                                         invited_email: 'bob2@example.com',
                                                         invited_email_confirmation: 'bob2@example.com')
-        visit "/organizations/#{org.id}/invitations/#{secondary_invitation.id}/set_idp_token?provider=#{provider}"
-        visit "/organizations/#{org.id}/invitations/#{secondary_invitation.id}/accept"
+        visit invitation_url_for(org.id, secondary_invitation, "set_idp_token?provider=#{provider}")
+        visit invitation_url_for(org.id, secondary_invitation, 'accept')
         expect(page).to have_text(:all, 'Step 3 of 5')
         expect(page).to have_css('.usa-step-indicator__heading',
                                  text: '3 of 5 Verify Medicare enrollment information')
@@ -489,26 +489,26 @@ RSpec.describe 'Accessibility', type: :system do
         end
         let(:renew_success) { 'You should receive your new invitation shortly' }
         it 'should show bad invitation' do
-          visit "/organizations/#{org.id}/invitations/bad-id"
+          visit "/organizations/#{org.id}/invitations/bad-id/#{unmatched_invitation_token}"
           expect(page).to have_text('Your registration link is invalid.')
           expect(page).to be_axe_clean.according_to axe_standard
         end
         it 'should show expired invitation' do
           invitation.update(created_at: 4.days.ago)
-          visit "/organizations/#{org.id}/invitations/#{invitation.id}"
+          visit invitation_url_for(org.id, invitation)
           expect(page).to have_text(I18n.t('verification.ao_expired_status'))
           expect(page).to be_axe_clean.according_to axe_standard
         end
         it 'should show successful renewal of invitation' do
           invitation.update(created_at: 4.days.ago)
-          visit "/organizations/#{org.id}/invitations/#{invitation.id}"
+          visit invitation_url_for(org.id, invitation)
           page.find('.usa-button', text: 'Request new link').click
           expect(page).to have_text(renew_success)
           expect(page).to be_axe_clean.according_to axe_standard
         end
         it 'should show already-renewed error' do
           invitation.update(status: :renewed)
-          visit "/organizations/#{org.id}/invitations/#{invitation.id}"
+          visit invitation_url_for(org.id, invitation)
           expect(page).to_not have_text(renew_success)
           expect(page).to have_text(I18n.t('verification.ao_renewed_text'))
           expect(page).to be_axe_clean.according_to axe_standard
@@ -517,14 +517,14 @@ RSpec.describe 'Accessibility', type: :system do
           mismatched_invitation = create(:invitation, :ao, provider_organization: org,
                                                            invited_email: 'somethingelse@example.com',
                                                            invited_email_confirmation: 'somethingelse@example.com')
-          visit "/organizations/#{org.id}/invitations/#{mismatched_invitation.id}/set_idp_token?provider=#{provider}"
-          visit "/organizations/#{org.id}/invitations/#{mismatched_invitation.id}/accept"
+          visit invitation_url_for(org.id, mismatched_invitation, "set_idp_token?provider=#{provider}")
+          visit invitation_url_for(org.id, mismatched_invitation, 'accept')
           expect(page).to have_text('The email you used to sign in was not recognized.')
           expect(page).to be_axe_clean.according_to axe_standard
         end
         it 'should show failed ao check' do
-          visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token?provider=#{provider}"
-          visit "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          visit invitation_url_for(org.id, invitation, "set_idp_token?provider=#{provider}")
+          visit invitation_url_for(org.id, invitation, 'accept')
           page.find('.usa-button', text: 'Verify information').click
           expect(page).to have_css('.usa-step-indicator__heading',
                                    text: '3 of 5 Verify Medicare enrollment information')
@@ -551,24 +551,24 @@ RSpec.describe 'Accessibility', type: :system do
         allow(mock_uis).to receive(:user_info).and_return(user_info)
       end
       it 'should show intro page' do
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}"
+        visit invitation_url_for(org.id, invitation)
         expect(page).to have_text('To accept your invitation as a Credential Delegate you must:')
         expect(page).to be_axe_clean.according_to axe_standard
       end
       it 'should show login page' do
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
+        visit invitation_url_for(org.id, invitation, 'confirm_cd')
         expect(page).to have_text('Accept invite')
         expect(page).to be_axe_clean.according_to axe_standard
       end
       it 'should show confirm page' do
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token?provider=#{provider}"
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
+        visit invitation_url_for(org.id, invitation, "set_idp_token?provider=#{provider}")
+        visit invitation_url_for(org.id, invitation, 'confirm_cd')
         expect(page).to have_text('Accept invite')
         expect(page).to be_axe_clean.according_to axe_standard
       end
       it 'should show success page' do
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token?provider=#{provider}"
-        visit "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
+        visit invitation_url_for(org.id, invitation, "set_idp_token?provider=#{provider}")
+        visit invitation_url_for(org.id, invitation, 'confirm_cd')
         page.find('.usa-button', text: 'Accept invite').click
         expect(page).to have_text('Thank you for accepting your invite.')
         expect(page).to be_axe_clean.according_to axe_standard
@@ -585,7 +585,7 @@ RSpec.describe 'Accessibility', type: :system do
         end
         it 'should show expired invitation' do
           invitation.update(created_at: 4.days.ago)
-          visit "/organizations/#{org.id}/invitations/#{invitation.id}"
+          visit invitation_url_for(org.id, invitation)
           expect(page).to have_text(I18n.t('verification.cd_expired_status'))
           expect(page).to be_axe_clean.according_to axe_standard
         end
@@ -593,8 +593,8 @@ RSpec.describe 'Accessibility', type: :system do
           mismatched_invitation = create(:invitation, :cd, provider_organization: org,
                                                            invited_email: 'somethingelse@example.com',
                                                            invited_email_confirmation: 'somethingelse@example.com')
-          visit "/organizations/#{org.id}/invitations/#{mismatched_invitation.id}/set_idp_token?provider=#{provider}"
-          visit "/organizations/#{org.id}/invitations/#{mismatched_invitation.id}/confirm_cd"
+          visit invitation_url_for(org.id, mismatched_invitation, "set_idp_token?provider=#{provider}")
+          visit invitation_url_for(org.id, mismatched_invitation, 'confirm_cd')
           expect(page).to have_text(I18n.t('verification.pii_mismatch_status'))
           expect(page).to be_axe_clean.according_to axe_standard
         end

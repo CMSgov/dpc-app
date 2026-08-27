@@ -28,14 +28,19 @@ Rails.application.routes.draw do
     resources :credential_delegate_invitations, only: [:new, :create, :destroy] do
       get 'success', on: :member
     end
-    resources :invitations, only: [:show] do
-      get 'accept', on: :member
-      post 'confirm', on: :member
-      post 'register', on: :member
-      post 'login', on: :member
-      post 'renew', on: :member
-      get 'confirm_cd', on: :member
-      get 'set_idp_token', on: :member
+    resources :invitations, only: [] do
+      member do
+        scope ':token', constraints: { token: /[A-Za-z0-9]{24}/ } do
+          get '/', action: :show, as: ''
+          get 'accept', action: :accept
+          post 'confirm', action: :confirm
+          post 'register', action: :register
+          post 'login', action: :login
+          post 'renew', action: :renew
+          get 'confirm_cd', action: :confirm_cd
+          get 'set_idp_token', action: :set_idp_token
+        end
+      end
     end
     get 'tos_form', on: :member
     post 'sign_tos', on: :member

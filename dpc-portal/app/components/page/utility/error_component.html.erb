@@ -22,7 +22,7 @@
       when :ao_expired %>
         <%= render Core::Button::ButtonComponent.new(label: "Request new link",
             disabled: @invitation&.renewed?,
-            destination: renew_organization_invitation_path(@invitation.provider_organization, @invitation)) %>
+            destination: renew_organization_invitation_path(@invitation.provider_organization, @invitation, @invitation.token)) %>
       <% when :ao_accepted %>
         <%= link_to sign_in_path, class: 'usa-button', data: { turbo: false } do %>
           Sign in to DPC Portal

@@ -13,35 +13,61 @@ RSpec.describe 'Invitations', type: :request do
     it 'should be ok or redirect' do
       stub_user_info
       # Most calls will be empty params, but for /login, param required to specify which IDP to use
-      send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}", params: request_params)
+      send(method, invitation_url_for(org.id, invitation, path_suffix), params: request_params)
       expect(response.status).to eq(expected_success_status)
     end
     it 'should show warning page with 404 if missing' do
-      send(method, "/organizations/#{org.id}/invitations/bad-id/#{path_suffix}")
+      send(method, "/organizations/#{org.id}/invitations/bad-id/#{unmatched_invitation_token}/#{path_suffix}")
       expect(response).to be_not_found
       # Without an invitation, we don't know if it's for an AO or CD, so we default to AO in the error message.
       expect(response.body).to include(I18n.t('verification.ao_invalid_status'))
     end
+    it 'should show warning page with 404 if token does not match the invitation' do
+      send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{unmatched_invitation_token}/#{path_suffix}")
+      expect(response).to be_not_found
+      # We can't disclose whether the invitation exists, so we give the same message as for a missing invitation.
+      expect(response.body).to include(I18n.t('verification.ao_invalid_status'))
+    end
+    it 'logs when the token does not match the invitation' do
+      allow(Rails.logger).to receive(:info)
+      expect(Rails.logger).to receive(:info).with(
+        ['Invitation not found',
+         hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                        actionType: LoggingConstants::ActionType::InvalidInvitation,
+                        invitation: invitation.id.to_s)]
+      )
+      send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{unmatched_invitation_token}/#{path_suffix}")
+    end
+    it 'should not route if the token is missing' do
+      expect do
+        send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+      end.to raise_error(ActionController::RoutingError)
+    end
+    it 'should not route if the token is malformed' do
+      expect do
+        send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/too-short/#{path_suffix}")
+      end.to raise_error(ActionController::RoutingError)
+    end
     it 'should show warning page with 404 if org-invitation mismatch' do
       bad_org = create(:provider_organization)
-      send(method, "/organizations/#{bad_org.id}/invitations/#{invitation.id}/#{path_suffix}")
+      send(method, invitation_url_for(bad_org.id, invitation, path_suffix))
       expect(response).to be_not_found
       expect(response.body).to include(I18n.t("verification.#{role}_invalid_status"))
     end
     it 'should show warning page if cancelled' do
       invitation.update(status: :cancelled)
-      send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+      send(method, invitation_url_for(org.id, invitation, path_suffix))
       expect(response).to be_forbidden
       expect(response.body).to include(I18n.t("verification.#{role}_invalid_status"))
     end
     context 'invitation expired' do
       before { invitation.update_attribute(:created_at, 3.days.ago) }
       it 'should show warning page' do
-        send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+        send(method, invitation_url_for(org.id, invitation, path_suffix))
         expect(response).to be_forbidden
       end
       it 'should show renew button only if ao' do
-        send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+        send(method, invitation_url_for(org.id, invitation, path_suffix))
         expect(response).to be_forbidden
         if invitation.authorized_official?
           expect(response.body).to include('Request new link')
@@ -69,11 +95,11 @@ RSpec.describe 'Invitations', type: :request do
                             invitation: invitation.id)]
           )
         end
-        send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+        send(method, invitation_url_for(org.id, invitation, path_suffix))
       end
       it 'should not show renew button if accepted' do
         invitation.accept!
-        send method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}"
+        send method, invitation_url_for(org.id, invitation, path_suffix)
         expect(response).to be_forbidden
         expect(response.body).to_not include('Request new link')
       end
@@ -100,7 +126,7 @@ RSpec.describe 'Invitations', type: :request do
         )
       end
 
-      send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{path_suffix}")
+      send(method, invitation_url_for(org.id, invitation, path_suffix))
       expect(response).to be_forbidden
       if invitation.authorized_official?
         expect(response.body).to include(I18n.t('verification.ao_accepted_status'))
@@ -113,9 +139,9 @@ RSpec.describe 'Invitations', type: :request do
   RSpec.shared_examples 'a login endpoint' do |provider|
     let(:org_id) { invitation.provider_organization.id }
     let(:provider_params) { { provider: provider } }
-    before { get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token", params: provider_params }
+    before { get invitation_url_for(org_id, invitation, 'set_idp_token'), params: provider_params }
     it 'should redirect to provider callback' do
-      post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
+      post invitation_url_for(org_id, invitation, 'login'), params: provider_params
       redirect_params = Rack::Utils.parse_query(URI.parse(response.location).query)
       expect(redirect_params['redirect_uri']).to eq("http://localhost:3100/auth/#{provider}/callback")
       expect(request.session[:user_return_to]).to eq expected_redirect
@@ -129,12 +155,12 @@ RSpec.describe 'Invitations', type: :request do
                                                                   csp: provider.to_s,
                                                                   invitation: invitation.id)])
       org_id = invitation.provider_organization.id
-      post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
+      post invitation_url_for(org_id, invitation, 'login'), params: provider_params
     end
 
     it 'should show error page if fail to proof' do
       org_id = invitation.provider_organization.id
-      post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
+      post invitation_url_for(org_id, invitation, 'login'), params: provider_params
       get '/auth/failure'
       expect(response).to be_forbidden
       expect(response.body).to include(I18n.t('verification.fail_to_proof_text'))
@@ -147,34 +173,34 @@ RSpec.describe 'Invitations', type: :request do
     context :success do
       before do
         stub_user_info
-        get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
+        get invitation_url_for(org.id, invitation, 'set_idp_token'), params: provider_params
         if invitation.authorized_official?
-          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+          get invitation_url_for(org.id, invitation, 'accept')
+          post invitation_url_for(org.id, invitation, 'confirm')
         else
-          get "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
+          get invitation_url_for(org.id, invitation, 'confirm_cd')
         end
       end
       it 'should show success page' do
-        post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+        post invitation_url_for(org.id, invitation, 'register')
         expect(response).to be_ok
         expect(response.body).to include('Go to DPC Portal')
       end
       it 'should update invitation' do
-        post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+        post invitation_url_for(org.id, invitation, 'register')
         invitation.reload
         expect(invitation.invited_given_name).to be_blank
         expect(invitation.invited_family_name).to be_blank
         expect(invitation.invited_email).to be_blank
       end
       it 'should clear session variable' do
-        post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+        post invitation_url_for(org.id, invitation, 'register')
         expect(request.session["invitation_status_#{invitation.id}"]).to be_nil
       end
       it 'should create link to organization' do
         klass = invitation.authorized_official? ? AoOrgLink : CdOrgLink
         expect do
-          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          post invitation_url_for(org.id, invitation, 'register')
         end.to change { klass.count }.by(1)
       end
       it 'should log that link was created' do
@@ -194,7 +220,7 @@ RSpec.describe 'Invitations', type: :request do
                                                                       organization_npi: org.npi,
                                                                       invitation: invitation.id)])
         end
-        post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+        post invitation_url_for(org.id, invitation, 'register')
       end
 
       it 'should log user logged in' do
@@ -205,12 +231,12 @@ RSpec.describe 'Invitations', type: :request do
                                                                     user_identifier: user_info_template['sub'],
                                                                     csp: provider.to_s,
                                                                     invitation: invitation.id)])
-        post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+        post invitation_url_for(org.id, invitation, 'register')
       end
 
       it 'should create user if not exist' do
         expect do
-          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          post invitation_url_for(org.id, invitation, 'register')
         end.to change { User.count }.by 1
 
         user_email = UserEmail.find_by(email: user_info_template['email'])
@@ -248,18 +274,18 @@ RSpec.describe 'Invitations', type: :request do
                                                                       organization_npi: org.npi,
                                                                       invitation: invitation.id)])
         end
-        post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+        post invitation_url_for(org.id, invitation, 'register')
       end
       it 'should not create user if exists' do
         create(:user, pac_id: user_info_template['social_security_number'])
         expect do
-          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          post invitation_url_for(org.id, invitation, 'register')
         end.to change { User.count }.by 0
       end
       it 'should update name of user if changed' do
         user = create(:user, pac_id: user_info_template['social_security_number'], given_name: :foo, family_name: :bar)
         expect do
-          post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+          post invitation_url_for(org.id, invitation, 'register')
         end.to change { User.count }.by 0
         user.reload
         expect(user.given_name).to eq user_info_template['given_name']
@@ -268,14 +294,14 @@ RSpec.describe 'Invitations', type: :request do
       it 'should not override pac_id on existing user' do
         create(:user, pac_id: :foo)
         create_invitation_user_with_csp(csp: provider.to_sym)
-        post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+        post invitation_url_for(org.id, invitation, 'register')
         expect(response).to be_ok
         user = User.find_by_csp_uid(name: provider, csp_uid: user_info_template['sub'])
         # We have the fake CPI API Gateway return the ssn as pac_id
         expect(user.pac_id).to eq 'foo'
       end
       it 'should be able to immediate view organizations' do
-        post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+        post invitation_url_for(org.id, invitation, 'register')
         get '/'
         expect(response).to be_ok
         links = assigns(:links)
@@ -286,28 +312,28 @@ RSpec.describe 'Invitations', type: :request do
 
     context 'failure' do
       before do
-        get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
+        get invitation_url_for(org.id, invitation, 'set_idp_token'), params: provider_params
         if invitation.authorized_official?
           stub_user_info
-          get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+          get invitation_url_for(org.id, invitation, 'accept')
         end
       end
       it 'should redirect if not confirmed' do
-        post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-        expect(response).to redirect_to(organization_invitation_path(org, invitation))
+        post invitation_url_for(org.id, invitation, 'register')
+        expect(response).to redirect_to(organization_invitation_path(org, invitation, invitation.token))
       end
       it 'should show login if token expired' do
         if invitation.authorized_official?
-          post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+          post invitation_url_for(org.id, invitation, 'confirm')
         else
           stub_user_info
-          get "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
+          get invitation_url_for(org.id, invitation, 'confirm_cd')
         end
         user_service_class = class_double(UserInfoService).as_stubbed_const
         allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'unauthorized')
-        post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+        post invitation_url_for(org.id, invitation, 'register')
         expect(response).to be_ok
-        expect(response.body).to include(login_organization_invitation_path(org, invitation))
+        expect(response.body).to include(login_organization_invitation_path(org, invitation, invitation.token))
       end
     end
   end
@@ -329,9 +355,9 @@ RSpec.describe 'Invitations', type: :request do
           end
 
           it 'should show button to accept' do
-            get "/organizations/#{org.id}/invitations/#{ao_invite.id}"
+            get invitation_url_for(org.id, ao_invite)
             expect(response).to be_ok
-            expect(response.body).to include(accept_organization_invitation_path(org, ao_invite))
+            expect(response.body).to include(accept_organization_invitation_path(org, ao_invite, ao_invite.token))
           end
         end
         context :cd do
@@ -343,9 +369,9 @@ RSpec.describe 'Invitations', type: :request do
           end
 
           it 'should show button to confirm identity' do
-            get "/organizations/#{org.id}/invitations/#{cd_invite.id}"
+            get invitation_url_for(org.id, cd_invite)
             expect(response).to be_ok
-            expect(response.body).to include(confirm_cd_organization_invitation_path(org, cd_invite))
+            expect(response.body).to include(confirm_cd_organization_invitation_path(org, cd_invite, cd_invite.token))
           end
         end
       end
@@ -360,14 +386,14 @@ RSpec.describe 'Invitations', type: :request do
           it_behaves_like 'a login endpoint', provider do
             let(:invitation) { create(:invitation, :cd) }
             let(:expected_redirect) do
-              confirm_cd_organization_invitation_url(invitation.provider_organization.id, invitation)
+              confirm_cd_organization_invitation_url(invitation.provider_organization.id, invitation, invitation.token)
             end
           end
           context 'fail to proof' do
             let(:invitation) { create(:invitation, :cd) }
             let(:org_id) { invitation.provider_organization.id }
             it 'should not show step navigation' do
-              post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
+              post invitation_url_for(org_id, invitation, 'login'), params: provider_params
               get '/auth/failure'
               expect(response).to be_forbidden
               expect(response.body).to_not include('<span class="usa-step-indicator__current-step">')
@@ -383,14 +409,14 @@ RSpec.describe 'Invitations', type: :request do
           it_behaves_like 'a login endpoint', provider do
             let(:invitation) { create(:invitation, :ao) }
             let(:expected_redirect) do
-              accept_organization_invitation_url(invitation.provider_organization.id, invitation)
+              accept_organization_invitation_url(invitation.provider_organization.id, invitation, invitation.token)
             end
           end
           context 'fail to proof' do
             let(:invitation) { create(:invitation, :ao) }
             let(:org_id) { invitation.provider_organization.id }
             it 'should show step 2' do
-              post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
+              post invitation_url_for(org_id, invitation, 'login'), params: provider_params
               get '/auth/failure'
               expect(response).to be_forbidden
               expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
@@ -409,37 +435,37 @@ RSpec.describe 'Invitations', type: :request do
         before { stub_user_info }
         context 'not logged in' do
           it 'should show login if valid invitation' do
-            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+            get invitation_url_for(org.id, invitation, 'accept')
             expect(response).to be_ok
-            expect(response.body).to include(login_organization_invitation_path(org, invitation))
+            expect(response.body).to include(login_organization_invitation_path(org, invitation, invitation.token))
           end
         end
 
         context 'logged in' do
           before do
             log_in(provider:)
-            get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
+            get invitation_url_for(org.id, invitation, 'set_idp_token'), params: provider_params
           end
           it 'should show login if token expired' do
             user_service_class = class_double(UserInfoService).as_stubbed_const
             allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'unauthorized')
-            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+            get invitation_url_for(org.id, invitation, 'accept')
             expect(response).to be_ok
-            expect(response.body).to include(login_organization_invitation_path(org, invitation))
+            expect(response.body).to include(login_organization_invitation_path(org, invitation, invitation.token))
           end
           context :success do
             it 'should show confirm form if valid invitation' do
               stub_user_info
-              get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+              get invitation_url_for(org.id, invitation, 'accept')
               expect(response).to be_ok
-              expect(response.body).to include(confirm_organization_invitation_path(org, invitation))
+              expect(response.body).to include(confirm_organization_invitation_path(org, invitation, invitation.token))
               expect(request.session["invitation_status_#{invitation.id}"]).to eq 'identity_verified'
             end
             it 'should not show error page if confirmed email' do
               stub_user_info(overrides: { 'email' => 'david2@example.com' })
-              get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+              get invitation_url_for(org.id, invitation, 'accept')
               expect(response).to be_ok
-              expect(response.body).to include(confirm_organization_invitation_path(org, invitation))
+              expect(response.body).to include(confirm_organization_invitation_path(org, invitation, invitation.token))
               expect(request.session["invitation_status_#{invitation.id}"]).to eq 'identity_verified'
               expect(assigns(:given_name)).to_not be_nil
             end
@@ -448,8 +474,8 @@ RSpec.describe 'Invitations', type: :request do
             it 'should fail if cd invitation' do
               cd_invite = create(:invitation, :cd)
               org = cd_invite.provider_organization
-              get "/organizations/#{org.id}/invitations/#{cd_invite.id}/accept"
-              expect(response).to redirect_to(organization_invitation_path(org, cd_invite))
+              get invitation_url_for(org.id, cd_invite, 'accept')
+              expect(response).to redirect_to(organization_invitation_path(org, cd_invite, cd_invite.token))
             end
             it 'should show error page if email not match' do
               allow(Rails.logger).to receive(:info)
@@ -461,7 +487,7 @@ RSpec.describe 'Invitations', type: :request do
                                 invitation: invitation.id)]
               )
               stub_user_info(overrides: { 'email' => 'another@example.com', 'all_emails' => ['another@example.com'] })
-              get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+              get invitation_url_for(org.id, invitation, 'accept')
               expect(assigns(:given_name)).to be_nil
               expect(response).to be_forbidden
               expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.email_mismatch_status')))
@@ -470,7 +496,7 @@ RSpec.describe 'Invitations', type: :request do
               it 'should show server error page' do
                 user_service_class = class_double(UserInfoService).as_stubbed_const
                 allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'server_error')
-                get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+                get invitation_url_for(org.id, invitation, 'accept')
                 expect(response.status).to eq 503
                 expect(response.body).to include(I18n.t('verification.server_error_status'))
               end
@@ -478,7 +504,7 @@ RSpec.describe 'Invitations', type: :request do
                 user_service_class = class_double(UserInfoService).as_stubbed_const
                 allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'server_error')
                 log_in(provider:)
-                get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+                get invitation_url_for(org.id, invitation, 'accept')
                 expect(response.status).to eq 503
                 expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
               end
@@ -497,16 +523,16 @@ RSpec.describe 'Invitations', type: :request do
           before do
             stub_user_info
             log_in(provider:)
-            get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
-            get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+            get invitation_url_for(org.id, invitation, 'set_idp_token'), params: provider_params
+            get invitation_url_for(org.id, invitation, 'accept')
           end
           it 'should set session status to conditions verified' do
-            post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+            post invitation_url_for(org.id, invitation, 'confirm')
             expect(response).to be_ok
             expect(request.session["invitation_status_#{invitation.id}"]).to eq 'verification_complete'
           end
           it 'sets pac id' do
-            post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+            post invitation_url_for(org.id, invitation, 'confirm')
             # We have the fake CPI API Gateway return the ssn as pac_id
             expect(request.session[:user_pac_id]).to eq user_info_template['social_security_number']
           end
@@ -516,7 +542,7 @@ RSpec.describe 'Invitations', type: :request do
             before do
               stub_user_info(overrides: { 'social_security_number' => '900777777' })
               log_in(provider:)
-              get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+              get invitation_url_for(org.id, invitation, 'accept')
             end
             it 'logs a waiver' do
               allow(Rails.logger).to receive(:info)
@@ -526,7 +552,7 @@ RSpec.describe 'Invitations', type: :request do
                                       actionType: LoggingConstants::ActionType::AoHasWaiver,
                                       csp: provider.to_s,
                                       invitation: invitation.id)])
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+              post invitation_url_for(org.id, invitation, 'confirm')
             end
           end
           context :org_has_waiver do
@@ -535,7 +561,7 @@ RSpec.describe 'Invitations', type: :request do
             before { log_in(provider:) }
             it 'should log a waiver' do
               stub_user_info
-              get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+              get invitation_url_for(org.id, invitation, 'accept')
               allow(Rails.logger).to receive(:info)
               expect(Rails.logger).to receive(:info)
                 .with(['Organization has a waiver',
@@ -543,26 +569,26 @@ RSpec.describe 'Invitations', type: :request do
                                       actionType: LoggingConstants::ActionType::OrgHasWaiver,
                                       csp: provider.to_s,
                                       invitation: invitation.id)])
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+              post invitation_url_for(org.id, invitation, 'confirm')
             end
           end
         end
         context :failure do
           let(:invitation) { create(:invitation, :ao) }
           let(:org) { invitation.provider_organization }
-          before { get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params }
+          before { get invitation_url_for(org.id, invitation, 'set_idp_token'), params: provider_params }
           context :process do
             before { log_in(provider:) }
             it 'should fail if cd invitation' do
               cd_invite = create(:invitation, :cd)
               org = cd_invite.provider_organization
-              post "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm"
-              expect(response).to redirect_to(organization_invitation_path(org, cd_invite))
+              post invitation_url_for(org.id, cd_invite, 'confirm')
+              expect(response).to redirect_to(organization_invitation_path(org, cd_invite, cd_invite.token))
             end
 
             it 'should not confirm if not passed identity verification' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
-              expect(response).to redirect_to(accept_organization_invitation_path(org, invitation))
+              post invitation_url_for(org.id, invitation, 'confirm')
+              expect(response).to redirect_to(accept_organization_invitation_path(org, invitation, invitation.token))
               expect(request.session["invitation_status_#{invitation.id}"]).to be_nil
             end
           end
@@ -571,15 +597,15 @@ RSpec.describe 'Invitations', type: :request do
             before do
               stub_user_info(overrides: { 'social_security_number' => '000000000' })
               log_in(provider:)
-              get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+              get invitation_url_for(org.id, invitation, 'accept')
             end
             it 'renders not-ao error' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+              post invitation_url_for(org.id, invitation, 'confirm')
               expect(response).to be_forbidden
               expect(response.body).to include(I18n.t('verification.user_not_authorized_official_status'))
             end
             it 'renders step 3' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+              post invitation_url_for(org.id, invitation, 'confirm')
               expect(response).to be_forbidden
               expect(response.body).to include('<span class="usa-step-indicator__current-step">3</span>')
             end
@@ -594,7 +620,7 @@ RSpec.describe 'Invitations', type: :request do
                                                                           verificationReason: verification_reason,
                                                                           organization_npi: org.npi,
                                                                           invitation: invitation.id)])
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+              post invitation_url_for(org.id, invitation, 'confirm')
             end
           end
 
@@ -610,17 +636,17 @@ RSpec.describe 'Invitations', type: :request do
                                                                      })
 
               log_in(provider:)
-              get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+              get invitation_url_for(org.id, invitation, 'accept')
             end
 
             it 'should show server error' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+              post invitation_url_for(org.id, invitation, 'confirm')
               expect(response.status).to eq 503
               expect(response.body).to include(I18n.t('verification.server_error_status'))
             end
 
             it 'should show step 3' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+              post invitation_url_for(org.id, invitation, 'confirm')
               expect(response.status).to eq 503
               expect(response.body).to include('<span class="usa-step-indicator__current-step">3</span>')
             end
@@ -630,17 +656,17 @@ RSpec.describe 'Invitations', type: :request do
             before do
               stub_user_info(overrides: { 'social_security_number' => '' })
               log_in(provider:)
-              get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+              get invitation_url_for(org.id, invitation, 'accept')
             end
 
             it 'should show missing info error' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+              post invitation_url_for(org.id, invitation, 'confirm')
               expect(response.status).to eq 503
               expect(response.body).to include(I18n.t('verification.missing_info_text'))
             end
 
             it 'should show step 3' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+              post invitation_url_for(org.id, invitation, 'confirm')
               expect(response.status).to eq 503
               expect(response.body).to include('<span class="usa-step-indicator__current-step">3</span>')
             end
@@ -656,17 +682,17 @@ RSpec.describe 'Invitations', type: :request do
               )
               stub_user_info
               log_in(provider:)
-              get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+              get invitation_url_for(org.id, invitation, 'accept')
             end
 
             it 'should show server error' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+              post invitation_url_for(org.id, invitation, 'confirm')
               expect(response.status).to eq 503
               expect(response.body).to include(I18n.t('verification.server_error_status'))
             end
 
             it 'should show step 3' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+              post invitation_url_for(org.id, invitation, 'confirm')
               expect(response.status).to eq 503
               expect(response.body).to include('<span class="usa-step-indicator__current-step">3</span>')
             end
@@ -683,18 +709,18 @@ RSpec.describe 'Invitations', type: :request do
           let(:org) { cd_invite.provider_organization }
           before do
             log_in(provider:)
-            get "/organizations/#{org.id}/invitations/#{cd_invite.id}/set_idp_token", params: provider_params
+            get invitation_url_for(org.id, cd_invite, 'set_idp_token'), params: provider_params
           end
           context 'passed identity confirmation' do
             context :success do
               it 'should show register' do
                 stub_user_info
-                get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
-                expect(response.body).to include(register_organization_invitation_path(org, cd_invite))
+                get invitation_url_for(org.id, cd_invite, 'confirm_cd')
+                expect(response.body).to include(register_organization_invitation_path(org, cd_invite, cd_invite.token))
               end
               it 'should set verification complete' do
                 stub_user_info
-                get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+                get invitation_url_for(org.id, cd_invite, 'confirm_cd')
                 expect(request.session["invitation_status_#{cd_invite.id}"]).to eq 'verification_complete'
               end
               it 'should log approved access for CD' do
@@ -708,12 +734,12 @@ RSpec.describe 'Invitations', type: :request do
                                  invitation: cd_invite.id)
                 ]
                 expect(Rails.logger).to receive(:info).with(approved_access_log_message)
-                get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+                get invitation_url_for(org.id, cd_invite, 'confirm_cd')
               end
               it 'should ignore given name' do
                 stub_user_info(overrides: { 'given_name' => 'Something Else' })
-                get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
-                expect(response.body).to include(register_organization_invitation_path(org, cd_invite))
+                get invitation_url_for(org.id, cd_invite, 'confirm_cd')
+                expect(response.body).to include(register_organization_invitation_path(org, cd_invite, cd_invite.token))
                 expect(request.session["invitation_status_#{cd_invite.id}"]).to eq 'verification_complete'
               end
             end
@@ -729,11 +755,12 @@ RSpec.describe 'Invitations', type: :request do
                                   invitation: cd_invite.id)]
                 )
                 stub_user_info(overrides: { 'email' => 'another@example.com', 'all_emails' => ['another@example.com'] })
-                get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+                get invitation_url_for(org.id, cd_invite, 'confirm_cd')
                 expect(assigns(:given_name)).to be_nil
                 expect(response).to be_forbidden
                 expect(response.body).to include(CGI.escapeHTML(I18n.t('verification.email_mismatch_status')))
-                expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
+                expect(response.body)
+                  .to_not include(confirm_organization_invitation_path(org, cd_invite, cd_invite.token))
               end
               it 'should render error page if family_name not match' do
                 allow(Rails.logger).to receive(:info)
@@ -745,22 +772,23 @@ RSpec.describe 'Invitations', type: :request do
                                   invitation: cd_invite.id)]
                 )
                 stub_user_info(overrides: { 'family_name' => 'Something Else' })
-                get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+                get invitation_url_for(org.id, cd_invite, 'confirm_cd')
                 expect(response).to be_forbidden
-                expect(response.body).to_not include(confirm_organization_invitation_path(org, cd_invite))
+                expect(response.body)
+                  .to_not include(confirm_organization_invitation_path(org, cd_invite, cd_invite.token))
               end
               it 'should not show step navigation' do
                 user_service_class = class_double(UserInfoService).as_stubbed_const
                 allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'server_error')
-                get "/organizations/#{org.id}/invitations/#{cd_invite.id}/confirm_cd"
+                get invitation_url_for(org.id, cd_invite, 'confirm_cd')
                 expect(response.status).to eq 503
                 expect(response.body).to_not include('<span class="usa-step-indicator__current-step">')
               end
               it 'should fail if ao invitation' do
                 ao_invite = create(:invitation, :ao)
                 org = ao_invite.provider_organization
-                get "/organizations/#{org.id}/invitations/#{ao_invite.id}/confirm_cd"
-                expect(response).to redirect_to(organization_invitation_path(org, ao_invite))
+                get invitation_url_for(org.id, ao_invite, 'confirm_cd')
+                expect(response).to redirect_to(organization_invitation_path(org, ao_invite, ao_invite.token))
               end
             end
           end
@@ -774,34 +802,34 @@ RSpec.describe 'Invitations', type: :request do
           context :success do
             before do
               stub_user_info
-              get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
+              get invitation_url_for(org.id, invitation, 'set_idp_token'), params: provider_params
               if invitation.authorized_official?
-                get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-                post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+                get invitation_url_for(org.id, invitation, 'accept')
+                post invitation_url_for(org.id, invitation, 'confirm')
               else
-                get "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
+                get invitation_url_for(org.id, invitation, 'confirm_cd')
               end
             end
             it 'should show success page' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+              post invitation_url_for(org.id, invitation, 'register')
               expect(response).to be_ok
               expect(response.body).to include('Go to DPC Portal')
             end
             it 'should update invitation' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+              post invitation_url_for(org.id, invitation, 'register')
               invitation.reload
               expect(invitation.invited_given_name).to be_blank
               expect(invitation.invited_family_name).to be_blank
               expect(invitation.invited_email).to be_blank
             end
             it 'should clear session variable' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+              post invitation_url_for(org.id, invitation, 'register')
               expect(request.session["invitation_status_#{invitation.id}"]).to be_nil
             end
             it 'should create link to organization' do
               klass = invitation.authorized_official? ? AoOrgLink : CdOrgLink
               expect do
-                post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+                post invitation_url_for(org.id, invitation, 'register')
               end.to change { klass.count }.by(1)
             end
             it 'should log that link was created' do
@@ -821,7 +849,7 @@ RSpec.describe 'Invitations', type: :request do
                                                                             organization_npi: org.npi,
                                                                             invitation: invitation.id)])
               end
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+              post invitation_url_for(org.id, invitation, 'register')
             end
 
             it 'should log user logged in' do
@@ -832,13 +860,13 @@ RSpec.describe 'Invitations', type: :request do
                                                                           csp: provider.to_s,
                                                                           user_identifier: user_info_template['sub'],
                                                                           invitation: invitation.id)])
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+              post invitation_url_for(org.id, invitation, 'register')
             end
 
             it 'should create user if not exist' do
               Csp.find_by(name: provider.to_s) || create(:csp, name: provider.to_s)
               expect do
-                post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+                post invitation_url_for(org.id, invitation, 'register')
               end.to change { User.count }.by 1
 
               user_email = UserEmail.find_by(email: user_info_template['email'])
@@ -874,12 +902,12 @@ RSpec.describe 'Invitations', type: :request do
                                                                             organization_npi: org.npi,
                                                                             invitation: invitation.id)])
               end
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+              post invitation_url_for(org.id, invitation, 'register')
             end
             it 'should not create user if exists' do
               create_invitation_user_with_csp(csp: provider.to_sym)
               expect do
-                post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+                post invitation_url_for(org.id, invitation, 'register')
               end.to change { User.count }.by 0
             end
             it 'should update name of user if changed' do
@@ -889,7 +917,7 @@ RSpec.describe 'Invitations', type: :request do
               csp_user = create(:csp_user, user:, csp:, uuid: user_info_template['sub'])
               create(:user_email, csp_user:, email: user_info_template['email'], primary: true)
               expect do
-                post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+                post invitation_url_for(org.id, invitation, 'register')
               end.to change { User.count }.by 0
               user.reload
               expect(user.given_name).to eq user_info_template['given_name']
@@ -901,7 +929,7 @@ RSpec.describe 'Invitations', type: :request do
               csp_user = create(:csp_user, user:, csp:, uuid: user_info_template['sub'])
               create(:user_email, csp_user:, email: user_info_template['email'], primary: true)
 
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+              post invitation_url_for(org.id, invitation, 'register')
               expect(response).to be_ok
 
               user_email = UserEmail.find_by(email: user_info_template['email'])
@@ -910,7 +938,7 @@ RSpec.describe 'Invitations', type: :request do
               expect(user.pac_id).to eq 'foo1'
             end
             it 'should be able to immediate view organizations' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+              post invitation_url_for(org.id, invitation, 'register')
               get '/'
               expect(response).to be_ok
               links = assigns(:links)
@@ -921,28 +949,28 @@ RSpec.describe 'Invitations', type: :request do
 
           context 'failure' do
             before do
-              get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
+              get invitation_url_for(org.id, invitation, 'set_idp_token'), params: provider_params
               if invitation.authorized_official?
                 stub_user_info
-                get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
+                get invitation_url_for(org.id, invitation, 'accept')
               end
             end
             it 'should redirect if not confirmed' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
-              expect(response).to redirect_to(organization_invitation_path(org, invitation))
+              post invitation_url_for(org.id, invitation, 'register')
+              expect(response).to redirect_to(organization_invitation_path(org, invitation, invitation.token))
             end
             it 'should show login if token expired' do
               if invitation.authorized_official?
-                post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+                post invitation_url_for(org.id, invitation, 'confirm')
               else
                 stub_user_info
-                get "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
+                get invitation_url_for(org.id, invitation, 'confirm_cd')
               end
               user_service_class = class_double(UserInfoService).as_stubbed_const
               allow(user_service_class).to receive(:new).and_raise(UserInfoServiceError, 'unauthorized')
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+              post invitation_url_for(org.id, invitation, 'register')
               expect(response).to be_ok
-              expect(response.body).to include(login_organization_invitation_path(org, invitation))
+              expect(response.body).to include(login_organization_invitation_path(org, invitation, invitation.token))
             end
           end
         end
@@ -960,7 +988,7 @@ RSpec.describe 'Invitations', type: :request do
             before do
               log_in(provider:)
               stub_user_info
-              get "/organizations/#{org.id}/invitations/#{invitation.id}/confirm_cd"
+              get invitation_url_for(org.id, invitation, 'confirm_cd')
             end
             it 'should not save verification_status on user and org' do
               user = create(:user, pac_id: 'foo1')
@@ -968,7 +996,7 @@ RSpec.describe 'Invitations', type: :request do
               csp_user = create(:csp_user, user:, csp:, uuid: user_info_template['sub'])
               create(:user_email, csp_user:, email: user_info_template['email'], primary: true)
 
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+              post invitation_url_for(org.id, invitation, 'register')
               user_email = UserEmail.find_by(email: user_info_template['email'])
               user = user_email&.csp_user&.user
 
@@ -1005,7 +1033,7 @@ RSpec.describe 'Invitations', type: :request do
                 )]
               )
 
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+              post invitation_url_for(org.id, invitation, 'register')
               expect(response.body).to include(I18n.t('verification.multi_user_match_text'))
             end
           end
@@ -1023,13 +1051,13 @@ RSpec.describe 'Invitations', type: :request do
             before do
               log_in(provider:)
               stub_user_info
-              get "/organizations/#{org.id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
-              get "/organizations/#{org.id}/invitations/#{invitation.id}/accept"
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/confirm"
+              get invitation_url_for(org.id, invitation, 'set_idp_token'), params: provider_params
+              get invitation_url_for(org.id, invitation, 'accept')
+              post invitation_url_for(org.id, invitation, 'confirm')
             end
             it 'should set pac_id on new user' do
               expect do
-                post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+                post invitation_url_for(org.id, invitation, 'register')
               end.to change { User.count }.by(1)
               user = User.find_by(pac_id: user_info_template['social_security_number'])
               # We have the fake CPI API Gateway return the ssn as pac_id
@@ -1039,7 +1067,7 @@ RSpec.describe 'Invitations', type: :request do
             it 'should set pac_id on existing user' do
               create_invitation_user_with_csp(csp: provider.to_sym)
               expect do
-                post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+                post invitation_url_for(org.id, invitation, 'register')
               end.to change { User.count }.by 0
               user = User.find_by_csp_uid(name: provider, csp_uid: user_info_template['sub'])
               # We have the fake CPI API Gateway return the ssn as pac_id
@@ -1049,21 +1077,21 @@ RSpec.describe 'Invitations', type: :request do
             it 'should add credential if user with pac id exists' do
               user = create(:user, pac_id: user_info_template['social_security_number'])
               expect do
-                post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+                post invitation_url_for(org.id, invitation, 'register')
               end.to change { CspUser.where(user:).count }.by 1
             end
             it 'should add credential if user with pac id exists and non-matching credential exists' do
               user = create(:user, pac_id: user_info_template['social_security_number'])
               create(:csp_user, user:, uuid: user_info_template['sub'], csp: other_csp)
               expect do
-                post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+                post invitation_url_for(org.id, invitation, 'register')
               end.to change { CspUser.where(user:).count }.by 1
             end
             it 'should not add credential if credential exists match on pac_id' do
               user = create(:user, pac_id: user_info_template['social_security_number'])
               create(:csp_user, user:, uuid: user_info_template['sub'], csp:)
               expect do
-                post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+                post invitation_url_for(org.id, invitation, 'register')
               end.to change { CspUser.count }.by 0
             end
             it 'should add credential if user with email exists' do
@@ -1071,18 +1099,18 @@ RSpec.describe 'Invitations', type: :request do
               other_csp_user = create(:csp_user, user:, csp: other_csp, uuid: SecureRandom.uuid)
               create(:user_email, csp_user: other_csp_user, email: user_info_template['email'], primary: true)
               expect do
-                post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+                post invitation_url_for(org.id, invitation, 'register')
               end.to change { CspUser.where(user:).count }.by 1
             end
             it 'should not add credential if credential exists match on email' do
               user = create(:user)
               create(:csp_user, user:, uuid: user_info_template['sub'], csp:)
               expect do
-                post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+                post invitation_url_for(org.id, invitation, 'register')
               end.to change { CspUser.count }.by 0
             end
             it 'should save verification_status on user and org' do
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+              post invitation_url_for(org.id, invitation, 'register')
               user = User.find_by(pac_id: user_info_template['social_security_number'])
               expect(user.verification_status).to eq('approved')
               expect(org.reload.verification_status).to eq('approved')
@@ -1112,7 +1140,7 @@ RSpec.describe 'Invitations', type: :request do
                 )]
               )
 
-              post "/organizations/#{org.id}/invitations/#{invitation.id}/register"
+              post invitation_url_for(org.id, invitation, 'register')
               expect(response.body).to include(I18n.t('verification.multi_user_match_text'))
             end
           end
@@ -1128,27 +1156,27 @@ RSpec.describe 'Invitations', type: :request do
           it 'should create another invitation for the user if expired' do
             invitation.update(created_at: 49.hours.ago)
             expect do
-              post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+              post invitation_url_for(org_id, invitation, 'renew')
             end.to change { Invitation.count }.by(1)
             expect(flash[:notice]).to eq success_message
-            expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+            expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation, invitation.token))
           end
           it 'should not create another invitation for the user if accepted' do
             invitation.accept!
             expect do
-              post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+              post invitation_url_for(org_id, invitation, 'renew')
             end.to change { Invitation.count }.by(0)
             expect(flash[:alert]).to eq fail_message
-            expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+            expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation, invitation.token))
           end
 
           it 'should not create another invitation for the user if cancelled' do
             invitation.update(status: :cancelled)
             expect do
-              post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+              post invitation_url_for(org_id, invitation, 'renew')
             end.to change { Invitation.count }.by(0)
             expect(flash[:alert]).to eq fail_message
-            expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+            expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation, invitation.token))
           end
         end
 
@@ -1157,10 +1185,10 @@ RSpec.describe 'Invitations', type: :request do
           let(:org_id) { invitation.provider_organization.id }
           it 'should not create another invitation for the user' do
             expect do
-              post "/organizations/#{org_id}/invitations/#{invitation.id}/renew"
+              post invitation_url_for(org_id, invitation, 'renew')
             end.to change { Invitation.count }.by(0)
             expect(flash[:alert]).to eq fail_message
-            expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation))
+            expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation, invitation.token))
           end
         end
       end
@@ -1173,13 +1201,13 @@ RSpec.describe 'Invitations', type: :request do
         end
 
         it 'should succeed in Rails.test' do
-          get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
+          get invitation_url_for(org_id, invitation, 'set_idp_token'), params: provider_params
           expect(response).to be_ok
           expect(response.body).to be_blank
         end
         it 'should fail outside Rails.test' do
           allow(Rails.env).to receive(:test?).and_return false
-          get "/organizations/#{org_id}/invitations/#{invitation.id}/set_idp_token", params: provider_params
+          get invitation_url_for(org_id, invitation, 'set_idp_token'), params: provider_params
           expect(response).to be_forbidden
         end
       end
