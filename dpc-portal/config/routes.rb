@@ -30,7 +30,7 @@ Rails.application.routes.draw do
     end
     resources :invitations, only: [] do
       member do
-        scope ':token', constraints: { token: /[A-Za-z0-9]{24}/ } do
+        scope ':token', constraints: { token: /\A[A-Za-z0-9]{24}\z/ } do
           get '/', action: :show, as: ''
           get 'accept', action: :accept
           post 'confirm', action: :confirm
