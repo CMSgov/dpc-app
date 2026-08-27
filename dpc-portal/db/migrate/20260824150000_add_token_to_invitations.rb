@@ -14,7 +14,9 @@ class AddTokenToInvitations < ActiveRecord::Migration[8.0]
 
     MigrationInvitation.reset_column_information
     MigrationInvitation.where(token: nil).find_each do |invitation|
-      invitation.update_column(:token, SecureRandom.base58(24))
+      token = nil
+      token = SecureRandom.base58(24) while token.nil? || MigrationInvitation.exists?(token: token)
+      invitation.update_column(:token, token)
     end
 
     change_column_null :invitations, :token, false
