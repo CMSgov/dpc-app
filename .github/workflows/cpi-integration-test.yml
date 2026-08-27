@@ -1,0 +1,102 @@
+name: 'CPI-Integration Test'
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  schedule:
+    - cron: '0 6 * * 1-5'
+  push:
+    branches: [ 'mw/dpc-5238-integration-test' ]
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: integration-test-${{ inputs.env }}
+  cancel-in-progress: false
+
+jobs:
+  cpi-integration-test:
+    defaults:
+      run:
+        working-directory: ./dpc-load-testing
+    name: CPI Integration Test
+    runs-on: codebuild-dpc-app-${{github.run_id}}-${{github.run_attempt}}
+    steps:
+      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
+        name: Slack Starting
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            attachments:
+              - color: warning
+                text: "Integration test for CPI Gateway has started"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Integration test - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer
+      - name: "Checkout code"
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+      - name: AWS Credentials (non-prod)
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
+      - name: Set up Go
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version: '>=1.24.4'      
+      - name: Build K6
+        run: |
+          # Install xk6
+          go install go.k6.io/xk6/cmd/xk6@v1.1.5
+
+          # Build the k6 binary
+          xk6 build
+      - name: Set env vars from AWS params
+        uses: cmsgov/cdap/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        with:
+          params: |
+            CPI_API_GW_TESTDATA=/dpc/test/web-portal/cpi_api_gw_testdata
+            CLIENT_ID=/dpc/test/web-portal/cpi_api_gw_client_id
+            CLIENT_SECRET=/dpc/test/web-portal/cpi_api_gw_client_secret
+      - name: Run CPI Gateway Integration Test
+        id: run-cpi-gateway-integration-test
+        env:
+          ENVIRONMENT: test
+        run: |
+          ./k6 run ./integration_test/cpi_gateway_test.js
+      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
+        name: Slack Success
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            attachments:
+              - color: good
+                text: "Integration test for CPI Gateway has succeeded"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|Integration Test - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer
+      - uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
+        name: Slack failure
+        if: ${{ failure() }}
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          # Sends to dpc-deploys
+          payload: |
+            channel: "CMC1E4AEQ"
+            attachments:
+              - color: danger
+                text: "Integration test for CPI Gateway has has failed"
+                footer: "<${{ github.server_url}}/${{ github.repository}}/actions/runs/${{ github.run_id }}|integration Test - Build ${{ github.run_id }}>"
+                mrkdown_in:
+                  - footer
