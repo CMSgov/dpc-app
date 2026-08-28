@@ -9,10 +9,10 @@ class VerifyResourceHealthJob < ApplicationJob
   METRIC_NAMESPACE = 'DPC'
   REGION = 'us-east-1'
   ENVIRONMENT = ENV.fetch('ENV', 'none')
-  IDP_HOSTS = [
-    ENV.fetch('IDP_LOGIN_DOT_GOV_HOST', nil),
-    ENV.fetch('IDP_ID_ME_HOST', nil),
-    ENV.fetch('CLEAR_IDP_HOST', nil)
+  CSPS = [
+    { name: 'login_gov', host: ENV.fetch('IDP_LOGIN_DOT_GOV_HOST', nil) },
+    { name: 'id_me', host: ENV.fetch('IDP_ID_ME_HOST', nil) },
+    { name: 'clear', host: ENV.fetch('CLEAR_IDP_HOST', nil) }
   ].freeze
 
   # Runs all healthchecks if no args provided
@@ -39,16 +39,19 @@ class VerifyResourceHealthJob < ApplicationJob
   end
 
   def idp_healthcheck
-    IDP_HOSTS.each do |idp_host|
-      if idp_host.nil?
-        log_healthcheck('PortalConnectedToIdp', false, csp: idp_host)
+    CSPS.each do |csp|
+      csp_host = csp[:host]
+      csp_name = csp[:name]
+      if csp_host.nil?
+        log_healthcheck('PortalConnectedToIdp', false, csp_host:, csp_name:)
       else
         # Login.gov doesn't have a /healthcheck, so we look for a 200 to verify connectivity.
-        response = Net::HTTP.get_response(URI("https://#{idp_host}"))
+        response = Net::HTTP.get_response(URI("https://#{csp_host}"))
         log_healthcheck(
           'PortalConnectedToIdp',
           response.code.to_i.between?(200, 299),
-          csp: idp_host
+          csp_host:,
+          csp_name:
         )
       end
     end
@@ -74,7 +77,7 @@ class VerifyResourceHealthJob < ApplicationJob
     )
   end
 
-  def log_healthcheck(check_name, healthy, csp: nil)
+  def log_healthcheck(check_name, healthy, csp_host: nil, csp_name: nil)
     action_type = if healthy
                     LoggingConstants::ActionType::HealthCheckPassed
                   else
@@ -83,31 +86,26 @@ class VerifyResourceHealthJob < ApplicationJob
     Rails.logger.info(["Healthcheck #{check_name}",
                        { actionContext: LoggingConstants::ActionContext::HealthCheck,
                          actionType: action_type,
-                         csp: }.compact])
-    emit_cloudwatch_metric(check_name, healthy)
+                         csp_host:, csp_name: }.compact])
+    emit_cloudwatch_metric(check_name, healthy, idp: csp_name)
   end
 
-  def dimensions
-    [
-      {
-        name: 'Type',
-        value: 'healthcheck'
-      },
-      {
-        name: 'environment',
-        value: ENVIRONMENT
-      }
-    ]
+  def dimensions(idp = nil)
+    dims = []
+    dims << { name: 'Type', value: 'healthcheck' }
+    dims << { name: 'environment', value: ENVIRONMENT }
+    dims << { name: 'idp', value: idp } if idp
+    dims
   end
 
-  def emit_cloudwatch_metric(check_name, healthy)
+  def emit_cloudwatch_metric(check_name, healthy, idp: nil)
     Aws::CloudWatch::Client.new(region: REGION).put_metric_data(
       {
         namespace: METRIC_NAMESPACE,
         metric_data: [
           {
             metric_name: check_name,
-            dimensions:,
+            dimensions: dimensions(idp),
             value: healthy ? 1 : 0,
             unit: 'None'
           }

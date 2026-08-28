@@ -73,7 +73,11 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
 
     describe 'idp is not configured' do
       it 'should emit an unhealthy metric when url is not configured' do
-        stub_const('VerifyResourceHealthJob::IDP_HOSTS', [nil, nil, nil])
+        stub_const('VerifyResourceHealthJob::CSPS', [
+                     { name: 'login_gov', host: nil },
+                     { name: 'id_me', host: nil },
+                     { name: 'clear', host: nil }
+                   ])
         expect_dpc_api
         expect_cpi
         expect_idp(metric: 0)
@@ -114,22 +118,17 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
 
   private
 
-  def put_metric_data_parms(namespace, env, check_name, value)
+  def put_metric_data_parms(namespace, env, check_name, value, idp = nil)
+    dims = []
+    dims << { name: 'Type', value: 'healthcheck' }
+    dims << { name: 'environment', value: env }
+    dims << { name: 'idp', value: idp } if idp
     {
       namespace:,
       metric_data: [
         {
           metric_name: check_name,
-          dimensions: [
-            {
-              name: 'Type',
-              value: 'healthcheck'
-            },
-            {
-              name: 'environment',
-              value: env
-            }
-          ],
+          dimensions: dims,
           value:,
           unit: 'None'
         }
@@ -154,16 +153,19 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
     stub_request(:get, 'https://idp.int.identitysandbox.gov').to_return(status: site_status)
     stub_request(:get, 'https://api.idmelabs.com').to_return(status: site_status)
     stub_request(:get, 'https://verified.clearme.com').to_return(status: site_status)
-    expect_put_metric('PortalConnectedToIdp', metric).exactly(3).times
+    expect_put_metric('PortalConnectedToIdp', metric, 'login_gov')
+    expect_put_metric('PortalConnectedToIdp', metric, 'id_me')
+    expect_put_metric('PortalConnectedToIdp', metric, 'clear')
   end
 
-  def expect_put_metric(name, value)
+  def expect_put_metric(name, value, idp = nil)
     expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
       put_metric_data_parms(
         VerifyResourceHealthJob::METRIC_NAMESPACE,
         VerifyResourceHealthJob::ENVIRONMENT,
         name,
-        value
+        value,
+        idp
       )
     )
   end
