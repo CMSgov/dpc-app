@@ -19,10 +19,10 @@ class VerifyResourceHealthJob < ApplicationJob
   ].freeze
 
   # Runs all healthchecks if no args provided
-  def perform(args = {})
-    dpc_healthcheck if args.key?('check_dpc') ? args['check_dpc'] : true
-    idp_healthcheck if args.key?('check_idp') ? args['check_idp'] : true
-    cpi_gateway_healthcheck if args.key?('check_cpi') ? args['check_cpi'] : true
+  def perform(check_dpc: true, check_idp: true, check_cpi: true)
+    dpc_healthcheck if check_dpc
+    idp_healthcheck if check_idp
+    cpi_gateway_healthcheck if check_cpi
   end
 
   private
