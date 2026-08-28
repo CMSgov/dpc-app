@@ -19,6 +19,9 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
   end
 
   let(:job) { VerifyResourceHealthJob.new }
+  let(:login_dot_gov_discovery) { 'https://idp.int.identitysandbox.gov/.well-known/openid-configuration' }
+  let(:id_me_discovery) { 'https://api.idmelabs.com/oidc/.well-known/openid-configuration' }
+  let(:clear_discovery) { 'https://verified.clearme.com/integrations/.well-known/openid-configuration' }
 
   context 'can successfully send metrics' do
     describe 'everything healthy' do
@@ -89,9 +92,9 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
 
   context 'not connected to AWS' do
     it 'should ignore connection error and move on gracefully' do
-      stub_request(:get, 'https://idp.int.identitysandbox.gov').to_return(status: 200)
-      stub_request(:get, 'https://api.idmelabs.com').to_return(status: 200)
-      stub_request(:get, 'https://verified.clearme.com').to_return(status: 200)
+      stub_request(:get, login_dot_gov_discovery).to_return(status: 200)
+      stub_request(:get, id_me_discovery).to_return(status: 200)
+      stub_request(:get, clear_discovery).to_return(status: 200)
 
       expect(mock_dpc_client).to receive(:healthcheck)
       expect(mock_dpc_client).to receive(:response_successful?).and_return(true).twice
@@ -150,9 +153,9 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
   end
 
   def expect_idp(site_status: 200, metric: 1)
-    stub_request(:get, 'https://idp.int.identitysandbox.gov').to_return(status: site_status)
-    stub_request(:get, 'https://api.idmelabs.com').to_return(status: site_status)
-    stub_request(:get, 'https://verified.clearme.com').to_return(status: site_status)
+    stub_request(:get, login_dot_gov_discovery).to_return(status: site_status)
+    stub_request(:get, id_me_discovery).to_return(status: site_status)
+    stub_request(:get, clear_discovery).to_return(status: site_status)
     expect_put_metric('PortalConnectedToIdp', metric, 'login_gov')
     expect_put_metric('PortalConnectedToIdp', metric, 'id_me')
     expect_put_metric('PortalConnectedToIdp', metric, 'clear')

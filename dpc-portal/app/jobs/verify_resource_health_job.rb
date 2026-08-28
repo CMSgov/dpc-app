@@ -10,9 +10,12 @@ class VerifyResourceHealthJob < ApplicationJob
   REGION = 'us-east-1'
   ENVIRONMENT = ENV.fetch('ENV', 'none')
   CSPS = [
-    { name: 'login_gov', host: ENV.fetch('IDP_LOGIN_DOT_GOV_HOST', nil) },
-    { name: 'id_me', host: ENV.fetch('IDP_ID_ME_HOST', nil) },
-    { name: 'clear', host: ENV.fetch('CLEAR_IDP_HOST', nil) }
+    { name: 'login_gov', host: ENV.fetch('IDP_LOGIN_DOT_GOV_HOST', nil),
+      discovery_endpoint: '/.well-known/openid-configuration' },
+    { name: 'id_me', host: ENV.fetch('IDP_ID_ME_HOST', nil),
+      discovery_endpoint: '/oidc/.well-known/openid-configuration' },
+    { name: 'clear', host: ENV.fetch('CLEAR_IDP_HOST', nil),
+      discovery_endpoint: '/integrations/.well-known/openid-configuration' }
   ].freeze
 
   # Runs all healthchecks if no args provided
@@ -42,11 +45,12 @@ class VerifyResourceHealthJob < ApplicationJob
     CSPS.each do |csp|
       csp_host = csp[:host]
       csp_name = csp[:name]
-      if csp_host.nil?
+      oidc_discovery_url = csp[:discovery_endpoint]
+      if csp_host.nil? || oidc_discovery_url.nil?
         log_healthcheck('PortalConnectedToIdp', false, csp_host:, csp_name:)
       else
-        # Login.gov doesn't have a /healthcheck, so we look for a 200 to verify connectivity.
-        response = Net::HTTP.get_response(URI("https://#{csp_host}"))
+        # None of our CSPs have a healthcheck, so we'll try the OIDC well-known endpoint
+        response = Net::HTTP.get_response(URI("https://#{csp_host}#{oidc_discovery_url}"))
         log_healthcheck(
           'PortalConnectedToIdp',
           response.code.to_i.between?(200, 299),
@@ -83,10 +87,8 @@ class VerifyResourceHealthJob < ApplicationJob
                   else
                     LoggingConstants::ActionType::HealthCheckFailed
                   end
-    Rails.logger.info(["Healthcheck #{check_name}",
-                       { actionContext: LoggingConstants::ActionContext::HealthCheck,
-                         actionType: action_type,
-                         csp_host:, csp_name: }.compact])
+    Rails.logger.info(["Healthcheck #{check_name}", { actionContext: LoggingConstants::ActionContext::HealthCheck,
+                                                      actionType: action_type, csp_host:, csp_name: }])
     emit_cloudwatch_metric(check_name, healthy, idp: csp_name)
   end
 
