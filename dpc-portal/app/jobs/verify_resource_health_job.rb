@@ -47,12 +47,12 @@ class VerifyResourceHealthJob < ApplicationJob
       csp_name = csp[:name]
       oidc_discovery_url = csp[:discovery_endpoint]
       if csp_host.nil? || oidc_discovery_url.nil?
-        log_healthcheck('PortalConnectedToIdp', false, csp_host:, csp_name:)
+        log_healthcheck('PortalConnectedToCsp', false, csp_host:, csp_name:)
       else
         # None of our CSPs have a healthcheck, so we'll try the OIDC well-known endpoint
         response = Net::HTTP.get_response(URI("https://#{csp_host}#{oidc_discovery_url}"))
         log_healthcheck(
-          'PortalConnectedToIdp',
+          'PortalConnectedToCsp',
           response.code.to_i.between?(200, 299),
           csp_host:,
           csp_name:
