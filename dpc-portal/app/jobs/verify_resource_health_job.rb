@@ -11,9 +11,9 @@ class VerifyResourceHealthJob < ApplicationJob
   ENVIRONMENT = ENV.fetch('ENV', 'none')
 
   # Runs all healthchecks if no args provided
-  def perform(check_dpc: true, check_idp: true, check_cpi: true)
+  def perform(check_dpc: true, check_csp: true, check_cpi: true)
     dpc_healthcheck if check_dpc
-    idp_healthcheck if check_idp
+    csp_healthcheck if check_csp
     cpi_gateway_healthcheck if check_cpi
   end
 
@@ -33,7 +33,7 @@ class VerifyResourceHealthJob < ApplicationJob
     )
   end
 
-  def idp_healthcheck
+  def csp_healthcheck
     CspConfig.all.each do |csp|
       csp_host = csp.host
       csp_name = csp.code
@@ -81,25 +81,25 @@ class VerifyResourceHealthJob < ApplicationJob
                   end
     Rails.logger.info(["Healthcheck #{check_name}", { actionContext: LoggingConstants::ActionContext::HealthCheck,
                                                       actionType: action_type, csp_host:, csp_name: }])
-    emit_cloudwatch_metric(check_name, healthy, idp: csp_name)
+    emit_cloudwatch_metric(check_name, healthy, csp: csp_name)
   end
 
-  def dimensions(idp = nil)
+  def dimensions(csp = nil)
     dims = []
     dims << { name: 'Type', value: 'healthcheck' }
     dims << { name: 'environment', value: ENVIRONMENT }
-    dims << { name: 'idp', value: idp } if idp
+    dims << { name: 'csp', value: csp } if csp
     dims
   end
 
-  def emit_cloudwatch_metric(check_name, healthy, idp: nil)
+  def emit_cloudwatch_metric(check_name, healthy, csp: nil)
     Aws::CloudWatch::Client.new(region: REGION).put_metric_data(
       {
         namespace: METRIC_NAMESPACE,
         metric_data: [
           {
             metric_name: check_name,
-            dimensions: dimensions(idp),
+            dimensions: dimensions(csp),
             value: healthy ? 1 : 0,
             unit: 'None'
           }
