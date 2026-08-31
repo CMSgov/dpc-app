@@ -76,11 +76,16 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
 
     describe 'idp is not configured' do
       it 'should emit an unhealthy metric when url is not configured' do
-        stub_const('VerifyResourceHealthJob::CSPS', [
-                     { name: 'login_gov', host: nil },
-                     { name: 'id_me', host: nil },
-                     { name: 'clear', host: nil }
-                   ])
+        allow(CspConfig).to receive(:all).and_return(
+          [
+            instance_double(CspConfig, code: 'login_dot_gov', host: nil,
+                                       discovery_uri: '/.well-known/openid-configuration'),
+            instance_double(CspConfig, code: 'id_me', host: nil,
+                                       discovery_uri: '/oidc/.well-known/openid-configuration'),
+            instance_double(CspConfig, code: 'clear', host: nil,
+                                       discovery_uri: '/integrations/.well-known/openid-configuration')
+          ]
+        )
         expect_dpc_api
         expect_cpi
         expect_idp(metric: 0)
@@ -156,9 +161,9 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
     stub_request(:get, login_dot_gov_discovery).to_return(status: site_status)
     stub_request(:get, id_me_discovery).to_return(status: site_status)
     stub_request(:get, clear_discovery).to_return(status: site_status)
-    expect_put_metric('PortalConnectedToIdp', metric, 'login_gov')
-    expect_put_metric('PortalConnectedToIdp', metric, 'id_me')
-    expect_put_metric('PortalConnectedToIdp', metric, 'clear')
+    expect_put_metric('PortalConnectedToCsp', metric, 'login_dot_gov')
+    expect_put_metric('PortalConnectedToCsp', metric, 'id_me')
+    expect_put_metric('PortalConnectedToCsp', metric, 'clear')
   end
 
   def expect_put_metric(name, value, idp = nil)

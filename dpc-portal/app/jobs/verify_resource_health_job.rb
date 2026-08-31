@@ -9,14 +9,6 @@ class VerifyResourceHealthJob < ApplicationJob
   METRIC_NAMESPACE = 'DPC'
   REGION = 'us-east-1'
   ENVIRONMENT = ENV.fetch('ENV', 'none')
-  CSPS = [
-    { name: 'login_gov', host: ENV.fetch('IDP_LOGIN_DOT_GOV_HOST', nil),
-      discovery_endpoint: '/.well-known/openid-configuration' },
-    { name: 'id_me', host: ENV.fetch('IDP_ID_ME_HOST', nil),
-      discovery_endpoint: '/oidc/.well-known/openid-configuration' },
-    { name: 'clear', host: ENV.fetch('CLEAR_IDP_HOST', nil),
-      discovery_endpoint: '/integrations/.well-known/openid-configuration' }
-  ].freeze
 
   # Runs all healthchecks if no args provided
   def perform(check_dpc: true, check_idp: true, check_cpi: true)
@@ -42,10 +34,10 @@ class VerifyResourceHealthJob < ApplicationJob
   end
 
   def idp_healthcheck
-    CSPS.each do |csp|
-      csp_host = csp[:host]
-      csp_name = csp[:name]
-      oidc_discovery_url = csp[:discovery_endpoint]
+    CspConfig.all.each do |csp|
+      csp_host = csp.host
+      csp_name = csp.code
+      oidc_discovery_url = csp.discovery_uri
       if csp_host.nil? || oidc_discovery_url.nil?
         log_healthcheck('PortalConnectedToCsp', false, csp_host:, csp_name:)
       else
