@@ -296,14 +296,19 @@ jobs:
         run: |
           sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-web") then .key |= sub("/dpc-web"; "${{ github.workspace }}/dpc-web") else . end)' web-resultset-raw.json > web-resultset.json
           sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-admin") then .key |= sub("/dpc-admin"; "${{ github.workspace }}/dpc-admin") else . end)' admin-resultset-raw.json > admin-resultset.json
+      - name: Configure non-prod AWS Credentials
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
       - name: Set env vars from AWS params
         uses: cmsgov/cdap/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
           params: |
-            SONAR_HOST_URL=/sonarqube/url
-            SONAR_TOKEN=/sonarqube/token
+            SONAR_HOST_URL=/cdap/test/common/nonsensitive/sonarqube/url
+            SONAR_TOKEN=/cdap/test/common/sensitive/sonarqube/token
       - name: Setup Node
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
@@ -345,14 +350,19 @@ jobs:
       - name: "Reformat test results" # Sonarqube will run in a docker container and wants the paths to be from /github/workspace
         run: |
           sudo jq '.RSpec.coverage |= with_entries(if .key | contains("dpc-portal") then .key |= sub("/dpc-portal"; "${{ github.workspace }}/dpc-portal") else . end)' portal-resultset-raw.json > portal-resultset.json
+      - name: Configure non-prod AWS Credentials
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
       - name: Set env vars from AWS params
         uses: cmsgov/cdap/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
           params: |
-            SONAR_HOST_URL=/sonarqube/url
-            SONAR_TOKEN=/sonarqube/token
+            SONAR_HOST_URL=/cdap/test/common/nonsensitive/sonarqube/url
+            SONAR_TOKEN=/cdap/test/common/sensitive/sonarqube/token
       - name: Setup Node
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
@@ -394,14 +404,19 @@ jobs:
           java-version: '17'
           distribution: temurin
           cache: maven
+      - name: Configure non-prod AWS Credentials
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-test-github-actions
       - name: Set env vars from AWS params
         uses: cmsgov/cdap/actions/aws-params-env-action@main
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         with:
           params: |
-            SONAR_HOST_URL=/sonarqube/url
-            SONAR_TOKEN=/sonarqube/token
+            SONAR_HOST_URL=/cdap/test/common/nonsensitive/sonarqube/url
+            SONAR_TOKEN=/cdap/test/common/sensitive/sonarqube/token
       - name: Setup Node
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
