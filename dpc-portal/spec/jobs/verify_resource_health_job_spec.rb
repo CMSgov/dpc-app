@@ -19,7 +19,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
   end
 
   let(:job) { VerifyResourceHealthJob.new }
-  let(:login_dot_gov_discovery) { 'https://csp.int.identitysandbox.gov/.well-known/openid-configuration' }
+  let(:login_dot_gov_discovery) { 'https://idp.int.identitysandbox.gov/.well-known/openid-configuration' }
   let(:id_me_discovery) { 'https://api.idmelabs.com/oidc/.well-known/openid-configuration' }
   let(:clear_discovery) { 'https://verified.clearme.com/integrations/.well-known/openid-configuration' }
 
