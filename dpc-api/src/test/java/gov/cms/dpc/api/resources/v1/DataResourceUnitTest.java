@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
@@ -10,6 +11,8 @@ import gov.cms.dpc.api.converters.ChecksumConverterProvider;
 import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
 import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.common.utils.GzipUtil;
+import gov.cms.dpc.common.utils.NPIUtil;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
@@ -23,6 +26,7 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -55,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class DataResourceUnitTest {
 
     private static final FileManager manager = Mockito.mock(FileManager.class);
+    private static final IGenericClient client = Mockito.mock(IGenericClient.class);
     private static final IJobQueue queue = Mockito.mock(IJobQueue.class);
     private static final ResourceExtension RESOURCE = buildDataResource();
 
@@ -64,7 +69,12 @@ class DataResourceUnitTest {
 
     @BeforeEach
     void setup() {
-        Mockito.reset(manager);
+        Mockito.reset(manager, client);
+
+        final Organization org = new Organization();
+        final String orgNPI = NPIUtil.generateNPI();
+        org.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(orgNPI);
+        APITestHelpers.mockOrganizationRead(client, org);
     }
 
     static Stream<Arguments> downloadArgs() {
@@ -356,7 +366,7 @@ class DataResourceUnitTest {
 
     private static ResourceExtension buildDataResource() {
 
-        final DataResource dataResource = new DataResource(manager, queue);
+        final DataResource dataResource = new DataResource(manager, client, queue);
         final FhirContext ctx = FhirContext.forDstu3();
         final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
 

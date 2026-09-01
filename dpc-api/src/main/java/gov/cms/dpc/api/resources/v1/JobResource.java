@@ -1,7 +1,9 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.resources.AbstractJobResource;
@@ -18,6 +20,7 @@ import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -49,11 +52,13 @@ public class JobResource extends AbstractJobResource {
             DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.US).withZone(ZoneId.of("GMT"));
 
     private final IJobQueue queue;
+    private final IGenericClient client;
     private final String baseURL;
 
     @Inject
-    public JobResource(IJobQueue queue, @APIV1 String baseURL) {
+    public JobResource(IJobQueue queue, @Named("attribution") IGenericClient client, @APIV1 String baseURL) {
         this.queue = queue;
+        this.client = client;
         this.baseURL = baseURL;
     }
 
@@ -105,7 +110,7 @@ public class JobResource extends AbstractJobResource {
             builder = buildJobStatusInProgress(builder, batches, jobStatusSet);
         } else if (jobStatusSet.size() == 1 && jobStatusSet.contains(JobStatus.COMPLETED)) {
             // All batches in the job have finished
-            builder = buildJobStatusCompleted(builder, batches);
+            builder = buildJobStatusCompleted(builder, batches, orgUUID);
         } else {
             builder = builder.status(HttpStatus.ACCEPTED_202);
         }
@@ -138,14 +143,24 @@ public class JobResource extends AbstractJobResource {
      *
      * @param builder - The current response builder
      * @param batches - The list of batches made up in a job
+     * @param orgUUID - The UUID of the organization
      * @return the response builder
      */
-    private Response.ResponseBuilder buildJobStatusCompleted(Response.ResponseBuilder builder, List<JobQueueBatch> batches) {
+    private Response.ResponseBuilder buildJobStatusCompleted(Response.ResponseBuilder builder, List<JobQueueBatch> batches, UUID orgUUID) {
         OffsetDateTime lastCompleteTime = getLatestBatchCompleteTime(batches);
 
         if (lastCompleteTime.isBefore(OffsetDateTime.now(ZoneOffset.UTC).minusHours(JOB_EXPIRATION_HOURS))) {
             return builder.status(HttpStatus.GONE_410);
         }
+
+        String orgNPI;
+        try {
+            orgNPI = APIHelpers.fetchOrganizationNPI(this.client, orgUUID);
+        } catch (Exception e) {
+            logger.warn("Unable to resolve NPI for organization {}", orgUUID, e);
+            orgNPI = null;
+        }
+        logger.info("dpcMetric=jobCompleted, jobID={}, orgId={}, orgNpi={}", batches.get(0).getJobID(), orgUUID, orgNPI);
 
         builder.header(HttpHeaders.EXPIRES, lastCompleteTime.plusDays(1).format(HTTP_DATE_FORMAT));
 

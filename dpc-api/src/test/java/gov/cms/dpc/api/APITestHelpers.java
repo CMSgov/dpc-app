@@ -8,6 +8,9 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.IRead;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import com.google.common.collect.Maps;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
@@ -46,6 +49,7 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.mockito.Mockito;
 import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.IOException;
@@ -82,6 +86,18 @@ public class APITestHelpers {
                 .setValue(ORGANIZATION_NPI)
         );
         return new OrganizationPrincipal(org);
+    }
+
+    public static void mockOrganizationRead(IGenericClient client, Organization organization) {
+        final IRead readMock = Mockito.mock(IRead.class);
+        final IReadTyped<Organization> readTypedMock = Mockito.mock(IReadTyped.class);
+        final IReadExecutable<Organization> readExecutableMock = Mockito.mock(IReadExecutable.class);
+
+        Mockito.when(client.read()).thenReturn(readMock);
+        Mockito.when(readMock.resource(Organization.class)).thenReturn(readTypedMock);
+        Mockito.when(readTypedMock.withId(Mockito.anyString())).thenReturn(readExecutableMock);
+        Mockito.when(readExecutableMock.encodedJson()).thenReturn(readExecutableMock);
+        Mockito.when(readExecutableMock.execute()).thenReturn(organization);
     }
 
     public static IGenericClient buildAttributionClient(FhirContext ctx) {

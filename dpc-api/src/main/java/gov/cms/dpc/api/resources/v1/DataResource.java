@@ -1,7 +1,9 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
+import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.core.CompressibleStreamingOutput;
@@ -16,6 +18,7 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.Response;
@@ -38,6 +41,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter.X_CONTENT_LENGTH;
@@ -57,11 +61,13 @@ public class DataResource extends AbstractDataResource {
     private static final String ACCEPTED_RANGE_VALUE = "bytes";
 
     private final FileManager manager;
+    private final IGenericClient client;
     private final IJobQueue queue;
 
     @Inject
-    public DataResource(FileManager manager, IJobQueue queue) {
+    public DataResource(FileManager manager, @Named("attribution") IGenericClient client, IJobQueue queue) {
         this.manager = manager;
+        this.client = client;
         this.queue = queue;
     }
 
@@ -136,7 +142,16 @@ public class DataResource extends AbstractDataResource {
             @HeaderParam(HttpHeaders.ACCEPT_ENCODING) @ApiParam(value = "Accept-Encoding header", example = "gzip") Optional<String> acceptEncoding,
             @PathParam("fileID") @ApiParam(required = true, value = "NDJSON file name", example = "728b270d-d7de-4143-82fe-d3ccd92cebe4-1-coverage.ndjson") @NoHtml String fileID) {
 
-        final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
+        final UUID orgUUID = organizationPrincipal.getID();
+        final FileManager.FilePointer filePointer = this.manager.getFile(orgUUID, fileID);
+        String orgNPI;
+        try {
+            orgNPI = APIHelpers.fetchOrganizationNPI(this.client, orgUUID);
+        } catch (Exception e) {
+            logger.warn("Unable to resolve NPI for organization {}", orgUUID, e);
+            orgNPI = null;
+        }
+        logger.info("dpcMetric=fileDownloaded, fileID={}, orgId={}, orgNpi={}", fileID, orgUUID, orgNPI);
 
         // If job is expired, the files should no longer be accessible
         List<JobQueueBatch> batches = queue.getJobBatches(filePointer.getJobID());

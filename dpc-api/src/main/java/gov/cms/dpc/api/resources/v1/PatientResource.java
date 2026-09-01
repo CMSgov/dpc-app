@@ -306,8 +306,8 @@ public class PatientResource extends AbstractPatientResource {
         );
 
         final String resourcesRequested = resourceTypesList.stream().map(DPCResourceType::getPath).collect(Collectors.joining(";"));
-        logger.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},orgId={},patientId={},resourcesRequested={},queueSubmitTime={}",
-            "/Patient/$export",jobID, orgID, patientId, resourcesRequested, eventTime);
+        logger.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},orgId={},orgNpi={},patientId={},resourcesRequested={},queueSubmitTime={}",
+            "/Patient/$export",jobID, orgID, orgNPI, patientId, resourcesRequested, eventTime);
         return Response.status(Response.Status.ACCEPTED).contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
     }
 

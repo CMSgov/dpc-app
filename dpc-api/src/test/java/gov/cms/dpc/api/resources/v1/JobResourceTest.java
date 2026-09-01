@@ -1,8 +1,10 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.common.utils.NPIUtil;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.queue.MemoryBatchQueue;
@@ -13,8 +15,11 @@ import gov.cms.dpc.testing.BufferedLoggerHandler;
 import jakarta.ws.rs.core.Response;
 import org.bouncycastle.util.encoders.Hex;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -36,6 +41,16 @@ public class JobResourceTest {
     static final String TEST_BASEURL = "http://localhost:8080";
     static final String TEST_JOB_URL = TEST_BASEURL + "/api/v1/Group/%s/$export";
     static final String OTHER_ORGANIZATION = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a1";
+    static final IGenericClient client = Mockito.mock(IGenericClient.class, Mockito.RETURNS_DEEP_STUBS);
+
+    @BeforeEach
+    void setup() {
+        Mockito.reset(client);
+
+        final Organization org = new Organization();
+        org.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(TEST_ORG_NPI);
+        APITestHelpers.mockOrganizationRead(client, org);
+    }
 
     /**
      * Test that a non-existent job is handled correctly
@@ -44,7 +59,7 @@ public class JobResourceTest {
     public void testNonExistentJob() {
         final var jobID = UUID.randomUUID();
         final var queue = new MemoryBatchQueue(100);
-        final var resource = new JobResource(queue, TEST_BASEURL);
+        final var resource = new JobResource(queue, client, TEST_BASEURL);
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
 
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
@@ -71,7 +86,7 @@ public class JobResourceTest {
                 OffsetDateTime.now(ZoneOffset.UTC), null, null, true, false);
 
         // Test the response
-        final var resource = new JobResource(queue, TEST_BASEURL);
+        final var resource = new JobResource(queue, client, TEST_BASEURL);
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus()),
                 () -> assertEquals("QUEUED: 0.00%", response.getHeaderString("X-Progress")));
@@ -100,7 +115,7 @@ public class JobResourceTest {
         queue.completeBatch(runningJob.get(), AGGREGATOR_ID);
 
         // Test the response
-        final var resource = new JobResource(queue, TEST_BASEURL);
+        final var resource = new JobResource(queue, client, TEST_BASEURL);
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.ACCEPTED_202, response.getStatus()),
                 () -> assertEquals("RUNNING: 33.33%", response.getHeaderString("X-Progress")));
@@ -136,7 +151,7 @@ public class JobResourceTest {
         queue.completeBatch(runningJob, AGGREGATOR_ID);
 
         // Test the response
-        final var resource = new JobResource(queue, TEST_BASEURL);
+        final var resource = new JobResource(queue, client, TEST_BASEURL);
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatus()));
 
@@ -182,7 +197,7 @@ public class JobResourceTest {
         queue.completeBatch(runningJob, AGGREGATOR_ID);
 
         // Test the response for ok
-        final var resource = new JobResource(queue, TEST_BASEURL);
+        final var resource = new JobResource(queue, client, TEST_BASEURL);
         final Response response = resource.checkJobStatus(organizationPrincipal, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.OK_200, response.getStatus()));
 
@@ -219,7 +234,7 @@ public class JobResourceTest {
         queue.failBatch(runningJob, AGGREGATOR_ID);
 
         // Test the response
-        final var resource = new JobResource(queue, TEST_BASEURL);
+        final var resource = new JobResource(queue, client, TEST_BASEURL);
         JobQueueFailure exception = assertThrows(JobQueueFailure.class, () -> resource.checkJobStatus(organizationPrincipal, jobID.toString()));
         assertEquals(String.format("Operation on Job(%s) Batch(%s) failed for reason: Batch failed", jobID, runningJob.getBatchID()), exception.getMessage());
     }
@@ -249,7 +264,7 @@ public class JobResourceTest {
             batch.setCompleteTime(timeAgo);
         }
 
-        final var resource = new JobResource(queue, TEST_BASEURL);
+        final var resource = new JobResource(queue, client, TEST_BASEURL);
         var response = resource.checkJobStatus(organizationPrincipal, jobId.toString());
         assertEquals(HttpStatus.GONE_410, response.getStatus());
 
@@ -291,7 +306,7 @@ public class JobResourceTest {
         queue.completeBatch(runningJob, AGGREGATOR_ID);
 
         // Try accessing it with the wrong org (should be unauthorized)
-        final var resource = new JobResource(queue, TEST_BASEURL);
+        final var resource = new JobResource(queue, client, TEST_BASEURL);
         final Response responseWrong = resource.checkJobStatus(organizationPrincipalWrong, jobID.toString());
         assertAll(() -> assertEquals(HttpStatus.UNAUTHORIZED_401, responseWrong.getStatus()));
 
@@ -313,7 +328,7 @@ public class JobResourceTest {
      */
     @Test
     public void testBuildOutputEntryExtension() {
-        final var resource = new JobResource(null, "");
+        final var resource = new JobResource(null, client, "");
         final var file = new JobQueueBatchFile(UUID.randomUUID(), UUID.fromString("f1e518f5-4977-47c6-971b-7eeaf1b433e8"), DPCResourceType.Patient, 0, 11);
         file.setChecksum(Hex.decode("9d251cea787379c603af13f90c26a9b2a4fbb1e029793ae0f688c5631cdb6a1b"));
         file.setFileLength(7202L);
@@ -326,7 +341,7 @@ public class JobResourceTest {
 
     @Test
     public void testBuildJobExtension() {
-        final var resource = new JobResource(null, "");
+        final var resource = new JobResource(null, client, "");
         final var batch = new JobQueueBatch(
                 UUID.randomUUID(),
                 UUID.randomUUID(),

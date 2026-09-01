@@ -1,10 +1,9 @@
 package gov.cms.dpc.api.resources;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
-import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
-import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.FHIRHeaders;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import jakarta.ws.rs.BadRequestException;
@@ -20,7 +19,6 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
 
@@ -96,14 +94,7 @@ public abstract class AbstractResourceWithExport {
      * @return NPI
      */
     protected String getOrganizationNPI(OrganizationPrincipal organizationPrincipal) {
-        final UUID orgId = organizationPrincipal.getID();
-        final Organization org = this.client
-            .read()
-            .resource(Organization.class)
-            .withId(orgId.toString())
-            .encodedJson()
-            .execute();
-        return FHIRExtractors.findMatchingIdentifier(org.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
+        return APIHelpers.fetchOrganizationNPI(this.client, organizationPrincipal.getID());
     }
 
     /**
