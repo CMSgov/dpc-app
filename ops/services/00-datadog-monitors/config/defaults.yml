@@ -1,0 +1,6 @@
+shadow_mode: true
+notifications:
+  slack: true
+  victorops: false
+  additional_webhooks: []
+  
