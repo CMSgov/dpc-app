@@ -2,6 +2,7 @@ package gov.cms.dpc.api.cli.keys;
 
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.DPCAPIService;
+import gov.cms.dpc.api.exceptions.AdminCommandException;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.NoExitSecurityManager;
 import gov.cms.dpc.testing.exceptions.SystemExitException;
@@ -111,13 +112,8 @@ class KeyUploadUnitTest {
                 )
                 .respond(
                         org.mockserver.model.HttpResponse.response()
-                                .withStatusCode(HttpStatus.SC_NOT_FOUND)
+                                .withStatusCode(HttpStatus.SC_BAD_REQUEST)
                 );
-
-        // This is kind of kludgey and isn't guaranteed to work for all versions of Java, but it allows us to test error
-        // cases that call System.exit()
-        SecurityManager originalSecurityManager = System.getSecurityManager();
-        System.setSecurityManager(new NoExitSecurityManager());
 
         Optional<Throwable> errors;
         try (MockedStatic<Files> files = Mockito.mockStatic(Files.class, Mockito.CALLS_REAL_METHODS)) {
@@ -129,10 +125,9 @@ class KeyUploadUnitTest {
         assertFalse(errors.isEmpty());
 
         Throwable throwable = errors.get();
-        assertInstanceOf(SystemExitException.class, throwable);
-        assertEquals("1", throwable.getMessage());
+        assertInstanceOf(AdminCommandException.class, throwable);
+        assertEquals(HttpStatus.SC_BAD_REQUEST, ((AdminCommandException) throwable).getStatusCode());
 
-        System.setSecurityManager(originalSecurityManager);
         assertFalse(stdErr.toString().isEmpty());
     }
 }

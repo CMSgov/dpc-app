@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.jakewharton.fliptables.FlipTable;
 import gov.cms.dpc.api.cli.AbstractAdminCommand;
 import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.api.exceptions.AdminCommandException;
 import gov.cms.dpc.api.models.CollectionResponse;
 import io.dropwizard.core.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -58,8 +59,10 @@ public class TokenList extends AbstractAdminCommand {
 
             try (CloseableHttpResponse response = httpClient.execute(tokenPost)) {
                 if (!HttpStatus.isSuccess(response.getCode())) {
-                    System.err.printf("Error fetching organization: %s%n", response.getReasonPhrase());
-                    System.exit(1);
+                    final String message = String.format("Error fetching organization: %s%n",
+                            response.getReasonPhrase());
+                    System.err.printf(message);
+                    throw new AdminCommandException(message, response.getCode());
                 }
 
                 CollectionResponse<TokenEntity> tokens = mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});

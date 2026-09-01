@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.cli.tokens;
 
 import gov.cms.dpc.api.cli.AbstractAdminCommand;
+import gov.cms.dpc.api.exceptions.AdminCommandException;
 import io.dropwizard.core.setup.Bootstrap;
 import jakarta.ws.rs.core.MediaType;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -71,8 +72,9 @@ public class TokenCreate extends AbstractAdminCommand {
 
             try (CloseableHttpResponse response = httpClient.execute(post)) {
                 if (!HttpStatus.isSuccess(response.getCode())) {
-                    System.err.printf("Error fetching organization: %s%n", response.getReasonPhrase());
-                    System.exit(1);
+                    final String message = String.format("Error fetching organization: %s%n", response.getReasonPhrase());
+                    System.err.printf(message);
+                    throw new AdminCommandException(message, response.getCode());
                 }
                 final String token = EntityUtils.toString(response.getEntity());
                 System.out.printf("Organization token: %s%n", token);
