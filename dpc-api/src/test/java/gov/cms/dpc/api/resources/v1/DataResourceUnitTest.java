@@ -52,15 +52,16 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(BufferedLoggerHandler.class)
 @SuppressWarnings("InnerClassMayBeStatic")
 class DataResourceUnitTest {
 
-    private static final FileManager manager = Mockito.mock(FileManager.class);
-    private static final IGenericClient client = Mockito.mock(IGenericClient.class);
-    private static final IJobQueue queue = Mockito.mock(IJobQueue.class);
+    private static final FileManager manager = mock(FileManager.class);
+    private static final IGenericClient client = mock(IGenericClient.class);
+    private static final IJobQueue queue = mock(IJobQueue.class);
     private static final ResourceExtension RESOURCE = buildDataResource();
 
     private DataResourceUnitTest() {

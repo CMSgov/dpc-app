@@ -7,11 +7,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.gclient.ICreateTyped;
-import ca.uhn.fhir.rest.gclient.IRead;
-import ca.uhn.fhir.rest.gclient.IReadExecutable;
-import ca.uhn.fhir.rest.gclient.IReadTyped;
-import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
+import ca.uhn.fhir.rest.gclient.*;
 import com.google.common.collect.Maps;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
@@ -60,6 +56,8 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class APITestHelpers {
     private static final String ATTRIBUTION_URL = "http://localhost:3500/v1";
@@ -89,15 +87,15 @@ public class APITestHelpers {
     }
 
     public static void mockOrganizationRead(IGenericClient client, Organization organization) {
-        final IRead readMock = Mockito.mock(IRead.class);
-        final IReadTyped<Organization> readTypedMock = Mockito.mock(IReadTyped.class);
-        final IReadExecutable<Organization> readExecutableMock = Mockito.mock(IReadExecutable.class);
+        final IRead readMock = mock(IRead.class);
+        final IReadTyped<Organization> readTypedMock = mock(IReadTyped.class);
+        final IReadExecutable<Organization> readExecutableMock = mock(IReadExecutable.class);
 
-        Mockito.when(client.read()).thenReturn(readMock);
-        Mockito.when(readMock.resource(Organization.class)).thenReturn(readTypedMock);
-        Mockito.when(readTypedMock.withId(Mockito.anyString())).thenReturn(readExecutableMock);
-        Mockito.when(readExecutableMock.encodedJson()).thenReturn(readExecutableMock);
-        Mockito.when(readExecutableMock.execute()).thenReturn(organization);
+        when(client.read()).thenReturn(readMock);
+        when(readMock.resource(Organization.class)).thenReturn(readTypedMock);
+        when(readTypedMock.withId(Mockito.anyString())).thenReturn(readExecutableMock);
+        when(readExecutableMock.encodedJson()).thenReturn(readExecutableMock);
+        when(readExecutableMock.execute()).thenReturn(organization);
     }
 
     public static IGenericClient buildAttributionClient(FhirContext ctx) {

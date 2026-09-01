@@ -30,6 +30,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @ExtendWith(BufferedLoggerHandler.class)
@@ -41,7 +42,7 @@ public class JobResourceTest {
     static final String TEST_BASEURL = "http://localhost:8080";
     static final String TEST_JOB_URL = TEST_BASEURL + "/api/v1/Group/%s/$export";
     static final String OTHER_ORGANIZATION = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a1";
-    static final IGenericClient client = Mockito.mock(IGenericClient.class, Mockito.RETURNS_DEEP_STUBS);
+    static final IGenericClient client = mock(IGenericClient.class, Mockito.RETURNS_DEEP_STUBS);
 
     @BeforeEach
     void setup() {
