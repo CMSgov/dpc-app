@@ -15,12 +15,10 @@ runs:
   steps:
     - name: Setup environment
       env:
-        CLOUDWATCH_LOG_GROUP: ${{ inputs.cw-log-group || format('/dpc/gha/{0}', github.action) }}
-        CLOUDWATCH_LOG_STREAM: ${{ inputs.cw-log-stream || format('{0}-{1}-{2}', github.action, github.run_id, github.run_attempt) }}
+        CLOUDWATCH_LOG_GROUP: ${{ inputs.cw-log-group || format('/dpc/gha/{0}', github.workflow) }}
+        CLOUDWATCH_LOG_STREAM: ${{ inputs.cw-log-stream || format('{0}-{1}-{2}', github.workflow, github.run_id, github.run_attempt) }}
       run: |
         echo "STDOUT_TO_CWLOGS_SCRIPT=${{ github.workspace }}/scripts/stdout-to-cwlogs.sh" >> $GITHUB_ENV
-        echo "CLOUDWATCH_LOG_GROUP=CLOUDWATCH_LOG_GROUP" >> $GITHUB_ENV
-        echo "CLOUDWATCH_LOG_STREAM=CLOUDWATCH_LOG_STREAM" >> $GITHUB_ENV
       shell: bash
 
     - name: Create Log Group if needed
