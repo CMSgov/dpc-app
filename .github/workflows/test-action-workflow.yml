@@ -1,12 +1,14 @@
 name: "DPC - Test action workflow"
 
 on:
-  push:
+  workflow_dispatch:
 
 jobs:
   test-action:
     name: "Test that I can call a custom action"
     runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
     steps:
+      - name: "Checkout code"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
       - name: Test custom action
         uses: ./.github/actions/config-std-out-to-cw-logs
