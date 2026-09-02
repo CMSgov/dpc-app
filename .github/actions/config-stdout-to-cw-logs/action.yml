@@ -9,16 +9,18 @@ inputs:
     description: >-
       Name of CloudWatch Log Stream to submit logs to; will be created if necessary
     required: false
-    default: 'fake_stream'
 
 runs:
   using: "composite"
   steps:
     - name: Setup environment
+      env:
+        CLOUDWATCH_LOG_GROUP: ${{ inputs.cw-log-group || format('/dpc/gha/{0}', github.action) }}
+        CLOUDWATCH_LOG_STREAM: ${{ inputs.cw-log-stream || format('{0}-{1}-{2}', github.action, github.run_id, github.run_attempt) }}
       run: |
         echo "STDOUT_TO_CWLOGS_SCRIPT=${{ github.workspace }}/scripts/stdout-to-cwlogs.sh" >> $GITHUB_ENV
-        echo "CLOUDWATCH_LOG_GROUP=${{ inputs.cw-log-group }} || format('/dpc/gha/{0}', ${{ github.action }})" >> $GITHUB_ENV
-        echo "CLOUDWATCH_LOG_STREAM=${{ inputs.cw-log-stream }} || format('{0}-{1}-{2}', ${{ github.action }}, ${{ github.run_id }}, ${{ github.run_attempt }})" >> $GITHUB_ENV
+        echo "CLOUDWATCH_LOG_GROUP=CLOUDWATCH_LOG_GROUP" >> $GITHUB_ENV
+        echo "CLOUDWATCH_LOG_STREAM=CLOUDWATCH_LOG_STREAM" >> $GITHUB_ENV
       shell: bash
 
     - name: Create Log Group if needed
@@ -27,7 +29,7 @@ runs:
         # capture the stderr output so that it can be checked
         create_log_group_stderr="$(
           aws logs create-log-group \
-            --log-group-name "${{ inputs.cw-log-group }}" 2>&1 >/dev/null || true
+            --log-group-name "$CLOUDWATCH_LOG_GROUP" 2>&1 >/dev/null || true
         )"
 
         # If there was an error message logged by create-log-group and that error was not
@@ -38,7 +40,7 @@ runs:
           $create_log_group_stderr != *"ResourceAlreadyExistsException"* ]] \
           ; then
           echo "Unrecoverable error occurred when trying to create Log Group" \
-            "'${{inputs.cw-log-stream }}' in Log Group '${{ inputs.cw-log-group }}'"
+            "'$CLOUDWATCH_LOG_GROUP'"
           echo "$create_log_group_stderr"
           exit 1
         fi
@@ -47,8 +49,8 @@ runs:
     - name: Create Log Stream if needed
       run: |
         create_log_stream_stderr="$(
-          aws logs create-log-stream --log-group-name "${{ inputs.cw-log-group }}" \
-            --log-stream-name "${{ inputs.cw-log-stream }}" 2>&1 >/dev/null || true
+          aws logs create-log-stream --log-group-name "$CLOUDWATCH_LOG_GROUP" \
+            --log-stream-name "$CLOUDWATCH_LOG_STREAM" 2>&1 >/dev/null || true
         )"
 
         if [[
@@ -56,13 +58,13 @@ runs:
           $create_log_stream_stderr != *"ResourceAlreadyExistsException"* ]] \
           ; then
           echo "Unrecoverable error occurred when trying to create Log Stream" \
-            "'${{inputs.cw-log-stream }}' in Log Group '${{ inputs.cw-log-group }}'"
+            "'$CLOUDWATCH_LOG_STREAM' in Log Group '$CLOUDWATCH_LOG_GROUP'"
           echo "$create_log_stream_stderr"
           exit 1
         fi
 
-        echo "'${{inputs.cw-log-stream }}' in Log Group '${{ inputs.cw-log-group }}'" \
+        echo "'$CLOUDWATCH_LOG_STREAM' in Log Group '$CLOUDWATCH_LOG_GROUP'" \
           "created or exists already"
         echo "Tail the Log Stream to view OpenTofu output in realtime:"
-        echo "aws logs tail --since 1h --follow '${{ inputs.cw-log-group }}'"
+        echo "aws logs tail --since 1h --follow '$CLOUDWATCH_LOG_GROUP'"
       shell: bash
