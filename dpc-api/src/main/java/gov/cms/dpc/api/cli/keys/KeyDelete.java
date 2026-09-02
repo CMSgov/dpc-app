@@ -55,7 +55,7 @@ public class KeyDelete extends AbstractAdminCommand {
 
             try (CloseableHttpResponse response = httpClient.execute(keyDelete)) {
                 if (!HttpStatus.isSuccess(response.getCode())) {
-                    final String message = String.format("Error deleting key: " + response.getReasonPhrase());
+                    final String message = String.format("Error deleting key: %s", response.getReasonPhrase());
                     System.err.println(message);
                     throw new AdminCommandException(message, response.getCode());
                 }

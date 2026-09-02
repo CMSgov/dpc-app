@@ -48,8 +48,12 @@
         <h2.version>2.3.232</h2.version>
         <aws.java.sdk.version>2.52.1</aws.java.sdk.version>
         <logback.version>1.5.36</logback.version>
-        <sonar.coverage.exclusions>**/MockBlueButton*.java</sonar.coverage.exclusions>
         <maven.build.cache.processPlugins>false</maven.build.cache.processPlugins>
+
+        <sonar.coverage.exclusions>**/MockBlueButton*.java</sonar.coverage.exclusions>
+        <sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S106</sonar.issue.ignore.multicriteria.e1.ruleKey>
+        <sonar.issue.ignore.multicriteria.e1.resourceKey>**/gov/cms/dpc/api/cli/**/*.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
     </properties>
 
     <developers>
