@@ -1,4 +1,4 @@
-# See: https://github.com/corretto/corretto-docker/blob/main/17/jdk/alpine/3.20/Dockerfile
+# See: https://github.com/corretto/corretto-docker/blob/main/21/jdk/alpine/3.20/Dockerfile
 FROM artifactory.cloud.cms.gov/docker/amazoncorretto:21-alpine-jdk
 
 # Install additional packages used across DPC images

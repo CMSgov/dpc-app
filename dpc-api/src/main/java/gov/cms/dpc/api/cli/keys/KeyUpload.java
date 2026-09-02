@@ -103,7 +103,7 @@ public class KeyUpload extends AbstractAdminCommand {
                 if (!HttpStatus.isSuccess(response.getCode())) {
                     final String message = String.format("Error fetching organization: %s%n",
                             response.getReasonPhrase());
-                    System.err.printf(message);
+                    System.err.println(message);
                     throw new AdminCommandException(message, response.getCode());
                 }
                 final String token = EntityUtils.toString(response.getEntity());

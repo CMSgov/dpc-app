@@ -18,7 +18,7 @@ public class AdminCommandException extends RuntimeException {
         this.statusCode = statusCode;
     }
 
-    public int getStatusCode() {
+    public Integer getStatusCode() {
         return statusCode;
     }
 }
