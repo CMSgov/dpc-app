@@ -6,6 +6,9 @@ on:
 jobs:
   test-action:
     name: "Test that I can call a custom action"
+    permissions:
+      contents: read
+      id-token: write
     runs-on: codebuild-dpc-app-non-prod-${{github.run_id}}-${{github.run_attempt}}
     steps:
       - name: "Checkout code"
