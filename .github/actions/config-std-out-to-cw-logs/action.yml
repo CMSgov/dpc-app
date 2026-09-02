@@ -1,0 +1,15 @@
+name: "Config std-out-to-cw-logs"
+description: Composite action to configure std-out-to-cw-logs
+inputs:
+  echo-string:
+    description: "String to spit back"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Prove this works
+      run: |
+        echo "My string: ${{ inputs.echo-string }}"
+        echo "Workspace: ${{ github.workspace }}"
+        echo "Run id and attempt: ${{ github.run_id }}-${{ github.run_attempt }}"
+      shell: bash
