@@ -22,9 +22,6 @@ jobs:
 
       - name: Setup stdout-to-cw-logs
         uses: ./.github/actions/config-stdout-to-cw-logs
-        with:
-          cw-log-group: "/dpc/test/gha/test-action-workflow"
-          cw-log-stream: "test-action-workflow-${{ github.run_id }}-${{ github.run_attempt }}"
 
       - name: Write something to logs
         run: |

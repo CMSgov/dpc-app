@@ -4,22 +4,20 @@ inputs:
   cw-log-group:
     description: >-
       Name of CloudWatch Log Group to submit logs to; will be created if necessary
-    required: true
+    required: false
   cw-log-stream:
     description: >-
       Name of CloudWatch Log Stream to submit logs to; will be created if necessary
-    required: true
+    required: false
 
 runs:
   using: "composite"
   steps:
-    # This step is necessary as it seems that some objects (like "github" or "inputs") are
-    # unavailable when the top-level "env" is evaluated for Composite Actions
     - name: Setup environment
       run: |
         echo "STDOUT_TO_CWLOGS_SCRIPT=${{ github.workspace }}/scripts/stdout-to-cwlogs.sh" >> $GITHUB_ENV
-        echo "CLOUDWATCH_LOG_GROUP=${{ inputs.cw-log-group }}" >> $GITHUB_ENV
-        echo "CLOUDWATCH_LOG_STREAM=${{ inputs.cw-log-stream }}" >> $GITHUB_ENV
+        echo "CLOUDWATCH_LOG_GROUP=${{ inputs.cw-log-group || format('/dpc/gha/{0}', github.action) }}" >> $GITHUB_ENV
+        echo "CLOUDWATCH_LOG_STREAM=${{ inputs.cw-log-stream || format('{0}-{1}-{2}', github.action, github.run_id, github.run_attempt) }}" >> $GITHUB_ENV
       shell: bash
 
     - name: Create Log Group if needed
