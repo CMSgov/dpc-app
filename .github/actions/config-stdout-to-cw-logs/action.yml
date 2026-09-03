@@ -1,14 +1,5 @@
 name: "Config std-out-to-cw-logs"
 description: Composite action to configure std-out-to-cw-logs
-inputs:
-  cw-log-group:
-    description: >-
-      Name of CloudWatch Log Group to submit logs to; will be created if necessary
-    required: false
-  cw-log-stream:
-    description: >-
-      Name of CloudWatch Log Stream to submit logs to; will be created if necessary
-    required: false
 
 runs:
   using: "composite"
@@ -18,9 +9,11 @@ runs:
         CLOUDWATCH_LOG_GROUP: ${{ inputs.cw-log-group || format('/dpc/gha/{0}', github.workflow) }}
         CLOUDWATCH_LOG_STREAM: ${{ inputs.cw-log-stream || format('{0}-{1}-{2}', github.workflow, github.run_id, github.run_attempt) }}
       run: |
-        echo "STDOUT_TO_CWLOGS_SCRIPT=${{ github.workspace }}/scripts/stdout-to-cwlogs.sh" >> $GITHUB_ENV
-        echo "CLOUDWATCH_LOG_GROUP=$CLOUDWATCH_LOG_GROUP" >> $GITHUB_ENV
-        echo "CLOUDWATCH_LOG_STREAM=$CLOUDWATCH_LOG_STREAM" >> $GITHUB_ENV
+        # github.workflow_ref looks like: blah/blah/my-workflow.yml
+        # We just want "my-workflow"
+        WORKFLOW_FILE=$(basename "${{ github.workflow_ref }}" | cut -d'@' -f1 | sed 's/\.yml$//; s/\.yaml$//')
+        echo "CLOUDWATCH_LOG_GROUP=/dpc/gha/${WORKFLOW_FILE}" >> $GITHUB_ENV        
+        echo "CLOUDWATCH_LOG_STREAM=${github.run_id}-${github.run_attempt}-${github.job}" >> $GITHUB_ENV
       shell: bash
 
     - name: Create Log Group if needed
