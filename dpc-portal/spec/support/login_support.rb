@@ -84,7 +84,10 @@ module LoginSupport
       info: { email: primary_email },
       credentials: { token: 'mock_token', expires_in: 300 },
       extra: {
-        raw_info: {}
-      } }
+        raw_info: {
+          sub: csp_user.uuid
+        }
+      }
+    }
   end
 end

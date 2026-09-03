@@ -1188,15 +1188,18 @@ RSpec.describe 'Invitations', type: :request do
 end
 
 def log_in(provider:, template: user_info_template)
+
+  csp_response = { uid: template['sub'],
+                   credentials: { expires_in: 899,
+                                  token: 'bearer-token' },
+                   info: { email: template['email'] },
+                   extra: { raw_info: { given_name: template['given_name'],
+                                        family_name: template['family_name'],
+                                        identity_assurance_level: 2 } } }
+  csp_response[:extra][:raw_info].merge!({ sub: template['sub'] }) if provider == :clear
+
   OmniAuth.config.test_mode = true
-  OmniAuth.config.add_mock(provider.to_sym,
-                           { uid: template['sub'],
-                             credentials: { expires_in: 899,
-                                            token: 'bearer-token' },
-                             info: { email: template['email'] },
-                             extra: { raw_info: { given_name: template['given_name'],
-                                                  family_name: template['family_name'],
-                                                  identity_assurance_level: 2 } } })
+  OmniAuth.config.add_mock(provider.to_sym, csp_response)
   post "/auth/#{provider}"
   follow_redirect!
 end
