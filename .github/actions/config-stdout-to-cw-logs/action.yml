@@ -9,9 +9,9 @@ runs:
         echo "$GITHUB_WORKFLOW_REF"
         echo "$GITHUB_JOB"
         
-        # github.workflow_ref looks like: blah/blah/my-workflow.yml
+        # github.workflow_ref looks like: blah/blah/my-workflow.yml@/blah/blah/my-branch
         # We just want "my-workflow"
-        WORKFLOW_FILE=$(basename "${{ github.workflow_ref }}" | cut -d'@' -f1 | sed 's/\.yml$//; s/\.yaml$//')
+        WORKFLOW_FILE=$(echo "${{ github.workflow_ref }}" | sed -E 's/.*\.github\/workflows\/(.*)\.ya?ml@.*/\1/')
         echo "CLOUDWATCH_LOG_GROUP=/dpc/gha/${WORKFLOW_FILE}" >> $GITHUB_ENV        
         echo "CLOUDWATCH_LOG_STREAM=${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}" >> "$GITHUB_ENV"
       shell: bash
