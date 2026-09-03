@@ -51,10 +51,10 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
       - name: Cleanup Runner
         run: ./scripts/cleanup-docker.sh
-      - name: "Set up JDK 17"
+      - name: "Set up JDK 21"
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
-          java-version: "17"
+          java-version: "21"
           distribution: "corretto"
           cache: maven
       - name: Clean maven
@@ -203,10 +203,10 @@ jobs:
         run: |
           sudo dnf -y install python3 python3-pip
           pip install ansible
-      - name: "Set up JDK 17"
+      - name: "Set up JDK 21"
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
-          java-version: "17"
+          java-version: "21"
           distribution: "corretto"
           cache: maven
       - name: Clean maven
@@ -247,10 +247,10 @@ jobs:
         run: |
           sudo dnf -y install python3 python3-pip
           pip install ansible
-      - name: "Set up JDK 17"
+      - name: "Set up JDK 21"
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
-          java-version: "17"
+          java-version: "21"
           distribution: "corretto"
           cache: maven
       - name: Clean maven
@@ -391,7 +391,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
-          java-version: '17'
+          java-version: "21"
           distribution: temurin
           cache: maven
       - name: Set env vars from AWS params
@@ -429,11 +429,6 @@ jobs:
       - name: Verify download
         run: |
           find . -name dpc-api-jacoco.xml
-      - name: Setup Java 21 for Sonar
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
-        with:
-          java-version: '21'
-          distribution: temurin
       - name: Run quality gate scan
         run: |
           mvn org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar -Dsonar.projectKey=bcda-dpc-api -Dsonar.branch.name=${{ github.event_name == 'pull_request' && github.head_ref || github.event_name == 'pull_request' && github.head_ref || github.ref_name }} -Dsonar.working.directory=./.sonar_workspace -Dsonar.projectVersion=${{ github.ref_name == 'main' && github.sha || 'branch' }} -Dsonar.qualitygate.wait=true -Dsonar.coverage.jacoco.xmlReportPaths="../jacoco-reports/*.xml" -Dsonar.ci.autoconfig.disabled=true -Dsonar.branch.target=${{ github.base_ref }}

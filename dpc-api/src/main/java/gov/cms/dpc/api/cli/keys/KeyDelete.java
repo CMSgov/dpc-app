@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.cli.keys;
 
 import gov.cms.dpc.api.cli.AbstractAdminCommand;
+import gov.cms.dpc.api.exceptions.AdminCommandException;
 import io.dropwizard.core.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
@@ -54,8 +55,9 @@ public class KeyDelete extends AbstractAdminCommand {
 
             try (CloseableHttpResponse response = httpClient.execute(keyDelete)) {
                 if (!HttpStatus.isSuccess(response.getCode())) {
-                    System.err.println("Error deleting key: " + response.getReasonPhrase());
-                    System.exit(1);
+                    final String message = String.format("Error deleting key: %s", response.getReasonPhrase());
+                    System.err.println(message);
+                    throw new AdminCommandException(message, response.getCode());
                 }
             }
         }
