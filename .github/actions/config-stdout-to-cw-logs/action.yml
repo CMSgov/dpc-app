@@ -5,15 +5,14 @@ runs:
   using: "composite"
   steps:
     - name: Setup environment
-      run: |
-        echo "$GITHUB_WORKFLOW_REF"
-        echo "$GITHUB_JOB"
-        
+      run: |        
         # github.workflow_ref looks like: blah/blah/my-workflow.yml@/blah/blah/my-branch
-        # We just want "my-workflow"
+        # We just want "my-workflow" for the log group
         WORKFLOW_FILE=$(echo "${{ github.workflow_ref }}" | sed -E 's/.*\.github\/workflows\/(.*)\.ya?ml@.*/\1/')
         echo "CLOUDWATCH_LOG_GROUP=/dpc/gha/${WORKFLOW_FILE}" >> $GITHUB_ENV        
         echo "CLOUDWATCH_LOG_STREAM=${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}" >> "$GITHUB_ENV"
+        
+        echo "STDOUT_TO_CWLOGS_SCRIPT=${{ github.workspace }}/scripts/stdout-to-cwlogs.sh" >> $GITHUB_ENV
       shell: bash
 
     - name: Create Log Group if needed
