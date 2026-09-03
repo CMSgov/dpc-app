@@ -312,7 +312,7 @@ public class GroupResource extends AbstractGroupResource {
         final UUID jobID = this.dataService.createJob(orgID, orgNPI, providerNPI, attributedPatients, resources, since, transactionTime, requestingIP, requestUrl, true, isSmoke);
         final int totalPatients = attributedPatients.size();
         final String resourcesRequested = resources.stream().map(DPCResourceType::getPath).collect(Collectors.joining(";"));
-        logger.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},orgId={},totalPatients={},resourcesRequested={},queueSubmitTime={}", "/Group/$export",jobID, orgID, totalPatients, resourcesRequested, eventTime);
+        logger.info("dpcMetric=queueSubmitted,requestUrl={},jobID={},orgId={},orgNpi={},totalPatients={},resourcesRequested={},queueSubmitTime={}", "/Group/$export",jobID, orgID, orgNPI, totalPatients, resourcesRequested, eventTime);
         return Response.status(Response.Status.ACCEPTED)
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + jobID)).build();
     }

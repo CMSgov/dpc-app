@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.cli.tokens;
 
 import gov.cms.dpc.api.cli.AbstractAdminCommand;
+import gov.cms.dpc.api.exceptions.AdminCommandException;
 import io.dropwizard.core.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
@@ -52,8 +53,9 @@ public class TokenDelete extends AbstractAdminCommand {
 
             try (CloseableHttpResponse response = httpClient.execute(tokenDelete)) {
                 if (!HttpStatus.isSuccess(response.getCode())) {
-                    System.err.printf("Error deleting token: %s%n", response.getReasonPhrase());
-                    System.exit(1);
+                    final String message = String.format("Error deleting token: %s%n", response.getReasonPhrase());
+                    System.err.println(message);
+                    throw new AdminCommandException(message, response.getCode());
                 }
             }
         }

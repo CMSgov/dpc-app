@@ -7,8 +7,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.gclient.ICreateTyped;
-import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
+import ca.uhn.fhir.rest.gclient.*;
 import com.google.common.collect.Maps;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
@@ -46,6 +45,7 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.mockito.Mockito;
 import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.IOException;
@@ -56,6 +56,8 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class APITestHelpers {
     private static final String ATTRIBUTION_URL = "http://localhost:3500/v1";
@@ -82,6 +84,18 @@ public class APITestHelpers {
                 .setValue(ORGANIZATION_NPI)
         );
         return new OrganizationPrincipal(org);
+    }
+
+    public static void mockOrganizationRead(IGenericClient client, Organization organization) {
+        final IRead readMock = mock(IRead.class);
+        final IReadTyped<Organization> readTypedMock = mock(IReadTyped.class);
+        final IReadExecutable<Organization> readExecutableMock = mock(IReadExecutable.class);
+
+        when(client.read()).thenReturn(readMock);
+        when(readMock.resource(Organization.class)).thenReturn(readTypedMock);
+        when(readTypedMock.withId(Mockito.anyString())).thenReturn(readExecutableMock);
+        when(readExecutableMock.encodedJson()).thenReturn(readExecutableMock);
+        when(readExecutableMock.execute()).thenReturn(organization);
     }
 
     public static IGenericClient buildAttributionClient(FhirContext ctx) {

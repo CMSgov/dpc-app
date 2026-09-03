@@ -5,6 +5,7 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.FHIRExtractors;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +15,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -113,5 +115,22 @@ public class APIHelpers {
             return null;
         }
         return request.getQueryString() == null ? request.getRequestURL().toString() : request.getRequestURL().append(request.getQueryString()).toString();
+    }
+
+    /**
+     * Fetch an Organization's NPI from the attribution service.
+     *
+     * @param client - attribution {@link IGenericClient}
+     * @param orgId  - {@link UUID} of the organization to look up
+     * @return NPI
+     */
+    public static String fetchOrganizationNPI(IGenericClient client, UUID orgId) {
+        final Organization org = client
+                .read()
+                .resource(Organization.class)
+                .withId(orgId.toString())
+                .encodedJson()
+                .execute();
+        return FHIRExtractors.findMatchingIdentifier(org.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
     }
 }

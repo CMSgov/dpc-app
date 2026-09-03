@@ -2,9 +2,8 @@ package gov.cms.dpc.api.cli.tokens;
 
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.DPCAPIService;
+import gov.cms.dpc.api.exceptions.AdminCommandException;
 import gov.cms.dpc.testing.APIAuthHelpers;
-import gov.cms.dpc.testing.NoExitSecurityManager;
-import gov.cms.dpc.testing.exceptions.SystemExitException;
 import io.dropwizard.core.cli.Cli;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.util.JarLocation;
@@ -99,22 +98,16 @@ class TokenDeleteUnitTest {
             )
             .respond(
                 org.mockserver.model.HttpResponse.response()
-                    .withStatusCode(HttpStatus.SC_NOT_FOUND)
+                    .withStatusCode(HttpStatus.SC_BAD_REQUEST)
             );
-
-        // This is kind of kludgey and isn't guaranteed to work for all versions of Java, but it allows us to test error
-        // cases that call System.exit()
-        SecurityManager originalSecurityManager = System.getSecurityManager();
-        System.setSecurityManager(new NoExitSecurityManager());
 
         Optional<Throwable> errors = cli.run("delete", "-o", "org_id", "token_id");
         assertFalse(errors.isEmpty());
 
         Throwable throwable = errors.get();
-        assertInstanceOf(SystemExitException.class, throwable);
-        assertEquals("1", throwable.getMessage());
+        assertInstanceOf(AdminCommandException.class, throwable);
+        assertEquals(HttpStatus.SC_BAD_REQUEST, ((AdminCommandException) throwable).getStatusCode());
 
-        System.setSecurityManager(originalSecurityManager);
         assertFalse(stdErr.toString().isEmpty());
     }
 }

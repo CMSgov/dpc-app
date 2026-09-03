@@ -173,8 +173,13 @@ maven-config:
 psql: ## Run a psql shell
 	@docker compose -f docker-compose.yml exec -it db psql -U postgres
 
-portal-sh: ## Run a portal shell
-	@docker compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/sh
+portal-sh: ## Run a portal shell.  If it's not already up, start it without running it's entry point.
+ 		   ## (Comes in handy when you break the portal and it won't start)
+	@if [ -n "$$(docker compose -f docker-compose.yml -f docker-compose.portals.yml ps --status running -q dpc_portal)" ]; then \
+		docker compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/sh; \
+	else \
+		docker compose -f docker-compose.yml -f docker-compose.portals.yml run --rm -it --no-deps --entrypoint bin/sh dpc_portal; \
+	fi
 
 portal-console: ## Run a rails console shell
 	@docker compose -f docker-compose.yml -f docker-compose.portals.yml exec -it dpc_portal bin/console

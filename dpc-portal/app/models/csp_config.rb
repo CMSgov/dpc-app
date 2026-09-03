@@ -17,6 +17,7 @@ class CspConfig
     @redirect_path = config[:redirect_path]
     @authorize_scope = config[:authorize_scope]
     @acr_values = config[:acr_values]
+    @discovery_uri = config[:discovery_uri]
   end
 
   LOGIN_DOT_GOV = new('login_dot_gov',
@@ -28,7 +29,7 @@ class CspConfig
   private_class_method :new
 
   attr_reader :code, :user_info_endpoint, :log_out_path, :token_expiration_interval, :host, :identifier,
-              :authorization_endpoint, :redirect_path, :authorize_scope, :acr_values
+              :authorization_endpoint, :redirect_path, :authorize_scope, :acr_values, :discovery_uri
 
   def self.for(code)
     case code.to_s
@@ -45,5 +46,9 @@ class CspConfig
 
   def self.list
     [LOGIN_DOT_GOV.code, ID_ME.code, CLEAR.code]
+  end
+
+  def self.all
+    [LOGIN_DOT_GOV, ID_ME, CLEAR]
   end
 end
