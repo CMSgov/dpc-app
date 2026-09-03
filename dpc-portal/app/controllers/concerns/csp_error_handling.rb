@@ -11,7 +11,7 @@ module CspErrorHandling
     CSP_AUTH_ERROR_MESSAGES.include?(params[:message])
   end
 
-  def csp_user_error?
+  def csp_user_cancelled?
     CSP_USER_ERROR_MESSAGES.include?(params[:message])
   end
 
@@ -19,17 +19,15 @@ module CspErrorHandling
     params[:strategy] || csp_session.current
   end
 
-  def handle_invitation_flow_failure(invitation_id)
-    log_event(:info, 'Failed invitation flow',
-              action_context: LoggingConstants::ActionContext::Registration,
-              action_type: LoggingConstants::ActionType::FailedLogin,
-              invitation: invitation_id)
-    invitation = Invitation.find(invitation_id)
-    if invitation.credential_delegate?
-      # TODO: Make an CdFlowFailComponent so that they can be routed back to the invitation
-      render(Page::Utility::ErrorComponent.new(invitation, 'fail_to_proof'), status: :forbidden)
+  def handle_invitation_flow_failure(invitation_url, invitation_id)
+    if csp_user_cancelled?
+      redirect_to invitation_url, alert: "Please sign in to continue."
     else
-      render(Page::Invitations::AoFlowFailComponent.new(invitation, 'fail_to_proof', 1), status: :forbidden)
+      log_event(:info, 'Failed invitation flow',
+                action_context: LoggingConstants::ActionContext::Registration,
+                action_type: LoggingConstants::ActionType::FailedLogin,
+                invitation: invitation_id)
+      redirect_to invitation_url, alert:  "Something went wrong. Please try to sign in again."
     end
   end
 
