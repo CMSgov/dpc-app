@@ -10,7 +10,7 @@ class AddTokenToInvitations < ActiveRecord::Migration[8.0]
   end
 
   def up
-    add_column :invitations, :token, :string
+    add_column :invitations, :token, :string, limit: 24
 
     MigrationInvitation.reset_column_information
     MigrationInvitation.where(token: nil).find_each do |invitation|
