@@ -6,6 +6,9 @@ runs:
   steps:
     - name: Setup environment
       run: |
+        echo "$GITHUB_WORKFLOW_REF"
+        echo "$GITHUB_JOB"
+        
         # github.workflow_ref looks like: blah/blah/my-workflow.yml
         # We just want "my-workflow"
         WORKFLOW_FILE=$(basename "${{ github.workflow_ref }}" | cut -d'@' -f1 | sed 's/\.yml$//; s/\.yaml$//')
