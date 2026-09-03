@@ -142,10 +142,9 @@ public class JobResource extends AbstractJobResource {
      *
      * @param builder - The current response builder
      * @param batches - The list of batches made up in a job
-     * @param orgUUID - The UUID of the organization
      * @return the response builder
      */
-    private Response.ResponseBuilder buildJobStatusCompleted(Response.ResponseBuilder builder, List<JobQueueBatch> batches, UUID orgUUID) {
+    private Response.ResponseBuilder buildJobStatusCompleted(Response.ResponseBuilder builder, List<JobQueueBatch> batches) {
         OffsetDateTime lastCompleteTime = getLatestBatchCompleteTime(batches);
 
         if (lastCompleteTime.isBefore(OffsetDateTime.now(ZoneOffset.UTC).minusHours(JOB_EXPIRATION_HOURS))) {
