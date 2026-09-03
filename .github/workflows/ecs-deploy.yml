@@ -150,6 +150,9 @@ jobs:
       - name: Install Tofu
         uses: cmsgov/cdap/actions/setup-tenv@main
 
+      - name: Setup stdout-to-cw-logs
+        uses: ./.github/actions/config-stdout-to-cw-logs
+
       - name: Verify persistent plan
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}/persistent
