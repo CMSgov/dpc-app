@@ -26,6 +26,7 @@ module CspErrorHandling
               invitation: invitation_id)
     invitation = Invitation.find(invitation_id)
     if invitation.credential_delegate?
+      # TODO: Make an CdFlowFailComponent so that they can be routed back to the invitation
       render(Page::Utility::ErrorComponent.new(invitation, 'fail_to_proof'), status: :forbidden)
     else
       render(Page::Invitations::AoFlowFailComponent.new(invitation, 'fail_to_proof', 1), status: :forbidden)
