@@ -14,5 +14,9 @@ class ClearController < CspController
     [auth.extra.raw_info.email]
   end
 
+  def sign_in_canceled?(auth)
+    auth.extra.raw_info.sub.downcase == 'unknown'
+  end
+
   def store_id_token? = true
 end
