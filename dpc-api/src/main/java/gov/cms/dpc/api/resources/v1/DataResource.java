@@ -151,7 +151,6 @@ public class DataResource extends AbstractDataResource {
             logger.warn("Unable to resolve NPI for organization {}", orgUUID, e);
             orgNPI = null;
         }
-        logger.info("dpcMetric=fileDownloaded, orgId={}, orgNpi={}", orgUUID, orgNPI);
 
         // If job is expired, the files should no longer be accessible
         List<JobQueueBatch> batches = queue.getJobBatches(filePointer.getJobID());
@@ -189,6 +188,8 @@ public class DataResource extends AbstractDataResource {
         cacheControl.setNoStore(true);
         Response.ResponseBuilder responseBuilder = Response.fromResponse(response)
             .cacheControl(cacheControl);
+
+        logger.info("dpcMetric=fileDownloaded, orgId={}, orgNpi={}, status={}", orgUUID, orgNPI, response.getStatus());
 
         return responseBuilder.build();
     }

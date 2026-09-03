@@ -3,7 +3,6 @@ package gov.cms.dpc.api.resources.v1;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import gov.cms.dpc.api.APIHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.resources.AbstractJobResource;
@@ -152,15 +151,6 @@ public class JobResource extends AbstractJobResource {
         if (lastCompleteTime.isBefore(OffsetDateTime.now(ZoneOffset.UTC).minusHours(JOB_EXPIRATION_HOURS))) {
             return builder.status(HttpStatus.GONE_410);
         }
-
-        String orgNPI;
-        try {
-            orgNPI = APIHelpers.fetchOrganizationNPI(this.client, orgUUID);
-        } catch (Exception e) {
-            logger.warn("Unable to resolve NPI for organization {}", orgUUID, e);
-            orgNPI = null;
-        }
-        logger.info("dpcMetric=jobCompleted, jobID={}, orgId={}, orgNpi={}", batches.get(0).getJobID(), orgUUID, orgNPI);
 
         builder.header(HttpHeaders.EXPIRES, lastCompleteTime.plusDays(1).format(HTTP_DATE_FORMAT));
 
