@@ -153,23 +153,24 @@ jobs:
       - name: Verify persistent plan
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}/persistent
-          tofu init
-          tofu plan -out dpc-release-${{ inputs.env }}.tfplan 2>&1
+          tofu init | "$STDOUT_TO_CWLOGS_SCRIPT"
+          tofu plan -out dpc-release-${{ inputs.env }}.tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
       - name: Apply persistent plan
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}/persistent
-          tofu apply dpc-release-${{ inputs.env }}.tfplan
+          tofu apply dpc-release-${{ inputs.env }}.tfplan | "$STDOUT_TO_CWLOGS_SCRIPT"
       - name: Verify main environment plan
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
-          tofu init
+          tofu init | "$STDOUT_TO_CWLOGS_SCRIPT"
           tofu plan -var 'release_version=${{ inputs.app-version}}' \
                          -var 'image_tag=${{ steps.image-tag.outputs.image_tag }}' \
-                         -out dpc-release-${{ inputs.env }}.tfplan
+                         -out dpc-release-${{ inputs.env }}.tfplan \
+                        | "$STDOUT_TO_CWLOGS_SCRIPT"
       - name: Apply main environment plan
         run: |
           cd dpc-ops/terraform/${{ inputs.env }}
-          tofu apply dpc-release-${{ inputs.env }}.tfplan
+          tofu apply dpc-release-${{ inputs.env }}.tfplan | "$STDOUT_TO_CWLOGS_SCRIPT"
       - uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1
         name: Slack failure
         if: ${{ failure() }}
