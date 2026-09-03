@@ -109,7 +109,7 @@ public class JobResource extends AbstractJobResource {
             builder = buildJobStatusInProgress(builder, batches, jobStatusSet);
         } else if (jobStatusSet.size() == 1 && jobStatusSet.contains(JobStatus.COMPLETED)) {
             // All batches in the job have finished
-            builder = buildJobStatusCompleted(builder, batches, orgUUID);
+            builder = buildJobStatusCompleted(builder, batches);
         } else {
             builder = builder.status(HttpStatus.ACCEPTED_202);
         }
