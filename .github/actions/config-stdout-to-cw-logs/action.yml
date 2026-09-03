@@ -12,7 +12,7 @@ runs:
         echo "CLOUDWATCH_LOG_GROUP=/dpc/gha/${WORKFLOW_FILE}" >> $GITHUB_ENV        
         echo "CLOUDWATCH_LOG_STREAM=${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}" >> "$GITHUB_ENV"
         
-        echo "STDOUT_TO_CWLOGS_SCRIPT=${{ github.workspace }}/scripts/stdout-to-cwlogs.sh" >> $GITHUB_ENV
+        echo "STDOUT_TO_CWLOGS_SCRIPT=${{ github.action_path }}/scripts/stdout-to-cwlogs.sh" >> $GITHUB_ENV
       shell: bash
 
     - name: Create Log Group if needed
