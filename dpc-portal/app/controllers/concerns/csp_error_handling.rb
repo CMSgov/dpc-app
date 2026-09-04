@@ -27,7 +27,7 @@ module CspErrorHandling
                 invitation: invitation_id)
     end
 
-    redirect_to invitation_url, alert:  "We weren't able to verify your identity because the authentication process failed. If this was unintentional, please try signing in again."
+    redirect_to invitation_url, alert:  "We weren't able to complete identity verification."
   end
 
   def handle_csp_auth_error
