@@ -29,15 +29,19 @@ class CspController < ApplicationController
   end
 
   def logout
-    if params[:invitation_id].present?
-      invitation = Invitation.find(params[:invitation_id])
-      session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id, invitation.id)
-    end
+    store_invitation_return_url if params[:invitation_id].present?
 
     redirect_to url_for_logout(csp_session.current), allow_other_host: true
   end
 
   private
+
+  def store_invitation_return_url
+    invitation = Invitation.find(params[:invitation_id])
+    session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id,
+                                                           invitation.id,
+                                                           invitation.token)
+  end
 
   def auth_details
     @auth_details ||= request.env['omniauth.auth']
