@@ -14,6 +14,7 @@ class ClearController < CspController
     [auth.extra.raw_info.email]
   end
 
+  # CLEAR returns user info with "unknown" subject ID during cancellation flow
   def sign_in_canceled?(auth)
     auth.extra.raw_info.sub.downcase == 'unknown'
   end

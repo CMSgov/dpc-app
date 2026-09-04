@@ -12,6 +12,7 @@ class CspController < ApplicationController
     return render_ial1_blocked if ial_1_user?(auth_details)
     return unless (active_csp = csp(auth_details.provider))
 
+    # redirect CLEAR cancellation so that the UX is the same for all CSP
     if sign_in_canceled?(auth_details)
       return redirect_to csp_failure_path(message: 'access_denied', strategy: active_csp.name)
     end
