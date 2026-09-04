@@ -2,6 +2,12 @@
 
 # Record of invitation, with possible verification code
 class Invitation < ApplicationRecord
+  TOKEN_LENGTH = 24
+  TOKEN_FORMAT = /\A[A-Za-z0-9]{#{TOKEN_LENGTH}}\z/
+
+  has_secure_token :token, length: TOKEN_LENGTH, on: :initialize
+
+  validates :token, presence: true, uniqueness: true, format: { with: TOKEN_FORMAT }
   validates :invited_by, :invited_given_name, :invited_family_name, presence: true, if: :needs_validation?
   validates :invited_email, :invited_email_confirmation, presence: true, if: :new_record?
   validates :invited_email, format: URI::MailTo::EMAIL_REGEXP, confirmation: true, if: :new_record?

@@ -549,7 +549,8 @@ RSpec.shared_examples 'a CSP client' do |config|
       invitation = create(:invitation, :ao)
       delete "/logout?invitation_id=#{invitation.id}"
       expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
-                                                                                 invitation.id)
+                                                                                 invitation.id,
+                                                                                 invitation.token)
     end
   end
 

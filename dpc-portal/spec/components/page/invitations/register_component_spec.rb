@@ -9,7 +9,7 @@ RSpec.describe Page::Invitations::RegisterComponent, type: :component do
   describe 'cd' do
     let(:invitation) { create(:invitation, :cd) }
     it 'should post to register' do
-      expected = "/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/register"
+      expected = invitation_url_for(invitation.provider_organization, invitation, 'register')
       form = page.find('form')
       expect(form[:action]).to eq expected
     end
@@ -23,7 +23,7 @@ RSpec.describe Page::Invitations::RegisterComponent, type: :component do
     end
 
     it 'should post to register' do
-      expected = "/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/register"
+      expected = invitation_url_for(invitation.provider_organization, invitation, 'register')
       form = page.find('form')
       expect(form[:action]).to eq expected
     end
