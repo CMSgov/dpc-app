@@ -132,7 +132,7 @@ RSpec.describe 'Invitations', type: :request do
       post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
     end
 
-    it 'should let the user try again if fail to proof' do
+    it 'should let the user try again if they fail to sign in' do
       org_id = invitation.provider_organization.id
       post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
       get '/auth/failure'
@@ -367,7 +367,7 @@ RSpec.describe 'Invitations', type: :request do
               confirm_cd_organization_invitation_url(invitation.provider_organization.id, invitation)
             end
           end
-          context 'fail to proof' do
+          context 'fail to sign in' do
             let(:invitation) { create(:invitation, :cd) }
             let(:org_id) { invitation.provider_organization.id }
             it 'should show step navigation' do
@@ -391,7 +391,7 @@ RSpec.describe 'Invitations', type: :request do
               accept_organization_invitation_url(invitation.provider_organization.id, invitation)
             end
           end
-          context 'fail to proof' do
+          context 'fail to sign in' do
             let(:invitation) { create(:invitation, :ao) }
             let(:org_id) { invitation.provider_organization.id }
             it 'should show step 2' do
