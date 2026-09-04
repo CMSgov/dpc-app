@@ -20,15 +20,14 @@ module CspErrorHandling
   end
 
   def handle_invitation_flow_failure(invitation_url, invitation_id)
-    if csp_user_cancelled?
-      redirect_to invitation_url, alert: "Please sign in to continue."
-    else
+    if csp_auth_error?
       log_event(:info, 'Failed invitation flow',
                 action_context: LoggingConstants::ActionContext::Registration,
                 action_type: LoggingConstants::ActionType::FailedLogin,
                 invitation: invitation_id)
-      redirect_to invitation_url, alert:  "Something went wrong. Please try to sign in again."
     end
+
+    redirect_to invitation_url, alert:  "We weren't able to verify your identity because the authentication process failed. If this was unintentional, please try signing in again."
   end
 
   def handle_csp_auth_error
