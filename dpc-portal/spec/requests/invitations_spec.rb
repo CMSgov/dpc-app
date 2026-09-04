@@ -132,12 +132,16 @@ RSpec.describe 'Invitations', type: :request do
       post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
     end
 
-    it 'should show error page if fail to proof' do
+    it 'should let the user try again if fail to proof' do
       org_id = invitation.provider_organization.id
       post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
       get '/auth/failure'
-      expect(response).to be_forbidden
-      expect(response.body).to include(I18n.t('verification.fail_to_proof_text'))
+
+      if invitation.authorized_official?
+        expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation.id))
+      elsif invitation.credential_delegate?
+        expect(response).to redirect_to(confirm_cd_organization_invitation_path(org_id, invitation.id))
+      end
     end
   end
 
@@ -366,11 +370,12 @@ RSpec.describe 'Invitations', type: :request do
           context 'fail to proof' do
             let(:invitation) { create(:invitation, :cd) }
             let(:org_id) { invitation.provider_organization.id }
-            it 'should not show step navigation' do
+            it 'should show step navigation' do
               post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
               get '/auth/failure'
-              expect(response).to be_forbidden
-              expect(response.body).to_not include('<span class="usa-step-indicator__current-step">')
+
+              follow_redirect!
+              expect(response.body).to include('<span class="usa-step-indicator__current-step">')
             end
           end
         end
@@ -392,7 +397,8 @@ RSpec.describe 'Invitations', type: :request do
             it 'should show step 2' do
               post "/organizations/#{org_id}/invitations/#{invitation.id}/login", params: provider_params
               get '/auth/failure'
-              expect(response).to be_forbidden
+
+              follow_redirect!
               expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
             end
           end
