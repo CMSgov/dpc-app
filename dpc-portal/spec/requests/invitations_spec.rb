@@ -164,9 +164,13 @@ RSpec.describe 'Invitations', type: :request do
       get '/auth/failure'
 
       if invitation.authorized_official?
-        expect(response).to redirect_to(accept_organization_invitation_path(org_id, invitation.id, invitation.token))
+        expect(response).to redirect_to(accept_organization_invitation_path(org_id,
+                                                                            invitation.id,
+                                                                            invitation.token))
       elsif invitation.credential_delegate?
-        expect(response).to redirect_to(confirm_cd_organization_invitation_path(org_id, invitation.id, invitation.token))
+        expect(response).to redirect_to(confirm_cd_organization_invitation_path(org_id,
+                                                                                invitation.id,
+                                                                                invitation.token))
       end
     end
   end
@@ -1222,7 +1226,6 @@ RSpec.describe 'Invitations', type: :request do
 end
 
 def log_in(provider:, template: user_info_template)
-
   csp_response = { uid: template['sub'],
                    credentials: { expires_in: 899,
                                   token: 'bearer-token' },

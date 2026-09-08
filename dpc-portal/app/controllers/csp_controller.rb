@@ -26,9 +26,7 @@ class CspController < ApplicationController
 
   def failure
     invitation_flow_match = session[:user_return_to]&.match(%r{/organizations/([0-9]+)/invitations/([0-9]+)})
-    if invitation_flow_match
-      return handle_invitation_flow_failure(session[:user_return_to], invitation_flow_match[2])
-    end
+    return handle_invitation_flow_failure(session[:user_return_to], invitation_flow_match[2]) if invitation_flow_match
 
     return handle_csp_auth_error if csp_auth_error?
     return handle_signin_cancel if csp_user_cancelled?
@@ -135,6 +133,6 @@ class CspController < ApplicationController
   def all_emails(auth) = auth.extra.raw_info.all_emails
 
   def ial_1_user?(auth) = auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
-  def sign_in_canceled?(auth) = false
+  def sign_in_canceled?(_auth) = false
   def store_id_token? = false
 end

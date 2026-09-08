@@ -87,7 +87,6 @@ module LoginSupport
         raw_info: {
           sub: csp_user.uuid
         }
-      }
-    }
+      } }
   end
 end

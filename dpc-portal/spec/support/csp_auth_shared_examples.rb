@@ -124,9 +124,7 @@ RSpec.shared_examples 'a CSP client' do |config|
             .to_return(body: csp_auth_response.to_json, status: 200)
 
           orig_csp_auth_response = csp_auth_response
-          if orig_csp_name == 'clear'
-            orig_csp_auth_response[:extra][:raw_info].merge!({ sub: csp_auth_response[:uid] })
-          end
+          orig_csp_auth_response[:extra][:raw_info].merge!({ sub: csp_auth_response[:uid] }) if orig_csp_name == 'clear'
 
           stub_request(:get, CspUtils.user_info_url(orig_csp_name))
             .with(headers: { Authorization: "Bearer #{token}" })
@@ -206,9 +204,7 @@ RSpec.shared_examples 'a CSP client' do |config|
           create(:user_email, csp_user:, email:, primary: true, active: true)
 
           orig_csp_auth_response = csp_auth_response
-          if orig_csp_name == 'clear'
-            orig_csp_auth_response[:extra][:raw_info].merge!({ sub: csp_auth_response[:uid] })
-          end
+          orig_csp_auth_response[:extra][:raw_info].merge!({ sub: csp_auth_response[:uid] }) if orig_csp_name == 'clear'
 
           stub_request(:get, CspUtils.user_info_url(orig_csp_name))
             .with(headers: { Authorization: "Bearer #{token}" })
