@@ -255,7 +255,8 @@ RSpec.shared_examples 'a CSP client' do |config|
         expect(response).to be_redirect
         expect(response.location).to eq organizations_url
         follow_redirect!
-        expect(response.location).to eq sign_in_url
+        expect(response.body).to include('The email you used to sign in was not recognized')
+        expect(response.body).to include('Back to sign in')
       end
 
       it 'sets authentication token' do
