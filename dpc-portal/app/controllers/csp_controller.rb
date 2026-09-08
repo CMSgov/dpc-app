@@ -12,8 +12,8 @@ class CspController < ApplicationController
     return render_ial1_blocked if ial_1_user?(auth_details)
     return unless (active_csp = csp(auth_details.provider))
 
-    # redirect CLEAR cancellation so that the UX is the same for all CSP
-    if sign_in_canceled?(auth_details)
+    # required to redirect CLEAR cancellation so that the UX is the same for all CSP
+    if auth_details.credentials.id_token.nil?
       return redirect_to csp_failure_path(message: 'access_denied', strategy: active_csp.name)
     end
 
@@ -133,6 +133,5 @@ class CspController < ApplicationController
   def all_emails(auth) = auth.extra.raw_info.all_emails
 
   def ial_1_user?(auth) = auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
-  def sign_in_canceled?(_auth) = false
   def store_id_token? = false
 end
