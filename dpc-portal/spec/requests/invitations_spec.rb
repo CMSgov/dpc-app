@@ -1228,7 +1228,8 @@ end
 def log_in(provider:, template: user_info_template)
   csp_response = { uid: template['sub'],
                    credentials: { expires_in: 899,
-                                  token: 'bearer-token' },
+                                  token: 'bearer-token',
+                                  id_token: 'id-token' },
                    info: { email: template['email'] },
                    extra: { raw_info: { given_name: template['given_name'],
                                         family_name: template['family_name'],
