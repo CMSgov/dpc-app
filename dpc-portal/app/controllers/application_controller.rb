@@ -44,7 +44,7 @@ class ApplicationController < ActionController::Base
   private
 
   def render_unauthorized_error
-    return unless csp_session.active? && csp_session.current && csp_session.user.blank?
+    return unless csp_session.token.present? && csp_session.current && csp_session.user.blank?
 
     render(Page::Utility::ErrorComponent.new(nil, 'email_mismatch', csp: csp_session.current), status: :forbidden)
   end
