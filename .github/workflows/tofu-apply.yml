@@ -49,9 +49,13 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{ contains(fromJSON('["dev", "test"]'), inputs.environment) && secrets.NON_PROD_ACCOUNT_ID || secrets.PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.environment }}-github-actions
           aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Setup stdout-to-cw-logs
+        uses: $/.github/actions/config-stdout-to-cw-logs
+
       - name: tofu apply - config
         working-directory: ops/services/10-config/
         run: |
-          tofu init -var env=$ENV -reconfigure
-          tofu plan -var env=$ENV -out=tfplan
-          tofu apply tfplan
+          tofu init -var env=$ENV -reconfigure | "$STDOUT_TO_CWLOGS_SCRIPT"
+          tofu plan -var env=$ENV -out=tfplan | "$STDOUT_TO_CWLOGS_SCRIPT"
+          tofu apply tfplan | "$STDOUT_TO_CWLOGS_SCRIPT"

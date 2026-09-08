@@ -1,0 +1,62 @@
+name: "Config std-out-to-cw-logs"
+description: Composite action to configure std-out-to-cw-logs
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup environment
+      run: |        
+        # github.workflow_ref looks like: blah/blah/my-workflow.yml@/blah/blah/my-branch
+        # We just want "my-workflow" for the log group
+        WORKFLOW_FILE=$(echo "${{ github.workflow_ref }}" | sed -E 's/.*\.github\/workflows\/(.*)\.ya?ml@.*/\1/')
+        echo "CLOUDWATCH_LOG_GROUP=/dpc/gha/${WORKFLOW_FILE}" >> $GITHUB_ENV        
+        echo "CLOUDWATCH_LOG_STREAM=${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}" >> "$GITHUB_ENV"
+        
+        echo "STDOUT_TO_CWLOGS_SCRIPT=${{ github.action_path }}/scripts/stdout-to-cwlogs.sh" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Create Log Group if needed
+      run: |
+        # Attempt to create the Log Group, swallowing any error code that is returned and also
+        # capture the stderr output so that it can be checked
+        create_log_group_stderr="$(
+          aws logs create-log-group \
+            --log-group-name "$CLOUDWATCH_LOG_GROUP" 2>&1 >/dev/null || true
+        )"
+
+        # If there was an error message logged by create-log-group and that error was not
+        # indicating that the Log Group already exists (which is fine), then log that there was an
+        # unrecoverable error and exit
+        if [[
+          -n $create_log_group_stderr &&
+          $create_log_group_stderr != *"ResourceAlreadyExistsException"* ]] \
+          ; then
+          echo "Unrecoverable error occurred when trying to create Log Group" \
+            "'$CLOUDWATCH_LOG_GROUP'"
+          echo "$create_log_group_stderr"
+          exit 1
+        fi
+      shell: bash
+
+    - name: Create Log Stream if needed
+      run: |
+        create_log_stream_stderr="$(
+          aws logs create-log-stream --log-group-name "$CLOUDWATCH_LOG_GROUP" \
+            --log-stream-name "$CLOUDWATCH_LOG_STREAM" 2>&1 >/dev/null || true
+        )"
+
+        if [[
+          -n $create_log_stream_stderr &&
+          $create_log_stream_stderr != *"ResourceAlreadyExistsException"* ]] \
+          ; then
+          echo "Unrecoverable error occurred when trying to create Log Stream" \
+            "'$CLOUDWATCH_LOG_STREAM' in Log Group '$CLOUDWATCH_LOG_GROUP'"
+          echo "$create_log_stream_stderr"
+          exit 1
+        fi
+
+        echo "'$CLOUDWATCH_LOG_STREAM' in Log Group '$CLOUDWATCH_LOG_GROUP'" \
+          "created or exists already"
+        echo "Tail the Log Stream to view OpenTofu output in realtime:"
+        echo "aws logs tail --since 1h --follow '$CLOUDWATCH_LOG_GROUP'"
+      shell: bash
