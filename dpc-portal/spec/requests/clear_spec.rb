@@ -168,12 +168,12 @@ RSpec.describe 'Clear', type: :request do
       before do
         OmniAuth.config.test_mode = true
         OmniAuth.config.add_mock(:clear,
-                                  { uid: "unknown",
-                                    credentials: { expires_in: 899,
+                                 { uid: 'unknown',
+                                   credentials: { expires_in: 899,
                                                   token:,
                                                   id_token: nil },
-                                    info: { email: 'Unknown' },
-                                    extra: { raw_info: { sub: 'unknown',
+                                   info: { email: 'Unknown' },
+                                   extra: { raw_info: { sub: 'unknown',
                                                         email: 'Unknown',
                                                         given_name: 'Unknown',
                                                         family_name: 'Unknown' } } })
