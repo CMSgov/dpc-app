@@ -122,13 +122,9 @@ RSpec.shared_examples 'a CSP client' do |config|
           stub_request(:get, CspUtils.user_info_url(provider))
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: csp_auth_response.to_json, status: 200)
-
-          orig_csp_auth_response = csp_auth_response
-          orig_csp_auth_response[:extra][:raw_info].merge!({ sub: csp_auth_response[:uid] }) if orig_csp_name == 'clear'
-
           stub_request(:get, CspUtils.user_info_url(orig_csp_name))
             .with(headers: { Authorization: "Bearer #{token}" })
-            .to_return(body: orig_csp_auth_response.to_json, status: 200)
+            .to_return(body: csp_auth_response.to_json, status: 200)
         end
 
         it 'renders the link account component' do
@@ -203,9 +199,6 @@ RSpec.shared_examples 'a CSP client' do |config|
           csp_user = create(:csp_user, user:, uuid:, csp: orig_csp)
           create(:user_email, csp_user:, email:, primary: true, active: true)
 
-          orig_csp_auth_response = csp_auth_response
-          orig_csp_auth_response[:extra][:raw_info].merge!({ sub: csp_auth_response[:uid] }) if orig_csp_name == 'clear'
-
           stub_request(:get, CspUtils.user_info_url(orig_csp_name))
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: csp_auth_response.to_json, status: 200)
@@ -213,7 +206,7 @@ RSpec.shared_examples 'a CSP client' do |config|
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: ssn_mismatch_response.to_json, status: 200)
 
-          OmniAuth.config.add_mock(orig_csp_name, orig_csp_auth_response)
+          OmniAuth.config.add_mock(orig_csp_name, csp_auth_response)
           OmniAuth.config.add_mock(provider, csp_auth_response)
         end
 
