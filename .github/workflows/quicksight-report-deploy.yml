@@ -99,6 +99,9 @@ jobs:
           pytest
           pylint .
 
+      - name: Setup stdout-to-cw-logs
+        uses: $/.github/actions/config-stdout-to-cw-logs
+
       - name: Install Cosign to verify tenv and tofu installs
         uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 #v4.1.1
 
@@ -108,10 +111,10 @@ jobs:
       - name: Verify plan
         run: |
           cd dpc-ops/terraform/lambda/quicksight-reports
-          tofu init -backend-config=backends/${{ inputs.env }}.config
-          tofu plan -var env=${{ inputs.env }} -out dpc-quicksight-report-release-${{ inputs.env }}.tfplan 2>&1
+          tofu init -backend-config=backends/${{ inputs.env }}.config | "$STDOUT_TO_CWLOGS_SCRIPT"
+          tofu plan -var env=${{ inputs.env }} -out dpc-quicksight-report-release-${{ inputs.env }}.tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
 
       - name: Apply plan
         run: |
           cd dpc-ops/terraform/lambda/quicksight-reports
-          tofu apply dpc-quicksight-report-release-${{ inputs.env }}.tfplan
+          tofu apply dpc-quicksight-report-release-${{ inputs.env }}.tfplan | "$STDOUT_TO_CWLOGS_SCRIPT"
