@@ -12,6 +12,11 @@ class CspController < ApplicationController
     return render_ial1_blocked if ial_1_user?(auth_details)
     return unless (active_csp = csp(auth_details.provider))
 
+    # redirect CLEAR cancellation so that the UX is the same for all CSP
+    if auth_details.credentials.id_token.nil?
+      return redirect_to csp_failure_url(message: 'access_denied', strategy: active_csp.name)
+    end
+
     user_actions(auth_details, active_csp)
   end
 
@@ -21,11 +26,12 @@ class CspController < ApplicationController
 
   def failure
     invitation_flow_match = session[:user_return_to]&.match(%r{/organizations/([0-9]+)/invitations/([0-9]+)})
-    return handle_invitation_flow_failure(invitation_flow_match[2]) if invitation_flow_match
-    return handle_csp_auth_error if csp_auth_error?
-    return handle_signin_fail unless csp_user_error?
+    return handle_invitation_flow_failure(session[:user_return_to], invitation_flow_match[2]) if invitation_flow_match
 
-    handle_signin_cancel
+    return handle_csp_auth_error if csp_auth_error?
+    return handle_signin_cancel if csp_user_cancelled?
+
+    handle_signin_fail
   end
 
   def logout

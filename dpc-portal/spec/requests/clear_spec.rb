@@ -163,5 +163,28 @@ RSpec.describe 'Clear', type: :request do
         follow_redirect!
       end
     end
+
+    context 'user cancels sign in' do
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.add_mock(:clear,
+                                 { uid: 'unknown',
+                                   credentials: { expires_in: 899,
+                                                  token:,
+                                                  id_token: nil },
+                                   info: { email: 'Unknown' },
+                                   extra: { raw_info: { sub: 'unknown',
+                                                        email: 'Unknown',
+                                                        given_name: 'Unknown',
+                                                        family_name: 'Unknown' } } })
+      end
+
+      it 'should redirect to failure path' do
+        post '/auth/clear'
+        follow_redirect!
+
+        expect(response.location).to eq csp_failure_url(message: 'access_denied', strategy: 'clear')
+      end
+    end
   end
 end

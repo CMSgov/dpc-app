@@ -107,6 +107,9 @@ CLEAR_CLIENT_CONFIG = {
 Rails.application.config.middleware.use OmniAuth::Builder do
   OmniAuth.config.logger = Rails.logger
 
+  ## Uncomment to redirect errors in localhost
+  ## OmniAuth.config.failure_raise_out_environments = []
+
   ## CLEAR
   provider :openid_connect, CLEAR_CLIENT_CONFIG
 

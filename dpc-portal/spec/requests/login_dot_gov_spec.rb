@@ -11,10 +11,12 @@ RSpec.describe 'LoginDotGov', type: :request do
   describe 'POST /auth/login_dot_gov' do
     let!(:csp) { Csp.find_by(name: 'login_dot_gov') || create(:csp, :login_dot_gov) }
     let(:token) { 'bearer-token' }
+    let(:id_token) { 'id-token' }
     let(:csp_auth_response) do
       { uid: uuid,
         credentials: { expires_in: 899,
-                       token: },
+                       token:,
+                       id_token: },
         info: { email: 'bob@example.com' },
         extra: { raw_info: { given_name: 'Bob',
                              family_name: 'Hoskins',
@@ -44,7 +46,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         OmniAuth.config.add_mock(
           :login_dot_gov,
           { uid: uuid,
-            credentials: { expires_in: 899, token: },
+            credentials: { expires_in: 899, token:, id_token: },
             info: { email: 'email1@example.com' },
             extra: { raw_info: { given_name: 'Bob',
                                  family_name: 'Hoskins',
@@ -87,7 +89,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         OmniAuth.config.add_mock(
           :login_dot_gov,
           { uid: uuid,
-            credentials: { expires_in: 899, token: },
+            credentials: { expires_in: 899, token:, id_token: },
             info: { email: 'email@example.com' },
             extra: { raw_info: { given_name: 'Bob',
                                  family_name: 'Hoskins',
@@ -128,7 +130,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         OmniAuth.config.add_mock(
           :login_dot_gov,
           { uid: uuid,
-            credentials: { expires_in: 899, token: },
+            credentials: { expires_in: 899, token:, id_token: },
             info: { email: 'email1@example.com' },
             extra: { raw_info: { given_name: 'Bob',
                                  family_name: 'Hoskins',

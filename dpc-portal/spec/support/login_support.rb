@@ -46,7 +46,7 @@ module LoginSupport
 
     { uid: csp_user.uuid,
       info: { email: primary_email },
-      credentials: { token: 'mock_token', expires_in: 899 },
+      credentials: { token: 'mock_token', id_token: 'mock_id_token', expires_in: 899 },
       extra: {
         raw_info: {
           given_name: user.given_name,
@@ -64,7 +64,7 @@ module LoginSupport
 
     { uid: csp_user.uuid,
       info: { email: primary_email },
-      credentials: { token: 'mock_token', expires_in: 300 },
+      credentials: { token: 'mock_token', id_token: 'mock_id_token', expires_in: 300 },
       extra: {
         raw_info: {
           SSN: 111_887_777,
@@ -82,9 +82,11 @@ module LoginSupport
 
     { uid: csp_user.uuid,
       info: { email: primary_email },
-      credentials: { token: 'mock_token', expires_in: 300 },
+      credentials: { token: 'mock_token', id_token: 'mock_id_token', expires_in: 300 },
       extra: {
-        raw_info: {}
+        raw_info: {
+          sub: csp_user.uuid
+        }
       } }
   end
 end

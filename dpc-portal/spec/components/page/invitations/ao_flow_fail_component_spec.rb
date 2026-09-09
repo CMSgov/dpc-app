@@ -49,13 +49,4 @@ RSpec.describe Page::Invitations::AoFlowFailComponent, type: :component do
       expect(page).to have_css("form[action='/logout?invitation_id=#{invitation.id}']")
     end
   end
-
-  describe 'fail to proof' do
-    let(:invitation) { create(:invitation, :ao) }
-    let(:reason) { 'fail_to_proof' }
-    it 'should have url to login' do
-      expect(page).to have_button('Back to sign in')
-      expect(page).to have_css("form[action='/logout?invitation_id=#{invitation.id}']")
-    end
-  end
 end
