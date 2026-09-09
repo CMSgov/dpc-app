@@ -428,7 +428,7 @@ GEM
       rubocop (>= 1.75.0, < 2.0)
       rubocop-ast (>= 1.47.1, < 2.0)
     ruby-progressbar (1.13.0)
-    rubyzip (2.4.1)
+    rubyzip (3.6.0)
     sassc (2.4.0)
       ffi (~> 1.9)
     sassc-rails (2.1.2)
