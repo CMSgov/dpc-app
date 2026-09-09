@@ -14,7 +14,7 @@ class CspController < ApplicationController
 
     # redirect CLEAR cancellation so that the UX is the same for all CSP
     if auth_details.credentials.id_token.nil?
-      return redirect_to csp_failure_path(message: 'access_denied', strategy: active_csp.name)
+      return redirect_to csp_failure_url(message: 'access_denied', strategy: active_csp.name)
     end
 
     user_actions(auth_details, active_csp)

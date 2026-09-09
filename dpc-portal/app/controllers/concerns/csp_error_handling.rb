@@ -19,7 +19,7 @@ module CspErrorHandling
     params[:strategy] || csp_session.current
   end
 
-  def handle_invitation_flow_failure(invitation_url, invitation_id)
+  def handle_invitation_flow_failure(saved_invitation_link, invitation_id)
     if csp_auth_error?
       log_event(:info, 'Failed invitation flow',
                 action_context: LoggingConstants::ActionContext::Registration,
@@ -27,7 +27,7 @@ module CspErrorHandling
                 invitation: invitation_id)
     end
 
-    redirect_to invitation_url, alert: "We weren't able to complete identity verification."
+    redirect_to saved_invitation_link, alert: "We weren't able to complete identity verification."
   end
 
   def handle_csp_auth_error
