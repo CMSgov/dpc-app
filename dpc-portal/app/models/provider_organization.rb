@@ -2,6 +2,12 @@
 
 # Link class to dpc-api Organization
 class ProviderOrganization < ApplicationRecord
+  PERSISTENT_TEST_ORG_IDS = %w[
+    a3abaf86-2cd4-4a32-a57e-1bda741ed00d
+    66e9f10c-31c7-41a4-b88f-4d10e59432d7
+    97509c9f-4350-4b4f-a9d4-aba4dadffe1c
+  ].freeze
+
   audited only: %i[verification_reason verification_status], on: :update
 
   validates :npi, presence: true

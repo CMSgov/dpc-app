@@ -12,6 +12,8 @@ class VerifyProviderOrganizationJob < ApplicationJob
     service = AoVerificationService.new
     @start = Time.now
     orgs_to_check.each do |org|
+      next if ProviderOrganization::PERSISTENT_TEST_ORG_IDS.include?(org.dpc_api_organization_id)
+
       CurrentAttributes.save_organization_attributes(org, nil)
       enrollments_and_waivers = service.get_approved_enrollments(org.npi)
       log_batch_verification_waivers(enrollments_and_waivers)
