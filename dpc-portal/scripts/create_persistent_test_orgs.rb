@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-environment = ENV['ENV']
+environment = ENV.fetch('ENV', nil)
 
 invite_emails = {
   clear: {
