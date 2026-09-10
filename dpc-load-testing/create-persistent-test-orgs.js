@@ -42,6 +42,11 @@ export default function () {
     const existingOrgResponse = getOrganizationById(token, organization.id);
 
     if (existingOrgResponse.status == 200) {
+      const existingOrganization = existingOrgResponse.json();
+      if (!existingOrganization.identifier.some(identifier => identifier.value === organization.npi)) {
+        console.error(existingOrgResponse.body);
+        exec.test.abort(`org ${organization.id} exists but does not match npi ${organization.npi}`);
+      }
       console.log(`org already exists: ${organization.id}`);
       continue;
     }
@@ -56,7 +61,10 @@ export default function () {
       org,
       {
         'create org response code was 200': res => res.status === 200,
-        'create org response has id': res => res.json().id,
+        'create org response has expected id': res => res.json().id === organization.id,
+        'create org response has expected npi': res => (
+          res.json().identifier.some(identifier => identifier.value === organization.npi)
+        ),
       }
     );
 
