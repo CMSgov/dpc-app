@@ -1,0 +1,36 @@
+# frozen_string_literal: true
+
+# Handles deletion of CdOrgLinks
+class CdOrgLinksController < ApplicationController
+  before_action :authenticate_user!
+  before_action :check_user_verification
+  before_action :load_organization
+  before_action :require_ao
+
+  def destroy
+    cd_org_link.disable!
+    log_event(:info, 'Credential Delegate removed from organization',
+              action_context: LoggingConstants::ActionContext::Registration,
+              action_type: LoggingConstants::ActionType::CdRemovedFromOrg,
+              **csp_log_context)
+    flash[:success] = 'Successfully removed Credential Delegate.'
+    redirect_to organization_path(organization)
+  rescue ActiveRecord::RecordInvalid
+    log_event(:error, 'Credential Delegate not removed from organization',
+              action_context: LoggingConstants::ActionContext::Registration,
+              action_type: LoggingConstants::ActionType::CdNotRemovedFromOrg,
+              **csp_log_context)
+    flash[:alert] = 'Failed to remove Credential Delegate. Please try again later.'
+    redirect_to organization_path(organization)
+  end
+
+  private
+
+  def organization
+    @organization ||= ProviderOrganization.find(params[:organization_id])
+  end
+
+  def cd_org_link
+    @cd_org_link ||= organization.cd_org_links.find(params[:id])
+  end
+end

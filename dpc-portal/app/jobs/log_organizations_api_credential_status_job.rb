@@ -30,8 +30,8 @@ class LogOrganizationsApiCredentialStatusJob < ApplicationJob
     update_organization_aggregate_hash(organizations_credential_aggregate_status, credential_status)
   rescue StandardError
     Rails.logger.error(['Failed to fetch api credential status for organization',
-                        {  name: organization_name,
-                           dpc_api_org_id: organization_id }])
+                        { name: organization_name,
+                          dpc_api_org_id: organization_id }])
   end
 
   def update_organization_aggregate_hash(aggregate_stats, credential_status)

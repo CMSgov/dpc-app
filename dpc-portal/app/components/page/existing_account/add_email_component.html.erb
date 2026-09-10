@@ -14,8 +14,15 @@
         </ul>
     </div>
     <div>
-        <%= button_to @path, class: 'usa-button margin-bottom-1', data: { turbo: false } do %>
-            <span>Add new email</span>
-        <% end %>
+      <ul class="usa-button-group">
+        <li class="usa-button-group__item">
+          <%= button_to @path, class: 'usa-button', data: { turbo: false } do %>
+            <span>Link to existing account</span>
+          <% end %>
+        </li>
+        <li class="usa-button-group__item">
+          <%= button_to 'Start over', destroy_user_session_path, method: :delete, class: 'usa-button usa-button--outline' %>
+        </li>
+      </ul>
     </div>
 </div>

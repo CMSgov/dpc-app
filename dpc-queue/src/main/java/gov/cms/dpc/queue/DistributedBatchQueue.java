@@ -292,6 +292,10 @@ public class DistributedBatchQueue extends JobQueueCommon {
 
                 final var delay = Duration.between(job.getStartTime().orElseThrow(), job.getCompleteTime().orElseThrow());
                 successTimer.update(delay.toMillis(), TimeUnit.MILLISECONDS);
+
+                if (isJobFullyCompleted(session, job.getJobID())) {
+                    logger.info("dpcMetric=jobCompleted, jobID={}, orgId={}, orgNpi={}", job.getJobID(), job.getOrgID(), job.getOrgNPI());
+                }
             } finally {
                 tx.commit();
             }
@@ -391,5 +395,14 @@ public class DistributedBatchQueue extends JobQueueCommon {
                 throw new JobQueueUnhealthy(DB_UNHEALTHY, e);
             }
         }
+    }
+
+    private boolean isJobFullyCompleted(Session session, UUID jobID) {
+        Long incompleteCount = session
+                .createQuery("select count(*) from JobQueueBatch where jobID = :jobID and status != :completed", Long.class)
+                .setParameter("jobID", jobID)
+                .setParameter("completed", JobStatus.COMPLETED)
+                .uniqueResult();
+        return incompleteCount == 0;
     }
 }

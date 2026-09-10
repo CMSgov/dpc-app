@@ -79,7 +79,7 @@ RSpec.describe IpAddressManager do
         stub_self_returning_api_client(message: :delete_ip_address,
                                        with: [api_id, addr_guid])
 
-        response = manager.delete_ip_address(id: addr_guid)
+        response = manager.delete_ip_address(addr_guid)
 
         expect(response).to be true
       end
@@ -92,7 +92,7 @@ RSpec.describe IpAddressManager do
                                        success: false,
                                        with: [api_id, addr_guid])
 
-        response = manager.delete_ip_address(id: addr_guid)
+        response = manager.delete_ip_address(addr_guid)
 
         expect(response).to be false
       end

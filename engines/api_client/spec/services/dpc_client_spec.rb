@@ -13,14 +13,13 @@ RSpec.describe DpcClient do
     double('RegisteredOrg', api_id: 'some-api-key')
   end
 
-  # rubocop:disable Layout/LineLength
   before(:each) do
     allow(ENV).to receive(:fetch).with('API_METADATA_URL').and_return('http://dpc.example.com')
     allow(ENV).to receive(:fetch).with('API_ADMIN_URL').and_return('http://dpc.example.com')
+    # rubocop:disable-next Layout/LineLength
     allow(ENV).to receive(:fetch).with('GOLDEN_MACAROON').and_return('MDAyM2xvY2F0aW9uIGh0dHA6Ly9sb2NhbGhvc3Q6MzAwMgowMDM0aWRlbnRpZmllciBiODY2NmVjMi1lOWY1LTRjODctYjI0My1jMDlhYjgyY2QwZTMKMDAyZnNpZ25hdHVyZSA1hzDOqfW_1hasj-tOps9XEBwMTQIW9ACQcZPuhAGxwwo')
     allow(ENV).to receive(:fetch).with('ALLOW_INVALID_SSL_CERT', 'false').and_return('false')
   end
-  # rubocop:enable Layout/LineLength
 
   describe '#get_organization' do
     let(:headers) do

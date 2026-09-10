@@ -2,6 +2,8 @@
 
 # Handles public key requests
 class PublicKeysController < ApplicationController
+  include InputSanitization
+
   before_action :authenticate_user!
   before_action :check_user_verification
   before_action :load_organization
@@ -12,7 +14,7 @@ class PublicKeysController < ApplicationController
     render Page::PublicKey::NewKeyComponent.new(@organization)
   end
 
-  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable-next Metrics/AbcSize
   def create
     manager = PublicKeyManager.new(@organization.dpc_api_organization_id)
 
@@ -32,17 +34,17 @@ class PublicKeysController < ApplicationController
       render_error @errors[:root] || 'Invalid encoding'
     end
   end
-  # rubocop:enable Metrics/AbcSize
 
   def destroy
     manager = PublicKeyManager.new(@organization.dpc_api_organization_id)
-    if manager.delete_public_key(params)
-      log_credential_action(:public_key, params[:id], :remove)
+    sanitized_id = sanitize_uid(params[:id])
+    if sanitized_id && manager.delete_public_key(sanitized_id)
+      log_credential_action(:public_key, sanitized_id, :remove)
       flash[:success] = 'Public key deleted successfully.'
-      redirect_to organization_path(@organization, credential_start: true)
     else
       flash[:alert] = 'Public key could not be deleted.'
     end
+    redirect_to organization_path(@organization, credential_start: true)
   end
 
   def download_snippet

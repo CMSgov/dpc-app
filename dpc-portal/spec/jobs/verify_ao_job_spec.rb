@@ -117,8 +117,8 @@ RSpec.describe VerifyAoJob, type: :job do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info)
           .with(['Authorized official has a waiver',
-                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                   actionType: LoggingConstants::ActionType::AoHasWaiver }])
+                 hash_including(actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                                actionType: LoggingConstants::ActionType::AoHasWaiver)])
         VerifyAoJob.perform_now
       end
     end
@@ -131,8 +131,8 @@ RSpec.describe VerifyAoJob, type: :job do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info)
           .with(['Organization has a waiver',
-                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                   actionType: LoggingConstants::ActionType::OrgHasWaiver }])
+                 hash_including(actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                                actionType: LoggingConstants::ActionType::OrgHasWaiver)])
         VerifyAoJob.perform_now
       end
     end
@@ -147,7 +147,7 @@ RSpec.describe VerifyAoJob, type: :job do
                    providerOrganization: link.provider_organization.id }])
       end
 
-      # rubocop:disable Metrics/AbcSize
+      # rubocop:disable-next Metrics/AbcSize
       def expect_audits(link, also: [])
         expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck
 
@@ -168,7 +168,6 @@ RSpec.describe VerifyAoJob, type: :job do
           expect(link.provider_organization.audits.length).to eq 0
         end
       end
-      # rubocop:enable Metrics/AbcSize
 
       context :ao_med_sanctions do
         let(:user) { create(:user, pac_id: '900666666', verification_status: :approved) }

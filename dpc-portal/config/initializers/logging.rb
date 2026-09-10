@@ -9,6 +9,7 @@ module LoggingConstants
     BatchVerificationCheck = 'BatchVerificationCheck'
     HealthCheck = 'HealthCheck'
     Rendering = 'Rendering'
+    CredentialManagement = 'CredentialManagement'
   end
 
   module ActionType
@@ -26,6 +27,8 @@ module LoggingConstants
     CdLinkedToOrg = 'CdLinkedToOrg'
     AoAlreadyRegistered = 'AoAlreadyRegistered'
     CdAlreadyRegistered = 'CdAlreadyRegistered'
+    CdRemovedFromOrg = 'CdRemovedFromOrg'
+    CdNotRemovedFromOrg = 'CdNotRemovedFromOrg'
 
     BeginLogin = 'BeginLogin'
     UserLoggedIn = 'UserLoggedIn'
@@ -35,12 +38,18 @@ module LoggingConstants
     UserCancelledLogin = 'UserCancelledLogin'
     FailedLogin = 'FailedLogin'
     UserLoginWithoutAccount = 'UserLoginWithoutAccount'
+    CspUserNotFound = 'CspUserNotFound'
 
     MergeUserAccountEmail = 'MergeUserAccountEmail'
     AddNewUserEmail = 'AddNewUserEmail'
     DeactivateUserEmail = 'DeactivateUserEmail'
     ReactivateUserEmail = 'ReactivateUserEmail'
     UpdatePrimaryUserEmail = 'UpdatePrimaryUserEmail'
+    OidcUserInfoFailed = 'OidcUserInfoFailed'
+
+    MergeUserAccountCsp = 'MergeUserAccountCsp'
+    NameMismatch = 'NameMismatch'
+    CspUserCreated = 'CspUserCreated'
 
     FailAoPiiCheck = 'FailAoPiiCheck'
     FailCdPiiCheck = 'FailCdPiiCheck'
@@ -51,6 +60,7 @@ module LoggingConstants
 
     HealthCheckPassed = 'HealthCheckPassed'
     HealthCheckFailed = 'HealthCheckFailed'
+    MultiUserMatch = 'MultiUserMatch'
 
     InvalidInvitation = 'InvalidInvitation'
     UnacceptableInvitation = 'UnacceptableInvitation'
@@ -58,5 +68,6 @@ module LoggingConstants
     InvalidFlashStatus = 'InvalidFlashStatus'
 
     InvalidCsp = 'InvalidCsp'
+    CspUnavailable = 'CspUnavailable'
   end
 end

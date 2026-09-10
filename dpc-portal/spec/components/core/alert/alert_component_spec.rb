@@ -159,4 +159,40 @@ RSpec.describe Core::Alert::Component, type: :component do
       end
     end
   end
+
+  describe 'message_key option' do
+    context 'invalid instantiation' do
+      subject(:component) { described_class.new heading: 'Look', message_key: 'email_not_found' }
+
+      it 'raises an error' do
+        expect { render_component }.to raise_error(ArgumentError)
+      end
+    end
+    context 'valid instantiation' do
+      subject(:component) { described_class.new message_key: 'email_not_found' }
+
+      before { allow(component).to receive(:t).and_call_original }
+
+      it 'renders the component and translates the key into heading and message' do
+        render_component
+        expect(page).to have_selector('.usa-alert')
+
+        # the message_key is looked up under errors.<key> for both the heading and the body
+        expect(component).to have_received(:t).with('errors.email_not_found.status')
+        expect(component).to have_received(:t).with('errors.email_not_found.text')
+
+        expect(page.find('h2.usa-alert__heading'))
+          .to have_content(I18n.t('errors.email_not_found.status'))
+        expect(page.find('.usa-alert__text'))
+          .to have_content('Try again with a different email:')
+      end
+
+      it 'renders the translated message as html rather than escaping it' do
+        render_component
+        expect(page).to have_selector('.usa-alert__body ol li', count: 2)
+        expect(page.find('.usa-alert__body ol li', match: :first))
+          .to have_content('Sign out of your identity provider')
+      end
+    end
+  end
 end

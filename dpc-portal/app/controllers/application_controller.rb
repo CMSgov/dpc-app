@@ -4,6 +4,7 @@
 class ApplicationController < ActionController::Base
   include CspLogout
   include OrganizationAccess
+  include StructuredLogging
 
   before_action :check_session_length
   before_action :set_current_request_attributes
@@ -18,6 +19,7 @@ class ApplicationController < ActionController::Base
   def current_user
     @current_user ||= User.find_by(id: session[:user])
   end
+  helper_method :current_user
 
   def csp_session
     @csp_session ||= CspSession.new(session)
@@ -27,8 +29,10 @@ class ApplicationController < ActionController::Base
   def authenticate_user!
     return if current_user
 
-    flash[:alert] = t('devise.failure.unauthenticated')
     session[:user_return_to] = request.path
+    return if render_unauthenticated_error
+
+    flash[:alert] = t('devise.failure.unauthenticated')
     redirect_to sign_in_path
   end
 
@@ -38,6 +42,12 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  def render_unauthenticated_error
+    return unless csp_session.current && csp_session.user.blank?
+
+    render(Page::Utility::ErrorComponent.new(nil, 'email_mismatch', csp: csp_session.current), status: :forbidden)
+  end
 
   def check_user_verification
     return unless current_user&.rejected?
@@ -49,11 +59,17 @@ class ApplicationController < ActionController::Base
     session[:logged_in_at] ||= Time.now
     return unless session_timed_out?
 
+    timed_out_user_identifier = current_csp_user_identifier
+    timed_out_csp             = csp_session.current
+
     reset_session
     flash[:notice] = t('devise.failure.max_session_timeout', default: 'Your session has timed out.')
-    Rails.logger.info(['User session timed out',
-                       { actionContext: LoggingConstants::ActionContext::Authentication,
-                         actionType: LoggingConstants::ActionType::SessionTimedOut }])
+    log_event(:info, 'User session timed out',
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::SessionTimedOut,
+              user_identifier: timed_out_user_identifier,
+              csp: timed_out_csp)
+
     redirect_to sign_in_path
   end
 
@@ -76,11 +92,22 @@ class ApplicationController < ActionController::Base
                                  action:)
     return if log.save
 
-    logger.error(['CredentialAuditLog failure', { action:, credential_type:, dpc_api_credential_id: }])
+    log_event(:error, 'CredentialAuditLog failure',
+              action_context: LoggingConstants::ActionContext::CredentialManagement,
+              action:, credential_type:, dpc_api_credential_id:,
+              user_identifier: current_csp_user_identifier,
+              csp: csp_session.current)
   end
 
   # Helper method for logging csp with actionContext and actionType whenever it's available on the session
   def csp_log_context
     session[:csp].present? ? { csp: session[:csp] } : {}
+  end
+
+  def current_csp_user_identifier
+    csp = csp_session.current
+    return nil unless csp
+
+    current_user&.csp_user_for(csp)&.uuid
   end
 end

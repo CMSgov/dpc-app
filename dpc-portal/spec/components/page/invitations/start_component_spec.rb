@@ -30,7 +30,7 @@ RSpec.describe Page::Invitations::StartComponent, type: :component do
     end
 
     it 'should go to accept page' do
-      expected = "/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/accept"
+      expected = invitation_url_for(invitation.provider_organization, invitation, 'accept')
       link = page.find('a.usa-button')
       expect(link[:href]).to eq expected
     end
@@ -49,7 +49,7 @@ RSpec.describe Page::Invitations::StartComponent, type: :component do
 
     it 'should show start button' do
       button = page.find('.usa-button')
-      expect(button.text).to eq 'Get Started'
+      expect(button.text).to eq 'Get started'
     end
 
     it 'should include the correct musts' do
@@ -62,7 +62,7 @@ RSpec.describe Page::Invitations::StartComponent, type: :component do
     end
 
     it 'should go to confirm_cd page' do
-      expected = "/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/confirm_cd"
+      expected = invitation_url_for(invitation.provider_organization, invitation, 'confirm_cd')
       link = page.find('a.usa-button')
       expect(link[:href]).to eq expected
     end

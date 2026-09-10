@@ -35,6 +35,8 @@ RSpec.describe Page::Invitations::AoFlowFailComponent, type: :component do
     it 'should show bad npi error message' do
       node = page.find('.usa-alert__text')
       expect(node.text).to include(I18n.t('verification.bad_npi_status'))
+      expect(page).to have_button('Back to sign in')
+      expect(page).to have_css("form[action='/logout?invitation_id=#{invitation.id}']")
     end
   end
 
@@ -43,6 +45,8 @@ RSpec.describe Page::Invitations::AoFlowFailComponent, type: :component do
     it 'should show generic server error message' do
       node = page.find('.usa-alert__text')
       expect(node.text).to include(I18n.t('verification.server_error_status'))
+      expect(page).to have_button('Back to sign in')
+      expect(page).to have_css("form[action='/logout?invitation_id=#{invitation.id}']")
     end
   end
 
@@ -50,8 +54,8 @@ RSpec.describe Page::Invitations::AoFlowFailComponent, type: :component do
     let(:invitation) { create(:invitation, :ao) }
     let(:reason) { 'fail_to_proof' }
     it 'should have url to login' do
-      url = '/users/sign_in'
-      expect(page.find('a.usa-button')[:href]).to eq url
+      expect(page).to have_button('Back to sign in')
+      expect(page).to have_css("form[action='/logout?invitation_id=#{invitation.id}']")
     end
   end
 end

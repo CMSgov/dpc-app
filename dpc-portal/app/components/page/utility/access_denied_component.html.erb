@@ -2,7 +2,16 @@
   <% if @organization.present? %>
   <div class="margin-bottom-5">&larr; <%= link_to "Return to my organizations", organizations_path %></div>
   <h1><%= @organization.name %></h1>
-  <p><span class="text-bold">NPI:</span> <%= @organization.npi %></p>
+  <div class="margin-bottom-3 display-flex flex-row flex-start" style="gap:20px;">
+    <div><span class="text-bold">NPI-2:</span> <%= @organization.npi %></div>
+    <div><span class="text-bold">Role:</span> <%= @role %></div>
+    <div><span class="text-bold">Status:</span> 
+      <%= render Core::Icon::UswdsComponent.new(@icon, additional_classes: @classes) %>
+      <span class="margin-top-neg-2px"><%= @status %></span>
+    </div>
+  </div>
+  <div class="margin-bottom-3"><span class="text-bold">Authorized Official:</span> <%= @organization.ao %></div>
+  <div class="margin-bottom-5"><span class="text-bold">Organization ID:</span> <%= @organization.dpc_api_organization_id %></div>
   <% else %>
   <h1>Access Denied</h1>
   <% end %>

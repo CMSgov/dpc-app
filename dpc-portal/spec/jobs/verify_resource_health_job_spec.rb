@@ -19,13 +19,16 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
   end
 
   let(:job) { VerifyResourceHealthJob.new }
+  let(:login_dot_gov_discovery) { 'https://idp.int.identitysandbox.gov/.well-known/openid-configuration' }
+  let(:id_me_discovery) { 'https://api.idmelabs.com/oidc/.well-known/openid-configuration' }
+  let(:clear_discovery) { 'https://verified.clearme.com/integrations/.well-known/openid-configuration' }
 
   context 'can successfully send metrics' do
     describe 'everything healthy' do
       it 'should emit healthy metrics' do
         expect_dpc_api
         expect_cpi
-        expect_idp
+        expect_csp
 
         job.perform
       end
@@ -35,7 +38,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
       it 'should emit an unhealthy metric' do
         expect_dpc_api(response_successful: false, metric: 0)
         expect_cpi
-        expect_idp
+        expect_csp
 
         job.perform
       end
@@ -45,7 +48,7 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
       it 'should emit an unhealthy metric' do
         expect_dpc_api
         expect_cpi(auth_health: false, metric: 0)
-        expect_idp
+        expect_csp
 
         job.perform
       end
@@ -55,28 +58,37 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
       it 'should emit an unhealthy metric' do
         expect_dpc_api
         expect_cpi(api_health: false, metric: 0)
-        expect_idp
+        expect_csp
 
         job.perform
       end
     end
 
-    describe 'idp is down' do
+    describe 'csp is down' do
       it 'should emit an unhealthy metric' do
         expect_dpc_api
         expect_cpi
-        expect_idp(site_status: 500, metric: 0)
+        expect_csp(site_status: 500, metric: 0)
 
         job.perform
       end
     end
 
-    describe 'idp is not configured' do
+    describe 'csp is not configured' do
       it 'should emit an unhealthy metric when url is not configured' do
-        stub_const('VerifyResourceHealthJob::IDP_HOSTS', [nil, nil, nil])
+        allow(CspConfig).to receive(:all).and_return(
+          [
+            instance_double(CspConfig, code: 'login_dot_gov', host: nil,
+                                       discovery_uri: '/.well-known/openid-configuration'),
+            instance_double(CspConfig, code: 'id_me', host: nil,
+                                       discovery_uri: '/oidc/.well-known/openid-configuration'),
+            instance_double(CspConfig, code: 'clear', host: nil,
+                                       discovery_uri: '/integrations/.well-known/openid-configuration')
+          ]
+        )
         expect_dpc_api
         expect_cpi
-        expect_idp(metric: 0)
+        expect_csp(metric: 0)
 
         VerifyResourceHealthJob.new.perform
       end
@@ -85,9 +97,9 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
 
   context 'not connected to AWS' do
     it 'should ignore connection error and move on gracefully' do
-      stub_request(:get, 'https://idp.int.identitysandbox.gov').to_return(status: 200)
-      stub_request(:get, 'https://api.idmelabs.com').to_return(status: 200)
-      stub_request(:get, 'https://verified.clearme.com').to_return(status: 200)
+      stub_request(:get, login_dot_gov_discovery).to_return(status: 200)
+      stub_request(:get, id_me_discovery).to_return(status: 200)
+      stub_request(:get, clear_discovery).to_return(status: 200)
 
       expect(mock_dpc_client).to receive(:healthcheck)
       expect(mock_dpc_client).to receive(:response_successful?).and_return(true).twice
@@ -102,34 +114,29 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
   context 'only runs requested checks' do
     it 'runs dpc-api check' do
       expect_dpc_api
-      job.perform({ 'check_dpc' => true, 'check_cpi' => false, 'check_idp' => false })
+      job.perform(check_dpc: true, check_cpi: false, check_csp: false)
     end
 
-    it 'runs idp and cpi checks' do
+    it 'runs csp and cpi checks' do
       expect_cpi
-      expect_idp
-      job.perform({ 'check_dpc' => false, 'check_cpi' => true, 'check_idp' => true })
+      expect_csp
+      job.perform(check_dpc: false, check_cpi: true, check_csp: true)
     end
   end
 
   private
 
-  def put_metric_data_parms(namespace, env, check_name, value)
+  def put_metric_data_parms(namespace, env, check_name, value, csp = nil)
+    dims = []
+    dims << { name: 'Type', value: 'healthcheck' }
+    dims << { name: 'environment', value: env }
+    dims << { name: 'csp', value: csp } if csp
     {
       namespace:,
       metric_data: [
         {
           metric_name: check_name,
-          dimensions: [
-            {
-              name: 'Type',
-              value: 'healthcheck'
-            },
-            {
-              name: 'environment',
-              value: env
-            }
-          ],
+          dimensions: dims,
           value:,
           unit: 'None'
         }
@@ -150,20 +157,23 @@ RSpec.describe VerifyResourceHealthJob, type: :job do
     expect_put_metric('PortalConnectedToCpiApiGateway', metric)
   end
 
-  def expect_idp(site_status: 200, metric: 1)
-    stub_request(:get, 'https://idp.int.identitysandbox.gov').to_return(status: site_status)
-    stub_request(:get, 'https://api.idmelabs.com').to_return(status: site_status)
-    stub_request(:get, 'https://verified.clearme.com').to_return(status: site_status)
-    expect_put_metric('PortalConnectedToIdp', metric).exactly(3).times
+  def expect_csp(site_status: 200, metric: 1)
+    stub_request(:get, login_dot_gov_discovery).to_return(status: site_status)
+    stub_request(:get, id_me_discovery).to_return(status: site_status)
+    stub_request(:get, clear_discovery).to_return(status: site_status)
+    expect_put_metric('PortalConnectedToCsp', metric, 'login_dot_gov')
+    expect_put_metric('PortalConnectedToCsp', metric, 'id_me')
+    expect_put_metric('PortalConnectedToCsp', metric, 'clear')
   end
 
-  def expect_put_metric(name, value)
+  def expect_put_metric(name, value, csp = nil)
     expect(mock_cloudwatch_client).to receive(:put_metric_data).with(
       put_metric_data_parms(
         VerifyResourceHealthJob::METRIC_NAMESPACE,
         VerifyResourceHealthJob::ENVIRONMENT,
         name,
-        value
+        value,
+        csp
       )
     )
   end

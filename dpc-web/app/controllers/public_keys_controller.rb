@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class PublicKeysController < ApplicationController
+  include InputSanitization
+
   layout 'public-key-new'
   before_action :authenticate_user!
   before_action :organization_enabled?, except: :download_snippet
@@ -15,11 +17,12 @@ class PublicKeysController < ApplicationController
     reg_org = @organization.registered_organization
 
     manager = PublicKeyManager.new(registered_organization: reg_org)
-    if manager.delete_public_key(id: params[:id])
+    sanitized_id = sanitize_uid(params[:id])
+    if sanitized_id && manager.delete_public_key(id: sanitized_id)
       flash[:notice] = 'Public token successfully deleted.'
       redirect_to root_path
     else
-      render_error 'Public token could not be deleted.'
+      render_error 'Public key could not be deleted.'
     end
   end
 

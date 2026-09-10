@@ -6,7 +6,7 @@ module Core
     class MaskedInputComponent < ViewComponent::Base
       attr_accessor :label, :attribute, :default, :input_options, :hint, :error_msg
 
-      # rubocop:disable Metrics/ParameterLists
+      # rubocop:disable-next Metrics/ParameterLists
       def initialize(label:, attribute:, mask:, default: '', hint: '', error_msg: '')
         super()
         @label = label
@@ -23,7 +23,6 @@ module Core
           @input_options['aria-describedby'] = 'telHint'
         end
       end
-      # rubocop:enable Metrics/ParameterLists
     end
   end
 end

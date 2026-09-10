@@ -126,6 +126,8 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
             invitation    = instance_double(Invitation)
             expect(invitation).to receive(:id).and_return(invitation_id)
             expect(invitation).to receive(:save).and_return(true)
+            # Rails.env.local? makes the controller log the tokenized invitation URL.
+            allow(invitation).to receive(:token).and_return(SecureRandom.base58(Invitation::TOKEN_LENGTH))
             expect(Invitation).to receive(:new).and_return(invitation)
 
             mailer = double(InvitationMailer)
@@ -136,9 +138,10 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
             allow(Rails.logger).to receive(:info)
             expect(Rails.logger).to receive(:info).with(
               ['Credential Delegate invited',
-               { actionContext: LoggingConstants::ActionContext::Registration,
-                 actionType: LoggingConstants::ActionType::CdInvited,
-                 invitation: invitation_id }]
+               hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                              actionType: LoggingConstants::ActionType::CdInvited,
+                              invitation: invitation_id,
+                              organization_npi: org.npi)]
             )
             post "/organizations/#{api_id}/credential_delegate_invitations", params: successful_parameters
           end

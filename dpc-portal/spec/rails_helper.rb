@@ -12,9 +12,11 @@ require 'support/component_support'
 require 'support/dpc_client_support'
 require 'support/match_html_fragment'
 require 'support/fixture_helper'
+require 'support/invitation_url_support'
 require 'support/selenium_driver'
 # Add additional requires below this line. Rails is not loaded until this point!
 require 'view_component/test_helpers'
+require 'rake'
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
 # run as spec files by default. This means that files in spec/support that end
@@ -40,6 +42,7 @@ end
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
   config.include FixtureHelper
+  config.include InvitationUrlSupport
 
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = ["#{Rails.root}/spec/fixtures"]
@@ -75,6 +78,9 @@ RSpec.configure do |config|
   config.include ViewComponent::TestHelpers, type: :component
   config.expect_with :rspec do |c|
     c.max_formatted_output_length = nil
+  end
+  config.before(:suite) do
+    Rails.application.load_tasks
   end
 end
 module Devise

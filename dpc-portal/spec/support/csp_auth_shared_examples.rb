@@ -35,9 +35,10 @@ RSpec.shared_examples 'a CSP client' do |config|
       it 'should log on successful sign in' do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(['User logged in',
-                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                       actionType: LoggingConstants::ActionType::UserLoggedIn,
-                                                       csp: csp_name }])
+                                                     hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                                                                    actionType: LoggingConstants::ActionType::UserLoggedIn,
+                                                                    user_identifier: uuid,
+                                                                    csp: csp_name)])
         post auth_endpoint
         follow_redirect!
       end
@@ -93,18 +94,143 @@ RSpec.shared_examples 'a CSP client' do |config|
         expect(response).to be_ok
         expect(response.body).to include('Existing account found')
         expect(response.body).to include(EmailMask.masked('original@example.com'))
-        expect(response.body).to include('Add new email')
-        expect(response.body).to include(root_path)
+        expect(response.body).to include('Link to existing account')
+        expect(response.body).to include('Start over')
       end
 
       it 'logs about existing account' do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info).with(['User has existing account associated with different email',
-                                                     { actionContext: LoggingConstants::ActionContext::Authentication,
-                                                       actionType: LoggingConstants::ActionType::MergeUserAccountEmail,
-                                                       csp: csp_name }])
+                                                     hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                                                                    actionType: LoggingConstants::ActionType::MergeUserAccountEmail,
+                                                                    csp: csp_name)])
         post auth_endpoint
         follow_redirect!
+      end
+    end
+
+    context 'user exists with different CSP' do
+      let(:email) { 'bob@example.com' }
+      let(:orig_csp_name) { (CspUtils::CODES_TO_DISPLAY.keys - [provider]).sample.to_s }
+      context 'SSN matches' do
+        before do
+          user = create(:user, given_name: 'Bob', family_name: 'Hoskins')
+          orig_csp = Csp.find_by(name: orig_csp_name) || create(:csp, name: orig_csp_name)
+          csp_user = create(:csp_user, user:, uuid:, csp: orig_csp)
+          create(:user_email, csp_user:, email:, primary: true, active: true)
+
+          stub_request(:get, CspUtils.user_info_url(provider))
+            .with(headers: { Authorization: "Bearer #{token}" })
+            .to_return(body: csp_auth_response.to_json, status: 200)
+          stub_request(:get, CspUtils.user_info_url(orig_csp_name))
+            .with(headers: { Authorization: "Bearer #{token}" })
+            .to_return(body: csp_auth_response.to_json, status: 200)
+        end
+
+        it 'renders the link account component' do
+          post auth_endpoint
+          follow_redirect!
+          expect(response).to be_ok
+          expect(response.body).to include('Existing account found')
+          expect(response.body).to include(EmailMask.masked(email))
+          expect(response.body).to include(CspUtils.display_name(orig_csp_name))
+          expect(response.body).to include('Link to existing account')
+          expect(response.body).to include("/auth/#{orig_csp_name}")
+        end
+
+        it 'logs about existing account' do
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(['User has existing account associated with different CSP',
+                                                       { actionContext: LoggingConstants::ActionContext::Authentication,
+                                                         actionType: LoggingConstants::ActionType::MergeUserAccountCsp,
+                                                         csp: orig_csp_name,
+                                                         timestamp: a_kind_of(String),
+                                                         user_identifier: uuid.to_s }])
+          post auth_endpoint
+          follow_redirect!
+        end
+
+        context 'after linking account' do
+          before do
+            OmniAuth.config.add_mock(orig_csp_name, csp_auth_response)
+            post "/auth/#{orig_csp_name}"
+            follow_redirect!
+          end
+
+          it 'signs in a user' do
+            post auth_endpoint
+            follow_redirect!
+            post "/auth/#{orig_csp_name}"
+            follow_redirect!
+            expect(response.location).to eq organizations_url
+            expect(response).to be_redirect
+            follow_redirect!
+            expect(response).to be_ok
+          end
+
+          it 'redirects to organizations path' do
+            post auth_endpoint
+            follow_redirect!
+            post "/auth/#{orig_csp_name}"
+            follow_redirect!
+            expect(response).to redirect_to(organizations_path)
+          end
+
+          it 'creates a new CspUser for the current CSP' do
+            expect do
+              post auth_endpoint
+              follow_redirect!
+              post "/auth/#{orig_csp_name}"
+              follow_redirect!
+            end.to change { CspUser.count }.by(1)
+          end
+        end
+      end
+
+      context 'SSN does not match' do
+        let(:social_security_number) { '4-5-6' }
+        let(:ssn_field) { provider == :clear ? :SSN : :social_security_number }
+        let(:ssn_mismatch_response) do
+          csp_auth_response.deep_dup.deep_merge(extra: { raw_info: { ssn_field => social_security_number } })
+        end
+        before do
+          user = create(:user, given_name: 'Bob', family_name: 'Hoskins')
+          orig_csp = Csp.find_by(name: orig_csp_name) || create(:csp, name: orig_csp_name)
+          csp_user = create(:csp_user, user:, uuid:, csp: orig_csp)
+          create(:user_email, csp_user:, email:, primary: true, active: true)
+
+          stub_request(:get, CspUtils.user_info_url(orig_csp_name))
+            .with(headers: { Authorization: "Bearer #{token}" })
+            .to_return(body: csp_auth_response.to_json, status: 200)
+          stub_request(:get, CspUtils.user_info_url(provider))
+            .with(headers: { Authorization: "Bearer #{token}" })
+            .to_return(body: ssn_mismatch_response.to_json, status: 200)
+
+          OmniAuth.config.add_mock(orig_csp_name, csp_auth_response)
+          OmniAuth.config.add_mock(provider, csp_auth_response)
+        end
+
+        it 'does not sign in a user' do
+          post auth_endpoint
+          follow_redirect!
+          expect(response.body).to include('Existing account found')
+
+          expect do
+            post "/auth/#{orig_csp_name}"
+            follow_redirect!
+          end.to raise_error(CspUtils::SsnMismatchError, 'SSN mismatch')
+        end
+
+        it 'does not create a new CspUser' do
+          post auth_endpoint
+          follow_redirect!
+          expect do
+            post "/auth/#{orig_csp_name}"
+            follow_redirect!
+          rescue CspUtils::SsnMismatchError
+            nil
+          end.to change { CspUser.count }.by(0)
+        end
       end
     end
 
@@ -119,10 +245,11 @@ RSpec.shared_examples 'a CSP client' do |config|
       it 'does not sign in user' do
         post auth_endpoint
         follow_redirect!
+        expect(response).to be_redirect
         expect(response.location).to eq organizations_url
-        expect(response).to be_redirect
         follow_redirect!
-        expect(response).to be_redirect
+        expect(response.body).to include('The email you used to sign in was not recognized')
+        expect(response.body).to include('Back to sign in')
       end
 
       it 'sets authentication token' do
@@ -166,8 +293,8 @@ RSpec.shared_examples 'a CSP client' do |config|
         follow_redirect!
         expect(Rails.logger).to have_received(:info).with(
           ["User attempted IAL1 login with #{display_name} — not permitted",
-           { actionContext: LoggingConstants::ActionContext::Authentication,
-             actionType: LoggingConstants::ActionType::UserLoginWithoutAccount }]
+           hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                          actionType: LoggingConstants::ActionType::UserLoginWithoutAccount)]
         )
       end
 
@@ -225,11 +352,165 @@ RSpec.shared_examples 'a CSP client' do |config|
       allow(Rails.logger).to receive(:info)
       expect(Rails.logger).to receive(:info).with(
         ["User attempted to login with #{display_name} but no active CSP found",
-         { actionContext: LoggingConstants::ActionContext::Authentication,
-           actionType: LoggingConstants::ActionType::InvalidCsp }]
+         hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                        actionType: LoggingConstants::ActionType::InvalidCsp)]
       )
       post auth_endpoint
       follow_redirect!
+    end
+  end
+
+  describe 'API errors' do
+    context "when #{display_name} returns 500 server error" do
+      let(:error) { :server_error }
+      let(:attempt_sign_in) do
+        post auth_endpoint
+        follow_redirect!
+        expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
+        follow_redirect!
+      end
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.mock_auth[provider] = error
+      end
+
+      it 'returns 503 service unavailable' do
+        attempt_sign_in
+        expect(response).to have_http_status(:service_unavailable)
+      end
+
+      it 'renders the server error component' do
+        attempt_sign_in
+        expect(response.body).to include(I18n.t('verification.server_error_status'))
+      end
+
+      it 'does not sign in the user' do
+        attempt_sign_in
+        csp_session = CspSession.new(request.session)
+        expect(csp_session.user).to be_nil
+        expect(csp_session.token).to be_nil
+      end
+
+      it 'does not create a CspUser' do
+        expect do
+          attempt_sign_in
+        end.to change { CspUser.count }.by(0)
+      end
+
+      it 'logs the CSP authentication error' do
+        allow(Rails.logger).to receive(:error)
+        expect(Rails.logger).to receive(:error).with(
+          ['CSP Authentication error',
+           hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                          actionType: LoggingConstants::ActionType::CspUnavailable,
+                          error: error.to_s,
+                          csp: csp_name,
+                          timestamp: a_kind_of(String))]
+        )
+        attempt_sign_in
+      end
+    end
+    context "when #{display_name} returns 400 invalid argument" do
+      let(:error) { :bad_request }
+      let(:attempt_sign_in) do
+        post auth_endpoint
+        follow_redirect!
+        expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
+        follow_redirect!
+      end
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.mock_auth[provider] = error
+      end
+
+      it 'does not return 503 service unavailable' do
+        attempt_sign_in
+        expect(response).to be_ok
+      end
+
+      it 'renders the CSP sign-in fail component' do
+        attempt_sign_in
+        expect(response.body).not_to include(I18n.t('verification.server_error_status'))
+        expect(response.body).to include(I18n.t('verification.csp_signin_fail_status', csp_display_name: display_name))
+        expect(response.body).to include(I18n.t('verification.csp_signin_fail_text', csp_display_name: display_name))
+      end
+
+      it 'does not sign in the user' do
+        attempt_sign_in
+        csp_session = CspSession.new(request.session)
+        expect(csp_session.user).to be_nil
+        expect(csp_session.token).to be_nil
+      end
+
+      it 'does not create a CspUser' do
+        expect do
+          attempt_sign_in
+        end.to change { CspUser.count }.by(0)
+      end
+
+      it 'logs the CSP authentication error' do
+        allow(Rails.logger).to receive(:error)
+        expect(Rails.logger).to receive(:error).with(
+          ['CSP Configuration error',
+           hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+                          actionType: LoggingConstants::ActionType::FailedLogin,
+                          csp: csp_name,
+                          timestamp: a_kind_of(String))]
+        )
+        attempt_sign_in
+      end
+    end
+
+    context "when #{display_name} returns 403 access denied" do
+      let(:error) { :access_denied }
+      let(:attempt_sign_in) do
+        post auth_endpoint
+        follow_redirect!
+        expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
+        follow_redirect!
+      end
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.mock_auth[provider] = error
+      end
+
+      it 'does not return 503 service unavailable' do
+        attempt_sign_in
+        expect(response).to be_ok
+      end
+
+      it 'renders the CSP sign-in cancel component' do
+        attempt_sign_in
+        expect(response.body).not_to include(I18n.t('verification.server_error_status'))
+        expect(response.body).to include(I18n.t('verification.csp_signin_cancel_status',
+                                                csp_display_name: display_name))
+        expect(response.body).to include(I18n.t('verification.csp_signin_cancel_text', csp_display_name: display_name))
+      end
+
+      it 'does not sign in the user' do
+        attempt_sign_in
+        csp_session = CspSession.new(request.session)
+        expect(csp_session.user).to be_nil
+        expect(csp_session.token).to be_nil
+      end
+
+      it 'does not create a CspUser' do
+        expect do
+          attempt_sign_in
+        end.to change { CspUser.count }.by(0)
+      end
+
+      it 'logs the CSP authentication error' do
+        allow(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with(
+          ['User cancelled login',
+           hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                          actionType: LoggingConstants::ActionType::UserCancelledLogin,
+                          csp: csp_name,
+                          timestamp: a_kind_of(String))]
+        )
+        attempt_sign_in
+      end
     end
   end
 
@@ -257,7 +538,8 @@ RSpec.shared_examples 'a CSP client' do |config|
       invitation = create(:invitation, :ao)
       delete "/logout?invitation_id=#{invitation.id}"
       expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
-                                                                                 invitation.id)
+                                                                                 invitation.id,
+                                                                                 invitation.token)
     end
   end
 

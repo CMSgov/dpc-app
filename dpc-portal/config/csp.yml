@@ -14,6 +14,7 @@ development: &development
     authorization_endpoint: <%= "https://#{ENV['IDP_LOGIN_DOT_GOV_HOST']}/openid_connect/authorize" %>
     token_endpoint: <%= "https://#{ENV['IDP_LOGIN_DOT_GOV_HOST']}/api/openid_connect/token" %>
     jwks_uri: <%= "https://#{ENV['IDP_LOGIN_DOT_GOV_HOST']}/api/openid_connect/certs" %>
+    discovery_uri: '/.well-known/openid-configuration'
 
   id_me:
     host: <%= ENV['IDP_ID_ME_HOST'] %>
@@ -27,6 +28,7 @@ development: &development
     authorize_scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2'
     log_out_path: '/oauth/logout'
     token_expiration_interval: 300
+    discovery_uri: '/oidc/.well-known/openid-configuration'
 
   clear:
     host: <%= ENV['CLEAR_IDP_HOST'] %>
@@ -40,6 +42,7 @@ development: &development
     authorize_scope: 'openid'
     log_out_path: '/integrations/oauth2/sessions/logout'
     token_expiration_interval: 300
+    discovery_uri: '/integrations/.well-known/openid-configuration'
 
 local:
   <<: *development

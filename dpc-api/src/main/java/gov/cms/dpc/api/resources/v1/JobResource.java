@@ -1,5 +1,6 @@
 package gov.cms.dpc.api.resources.v1;
 
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
@@ -18,6 +19,7 @@ import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -49,11 +51,13 @@ public class JobResource extends AbstractJobResource {
             DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.US).withZone(ZoneId.of("GMT"));
 
     private final IJobQueue queue;
+    private final IGenericClient client;
     private final String baseURL;
 
     @Inject
-    public JobResource(IJobQueue queue, @APIV1 String baseURL) {
+    public JobResource(IJobQueue queue, @Named("attribution") IGenericClient client, @APIV1 String baseURL) {
         this.queue = queue;
+        this.client = client;
         this.baseURL = baseURL;
     }
 

@@ -13,18 +13,20 @@ class CredentialDelegateInvitationsController < ApplicationController
     render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, Invitation.new))
   end
 
-  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable-next Metrics/AbcSize
   def create
     @cd_invitation = build_invitation
 
     if @cd_invitation.save
-      Rails.logger.info(['Credential Delegate invited',
-                         { actionContext: LoggingConstants::ActionContext::Registration,
-                           actionType: LoggingConstants::ActionType::CdInvited,
-                           invitation: @cd_invitation.id }])
+      log_event(:info, 'Credential Delegate invited',
+                action_context: LoggingConstants::ActionContext::Registration,
+                action_type: LoggingConstants::ActionType::CdInvited,
+                invitation: @cd_invitation.id,
+                organization_npi: @organization.npi)
       InvitationMailer.with(invitation: @cd_invitation).invite_cd.deliver_later
       if Rails.env.local?
-        logger.info("Invitation URL: #{accept_organization_invitation_url(@organization, @cd_invitation)}")
+        logger.info('Invitation URL: ' \
+                    "#{accept_organization_invitation_url(@organization, @cd_invitation, @cd_invitation.token)}")
       end
       flash[:success] = 'Credential Delegate invited successfully.'
       redirect_to organization_path(@organization)
@@ -32,7 +34,6 @@ class CredentialDelegateInvitationsController < ApplicationController
       render(Page::CredentialDelegate::NewInvitationComponent.new(@organization, @cd_invitation), status: :bad_request)
     end
   end
-  # rubocop:enable Metrics/AbcSize
 
   def destroy
     if @invitation.update(status: :cancelled)

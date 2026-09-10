@@ -46,6 +46,36 @@ RSpec.describe 'IpAddresses', type: :request do
           get "/organizations/#{org.id}"
           expect(response.body).to include('You have no public IP addresses.')
         end
+
+        it 'redirects with alert when id contains path traversal' do
+          delete "/organizations/#{org.id}/ip_addresses/../../etc/passwd"
+          expect(flash[:alert]).to eq('Public IP address could not be deleted.')
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+        end
+
+        it 'redirects with alert when id contains special characters' do
+          delete "/organizations/#{org.id}/ip_addresses/<script>alert(1)</script>"
+          expect(flash[:alert]).to eq('Public IP address could not be deleted.')
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+        end
+
+        it 'redirects with alert when id is blank' do
+          delete "/organizations/#{org.id}/ip_addresses/%20"
+          expect(flash[:alert]).to eq('Public IP address could not be deleted.')
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+        end
+
+        it 'redirects with alert when id exceeds 64 characters' do
+          long_id = 'a' * 65
+          delete "/organizations/#{org.id}/ip_addresses/#{long_id}"
+          expect(flash[:alert]).to eq('Public IP address could not be deleted.')
+          expect(response).to redirect_to(organization_path(org, credential_start: true))
+        end
+
+        it 'does not call the API when id is invalid' do
+          expect_any_instance_of(PublicKeyManager).not_to receive(:delete_ip_address)
+          delete "/organizations/#{org.id}/ip_addresses/../../etc/passwd"
+        end
       end
     end
   end

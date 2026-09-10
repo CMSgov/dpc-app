@@ -3,6 +3,7 @@ package gov.cms.dpc.api.cli.organizations;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.cli.AbstractAttributionCommand;
+import gov.cms.dpc.api.exceptions.AdminCommandException;
 import io.dropwizard.core.setup.Bootstrap;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -101,8 +102,9 @@ public class OrganizationRegistration extends AbstractAttributionCommand {
             System.out.printf("Registered organization: %s%n", organizationID);
 
         } catch (Exception e) {
-            System.err.printf("Unable to register organization. %s%n", e.getMessage());
-            System.exit(1);
+            final String message = String.format("Unable to register organization. %s", e.getMessage());
+            System.err.println(message);
+            throw new AdminCommandException(message, e);
         }
 
         // Now, create a token, unless --no-token has been passed

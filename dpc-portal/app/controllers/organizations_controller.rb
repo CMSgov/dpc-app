@@ -6,9 +6,9 @@ class OrganizationsController < ApplicationController
 
   before_action :authenticate_user!
   before_action :check_user_verification
-  before_action :load_organization, only: %i[show tos_form sign_tos success]
+  before_action :load_organization, only: %i[show tos_form sign_tos]
   before_action :require_can_access, only: %i[show]
-  before_action :require_ao, only: %i[tos_form sign_tos success]
+  before_action :require_ao, only: %i[tos_form sign_tos]
   before_action :tos_accepted, only: %i[show]
 
   def index
@@ -19,11 +19,7 @@ class OrganizationsController < ApplicationController
 
   def show
     @delegate_information = {}
-    role = 'Credential Delegate'
-    if current_user.ao?(@organization)
-      @delegate_information = ao_delegate_information
-      role = 'Authorized Official'
-    end
+    @delegate_information = ao_delegate_information if current_user.ao?(@organization)
 
     render(Page::Organization::CompoundShowComponent.new(@organization,
                                                          @delegate_information,
@@ -40,25 +36,19 @@ class OrganizationsController < ApplicationController
     @organization.terms_of_service_accepted_at = DateTime.now
     @organization.terms_of_service_accepted_by = current_user
     @organization.save!
-    Rails.logger.info(['Authorized Official signed Terms of Service',
-                       { actionContext: LoggingConstants::ActionContext::Registration,
-                         actionType: LoggingConstants::ActionType::AoSignedToS }])
+    log_event(:info, 'Authorized Official signed Terms of Service',
+              action_context: LoggingConstants::ActionContext::Registration,
+              action_type: LoggingConstants::ActionType::AoSignedToS,
+              user_identifier: current_csp_user_identifier,
+              csp: csp_session.current,
+              organization_npi: @organization.npi)
     redirect_to organization_path(@organization)
-  end
-
-  def success
-    render(Page::Organization::NewOrganizationSuccessComponent.new(@organization))
   end
 
   private
 
   def organization_id
     params[:id]
-  end
-
-  def cur_org_status
-    cur_link = current_user.provider_links.find { |link| link.provider_organization_id == @organization.id }
-    org_status(@organization, cur_link)
   end
 
   def ao_delegate_information

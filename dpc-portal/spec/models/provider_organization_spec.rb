@@ -217,7 +217,7 @@ RSpec.describe ProviderOrganization, type: :model do
     end
   end
 
-  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable-next Metrics/AbcSize
   def set_credentials(*args)
     tokens = []
     tokens << { 'token' => 'exampleToken' } if args.include?(:client_token)
@@ -237,5 +237,4 @@ RSpec.describe ProviderOrganization, type: :model do
     allow(IpAddressManager).to receive(:new).and_return(mock_ipm)
     allow(mock_ipm).to receive(:ip_addresses).and_return(addresses)
   end
-  # rubocop:enable Metrics/AbcSize
 end

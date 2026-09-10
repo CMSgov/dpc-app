@@ -2,6 +2,8 @@
 
 # Handles IP address requests
 class IpAddressesController < ApplicationController
+  include InputSanitization
+
   before_action :authenticate_user!
   before_action :check_user_verification
   before_action :load_organization
@@ -30,9 +32,10 @@ class IpAddressesController < ApplicationController
 
   def destroy
     manager = IpAddressManager.new(@organization.dpc_api_organization_id)
-    if manager.delete_ip_address(params)
+    sanitized_id = sanitize_uid(params[:id])
+    if sanitized_id && manager.delete_ip_address(sanitized_id)
       flash[:success] = 'Public IP address deleted successfully.'
-      log_credential_action(:ip_address, params[:id], :remove)
+      log_credential_action(:ip_address, sanitized_id, :remove)
     else
       flash[:alert] = manager.errors[:root] || 'Public IP address could not be deleted.'
     end

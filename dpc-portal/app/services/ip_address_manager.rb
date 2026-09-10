@@ -22,9 +22,9 @@ class IpAddressManager
       errors: }
   end
 
-  def delete_ip_address(params)
+  def delete_ip_address(ip_address_id)
     api_client = DpcClient.new
-    api_client.delete_ip_address(api_id, params[:id])
+    api_client.delete_ip_address(api_id, ip_address_id)
 
     unless api_client.response_successful?
       Rails.logger.error "Failed to delete IP address: #{api_client.response_body}"

@@ -5,7 +5,7 @@ Rails.application.configure do
   config.lograge.logger = ActiveSupport::Logger.new(STDOUT) unless ENV['DISABLE_JSON_LOGGER'] == 'true'
   config.lograge.formatter = Lograge::Formatters::Json.new
 
-  config.lograge.ignore_actions = ["HealthCheck::HealthCheckController#index"]
+  config.lograge.ignore_actions = %w[HealthCheck::HealthCheckController#index Users::SessionsController#active]
 
   config.lograge.custom_options = lambda do |event|
     info = { 
@@ -18,9 +18,8 @@ Rails.application.configure do
     exception = event.payload[:exception_object]
 
     if exception
-      info[:exception_message] = exception.message
       info[:exception_class] = exception.class
-      info[:exception_backtrace] = Rails.backtrace_cleaner.clean(exception.backtrace)
+      info[:exception_reference] = info[:request_id]
     end
     
     info

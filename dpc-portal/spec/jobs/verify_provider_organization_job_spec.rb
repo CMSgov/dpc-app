@@ -102,8 +102,8 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
         allow(Rails.logger).to receive(:info)
         expect(Rails.logger).to receive(:info)
           .with(['Organization has a waiver',
-                 { actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
-                   actionType: LoggingConstants::ActionType::OrgHasWaiver }])
+                 hash_including(actionContext: LoggingConstants::ActionContext::BatchVerificationCheck,
+                                actionType: LoggingConstants::ActionType::OrgHasWaiver)])
         VerifyProviderOrganizationJob.perform_now
       end
     end
@@ -118,7 +118,7 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
                    providerOrganization: link.provider_organization.id }])
       end
 
-      # rubocop:disable Metrics/AbcSize
+      # rubocop:disable-next Metrics/AbcSize
       def expect_audits(link)
         expected_comment = LoggingConstants::ActionContext::BatchVerificationCheck
 
@@ -130,7 +130,6 @@ RSpec.describe VerifyProviderOrganizationJob, type: :job do
         expect(link.provider_organization.audits.length).to eq 1
         expect(link.provider_organization.audits.first.comment).to eq expected_comment
       end
-      # rubocop:enable Metrics/AbcSize
 
       context :org_med_sanctions do
         let(:provider_organization) do
