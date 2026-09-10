@@ -79,7 +79,7 @@ class Invitation < ApplicationRecord
     invitation
   end
 
-  def ao_match?(user_info)
+  def ao_match?(user_info) # rubocop:disable Naming/PredicateMethod
     check_missing_user_info(user_info, 'social_security_number', 'SSN', check_all_keys: false)
     ssn = user_info['social_security_number']&.tr('-', '') || user_info['SSN']&.tr('-', '')
 

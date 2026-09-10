@@ -12,8 +12,6 @@ class VerifyProviderOrganizationJob < ApplicationJob
     service = AoVerificationService.new
     @start = Time.now
     orgs_to_check.each do |org|
-      next if ProviderOrganization::PERSISTENT_TEST_ORG_IDS.include?(org.dpc_api_organization_id)
-
       CurrentAttributes.save_organization_attributes(org, nil)
       enrollments_and_waivers = service.get_approved_enrollments(org.npi)
       log_batch_verification_waivers(enrollments_and_waivers)
@@ -34,6 +32,8 @@ class VerifyProviderOrganizationJob < ApplicationJob
 
   def orgs_to_check
     ProviderOrganization.where(last_checked_at: ..lookback_hours.hours.ago,
-                               verification_status: 'approved').limit(max_records)
+                               verification_status: 'approved')
+                        .excluding_persistent_test_orgs
+                        .limit(max_records)
   end
 end
