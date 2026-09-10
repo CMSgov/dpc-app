@@ -25,7 +25,8 @@ class CredentialDelegateInvitationsController < ApplicationController
                 organization_npi: @organization.npi)
       InvitationMailer.with(invitation: @cd_invitation).invite_cd.deliver_later
       if Rails.env.local?
-        logger.info("Invitation URL: #{accept_organization_invitation_url(@organization, @cd_invitation)}")
+        logger.info('Invitation URL: ' \
+                    "#{accept_organization_invitation_url(@organization, @cd_invitation, @cd_invitation.token)}")
       end
       flash[:success] = 'Credential Delegate invited successfully.'
       redirect_to organization_path(@organization)

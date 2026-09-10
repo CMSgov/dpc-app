@@ -98,7 +98,7 @@ In that scenario, you only need the following dependencies:
 If you want to build applications locally, you'll need the following tools:
 
 - Ruby and `bundler`
-- Java 17 and Maven (`mvn`)
+- Java 21 and Maven (`mvn`)
 
 In addition, it's helpful to have the following installed for more specific scenarios:
 - Running [postman tests](#postman-collection): Node.js (includes `npm`)

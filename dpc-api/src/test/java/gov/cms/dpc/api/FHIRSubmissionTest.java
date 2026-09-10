@@ -78,7 +78,7 @@ class FHIRSubmissionTest {
 
     private final ResourceExtension groupResource = ResourceExtension.builder()
             .addResource(new GroupResource(dataService, client, TEST_BASE_URL, bfdClient, new DPCAPIConfiguration()))
-            .addResource(new JobResource(queue, TEST_BASE_URL))
+            .addResource(new JobResource(queue, client, TEST_BASE_URL))
             .setTestContainerFactory(testContainer)
             .addProvider(staticFilter)
             .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class))

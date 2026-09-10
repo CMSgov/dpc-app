@@ -126,6 +126,8 @@ RSpec.describe 'CredentialDelegateInvitations', type: :request do
             invitation    = instance_double(Invitation)
             expect(invitation).to receive(:id).and_return(invitation_id)
             expect(invitation).to receive(:save).and_return(true)
+            # Rails.env.local? makes the controller log the tokenized invitation URL.
+            allow(invitation).to receive(:token).and_return(SecureRandom.base58(Invitation::TOKEN_LENGTH))
             expect(Invitation).to receive(:new).and_return(invitation)
 
             mailer = double(InvitationMailer)

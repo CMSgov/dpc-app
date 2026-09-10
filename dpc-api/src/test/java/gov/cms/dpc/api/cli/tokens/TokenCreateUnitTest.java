@@ -5,6 +5,7 @@ import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.DPCAPIService;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.entities.TokenEntity.TokenType;
+import gov.cms.dpc.api.exceptions.AdminCommandException;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.NoExitSecurityManager;
@@ -121,19 +122,13 @@ class TokenCreateUnitTest {
                     .withStatusCode(HttpStatus.SC_BAD_REQUEST)
             );
 
-        // This is kind of kludgey and isn't guaranteed to work for all versions of Java, but it allows us to test error
-        // cases that call System.exit()
-        SecurityManager originalSecurityManager = System.getSecurityManager();
-        System.setSecurityManager(new NoExitSecurityManager());
-
         Optional<Throwable> errors = cli.run("create", "org_id", "-l", "token_label");
         assertFalse(errors.isEmpty());
 
         Throwable throwable = errors.get();
-        assertInstanceOf(SystemExitException.class, throwable);
-        assertEquals("1", throwable.getMessage());
+        assertInstanceOf(AdminCommandException.class, throwable);
+        assertEquals(HttpStatus.SC_BAD_REQUEST, ((AdminCommandException) throwable).getStatusCode());
 
-        System.setSecurityManager(originalSecurityManager);
         assertFalse(stdErr.toString().isEmpty());
     }
 
