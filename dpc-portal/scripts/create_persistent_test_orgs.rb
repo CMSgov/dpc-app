@@ -44,12 +44,6 @@ organizations = [
 service = AoInvitationService.new
 
 organizations.each do |organization_data|
-  email = invite_emails.fetch(organization_data[:csp]).fetch(environment)
-  if email.nil?
-    puts "skipping #{organization_data[:csp]} persistent test org creation for ENV=#{environment.inspect}"
-    next
-  end
-
   provider_organization = ProviderOrganization.find_or_create_by!(
     npi: organization_data[:npi],
     dpc_api_organization_id: organization_data[:dpc_api_organization_id]
@@ -58,6 +52,12 @@ organizations.each do |organization_data|
   end
 
   puts "got provider organization #{provider_organization.id}, #{provider_organization.dpc_api_organization_id}"
+
+  email = invite_emails.fetch(organization_data[:csp]).fetch(environment)
+  if email.nil?
+    puts "skipping #{organization_data[:csp]} persistent test org creation for ENV=#{environment.inspect}"
+    next
+  end
 
   invitation = service.create_invitation('Test', 'User', email, organization_data[:npi])
   puts "created AO invitation #{invitation.id} for #{email}"
