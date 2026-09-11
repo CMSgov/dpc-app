@@ -20,7 +20,9 @@ class ProviderOrganization < ApplicationRecord
   enum :verification_reason, %i[org_med_sanction_waived ao_med_sanctions no_approved_enrollment org_med_sanctions]
   enum :verification_status, %i[approved rejected]
 
-  scope :excluding_persistent_test_orgs, -> { where.not(dpc_api_organization_id: PERSISTENT_TEST_ORG_IDS) }
+  scope :excluding_persistent_test_orgs, lambda {
+    where(dpc_api_organization_id: nil).or(where.not(dpc_api_organization_id: PERSISTENT_TEST_ORG_IDS))
+  }
 
   belongs_to :terms_of_service_accepted_by, class_name: 'User', required: false
 

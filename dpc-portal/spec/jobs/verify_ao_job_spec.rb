@@ -107,18 +107,18 @@ RSpec.describe VerifyAoJob, type: :job do
         end
         VerifyAoJob.perform_now
       end
-      it 'should not select persistent test organization links' do
-        user = create(:user, pac_id: '900111111', verification_status: :approved)
-        test_org = create(:provider_organization,
-                          dpc_api_organization_id: 'a3abaf86-2cd4-4a32-a57e-1bda741ed00d')
-        link_to_test_org = create(:ao_org_link, user:, provider_organization: test_org,
-                                                last_checked_at: 8.days.ago)
-        regular_org = create(:provider_organization, npi: '900111111', verification_status: :approved)
-        regular_link = create(:ao_org_link, user:, last_checked_at: 8.days.ago, provider_organization: regular_org)
+    end
+    it 'should not select persistent test organization links' do
+      user = create(:user, pac_id: '900111111', verification_status: :approved)
+      test_org = create(:provider_organization,
+                        dpc_api_organization_id: 'a3abaf86-2cd4-4a32-a57e-1bda741ed00d')
+      link_to_test_org = create(:ao_org_link, user:, provider_organization: test_org,
+                                              last_checked_at: 8.days.ago)
+      regular_org = create(:provider_organization, npi: '900111111', verification_status: :approved)
+      regular_link = create(:ao_org_link, user:, last_checked_at: 8.days.ago, provider_organization: regular_org)
 
-        expect(VerifyAoJob.new.links_to_check).not_to include(link_to_test_org)
-        expect(VerifyAoJob.new.links_to_check).to include(regular_link)
-      end
+      expect(VerifyAoJob.new.links_to_check).not_to include(link_to_test_org)
+      expect(VerifyAoJob.new.links_to_check).to include(regular_link)
     end
     context :ao_has_waiver do
       let(:user) { create(:user, pac_id: '900777777', verification_status: :approved) }
