@@ -1,6 +1,6 @@
 module opt-out-import-lambda
 
-go 1.25.9
+go 1.25.13
 
 require (
 	github.com/aws/aws-lambda-go v1.54.0
