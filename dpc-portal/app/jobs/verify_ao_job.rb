@@ -62,7 +62,10 @@ class VerifyAoJob < ApplicationJob
 
   def links_to_check
     AoOrgLink.where(last_checked_at: ..lookback_hours.hours.ago,
-                    verification_status: true).limit(max_records)
+                    verification_status: true)
+             .joins(:provider_organization)
+             .merge(ProviderOrganization.excluding_persistent_test_orgs)
+             .limit(max_records)
   end
 
   def unverify_all_links_and_orgs(user, message)

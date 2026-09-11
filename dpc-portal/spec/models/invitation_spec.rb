@@ -436,6 +436,24 @@ RSpec.describe Invitation, type: :model do
         user_info = { 'SSN' => '999999999' }
         expect(ao_invite.ao_match?(user_info)).to be_truthy
       end
+      it 'should check against AO Verification service' do
+        service = instance_double(AoVerificationService)
+        expect(AoVerificationService).to receive(:new).and_return(service)
+        expect(service).to receive(:check_eligibility)
+          .with(ao_invite.provider_organization.npi, '123456789')
+          .and_return(success: true)
+
+        ao_invite.ao_match?({ 'social_security_number' => '123-45-6789' })
+      end
+      it 'should skip AO Verification for persistent test orgs' do
+        persistent_test_org = create(:provider_organization,
+                                     dpc_api_organization_id: ProviderOrganization::PERSISTENT_TEST_ORG_IDS.first)
+        test_org_invite = create(:invitation, :ao, provider_organization: persistent_test_org)
+
+        expect(AoVerificationService).not_to receive(:new)
+
+        test_org_invite.ao_match?({ 'social_security_number' => '123-45-6789' })
+      end
       it 'should raise with bad ssn' do
         user_info = { 'social_security_number' => '900666666' }
         expect do
