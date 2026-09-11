@@ -447,7 +447,7 @@ RSpec.describe Invitation, type: :model do
       end
       it 'should skip AO Verification for persistent test orgs' do
         persistent_test_org = create(:provider_organization,
-                                dpc_api_organization_id: ProviderOrganization::PERSISTENT_TEST_ORG_IDS.first)
+                                     dpc_api_organization_id: ProviderOrganization::PERSISTENT_TEST_ORG_IDS.first)
         test_org_invite = create(:invitation, :ao, provider_organization: persistent_test_org)
 
         expect(AoVerificationService).not_to receive(:new)
