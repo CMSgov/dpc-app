@@ -6,11 +6,11 @@ require (
 	github.com/BurntSushi/toml v0.4.1
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/aws/aws-lambda-go v1.47.0
-	github.com/aws/aws-sdk-go-v2 v1.42.0
+	github.com/aws/aws-sdk-go-v2 v1.47.0
 	github.com/aws/aws-sdk-go-v2/config v1.32.25
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.69.3
 	github.com/aws/aws-sdk-go-v2/service/wafv2 v1.73.0
-	github.com/aws/smithy-go v1.27.1
+	github.com/aws/smithy-go v1.28.1
 	github.com/howeyc/fsnotify v0.9.0
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-colorable v0.1.12
