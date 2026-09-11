@@ -13,8 +13,7 @@ class VerifyAoJob < ApplicationJob
     service = AoVerificationService.new
     links_to_check.each do |link|
       config_attributes(link)
-      next if check_link(service, link) == :skipped
-
+      check_link(service, link)
       update_success(link)
     rescue AoException => e
       handle_error(link, e.message)
@@ -27,10 +26,6 @@ class VerifyAoJob < ApplicationJob
   end
 
   def check_link(service, link)
-    return :skipped if ProviderOrganization::PERSISTENT_TEST_ORG_IDS.include?(
-      link.provider_organization.dpc_api_organization_id
-    )
-
     response = service.check_ao_eligibility(link.provider_organization.npi, :pac_id, link.user.pac_id)
     log_batch_verification_waivers(response)
   end
@@ -67,7 +62,10 @@ class VerifyAoJob < ApplicationJob
 
   def links_to_check
     AoOrgLink.where(last_checked_at: ..lookback_hours.hours.ago,
-                    verification_status: true).limit(max_records)
+                    verification_status: true)
+             .joins(:provider_organization)
+             .merge(ProviderOrganization.excluding_persistent_test_orgs)
+             .limit(max_records)
   end
 
   def unverify_all_links_and_orgs(user, message)
