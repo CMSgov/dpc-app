@@ -62,6 +62,6 @@ organizations.each do |organization_data|
   invitation = service.create_invitation('Test', 'User', email, organization_data[:npi])
   puts "created AO invitation #{invitation.id} for #{email}"
   if Rails.env.development?
-    puts "http://localhost:3100/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/accept"
+    puts "http://localhost:3100/organizations/#{invitation.provider_organization.id}/invitations/#{invitation.id}/#{invitation.token}/accept"
   end
 end
