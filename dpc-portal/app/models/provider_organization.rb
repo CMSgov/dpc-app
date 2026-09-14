@@ -2,6 +2,13 @@
 
 # Link class to dpc-api Organization
 class ProviderOrganization < ApplicationRecord
+  # rubocop:disable-next Style/WordArray
+  PERSISTENT_TEST_ORG_IDS = [
+    'a3abaf86-2cd4-4a32-a57e-1bda741ed00d',
+    '66e9f10c-31c7-41a4-b88f-4d10e59432d7',
+    '97509c9f-4350-4b4f-a9d4-aba4dadffe1c'
+  ].freeze
+
   audited only: %i[verification_reason verification_status], on: :update
 
   validates :npi, presence: true
@@ -12,6 +19,10 @@ class ProviderOrganization < ApplicationRecord
 
   enum :verification_reason, %i[org_med_sanction_waived ao_med_sanctions no_approved_enrollment org_med_sanctions]
   enum :verification_status, %i[approved rejected]
+
+  scope :excluding_persistent_test_orgs, lambda {
+    where(dpc_api_organization_id: nil).or(where.not(dpc_api_organization_id: PERSISTENT_TEST_ORG_IDS))
+  }
 
   belongs_to :terms_of_service_accepted_by, class_name: 'User', required: false
 
