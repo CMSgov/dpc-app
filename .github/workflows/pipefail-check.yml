@@ -43,5 +43,5 @@ jobs:
       - name: Fail inside a pipe
         run: |
           echo "Testing to see if non-zero code is swallowed"
-          false | "$STDOUT_TO_CWLOGS_SCRIPT"
+          tofu apply invalidplan.plan | "$STDOUT_TO_CWLOGS_SCRIPT"
           echo "Should never get here"
