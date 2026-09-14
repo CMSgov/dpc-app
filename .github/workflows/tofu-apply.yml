@@ -23,6 +23,10 @@ on:
 concurrency:
   group: tofu-plan-or-apply-${ inputs.environment }
 
+defaults:
+  run:
+    shell: bash # sets pipefail so errors are not swallowed by Config std-out-to-cw-logs
+
 env:
   TENV_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
