@@ -1,0 +1,31 @@
+name: Pipefail Sanity Check
+
+on:
+  push:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  TENV_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#defaults:
+#  run:
+#    shell: bash
+
+jobs:
+  test-pipefail:
+    runs-on: >-
+      codebuild-dpc-app${{
+        contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
+      }}-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Setup stdout-to-cw-logs
+        uses: $/.github/actions/config-stdout-to-cw-logs
+
+      - name: Fail inside a pipe
+        run: |
+          echo "Testing to see if non-zero code is swallowed"
+          false | "$STDOUT_TO_CWLOGS_SCRIPT"
+          echo "Should never get here"
