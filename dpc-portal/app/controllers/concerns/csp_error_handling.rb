@@ -11,7 +11,7 @@ module CspErrorHandling
     CSP_AUTH_ERROR_MESSAGES.include?(params[:message])
   end
 
-  def csp_user_error?
+  def csp_user_cancelled?
     CSP_USER_ERROR_MESSAGES.include?(params[:message])
   end
 
@@ -19,16 +19,25 @@ module CspErrorHandling
     params[:strategy] || csp_session.current
   end
 
-  def handle_invitation_flow_failure(invitation_id)
-    log_event(:info, 'Failed invitation flow',
-              action_context: LoggingConstants::ActionContext::Registration,
-              action_type: LoggingConstants::ActionType::FailedLogin,
-              invitation: invitation_id)
-    invitation = Invitation.find(invitation_id)
+  def handle_invitation_flow_failure(invitation)
+    if csp_auth_error?
+      log_event(:info, 'Failed invitation flow',
+                action_context: LoggingConstants::ActionContext::Registration,
+                action_type: LoggingConstants::ActionType::FailedLogin,
+                invitation: invitation.id)
+    end
+
+    alert_text = "We weren't able to complete identity verification."
     if invitation.credential_delegate?
-      render(Page::Utility::ErrorComponent.new(invitation, 'fail_to_proof'), status: :forbidden)
+      redirect_to confirm_cd_organization_invitation_url(invitation.provider_organization_id,
+                                                         invitation.id,
+                                                         invitation.token),
+                  alert: alert_text
     else
-      render(Page::Invitations::AoFlowFailComponent.new(invitation, 'fail_to_proof', 1), status: :forbidden)
+      redirect_to accept_organization_invitation_url(invitation.provider_organization_id,
+                                                     invitation.id,
+                                                     invitation.token),
+                  alert: alert_text
     end
   end
 

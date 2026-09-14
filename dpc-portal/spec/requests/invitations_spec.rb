@@ -158,12 +158,21 @@ RSpec.describe 'Invitations', type: :request do
       post invitation_url_for(org_id, invitation, 'login'), params: provider_params
     end
 
-    it 'should show error page if fail to proof' do
+    it 'should let the user try again if they fail to sign in' do
       org_id = invitation.provider_organization.id
       post invitation_url_for(org_id, invitation, 'login'), params: provider_params
       get '/auth/failure'
-      expect(response).to be_forbidden
-      expect(response.body).to include(I18n.t('verification.fail_to_proof_text'))
+
+      if invitation.authorized_official?
+        expect(response).to redirect_to(accept_organization_invitation_path(org_id,
+                                                                            invitation.id,
+                                                                            invitation.token))
+      elsif invitation.credential_delegate?
+        expect(response).to redirect_to(confirm_cd_organization_invitation_path(org_id,
+                                                                                invitation.id,
+                                                                                invitation.token))
+      end
+      expect(flash.alert).to eq("We weren't able to complete identity verification.")
     end
   end
 
@@ -389,14 +398,15 @@ RSpec.describe 'Invitations', type: :request do
               confirm_cd_organization_invitation_url(invitation.provider_organization.id, invitation, invitation.token)
             end
           end
-          context 'fail to proof' do
+          context 'fail to sign in' do
             let(:invitation) { create(:invitation, :cd) }
             let(:org_id) { invitation.provider_organization.id }
-            it 'should not show step navigation' do
+            it 'should show step navigation' do
               post invitation_url_for(org_id, invitation, 'login'), params: provider_params
               get '/auth/failure'
-              expect(response).to be_forbidden
-              expect(response.body).to_not include('<span class="usa-step-indicator__current-step">')
+
+              follow_redirect!
+              expect(response.body).to include('<span class="usa-step-indicator__current-step">')
             end
           end
         end
@@ -412,13 +422,14 @@ RSpec.describe 'Invitations', type: :request do
               accept_organization_invitation_url(invitation.provider_organization.id, invitation, invitation.token)
             end
           end
-          context 'fail to proof' do
+          context 'fail to sign in' do
             let(:invitation) { create(:invitation, :ao) }
             let(:org_id) { invitation.provider_organization.id }
             it 'should show step 2' do
               post invitation_url_for(org_id, invitation, 'login'), params: provider_params
               get '/auth/failure'
-              expect(response).to be_forbidden
+
+              follow_redirect!
               expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
             end
           end
@@ -1216,15 +1227,18 @@ RSpec.describe 'Invitations', type: :request do
 end
 
 def log_in(provider:, template: user_info_template)
+  csp_response = { uid: template['sub'],
+                   credentials: { expires_in: 899,
+                                  token: 'bearer-token',
+                                  id_token: 'id-token' },
+                   info: { email: template['email'] },
+                   extra: { raw_info: { given_name: template['given_name'],
+                                        family_name: template['family_name'],
+                                        identity_assurance_level: 2 } } }
+  csp_response[:extra][:raw_info].merge!({ sub: template['sub'] }) if provider == :clear
+
   OmniAuth.config.test_mode = true
-  OmniAuth.config.add_mock(provider.to_sym,
-                           { uid: template['sub'],
-                             credentials: { expires_in: 899,
-                                            token: 'bearer-token' },
-                             info: { email: template['email'] },
-                             extra: { raw_info: { given_name: template['given_name'],
-                                                  family_name: template['family_name'],
-                                                  identity_assurance_level: 2 } } })
+  OmniAuth.config.add_mock(provider.to_sym, csp_response)
   post "/auth/#{provider}"
   follow_redirect!
 end
