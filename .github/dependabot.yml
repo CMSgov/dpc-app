@@ -5,7 +5,9 @@
 version: 2
 updates:
   - package-ecosystem: "gomod"
-    directory: "/"
+    directories:
+      - "/"
+      - "/lambda/**/*"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 0
