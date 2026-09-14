@@ -10,9 +10,9 @@ permissions:
 env:
   TENV_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-#defaults:
-#  run:
-#    shell: bash
+defaults:
+  run:
+    shell: bash
 
 jobs:
   test-pipefail:
