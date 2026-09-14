@@ -25,8 +25,9 @@ class CspController < ApplicationController
   end
 
   def failure
-    invitation_flow_match = session[:user_return_to]&.match(%r{/organizations/([0-9]+)/invitations/([0-9]+)})
-    return handle_invitation_flow_failure(session[:user_return_to], invitation_flow_match[2]) if invitation_flow_match
+    invitation_pattern = %r{/organizations/([0-9]+)/invitations/([0-9]+)/([a-zA-Z0-9]{24})/(accept|confirm_cd)}
+    invitation_flow_match = session[:user_return_to]&.match(invitation_pattern)
+    return handle_invitation_flow_failure(invitation_flow_match) if invitation_flow_match
 
     return handle_csp_auth_error if csp_auth_error?
     return handle_signin_cancel if csp_user_cancelled?
