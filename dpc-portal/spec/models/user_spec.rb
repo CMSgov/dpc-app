@@ -123,7 +123,7 @@ RSpec.describe User, type: :model do
 
     it 'allows good verification_reason' do
       expect do
-        user.verification_reason = :ao_med_sanction_waived
+        user.verification_reason = :ao_med_sanctions
         user.save
       end.not_to raise_error
     end

@@ -24,7 +24,7 @@ RSpec.describe ProviderOrganization, type: :model do
 
     it 'allows good verification_reason' do
       expect do
-        provider_organization.verification_reason = :org_med_sanction_waived
+        provider_organization.verification_reason = :org_med_sanctions
         provider_organization.save
       end.not_to raise_error
     end
