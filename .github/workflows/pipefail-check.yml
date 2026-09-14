@@ -17,15 +17,13 @@ env:
 jobs:
   test-pipefail:
     runs-on: >-
-      codebuild-dpc-app${{
-        contains(fromJSON('["prod", "sandbox"]'), inputs.env) && '-prod' || '-non-prod'
-      }}-${{ github.run_id }}-${{ github.run_attempt }}
+      codebuild-dpc-app-non-prod-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: AWS Credentials (non-prod)
         uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:
           aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-${{ inputs.env }}-github-actions
+          role-to-assume: arn:aws:iam::${{ secrets.NON_PROD_ACCOUNT_ID }}:role/delegatedadmin/developer/dpc-dev-github-actions
       - name: "Checkout code"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
         with:
