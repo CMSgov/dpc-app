@@ -19,24 +19,24 @@ module CspErrorHandling
     params[:strategy] || csp_session.current
   end
 
-  def handle_invitation_flow_failure(invitation_flow_match)
+  def handle_invitation_flow_failure(invitation)
     if csp_auth_error?
       log_event(:info, 'Failed invitation flow',
                 action_context: LoggingConstants::ActionContext::Registration,
                 action_type: LoggingConstants::ActionType::FailedLogin,
-                invitation: invitation_flow_match[2])
+                invitation: invitation.id)
     end
 
     alert_text = "We weren't able to complete identity verification."
-    if invitation_flow_match[4] == 'accept'
-      redirect_to accept_organization_invitation_url(invitation_flow_match[1],
-                                                     invitation_flow_match[2],
-                                                     invitation_flow_match[3]),
+    if invitation.credential_delegate?
+      redirect_to confirm_cd_organization_invitation_url(invitation.provider_organization_id,
+                                                         invitation.id,
+                                                         invitation.token),
                   alert: alert_text
     else
-      redirect_to confirm_cd_organization_invitation_url(invitation_flow_match[1],
-                                                         invitation_flow_match[2],
-                                                         invitation_flow_match[3]),
+      redirect_to accept_organization_invitation_url(invitation.provider_organization_id,
+                                                     invitation.id,
+                                                     invitation.token),
                   alert: alert_text
     end
   end
