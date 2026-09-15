@@ -22,9 +22,15 @@ RSpec.describe ProviderOrganization, type: :model do
       end.to raise_error(ArgumentError)
     end
 
-    it 'allows good verification_reason' do
+    it 'fails on removed verification_reason' do
       expect do
         provider_organization.verification_reason = :org_med_sanction_waived
+      end.to raise_error(ArgumentError)
+    end
+
+    it 'allows good verification_reason' do
+      expect do
+        provider_organization.verification_reason = :org_med_sanctions
         provider_organization.save
       end.not_to raise_error
     end

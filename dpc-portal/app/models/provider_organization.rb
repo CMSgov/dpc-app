@@ -17,7 +17,8 @@ class ProviderOrganization < ApplicationRecord
   validates :verification_status, allow_nil: true,
                                   inclusion: { in: :verification_status }
 
-  enum :verification_reason, %i[org_med_sanction_waived ao_med_sanctions no_approved_enrollment org_med_sanctions]
+  # org_med_sanction_waived used to be index 0, but we removed it so we start with 1 now
+  enum :verification_reason, { ao_med_sanctions: 1, no_approved_enrollment: 2, org_med_sanctions: 3 }
   enum :verification_status, %i[approved rejected]
 
   scope :excluding_persistent_test_orgs, lambda {

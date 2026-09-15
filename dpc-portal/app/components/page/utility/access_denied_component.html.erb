@@ -15,6 +15,14 @@
   <% else %>
   <h1>Access Denied</h1>
   <% end %>
-  <div class="font-body-lg text-bold"><%= t("#{@failure_code}_status") %></div>
-  <p><%=raw t("#{@failure_code}_text") %></p>
+  <%#
+    If we get a bad failure_code that isn't supported, I'd rather display nothing than the generic default.
+    Example: ao_med_sanction_waived, which no longer exists, was displaying "Ao Med Sanction Waived Status".
+  %>
+  <% if I18n.exists?("#{@failure_code}_status") %>
+    <div class="font-body-lg text-bold"><%= t("#{@failure_code}_status") %></div>
+  <% end %>
+  <% if I18n.exists?("#{@failure_code}_text") %>
+    <p><%=raw t("#{@failure_code}_text") %></p>
+  <% end %>
 </div>
