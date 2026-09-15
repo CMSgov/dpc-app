@@ -25,16 +25,15 @@ class CspController < ApplicationController
   end
 
   def failure
-    invitation_flow_match = session[:user_return_to]&.match(%r{/invitations/([0-9]+)/([a-zA-Z0-9]{24})})
-    if invitation_flow_match
-      invitation = Invitation.find_by(id: invitation_flow_match[1], token: invitation_flow_match[2])
-      return handle_invitation_flow_failure(invitation)
-    end
+    invitation_match = session[:user_return_to]&.match(%r{/invitations/([0-9]+)/([a-zA-Z0-9]{24})})
+    invitation = invitation_match ? Invitation.find_by(id: invitation_match[1], token: invitation_match[2]) : nil
 
-    return handle_csp_auth_error if csp_auth_error?
-    return handle_signin_cancel if csp_user_cancelled?
+    # TODO: render fail to proof if verification_failure
 
-    handle_signin_fail
+    return handle_csp_auth_error(invitation) if csp_auth_error?
+    return handle_signin_cancel(invitation) if csp_user_cancelled?
+
+    handle_signin_fail(invitation)
   end
 
   def logout
