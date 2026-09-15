@@ -46,10 +46,8 @@ module CspErrorHandling
 
   # rubocop:disable-next Metrics/AbcSize
   def handle_error_redirects(invitation, error_display_text)
-    # TODO: set flash alerts in callers in upcoming ticket(s)
     alert_text = "We weren't able to complete identity verification."
 
-    # TODO: redirect to main sign in page if invitation is nil in upcoming ticket(s)
     if invitation.nil? && (error_display_text == 'server_error')
       render(Page::Utility::ErrorComponent.new(nil, error_display_text, csp: csp_param), status: :service_unavailable)
     elsif invitation.nil?
