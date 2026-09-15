@@ -46,7 +46,7 @@ module CspErrorHandling
 
   # rubocop:disable-next Metrics/AbcSize
   def handle_error_redirects(invitation, error_display_text)
-    # TODO: pass in alert text specific to each error type in upcoming task
+    # TODO: set flash alerts in callers
     alert_text = "We weren't able to complete identity verification."
 
     # TODO: redirect nil invitations to main sign in page in upcoming task
