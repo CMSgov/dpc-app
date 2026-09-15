@@ -19,16 +19,40 @@ module CspErrorHandling
     params[:strategy] || csp_session.current
   end
 
-  def handle_invitation_flow_failure(invitation)
-    if csp_auth_error?
-      log_event(:info, 'Failed invitation flow',
-                action_context: LoggingConstants::ActionContext::Registration,
-                action_type: LoggingConstants::ActionType::FailedLogin,
-                invitation: invitation.id)
-    end
+  def handle_csp_auth_error(invitation)
+    log_event(:error, 'CSP Authentication error',
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::CspUnavailable,
+              error: params[:message],
+              csp: csp_param)
+    handle_error_redirects(invitation, 'server_error')
+  end
 
+  def handle_signin_fail(invitation)
+    log_event(:error, 'CSP Configuration error',
+              action_context: LoggingConstants::ActionContext::Registration,
+              action_type: LoggingConstants::ActionType::FailedLogin,
+              csp: csp_param)
+    handle_error_redirects(invitation, 'csp_signin_fail')
+  end
+
+  def handle_signin_cancel(invitation)
+    log_event(:info, 'User cancelled login',
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::UserCancelledLogin,
+              csp: csp_param)
+    handle_error_redirects(invitation, 'csp_signin_cancel')
+  end
+
+  # rubocop:disable-next Metrics/AbcSize
+  def handle_error_redirects(invitation, error_display_text)
     alert_text = "We weren't able to complete identity verification."
-    if invitation.credential_delegate?
+
+    if invitation.nil? && (error_display_text == 'server_error')
+      render(Page::Utility::ErrorComponent.new(nil, error_display_text, csp: csp_param), status: :service_unavailable)
+    elsif invitation.nil?
+      render(Page::Utility::ErrorComponent.new(nil, error_display_text, csp: csp_param))
+    elsif invitation.credential_delegate?
       redirect_to confirm_cd_organization_invitation_url(invitation.provider_organization_id,
                                                          invitation.id,
                                                          invitation.token),
@@ -39,31 +63,5 @@ module CspErrorHandling
                                                      invitation.token),
                   alert: alert_text
     end
-  end
-
-  def handle_csp_auth_error
-    log_event(:error, 'CSP Authentication error',
-              action_context: LoggingConstants::ActionContext::Authentication,
-              action_type: LoggingConstants::ActionType::CspUnavailable,
-              error: params[:message],
-              csp: csp_param)
-    render(Page::Utility::ErrorComponent.new(nil, 'server_error', csp: csp_param),
-           status: :service_unavailable)
-  end
-
-  def handle_signin_fail
-    log_event(:error, 'CSP Configuration error',
-              action_context: LoggingConstants::ActionContext::Registration,
-              action_type: LoggingConstants::ActionType::FailedLogin,
-              csp: csp_param)
-    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp: csp_param))
-  end
-
-  def handle_signin_cancel
-    log_event(:info, 'User cancelled login',
-              action_context: LoggingConstants::ActionContext::Authentication,
-              action_type: LoggingConstants::ActionType::UserCancelledLogin,
-              csp: csp_param)
-    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_cancel', csp: csp_param))
   end
 end
