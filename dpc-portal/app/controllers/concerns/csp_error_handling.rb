@@ -6,6 +6,7 @@ module CspErrorHandling
 
   CSP_AUTH_ERROR_MESSAGES = %w[server_error service_unavailable connection_failed internal_server_error timeout].freeze
   CSP_USER_ERROR_MESSAGES = %w[access_denied].freeze
+  VERIFICATION_ALERT = "We weren't able to complete identity verification."
 
   def csp_auth_error?
     CSP_AUTH_ERROR_MESSAGES.include?(params[:message])
@@ -25,7 +26,7 @@ module CspErrorHandling
               action_type: LoggingConstants::ActionType::CspUnavailable,
               error: params[:message],
               csp: csp_param)
-    render_or_redirect(invitation, 'server_error')
+    redirect_to signin_destination(invitation), alert: VERIFICATION_ALERT
   end
 
   def handle_signin_fail(invitation)
@@ -33,7 +34,7 @@ module CspErrorHandling
               action_context: action_context(invitation),
               action_type: LoggingConstants::ActionType::FailedLogin,
               csp: csp_param)
-    render_or_redirect(invitation, 'csp_signin_fail')
+    redirect_to signin_destination(invitation), alert: VERIFICATION_ALERT
   end
 
   def handle_signin_cancel(invitation)
@@ -41,13 +42,7 @@ module CspErrorHandling
               action_context: action_context(invitation),
               action_type: LoggingConstants::ActionType::UserCancelledLogin,
               csp: csp_param)
-    render_or_redirect(invitation, 'csp_signin_cancel')
-  end
-
-  def render_or_redirect(invitation, error_reason)
-    return render(Page::Utility::ErrorComponent.new(nil, error_reason, csp: csp_param)) if invitation.nil?
-
-    redirect_to signin_destination(invitation), alert: "We weren't able to complete identity verification."
+    redirect_to signin_destination(invitation), alert: VERIFICATION_ALERT
   end
 
   private
@@ -57,6 +52,8 @@ module CspErrorHandling
   end
 
   def signin_destination(invitation)
+    return sign_in_path if invitation.nil?
+
     if invitation.credential_delegate?
       confirm_cd_organization_invitation_url(invitation.provider_organization_id, invitation.id, invitation.token)
     else
