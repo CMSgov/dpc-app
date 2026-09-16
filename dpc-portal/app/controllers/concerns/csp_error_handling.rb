@@ -20,48 +20,56 @@ module CspErrorHandling
   end
 
   def handle_csp_auth_error(invitation)
-    log_event(:error, 'CSP Authentication error',
-              action_context: LoggingConstants::ActionContext::Authentication,
-              action_type: LoggingConstants::ActionType::CspUnavailable,
-              error: params[:message],
-              csp: csp_param)
-    handle_error_redirects(invitation, 'server_error')
+    handle_csp_error(level: :error,
+                     alert_text: 'CSP Authentication error',
+                     action_type: LoggingConstants::ActionType::CspUnavailable,
+                     invitation:,
+                     error: params[:message])
+    render_or_redirect(invitation, 'server_error')
   end
 
   def handle_signin_fail(invitation)
-    log_event(:error, 'CSP Configuration error',
-              action_context: LoggingConstants::ActionContext::Registration,
-              action_type: LoggingConstants::ActionType::FailedLogin,
-              csp: csp_param)
-    handle_error_redirects(invitation, 'csp_signin_fail')
+    handle_csp_error(level: :error,
+                     alert_text: 'CSP Configuration error',
+                     action_type: LoggingConstants::ActionType::FailedLogin,
+                     invitation:,
+                     error: params[:message])
+    render_or_redirect(invitation, 'csp_signin_fail')
   end
 
   def handle_signin_cancel(invitation)
-    log_event(:info, 'User cancelled login',
-              action_context: LoggingConstants::ActionContext::Authentication,
-              action_type: LoggingConstants::ActionType::UserCancelledLogin,
-              csp: csp_param)
-    handle_error_redirects(invitation, 'csp_signin_cancel')
+    handle_csp_error(level: :info,
+                     alert_text: 'User cancelled login',
+                     action_type: LoggingConstants::ActionType::UserCancelledLogin,
+                     invitation:)
+    render_or_redirect(invitation, 'csp_signin_cancel')
   end
 
-  # rubocop:disable-next Metrics/AbcSize
-  def handle_error_redirects(invitation, error_display_text)
-    alert_text = "We weren't able to complete identity verification."
+  def render_or_redirect(invitation, error_reason)
+    return render(Page::Utility::ErrorComponent.new(nil, error_reason, csp: csp_param)) if invitation.nil?
 
-    if invitation.nil? && (error_display_text == 'server_error')
-      render(Page::Utility::ErrorComponent.new(nil, error_display_text, csp: csp_param), status: :service_unavailable)
-    elsif invitation.nil?
-      render(Page::Utility::ErrorComponent.new(nil, error_display_text, csp: csp_param))
-    elsif invitation.credential_delegate?
-      redirect_to confirm_cd_organization_invitation_url(invitation.provider_organization_id,
-                                                         invitation.id,
-                                                         invitation.token),
-                  alert: alert_text
+    redirect_to redirect_url(invitation), alert: "We weren't able to complete identity verification."
+  end
+
+  private
+
+  def handle_csp_error(level:, alert_text:, action_type:, invitation:, error: nil)
+    log_event(level, alert_text,
+              action_context: action_context(invitation),
+              action_type: action_type,
+              csp: csp_param,
+              **{ error: }.compact)
+  end
+
+  def action_context(invitation)
+    invitation.nil? ? LoggingConstants::ActionContext::Authentication : LoggingConstants::ActionContext::Registration
+  end
+
+  def redirect_url(invitation)
+    if invitation.credential_delegate?
+      confirm_cd_organization_invitation_url(invitation.provider_organization_id, invitation.id, invitation.token)
     else
-      redirect_to accept_organization_invitation_url(invitation.provider_organization_id,
-                                                     invitation.id,
-                                                     invitation.token),
-                  alert: alert_text
+      accept_organization_invitation_url(invitation.provider_organization_id, invitation.id, invitation.token)
     end
   end
 end

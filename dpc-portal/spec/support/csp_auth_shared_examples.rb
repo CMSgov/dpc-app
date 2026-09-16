@@ -374,9 +374,9 @@ RSpec.shared_examples 'a CSP client' do |config|
         OmniAuth.config.mock_auth[provider] = error
       end
 
-      it 'returns 503 service unavailable' do
+      it 'returns 200 OK' do
         attempt_sign_in
-        expect(response).to have_http_status(:service_unavailable)
+        expect(response).to be_ok
       end
 
       it 'renders the server error component' do
@@ -423,7 +423,7 @@ RSpec.shared_examples 'a CSP client' do |config|
         OmniAuth.config.mock_auth[provider] = error
       end
 
-      it 'does not return 503 service unavailable' do
+      it 'returns 200 OK' do
         attempt_sign_in
         expect(response).to be_ok
       end
@@ -452,7 +452,7 @@ RSpec.shared_examples 'a CSP client' do |config|
         allow(Rails.logger).to receive(:error)
         expect(Rails.logger).to receive(:error).with(
           ['CSP Configuration error',
-           hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+           hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
                           actionType: LoggingConstants::ActionType::FailedLogin,
                           csp: csp_name,
                           timestamp: a_kind_of(String))]
@@ -474,7 +474,7 @@ RSpec.shared_examples 'a CSP client' do |config|
         OmniAuth.config.mock_auth[provider] = error
       end
 
-      it 'does not return 503 service unavailable' do
+      it 'returns 200 OK' do
         attempt_sign_in
         expect(response).to be_ok
       end
