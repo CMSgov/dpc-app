@@ -20,28 +20,27 @@ module CspErrorHandling
   end
 
   def handle_csp_auth_error(invitation)
-    handle_csp_error(level: :error,
-                     alert_text: 'CSP Authentication error',
-                     action_type: LoggingConstants::ActionType::CspUnavailable,
-                     invitation:,
-                     error: params[:message])
+    log_event(:error, 'CSP Authentication error',
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::CspUnavailable,
+              error: params[:message],
+              csp: csp_param)
     render_or_redirect(invitation, 'server_error')
   end
 
   def handle_signin_fail(invitation)
-    handle_csp_error(level: :error,
-                     alert_text: 'CSP Configuration error',
-                     action_type: LoggingConstants::ActionType::FailedLogin,
-                     invitation:,
-                     error: params[:message])
+    log_event(:error, 'CSP Configuration error',
+              action_context: LoggingConstants::ActionContext::Registration,
+              action_type: LoggingConstants::ActionType::FailedLogin,
+              csp: csp_param)
     render_or_redirect(invitation, 'csp_signin_fail')
   end
 
   def handle_signin_cancel(invitation)
-    handle_csp_error(level: :info,
-                     alert_text: 'User cancelled login',
-                     action_type: LoggingConstants::ActionType::UserCancelledLogin,
-                     invitation:)
+    log_event(:info, 'User cancelled login',
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::UserCancelledLogin,
+              csp: csp_param)
     render_or_redirect(invitation, 'csp_signin_cancel')
   end
 
@@ -52,14 +51,6 @@ module CspErrorHandling
   end
 
   private
-
-  def handle_csp_error(level:, alert_text:, action_type:, invitation:, error: nil)
-    log_event(level, alert_text,
-              action_context: action_context(invitation),
-              action_type: action_type,
-              csp: csp_param,
-              **{ error: }.compact)
-  end
 
   def action_context(invitation)
     invitation.nil? ? LoggingConstants::ActionContext::Authentication : LoggingConstants::ActionContext::Registration
