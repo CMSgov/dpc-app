@@ -21,7 +21,7 @@ module CspErrorHandling
 
   def handle_csp_auth_error(invitation)
     log_event(:error, 'CSP Authentication error',
-              action_context: LoggingConstants::ActionContext::Authentication,
+              action_context: action_context(invitation),
               action_type: LoggingConstants::ActionType::CspUnavailable,
               error: params[:message],
               csp: csp_param)
@@ -30,7 +30,7 @@ module CspErrorHandling
 
   def handle_signin_fail(invitation)
     log_event(:error, 'CSP Configuration error',
-              action_context: LoggingConstants::ActionContext::Registration,
+              action_context: action_context(invitation),
               action_type: LoggingConstants::ActionType::FailedLogin,
               csp: csp_param)
     render_or_redirect(invitation, 'csp_signin_fail')
@@ -38,7 +38,7 @@ module CspErrorHandling
 
   def handle_signin_cancel(invitation)
     log_event(:info, 'User cancelled login',
-              action_context: LoggingConstants::ActionContext::Authentication,
+              action_context: action_context(invitation),
               action_type: LoggingConstants::ActionType::UserCancelledLogin,
               csp: csp_param)
     render_or_redirect(invitation, 'csp_signin_cancel')
