@@ -6,6 +6,7 @@ module CspErrorHandling
 
   CSP_AUTH_ERROR_MESSAGES = %w[server_error service_unavailable connection_failed internal_server_error timeout].freeze
   CSP_USER_ERROR_MESSAGES = %w[access_denied].freeze
+  CSP_USER_FAIL_TO_PROOF = %w[verification_failure].freeze
 
   def csp_auth_error?
     CSP_AUTH_ERROR_MESSAGES.include?(params[:message])
@@ -15,8 +16,21 @@ module CspErrorHandling
     CSP_USER_ERROR_MESSAGES.include?(params[:message])
   end
 
+  def csp_user_fail_to_proof?
+    CSP_USER_FAIL_TO_PROOF.include?(params[:message])
+  end
+
   def csp_param
     params[:strategy] || csp_session.current
+  end
+
+  def handle_fail_to_proof(invitation)
+    log_event(:info, 'User failed identity verification',
+              # TODO: update action context depending on invitation vs main sign in
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::FailedLogin,
+              csp: csp_param)
+    render(Page::Utility::VerificationFailureComponent.new(invitation, csp: csp_param))
   end
 
   def handle_csp_auth_error(invitation)

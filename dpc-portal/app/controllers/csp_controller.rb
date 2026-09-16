@@ -28,6 +28,7 @@ class CspController < ApplicationController
     invitation_match = session[:user_return_to]&.match(%r{/invitations/([0-9]+)/([a-zA-Z0-9]{24})})
     invitation = invitation_match ? Invitation.find_by(id: invitation_match[1], token: invitation_match[2]) : nil
 
+    return handle_fail_to_proof(invitation) if csp_user_fail_to_proof?
     return handle_csp_auth_error(invitation) if csp_auth_error?
     return handle_signin_cancel(invitation) if csp_user_cancelled?
 
