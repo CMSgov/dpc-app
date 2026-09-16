@@ -17,7 +17,8 @@ RSpec.describe 'Accessibility', type: :system do
     emails = %w[bob@example.com bob2@example.com]
     {
       login_dot_gov: { all_emails: emails, ial: 'http://idmanagement.gov/ns/assurance/ial/2' },
-      id_me: { emails_confirmed: emails, identity_assurance_level: 2 }
+      id_me: { emails_confirmed: emails, identity_assurance_level: 2 },
+      clear: { },
     }
   end
 
@@ -49,7 +50,7 @@ RSpec.describe 'Accessibility', type: :system do
         OmniAuth.config.mock_auth[provider] = :access_denied
 
         visit "/auth/failure?message=access_denied&strategy=#{provider}"
-        expect(page).to have_text('sign-in was unsuccessful')
+        expect(page).to have_text('We weren\'t able to complete identity verification.')
         expect(page).to be_axe_clean.according_to axe_standard
       end
 
@@ -601,6 +602,10 @@ RSpec.describe 'Accessibility', type: :system do
         end
       end
     end
+  end
+
+  describe 'with CLEAR' do
+    it_behaves_like 'accessibility tests', :clear, 'CLEAR'
   end
 
   describe 'with ID.me' do
