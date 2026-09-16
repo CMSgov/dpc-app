@@ -47,7 +47,7 @@ module CspErrorHandling
   def render_or_redirect(invitation, error_reason)
     return render(Page::Utility::ErrorComponent.new(nil, error_reason, csp: csp_param)) if invitation.nil?
 
-    redirect_to redirect_url(invitation), alert: "We weren't able to complete identity verification."
+    redirect_to signin_destination(invitation), alert: "We weren't able to complete identity verification."
   end
 
   private
@@ -56,7 +56,7 @@ module CspErrorHandling
     invitation.nil? ? LoggingConstants::ActionContext::Authentication : LoggingConstants::ActionContext::Registration
   end
 
-  def redirect_url(invitation)
+  def signin_destination(invitation)
     if invitation.credential_delegate?
       confirm_cd_organization_invitation_url(invitation.provider_organization_id, invitation.id, invitation.token)
     else
