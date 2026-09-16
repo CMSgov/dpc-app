@@ -18,7 +18,7 @@ RSpec.describe 'Accessibility', type: :system do
     {
       login_dot_gov: { all_emails: emails, ial: 'http://idmanagement.gov/ns/assurance/ial/2' },
       id_me: { emails_confirmed: emails, identity_assurance_level: 2 },
-      clear: { },
+      clear: {}
     }
   end
 
