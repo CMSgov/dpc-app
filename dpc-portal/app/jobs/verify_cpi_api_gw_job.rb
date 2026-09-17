@@ -27,13 +27,9 @@ class VerifyCpiApiGwJob < ApplicationJob
   private
 
   def can_process_ao_with_med_sanctions?(service, test_data)
-#     # VerifyAoJob path
-#     begin
-#       service.check_ao_eligibility(test_data['org_npi'], :pac_id, test_data['ao_pac_id'])
-#       return false
-#     rescue AoException => e
-#       return false unless e.message == 'ao_med_sanctions'
-#     end
+    # VerifyAoJob path
+    check_ao_eligibility_result = check_ao_eligibility_safe(service, test_data)
+    return false unless check_ao_eligibility_result[:error_message] == 'ao_med_sanctions'
 
     # VerifyProviderOrganizationJob path
     approved_enrollments_result = get_approved_enrollments_safe(service, test_data)
@@ -45,13 +41,9 @@ class VerifyCpiApiGwJob < ApplicationJob
   end
 
   def can_process_ao_with_waiver?(service, test_data)
-#     # VerifyAoJob path
-#     begin
-#       result = service.check_ao_eligibility(test_data['org_npi'], :pac_id, test_data['ao_pac_id'])
-#       return false unless result[:has_ao_waiver] == true
-#     rescue AoException
-#       return false
-#     end
+    # VerifyAoJob path
+    check_ao_eligibility_result = check_ao_eligibility_safe(service, test_data)
+    return false unless check_ao_eligibility_result[:result][:has_ao_waiver] == true
 
     # VerifyProviderOrganizationJob path
     enrollments = get_approved_enrollments_safe(service, test_data)[:enrollments]
@@ -64,13 +56,9 @@ class VerifyCpiApiGwJob < ApplicationJob
   end
 
   def can_process_org_with_no_enrollment?(service, test_data)
-#     # VerifyAoJob path
-#     begin
-#       service.check_ao_eligibility(test_data['org_npi'], :pac_id, test_data['ao_pac_id'])
-#       return false
-#     rescue AoException => e
-#       return false unless e.message == 'no_approved_enrollment'
-#     end
+    # VerifyAoJob path
+    check_ao_eligibility_result = check_ao_eligibility_safe(service, test_data)
+    return false unless check_ao_eligibility_result[:error_message] == 'no_approved_enrollment'
 
     # VerifyProviderOrganizationJob path
     approved_enrollments_result = get_approved_enrollments_safe(service, test_data)
@@ -82,12 +70,10 @@ class VerifyCpiApiGwJob < ApplicationJob
   end
 
   def can_process_org_with_active_ao?(service, test_data)
-#     # VerifyAoJob path
-#     begin
-#       service.check_ao_eligibility(test_data['org_npi'], :pac_id, test_data['ao_pac_id'])
-#     rescue AoException
-#       return false
-#     end
+    # VerifyAoJob path
+    check_ao_eligibility_result = check_ao_eligibility_safe(service, test_data)
+    return false unless check_ao_eligibility_result[:result][:has_org_waiver] == false
+    return false unless check_ao_eligibility_result[:result][:has_ao_waiver] == false
 
     # VerifyProviderOrganizationJob path
     enrollments = get_approved_enrollments_safe(service, test_data)[:enrollments]
@@ -106,6 +92,14 @@ class VerifyCpiApiGwJob < ApplicationJob
     { enrollments: result[:enrollments], error_message: nil }
   rescue AoException => e
     { enrollments: nil, error_message: e.message }
+  end
+
+  # There are two things we care about here: has_ao_waiver and has_org_waiver
+  def check_ao_eligibility_safe(service, test_data)
+    result = service.check_ao_eligibility(test_data['org_npi'], :pac_id, test_data['ao_pac_id'])
+    { result:, error_message: nil }
+  rescue AoException => e
+    { result: nil, error_message: e.message }
   end
 
   def enrollments_has_ssn?(enrollments_arr, ssn)
