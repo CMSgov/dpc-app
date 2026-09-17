@@ -4,11 +4,9 @@ module Page
   module Utility
     # Displays failure to proof page
     class VerificationFailureComponentPreview < ViewComponent::Preview
-      DEFAULT_CSP = :login_dot_gov
-
       # @param csp select :csp_codes
-      def main_sign_in(csp: DEFAULT_CSP)
-        render(Page::Utility::VerificationFailureComponent.new(nil, csp:))
+      def verification_failure(csp: :login_dot_gov)
+        render(Page::Utility::VerificationFailureComponent.new(nil, csp))
       end
 
       private

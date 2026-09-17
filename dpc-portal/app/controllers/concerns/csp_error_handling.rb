@@ -31,7 +31,7 @@ module CspErrorHandling
               action_context: action_context(invitation),
               action_type: LoggingConstants::ActionType::FailedLogin,
               csp: csp_param)
-    render(Page::Utility::VerificationFailureComponent.new(invitation, csp: csp_param))
+    render(Page::Utility::VerificationFailureComponent.new(invitation, csp_param))
   end
 
   def handle_csp_auth_error(invitation)

@@ -10,7 +10,7 @@ module Page
         clear: 'CLEAR'
       }.freeze
 
-      def initialize(invitation, csp: nil)
+      def initialize(invitation, csp)
         super()
         @invitation = invitation
         @current_csp = csp&.to_sym
