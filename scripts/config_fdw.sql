@@ -13,6 +13,12 @@ psql -U {MASTER_DB_USER} \
 -f scripts/config_fdw.sql
 */
 
+-- We never updated our DB roles from prod-sbx to sandbox, so we need to translate
+SELECT CASE WHEN :'ENV' = 'prod-sbx' THEN 'true' ELSE 'false' END AS is_prod_sbx \gset
+\if :is_prod_sbx
+\set ENV sandbox
+\endif
+
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
 
 CREATE SERVER IF NOT EXISTS dpc_attribution
