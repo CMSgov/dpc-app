@@ -512,8 +512,8 @@ RSpec.shared_examples 'a CSP client' do |config|
   context "when #{display_name} returns verification failure" do
     let(:error) { :verification_failure }
     before do
-        OmniAuth.config.test_mode = true
-        OmniAuth.config.mock_auth[provider] = error
+      OmniAuth.config.test_mode = true
+      OmniAuth.config.mock_auth[provider] = error
     end
 
     it 'should render verification failure' do
