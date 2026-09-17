@@ -28,8 +28,7 @@ module CspErrorHandling
 
   def handle_fail_to_proof(invitation)
     log_event(:info, 'User failed identity verification',
-              # TODO: update action context depending on invitation vs main sign in
-              action_context: LoggingConstants::ActionContext::Authentication,
+              action_context: action_context(invitation),
               action_type: LoggingConstants::ActionType::FailedLogin,
               csp: csp_param)
     render(Page::Utility::VerificationFailureComponent.new(invitation, csp: csp_param))
