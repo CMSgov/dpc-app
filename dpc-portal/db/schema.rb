@@ -96,7 +96,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_14_201121) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "status"
-    t.string "token", limit: 24, null: false
+    t.string "token", null: false
     t.index ["token"], name: "index_invitations_on_token", unique: true
   end
 
