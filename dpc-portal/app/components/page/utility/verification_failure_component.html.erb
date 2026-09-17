@@ -8,6 +8,12 @@
   <% elsif @current_csp == :id_me %>
     <p><%= link_to 'ID.me Help Center', 'https://help.id.me/hc/en-us' %></p>
   <% end %>
+</div>
 
+<div class="margin-y-3">
+  <%= link_to 'Back to sign in', sign_in_destination, class: 'usa-button usa-button--outline' %>
+</div>
+
+<div class="usa-prose">
   <p><span class="text-bold">Still need help?</span> Contact us at <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a></p>
 </div>
