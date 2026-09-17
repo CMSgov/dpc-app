@@ -408,6 +408,12 @@ RSpec.describe 'Invitations', type: :request do
               follow_redirect!
               expect(response.body).to include('<span class="usa-step-indicator__current-step">')
             end
+            it 'should render verification failure' do
+              post invitation_url_for(org_id, invitation, 'login'), params: provider_params
+              get '/auth/failure?message=verification_failure'
+
+              expect(response.body).to include('Your identity could not be verified')
+            end
           end
         end
         context :ao do
@@ -416,6 +422,7 @@ RSpec.describe 'Invitations', type: :request do
             let(:expected_success_status) { 302 }
             let(:request_params) { provider_params }
           end
+
           it_behaves_like 'a login endpoint', provider do
             let(:invitation) { create(:invitation, :ao) }
             let(:expected_redirect) do
@@ -431,6 +438,13 @@ RSpec.describe 'Invitations', type: :request do
 
               follow_redirect!
               expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
+            end
+
+            it 'should render verification failure' do
+              post invitation_url_for(org_id, invitation, 'login'), params: provider_params
+              get '/auth/failure?message=verification_failure'
+
+              expect(response.body).to include('Your identity could not be verified')
             end
           end
         end
