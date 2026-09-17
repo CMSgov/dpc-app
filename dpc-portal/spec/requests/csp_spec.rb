@@ -6,9 +6,9 @@ require 'rails_helper'
 RSpec.describe 'CSP', type: :request do
   describe 'Get /auth/failure' do
     let(:auth_failure_path) { '/auth/failure?message=access_denied&strategy=csp' }
-    it 'should succeed' do
+    it 'should redirect to sign-in' do
       get auth_failure_path
-      expect(response).to be_ok
+      expect(response.location).to eq(sign_in_url)
     end
 
     it 'should log on failure' do

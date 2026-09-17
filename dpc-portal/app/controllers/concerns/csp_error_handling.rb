@@ -6,6 +6,7 @@ module CspErrorHandling
 
   CSP_AUTH_ERROR_MESSAGES = %w[server_error service_unavailable connection_failed internal_server_error timeout].freeze
   CSP_USER_ERROR_MESSAGES = %w[access_denied].freeze
+  VERIFICATION_ALERT = "We weren't able to complete identity verification."
 
   def csp_auth_error?
     CSP_AUTH_ERROR_MESSAGES.include?(params[:message])
@@ -21,47 +22,42 @@ module CspErrorHandling
 
   def handle_csp_auth_error(invitation)
     log_event(:error, 'CSP Authentication error',
-              action_context: LoggingConstants::ActionContext::Authentication,
+              action_context: action_context(invitation),
               action_type: LoggingConstants::ActionType::CspUnavailable,
               error: params[:message],
               csp: csp_param)
-    handle_error_redirects(invitation, 'server_error')
+    redirect_to signin_destination(invitation), alert: VERIFICATION_ALERT
   end
 
   def handle_signin_fail(invitation)
     log_event(:error, 'CSP Configuration error',
-              action_context: LoggingConstants::ActionContext::Registration,
+              action_context: action_context(invitation),
               action_type: LoggingConstants::ActionType::FailedLogin,
               csp: csp_param)
-    handle_error_redirects(invitation, 'csp_signin_fail')
+    redirect_to signin_destination(invitation), alert: VERIFICATION_ALERT
   end
 
   def handle_signin_cancel(invitation)
     log_event(:info, 'User cancelled login',
-              action_context: LoggingConstants::ActionContext::Authentication,
+              action_context: action_context(invitation),
               action_type: LoggingConstants::ActionType::UserCancelledLogin,
               csp: csp_param)
-    handle_error_redirects(invitation, 'csp_signin_cancel')
+    redirect_to signin_destination(invitation), alert: VERIFICATION_ALERT
   end
 
-  # rubocop:disable-next Metrics/AbcSize
-  def handle_error_redirects(invitation, error_display_text)
-    alert_text = "We weren't able to complete identity verification."
+  private
 
-    if invitation.nil? && (error_display_text == 'server_error')
-      render(Page::Utility::ErrorComponent.new(nil, error_display_text, csp: csp_param), status: :service_unavailable)
-    elsif invitation.nil?
-      render(Page::Utility::ErrorComponent.new(nil, error_display_text, csp: csp_param))
-    elsif invitation.credential_delegate?
-      redirect_to confirm_cd_organization_invitation_url(invitation.provider_organization_id,
-                                                         invitation.id,
-                                                         invitation.token),
-                  alert: alert_text
+  def action_context(invitation)
+    invitation.nil? ? LoggingConstants::ActionContext::Authentication : LoggingConstants::ActionContext::Registration
+  end
+
+  def signin_destination(invitation)
+    return sign_in_path if invitation.nil?
+
+    if invitation.credential_delegate?
+      confirm_cd_organization_invitation_url(invitation.provider_organization_id, invitation.id, invitation.token)
     else
-      redirect_to accept_organization_invitation_url(invitation.provider_organization_id,
-                                                     invitation.id,
-                                                     invitation.token),
-                  alert: alert_text
+      accept_organization_invitation_url(invitation.provider_organization_id, invitation.id, invitation.token)
     end
   end
 end
