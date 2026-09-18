@@ -7,7 +7,9 @@ class VerifyCpiApiGwJob < ApplicationJob
   def perform
     # let service handle API GW credentials and connection
     # this is what's used by both verify_ao_job and invitations already.
-    service = AoVerificationService.new
+    cpi_client_config = cpi_api_gateway_client_options
+    cpi_api_gw_client = CpiApiGatewayClient.new(cpi_client_config["OAUTH_URL"], cpi_client_config["BASE_URL"])
+    service = AoVerificationService.new(cpi_api_gw_client:)
     test_data = get_test_data
 
     cpi_gateway_results = [
@@ -18,7 +20,7 @@ class VerifyCpiApiGwJob < ApplicationJob
     ]
 
     # add log that cpi_gateway_results.length organizations processed
-    trigger_alarm unless cpi_gateway_results.values.all?
+    trigger_alarm unless cpi_gateway_results.all?
   rescue StandardError => e
     log_failure(e)  # if we reach this, alarm should be caught by higher level checks (ie. unexpected errors check)
     raise
@@ -109,8 +111,16 @@ class VerifyCpiApiGwJob < ApplicationJob
     end
   end
 
-
+  # TODO update methods to actually retrieve from ssm
   def get_test_data
     # retrieve from /dpc/test/web-portal/cpi_api_gw_testdata etc
+    return ["data"]
+  end
+
+  def get_configuration
+    # retrieve from /dpc/test/web-portal/cpi_api_gw_testdata etc
+    # includes "BASE_URL" and "OAUTH_URL"
+    # "TOKEN_ENDPOINT" should be same as what's already used
+    return ["meta"]["configuration"]["test"]
   end
 end
