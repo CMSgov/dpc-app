@@ -6,7 +6,7 @@ module CspErrorHandling
 
   CSP_AUTH_ERROR_MESSAGES = %w[server_error service_unavailable connection_failed internal_server_error timeout].freeze
   CSP_USER_ERROR_MESSAGES = %w[access_denied].freeze
-  CSP_USER_FAIL_TO_PROOF = %w[verification_failure].freeze
+  CSP_USER_FAIL_TO_PROOF = %w[verification_failure identity_failed].freeze
 
   CSP_CODES = %w[id_me login_dot_gov clear].freeze
 
