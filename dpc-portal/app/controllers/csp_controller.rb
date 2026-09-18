@@ -38,7 +38,8 @@ class CspController < ApplicationController
   def logout
     store_invitation_return_url if params[:invitation_id].present?
 
-    redirect_to url_for_logout(csp_session.current), allow_other_host: true
+    current_csp = csp_session.current || params[:current_csp]
+    redirect_to url_for_logout(current_csp), allow_other_host: true
   end
 
   private

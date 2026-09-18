@@ -11,7 +11,9 @@
 </div>
 
 <div class="margin-y-3">
-  <%= link_to 'Back to sign in', sign_in_destination, class: 'usa-button usa-button--outline' %>
+  <%= render Core::Button::ButtonComponent.new(label: "Sign out of #{@csp_display_name}",
+      destination: csp_logout_path(invitation_id: @invitation&.id, current_csp: @current_csp),
+      method: :delete) %>
 </div>
 
 <div class="usa-prose">
