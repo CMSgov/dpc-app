@@ -49,6 +49,10 @@ class ApplicationController < ActionController::Base
     render(Page::Utility::ErrorComponent.new(nil, 'email_mismatch', csp: csp_session.current), status: :forbidden)
   end
 
+  def not_found
+    render file: Rails.public_path.join('404.html'), layout: false, status: :not_found
+  end
+
   def check_user_verification
     return unless current_user&.rejected?
 
