@@ -27,7 +27,7 @@ module CspErrorHandling
   end
 
   def handle_fail_to_proof(invitation)
-    return not_found unless [:id_me, :login_dot_gov].include?(csp_param.to_sym)
+    return not_found unless %i[id_me login_dot_gov].include?(csp_param.to_sym)
 
     log_event(:info, 'User failed identity verification',
               action_context: action_context(invitation),
