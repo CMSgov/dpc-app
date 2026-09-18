@@ -6,8 +6,7 @@ module Page
     class VerificationFailureComponent < ViewComponent::Base
       DISPLAY_NAMES = {
         login_dot_gov: 'Login.gov',
-        id_me: 'ID.me',
-        clear: 'CLEAR'
+        id_me: 'ID.me'
       }.freeze
 
       def initialize(invitation, csp)
@@ -16,6 +15,8 @@ module Page
         @current_csp = csp&.to_sym
         @csp_display_name = DISPLAY_NAMES.fetch(csp&.to_sym, 'CSP')
       end
+
+      private
 
       def sign_in_destination
         if @invitation.nil?
