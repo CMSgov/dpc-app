@@ -12,7 +12,7 @@
 
 <div class="margin-y-3">
   <%= render Core::Button::ButtonComponent.new(label: "Sign out of #{@csp_display_name}",
-      destination: csp_logout_path(invitation_id: @invitation&.id, current_csp: @current_csp),
+      destination: csp_logout_path(invitation_token: @invitation&.token, current_csp: @current_csp),
       method: :delete) %>
 </div>
 
