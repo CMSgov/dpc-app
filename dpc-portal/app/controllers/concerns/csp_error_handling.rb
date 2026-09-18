@@ -8,6 +8,8 @@ module CspErrorHandling
   CSP_USER_ERROR_MESSAGES = %w[access_denied].freeze
   CSP_USER_FAIL_TO_PROOF = %w[verification_failure].freeze
 
+  CSP_CODES = %w[id_me login_dot_gov clear].freeze
+
   VERIFICATION_ALERT = "We weren't able to complete identity verification."
 
   def csp_auth_error?
@@ -27,7 +29,7 @@ module CspErrorHandling
   end
 
   def handle_fail_to_proof(invitation)
-    return not_found unless %i[id_me login_dot_gov].include?(csp_param.to_sym)
+    return not_found unless CSP_CODES.include?(csp_param)
 
     log_event(:info, 'User failed identity verification',
               action_context: action_context(invitation),

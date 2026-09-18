@@ -6,7 +6,8 @@ module Page
     class VerificationFailureComponent < ViewComponent::Base
       DISPLAY_NAMES = {
         login_dot_gov: 'Login.gov',
-        id_me: 'ID.me'
+        id_me: 'ID.me',
+        clear: 'CLEAR'
       }.freeze
 
       def initialize(invitation, csp)

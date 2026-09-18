@@ -412,11 +412,7 @@ RSpec.describe 'Invitations', type: :request do
               post invitation_url_for(org_id, invitation, 'login'), params: provider_params
               get '/auth/failure?message=verification_failure'
 
-              if provider_params[:provider] == :clear
-                expect(response).to be_not_found
-              else
-                expect(response.body).to include('Your identity could not be verified')
-              end
+              expect(response.body).to include('Your identity could not be verified')
             end
           end
         end
@@ -448,11 +444,7 @@ RSpec.describe 'Invitations', type: :request do
               post invitation_url_for(org_id, invitation, 'login'), params: provider_params
               get '/auth/failure?message=verification_failure'
 
-              if provider_params[:provider] == :clear
-                expect(response).to be_not_found
-              else
-                expect(response.body).to include('Your identity could not be verified')
-              end
+              expect(response.body).to include('Your identity could not be verified')
             end
           end
         end

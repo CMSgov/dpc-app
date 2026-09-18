@@ -521,11 +521,7 @@ RSpec.shared_examples 'a CSP client' do |config|
       follow_redirect!
       expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
       follow_redirect!
-      if provider == :clear
-        expect(response).to be_not_found
-      else
-        expect(response.body).to include('Your identity could not be verified')
-      end
+      expect(response.body).to include('Your identity could not be verified')
     end
   end
 
