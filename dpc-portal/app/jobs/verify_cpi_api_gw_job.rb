@@ -22,8 +22,7 @@ class VerifyCpiApiGwJob < ApplicationJob
       can_process_org_with_active_ao?(service, test_scenarios['ORG_WITH_AO_SSN'])
     ]
 
-    Rails.logger.info "CPI API gateway  verification tests: #{cpi_gateway_results.count(true)} out of #{cpi_gateway_results.length} tests passing"
-    # add log that cpi_gateway_results.length organizations processed
+    Rails.logger.info "CPI GW tests: #{cpi_gateway_results.count(true)} out of #{cpi_gateway_results.length} passing"
     trigger_alarm unless cpi_gateway_results.all?
   rescue JSON::ParserError, KeyError => e
     Rails.logger.error "failed to process JSON: #{e}"
