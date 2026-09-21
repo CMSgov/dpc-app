@@ -6,6 +6,10 @@ module CspErrorHandling
 
   CSP_AUTH_ERROR_MESSAGES = %w[server_error service_unavailable connection_failed internal_server_error timeout].freeze
   CSP_USER_ERROR_MESSAGES = %w[access_denied].freeze
+  CSP_USER_FAIL_TO_PROOF = %w[verification_failure identity_failed].freeze
+
+  CSP_CODES = %w[id_me login_dot_gov clear].freeze
+
   VERIFICATION_ALERT = "We weren't able to complete identity verification."
 
   def csp_auth_error?
@@ -16,8 +20,22 @@ module CspErrorHandling
     CSP_USER_ERROR_MESSAGES.include?(params[:message])
   end
 
+  def csp_user_fail_to_proof?
+    CSP_USER_FAIL_TO_PROOF.include?(params[:message])
+  end
+
   def csp_param
     params[:strategy] || csp_session.current
+  end
+
+  def handle_fail_to_proof(invitation)
+    return not_found unless CSP_CODES.include?(csp_param)
+
+    log_event(:info, 'User failed identity verification',
+              action_context: action_context(invitation),
+              action_type: LoggingConstants::ActionType::FailedLogin,
+              csp: csp_param)
+    render(Page::Utility::VerificationFailureComponent.new(invitation, csp_param))
   end
 
   def handle_csp_auth_error(invitation)
