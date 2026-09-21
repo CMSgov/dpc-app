@@ -25,9 +25,9 @@ class VerifyCpiApiGwJob < ApplicationJob
     # add log that cpi_gateway_results.length organizations processed
     trigger_alarm unless cpi_gateway_results.all?
   rescue JSON::ParserError, KeyError => e
-    log_failure(e)
+    Rails.logger.error "failed to process JSON: #{e}"
   rescue StandardError => e
-    log_failure(e) # if we reach this, alarm should be caught by higher level checks (ie. unexpected errors check)
+    Rails.logger.error "unexpected error: #{e}"
     raise
   end
 
