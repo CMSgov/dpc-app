@@ -26,7 +26,7 @@ module CspErrorHandling
               action_type: LoggingConstants::ActionType::CspUnavailable,
               error: params[:message],
               csp: csp_param)
-    redirect_to signin_destination(invitation), alert: VERIFICATION_ALERT
+    redirect_to signin_destination(invitation), alert: 'Registration unavailable: external system error.'
   end
 
   def handle_signin_fail(invitation)
