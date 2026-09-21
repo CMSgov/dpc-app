@@ -509,6 +509,22 @@ RSpec.shared_examples 'a CSP client' do |config|
     end
   end
 
+  context "when #{display_name} returns verification failure" do
+    let(:error) { :verification_failure }
+    before do
+      OmniAuth.config.test_mode = true
+      OmniAuth.config.mock_auth[provider] = error
+    end
+
+    it 'should render verification failure' do
+      post auth_endpoint
+      follow_redirect!
+      expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
+      follow_redirect!
+      expect(response.body).to include('Your identity could not be verified')
+    end
+  end
+
   describe 'Delete /logout' do
     before do
       OmniAuth.config.test_mode = true
