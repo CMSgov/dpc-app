@@ -11,8 +11,8 @@ class CpiApiGatewayClient
     cms_idm_url: ENV.fetch('CMS_IDM_OAUTH_URL', nil),
     cpi_api_gateway_url: ENV.fetch('CPI_API_GW_BASE_URL', nil)
   )
-    env = ENV.fetch('ENV', nil),
-          client_id = ENV.fetch('CPI_API_GW_CLIENT_ID', nil)
+    env = ENV.fetch('ENV', nil)
+    client_id = ENV.fetch('CPI_API_GW_CLIENT_ID', nil)
     client_secret = ENV.fetch('CPI_API_GW_CLIENT_SECRET', nil)
     @cpi_api_gateway_url = cpi_api_gateway_url
     @cpi_api_gateway_url += '/' unless @cpi_api_gateway_url.end_with?('/')

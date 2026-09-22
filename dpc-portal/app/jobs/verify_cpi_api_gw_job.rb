@@ -8,7 +8,10 @@ class VerifyCpiApiGwJob < ApplicationJob
   def perform
     # CPI GW overrides so this job can use IPML and rest of portal can use fake_cpi_gateway.rb
     cpi_client_config = configuration
-    cpi_api_gw_client = CpiApiGatewayClient.new(cpi_client_config['OAUTH_URL'], cpi_client_config['BASE_URL'])
+    cpi_api_gw_client = CpiApiGatewayClient.new(
+      cms_idm_url: cpi_client_config['OAUTH_URL'],
+      cpi_api_gateway_url: cpi_client_config['BASE_URL']
+    )
 
     # let service handle API GW credentials and connection
     # this is what's used by both verify_ao_job and invitations already.
