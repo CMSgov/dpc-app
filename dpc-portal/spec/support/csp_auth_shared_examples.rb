@@ -381,7 +381,7 @@ RSpec.shared_examples 'a CSP client' do |config|
 
       it 'flashes the alert text' do
         attempt_sign_in
-        expect(flash[:alert]).to eq("We weren't able to complete identity verification.")
+        expect(flash[:alert]).to eq('Registration unavailable: external system error.')
       end
 
       it 'does not sign in the user' do
@@ -506,6 +506,22 @@ RSpec.shared_examples 'a CSP client' do |config|
         )
         attempt_sign_in
       end
+    end
+  end
+
+  context "when #{display_name} returns verification failure" do
+    let(:error) { :verification_failure }
+    before do
+      OmniAuth.config.test_mode = true
+      OmniAuth.config.mock_auth[provider] = error
+    end
+
+    it 'should render verification failure' do
+      post auth_endpoint
+      follow_redirect!
+      expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
+      follow_redirect!
+      expect(response.body).to include('Your identity could not be verified')
     end
   end
 

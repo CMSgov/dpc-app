@@ -47,7 +47,7 @@
         <pitest.version>1.22.0</pitest.version>
         <h2.version>2.3.232</h2.version>
         <aws.java.sdk.version>2.52.1</aws.java.sdk.version>
-        <logback.version>1.5.36</logback.version>
+        <logback.version>1.6.3</logback.version>
         <maven.build.cache.processPlugins>false</maven.build.cache.processPlugins>
 
         <sonar.coverage.exclusions>**/MockBlueButton*.java</sonar.coverage.exclusions>
@@ -142,7 +142,7 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-bom</artifactId>
-                <version>12.1.10</version>
+                <version>12.1.12</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -219,7 +219,12 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
-                <version>2.21.4</version>
+                <version>2.21.6</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>2.21.6</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.persistence</groupId>
@@ -464,6 +469,53 @@
                 <version>2.28.1</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bouncey.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.thymeleaf</groupId>
+                <artifactId>thymeleaf</artifactId>
+                <version>3.1.5.RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>org.hl7.fhir.dstu2</artifactId>
+                <version>6.9.11</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>org.hl7.fhir.dstu2016may</artifactId>
+                <version>6.9.11</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>org.hl7.fhir.r4b</artifactId>
+                <version>6.9.11</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>org.hl7.fhir.r5</artifactId>
+                <version>6.9.12</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>org.hl7.fhir.validation</artifactId>
+                <version>6.10.4</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>4.2.18.Final</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mozilla</groupId>
+                <artifactId>rhino</artifactId>
+                <version>1.8.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
