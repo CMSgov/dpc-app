@@ -39,6 +39,9 @@ elif [ "$1" == "async" ]; then
     ./bin/nonprod_async
   fi
 else
+  # Make sure the fake cpi gateway is running
+  ./bin/nonprod_cpi
+
   # Allow passing custom commands through our entrypoint script (ex: inviting a new AO from a GHA)
   exec "$@"
 fi
