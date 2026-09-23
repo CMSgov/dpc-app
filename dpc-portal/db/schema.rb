@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_08_24_150000) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_14_201121) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -96,7 +96,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_08_24_150000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "status"
-    t.string "token", null: false
+    t.string "token", limit: 24, null: false
     t.index ["token"], name: "index_invitations_on_token", unique: true
   end
 

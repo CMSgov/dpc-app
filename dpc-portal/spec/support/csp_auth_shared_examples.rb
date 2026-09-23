@@ -374,14 +374,14 @@ RSpec.shared_examples 'a CSP client' do |config|
         OmniAuth.config.mock_auth[provider] = error
       end
 
-      it 'returns 503 service unavailable' do
+      it 'redirects to sign in path' do
         attempt_sign_in
-        expect(response).to have_http_status(:service_unavailable)
+        expect(response.location).to eq(sign_in_url)
       end
 
-      it 'renders the server error component' do
+      it 'flashes the alert text' do
         attempt_sign_in
-        expect(response.body).to include(I18n.t('verification.server_error_status'))
+        expect(flash[:alert]).to eq('Registration unavailable: external system error.')
       end
 
       it 'does not sign in the user' do
@@ -423,16 +423,14 @@ RSpec.shared_examples 'a CSP client' do |config|
         OmniAuth.config.mock_auth[provider] = error
       end
 
-      it 'does not return 503 service unavailable' do
+      it 'redirects to sign in path' do
         attempt_sign_in
-        expect(response).to be_ok
+        expect(response.location).to eq(sign_in_url)
       end
 
-      it 'renders the CSP sign-in fail component' do
+      it 'flashes the alert text' do
         attempt_sign_in
-        expect(response.body).not_to include(I18n.t('verification.server_error_status'))
-        expect(response.body).to include(I18n.t('verification.csp_signin_fail_status', csp_display_name: display_name))
-        expect(response.body).to include(I18n.t('verification.csp_signin_fail_text', csp_display_name: display_name))
+        expect(flash[:alert]).to eq("We weren't able to complete identity verification.")
       end
 
       it 'does not sign in the user' do
@@ -452,7 +450,7 @@ RSpec.shared_examples 'a CSP client' do |config|
         allow(Rails.logger).to receive(:error)
         expect(Rails.logger).to receive(:error).with(
           ['CSP Configuration error',
-           hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+           hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
                           actionType: LoggingConstants::ActionType::FailedLogin,
                           csp: csp_name,
                           timestamp: a_kind_of(String))]
@@ -474,17 +472,14 @@ RSpec.shared_examples 'a CSP client' do |config|
         OmniAuth.config.mock_auth[provider] = error
       end
 
-      it 'does not return 503 service unavailable' do
+      it 'redirects to sign in path' do
         attempt_sign_in
-        expect(response).to be_ok
+        expect(response.location).to eq(sign_in_url)
       end
 
-      it 'renders the CSP sign-in cancel component' do
+      it 'flashes the alert text' do
         attempt_sign_in
-        expect(response.body).not_to include(I18n.t('verification.server_error_status'))
-        expect(response.body).to include(I18n.t('verification.csp_signin_cancel_status',
-                                                csp_display_name: display_name))
-        expect(response.body).to include(I18n.t('verification.csp_signin_cancel_text', csp_display_name: display_name))
+        expect(flash[:alert]).to eq("We weren't able to complete identity verification.")
       end
 
       it 'does not sign in the user' do
@@ -511,6 +506,22 @@ RSpec.shared_examples 'a CSP client' do |config|
         )
         attempt_sign_in
       end
+    end
+  end
+
+  context "when #{display_name} returns verification failure" do
+    let(:error) { :verification_failure }
+    before do
+      OmniAuth.config.test_mode = true
+      OmniAuth.config.mock_auth[provider] = error
+    end
+
+    it 'should render verification failure' do
+      post auth_endpoint
+      follow_redirect!
+      expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
+      follow_redirect!
+      expect(response.body).to include('Your identity could not be verified')
     end
   end
 

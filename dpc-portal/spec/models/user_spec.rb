@@ -121,9 +121,15 @@ RSpec.describe User, type: :model do
       end.to raise_error(ArgumentError)
     end
 
-    it 'allows good verification_reason' do
+    it 'fails on removed verification_reason' do
       expect do
         user.verification_reason = :ao_med_sanction_waived
+      end.to raise_error(ArgumentError)
+    end
+
+    it 'allows good verification_reason' do
+      expect do
+        user.verification_reason = :ao_med_sanctions
         user.save
       end.not_to raise_error
     end

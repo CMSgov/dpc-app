@@ -32,6 +32,8 @@ class VerifyProviderOrganizationJob < ApplicationJob
 
   def orgs_to_check
     ProviderOrganization.where(last_checked_at: ..lookback_hours.hours.ago,
-                               verification_status: 'approved').limit(max_records)
+                               verification_status: 'approved')
+                        .excluding_persistent_test_orgs
+                        .limit(max_records)
   end
 end

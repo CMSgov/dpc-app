@@ -30,7 +30,7 @@ class ApplicationController < ActionController::Base
     return if current_user
 
     session[:user_return_to] = request.path
-    return if render_unauthenticated_error
+    return if render_unauthorized_error
 
     flash[:alert] = t('devise.failure.unauthenticated')
     redirect_to sign_in_path
@@ -43,10 +43,14 @@ class ApplicationController < ActionController::Base
 
   private
 
-  def render_unauthenticated_error
-    return unless csp_session.current && csp_session.user.blank?
+  def render_unauthorized_error
+    return unless csp_session.token.present? && csp_session.current && csp_session.user.blank?
 
     render(Page::Utility::ErrorComponent.new(nil, 'email_mismatch', csp: csp_session.current), status: :forbidden)
+  end
+
+  def not_found
+    render file: Rails.public_path.join('404.html'), layout: false, status: :not_found
   end
 
   def check_user_verification

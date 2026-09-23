@@ -15,7 +15,8 @@ class User < ApplicationRecord
   has_many :ao_org_links
   has_many :cd_org_links
 
-  enum :verification_reason, %i[ao_med_sanction_waived ao_med_sanctions]
+  # ao_med_sanction_waived used to be index 0, but we removed it so we start with 1 now
+  enum :verification_reason, { ao_med_sanctions: 1 }
   enum :verification_status, %i[approved rejected]
 
   def csp_user_for(name)

@@ -49,6 +49,7 @@ RSpec.describe Page::Utility::AccessDeniedComponent, type: :component do
 
       it { is_expected.to match_html_fragment(expected_html) }
     end
+
     context 'without organization' do
       let(:component) do
         described_class.new(failure_code: 'verification.ao_med_sanctions')
@@ -59,6 +60,21 @@ RSpec.describe Page::Utility::AccessDeniedComponent, type: :component do
             <h1>Access Denied</h1>
             <div class="font-body-lg text-bold">#{I18n.t('verification.ao_med_sanctions_status')}</div>
             <p>#{I18n.t('verification.ao_med_sanctions_text')}</p>
+          </div>
+        HTML
+      end
+
+      it { is_expected.to match_html_fragment(expected_html) }
+    end
+
+    context 'unknown failure code' do
+      let(:component) do
+        described_class.new(failure_code: 'verification.not_real')
+      end
+      let(:expected_html) do
+        <<~HTML
+          <div>
+            <h1>Access Denied</h1>
           </div>
         HTML
       end

@@ -79,9 +79,15 @@ class Invitation < ApplicationRecord
     invitation
   end
 
-  def ao_match?(user_info)
+  def ao_match?(user_info) # rubocop:disable Naming/PredicateMethod
     check_missing_user_info(user_info, 'social_security_number', 'SSN', check_all_keys: false)
     ssn = user_info['social_security_number']&.tr('-', '') || user_info['SSN']&.tr('-', '')
+
+    if ProviderOrganization::PERSISTENT_TEST_ORG_IDS.include?(provider_organization.dpc_api_organization_id)
+      return { success: true, ao_role: { 'pacId' => ssn, 'roleCode' => '10', 'ssn' => ssn },
+               has_org_waiver: false, has_ao_waiver: false }
+    end
+
     service = AoVerificationService.new
     result = service.check_eligibility(provider_organization.npi, ssn)
 

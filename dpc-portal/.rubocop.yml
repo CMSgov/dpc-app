@@ -27,6 +27,7 @@ Metrics/MethodLength:
 
 Metrics/ClassLength:
   Exclude:
+    - app/controllers/csp_controller.rb
     - app/controllers/invitations_controller.rb
     - app/models/invitation.rb
     - spec/support/fake_cpi_gateway.rb

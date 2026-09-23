@@ -12,6 +12,11 @@ class CspController < ApplicationController
     return render_ial1_blocked if ial_1_user?(auth_details)
     return unless (active_csp = csp(auth_details.provider))
 
+    # redirect CLEAR cancellation so that the UX is the same for all CSP
+    if auth_details.credentials.id_token.nil?
+      return redirect_to csp_failure_url(message: 'access_denied', strategy: active_csp.name)
+    end
+
     user_actions(auth_details, active_csp)
   end
 
@@ -20,24 +25,32 @@ class CspController < ApplicationController
   end
 
   def failure
-    invitation_flow_match = session[:user_return_to]&.match(%r{/organizations/([0-9]+)/invitations/([0-9]+)})
-    return handle_invitation_flow_failure(invitation_flow_match[2]) if invitation_flow_match
-    return handle_csp_auth_error if csp_auth_error?
-    return handle_signin_fail unless csp_user_error?
+    invitation_match = session[:user_return_to]&.match(%r{/invitations/([0-9]+)/([a-zA-Z0-9]{24})})
+    invitation = invitation_match ? Invitation.find_by(id: invitation_match[1], token: invitation_match[2]) : nil
 
-    handle_signin_cancel
+    return handle_fail_to_proof(invitation) if csp_user_fail_to_proof?
+    return handle_csp_auth_error(invitation) if csp_auth_error?
+    return handle_signin_cancel(invitation) if csp_user_cancelled?
+
+    handle_signin_fail(invitation)
   end
 
   def logout
-    store_invitation_return_url if params[:invitation_id].present?
+    store_invitation_return_url if params[:invitation_id].present? || params[:invitation_token].present?
 
-    redirect_to url_for_logout(csp_session.current), allow_other_host: true
+    current_csp = csp_session.current || params[:current_csp]
+    redirect_to url_for_logout(current_csp), allow_other_host: true
   end
 
   private
 
   def store_invitation_return_url
-    invitation = Invitation.find(params[:invitation_id])
+    invitation = if params[:invitation_id].present?
+                   Invitation.find(params[:invitation_id])
+                 else
+                   Invitation.find_by(token: params[:invitation_token])
+                 end
+
     session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id,
                                                            invitation.id,
                                                            invitation.token)
