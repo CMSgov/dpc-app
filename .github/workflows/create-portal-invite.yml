@@ -65,5 +65,5 @@ jobs:
       - name: Generate invite link
         env:
           RAILS_CMD: rails dpc:invite_ao INVITE=${{ inputs.given_name }},${{ inputs.family_name }},${{ inputs.email }},${{ inputs.org_npi }}
-        run: ./dpc-app/scripts/run_task_on_tmp_srvc.sh ${{ vars.AWS_REGION }} $CLUSTER_NAME $SERVICE_NAME $RAILS_CMD
+        run: ./dpc-app/scripts/run_task_on_tmp_srvc.sh ${{ vars.AWS_REGION }} $CLUSTER_NAME $SERVICE_NAME "$RAILS_CMD"
 
