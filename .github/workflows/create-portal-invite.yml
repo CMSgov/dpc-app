@@ -62,8 +62,6 @@ jobs:
         run: |
           echo "CLUSTER_NAME=dpc-${{ inputs.env }}-frontend" >> $GITHUB_ENV
           echo "SERVICE_NAME=dpc-${{ inputs.env }}-web-portal-v9" >> $GITHUB_ENV
-      - name: Start temp service
-        run: ./dpc-app/scripts/start_temp_service.sh $CLUSTER_NAME $SERVICE_NAME
       - name: Generate invite link
         env:
           RAILS_CMD: rails dpc:invite_ao INVITE=${{ inputs.given_name }},${{ inputs.family_name }},${{ inputs.email }},${{ inputs.org_npi }}
