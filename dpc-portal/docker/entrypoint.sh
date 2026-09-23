@@ -38,4 +38,7 @@ elif [ "$1" == "async" ]; then
     echo "Starting in non-production"
     ./bin/nonprod_async
   fi
+else
+  # Allow passing custom commands through our entrypoint script (ex: inviting a new AO from a GHA)
+  exec "$@"
 fi
