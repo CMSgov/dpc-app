@@ -35,12 +35,12 @@ class UserInfoService
     raise CspLogout::UnknownCspError, csp
   end
 
-  def parsed_response(response)
+  def parsed_response(response, csp_config)
     return if response.body.blank?
 
     body = response.body.to_s.strip
     if response.content_type.to_s.strip.downcase == 'application/jwt' || looks_like_jwt?(body)
-      decode_jwt(body)
+      decode_jwt(body, csp_config[:client_options][:host])
     else
       JSON.parse(body).with_indifferent_access
     end
@@ -51,15 +51,19 @@ class UserInfoService
     parts.length == 3 && parts.all? { |p| p.match?(/\A[A-Za-z0-9_-]+\z/) }
   end
 
-  def decode_jwt(body)
+  # Delegates to OidcJwksVerifier to verify signature
+  def decode_jwt(body, host)
     body = body[1..-2] if body.start_with?('"') && body.end_with?('"')
-    JSON::JWT.decode(body, :skip_verification).to_h.with_indifferent_access
+    OidcJwksVerifier.decode_and_verify(body, host: host).with_indifferent_access
+  rescue JSON::JWT::Exception, ArgumentError, OidcJwksVerifier::UntrustedJwksUriError => e
+    Rails.logger.error "User Info JWT verification failed (host=#{host}): #{e.class}"
+    raise UserInfoServiceError, 'server_error'
   end
 
-  def handle_response(response)
+  def handle_response(response, csp_config)
     case response
     when Net::HTTPSuccess
-      parsed_response(response)
+      parsed_response(response, csp_config)
     when Net::HTTPUnauthorized
       raise UserInfoServiceError, 'unauthorized'
     else
@@ -78,7 +82,7 @@ class UserInfoService
     end
 
     code = response.code
-    handle_response(response)
+    handle_response(response, csp_config)
   rescue Errno::ECONNREFUSED
     code = 503
     Rails.logger.error "Could not connect to CSP userinfo endpoint (csp=#{csp})"
