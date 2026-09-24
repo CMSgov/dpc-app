@@ -109,6 +109,7 @@ class InvitationsController < ApplicationController
               action_type: LoggingConstants::ActionType::UserLoggedIn,
               user_identifier: current_csp_user_identifier,
               invitation: @invitation.id)
+    cookies.permanent[:last_used_csp] = csp_session.current
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
