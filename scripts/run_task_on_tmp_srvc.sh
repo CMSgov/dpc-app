@@ -3,7 +3,7 @@
 set -euxo pipefail
 
 # Requires AWS CLI and session manager plugin.
-# Starts a temporary copy of a service that supports shell access and deletes it on completion.
+# Starts a temporary copy of a service that runs the given command and deletes it on completion.
 
 # Run with: ~/scripts/run_task_on_tmp_srvc.sh \
 #             <REGION> \
