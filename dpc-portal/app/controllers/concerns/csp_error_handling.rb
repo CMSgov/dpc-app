@@ -10,7 +10,7 @@ module CspErrorHandling
 
   CSP_CODES = %w[id_me login_dot_gov clear].freeze
 
-  VERIFICATION_ALERT = "We weren't able to complete identity verification."
+  VERIFICATION_ALERT = "You must complete verification before continuing registration."
 
   def csp_auth_error?
     CSP_AUTH_ERROR_MESSAGES.include?(params[:message])

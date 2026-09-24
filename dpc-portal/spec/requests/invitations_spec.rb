@@ -172,7 +172,7 @@ RSpec.describe 'Invitations', type: :request do
                                                                                 invitation.id,
                                                                                 invitation.token))
       end
-      expect(flash.alert).to eq("We weren't able to complete identity verification.")
+      expect(flash.alert).to eq("You must complete verification before continuing registration.")
     end
   end
 

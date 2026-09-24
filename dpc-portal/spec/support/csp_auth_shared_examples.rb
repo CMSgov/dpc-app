@@ -430,7 +430,7 @@ RSpec.shared_examples 'a CSP client' do |config|
 
       it 'flashes the alert text' do
         attempt_sign_in
-        expect(flash[:alert]).to eq("We weren't able to complete identity verification.")
+        expect(flash[:alert]).to eq("You must complete verification before continuing registration.")
       end
 
       it 'does not sign in the user' do
@@ -479,7 +479,7 @@ RSpec.shared_examples 'a CSP client' do |config|
 
       it 'flashes the alert text' do
         attempt_sign_in
-        expect(flash[:alert]).to eq("We weren't able to complete identity verification.")
+        expect(flash[:alert]).to eq("You must complete verification before continuing registration.")
       end
 
       it 'does not sign in the user' do
