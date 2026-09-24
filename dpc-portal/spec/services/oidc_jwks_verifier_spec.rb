@@ -6,9 +6,20 @@ describe OidcJwksVerifier do
   let(:idp_host) { 'idp.example.com' }
   let(:well_known_uri) { "https://#{idp_host}/.well-known/openid-configuration" }
   let(:jwks_uri) { "https://#{idp_host}/jwks" }
-  let(:payload) { { 'sub' => '12345', 'email' => 'test@example.com' } }
   let(:rsa_key) { OpenSSL::PKey::RSA.generate(2048) }
   let(:jwk) { JSON::JWK.new(rsa_key) }
+  let(:issuer) { "https://#{idp_host}/oidc" }
+  let(:aud) { 'dpc-portal' }
+  let(:payload) do
+    {
+      'sub' => '12345',
+      'email' => 'test@example.com',
+      'iss' => issuer,
+      'aud' => aud,
+      'iat' => Time.now.to_i,
+      'exp' => Time.now.to_i + (60 * 5)
+    }
+  end
 
   def signed_jwt(claims, key: rsa_key, kid: jwk[:kid])
     token = JSON::JWT.new(claims)
@@ -33,6 +44,8 @@ describe OidcJwksVerifier do
     stub_const('OidcJwksVerifier::ALLOWED_IDP_HOSTS_DISCOVERY_URL_MAP',
                { idp_host => '/.well-known/openid-configuration' })
     stub_const('OidcJwksVerifier::ALLOWED_JWKS_HOSTS', Set.new([idp_host]))
+    stub_const('OidcJwksVerifier::ALLOWED_IDP_HOSTS_IDENTIFIER_MAP',
+               { idp_host => aud })
   end
 
   describe '.decode_and_verify' do

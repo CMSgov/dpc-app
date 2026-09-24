@@ -12,8 +12,14 @@ require 'openid_connect'
 #    as published in the discovery document.
 class OidcJwksVerifier
   class UntrustedJwksUriError < StandardError; end
+  class InvalidClaimsError < StandardError; end
 
   CSP_IDP_CONFIGS = Rails.application.config_for(:csp).values.grep(Hash).freeze
+
+  # Host -> expected aud claim for that host, as configured in config/csp.yml.
+  ALLOWED_IDP_HOSTS_IDENTIFIER_MAP = CSP_IDP_CONFIGS
+                                     .filter_map { |c| [c[:host], c[:identifier]] if c[:host].present? }
+                                     .to_h.freeze
 
   # Host -> discovery document path as configured in config/csp.yml.
   ALLOWED_IDP_HOSTS_DISCOVERY_URL_MAP = CSP_IDP_CONFIGS
@@ -41,12 +47,18 @@ class OidcJwksVerifier
     # the JWKS is refreshed once before giving up, so that a key rotated in
     # by the provider but missing in the stale JWKS doesn't cause failures
     def decode_and_verify(jwt_string, host:)
-      JSON::JWT.decode(jwt_string, jwk_set_for(host)).to_h
+      decode_verified_claims(jwt_string, host)
     rescue JSON::JWK::Set::KidNotFound
-      JSON::JWT.decode(jwt_string, jwk_set_for(host, force_refresh: true)).to_h
+      decode_verified_claims(jwt_string, host, force_refresh: true)
     end
 
     private
+
+    def decode_verified_claims(jwt_string, host, force_refresh: false)
+      claims = JSON::JWT.decode(jwt_string, jwk_set_for(host, force_refresh: force_refresh), :RS256).to_h
+      validate_claims!(claims, host)
+      claims
+    end
 
     def jwk_set_for(host, force_refresh: false)
       unless ALLOWED_IDP_HOSTS_DISCOVERY_URL_MAP.key?(host)
@@ -81,6 +93,36 @@ class OidcJwksVerifier
       return response.body if response.body.is_a?(Hash)
 
       JSON.parse(response.body.to_s)
+    end
+
+    def validate_claims!(claims, host)
+      validate_audience!(claims, host)
+      validate_issuer!(claims, host)
+      validate_not_expired!(claims)
+    end
+
+    def validate_audience!(claims, host)
+      expected = ALLOWED_IDP_HOSTS_IDENTIFIER_MAP[host]
+      return if expected.present? && Array(claims['aud']).include?(expected)
+
+      raise InvalidClaimsError, "Unexpected aud claim for host #{host}"
+    end
+
+    def validate_issuer!(claims, host)
+      iss_host = begin
+        URI.parse(claims['iss'].to_s).host
+      rescue StandardError
+        nil
+      end
+      return if iss_host == host
+
+      raise InvalidClaimsError, "Unexpected iss claim for host #{host}: #{claims['iss'].inspect}"
+    end
+
+    def validate_not_expired!(claims)
+      exp = claims['exp']
+      raise InvalidClaimsError, 'Missing exp claim' if exp.blank?
+      raise InvalidClaimsError, 'Token is expired' if Time.zone.at(exp.to_i) <= Time.current
     end
   end
 end
