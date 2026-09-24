@@ -36,7 +36,7 @@ class CspController < ApplicationController
   end
 
   def logout
-    store_invitation_return_url if params[:invitation_id].present? || params[:invitation_token].present?
+    store_invitation_link if params[:invitation_token].present?
 
     current_csp = csp_session.current || params[:current_csp]
     redirect_to url_for_logout(current_csp), allow_other_host: true
@@ -44,12 +44,8 @@ class CspController < ApplicationController
 
   private
 
-  def store_invitation_return_url
-    invitation = if params[:invitation_id].present?
-                   Invitation.find(params[:invitation_id])
-                 else
-                   Invitation.find_by(token: params[:invitation_token])
-                 end
+  def store_invitation_link
+    invitation = Invitation.find_by(token: params[:invitation_token])
 
     session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id,
                                                            invitation.id,
