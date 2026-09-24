@@ -55,7 +55,7 @@ class UserInfoService
   def decode_jwt(body, host)
     body = body[1..-2] if body.start_with?('"') && body.end_with?('"')
     OidcJwksVerifier.decode_and_verify(body, host: host).with_indifferent_access
-  rescue JSON::JWT::Exception, ArgumentError, OidcJwksVerifier::UntrustedJwksUriError => e
+  rescue JSON::JWT::Exception, ArgumentError, OidcJwksVerifier::UntrustedJwksUriError, InvalidClaimsError => e
     Rails.logger.error "User Info JWT verification failed (host=#{host}): #{e.class}"
     raise UserInfoServiceError, 'server_error'
   end
