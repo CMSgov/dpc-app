@@ -36,7 +36,7 @@ RSpec.describe Page::Invitations::AoFlowFailComponent, type: :component do
       node = page.find('.usa-alert__text')
       expect(node.text).to include(I18n.t('verification.bad_npi_status'))
       expect(page).to have_button('Back to sign in')
-      expect(page).to have_css("form[action='/logout?invitation_id=#{invitation.id}']")
+      expect(page).to have_css("form[action='/logout?invitation_token=#{invitation.token}']")
     end
   end
 
@@ -46,7 +46,7 @@ RSpec.describe Page::Invitations::AoFlowFailComponent, type: :component do
       node = page.find('.usa-alert__text')
       expect(node.text).to include(I18n.t('verification.server_error_status'))
       expect(page).to have_button('Back to sign in')
-      expect(page).to have_css("form[action='/logout?invitation_id=#{invitation.id}']")
+      expect(page).to have_css("form[action='/logout?invitation_token=#{invitation.token}']")
     end
   end
 end

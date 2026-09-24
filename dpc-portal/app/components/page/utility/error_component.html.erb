@@ -29,13 +29,9 @@
         <% end %>
       <% when :cd_accepted %>
         <%= link_to 'Go to DPC home', root_url, class: 'usa-button margin-right-0' %>
-      <% when :pii_mismatch %>
+      <% when :multi_user_match, :pii_mismatch %>
         <%= render Core::Button::ButtonComponent.new(label: "Back to sign in",
-            destination: csp_logout_path(invitation_id: @invitation.id),
-            method: :delete) %>
-      <% when :multi_user_match %>
-        <%= render Core::Button::ButtonComponent.new(label: "Back to sign in",
-            destination: csp_logout_path(invitation_id: @invitation.id),
+            destination: csp_logout_path(invitation_token: @invitation.token),
             method: :delete) %>
       <% when :email_mismatch %>
         <%= render Core::Button::ButtonComponent.new(label: "Back to sign in",
