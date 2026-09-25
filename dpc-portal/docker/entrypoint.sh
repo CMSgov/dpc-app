@@ -38,4 +38,11 @@ elif [ "$1" == "async" ]; then
     echo "Starting in non-production"
     ./bin/nonprod_async
   fi
+else
+  # Start the fake cpi gateway in the background and wait for it to boot
+  ./bin/nonprod_cpi &
+  sleep 3
+
+  # Allow passing custom commands through our entrypoint script (ex: inviting a new AO from a GHA)
+  exec "$@"
 fi
