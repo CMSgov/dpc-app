@@ -840,6 +840,10 @@ RSpec.describe 'Invitations', type: :request do
               expect(response).to be_ok
               expect(response.body).to include('Go to DPC Portal')
             end
+            it 'should set "last used" cookie when success page is rendered' do
+              post invitation_url_for(org.id, invitation, 'register')
+              expect(cookies[:last_used_csp]).to eq(provider.to_s)
+            end
             it 'should update invitation' do
               post invitation_url_for(org.id, invitation, 'register')
               invitation.reload
