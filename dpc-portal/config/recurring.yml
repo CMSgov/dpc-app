@@ -46,3 +46,8 @@ production:
     schedule: "0 2 * * 0"
     class: "CheckConfigCompleteJob"
     queue: portal
+
+  verify_cpi_gateway:
+    schedule: "*/15 * * * *"
+    class: "VerifyCpiApiGwJob"
+    queue: portal
