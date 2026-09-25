@@ -45,8 +45,6 @@
         <%= render Core::Button::ButtonComponent.new(label: "Back to sign in",
             destination: csp_logout_path,
             method: :delete) %>
-      <% when /signin_cancel/ %>
-        <%= link_to 'Back to portal home', sign_in_path, class: 'usa-button usa-button--outline', data: { turbo: false }%>
       <% when /signin_fail/ %>
         <%= link_to 'Back to portal home', sign_in_path, class: 'usa-button usa-button--outline', data: { turbo: false }%>
     <% end %>
