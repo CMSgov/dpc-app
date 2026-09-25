@@ -172,7 +172,7 @@ RSpec.describe 'Invitations', type: :request do
                                                                                 invitation.id,
                                                                                 invitation.token))
       end
-      expect(flash.alert).to eq(CspErrorHandling::VERIFICATION_ALERT)
+      expect(flash.alert).to eq(CspErrorHandling::SIGNIN_FAIL)
     end
   end
 

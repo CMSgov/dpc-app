@@ -430,7 +430,7 @@ RSpec.shared_examples 'a CSP client' do |config|
 
       it 'flashes the alert text' do
         attempt_sign_in
-        expect(flash[:alert]).to eq(CspErrorHandling::VERIFICATION_ALERT)
+        expect(flash[:alert]).to eq(CspErrorHandling::SIGNIN_FAIL)
       end
 
       it 'does not sign in the user' do
