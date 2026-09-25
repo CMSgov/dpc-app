@@ -19,8 +19,9 @@ module OmniAuth
 
       # Calls the userinfo endpoint with the bearer access token and returns
       # the claims as a Hash. If the IdP responds with a signed JWT
-      # (application/jwt), the JWT is decoded without signature verification
-      # and the payload is returned. Otherwise the JSON body is parsed.
+      # (application/jwt), the JWT's signature is verified against the
+      # provider's published JWKS before its payload is trusted. Otherwise
+      # the JSON body is parsed.
       # Fetches and parses the userinfo payload from the OpenID Connect provider.
       #
       # This method retrieves user information from the userinfo endpoint using the access token,
@@ -32,7 +33,7 @@ module OmniAuth
       # - Some providers JSON-encode the JWT, wrapping it as a string: `"<jwt>"`
       #
       # @return [Hash] A hash with indifferent access containing the userinfo payload.
-      #   If the response is a JWT, it is decoded and converted to a hash.
+      #   If the response is a JWT, its signature is verified and the payload is converted to a hash.
       #   If the response is JSON, it is parsed and converted to a hash.
       #   Keys can be accessed with symbols or strings.
       #
@@ -53,15 +54,23 @@ module OmniAuth
 
         if content_type == 'application/jwt' || looks_like_jwt?(body)
           body = body[1..-2] if body.start_with?('"') && body.end_with?('"')
-          ## TODO - consider verifying the JWT signature using the provider's JWKS keys
-          JSON::JWT.decode(body, :skip_verification).to_h.with_indifferent_access
+          decode_verified_jwt(body).with_indifferent_access
         else
           JSON.parse(body).with_indifferent_access
         end
       end
 
+      # Decodes a userinfo JWT, verifying its signature against the key
+      # published by the issuing provider. 
+      def decode_verified_jwt(jwt_string)
+        OidcJwksVerifier.decode_and_verify(jwt_string, host: client_options.host)
+      end
+
       def userinfo_endpoint_uri
-        endpoint = client_options.userinfo_endpoint
+        provider_uri(client_options.userinfo_endpoint)
+      end
+
+      def provider_uri(endpoint)
         parsed = URI.parse(endpoint)
         return parsed.to_s if parsed.is_a?(URI::HTTP) || parsed.is_a?(URI::HTTPS)
 

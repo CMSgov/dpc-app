@@ -31,3 +31,4 @@ Metrics/ClassLength:
     - app/controllers/invitations_controller.rb
     - app/models/invitation.rb
     - spec/support/fake_cpi_gateway.rb
+    - app/services/user_info_service.rb
