@@ -366,13 +366,10 @@ class InvitationsController < ApplicationController
   end
 
   def load_invitation
-    @invitation = Invitation.find_by(id: params[:id], token: params[:token])
+    @invitation = Invitation.find_by(id: params[:id],
+                                     token: params[:token],
+                                     provider_organization: params[:organization_id])
     return render_invitation_not_found if @invitation.nil?
-
-    return if @organization == @invitation.provider_organization
-
-    invalid_status = @invitation.credential_delegate? ? 'cd_invalid' : 'ao_invalid'
-    render(Page::Utility::ErrorComponent.new(@invitation, invalid_status), status: :not_found)
   end
 
   # No invitation matched the id/token pair, so we cannot say anything about the invitation itself.
@@ -381,6 +378,7 @@ class InvitationsController < ApplicationController
               action_context: LoggingConstants::ActionContext::Registration,
               action_type: LoggingConstants::ActionType::InvalidInvitation,
               invitation: params[:id])
+    # add new text/status for generic invalid invitation, rather than using ao_invalid
     render(Page::Utility::ErrorComponent.new(nil, 'ao_invalid'), status: :not_found)
   end
 
