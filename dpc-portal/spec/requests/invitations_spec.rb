@@ -172,7 +172,7 @@ RSpec.describe 'Invitations', type: :request do
                                                                                 invitation.id,
                                                                                 invitation.token))
       end
-      expect(flash.alert).to eq("You must complete verification before continuing registration.")
+      expect(flash.alert).to eq(CspErrorHandling::VERIFICATION_ALERT)
     end
   end
 
