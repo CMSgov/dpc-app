@@ -27,7 +27,7 @@ module Page
       def log_out_path
         return destroy_user_session_path unless @invitation&.id
 
-        csp_logout_path(invitation_id: @invitation.id)
+        csp_logout_path(invitation_token: @invitation.token)
       end
 
       private
