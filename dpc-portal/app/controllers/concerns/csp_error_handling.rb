@@ -10,7 +10,8 @@ module CspErrorHandling
 
   CSP_CODES = %w[id_me login_dot_gov clear].freeze
 
-  VERIFICATION_ALERT = "We weren't able to complete identity verification."
+  SIGNIN_FAIL = "We weren't able to complete identity verification."
+  VERIFICATION_ALERT = 'You must complete verification before continuing registration.'
 
   def csp_auth_error?
     CSP_AUTH_ERROR_MESSAGES.include?(params[:message])
@@ -52,7 +53,7 @@ module CspErrorHandling
               action_context: action_context(invitation),
               action_type: LoggingConstants::ActionType::FailedLogin,
               csp: csp_param)
-    redirect_to signin_destination(invitation), alert: VERIFICATION_ALERT
+    redirect_to signin_destination(invitation), alert: SIGNIN_FAIL
   end
 
   def handle_signin_cancel(invitation)

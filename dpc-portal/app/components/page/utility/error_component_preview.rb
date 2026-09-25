@@ -88,12 +88,6 @@ module Page
       end
 
       # @param csp select :csp_codes
-      def csp_signin_cancel(csp: DEFAULT_CSP)
-        reason = 'csp_signin_cancel'
-        render(Page::Utility::ErrorComponent.new(nil, reason, csp:))
-      end
-
-      # @param csp select :csp_codes
       def csp_signin_fail(csp: DEFAULT_CSP)
         reason = 'csp_signin_fail'
         render(Page::Utility::ErrorComponent.new(nil, reason, csp:))
