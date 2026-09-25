@@ -36,6 +36,18 @@ CONTAINER_NAME=$(aws ecs describe-task-definition \
   --output text)
 
 # Skip running the entry point script on our tmp task and just drop to a shell for our command
+OVERRIDES=$(jq -n \
+  --arg name "$CONTAINER_NAME" \
+  --arg cmd "$COMMAND" \
+  '{
+    containerOverrides: [
+      {
+        name: $name,
+        command: ["sh", "-c", $cmd]
+      }
+    ]
+  }')
+
 echo "Running command on temp task"
 aws ecs run-task \
   --region "$REGION" \
@@ -43,12 +55,5 @@ aws ecs run-task \
   --task-definition "$TASK_DEF" \
   --launch-type FARGATE \
   --network-configuration "$NETWORK_CONFIG" \
-  --overrides "{
-    \"containerOverrides\": [
-      {
-        \"name\": \"$CONTAINER_NAME\",
-        \"command\": [\"sh\", \"-c\", \"$COMMAND\"]
-      }
-    ]
-  }" \
+  --overrides "$OVERRIDES" \
   --query 'tasks[0].taskArn' --output text
