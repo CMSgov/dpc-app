@@ -93,6 +93,12 @@ class CpiApiGatewayClient
 
   def fetch_token
     @access = @client.client_credentials.get_token(scope: 'READ')
+    Rails.logger.info(
+      ['Got CPI GW access token',
+       { access_token_present: @access.token.present?,
+         access_token_expired: @access.expired?,
+         access_token_expires_at: @access.expires_at }]
+    )
   end
 
   def request_client
