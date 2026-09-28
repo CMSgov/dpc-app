@@ -35,8 +35,10 @@ class CpiApiGatewayClient
   # fetch full enrollments information about an organization
   def fetch_profile(npi)
     url = "#{@cpi_api_gateway_url}api/1.0/ppr/providers/profile"
-    start_tracking(:fetch_profile, url)
     body = { providerID: { npi: npi.to_s } }.to_json
+    start_tracking(:fetch_profile, url,
+                   cpi_api_gateway_request_content_type: 'application/json',
+                   cpi_api_gateway_request_body: body)
     response = request_client.post(url,
                                    headers: { 'Content-Type': 'application/json' },
                                    body:)
@@ -118,13 +120,13 @@ class CpiApiGatewayClient
     response.parsed
   end
 
-  def start_tracking(method_name, url)
+  def start_tracking(method_name, url, request_details = {})
     @start = Time.now
     Rails.logger.info(
       ['Calling CPI API Gateway',
        { cpi_api_gateway_request_method: :post,
          cpi_api_gateway_request_url: url,
-         cpi_api_gateway_request_method_name: method_name }]
+         cpi_api_gateway_request_method_name: method_name }.merge(request_details)]
     )
   end
 
