@@ -19,10 +19,10 @@ class VerifyCpiApiGwJob < ApplicationJob
     test_scenarios = test_data
 
     cpi_gateway_results = [
-      can_process_ao_with_med_sanctions?(service, test_scenarios['AO_WITH_MED_SANCTIONS']),
-      can_process_ao_with_waiver?(service, test_scenarios['AO_WITH_WAIVERS']),
-      can_process_org_with_no_enrollment?(service, test_scenarios['UNAPPROVED_ENROLLMENT_STATUS']),
-      can_process_org_with_active_ao?(service, test_scenarios['ORG_WITH_AO_SSN'])
+      can_process_ao_with_med_sanctions?(service, test_scenarios.fetch('AO_WITH_MED_SANCTIONS')),
+      can_process_ao_with_waiver?(service, test_scenarios.fetch('AO_WITH_WAIVERS')),
+      can_process_org_with_no_enrollment?(service, test_scenarios.fetch('UNAPPROVED_ENROLLMENT_STATUS')),
+      can_process_org_with_active_ao?(service, test_scenarios.fetch('ORG_WITH_AO_SSN'))
     ]
 
     Rails.logger.info "CPI GW tests: #{cpi_gateway_results.count(true)} out of #{cpi_gateway_results.length} passing"
@@ -123,7 +123,9 @@ class VerifyCpiApiGwJob < ApplicationJob
     # retrieve from /dpc/test/web-portal/cpi_api_gw_testdata etc
     # includes 4 specific test scenarios set up by the CPI API GW team
     testdata_object = JSON.parse(ENV.fetch('CPI_API_GW_TESTDATA'))
-    testdata_object.fetch('data')
+    data_hash = testdata_object.fetch('data')
+    Rails.logger.info(['testing .fetch call on ao with med sanctions', data_hash.fetch('AO_WITH_MED_SANCTIONS')])
+    data_hash
   end
 
   def configuration
