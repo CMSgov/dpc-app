@@ -8,8 +8,8 @@ class InvitationsController < ApplicationController
   include CspUtils
   include DpcPortalUtils
 
-  before_action :load_organization
   before_action :load_invitation
+  before_action :load_organization
   before_action :validate_invitation, except: %i[renew]
   before_action :verify_ao_invitation, only: %i[accept confirm]
   before_action :verify_cd_invitation, only: %i[code verify_code confirm_cd]
