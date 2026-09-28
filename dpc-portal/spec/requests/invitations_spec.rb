@@ -57,7 +57,7 @@ RSpec.describe 'Invitations', type: :request do
       bad_org = create(:provider_organization)
       send(method, invitation_url_for(bad_org.id, invitation, path_suffix))
       expect(response).to be_not_found
-      expect(response.body).to include(I18n.t("verification.invitation_invalid_status"))
+      expect(response.body).to include(I18n.t('verification.invitation_invalid_status'))
     end
     it 'should show warning page if cancelled' do
       invitation.update(status: :cancelled)

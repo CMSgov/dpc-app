@@ -369,7 +369,7 @@ class InvitationsController < ApplicationController
     @invitation = Invitation.find_by(id: params[:id],
                                      token: params[:token],
                                      provider_organization: params[:organization_id])
-    return render_invitation_not_found if @invitation.nil?
+    render_invitation_not_found if @invitation.nil?
   end
 
   # No invitation matched the id/token/organization combination, so we cannot say anything about the invitation itself.
