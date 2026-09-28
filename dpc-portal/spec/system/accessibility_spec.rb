@@ -492,7 +492,7 @@ RSpec.describe 'Accessibility', type: :system do
         let(:renew_success) { 'You should receive your new invitation shortly' }
         it 'should show bad invitation' do
           visit "/organizations/#{org.id}/invitations/bad-id/#{unmatched_invitation_token}"
-          expect(page).to have_text('Your registration link is invalid.')
+          expect(page).to have_text('Your invitation link is invalid.')
           expect(page).to be_axe_clean.according_to axe_standard
         end
         it 'should show expired invitation' do
