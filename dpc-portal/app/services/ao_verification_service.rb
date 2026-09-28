@@ -72,6 +72,7 @@ class AoVerificationService
   end
 
   def get_authorized_official_role(organization_npi, identifier_type, identifier)
+    Rails.logger.info(['AoVerificationService calling fetch_profile'], { org_npi: organization_npi })
     profile = @cpi_api_gw_client.fetch_profile(organization_npi)
     raise AoException, 'bad_npi' if profile['code'] == '404'
 

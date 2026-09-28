@@ -14,12 +14,21 @@ class CpiApiGatewayClient
     env = ENV.fetch('ENV', nil)
     client_id = ENV.fetch('CPI_API_GW_CLIENT_ID', nil)
     client_secret = ENV.fetch('CPI_API_GW_CLIENT_SECRET', nil)
+    token_endpoint = '/oauth2/aus2151jb0hszrbLU297/v1/token'
+    ssl_verify = env != 'local'
     @cpi_api_gateway_url = cpi_api_gateway_url
     @cpi_api_gateway_url += '/' unless @cpi_api_gateway_url.end_with?('/')
+    Rails.logger.info(
+      ['CPI API Gateway client configuration',
+       { cpi_api_gateway_token_endpoint: token_endpoint,
+         cpi_api_gateway_url: @cpi_api_gateway_url,
+         cpi_api_gateway_oauth_url: cms_idm_url,
+         cpi_api_gateway_ssl_verify: ssl_verify }]
+    )
     @client = OAuth2::Client.new(client_id, client_secret,
                                  site: cms_idm_url,
-                                 token_url: '/oauth2/aus2151jb0hszrbLU297/v1/token',
-                                 ssl: { verify: env != 'local' })
+                                 token_url: token_endpoint,
+                                 ssl: { verify: ssl_verify })
     fetch_token
   end
 
