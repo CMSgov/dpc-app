@@ -125,16 +125,37 @@ RSpec.describe StructuredLogging do
     end
 
     context 'with extra/unknown fields' do
-      it 'passes unknown extras through to the payload' do
+      it 'drops unknown extras from the payload' do
         expect(Rails.logger).to receive(:info) do |(_, payload)|
-          expect(payload[:verification_reason]).to eq('expired')
-          expect(payload[:custom_field]).to eq('custom_value')
+          expect(payload).not_to have_key(:custom_field)
         end
 
         controller.log_event(:info, 'Custom event',
                              action_context: 'Authentication',
-                             verification_reason: 'expired',
                              custom_field: 'custom_value')
+      end
+
+      it 'logs a warning naming the rejected fields, without their values' do
+        expect(Rails.logger).to receive(:warn) do |(message, details)|
+          expect(message).to eq('StructuredLogging: dropped non-allowlisted field(s) from log payload')
+          expect(details[:rejected_fields]).to eq([:custom_field])
+          expect([message, details].to_s).not_to include('custom_value')
+        end
+
+        controller.log_event(:info, 'Custom event',
+                             action_context: 'Authentication',
+                             custom_field: 'custom_value')
+      end
+
+      it 'still includes allowlisted fields alongside dropped ones' do
+        expect(Rails.logger).to receive(:info) do |(_, payload)|
+          expect(payload[:user_identifier]).to eq('abc-123-uuid')
+          expect(payload).not_to have_key(:custom_field)
+        end
+
+        controller.log_event(:info, 'Custom event',
+                             action_context: 'Authentication',
+                             user_identifier: 'abc-123-uuid')
       end
     end
 
@@ -210,11 +231,49 @@ RSpec.describe StructuredLogging do
                                { user_identifier: 'uid',
                                  invitation: 1,
                                  csp_name: 'logingov',
-                                 error: 'oops',
-                                 custom: 'value' })
+                                 error: 'oops' })
 
       expect(result).not_to have_key(:csp_name)
-      expect(result[:custom]).to eq('value')
+    end
+
+    it 'drops keys not on the allowlist from remaining extras' do
+      expect(Rails.logger).to receive(:warn) do |(message, details)|
+        expect(message).to eq('StructuredLogging: dropped non-allowlisted field(s) from log payload')
+        expect(details[:rejected_fields]).to eq([:custom_key])
+        expect([message, details].to_s).not_to include('custom_value')
+      end
+
+      result = controller.send(:optional_log_fields, 'SomeType',
+                               { user_identifier: 'uid', custom_key: 'custom_value' })
+
+      expect(result[:user_identifier]).to eq('uid')
+      expect(result).not_to have_key(:custom)
+    end
+  end
+
+  describe '#filter_extras (private)' do
+    it 'keeps only allowlisted keys' do
+      allow(Rails.logger).to receive(:warn)
+
+      result = controller.send(:filter_extras,
+                               { user_identifier: 'uid', ssn: '123-45-6789' })
+
+      expect(result).to eq(user_identifier: 'uid')
+    end
+
+    it 'warns with the names of rejected keys, never their values' do
+      expect(Rails.logger).to receive(:warn) do |(message, details)|
+        expect(details[:rejected_fields]).to eq([:ssn])
+        expect([message, details].to_s).not_to include('123-45-6789')
+      end
+
+      controller.send(:filter_extras, { ssn: '123-45-6789' })
+    end
+
+    it 'does not warn when every key is allowlisted' do
+      expect(Rails.logger).not_to receive(:warn)
+
+      controller.send(:filter_extras, { user_identifier: 'uid', error: 'oops' })
     end
   end
 end
