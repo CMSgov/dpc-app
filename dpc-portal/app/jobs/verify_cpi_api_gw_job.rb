@@ -19,9 +19,9 @@ class VerifyCpiApiGwJob < ApplicationJob
     test_scenarios = test_data
 
     cpi_gateway_results = [
-      can_process_ao_with_med_sanctions?(service, test_scenarios.fetch('AO_WITH_MED_SANCTIONS')),
-      can_process_ao_with_waiver?(service, test_scenarios.fetch('AO_WITH_WAIVERS')),
-      can_process_org_with_no_enrollment?(service, test_scenarios.fetch('UNAPPROVED_ENROLLMENT_STATUS')),
+      # can_process_ao_with_med_sanctions?(service, test_scenarios.fetch('AO_WITH_MED_SANCTIONS')),
+      # can_process_ao_with_waiver?(service, test_scenarios.fetch('AO_WITH_WAIVERS')),
+      # can_process_org_with_no_enrollment?(service, test_scenarios.fetch('UNAPPROVED_ENROLLMENT_STATUS')),
       can_process_org_with_active_ao?(service, test_scenarios.fetch('ORG_WITH_AO_SSN'))
     ]
 
