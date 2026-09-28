@@ -378,8 +378,7 @@ class InvitationsController < ApplicationController
               action_context: LoggingConstants::ActionContext::Registration,
               action_type: LoggingConstants::ActionType::InvalidInvitation,
               invitation: params[:id])
-    # add new text/status for generic invalid invitation, rather than using ao_invalid
-    render(Page::Utility::ErrorComponent.new(nil, 'ao_invalid'), status: :not_found)
+    render(Page::Utility::ErrorComponent.new(nil, 'invitation_invalid'), status: :not_found)
   end
 
   def validate_invitation
