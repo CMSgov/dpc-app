@@ -368,7 +368,7 @@ class InvitationsController < ApplicationController
   def load_invitation
     @invitation = Invitation.find_by(id: params[:id],
                                      token: params[:token],
-                                     provider_organization: params[:organization_id])
+                                     provider_organization_id: params[:organization_id])
     render_invitation_not_found if @invitation.nil?
   end
 
