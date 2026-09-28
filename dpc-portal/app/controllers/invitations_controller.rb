@@ -372,7 +372,7 @@ class InvitationsController < ApplicationController
     return render_invitation_not_found if @invitation.nil?
   end
 
-  # No invitation matched the id/token pair, so we cannot say anything about the invitation itself.
+  # No invitation matched the id/token/organization combination, so we cannot say anything about the invitation itself.
   def render_invitation_not_found
     log_event(:info, 'Invitation not found',
               action_context: LoggingConstants::ActionContext::Registration,
