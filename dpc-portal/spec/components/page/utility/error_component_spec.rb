@@ -131,7 +131,7 @@ RSpec.describe Page::Utility::ErrorComponent, type: :component do
             is_expected.to include(normalize_space(header))
           end
           it 'should have logout button' do
-            button_url = "/logout?invitation_id=#{invitation.id}"
+            button_url = "/logout?invitation_token=#{invitation.token}"
             is_expected.to include(button_url)
             is_expected.to include('Back to sign in')
           end
@@ -146,7 +146,7 @@ RSpec.describe Page::Utility::ErrorComponent, type: :component do
             is_expected.to include(normalize_space(header))
           end
           it 'should have logout button' do
-            button_url = "/logout?invitation_id=#{invitation.id}"
+            button_url = "/logout?invitation_token=#{invitation.token}"
             is_expected.to include(button_url)
             is_expected.to include('Back to sign in')
           end
@@ -162,7 +162,7 @@ RSpec.describe Page::Utility::ErrorComponent, type: :component do
             is_expected.to include(normalize_space(header))
           end
           it 'should have logout button' do
-            button_url = "/logout?invitation_id=#{invitation.id}"
+            button_url = "/logout?invitation_token=#{invitation.token}"
             is_expected.to include(button_url)
             is_expected.to include('Back to sign in')
           end
