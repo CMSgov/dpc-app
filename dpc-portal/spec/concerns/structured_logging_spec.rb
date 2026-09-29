@@ -127,11 +127,13 @@ RSpec.describe StructuredLogging do
     context 'with extra/unknown fields' do
       it 'drops unknown extras from the payload' do
         expect(Rails.logger).to receive(:info) do |(_, payload)|
+          expect(payload[:verificationReason]).to eq('expired')
           expect(payload).not_to have_key(:custom_field)
         end
 
         controller.log_event(:info, 'Custom event',
                              action_context: 'Authentication',
+                             verificationReason: 'expired',
                              custom_field: 'custom_value')
       end
 
