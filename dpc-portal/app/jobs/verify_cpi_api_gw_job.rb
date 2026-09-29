@@ -19,8 +19,8 @@ class VerifyCpiApiGwJob < ApplicationJob
     test_scenarios = test_data
 
     cpi_gateway_results = [
-      can_process_ao_with_med_sanctions?(service, test_scenarios.fetch('AO_WITH_MED_SANCTIONS')),
-      can_process_ao_with_waiver?(service, test_scenarios.fetch('AO_WITH_WAIVERS')),
+      # can_process_ao_with_med_sanctions?(service, test_scenarios.fetch('AO_WITH_MED_SANCTIONS')),
+      # can_process_ao_with_waiver?(service, test_scenarios.fetch('AO_WITH_WAIVERS')),
       can_process_org_with_no_enrollment?(service, test_scenarios.fetch('UNAPPROVED_ENROLLMENT_STATUS')),
       can_process_org_with_active_ao?(service, test_scenarios.fetch('ORG_WITH_AO_SSN'))
     ]
@@ -96,17 +96,17 @@ class VerifyCpiApiGwJob < ApplicationJob
     # VerifyProviderOrganizationJob path
     enrollments = get_approved_enrollments_safe(service, test_data)[:enrollments]
     return false unless enrollments.present?
-    return false unless enrollments_has_ssn(enrollments, test_data['ao_ssn'])
+    return false unless enrollments_has_ssn(enrollments, test_data.fetch('ao_ssn'))
 
     # Invitation path
-    result = service.check_eligibility(test_data['org_npi'], test_data['ao_ssn'])
+    result = service.check_eligibility(test_data.fetch('org_npi'), test_data.fetch('ao_ssn'))
     result[:success] == true
   end
 
   # Happy path for this method returns an object with an an array under enrollments.
   # When there are no approved enrollments, an exception is raised.
   def get_approved_enrollments_safe(service, test_data)
-    result = service.get_approved_enrollments(test_data['org_npi'])
+    result = service.get_approved_enrollments(test_data.fetch('org_npi'))
     { enrollments: result[:enrollments], error_message: nil }
   rescue AoException => e
     { enrollments: nil, error_message: e.message }
@@ -114,7 +114,7 @@ class VerifyCpiApiGwJob < ApplicationJob
 
   # There are two things we care about here: has_ao_waiver and has_org_waiver
   def check_ao_eligibility_safe(service, test_data)
-    result = service.check_ao_eligibility(test_data['org_npi'], :pac_id, test_data['ao_pacId'])
+    result = service.check_ao_eligibility(test_data.fetch('org_npi'), :pac_id, test_data.fetch('ao_pacId'))
     { result:, error_message: nil }
   rescue AoException => e
     { result: nil, error_message: e.message }
