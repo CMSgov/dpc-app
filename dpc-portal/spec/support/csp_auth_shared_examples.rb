@@ -547,7 +547,7 @@ RSpec.shared_examples 'a CSP client' do |config|
 
     it 'should set return to invitation flow if invitation sent' do
       invitation = create(:invitation, :ao)
-      delete "/logout?invitation_id=#{invitation.id}"
+      delete "/logout?invitation_token=#{invitation.token}"
       expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
                                                                                  invitation.id,
                                                                                  invitation.token)
