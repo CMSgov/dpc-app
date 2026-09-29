@@ -137,7 +137,7 @@ RSpec.describe StructuredLogging do
 
       it 'logs a warning naming the rejected fields, without their values' do
         expect(Rails.logger).to receive(:warn) do |(message, details)|
-          expect(message).to eq('StructuredLogging: dropped non-allowlisted field(s) from log payload')
+          expect(message).to eq('Unknown field(s) rejected from logs')
           expect(details[:rejected_fields]).to eq([:custom_field])
           expect([message, details].to_s).not_to include('custom_value')
         end
@@ -238,7 +238,7 @@ RSpec.describe StructuredLogging do
 
     it 'drops keys not on the allowlist from remaining extras' do
       expect(Rails.logger).to receive(:warn) do |(message, details)|
-        expect(message).to eq('StructuredLogging: dropped non-allowlisted field(s) from log payload')
+        expect(message).to eq('Unknown field(s) rejected from logs')
         expect(details[:rejected_fields]).to eq([:custom_key])
         expect([message, details].to_s).not_to include('custom_value')
       end

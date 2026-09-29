@@ -50,10 +50,7 @@ module StructuredLogging
   # Drop non-allowlisted fields and warn with key name (not value) in logs
   def filter_extras(extras)
     rejected_keys = extras.keys - ALLOWED_EXTRA_LOG_FIELDS
-    if rejected_keys.any?
-      Rails.logger.warn(['StructuredLogging: dropped non-allowlisted field(s) from log payload',
-                         { rejected_fields: rejected_keys }])
-    end
+    Rails.logger.warn(['Unknown field(s) rejected from logs', { rejected_fields: rejected_keys }]) if rejected_keys.any?
 
     extras.slice(*ALLOWED_EXTRA_LOG_FIELDS)
   end
