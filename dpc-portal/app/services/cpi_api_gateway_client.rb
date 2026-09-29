@@ -44,6 +44,15 @@ class CpiApiGatewayClient
                                    body:)
     stop_tracking(:fetch_profile, url, response.status)
     response.parsed
+  rescue OAuth2::Error => e
+    Rails.logger.error(
+      ['CPI API Gateway fetch_profile failed',
+       { cpi_api_gateway_request_url: url,
+         cpi_api_gateway_request_npi: npi,
+         cpi_api_gateway_request_body: body,
+         cpi_api_gateway_response_status_code: e.response.status }]
+    )
+    raise
   end
 
   # fetch info about the authorized official, including a list of med sanctions
