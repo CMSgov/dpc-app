@@ -27,9 +27,9 @@ describe OidcJwksVerifier do
     token.sign(key, :RS256).to_s
   end
 
-  def stub_discovery(jwks_uri:)
+  def stub_discovery(jwks_uri:, iss: issuer)
     stub_request(:get, well_known_uri).to_return(
-      body: { 'jwks_uri' => jwks_uri }.to_json, headers: { 'Content-Type' => 'application/json' }
+      body: { 'jwks_uri' => jwks_uri, 'issuer' => iss }.to_json, headers: { 'Content-Type' => 'application/json' }
     )
   end
 
@@ -44,8 +44,9 @@ describe OidcJwksVerifier do
     stub_const('OidcJwksVerifier::ALLOWED_IDP_HOSTS_DISCOVERY_URL_MAP',
                { idp_host => '/.well-known/openid-configuration' })
     stub_const('OidcJwksVerifier::ALLOWED_JWKS_HOSTS', Set.new([idp_host]))
-    stub_const('OidcJwksVerifier::ALLOWED_IDP_HOSTS_IDENTIFIER_MAP',
+    stub_const('OidcJwksVerifier::ALLOWED_IDP_HOSTS_CLIENT_IDENTIFIER_MAP',
                { idp_host => aud })
+    allow(CspUtils).to receive(:issuer).with(idp_host).and_return(issuer)
   end
 
   describe '.decode_and_verify' do
@@ -69,6 +70,33 @@ describe OidcJwksVerifier do
         token = signed_jwt(payload, key: OpenSSL::PKey::RSA.generate(2048))
         expect { described_class.decode_and_verify(token, host: idp_host) }
           .to raise_error(JSON::JWT::VerificationFailed)
+      end
+
+      context 'invalid claims' do
+        it 'raises when the audience claim does not match the expected value for the host' do
+          token = signed_jwt(payload.merge('aud' => 'other-audience'))
+          expect { described_class.decode_and_verify(token, host: idp_host) }
+            .to raise_error(OidcJwksVerifier::InvalidClaimsError, /Unexpected aud claim/)
+        end
+
+        it 'raises when the issuer claim does not match the expected value for the host' do
+          token = signed_jwt(payload.merge('iss' => 'other-issuer'))
+          expect { described_class.decode_and_verify(token, host: idp_host) }
+            .to raise_error(OidcJwksVerifier::InvalidClaimsError, /Unexpected iss claim/)
+        end
+
+        it 'raises when the exp claim is a past timestamp' do
+          token = signed_jwt(payload.merge('exp' => 10.minutes.ago(Time.now).to_i))
+          expect { described_class.decode_and_verify(token, host: idp_host) }
+            .to raise_error(OidcJwksVerifier::InvalidClaimsError, /Token is expired/)
+        end
+
+        it 'raises when the exp claim is missing' do
+          payload.delete('exp')
+          token = signed_jwt(payload)
+          expect { described_class.decode_and_verify(token, host: idp_host) }
+            .to raise_error(OidcJwksVerifier::InvalidClaimsError, /Missing exp claim/)
+        end
       end
     end
 

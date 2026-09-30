@@ -17,9 +17,9 @@ class OidcJwksVerifier
   CSP_IDP_CONFIGS = Rails.application.config_for(:csp).values.grep(Hash).freeze
 
   # Host -> expected aud claim for that host, as configured in config/csp.yml.
-  ALLOWED_IDP_HOSTS_IDENTIFIER_MAP = CSP_IDP_CONFIGS
-                                     .filter_map { |c| [c[:host], c[:identifier]] if c[:host].present? }
-                                     .to_h.freeze
+  ALLOWED_IDP_HOSTS_CLIENT_IDENTIFIER_MAP =
+    CSP_IDP_CONFIGS.filter_map { |c| [c[:host], c[:identifier]] if c[:host].present? }
+                   .to_h.freeze
 
   # Host -> discovery document path as configured in config/csp.yml.
   ALLOWED_IDP_HOSTS_DISCOVERY_URL_MAP = CSP_IDP_CONFIGS
@@ -102,19 +102,20 @@ class OidcJwksVerifier
     end
 
     def validate_audience!(claims, host)
-      expected = ALLOWED_IDP_HOSTS_IDENTIFIER_MAP[host]
+      expected = ALLOWED_IDP_HOSTS_CLIENT_IDENTIFIER_MAP[host]
       return if expected.present? && Array(claims['aud']).include?(expected)
 
       raise InvalidClaimsError, "Unexpected aud claim for host #{host}"
     end
 
+    # search by host, match result against the iss claim.
     def validate_issuer!(claims, host)
-      iss_host = begin
-        URI.parse(claims['iss'].to_s).host
-      rescue StandardError
+      valid_issuer = begin
+        CspUtils.issuer(host)
+      rescue ArgumentError
         nil
       end
-      return if iss_host == host
+      return if valid_issuer == claims['iss']
 
       raise InvalidClaimsError, "Unexpected iss claim for host #{host}: #{claims['iss'].inspect}"
     end
