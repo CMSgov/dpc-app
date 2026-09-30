@@ -19,14 +19,19 @@ RSpec.describe 'Invitations', type: :request do
     it 'should show warning page with 404 if missing' do
       send(method, "/organizations/#{org.id}/invitations/bad-id/#{unmatched_invitation_token}/#{path_suffix}")
       expect(response).to be_not_found
-      # Without an invitation, we don't know if it's for an AO or CD, so we default to AO in the error message.
-      expect(response.body).to include(I18n.t('verification.ao_invalid_status'))
+      # Without an invitation, we don't know if it's for an AO or CD.
+      expect(response.body).to include(I18n.t('verification.invitation_invalid_status'))
     end
     it 'should show warning page with 404 if token does not match the invitation' do
       send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{unmatched_invitation_token}/#{path_suffix}")
       expect(response).to be_not_found
       # We can't disclose whether the invitation exists, so we give the same message as for a missing invitation.
-      expect(response.body).to include(I18n.t('verification.ao_invalid_status'))
+      expect(response.body).to include(I18n.t('verification.invitation_invalid_status'))
+    end
+    it 'should show warning page with 404 if org does not match invitation' do
+      send(method, "/organizations/invalid_id/invitations/#{invitation.id}/#{invitation.token}/#{path_suffix}")
+      expect(response).to be_not_found
+      expect(response.body).to include(I18n.t('verification.invitation_invalid_status'))
     end
     it 'logs when the token does not match the invitation' do
       allow(Rails.logger).to receive(:info)
@@ -52,7 +57,7 @@ RSpec.describe 'Invitations', type: :request do
       bad_org = create(:provider_organization)
       send(method, invitation_url_for(bad_org.id, invitation, path_suffix))
       expect(response).to be_not_found
-      expect(response.body).to include(I18n.t("verification.#{role}_invalid_status"))
+      expect(response.body).to include(I18n.t('verification.invitation_invalid_status'))
     end
     it 'should show warning page if cancelled' do
       invitation.update(status: :cancelled)
