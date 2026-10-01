@@ -430,7 +430,7 @@ RSpec.shared_examples 'a CSP client' do |config|
 
       it 'flashes the alert text' do
         attempt_sign_in
-        expect(flash[:alert]).to eq("We weren't able to complete identity verification.")
+        expect(flash[:alert]).to eq(CspErrorHandling::SIGNIN_FAIL)
       end
 
       it 'does not sign in the user' do
@@ -479,7 +479,7 @@ RSpec.shared_examples 'a CSP client' do |config|
 
       it 'flashes the alert text' do
         attempt_sign_in
-        expect(flash[:alert]).to eq("We weren't able to complete identity verification.")
+        expect(flash[:alert]).to eq(CspErrorHandling::VERIFICATION_ALERT)
       end
 
       it 'does not sign in the user' do
@@ -547,7 +547,7 @@ RSpec.shared_examples 'a CSP client' do |config|
 
     it 'should set return to invitation flow if invitation sent' do
       invitation = create(:invitation, :ao)
-      delete "/logout?invitation_id=#{invitation.id}"
+      delete "/logout?invitation_token=#{invitation.token}"
       expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
                                                                                  invitation.id,
                                                                                  invitation.token)

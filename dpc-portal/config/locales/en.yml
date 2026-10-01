@@ -16,6 +16,8 @@ en:
     cd_expired_text: "<p>You've exceeded the 48 hour expiration period.</p><p>Contact the Authorized Official (AO) that invited you. The AO will need to sign in to the DPC Portal and create a new invite.</p>"
     ao_renewed_status: You already requested a new invite.
     ao_renewed_text: Please check your email. We sent you a message which includes a new link.
+    invitation_invalid_status: Your invitation link is invalid.
+    invitation_invalid_text: Please make sure your invitation link was copied correctly. If this problem persists contact DPC at <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
     ao_invalid_status: Your registration link is invalid.
     cd_invalid_status: Your invite is invalid.
     ao_invalid_text: Make sure you're using the email address your invite was originally sent to and try again. If the problem persists contact DPC at <a href="mailto:dpcinfo@cms.hhs.gov">dpcinfo@cms.hhs.gov</a>.
@@ -47,8 +49,6 @@ en:
     configuration_complete: Setup complete
     api_disabled: API disabled
     access_denied: Access denied
-    csp_signin_cancel_status: "%{csp_display_name} sign-in incomplete"
-    csp_signin_cancel_text: "%{csp_display_name} sign-in was unsuccessful. If this was an error, try signing in again."
     csp_signin_fail_status: "%{csp_display_name} sign-in failed"
     csp_signin_fail_text: "Something went wrong while trying to sign-in with %{csp_display_name}. Please try again."
   cd_access:

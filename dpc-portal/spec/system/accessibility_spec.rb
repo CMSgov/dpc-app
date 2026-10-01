@@ -46,11 +46,11 @@ RSpec.describe 'Accessibility', type: :system do
         expect(page).to have_text('Sign in')
         expect(page).to be_axe_clean.according_to axe_standard
       end
-      it 'shows login failure' do
+      it 'shows login cancellation' do
         OmniAuth.config.mock_auth[provider] = :access_denied
 
         visit "/auth/failure?message=access_denied&strategy=#{provider}"
-        expect(page).to have_text('We weren\'t able to complete identity verification.')
+        expect(page).to have_text(CspErrorHandling::VERIFICATION_ALERT)
         expect(page).to be_axe_clean.according_to axe_standard
       end
 
@@ -492,7 +492,7 @@ RSpec.describe 'Accessibility', type: :system do
         let(:renew_success) { 'You should receive your new invitation shortly' }
         it 'should show bad invitation' do
           visit "/organizations/#{org.id}/invitations/bad-id/#{unmatched_invitation_token}"
-          expect(page).to have_text('Your registration link is invalid.')
+          expect(page).to have_text('Your invitation link is invalid.')
           expect(page).to be_axe_clean.according_to axe_standard
         end
         it 'should show expired invitation' do
