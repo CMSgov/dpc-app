@@ -101,7 +101,7 @@ RSpec.shared_examples 'a CSP client' do |config|
       end
 
       it 'adds the new email to the existing account' do
-        # Don't want change the existing csp_auth_response
+        # Don't want to change the existing csp_auth_response
         auth = csp_auth_response.deep_dup
         auth[:info][:email] = new_email
         case provider
