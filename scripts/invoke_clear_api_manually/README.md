@@ -1,3 +1,7 @@
+# Purpose
+
+This script was written to automate oauth2 flow and review responses to /userinfo calls while working with the CLEAR team to get necessary fields for Portal invitation flow.
+
 # Instructions
 
 ### Set necessary environment variables
