@@ -18,6 +18,9 @@ class VerifyCpiApiGwJob < ApplicationJob
     service = AoVerificationService.new(cpi_api_gw_client:)
     test_scenarios = test_data
 
+    cpi_api_gw_client.fetch_npi_from_pac_id(test_scenarios.fetch('AO_WITH_MED_SANCTIONS').fetch('org_pacId'))
+    cpi_api_gw_client.fetch_npi_from_pac_id(test_scenarios.fetch('AO_WITH_WAIVERS').fetch('org_pacId'))
+
     cpi_gateway_results = [
       # can_process_ao_with_med_sanctions?(service, test_scenarios.fetch('AO_WITH_MED_SANCTIONS')),
       # can_process_ao_with_waiver?(service, test_scenarios.fetch('AO_WITH_WAIVERS')),

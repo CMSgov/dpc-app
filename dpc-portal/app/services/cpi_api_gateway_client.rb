@@ -135,6 +135,22 @@ class CpiApiGatewayClient
     response.parsed
   end
 
+  def fetch_npi_from_pac_id(pac_id)
+    url = "#{@cpi_api_gateway_url}api/1.0/ppr/providers/npinames"
+    body = {
+      providerID: {
+        providerType: 'org',
+        pacId: pac_id.to_s
+      },
+      dataSets: { all: true }
+    }.to_json
+    fetch_provider_info(body)
+
+    # Build a custom span around the request for DD APM
+    response = request_client.post(url, headers: { 'Content-Type': 'application/json' }, body:)
+    response.parsed
+  end
+
   def start_tracking(method_name, url, request_details = {})
     @start = Time.now
     Rails.logger.info(
