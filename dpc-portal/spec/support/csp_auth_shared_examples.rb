@@ -81,10 +81,12 @@ RSpec.shared_examples 'a CSP client' do |config|
     end
 
     context 'user exists with different email' do
+      let!(:user) { create(:user) }
+      let!(:csp) { Csp.find_by(name: csp_name) || create(:csp, name: csp_name) }
+      let!(:csp_user) { create(:csp_user, user:, uuid:, csp:) }
+      let(:new_email) { 'new@example.com' }
+
       before do
-        user = create(:user)
-        csp = Csp.find_by(name: csp_name) || create(:csp, name: csp_name)
-        csp_user = create(:csp_user, user:, uuid:, csp:)
         create(:user_email, csp_user:, email: 'original@example.com', active: true)
       end
 
@@ -96,6 +98,36 @@ RSpec.shared_examples 'a CSP client' do |config|
         expect(response.body).to include(EmailMask.masked('original@example.com'))
         expect(response.body).to include('Link to existing account')
         expect(response.body).to include('Start over')
+      end
+
+      it 'adds the new email to the existing account' do
+        # Don't want change the existing csp_auth_response
+        auth = csp_auth_response.deep_dup
+        auth[:info][:email] = new_email
+        case provider
+        when :id_me
+          auth[:extra][:raw_info][:emails_confirmed] = [new_email]
+        when :login_dot_gov
+          auth[:extra][:raw_info][:all_emails] = [new_email]
+        when :clear
+          auth[:extra][:raw_info][:email] = new_email
+        else
+          # If we ever add a new CSP make sure we don't silently fail
+          raise "Unknown CSP: #{provider}"
+        end
+        OmniAuth.config.add_mock(provider, auth)
+
+        post auth_endpoint
+        follow_redirect!
+        expect(response.body).to include('Existing account found')
+
+        post '/update',
+             params: { id: csp_user.id, csp: csp.id, all_emails: [new_email], primary_email: new_email }
+        follow_redirect!
+
+        email = UserEmail.find_by!(csp_user:, email: new_email)
+        expect(email.active).to be(true)
+        expect(email.primary).to be(true)
       end
 
       it 'logs about existing account' do
