@@ -121,8 +121,8 @@ RSpec.shared_examples 'a CSP client' do |config|
         follow_redirect!
         expect(response.body).to include('Existing account found')
 
-        post '/update',
-             params: { id: csp_user.id, csp: csp.id, all_emails: [new_email], primary_email: new_email }
+        update_action = Nokogiri::HTML(response.body).at_css('form[action^="/update"]')['action']
+        post update_action
         follow_redirect!
 
         email = UserEmail.find_by!(csp_user:, email: new_email)
