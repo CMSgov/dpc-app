@@ -109,8 +109,11 @@ class CpiApiGatewayClient
     }.to_json
     fetch_provider_info(body)
 
-    # Build a custom span around the request for DD APM
+    start_tracking(:fetch_npi_from_pac_id, url,
+                   cpi_api_gateway_request_content_type: 'application/json',
+                   cpi_api_gateway_request_body: body)
     response = request_client.post(url, headers: { 'Content-Type': 'application/json' }, body:)
+    stop_tracking(:fetch_npi_from_pac_id, url, response.status)
     response.parsed
   end
 
