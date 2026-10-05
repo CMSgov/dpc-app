@@ -32,10 +32,7 @@ module CspUtils
   end
 
   def self.lookup_by_host(host)
-    CODES_TO_CONFIGS.each do |csp_code, config|
-      return csp_code if config[:client_options][:host] == host
-    end
-    nil
+    CODES_TO_CONFIGS.find { |_, config| config[:client_options][:host] == host }.try(:first)
   end
 
   def self.issuer(host)
