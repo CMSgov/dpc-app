@@ -8,8 +8,8 @@ class InvitationsController < ApplicationController
   include CspUtils
   include DpcPortalUtils
 
-  before_action :load_organization
   before_action :load_invitation
+  before_action :load_organization
   before_action :validate_invitation, except: %i[renew]
   before_action :verify_ao_invitation, only: %i[accept confirm]
   before_action :verify_cd_invitation, only: %i[code verify_code confirm_cd]
@@ -109,6 +109,7 @@ class InvitationsController < ApplicationController
               action_type: LoggingConstants::ActionType::UserLoggedIn,
               user_identifier: current_csp_user_identifier,
               invitation: @invitation.id)
+    cookies.permanent[:last_used_csp] = csp_session.current
     render(Page::Invitations::SuccessComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
@@ -365,22 +366,19 @@ class InvitationsController < ApplicationController
   end
 
   def load_invitation
-    @invitation = Invitation.find_by(id: params[:id], token: params[:token])
-    return render_invitation_not_found if @invitation.nil?
-
-    return if @organization == @invitation.provider_organization
-
-    invalid_status = @invitation.credential_delegate? ? 'cd_invalid' : 'ao_invalid'
-    render(Page::Utility::ErrorComponent.new(@invitation, invalid_status), status: :not_found)
+    @invitation = Invitation.find_by(id: params[:id],
+                                     token: params[:token],
+                                     provider_organization_id: params[:organization_id])
+    render_invitation_not_found if @invitation.nil?
   end
 
-  # No invitation matched the id/token pair, so we cannot say anything about the invitation itself.
+  # No invitation matched the id/token/organization combination, so we cannot say anything about the invitation itself.
   def render_invitation_not_found
     log_event(:info, 'Invitation not found',
               action_context: LoggingConstants::ActionContext::Registration,
               action_type: LoggingConstants::ActionType::InvalidInvitation,
               invitation: params[:id])
-    render(Page::Utility::ErrorComponent.new(nil, 'ao_invalid'), status: :not_found)
+    render(Page::Utility::ErrorComponent.new(nil, 'invitation_invalid'), status: :not_found)
   end
 
   def validate_invitation

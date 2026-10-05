@@ -6,6 +6,12 @@ module CspErrorHandling
 
   CSP_AUTH_ERROR_MESSAGES = %w[server_error service_unavailable connection_failed internal_server_error timeout].freeze
   CSP_USER_ERROR_MESSAGES = %w[access_denied].freeze
+  CSP_USER_FAIL_TO_PROOF = %w[verification_failure identity_failed].freeze
+
+  CSP_CODES = %w[id_me login_dot_gov clear].freeze
+
+  SIGNIN_FAIL = "We weren't able to complete identity verification."
+  VERIFICATION_ALERT = 'You must complete verification before continuing registration.'
 
   def csp_auth_error?
     CSP_AUTH_ERROR_MESSAGES.include?(params[:message])
@@ -15,55 +21,62 @@ module CspErrorHandling
     CSP_USER_ERROR_MESSAGES.include?(params[:message])
   end
 
+  def csp_user_fail_to_proof?
+    CSP_USER_FAIL_TO_PROOF.include?(params[:message])
+  end
+
   def csp_param
     params[:strategy] || csp_session.current
   end
 
-  def handle_invitation_flow_failure(invitation)
-    if csp_auth_error?
-      log_event(:info, 'Failed invitation flow',
-                action_context: LoggingConstants::ActionContext::Registration,
-                action_type: LoggingConstants::ActionType::FailedLogin,
-                invitation: invitation.id)
-    end
+  def handle_fail_to_proof(invitation)
+    return not_found unless CSP_CODES.include?(csp_param)
 
-    alert_text = "We weren't able to complete identity verification."
-    if invitation.credential_delegate?
-      redirect_to confirm_cd_organization_invitation_url(invitation.provider_organization_id,
-                                                         invitation.id,
-                                                         invitation.token),
-                  alert: alert_text
-    else
-      redirect_to accept_organization_invitation_url(invitation.provider_organization_id,
-                                                     invitation.id,
-                                                     invitation.token),
-                  alert: alert_text
-    end
+    log_event(:info, 'User failed identity verification',
+              action_context: action_context(invitation),
+              action_type: LoggingConstants::ActionType::FailedLogin,
+              csp: csp_param)
+    render(Page::Utility::VerificationFailureComponent.new(invitation, csp_param))
   end
 
-  def handle_csp_auth_error
+  def handle_csp_auth_error(invitation)
     log_event(:error, 'CSP Authentication error',
-              action_context: LoggingConstants::ActionContext::Authentication,
+              action_context: action_context(invitation),
               action_type: LoggingConstants::ActionType::CspUnavailable,
               error: params[:message],
               csp: csp_param)
-    render(Page::Utility::ErrorComponent.new(nil, 'server_error', csp: csp_param),
-           status: :service_unavailable)
+    redirect_to signin_destination(invitation), alert: 'Registration unavailable: external system error.'
   end
 
-  def handle_signin_fail
+  def handle_signin_fail(invitation)
     log_event(:error, 'CSP Configuration error',
-              action_context: LoggingConstants::ActionContext::Registration,
+              action_context: action_context(invitation),
               action_type: LoggingConstants::ActionType::FailedLogin,
               csp: csp_param)
-    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp: csp_param))
+    redirect_to signin_destination(invitation), alert: SIGNIN_FAIL
   end
 
-  def handle_signin_cancel
+  def handle_signin_cancel(invitation)
     log_event(:info, 'User cancelled login',
-              action_context: LoggingConstants::ActionContext::Authentication,
+              action_context: action_context(invitation),
               action_type: LoggingConstants::ActionType::UserCancelledLogin,
               csp: csp_param)
-    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_cancel', csp: csp_param))
+    redirect_to signin_destination(invitation), alert: VERIFICATION_ALERT
+  end
+
+  private
+
+  def action_context(invitation)
+    invitation.nil? ? LoggingConstants::ActionContext::Authentication : LoggingConstants::ActionContext::Registration
+  end
+
+  def signin_destination(invitation)
+    return sign_in_path if invitation.nil?
+
+    if invitation.credential_delegate?
+      confirm_cd_organization_invitation_url(invitation.provider_organization_id, invitation.id, invitation.token)
+    else
+      accept_organization_invitation_url(invitation.provider_organization_id, invitation.id, invitation.token)
+    end
   end
 end

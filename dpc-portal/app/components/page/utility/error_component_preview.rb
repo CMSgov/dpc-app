@@ -18,6 +18,11 @@ module Page
         render(Page::Utility::ErrorComponent.new(invitation, reason))
       end
 
+      def invitation_invalid
+        reason = 'invitation_invalid'
+        render(Page::Utility::ErrorComponent.new(nil, reason))
+      end
+
       # @param csp select :csp_codes
       def pii_mismatch(csp: DEFAULT_CSP)
         invitation = Invitation.new(provider_organization: ProviderOrganization.new(name: ORG_NAME))
@@ -84,12 +89,6 @@ module Page
       # @param csp select :csp_codes
       def no_account(csp: DEFAULT_CSP)
         reason = 'no_account'
-        render(Page::Utility::ErrorComponent.new(nil, reason, csp:))
-      end
-
-      # @param csp select :csp_codes
-      def csp_signin_cancel(csp: DEFAULT_CSP)
-        reason = 'csp_signin_cancel'
         render(Page::Utility::ErrorComponent.new(nil, reason, csp:))
       end
 

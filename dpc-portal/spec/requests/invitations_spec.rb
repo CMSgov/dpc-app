@@ -19,14 +19,19 @@ RSpec.describe 'Invitations', type: :request do
     it 'should show warning page with 404 if missing' do
       send(method, "/organizations/#{org.id}/invitations/bad-id/#{unmatched_invitation_token}/#{path_suffix}")
       expect(response).to be_not_found
-      # Without an invitation, we don't know if it's for an AO or CD, so we default to AO in the error message.
-      expect(response.body).to include(I18n.t('verification.ao_invalid_status'))
+      # Without an invitation, we don't know if it's for an AO or CD.
+      expect(response.body).to include(I18n.t('verification.invitation_invalid_status'))
     end
     it 'should show warning page with 404 if token does not match the invitation' do
       send(method, "/organizations/#{org.id}/invitations/#{invitation.id}/#{unmatched_invitation_token}/#{path_suffix}")
       expect(response).to be_not_found
       # We can't disclose whether the invitation exists, so we give the same message as for a missing invitation.
-      expect(response.body).to include(I18n.t('verification.ao_invalid_status'))
+      expect(response.body).to include(I18n.t('verification.invitation_invalid_status'))
+    end
+    it 'should show warning page with 404 if org does not match invitation' do
+      send(method, "/organizations/invalid_id/invitations/#{invitation.id}/#{invitation.token}/#{path_suffix}")
+      expect(response).to be_not_found
+      expect(response.body).to include(I18n.t('verification.invitation_invalid_status'))
     end
     it 'logs when the token does not match the invitation' do
       allow(Rails.logger).to receive(:info)
@@ -52,7 +57,7 @@ RSpec.describe 'Invitations', type: :request do
       bad_org = create(:provider_organization)
       send(method, invitation_url_for(bad_org.id, invitation, path_suffix))
       expect(response).to be_not_found
-      expect(response.body).to include(I18n.t("verification.#{role}_invalid_status"))
+      expect(response.body).to include(I18n.t('verification.invitation_invalid_status'))
     end
     it 'should show warning page if cancelled' do
       invitation.update(status: :cancelled)
@@ -172,7 +177,7 @@ RSpec.describe 'Invitations', type: :request do
                                                                                 invitation.id,
                                                                                 invitation.token))
       end
-      expect(flash.alert).to eq("We weren't able to complete identity verification.")
+      expect(flash.alert).to eq(CspErrorHandling::SIGNIN_FAIL)
     end
   end
 
@@ -408,6 +413,12 @@ RSpec.describe 'Invitations', type: :request do
               follow_redirect!
               expect(response.body).to include('<span class="usa-step-indicator__current-step">')
             end
+            it 'should render verification failure' do
+              post invitation_url_for(org_id, invitation, 'login'), params: provider_params
+              get '/auth/failure?message=verification_failure'
+
+              expect(response.body).to include('Your identity could not be verified')
+            end
           end
         end
         context :ao do
@@ -416,6 +427,7 @@ RSpec.describe 'Invitations', type: :request do
             let(:expected_success_status) { 302 }
             let(:request_params) { provider_params }
           end
+
           it_behaves_like 'a login endpoint', provider do
             let(:invitation) { create(:invitation, :ao) }
             let(:expected_redirect) do
@@ -431,6 +443,13 @@ RSpec.describe 'Invitations', type: :request do
 
               follow_redirect!
               expect(response.body).to include('<span class="usa-step-indicator__current-step">2</span>')
+            end
+
+            it 'should render verification failure' do
+              post invitation_url_for(org_id, invitation, 'login'), params: provider_params
+              get '/auth/failure?message=verification_failure'
+
+              expect(response.body).to include('Your identity could not be verified')
             end
           end
         end
@@ -825,6 +844,10 @@ RSpec.describe 'Invitations', type: :request do
               post invitation_url_for(org.id, invitation, 'register')
               expect(response).to be_ok
               expect(response.body).to include('Go to DPC Portal')
+            end
+            it 'should set "last used" cookie when success page is rendered' do
+              post invitation_url_for(org.id, invitation, 'register')
+              expect(cookies[:last_used_csp]).to eq(provider.to_s)
             end
             it 'should update invitation' do
               post invitation_url_for(org.id, invitation, 'register')

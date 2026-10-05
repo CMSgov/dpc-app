@@ -21,6 +21,10 @@ RSpec.describe 'Sessions', type: :request do
           expect(flash[:alert]).to be_present
         end
 
+        it 'should have set the last_used_csp cookie during login' do
+          expect(cookies[:last_used_csp]).to eq(provider.to_s)
+        end
+
         it 'should log action' do
           allow(Rails.logger).to receive(:info)
           expect(Rails.logger).to receive(:info).with(

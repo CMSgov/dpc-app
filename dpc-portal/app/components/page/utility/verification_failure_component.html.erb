@@ -1,0 +1,21 @@
+<h1>Your identity could not be verified with <%= @csp_display_name %></h1>
+<div class="usa-prose">
+  <p>You've been returned to the DPC Portal because your identity verification with <%= @csp_display_name %> wasn't completed.</p>
+
+  <% if @current_csp == :login_dot_gov %>
+    <p><%= link_to 'Get help from Login.gov', 'https://www.login.gov/help/verify-your-identity/overview/' %></p>
+    <p><%= link_to 'Contact Login.gov ', 'https://www.login.gov/contact/' %></p>
+  <% elsif @current_csp == :id_me %>
+    <p><%= link_to 'ID.me Help Center', 'https://help.id.me/hc/en-us' %></p>
+  <% end %>
+</div>
+
+<div class="margin-y-3">
+  <%= render Core::Button::ButtonComponent.new(label: "Sign out of #{@csp_display_name}",
+      destination: csp_logout_path(invitation_token: @invitation&.token, current_csp: @current_csp),
+      method: :delete) %>
+</div>
+
+<div class="usa-prose">
+  <p><span class="text-bold">Still need help?</span> Contact us at <%= mail_to 'dpcinfo@cms.hhs.gov' %></p>
+</div>

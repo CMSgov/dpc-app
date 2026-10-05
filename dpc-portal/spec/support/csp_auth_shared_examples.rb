@@ -81,10 +81,12 @@ RSpec.shared_examples 'a CSP client' do |config|
     end
 
     context 'user exists with different email' do
+      let!(:user) { create(:user) }
+      let!(:csp) { Csp.find_by(name: csp_name) || create(:csp, name: csp_name) }
+      let!(:csp_user) { create(:csp_user, user:, uuid:, csp:) }
+      let(:new_email) { 'new@example.com' }
+
       before do
-        user = create(:user)
-        csp = Csp.find_by(name: csp_name) || create(:csp, name: csp_name)
-        csp_user = create(:csp_user, user:, uuid:, csp:)
         create(:user_email, csp_user:, email: 'original@example.com', active: true)
       end
 
@@ -96,6 +98,36 @@ RSpec.shared_examples 'a CSP client' do |config|
         expect(response.body).to include(EmailMask.masked('original@example.com'))
         expect(response.body).to include('Link to existing account')
         expect(response.body).to include('Start over')
+      end
+
+      it 'adds the new email to the existing account' do
+        # Don't want to change the existing csp_auth_response
+        auth = csp_auth_response.deep_dup
+        auth[:info][:email] = new_email
+        case provider
+        when :id_me
+          auth[:extra][:raw_info][:emails_confirmed] = [new_email]
+        when :login_dot_gov
+          auth[:extra][:raw_info][:all_emails] = [new_email]
+        when :clear
+          auth[:extra][:raw_info][:email] = new_email
+        else
+          # If we ever add a new CSP make sure we don't silently fail
+          raise "Unknown CSP: #{provider}"
+        end
+        OmniAuth.config.add_mock(provider, auth)
+
+        post auth_endpoint
+        follow_redirect!
+        expect(response.body).to include('Existing account found')
+
+        update_action = Nokogiri::HTML(response.body).at_css('form[action^="/update"]')['action']
+        post update_action
+        follow_redirect!
+
+        email = UserEmail.find_by!(csp_user:, email: new_email)
+        expect(email.active).to be(true)
+        expect(email.primary).to be(true)
       end
 
       it 'logs about existing account' do
@@ -374,14 +406,14 @@ RSpec.shared_examples 'a CSP client' do |config|
         OmniAuth.config.mock_auth[provider] = error
       end
 
-      it 'returns 503 service unavailable' do
+      it 'redirects to sign in path' do
         attempt_sign_in
-        expect(response).to have_http_status(:service_unavailable)
+        expect(response.location).to eq(sign_in_url)
       end
 
-      it 'renders the server error component' do
+      it 'flashes the alert text' do
         attempt_sign_in
-        expect(response.body).to include(I18n.t('verification.server_error_status'))
+        expect(flash[:alert]).to eq('Registration unavailable: external system error.')
       end
 
       it 'does not sign in the user' do
@@ -423,16 +455,14 @@ RSpec.shared_examples 'a CSP client' do |config|
         OmniAuth.config.mock_auth[provider] = error
       end
 
-      it 'does not return 503 service unavailable' do
+      it 'redirects to sign in path' do
         attempt_sign_in
-        expect(response).to be_ok
+        expect(response.location).to eq(sign_in_url)
       end
 
-      it 'renders the CSP sign-in fail component' do
+      it 'flashes the alert text' do
         attempt_sign_in
-        expect(response.body).not_to include(I18n.t('verification.server_error_status'))
-        expect(response.body).to include(I18n.t('verification.csp_signin_fail_status', csp_display_name: display_name))
-        expect(response.body).to include(I18n.t('verification.csp_signin_fail_text', csp_display_name: display_name))
+        expect(flash[:alert]).to eq(CspErrorHandling::SIGNIN_FAIL)
       end
 
       it 'does not sign in the user' do
@@ -452,7 +482,7 @@ RSpec.shared_examples 'a CSP client' do |config|
         allow(Rails.logger).to receive(:error)
         expect(Rails.logger).to receive(:error).with(
           ['CSP Configuration error',
-           hash_including(actionContext: LoggingConstants::ActionContext::Registration,
+           hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
                           actionType: LoggingConstants::ActionType::FailedLogin,
                           csp: csp_name,
                           timestamp: a_kind_of(String))]
@@ -474,17 +504,14 @@ RSpec.shared_examples 'a CSP client' do |config|
         OmniAuth.config.mock_auth[provider] = error
       end
 
-      it 'does not return 503 service unavailable' do
+      it 'redirects to sign in path' do
         attempt_sign_in
-        expect(response).to be_ok
+        expect(response.location).to eq(sign_in_url)
       end
 
-      it 'renders the CSP sign-in cancel component' do
+      it 'flashes the alert text' do
         attempt_sign_in
-        expect(response.body).not_to include(I18n.t('verification.server_error_status'))
-        expect(response.body).to include(I18n.t('verification.csp_signin_cancel_status',
-                                                csp_display_name: display_name))
-        expect(response.body).to include(I18n.t('verification.csp_signin_cancel_text', csp_display_name: display_name))
+        expect(flash[:alert]).to eq(CspErrorHandling::VERIFICATION_ALERT)
       end
 
       it 'does not sign in the user' do
@@ -514,6 +541,22 @@ RSpec.shared_examples 'a CSP client' do |config|
     end
   end
 
+  context "when #{display_name} returns verification failure" do
+    let(:error) { :verification_failure }
+    before do
+      OmniAuth.config.test_mode = true
+      OmniAuth.config.mock_auth[provider] = error
+    end
+
+    it 'should render verification failure' do
+      post auth_endpoint
+      follow_redirect!
+      expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
+      follow_redirect!
+      expect(response.body).to include('Your identity could not be verified')
+    end
+  end
+
   describe 'Delete /logout' do
     before do
       OmniAuth.config.test_mode = true
@@ -536,7 +579,7 @@ RSpec.shared_examples 'a CSP client' do |config|
 
     it 'should set return to invitation flow if invitation sent' do
       invitation = create(:invitation, :ao)
-      delete "/logout?invitation_id=#{invitation.id}"
+      delete "/logout?invitation_token=#{invitation.token}"
       expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
                                                                                  invitation.id,
                                                                                  invitation.token)

@@ -25,28 +25,28 @@ class CspController < ApplicationController
   end
 
   def failure
-    invitation_flow_match = session[:user_return_to]&.match(%r{/invitations/([0-9]+)/([a-zA-Z0-9]{24})})
-    if invitation_flow_match
-      invitation = Invitation.find_by(id: invitation_flow_match[1], token: invitation_flow_match[2])
-      return handle_invitation_flow_failure(invitation)
-    end
+    invitation_match = session[:user_return_to]&.match(%r{/invitations/([0-9]+)/([a-zA-Z0-9]{24})})
+    invitation = invitation_match ? Invitation.find_by(id: invitation_match[1], token: invitation_match[2]) : nil
 
-    return handle_csp_auth_error if csp_auth_error?
-    return handle_signin_cancel if csp_user_cancelled?
+    return handle_fail_to_proof(invitation) if csp_user_fail_to_proof?
+    return handle_csp_auth_error(invitation) if csp_auth_error?
+    return handle_signin_cancel(invitation) if csp_user_cancelled?
 
-    handle_signin_fail
+    handle_signin_fail(invitation)
   end
 
   def logout
-    store_invitation_return_url if params[:invitation_id].present?
+    store_invitation_link if params[:invitation_token].present?
 
-    redirect_to url_for_logout(csp_session.current), allow_other_host: true
+    current_csp = csp_session.current || params[:current_csp]
+    redirect_to url_for_logout(current_csp), allow_other_host: true
   end
 
   private
 
-  def store_invitation_return_url
-    invitation = Invitation.find(params[:invitation_id])
+  def store_invitation_link
+    invitation = Invitation.find_by(token: params[:invitation_token])
+
     session[:user_return_to] = organization_invitation_url(invitation.provider_organization.id,
                                                            invitation.id,
                                                            invitation.token)

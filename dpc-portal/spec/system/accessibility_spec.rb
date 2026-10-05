@@ -17,7 +17,8 @@ RSpec.describe 'Accessibility', type: :system do
     emails = %w[bob@example.com bob2@example.com]
     {
       login_dot_gov: { all_emails: emails, ial: 'http://idmanagement.gov/ns/assurance/ial/2' },
-      id_me: { emails_confirmed: emails, identity_assurance_level: 2 }
+      id_me: { emails_confirmed: emails, identity_assurance_level: 2 },
+      clear: {}
     }
   end
 
@@ -45,11 +46,11 @@ RSpec.describe 'Accessibility', type: :system do
         expect(page).to have_text('Sign in')
         expect(page).to be_axe_clean.according_to axe_standard
       end
-      it 'shows login failure' do
+      it 'shows login cancellation' do
         OmniAuth.config.mock_auth[provider] = :access_denied
 
         visit "/auth/failure?message=access_denied&strategy=#{provider}"
-        expect(page).to have_text('sign-in was unsuccessful')
+        expect(page).to have_text(CspErrorHandling::VERIFICATION_ALERT)
         expect(page).to be_axe_clean.according_to axe_standard
       end
 
@@ -491,7 +492,7 @@ RSpec.describe 'Accessibility', type: :system do
         let(:renew_success) { 'You should receive your new invitation shortly' }
         it 'should show bad invitation' do
           visit "/organizations/#{org.id}/invitations/bad-id/#{unmatched_invitation_token}"
-          expect(page).to have_text('Your registration link is invalid.')
+          expect(page).to have_text('Your invitation link is invalid.')
           expect(page).to be_axe_clean.according_to axe_standard
         end
         it 'should show expired invitation' do
@@ -601,6 +602,10 @@ RSpec.describe 'Accessibility', type: :system do
         end
       end
     end
+  end
+
+  describe 'with CLEAR' do
+    it_behaves_like 'accessibility tests', :clear, 'CLEAR'
   end
 
   describe 'with ID.me' do
