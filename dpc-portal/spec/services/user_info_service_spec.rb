@@ -22,6 +22,34 @@ describe UserInfoService do
         end
       end
 
+      context :jwt_response do
+        let(:jwt_body) { 'header.payload.signature' }
+        let(:host) { service.send(:oidc_client_config, provider)[:client_options][:host] }
+
+        before do
+          stub_request(:get, CspUtils.user_info_url(provider))
+            .with(headers: { Authorization: "Bearer #{token}" })
+            .to_return(body: jwt_body, status: 200, headers: { 'Content-Type' => 'application/jwt' })
+        end
+
+        it 'verifies the JWT against the provider JWKS via OidcJwksVerifier and returns its claims' do
+          verify_logs(status: 200, csp: provider)
+          expect(OidcJwksVerifier).to receive(:decode_and_verify)
+            .with(jwt_body, host: host).and_return(csp_response(provider))
+
+          expect(service.user_info(build_csp_session(provider))).to eq csp_response(provider)
+        end
+
+        it 'raises a server_error instead of trusting an unverifiable JWT' do
+          verify_logs(status: 200, csp: provider)
+          allow(Rails.logger).to receive(:error)
+          allow(OidcJwksVerifier).to receive(:decode_and_verify).and_raise(JSON::JWT::VerificationFailed)
+
+          expect do
+            service.user_info(build_csp_session(provider))
+          end.to raise_error(UserInfoServiceError, 'server_error')
+        end
+      end
       context :bad_request do
         it 'should throw error if status is 401' do
           verify_logs(status: 401, csp: provider)
