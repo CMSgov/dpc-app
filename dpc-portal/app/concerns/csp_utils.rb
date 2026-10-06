@@ -30,4 +30,15 @@ module CspUtils
     config = CODES_TO_CONFIGS.fetch(csp_code.to_sym) { raise ArgumentError, "Unknown CSP code: #{csp_code}" }
     config[:client_options][:userinfo_endpoint]
   end
+
+  def self.lookup_by_host(host)
+    CODES_TO_CONFIGS.find { |_, config| config[:client_options][:host] == host }.try(:first)
+  end
+
+  def self.issuer(host)
+    csp = lookup_by_host(host)
+    raise ArgumentError, "Unknown CSP host: #{host}" unless csp
+
+    CODES_TO_CONFIGS.fetch(csp)[:issuer]
+  end
 end
