@@ -53,6 +53,7 @@ class VerifyCpiApiGwJob < ApplicationJob
   def can_process_ao_with_waiver?(service, test_data)
     # VerifyAoJob path
     check_ao_eligibility_result = check_ao_eligibility_safe(service, test_data)
+    rails.logger.info "can_process_ao_with_waiver? first ao check: #{check_ao_eligibility_result}"
     return false unless check_ao_eligibility_result[:result][:has_ao_waiver] == true
 
     # VerifyProviderOrganizationJob path
