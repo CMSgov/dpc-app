@@ -5,7 +5,6 @@ class VerifyCpiApiGwJob < ApplicationJob
   queue_as :portal
 
   # rubocop:disable-next Metrics/AbcSize
-  # rubocop:disable-next Metrics/MethodLength
   def perform
     # CPI GW overrides so this job can use IPML and rest of portal can use fake_cpi_gateway.rb
     cpi_client_config = configuration
