@@ -19,16 +19,6 @@ class VerifyCpiApiGwJob < ApplicationJob
     service = AoVerificationService.new(cpi_api_gw_client:)
     test_scenarios = test_data
 
-    response_for_npi1 = cpi_api_gw_client.fetch_npi_from_pac_id(
-      test_scenarios.fetch('AO_WITH_MED_SANCTIONS').fetch('org_pacId')
-    )
-    Rails.logger.info "retrieved npi for 'AO_WITH_MED_SANCTIONS'? #{response_for_npi1}"
-
-    response_for_npi2 = cpi_api_gw_client.fetch_npi_from_pac_id(
-      test_scenarios.fetch('AO_WITH_WAIVERS').fetch('org_pacId')
-    )
-    Rails.logger.info "retrieved npi for 'AO_WITH_WAIVERS'? #{response_for_npi2}"
-
     cpi_gateway_results = [
       # can_process_ao_with_med_sanctions?(service, test_scenarios.fetch('AO_WITH_MED_SANCTIONS')),
       # can_process_ao_with_waiver?(service, test_scenarios.fetch('AO_WITH_WAIVERS')),

@@ -98,25 +98,6 @@ class CpiApiGatewayClient
     false
   end
 
-  def fetch_npi_from_pac_id(pac_id)
-    url = "#{@cpi_api_gateway_url}api/1.0/ppr/providers/npinames"
-    body = {
-      providerID: {
-        providerType: 'org',
-        pacId: pac_id.to_s
-      },
-      dataSets: { all: true }
-    }.to_json
-    fetch_provider_info(body)
-
-    start_tracking(:fetch_npi_from_pac_id, url,
-                   cpi_api_gateway_request_content_type: 'application/json',
-                   cpi_api_gateway_request_body: body)
-    response = request_client.post(url, headers: { 'Content-Type': 'application/json' }, body:)
-    stop_tracking(:fetch_npi_from_pac_id, url, response.status)
-    response.parsed
-  end
-
   private
 
   def fetch_token
