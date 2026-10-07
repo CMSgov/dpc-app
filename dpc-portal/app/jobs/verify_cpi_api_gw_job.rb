@@ -20,8 +20,8 @@ class VerifyCpiApiGwJob < ApplicationJob
     test_scenarios = test_data
 
     cpi_gateway_results = [
-      # can_process_ao_with_med_sanctions?(service, test_scenarios.fetch('AO_WITH_MED_SANCTIONS')),
-      # can_process_ao_with_waiver?(service, test_scenarios.fetch('AO_WITH_WAIVERS')),
+      can_process_ao_with_med_sanctions?(service, test_scenarios.fetch('AO_WITH_MED_SANCTIONS')),
+      can_process_ao_with_waiver?(service, test_scenarios.fetch('AO_WITH_WAIVERS')),
       can_process_org_with_no_enrollment?(service, test_scenarios.fetch('UNAPPROVED_ENROLLMENT_STATUS')),
       can_process_org_with_active_ao?(service, test_scenarios.fetch('ORG_WITH_AO_SSN'))
     ]
@@ -38,54 +38,38 @@ class VerifyCpiApiGwJob < ApplicationJob
   private
 
   def can_process_ao_with_med_sanctions?(service, test_data)
-    # needs org_npi
-    #     # VerifyAoJob path
-    #     check_ao_eligibility_result = check_ao_eligibility_safe(service, test_data)
-    #     return false unless check_ao_eligibility_result[:error_message] == 'ao_med_sanctions'
-
-    # needs org_npi
-    #     # VerifyProviderOrganizationJob path
-    #     approved_enrollments_result = get_approved_enrollments_safe(service, test_data)
-    #     return false unless approved_enrollments_result[:error_message].nil?
-
-    # needs org_npi
-    #     # Invitation path
-    #     result = service.check_eligibility(test_data['org_npi'], test_data['ao_ssn'])
-    #     result[:success] == false && result[:failure_reason] == 'ao_med_sanctions'
-  end
-
-  def can_process_ao_with_waiver?(service, test_data)
-    # needs org_npi
-    #     # VerifyAoJob path
-    #     check_ao_eligibility_result = check_ao_eligibility_safe(service, test_data)
-    #     return false unless check_ao_eligibility_result[:result][:has_ao_waiver] == true
-
-    # needs org_npi
-    #     # VerifyProviderOrganizationJob path
-    #     enrollments = get_approved_enrollments_safe(service, test_data)[:enrollments]
-    #     return false unless enrollments.present?
-    #     return false unless enrollments_has_ssn(enrollments, test_data['ao_ssn'])
-
-    # needs org_npi
-    #     # Invitation path
-    #     result = service.check_eligibility(test_data['org_npi'], test_data['ao_ssn'])
-    #     result[:success] == true && result[:has_ao_waiver] == true
-  end
-
-  def can_process_org_with_no_enrollment?(service, test_data)
-    # needs ao_pac_id
-    #     # VerifyAoJob path
-    #     check_ao_eligibility_result = check_ao_eligibility_safe(service, test_data)
-    #     return false unless check_ao_eligibility_result[:error_message] == 'no_approved_enrollment'
+    # VerifyAoJob path
+    check_ao_eligibility_result = check_ao_eligibility_safe(service, test_data)
+    return false unless check_ao_eligibility_result[:error_message] == 'ao_med_sanctions'
 
     # VerifyProviderOrganizationJob path
     approved_enrollments_result = get_approved_enrollments_safe(service, test_data)
-    false unless approved_enrollments_result[:error_message] == 'no_approved_enrollment'
+    return false unless approved_enrollments_result[:error_message].nil?
 
-    # needs ao_ssn
-    #     # Invitation path
-    #     result = service.check_eligibility(test_data['org_npi'], test_data['ao_ssn'])
-    #     result[:success] == false && result[:failure_reason] == 'no_approved_enrollment'
+    # Invitation path
+    result = service.check_eligibility(test_data['org_npi'], test_data['ao_ssn'])
+    result[:success] == false && result[:failure_reason] == 'ao_med_sanctions'
+  end
+
+  def can_process_ao_with_waiver?(service, test_data)
+    # VerifyAoJob path
+    check_ao_eligibility_result = check_ao_eligibility_safe(service, test_data)
+    return false unless check_ao_eligibility_result[:result][:has_ao_waiver] == true
+
+    # VerifyProviderOrganizationJob path
+    enrollments = get_approved_enrollments_safe(service, test_data)[:enrollments]
+    return false unless enrollments.present?
+    return false unless enrollments_has_ssn(enrollments, test_data['ao_ssn'])
+
+    # Invitation path
+    result = service.check_eligibility(test_data['org_npi'], test_data['ao_ssn'])
+    result[:success] == true && result[:has_ao_waiver] == true
+  end
+
+  def can_process_org_with_no_enrollment?(service, test_data)
+    # VerifyProviderOrganizationJob path
+    approved_enrollments_result = get_approved_enrollments_safe(service, test_data)
+    false unless approved_enrollments_result[:error_message] == 'no_approved_enrollment'
   end
 
   def can_process_org_with_active_ao?(service, test_data)
