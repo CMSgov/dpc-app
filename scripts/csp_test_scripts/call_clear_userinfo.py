@@ -16,7 +16,6 @@ from util import decode_jwt, print_response
 CLEAR_IDP_HOST = "verified.clearme.com"
 REDIRECT_URI = "http://localhost:3100/auth/clear/callback"
 REQUEST_TIMEOUT_SECONDS = 30
-SYNTHETIC_IDENTITY_EMAIL = "dogbeaker@aol.com"
 
 OIDC_CLAIMS = {
     "id_token": {
