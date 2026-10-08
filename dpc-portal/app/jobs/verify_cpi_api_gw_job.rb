@@ -50,6 +50,7 @@ class VerifyCpiApiGwJob < ApplicationJob
     result[:success] == false && result[:failure_reason] == 'ao_med_sanctions'
   end
 
+  # rubocop:disable-next Metrics/AbcSize
   def can_process_ao_with_waiver?(service, test_data)
     # VerifyAoJob path
     check_ao_eligibility_result = check_ao_eligibility_safe(service, test_data)
