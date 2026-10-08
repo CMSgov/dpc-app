@@ -1,67 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>The change you wanted was rejected (422)</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-  .rails-default-error-page {
-    background-color: #EFEFEF;
-    color: #2E2F30;
-    text-align: center;
-    font-family: arial, sans-serif;
-    margin: 0;
-  }
-
-  .rails-default-error-page div.dialog {
-    width: 95%;
-    max-width: 33em;
-    margin: 4em auto 0;
-  }
-
-  .rails-default-error-page div.dialog > div {
-    border: 1px solid #CCC;
-    border-right-color: #999;
-    border-left-color: #999;
-    border-bottom-color: #BBB;
-    border-top: #B00100 solid 4px;
-    border-top-left-radius: 9px;
-    border-top-right-radius: 9px;
-    background-color: white;
-    padding: 7px 12% 0;
-    box-shadow: 0 3px 8px rgba(50, 50, 50, 0.17);
-  }
-
-  .rails-default-error-page h1 {
-    font-size: 100%;
-    color: #730E15;
-    line-height: 1.5em;
-  }
-
-  .rails-default-error-page div.dialog > p {
-    margin: 0 0 1em;
-    padding: 1em;
-    background-color: #F7F7F7;
-    border: 1px solid #CCC;
-    border-right-color: #999;
-    border-left-color: #999;
-    border-bottom-color: #999;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-top-color: #DADADA;
-    color: #666;
-    box-shadow: 0 3px 8px rgba(50, 50, 50, 0.17);
-  }
+    .default-error-page {
+      font-family: arial, sans-serif;
+      color: #1b1b1b;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+    }
+    .grid-container {
+      padding-top: 2.5rem;
+      padding-bottom: 2rem;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 64rem;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    .default-header {
+      background-color: white;
+      font-size: 1.46rem;
+      line-height: 1.1;
+    }
+    .default-header__link {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      text-decoration: none;
+      color: #1b1b1b;
+      padding-left: 0.5rem;
+    }
+    .dpc-logo {
+      width: 1.5rem;
+      padding-right: 0.5rem;
+    }
+    .divider {
+      height: 1rem;
+      background-color: #565c65;
+    }
+    .default-alert {
+      background-color: #f4e3db;
+      border-left: 0.5rem solid #d54309;
+      padding: 1em;
+      padding-left: 1.5em;
+      width: 95%;
+      max-width: 33em;
+      margin: 4em auto 0;
+    }
+    .default-alert__heading {
+      font-size: 1.46rem;
+      line-height: 0.9;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
   </style>
 </head>
 
-<body class="rails-default-error-page">
+<body class="default-error-page">
   <!-- This file lives in public/422.html -->
-  <div class="dialog">
-    <div>
-      <h1>The change you wanted was rejected.</h1>
-      <p>Maybe you tried to change something you didn't have access to.</p>
+  <header class="default-header">
+    <div class="grid-container">
+      <div class="default-nav">
+        <a href="/" class="default-header__link">
+          <svg aria-hidden="true" class="dpc-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 33"><defs><style>.cls-1{fill:#fad980;}.cls-2{fill:#102e51;}</style></defs><title>Top nav heart</title><path class="cls-1" d="M19.0335,30.5278c-3.3955-2.1552-17.041-11.35-16.9521-19.8442A8.7439,8.7439,0,0,1,17.8841,5.4985L19.1126,7.124,20.3,5.4688A8.53,8.53,0,0,1,27.3284,1.915a8.7632,8.7632,0,0,1,8.753,8.753C36.0814,18.3091,24.431,27.1631,19.0335,30.5278Z"/><path class="cls-2" d="M37.5812,10.6677A10.226,10.226,0,0,0,27.3282.4149,10.0819,10.0819,0,0,0,19.0814,4.594a10.2441,10.2441,0,0,0-18.5,6.0737C.47,21.3107,19.0257,32.288,19.0257,32.288a69.69,69.69,0,0,0,8.9119-6.5041,4.9733,4.9733,0,0,0,6.4348-6.8195C36.279,16.314,37.5812,13.48,37.5812,10.6677ZM11.6791,23.16c-5.2574-4.6472-8.1331-9.0725-8.0975-12.492A7.2445,7.2445,0,0,1,16.6879,6.4025L19.144,9.6533l2.375-3.31a7.0464,7.0464,0,0,1,5.8092-2.9279,7.2611,7.2611,0,0,1,7.253,7.2528,11.3731,11.3731,0,0,1-2.3526,6.1185,4.9437,4.9437,0,0,0-2.3078-.5893,4.975,4.975,0,0,0-4.26,7.586,68.9463,68.9463,0,0,1-6.6349,4.9557A66.9177,66.9177,0,0,1,11.6791,23.16Z"/></svg>
+          <span>Data at the Point of Care</span>
+        </a>
+      </div>
     </div>
-    <p>If you are the application owner check the logs for more information.</p>
-  </div>
+    <div class="divider"></div>
+  </header>
+  <main>
+    <div class="default-alert">
+      <h1 class="default-alert__heading">Your request was denied.</h1>
+      <p>You may have formatted something incorrectly, or you don't have rights to change this setting. Please check what you entered and try again.</p>
+    </div>
+  </main>
 </body>
 </html>
