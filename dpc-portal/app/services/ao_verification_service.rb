@@ -4,8 +4,8 @@
 class AoVerificationService
   SERVER_ERRORS = %w[api_gateway_error invalid_endpoint_called unexpected_error].freeze
 
-  def initialize
-    @cpi_api_gw_client = CpiApiGatewayClient.new
+  def initialize(cpi_api_gw_client: CpiApiGatewayClient.new)
+    @cpi_api_gw_client = cpi_api_gw_client
   end
 
   def check_eligibility(organization_npi, ssn)
