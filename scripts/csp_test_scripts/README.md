@@ -35,12 +35,13 @@ Step 2: Paste the returned code or full redirect URL:
 - Copy/paste the URL from that Rails error page into the terminal.
 - It will automatically pull `code` and print the response from `/userinfo`.
 
-#
+---
+
 # Instructions for call_clear_verification_session_api.py
 
 
 ### Set necessary environment variables
-Retrieve the CLEAR API key and project ID from sops and create the following envrionment variables
+Retrieve the CLEAR API key and project ID from sops and create the following environment variables
 ```
 export CLEAR_API_KEY=
 export CLEAR_PROJECT_ID=
