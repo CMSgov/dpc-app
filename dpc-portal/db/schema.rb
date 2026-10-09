@@ -94,9 +94,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_09_173545) do
 
   create_table "csp_verification_checks", force: :cascade do |t|
     t.bigint "csp_user_verification_id", null: false
-    t.string "message_status", null: false
-    t.string "description"
-    t.boolean "passed"
+    t.string "check_name", null: false
+    t.string "check_status"
+    t.boolean "status_value"
+    t.integer "status_code"
+    t.string "status_message"
     t.jsonb "reason_codes", default: [], null: false
     t.datetime "completed_at"
     t.datetime "created_at", null: false
