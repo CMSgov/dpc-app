@@ -76,9 +76,12 @@ jobs:
       - name: Build K6
         run: |
           # Install xk6
-          go install go.k6.io/xk6/cmd/xk6@v1.3.7
-
-          # Build the k6 binary
+          curl -LO https://go.dev/dl/go1.27.2.linux-arm64.tar.gz
+          tar -xzf go1.27.2.linux-arm64.tar.gz
+          chmod +x go/bin/go
+          ./go/bin/go install go.k6.io/xk6/cmd/xk6@v1.3.7
+          
+          # Build the k6 binary`
           xk6 build
       - name: Set env vars from AWS params
         uses: cmsgov/cdap/actions/aws-params-env-action@main
