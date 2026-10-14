@@ -70,15 +70,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_09_173545) do
   end
 
   create_table "csp_user_verifications", force: :cascade do |t|
-    t.bigint "csp_user_id", null: false
+    t.bigint "invitation_id"
+    t.bigint "user_id"
+    t.bigint "csp_id", null: false
     t.string "csp_verification_id", null: false
     t.string "status", null: false
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["csp_user_id", "csp_verification_id"], name: "index_csp_user_verifications_on_csp_user_and_verification_id", unique: true
-    t.index ["csp_user_id", "status"], name: "index_csp_user_verifications_on_csp_user_id_and_status"
-    t.index ["csp_user_id"], name: "index_csp_user_verifications_on_csp_user_id"
+    t.index ["csp_id", "csp_verification_id"], name: "index_csp_user_verifications_on_csp_and_verification_id", unique: true
+    t.index ["csp_id"], name: "index_csp_user_verifications_on_csp_id"
+    t.index ["invitation_id", "status"], name: "index_csp_user_verifications_on_invitation_id_and_status"
+    t.index ["invitation_id"], name: "index_csp_user_verifications_on_invitation_id"
+    t.index ["user_id", "status"], name: "index_csp_user_verifications_on_user_id_and_status"
+    t.index ["user_id"], name: "index_csp_user_verifications_on_user_id"
   end
 
   create_table "csp_users", force: :cascade do |t|
@@ -96,6 +101,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_09_173545) do
     t.bigint "csp_user_verification_id", null: false
     t.string "check_name", null: false
     t.string "check_status"
+    t.string "status_details"
     t.boolean "status_value"
     t.jsonb "reason_codes", default: [], null: false
     t.datetime "completed_at"
@@ -302,7 +308,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_09_173545) do
   add_foreign_key "cd_org_links", "invitations"
   add_foreign_key "cd_org_links", "provider_organizations"
   add_foreign_key "cd_org_links", "users"
-  add_foreign_key "csp_user_verifications", "csp_users"
+  add_foreign_key "csp_user_verifications", "csps"
+  add_foreign_key "csp_user_verifications", "invitations"
+  add_foreign_key "csp_user_verifications", "users"
   add_foreign_key "csp_users", "csps"
   add_foreign_key "csp_users", "users"
   add_foreign_key "csp_verification_checks", "csp_user_verifications"

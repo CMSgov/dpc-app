@@ -5,6 +5,7 @@ class CreateCspVerificationChecks < ActiveRecord::Migration[8.0]
 
       t.string :check_name, null: false
       t.string :check_status
+      t.string :status_details
       t.boolean :status_value
       t.jsonb :reason_codes, default: [], null: false
 
