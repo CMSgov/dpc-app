@@ -136,6 +136,7 @@ services:
       IDP_LOGIN_DOT_GOV_HOST: idp.int.identitysandbox.gov
       IDP_ID_ME_HOST: api.idmelabs.com
       CLEAR_IDP_HOST: verified.clearme.com
+      CPI_API_GW_TESTDATA: ${CPI_API_GW_TESTDATA}
       RUBY_YJIT_ENABLE: 1
       ENV: local
       DISABLE_JSON_LOGGER: true
