@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_14_201121) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_09_173545) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -69,6 +69,23 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_14_201121) do
     t.index ["user_id"], name: "index_credential_audit_logs_on_user_id"
   end
 
+  create_table "csp_user_verifications", force: :cascade do |t|
+    t.bigint "invitation_id"
+    t.bigint "user_id"
+    t.bigint "csp_id", null: false
+    t.string "csp_verification_id", null: false
+    t.string "status", null: false
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["csp_id", "csp_verification_id"], name: "index_csp_user_verifications_on_csp_and_verification_id", unique: true
+    t.index ["csp_id"], name: "index_csp_user_verifications_on_csp_id"
+    t.index ["invitation_id", "status"], name: "index_csp_user_verifications_on_invitation_id_and_status"
+    t.index ["invitation_id"], name: "index_csp_user_verifications_on_invitation_id"
+    t.index ["user_id", "status"], name: "index_csp_user_verifications_on_user_id_and_status"
+    t.index ["user_id"], name: "index_csp_user_verifications_on_user_id"
+  end
+
   create_table "csp_users", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "csp_id", null: false
@@ -78,6 +95,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_14_201121) do
     t.index ["csp_id"], name: "index_csp_users_on_csp_id"
     t.index ["user_id", "csp_id"], name: "index_csp_users_on_user_id_and_csp_id", unique: true
     t.index ["user_id"], name: "index_csp_users_on_user_id"
+  end
+
+  create_table "csp_verification_checks", force: :cascade do |t|
+    t.bigint "csp_user_verification_id", null: false
+    t.string "check_name", null: false
+    t.string "check_status"
+    t.string "status_details"
+    t.boolean "status_value"
+    t.jsonb "reason_codes", default: [], null: false
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["csp_user_verification_id"], name: "index_csp_verification_checks_on_csp_user_verification_id"
   end
 
   create_table "csps", force: :cascade do |t|
@@ -278,8 +308,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_14_201121) do
   add_foreign_key "cd_org_links", "invitations"
   add_foreign_key "cd_org_links", "provider_organizations"
   add_foreign_key "cd_org_links", "users"
+  add_foreign_key "csp_user_verifications", "csps"
+  add_foreign_key "csp_user_verifications", "invitations"
+  add_foreign_key "csp_user_verifications", "users"
   add_foreign_key "csp_users", "csps"
   add_foreign_key "csp_users", "users"
+  add_foreign_key "csp_verification_checks", "csp_user_verifications"
   add_foreign_key "invitations", "provider_organizations"
   add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "provider_organizations", "users", column: "terms_of_service_accepted_by_id"
