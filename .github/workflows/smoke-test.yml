@@ -75,10 +75,8 @@ jobs:
           update-ca-trust
       - name: Build K6
         run: |
-          go install go.k6.io/xk6/cmd/xk6@v1.3.7
-          
-          # Build the k6 binary`
-          xk6 build
+          go install go.k6.io/xk6/cmd/xk6@v1.3.7 # Install xk6
+          xk6 build # Build the k6 binary
       - name: Set env vars from AWS params
         uses: cmsgov/cdap/actions/aws-params-env-action@main
         env:
