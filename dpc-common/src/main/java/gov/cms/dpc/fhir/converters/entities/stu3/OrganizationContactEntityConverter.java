@@ -43,7 +43,7 @@ public class OrganizationContactEntityConverter implements FHIRConverter<Organiz
         final List<ContactPoint> cps = entity.getTelecom()
                 .stream()
                 .map(ContactPointEntity::toFHIR)
-                .collect(Collectors.toCollection(ArrayList::new));
+                .collect(Collectors.toList());
 
         contactComponent.setTelecom(cps);
         contactComponent.setAddress(converter.toFHIR(Address.class, entity.getAddress()));
