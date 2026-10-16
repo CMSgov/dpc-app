@@ -1,7 +1,7 @@
 package gov.cms.dpc.common.hibernate.validator;
 
 import gov.cms.dpc.common.annotations.OrganizationId;
-import gov.cms.dpc.common.entities.OrganizationEntity;
+import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import jakarta.validation.*;
 import org.junit.jupiter.api.Assertions;

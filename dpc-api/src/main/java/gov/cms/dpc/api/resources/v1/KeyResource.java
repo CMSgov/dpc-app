@@ -12,7 +12,7 @@ import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.resources.AbstractKeyResource;
 import gov.cms.dpc.common.annotations.NoHtml;
-import gov.cms.dpc.common.entities.OrganizationEntity;
+import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;

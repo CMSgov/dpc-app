@@ -10,7 +10,10 @@ import gov.cms.dpc.attribution.dao.tables.records.OrganizationsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.PatientsRecord;
 import gov.cms.dpc.attribution.dao.tables.records.ProvidersRecord;
 import gov.cms.dpc.attribution.jdbi.RosterUtils;
-import gov.cms.dpc.common.entities.*;
+import gov.cms.dpc.common.entities.stu3.AddressEntity;
+import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
+import gov.cms.dpc.common.entities.stu3.PatientEntity;
+import gov.cms.dpc.common.entities.stu3.ProviderEntity;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.common.utils.DBUtils;
@@ -187,8 +190,8 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         record.setIdValue(entity.getOrganizationID().getValue());
 
         final AddressEntity address = entity.getOrganizationAddress();
-        record.setAddressType(address.getType().ordinal());
-        record.setAddressUse(address.getUse().ordinal());
+        record.setAddressType(address.getType().name());
+        record.setAddressUse(address.getUse().name());
         record.setLine1(address.getLine1());
         record.setLine2(address.getLine2());
         record.setCity(address.getCity());
@@ -217,7 +220,7 @@ public class SeedCommand extends EnvironmentCommand<DPCAttributionConfiguration>
         final OffsetDateTime created = OffsetDateTime.now(ZoneOffset.UTC);
         record.setCreatedAt(created);
         record.setUpdatedAt(created);
-        record.setGender(entity.getGender().ordinal());
+        record.setGender(entity.getGender().name());
         record.setId(UUID.randomUUID());
 
         return record;

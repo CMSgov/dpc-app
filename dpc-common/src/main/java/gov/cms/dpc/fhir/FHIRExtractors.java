@@ -2,7 +2,7 @@ package gov.cms.dpc.fhir;
 
 import com.google.re2j.Matcher;
 import com.google.re2j.Pattern;
-import gov.cms.dpc.common.entities.PatientEntity;
+import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.fhir.helpers.DPCCollectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;

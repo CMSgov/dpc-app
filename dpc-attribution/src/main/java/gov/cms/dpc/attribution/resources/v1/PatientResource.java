@@ -6,7 +6,7 @@ import gov.cms.dpc.attribution.jdbi.PatientDAO;
 import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
 import gov.cms.dpc.attribution.resources.AbstractPatientResource;
 import gov.cms.dpc.attribution.utils.RESTUtils;
-import gov.cms.dpc.common.entities.PatientEntity;
+import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.common.utils.PagingService;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;

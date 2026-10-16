@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.google.common.collect.ImmutableList;
-import gov.cms.dpc.common.entities.*;
+import gov.cms.dpc.common.entities.stu3.*;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 

@@ -1,6 +1,6 @@
 package gov.cms.dpc.attribution;
 
-import gov.cms.dpc.common.entities.*;
+import gov.cms.dpc.common.entities.stu3.*;
 import gov.cms.dpc.testing.AbstractMultipleDAOTest;
 
 /**

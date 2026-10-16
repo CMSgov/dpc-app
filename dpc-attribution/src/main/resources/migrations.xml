@@ -445,4 +445,239 @@
                       oldColumnName="value"
                       newColumnName="contact_value"/>
     </changeSet>
+
+    <!-- Address_use and address_type are mapped to specific enumerated types in HAPI FHIR stu3, and they changed -->
+    <!-- in r4.  Instead of using the int values, we're going to use the strings.  These shouldn't change across  -->
+    <!-- versions and won't break our upgrade (or any future upgrades). -->
+    <changeSet id="convert-organization-address-enums-to-string" author="MEsposito">
+        <!-- Update column types -->
+        <sql>
+            ALTER TABLE ORGANIZATIONS ALTER COLUMN address_use TYPE VARCHAR(32) USING address_use::VARCHAR;
+            ALTER TABLE ORGANIZATIONS ALTER COLUMN address_type TYPE VARCHAR(32) USING address_type::VARCHAR;
+        </sql>
+
+        <!-- Map the existing integers to strings -->
+        <!-- 0=HOME, 1=WORK, 2=TEMP, 3=OLD, 4=NULL -->
+        <update tableName="ORGANIZATIONS">
+            <column name="address_use" value="HOME"/>
+            <where>address_use = '0'</where>
+        </update>
+        <update tableName="ORGANIZATIONS">
+            <column name="address_use" value="WORK"/>
+            <where>address_use = '1'</where>
+        </update>
+        <update tableName="ORGANIZATIONS">
+            <column name="address_use" value="TEMP"/>
+            <where>address_use = '2'</where>
+        </update>
+        <update tableName="ORGANIZATIONS">
+            <column name="address_use" value="OLD"/>
+            <where>address_use = '3'</where>
+        </update>
+        <update tableName="ORGANIZATIONS">
+            <column name="address_use" value="NULL"/>
+            <where>address_use = '4'</where>
+        </update>
+
+        <!-- 0=POSTAL, 1=PHYSICAL, 2=BOTH, 3=NULL -->
+        <update tableName="ORGANIZATIONS">
+            <column name="address_type" value="POSTAL"/>
+            <where>address_type = '0'</where>
+        </update>
+        <update tableName="ORGANIZATIONS">
+            <column name="address_type" value="PHYSICAL"/>
+            <where>address_type = '1'</where>
+        </update>
+        <update tableName="ORGANIZATIONS">
+            <column name="address_type" value="BOTH"/>
+            <where>address_type = '2'</where>
+        </update>
+        <update tableName="ORGANIZATIONS">
+            <column name="address_type" value="NULL"/>
+            <where>address_type = '3'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="convert-organization-contacts-address-enums-to-string" author="MEsposito">
+        <!-- Update column types -->
+        <sql>
+            ALTER TABLE ORGANIZATION_CONTACTS ALTER COLUMN address_use TYPE VARCHAR(32) USING address_use::VARCHAR;
+            ALTER TABLE ORGANIZATION_CONTACTS ALTER COLUMN address_type TYPE VARCHAR(32) USING address_type::VARCHAR;
+            ALTER TABLE ORGANIZATION_CONTACTS ALTER COLUMN name_use TYPE VARCHAR(32) USING name_use::VARCHAR;
+        </sql>
+
+        <!-- Map existing ints to strings -->
+        <!-- 0=HOME, 1=WORK, 2=TEMP, 3=OLD, 4=NULL -->
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="address_use" value="HOME"/>
+            <where>address_use = '0'</where>
+        </update>
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="address_use" value="WORK"/>
+            <where>address_use = '1'</where>
+        </update>
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="address_use" value="TEMP"/>
+            <where>address_use = '2'</where>
+        </update>
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="address_use" value="OLD"/>
+            <where>address_use = '3'</where>
+        </update>
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="address_use" value="NULL"/>
+            <where>address_use = '4'</where>
+        </update>
+
+        <!-- 0=POSTAL, 1=PHYSICAL, 2=BOTH, 3=NULL -->
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="address_type" value="POSTAL"/>
+            <where>address_type = '0'</where>
+        </update>
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="address_type" value="PHYSICAL"/>
+            <where>address_type = '1'</where>
+        </update>
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="address_type" value="BOTH"/>
+            <where>address_type = '2'</where>
+        </update>
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="address_type" value="NULL"/>
+            <where>address_type = '3'</where>
+        </update>
+
+        <!-- 0=USUAL, 1=OFFICIAL, 2=TEMP, 3=NICKNAME, 4=ANONYMOUS, 5=OLD, 6=MAIDEN, 7=NULL -->
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="name_use" value="USUAL"/>
+            <where>name_use = '0'</where>
+        </update>
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="name_use" value="OFFICIAL"/>
+            <where>name_use = '1'</where>
+        </update>
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="name_use" value="TEMP"/>
+            <where>name_use = '2'</where>
+        </update>
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="name_use" value="NICKNAME"/>
+            <where>name_use = '3'</where>
+        </update>
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="name_use" value="ANONYMOUS"/>
+            <where>name_use = '4'</where>
+        </update>
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="name_use" value="OLD"/>
+            <where>name_use = '5'</where>
+        </update>
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="name_use" value="MAIDEN"/>
+            <where>name_use = '6'</where>
+        </update>
+        <update tableName="ORGANIZATION_CONTACTS">
+            <column name="name_use" value="NULL"/>
+            <where>name_use = '7'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="convert-telecom-enums-to-string" author="MEsposito">
+        <!-- Update column types -->
+        <sql>
+            ALTER TABLE CONTACT_TELECOMS ALTER COLUMN system TYPE VARCHAR(32) USING system::VARCHAR;
+            ALTER TABLE CONTACT_TELECOMS ALTER COLUMN "use" TYPE VARCHAR(32) USING "use"::VARCHAR;
+        </sql>
+
+        <!-- Map existing ints to strings -->
+        <!-- 0=PHONE, 1=FAX, 2=EMAIL, 3=PAGER, 4=URL, 5=SMS, 6=OTHER, 7=NULL -->
+        <update tableName="CONTACT_TELECOMS">
+            <column name="system" value="PHONE"/>
+            <where>system = '0'</where>
+        </update>
+        <update tableName="CONTACT_TELECOMS">
+            <column name="system" value="FAX"/>
+            <where>system = '1'</where>
+        </update>
+        <update tableName="CONTACT_TELECOMS">
+            <column name="system" value="EMAIL"/>
+            <where>system = '2'</where>
+        </update>
+        <update tableName="CONTACT_TELECOMS">
+            <column name="system" value="PAGER"/>
+            <where>system = '3'</where>
+        </update>
+        <update tableName="CONTACT_TELECOMS">
+            <column name="system" value="URL"/>
+            <where>system = '4'</where>
+        </update>
+        <update tableName="CONTACT_TELECOMS">
+            <column name="system" value="SMS"/>
+            <where>system = '5'</where>
+        </update>
+        <update tableName="CONTACT_TELECOMS">
+            <column name="system" value="OTHER"/>
+            <where>system = '6'</where>
+        </update>
+        <update tableName="CONTACT_TELECOMS">
+            <column name="system" value="NULL"/>
+            <where>system = '7'</where>
+        </update>
+
+        <!-- 0=HOME, 1=WORK, 2=TEMP, 3=OLD, 4=MOBILE, 5=NULL -->
+        <update tableName="CONTACT_TELECOMS">
+            <column name="use" value="HOME"/>
+            <where>use = '0'</where>
+        </update>
+        <update tableName="CONTACT_TELECOMS">
+            <column name="use" value="WORK"/>
+            <where>use = '1'</where>
+        </update>
+        <update tableName="CONTACT_TELECOMS">
+            <column name="use" value="TEMP"/>
+            <where>use = '2'</where>
+        </update>
+        <update tableName="CONTACT_TELECOMS">
+            <column name="use" value="OLD"/>
+            <where>use = '3'</where>
+        </update>
+        <update tableName="CONTACT_TELECOMS">
+            <column name="use" value="MOBILE"/>
+            <where>use = '4'</where>
+        </update>
+        <update tableName="CONTACT_TELECOMS">
+            <column name="use" value="NULL"/>
+            <where>use = '5'</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="convert-patient-gender-to-string" author="MEsposito">
+        <!-- Update column types -->
+        <sql>
+            ALTER TABLE PATIENTS ALTER COLUMN gender TYPE VARCHAR(32) USING gender::VARCHAR;
+        </sql>
+
+        <!-- Map existing ints to strings -->
+        <!-- 0=MALE, 1=FEMALE, 2=OTHER, 3=UNKNOWN, 4=NULL -->
+        <update tableName="PATIENTS">
+            <column name="gender" value="MALE"/>
+            <where>gender = '0'</where>
+        </update>
+        <update tableName="PATIENTS">
+            <column name="gender" value="FEMALE"/>
+            <where>gender = '1'</where>
+        </update>
+        <update tableName="PATIENTS">
+            <column name="gender" value="OTHER"/>
+            <where>gender = '2'</where>
+        </update>
+        <update tableName="PATIENTS">
+            <column name="gender" value="UNKNOWN"/>
+            <where>gender = '3'</where>
+        </update>
+        <update tableName="PATIENTS">
+            <column name="gender" value="NULL"/>
+            <where>gender = '4'</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
