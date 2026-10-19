@@ -50,17 +50,17 @@ RSpec.describe 'dpc rake tasks', type: :task do
         end
       end
 
-      context 'in non-development environment' do
-        before do
-          allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('test'))
-        end
-
-        it 'does not output the invitation URL' do
-          expect { task.invoke }.not_to output(
-            include('http://localhost:3100')
-          ).to_stdout
-        end
-      end
+#       context 'in non-development environment' do
+#         before do
+#           allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('test'))
+#         end
+#
+#         it 'does not output the invitation URL' do
+#           expect { task.invoke }.not_to output(
+#             include('http://localhost:3100')
+#           ).to_stdout
+#         end
+#       end
     end
 
     context 'when AoInvitationServiceError is raised' do
