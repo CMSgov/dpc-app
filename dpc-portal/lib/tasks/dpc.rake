@@ -14,10 +14,8 @@ namespace :dpc do
     service = AoInvitationService.new
     invitation = service.create_invitation(ao_given_name, ao_family_name, ao_email, org_npi)
     puts "Invitation created successfully for #{invitation.provider_organization.name}"
-    if Rails.env.development?
-      puts "http://localhost:3100/organizations/#{invitation.provider_organization.id}" \
-           "/invitations/#{invitation.id}/#{invitation.token}/accept"
-    end
+    puts "http://localhost:3100/organizations/#{invitation.provider_organization.id}" \
+         "/invitations/#{invitation.id}/#{invitation.token}/accept"
   rescue AoInvitationServiceError => e
     puts "Unable to create invitation: #{e.message}"
   end
