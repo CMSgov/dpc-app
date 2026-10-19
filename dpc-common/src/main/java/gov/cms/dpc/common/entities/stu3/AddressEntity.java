@@ -18,6 +18,9 @@ public class AddressEntity implements Serializable {
 
     private static final long serialVersionUID = 42L;
 
+    // R4 AddressUse added BILLING.  If someone creates a BILLING address with the R4 endpoints and tries to read
+    // it from our STU3 endpoints it will fail.  It shouldn't be an issue since the portal always forces AddressUse=WORK,
+    // but better to be aware of it just in case.
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "address_use")

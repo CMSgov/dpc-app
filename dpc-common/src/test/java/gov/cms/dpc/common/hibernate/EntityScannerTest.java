@@ -5,6 +5,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.google.common.collect.ImmutableList;
 import gov.cms.dpc.common.entities.stu3.*;
+import gov.cms.dpc.common.hibernate.attribution.DPCHibernateBundle;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EntityScannerTest {
 
     static final ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-    static final String PREFIX_STRING = "gov.cms.dpc.common.entities";
+    static final String PREFIX_STRING = DPCHibernateBundle.PREFIX_STRING;
 
     @Test
     void testApplicationEntities() {

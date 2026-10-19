@@ -8,7 +8,7 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 
-public class OrganizationIdValidator implements ConstraintValidator<OrganizationId, OrganizationEntity.OrganizationID> {
+public class Stu3OrganizationValidator implements ConstraintValidator<OrganizationId, OrganizationEntity.OrganizationID> {
 
     public static final String VALIDATION_MESSAGE = "Invalid Organization ID format";
 
