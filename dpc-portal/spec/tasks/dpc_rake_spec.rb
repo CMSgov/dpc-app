@@ -50,17 +50,24 @@ RSpec.describe 'dpc rake tasks', type: :task do
         end
       end
 
-      # context 'in non-development environment' do
-      #   before do
-      #     allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('test'))
-      #   end
-      #
-      #   it 'does not output the invitation URL' do
-      #     expect { task.invoke }.not_to output(
-      #       include('http://localhost:3100')
-      #     ).to_stdout
-      #   end
-      # end
+      context 'in non-development environment' do
+        before do
+          allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('test'))
+          stub_const('ENV', ENV.to_h.merge('HOST_NAME' => 'portal.test.dpc.cmscloud.local'))
+        end
+
+        it 'does not include localhost in invitation URL for deployed env' do
+          expect { task.invoke }.not_to output(
+            include('http://localhost:3100')
+          ).to_stdout
+        end
+
+        it 'does include hostname in invitation URL' do
+          expect { task.invoke }.to output(
+            include('portal.test.dpc.cmscloud.local')
+          ).to_stdout
+        end
+      end
     end
 
     context 'when AoInvitationServiceError is raised' do
