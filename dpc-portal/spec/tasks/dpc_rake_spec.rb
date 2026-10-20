@@ -6,10 +6,10 @@ RSpec.describe 'dpc rake tasks', type: :task do
   describe 'dpc:invite_ao' do
     let(:task) { Rake::Task['dpc:invite_ao'] }
     let(:service) { instance_double(AoInvitationService) }
-    let(:organization) { instance_double(ProviderOrganization, name: 'Test Org', id: 'org-123') }
+    let(:organization) { ProviderOrganization.new(id: 123, name: 'Test Org') }
     let(:token) { SecureRandom.base58(Invitation::TOKEN_LENGTH) }
     let(:invitation) do
-      instance_double(Invitation, id: 'inv-456', token:, provider_organization: organization)
+      Invitation.new(id: 456, token:, provider_organization: organization, invitation_type: :authorized_official)
     end
 
     before do
@@ -45,7 +45,7 @@ RSpec.describe 'dpc rake tasks', type: :task do
 
         it 'outputs the invitation URL' do
           expect { task.invoke }.to output(
-            include("http://localhost:3100/organizations/org-123/invitations/inv-456/#{token}/accept")
+            include("http://localhost:3100/organizations/123/invitations/456/#{token}/accept")
           ).to_stdout
         end
       end
