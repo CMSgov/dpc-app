@@ -475,7 +475,7 @@
             <where>address_use = '3'</where>
         </update>
         <update tableName="ORGANIZATIONS">
-            <column name="address_use" value="NULL"/>
+Wh            <column name="address_use" valueComputed="'NULL'"/>
             <where>address_use = '4'</where>
         </update>
 
@@ -493,9 +493,32 @@
             <where>address_type = '2'</where>
         </update>
         <update tableName="ORGANIZATIONS">
-            <column name="address_type" value="NULL"/>
+            <column name="address_type" valueComputed="'NULL'"/>
             <where>address_type = '3'</where>
         </update>
+
+        <rollback>
+            <!-- I want to be able to roll these back if the stuff hits the fan. -->
+            <sql>
+                ALTER TABLE ORGANIZATIONS ALTER COLUMN address_use TYPE SMALLINT
+                    USING (CASE address_use
+                        WHEN 'HOME' THEN '0'
+                        WHEN 'WORK' THEN '1'
+                        WHEN 'TEMP' THEN '2'
+                        WHEN 'OLD' THEN '3'
+                        WHEN 'NULL' THEN '4'
+                        ELSE address_use
+                    END)::SMALLINT;
+                ALTER TABLE ORGANIZATIONS ALTER COLUMN address_type TYPE SMALLINT
+                    USING (CASE address_type
+                        WHEN 'POSTAL' THEN '0'
+                        WHEN 'PHYSICAL' THEN '1'
+                        WHEN 'BOTH' THEN '2'
+                        WHEN 'NULL' THEN '3'
+                        ELSE address_type
+                    END)::SMALLINT;
+            </sql>
+        </rollback>
     </changeSet>
 
     <changeSet id="convert-organization-contacts-address-enums-to-string" author="MEsposito">
@@ -525,7 +548,7 @@
             <where>address_use = '3'</where>
         </update>
         <update tableName="ORGANIZATION_CONTACTS">
-            <column name="address_use" value="NULL"/>
+            <column name="address_use" valueComputed="'NULL'"/>
             <where>address_use = '4'</where>
         </update>
 
@@ -543,7 +566,7 @@
             <where>address_type = '2'</where>
         </update>
         <update tableName="ORGANIZATION_CONTACTS">
-            <column name="address_type" value="NULL"/>
+            <column name="address_type" valueComputed="'NULL'"/>
             <where>address_type = '3'</where>
         </update>
 
@@ -577,9 +600,44 @@
             <where>name_use = '6'</where>
         </update>
         <update tableName="ORGANIZATION_CONTACTS">
-            <column name="name_use" value="NULL"/>
+            <column name="name_use" valueComputed="'NULL'"/>
             <where>name_use = '7'</where>
         </update>
+
+        <rollback>
+            <!-- I want to be able to roll these back if the stuff hits the fan. -->
+            <sql>
+                ALTER TABLE ORGANIZATION_CONTACTS ALTER COLUMN address_use TYPE SMALLINT
+                    USING (CASE address_use
+                        WHEN 'HOME' THEN '0'
+                        WHEN 'WORK' THEN '1'
+                        WHEN 'TEMP' THEN '2'
+                        WHEN 'OLD' THEN '3'
+                        WHEN 'NULL' THEN '4'
+                        ELSE address_use
+                    END)::SMALLINT;
+                ALTER TABLE ORGANIZATION_CONTACTS ALTER COLUMN address_type TYPE SMALLINT
+                    USING (CASE address_type
+                        WHEN 'POSTAL' THEN '0'
+                        WHEN 'PHYSICAL' THEN '1'
+                        WHEN 'BOTH' THEN '2'
+                        WHEN 'NULL' THEN '3'
+                        ELSE address_type
+                    END)::SMALLINT;
+                ALTER TABLE ORGANIZATION_CONTACTS ALTER COLUMN name_use TYPE SMALLINT
+                    USING (CASE name_use
+                        WHEN 'USUAL' THEN '0'
+                        WHEN 'OFFICIAL' THEN '1'
+                        WHEN 'TEMP' THEN '2'
+                        WHEN 'NICKNAME' THEN '3'
+                        WHEN 'ANONYMOUS' THEN '4'
+                        WHEN 'OLD' THEN '5'
+                        WHEN 'MAIDEN' THEN '6'
+                        WHEN 'NULL' THEN '7'
+                        ELSE name_use
+                    END)::SMALLINT;
+            </sql>
+        </rollback>
     </changeSet>
 
     <changeSet id="convert-telecom-enums-to-string" author="MEsposito">
@@ -620,7 +678,7 @@
             <where>system = '6'</where>
         </update>
         <update tableName="CONTACT_TELECOMS">
-            <column name="system" value="NULL"/>
+            <column name="system" valueComputed="'NULL'"/>
             <where>system = '7'</where>
         </update>
 
@@ -646,9 +704,37 @@
             <where>use = '4'</where>
         </update>
         <update tableName="CONTACT_TELECOMS">
-            <column name="use" value="NULL"/>
+            <column name="use" valueComputed="'NULL'"/>
             <where>use = '5'</where>
         </update>
+
+        <rollback>
+            <!-- I want to be able to roll these back if the stuff hits the fan. -->
+            <sql>
+                ALTER TABLE CONTACT_TELECOMS ALTER COLUMN system TYPE SMALLINT
+                    USING (CASE system
+                        WHEN 'PHONE' THEN '0'
+                        WHEN 'FAX' THEN '1'
+                        WHEN 'EMAIL' THEN '2'
+                        WHEN 'PAGER' THEN '3'
+                        WHEN 'URL' THEN '4'
+                        WHEN 'SMS' THEN '5'
+                        WHEN 'OTHER' THEN '6'
+                        WHEN 'NULL' THEN '7'
+                        ELSE system
+                    END)::SMALLINT;
+                ALTER TABLE CONTACT_TELECOMS ALTER COLUMN "use" TYPE SMALLINT
+                    USING (CASE "use"
+                        WHEN 'HOME' THEN '0'
+                        WHEN 'WORK' THEN '1'
+                        WHEN 'TEMP' THEN '2'
+                        WHEN 'OLD' THEN '3'
+                        WHEN 'MOBILE' THEN '4'
+                        WHEN 'NULL' THEN '5'
+                        ELSE "use"
+                    END)::SMALLINT;
+            </sql>
+        </rollback>
     </changeSet>
 
     <changeSet id="convert-patient-gender-to-string" author="MEsposito">
@@ -676,8 +762,23 @@
             <where>gender = '3'</where>
         </update>
         <update tableName="PATIENTS">
-            <column name="gender" value="NULL"/>
+            <column name="gender" valueComputed="'NULL'"/>
             <where>gender = '4'</where>
         </update>
+
+        <rollback>
+            <!-- I want to be able to roll these back if the stuff hits the fan. -->
+            <sql>
+                ALTER TABLE PATIENTS ALTER COLUMN gender TYPE SMALLINT
+                    USING (CASE gender
+                        WHEN 'MALE' THEN '0'
+                        WHEN 'FEMALE' THEN '1'
+                        WHEN 'OTHER' THEN '2'
+                        WHEN 'UNKNOWN' THEN '3'
+                        WHEN 'NULL' THEN '4'
+                        ELSE gender
+                    END)::SMALLINT;
+            </sql>
+        </rollback>
     </changeSet>
 </databaseChangeLog>
