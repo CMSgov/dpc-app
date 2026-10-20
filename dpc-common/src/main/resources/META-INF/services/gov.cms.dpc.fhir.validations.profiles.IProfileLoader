@@ -1,6 +1,6 @@
-gov.cms.dpc.fhir.validations.profiles.AddressProfile
-gov.cms.dpc.fhir.validations.profiles.AttributionRosterProfile
-gov.cms.dpc.fhir.validations.profiles.OrganizationProfile
-gov.cms.dpc.fhir.validations.profiles.PatientProfile
-gov.cms.dpc.fhir.validations.profiles.PractitionerProfile
-gov.cms.dpc.fhir.validations.profiles.AttestationProfile
+gov.cms.dpc.fhir.validations.profiles.stu3.AddressProfile
+gov.cms.dpc.fhir.validations.profiles.stu3.AttributionRosterProfile
+gov.cms.dpc.fhir.validations.profiles.stu3.OrganizationProfile
+gov.cms.dpc.fhir.validations.profiles.stu3.PatientProfile
+gov.cms.dpc.fhir.validations.profiles.stu3.PractitionerProfile
+gov.cms.dpc.fhir.validations.profiles.stu3.AttestationProfile

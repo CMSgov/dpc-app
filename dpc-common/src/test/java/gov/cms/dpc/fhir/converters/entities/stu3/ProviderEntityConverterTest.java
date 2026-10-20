@@ -4,7 +4,7 @@ import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.common.entities.stu3.ProviderEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
-import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
+import gov.cms.dpc.fhir.validations.profiles.stu3.PractitionerProfile;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

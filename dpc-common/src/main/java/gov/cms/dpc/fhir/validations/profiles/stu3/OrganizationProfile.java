@@ -1,4 +1,6 @@
-package gov.cms.dpc.fhir.validations.profiles;
+package gov.cms.dpc.fhir.validations.profiles.stu3;
+
+import gov.cms.dpc.fhir.validations.profiles.IProfileLoader;
 
 public class OrganizationProfile implements IProfileLoader {
 
@@ -6,7 +8,7 @@ public class OrganizationProfile implements IProfileLoader {
 
     @Override
     public String getPath() {
-        return "validations/DPCOrganization.json";
+        return "validations/v1/DPCOrganization.json";
     }
 
     @Override

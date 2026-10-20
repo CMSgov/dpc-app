@@ -5,7 +5,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.annotations.Profiled;
-import gov.cms.dpc.fhir.validations.profiles.*;
+import gov.cms.dpc.fhir.validations.profiles.stu3.*;
 import jakarta.validation.ConstraintValidatorContext;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;

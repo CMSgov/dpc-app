@@ -4,7 +4,7 @@ import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
-import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
+import gov.cms.dpc.fhir.validations.profiles.stu3.PatientProfile;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.r4.model.codesystems.GenderIdentity;
 import org.junit.jupiter.api.BeforeEach;

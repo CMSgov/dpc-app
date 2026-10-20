@@ -6,7 +6,7 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.FHIRConverter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
-import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
+import gov.cms.dpc.fhir.validations.profiles.stu3.PractitionerProfile;
 import org.hl7.fhir.dstu3.model.*;
 
 import java.util.UUID;

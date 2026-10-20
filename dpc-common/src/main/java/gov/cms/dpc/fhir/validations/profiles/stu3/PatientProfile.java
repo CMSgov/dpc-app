@@ -1,4 +1,6 @@
-package gov.cms.dpc.fhir.validations.profiles;
+package gov.cms.dpc.fhir.validations.profiles.stu3;
+
+import gov.cms.dpc.fhir.validations.profiles.IProfileLoader;
 
 /**
  * Custom patient profile that requires specific data points in order to support patient matching.
@@ -9,7 +11,7 @@ public class PatientProfile implements IProfileLoader {
 
     @Override
     public String getPath() {
-        return "validations/DPCPatient.json";
+        return "validations/v1/DPCPatient.json";
     }
 
     @Override

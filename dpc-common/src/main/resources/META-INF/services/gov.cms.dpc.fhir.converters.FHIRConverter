@@ -6,3 +6,12 @@ gov.cms.dpc.fhir.converters.entities.stu3.NameEntityConverter
 gov.cms.dpc.fhir.converters.entities.stu3.PatientEntityConverter
 gov.cms.dpc.fhir.converters.entities.stu3.ProviderEntityConverter
 gov.cms.dpc.fhir.converters.entities.stu3.RosterEntityConverter
+gov.cms.dpc.fhir.converters.entities.r4.AddressEntityConverter
+gov.cms.dpc.fhir.converters.entities.r4.ConsentEntityConverter
+gov.cms.dpc.fhir.converters.entities.r4.ContactPointConverter
+gov.cms.dpc.fhir.converters.entities.r4.NameEntityConverter
+gov.cms.dpc.fhir.converters.entities.r4.OrganizationContactEntityConverter
+gov.cms.dpc.fhir.converters.entities.r4.OrganizationEntityConverter
+gov.cms.dpc.fhir.converters.entities.r4.PatientEntityConverter
+gov.cms.dpc.fhir.converters.entities.r4.ProviderEntityConverter
+gov.cms.dpc.fhir.converters.entities.r4.RosterEntityConverter
