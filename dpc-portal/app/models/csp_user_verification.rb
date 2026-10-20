@@ -17,6 +17,7 @@ class CspUserVerification < ApplicationRecord
     begin
       transaction do
         record = find_or_initialize_by(csp:, csp_verification_id: verification[:session_id])
+        record.lock! if record.persisted?
         record.assign_attributes(verification.slice(:status, :created_at, :completed_at).compact)
         record.link(user:, invitation:)
         record.save!
@@ -31,6 +32,7 @@ class CspUserVerification < ApplicationRecord
     end
   end
 
+  # Links the row to the existing user or to the invitation they are registering with. Only the first link is kept.
   def link(user:, invitation:)
     return if user_id.present? || invitation_id.present?
 

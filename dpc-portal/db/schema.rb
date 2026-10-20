@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_19_150000) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_09_173545) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -78,7 +78,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_19_150000) do
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.datetime "started_at"
     t.index ["csp_id", "csp_verification_id"], name: "index_csp_user_verifications_on_csp_and_verification_id", unique: true
     t.index ["csp_id"], name: "index_csp_user_verifications_on_csp_id"
     t.index ["invitation_id", "status"], name: "index_csp_user_verifications_on_invitation_id_and_status"
@@ -127,7 +126,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_19_150000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "status"
-    t.string "token", null: false
+    t.string "token", limit: 24, null: false
     t.index ["token"], name: "index_invitations_on_token", unique: true
   end
 

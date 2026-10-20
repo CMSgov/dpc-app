@@ -30,7 +30,7 @@ module CspErrorHandling
   end
 
   def handle_fail_to_proof(invitation)
-    return not_found unless CspUtils::CODES_TO_DISPLAY.keys.include?(csp_param.to_sym)
+    return not_found unless CspUtils::CODES_TO_DISPLAY.keys.include?(csp_param&.to_sym)
 
     log_event(:info, 'User failed identity verification',
               action_context: action_context(invitation),

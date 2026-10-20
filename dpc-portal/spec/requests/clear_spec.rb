@@ -17,6 +17,10 @@ RSpec.describe 'Clear', type: :request do
       { status: 200, body: { id: verification_id }.merge(verification_session_body).to_json }
     end
     let(:id_token) { 'id-token' }
+    let(:attempt_sign_in) do
+      post '/auth/clear'
+      follow_redirect!
+    end
     before do
       stub_request(:get, verification_session_url)
         .with(headers: { 'Authorization' => "Bearer #{token}" })
@@ -178,11 +182,6 @@ RSpec.describe 'Clear', type: :request do
     end
 
     context 'user cancels sign in' do
-      let(:attempt_sign_in) do
-        post '/auth/clear'
-        follow_redirect!
-      end
-
       before do
         OmniAuth.config.test_mode = true
         OmniAuth.config.add_mock(:clear, { uid: 'unknown',
@@ -279,11 +278,6 @@ RSpec.describe 'Clear', type: :request do
     end
 
     context 'Get Verification Session cannot be completed' do
-      let(:attempt_sign_in) do
-        post '/auth/clear'
-        follow_redirect!
-      end
-
       before do
         user = create(:user)
         create(:csp_user, user:, uuid:, csp:)
@@ -372,10 +366,6 @@ RSpec.describe 'Clear', type: :request do
       let(:verification_session_body) do
         { status: 'success', created_at: session_created_at, completed_at:,
           checks: [{ name: 'Gov ID is not expired', value: true, status: 'completed' }] }
-      end
-      let(:attempt_sign_in) do
-        post '/auth/clear'
-        follow_redirect!
       end
       let(:no_id_token_response) do
         { uid: uuid, credentials: { expires_in: 899, token:, id_token: nil }, info: { email: 'Unknown' },
