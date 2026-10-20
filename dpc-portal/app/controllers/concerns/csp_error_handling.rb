@@ -4,13 +4,13 @@
 module CspErrorHandling
   extend ActiveSupport::Concern
 
-  CSP_AUTH_ERROR_MESSAGES = %w[server_error service_unavailable connection_failed internal_server_error timeout].freeze
-  CSP_USER_ERROR_MESSAGES = %w[access_denied].freeze
-  CSP_USER_FAIL_TO_PROOF = %w[verification_failure identity_failed].freeze
-
-  CSP_CODES = %w[id_me login_dot_gov clear].freeze
+  CSP_AUTH_ERROR_MESSAGES = %w[server_error service_unavailable connection_failed internal_server_error timeout
+                               unavailable].freeze
+  CSP_USER_ERROR_MESSAGES = %w[access_denied canceled cancelled].freeze
+  CSP_USER_FAIL_TO_PROOF = %w[verification_failure identity_failed failed].freeze
 
   SIGNIN_FAIL = "We weren't able to complete identity verification."
+  EXTERNAL_SYSTEM_ERROR = 'Registration unavailable: external system error.'
   VERIFICATION_ALERT = 'You must complete verification before continuing registration.'
 
   def csp_auth_error?
@@ -30,7 +30,7 @@ module CspErrorHandling
   end
 
   def handle_fail_to_proof(invitation)
-    return not_found unless CSP_CODES.include?(csp_param)
+    return not_found unless CspUtils::CODES_TO_DISPLAY.keys.include?(csp_param.to_sym)
 
     log_event(:info, 'User failed identity verification',
               action_context: action_context(invitation),
@@ -45,7 +45,7 @@ module CspErrorHandling
               action_type: LoggingConstants::ActionType::CspUnavailable,
               error: params[:message],
               csp: csp_param)
-    redirect_to signin_destination(invitation), alert: 'Registration unavailable: external system error.'
+    redirect_to signin_destination(invitation), alert: EXTERNAL_SYSTEM_ERROR
   end
 
   def handle_signin_fail(invitation)

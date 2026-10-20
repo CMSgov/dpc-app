@@ -1250,20 +1250,30 @@ RSpec.describe 'Invitations', type: :request do
 end
 
 def log_in(provider:, template: user_info_template)
-  csp_response = { uid: template['sub'],
-                   credentials: { expires_in: 899,
-                                  token: 'bearer-token',
-                                  id_token: 'id-token' },
-                   info: { email: template['email'] },
-                   extra: { raw_info: { given_name: template['given_name'],
-                                        family_name: template['family_name'],
-                                        identity_assurance_level: 2 } } }
-  csp_response[:extra][:raw_info].merge!({ sub: template['sub'] }) if provider == :clear
+  # CLEAR logins need a token carrying a verification_id and a stubbed verification session
+  stub_clear_verification_session if provider.to_sym == :clear
 
   OmniAuth.config.test_mode = true
-  OmniAuth.config.add_mock(provider.to_sym, csp_response)
+  OmniAuth.config.add_mock(provider.to_sym, csp_login_response(provider, template))
   post "/auth/#{provider}"
   follow_redirect!
+end
+
+def csp_login_response(provider, template)
+  response = { uid: template['sub'],
+               credentials: { expires_in: 899,
+                              token: bearer_token(provider),
+                              id_token: 'id-token' },
+               info: { email: template['email'] },
+               extra: { raw_info: { given_name: template['given_name'],
+                                    family_name: template['family_name'],
+                                    identity_assurance_level: 2 } } }
+  response[:extra][:raw_info][:sub] = template['sub'] if provider.to_sym == :clear
+  response
+end
+
+def bearer_token(provider)
+  provider.to_sym == :clear ? clear_access_token : 'bearer-token'
 end
 
 def user_info_template(overrides = {})

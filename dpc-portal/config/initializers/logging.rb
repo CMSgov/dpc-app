@@ -69,5 +69,6 @@ module LoggingConstants
 
     InvalidCsp = 'InvalidCsp'
     CspUnavailable = 'CspUnavailable'
+    CspVerificationNotRecorded = 'CspVerificationNotRecorded'
   end
 end
