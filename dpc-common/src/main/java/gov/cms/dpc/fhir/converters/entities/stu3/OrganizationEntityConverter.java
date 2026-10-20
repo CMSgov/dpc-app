@@ -9,12 +9,12 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.FHIRConverter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.validations.profiles.stu3.OrganizationProfile;
-import org.hl7.fhir.dstu3.model.Address;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Meta;
-import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.*;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class OrganizationEntityConverter implements FHIRConverter<Organization, OrganizationEntity> {
@@ -70,7 +70,7 @@ public class OrganizationEntityConverter implements FHIRConverter<Organization, 
                 .getContact()
                 .stream()
                 .map(r -> converter.fromFHIR(ContactEntity.class, r))
-                .collect(Collectors.toCollection(ArrayList::new));
+                .collect(Collectors.toList());
         // Add the entity reference
         contactEntities.forEach(contact -> contact.setOrganization(entity));
         entity.setContacts(contactEntities);
@@ -91,7 +91,7 @@ public class OrganizationEntityConverter implements FHIRConverter<Organization, 
         final List<Organization.OrganizationContactComponent> contactComponents = entity.getContacts()
                 .stream()
                 .map(ContactEntity::toFHIR)
-                .collect(Collectors.toCollection(ArrayList::new));
+                .collect(Collectors.toList());
         org.setContact(contactComponents);
 
         return org;
