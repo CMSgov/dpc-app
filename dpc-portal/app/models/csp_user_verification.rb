@@ -15,21 +15,26 @@ class CspUserVerification < ApplicationRecord
 
     retried = false
     begin
-      transaction do
-        record = find_or_initialize_by(csp:, csp_verification_id: verification[:session_id])
-        record.lock! if record.persisted?
-        record.assign_attributes(verification.slice(:status, :created_at, :completed_at).compact)
-        record.link(user:, invitation:)
-        record.save!
-        record.replace_checks(verification[:checks]) if verification[:checks].present?
-        record
-      end
+      transaction { write_session(csp:, verification:, user:, invitation:) }
     rescue ActiveRecord::RecordNotUnique
       raise if retried
 
       retried = true
       retry
     end
+  end
+
+  # Locks and reloads an existing row first, so concurrent callbacks for the same session take turns: the second
+  # waits, then sees what the first wrote, instead of both replacing the checks at once. Two callbacks that both find
+  # no row compete to insert it, and the loser retries in record!.
+  def self.write_session(csp:, verification:, user:, invitation:)
+    record = find_or_initialize_by(csp:, csp_verification_id: verification[:session_id])
+    record.lock! if record.persisted?
+    record.assign_attributes(verification.slice(:status, :created_at, :completed_at).compact)
+    record.link(user:, invitation:)
+    record.save!
+    record.replace_checks(verification[:checks]) if verification[:checks].present?
+    record
   end
 
   # Links the row to the existing user or to the invitation they are registering with. Only the first link is kept.
