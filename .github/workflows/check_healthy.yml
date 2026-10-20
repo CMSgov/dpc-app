@@ -36,10 +36,10 @@ jobs:
             skip: ${{ inputs.env == 'prod' }}
           - service: web-portal
             script_params: web-portal-https web-portal frontend v9
-            skip: ${{ inputs.env == 'prod' || inputs.env == 'sandbox' }}
+            skip: ${{ inputs.env == 'sandbox' }}
           - service: async-portal
             script_params: none async-portal frontend v9
-            skip: ${{ inputs.env == 'prod' || inputs.env == 'sandbox' }}
+            skip: ${{ inputs.env == 'sandbox' }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.3.0
