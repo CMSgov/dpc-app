@@ -7,7 +7,6 @@ import gov.cms.dpc.fhir.converters.FHIRConverter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import org.hl7.fhir.dstu3.model.*;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,7 +43,7 @@ public class RosterEntityConverter implements FHIRConverter<Group, RosterEntity>
                 .getAttributions()
                 .stream()
                 .map(RosterEntityConverter::buildComponent)
-                .collect(Collectors.toCollection(ArrayList::new));
+                .collect(Collectors.toList());
 
         group.setMember(patients);
 
