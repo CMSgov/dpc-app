@@ -60,7 +60,7 @@ TASK_ARN=$(aws ecs run-task \
   --query 'tasks[0].taskArn' --output text)
 
 aws ecs wait tasks-stopped --region "$REGION" --cluster "$CLUSTER_NAME" --tasks "$TASK_ARN"
-sleep 10 # Allow CloudWatch to ingest the final output.
+sleep 5
 aws logs tail "$(jq -er '.logConfiguration.options."awslogs-group"' <<< "$CONTAINER")" \
   --region "$(jq -er '.logConfiguration.options."awslogs-region"' <<< "$CONTAINER")" \
   --log-stream-names "$(jq -er '.logConfiguration.options."awslogs-stream-prefix"' <<< "$CONTAINER")/$CONTAINER_NAME/${TASK_ARN##*/}" \
