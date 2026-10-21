@@ -5,13 +5,14 @@
 class CspVerification
   # When the CSP couldn't be asked, there is only outcome: :unavailable and failure_reason (one of FAILURE_REASONS).
   FAILURE_REASONS = %w[missing_access_token invalid_access_token invalid_verification_id unauthorized forbidden
-                       not_found rate_limited server_error request_failed invalid_response].freeze
+                       not_found rate_limited server_error request_failed invalid_response expired].freeze
 
   class Error < StandardError; end
 
   # Asks the CSP what happened to the verification, using the access token received at login
   # Returns a plain Hash with these keys. Together they are what CspUserVerification stores.
-  #   outcome:        :verified, :cancelled, :failed or :unavailable. Passed to csp#failure as params[:message]
+  #   outcome:        :verified, :cancelled, :failed, :expired or :unavailable. Anything but :verified is passed to
+  #                   csp#failure as params[:message]
   #   status:         the CSP's own status string
   #   reason:         the CSP's own failure reason, if it gave one (for outcome_for and for logging)
   #   session_id:     the CSP's id for the verification session
@@ -85,7 +86,7 @@ class CspVerification
       'manual_success' => :verified,
       'canceled' => :cancelled,
       'fail' => :failed,
-      'expired' => :failed,
+      'expired' => :expired,
       'manual_fail' => :failed,
       'deferred' => :failed
     }.freeze

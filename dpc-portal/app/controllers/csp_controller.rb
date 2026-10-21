@@ -25,6 +25,7 @@ class CspController < ApplicationController
   def failure
     invitation = invitation_match
 
+    return handle_verification_expired(invitation) if csp_verification_expired?
     return handle_fail_to_proof(invitation) if csp_user_fail_to_proof?
     return handle_csp_auth_error(invitation) if csp_auth_error?
     return handle_signin_cancel(invitation) if csp_user_cancelled?

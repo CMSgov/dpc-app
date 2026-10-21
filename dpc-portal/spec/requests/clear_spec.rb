@@ -261,6 +261,34 @@ RSpec.describe 'Clear', type: :request do
         it_behaves_like 'does not sign in'
       end
 
+      context 'verification session expired' do
+        let(:verification_session_body) { { status: 'expired' } }
+
+        it 'redirects to the failure path with an expired message' do
+          attempt_sign_in
+          expect(response.location).to eq csp_failure_url(message: 'expired', strategy: 'clear')
+        end
+
+        it 'flashes the expired verification alert on the sign in page' do
+          attempt_sign_in
+          follow_redirect!
+          expect(response.location).to eq sign_in_url
+          expect(flash[:alert]).to eq CspErrorHandling::SESSION_EXPIRED
+        end
+
+        it 'logs the expiry' do
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(
+            ['User verification session expired',
+             hash_including(actionType: LoggingConstants::ActionType::FailedLogin, csp: 'clear')]
+          )
+          attempt_sign_in
+          follow_redirect!
+        end
+
+        it_behaves_like 'does not sign in'
+      end
+
       context 'session was cancelled for a reason other than the user choosing to' do
         let(:verification_session_body) { { status: 'canceled', status_details: 'ineligible' } }
 

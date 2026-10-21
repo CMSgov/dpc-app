@@ -215,6 +215,7 @@ RSpec.describe CspVerification::Clear do
       ['canceled', nil] => :cancelled,
       %w[canceled authentication_error] => :failed,
       ['fail', nil] => :failed,
+      ['expired', nil] => :expired,
       ['awaiting_manual_review', nil] => :unavailable
     }.each do |(status, reason), outcome|
       it "is #{outcome} for #{status}#{" with #{reason}" if reason}" do

@@ -612,6 +612,30 @@ RSpec.shared_examples 'a CSP client' do |config|
       end
     end
 
+    context "when #{display_name} reports an expired verification" do
+      let(:error) { :expired }
+      let(:attempt_sign_in) do
+        post auth_endpoint
+        follow_redirect!
+        expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
+        follow_redirect!
+      end
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.mock_auth[provider] = error
+      end
+
+      it 'redirects to sign in path' do
+        attempt_sign_in
+        expect(response.location).to eq(sign_in_url)
+      end
+
+      it 'flashes the expired verification alert' do
+        attempt_sign_in
+        expect(flash[:alert]).to eq(CspErrorHandling::SESSION_EXPIRED)
+      end
+    end
+
     context "when #{display_name} reports a failed verification" do
       let(:error) { :failed }
       before do
