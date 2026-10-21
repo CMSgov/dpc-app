@@ -64,4 +64,4 @@ sleep 5
 aws logs tail "$(jq -er '.logConfiguration.options."awslogs-group"' <<< "$CONTAINER")" \
   --region "$(jq -er '.logConfiguration.options."awslogs-region"' <<< "$CONTAINER")" \
   --log-stream-names "$(jq -er '.logConfiguration.options."awslogs-stream-prefix"' <<< "$CONTAINER")/$CONTAINER_NAME/${TASK_ARN##*/}" \
-  --since 1h --format short
+  --since 1h --format short | { grep -oE 'https?://[^[:space:]]+/accept' || [[ $? -eq 1 ]]; }
