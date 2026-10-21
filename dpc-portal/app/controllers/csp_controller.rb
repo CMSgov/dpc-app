@@ -56,7 +56,7 @@ class CspController < ApplicationController
   end
 
   def redirect_to_cleared_session
-    return_to = session[:user_return_to]
+    return_to = session.delete(:user_return_to)
     clean_session
     redirect_to return_to || sign_in_path
   end
