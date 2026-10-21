@@ -36,7 +36,7 @@ public class ConsentEntityConverter implements FHIRConverter<Consent, ConsentEnt
 
     @Override
     public ConsentEntity fromFHIR(FHIREntityConverter converter, Consent resource) {
-        return fromFhir(resource);
+        return fromFHIR(resource);
     }
 
     /**
@@ -45,7 +45,7 @@ public class ConsentEntityConverter implements FHIRConverter<Consent, ConsentEnt
      */
     @Override
     public Consent toFHIR(FHIREntityConverter converter, ConsentEntity entity) {
-        return toFhir(entity, "");
+        return toFHIR(entity, "");
     }
 
     @Override
@@ -161,7 +161,7 @@ public class ConsentEntityConverter implements FHIRConverter<Consent, ConsentEnt
     }
 
     @SuppressWarnings("JdkObsolete") // Date class is used by FHIR R4 Consent model
-    public static ConsentEntity fromFhir(Consent consent) {
+    public static ConsentEntity fromFHIR(Consent consent) {
         if (consent == null) {
             throw new WebApplicationException("No consent resource provided", Response.Status.BAD_REQUEST);
         }
@@ -199,7 +199,7 @@ public class ConsentEntityConverter implements FHIRConverter<Consent, ConsentEnt
     }
 
     @SuppressWarnings("JdkObsolete") // Date class is used by FHIR R4 Consent model
-    public static Consent toFhir(ConsentEntity consentEntity, String fhirURL) {
+    public static Consent toFHIR(ConsentEntity consentEntity, String fhirURL) {
         Consent c = new Consent();
 
         c.setId(consentEntity.getId().toString());

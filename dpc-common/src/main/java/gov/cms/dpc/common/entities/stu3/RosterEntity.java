@@ -15,7 +15,6 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Entity(name = "rosters")
 public class RosterEntity implements Serializable {
@@ -161,6 +160,6 @@ public class RosterEntity implements Serializable {
                     relationship.setPeriodEnd(expires);
                     return relationship;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 }

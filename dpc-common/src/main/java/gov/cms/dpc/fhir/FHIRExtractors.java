@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -107,7 +106,7 @@ public class FHIRExtractors {
     public static String getPatientMBI(org.hl7.fhir.r4.model.Patient patient) {
         List<org.hl7.fhir.r4.model.Identifier> mbis = patient.getIdentifier().stream()
                 .filter(id -> id.getSystem().equals(DPCIdentifierSystem.MBI.getSystem()))
-                .collect(Collectors.toList());
+                .toList();
         String currentMBI;
 
         if(mbis.size() == 1) {
@@ -162,7 +161,7 @@ public class FHIRExtractors {
                 }
             })
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     /**
@@ -289,7 +288,7 @@ public class FHIRExtractors {
         return identifiers
                 .stream()
                 .filter(id -> id.getSystem().equals(system.getSystem()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**

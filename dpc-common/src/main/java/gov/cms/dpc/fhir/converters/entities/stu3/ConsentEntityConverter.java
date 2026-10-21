@@ -24,7 +24,7 @@ import static gov.cms.dpc.common.consent.entities.ConsentEntity.*;
  * A utility class for converting a ConsentEntity into a FHIR Consent Resource.
  */
 public class ConsentEntityConverter {
-    /*
+    /**
      * "magic string" uris for a PolicyRule, as defined
      * <a href="http://hl7.org/fhir/STU3/consent.html#6.2.5">by Hl7</a>
      */
