@@ -13,8 +13,7 @@ namespace :dpc do
     ao_given_name, ao_family_name, ao_email, org_npi = ENV['INVITE'].split(',')
     service = AoInvitationService.new
     invitation = service.create_invitation(ao_given_name, ao_family_name, ao_email, org_npi)
-    puts "Invitation created successfully for #{invitation.provider_organization.name}"
-    puts invitation.invite_url
+    puts "Invitation created successfully for #{invitation.provider_organization.name} #{invitation.invite_url}"
   rescue AoInvitationServiceError => e
     puts "Unable to create invitation: #{e.message}"
   end
