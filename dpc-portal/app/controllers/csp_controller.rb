@@ -38,11 +38,33 @@ class CspController < ApplicationController
   def logout
     store_invitation_link if params[:invitation_token].present?
 
-    current_csp = csp_session.current || params[:current_csp]
-    redirect_to url_for_logout(current_csp), allow_other_host: true
+    if clearing_session?
+      redirect_to_cleared_session
+    else
+      redirect_to url_for_logout(current_csp), allow_other_host: true
+    end
   end
 
   private
+
+  def current_csp
+    @current_csp ||= csp_session.current || params[:current_csp]
+  end
+
+  def clearing_session?
+    current_csp.to_s == 'clear'
+  end
+
+  def redirect_to_cleared_session
+    return_to = session[:user_return_to]
+    clean_session
+    redirect_to return_to || sign_in_path
+  end
+
+  def clean_session
+    csp_session.clear_user
+    csp_session.clear_all
+  end
 
   def store_invitation_link
     invitation = Invitation.find_by(token: params[:invitation_token])
