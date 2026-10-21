@@ -50,10 +50,10 @@ RSpec.describe 'dpc rake tasks', type: :task do
         end
       end
 
-      context 'in non-development environment' do
+      context 'in test environment' do
         before do
           allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('test'))
-          stub_const('ENV', ENV.to_h.merge('HOST_NAME' => 'portal.test.dpc.cmscloud.local'))
+          stub_const('ENV', ENV.to_h.merge('ENV' => 'test', 'HOST_NAME' => 'portal.test.dpc.cmscloud.local'))
         end
 
         it 'does not include localhost in invitation URL for deployed env' do
@@ -66,6 +66,18 @@ RSpec.describe 'dpc rake tasks', type: :task do
           expect { task.invoke }.to output(
             include('portal.test.dpc.cmscloud.local')
           ).to_stdout
+        end
+      end
+
+      context 'in prod environment' do
+        before do
+          allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('production'))
+          stub_const('ENV', ENV.to_h.merge('ENV' => 'prod'))
+        end
+
+        it 'creates the invitation without computing or printing its URL' do
+          expect(invitation).not_to receive(:invite_url)
+          expect { task.invoke }.to output("Invitation created successfully for Test Org\n").to_stdout
         end
       end
     end

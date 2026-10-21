@@ -14,7 +14,11 @@ namespace :dpc do
     service = AoInvitationService.new
     invitation = service.create_invitation(ao_given_name, ao_family_name, ao_email, org_npi)
     puts "Invitation created successfully for #{invitation.provider_organization.name}"
-    puts invitation.invite_url
+
+    environment = ENV.fetch('ENV', nil)
+    if Rails.env.development? || environment == 'dev' || environment == 'test'
+      puts invitation.invite_url
+    end
   rescue AoInvitationServiceError => e
     puts "Unable to create invitation: #{e.message}"
   end

@@ -30,10 +30,11 @@ NETWORK_CONFIG=$(aws ecs describe-services --cluster "$CLUSTER_NAME" --services 
 # revisit, but for now this is the easiest way to filter out the datadog-agent, guard duty, service connect and whatever
 # other containers we add to our services in the future.
 echo "Getting container name"
-CONTAINER_NAME=$(aws ecs describe-task-definition \
+CONTAINER=$(aws ecs describe-task-definition \
   --task-definition "$TASK_DEF" \
-  --query "taskDefinition.containerDefinitions[?starts_with('${SERVICE_NAME}', name)].name | [0]" \
-  --output text)
+  --query "taskDefinition.containerDefinitions[?starts_with('${SERVICE_NAME}', name)] | [0]" \
+  --output json)
+CONTAINER_NAME=$(jq -r '.name' <<< "$CONTAINER")
 
 # Skip running the entry point script on our tmp task and just drop to a shell for our command
 OVERRIDES=$(jq -n \
@@ -49,11 +50,18 @@ OVERRIDES=$(jq -n \
   }')
 
 echo "Running command on temp task"
-aws ecs run-task \
+TASK_ARN=$(aws ecs run-task \
   --region "$REGION" \
   --cluster "$CLUSTER_NAME" \
   --task-definition "$TASK_DEF" \
   --launch-type FARGATE \
   --network-configuration "$NETWORK_CONFIG" \
   --overrides "$OVERRIDES" \
-  --query 'tasks[0].taskArn' --output text
+  --query 'tasks[0].taskArn' --output text)
+
+aws ecs wait tasks-stopped --region "$REGION" --cluster "$CLUSTER_NAME" --tasks "$TASK_ARN"
+sleep 5
+aws logs tail "$(jq -er '.logConfiguration.options."awslogs-group"' <<< "$CONTAINER")" \
+  --region "$(jq -er '.logConfiguration.options."awslogs-region"' <<< "$CONTAINER")" \
+  --log-stream-names "$(jq -er '.logConfiguration.options."awslogs-stream-prefix"' <<< "$CONTAINER")/$CONTAINER_NAME/${TASK_ARN##*/}" \
+  --since 1h --format short | { grep -oE 'https?://[^[:space:]]+/accept' || [[ $? -eq 1 ]]; }
