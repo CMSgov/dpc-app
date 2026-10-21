@@ -76,10 +76,6 @@ class CspVerification
 
   # Adapter for CLEAR's Get Verification Session (OAuth variant): GET /v1/verification_sessions/{verification_id} with
   # the access token as Bearer. The verification_id is a claim in the access token.
-  #
-  # The claim is read *without* verifying the token's signature. That is safe here because the id is only used to
-  # build the request path (and is format-checked first), and CLEAR authenticates the Bearer token itself.
-  # Everything we act on comes from CLEAR's response, never from the unverified claims.
   module Clear
     VERIFICATION_ID_FORMAT = /\Averify_[A-Za-z0-9]+\z/
 
@@ -89,18 +85,16 @@ class CspVerification
       'manual_success' => :verified,
       'canceled' => :cancelled,
       'fail' => :failed,
-      'expired' => :failed, # the session ran out before the person finished verifying
+      'expired' => :failed,
       'manual_fail' => :failed,
       'deferred' => :failed
-      # awaiting_manual_review, awaiting_user_input, processing_data (and anything new) => :unavailable
     }.freeze
 
     def self.session_url(access_token)
-      "#{CLEAR_CONFIG[:verification_session_endpoint].to_s.chomp('/')}/#{verification_id(access_token)}"
+      "#{CLEAR_CONFIG[:verification_session_endpoint]}/#{verification_id(access_token)}"
     end
 
-    # Valid JSON isn't necessarily a verification session: null, a list, a string, a checks entry that isn't an object,
-    # or times that aren't numbers would make the methods below raise. Nothing else is checked.
+    # Ensure JSON response is a valid verification session
     def self.valid_response?(body)
       body.is_a?(Hash) && optional?(body['status_reason'], Hash) && valid_checks?(body['checks']) &&
         optional?(body['created_at'], Numeric) && optional?(body['completed_at'], Numeric)
@@ -143,7 +137,6 @@ class CspVerification
         value: check['value'], reason_codes: check['reason_codes'] }
     end
 
-    # CLEAR sends 0 (or nothing) for a time that hasn't happened yet
     def self.time_from(epoch)
       Time.at(epoch).utc if epoch.to_i.positive?
     end

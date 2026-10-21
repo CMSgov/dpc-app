@@ -52,7 +52,6 @@ RSpec.describe CspVerification do
 
     it 'requests the session named in the access token, without revealing sensitive data' do
       verify
-      # a string url only matches a request with no query string, so this also proves reveal_sensitive_data is unset
       expect(a_request(:get, url)).to have_been_made.once
     end
 
@@ -67,8 +66,6 @@ RSpec.describe CspVerification do
     end
 
     context 'when CLEAR says the session failed' do
-      # Everything CLEAR sends that we must not keep (check details, the person's traits) is in the body, so equality
-      # below also shows that none of it comes through
       let(:body) do
         { id: verification_id, status: 'fail', status_details: 'ip_blocked',
           created_at: SESSION_CREATED_AT, completed_at: SESSION_COMPLETED_AT,
@@ -216,7 +213,6 @@ RSpec.describe CspVerification::Clear do
     {
       ['success', nil] => :verified,
       ['canceled', nil] => :cancelled,
-      # not the person choosing to cancel (ineligible, ip_blocked, authentication_error...)
       %w[canceled authentication_error] => :failed,
       ['fail', nil] => :failed,
       ['awaiting_manual_review', nil] => :unavailable

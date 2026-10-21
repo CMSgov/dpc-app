@@ -184,11 +184,16 @@ RSpec.describe 'Clear', type: :request do
     context 'user cancels sign in' do
       before do
         OmniAuth.config.test_mode = true
-        OmniAuth.config.add_mock(:clear, { uid: 'unknown',
-                                           credentials: { expires_in: 899, token:, id_token: nil },
-                                           info: { email: 'Unknown' },
-                                           extra: { raw_info: { sub: 'unknown', email: 'Unknown',
-                                                                given_name: 'Unknown', family_name: 'Unknown' } } })
+        OmniAuth.config.add_mock(:clear,
+                                 { uid: 'unknown',
+                                   credentials: { expires_in: 899,
+                                                  token:,
+                                                  id_token: nil },
+                                   info: { email: 'Unknown' },
+                                   extra: { raw_info: { sub: 'unknown',
+                                                        email: 'Unknown',
+                                                        given_name: 'Unknown',
+                                                        family_name: 'Unknown' } } })
       end
 
       shared_examples 'does not sign in' do

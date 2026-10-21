@@ -1254,12 +1254,12 @@ def log_in(provider:, template: user_info_template)
   stub_clear_verification_session if provider.to_sym == :clear
 
   OmniAuth.config.test_mode = true
-  OmniAuth.config.add_mock(provider.to_sym, csp_login_response(provider, template))
+  OmniAuth.config.add_mock(provider.to_sym, csp_response(provider, template))
   post "/auth/#{provider}"
   follow_redirect!
 end
 
-def csp_login_response(provider, template)
+def csp_response(provider, template)
   response = { uid: template['sub'],
                credentials: { expires_in: 899,
                               token: bearer_token(provider),
