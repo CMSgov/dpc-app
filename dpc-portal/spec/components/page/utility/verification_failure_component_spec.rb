@@ -37,5 +37,9 @@ RSpec.describe Page::Utility::VerificationFailureComponent, type: :component do
     it 'should specify CLEAR on page' do
       expect(page).to have_text('Your identity could not be verified with CLEAR')
     end
+
+    it 'should link to support' do
+      expect(page).to have_link('CLEAR Support', href: 'https://www.clearme.com/support')
+    end
   end
 end
