@@ -94,21 +94,6 @@ RSpec.describe CspUserVerification, type: :model do
       expect { described_class.record!(csp: other, verification: failure) }.to change { described_class.count }.by(1)
     end
 
-    it 'retries once if another writer inserts the same session first' do
-      attempts = 0
-      # In production the unique index rejects our insert at save!, after the lookup found nothing
-      allow_any_instance_of(described_class).to receive(:save!).and_wrap_original do |original, *args|
-        attempts += 1
-        raise ActiveRecord::RecordNotUnique, 'duplicate' if attempts == 1
-
-        original.call(*args)
-      end
-
-      expect(described_class.record!(csp:, verification: failure)).to be_persisted
-      expect(attempts).to eq 2
-      expect(described_class.where(csp_verification_id: 'verify_abc123').count).to eq 1
-    end
-
     it 'requires a session id' do
       expect { described_class.record!(csp:, verification: { status: 'fail' }) }
         .to raise_error(ArgumentError, /session_id/)

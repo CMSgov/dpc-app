@@ -12,23 +12,13 @@ class CspUserVerification < ApplicationRecord
   def self.record!(csp:, verification:, user: nil, invitation: nil)
     raise ArgumentError, 'verification has no session_id' if verification[:session_id].blank?
 
-    retried = false
-    begin
-      transaction { write_session(csp:, verification:, user:, invitation:) }
-    rescue ActiveRecord::RecordNotUnique
-      raise if retried
-
-      retried = true
-      retry
-    end
+    transaction { write_session(csp:, verification:, user:, invitation:) }
   end
 
-  # Locks and reloads an existing row first, so concurrent callbacks for the same session take turns: the second
-  # waits, then sees what the first wrote, instead of both replacing the checks at once. Two callbacks that both find
-  # no row compete to insert it, and the loser retries in record!.
   def self.write_session(csp:, verification:, user:, invitation:)
-    record = find_or_initialize_by(csp:, csp_verification_id: verification[:session_id])
-    record.lock! if record.persisted?
+    record = find_or_create_by(csp:, csp_verification_id: verification[:session_id]) do |new_record|
+      new_record.status = verification[:status]
+    end
     record.assign_attributes(verification.slice(:status, :created_at, :completed_at).compact)
     record.link(user:, invitation:)
     record.save!
