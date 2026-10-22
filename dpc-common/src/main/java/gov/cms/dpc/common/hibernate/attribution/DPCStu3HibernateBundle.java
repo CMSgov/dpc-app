@@ -14,21 +14,27 @@ import static gov.cms.dpc.common.hibernate.EntityScanner.applicationEntities;
 
 /**
  * Custom Hibernate bundle, which allows us to inject the {@link org.hibernate.SessionFactory} into non-resource types.
- * By default, the bundle scans the {@link DPCHibernateBundle#PREFIX_STRING} for a list of annotated entities.
+ * By default, the bundle scans the {@link DPCStu3HibernateBundle#PREFIX_STRING} for a list of annotated entities.
  *
  * @param <T> - Configuration class type
  */
-public class DPCHibernateBundle<T extends Configuration & IDPCDatabase> extends HibernateBundle<T> implements ConfiguredBundle<T> {
+public class DPCStu3HibernateBundle<T extends Configuration & IDPCDatabase> extends HibernateBundle<T> implements ConfiguredBundle<T> {
 
     public static final String PREFIX_STRING = "gov.cms.dpc.common.entities.stu3";
+    public static final String BUNDLE_NAME = "stu3";
 
     @Inject
-    public DPCHibernateBundle() {
+    public DPCStu3HibernateBundle() {
         this(Collections.emptyList());
     }
 
-    public DPCHibernateBundle(List<String> additionalPaths) {
+    public DPCStu3HibernateBundle(List<String> additionalPaths) {
         super(applicationEntities(PREFIX_STRING, additionalPaths), new SessionFactoryFactory());
+    }
+
+    @Override
+    protected String name() {
+        return BUNDLE_NAME;
     }
 
     @Override

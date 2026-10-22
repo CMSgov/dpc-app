@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.jdbi.stu3;
 
+import com.google.inject.name.Named;
 import gov.cms.dpc.common.entities.stu3.OrganizationEntity_;
 import gov.cms.dpc.common.entities.stu3.ProviderEntity;
 import gov.cms.dpc.common.entities.stu3.ProviderEntity_;
@@ -19,7 +20,7 @@ import java.util.UUID;
 public class ProviderDAO extends DPCAbstractDAO<ProviderEntity> {
 
     @Inject
-    public ProviderDAO(DPCManagedSessionFactory factory) {
+    public ProviderDAO(@Named("stu3") DPCManagedSessionFactory factory) {
         super(factory.getSessionFactory());
     }
 

@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.jdbi.stu3;
 
+import com.google.inject.name.Named;
 import gov.cms.dpc.common.entities.stu3.AttributionRelationship;
 import gov.cms.dpc.common.entities.stu3.AttributionRelationship_;
 import gov.cms.dpc.common.entities.stu3.PatientEntity_;
@@ -23,7 +24,7 @@ public class RelationshipDAO extends DPCAbstractDAO<AttributionRelationship> {
     private static final Logger logger = LoggerFactory.getLogger(RelationshipDAO.class);
 
     @Inject
-    public RelationshipDAO(DPCManagedSessionFactory sessionFactory) {
+    public RelationshipDAO(@Named("stu3") DPCManagedSessionFactory sessionFactory) {
         super(sessionFactory.getSessionFactory());
     }
 
