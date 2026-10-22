@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -73,7 +74,7 @@ public class OrganizationEntityConverter implements FHIRConverter<Organization, 
                 .getContact()
                 .stream()
                 .map(r -> converter.fromFHIR(ContactEntity.class, r))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
         // Add the entity reference
         contactEntities.forEach(contact -> contact.setOrganization(entity));
         entity.setContacts(contactEntities);
@@ -94,7 +95,7 @@ public class OrganizationEntityConverter implements FHIRConverter<Organization, 
         final List<Organization.OrganizationContactComponent> contactComponents = entity.getContacts()
                 .stream()
                 .map(ContactEntity::toFHIR)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
         org.setContact(contactComponents);
 
         return org;
