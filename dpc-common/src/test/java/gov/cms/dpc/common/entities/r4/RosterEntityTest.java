@@ -13,10 +13,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RosterEntityTest {
+class RosterEntityTest {
 
 	@Test
-	public void testGettersAndSetters() {
+	void testGettersAndSetters() {
 		RosterEntity roster = new RosterEntity();
 		UUID id = UUID.randomUUID();
 		ProviderEntity provider = new ProviderEntity();
@@ -41,7 +41,7 @@ public class RosterEntityTest {
 	}
 
 	@Test
-	public void testFromFHIR() {
+	void testFromFHIR() {
 		Group attributionRoster = new Group();
 
 		Coding coding = new Coding();
@@ -66,7 +66,7 @@ public class RosterEntityTest {
 	}
 
 	@Test
-	public void testEqualsAndHashCode() {
+	void testEqualsAndHashCode() {
 		UUID id = UUID.randomUUID();
 		RosterEntity r1 = new RosterEntity();
 		r1.setId(id);

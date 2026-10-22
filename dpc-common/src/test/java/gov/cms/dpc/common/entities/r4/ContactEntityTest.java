@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.ArrayList;
 
-public class ContactEntityTest {
+class ContactEntityTest {
 
 	@Test
-	public void testGettersAndSetters() {
+	void testGettersAndSetters() {
 		ContactEntity contact = new ContactEntity();
 		UUID id = UUID.randomUUID();
 		OrganizationEntity org = new OrganizationEntity();
@@ -36,7 +36,7 @@ public class ContactEntityTest {
 	}
 
 	@Test
-	public void testToFHIR() {
+	void testToFHIR() {
 		ContactEntity contact = new ContactEntity();
 		NameEntity name = new NameEntity();
 		name.setFamily("Dog");

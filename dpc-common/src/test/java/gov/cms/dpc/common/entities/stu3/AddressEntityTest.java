@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AddressEntityTest {
+class AddressEntityTest {
 	private String addressCity = "Galveston";
 	private String addressCountry = "US";
 	private String addressDistrict = "Southern";
@@ -15,7 +15,7 @@ public class AddressEntityTest {
 	private String addressLine2 = "N/A";
 
 	@Test
-	public void testGettersAndSetters() {
+	void testGettersAndSetters() {
 		// Create an object, and set / get the objects in the Entity.
 		AddressEntity address = new AddressEntity();
 		address.setCity(addressCity);
@@ -39,7 +39,7 @@ public class AddressEntityTest {
 	}
 
 	@Test
-	public void testToFHIR() {
+	void testToFHIR() {
 		AddressEntity address = new AddressEntity();
 
 		address.setCity(addressCity);

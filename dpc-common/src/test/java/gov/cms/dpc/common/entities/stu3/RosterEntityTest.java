@@ -14,10 +14,10 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-public class RosterEntityTest {
+class RosterEntityTest {
 
 	@Test
-	public void testGettersAndSetters() {
+	void testGettersAndSetters() {
 		RosterEntity roster = new RosterEntity();
 		UUID id = UUID.randomUUID();
 		ProviderEntity provider = new ProviderEntity();
@@ -42,7 +42,7 @@ public class RosterEntityTest {
 	}
 
 	@Test
-	public void testFromFHIR() {
+	void testFromFHIR() {
 		Group attributionRoster = new Group();
 
 		Coding coding = new Coding();
@@ -67,7 +67,7 @@ public class RosterEntityTest {
 	}
 
 	@Test
-	public void testEqualsAndHashCode() {
+	void testEqualsAndHashCode() {
 		UUID id = UUID.randomUUID();
 		RosterEntity r1 = new RosterEntity();
 		r1.setId(id);

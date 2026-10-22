@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-public class PersonEntityTest {
+class PersonEntityTest {
 	@Test
-	public void testGettersAndSetters() {
+	void testGettersAndSetters() {
 		PersonEntityImpl personEntity = new PersonEntityImpl();
 		String firstName = "Sydney";
 		String lastName = "Danger";
@@ -30,7 +30,7 @@ public class PersonEntityTest {
 	}
 
 	@Test
-	public void testSetCreation() {
+	void testSetCreation() {
 		PersonEntityImpl personEntity = new PersonEntityImpl();
 		personEntity.setCreation();
 		assertNotNull(personEntity.getCreatedAt());
@@ -38,7 +38,7 @@ public class PersonEntityTest {
 	}
 
 	@Test
-	public void testSetUpdateTime() {
+	void testSetUpdateTime() {
 		PersonEntityImpl personEntity = new PersonEntityImpl();
 		personEntity.setUpdateTime();
 		assertNotNull(personEntity.getUpdatedAt());

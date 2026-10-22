@@ -10,10 +10,10 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
-public class AttributionRelationshipTest {
+class AttributionRelationshipTest {
 
 	@Test
-	public void testEqualsAndHashCode() {
+	void testEqualsAndHashCode() {
 		AttributionRelationship r1 = new AttributionRelationship();
 		AttributionRelationship r2 = new AttributionRelationship();
 
@@ -45,7 +45,7 @@ public class AttributionRelationshipTest {
 	}
 
 	@Test
-	public void testToString() {
+	void testToString() {
 		AttributionRelationship relationship = new AttributionRelationship();
 		relationship.setAttributionID(1L);
 		RosterEntity roster = new RosterEntity();
@@ -66,7 +66,7 @@ public class AttributionRelationshipTest {
 	}
 
 	@Test
-	public void testConstructors() {
+	void testConstructors() {
 		RosterEntity roster = new RosterEntity();
 		PatientEntity patient = new PatientEntity();
 		Timestamp created = Timestamp.from(Instant.now());

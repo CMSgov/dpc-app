@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import org.hl7.fhir.dstu3.model.HumanName;
 
-public class NameEntityTest {
+class NameEntityTest {
 
 	@Test
-	public void testGettersAndSetters() {
+	void testGettersAndSetters() {
 		NameEntity name = new NameEntity();
 		HumanName.NameUse use = HumanName.NameUse.OFFICIAL;
 		String given = "Australian";
@@ -32,7 +32,7 @@ public class NameEntityTest {
 	}
 
 	@Test
-	public void testToFHIR() {
+	void testToFHIR() {
 		NameEntity name = new NameEntity();
 		HumanName.NameUse use = HumanName.NameUse.OFFICIAL;
 		String given = "Australian";
