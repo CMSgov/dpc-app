@@ -149,7 +149,7 @@ public class DPCJsonLayoutUnitTest {
 
     @Test
     public void testBatchMessageMasking() {
-        String reallyLongLogMessage = "Wrapped by: java.sql.BatchUpdateException: Batch entry 0 /* insert gov.cms.dpc.common.entities.OrganizationEntity */ insert into organizations (city, country, district, line1, line2, postal_code, state, address_type, address_use, id_system, id_value, organization_name, id) values (('Akron'), ('US'), (NULL), ('111 Main ST'), ('STE 5'), ('22222'), ('OH'), ('2'::int4), ('1'::int4), ('1'::int4), ('1111111112'), ('Org'), ('d2fcd068-a818-4874-9fc2-fd9633b073a2'::uuid)) was aborted: ERROR: duplicate key value violates unique constraint \\\"organization_idx\\\"\\n  Detail: some bad info here";
+        String reallyLongLogMessage = "Wrapped by: java.sql.BatchUpdateException: Batch entry 0 /* insert gov.cms.dpc.common.entities.stu3.OrganizationEntity */ insert into organizations (city, country, district, line1, line2, postal_code, state, address_type, address_use, id_system, id_value, organization_name, id) values (('Akron'), ('US'), (NULL), ('111 Main ST'), ('STE 5'), ('22222'), ('OH'), ('2'::int4), ('1'::int4), ('1'::int4), ('1111111112'), ('Org'), ('d2fcd068-a818-4874-9fc2-fd9633b073a2'::uuid)) was aborted: ERROR: duplicate key value violates unique constraint \\\"organization_idx\\\"\\n  Detail: some bad info here";
         String expectedLogMessage = "Wrapped by: java.sql.BatchUpdateException: **********: ERROR: duplicate key value violates unique constraint \\\"organization_idx\\\"\\n  **********";
         when(loggingEvent.getFormattedMessage()).thenReturn(reallyLongLogMessage);
         Map<String, Object> map = dpcJsonLayout.toJsonMap(loggingEvent);
@@ -176,7 +176,7 @@ public class DPCJsonLayoutUnitTest {
         logger.addAppender(listAppender);
 
         // log exception with nested database info
-        SQLException sqlException = new SQLException("/* insert gov.cms.dpc.common.entities.OrganizationEntity */ insert into organizations (city, country, district, line1, line2, postal_code, state, address_type, address_use, id_system, id_value, organization_name, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        SQLException sqlException = new SQLException("/* insert gov.cms.dpc.common.entities.stu3.OrganizationEntity */ insert into organizations (city, country, district, line1, line2, postal_code, state, address_type, address_use, id_system, id_value, organization_name, id) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         ConstraintViolationException exception = new ConstraintViolationException("could not execute batch", sqlException, "organization_idx");
         logger.error("Error handling a request: 33211570adcaad95", exception);
 

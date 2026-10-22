@@ -1,8 +1,8 @@
 package gov.cms.dpc.fhir.converters;
 
-import org.hl7.fhir.dstu3.model.Base;
+import org.hl7.fhir.instance.model.api.IBase;
 
-public interface FHIRConverter<R extends Base, C> {
+public interface FHIRConverter<R extends IBase, C> {
 
     C fromFHIR(FHIREntityConverter converter, R resource);
 

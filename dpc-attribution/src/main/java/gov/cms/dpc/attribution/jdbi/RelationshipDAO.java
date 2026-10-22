@@ -1,9 +1,9 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import gov.cms.dpc.common.entities.AttributionRelationship;
-import gov.cms.dpc.common.entities.AttributionRelationship_;
-import gov.cms.dpc.common.entities.PatientEntity_;
-import gov.cms.dpc.common.entities.RosterEntity_;
+import gov.cms.dpc.common.entities.stu3.AttributionRelationship;
+import gov.cms.dpc.common.entities.stu3.AttributionRelationship_;
+import gov.cms.dpc.common.entities.stu3.PatientEntity_;
+import gov.cms.dpc.common.entities.stu3.RosterEntity_;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import jakarta.inject.Inject;

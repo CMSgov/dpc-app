@@ -1,37 +1,45 @@
 package gov.cms.dpc.common.hibernate.validator;
 
 import gov.cms.dpc.common.annotations.OrganizationId;
-import gov.cms.dpc.common.entities.OrganizationEntity;
+import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import jakarta.validation.*;
+import jakarta.validation.Valid;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-public class OrganizationIdValidatorTest {
+class OrganizationIdValidatorTest {
 
     private Validator validator;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
     }
 
     @ParameterizedTest
     @MethodSource("stringSource")
-    public void organizationIdValidatorTest(DPCIdentifierSystem dpcIdentifierSystem, String value, boolean isValid) {
+    void stu3organizationIdValidatorTest(DPCIdentifierSystem dpcIdentifierSystem, String value, boolean isValid) {
+        Stu3TestObject testObject = new Stu3TestObject();
+        testObject.id = new OrganizationEntity.OrganizationID(dpcIdentifierSystem, value);
+        Assertions.assertEquals(isValid, validator.validate(testObject).isEmpty());
+    }
 
-        TestObject testObject = new TestObject();
-        testObject.setA(new OrganizationEntity.OrganizationID(dpcIdentifierSystem, value));
-        Set<ConstraintViolation<TestObject>> violations = validator.validate(testObject);
-        Assertions.assertEquals(isValid, violations.isEmpty());
+    @ParameterizedTest
+    @MethodSource("stringSource")
+    void r4OrganizationIdValidatorTest(DPCIdentifierSystem system, String value, boolean isValid) {
+        R4TestObject testObject = new R4TestObject();
+        testObject.id = new gov.cms.dpc.common.entities.r4.OrganizationEntity.OrganizationID(system, value);
+        Assertions.assertEquals(isValid, validator.validate(testObject).isEmpty());
     }
 
     private static Stream<Arguments> stringSource() {
@@ -57,23 +65,19 @@ public class OrganizationIdValidatorTest {
                 Arguments.of(DPCIdentifierSystem.PECOS, "12345678921", true),
                 Arguments.of(DPCIdentifierSystem.PECOS, UUID.randomUUID().toString(), true),
                 Arguments.of(DPCIdentifierSystem.PECOS, null, false)
-
                 );
     }
 
-    static class TestObject {
-
+    static class R4TestObject {
         @Valid
         @OrganizationId
-        private OrganizationEntity.OrganizationID a;
+        private gov.cms.dpc.common.entities.r4.OrganizationEntity.OrganizationID id;
+    }
 
-        public OrganizationEntity.OrganizationID getA() {
-            return a;
-        }
-
-        public void setA(OrganizationEntity.OrganizationID a) {
-            this.a = a;
-        }
+    static class Stu3TestObject {
+        @Valid
+        @OrganizationId
+        private OrganizationEntity.OrganizationID id;
     }
 }
 

@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
-import gov.cms.dpc.fhir.validations.profiles.AttributionRosterProfile;
+import gov.cms.dpc.fhir.validations.profiles.stu3.AttributionRosterProfile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;

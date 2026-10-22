@@ -259,7 +259,7 @@
                                     <properties>
                                         <property>
                                             <key>packages</key>
-                                            <value>gov.cms.dpc.common.entities</value>
+                                            <value>gov.cms.dpc.common.entities.stu3</value>
                                         </property>
                                         <property>
                                             <key>dialect</key>

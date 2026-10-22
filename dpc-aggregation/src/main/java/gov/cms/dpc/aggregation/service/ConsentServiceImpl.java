@@ -3,7 +3,7 @@ package gov.cms.dpc.aggregation.service;
 import gov.cms.dpc.common.jdbi.ConsentDAO;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.converters.entities.ConsentEntityConverter;
+import gov.cms.dpc.fhir.converters.entities.stu3.ConsentEntityConverter;
 import jakarta.inject.Named;
 import org.hl7.fhir.dstu3.model.Consent;
 

@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
-import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
+import gov.cms.dpc.fhir.validations.profiles.stu3.PatientProfile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
