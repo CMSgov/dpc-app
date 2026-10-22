@@ -107,7 +107,7 @@ public class FHIRExtractors {
     public static String getPatientMBI(org.hl7.fhir.r4.model.Patient patient) {
         List<org.hl7.fhir.r4.model.Identifier> mbis = patient.getIdentifier().stream()
                 .filter(id -> id.getSystem().equals(DPCIdentifierSystem.MBI.getSystem()))
-                .collect(Collectors.toList());
+                .toList();
         String currentMBI;
 
         if(mbis.size() == 1) {

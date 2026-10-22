@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.Reference;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -161,6 +162,6 @@ public class RosterEntity implements Serializable {
                     relationship.setPeriodEnd(expires);
                     return relationship;
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }
