@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.jdbi.stu3;
 
+import com.google.inject.name.Named;
 import gov.cms.dpc.common.entities.stu3.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
@@ -16,7 +17,7 @@ import java.util.UUID;
 public class RosterDAO extends DPCAbstractDAO<RosterEntity> {
 
     @Inject
-    public RosterDAO(DPCManagedSessionFactory factory) {
+    public RosterDAO(@Named("stu3") DPCManagedSessionFactory factory) {
         super(factory.getSessionFactory());
     }
 

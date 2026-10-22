@@ -1,5 +1,6 @@
 package gov.cms.dpc.attribution.jdbi.stu3;
 
+import com.google.inject.name.Named;
 import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
@@ -16,7 +17,7 @@ import java.util.UUID;
 public class OrganizationDAO extends DPCAbstractDAO<OrganizationEntity> {
 
     @Inject
-    public OrganizationDAO(DPCManagedSessionFactory factory) {
+    public OrganizationDAO(@Named("stu3") DPCManagedSessionFactory factory) {
         super(factory.getSessionFactory());
     }
 

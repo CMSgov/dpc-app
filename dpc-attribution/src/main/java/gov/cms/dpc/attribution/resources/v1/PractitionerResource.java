@@ -11,6 +11,7 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
+import gov.cms.dpc.common.hibernate.attribution.DPCStu3HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWork;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotEmpty;
@@ -50,7 +51,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
 
     @GET
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     @Timed
     @ExceptionMetered
@@ -66,7 +67,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
 
     @POST
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     @Timed
     @ExceptionMetered
@@ -104,7 +105,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @GET
     @Path("/{providerID}")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     @Timed
     @ExceptionMetered
@@ -121,7 +122,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @POST
     @Path("/$submit")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Timed
     @ExceptionMetered
     @BundleReturnProperties(bundleType = Bundle.BundleType.COLLECTION)
@@ -163,7 +164,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @DELETE
     @Path("/{providerID}")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     @Timed
     @ExceptionMetered
@@ -180,7 +181,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @PUT
     @Path("/{providerID}")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     @Timed
     @ExceptionMetered

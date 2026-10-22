@@ -22,7 +22,7 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
 
 
     @Inject
-    public PatientDAO(DPCManagedSessionFactory factory, @Named("queryChunkSize") int queryChunkSize) {
+    public PatientDAO(@Named("stu3") DPCManagedSessionFactory factory, @Named("queryChunkSize") int queryChunkSize) {
         super(factory.getSessionFactory());
         this.queryChunkSize = queryChunkSize;
     }

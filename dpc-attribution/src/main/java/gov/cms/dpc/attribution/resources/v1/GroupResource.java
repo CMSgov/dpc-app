@@ -18,6 +18,7 @@ import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
+import gov.cms.dpc.common.hibernate.attribution.DPCStu3HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWork;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotEmpty;
@@ -64,7 +65,7 @@ public class GroupResource extends AbstractGroupResource {
 
     @POST
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     public Response createRoster(Group attributionRoster) {
         if (rosterSizeTooBig(config.getPatientLimit(), attributionRoster)) {
@@ -100,7 +101,7 @@ public class GroupResource extends AbstractGroupResource {
 
     @GET
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     public List<Group> rosterSearch(@QueryParam(IAnyResource.SP_RES_ID) UUID rosterID,
                                     @NotEmpty @QueryParam("_tag") String organizationToken,
@@ -124,7 +125,7 @@ public class GroupResource extends AbstractGroupResource {
     @GET
     @Path("/{rosterID}/$patients")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     public List<Patient> getAttributedPatients(@NotNull @PathParam("rosterID") UUID rosterID, @QueryParam(value = "active") boolean activeOnly) {
         if (!this.rosterDAO.rosterExists(rosterID)) {
@@ -149,7 +150,7 @@ public class GroupResource extends AbstractGroupResource {
     @PUT
     @Path("/{rosterID}")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     public Group replaceRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
         // Check that the roster exists, that the new roster isn't too big, and that all patients exist
@@ -186,7 +187,7 @@ public class GroupResource extends AbstractGroupResource {
     @POST
     @Path("/{rosterID}/$add")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     public Group addRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
         // Get the roster if it exists, if not return NOT_FOUND
@@ -246,7 +247,7 @@ public class GroupResource extends AbstractGroupResource {
     @POST
     @Path("/{rosterID}/$remove")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     public Group removeRosterMembers(@PathParam("rosterID") UUID rosterID, @FHIRParameter Group groupUpdate) {
         if (!this.rosterDAO.rosterExists(rosterID)) {
@@ -279,7 +280,7 @@ public class GroupResource extends AbstractGroupResource {
     @DELETE
     @Path("/{rosterID}")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     public Response deleteRoster(@PathParam("rosterID") UUID rosterID) {
         final RosterEntity rosterEntity = this.rosterDAO.getEntity(rosterID)
@@ -292,7 +293,7 @@ public class GroupResource extends AbstractGroupResource {
 
     @Path("/{rosterID}")
     @GET
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Timed
     @ExceptionMetered
     @Override
