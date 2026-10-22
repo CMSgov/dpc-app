@@ -5,8 +5,7 @@ class CspUserVerification < ApplicationRecord
   belongs_to :csp
   belongs_to :user, optional: true
   belongs_to :invitation, optional: true
-  has_many :csp_verification_checks, class_name: 'CspUserVerification::Check',
-                                     inverse_of: :csp_user_verification, dependent: :delete_all
+  has_many :csp_verification_checks, inverse_of: :csp_user_verification, dependent: :delete_all
 
   validates :csp_verification_id, :status, presence: true
 
@@ -55,14 +54,5 @@ class CspUserVerification < ApplicationRecord
                                       status_details: check[:status_details], status_value: check[:value],
                                       reason_codes: check[:reason_codes] || [], completed_at: check[:completed_at])
     end
-  end
-
-  # One check from a verification session.
-  class Check < ApplicationRecord
-    self.table_name = 'csp_verification_checks'
-
-    belongs_to :csp_user_verification, inverse_of: :csp_verification_checks
-
-    validates :check_name, presence: true
   end
 end

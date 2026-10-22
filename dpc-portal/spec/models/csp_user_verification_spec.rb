@@ -50,7 +50,7 @@ RSpec.describe CspUserVerification, type: :model do
       expect(record.invitation).to eq invitation
     end
 
-    it 'allows a failure for someone we cannot identify' do
+    it 'allows a session for someone we cannot identify' do
       record = described_class.record!(csp:, verification: failure)
       expect([record.user, record.invitation]).to eq [nil, nil]
     end
@@ -76,10 +76,10 @@ RSpec.describe CspUserVerification, type: :model do
       described_class.record!(csp:, verification: failure)
       described_class.record!(csp:, verification: { status: 'fail', session_id: 'verify_abc123',
                                                     checks: [checks.first] })
-      expect(CspUserVerification::Check.count).to eq 1
+      expect(CspVerificationCheck.count).to eq 1
 
       described_class.record!(csp:, verification: { status: 'fail', session_id: 'verify_abc123' })
-      expect(CspUserVerification::Check.count).to eq 1
+      expect(CspVerificationCheck.count).to eq 1
     end
 
     it 'does not clear the times when a later write lacks them' do
@@ -95,15 +95,18 @@ RSpec.describe CspUserVerification, type: :model do
     end
 
     it 'retries once if another writer inserts the same session first' do
-      calls = 0
-      allow(described_class).to receive(:find_or_initialize_by).and_wrap_original do |original, *args, **kwargs|
-        calls += 1
-        raise ActiveRecord::RecordNotUnique, 'duplicate' if calls == 1
+      attempts = 0
+      # In production the unique index rejects our insert at save!, after the lookup found nothing
+      allow_any_instance_of(described_class).to receive(:save!).and_wrap_original do |original, *args|
+        attempts += 1
+        raise ActiveRecord::RecordNotUnique, 'duplicate' if attempts == 1
 
-        original.call(*args, **kwargs)
+        original.call(*args)
       end
+
       expect(described_class.record!(csp:, verification: failure)).to be_persisted
-      expect(calls).to eq 2
+      expect(attempts).to eq 2
+      expect(described_class.where(csp_verification_id: 'verify_abc123').count).to eq 1
     end
 
     it 'requires a session id' do
@@ -114,18 +117,5 @@ RSpec.describe CspUserVerification, type: :model do
 
   it 'requires a session id and status' do
     expect(described_class.new(csp:)).not_to be_valid
-  end
-
-  describe 'checks' do
-    it 'belongs to a verification and needs a name' do
-      check = create(:csp_verification_check)
-      expect(check.csp_user_verification).to be_a(CspUserVerification)
-      expect(CspUserVerification::Check.new(csp_user_verification: check.csp_user_verification)).not_to be_valid
-    end
-
-    it 'is removed with its verification' do
-      check = create(:csp_verification_check)
-      expect { check.csp_user_verification.destroy }.to change { CspUserVerification::Check.count }.by(-1)
-    end
   end
 end

@@ -19,7 +19,7 @@ FactoryBot.define do
     end
   end
 
-  factory :csp_verification_check, class: 'CspUserVerification::Check' do
+  factory :csp_verification_check do
     csp_user_verification
     check_name { 'Gov ID is not expired' }
     check_status { 'completed' }
