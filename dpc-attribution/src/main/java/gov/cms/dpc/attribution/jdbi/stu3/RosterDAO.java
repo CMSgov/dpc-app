@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.jdbi;
+package gov.cms.dpc.attribution.jdbi.stu3;
 
 import gov.cms.dpc.common.entities.stu3.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;

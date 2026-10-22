@@ -1,7 +1,7 @@
-package gov.cms.dpc.attribution.jdbi;
+package gov.cms.dpc.attribution.jdbi.stu3;
 
-import gov.cms.dpc.attribution.AbstractAttributionDAOTest;
-import gov.cms.dpc.attribution.AttributionTestHelpers;
+import gov.cms.dpc.attribution.Stu3AbstractAttributionDAOTest;
+import gov.cms.dpc.attribution.Stu3AttributionTestHelpers;
 import gov.cms.dpc.common.entities.stu3.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import jakarta.persistence.SequenceGenerator;
@@ -15,7 +15,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
+class RelationshipDAOUnitTest extends Stu3AbstractAttributionDAOTest {
 	private RelationshipDAO relationshipDAO;
 	private PatientDAO patientDAO;
 	private OrganizationDAO organizationDAO;
@@ -34,19 +34,19 @@ class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 
 	@Test
 	void test_AttributionRelationship_batch_search_happy_path() {
-		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+		OrganizationEntity org = Stu3AttributionTestHelpers.createOrganizationEntity();
 
-		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(org);
-		PatientEntity pat2 = AttributionTestHelpers.createPatientEntity(org);
-		PatientEntity pat3 = AttributionTestHelpers.createPatientEntity(org);
+		PatientEntity pat1 = Stu3AttributionTestHelpers.createPatientEntity(org);
+		PatientEntity pat2 = Stu3AttributionTestHelpers.createPatientEntity(org);
+		PatientEntity pat3 = Stu3AttributionTestHelpers.createPatientEntity(org);
 
-		ProviderEntity provider = AttributionTestHelpers.createProviderEntity(org);
+		ProviderEntity provider = Stu3AttributionTestHelpers.createProviderEntity(org);
 
-		RosterEntity roster = AttributionTestHelpers.createRosterEntity(org, provider);
+		RosterEntity roster = Stu3AttributionTestHelpers.createRosterEntity(org, provider);
 
-		AttributionRelationship attribution1 = AttributionTestHelpers.createAttributionRelationship(roster, pat1);
-		AttributionRelationship attribution2 = AttributionTestHelpers.createAttributionRelationship(roster, pat2);
-		AttributionRelationship attribution3 = AttributionTestHelpers.createAttributionRelationship(roster, pat3);
+		AttributionRelationship attribution1 = Stu3AttributionTestHelpers.createAttributionRelationship(roster, pat1);
+		AttributionRelationship attribution2 = Stu3AttributionTestHelpers.createAttributionRelationship(roster, pat2);
+		AttributionRelationship attribution3 = Stu3AttributionTestHelpers.createAttributionRelationship(roster, pat3);
 
 		db.inTransaction(() -> {
 			organizationDAO.registerOrganization(org);
@@ -73,20 +73,20 @@ class RelationshipDAOUnitTest extends AbstractAttributionDAOTest {
 
 	@Test
 	void test_AttributionRelationship_batch_search_only_finds_correct_roster() {
-		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+		OrganizationEntity org = Stu3AttributionTestHelpers.createOrganizationEntity();
 
-		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(org);
-		PatientEntity pat2 = AttributionTestHelpers.createPatientEntity(org);
-		PatientEntity pat3 = AttributionTestHelpers.createPatientEntity(org);
+		PatientEntity pat1 = Stu3AttributionTestHelpers.createPatientEntity(org);
+		PatientEntity pat2 = Stu3AttributionTestHelpers.createPatientEntity(org);
+		PatientEntity pat3 = Stu3AttributionTestHelpers.createPatientEntity(org);
 
-		ProviderEntity provider = AttributionTestHelpers.createProviderEntity(org);
+		ProviderEntity provider = Stu3AttributionTestHelpers.createProviderEntity(org);
 
-		RosterEntity goodRoster = AttributionTestHelpers.createRosterEntity(org, provider);
-		RosterEntity badRoster = AttributionTestHelpers.createRosterEntity(org, provider);
+		RosterEntity goodRoster = Stu3AttributionTestHelpers.createRosterEntity(org, provider);
+		RosterEntity badRoster = Stu3AttributionTestHelpers.createRosterEntity(org, provider);
 
-		AttributionRelationship attribution1 = AttributionTestHelpers.createAttributionRelationship(goodRoster, pat1);
-		AttributionRelationship attribution2 = AttributionTestHelpers.createAttributionRelationship(goodRoster, pat2);
-		AttributionRelationship attribution3 = AttributionTestHelpers.createAttributionRelationship(badRoster, pat3);
+		AttributionRelationship attribution1 = Stu3AttributionTestHelpers.createAttributionRelationship(goodRoster, pat1);
+		AttributionRelationship attribution2 = Stu3AttributionTestHelpers.createAttributionRelationship(goodRoster, pat2);
+		AttributionRelationship attribution3 = Stu3AttributionTestHelpers.createAttributionRelationship(badRoster, pat3);
 
 		db.inTransaction(() -> {
 			organizationDAO.registerOrganization(org);

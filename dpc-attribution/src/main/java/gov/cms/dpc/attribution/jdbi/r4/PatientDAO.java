@@ -1,7 +1,9 @@
-package gov.cms.dpc.attribution.jdbi;
+package gov.cms.dpc.attribution.jdbi.r4;
 
 import com.google.inject.name.Named;
-import gov.cms.dpc.common.entities.stu3.*;
+import gov.cms.dpc.attribution.jdbi.PageResult;
+import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
+import gov.cms.dpc.common.entities.r4.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import jakarta.inject.Inject;
@@ -20,7 +22,7 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
 
 
     @Inject
-    public PatientDAO(DPCManagedSessionFactory factory, @Named("queryChunkSize") int queryChunkSize) {
+    public PatientDAO(@Named("r4") DPCManagedSessionFactory factory, @Named("queryChunkSize") int queryChunkSize) {
         super(factory.getSessionFactory());
         this.queryChunkSize = queryChunkSize;
     }
