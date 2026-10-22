@@ -30,7 +30,7 @@ RSpec.describe 'Sessions', type: :request do
           allow(Rails.logger).to receive(:info)
           expect(Rails.logger).to receive(:info).with(
             ['User logged out',
-            hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+             hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
                             actionType: LoggingConstants::ActionType::UserLoggedOut,
                             user_identifier: uuid,
                             csp: provider.to_s)]
