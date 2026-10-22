@@ -571,8 +571,9 @@ RSpec.shared_examples 'a CSP client' do |config|
 
       if csp_name == 'clear'
         expect(response).to redirect_to(sign_in_path)
-        expect(request.session[:user_id]).to be_nil
-        expect(request.session[:csp_session]).to be_blank
+        expect(request.session[:user]).to be_nil
+        expect(request.session[:csp_sessions]).to be_blank
+        expect(request.session[:csp]).to be_nil
       else
         expect(response.location).to include(logout_host)
       end
