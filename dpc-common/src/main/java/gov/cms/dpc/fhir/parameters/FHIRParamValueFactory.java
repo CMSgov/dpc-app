@@ -1,6 +1,7 @@
 package gov.cms.dpc.fhir.parameters;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.inject.name.Named;
 import gov.cms.dpc.fhir.annotations.FHIRParameter;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ext.Provider;
@@ -20,7 +21,7 @@ public class FHIRParamValueFactory implements ValueParamProvider {
     private final FhirContext ctx;
 
     @Inject
-    FHIRParamValueFactory(FhirContext ctx) {
+    FHIRParamValueFactory(@Named("stu3") FhirContext ctx) {
         this.ctx = ctx;
     }
 

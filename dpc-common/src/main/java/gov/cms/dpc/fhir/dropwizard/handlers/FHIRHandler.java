@@ -1,6 +1,7 @@
 package gov.cms.dpc.fhir.dropwizard.handlers;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.inject.name.Named;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
@@ -31,7 +32,7 @@ public class FHIRHandler implements MessageBodyReader<BaseResource>, MessageBody
     private final FhirContext ctx;
 
     @Inject
-    public FHIRHandler(FhirContext context) {
+    public FHIRHandler(@Named("stu3") FhirContext context) {
         this.ctx = context;
     }
 
