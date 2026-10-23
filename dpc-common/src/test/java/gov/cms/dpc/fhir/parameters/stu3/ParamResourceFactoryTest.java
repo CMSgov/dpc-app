@@ -1,8 +1,8 @@
-package gov.cms.dpc.fhir.parameters;
+package gov.cms.dpc.fhir.parameters.stu3;
 
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import gov.cms.dpc.fhir.annotations.FHIRParameter;
+import gov.cms.dpc.fhir.annotations.stu3.FHIRParameter;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import jakarta.ws.rs.WebApplicationException;
 import org.eclipse.jetty.http.HttpStatus;

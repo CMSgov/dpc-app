@@ -1,7 +1,7 @@
 package gov.cms.dpc.attribution.resources.v1;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
-import gov.cms.dpc.fhir.annotations.FHIRParameter;
+import gov.cms.dpc.fhir.annotations.stu3.FHIRParameter;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Bundle;

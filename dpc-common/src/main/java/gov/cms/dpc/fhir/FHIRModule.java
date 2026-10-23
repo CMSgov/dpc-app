@@ -15,7 +15,7 @@ import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionMappe
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionMapper;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionMapper;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionMapper;
-import gov.cms.dpc.fhir.parameters.FHIRParamValueFactory;
+import gov.cms.dpc.fhir.parameters.r4.FHIRParamValueFactory;
 import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
 import io.dropwizard.core.Configuration;
@@ -52,6 +52,7 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
         binder.bind(gov.cms.dpc.fhir.dropwizard.handlers.stu3.BundleHandler.class);
         binder.bind(BundleHandler.class);
         binder.bind(FHIRRequestFeature.class);
+        binder.bind(gov.cms.dpc.fhir.parameters.stu3.FHIRParamValueFactory.class);
         binder.bind(FHIRParamValueFactory.class);
         binder.bind(StreamingContentSizeFilter.class);
 

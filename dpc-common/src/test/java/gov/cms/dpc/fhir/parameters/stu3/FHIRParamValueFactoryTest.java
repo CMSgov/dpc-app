@@ -1,7 +1,7 @@
-package gov.cms.dpc.fhir.parameters;
+package gov.cms.dpc.fhir.parameters.stu3;
 
 import ca.uhn.fhir.context.FhirContext;
-import gov.cms.dpc.fhir.annotations.FHIRParameter;
+import gov.cms.dpc.fhir.annotations.stu3.FHIRParameter;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,7 +43,7 @@ class FHIRParamValueFactoryTest {
         final String provString = ctx.newJsonParser().encodeResourceToString(provenance);
         final HttpServletRequest httpRequest = Mockito.mock(HttpServletRequest.class);
         final ServletInputStream inputStream = Mockito.mock(ServletInputStream.class);
-        Mockito.when(httpRequest.getHeader(ProvenanceResourceValueFactory.PROVENANCE_HEADER)).thenReturn(provString);
+        Mockito.when(httpRequest.getHeader("X-Provenance")).thenReturn(provString);
         Mockito.when(httpRequest.getInputStream()).thenReturn(inputStream);
 
         final ContainerRequest request = Mockito.mock(ContainerRequest.class);
@@ -63,6 +63,14 @@ class FHIRParamValueFactoryTest {
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> Patient.class);
 
         assertNull(factory.getValueProvider(parameter), "Should not have factory");
+    }
+
+    @Test
+    void testOtherVersionResource() {
+        final Parameter parameter = Mockito.mock(Parameter.class);
+        Mockito.when(parameter.getDeclaredAnnotation(FHIRParameter.class)).thenReturn(Mockito.mock(FHIRParameter.class));
+        Mockito.when(parameter.getRawType()).thenAnswer(answer -> org.hl7.fhir.r4.model.Patient.class);
+        assertNull(factory.getValueProvider(parameter));
     }
 
     @Test

@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.annotations;
+package gov.cms.dpc.fhir.annotations.stu3;
 
 import org.hl7.fhir.dstu3.model.Parameters;
 

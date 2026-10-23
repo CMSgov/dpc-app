@@ -7,7 +7,7 @@ import gov.cms.dpc.attribution.jdbi.stu3.OrganizationDAO;
 import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import gov.cms.dpc.fhir.annotations.FHIRParameter;
+import gov.cms.dpc.fhir.annotations.stu3.FHIRParameter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.common.hibernate.attribution.DPCStu3HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWork;

@@ -15,7 +15,7 @@ import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import gov.cms.dpc.fhir.annotations.FHIRParameter;
+import gov.cms.dpc.fhir.annotations.stu3.FHIRParameter;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
