@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.dropwizard.handlers;
+package gov.cms.dpc.fhir.dropwizard.handlers.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.name.Named;
@@ -16,7 +16,7 @@ import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 import jakarta.ws.rs.ext.Provider;
 import org.eclipse.jetty.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.BaseResource;
+import org.hl7.fhir.r4.model.BaseResource;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
@@ -32,7 +32,7 @@ public class FHIRHandler implements MessageBodyReader<BaseResource>, MessageBody
     private final FhirContext ctx;
 
     @Inject
-    public FHIRHandler(@Named("stu3") FhirContext context) {
+    public FHIRHandler(@Named("r4") FhirContext context) {
         this.ctx = context;
     }
 

@@ -1,6 +1,6 @@
-package gov.cms.dpc.fhir.annotations;
+package gov.cms.dpc.fhir.annotations.r4;
 
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

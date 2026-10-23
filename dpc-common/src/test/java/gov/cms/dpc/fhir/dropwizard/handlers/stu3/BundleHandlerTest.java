@@ -1,10 +1,10 @@
-package gov.cms.dpc.fhir.dropwizard.handlers;
+package gov.cms.dpc.fhir.dropwizard.handlers.stu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
-import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
+import gov.cms.dpc.fhir.annotations.stu3.BundleReturnProperties;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import jakarta.ws.rs.GET;
@@ -36,8 +36,11 @@ public class BundleHandlerTest {
     private static ResourceExtension buildResource() {
         ctx = FhirContext.forDstu3();
         final FHIRHandler fhirHandler = new FHIRHandler(ctx);
+        final var otherHandler = new gov.cms.dpc.fhir.dropwizard.handlers.r4.FHIRHandler(FhirContext.forR4());
         return ResourceExtension
                 .builder()
+                .addProvider(otherHandler)
+                .addProvider(new gov.cms.dpc.fhir.dropwizard.handlers.r4.BundleHandler(otherHandler))
                 .addProvider(fhirHandler)
                 .addProvider(new BundleHandler(fhirHandler))
                 .addResource(new BundleTestResource())

@@ -8,7 +8,7 @@ import com.google.inject.Key;
 import com.google.inject.name.Names;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
-import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.r4.FHIRHandler;
 import io.dropwizard.core.Configuration;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +23,7 @@ class FHIRModuleTest {
         // Make sure we can get stu3 and r4 contexts from the FHIRModule
         Injector injector = Guice.createInjector(new FHIRModule<TestConfiguration>() {
             @Override
-            public void configure() { bind(FHIRHandler.class); }
+            public void configure() { bind(gov.cms.dpc.fhir.dropwizard.handlers.stu3.FHIRHandler.class); }
         });
         Key<FhirContext> stu3Key = Key.get(FhirContext.class, Names.named("stu3"));
         Key<FhirContext> r4Key = Key.get(FhirContext.class, Names.named("r4"));
@@ -34,6 +34,7 @@ class FHIRModuleTest {
         assertEquals(FhirVersionEnum.R4, r4.getVersion().getVersion());
         assertSame(stu3, injector.getInstance(stu3Key));
         assertSame(r4, injector.getInstance(r4Key));
+        assertDoesNotThrow(() -> injector.getInstance(gov.cms.dpc.fhir.dropwizard.handlers.stu3.FHIRHandler.class));
         assertDoesNotThrow(() -> injector.getInstance(FHIRHandler.class));
     }
 
