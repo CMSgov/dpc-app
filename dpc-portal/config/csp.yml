@@ -40,7 +40,6 @@ development: &development
     jwks_uri: <%= "https://#{ENV['CLEAR_IDP_HOST']}/integrations/.well-known/jwks.json" %>
     redirect_path: '/auth/clear/callback'
     authorize_scope: 'openid'
-    log_out_path: '/integrations/oauth2/sessions/logout'
     token_expiration_interval: 300
     discovery_uri: '/integrations/.well-known/openid-configuration'
 
