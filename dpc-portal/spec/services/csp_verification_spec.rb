@@ -78,7 +78,7 @@ RSpec.describe CspVerification do
       it 'returns the outcome, the status and reason CLEAR gave, and what we store about the session' do
         expect(verify).to eq(
           outcome: :failed, status: 'fail', reason: 'ip_blocked', session_id: verification_id,
-          created_at: Time.zone.at(SESSION_CREATED_AT), completed_at: Time.zone.at(SESSION_COMPLETED_AT),
+          session_created_at: Time.zone.at(SESSION_CREATED_AT), completed_at: Time.zone.at(SESSION_COMPLETED_AT),
           checks: [{ name: 'Gov ID is not expired', status: 'completed', status_details: 'fail', value: false,
                      reason_codes: %w[doc_expired] }]
         )
@@ -241,7 +241,7 @@ RSpec.describe CspVerification::Clear do
     it 'is the session id, its times (epoch seconds), and its checks' do
       expect(described_class.details_from(body)).to eq(
         session_id: 'verify_abc123',
-        created_at: Time.zone.at(SESSION_CREATED_AT),
+        session_created_at: Time.zone.at(SESSION_CREATED_AT),
         completed_at: Time.zone.at(SESSION_COMPLETED_AT),
         checks: [{ name: 'Gov ID is not expired', status: 'completed', status_details: 'fail', value: false,
                    reason_codes: %w[doc_expired] },
@@ -252,7 +252,7 @@ RSpec.describe CspVerification::Clear do
 
     it 'has nil times and no checks for a session that has not started or finished' do
       expect(described_class.details_from('id' => 'verify_abc123', 'created_at' => 0, 'completed_at' => 0))
-        .to eq(session_id: 'verify_abc123', created_at: nil, completed_at: nil, checks: [])
+        .to eq(session_id: 'verify_abc123', session_created_at: nil, completed_at: nil, checks: [])
     end
   end
 end

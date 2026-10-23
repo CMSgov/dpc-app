@@ -5,21 +5,20 @@
 class CspVerification
   # When the CSP couldn't be asked, there is only outcome: :unavailable and failure_reason (one of FAILURE_REASONS).
   FAILURE_REASONS = %w[missing_access_token invalid_access_token invalid_verification_id unauthorized forbidden
-                       not_found rate_limited server_error request_failed invalid_response expired].freeze
+                       not_found rate_limited server_error request_failed invalid_response].freeze
 
   class Error < StandardError; end
 
   # Asks the CSP what happened to the verification, using the access token received at login
   # Returns a plain Hash with these keys. Together they are what CspUserVerification stores.
-  #   outcome:        :verified, :cancelled, :failed, :expired or :unavailable. Anything but :verified is passed to
-  #                   csp#failure as params[:message]
-  #   status:         the CSP's own status string
-  #   reason:         the CSP's own failure reason, if it gave one (for outcome_for and for logging)
-  #   session_id:     the CSP's id for the verification session
-  #   created_at:     Time the CSP created the session. Stored as the row's created_at, so it is when the session
-  #                   began rather than when we recorded it
-  #   completed_at:   Time the session completed, if it has
-  #   checks:         array of { name:, status:, status_details:, value:, reason_codes: }
+  #   outcome:            :verified, :cancelled, :failed, :expired or :unavailable. Anything but :verified is passed to
+  #                       csp#failure as params[:message]
+  #   status:             the CSP's own status string
+  #   reason:             the CSP's own failure reason, if it gave one (for outcome_for and for logging)
+  #   session_id:         the CSP's id for the verification session
+  #   session_created_at: Time the CSP created the session
+  #   completed_at:       Time the session completed, if it has
+  #   checks:             array of { name:, status:, status_details:, value:, reason_codes: }
   def verify(csp, access_token)
     adapter = adapter_for(csp)
     raise ArgumentError, "No verification adapter for #{csp.inspect}" unless adapter
@@ -113,7 +112,7 @@ class CspVerification
 
     def self.details_from(body)
       { session_id: body['id'],
-        created_at: time_from(body['created_at']),
+        session_created_at: time_from(body['created_at']),
         completed_at: time_from(body['completed_at']),
         checks: Array(body['checks']).map { |check| check_from(check) } }
     end

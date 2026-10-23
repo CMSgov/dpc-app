@@ -11,8 +11,8 @@ FactoryBot.define do
     csp { Csp.find_by(name: 'clear') || association(:csp, :clear) }
     sequence(:csp_verification_id) { |n| "verify_factory#{n}" }
     status { 'success' }
-    created_at { 2.hours.ago }
-    completed_at { 1.hour.ago }
+    session_created_at { Time.zone.at(1_761_677_000) }
+    completed_at { Time.zone.at(1_761_677_082) }
 
     trait :failed do
       status { 'fail' }

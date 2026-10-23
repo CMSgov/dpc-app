@@ -17,10 +17,12 @@ RSpec.describe 'Clear', type: :request do
       { status: 200, body: { id: verification_id }.merge(verification_session_body).to_json }
     end
     let(:id_token) { 'id-token' }
-    let(:attempt_sign_in) do
+
+    def attempt_sign_in
       post '/auth/clear'
       follow_redirect!
     end
+
     before do
       stub_request(:get, verification_session_url)
         .with(headers: { 'Authorization' => "Bearer #{token}" })
@@ -419,14 +421,18 @@ RSpec.describe 'Clear', type: :request do
           expect { attempt_sign_in }.to change { CspUserVerification.count }.by(1)
           verification = CspUserVerification.last
           expect(verification).to have_attributes(csp:, csp_verification_id: verification_id, status: 'success',
-                                                  user:, invitation: nil, created_at: Time.zone.at(session_created_at),
+                                                  user:, invitation: nil,
+                                                  session_created_at: Time.zone.at(session_created_at),
                                                   completed_at: Time.zone.at(completed_at))
           expect(verification.csp_verification_checks.pluck(:check_name)).to eq ['Gov ID is not expired']
         end
 
-        it 'does not duplicate the session on a repeat login' do
+        it 'keeps each response as its own row on a repeat login' do
+          allow(Rails.logger).to receive(:error)
           attempt_sign_in
-          expect { attempt_sign_in }.not_to(change { CspUserVerification.count })
+          expect { attempt_sign_in }.to change { CspUserVerification.count }.by(1)
+          expect(CspUserVerification.where(csp_verification_id: verification_id).count).to eq 2
+          expect(Rails.logger).not_to have_received(:error).with(['Unable to record CSP verification', anything])
         end
 
         it 'still signs the user in' do
