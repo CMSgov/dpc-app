@@ -7,6 +7,8 @@
     <p><%= link_to 'Contact Login.gov ', 'https://www.login.gov/contact/' %></p>
   <% elsif @current_csp == :id_me %>
     <p><%= link_to 'ID.me Help Center', 'https://help.id.me/hc/en-us' %></p>
+  <% elsif @current_csp == :clear %>
+    <p><%= link_to 'CLEAR Support', 'https://www.clearme.com/support' %></p>
   <% end %>
 </div>
 

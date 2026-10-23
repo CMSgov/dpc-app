@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'support/login_support'
+
 RSpec.shared_examples 'a CSP client' do |config|
   provider = config[:provider]
   auth_endpoint = config[:auth_endpoint]
@@ -8,6 +10,7 @@ RSpec.shared_examples 'a CSP client' do |config|
   expected_id_token = config[:expected_id_token]
   ial1_auth_response = config[:ial1_auth_response]
   csp_name = provider.to_s
+  include LoginSupport::ClearVerification
 
   context 'IAL/2' do
     before do
@@ -144,18 +147,22 @@ RSpec.shared_examples 'a CSP client' do |config|
     context 'user exists with different CSP' do
       let(:email) { 'bob@example.com' }
       let(:orig_csp_name) { (CspUtils::CODES_TO_DISPLAY.keys - [provider]).sample.to_s }
+      # A CLEAR login needs an access token carrying a verification_id, and a stubbed verification session
+      let(:orig_token) { orig_csp_name == 'clear' ? clear_access_token : token }
+      let(:orig_csp_auth_response) { csp_auth_response.deep_merge(credentials: { token: orig_token }) }
       context 'SSN matches' do
         before do
           user = create(:user, given_name: 'Bob', family_name: 'Hoskins')
           orig_csp = Csp.find_by(name: orig_csp_name) || create(:csp, name: orig_csp_name)
           csp_user = create(:csp_user, user:, uuid:, csp: orig_csp)
           create(:user_email, csp_user:, email:, primary: true, active: true)
+          stub_clear_verification_session
 
           stub_request(:get, CspUtils.user_info_url(provider))
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: csp_auth_response.to_json, status: 200)
           stub_request(:get, CspUtils.user_info_url(orig_csp_name))
-            .with(headers: { Authorization: "Bearer #{token}" })
+            .with(headers: { Authorization: "Bearer #{orig_token}" })
             .to_return(body: csp_auth_response.to_json, status: 200)
         end
 
@@ -184,7 +191,7 @@ RSpec.shared_examples 'a CSP client' do |config|
 
         context 'after linking account' do
           before do
-            OmniAuth.config.add_mock(orig_csp_name, csp_auth_response)
+            OmniAuth.config.add_mock(orig_csp_name, orig_csp_auth_response)
             post "/auth/#{orig_csp_name}"
             follow_redirect!
           end
@@ -230,15 +237,16 @@ RSpec.shared_examples 'a CSP client' do |config|
           orig_csp = Csp.find_by(name: orig_csp_name) || create(:csp, name: orig_csp_name)
           csp_user = create(:csp_user, user:, uuid:, csp: orig_csp)
           create(:user_email, csp_user:, email:, primary: true, active: true)
+          stub_clear_verification_session
 
           stub_request(:get, CspUtils.user_info_url(orig_csp_name))
-            .with(headers: { Authorization: "Bearer #{token}" })
+            .with(headers: { Authorization: "Bearer #{orig_token}" })
             .to_return(body: csp_auth_response.to_json, status: 200)
           stub_request(:get, CspUtils.user_info_url(provider))
             .with(headers: { Authorization: "Bearer #{token}" })
             .to_return(body: ssn_mismatch_response.to_json, status: 200)
 
-          OmniAuth.config.add_mock(orig_csp_name, csp_auth_response)
+          OmniAuth.config.add_mock(orig_csp_name, orig_csp_auth_response)
           OmniAuth.config.add_mock(provider, csp_auth_response)
         end
 
@@ -413,7 +421,7 @@ RSpec.shared_examples 'a CSP client' do |config|
 
       it 'flashes the alert text' do
         attempt_sign_in
-        expect(flash[:alert]).to eq('Registration unavailable: external system error.')
+        expect(flash[:alert]).to eq(CspErrorHandling::EXTERNAL_SYSTEM_ERROR)
       end
 
       it 'does not sign in the user' do
@@ -539,21 +547,109 @@ RSpec.shared_examples 'a CSP client' do |config|
         attempt_sign_in
       end
     end
-  end
 
-  context "when #{display_name} returns verification failure" do
-    let(:error) { :verification_failure }
-    before do
-      OmniAuth.config.test_mode = true
-      OmniAuth.config.mock_auth[provider] = error
+    context "when #{display_name} returns verification failure" do
+      let(:error) { :verification_failure }
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.mock_auth[provider] = error
+      end
+
+      it 'should render verification failure' do
+        post auth_endpoint
+        follow_redirect!
+        expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
+        follow_redirect!
+        expect(response.body).to include('Your identity could not be verified')
+      end
     end
 
-    it 'should render verification failure' do
-      post auth_endpoint
-      follow_redirect!
-      expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
-      follow_redirect!
-      expect(response.body).to include('Your identity could not be verified')
+    context "when #{display_name} reports a cancelled verification" do
+      let(:error) { :cancelled }
+      let(:attempt_sign_in) do
+        post auth_endpoint
+        follow_redirect!
+        expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
+        follow_redirect!
+      end
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.mock_auth[provider] = error
+      end
+
+      it 'redirects to sign in path' do
+        attempt_sign_in
+        expect(response.location).to eq(sign_in_url)
+      end
+
+      it 'flashes the verification alert' do
+        attempt_sign_in
+        expect(flash[:alert]).to eq(CspErrorHandling::VERIFICATION_ALERT)
+      end
+    end
+
+    context "when #{display_name} reports an unavailable verification" do
+      let(:error) { :unavailable }
+      let(:attempt_sign_in) do
+        post auth_endpoint
+        follow_redirect!
+        expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
+        follow_redirect!
+      end
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.mock_auth[provider] = error
+      end
+
+      it 'redirects to sign in path' do
+        attempt_sign_in
+        expect(response.location).to eq(sign_in_url)
+      end
+
+      it 'flashes the external system error alert' do
+        attempt_sign_in
+        expect(flash[:alert]).to eq(CspErrorHandling::EXTERNAL_SYSTEM_ERROR)
+      end
+    end
+
+    context "when #{display_name} reports an expired verification" do
+      let(:error) { :expired }
+      let(:attempt_sign_in) do
+        post auth_endpoint
+        follow_redirect!
+        expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
+        follow_redirect!
+      end
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.mock_auth[provider] = error
+      end
+
+      it 'redirects to sign in path' do
+        attempt_sign_in
+        expect(response.location).to eq(sign_in_url)
+      end
+
+      it 'flashes the expired verification alert' do
+        attempt_sign_in
+        expect(flash[:alert]).to eq(CspErrorHandling::SESSION_EXPIRED)
+      end
+    end
+
+    context "when #{display_name} reports a failed verification" do
+      let(:error) { :failed }
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.mock_auth[provider] = error
+      end
+
+      it 'should render verification failure' do
+        post auth_endpoint
+        follow_redirect!
+        expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
+        follow_redirect!
+        expect(response.body).to include("Your identity could not be verified with #{display_name}")
+      end
     end
   end
 

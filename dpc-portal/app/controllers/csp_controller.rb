@@ -12,10 +12,8 @@ class CspController < ApplicationController
     return render_ial1_blocked if ial_1_user?(auth_details)
     return unless (active_csp = csp(auth_details.provider))
 
-    # redirect CLEAR cancellation so that the UX is the same for all CSP
-    if auth_details.credentials.id_token.nil?
-      return redirect_to csp_failure_url(message: 'access_denied', strategy: active_csp.name)
-    end
+    failure_message = verification_failure_message(active_csp)
+    return redirect_to csp_failure_url(message: failure_message, strategy: active_csp.name) if failure_message
 
     user_actions(auth_details, active_csp)
   end
@@ -25,9 +23,9 @@ class CspController < ApplicationController
   end
 
   def failure
-    invitation_match = session[:user_return_to]&.match(%r{/invitations/([0-9]+)/([a-zA-Z0-9]{24})})
-    invitation = invitation_match ? Invitation.find_by(id: invitation_match[1], token: invitation_match[2]) : nil
+    invitation = invitation_match
 
+    return handle_verification_expired(invitation) if csp_verification_expired?
     return handle_fail_to_proof(invitation) if csp_user_fail_to_proof?
     return handle_csp_auth_error(invitation) if csp_auth_error?
     return handle_signin_cancel(invitation) if csp_user_cancelled?
@@ -129,6 +127,66 @@ class CspController < ApplicationController
                       token: auth.credentials.token,
                       token_exp: auth.credentials.expires_in.seconds.from_now,
                       id_token: store_id_token? ? auth.credentials.id_token : nil)
+  end
+
+  def csp_verification
+    @csp_verification ||= CspVerification.new
+  end
+
+  # Returns the message to pass to csp#failure as params[:message], or nil if verification was successful.
+  def verification_failure_message(active_csp)
+    unless csp_verification.supported?(active_csp.name)
+      return auth_details.credentials.id_token.nil? ? 'access_denied' : nil
+    end
+
+    verification = csp_verification.verify(active_csp.name, auth_details.credentials.token)
+    record_csp_verification(verification, active_csp)
+    failure_message_for(verification, active_csp)
+  end
+
+  def failure_message_for(verification, active_csp)
+    if verification[:outcome] == :verified
+      return if auth_details.credentials.id_token.present?
+
+      verification = { outcome: :unavailable, failure_reason: 'verified_without_id_token' }
+    end
+    log_verification_failure(verification, active_csp)
+    verification[:outcome]
+  end
+
+  def record_csp_verification(verification, active_csp)
+    return if verification[:session_id].blank?
+
+    user = CspUser.find_by(uuid: auth_details&.uid, csp: active_csp)&.user
+    CspUserVerification.record!(csp: active_csp, verification:, user:,
+                                invitation: (invitation_match unless user))
+  rescue StandardError => e
+    log_event(:error, 'Unable to record CSP verification',
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::CspVerificationNotRecorded,
+              error: e.class.name,
+              csp: active_csp.name)
+  end
+
+  def invitation_match
+    match = session[:user_return_to]&.match(%r{/invitations/([0-9]+)/([a-zA-Z0-9]{24})})
+    match ? Invitation.find_by(id: match[1], token: match[2]) : nil
+  end
+
+  def log_verification_failure(verification, active_csp)
+    if verification[:failure_reason]
+      log_event(:error, 'CSP verification session could not be retrieved',
+                action_context: LoggingConstants::ActionContext::Authentication,
+                action_type: LoggingConstants::ActionType::CspUnavailable,
+                error: verification[:failure_reason],
+                csp: active_csp.name)
+    else
+      log_event(:info, 'CSP verification session was not successful',
+                action_context: LoggingConstants::ActionContext::Authentication,
+                action_type: LoggingConstants::ActionType::FailedLogin,
+                verificationReason: verification.values_at(:status, :reason).compact_blank.join(':'),
+                csp: active_csp.name)
+    end
   end
 
   # Can be overridden

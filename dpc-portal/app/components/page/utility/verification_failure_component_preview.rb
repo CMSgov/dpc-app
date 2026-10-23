@@ -12,7 +12,7 @@ module Page
       private
 
       def csp_codes
-        { choices: %i[login_dot_gov id_me] }
+        { choices: %i[login_dot_gov id_me clear] }
       end
     end
   end
