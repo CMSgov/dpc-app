@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.resources;
+package gov.cms.dpc.attribution.resources.v1;
 
 import gov.cms.dpc.common.utils.PropertiesProvider;
 import jakarta.ws.rs.GET;
