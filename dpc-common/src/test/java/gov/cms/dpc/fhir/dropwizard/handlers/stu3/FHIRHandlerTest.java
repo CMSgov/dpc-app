@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.dropwizard.handlers;
+package gov.cms.dpc.fhir.dropwizard.handlers.stu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -43,6 +43,11 @@ public class FHIRHandlerTest {
         }
 
         @Test
+        void testOtherVersionNotReadable() {
+            assertFalse(handler.isReadable(org.hl7.fhir.r4.model.Patient.class, null, null, MediaType.APPLICATION_JSON_TYPE));
+        }
+
+        @Test
         void testFHIRRead() {
             final Patient patient = new Patient();
             patient.addIdentifier().setSystem("http://test.local").setValue("test-patient");
@@ -73,6 +78,11 @@ public class FHIRHandlerTest {
         @Test
         void testNotWritable() {
             assertFalse(handler.isWriteable(String.class, null, null, MediaType.TEXT_HTML_TYPE), "Should not be writable");
+        }
+
+        @Test
+        void testOtherVersionNotWritable() {
+            assertFalse(handler.isWriteable(org.hl7.fhir.r4.model.Patient.class, null, null, MediaType.APPLICATION_JSON_TYPE));
         }
 
         @Test

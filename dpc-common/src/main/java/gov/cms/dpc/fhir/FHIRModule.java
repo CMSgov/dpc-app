@@ -8,8 +8,8 @@ import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.dropwizard.features.FHIRRequestFeature;
 import gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter;
-import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.r4.BundleHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.r4.FHIRHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DataFormatExceptionMapper;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionMapper;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionMapper;
@@ -47,7 +47,9 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
         Binder binder = binder();
 
         // Request/Response handlers
+        binder.bind(gov.cms.dpc.fhir.dropwizard.handlers.stu3.FHIRHandler.class);
         binder.bind(FHIRHandler.class);
+        binder.bind(gov.cms.dpc.fhir.dropwizard.handlers.stu3.BundleHandler.class);
         binder.bind(BundleHandler.class);
         binder.bind(FHIRRequestFeature.class);
         binder.bind(FHIRParamValueFactory.class);

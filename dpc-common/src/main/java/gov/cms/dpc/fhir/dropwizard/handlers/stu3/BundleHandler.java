@@ -1,8 +1,8 @@
-package gov.cms.dpc.fhir.dropwizard.handlers;
+package gov.cms.dpc.fhir.dropwizard.handlers.stu3;
 
 import com.google.common.reflect.TypeToken;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
-import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
+import gov.cms.dpc.fhir.annotations.stu3.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
