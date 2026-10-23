@@ -1,6 +1,7 @@
 package gov.cms.dpc.fhir.parameters;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.inject.name.Named;
 import com.google.inject.Injector;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
 import jakarta.inject.Inject;
@@ -23,7 +24,7 @@ public class ProvenanceResourceFactoryProvider implements ValueParamProvider {
     private final FhirContext ctx;
 
     @Inject
-    public ProvenanceResourceFactoryProvider(Injector injector, FhirContext ctx) {
+    public ProvenanceResourceFactoryProvider(Injector injector, @Named("stu3") FhirContext ctx) {
         this.injector = injector;
         this.ctx = ctx;
     }

@@ -3,6 +3,7 @@ package gov.cms.dpc.fhir;
 import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
+import com.google.inject.name.Named;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.dropwizard.features.FHIRRequestFeature;
@@ -30,9 +31,15 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
 
     @Provides
     @Singleton
+    @Named("stu3")
     public FhirContext provideSTU3Context() {
         return FhirContext.forDstu3();
     }
+
+    @Provides
+    @Singleton
+    @Named("r4")
+    public FhirContext provideR4Context() { return FhirContext.forR4(); }
 
     @Override
     public void configure() {
