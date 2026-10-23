@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
+package gov.cms.dpc.fhir.dropwizard.handlers.exceptions.r4;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

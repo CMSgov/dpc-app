@@ -10,10 +10,11 @@ import gov.cms.dpc.fhir.dropwizard.features.FHIRRequestFeature;
 import gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter;
 import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
 import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DataFormatExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionMapper;
 import gov.cms.dpc.fhir.parameters.FHIRParamValueFactory;
 import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
@@ -53,10 +54,16 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
         binder.bind(StreamingContentSizeFilter.class);
 
         // Custom exception mappers
-        binder.bind(JerseyExceptionHandler.class);
-        binder.bind(PersistenceExceptionHandler.class);
-        binder.bind(HAPIExceptionHandler.class);
-        binder.bind(DefaultFHIRExceptionHandler.class);
+        // TODO: Once stu3 is gone map the exception handlers directly.
+        // binder.bind(JerseyExceptionHandler.class);
+        // binder.bind(PersistenceExceptionHandler.class);
+        // binder.bind(HAPIExceptionHandler.class);
+        // binder.bind(DefaultFHIRExceptionHandler.class);
+        binder.bind(DataFormatExceptionMapper.class);
+        binder.bind(JerseyExceptionMapper.class);
+        binder.bind(PersistenceExceptionMapper.class);
+        binder.bind(HAPIExceptionMapper.class);
+        binder.bind(DefaultFHIRExceptionMapper.class);
         binder.bind(ProvenanceResourceFactoryProvider.class);
 
         binder.bind(FHIREntityConverter.class).toProvider(EntityConverterProvider.class).in(Singleton.class);

@@ -1,25 +1,29 @@
-package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
+package gov.cms.dpc.fhir.dropwizard.handlers.exceptions.stu3;
 
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.AbstractFHIRExceptionHandler;
 import ca.uhn.fhir.parser.DataFormatException;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.Provider;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 
-@Provider
 public class DataFormatExceptionHandler extends AbstractFHIRExceptionHandler<DataFormatException> {
 
     @Inject
-    DataFormatExceptionHandler(@Context ResourceInfo info) {
+    public DataFormatExceptionHandler(@Context ResourceInfo info) {
         super(info);
     }
 
     @Override
-    Response handleFHIRException(DataFormatException exception) {
+    public Response toResponse(DataFormatException exception) {
+        return isFHIRResource() ? handleFHIRException(exception) : handleNonFHIRException(exception);
+    }
+
+    @Override
+    protected Response handleFHIRException(DataFormatException exception) {
         final long exceptionID = super.logException(exception);
 
         final OperationOutcome outcome = new OperationOutcome();
@@ -37,7 +41,7 @@ public class DataFormatExceptionHandler extends AbstractFHIRExceptionHandler<Dat
     }
 
     @Override
-    Response handleNonFHIRException(DataFormatException exception) {
+    protected Response handleNonFHIRException(DataFormatException exception) {
         throw new IllegalStateException("Cannot throw FHIR Parser exception from non-FHIR endpoint");
     }
 }

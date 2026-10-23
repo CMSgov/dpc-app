@@ -1,11 +1,10 @@
-package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
+package gov.cms.dpc.fhir.dropwizard.handlers.exceptions.stu3;
 
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.jersey.errors.LoggingExceptionMapper;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.Provider;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 
 
@@ -14,18 +13,17 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
  * non-FHIR end point make a FHIR call that throws a BaseServerResponseException, and in that case we'll still return
  * an OperationOutcome in the response body and the correct HTTP status code.
  */
-@Provider
 public class HAPIExceptionHandler extends LoggingExceptionMapper<BaseServerResponseException> {
 
     @Inject
-    HAPIExceptionHandler() {super();}
+    public HAPIExceptionHandler() {super();}
 
     @Override
     public Response toResponse(BaseServerResponseException exception) {
         final long exceptionID = super.logException(exception);
 
         // If the exception contains a FHIR OperationOutcome, use it.  If not, create one.
-        OperationOutcome operationOutcome = (OperationOutcome) exception.getOperationOutcome();
+        OperationOutcome operationOutcome = exception.getOperationOutcome() instanceof OperationOutcome outcome ? outcome : null;
         if (operationOutcome == null) {
             operationOutcome = new OperationOutcome();
             operationOutcome.addIssue()

@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
+package gov.cms.dpc.fhir.dropwizard.handlers.exceptions.r4;
 
 import gov.cms.dpc.fhir.annotations.FHIR;
 import io.dropwizard.jersey.validation.JerseyViolationException;

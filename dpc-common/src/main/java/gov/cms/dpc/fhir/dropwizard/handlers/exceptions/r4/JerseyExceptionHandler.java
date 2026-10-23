@@ -1,5 +1,6 @@
-package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
+package gov.cms.dpc.fhir.dropwizard.handlers.exceptions.r4;
 
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.AbstractFHIRExceptionHandler;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import io.dropwizard.jersey.validation.ConstraintMessage;
@@ -9,11 +10,10 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.Provider;
 import org.apache.commons.lang3.tuple.Pair;
 import org.glassfish.jersey.server.model.Invocable;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.OperationOutcome;
 
 import java.util.Set;
 
@@ -21,11 +21,10 @@ import java.util.Set;
  * Custom exception handler for {@link JerseyViolationException}.
  * It provides human-readable error messages which can help pinpoint which violates the user needs to address.
  */
-@Provider
 public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyViolationException> {
 
     @Inject
-    JerseyExceptionHandler(@Context ResourceInfo info) {
+    public JerseyExceptionHandler(@Context ResourceInfo info) {
         super(info);
     }
 
@@ -39,7 +38,7 @@ public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyV
     }
 
     @Override
-    Response handleFHIRException(JerseyViolationException exception) {
+    protected Response handleFHIRException(JerseyViolationException exception) {
         final long exceptionID = this.logException(exception);
         final Pair<ImmutableList<String>, Integer> errorStatusPair = processConstraintViolations(exception);
         final OperationOutcome outcome = new OperationOutcome();
@@ -59,7 +58,7 @@ public class JerseyExceptionHandler extends AbstractFHIRExceptionHandler<JerseyV
     }
 
     @Override
-    Response handleNonFHIRException(JerseyViolationException exception) {
+    protected Response handleNonFHIRException(JerseyViolationException exception) {
         final Pair<ImmutableList<String>, Integer> errorStatusPair = processConstraintViolations(exception);
         final long exceptionID = super.logException(exception);
 
