@@ -1,5 +1,6 @@
-package gov.cms.dpc.fhir.dropwizard.handlers.exceptions;
+package gov.cms.dpc.fhir.dropwizard.handlers.exceptions.stu3;
 
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.AbstractFHIRExceptionHandler;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import io.dropwizard.jersey.errors.LoggingExceptionMapper;
 import jakarta.inject.Inject;
@@ -7,7 +8,6 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.Provider;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 
@@ -15,7 +15,6 @@ import org.hl7.fhir.dstu3.model.OperationOutcome;
  * Core error handler for differentiating between FHIR and standard HTTP errors.
  * This overrides *all* of Dropwizard's error handling, but for any non-FHIR resources, we simply delegate back to the root {@link LoggingExceptionMapper}
  */
-@Provider
 public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Throwable> {
 
     @Inject
@@ -33,7 +32,7 @@ public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Th
     }
 
     @Override
-    Response handleFHIRException(Throwable exception) {
+    protected Response handleFHIRException(Throwable exception) {
         final int statusCode;
         // Duplicating some of the logic from the parent LoggingExceptionMapper, because we need to get the logged ID
         // We just pass along redirects
@@ -65,7 +64,7 @@ public class DefaultFHIRExceptionHandler extends AbstractFHIRExceptionHandler<Th
     }
 
     @Override
-    Response handleNonFHIRException(Throwable exception) {
+    protected Response handleNonFHIRException(Throwable exception) {
         return super.toResponse(exception);
     }
 }

@@ -103,11 +103,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--        Validations use the R4 validator, even for STU3 resources-->
+        <!-- FHIRModule creates an R4 context, so its structure library is required at runtime. -->
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
             <artifactId>hapi-fhir-structures-r4</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${hapi.fhir.groupID}</groupId>
