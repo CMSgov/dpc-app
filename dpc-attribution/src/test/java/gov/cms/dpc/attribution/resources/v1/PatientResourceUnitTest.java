@@ -1,8 +1,8 @@
 package gov.cms.dpc.attribution.resources.v1;
 
 import gov.cms.dpc.attribution.jdbi.*;
-import gov.cms.dpc.common.entities.OrganizationEntity;
-import gov.cms.dpc.common.entities.PatientEntity;
+import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
+import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.common.utils.PagingService;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import org.hl7.fhir.dstu3.model.Bundle;

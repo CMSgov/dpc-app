@@ -16,7 +16,7 @@ import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.ValidationHelpers;
-import gov.cms.dpc.fhir.validations.profiles.PractitionerProfile;
+import gov.cms.dpc.fhir.validations.profiles.stu3.PractitionerProfile;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import jakarta.inject.Inject;

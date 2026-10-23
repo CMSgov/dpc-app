@@ -4,7 +4,7 @@ import gov.cms.dpc.attribution.AbstractAttributionDAOTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
 import gov.cms.dpc.attribution.exceptions.AttributionException;
 import gov.cms.dpc.attribution.jdbi.*;
-import gov.cms.dpc.common.entities.*;
+import gov.cms.dpc.common.entities.stu3.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import io.dropwizard.db.ManagedDataSource;
 import org.jooq.conf.RenderQuotedNames;

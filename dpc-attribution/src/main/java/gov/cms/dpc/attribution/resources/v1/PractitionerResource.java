@@ -6,7 +6,7 @@ import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.jdbi.ProviderDAO;
 import gov.cms.dpc.attribution.resources.AbstractPractitionerResource;
 import gov.cms.dpc.attribution.utils.RESTUtils;
-import gov.cms.dpc.common.entities.ProviderEntity;
+import gov.cms.dpc.common.entities.stu3.ProviderEntity;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;

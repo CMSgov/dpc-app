@@ -6,7 +6,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.validations.profiles.OrganizationProfile;
+import gov.cms.dpc.fhir.validations.profiles.stu3.OrganizationProfile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;

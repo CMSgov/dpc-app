@@ -5,7 +5,6 @@ RSpec.shared_examples 'a CSP client' do |config|
   auth_endpoint = config[:auth_endpoint]
   display_name = config[:display_name]
   logout_host = config[:logout_host]
-  expected_id_token = config[:expected_id_token]
   ial1_auth_response = config[:ial1_auth_response]
   csp_name = provider.to_s
 
@@ -76,7 +75,6 @@ RSpec.shared_examples 'a CSP client' do |config|
         expect(csp_session.token).to eq token
         expect(csp_session.token_exp).to_not be_nil
         expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
-        expect(csp_session.id_token).to eq expected_id_token
       end
     end
 
@@ -292,7 +290,6 @@ RSpec.shared_examples 'a CSP client' do |config|
         expect(csp_session.token).to eq token
         expect(csp_session.token_exp).to_not be_nil
         expect(csp_session.token_exp).to be_within(1.second).of 899.seconds.from_now
-        expect(csp_session.id_token).to eq expected_id_token
         expect(csp_session.user).to be_nil
       end
     end
@@ -571,18 +568,33 @@ RSpec.shared_examples 'a CSP client' do |config|
 
     it "should redirect to #{display_name}" do
       delete '/logout'
-      expect(response.location).to include(logout_host)
-      # id_token_hint for CLEAR csp only
-      expect(response.location).to include("id_token_hint=#{expected_id_token}") if expected_id_token
+
+      if csp_name == 'clear'
+        expect(response).to redirect_to(sign_in_path)
+        expect(request.session[:user]).to be_nil
+        expect(request.session[:csp_sessions]).to be_blank
+        expect(request.session[:csp]).to be_nil
+      else
+        expect(response.location).to include(logout_host)
+      end
+
       expect(request.session[:user_return_to]).to be_nil
     end
 
     it 'should set return to invitation flow if invitation sent' do
       invitation = create(:invitation, :ao)
+      invitation_url = organization_invitation_url(invitation.provider_organization.id,
+                                                   invitation.id,
+                                                   invitation.token)
+
       delete "/logout?invitation_token=#{invitation.token}"
-      expect(request.session[:user_return_to]).to eq organization_invitation_url(invitation.provider_organization.id,
-                                                                                 invitation.id,
-                                                                                 invitation.token)
+
+      if csp_name == 'clear'
+        expect(response).to redirect_to(invitation_url)
+        expect(request.session[:user_return_to]).to be_blank
+      else
+        expect(request.session[:user_return_to]).to eq invitation_url
+      end
     end
   end
 

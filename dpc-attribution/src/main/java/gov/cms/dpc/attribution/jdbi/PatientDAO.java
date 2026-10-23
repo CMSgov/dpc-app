@@ -1,7 +1,7 @@
 package gov.cms.dpc.attribution.jdbi;
 
 import com.google.inject.name.Named;
-import gov.cms.dpc.common.entities.*;
+import gov.cms.dpc.common.entities.stu3.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import jakarta.inject.Inject;

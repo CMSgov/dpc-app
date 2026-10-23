@@ -1,8 +1,8 @@
 package gov.cms.dpc.attribution.jdbi;
 
-import gov.cms.dpc.common.entities.OrganizationEntity_;
-import gov.cms.dpc.common.entities.ProviderEntity;
-import gov.cms.dpc.common.entities.ProviderEntity_;
+import gov.cms.dpc.common.entities.stu3.OrganizationEntity_;
+import gov.cms.dpc.common.entities.stu3.ProviderEntity;
+import gov.cms.dpc.common.entities.stu3.ProviderEntity_;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import jakarta.inject.Inject;

@@ -1,6 +1,7 @@
 package gov.cms.dpc.common.annotations;
 
-import gov.cms.dpc.common.hibernate.validator.OrganizationIdValidator;
+import gov.cms.dpc.common.hibernate.validator.Stu3OrganizationValidator;
+import gov.cms.dpc.common.hibernate.validator.R4OrganizationIdValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
@@ -13,11 +14,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({METHOD, FIELD, ANNOTATION_TYPE, PARAMETER})
 @Retention(RUNTIME)
-@Constraint(validatedBy = OrganizationIdValidator.class)
+@Constraint(validatedBy = {Stu3OrganizationValidator.class, R4OrganizationIdValidator.class})
 @Documented
 public @interface OrganizationId {
 
-    String message() default OrganizationIdValidator.VALIDATION_MESSAGE;
+    String message() default Stu3OrganizationValidator.VALIDATION_MESSAGE;
 
     Class<?>[] groups() default {};
 

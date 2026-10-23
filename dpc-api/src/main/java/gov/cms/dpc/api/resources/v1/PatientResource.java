@@ -30,7 +30,7 @@ import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
 import gov.cms.dpc.fhir.validations.ValidationHelpers;
-import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
+import gov.cms.dpc.fhir.validations.profiles.stu3.PatientProfile;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;

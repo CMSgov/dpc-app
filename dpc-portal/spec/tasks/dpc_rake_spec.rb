@@ -6,10 +6,10 @@ RSpec.describe 'dpc rake tasks', type: :task do
   describe 'dpc:invite_ao' do
     let(:task) { Rake::Task['dpc:invite_ao'] }
     let(:service) { instance_double(AoInvitationService) }
-    let(:organization) { instance_double(ProviderOrganization, name: 'Test Org', id: 'org-123') }
+    let(:organization) { ProviderOrganization.new(id: 123, name: 'Test Org') }
     let(:token) { SecureRandom.base58(Invitation::TOKEN_LENGTH) }
     let(:invitation) do
-      instance_double(Invitation, id: 'inv-456', token:, provider_organization: organization)
+      Invitation.new(id: 456, token:, provider_organization: organization, invitation_type: :authorized_official)
     end
 
     before do
@@ -45,20 +45,39 @@ RSpec.describe 'dpc rake tasks', type: :task do
 
         it 'outputs the invitation URL' do
           expect { task.invoke }.to output(
-            include("http://localhost:3100/organizations/org-123/invitations/inv-456/#{token}/accept")
+            include("http://localhost:3100/organizations/123/invitations/456/#{token}/accept")
           ).to_stdout
         end
       end
 
-      context 'in non-development environment' do
+      context 'in test environment' do
         before do
           allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('test'))
+          stub_const('ENV', ENV.to_h.merge('ENV' => 'test', 'HOST_NAME' => 'portal.test.dpc.cmscloud.local'))
         end
 
-        it 'does not output the invitation URL' do
+        it 'does not include localhost in invitation URL for deployed env' do
           expect { task.invoke }.not_to output(
             include('http://localhost:3100')
           ).to_stdout
+        end
+
+        it 'does include hostname in invitation URL' do
+          expect { task.invoke }.to output(
+            include('portal.test.dpc.cmscloud.local')
+          ).to_stdout
+        end
+      end
+
+      context 'in prod environment' do
+        before do
+          allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('production'))
+          stub_const('ENV', ENV.to_h.merge('ENV' => 'prod'))
+        end
+
+        it 'creates the invitation without computing or printing its URL' do
+          expect(invitation).not_to receive(:invite_url)
+          expect { task.invoke }.to output("Invitation created successfully for Test Org\n").to_stdout
         end
       end
     end

@@ -2,8 +2,8 @@ package gov.cms.dpc.attribution.jdbi;
 
 import gov.cms.dpc.attribution.AbstractAttributionDAOTest;
 import gov.cms.dpc.attribution.AttributionTestHelpers;
-import gov.cms.dpc.common.entities.OrganizationEntity;
-import gov.cms.dpc.common.entities.PatientEntity;
+import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
+import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import org.junit.jupiter.api.BeforeEach;
