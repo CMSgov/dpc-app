@@ -24,6 +24,8 @@ class CspVerificationService
 
   private
 
+  def csp_log_context = {}
+
   def adapter_for(csp)
     ADAPTERS[csp.to_s]
   end
@@ -142,6 +144,7 @@ class CspVerificationService
   end
 
   ADAPTERS = { 'clear' => Clear }.freeze
+  private_constant :ADAPTERS
 end
 
 class CspVerificationServiceError < StandardError; end
