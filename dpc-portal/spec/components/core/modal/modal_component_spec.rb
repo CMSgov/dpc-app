@@ -56,9 +56,6 @@ RSpec.describe Core::Modal::ModalComponent, type: :component do
         </div>
       HTML
     end
-    before do
-      render_inline(component)
-    end
 
     it { is_expected.to match_html_fragment(expected_html) }
   end
