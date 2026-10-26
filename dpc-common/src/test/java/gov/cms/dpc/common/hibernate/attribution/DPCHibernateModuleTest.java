@@ -4,6 +4,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
+import gov.cms.dpc.common.hibernate.attribution.r4.DPCHibernateModule;
 import io.dropwizard.core.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import org.hibernate.SessionFactory;
@@ -29,7 +30,9 @@ class DPCHibernateModuleTest {
         when(stu3Bundle.getSessionFactory()).thenReturn(stu3Factory);
         when(r4Bundle.getSessionFactory()).thenReturn(r4Factory);
 
-        Injector injector = Guice.createInjector(new DPCHibernateModule<>(stu3Bundle, r4Bundle));
+        Injector injector = Guice.createInjector(
+                new gov.cms.dpc.common.hibernate.attribution.stu3.DPCHibernateModule<>(stu3Bundle),
+                new DPCHibernateModule<>(r4Bundle));
         Key<DPCManagedSessionFactory> stu3Key = Key.get(DPCManagedSessionFactory.class, Names.named("stu3"));
         Key<DPCManagedSessionFactory> r4Key = Key.get(DPCManagedSessionFactory.class, Names.named("r4"));
         DPCManagedSessionFactory stu3ManagedFactory = injector.getInstance(stu3Key);

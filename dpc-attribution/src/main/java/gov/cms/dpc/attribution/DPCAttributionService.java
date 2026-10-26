@@ -4,7 +4,7 @@ import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListene
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
 import gov.cms.dpc.attribution.jobs.ExpireAttributions;
-import gov.cms.dpc.common.hibernate.attribution.DPCHibernateModule;
+import gov.cms.dpc.common.hibernate.attribution.r4.DPCHibernateModule;
 import gov.cms.dpc.common.hibernate.attribution.DPCR4HibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCStu3HibernateBundle;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
@@ -86,7 +86,8 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
         guiceBundle = GuiceBundle.builder()
                 .enableAutoConfig("gov.cms.dpc.attribution")
                 .modules(
-                        new DPCHibernateModule<>(stu3HibernateBundle, r4HibernateBundle),
+                        new gov.cms.dpc.common.hibernate.attribution.stu3.DPCHibernateModule<>(stu3HibernateBundle),
+                        new DPCHibernateModule<>(r4HibernateBundle),
                         new AttributionAppModule(),
                         new FHIRModule<DPCAttributionConfiguration>())
                 .build();

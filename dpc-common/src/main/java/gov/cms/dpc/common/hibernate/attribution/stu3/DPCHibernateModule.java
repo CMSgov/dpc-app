@@ -1,7 +1,10 @@
-package gov.cms.dpc.common.hibernate.attribution;
+package gov.cms.dpc.common.hibernate.attribution.stu3;
 
 import com.google.inject.Provides;
 import com.google.inject.name.Named;
+import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import gov.cms.dpc.common.hibernate.attribution.DPCStu3HibernateBundle;
+import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import io.dropwizard.core.Configuration;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.db.ManagedDataSource;
@@ -12,17 +15,14 @@ import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 public class DPCHibernateModule<T extends Configuration & IDPCDatabase> extends DropwizardAwareModule<T> {
 
     private final DPCStu3HibernateBundle<T> stu3Hibernate;
-    private final DPCR4HibernateBundle<T> r4Hibernate;
 
-    public DPCHibernateModule(DPCStu3HibernateBundle<T> stu3Hibernate, DPCR4HibernateBundle<T> r4Hibernate) {
+    public DPCHibernateModule(DPCStu3HibernateBundle<T> stu3Hibernate) {
         this.stu3Hibernate = stu3Hibernate;
-        this.r4Hibernate = r4Hibernate;
     }
 
     @Override
     public void configure() {
         binder().bind(DPCStu3HibernateBundle.class).toInstance(stu3Hibernate);
-        binder().bind(DPCR4HibernateBundle.class).toInstance(r4Hibernate);
     }
 
     @Provides
@@ -30,13 +30,6 @@ public class DPCHibernateModule<T extends Configuration & IDPCDatabase> extends 
     @Named("stu3")
     DPCManagedSessionFactory getStu3SessionFactory() {
         return new DPCManagedSessionFactory(this.stu3Hibernate.getSessionFactory());
-    }
-
-    @Provides
-    @Singleton
-    @Named("r4")
-    DPCManagedSessionFactory getR4SessionFactory() {
-        return new DPCManagedSessionFactory(this.r4Hibernate.getSessionFactory());
     }
 
     @Provides
