@@ -71,7 +71,7 @@ class CspVerificationService
               action_context: LoggingConstants::ActionContext::Authentication,
               action_type: LoggingConstants::ActionType::CspUnavailable,
               csp:, error:)
-    end
+  end
 
   # Adapter for CLEAR's Get Verification Session (OAuth variant): GET /v1/verification_sessions/{verification_id} with
   # the access token as Bearer. The verification_id is a claim in the access token.
