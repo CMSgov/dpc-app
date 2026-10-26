@@ -9,10 +9,6 @@ RSpec.describe Core::Form::MaskedInputComponent, type: :component do
       rendered_content
     end
 
-    before do
-      render_inline(component)
-    end
-
     context 'us-phone mask' do
       let(:component) { described_class.new(label: 'Some Label', attribute: 'attr', mask: 'us-phone') }
       let(:expected_html) do

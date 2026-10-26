@@ -9,10 +9,6 @@ RSpec.describe Core::Form::TextAreaComponent, type: :component do
       rendered_content
     end
 
-    before do
-      render_inline(component)
-    end
-
     context 'basic' do
       let(:component) { described_class.new(label: 'Some Label', attribute: 'attr') }
       let(:expected_html) do
