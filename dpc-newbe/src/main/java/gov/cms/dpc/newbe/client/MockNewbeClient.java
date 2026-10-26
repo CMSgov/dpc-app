@@ -1,0 +1,117 @@
+package gov.cms.dpc.newbe.client;
+
+import gov.cms.dpc.newbe.models.NewbeExportRequest;
+import gov.cms.dpc.newbe.models.NewbeExportResponse;
+import gov.cms.dpc.newbe.models.NewbeJobStatus;
+import gov.cms.dpc.newbe.models.NewbeJobStatusOutput;
+import gov.cms.dpc.newbe.models.NewbeJobStatusResponse;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.UUID;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+import java.util.zip.GZIPOutputStream;
+
+public class MockNewbeClient implements NewbeClient {
+
+    private static final int POLL_RETRIES_BEFORE_FILE_DOWNLOAD = 2;
+    private static final String[] ALL_RESOURCE_TYPES = {"Patient", "Coverage", "ExplanationOfBenefit"};
+
+    private final Path exportPath;
+    private final Map<UUID, MockJob> jobs = new HashMap<>();
+
+    public MockNewbeClient(Path exportPath) {
+        this.exportPath = exportPath;
+    }
+
+    @Override
+    public NewbeExportResponse export(NewbeExportRequest request) {
+        final UUID jobId = UUID.randomUUID();
+        final String requestUrl = "/v3/Group/" + request.groupId() + "/$export";
+        jobs.put(jobId, new MockJob(jobId, Instant.now(), requestUrl));
+        return new NewbeExportResponse(jobId);
+    }
+
+    /**
+     * arbitrarily 202's two times then returns response with where to get the file (200)
+     */
+    @Override
+    public synchronized NewbeJobStatus jobStatus(UUID jobId) {
+        MockJob job = jobs.get(jobId);
+        if (job == null) {
+            return null;
+        }
+        if (++job.polls <= POLL_RETRIES_BEFORE_FILE_DOWNLOAD) {
+            return new NewbeJobStatus(202, null);
+        }
+        if (!job.complete) {
+            writeNdjsonFiles(job.jobId);
+            job.complete = true;
+        }
+        return new NewbeJobStatus(200, new NewbeJobStatusResponse(
+            job.transactionTime,
+            job.requestUrl,
+            true,
+            output(job.jobId),
+            List.of(),
+            job.jobId
+        ));
+    }
+
+    private List<NewbeJobStatusOutput> output(UUID jobId) {
+        return Stream.of(ALL_RESOURCE_TYPES)
+            .map(resourceType -> new NewbeJobStatusOutput(
+                resourceType,
+                "/data/" + jobId + "/" + jobId + "-" + resourceType + ".ndjson"
+            ))
+            .toList();
+    }
+
+    private void writeNdjsonFiles(UUID jobId) {
+        try {
+            Files.createDirectories(exportPath);
+            byte[] ndjson = "{\"foo\": \"bar\"}\n"
+                .getBytes(StandardCharsets.UTF_8);
+
+            for (String resourceType : ALL_RESOURCE_TYPES) {
+                String filename = jobId + "-" + resourceType + ".ndjson";
+
+                // write unzipped
+                try (FileOutputStream output = new FileOutputStream(exportPath + "/" + filename)) {
+                    output.write(ndjson);
+                }
+                // write gzipped
+                try (
+                    FileOutputStream fos = new FileOutputStream(exportPath + "/" + filename + ".gz");
+                    GZIPOutputStream output = new GZIPOutputStream(fos)
+                ) {
+                    output.write(ndjson);
+                }
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException("Unable to write mock export file", e);
+        }
+    }
+
+    private static class MockJob {
+        private final UUID jobId;
+        private final Instant transactionTime;
+        private final String requestUrl;
+        private int polls;
+        private boolean complete;
+
+        private MockJob(UUID jobId, Instant transactionTime, String requestUrl) {
+            this.jobId = jobId;
+            this.transactionTime = transactionTime;
+            this.requestUrl = requestUrl;
+        }
+    }
+}
