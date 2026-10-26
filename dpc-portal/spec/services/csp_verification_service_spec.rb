@@ -5,7 +5,7 @@ require 'rails_helper'
 SESSION_CREATED_AT = 1.hour.ago.to_i
 SESSION_COMPLETED_AT = Time.now.to_i
 
-RSpec.describe CspVerification do
+RSpec.describe CspVerificationService do
   let(:service) { described_class.new }
   let(:verification_id) { 'verify_abc123' }
   let(:url) { "#{CLEAR_CONFIG[:verification_session_endpoint]}/#{verification_id}" }
@@ -150,7 +150,7 @@ RSpec.describe CspVerification do
   end
 end
 
-RSpec.describe CspVerification::Clear do
+RSpec.describe CspVerificationService::Clear do
   describe '.session_url' do
     it 'is the session named in the access token' do
       token = JWT.encode({ 'verification_id' => 'verify_abc123' }, nil, 'none')
@@ -160,7 +160,7 @@ RSpec.describe CspVerification::Clear do
 
     shared_examples 'a rejected access token' do |reason|
       it "raises #{reason}" do
-        expect { described_class.session_url(token) }.to raise_error(CspVerification::Error, reason)
+        expect { described_class.session_url(token) }.to raise_error(CspVerificationServiceError, reason)
       end
     end
 

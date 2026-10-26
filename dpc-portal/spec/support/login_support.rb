@@ -4,8 +4,8 @@ require 'securerandom'
 
 module LoginSupport
   # Helpers for specs that log in through CLEAR. Every CLEAR login asks CLEAR for the outcome of the verification, using
-  # the verification_id claim in the access token (see CspVerification::Clear), so specs need a token with that claim
-  # and a stubbed Get Verification Session response.
+  # the verification_id claim in the access token (see CspVerificationService::Clear), so specs need a token with that
+  # claim and a stubbed Get Verification Session response.
   module ClearVerification
     CLEAR_TEST_VERIFICATION_ID = 'verify_test123'
 

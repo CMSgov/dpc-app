@@ -130,7 +130,7 @@ class CspController < ApplicationController
   end
 
   def csp_verification
-    @csp_verification ||= CspVerification.new
+    @csp_verification ||= CspVerificationService.new
   end
 
   # Returns the message to pass to csp#failure as params[:message], or nil if verification was successful.

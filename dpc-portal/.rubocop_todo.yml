@@ -26,6 +26,7 @@ Style/OneClassPerFile:
     - 'app/models/invitation.rb'
     - 'app/services/ao_invitation_service.rb'
     - 'app/services/ao_verification_service.rb'
+    - 'app/services/csp_verification_service.rb'
     - 'app/services/user_info_service.rb'
     - 'spec/jobs/sync_organization_job_spec.rb'
 

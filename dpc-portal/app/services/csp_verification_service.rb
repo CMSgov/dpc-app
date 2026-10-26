@@ -2,44 +2,36 @@
 
 # A service that checks with a CSP whether a person's identity verification passed, using the access token received
 # at login.
-class CspVerification
+class CspVerificationService
+  include StructuredLogging
+
   # When the CSP couldn't be asked, there is only outcome: :unavailable and failure_reason (one of FAILURE_REASONS).
   FAILURE_REASONS = %w[missing_access_token invalid_access_token invalid_verification_id unauthorized forbidden
                        not_found rate_limited server_error request_failed invalid_response].freeze
 
-  class Error < StandardError; end
+  ADAPTERS = { 'clear' => Clear }.freeze
 
-  # Asks the CSP what happened to the verification, using the access token received at login
-  # Returns a plain Hash with these keys. Together they are what CspUserVerification stores.
-  #   outcome:            :verified, :cancelled, :failed, :expired or :unavailable. Anything but :verified is passed to
-  #                       csp#failure as params[:message]
-  #   status:             the CSP's own status string
-  #   reason:             the CSP's own failure reason, if it gave one (for outcome_for and for logging)
-  #   session_id:         the CSP's id for the verification session
-  #   session_created_at: Time the CSP created the session
-  #   completed_at:       Time the session completed, if it has
-  #   checks:             array of { name:, status:, status_details:, value:, reason_codes: }
   def verify(csp, access_token)
     adapter = adapter_for(csp)
     raise ArgumentError, "No verification adapter for #{csp.inspect}" unless adapter
 
     build_verification(adapter, get_session(adapter.session_url(access_token), access_token))
-  rescue Error => e
+  rescue CspVerificationServiceError => e
     handle_error(e, csp)
   end
 
   def supported?(csp)
-    !adapter_for(csp).nil?
+    ADAPTERS.key?(csp.to_s)
   end
 
   private
 
   def adapter_for(csp)
-    { 'clear' => Clear }[csp.to_s]
+    ADAPTERS[csp.to_s]
   end
 
   def build_verification(adapter, body)
-    raise Error, 'invalid_response' unless adapter.valid_response?(body)
+    raise CspVerificationServiceError, 'invalid_response' unless adapter.valid_response?(body)
 
     status = adapter.status_from(body).to_s
     reason = adapter.reason_from(body)
@@ -47,7 +39,7 @@ class CspVerification
   end
 
   def handle_error(error, csp)
-    Rails.logger.error "CSP verification unavailable (csp=#{csp}): #{error.message}"
+    log_verification_error('CSP verification unavailable', csp, error.message)
     { outcome: :unavailable, failure_reason: error.message }
   end
 
@@ -56,23 +48,30 @@ class CspVerification
     handle_response(Net::HTTP.get_response(URI(session_uri), headers))
   rescue Timeout::Error, SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError => e
     Rails.logger.error "Could not reach CSP verification endpoint: #{e.class}"
-    raise Error, 'request_failed'
+    raise CspVerificationServiceError, 'request_failed'
   end
 
   def handle_response(response)
     case response
     when Net::HTTPSuccess then JSON.parse(response.body)
-    when Net::HTTPUnauthorized then raise Error, 'unauthorized'
-    when Net::HTTPForbidden then raise Error, 'forbidden'
-    when Net::HTTPNotFound then raise Error, 'not_found'
-    when Net::HTTPTooManyRequests then raise Error, 'rate_limited'
+    when Net::HTTPUnauthorized then raise CspVerificationServiceError, 'unauthorized'
+    when Net::HTTPForbidden then raise CspVerificationServiceError, 'forbidden'
+    when Net::HTTPNotFound then raise CspVerificationServiceError, 'not_found'
+    when Net::HTTPTooManyRequests then raise CspVerificationServiceError, 'rate_limited'
     else
       Rails.logger.error "CSP verification error: #{response.code}"
-      raise Error, 'server_error'
+      raise CspVerificationServiceError, 'server_error'
     end
   rescue JSON::ParserError
-    raise Error, 'invalid_response'
+    raise CspVerificationServiceError, 'invalid_response'
   end
+
+  def log_verification_error(message, csp, error)
+    log_event(:error, message,
+              action_context: LoggingConstants::ActionContext::Authentication,
+              action_type: LoggingConstants::ActionType::CspUnavailable,
+              csp:, error:)
+    end
 
   # Adapter for CLEAR's Get Verification Session (OAuth variant): GET /v1/verification_sessions/{verification_id} with
   # the access token as Bearer. The verification_id is a claim in the access token.
@@ -118,14 +117,14 @@ class CspVerification
     end
 
     def self.verification_id(access_token)
-      raise Error, 'missing_access_token' if access_token.blank?
+      raise CspVerificationServiceError, 'missing_access_token' if access_token.blank?
 
       id = JWT.decode(access_token, nil, false).first['verification_id']
-      raise Error, 'invalid_verification_id' unless VERIFICATION_ID_FORMAT.match?(id.to_s)
+      raise CspVerificationServiceError, 'invalid_verification_id' unless VERIFICATION_ID_FORMAT.match?(id.to_s)
 
       id
     rescue JWT::DecodeError
-      raise Error, 'invalid_access_token'
+      raise CspVerificationServiceError, 'invalid_access_token'
     end
 
     def self.optional?(value, type) = value.nil? || value.is_a?(type)
@@ -144,3 +143,5 @@ class CspVerification
     private_class_method :verification_id, :optional?, :valid_checks?, :check_from, :time_from
   end
 end
+
+class CspVerificationServiceError < StandardError; end

@@ -12,8 +12,6 @@ class CspUserVerification < ApplicationRecord
   validates :csp_verification_id, :status, presence: true
 
   def self.record!(csp:, verification:, user: nil, invitation: nil)
-    raise ArgumentError, 'verification has no session_id' if verification[:session_id].blank?
-
     record = new(csp:, csp_verification_id: verification[:session_id], user:, invitation: (invitation unless user),
                  **verification.slice(:status, :session_created_at, :completed_at).compact)
     Array(verification[:checks]).each { |check| record.csp_verification_checks.build(check_attributes(check)) }
