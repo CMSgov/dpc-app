@@ -15,9 +15,6 @@ RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
     let(:given_name) { 'Paola' }
     let(:family_name) { 'Pineiro' }
 
-    before do
-      render_inline(component)
-    end
     context 'authorized official' do
       let(:ao_invite) { Invitation.new(id: 5, invitation_type: :authorized_official) }
       let(:component) { described_class.new(org, ao_invite, given_name, family_name) }
@@ -28,6 +25,7 @@ RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
       end
 
       it 'should have step component at step 3' do
+        render_inline(described_class.new(org, ao_invite, given_name, family_name))
         expect(page).to have_selector('.usa-step-indicator__current-step')
         expect(page.find('.usa-step-indicator__current-step').text).to eq '3'
       end
@@ -47,6 +45,7 @@ RSpec.describe Page::Invitations::AcceptInvitationComponent, type: :component do
       end
 
       it 'should have step component at step 3' do
+        render_inline(described_class.new(org, cd_invite, given_name, family_name))
         expect(page).to have_selector('.usa-step-indicator__current-step')
         expect(page.find('.usa-step-indicator__current-step').text).to eq '3'
       end

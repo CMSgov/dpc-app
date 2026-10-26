@@ -19,20 +19,12 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
     context 'when is ao' do
       let(:component) { described_class.new(ao_or_cd: :ao, links: []) }
 
-      before do
-        render_inline(component)
-      end
-
       it 'should have reference to Authorized Official' do
         is_expected.to include(normalize_space(ao_or_cd_ref))
       end
     end
     context 'when has no options and is cd' do
       let(:component) { described_class.new(ao_or_cd: :cd, links: []) }
-
-      before do
-        render_inline(component)
-      end
 
       it 'should have generic AO/CD message' do
         is_expected.to include(normalize_space(ao_or_cd_ref))
@@ -91,10 +83,6 @@ RSpec.describe Page::Organization::OrganizationListComponent, type: :component d
             </table>
           </div>
         HTML
-      end
-
-      before do
-        render_inline(component)
       end
 
       it 'should have one row in table' do
