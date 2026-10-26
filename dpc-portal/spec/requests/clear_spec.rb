@@ -27,9 +27,7 @@ RSpec.describe 'Clear', type: :request do
     clear_config = {
       provider: :clear,
       auth_endpoint: '/auth/clear',
-      display_name: 'CLEAR',
-      logout_host: ENV.fetch('CLEAR_IDP_HOST'),
-      expected_id_token: 'id-token' # covers store_id_token = true for clear_controller
+      display_name: 'CLEAR'
     }
     it_behaves_like 'a CSP client', clear_config
 
