@@ -68,7 +68,8 @@ class FHIRParamValueFactoryTest {
     @Test
     void testOtherVersionResource() {
         final Parameter parameter = Mockito.mock(Parameter.class);
-        Mockito.when(parameter.getDeclaredAnnotation(FHIRParameter.class)).thenReturn(Mockito.mock(FHIRParameter.class));
+        final FHIRParameter mockAnnotation = Mockito.mock(FHIRParameter.class);
+        Mockito.when(parameter.getDeclaredAnnotation(FHIRParameter.class)).thenReturn(mockAnnotation);
         Mockito.when(parameter.getRawType()).thenAnswer(answer -> org.hl7.fhir.dstu3.model.Patient.class);
         assertNull(factory.getValueProvider(parameter));
     }

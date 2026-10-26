@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -76,7 +77,7 @@ public class BundleHandler implements MessageBodyWriter<Collection<Resource>> {
                     bundleEntryComponent.setResource(resource);
                     return bundleEntryComponent;
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
 
         baseBundle.setEntry(entries);
     }

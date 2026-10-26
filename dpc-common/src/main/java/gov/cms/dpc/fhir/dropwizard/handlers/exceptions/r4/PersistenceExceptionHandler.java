@@ -26,7 +26,7 @@ import java.sql.BatchUpdateException;
  */
 public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<PersistenceException> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PersistenceExceptionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceExceptionHandler.class);
     private static final Pattern MSG_PATTERN = Pattern.compile("ERROR:\\s(duplicate\\s[a-zA-Z_]*\\svalue\\sviolates\\sunique\\sconstraint)");
 
     @Inject
@@ -80,7 +80,7 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
                 || exception.getCause() instanceof BatchUpdateException) {
             message = exception.getMessage();
         } else {
-            logger.error("Cannot persist to DB", exception);
+            LOGGER.error("Cannot persist to DB", exception);
             message = "Internal server error";
             status = Response.Status.INTERNAL_SERVER_ERROR;
         }
@@ -99,7 +99,7 @@ public class PersistenceExceptionHandler extends AbstractFHIRExceptionHandler<Pe
             try {
                 message = matcher.group(1);
             } catch (IndexOutOfBoundsException e) {
-                logger.error("Failed to parse constraint from error message: {}", inputMessage, e);
+                LOGGER.error("Failed to parse constraint from error message: {}", inputMessage, e);
                 message = inputMessage;
             }
         } else {

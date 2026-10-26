@@ -19,7 +19,7 @@ class ProviderDAOUnitTest extends AbstractAttributionDAOTest {
 	private OrganizationDAO organizationDAO;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		DPCManagedSessionFactory dpcManagedSessionFactory = new DPCManagedSessionFactory(db.getSessionFactory());
 		providerDAO = new ProviderDAO(dpcManagedSessionFactory);
 		organizationDAO = new OrganizationDAO(dpcManagedSessionFactory);

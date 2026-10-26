@@ -62,7 +62,7 @@ class ExpireAttributionsUnitTest extends Stu3AbstractAttributionDAOTest {
     private ExpireAttributions expireAttributions;
 
     @BeforeEach
-    public void setUp() throws SQLException {
+    void setUp() throws SQLException {
         MockitoAnnotations.openMocks(this);
 
         when(this.dataSource.getConnection()).thenReturn(this.connection);

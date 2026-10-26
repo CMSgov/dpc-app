@@ -23,7 +23,7 @@ class RelationshipDAOUnitTest extends Stu3AbstractAttributionDAOTest {
 	private RosterDAO rosterDAO;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		DPCManagedSessionFactory dpcManagedSessionFactory = new DPCManagedSessionFactory(db.getSessionFactory());
 		relationshipDAO = new RelationshipDAO(dpcManagedSessionFactory);
 		patientDAO = new PatientDAO(dpcManagedSessionFactory, 1);
