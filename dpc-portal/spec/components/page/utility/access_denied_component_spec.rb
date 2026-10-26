@@ -9,10 +9,6 @@ RSpec.describe Page::Utility::AccessDeniedComponent, type: :component do
       rendered_content
     end
 
-    before do
-      render_inline(component)
-    end
-
     let(:sprite_path) { ActionController::Base.helpers.asset_path('@uswds/uswds/dist/img/sprite.svg') }
 
     context 'with organization' do

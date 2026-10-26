@@ -11,10 +11,6 @@ RSpec.describe Page::Utility::ErrorComponent, type: :component do
       normalize_space(rendered_content)
     end
 
-    before do
-      render_inline(component)
-    end
-
     let(:provider_organization) { create(:provider_organization, name: 'Health Hut') }
     let(:invitation) { create(:invitation, :ao, provider_organization:) }
     context 'ao invalid invitation' do

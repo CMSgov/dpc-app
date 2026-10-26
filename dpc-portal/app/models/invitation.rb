@@ -146,6 +146,12 @@ class Invitation < ApplicationRecord
       .exists?
   end
 
+  # for use w/ dpc.rake task to capture invite URL's for synthetic users
+  def invite_url
+    base_url = Rails.env.development? ? 'http://localhost:3100' : "https://#{ENV.fetch('HOST_NAME', 'localhost:3100')}"
+    "#{base_url}/organizations/#{provider_organization_id}/invitations/#{id}/#{token}/accept"
+  end
+
   private
 
   def cd_info_present?(user_info)

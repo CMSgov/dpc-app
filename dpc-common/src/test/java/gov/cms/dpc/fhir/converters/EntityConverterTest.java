@@ -1,6 +1,6 @@
 package gov.cms.dpc.fhir.converters;
 
-import gov.cms.dpc.common.entities.PatientEntity;
+import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.fhir.converters.exceptions.DataTranslationException;
 import gov.cms.dpc.fhir.converters.exceptions.FHIRConverterException;
 import gov.cms.dpc.fhir.converters.exceptions.MissingConverterException;

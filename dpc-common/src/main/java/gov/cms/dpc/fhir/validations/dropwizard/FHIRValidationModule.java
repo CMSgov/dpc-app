@@ -13,7 +13,7 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration.FHIRValidationConfiguration;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
-import gov.cms.dpc.fhir.validations.profiles.PatientProfile;
+import gov.cms.dpc.fhir.validations.profiles.stu3.PatientProfile;
 import io.dropwizard.jersey.validation.Validators;
 import jakarta.inject.Singleton;
 import jakarta.validation.ConstraintValidator;

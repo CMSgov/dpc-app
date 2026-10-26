@@ -2,7 +2,7 @@ package gov.cms.dpc.fhir;
 
 import com.google.re2j.Matcher;
 import com.google.re2j.Pattern;
-import gov.cms.dpc.common.entities.PatientEntity;
+import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.fhir.helpers.DPCCollectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
@@ -75,6 +75,65 @@ public class FHIRExtractors {
 
         // We only return MBIs if they're in the correct format
         Pattern mbiPattern = Pattern.compile(PatientEntity.MBI_FORMAT);
+        if (mbiPattern.matcher(currentMBI).matches()) {
+            return currentMBI;
+        } else {
+            throw new IllegalArgumentException("MBI: " + currentMBI + " for patient: " + patient.getId() + " does not match MBI format");
+        }
+    }
+
+    /**
+     * Extract the National Provider ID (NPI) from an R4 Practitioner.
+     *
+     * @param provider - R4 practitioner to get NPI from
+     * @return - provider NPI
+     */
+    public static String getProviderNPI(org.hl7.fhir.r4.model.Practitioner provider) {
+        return provider.getIdentifier().stream()
+                .filter(id -> id.getSystem().equals(DPCIdentifierSystem.NPPES.getSystem()))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException(String.format(
+                        "Cannot find identifier for system: %s", DPCIdentifierSystem.NPPES.getSystem())))
+                .getValue();
+    }
+
+    /**
+     * Extract the current Medicare Beneficiary ID (MBI) from an R4 Patient.
+     * Kept independent of the STU3 extraction methods for eventual STU3 removal.
+     *
+     * @param patient - R4 patient to get MBI from
+     * @return - current MBI, validated against the R4 entity's MBI format
+     */
+    public static String getPatientMBI(org.hl7.fhir.r4.model.Patient patient) {
+        List<org.hl7.fhir.r4.model.Identifier> mbis = patient.getIdentifier().stream()
+                .filter(id -> id.getSystem().equals(DPCIdentifierSystem.MBI.getSystem()))
+                .toList();
+        String currentMBI;
+
+        if(mbis.size() == 1) {
+            // If we only received one MBI, use it
+            currentMBI = mbis.get(0).getValue();
+        } else if(mbis.size() > 1) {
+            // If we received multiple MBI's, find the one marked current
+            currentMBI = mbis.stream()
+                .filter( mbi -> {
+                    org.hl7.fhir.r4.model.Extension mbiExtension = mbi.getExtension().stream()
+                        .filter(ext -> ext.hasUrlElement() && ext.getUrl().equals(DPCExtensionSystem.IDENTIFIER_CURRENCY.getSystem()))
+                        .collect(DPCCollectors.singleOrNone())
+                        .orElseThrow(() -> new IllegalArgumentException("Cannot find an MBI with identifier currency for patient: " + patient.getId()));
+
+                    return mbi.castToCoding(mbiExtension.getValue()).getCode().equals(DPCExtensionSystem.CURRENT);
+                })
+                .collect(DPCCollectors.singleOrNone())
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find current MBI for patient: " + patient.getId()))
+                .getValue();
+        } else {
+            // Patient resource didn't have any MBIs
+            throw new IllegalArgumentException("Patient: " + patient.getId() + " doesn't have an MBI");
+        }
+
+        // We only return MBIs if they're in the correct format
+        Pattern mbiPattern = Pattern.compile(gov.cms.dpc.common.entities.r4.PatientEntity.MBI_FORMAT);
         if (mbiPattern.matcher(currentMBI).matches()) {
             return currentMBI;
         } else {

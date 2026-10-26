@@ -16,10 +16,6 @@ RSpec.describe Page::Organization::CompoundShowComponent, type: :component do
                           ['verified', %i[text-accent-cool], 'Manage your organization.'])
     end
 
-    before do
-      render_inline(component)
-    end
-
     context 'cd tab' do
       let(:delegate_info) { { active: [], pending: [], expired: [] } }
       let(:role) { 'Authorized Official' }

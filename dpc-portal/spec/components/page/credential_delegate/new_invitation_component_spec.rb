@@ -17,10 +17,6 @@ RSpec.describe Page::CredentialDelegate::NewInvitationComponent, type: :componen
 
     let(:sprite_path) { ActionController::Base.helpers.asset_path('@uswds/uswds/dist/img/sprite.svg') }
 
-    before do
-      render_inline(component)
-    end
-
     context 'New form' do
       it 'should match header' do
         header = <<~HTML
