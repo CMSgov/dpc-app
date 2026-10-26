@@ -9,8 +9,6 @@ class CspVerificationService
   FAILURE_REASONS = %w[missing_access_token invalid_access_token invalid_verification_id unauthorized forbidden
                        not_found rate_limited server_error request_failed invalid_response].freeze
 
-  ADAPTERS = { 'clear' => Clear }.freeze
-
   def verify(csp, access_token)
     adapter = adapter_for(csp)
     raise ArgumentError, "No verification adapter for #{csp.inspect}" unless adapter
@@ -142,6 +140,8 @@ class CspVerificationService
 
     private_class_method :verification_id, :optional?, :valid_checks?, :check_from, :time_from
   end
+
+  ADAPTERS = { 'clear' => Clear }.freeze
 end
 
 class CspVerificationServiceError < StandardError; end
