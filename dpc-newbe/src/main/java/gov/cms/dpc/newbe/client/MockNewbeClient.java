@@ -2,6 +2,7 @@ package gov.cms.dpc.newbe.client;
 
 import gov.cms.dpc.newbe.models.NewbeExportRequest;
 import gov.cms.dpc.newbe.models.NewbeExportResponse;
+import gov.cms.dpc.newbe.models.NewbeHealthCheckResponse;
 import gov.cms.dpc.newbe.models.NewbeJobStatus;
 import gov.cms.dpc.newbe.models.NewbeJobStatusOutput;
 import gov.cms.dpc.newbe.models.NewbeJobStatusResponse;
@@ -30,6 +31,15 @@ public class MockNewbeClient implements NewbeClient {
 
     public MockNewbeClient(Path exportPath) {
         this.exportPath = exportPath;
+    }
+
+    /**
+     *  CapabilitiesStatement is retrurned from metadata endpoint
+     *  <a href="https://bcda.cms.gov/api-documentation/access-claims-data.html#check-api-status-2">...</a>
+     */
+    @Override
+    public NewbeHealthCheckResponse healthy() {
+        return new NewbeHealthCheckResponse("{\"resourceType\":\"CapabilityStatement\",\"status\":\"active\"}");
     }
 
     @Override

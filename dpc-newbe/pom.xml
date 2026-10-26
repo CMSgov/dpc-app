@@ -14,6 +14,19 @@
 
     <dependencies>
         <dependency>
+            <groupId>${hapi.fhir.groupID}</groupId>
+            <artifactId>hapi-fhir-structures-r4</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ru.vyarus</groupId>
+            <artifactId>dropwizard-guicey</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
