@@ -12,9 +12,6 @@ RSpec.describe Core::Navigation::TabbedComponent, type: :component do
     let(:component) { described_class.new('header_id', links) }
     let(:expected_selectors) { '' }
     let(:expected_start_index) { -1 }
-    before do
-      render_inline(component)
-    end
 
     context 'without links' do
       let(:links) { [] }

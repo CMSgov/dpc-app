@@ -13,10 +13,6 @@ RSpec.describe Page::Organization::CredentialsComponent, type: :component do
 
     let(:component) { described_class.new(org) }
 
-    before do
-      render_inline(component)
-    end
-
     context 'No tokens, keys, or ip addrs' do
       let(:org) { ComponentSupport::MockOrg.new(0) }
       it 'Should have Generate token button' do

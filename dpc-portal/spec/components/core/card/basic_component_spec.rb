@@ -26,10 +26,6 @@ RSpec.describe Core::Card::BasicComponent, type: :component do
       HTML
     end
 
-    before do
-      render_inline(component)
-    end
-
     it { is_expected.to match_html_fragment(expected_html) }
 
     context 'when has button' do

@@ -22,10 +22,6 @@ RSpec.describe Core::Table::RowComponent, type: :component do
       HTML
     end
 
-    before do
-      render_inline(component)
-    end
-
     it { is_expected.to match_html_fragment(expected_html) }
 
     context 'with delete' do
