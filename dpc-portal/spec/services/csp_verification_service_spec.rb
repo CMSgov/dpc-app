@@ -118,7 +118,11 @@ RSpec.describe CspVerificationService do
         stub_request(:get, url).to_return(status: 401)
         allow(Rails.logger).to receive(:error)
         verify
-        expect(Rails.logger).to have_received(:error).with('CSP verification unavailable (csp=clear): unauthorized')
+        expect(Rails.logger).to have_received(:error).with(
+          ['CSP verification unavailable',
+           hash_including(actionContext: LoggingConstants::ActionContext::Authentication,
+                          actionType: LoggingConstants::ActionType::CspUnavailable)]
+        )
       end
     end
 

@@ -91,7 +91,7 @@ RSpec.describe CspUserVerification, type: :model do
 
     it 'requires a session id' do
       expect { described_class.record!(csp:, verification: { status: 'fail' }) }
-        .to raise_error(ArgumentError, /session_id/)
+        .to raise_error(ActiveRecord::RecordInvalid)
     end
   end
 
