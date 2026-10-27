@@ -23,11 +23,13 @@ class MockNewbeClientTest {
         MockNewbeClient client = new MockNewbeClient(exportPath);
 
         NewbeExportResponse response = client.export(request());
+        final UUID jobId = getJobIdFromResponse(response);
 
-        assertEquals(202, client.jobStatus(response.jobId()).statusCode());
-        assertEquals(202, client.jobStatus(response.jobId()).statusCode());
+        assertEquals(202, response.statusCode());
+        assertEquals(202, client.jobStatus(jobId).statusCode());
+        assertEquals(202, client.jobStatus(jobId).statusCode());
 
-        var completedJob = client.jobStatus(response.jobId());
+        var completedJob = client.jobStatus(jobId);
         assertEquals(200, completedJob.statusCode());
     }
 
@@ -36,10 +38,11 @@ class MockNewbeClientTest {
         MockNewbeClient client = new MockNewbeClient(exportPath);
 
         NewbeExportResponse response = client.export(request());
-        client.jobStatus(response.jobId());
-        client.jobStatus(response.jobId());
+        final UUID jobId = getJobIdFromResponse(response);
+        client.jobStatus(jobId);
+        client.jobStatus(jobId);
 
-        var completedJob = client.jobStatus(response.jobId());
+        var completedJob = client.jobStatus(jobId);
         assertEquals(200, completedJob.statusCode());
 
         List<String> resourceTypes = List.of("Patient", "Coverage", "ExplanationOfBenefit");
@@ -49,7 +52,7 @@ class MockNewbeClientTest {
             var output = completedJob.body().output().get(index);
             assertEquals(resourceType, output.type());
             assertEquals(
-                    "/data/" + response.jobId() + "/" + response.jobId() + "-" + resourceType + ".ndjson",
+                    "/data/" + jobId + "/" + jobId + "-" + resourceType + ".ndjson",
                     output.url()
             );
         }
@@ -60,22 +63,27 @@ class MockNewbeClientTest {
         MockNewbeClient client = new MockNewbeClient(exportPath);
 
         NewbeExportResponse response = client.export(request());
-        client.jobStatus(response.jobId());
-        client.jobStatus(response.jobId());
+        final UUID jobId = getJobIdFromResponse(response);
+        client.jobStatus(jobId);
+        client.jobStatus(jobId);
 
-        var completedJob = client.jobStatus(response.jobId());
+        var completedJob = client.jobStatus(jobId);
         assertEquals(200, completedJob.statusCode());
 
         // verify unzipped that mock files are created
         for (String resourceType : List.of("Patient", "Coverage", "ExplanationOfBenefit")) {
-            Path output = Path.of(exportPath + "/" + response.jobId() + "-" + resourceType + ".ndjson");
+            Path output = Path.of(exportPath + "/" + jobId + "-" + resourceType + ".ndjson");
             assertTrue(Files.exists(output));
         }
         // verify gzipped
         for (String resourceType : List.of("Patient", "Coverage", "ExplanationOfBenefit")) {
-            Path output = Path.of(exportPath + "/" + response.jobId() + "-" + resourceType + ".ndjson.gz");
+            Path output = Path.of(exportPath + "/" + jobId + "-" + resourceType + ".ndjson.gz");
             assertTrue(Files.exists(output));
         }
+    }
+
+    private UUID getJobIdFromResponse(NewbeExportResponse response) {
+        return UUID.fromString(response.contentLocation().substring(response.contentLocation().lastIndexOf('/') + 1));
     }
 
     private NewbeExportRequest request() {

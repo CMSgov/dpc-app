@@ -2,7 +2,6 @@ package gov.cms.dpc.newbe.client;
 
 import gov.cms.dpc.newbe.models.NewbeExportRequest;
 import gov.cms.dpc.newbe.models.NewbeExportResponse;
-import gov.cms.dpc.newbe.models.NewbeHealthCheckResponse;
 import gov.cms.dpc.newbe.models.NewbeJobStatus;
 import gov.cms.dpc.newbe.models.NewbeJobStatusOutput;
 import gov.cms.dpc.newbe.models.NewbeJobStatusResponse;
@@ -38,16 +37,20 @@ public class MockNewbeClient implements NewbeClient {
      *  <a href="https://bcda.cms.gov/api-documentation/access-claims-data.html#check-api-status-2">...</a>
      */
     @Override
-    public NewbeHealthCheckResponse healthy() {
-        return new NewbeHealthCheckResponse("{\"resourceType\":\"CapabilityStatement\",\"status\":\"active\"}");
+    public boolean healthy() {
+        return true;
     }
 
+    /**
+     * response still tbd, but BCDA docs say to use content-location header for job URL
+     */
     @Override
     public NewbeExportResponse export(NewbeExportRequest request) {
         final UUID jobId = UUID.randomUUID();
         final String requestUrl = "/v3/Group/" + request.groupId() + "/$export";
-        jobs.put(jobId, new MockJob(jobId, Instant.now(), requestUrl));
-        return new NewbeExportResponse(jobId);
+        final String jobUrl = "https://localhost:3002/api/v3/jobs/" + jobId;
+        jobs.put(jobId, new MockJob(jobId, requestUrl));
+        return new NewbeExportResponse(202, jobUrl);
     }
 
     /**
@@ -67,7 +70,7 @@ public class MockNewbeClient implements NewbeClient {
             job.complete = true;
         }
         return new NewbeJobStatus(200, new NewbeJobStatusResponse(
-            job.transactionTime,
+            Instant.now(),
             job.requestUrl,
             true,
             output(job.jobId),
@@ -113,14 +116,12 @@ public class MockNewbeClient implements NewbeClient {
 
     private static class MockJob {
         private final UUID jobId;
-        private final Instant transactionTime;
         private final String requestUrl;
         private int polls;
         private boolean complete;
 
-        private MockJob(UUID jobId, Instant transactionTime, String requestUrl) {
+        private MockJob(UUID jobId, String requestUrl) {
             this.jobId = jobId;
-            this.transactionTime = transactionTime;
             this.requestUrl = requestUrl;
         }
     }
