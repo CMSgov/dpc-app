@@ -17,7 +17,6 @@ import java.util.UUID;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
 public class MockNewbeClient implements NewbeClient {
@@ -43,13 +42,19 @@ public class MockNewbeClient implements NewbeClient {
 
     /**
      * response still tbd, but BCDA docs say to use content-location header for job URL
+     *
+     * Only one mock even though Patient parameter requrests will be POST - TRD specifies that
+     *   all requests will be POST to $shared-export
      */
     @Override
     public NewbeExportResponse export(NewbeExportRequest request) {
         final UUID jobId = UUID.randomUUID();
         final String requestUrl = "/v3/Group/" + request.groupId() + "/$export";
         final String jobUrl = "https://localhost:3002/api/v3/jobs/" + jobId;
-        jobs.put(jobId, new MockJob(jobId, requestUrl));
+        final List<String> resourceTypes = request.resourceTypes().isEmpty()
+            ? List.of(ALL_RESOURCE_TYPES)
+            : request.resourceTypes();
+        jobs.put(jobId, new MockJob(jobId, requestUrl, resourceTypes));
         return new NewbeExportResponse(202, jobUrl);
     }
 
@@ -66,36 +71,36 @@ public class MockNewbeClient implements NewbeClient {
             return new NewbeJobStatus(202, null);
         }
         if (!job.complete) {
-            writeNdjsonFiles(job.jobId);
+            writeNdjsonFiles(job);
             job.complete = true;
         }
         return new NewbeJobStatus(200, new NewbeJobStatusResponse(
             Instant.now(),
             job.requestUrl,
             true,
-            output(job.jobId),
+            output(job),
             List.of(),
             job.jobId
         ));
     }
 
-    private List<NewbeJobStatusOutput> output(UUID jobId) {
-        return Stream.of(ALL_RESOURCE_TYPES)
+    private List<NewbeJobStatusOutput> output(MockJob job) {
+        return job.resourceTypes.stream()
             .map(resourceType -> new NewbeJobStatusOutput(
                 resourceType,
-                "/data/" + jobId + "/" + jobId + "-" + resourceType + ".ndjson"
+                "/data/" + job.jobId + "/" + job.jobId + "-" + resourceType + ".ndjson"
             ))
             .toList();
     }
 
-    private void writeNdjsonFiles(UUID jobId) {
+    private void writeNdjsonFiles(MockJob job) {
         try {
             Files.createDirectories(exportPath);
             byte[] ndjson = "{\"foo\": \"bar\"}\n"
                 .getBytes(StandardCharsets.UTF_8);
 
-            for (String resourceType : ALL_RESOURCE_TYPES) {
-                String filename = jobId + "-" + resourceType + ".ndjson";
+            for (String resourceType : job.resourceTypes) {
+                String filename = job.jobId + "-" + resourceType + ".ndjson";
 
                 // write unzipped
                 try (FileOutputStream output = new FileOutputStream(exportPath + "/" + filename)) {
@@ -117,12 +122,14 @@ public class MockNewbeClient implements NewbeClient {
     private static class MockJob {
         private final UUID jobId;
         private final String requestUrl;
+        private final List<String> resourceTypes;
         private int polls;
         private boolean complete;
 
-        private MockJob(UUID jobId, String requestUrl) {
+        private MockJob(UUID jobId, String requestUrl, List<String> resourceTypes) {
             this.jobId = jobId;
             this.requestUrl = requestUrl;
+            this.resourceTypes = List.copyOf(resourceTypes);
         }
     }
 }

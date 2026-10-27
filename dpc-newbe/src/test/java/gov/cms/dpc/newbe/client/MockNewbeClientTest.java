@@ -11,9 +11,12 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MockNewbeClientTest {
+
+    private static final List<String> ALL_RESOURCE_TYPES = List.of("Patient", "Coverage", "ExplanationOfBenefit");
 
     @TempDir
     Path exportPath;
@@ -45,10 +48,9 @@ class MockNewbeClientTest {
         var completedJob = client.jobStatus(jobId);
         assertEquals(200, completedJob.statusCode());
 
-        List<String> resourceTypes = List.of("Patient", "Coverage", "ExplanationOfBenefit");
-        assertEquals(resourceTypes.size(), completedJob.body().output().size());
-        for (int index = 0; index < resourceTypes.size(); index++) {
-            String resourceType = resourceTypes.get(index);
+        assertEquals(ALL_RESOURCE_TYPES.size(), completedJob.body().output().size());
+        for (int index = 0; index < ALL_RESOURCE_TYPES.size(); index++) {
+            String resourceType = ALL_RESOURCE_TYPES.get(index);
             var output = completedJob.body().output().get(index);
             assertEquals(resourceType, output.type());
             assertEquals(
@@ -71,15 +73,40 @@ class MockNewbeClientTest {
         assertEquals(200, completedJob.statusCode());
 
         // verify unzipped that mock files are created
-        for (String resourceType : List.of("Patient", "Coverage", "ExplanationOfBenefit")) {
+        for (String resourceType : ALL_RESOURCE_TYPES) {
             Path output = Path.of(exportPath + "/" + jobId + "-" + resourceType + ".ndjson");
             assertTrue(Files.exists(output));
         }
         // verify gzipped
-        for (String resourceType : List.of("Patient", "Coverage", "ExplanationOfBenefit")) {
+        for (String resourceType : ALL_RESOURCE_TYPES) {
             Path output = Path.of(exportPath + "/" + jobId + "-" + resourceType + ".ndjson.gz");
             assertTrue(Files.exists(output));
         }
+    }
+
+    @Test
+    void testJobCreatesFilesOnlyForRequestedResourceTypes() {
+        MockNewbeClient client = new MockNewbeClient(exportPath);
+
+        NewbeExportResponse response = client.export(request(List.of("Patient")));
+        final UUID jobId = getJobIdFromResponse(response);
+        client.jobStatus(jobId);
+        client.jobStatus(jobId);
+
+        var completedJob = client.jobStatus(jobId);
+        assertEquals(List.of("Patient"), completedJob.body().output().stream()
+            .map(output -> output.type())
+            .toList());
+
+        // verify patient files are created
+        assertTrue(Files.exists(Path.of(exportPath + "/" + jobId + "-Patient.ndjson")));
+        assertTrue(Files.exists(Path.of(exportPath + "/" + jobId + "-Patient.ndjson.gz")));
+
+        // verify other files are not created
+        assertFalse(Files.exists(Path.of(exportPath + "/" + jobId + "-Coverage.ndjson")));
+        assertFalse(Files.exists(Path.of(exportPath + "/" + jobId + "-Coverage.ndjson.gz")));
+        assertFalse(Files.exists(Path.of(exportPath + "/" + jobId + "-ExplanationOfBenefit.ndjson")));
+        assertFalse(Files.exists(Path.of(exportPath + "/" + jobId + "-ExplanationOfBenefit.ndjson.gz")));
     }
 
     private UUID getJobIdFromResponse(NewbeExportResponse response) {
@@ -87,6 +114,10 @@ class MockNewbeClientTest {
     }
 
     private NewbeExportRequest request() {
-        return new NewbeExportRequest(UUID.randomUUID());
+        return request(ALL_RESOURCE_TYPES);
+    }
+
+    private NewbeExportRequest request(List<String> resourceTypes) {
+        return new NewbeExportRequest(UUID.randomUUID(), resourceTypes);
     }
 }
