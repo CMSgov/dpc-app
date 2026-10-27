@@ -11,10 +11,6 @@ RSpec.describe Page::PublicKey::NewKeyComponent, type: :component do
       normalize_space(rendered_content)
     end
 
-    before do
-      render_inline(component)
-    end
-
     let(:org) { ComponentSupport::MockOrg.new }
 
     context 'no errors' do
