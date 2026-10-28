@@ -4,7 +4,7 @@ import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.jdbi.stu3.ProviderDAO;
-import gov.cms.dpc.attribution.utils.RESTUtils;
+import gov.cms.dpc.attribution.utils.stu3.RESTUtils;
 import gov.cms.dpc.common.entities.stu3.ProviderEntity;
 import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.stu3.BundleReturnProperties;

@@ -1,10 +1,10 @@
-package gov.cms.dpc.attribution.utils;
+package gov.cms.dpc.attribution.utils.r4;
 
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.lang3.exception.UncheckedException;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 

@@ -7,7 +7,7 @@ import gov.cms.dpc.attribution.jdbi.stu3.PatientDAO;
 import gov.cms.dpc.attribution.jdbi.stu3.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.stu3.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.stu3.RosterDAO;
-import gov.cms.dpc.attribution.utils.RESTUtils;
+import gov.cms.dpc.attribution.utils.stu3.RESTUtils;
 import gov.cms.dpc.common.entities.stu3.AttributionRelationship;
 import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.common.entities.stu3.ProviderEntity;

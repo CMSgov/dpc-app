@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.utils;
+package gov.cms.dpc.attribution.utils.stu3;
 
 import jakarta.ws.rs.WebApplicationException;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;

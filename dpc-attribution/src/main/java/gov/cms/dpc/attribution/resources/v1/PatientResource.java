@@ -4,7 +4,7 @@ import com.google.inject.name.Named;
 import gov.cms.dpc.attribution.jdbi.PageResult;
 import gov.cms.dpc.attribution.jdbi.stu3.PatientDAO;
 import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
-import gov.cms.dpc.attribution.utils.RESTUtils;
+import gov.cms.dpc.attribution.utils.stu3.RESTUtils;
 import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.common.utils.stu3.PagingService;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
