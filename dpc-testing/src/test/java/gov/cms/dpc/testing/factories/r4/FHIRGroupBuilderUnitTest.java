@@ -1,7 +1,7 @@
-package gov.cms.dpc.testing.factories;
+package gov.cms.dpc.testing.factories.r4;
 
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Group;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Group;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

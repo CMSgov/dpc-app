@@ -19,7 +19,7 @@ import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.service.DataService;
-import gov.cms.dpc.testing.factories.FHIRGroupBuilder;
+import gov.cms.dpc.testing.factories.stu3.FHIRGroupBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;

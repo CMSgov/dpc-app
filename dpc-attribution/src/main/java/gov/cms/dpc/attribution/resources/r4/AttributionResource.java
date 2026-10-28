@@ -10,14 +10,17 @@ public class AttributionResource {
     private final OrganizationResource or;
     private final PractitionerResource pr;
     private final PatientResource patr;
+    private final GroupResource gr;
 
     @Inject
     public AttributionResource(OrganizationResource or,
                                PractitionerResource pr,
-                               PatientResource patr) {
+                               PatientResource patr,
+                               GroupResource gr) {
         this.or = or;
         this.pr = pr;
         this.patr = patr;
+        this.gr = gr;
     }
 
     @Path("/Organization")
@@ -33,6 +36,11 @@ public class AttributionResource {
     @Path("/Patient")
     public PatientResource patientOperations() {
         return this.patr;
+    }
+
+    @Path("/Group")
+    public GroupResource groupOperations() {
+        return this.gr;
     }
 
     @GET

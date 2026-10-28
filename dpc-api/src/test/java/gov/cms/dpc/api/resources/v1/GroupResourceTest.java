@@ -17,7 +17,7 @@ import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import gov.cms.dpc.testing.factories.FHIRGroupBuilder;
+import gov.cms.dpc.testing.factories.stu3.FHIRGroupBuilder;
 import jakarta.ws.rs.HttpMethod;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.ParseException;

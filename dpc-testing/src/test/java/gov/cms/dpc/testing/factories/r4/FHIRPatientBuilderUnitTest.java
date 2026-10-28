@@ -1,8 +1,8 @@
-package gov.cms.dpc.testing.factories;
+package gov.cms.dpc.testing.factories.r4;
 
-import org.hl7.fhir.dstu3.model.Enumerations;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Date;

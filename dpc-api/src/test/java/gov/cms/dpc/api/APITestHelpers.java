@@ -26,7 +26,7 @@ import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
 import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
 import gov.cms.dpc.testing.APIAuthHelpers;
-import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
+import gov.cms.dpc.testing.factories.stu3.FHIRPatientBuilder;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
 import gov.cms.dpc.testing.utils.MBIUtil;
 import io.dropwizard.auth.AuthValueFactoryProvider;

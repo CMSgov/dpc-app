@@ -1,9 +1,9 @@
-package gov.cms.dpc.testing.factories;
+package gov.cms.dpc.testing.factories.r4;
 
-import org.hl7.fhir.dstu3.model.Enumerations;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 
 import java.sql.Date;
 import java.util.UUID;
