@@ -29,4 +29,17 @@ RSpec.describe Page::Utility::VerificationFailureComponent, type: :component do
       expect(page).to have_text('Your identity could not be verified with ID.me')
     end
   end
+
+  context 'when CSP is CLEAR' do
+    let(:component) { described_class.new(nil, 'clear') }
+    before { render_inline(component) }
+
+    it 'should specify CLEAR on page' do
+      expect(page).to have_text('Your identity could not be verified with CLEAR')
+    end
+
+    it 'should link to support' do
+      expect(page).to have_link('CLEAR Support', href: 'https://www.clearme.com/support')
+    end
+  end
 end

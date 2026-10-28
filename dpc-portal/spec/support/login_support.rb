@@ -3,6 +3,24 @@
 require 'securerandom'
 
 module LoginSupport
+  # Helpers for specs that log in through CLEAR. Every CLEAR login asks CLEAR for the outcome of the verification, using
+  # the verification_id claim in the access token (see CspVerificationService::Clear), so specs need a token with that
+  # claim and a stubbed Get Verification Session response.
+  module ClearVerification
+    CLEAR_TEST_VERIFICATION_ID = 'verify_test123'
+
+    def clear_access_token
+      JWT.encode({ 'verification_id' => CLEAR_TEST_VERIFICATION_ID }, nil, 'none')
+    end
+
+    def stub_clear_verification_session(status: 'success')
+      stub_request(:get, "#{CLEAR_CONFIG[:verification_session_endpoint]}/#{CLEAR_TEST_VERIFICATION_ID}")
+        .to_return(status: 200, body: { id: CLEAR_TEST_VERIFICATION_ID, status: }.to_json)
+    end
+  end
+
+  include ClearVerification
+
   def create_user_with_csp(csp:, given_name: 'John', family_name: 'Smith', uuid: SecureRandom.uuid, **user_attrs)
     csp_name = csp.to_s
     csp_record = Csp.find_by(name: csp_name) || create(:csp, name: csp_name)
@@ -75,14 +93,16 @@ module LoginSupport
       } }
   end
 
+  # The token in this hash only works if CLEAR's verification session is stubbed, so this does that too
   def clear_auth_hash(user)
+    stub_clear_verification_session
     csp_user   = fetch_csp_user!(user, 'clear')
     all_emails = csp_user.user_emails.map(&:email)
     primary_email = csp_user.user_emails.find_by(primary: true)&.email || all_emails.first
 
     { uid: csp_user.uuid,
       info: { email: primary_email },
-      credentials: { token: 'mock_token', id_token: 'mock_id_token', expires_in: 300 },
+      credentials: { token: clear_access_token, id_token: 'mock_id_token', expires_in: 300 },
       extra: {
         raw_info: {
           sub: csp_user.uuid

@@ -38,6 +38,7 @@ development: &development
     token_endpoint: <%= "https://#{ENV['CLEAR_IDP_HOST']}/integrations/oauth2/token" %>
     user_info_endpoint: <%= "https://#{ENV['CLEAR_IDP_HOST']}/integrations/userinfo" %>
     jwks_uri: <%= "https://#{ENV['CLEAR_IDP_HOST']}/integrations/.well-known/jwks.json" %>
+    verification_session_endpoint: <%= "https://#{ENV['CLEAR_IDP_HOST']}/v1/verification_sessions" %>
     redirect_path: '/auth/clear/callback'
     authorize_scope: 'openid'
     token_expiration_interval: 300
