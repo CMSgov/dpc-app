@@ -1,37 +1,40 @@
-package gov.cms.dpc.attribution;
+package gov.cms.dpc.attribution.utils.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
-import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
-import gov.cms.dpc.common.entities.stu3.AddressEntity;
-import gov.cms.dpc.common.entities.stu3.NameEntity;
-import gov.cms.dpc.common.entities.stu3.ContactEntity;
-import gov.cms.dpc.common.entities.stu3.PatientEntity;
-import gov.cms.dpc.common.entities.stu3.ProviderEntity;
-import gov.cms.dpc.common.entities.stu3.RosterEntity;
-import gov.cms.dpc.common.entities.stu3.AttributionRelationship;
+import gov.cms.dpc.common.entities.r4.*;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.testing.utils.MBIUtil;
-import jakarta.annotation.Nullable;
-import org.hl7.fhir.dstu3.model.*;
-import org.mockito.ArgumentMatcher;
+import gov.cms.dpc.fhir.r4.FHIRBuilders;
+import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Practitioner;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
-public class Stu3AttributionTestHelpers {
+public class AttributionTestHelpers {
 
     public static final String DEFAULT_ORG_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
-    public static final String DEFAULT_PATIENT_MBI = "3SQ0C00AA00";
+
+    public static Organization createOrgResource(String uuid, String npi){
+        final Organization organization = new Organization();
+        organization.setId(uuid);
+        organization.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(npi);
+        organization.setName("Test Org");
+        organization.addAddress().addLine("12345 Fake Street");
+        return organization;
+    }
 
     public static Practitioner createPractitionerResource(String npi) {
         final Practitioner practitioner = new Practitioner();
@@ -46,35 +49,24 @@ public class Stu3AttributionTestHelpers {
         return practitioner;
     }
 
-    public static Patient createPatientResource(String mbi, String organizationID) {
-        final Patient patient = new Patient();
-        patient.addIdentifier()
-                .setSystem(DPCIdentifierSystem.MBI.getSystem())
-                .setValue(mbi);
+    public static Group createBaseAttributionGroup(String providerNPI, String organizationID) {
+        final CodeableConcept attributionConcept = new CodeableConcept();
+        attributionConcept.addCoding().setCode("attributed-to");
 
-        patient.addName().setFamily("Patient").addGiven("Test");
-        patient.setBirthDate(Date.valueOf("1990-01-01"));
-        patient.setGender(Enumerations.AdministrativeGender.OTHER);
-        patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
+        final CodeableConcept npiConcept = new CodeableConcept();
+        npiConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(providerNPI);
 
-        return patient;
-    }
+        final Group rosterGroup = new Group();
+        rosterGroup.setType(Group.GroupType.PERSON);
+        rosterGroup.setActual(true);
+        rosterGroup.setActive(true);
+        rosterGroup.addCharacteristic()
+                .setExclude(false)
+                .setCode(attributionConcept)
+                .setValue(npiConcept);
+        FHIRBuilders.addOrganizationTag(rosterGroup, UUID.fromString(organizationID));
 
-    public static List<Patient> createPatientResources(String organizationId, int numPatients) {
-        List<Patient> patients = new ArrayList<>(numPatients);
-        for(int i=0; i<numPatients; i++) {
-            patients.add(createPatientResource(MBIUtil.generateMBI(), organizationId));
-        }
-        return patients;
-    }
-
-    public static Organization createOrgResource(String uuid, String npi){
-        final Organization organization = new Organization();
-        organization.setId(uuid);
-        organization.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(npi);
-        organization.setName("Test Org");
-        organization.addAddress().addLine("12345 Fake Street");
-        return organization;
+        return rosterGroup;
     }
 
     public static IGenericClient createFHIRClient(FhirContext ctx, String serverURL) {
@@ -167,14 +159,4 @@ public class Stu3AttributionTestHelpers {
         return attributionRelationship;
     }
 
-    public static ArgumentMatcher<PatientSearchQuery> queryMatches(UUID resourceId, UUID orgId, @Nullable Integer count, @Nullable Integer pageOffset) {
-        return query ->
-                query != null &&
-                        Objects.equals(query.getResourceID().orElse(null), resourceId) &&
-                        Objects.equals(query.getOrganizationID().orElse(null), orgId) &&
-                        query.getPatientMBI().orElse(null) == null &&
-                        Objects.equals(query.getCount().orElse(null), count) &&
-                        Objects.equals(query.getPageOffset().orElse(null), pageOffset)
-                ;
-    }
 }

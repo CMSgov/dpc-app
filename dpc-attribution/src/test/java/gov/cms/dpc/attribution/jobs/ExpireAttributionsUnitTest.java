@@ -5,8 +5,8 @@ import gov.cms.dpc.attribution.jdbi.stu3.PatientDAO;
 import gov.cms.dpc.attribution.jdbi.stu3.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.stu3.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.stu3.RosterDAO;
-import gov.cms.dpc.attribution.Stu3AbstractAttributionDAOTest;
-import gov.cms.dpc.attribution.Stu3AttributionTestHelpers;
+import gov.cms.dpc.attribution.utils.stu3.AbstractAttributionDAOTest;
+import gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers;
 import gov.cms.dpc.attribution.exceptions.AttributionException;
 import gov.cms.dpc.common.entities.stu3.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(BufferedLoggerHandler.class)
 @ExtendWith(MockitoExtension.class)
-class ExpireAttributionsUnitTest extends Stu3AbstractAttributionDAOTest {
+class ExpireAttributionsUnitTest extends AbstractAttributionDAOTest {
 
     private OrganizationDAO organizationDAO;
     private ProviderDAO providerDAO;
@@ -77,11 +77,11 @@ class ExpireAttributionsUnitTest extends Stu3AbstractAttributionDAOTest {
 
     @Test
     void testExpireAttribution() {
-        OrganizationEntity org = Stu3AttributionTestHelpers.createOrganizationEntity();
-        ProviderEntity provider = Stu3AttributionTestHelpers.createProviderEntity(org);
-        RosterEntity roster = Stu3AttributionTestHelpers.createRosterEntity(org, provider);
-        PatientEntity patient = Stu3AttributionTestHelpers.createPatientEntity(org);
-        AttributionRelationship attr = Stu3AttributionTestHelpers.createAttributionRelationship(roster, patient);
+        OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+        ProviderEntity provider = AttributionTestHelpers.createProviderEntity(org);
+        RosterEntity roster = AttributionTestHelpers.createRosterEntity(org, provider);
+        PatientEntity patient = AttributionTestHelpers.createPatientEntity(org);
+        AttributionRelationship attr = AttributionTestHelpers.createAttributionRelationship(roster, patient);
 
         db.inTransaction(() -> {
             organizationDAO.registerOrganization(org);
@@ -102,11 +102,11 @@ class ExpireAttributionsUnitTest extends Stu3AbstractAttributionDAOTest {
 
     @Test
     void testDeleteInactiveAttribution() {
-        OrganizationEntity org = Stu3AttributionTestHelpers.createOrganizationEntity();
-        ProviderEntity provider = Stu3AttributionTestHelpers.createProviderEntity(org);
-        RosterEntity roster = Stu3AttributionTestHelpers.createRosterEntity(org, provider);
-        PatientEntity patient = Stu3AttributionTestHelpers.createPatientEntity(org);
-        AttributionRelationship attr = Stu3AttributionTestHelpers.createAttributionRelationship(roster, patient);
+        OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+        ProviderEntity provider = AttributionTestHelpers.createProviderEntity(org);
+        RosterEntity roster = AttributionTestHelpers.createRosterEntity(org, provider);
+        PatientEntity patient = AttributionTestHelpers.createPatientEntity(org);
+        AttributionRelationship attr = AttributionTestHelpers.createAttributionRelationship(roster, patient);
         attr.setInactive(true);
         attr.setPeriodEnd(OffsetDateTime.now().minusMonths(6));
 
@@ -128,24 +128,24 @@ class ExpireAttributionsUnitTest extends Stu3AbstractAttributionDAOTest {
 
     @Test
     void testMultipleAttributions() {
-        OrganizationEntity org = Stu3AttributionTestHelpers.createOrganizationEntity();
-        ProviderEntity provider = Stu3AttributionTestHelpers.createProviderEntity(org);
-        RosterEntity roster = Stu3AttributionTestHelpers.createRosterEntity(org, provider);
-        PatientEntity patient1 = Stu3AttributionTestHelpers.createPatientEntity(org);
-        PatientEntity patient2 = Stu3AttributionTestHelpers.createPatientEntity(org);
-        PatientEntity patient3 = Stu3AttributionTestHelpers.createPatientEntity(org);
+        OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+        ProviderEntity provider = AttributionTestHelpers.createProviderEntity(org);
+        RosterEntity roster = AttributionTestHelpers.createRosterEntity(org, provider);
+        PatientEntity patient1 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient2 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient3 = AttributionTestHelpers.createPatientEntity(org);
 
         // should expire -- Stu3AttributionTestHelpers.createAttributionRelationship by default creates attribution
         // record with periodEnd 1 month before now.
-        AttributionRelationship attr1 = Stu3AttributionTestHelpers.createAttributionRelationship(roster, patient1);
+        AttributionRelationship attr1 = AttributionTestHelpers.createAttributionRelationship(roster, patient1);
 
         // should get deleted
-        AttributionRelationship attr2 = Stu3AttributionTestHelpers.createAttributionRelationship(roster, patient2);
+        AttributionRelationship attr2 = AttributionTestHelpers.createAttributionRelationship(roster, patient2);
         attr2.setInactive(true);
         attr2.setPeriodEnd(OffsetDateTime.now().minusMonths(6));
 
         // should not be expired or deleted
-        AttributionRelationship attr3 = Stu3AttributionTestHelpers.createAttributionRelationship(roster, patient3);
+        AttributionRelationship attr3 = AttributionTestHelpers.createAttributionRelationship(roster, patient3);
         attr3.setPeriodEnd(OffsetDateTime.now().plusMonths(2));
 
         db.inTransaction(() -> {

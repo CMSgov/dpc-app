@@ -26,7 +26,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.*;
 
-import static gov.cms.dpc.attribution.Stu3AttributionTestHelpers.queryMatches;
+import static gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers.queryMatches;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 

@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.resources;
+package gov.cms.dpc.attribution.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -7,21 +7,21 @@ import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import gov.cms.dpc.attribution.AbstractAttributionTest;
-import gov.cms.dpc.attribution.Stu3AttributionTestHelpers;
+import gov.cms.dpc.attribution.utils.stu3.AbstractAttributionTest;
+import gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.fhir.validations.profiles.stu3.PractitionerProfile;
-import gov.cms.dpc.testing.factories.BundleFactory;
+import gov.cms.dpc.testing.factories.stu3.BundleFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static gov.cms.dpc.attribution.Stu3AttributionTestHelpers.DEFAULT_ORG_ID;
-import static gov.cms.dpc.attribution.Stu3AttributionTestHelpers.createFHIRClient;
+import static gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers.DEFAULT_ORG_ID;
+import static gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers.createFHIRClient;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,7 +55,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     @Test
     void testPractitionerReadWrite() {
 
-        final Practitioner practitioner = Stu3AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
         final ICreateTyped creation = client
                 .create()
@@ -121,7 +121,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     @Test
     void testPractitionerSearch() {
 
-        final Practitioner practitioner = Stu3AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
         final MethodOutcome outcome = client
                 .create()
@@ -162,7 +162,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
     @Test
     void testPractitionerUpdate() {
-        final Practitioner practitioner = Stu3AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
         final MethodOutcome outcome = client
                 .create()
@@ -210,7 +210,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
     @Test
     void testPractitionerRemoval() {
-        final Practitioner practitioner = Stu3AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
         final MethodOutcome outcome = client
                 .create()
@@ -257,8 +257,8 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         //Currently 4 providers are created in the seed for the test
         APPLICATION.getConfiguration().setProviderLimit(5);
 
-        final Practitioner practitioner = Stu3AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
-        final Practitioner practitioner2 = Stu3AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        final Practitioner practitioner2 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
         final MethodOutcome mo = submitPractitioner(practitioner).execute();
 
@@ -291,7 +291,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         APPLICATION.before();
         APPLICATION.getConfiguration().setProviderLimit(-1);
 
-        final Practitioner practitioner = Stu3AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
         final ICreateTyped creation = client
                 .create()
@@ -305,7 +305,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
         assertNotNull(result1, "Should be created");
 
-        final Practitioner practitioner2 = Stu3AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        final Practitioner practitioner2 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
         final ICreateTyped creation2 = client
                 .create()
@@ -323,7 +323,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     void testBulkInsert() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
-        Practitioner practitioner = Stu3AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
         Bundle practitionerBundle = BundleFactory.createBundle(practitioner);
         Parameters params = new Parameters();
@@ -349,9 +349,9 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     void testBulkInsertMultiplePractioners() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
-        Practitioner prac1 = Stu3AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
-        Practitioner prac2 = Stu3AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
-        Practitioner prac3 = Stu3AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        Practitioner prac1 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        Practitioner prac2 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        Practitioner prac3 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
         Bundle practitionerBundle = BundleFactory.createBundle(prac1, prac2, prac3);
         Parameters params = new Parameters();
@@ -377,7 +377,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     void testBulkInsertWithExistingId() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
-        Practitioner practitioner = Stu3AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
+        Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
         practitioner.setId(UUID.randomUUID().toString());
 
         Bundle practitionerBundle = BundleFactory.createBundle(practitioner);
@@ -407,8 +407,8 @@ class PractitionerResourceTest extends AbstractAttributionTest {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
         String npi = NPIUtil.generateNPI();
-        Practitioner practitioner = Stu3AttributionTestHelpers.createPractitionerResource(npi);
-        Practitioner duplicatePractitioner = Stu3AttributionTestHelpers.createPractitionerResource(npi);
+        Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(npi);
+        Practitioner duplicatePractitioner = AttributionTestHelpers.createPractitionerResource(npi);
 
         // Create first practitioner
         final MethodOutcome outcome = client

@@ -3,8 +3,8 @@ package gov.cms.dpc.attribution.jdbi.stu3;
 import gov.cms.dpc.attribution.jdbi.PageResult;
 import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
 
-import gov.cms.dpc.attribution.Stu3AbstractAttributionDAOTest;
-import gov.cms.dpc.attribution.Stu3AttributionTestHelpers;
+import gov.cms.dpc.attribution.utils.stu3.AbstractAttributionDAOTest;
+import gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers;
 import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
@@ -18,7 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PatientDAOUnitTest extends Stu3AbstractAttributionDAOTest {
+class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 	private PatientDAO patientDAO;
 	private OrganizationDAO organizationDAO;
 
@@ -33,10 +33,10 @@ class PatientDAOUnitTest extends Stu3AbstractAttributionDAOTest {
 
 	@Test
 	void test_batch_patientSearchById_happy_path() {
-		OrganizationEntity org = Stu3AttributionTestHelpers.createOrganizationEntity();
-		PatientEntity pat1 = Stu3AttributionTestHelpers.createPatientEntity(org);
-		PatientEntity pat2 = Stu3AttributionTestHelpers.createPatientEntity(org);
-		PatientEntity pat3 = Stu3AttributionTestHelpers.createPatientEntity(org);
+		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(org);
+		PatientEntity pat2 = AttributionTestHelpers.createPatientEntity(org);
+		PatientEntity pat3 = AttributionTestHelpers.createPatientEntity(org);
 
 		db.inTransaction(() -> {
 			organizationDAO.registerOrganization(org);
@@ -55,11 +55,11 @@ class PatientDAOUnitTest extends Stu3AbstractAttributionDAOTest {
 
 	@Test
 	void test_batch_patientSearchById_only_finds_correct_org() {
-		OrganizationEntity goodOrg = Stu3AttributionTestHelpers.createOrganizationEntity();
-		OrganizationEntity badOrg = Stu3AttributionTestHelpers.createOrganizationEntity();
-		PatientEntity pat1 = Stu3AttributionTestHelpers.createPatientEntity(goodOrg);
-		PatientEntity pat2 = Stu3AttributionTestHelpers.createPatientEntity(goodOrg);
-		PatientEntity pat3 = Stu3AttributionTestHelpers.createPatientEntity(badOrg);
+		OrganizationEntity goodOrg = AttributionTestHelpers.createOrganizationEntity();
+		OrganizationEntity badOrg = AttributionTestHelpers.createOrganizationEntity();
+		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(goodOrg);
+		PatientEntity pat2 = AttributionTestHelpers.createPatientEntity(goodOrg);
+		PatientEntity pat3 = AttributionTestHelpers.createPatientEntity(badOrg);
 
 		db.inTransaction(() -> {
 			organizationDAO.registerOrganization(goodOrg);
@@ -79,10 +79,10 @@ class PatientDAOUnitTest extends Stu3AbstractAttributionDAOTest {
 
 	@Test
 	void test_batch_patientSearchByMbi_happy_path() {
-		OrganizationEntity org = Stu3AttributionTestHelpers.createOrganizationEntity();
-		PatientEntity pat1 = Stu3AttributionTestHelpers.createPatientEntity(org);
-		PatientEntity pat2 = Stu3AttributionTestHelpers.createPatientEntity(org);
-		PatientEntity pat3 = Stu3AttributionTestHelpers.createPatientEntity(org);
+		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(org);
+		PatientEntity pat2 = AttributionTestHelpers.createPatientEntity(org);
+		PatientEntity pat3 = AttributionTestHelpers.createPatientEntity(org);
 
 		db.inTransaction(() -> {
 			organizationDAO.registerOrganization(org);
@@ -101,11 +101,11 @@ class PatientDAOUnitTest extends Stu3AbstractAttributionDAOTest {
 
 	@Test
 	void test_batch_patientSearchByMbi_only_finds_correct_org() {
-		OrganizationEntity goodOrg = Stu3AttributionTestHelpers.createOrganizationEntity();
-		OrganizationEntity badOrg = Stu3AttributionTestHelpers.createOrganizationEntity();
-		PatientEntity pat1 = Stu3AttributionTestHelpers.createPatientEntity(goodOrg);
-		PatientEntity pat2 = Stu3AttributionTestHelpers.createPatientEntity(goodOrg);
-		PatientEntity pat3 = Stu3AttributionTestHelpers.createPatientEntity(badOrg);
+		OrganizationEntity goodOrg = AttributionTestHelpers.createOrganizationEntity();
+		OrganizationEntity badOrg = AttributionTestHelpers.createOrganizationEntity();
+		PatientEntity pat1 = AttributionTestHelpers.createPatientEntity(goodOrg);
+		PatientEntity pat2 = AttributionTestHelpers.createPatientEntity(goodOrg);
+		PatientEntity pat3 = AttributionTestHelpers.createPatientEntity(badOrg);
 
 		db.inTransaction(() -> {
 			organizationDAO.registerOrganization(goodOrg);
@@ -127,8 +127,8 @@ class PatientDAOUnitTest extends Stu3AbstractAttributionDAOTest {
 
 	@Test
 	void test_bulkPatientSearchByMbi_handles_large_requests() throws IOException {
-		OrganizationEntity org = Stu3AttributionTestHelpers.createOrganizationEntity();
-		PatientEntity patientEntity = Stu3AttributionTestHelpers.createPatientEntity(org);
+		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+		PatientEntity patientEntity = AttributionTestHelpers.createPatientEntity(org);
 
 		db.inTransaction(() -> {
 			organizationDAO.registerOrganization(org);
@@ -151,13 +151,13 @@ class PatientDAOUnitTest extends Stu3AbstractAttributionDAOTest {
 
     @Test
     void test_countPatients() {
-        OrganizationEntity org = Stu3AttributionTestHelpers.createOrganizationEntity();
+        OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
         String orgRef = "Organization/" + org.getId();
-        PatientEntity patient1 = Stu3AttributionTestHelpers.createPatientEntity(org);
-        PatientEntity patient2 = Stu3AttributionTestHelpers.createPatientEntity(org);
-        PatientEntity patient3 = Stu3AttributionTestHelpers.createPatientEntity(org);
-        PatientEntity patient4 = Stu3AttributionTestHelpers.createPatientEntity(org);
-        PatientEntity patient5 = Stu3AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient1 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient2 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient3 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient4 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient5 = AttributionTestHelpers.createPatientEntity(org);
 
         db.inTransaction(() -> {
             organizationDAO.registerOrganization(org);
@@ -177,13 +177,13 @@ class PatientDAOUnitTest extends Stu3AbstractAttributionDAOTest {
 
     @Test
     void test_patientSearch() {
-        OrganizationEntity org = Stu3AttributionTestHelpers.createOrganizationEntity();
+        OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
         String orgRef = "Organization/" + org.getId();
-        PatientEntity patient1 = Stu3AttributionTestHelpers.createPatientEntity(org);
-        PatientEntity patient2 = Stu3AttributionTestHelpers.createPatientEntity(org);
-        PatientEntity patient3 = Stu3AttributionTestHelpers.createPatientEntity(org);
-        PatientEntity patient4 = Stu3AttributionTestHelpers.createPatientEntity(org);
-        PatientEntity patient5 = Stu3AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient1 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient2 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient3 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient4 = AttributionTestHelpers.createPatientEntity(org);
+        PatientEntity patient5 = AttributionTestHelpers.createPatientEntity(org);
 
         db.inTransaction(() -> {
             organizationDAO.registerOrganization(org);

@@ -8,13 +8,15 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.dpc.attribution.utils.stu3.AbstractAttributionTest;
+import gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.stu3.FHIRBuilders;
 import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
-import gov.cms.dpc.testing.OrganizationHelpers;
+import gov.cms.dpc.testing.stu3.OrganizationHelpers;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
@@ -57,7 +59,7 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         groupedPairs.forEach((providerId, pairList) -> pairList.forEach(pair -> assertEquals(providerId, pair.getLeft())));
 
         // Create the Organization
-        organization = OrganizationHelpers.createOrganization(ctx, Stu3AttributionTestHelpers.createFHIRClient(ctx, String.format("http://localhost:%s/v1/", APPLICATION.getLocalPort())));
+        organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, String.format("http://localhost:%s/v1/", APPLICATION.getLocalPort())));
     }
 
     @TestFactory

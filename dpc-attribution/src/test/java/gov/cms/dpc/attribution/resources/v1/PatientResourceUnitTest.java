@@ -17,7 +17,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.*;
 
-import static gov.cms.dpc.attribution.Stu3AttributionTestHelpers.*;
+import static gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 

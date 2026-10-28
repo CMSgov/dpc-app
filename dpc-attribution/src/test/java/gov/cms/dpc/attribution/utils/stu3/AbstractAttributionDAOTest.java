@@ -1,6 +1,6 @@
-package gov.cms.dpc.attribution;
+package gov.cms.dpc.attribution.utils.stu3;
 
-import gov.cms.dpc.common.entities.r4.*;
+import gov.cms.dpc.common.entities.stu3.*;
 import gov.cms.dpc.testing.AbstractMultipleDAOTest;
 
 /**
@@ -8,7 +8,7 @@ import gov.cms.dpc.testing.AbstractMultipleDAOTest;
  * Hibernate will flip out when it can't find the others it references.  Instead, you have to pull in all of them.  This
  * class handles doing that so child DAO tests don't have to.
  */
-public class AbstractAttributionDAOTest extends AbstractMultipleDAOTest {
+public abstract class AbstractAttributionDAOTest extends AbstractMultipleDAOTest {
 	public AbstractAttributionDAOTest() {
 		super(
 			PatientEntity.class,

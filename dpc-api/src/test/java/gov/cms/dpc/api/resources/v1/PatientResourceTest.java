@@ -29,7 +29,7 @@ import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.queue.DistributedBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.APIAuthHelpers;
-import gov.cms.dpc.testing.factories.BundleFactory;
+import gov.cms.dpc.testing.factories.stu3.BundleFactory;
 import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
 import jakarta.ws.rs.HttpMethod;
 import org.apache.commons.lang3.RandomStringUtils;

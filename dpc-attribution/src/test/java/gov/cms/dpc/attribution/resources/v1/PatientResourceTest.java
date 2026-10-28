@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.resources;
+package gov.cms.dpc.attribution.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -7,12 +7,12 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import gov.cms.dpc.attribution.AbstractAttributionTest;
-import gov.cms.dpc.attribution.Stu3AttributionTestHelpers;
+import gov.cms.dpc.attribution.utils.stu3.AbstractAttributionTest;
+import gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.testing.utils.MBIUtil;
-import gov.cms.dpc.testing.factories.BundleFactory;
+import gov.cms.dpc.testing.factories.stu3.BundleFactory;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +20,7 @@ import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
 
-import static gov.cms.dpc.attribution.Stu3AttributionTestHelpers.*;
+import static gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers.*;
 import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -184,7 +184,7 @@ class PatientResourceTest extends AbstractAttributionTest {
         assertEquals(1, firstSearch.getTotal(), "Should have a single patient");
 
         // Create a practitioner and an attribution resource
-        final Practitioner practitioner = Stu3AttributionTestHelpers.createPractitionerResource("2222222228");
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("2222222228");
 
         final MethodOutcome outcome = client
                 .create()
@@ -322,7 +322,7 @@ class PatientResourceTest extends AbstractAttributionTest {
 
         final int COUNT_TEST_PATIENTS = 25000;
 
-        List<Patient> patients = Stu3AttributionTestHelpers.createPatientResources(DEFAULT_ORG_ID, COUNT_TEST_PATIENTS);
+        List<Patient> patients = AttributionTestHelpers.createPatientResources(DEFAULT_ORG_ID, COUNT_TEST_PATIENTS);
         Bundle patientBundle = BundleFactory.createBundle(
             patients.stream().map(Resource.class::cast).toArray(Resource[] ::new)
         );
@@ -345,7 +345,7 @@ class PatientResourceTest extends AbstractAttributionTest {
     void testBulkInsertHandlesPatWithExistingId() {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
-        Patient patient = Stu3AttributionTestHelpers.createPatientResource(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
+        Patient patient = AttributionTestHelpers.createPatientResource(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
         patient.setId(UUID.randomUUID().toString());
 
         Bundle patientBundle = BundleFactory.createBundle(patient);
@@ -372,10 +372,10 @@ class PatientResourceTest extends AbstractAttributionTest {
         final IGenericClient client = createFHIRClient(ctx, getServerURL());
 
         String mbi = MBIUtil.generateMBI();
-        Patient patient = Stu3AttributionTestHelpers.createPatientResource(mbi, DEFAULT_ORG_ID);
+        Patient patient = AttributionTestHelpers.createPatientResource(mbi, DEFAULT_ORG_ID);
         patient.getName().get(0).setFamily("original");
 
-        Patient duplicatePatient = Stu3AttributionTestHelpers.createPatientResource(mbi, DEFAULT_ORG_ID);
+        Patient duplicatePatient = AttributionTestHelpers.createPatientResource(mbi, DEFAULT_ORG_ID);
         duplicatePatient.getName().get(0).setFamily("duplicate");
 
         // Submit first patient

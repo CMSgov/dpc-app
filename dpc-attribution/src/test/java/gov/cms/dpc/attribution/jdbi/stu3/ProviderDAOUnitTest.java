@@ -1,7 +1,7 @@
 package gov.cms.dpc.attribution.jdbi.stu3;
 
-import gov.cms.dpc.attribution.Stu3AbstractAttributionDAOTest;
-import gov.cms.dpc.attribution.Stu3AttributionTestHelpers;
+import gov.cms.dpc.attribution.utils.stu3.AbstractAttributionDAOTest;
+import gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers;
 import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.common.entities.stu3.ProviderEntity;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ProviderDAOUnitTest extends Stu3AbstractAttributionDAOTest {
+class ProviderDAOUnitTest extends AbstractAttributionDAOTest {
 	private ProviderDAO providerDAO;
 	private OrganizationDAO organizationDAO;
 
@@ -27,10 +27,10 @@ class ProviderDAOUnitTest extends Stu3AbstractAttributionDAOTest {
 
 	@Test
 	void test_bulkProviderSearch() {
-		OrganizationEntity org = Stu3AttributionTestHelpers.createOrganizationEntity();
-		ProviderEntity provider1 = Stu3AttributionTestHelpers.createProviderEntity(org);
-		ProviderEntity provider2 = Stu3AttributionTestHelpers.createProviderEntity(org);
-		ProviderEntity provider3 = Stu3AttributionTestHelpers.createProviderEntity(org);
+		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+		ProviderEntity provider1 = AttributionTestHelpers.createProviderEntity(org);
+		ProviderEntity provider2 = AttributionTestHelpers.createProviderEntity(org);
+		ProviderEntity provider3 = AttributionTestHelpers.createProviderEntity(org);
 
 		db.inTransaction(() -> {
 			organizationDAO.registerOrganization(org);
@@ -48,11 +48,11 @@ class ProviderDAOUnitTest extends Stu3AbstractAttributionDAOTest {
 
 	@Test
 	void test_bulkProviderSearch_only_finds_correct_org() {
-		OrganizationEntity goodOrg = Stu3AttributionTestHelpers.createOrganizationEntity();
-		OrganizationEntity badOrg = Stu3AttributionTestHelpers.createOrganizationEntity();
-		ProviderEntity provider1 = Stu3AttributionTestHelpers.createProviderEntity(goodOrg);
-		ProviderEntity provider2 = Stu3AttributionTestHelpers.createProviderEntity(goodOrg);
-		ProviderEntity provider3 = Stu3AttributionTestHelpers.createProviderEntity(badOrg);
+		OrganizationEntity goodOrg = AttributionTestHelpers.createOrganizationEntity();
+		OrganizationEntity badOrg = AttributionTestHelpers.createOrganizationEntity();
+		ProviderEntity provider1 = AttributionTestHelpers.createProviderEntity(goodOrg);
+		ProviderEntity provider2 = AttributionTestHelpers.createProviderEntity(goodOrg);
+		ProviderEntity provider3 = AttributionTestHelpers.createProviderEntity(badOrg);
 
 		db.inTransaction(() -> {
 			organizationDAO.registerOrganization(goodOrg);

@@ -1,15 +1,15 @@
-package gov.cms.dpc.testing;
+package gov.cms.dpc.testing.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 
 import java.io.InputStream;
 
 /**
- * Helper class for holding common {@link org.hl7.fhir.dstu3.model.Organization} helper methods
+ * Helper class for holding common {@link org.hl7.fhir.r4.model.Organization} helper methods
  */
 public class OrganizationHelpers {
 

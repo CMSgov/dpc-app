@@ -1,16 +1,16 @@
-package gov.cms.dpc.attribution.resources;
+package gov.cms.dpc.attribution.resources.r4;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.dpc.attribution.AbstractAttributionTest;
-import gov.cms.dpc.attribution.Stu3AttributionTestHelpers;
+import gov.cms.dpc.attribution.utils.r4.AbstractAttributionTest;
+import gov.cms.dpc.attribution.utils.r4.AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.stu3.FHIRExtractors;
-import gov.cms.dpc.testing.OrganizationHelpers;
-import org.hl7.fhir.dstu3.model.*;
+import gov.cms.dpc.fhir.r4.FHIRExtractors;
+import gov.cms.dpc.testing.r4.OrganizationHelpers;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static gov.cms.dpc.common.utils.SeedProcessor.createBaseAttributionGroup;
+import static gov.cms.dpc.attribution.utils.r4.AttributionTestHelpers.createBaseAttributionGroup;
 import static org.junit.jupiter.api.Assertions.*;
 
 class OrganizationResourceTest extends AbstractAttributionTest {
@@ -30,7 +30,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         final List<Organization> organizationsToCleanUp;
 
     private OrganizationResourceTest() {
-        client = Stu3AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
+        client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
         organizationsToCleanUp = new ArrayList<>();
     }
 

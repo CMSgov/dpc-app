@@ -1,7 +1,7 @@
 package gov.cms.dpc.attribution.jdbi.r4;
 
-import gov.cms.dpc.attribution.AbstractAttributionDAOTest;
-import gov.cms.dpc.attribution.AttributionTestHelpers;
+import gov.cms.dpc.attribution.utils.r4.AbstractAttributionDAOTest;
+import gov.cms.dpc.attribution.utils.r4.AttributionTestHelpers;
 import gov.cms.dpc.attribution.jdbi.PageResult;
 import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
 import gov.cms.dpc.common.entities.r4.OrganizationEntity;

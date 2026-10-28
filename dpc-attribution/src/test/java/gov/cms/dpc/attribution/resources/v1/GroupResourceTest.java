@@ -1,12 +1,11 @@
-package gov.cms.dpc.attribution.resources;
+package gov.cms.dpc.attribution.resources.v1;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import gov.cms.dpc.attribution.AbstractAttributionTest;
-import gov.cms.dpc.attribution.Stu3AttributionTestHelpers;
-import gov.cms.dpc.attribution.resources.v1.GroupResource;
+import gov.cms.dpc.attribution.utils.stu3.AbstractAttributionTest;
+import gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.stu3.FHIRExtractors;
@@ -21,7 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static gov.cms.dpc.attribution.Stu3AttributionTestHelpers.DEFAULT_ORG_ID;
+import static gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
 @IntegrationTest
@@ -32,7 +31,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
     @BeforeEach
     public void beforeEach() {
         APPLICATION.getConfiguration().setPatientLimit(1);
-        client = Stu3AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
+        client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
     }
 
     @Test
@@ -265,7 +264,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
 
     @Test
     public void testRosterSizeToBigMethodDirectly() {
-        final Practitioner practitioner1 = Stu3AttributionTestHelpers.createPractitionerResource("1111111112");
+        final Practitioner practitioner1 = AttributionTestHelpers.createPractitionerResource("1111111112");
         final Group group1 = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner1), DEFAULT_ORG_ID);
 
         assertFalse(GroupResource.rosterSizeTooBig(-1, group1));
@@ -287,7 +286,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
         group1.addMember().setEntity(new Reference("2"));
         assertTrue(GroupResource.rosterSizeTooBig(1, group1));
 
-        final Practitioner practitioner2 = Stu3AttributionTestHelpers.createPractitionerResource("1211111111");
+        final Practitioner practitioner2 = AttributionTestHelpers.createPractitionerResource("1211111111");
         final Group group2 = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner2), DEFAULT_ORG_ID);
         group1.getMember().clear();
         group1.addMember().setEntity(new Reference("1"));
@@ -321,7 +320,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
         // Create patients
         List<Patient> patientList = new LinkedList<>();
         for(int i=0; i<MAX_PATIENTS; i++) {
-            Patient patient = Stu3AttributionTestHelpers.createPatientResource(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
+            Patient patient = AttributionTestHelpers.createPatientResource(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
             patientList.add(patient);
         }
         List<Patient> insertedPatientList = bulkSubmitPatients(patientList);
@@ -353,7 +352,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
     }
 
     private Practitioner createPractitioner(String NPI) {
-        final Practitioner practitioner = Stu3AttributionTestHelpers.createPractitionerResource(NPI);
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPI);
         MethodOutcome methodOutcome = client.create()
                 .resource(practitioner)
                 .encodedJson()
@@ -362,7 +361,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
     }
 
     private Patient createPatient(String MBI, String orgID) {
-        final Patient patient = Stu3AttributionTestHelpers.createPatientResource(MBI, orgID);
+        final Patient patient = AttributionTestHelpers.createPatientResource(MBI, orgID);
         MethodOutcome methodOutcome = client.create()
                 .resource(patient)
                 .encodedJson()

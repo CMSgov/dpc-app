@@ -22,7 +22,7 @@ import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.testing.APIAuthHelpers;
-import gov.cms.dpc.testing.OrganizationHelpers;
+import gov.cms.dpc.testing.stu3.OrganizationHelpers;
 import jakarta.ws.rs.HttpMethod;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
