@@ -2,16 +2,14 @@ package gov.cms.dpc.attribution.resources.r4;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.dpc.attribution.utils.r4.AbstractAttributionTest;
 import gov.cms.dpc.attribution.utils.r4.AttributionTestHelpers;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.r4.FHIRExtractors;
 import gov.cms.dpc.testing.IntegrationTest;
 import gov.cms.dpc.testing.utils.MBIUtil;
-import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.r4.AttributionTestHelpers.DEFAULT_ORG_ID;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @IntegrationTest
 public class GroupResourceTest extends AbstractAttributionTest {
@@ -29,62 +28,11 @@ public class GroupResourceTest extends AbstractAttributionTest {
 
     @BeforeEach
     public void beforeEach() {
-        APPLICATION.getConfiguration().setPatientLimit(1);
         client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
     }
 
     @Test
-    public void testCreateRosterPatientLimit() {
-        final Practitioner practitioner = createPractitioner("1111111112");
-        final Patient patient1 = createPatient("0O00O00OO01", DEFAULT_ORG_ID);
-        final Patient patient2 = createPatient("0O00O00OO00", DEFAULT_ORG_ID);
-        final Group group = AttributionTestHelpers.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
-
-        //Add too many patients
-        group.addMember().setEntity(new Reference(patient1.getIdElement()));
-        group.addMember().setEntity(new Reference(patient2.getIdElement()));
-
-        assertThrows(InvalidRequestException.class, () -> client.create()
-                .resource(group)
-                .encodedJson()
-                .execute());
-
-        //Remove second patient
-        group.getMember().remove(1);
-
-        //Add the amount of patients allowed
-        final MethodOutcome methodOutcome = client.create()
-                .resource(group)
-                .encodedJson()
-                .execute();
-
-        assertTrue(methodOutcome.getCreated());
-
-    }
-
-    @Test
-    public void testCreateDuplicateRoster() {
-        final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
-        final Patient patient = createPatient(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
-
-        final Group group = AttributionTestHelpers.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
-        group.addMember().setEntity(new Reference(patient.getIdElement()));
-
-        client.create()
-            .resource(group)
-            .encodedJson()
-            .execute();
-
-        // "Create" a new roster for the same provider and org
-        assertThrows(ForbiddenOperationException.class, () ->
-            client.create()
-            .resource(group)
-            .encodedJson()
-            .execute(), "Should error on a duplicate roster");
-    }
-
-    @Test
-    public void testReplaceRosterPatientLimit() {
+    public void testReplaceRosterMembers() {
         final Practitioner practitioner = createPractitioner("1211111111");
         final Patient patient1 = createPatient("0O00O00OO02", DEFAULT_ORG_ID);
         final Group group = AttributionTestHelpers.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
@@ -100,15 +48,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
 
         assertTrue(methodOutcome.getCreated());
 
-        //Add an additional patient
         final Patient patient2 = createPatient("0O00O00OO00", DEFAULT_ORG_ID);
-        group.addMember().setEntity(new Reference(patient2.getIdElement()));
-
-        assertThrows(InvalidRequestException.class, () -> client.update()
-                .resource(group)
-                .withId(groupId)
-                .encodedJson()
-                .execute());
 
         //Replace patient
         group.getMember().clear();
@@ -209,7 +149,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
     }
 
     @Test
-    public void testAddMembersToRosterPatientLimit() {
+    public void testAddExistingMemberToRoster() {
         final Practitioner practitioner = createPractitioner("1112111111");
         final Patient patient1 = createPatient("0O00O00OO03", DEFAULT_ORG_ID);
         final Group group = AttributionTestHelpers.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
@@ -225,26 +165,8 @@ public class GroupResourceTest extends AbstractAttributionTest {
         assertTrue(methodOutcome.getCreated());
         final Group createdGroup = (Group) methodOutcome.getResource();
 
-        //Add new patient to existing group, should throw error
-        final Patient patient2 = createPatient("0O00O00OO10", DEFAULT_ORG_ID);
-        group.addMember().setEntity(new Reference(patient2.getIdElement()));
-
         final Parameters parameters = new Parameters();
         parameters.addParameter().setResource(group);
-
-        assertThrows(InvalidRequestException.class, () -> client
-                .operation()
-                .onInstance(createdGroup.getIdElement())
-                .named("$add")
-                .withParameters(parameters)
-                .returnResourceType(Group.class)
-                .encodedJson()
-                .execute());
-
-        //Add same patient to existing group, should not throw an error nor should it update any members
-
-        group.getMember().clear();
-        group.addMember().setEntity(new Reference(patient1.getIdElement()));
 
         // patient is already in group, this doesn't increase member size
         Group addMember = client
@@ -262,63 +184,15 @@ public class GroupResourceTest extends AbstractAttributionTest {
     }
 
     @Test
-    public void testRosterSizeToBigMethodDirectly() {
-        final Practitioner practitioner1 = AttributionTestHelpers.createPractitionerResource("1111111112");
-        final Group group1 = AttributionTestHelpers.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner1), DEFAULT_ORG_ID);
-
-        assertFalse(GroupResource.rosterSizeTooBig(-1, group1));
-        assertFalse(GroupResource.rosterSizeTooBig(null, group1));
-        assertFalse(GroupResource.rosterSizeTooBig(1, (Group) null));
-        assertFalse(GroupResource.rosterSizeTooBig(1, group1, null));
-
-        group1.getMember().clear();
-        group1.addMember().setEntity(new Reference("1"));
-        assertFalse(GroupResource.rosterSizeTooBig(1, group1));
-
-        group1.getMember().clear();
-        group1.addMember().setEntity(new Reference("1"));
-        group1.addMember().setEntity(new Reference("1"));
-        assertFalse(GroupResource.rosterSizeTooBig(1, group1));
-
-        group1.getMember().clear();
-        group1.addMember().setEntity(new Reference("1"));
-        group1.addMember().setEntity(new Reference("2"));
-        assertTrue(GroupResource.rosterSizeTooBig(1, group1));
-
-        final Practitioner practitioner2 = AttributionTestHelpers.createPractitionerResource("1211111111");
-        final Group group2 = AttributionTestHelpers.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner2), DEFAULT_ORG_ID);
-        group1.getMember().clear();
-        group1.addMember().setEntity(new Reference("1"));
-        group1.addMember().setEntity(new Reference("2"));
-        group2.getMember().clear();
-        group2.addMember().setEntity(new Reference("1"));
-        group2.addMember().setEntity(new Reference("2"));
-        assertTrue(GroupResource.rosterSizeTooBig(1, group1, group2));
-
-        group1.getMember().clear();
-        group1.addMember().setEntity(new Reference("1"));
-        group2.getMember().clear();
-        group2.addMember().setEntity(new Reference("1"));
-        assertFalse(GroupResource.rosterSizeTooBig(1, group1, group2));
-
-        group1.getMember().clear();
-        group1.addMember().setEntity(new Reference("1"));
-        group2.getMember().clear();
-        group2.addMember().setEntity(new Reference("2"));
-        assertTrue(GroupResource.rosterSizeTooBig(1, group1, group2));
-    }
-
-    @Test
-    public void testMaxPatients() {
-        final int MAX_PATIENTS = 1350;
-        APPLICATION.getConfiguration().setPatientLimit(MAX_PATIENTS);
+    public void testLargeRoster() {
+        final int LARGE_ROSTER_SIZE = 2213; // Some random number > 2k patients.  (Our current chunk size is 1,000)
 
         final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
         final Group group = AttributionTestHelpers.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
 
         // Create patients
         List<Patient> patientList = new LinkedList<>();
-        for(int i=0; i<MAX_PATIENTS; i++) {
+        for(int i=0; i<LARGE_ROSTER_SIZE; i++) {
             Patient patient = AttributionTestHelpers.createPatientResource(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
             patientList.add(patient);
         }
@@ -346,7 +220,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
             .execute();
 
         // If nothing blew up we should be good, but check a few things anyway
-        assertEquals(MAX_PATIENTS, groupResult.getMember().size());
+        assertEquals(LARGE_ROSTER_SIZE, groupResult.getMember().size());
         assertEquals(createdGroup.getId(), groupResult.getId());
     }
 

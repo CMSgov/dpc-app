@@ -28,16 +28,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,7 +44,6 @@ public class GroupResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
     private static final WebApplicationException NOT_FOUND_EXCEPTION = new WebApplicationException("Cannot find Roster resource", Response.Status.NOT_FOUND);
-    private static final WebApplicationException TOO_MANY_MEMBERS_EXCEPTION = new WebApplicationException("Roster limit reached", Response.Status.BAD_REQUEST);
 
     private final ProviderDAO providerDAO;
     private final PatientDAO patientDAO;
@@ -70,10 +66,6 @@ public class GroupResource {
     @FHIR
     @UnitOfWork(DPCR4HibernateBundle.BUNDLE_NAME)
     public Response createRoster(Group attributionRoster) {
-        if (rosterSizeTooBig(config.getPatientLimit(), attributionRoster)) {
-            throw TOO_MANY_MEMBERS_EXCEPTION;
-        }
-
         final UUID organizationID = UUID.fromString(FHIRExtractors.getOrganizationID(attributionRoster));
 
         // Make sure the provider exists for this org
@@ -152,12 +144,9 @@ public class GroupResource {
     @FHIR
     @UnitOfWork(DPCR4HibernateBundle.BUNDLE_NAME)
     public Group replaceRoster(@PathParam("rosterID") UUID rosterID, Group groupUpdate) {
-        // Check that the roster exists, that the new roster isn't too big, and that all patients exist
+        // Check that the roster exists and that all patients exist
         if (!this.rosterDAO.rosterExists(rosterID)) {
             throw new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND);
-        }
-        if (rosterSizeTooBig(config.getPatientLimit(), groupUpdate)) {
-            throw TOO_MANY_MEMBERS_EXCEPTION;
         }
         List<PatientEntity> patientEntities = verifyAndGetMembers(groupUpdate);
 
@@ -191,11 +180,6 @@ public class GroupResource {
         // Get the roster if it exists, if not return NOT_FOUND
         final RosterEntity rosterEntity = this.rosterDAO.getEntity(rosterID)
                 .orElseThrow(() -> new WebApplicationException(NOT_FOUND_EXCEPTION, Response.Status.NOT_FOUND));
-
-        if (rosterSizeTooBig(config.getPatientLimit(), converter.toFHIR(Group.class, rosterEntity), groupUpdate)) {
-            throw TOO_MANY_MEMBERS_EXCEPTION;
-        }
-
 
         // Verify that all patients in the update exist
         List<PatientEntity> patientEntities = verifyAndGetMembers(groupUpdate);
@@ -302,21 +286,6 @@ public class GroupResource {
         return converter.toFHIR(Group.class, rosterEntity);
     }
 
-    public static boolean rosterSizeTooBig(Integer limit, Group... groups) {
-        if (groups == null || groups.length == 0 || limit == null || limit == -1) {
-            return false;
-        }
-        long totalMembers = Arrays.stream(groups)
-                .filter(Objects::nonNull)
-                .map(Group::getMember)
-                .flatMap(List::stream)
-                .map(Group.GroupMemberComponent::getEntity)
-                .map(Reference::getReference)
-                .distinct()
-                .count();
-        return totalMembers > limit;
-    }
-
     private OffsetDateTime generateExpirationTime() {
         return OffsetDateTime.now(ZoneOffset.UTC).plus(config.getExpirationThreshold());
     }
@@ -356,8 +325,6 @@ public class GroupResource {
             .collect(Collectors.toList());
 
         // Get corresponding PatientEntities
-        // As of 7/30/24, we're currently capped at 1350 patients per group.  If we ever raise that it might be worth
-        // considering breaking this up into multiple queries.
         List<PatientEntity> patientEntities = patientDAO.bulkPatientSearchById(orgId, patientIds);
 
         // Make sure we have the same number of Ids and entities

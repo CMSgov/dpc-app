@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -74,6 +75,30 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 		assertTrue(patients.contains(pat1));
 		assertTrue(patients.contains(pat2));
 		assertFalse(patients.contains(pat3));
+	}
+
+	@Test
+	void test_bulkPatientSearchById_handles_large_requests() {
+		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+		PatientEntity patientEntity = AttributionTestHelpers.createPatientEntity(org);
+
+		db.inTransaction(() -> {
+			organizationDAO.registerOrganization(org);
+			patientDAO.persistPatient(patientEntity);
+		});
+
+		List<UUID> ids = new ArrayList<>();
+		ids.add(patientEntity.getID());
+
+		// Add enough random IDs to make sure we have to chunk the query
+		for(int i=0; i< 50000; i++){
+			ids.add(UUID.randomUUID());
+		}
+
+		List<PatientEntity> patients = patientDAO.bulkPatientSearchById(org.getId(), ids);
+
+		assertEquals(1, patients.size());
+		assertTrue(patients.contains(patientEntity));
 	}
 
 	@Test

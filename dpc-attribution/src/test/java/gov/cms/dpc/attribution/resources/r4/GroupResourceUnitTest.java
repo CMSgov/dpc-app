@@ -75,7 +75,6 @@ class GroupResourceUnitTest {
                 .withOrgTag(orgId)
                 .build();
 
-        configuration.setPatientLimit(10);
         configuration.setExpirationThreshold(10);
         Mockito.when(rosterDAO.findEntities(isNull(),eq(orgId), eq(providerNpi), isNull())).thenReturn(List.of());
         Mockito.when(providerDAO.getProviders(isNull(),eq(providerNpi), eq(orgId))).thenReturn(List.of(new ProviderEntity()));
@@ -110,7 +109,6 @@ class GroupResourceUnitTest {
                 .withOrgTag(orgId)
                 .build();
 
-        configuration.setPatientLimit(10);
         configuration.setExpirationThreshold(10);
         Mockito.when(rosterDAO.findEntities(isNull(),eq(orgId), eq(providerNpi), isNull())).thenReturn(List.of());
         Mockito.when(providerDAO.getProviders(isNull(),eq(providerNpi), eq(orgId))).thenReturn(List.of(new ProviderEntity()));
