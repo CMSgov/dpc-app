@@ -8,7 +8,10 @@ import java.util.UUID;
 
 public interface NewbeClient {
 
-    // verify capabilities statement is "active"
+    /**
+     *  Check CapabilitiesStatement is "active"
+     *  <a href="https://bcda.cms.gov/api-documentation/access-claims-data.html#check-api-status-2">...</a>
+     */
     boolean healthy();
 
     NewbeExportResponse export(NewbeExportRequest request);

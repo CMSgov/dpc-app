@@ -31,10 +31,6 @@ public class MockNewbeClient implements NewbeClient {
         this.exportPath = exportPath;
     }
 
-    /**
-     *  CapabilitiesStatement is retrurned from metadata endpoint
-     *  <a href="https://bcda.cms.gov/api-documentation/access-claims-data.html#check-api-status-2">...</a>
-     */
     @Override
     public boolean healthy() {
         return true;
