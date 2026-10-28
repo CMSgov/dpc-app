@@ -9,7 +9,7 @@ import gov.cms.dpc.attribution.Stu3AttributionTestHelpers;
 import gov.cms.dpc.attribution.resources.v1.GroupResource;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.common.utils.SeedProcessor;
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.testing.IntegrationTest;
 import gov.cms.dpc.testing.utils.MBIUtil;
 import org.hl7.fhir.dstu3.model.*;

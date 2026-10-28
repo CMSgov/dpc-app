@@ -4,7 +4,7 @@ import com.google.inject.name.Named;
 import gov.cms.dpc.common.entities.r4.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCAbstractDAO;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.r4.FHIRExtractors;
 import jakarta.inject.Inject;
 import jakarta.persistence.criteria.*;
 import org.hibernate.query.Query;

@@ -7,7 +7,7 @@ import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
 import gov.cms.dpc.common.entities.r4.OrganizationEntity;
 import gov.cms.dpc.common.entities.r4.PatientEntity;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.r4.FHIRExtractors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package gov.cms.dpc.testing.factories;
+package gov.cms.dpc.testing.factories.stu3;
 
 import org.hl7.fhir.dstu3.model.Address;
 import org.hl7.fhir.dstu3.model.Organization;

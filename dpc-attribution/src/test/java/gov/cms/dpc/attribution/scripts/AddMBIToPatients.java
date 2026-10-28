@@ -1,7 +1,7 @@
 package gov.cms.dpc.attribution.scripts;
 
 import ca.uhn.fhir.context.FhirContext;
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;

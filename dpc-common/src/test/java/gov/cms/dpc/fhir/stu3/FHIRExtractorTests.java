@@ -1,8 +1,10 @@
-package gov.cms.dpc.fhir;
+package gov.cms.dpc.fhir.stu3;
 
+import gov.cms.dpc.fhir.DPCExtensionSystem;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.utils.MBIUtil;
-import gov.cms.dpc.testing.factories.OrganizationFactory;
+import gov.cms.dpc.testing.factories.stu3.OrganizationFactory;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.jupiter.api.Nested;
@@ -15,7 +17,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static gov.cms.dpc.fhir.FHIRExtractors.*;
+import static gov.cms.dpc.fhir.stu3.FHIRExtractors.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)
@@ -379,138 +381,6 @@ class FHIRExtractorTests {
             Stream<Patient> patStream = FHIRExtractors.getResourceStream(parameters, Patient.class);
             Optional<Patient> optionalPatient = patStream.findAny();
             assertTrue(optionalPatient.isEmpty());
-        }
-    }
-
-    @Nested
-    class R4Tests {
-
-        private static final String MISSING_ID_FMT = "Cannot find identifier for system: %s";
-        private static final String MISSING_MBI_FMT = "Patient: %s doesn't have an MBI";
-
-        @Test
-        void testGetMBI_MultipleCurrentMBIs() {
-            org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
-            patient.setId("id");
-            for (String value : new String[]{"0A00A00AA01", "0A00A00AA02"}) {
-                patient.addIdentifier()
-                        .setSystem(DPCIdentifierSystem.MBI.getSystem())
-                        .setValue(value)
-                        .addExtension()
-                        .setUrl(DPCExtensionSystem.IDENTIFIER_CURRENCY.getSystem())
-                        .setValue(new org.hl7.fhir.r4.model.Coding().setCode(DPCExtensionSystem.CURRENT));
-            }
-
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                    () -> getPatientMBI(patient));
-            assertEquals("Cannot find current MBI for patient: id", exception.getMessage());
-        }
-
-        @Test
-        void testGetMBI_MultipleIDs() {
-            final org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
-            // This double nesting verifies that the fromString method works correctly. Makes PiTest happy.
-            patient.addIdentifier().setSystem(DPCIdentifierSystem.fromString(DPCIdentifierSystem.DPC.getSystem()).getSystem()).setValue("test-dpc-one");
-            patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("0A00A00AA01");
-
-            assertEquals("0A00A00AA01", getPatientMBI(patient), "Should have MBI");
-        }
-
-        @Test
-        void testGetMBI_NoID() {
-            final org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
-            patient.setId("id");
-
-            final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> getPatientMBI(patient), "Should not have patient MBI");
-            assertEquals(String.format(MISSING_MBI_FMT, "id"), exception.getMessage(), "Should have correct exception message");
-        }
-
-        @Test
-        void testGetMBI_MultipleMBIs() {
-            final org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
-            patient
-                .addIdentifier()
-                .setSystem(DPCIdentifierSystem.MBI.getSystem())
-                .setValue("0A00A00AA01")
-                .addExtension()
-                    .setUrl(DPCExtensionSystem.IDENTIFIER_CURRENCY.getSystem())
-                    .setValue(new org.hl7.fhir.r4.model.Coding().setCode(DPCExtensionSystem.CURRENT));
-
-            patient
-                .addIdentifier()
-                .setSystem(DPCIdentifierSystem.MBI.getSystem())
-                .setValue("0A00A00AA02")
-                .addExtension()
-                    .setUrl(DPCExtensionSystem.IDENTIFIER_CURRENCY.getSystem())
-                    .setValue(new org.hl7.fhir.r4.model.Coding().setCode(DPCExtensionSystem.HISTORIC));
-
-            assertEquals("0A00A00AA01", getPatientMBI(patient), "Should have MBI");
-        }
-
-        @Test
-        void testGetMBI_MultipleMBIs_NoneCurrent() {
-            final org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
-            patient.setId("id");
-            patient
-                    .addIdentifier()
-                    .setSystem(DPCIdentifierSystem.MBI.getSystem())
-                    .setValue("0A00A00AA01")
-                    .addExtension()
-                    .setUrl(DPCExtensionSystem.IDENTIFIER_CURRENCY.getSystem())
-                    .setValue(new org.hl7.fhir.r4.model.Coding().setCode(DPCExtensionSystem.HISTORIC));
-
-            patient
-                    .addIdentifier()
-                    .setSystem(DPCIdentifierSystem.MBI.getSystem())
-                    .setValue("0A00A00AA01")
-                    .addExtension()
-                    .setUrl(DPCExtensionSystem.IDENTIFIER_CURRENCY.getSystem())
-                    .setValue(new org.hl7.fhir.r4.model.Coding().setCode(DPCExtensionSystem.HISTORIC));
-
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> getPatientMBI(patient));
-            assertEquals("Cannot find current MBI for patient: id", exception.getMessage());
-        }
-
-        @Test
-        void testGetMBI_MultipleMBIs_NoneWithCurrency() {
-            final org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
-            patient.setId("id");
-            patient
-                    .addIdentifier()
-                    .setSystem(DPCIdentifierSystem.MBI.getSystem())
-                    .setValue("0A00A00AA01");
-
-            patient
-                    .addIdentifier()
-                    .setSystem(DPCIdentifierSystem.MBI.getSystem())
-                    .setValue("0A00A00AA01");
-
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> getPatientMBI(patient));
-            assertEquals("Cannot find an MBI with identifier currency for patient: id", exception.getMessage());
-        }
-
-        @Test
-        void testGetMBI_BadFormat() {
-            final org.hl7.fhir.r4.model.Patient patient = new org.hl7.fhir.r4.model.Patient();
-            patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("bad_mbi");
-
-            assertThrows(IllegalArgumentException.class, () -> getPatientMBI(patient));
-        }
-
-        @Test
-        void testPractitionerMultipleIDs() {
-            final org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
-            practitioner.addIdentifier().setSystem(DPCIdentifierSystem.DPC.getSystem()).setValue("test-dpc-one");
-            practitioner.addIdentifier().setSystem(DPCIdentifierSystem.fromString(DPCIdentifierSystem.NPPES.getSystem()).getSystem()).setValue("test-npi-one");
-
-            assertEquals("test-npi-one", getProviderNPI(practitioner), "Should have NPI");
-        }
-
-        @Test
-        void testPractitionerNoID() {
-            final org.hl7.fhir.r4.model.Practitioner practitioner = new org.hl7.fhir.r4.model.Practitioner();
-            final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> getProviderNPI(practitioner), "Should not have NPI");
-            assertEquals(String.format(MISSING_ID_FMT, DPCIdentifierSystem.NPPES.getSystem()), exception.getMessage(), "Should have correct error message");
         }
     }
 }

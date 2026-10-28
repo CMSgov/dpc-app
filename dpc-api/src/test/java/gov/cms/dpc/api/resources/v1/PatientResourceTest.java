@@ -23,7 +23,7 @@ import gov.cms.dpc.common.jdbi.ConsentDAO;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.fhir.helpers.FHIRHelpers;
 import gov.cms.dpc.queue.DistributedBatchQueue;

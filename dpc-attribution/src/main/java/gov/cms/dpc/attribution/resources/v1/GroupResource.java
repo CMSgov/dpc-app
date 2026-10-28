@@ -13,7 +13,7 @@ import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.common.entities.stu3.ProviderEntity;
 import gov.cms.dpc.common.entities.stu3.RosterEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.stu3.FHIRParameter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
