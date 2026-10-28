@@ -1,8 +1,8 @@
-package gov.cms.dpc.common.utils;
+package gov.cms.dpc.common.utils.r4;
 
-import gov.cms.dpc.fhir.dropwizard.handlers.stu3.BundleHandler;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Patient;
+import gov.cms.dpc.fhir.dropwizard.handlers.r4.BundleHandler;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 import java.util.List;

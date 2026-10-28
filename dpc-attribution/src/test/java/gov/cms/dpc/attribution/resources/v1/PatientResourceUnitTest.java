@@ -5,7 +5,7 @@ import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
 import gov.cms.dpc.attribution.jdbi.stu3.PatientDAO;
 import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.common.entities.stu3.PatientEntity;
-import gov.cms.dpc.common.utils.PagingService;
+import gov.cms.dpc.common.utils.stu3.PagingService;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
