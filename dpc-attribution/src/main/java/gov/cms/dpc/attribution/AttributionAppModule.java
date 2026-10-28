@@ -12,6 +12,7 @@ import gov.cms.dpc.attribution.jdbi.r4.RosterDAO;
 import gov.cms.dpc.attribution.resources.r4.AttributionResource;
 import gov.cms.dpc.attribution.resources.r4.BaseResource;
 import gov.cms.dpc.attribution.resources.r4.OrganizationResource;
+import gov.cms.dpc.attribution.resources.r4.PatientResource;
 import gov.cms.dpc.attribution.resources.r4.PractitionerResource;
 import gov.cms.dpc.attribution.resources.v1.*;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
@@ -31,7 +32,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
 
         // STU3 resources
         binder.bind(V1AttributionResource.class);
-        binder.bind(PatientResource.class);
+        binder.bind(gov.cms.dpc.attribution.resources.v1.PatientResource.class);
         binder.bind(gov.cms.dpc.attribution.resources.v1.PractitionerResource.class);
         binder.bind(GroupResource.class);
         binder.bind(gov.cms.dpc.attribution.resources.v1.OrganizationResource.class);
@@ -42,6 +43,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         binder.bind(AttributionResource.class);
         binder.bind(OrganizationResource.class);
         binder.bind(PractitionerResource.class);
+        binder.bind(PatientResource.class);
 
         // STU3 DAOs
         binder.bind(gov.cms.dpc.attribution.jdbi.stu3.OrganizationDAO.class);

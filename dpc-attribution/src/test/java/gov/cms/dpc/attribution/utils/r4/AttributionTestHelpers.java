@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
 import gov.cms.dpc.common.entities.r4.*;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -15,17 +16,49 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
+import org.mockito.ArgumentMatcher;
 
+import jakarta.annotation.Nullable;
+
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class AttributionTestHelpers {
 
     public static final String DEFAULT_ORG_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
+    public static final String DEFAULT_PATIENT_MBI = "3SQ0C00AA00";
+
+    public static Patient createPatientResource(String mbi, String organizationID) {
+        final Patient patient = new Patient();
+        patient.addIdentifier()
+                .setSystem(DPCIdentifierSystem.MBI.getSystem())
+                .setValue(mbi);
+
+        patient.addName().setFamily("Patient").addGiven("Test");
+        patient.setBirthDate(Date.valueOf("1990-01-01"));
+        patient.setGender(Enumerations.AdministrativeGender.OTHER);
+        patient.setManagingOrganization(new Reference(new IdType("Organization", organizationID)));
+
+        return patient;
+    }
+
+    public static List<Patient> createPatientResources(String organizationId, int numPatients) {
+        List<Patient> patients = new ArrayList<>(numPatients);
+        for (int i = 0; i < numPatients; i++) {
+            patients.add(createPatientResource(MBIUtil.generateMBI(), organizationId));
+        }
+        return patients;
+    }
 
     public static Organization createOrgResource(String uuid, String npi){
         final Organization organization = new Organization();
@@ -159,4 +192,13 @@ public class AttributionTestHelpers {
         return attributionRelationship;
     }
 
+    public static ArgumentMatcher<PatientSearchQuery> queryMatches(UUID resourceId, UUID orgId, @Nullable Integer count, @Nullable Integer pageOffset) {
+        return query ->
+                query != null &&
+                        Objects.equals(query.getResourceID().orElse(null), resourceId) &&
+                        Objects.equals(query.getOrganizationID().orElse(null), orgId) &&
+                        query.getPatientMBI().orElse(null) == null &&
+                        Objects.equals(query.getCount().orElse(null), count) &&
+                        Objects.equals(query.getPageOffset().orElse(null), pageOffset);
+    }
 }
