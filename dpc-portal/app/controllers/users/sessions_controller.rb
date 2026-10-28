@@ -14,7 +14,12 @@ module Users
                 action_type: LoggingConstants::ActionType::UserLoggedOut,
                 user_identifier: current_user_identifier,
                 csp: csp)
-      redirect_to url_for_logout(csp), allow_other_host: true
+
+      if csp.to_s == 'clear'
+        redirect_to session.delete(:user_return_to) || sign_in_path
+      else
+        redirect_to url_for_logout(csp), allow_other_host: true
+      end
     end
 
     def logged_out

@@ -14,6 +14,7 @@ RSpec.describe 'Sessions', type: :request do
         before do
           sign_in user, csp: provider
         end
+
         it 'should prevent access' do
           delete '/users/sign_out'
           get '/organizations'
@@ -37,9 +38,22 @@ RSpec.describe 'Sessions', type: :request do
           delete '/users/sign_out'
         end
 
-        it 'should redirect to the provider host' do
+        it 'clears user and CSP authentication data from the session' do
           delete '/users/sign_out'
-          expect(response.location).to include(ENV.fetch("IDP_#{provider.to_s.upcase}_HOST"))
+          expect(request.session[:user_id]).to be_nil
+          expect(request.session[:csp_session]).to be_blank
+        end
+
+        if provider == :clear
+          it 'should redirect locally to sign_in_path' do
+            delete '/users/sign_out'
+            expect(response).to redirect_to(sign_in_path)
+          end
+        else
+          it 'should redirect to the provider host' do
+            delete '/users/sign_out'
+            expect(response.location).to include(ENV.fetch("IDP_#{provider.to_s.upcase}_HOST"))
+          end
         end
       end
 
@@ -49,6 +63,10 @@ RSpec.describe 'Sessions', type: :request do
 
       context 'using ID.me' do
         it_behaves_like 'logout actions', :id_me
+      end
+
+      context 'using CLEAR' do
+        it_behaves_like 'logout actions', :clear
       end
     end
 

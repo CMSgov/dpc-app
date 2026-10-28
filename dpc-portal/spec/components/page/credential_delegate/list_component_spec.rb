@@ -15,10 +15,6 @@ RSpec.describe Page::CredentialDelegate::ListComponent, type: :component do
 
     let(:component) { described_class.new(org, pending_invitations, expired_invitations, credential_delegates) }
 
-    before do
-      render_inline(component)
-    end
-
     context 'No credential delegates' do
       let(:pending_invitations) { [] }
       let(:expired_invitations) { [] }

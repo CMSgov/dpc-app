@@ -98,8 +98,7 @@ CLEAR_CLIENT_CONFIG = {
     authorization_endpoint: CLEAR_CONFIG[:authorization_endpoint],
     token_endpoint: CLEAR_CONFIG[:token_endpoint],
     userinfo_endpoint: CLEAR_CONFIG[:user_info_endpoint],
-    jwks_uri: CLEAR_CONFIG[:jwks_uri],
-    end_session_endpoint: "https://#{CLEAR_CONFIG[:host]}#{CLEAR_CONFIG[:log_out_path]}"
+    jwks_uri: CLEAR_CONFIG[:jwks_uri]
   }
 }.freeze
 

@@ -2,9 +2,11 @@
 
 require 'rails_helper'
 require 'securerandom'
+require 'support/login_support'
 
 RSpec.describe 'Accessibility', type: :system do
   include DpcClientSupport
+  include LoginSupport::ClearVerification
 
   before do
     driven_by(:selenium_headless)
@@ -25,11 +27,12 @@ RSpec.describe 'Accessibility', type: :system do
   RSpec.shared_examples 'accessibility tests' do |provider, display_name|
     let!(:csp) { Csp.find_by(name: provider) || create(:csp, name: provider) }
     before do
+      stub_clear_verification_session if provider == :clear
       OmniAuth.config.test_mode = true
       OmniAuth.config.add_mock(provider,
                                { uid:,
                                  credentials: { expires_in: 899,
-                                                token: 'bearer-token',
+                                                token: provider == :clear ? clear_access_token : 'bearer-token',
                                                 id_token: 'mock_id_token' },
                                  info: { email: 'bob@example.com' },
                                  extra: { raw_info: { given_name: 'Bob',
