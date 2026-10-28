@@ -14,6 +14,7 @@ on:
       - dpc-bluebutton/**
       - dpc-common/**
       - dpc-macaroons/**
+      - dpc-newbe/**
       - dpc-portal/**
       - dpc-queue/**
       - dpc-smoketest/**

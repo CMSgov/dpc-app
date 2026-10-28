@@ -43,7 +43,7 @@ public class MockNewbeClient implements NewbeClient {
      *   all requests will be POST to $shared-export
      */
     @Override
-    public NewbeExportResponse export(NewbeExportRequest request) {
+    public synchronized NewbeExportResponse export(NewbeExportRequest request) {
         final UUID jobId = UUID.randomUUID();
         final String requestUrl = "/v3/Group/" + request.groupId() + "/$export";
         final String jobUrl = "https://localhost:3002/api/v3/jobs/" + jobId;
@@ -61,7 +61,14 @@ public class MockNewbeClient implements NewbeClient {
     public synchronized NewbeJobStatus jobStatus(UUID jobId) {
         MockJob job = jobs.get(jobId);
         if (job == null) {
-            return null;
+            return new NewbeJobStatus(400, new NewbeJobStatusResponse(
+                Instant.now(),
+                null,
+                true,
+                List.of(),
+                List.of("error occurred on backend"),
+                jobId
+            ));
         }
         if (++job.polls <= POLL_RETRIES_BEFORE_FILE_DOWNLOAD) {
             return new NewbeJobStatus(202, null);

@@ -22,6 +22,14 @@ class MockNewbeClientTest {
     Path exportPath;
 
     @Test
+    void testInvalidJobReturnsBackendError() {
+        MockNewbeClient client = new MockNewbeClient(exportPath);
+
+        var invalidJob = client.jobStatus(UUID.randomUUID());
+        assertEquals(400, invalidJob.statusCode());
+    }
+
+    @Test
     void testJobCompletesOnThirdPoll() {
         MockNewbeClient client = new MockNewbeClient(exportPath);
 
