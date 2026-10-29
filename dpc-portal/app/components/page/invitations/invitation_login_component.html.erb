@@ -31,7 +31,7 @@
           ]
         %>
         <% csps.each do |csp| %>
-          <%= button_to csp[:verify_path], class: 'usa-button padding-y-0 display-flex flex-align-center flex-justify-center height-6 width-full margin-bottom-1', data: { turbo: false } do %>
+          <%= button_to csp[:verify_path], class: 'usa-button padding-y-0 display-flex flex-align-center flex-justify-center height-5 width-full margin-bottom-1', data: { turbo: false } do %>
             <img class="csp_logo" src="<%= csp[:logo_src_light] %>" alt="<%= csp[:alt] %>" />
           <% end %>
         <% end %>

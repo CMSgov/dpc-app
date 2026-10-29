@@ -19,7 +19,7 @@
           <% is_last_used = (@last_used_csp == csp[:id]) %>
           <div class="<%= class_names('last-used-login-wrapper margin-bottom-1': is_last_used) %>">
             <%= button_to csp[:login_path],
-                          class: class_names('usa-button padding-y-0 display-flex flex-align-center flex-justify-center height-6 width-full margin-bottom-1', 'usa-button--outline': @last_used_csp.present? && !is_last_used),
+                          class: class_names('usa-button padding-y-0 display-flex flex-align-center flex-justify-center height-5 width-full margin-bottom-1', 'usa-button--outline': @last_used_csp.present? && !is_last_used),
                           data: { turbo: false } do %>
                 <% logo_src = @last_used_csp.present? && !is_last_used ? csp[:logo_src_dark] : csp[:logo_src_light] %>
                 <img class="csp_logo" src="<%= logo_src %>" alt="<%= csp[:alt] %>" />
