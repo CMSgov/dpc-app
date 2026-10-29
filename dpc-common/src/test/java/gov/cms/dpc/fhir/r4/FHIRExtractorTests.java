@@ -13,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static gov.cms.dpc.fhir.r4.FHIRExtractors.*;
@@ -347,11 +346,11 @@ class FHIRExtractorTests {
         bundle.addEntry(new Bundle.BundleEntryComponent().setResource(org));
 
         Stream<Patient> patStream = FHIRExtractors.getResourceStream(bundle, Patient.class);
-        List<Patient> patients = patStream.collect(Collectors.toList());
+        List<Patient> patients = patStream.toList();
         assertEquals(2, patients.size());
 
         Stream<Organization> orgStream = FHIRExtractors.getResourceStream(bundle, Organization.class);
-        List<Organization> orgs = orgStream.collect(Collectors.toList());
+        List<Organization> orgs = orgStream.toList();
         assertEquals(1, orgs.size());
 
         // Should return an empty stream if we ask for a resource that's not in our bundle
@@ -371,7 +370,7 @@ class FHIRExtractorTests {
         parameters.setParameter(List.of(new Parameters.ParametersParameterComponent().setResource(bundle)));
 
         Stream<Patient> patStream = FHIRExtractors.getResourceStream(parameters, Patient.class);
-        List<Patient> patients = patStream.collect(Collectors.toList());
+        List<Patient> patients = patStream.toList();
         assertEquals(1, patients.size());
         assertSame(pat, patients.get(0));
     }

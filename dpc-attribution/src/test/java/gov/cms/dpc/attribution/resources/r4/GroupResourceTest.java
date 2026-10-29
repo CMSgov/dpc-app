@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static gov.cms.dpc.attribution.utils.r4.AttributionTestHelpers.DEFAULT_ORG_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -261,6 +260,6 @@ public class GroupResourceTest extends AbstractAttributionTest {
 
         return patientsReturned.getEntry().stream()
             .map(component -> (Patient) component.getResource())
-            .collect(Collectors.toList());
+            .toList();
     }
 }

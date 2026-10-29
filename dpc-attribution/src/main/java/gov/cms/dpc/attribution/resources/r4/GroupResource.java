@@ -135,7 +135,7 @@ public class GroupResource {
                     p.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(mbi);
                     return p;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
 
@@ -322,7 +322,7 @@ public class GroupResource {
             .map(Group.GroupMemberComponent::getEntity)
             .map(ref -> UUID.fromString(new IdType(ref.getReference()).getIdPart()))
             .distinct()
-            .collect(Collectors.toList());
+            .toList();
 
         // Get corresponding PatientEntities
         List<PatientEntity> patientEntities = patientDAO.bulkPatientSearchById(orgId, patientIds);

@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,7 +29,7 @@ public class RESTUtils {
      * @param action A function that performs the insert/update on each {@link Resource}
      * @param dao A DAO used for flushing the Hibernate cache
      * @param batchSize The batch size used for sending inserts/updates to the DB
-     * @return A list of the inserted {@link Resource}s
+     * @return A mutable list of the inserted {@link Resource}s
      * @param <R> Any FHIR {@link Resource}
      */
     public static <R extends Resource> List<R> bulkResourceHandler(Stream<R> resources, UnaryOperator<R> action, DPCAbstractDAO<?> dao, int batchSize) {
@@ -50,7 +51,7 @@ public class RESTUtils {
                 }
                 return resource;
             })
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**

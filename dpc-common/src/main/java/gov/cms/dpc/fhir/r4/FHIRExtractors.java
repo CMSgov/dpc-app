@@ -13,6 +13,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -88,7 +89,7 @@ public class FHIRExtractors {
      * Extract all Medicare Beneficiary IDs (MBI) from the given {@link Patient} resource
      *
      * @param patient - {@link Patient} provider to get MBI from
-     * @return - List of {@link String} patient MBI
+     * @return - Mutable list of {@link String} patient MBI
      */
     public static List<String> getPatientMBIs(Patient patient) {
         List<Identifier> identifiers = findMatchingIdentifiers(patient.getIdentifier(), DPCIdentifierSystem.MBI);
@@ -105,7 +106,7 @@ public class FHIRExtractors {
                 }
             })
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
@@ -226,13 +227,13 @@ public class FHIRExtractors {
      *
      * @param identifiers List of {@link Identifier}s to search
      * @param system {@link DPCIdentifierSystem} to search identifiers for
-     * @return list of {@link Identifier}
+     * @return mutable list of {@link Identifier}
      */
     public static List<Identifier> findMatchingIdentifiers(List<Identifier> identifiers, DPCIdentifierSystem system) {
         return identifiers
                 .stream()
                 .filter(id -> id.getSystem().equals(system.getSystem()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
