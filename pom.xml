@@ -48,7 +48,6 @@
         <pitest.version>1.22.0</pitest.version>
         <h2.version>2.3.232</h2.version>
         <aws.java.sdk.version>2.52.1</aws.java.sdk.version>
-        <logback.version>1.6.5</logback.version>
         <maven.build.cache.processPlugins>false</maven.build.cache.processPlugins>
 
         <sonar.coverage.exclusions>**/MockBlueButton*.java</sonar.coverage.exclusions>
@@ -309,22 +308,6 @@
                 <groupId>com.smoketurner</groupId>
                 <artifactId>dropwizard-swagger</artifactId>
                 <version>4.0.5-1</version>
-            </dependency>
-            <!-- Keep Logback dependencies aligned to the configured version. -->
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-access</artifactId>
-                <version>${logback.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${logback.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>${logback.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
