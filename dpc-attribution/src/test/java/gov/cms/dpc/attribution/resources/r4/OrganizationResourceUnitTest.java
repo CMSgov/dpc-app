@@ -45,7 +45,7 @@ class OrganizationResourceUnitTest {
     private final String lookbackExemptOrgId = "0ab352f1-2bf1-44c4-aa7a-3004a1ffef12";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         configuration = new DPCAttributionConfiguration();
         resource = new OrganizationResource(converter,mockOrganizationDao, configuration);

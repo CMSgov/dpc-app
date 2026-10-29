@@ -25,11 +25,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(BufferedLoggerHandler.class)
 @IntegrationTest
 public abstract class AbstractAttributionTest {
-    protected static final String configPath = "src/test/resources/test.application.yml";
+    protected static final String CONFIG_PATH = "src/test/resources/test.application.yml";
     private static final ObjectMapper mapper = new ObjectMapper();
 
     protected static final DropwizardTestSupport<DPCAttributionConfiguration> APPLICATION =
-            new DropwizardTestSupport<>(DPCAttributionService.class, configPath,
+            new DropwizardTestSupport<>(DPCAttributionService.class, CONFIG_PATH,
                     ConfigOverride.config("server.applicationConnectors[0].port", "3727"),
                     ConfigOverride.config("server.adminConnectors[0].port", "3728"));
 
@@ -41,9 +41,9 @@ public abstract class AbstractAttributionTest {
     public static void initDB() throws Exception {
         APPLICATION.before();
         SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("db", "migrate" , configPath);
+        APPLICATION.getApplication().run("db", "migrate" , CONFIG_PATH);
         SharedConfigurationState.clear();
-        APPLICATION.getApplication().run("seed", configPath);
+        APPLICATION.getApplication().run("seed", CONFIG_PATH);
     }
 
     @AfterAll

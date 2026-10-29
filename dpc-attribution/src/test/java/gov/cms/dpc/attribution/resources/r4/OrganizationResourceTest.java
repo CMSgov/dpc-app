@@ -35,7 +35,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
     }
 
     @AfterEach
-    public void cleanup() {
+    void cleanup() {
         organizationsToCleanUp.forEach(organization -> {
             try {
                 client
@@ -148,26 +148,26 @@ class OrganizationResourceTest extends AbstractAttributionTest {
                 .execute();
 
         // Try to read the resources, should get 404s
-        assertThrows(ResourceNotFoundException.class, () -> client
+        final var patientRead = client
                 .read()
                 .resource(Patient.class)
                 .withId(createdPatient.getId())
-                .encodedJson()
-                .execute(), "Should not have found patient");
+                .encodedJson();
+        assertThrows(ResourceNotFoundException.class, patientRead::execute, "Should not have found patient");
 
-        assertThrows(ResourceNotFoundException.class, () -> client
+        final var practitionerRead = client
                 .read()
                 .resource(Practitioner.class)
                 .withId(createdPractitioner.getId())
-                .encodedJson()
-                .execute(), "Should not have found practitioner");
+                .encodedJson();
+        assertThrows(ResourceNotFoundException.class, practitionerRead::execute, "Should not have found practitioner");
 
-        assertThrows(ResourceNotFoundException.class, () -> client
+        final var organizationRead = client
                 .read()
                 .resource(Organization.class)
                 .withId(organization.getId())
-                .encodedJson()
-                .execute(), "Should not have found organization");
+                .encodedJson();
+        assertThrows(ResourceNotFoundException.class, organizationRead::execute, "Should not have found organization");
     }
 
     @Test
@@ -186,10 +186,10 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         assertTrue(organization.equalsDeep(orgResult));
 
         organization.setName("<script>nope</script");
-        assertThrows(InvalidRequestException.class, () -> client
+        final IUpdateTyped invalidUpdate = client
                 .update()
-                .resource(organization)
-                .execute(), "Should not have updated organization");
+                .resource(organization);
+        assertThrows(InvalidRequestException.class, invalidUpdate::execute, "Should not have updated organization");
         organizationsToCleanUp.add(organization);
     }
 

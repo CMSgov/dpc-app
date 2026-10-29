@@ -186,7 +186,7 @@ class PatientResourceTest extends AbstractAttributionTest {
         // Create a practitioner and an attribution resource
         final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource("2222222228");
 
-        final MethodOutcome outcome = client
+        client
                 .create()
                 .resource(practitioner)
                 .encodedJson()
@@ -268,11 +268,11 @@ class PatientResourceTest extends AbstractAttributionTest {
         final Patient updatedPatient = (Patient) updated.getResource();
 
         foundPatient.getNameFirstRep().setFamily("<script>Family</script>");
-        assertThrows(InvalidRequestException.class, () -> client
+        final var invalidUpdate = client
                 .update()
                 .resource(foundPatient)
-                .encodedJson()
-                .execute(), "Should not have updated patient");
+                .encodedJson();
+        assertThrows(InvalidRequestException.class, invalidUpdate::execute, "Should not have updated patient");
 
         // Try to pull the record, again, from the DB
 

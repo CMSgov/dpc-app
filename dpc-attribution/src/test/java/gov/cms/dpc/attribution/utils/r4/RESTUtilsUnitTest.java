@@ -6,14 +6,17 @@ import org.apache.commons.lang3.exception.UncheckedException;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class RESTUtilsUnitTest {
 	DPCAbstractDAO<?> dao = mock(DPCAbstractDAO.class);
@@ -24,23 +27,24 @@ class RESTUtilsUnitTest {
 		RESTUtils.bulkResourceHandler(
 			Stream.of(new Patient(), new Patient(), new Patient()), action, dao, 10);
 
-		Mockito.verify(action, Mockito.times(3)).apply(any());
-		Mockito.verify(dao, Mockito.never()).cleanUpBatch();
+		verify(action, times(3)).apply(any());
+		verify(dao, never()).cleanUpBatch();
 	}
 
 	@Test
 	void test_bulkResourceHandler_empty_stream() {
 		RESTUtils.bulkResourceHandler(Stream.of(), action, dao, 10);
 
-		Mockito.verify(action, Mockito.never()).apply(any());
+		verify(action, never()).apply(any());
 	}
 
 	@Test
 	void test_bulkResourceHandler_error_on_action() {
-		Mockito.when(action.apply(any())).thenThrow(UncheckedException.class);
+		when(action.apply(any())).thenThrow(UncheckedException.class);
+		Stream<Resource> resources = Stream.of(new Patient());
 
 		assertThrows(WebApplicationException.class, () ->
-			RESTUtils.bulkResourceHandler(Stream.of(new Patient()), action, dao, 10));
+			RESTUtils.bulkResourceHandler(resources, action, dao, 10));
 	}
 
 	@Test
@@ -48,6 +52,6 @@ class RESTUtilsUnitTest {
 		RESTUtils.bulkResourceHandler(
 			Stream.of(new Patient(), new Patient(), new Patient(), new Patient()), action, dao, 2);
 
-		Mockito.verify(dao, Mockito.times(2)).cleanUpBatch();
+		verify(dao, times(2)).cleanUpBatch();
 	}
 }

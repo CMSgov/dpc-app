@@ -29,13 +29,13 @@ public class GroupResourceTest extends AbstractAttributionTest {
     private IGenericClient client;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         APPLICATION.getConfiguration().setPatientLimit(1);
         client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
     }
 
     @Test
-    public void testCreateRosterPatientLimit() {
+    void testCreateRosterPatientLimit() {
         final Practitioner practitioner = createPractitioner("1111111112");
         final Patient patient1 = createPatient("0O00O00OO01", DEFAULT_ORG_ID);
         final Patient patient2 = createPatient("0O00O00OO00", DEFAULT_ORG_ID);
@@ -45,10 +45,10 @@ public class GroupResourceTest extends AbstractAttributionTest {
         group.addMember().setEntity(new Reference(patient1.getIdElement()));
         group.addMember().setEntity(new Reference(patient2.getIdElement()));
 
-        assertThrows(InvalidRequestException.class, () -> client.create()
+        final var oversizedCreate = client.create()
                 .resource(group)
-                .encodedJson()
-                .execute());
+                .encodedJson();
+        assertThrows(InvalidRequestException.class, oversizedCreate::execute);
 
         //Remove second patient
         group.getMember().remove(1);
@@ -64,7 +64,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
     }
 
     @Test
-    public void testCreateDuplicateRoster() {
+    void testCreateDuplicateRoster() {
         final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
         final Patient patient = createPatient(MBIUtil.generateMBI(), DEFAULT_ORG_ID);
 
@@ -77,15 +77,14 @@ public class GroupResourceTest extends AbstractAttributionTest {
             .execute();
 
         // "Create" a new roster for the same provider and org
-        assertThrows(ForbiddenOperationException.class, () ->
-            client.create()
+        final var duplicateCreate = client.create()
             .resource(group)
-            .encodedJson()
-            .execute(), "Should error on a duplicate roster");
+            .encodedJson();
+        assertThrows(ForbiddenOperationException.class, duplicateCreate::execute, "Should error on a duplicate roster");
     }
 
     @Test
-    public void testReplaceRosterPatientLimit() {
+    void testReplaceRosterPatientLimit() {
         final Practitioner practitioner = createPractitioner("1211111111");
         final Patient patient1 = createPatient("0O00O00OO02", DEFAULT_ORG_ID);
         final Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
@@ -105,17 +104,17 @@ public class GroupResourceTest extends AbstractAttributionTest {
         final Patient patient2 = createPatient("0O00O00OO00", DEFAULT_ORG_ID);
         group.addMember().setEntity(new Reference(patient2.getIdElement()));
 
-        assertThrows(InvalidRequestException.class, () -> client.update()
+        final var oversizedUpdate = client.update()
                 .resource(group)
                 .withId(groupId)
-                .encodedJson()
-                .execute());
+                .encodedJson();
+        assertThrows(InvalidRequestException.class, oversizedUpdate::execute);
 
         //Replace patient
         group.getMember().clear();
         group.addMember().setEntity(new Reference(patient2.getIdElement()));
 
-        final MethodOutcome methodOutcomeUpdate = client.update()
+        client.update()
                 .resource(group)
                 .withId(methodOutcome.getResource().getIdElement())
                 .encodedJson()
@@ -134,7 +133,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
      * When $add is called and a new patient is added to a roster, it should show up in the response
      */
     @Test
-    public void testAddToRosterResponse() {
+    void testAddToRosterResponse() {
         final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
         final Patient patient1 = createPatient("0O00O00OO04", DEFAULT_ORG_ID);
         final Group groupForParams = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
@@ -178,7 +177,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
      * in order to ensure the response includes the appropriate number of members
      */
     @Test
-    public void testReplaceRosterResponse() {
+    void testReplaceRosterResponse() {
         final Practitioner practitioner = createPractitioner(NPIUtil.generateNPI());
         final Group groupForCreate = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
 
@@ -210,7 +209,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
     }
 
     @Test
-    public void testAddMembersToRosterPatientLimit() {
+    void testAddMembersToRosterPatientLimit() {
         final Practitioner practitioner = createPractitioner("1112111111");
         final Patient patient1 = createPatient("0O00O00OO03", DEFAULT_ORG_ID);
         final Group group = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner), DEFAULT_ORG_ID);
@@ -233,14 +232,14 @@ public class GroupResourceTest extends AbstractAttributionTest {
         final Parameters parameters = new Parameters();
         parameters.addParameter().setResource(group);
 
-        assertThrows(InvalidRequestException.class, () -> client
+        final var oversizedAdd = client
                 .operation()
                 .onInstance(createdGroup.getIdElement())
                 .named("$add")
                 .withParameters(parameters)
                 .returnResourceType(Group.class)
-                .encodedJson()
-                .execute());
+                .encodedJson();
+        assertThrows(InvalidRequestException.class, oversizedAdd::execute);
 
         //Add same patient to existing group, should not throw an error nor should it update any members
 
@@ -263,7 +262,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
     }
 
     @Test
-    public void testRosterSizeToBigMethodDirectly() {
+    void testRosterSizeToBigMethodDirectly() {
         final Practitioner practitioner1 = AttributionTestHelpers.createPractitionerResource("1111111112");
         final Group group1 = SeedProcessor.createBaseAttributionGroup(FHIRExtractors.getProviderNPI(practitioner1), DEFAULT_ORG_ID);
 
@@ -310,7 +309,7 @@ public class GroupResourceTest extends AbstractAttributionTest {
     }
 
     @Test
-    public void testMaxPatients() {
+    void testMaxPatients() {
         final int MAX_PATIENTS = 1350;
         APPLICATION.getConfiguration().setPatientLimit(MAX_PATIENTS);
 
@@ -351,8 +350,8 @@ public class GroupResourceTest extends AbstractAttributionTest {
         assertEquals(createdGroup.getId(), groupResult.getId());
     }
 
-    private Practitioner createPractitioner(String NPI) {
-        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPI);
+    private Practitioner createPractitioner(String npi) {
+        final Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(npi);
         MethodOutcome methodOutcome = client.create()
                 .resource(practitioner)
                 .encodedJson()
@@ -360,8 +359,8 @@ public class GroupResourceTest extends AbstractAttributionTest {
         return (Practitioner) methodOutcome.getResource();
     }
 
-    private Patient createPatient(String MBI, String orgID) {
-        final Patient patient = AttributionTestHelpers.createPatientResource(MBI, orgID);
+    private Patient createPatient(String mbi, String orgID) {
+        final Patient patient = AttributionTestHelpers.createPatientResource(mbi, orgID);
         MethodOutcome methodOutcome = client.create()
                 .resource(patient)
                 .encodedJson()

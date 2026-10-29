@@ -19,8 +19,6 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -29,8 +27,6 @@ import java.util.stream.Collectors;
 import static gov.cms.dpc.attribution.utils.r4.RESTUtils.parseTokenTag;
 
 public class OrganizationResource {
-
-    private static final Logger logger = LoggerFactory.getLogger(OrganizationResource.class);
 
     private final OrganizationDAO dao;
     private final FHIREntityConverter converter;
@@ -108,13 +104,8 @@ public class OrganizationResource {
         }
 
         final OrganizationEntity entity = this.converter.fromFHIR(OrganizationEntity.class, organization);
-        try {
-            final OrganizationEntity persistedOrg = this.dao.registerOrganization(entity);
-            return Response.status(Response.Status.CREATED).entity(this.converter.toFHIR(Organization.class, persistedOrg)).build();
-        } catch (Exception e) {
-            logger.error("Error: ", e);
-            throw e;
-        }
+        final OrganizationEntity persistedOrg = this.dao.registerOrganization(entity);
+        return Response.status(Response.Status.CREATED).entity(this.converter.toFHIR(Organization.class, persistedOrg)).build();
     }
 
     /**
@@ -146,14 +137,9 @@ public class OrganizationResource {
     @FHIR
     @UnitOfWork(DPCR4HibernateBundle.BUNDLE_NAME)
     public Response updateOrganization(@PathParam("organizationID") UUID organizationID, Organization organization) {
-        try {
-            OrganizationEntity orgEntity = this.converter.fromFHIR(OrganizationEntity.class, organization);
-            orgEntity = this.dao.updateOrganization(organizationID, orgEntity);
-            return Response.status(Response.Status.OK).entity(this.converter.toFHIR(Organization.class, orgEntity)).build();
-        } catch (Exception e) {
-            logger.error("Error: ", e);
-            throw e;
-        }
+        OrganizationEntity orgEntity = this.converter.fromFHIR(OrganizationEntity.class, organization);
+        orgEntity = this.dao.updateOrganization(organizationID, orgEntity);
+        return Response.status(Response.Status.OK).entity(this.converter.toFHIR(Organization.class, orgEntity)).build();
     }
 
     /**

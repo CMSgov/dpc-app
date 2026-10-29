@@ -36,7 +36,7 @@ class PractitionerResourceTest extends AbstractAttributionTest {
     }
 
     @AfterEach
-    public void cleanup() {
+    void cleanup() {
         practitionersToCleanUp.forEach(practitioner -> {
             try {
                 client
@@ -321,8 +321,6 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
     @Test
     void testBulkInsert() {
-        final IGenericClient client = createFHIRClient(ctx, getServerURL());
-
         Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
 
         Bundle practitionerBundle = BundleFactory.createBundle(practitioner);
@@ -347,8 +345,6 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
     @Test
     void testBulkInsertMultiplePractioners() {
-        final IGenericClient client = createFHIRClient(ctx, getServerURL());
-
         Practitioner prac1 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
         Practitioner prac2 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
         Practitioner prac3 = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
@@ -375,8 +371,6 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
     @Test
     void testBulkInsertWithExistingId() {
-        final IGenericClient client = createFHIRClient(ctx, getServerURL());
-
         Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(NPIUtil.generateNPI());
         practitioner.setId(UUID.randomUUID().toString());
 
@@ -404,8 +398,6 @@ class PractitionerResourceTest extends AbstractAttributionTest {
 
     @Test
     void testBulkInsertWithDuplicatePractitioner() {
-        final IGenericClient client = createFHIRClient(ctx, getServerURL());
-
         String npi = NPIUtil.generateNPI();
         Practitioner practitioner = AttributionTestHelpers.createPractitionerResource(npi);
         Practitioner duplicatePractitioner = AttributionTestHelpers.createPractitionerResource(npi);

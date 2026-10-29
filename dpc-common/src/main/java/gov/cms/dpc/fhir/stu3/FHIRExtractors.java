@@ -137,7 +137,7 @@ public class FHIRExtractors {
         }
 
         final Matcher matcher = idExtractor.matcher(idString);
-        if (!matcher.find() || !(matcher.groupCount() == 1)) {
+        if (!matcher.find() || matcher.groupCount() != 1) {
             throw new IllegalArgumentException(String.format(ENTITY_ID_ERROR, idString));
         }
 
