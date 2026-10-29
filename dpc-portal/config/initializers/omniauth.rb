@@ -40,7 +40,7 @@ end
 ID_ME_CLIENT_CONFIG = {
   name: :id_me,
   issuer: "https://#{ID_ME_CONFIG[:host]}/oidc",
-  scope: %i[openid http://idmanagement.gov/ns/assurance/ial/2/aal/2],
+  scope: ID_ME_CONFIG[:authorize_scope],
   response_type: :code,
   client_auth_method: :client_secret_post,
   client_options: {
@@ -63,7 +63,7 @@ LOGIN_DOT_GOV_CLIENT_CONFIG = {
   name: :login_dot_gov,
   issuer: "https://#{LOGIN_DOT_GOV_CONFIG[:host]}/",
   discovery: true,
-  scope: %i[openid email all_emails profile:name social_security_number],
+  scope: LOGIN_DOT_GOV_CONFIG[:authorize_scope],
   response_type: :code,
   acr_values: 'http://idmanagement.gov/ns/assurance/ial/2',
   client_auth_method: :jwt_bearer,
@@ -84,7 +84,7 @@ LOGIN_DOT_GOV_CLIENT_CONFIG = {
 CLEAR_CLIENT_CONFIG = {
   name: :clear,
   issuer: "https://#{CLEAR_CONFIG[:host]}/integrations",
-  scope: 'openid',
+  scope: CLEAR_CONFIG[:authorize_scope],
   response_type: :code,
   client_auth_method: :client_secret_post,
   client_signing_alg: :RS256,
