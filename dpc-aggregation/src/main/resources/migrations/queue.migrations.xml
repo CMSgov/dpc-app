@@ -154,4 +154,23 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="add-export-source-and-file-source" author="Jose Alejandro">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <and>
+                    <columnExists tableName="JOB_QUEUE_BATCH" columnName="export_source"/>
+                    <columnExists tableName="JOB_QUEUE_BATCH" columnName="file_source"/>
+                </and>
+            </not>
+        </preConditions>
+        <addColumn tableName="JOB_QUEUE_BATCH">
+            <column name="export_source" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="file_source" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
