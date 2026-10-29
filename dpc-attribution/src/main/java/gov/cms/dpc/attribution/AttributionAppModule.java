@@ -19,8 +19,6 @@ import gov.cms.dpc.attribution.resources.v1.*;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import org.hibernate.SessionFactory;
-import org.jooq.conf.RenderQuotedNames;
-import org.jooq.conf.Settings;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
 import java.time.Duration;
@@ -74,11 +72,6 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Provides
     Duration provideExpiration(DPCAttributionConfiguration config) {
         return config.getExpirationThreshold();
-    }
-
-    @Provides
-    Settings provideSettings() {
-        return new Settings().withRenderQuotedNames(RenderQuotedNames.EXPLICIT_DEFAULT_UNQUOTED);
     }
 
     @Provides

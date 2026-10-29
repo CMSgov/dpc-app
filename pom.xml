@@ -310,18 +310,7 @@
                 <artifactId>dropwizard-swagger</artifactId>
                 <version>4.0.5-1</version>
             </dependency>
-            <dependency>
-                <groupId>io.github.dropwizard-jobs</groupId>
-                <artifactId>dropwizard-jobs-core</artifactId>
-                <version>6.0.1</version>
-            </dependency>
-            <dependency>
-                <groupId>io.github.dropwizard-jobs</groupId>
-                <artifactId>dropwizard-jobs-guice</artifactId>
-                <version>6.0.1</version>
-            </dependency>
-            <!-- These logback dependencies are to prevent dropwizard-jobs from downgrading them -->
-            <!-- Dropwizard:4.0.14 pulls logback 1.5.18, dropwizard-jobs:6.0.1 tries to pull 1.4.14 -->
+            <!-- Keep Logback dependencies aligned to the configured version. -->
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-access</artifactId>
@@ -336,11 +325,6 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
                 <version>${logback.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.quartz-scheduler</groupId>
-                <artifactId>quartz</artifactId>
-                <version>2.5.0</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>

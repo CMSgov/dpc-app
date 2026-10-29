@@ -291,6 +291,10 @@ This means that only the config variables directly specified in the file will be
 
 **Note**: This step is not required when directly running the `demo` for the `dpc-api` service, which partially seeds the database on first execution.
 
+Attribution relationships are not automatically expired or purged in either STU3 (`/v1`) or R4 (`/r4`).
+The `expirationThreshold` setting still determines the recorded attribution `period_end`, but passing that date does not mark a relationship inactive.
+Explicit removal through the Group `$remove` operation still marks relationships inactive; previously inactive relationships remain inactive.
+
 By default, DPC initially starts with an empty attribution database, which means that no patients have been attributed to any providers and thus nothing can be exported from BlueButton2.0.
 
 In order to successfully test and demonstrate the application, there needs to be initial data loaded into the attribution database.
@@ -441,7 +445,6 @@ If you want to run and debug integration tests through IntelliJ there are a few 
   - This will recompile dpc with debug extensions included and start containers for dpc-attribution, dpc-aggregation, and a db.
 - Now you should be able to run any of the integration tests under dpc-api by clicking on the little green arrow next to their implementation.
   - Need to debug a test?  Right click on the triangle and select debug.
-  - If running ExpirationJobTest results in a port collision error, you can stop the attribution service in Docker and try running the test again. 
 - If you have to debug one of the dependant services, for instance because an IT is calling dpc-attribution and getting a 500, and you can't figure out why, follow the instructions under [Local Debugging](#local-debugging) to open up the dependant service's debugger port in docker-compose, then rerun `make start-it-debug`.
   - Now you can attach your debugger to that service and still run integration tests as described above.
   - You'll have one debugger tab open on an IT in dpc-api and another on the dependant service, allowing you to set break points in either and examine the test end to end.
