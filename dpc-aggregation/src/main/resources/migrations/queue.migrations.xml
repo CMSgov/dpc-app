@@ -158,8 +158,10 @@
         <preConditions onFail="MARK_RAN">
             <not>
                 <and>
-                    <columnExists tableName="JOB_QUEUE_BATCH" columnName="export_source"/>
                     <columnExists tableName="JOB_QUEUE_BATCH" columnName="file_source"/>
+                    <columnExists tableName="JOB_QUEUE_BATCH" columnName="export_source"/>
+                    <columnExists tableName="JOB_QUEUE_BATCH" columnName="export_version"/>
+                    <columnExists tableName="JOB_QUEUE_BATCH" columnName="group_id"/>
                 </and>
             </not>
         </preConditions>
@@ -170,7 +172,49 @@
             <column name="file_source" type="VARCHAR(50)">
                 <constraints nullable="true"/>
             </column>
+            <column name="export_version" type="VARCHAR(10)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="group_id" type="UUID">
+                <constraints nullable="true"/>
+            </column>
         </addColumn>
+    </changeSet>
+
+    <changeSet id="create-job-queue-batch-filter-claims" author="Jose Alejandro">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="JOB_QUEUE_BATCH_FILTER_CLAIMS"/>
+            </not>
+        </preConditions>
+        <createTable tableName="JOB_QUEUE_BATCH_FILTER_CLAIMS">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="batch_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resource_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="filter_key" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="operator" type="VARCHAR(10)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="filter_value" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="JOB_QUEUE_BATCH_FILTER_CLAIMS" indexName="job_queue_batch_filter_claims_batch_id">
+            <column name="batch_id"></column>
+        </createIndex>
+
+        <addForeignKeyConstraint baseTableName="JOB_QUEUE_BATCH_FILTER_CLAIMS" baseColumnNames="batch_id"
+                                constraintName="fk_job_batch_id_filter_claims"
+                                referencedTableName="JOB_QUEUE_BATCH" referencedColumnNames="batch_id"/>
     </changeSet>
 
 </databaseChangeLog>
