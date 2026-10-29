@@ -154,7 +154,7 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="add-export-source-and-file-source" author="Jose Alejandro">
+    <changeSet id="add-source-columns-and-group-id" author="Jose Alejandro">
         <preConditions onFail="MARK_RAN">
             <not>
                 <and>
@@ -194,6 +194,9 @@
             <column name="batch_id" type="UUID">
                 <constraints nullable="false"/>
             </column>
+            <column name="job_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
             <column name="resource_type" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
@@ -210,6 +213,10 @@
 
         <createIndex tableName="JOB_QUEUE_BATCH_FILTER_CLAIMS" indexName="job_queue_batch_filter_claims_batch_id">
             <column name="batch_id"></column>
+        </createIndex>
+
+        <createIndex tableName="JOB_QUEUE_BATCH_FILTER_CLAIMS" indexName="job_queue_batch_filter_claims_job_id">
+            <column name="job_id"></column>
         </createIndex>
 
         <addForeignKeyConstraint baseTableName="JOB_QUEUE_BATCH_FILTER_CLAIMS" baseColumnNames="batch_id"
