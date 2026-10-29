@@ -220,7 +220,9 @@ RSpec.describe CspVerificationService::Clear do
       %w[canceled authentication_error] => :failed,
       ['fail', nil] => :failed,
       ['expired', nil] => :expired,
-      ['awaiting_manual_review', nil] => :unavailable
+      ['awaiting_manual_review', nil] => :pending,
+      # not a failure: CLEAR couldn't reach a final decision yet, and it may still become a pass
+      ['deferred', nil] => :pending
     }.each do |(status, reason), outcome|
       it "is #{outcome} for #{status}#{" with #{reason}" if reason}" do
         expect(described_class.outcome_for(status, reason)).to eq outcome

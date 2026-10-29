@@ -9,11 +9,13 @@ module CspErrorHandling
   CSP_USER_ERROR_MESSAGES = %w[access_denied canceled cancelled].freeze
   CSP_USER_FAIL_TO_PROOF = %w[verification_failure identity_failed failed].freeze
   CSP_VERIFICATION_EXPIRED = %w[expired].freeze
+  CSP_VERIFICATION_PENDING = %w[pending].freeze
 
   SIGNIN_FAIL = "We weren't able to complete identity verification."
   EXTERNAL_SYSTEM_ERROR = 'Registration unavailable: external system error.'
   VERIFICATION_ALERT = 'You must complete verification before continuing registration.'
   SESSION_EXPIRED = 'Your verification session has expired.'
+  VERIFICATION_PENDING = 'Your account is being verified. Please try again later.'
 
   def csp_auth_error?
     CSP_AUTH_ERROR_MESSAGES.include?(params[:message])
@@ -29,6 +31,10 @@ module CspErrorHandling
 
   def csp_verification_expired?
     CSP_VERIFICATION_EXPIRED.include?(params[:message])
+  end
+
+  def csp_verification_pending?
+    CSP_VERIFICATION_PENDING.include?(params[:message])
   end
 
   def csp_param
@@ -76,6 +82,14 @@ module CspErrorHandling
               action_type: LoggingConstants::ActionType::FailedLogin,
               csp: csp_param)
     redirect_to signin_destination(invitation), alert: SESSION_EXPIRED
+  end
+
+  def handle_verification_pending(invitation)
+    log_event(:info, 'User verification session pending',
+              action_context: action_context(invitation),
+              action_type: LoggingConstants::ActionType::FailedLogin,
+              csp: csp_param)
+    redirect_to signin_destination(invitation), alert: VERIFICATION_PENDING
   end
 
   private
