@@ -1,43 +1,10 @@
-.lg-login-button__logo {
-    vertical-align: middle;
-    color: #0000;
-    background: url(asset_path('lg-logo-white.svg')) center / contain no-repeat;
-    margin-left: 2px;
-    font-size: 1.45rem
-}
-
-.clear-login-button__logo {
-    vertical-align: middle;
-    color: #0000;
-    background: url(asset_path('clear-logo-white.svg')) center / contain no-repeat;
-    margin-left: 2px;
-    font-size: 1.45rem
-}
-
-.idme-login-button__logo {
-    display: inline-block;
-    vertical-align: middle;
-    color: #0000;
-    background: url(asset_path('idme-logo-white.svg')) center / contain no-repeat;
-    width: 2.5rem;
-    height: 1rem;
-    margin-left: 2px;
-    font-size: 1.45rem
-}
-
-// Use navy logos on white buttons
-.usa-button--outline {
-    .lg-login-button__logo {
-        background: url(asset_path('lg-logo-navy.svg')) center / contain no-repeat;
-    }
-
-    .clear-login-button__logo {
-        background: url(asset_path('clear-logo-navy.svg')) center / contain no-repeat;
-    }
-
-    .idme-login-button__logo {
-        background: url(asset_path('idme-logo-navy.svg')) center / contain no-repeat;
-    }
+.csp_logo {
+    aspect-ratio: 16 / 9;
+    max-width: 120px;
+    max-height: 24px;
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
 }
 
 .line-separator {
@@ -45,27 +12,27 @@
 }
 
 .last-used-login-wrapper {
-  display: block;
-  text-align: center;
-  padding: 0.5rem;
-  background-color: #e1f3f8; 
-  border: 1px solid #a8ddec;   
-  border-radius: 4px;                    
-  box-sizing: border-box;
-  width: 100%;             
-
-  // Make the button stretch across the full with.
-  .usa-button {
+    display: block;
+    text-align: center;
+    padding: 0.5rem;
+    background-color: #e1f3f8;
+    border: 1px solid #a8ddec;
+    border-radius: 4px;
+    box-sizing: border-box;
     width: 100%;
-    margin-bottom: 0.5rem; 
-  }
 
-  .last-used-login-wrapper__badge {
-    font-size: 0.875rem;      
-    font-weight: bold;
-    color: #005ea2;           
-    letter-spacing: 0.5px;
-    margin: 0;
-    line-height: 1;
-  }
+    // Make the button stretch across the full with.
+    .usa-button {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .last-used-login-wrapper__badge {
+        font-size: 0.875rem;
+        font-weight: bold;
+        color: #005ea2;
+        letter-spacing: 0.5px;
+        margin: 0;
+        line-height: 1;
+    }
 }
