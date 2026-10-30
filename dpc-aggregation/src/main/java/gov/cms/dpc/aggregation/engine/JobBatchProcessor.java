@@ -11,7 +11,7 @@ import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.utils.MetricMaker;
 import gov.cms.dpc.fhir.DPCResourceType;
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
@@ -35,8 +35,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBI;
-import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBIs;
+import static gov.cms.dpc.fhir.stu3.FHIRExtractors.getPatientMBI;
+import static gov.cms.dpc.fhir.stu3.FHIRExtractors.getPatientMBIs;
 
 public class JobBatchProcessor {
     private static final Logger logger = LoggerFactory.getLogger(JobBatchProcessor.class);

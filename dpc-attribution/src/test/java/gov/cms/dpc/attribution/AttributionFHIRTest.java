@@ -8,13 +8,15 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.*;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.dpc.attribution.utils.stu3.AbstractAttributionTest;
+import gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers;
 import gov.cms.dpc.common.utils.SeedProcessor;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.FHIRBuilders;
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.stu3.FHIRBuilders;
+import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
-import gov.cms.dpc.testing.OrganizationHelpers;
+import gov.cms.dpc.testing.stu3.OrganizationHelpers;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.dstu3.model.*;
@@ -57,7 +59,7 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         groupedPairs.forEach((providerId, pairList) -> pairList.forEach(pair -> assertEquals(providerId, pair.getLeft())));
 
         // Create the Organization
-        organization = OrganizationHelpers.createOrganization(ctx, Stu3AttributionTestHelpers.createFHIRClient(ctx, String.format("http://localhost:%s/v1/", APPLICATION.getLocalPort())));
+        organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, String.format("http://localhost:%s/v1/", APPLICATION.getLocalPort())));
     }
 
     @TestFactory
@@ -296,8 +298,8 @@ class AttributionFHIRTest extends AbstractAttributionTest {
                 () -> assertEquals(bundle.getEntry().size() - 1, activeMembers.size(), "Should have 1 less active member"),
                 () -> assertEquals(1, inactiveMembers.size(), "Should have a single inactive"),
                 () -> assertEquals(1, offsetNow.compareTo(inactiveMembers.get(0).getPeriod().getEnd()), "Period end should be today"),
-                () -> assertEquals(-1, offsetNow.compareTo(activeMembers.get(0).getPeriod().getEnd()), "Active member should have period end after today"),
-                () -> assertNotEquals(activeMembers.get(0).getPeriod().getStart(), activeMembers.get(0).getPeriod().getEnd(), "Period should not be equal"));
+                () -> assertTrue(activeMembers.stream().allMatch(member -> member.getPeriod().getEnd() == null),
+                        "Active members should have no period end"));
 
         // Re-add the patient, which should force them to be re-created
         final Group.GroupMemberComponent reAddEntity = new Group.GroupMemberComponent().setEntity(patientReference);
@@ -325,6 +327,7 @@ class AttributionFHIRTest extends AbstractAttributionTest {
 
         // We should compare the created dates, but Java Date objects don't carry enough precision for us to do an accurate comparison
         assertFalse(matchingMember.getInactive(), "Member should be active");
+        assertNull(matchingMember.getPeriod().getEnd(), "Reactivated member should not have period end");
 
         // Replace the roster and ensure the numbers are correct.
         client

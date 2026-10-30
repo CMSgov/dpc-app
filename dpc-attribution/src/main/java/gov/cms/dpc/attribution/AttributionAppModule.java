@@ -9,16 +9,17 @@ import gov.cms.dpc.attribution.jdbi.r4.PatientDAO;
 import gov.cms.dpc.attribution.jdbi.r4.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.r4.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.r4.RosterDAO;
+import gov.cms.dpc.attribution.resources.r4.AttributionResource;
 import gov.cms.dpc.attribution.resources.r4.BaseResource;
+import gov.cms.dpc.attribution.resources.r4.OrganizationResource;
+import gov.cms.dpc.attribution.resources.r4.GroupResource;
+import gov.cms.dpc.attribution.resources.r4.PatientResource;
+import gov.cms.dpc.attribution.resources.r4.PractitionerResource;
 import gov.cms.dpc.attribution.resources.v1.*;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import org.hibernate.SessionFactory;
-import org.jooq.conf.RenderQuotedNames;
-import org.jooq.conf.Settings;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
-
-import java.time.Duration;
 
 class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfiguration> {
 
@@ -28,14 +29,19 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
 
         // STU3 resources
         binder.bind(V1AttributionResource.class);
-        binder.bind(PatientResource.class);
-        binder.bind(PractitionerResource.class);
-        binder.bind(GroupResource.class);
-        binder.bind(OrganizationResource.class);
+        binder.bind(gov.cms.dpc.attribution.resources.v1.PatientResource.class);
+        binder.bind(gov.cms.dpc.attribution.resources.v1.PractitionerResource.class);
+        binder.bind(gov.cms.dpc.attribution.resources.v1.GroupResource.class);
+        binder.bind(gov.cms.dpc.attribution.resources.v1.OrganizationResource.class);
         binder.bind(gov.cms.dpc.attribution.resources.v1.BaseResource.class);
 
         // R4 resources
         binder.bind(BaseResource.class);
+        binder.bind(AttributionResource.class);
+        binder.bind(OrganizationResource.class);
+        binder.bind(PractitionerResource.class);
+        binder.bind(PatientResource.class);
+        binder.bind(GroupResource.class);
 
         // STU3 DAOs
         binder.bind(gov.cms.dpc.attribution.jdbi.stu3.OrganizationDAO.class);
@@ -59,16 +65,6 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
         // Healthchecks
         // Additional health-checks can be added here
         // By default, Dropwizard adds a check for Hibernate and each additional database (e.g. auth, queue, etc)
-    }
-
-    @Provides
-    Duration provideExpiration(DPCAttributionConfiguration config) {
-        return config.getExpirationThreshold();
-    }
-
-    @Provides
-    Settings provideSettings() {
-        return new Settings().withRenderQuotedNames(RenderQuotedNames.EXPLICIT_DEFAULT_UNQUOTED);
     }
 
     @Provides

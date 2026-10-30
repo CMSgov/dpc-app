@@ -19,8 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Collections;
 
-import static gov.cms.dpc.testing.factories.OrganizationFactory.generateFakeAddress;
-import static gov.cms.dpc.testing.factories.OrganizationFactory.generateFakeOrganization;
+import static gov.cms.dpc.testing.factories.stu3.OrganizationFactory.generateFakeAddress;
+import static gov.cms.dpc.testing.factories.stu3.OrganizationFactory.generateFakeOrganization;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(BufferedLoggerHandler.class)

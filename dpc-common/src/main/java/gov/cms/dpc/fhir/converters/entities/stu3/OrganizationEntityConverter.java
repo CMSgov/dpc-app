@@ -5,7 +5,7 @@ import gov.cms.dpc.common.entities.stu3.AddressEntity;
 import gov.cms.dpc.common.entities.stu3.ContactEntity;
 import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.FHIRConverter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.validations.profiles.stu3.OrganizationProfile;

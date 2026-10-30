@@ -7,13 +7,14 @@ import gov.cms.dpc.attribution.jdbi.stu3.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.stu3.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.stu3.RosterDAO;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
+import gov.cms.dpc.common.entities.stu3.AttributionRelationship;
 import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.common.entities.stu3.ProviderEntity;
 import gov.cms.dpc.common.entities.stu3.RosterEntity;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
-import gov.cms.dpc.testing.factories.FHIRGroupBuilder;
-import gov.cms.dpc.testing.factories.FHIRPatientBuilder;
+import gov.cms.dpc.testing.factories.stu3.FHIRGroupBuilder;
+import gov.cms.dpc.testing.factories.stu3.FHIRPatientBuilder;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.dstu3.model.Group;
@@ -24,9 +25,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
-import static gov.cms.dpc.attribution.Stu3AttributionTestHelpers.queryMatches;
+import static gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers.queryMatches;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 
@@ -76,7 +79,6 @@ class GroupResourceUnitTest {
                 .build();
 
         configuration.setPatientLimit(10);
-        configuration.setExpirationThreshold(10);
         Mockito.when(rosterDAO.findEntities(isNull(),eq(orgId), eq(providerNpi), isNull())).thenReturn(List.of());
         Mockito.when(providerDAO.getProviders(isNull(),eq(providerNpi), eq(orgId))).thenReturn(List.of(new ProviderEntity()));
         Mockito.when(patientDAO.bulkPatientSearchById(eq(orgId), any(List.class))).thenReturn(Collections.nCopies(5, new PatientEntity()));
@@ -90,6 +92,7 @@ class GroupResourceUnitTest {
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus(), "Response status should have been CREATED (201)");
         assertNotNull(response.getEntity(), "Response should have contained a body");
         assertEquals(patientBank.keySet().size(),((Group) response.getEntity()).getMember().size(), "Patients count should be the same as submitted");
+        assertNull(((Group) response.getEntity()).getMember().getFirst().getPeriod().getEnd());
     }
 
     @Test
@@ -111,7 +114,6 @@ class GroupResourceUnitTest {
                 .build();
 
         configuration.setPatientLimit(10);
-        configuration.setExpirationThreshold(10);
         Mockito.when(rosterDAO.findEntities(isNull(),eq(orgId), eq(providerNpi), isNull())).thenReturn(List.of());
         Mockito.when(providerDAO.getProviders(isNull(),eq(providerNpi), eq(orgId))).thenReturn(List.of(new ProviderEntity()));
 
@@ -128,6 +130,43 @@ class GroupResourceUnitTest {
 
         //Act & Assert
         assertThrows(WebApplicationException.class, () -> groupResource.createRoster(group), "Expected and exception if an invalid patient was added");
+    }
+
+    @Test
+    void testReactivatingClearsExpirationDt() {
+        final UUID rosterId = UUID.randomUUID();
+        final UUID organizationId = UUID.randomUUID();
+        final UUID patientId = UUID.randomUUID();
+        final String providerNpi = NPIUtil.generateNPI();
+        final PatientEntity patient = new PatientEntity();
+        patient.setID(patientId);
+        final ProviderEntity provider = new ProviderEntity();
+        provider.setProviderNPI(providerNpi);
+        final RosterEntity roster = new RosterEntity();
+        roster.setId(rosterId);
+        roster.setAttributedProvider(provider);
+
+        final AttributionRelationship relationship = new AttributionRelationship(roster, patient,
+                OffsetDateTime.now(ZoneOffset.UTC).minusDays(2));
+        relationship.setInactive(true);
+        relationship.setPeriodEnd(OffsetDateTime.now(ZoneOffset.UTC).minusDays(1));
+        roster.setAttributions(new ArrayList<>(List.of(relationship)));
+
+        final Group groupUpdate = FHIRGroupBuilder.newBuild()
+                .withUUID()
+                .attributedTo(providerNpi)
+                .withPatients(patientId)
+                .withOrgTag(organizationId)
+                .build();
+
+        Mockito.when(rosterDAO.getEntity(rosterId)).thenReturn(Optional.of(roster));
+        Mockito.when(patientDAO.bulkPatientSearchById(eq(organizationId), anyList())).thenReturn(List.of(patient));
+        Mockito.when(relationshipDAO.lookupAttributionRelationships(rosterId, List.of(patientId))).thenReturn(List.of(relationship));
+
+        final Group updatedGroup = groupResource.addRosterMembers(rosterId, groupUpdate);
+
+        assertFalse(updatedGroup.getMember().getFirst().getInactive());
+        assertNull(updatedGroup.getMember().getFirst().getPeriod().getEnd());
     }
 
     private Map<UUID,Patient> makeTestPatients(int count){

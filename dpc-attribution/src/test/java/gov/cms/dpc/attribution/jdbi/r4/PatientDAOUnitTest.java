@@ -1,19 +1,20 @@
 package gov.cms.dpc.attribution.jdbi.r4;
 
-import gov.cms.dpc.attribution.AbstractAttributionDAOTest;
-import gov.cms.dpc.attribution.AttributionTestHelpers;
+import gov.cms.dpc.attribution.utils.r4.AbstractAttributionDAOTest;
+import gov.cms.dpc.attribution.utils.r4.AttributionTestHelpers;
 import gov.cms.dpc.attribution.jdbi.PageResult;
 import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
 import gov.cms.dpc.common.entities.r4.OrganizationEntity;
 import gov.cms.dpc.common.entities.r4.PatientEntity;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.r4.FHIRExtractors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -74,6 +75,30 @@ class PatientDAOUnitTest extends AbstractAttributionDAOTest {
 		assertTrue(patients.contains(pat1));
 		assertTrue(patients.contains(pat2));
 		assertFalse(patients.contains(pat3));
+	}
+
+	@Test
+	void test_bulkPatientSearchById_handles_large_requests() {
+		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+		PatientEntity patientEntity = AttributionTestHelpers.createPatientEntity(org);
+
+		db.inTransaction(() -> {
+			organizationDAO.registerOrganization(org);
+			patientDAO.persistPatient(patientEntity);
+		});
+
+		List<UUID> ids = new ArrayList<>();
+		ids.add(patientEntity.getID());
+
+		// Add enough random IDs to make sure we have to chunk the query
+		for(int i=0; i< 50000; i++){
+			ids.add(UUID.randomUUID());
+		}
+
+		List<PatientEntity> patients = patientDAO.bulkPatientSearchById(org.getId(), ids);
+
+		assertEquals(1, patients.size());
+		assertTrue(patients.contains(patientEntity));
 	}
 
 	@Test

@@ -1,6 +1,6 @@
 package gov.cms.dpc.attribution.resources.v1;
 
-import gov.cms.dpc.attribution.Stu3AttributionTestHelpers;
+import gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.jdbi.stu3.OrganizationDAO;
 import gov.cms.dpc.common.entities.stu3.AddressEntity;
@@ -10,7 +10,7 @@ import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import jakarta.ws.rs.core.Response;
-import gov.cms.dpc.testing.factories.BundleFactory;
+import gov.cms.dpc.testing.factories.stu3.BundleFactory;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.BeforeEach;
@@ -123,7 +123,7 @@ class OrganizationResourceUnitTest {
 
 
     private Bundle buildBundleWithTestOrg(String uuid){
-        Organization organization = Stu3AttributionTestHelpers.createOrgResource(uuid, "1334567892");
+        Organization organization = AttributionTestHelpers.createOrgResource(uuid, "1334567892");
         return BundleFactory.createBundle(organization);
     }
 
