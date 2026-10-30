@@ -3,14 +3,13 @@ package gov.cms.dpc.api.resources.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
-import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
@@ -18,8 +17,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -33,7 +30,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
             .addParameter(new Parameters.ParametersParameterComponent().setResource(new Group()));
 
     @Test
-    void testCreateRoster() throws IOException, URISyntaxException {
+    void testCreateRoster() {
         final IGenericClient client = buildV3Client();
 
         ICreateTyped rosterCreate = client.create()
@@ -43,7 +40,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testGetRoster() throws IOException, URISyntaxException {
+    void testGetRoster() {
         final IGenericClient client = buildV3Client();
 
         IReadExecutable<Group> rosterAdd = client.read()
@@ -54,7 +51,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testUpdateRoster() throws IOException, URISyntaxException {
+    void testUpdateRoster() {
         final IGenericClient client = buildV3Client();
 
         IUpdateExecutable rosterUpdate = client.update()
@@ -65,7 +62,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testAddMemberToRoster() throws IOException, URISyntaxException {
+    void testAddMemberToRoster() {
         final IGenericClient client = buildV3Client();
 
         IOperationUntypedWithInput<Group> memberAdd = client
@@ -79,7 +76,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testRemoveMemberFromRoster() throws IOException, URISyntaxException {
+    void testRemoveMemberFromRoster() {
         final IGenericClient client = buildV3Client();
 
         IOperationUntypedWithInput<Group> memberRemove = client
@@ -92,13 +89,12 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         assertThrows(NotImplementedOperationException.class, memberRemove::execute, "Should throw a 501");
     }
 
-    private IGenericClient buildV3Client() throws IOException, URISyntaxException {
+    private IGenericClient buildV3Client() {
         final String v3Endpoint = getBaseURL().replaceFirst("/v1$", "/v3");
-        final APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         // v3 has no /metadata endpoint to validate against
         ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         final IGenericClient client = ctx.newRestfulGenericClient(v3Endpoint);
-        client.registerInterceptor(new BearerTokenAuthInterceptor(auth.accessToken));
+        client.registerInterceptor(new LoggingInterceptor(false));
         return client;
     }
 }
