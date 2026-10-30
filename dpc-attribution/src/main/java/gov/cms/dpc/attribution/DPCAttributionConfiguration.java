@@ -14,14 +14,10 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
 public class DPCAttributionConfiguration extends Configuration implements IDPCDatabase, IDPCFHIRConfiguration {
-
-    @Valid
-    private Duration expirationThreshold;
 
     private Boolean migrationEnabled;
 
@@ -52,14 +48,6 @@ public class DPCAttributionConfiguration extends Configuration implements IDPCDa
     @Override
     public DataSourceFactory getDatabase() {
         return database;
-    }
-
-    public Duration getExpirationThreshold() {
-        return expirationThreshold;
-    }
-
-    public void setExpirationThreshold(int expirationThreshold) {
-        this.expirationThreshold = Duration.ofDays(expirationThreshold);
     }
 
     public String getPublicServerURL() {

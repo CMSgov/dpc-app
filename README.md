@@ -291,10 +291,6 @@ This means that only the config variables directly specified in the file will be
 
 **Note**: This step is not required when directly running the `demo` for the `dpc-api` service, which partially seeds the database on first execution.
 
-Attribution relationships are not automatically expired or purged in either STU3 (`/v1`) or R4 (`/r4`).
-The `expirationThreshold` setting still determines the recorded attribution `period_end`, but passing that date does not mark a relationship inactive.
-Explicit removal through the Group `$remove` operation still marks relationships inactive; previously inactive relationships remain inactive.
-
 By default, DPC initially starts with an empty attribution database, which means that no patients have been attributed to any providers and thus nothing can be exported from BlueButton2.0.
 
 In order to successfully test and demonstrate the application, there needs to be initial data loaded into the attribution database.

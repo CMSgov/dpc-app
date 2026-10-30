@@ -2,7 +2,6 @@ package gov.cms.dpc.attribution.resources.r4;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
-import gov.cms.dpc.attribution.DPCAttributionConfiguration;
 import gov.cms.dpc.attribution.jdbi.r4.PatientDAO;
 import gov.cms.dpc.attribution.jdbi.r4.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.r4.RelationshipDAO;
@@ -49,16 +48,14 @@ public class GroupResource {
     private final PatientDAO patientDAO;
     private final RosterDAO rosterDAO;
     private final RelationshipDAO relationshipDAO;
-    private final DPCAttributionConfiguration config;
     private final FHIREntityConverter converter;
 
     @Inject
-    GroupResource(FHIREntityConverter converter, ProviderDAO providerDAO, RosterDAO rosterDAO, PatientDAO patientDAO, RelationshipDAO relationshipDAO, DPCAttributionConfiguration config) {
+    GroupResource(FHIREntityConverter converter, ProviderDAO providerDAO, RosterDAO rosterDAO, PatientDAO patientDAO, RelationshipDAO relationshipDAO) {
         this.rosterDAO = rosterDAO;
         this.providerDAO = providerDAO;
         this.patientDAO = patientDAO;
         this.relationshipDAO = relationshipDAO;
-        this.config = config;
         this.converter = converter;
     }
 
@@ -86,7 +83,7 @@ public class GroupResource {
         verifyAndGetMembers(attributionRoster);
 
         // Add the first provider and save the persisted Roster.
-        final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0), generateExpirationTime());
+        final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0));
         final RosterEntity persisted = this.rosterDAO.persistEntity(rosterEntity);
         final Group persistedGroup = this.converter.toFHIR(Group.class, persisted);
 
@@ -160,7 +157,6 @@ public class GroupResource {
         patientEntities.stream()
             .map( pe -> {
                 AttributionRelationship attribution = new AttributionRelationship(rosterEntity, pe, OffsetDateTime.now(ZoneOffset.UTC));
-                attribution.setPeriodEnd(generateExpirationTime());
                 return attribution;
                 })
             .forEach(relationshipDAO::addAttributionRelationship);
@@ -189,15 +185,13 @@ public class GroupResource {
 
         // Check which patients are already part of the roster and mark them active as of today
         OffsetDateTime periodBegin = OffsetDateTime.now(ZoneOffset.UTC);
-        OffsetDateTime periodEnd = generateExpirationTime();
-
         List<AttributionRelationship> existingAttributions = relationshipDAO.lookupAttributionRelationships(rosterID, patientIds);
         existingAttributions.forEach(attribution -> {
             if (attribution.isInactive()) {
                 attribution.setPeriodBegin(periodBegin);
             }
             attribution.setInactive(false);
-            attribution.setPeriodEnd(periodEnd);
+            attribution.setPeriodEnd(null);
         });
 
         // Build attributions for the new patients
@@ -209,9 +203,7 @@ public class GroupResource {
         List<AttributionRelationship> newAttributions = patientEntities.stream()
             .filter( patient -> !existingPatientIds.contains(patient.getID()))
             .map( patient -> {
-                AttributionRelationship attribution = new AttributionRelationship(rosterEntity, patient, periodBegin);
-                attribution.setPeriodEnd(periodEnd);
-                return attribution;
+                return new AttributionRelationship(rosterEntity, patient, periodBegin);
             })
             .collect(Collectors.toList());
 
@@ -284,10 +276,6 @@ public class GroupResource {
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
 
         return converter.toFHIR(Group.class, rosterEntity);
-    }
-
-    private OffsetDateTime generateExpirationTime() {
-        return OffsetDateTime.now(ZoneOffset.UTC).plus(config.getExpirationThreshold());
     }
 
     private static Pair<IdType, IdType> parseCompositeID(String queryParam) {

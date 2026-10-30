@@ -781,4 +781,16 @@ Wh            <column name="address_use" valueComputed="'NULL'"/>
             </sql>
         </rollback>
     </changeSet>
+
+    <changeSet id="remove-attribution-period-end-default" author="MEsposito">
+        <dropDefaultValue tableName="ATTRIBUTIONS"
+                          columnName="period_end"
+                          columnDataType="TIMESTAMP WITH TIME ZONE"/>
+        <rollback>
+            <addDefaultValue tableName="ATTRIBUTIONS"
+                             columnName="period_end"
+                             columnDataType="TIMESTAMP WITH TIME ZONE"
+                             defaultValueComputed="current_timestamp + ( 90 || ' day')::interval"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

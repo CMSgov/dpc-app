@@ -45,7 +45,6 @@ public class RosterUtils {
                 .map(id -> {
                     final AttributionsRecord ar = new AttributionsRecord();
                     ar.setPeriodBegin(creationTimestamp);
-                    ar.setPeriodEnd(creationTimestamp.plusDays(90));
                     ar.setRosterId(roster.getId());
                     ar.setPatientId(UUID.fromString(id.getIdPart()));
                     return ar;
