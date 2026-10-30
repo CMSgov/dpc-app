@@ -2,14 +2,13 @@ package gov.cms.dpc.api.resources.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
@@ -90,11 +89,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     private IGenericClient buildV3Client() {
-        final String v3Endpoint = getBaseURL().replaceFirst("/v1$", "/v3");
-        // v3 has no /metadata endpoint to validate against
-        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-        final IGenericClient client = ctx.newRestfulGenericClient(v3Endpoint);
-        client.registerInterceptor(new LoggingInterceptor(false));
-        return client;
+        final String v3BaseURL = getBaseURL().replaceFirst("/v1$", "/v3");
+        return APIAuthHelpers.buildAuthenticatedClient(ctx, v3BaseURL, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
     }
 }
