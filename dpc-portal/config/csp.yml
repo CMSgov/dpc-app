@@ -25,7 +25,7 @@ development: &development
     user_info_endpoint: <%= "https://#{ENV['IDP_ID_ME_HOST']}/api/public/v3/userinfo" %>
     jwks_uri: <%= "https://#{ENV['IDP_ID_ME_HOST']}/oidc/.well-known/jwks" %> 
     redirect_path: '/auth/id_me/callback'
-    authorize_scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2'
+    authorize_scope: 'openid http://idmanagement.gov/ns/assurance/ial/2/aal/2/cms-dpc'
     log_out_path: '/oauth/logout'
     token_expiration_interval: 300
     discovery_uri: '/oidc/.well-known/openid-configuration'
