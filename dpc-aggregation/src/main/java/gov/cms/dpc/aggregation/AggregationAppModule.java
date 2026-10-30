@@ -48,6 +48,7 @@ public class AggregationAppModule extends DropwizardAwareModule<DPCAggregationCo
 
     @Provides
     @Singleton
+    @Named("stu3")
     public FhirContext provideSTU3Context() {
         final var fhirContext = FhirContext.forDstu3();
 

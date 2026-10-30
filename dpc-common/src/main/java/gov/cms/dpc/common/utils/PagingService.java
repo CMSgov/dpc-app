@@ -1,6 +1,6 @@
 package gov.cms.dpc.common.utils;
 
-import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.stu3.BundleHandler;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseBundle;

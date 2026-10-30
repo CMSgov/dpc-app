@@ -13,7 +13,7 @@ import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.TokenResource;
-import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DPCValidationErrorMessage;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.stu3.DPCValidationErrorMessage;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.MacaroonCaveat;
 import gov.cms.dpc.macaroons.MacaroonCondition;

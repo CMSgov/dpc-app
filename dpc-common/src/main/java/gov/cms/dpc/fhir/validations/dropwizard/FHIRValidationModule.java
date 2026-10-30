@@ -1,6 +1,7 @@
 package gov.cms.dpc.fhir.validations.dropwizard;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.inject.name.Named;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
@@ -88,7 +89,7 @@ public class FHIRValidationModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public FhirValidator provideFhirValidator(FhirContext ctx,
+    public FhirValidator provideFhirValidator(@Named("stu3") FhirContext ctx,
                                               ValidationSupportChain supportChain) {
         final FhirValidator fhirValidator = ctx.newValidator();
         final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(supportChain);

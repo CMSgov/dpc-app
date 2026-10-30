@@ -1,8 +1,8 @@
 package gov.cms.dpc.attribution.resources.v1;
 
-import gov.cms.dpc.attribution.AttributionTestHelpers;
+import gov.cms.dpc.attribution.Stu3AttributionTestHelpers;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
+import gov.cms.dpc.attribution.jdbi.stu3.OrganizationDAO;
 import gov.cms.dpc.common.entities.stu3.AddressEntity;
 import gov.cms.dpc.common.entities.stu3.ContactEntity;
 import gov.cms.dpc.common.entities.stu3.NameEntity;
@@ -123,7 +123,7 @@ class OrganizationResourceUnitTest {
 
 
     private Bundle buildBundleWithTestOrg(String uuid){
-        Organization organization = AttributionTestHelpers.createOrgResource(uuid, "1334567892");
+        Organization organization = Stu3AttributionTestHelpers.createOrgResource(uuid, "1334567892");
         return BundleFactory.createBundle(organization);
     }
 

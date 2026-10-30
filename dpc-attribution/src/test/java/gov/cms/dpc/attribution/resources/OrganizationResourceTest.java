@@ -6,7 +6,7 @@ import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.dpc.attribution.AbstractAttributionTest;
-import gov.cms.dpc.attribution.AttributionTestHelpers;
+import gov.cms.dpc.attribution.Stu3AttributionTestHelpers;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
 import gov.cms.dpc.testing.OrganizationHelpers;
@@ -30,7 +30,7 @@ class OrganizationResourceTest extends AbstractAttributionTest {
         final List<Organization> organizationsToCleanUp;
 
     private OrganizationResourceTest() {
-        client = AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
+        client = Stu3AttributionTestHelpers.createFHIRClient(ctx, getServerURL());
         organizationsToCleanUp = new ArrayList<>();
     }
 
