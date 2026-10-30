@@ -11,7 +11,7 @@ class GroupResourceUnitTest {
     private GroupResource groupResource;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         groupResource = new GroupResource();
     }
 
