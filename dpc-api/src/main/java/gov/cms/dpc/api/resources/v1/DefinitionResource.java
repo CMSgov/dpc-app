@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.resources.v1;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.inject.name.Named;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.resources.AbstractDefinitionResource;
@@ -28,7 +29,7 @@ public class DefinitionResource extends AbstractDefinitionResource {
     private final DPCProfileSupport profileSupport;
 
     @Inject
-    DefinitionResource(FhirContext ctx, DPCProfileSupport profileSupport) {
+    DefinitionResource(@Named("stu3") FhirContext ctx, DPCProfileSupport profileSupport) {
         this.ctx = ctx;
         this.profileSupport = profileSupport;
     }
