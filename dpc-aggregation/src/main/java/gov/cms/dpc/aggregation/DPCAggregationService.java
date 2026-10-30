@@ -62,6 +62,17 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration configuration) {
+                return configuration.getQueueDatabase();
+            }
+
+            @Override
+            public String name() {
+                return "queuedb";
+            }
+        });
+        bootstrap.addBundle(new MigrationsBundle<>() {
+            @Override
+            public DataSourceFactory getDataSourceFactory(DPCAggregationConfiguration configuration) {
                 return configuration.getConsentDatabase();
             }
 
