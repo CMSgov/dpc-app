@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.resources.v3;
+package gov.cms.dpc.api.resources.r4;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;

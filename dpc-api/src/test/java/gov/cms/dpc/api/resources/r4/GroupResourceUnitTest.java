@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.resources.v3;
+package gov.cms.dpc.api.resources.r4;
 
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
