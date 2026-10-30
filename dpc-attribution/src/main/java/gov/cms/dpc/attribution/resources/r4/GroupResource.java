@@ -155,10 +155,7 @@ public class GroupResource {
 
         // Build an attribution for each patient and add them to the roster
         patientEntities.stream()
-            .map( pe -> {
-                AttributionRelationship attribution = new AttributionRelationship(rosterEntity, pe, OffsetDateTime.now(ZoneOffset.UTC));
-                return attribution;
-                })
+            .map( pe -> new AttributionRelationship(rosterEntity, pe, OffsetDateTime.now(ZoneOffset.UTC)))
             .forEach(relationshipDAO::addAttributionRelationship);
 
         final RosterEntity rosterEntity1 = rosterDAO.getEntity(rosterID)
