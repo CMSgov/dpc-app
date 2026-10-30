@@ -57,7 +57,7 @@ class AttributionFHIRTest extends AbstractAttributionTest {
         groupedPairs.forEach((providerId, pairList) -> pairList.forEach(pair -> assertEquals(providerId, pair.getLeft())));
 
         // Create the Organization
-        organization = OrganizationHelpers.createOrganization(ctx, AttributionTestHelpers.createFHIRClient(ctx, String.format("http://localhost:%s/v1/", APPLICATION.getLocalPort())));
+        organization = OrganizationHelpers.createOrganization(ctx, Stu3AttributionTestHelpers.createFHIRClient(ctx, String.format("http://localhost:%s/v1/", APPLICATION.getLocalPort())));
     }
 
     @TestFactory

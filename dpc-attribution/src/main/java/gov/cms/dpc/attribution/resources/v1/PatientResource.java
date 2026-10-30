@@ -2,19 +2,19 @@ package gov.cms.dpc.attribution.resources.v1;
 
 import com.google.inject.name.Named;
 import gov.cms.dpc.attribution.jdbi.PageResult;
-import gov.cms.dpc.attribution.jdbi.PatientDAO;
+import gov.cms.dpc.attribution.jdbi.stu3.PatientDAO;
 import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
-import gov.cms.dpc.attribution.resources.AbstractPatientResource;
 import gov.cms.dpc.attribution.utils.RESTUtils;
 import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.common.utils.PagingService;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
+import gov.cms.dpc.fhir.annotations.stu3.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.converters.exceptions.FHIRConverterException;
-import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.stu3.BundleHandler;
+import gov.cms.dpc.common.hibernate.attribution.DPCStu3HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWork;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
@@ -50,7 +50,7 @@ public class PatientResource extends AbstractPatientResource {
 
     @GET
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     public Bundle searchPatients(
             @QueryParam("_id") UUID resourceID,
@@ -108,7 +108,7 @@ public class PatientResource extends AbstractPatientResource {
     @GET
     @Path("/{patientID}")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     public Patient getPatient(@PathParam("patientID") UUID patientID) {
         final PatientEntity patientEntity = this.dao.getPatient(patientID)
@@ -120,7 +120,7 @@ public class PatientResource extends AbstractPatientResource {
 
     @POST
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     public Response createPatient(Patient patient) {
         try {
@@ -154,7 +154,7 @@ public class PatientResource extends AbstractPatientResource {
     @POST
     @Path("/$submit")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @BundleReturnProperties(bundleType = Bundle.BundleType.COLLECTION)
     @Override
     public List<Patient> bulkSubmitPatients(Parameters params) {
@@ -197,7 +197,7 @@ public class PatientResource extends AbstractPatientResource {
     @DELETE
     @Path("/{patientID}")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     public Response deletePatient(@PathParam("patientID") UUID patientID) {
         final boolean found = this.dao.deletePatient(patientID);
@@ -212,7 +212,7 @@ public class PatientResource extends AbstractPatientResource {
     @PUT
     @Path("/{patientID}")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     public Response updatePatient(@PathParam("patientID") UUID patientID, Patient patient) {
         try {
