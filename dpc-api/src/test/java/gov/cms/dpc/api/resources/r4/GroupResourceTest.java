@@ -2,6 +2,7 @@ package gov.cms.dpc.api.resources.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
@@ -90,6 +91,8 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     private IGenericClient buildV3Client() throws IOException, URISyntaxException {
         final String v3Endpoint = getBaseURL().replaceFirst("/v1$", "/v3");
         final APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        // v3 has no /metadata endpoint to validate against
+        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
         final IGenericClient client = ctx.newRestfulGenericClient(v3Endpoint);
         client.registerInterceptor(new BearerTokenAuthInterceptor(auth.accessToken));
         return client;
