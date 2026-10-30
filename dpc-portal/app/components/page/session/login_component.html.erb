@@ -8,21 +8,21 @@
         <h1 class="margin-bottom-0">DPC Portal sign in</h1>
         <p>You can access your account by signing in with one of the options below.</p>
         
-        <%# Build a login button for each CSP %>
         <%
           csps = [
-            { id: :clear, logo_class: 'clear-login-button__logo', text: 'CLEAR', login_path: helpers.omniauth_authorize_path(:clear) },
-            { id: :id_me, logo_class: 'idme-login-button__logo', text: 'ID.me', login_path: helpers.omniauth_authorize_path(:id_me) },
-            { id: :login_dot_gov, logo_class: 'lg-login-button__logo', text: 'Login.gov', login_path: helpers.omniauth_authorize_path(:login_dot_gov) }
+            { id: :clear, logo_src_light: asset_path('clear-logo-white.svg'), logo_src_dark: asset_path('clear-logo-navy.svg'), alt: 'CLEAR', login_path: helpers.omniauth_authorize_path(:clear) },
+            { id: :id_me, logo_src_light: asset_path('idme-logo-white.svg'), logo_src_dark: asset_path('idme-logo-navy.svg'), alt: 'ID.me', login_path: helpers.omniauth_authorize_path(:id_me) },
+            { id: :login_dot_gov, logo_src_light: asset_path('lg-logo-white.svg'), logo_src_dark: asset_path('lg-logo-navy.svg'), alt: 'Login.gov', login_path: helpers.omniauth_authorize_path(:login_dot_gov) }
           ]
         %>
         <% csps.each do |csp| %>
           <% is_last_used = (@last_used_csp == csp[:id]) %>
           <div class="<%= class_names('last-used-login-wrapper margin-bottom-1': is_last_used) %>">
             <%= button_to csp[:login_path],
-                          class: class_names('usa-button width-full margin-bottom-1', 'usa-button--outline': @last_used_csp.present? && !is_last_used),
+                          class: class_names('usa-button padding-y-0 display-flex flex-align-center flex-justify-center height-5 width-full margin-bottom-1', 'usa-button--outline': @last_used_csp.present? && !is_last_used),
                           data: { turbo: false } do %>
-              <span class="<%= csp[:logo_class] %>"><%= csp[:text] %></span>
+                <% logo_src = @last_used_csp.present? && !is_last_used ? csp[:logo_src_dark] : csp[:logo_src_light] %>
+                <img class="csp_logo" src="<%= logo_src %>" alt="<%= csp[:alt] %>" />
             <% end %>
             <%= content_tag(:span, 'LAST USED', class: 'last-used-login-wrapper__badge') if is_last_used %>
           </div>

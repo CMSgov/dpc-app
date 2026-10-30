@@ -3,9 +3,9 @@
 require 'rails_helper'
 
 CSP_CONFIG = {
-  clear: { logo_class: 'clear-login-button__logo', display_name: 'CLEAR' },
-  id_me: { logo_class: 'idme-login-button__logo', display_name: 'ID.me' },
-  login_dot_gov: { logo_class: 'lg-login-button__logo', display_name: 'Login.gov' }
+  clear: { selector: 'img.csp_logo[alt="CLEAR"]', display_name: 'CLEAR' },
+  id_me: { selector: 'img.csp_logo[alt="ID.me"]', display_name: 'ID.me' },
+  login_dot_gov: { selector: 'img.csp_logo[alt="Login.gov"]', display_name: 'Login.gov' }
 }.freeze
 
 RSpec.describe Page::Session::LoginComponent, type: :component do
@@ -21,8 +21,7 @@ RSpec.describe Page::Session::LoginComponent, type: :component do
 
     it 'should have login buttons' do
       CSP_CONFIG.each_value do |csp|
-        expect(page).to have_selector("button.usa-button span.#{csp[:logo_class]}")
-        expect(page.find("button.usa-button span.#{csp[:logo_class]}")).to have_content(csp[:display_name])
+        expect(page).to have_selector("button.usa-button #{csp[:selector]}")
       end
     end
 
@@ -53,19 +52,19 @@ RSpec.describe Page::Session::LoginComponent, type: :component do
 
       it "wraps only the #{csp[:display_name]} button" do
         # Check that the right button has the "last used" wrapper.
-        expect(page).to have_css(".last-used-login-wrapper .#{csp[:logo_class]}")
+        expect(page).to have_css(".last-used-login-wrapper #{csp[:selector]}")
 
         # Make sure the other two don't.
         CSP_CONFIG.except(csp_code).each_value do |other_csp|
-          expect(page).not_to have_css(".last-used-login-wrapper .#{other_csp[:logo_class]}")
+          expect(page).not_to have_css(".last-used-login-wrapper #{other_csp[:selector]}")
         end
       end
 
       it "outlines all buttons except for #{csp[:display_name]}" do
-        expect(find_button_for(csp[:logo_class])[:class]).not_to include('usa-button--outline')
+        expect(find_button_for(csp[:selector])[:class]).not_to include('usa-button--outline')
 
         CSP_CONFIG.except(csp_code).each_value do |other_csp|
-          expect(find_button_for(other_csp[:logo_class])[:class]).to include('usa-button--outline')
+          expect(find_button_for(other_csp[:selector])[:class]).to include('usa-button--outline')
         end
       end
     end
@@ -77,18 +76,18 @@ RSpec.describe Page::Session::LoginComponent, type: :component do
 
     it "doesn't wrap any buttons" do
       CSP_CONFIG.each_value do |csp|
-        expect(page).not_to have_css(".last-used-login-wrapper .#{csp[:logo_class]}")
+        expect(page).not_to have_css(".last-used-login-wrapper #{csp[:selector]}")
       end
     end
 
     it "doesn't outline any buttons" do
       CSP_CONFIG.each_value do |csp|
-        expect(find_button_for(csp[:logo_class])[:class]).not_to include('usa-button--outline')
+        expect(find_button_for(csp[:selector])[:class]).not_to include('usa-button--outline')
       end
     end
   end
 
-  def find_button_for(logo_class)
-    page.find("button.usa-button span.#{logo_class}").find(:xpath, '..')
+  def find_button_for(selector)
+    page.find("button.usa-button #{selector}").find(:xpath, '..')
   end
 end
