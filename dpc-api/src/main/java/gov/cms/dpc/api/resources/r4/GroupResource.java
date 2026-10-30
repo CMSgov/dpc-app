@@ -3,8 +3,9 @@ package gov.cms.dpc.api.resources.r4;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
+import gov.cms.dpc.fhir.annotations.FHIR;
 import io.swagger.annotations.ApiOperation;
-import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -13,6 +14,7 @@ import jakarta.ws.rs.core.Response;
 public class GroupResource {
 
     @POST
+    @FHIR
     @Timed
     @ExceptionMetered
     @Authorizer
@@ -21,28 +23,31 @@ public class GroupResource {
         return notImplemented();
     }
 
-    @PUT
+    @GET
     @Path("/{rosterID}")
+    @FHIR
     @Timed
     @ExceptionMetered
     @Authorizer
-    @ApiOperation(value = "Replace Attribution Group members", notes = "Not yet implemented.")
-    public Response replaceRoster() {
+    @ApiOperation(value = "Fetch Attribution Group", notes = "Not yet implemented.")
+    public Response getRoster() {
         return notImplemented();
     }
 
-    @DELETE
+    @PUT
     @Path("/{rosterID}")
+    @FHIR
     @Timed
     @ExceptionMetered
     @Authorizer
-    @ApiOperation(value = "Delete Attribution Group", notes = "Not yet implemented.")
-    public Response deleteRoster() {
+    @ApiOperation(value = "Create or update Attribution Group", notes = "Not yet implemented.")
+    public Response updateRoster() {
         return notImplemented();
     }
 
     @POST
     @Path("/{rosterID}/$member-add")
+    @FHIR
     @Timed
     @ExceptionMetered
     @Authorizer
@@ -53,6 +58,7 @@ public class GroupResource {
 
     @POST
     @Path("/{rosterID}/$member-remove")
+    @FHIR
     @Timed
     @ExceptionMetered
     @Authorizer

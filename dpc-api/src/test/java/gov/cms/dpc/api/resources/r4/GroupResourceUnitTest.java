@@ -22,14 +22,14 @@ class GroupResourceUnitTest {
     }
 
     @Test
-    void testReplaceRoster() {
-        Response response = groupResource.replaceRoster();
+    void testGetRoster() {
+        Response response = groupResource.getRoster();
         assertEquals(Response.Status.NOT_IMPLEMENTED.getStatusCode(), response.getStatus(), "Response status should have been NOT_IMPLEMENTED (501)");
     }
 
     @Test
-    void testDeleteRoster() {
-        Response response = groupResource.deleteRoster();
+    void testUpdateRoster() {
+        Response response = groupResource.updateRoster();
         assertEquals(Response.Status.NOT_IMPLEMENTED.getStatusCode(), response.getStatus(), "Response status should have been NOT_IMPLEMENTED (501)");
     }
 

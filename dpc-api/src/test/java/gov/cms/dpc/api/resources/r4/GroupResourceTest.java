@@ -5,10 +5,8 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
-import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import gov.cms.dpc.testing.utils.MBIUtil;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -27,8 +25,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     private final FhirContext ctx = FhirContext.forR4();
     private final IdType rosterId = new IdType("Group", UUID.randomUUID().toString());
     private final Parameters memberParameters = new Parameters()
-            .addParameter("memberId", MBIUtil.generateMBI())
-            .addParameter("providerNpi", NPIUtil.generateNPI());
+            .addParameter(new Parameters.ParametersParameterComponent().setResource(new Group()));
 
     @Test
     void testCreateRoster() throws IOException, URISyntaxException {
@@ -41,22 +38,23 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     }
 
     @Test
-    void testReplaceRoster() throws IOException, URISyntaxException {
+    void testGetRoster() throws IOException, URISyntaxException {
         final IGenericClient client = buildV3Client();
 
-        assertThrows(NotImplementedOperationException.class, () -> client.update()
-                .resource(new Group())
+        assertThrows(NotImplementedOperationException.class, () -> client.read()
+                .resource(Group.class)
                 .withId(rosterId)
                 .encodedJson()
                 .execute(), "Should throw a 501");
     }
 
     @Test
-    void testDeleteRoster() throws IOException, URISyntaxException {
+    void testUpdateRoster() throws IOException, URISyntaxException {
         final IGenericClient client = buildV3Client();
 
-        assertThrows(NotImplementedOperationException.class, () -> client.delete()
-                .resourceById(rosterId)
+        assertThrows(NotImplementedOperationException.class, () -> client.update()
+                .resource(new Group())
+                .withId(rosterId)
                 .encodedJson()
                 .execute(), "Should throw a 501");
     }
