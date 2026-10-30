@@ -1,6 +1,8 @@
 package gov.cms.dpc.attribution.resources.v1;
 
-import gov.cms.dpc.attribution.jdbi.*;
+import gov.cms.dpc.attribution.jdbi.PageResult;
+import gov.cms.dpc.attribution.jdbi.PatientSearchQuery;
+import gov.cms.dpc.attribution.jdbi.stu3.PatientDAO;
 import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.common.utils.PagingService;
@@ -15,7 +17,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.*;
 
-import static gov.cms.dpc.attribution.AttributionTestHelpers.*;
+import static gov.cms.dpc.attribution.Stu3AttributionTestHelpers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 

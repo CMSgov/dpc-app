@@ -3,14 +3,14 @@ package gov.cms.dpc.attribution.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.jdbi.ProviderDAO;
-import gov.cms.dpc.attribution.resources.AbstractPractitionerResource;
+import gov.cms.dpc.attribution.jdbi.stu3.ProviderDAO;
 import gov.cms.dpc.attribution.utils.RESTUtils;
 import gov.cms.dpc.common.entities.stu3.ProviderEntity;
 import gov.cms.dpc.fhir.FHIRExtractors;
-import gov.cms.dpc.fhir.annotations.BundleReturnProperties;
+import gov.cms.dpc.fhir.annotations.stu3.BundleReturnProperties;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
+import gov.cms.dpc.common.hibernate.attribution.DPCStu3HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWork;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotEmpty;
@@ -50,7 +50,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
 
     @GET
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     @Timed
     @ExceptionMetered
@@ -66,7 +66,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
 
     @POST
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     @Timed
     @ExceptionMetered
@@ -104,7 +104,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @GET
     @Path("/{providerID}")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     @Timed
     @ExceptionMetered
@@ -121,7 +121,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @POST
     @Path("/$submit")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Timed
     @ExceptionMetered
     @BundleReturnProperties(bundleType = Bundle.BundleType.COLLECTION)
@@ -163,7 +163,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @DELETE
     @Path("/{providerID}")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     @Timed
     @ExceptionMetered
@@ -180,7 +180,7 @@ public class PractitionerResource extends AbstractPractitionerResource {
     @PUT
     @Path("/{providerID}")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     @Timed
     @ExceptionMetered

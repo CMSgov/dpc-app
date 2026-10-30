@@ -1,6 +1,7 @@
 package gov.cms.dpc.queue.service;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.inject.name.Named;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
@@ -44,7 +45,7 @@ public class DataService {
     private final FileManager fileManager;
 
     @Inject
-    public DataService(IJobQueue queue, FhirContext fhirContext, @ExportPath String exportPath, @JobTimeout int jobTimeoutInSeconds, FileManager fileManager) {
+    public DataService(IJobQueue queue, @Named("stu3") FhirContext fhirContext, @ExportPath String exportPath, @JobTimeout int jobTimeoutInSeconds, FileManager fileManager) {
         this.queue = queue;
         this.fhirContext = fhirContext;
         this.exportPath = exportPath;

@@ -1,0 +1,73 @@
+package gov.cms.dpc.attribution.jdbi.stu3;
+
+import gov.cms.dpc.attribution.Stu3AbstractAttributionDAOTest;
+import gov.cms.dpc.attribution.Stu3AttributionTestHelpers;
+import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
+import gov.cms.dpc.common.entities.stu3.ProviderEntity;
+import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class ProviderDAOUnitTest extends Stu3AbstractAttributionDAOTest {
+	private ProviderDAO providerDAO;
+	private OrganizationDAO organizationDAO;
+
+	@BeforeEach
+	void setup() {
+		DPCManagedSessionFactory dpcManagedSessionFactory = new DPCManagedSessionFactory(db.getSessionFactory());
+		providerDAO = new ProviderDAO(dpcManagedSessionFactory);
+		organizationDAO = new OrganizationDAO(dpcManagedSessionFactory);
+	}
+
+	@Test
+	void test_bulkProviderSearch() {
+		OrganizationEntity org = Stu3AttributionTestHelpers.createOrganizationEntity();
+		ProviderEntity provider1 = Stu3AttributionTestHelpers.createProviderEntity(org);
+		ProviderEntity provider2 = Stu3AttributionTestHelpers.createProviderEntity(org);
+		ProviderEntity provider3 = Stu3AttributionTestHelpers.createProviderEntity(org);
+
+		db.inTransaction(() -> {
+			organizationDAO.registerOrganization(org);
+			providerDAO.persistProvider(provider1);
+			providerDAO.persistProvider(provider2);
+			providerDAO.persistProvider(provider3);
+		});
+
+		List<ProviderEntity> providers = providerDAO.bulkProviderSearch(org.getId(), List.of(provider1.getProviderNPI(), provider2.getProviderNPI()));
+		assertEquals(2, providers.size());
+		assertTrue(providers.contains(provider1));
+		assertTrue(providers.contains(provider2));
+		assertFalse(providers.contains(provider3));
+	}
+
+	@Test
+	void test_bulkProviderSearch_only_finds_correct_org() {
+		OrganizationEntity goodOrg = Stu3AttributionTestHelpers.createOrganizationEntity();
+		OrganizationEntity badOrg = Stu3AttributionTestHelpers.createOrganizationEntity();
+		ProviderEntity provider1 = Stu3AttributionTestHelpers.createProviderEntity(goodOrg);
+		ProviderEntity provider2 = Stu3AttributionTestHelpers.createProviderEntity(goodOrg);
+		ProviderEntity provider3 = Stu3AttributionTestHelpers.createProviderEntity(badOrg);
+
+		db.inTransaction(() -> {
+			organizationDAO.registerOrganization(goodOrg);
+			organizationDAO.registerOrganization(badOrg);
+			providerDAO.persistProvider(provider1);
+			providerDAO.persistProvider(provider2);
+			providerDAO.persistProvider(provider3);
+		});
+
+		List<ProviderEntity> providers = providerDAO.bulkProviderSearch(goodOrg.getId(), List.of(
+			provider1.getProviderNPI(), provider2.getProviderNPI(), provider3.getProviderNPI()
+		));
+		assertEquals(2, providers.size());
+		assertTrue(providers.contains(provider1));
+		assertTrue(providers.contains(provider2));
+		assertFalse(providers.contains(provider3));
+	}
+}

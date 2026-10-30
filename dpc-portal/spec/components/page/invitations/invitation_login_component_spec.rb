@@ -12,9 +12,9 @@ RSpec.describe Page::Invitations::InvitationLoginComponent, type: :component do
     before { render_inline(component) }
 
     it 'should have verify identity buttons for all csps' do
-      expect(page).to have_selector('button.usa-button span.lg-login-button__logo', text: 'Verify with Login.gov')
-      expect(page).to have_selector('button.usa-button span.clear-login-button__logo', text: 'Verify with CLEAR')
-      expect(page).to have_selector('button.usa-button span.idme-login-button__logo', text: 'Verify with ID.me')
+      expect(page).to have_selector('button.usa-button img.csp_logo[alt="Login.gov"]')
+      expect(page).to have_selector('button.usa-button img.csp_logo[alt="CLEAR"]')
+      expect(page).to have_selector('button.usa-button img.csp_logo[alt="ID.me"]')
     end
 
     it 'should post each CSP to the appropriate url' do

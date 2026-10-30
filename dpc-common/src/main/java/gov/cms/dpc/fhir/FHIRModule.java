@@ -3,17 +3,19 @@ package gov.cms.dpc.fhir;
 import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
+import com.google.inject.name.Named;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.dropwizard.features.FHIRRequestFeature;
 import gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter;
-import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandler;
-import gov.cms.dpc.fhir.parameters.FHIRParamValueFactory;
+import gov.cms.dpc.fhir.dropwizard.handlers.r4.BundleHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.r4.FHIRHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DataFormatExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionMapper;
+import gov.cms.dpc.fhir.parameters.r4.FHIRParamValueFactory;
 import gov.cms.dpc.fhir.parameters.ProvenanceResourceFactoryProvider;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
 import io.dropwizard.core.Configuration;
@@ -30,26 +32,41 @@ public class FHIRModule<T extends Configuration & IDPCFHIRConfiguration> extends
 
     @Provides
     @Singleton
+    @Named("stu3")
     public FhirContext provideSTU3Context() {
         return FhirContext.forDstu3();
     }
+
+    @Provides
+    @Singleton
+    @Named("r4")
+    public FhirContext provideR4Context() { return FhirContext.forR4(); }
 
     @Override
     public void configure() {
         Binder binder = binder();
 
         // Request/Response handlers
+        binder.bind(gov.cms.dpc.fhir.dropwizard.handlers.stu3.FHIRHandler.class);
         binder.bind(FHIRHandler.class);
+        binder.bind(gov.cms.dpc.fhir.dropwizard.handlers.stu3.BundleHandler.class);
         binder.bind(BundleHandler.class);
         binder.bind(FHIRRequestFeature.class);
+        binder.bind(gov.cms.dpc.fhir.parameters.stu3.FHIRParamValueFactory.class);
         binder.bind(FHIRParamValueFactory.class);
         binder.bind(StreamingContentSizeFilter.class);
 
         // Custom exception mappers
-        binder.bind(JerseyExceptionHandler.class);
-        binder.bind(PersistenceExceptionHandler.class);
-        binder.bind(HAPIExceptionHandler.class);
-        binder.bind(DefaultFHIRExceptionHandler.class);
+        // TODO: Once stu3 is gone map the exception handlers directly.
+        // binder.bind(JerseyExceptionHandler.class);
+        // binder.bind(PersistenceExceptionHandler.class);
+        // binder.bind(HAPIExceptionHandler.class);
+        // binder.bind(DefaultFHIRExceptionHandler.class);
+        binder.bind(DataFormatExceptionMapper.class);
+        binder.bind(JerseyExceptionMapper.class);
+        binder.bind(PersistenceExceptionMapper.class);
+        binder.bind(HAPIExceptionMapper.class);
+        binder.bind(DefaultFHIRExceptionMapper.class);
         binder.bind(ProvenanceResourceFactoryProvider.class);
 
         binder.bind(FHIREntityConverter.class).toProvider(EntityConverterProvider.class).in(Singleton.class);

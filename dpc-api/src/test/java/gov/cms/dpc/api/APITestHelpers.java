@@ -14,12 +14,13 @@ import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
-import gov.cms.dpc.fhir.dropwizard.handlers.BundleHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.FHIRHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionHandler;
-import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.stu3.BundleHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.stu3.FHIRHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DataFormatExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionMapper;
 import gov.cms.dpc.fhir.validations.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.ProfileValidator;
 import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
@@ -161,10 +162,11 @@ public class APITestHelpers {
                 .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
                 .addProvider(fhirHandler)
                 .addProvider(new BundleHandler(fhirHandler))
-                .addProvider(JerseyExceptionHandler.class)
-                .addProvider(PersistenceExceptionHandler.class)
-                .addProvider(HAPIExceptionHandler.class)
-                .addProvider(DefaultFHIRExceptionHandler.class)
+                .addProvider(JerseyExceptionMapper.class)
+                .addProvider(PersistenceExceptionMapper.class)
+                .addProvider(HAPIExceptionMapper.class)
+                .addProvider(DefaultFHIRExceptionMapper.class)
+                .addProvider(DataFormatExceptionMapper.class)
                 .addProvider(JsonParseExceptionMapper.class)
                 .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
 

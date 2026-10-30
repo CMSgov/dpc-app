@@ -1,10 +1,12 @@
 package gov.cms.dpc.queue;
 
+import ca.uhn.fhir.context.FhirContext;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+import com.google.inject.name.Named;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
@@ -123,6 +125,13 @@ class JobQueueModuleUnitTest {
 
 	// Dummy Module that implements the providers we need to build our queues.
 	private static class MockModule <T extends Configuration & DPCQueueConfig> extends DropwizardAwareModule<T> {
+		@Provides
+		@Singleton
+		@Named("stu3")
+		FhirContext provideStu3Context() {
+			return FhirContext.forDstu3();
+		}
+
 		@Provides
 		@JobTimeout
 		public int provideJobTimeoutInSeconds() {
