@@ -1,7 +1,7 @@
-package gov.cms.dpc.newbe.client;
+package gov.cms.dpc.oneecosystem.client;
 
-import gov.cms.dpc.newbe.models.NewbeExportRequest;
-import gov.cms.dpc.newbe.models.NewbeExportResponse;
+import gov.cms.dpc.oneecosystem.models.OneEcosystemExportRequest;
+import gov.cms.dpc.oneecosystem.models.OneEcosystemExportResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class MockNewbeClientTest {
+class MockOneEcosystemClientTest {
 
     private static final List<String> ALL_RESOURCE_TYPES = List.of("Patient", "Coverage", "ExplanationOfBenefit");
 
@@ -24,7 +24,7 @@ class MockNewbeClientTest {
 
     @Test
     void testInvalidJobReturnsBackendError() {
-        MockNewbeClient client = new MockNewbeClient(exportPath);
+        MockOneEcosystemClient client = new MockOneEcosystemClient(exportPath);
 
         var invalidJob = client.jobStatus(UUID.randomUUID());
         assertEquals(400, invalidJob.statusCode());
@@ -32,9 +32,9 @@ class MockNewbeClientTest {
 
     @Test
     void testJobCompletesOnThirdPoll() {
-        MockNewbeClient client = new MockNewbeClient(exportPath);
+        MockOneEcosystemClient client = new MockOneEcosystemClient(exportPath);
 
-        NewbeExportResponse response = client.export(request());
+        OneEcosystemExportResponse response = client.export(request());
         final UUID jobId = getJobIdFromResponse(response);
 
         assertEquals(202, response.statusCode());
@@ -47,9 +47,9 @@ class MockNewbeClientTest {
 
     @Test
     void testCompletedJobHasThreeFileUrls() {
-        MockNewbeClient client = new MockNewbeClient(exportPath);
+        MockOneEcosystemClient client = new MockOneEcosystemClient(exportPath);
 
-        NewbeExportResponse response = client.export(request());
+        OneEcosystemExportResponse response = client.export(request());
         final UUID jobId = getJobIdFromResponse(response);
         client.jobStatus(jobId);
         client.jobStatus(jobId);
@@ -71,9 +71,9 @@ class MockNewbeClientTest {
 
     @Test
     void testJobCreatesSixFakeNdjsonFiles() {
-        MockNewbeClient client = new MockNewbeClient(exportPath);
+        MockOneEcosystemClient client = new MockOneEcosystemClient(exportPath);
 
-        NewbeExportResponse response = client.export(request());
+        OneEcosystemExportResponse response = client.export(request());
         final UUID jobId = getJobIdFromResponse(response);
         client.jobStatus(jobId);
         client.jobStatus(jobId);
@@ -95,9 +95,9 @@ class MockNewbeClientTest {
 
     @Test
     void testJobCreatesFilesOnlyForRequestedResourceTypes() {
-        MockNewbeClient client = new MockNewbeClient(exportPath);
+        MockOneEcosystemClient client = new MockOneEcosystemClient(exportPath);
 
-        NewbeExportResponse response = client.export(request(List.of("Patient")));
+        OneEcosystemExportResponse response = client.export(request(List.of("Patient")));
         final UUID jobId = getJobIdFromResponse(response);
         client.jobStatus(jobId);
         client.jobStatus(jobId);
@@ -118,16 +118,16 @@ class MockNewbeClientTest {
         assertFalse(Files.exists(Path.of(exportPath + "/" + jobId + "-ExplanationOfBenefit.ndjson.gz")));
     }
 
-    private UUID getJobIdFromResponse(NewbeExportResponse response) {
+    private UUID getJobIdFromResponse(OneEcosystemExportResponse response) {
         return UUID.fromString(response.contentLocation().substring(response.contentLocation().lastIndexOf('/') + 1));
     }
 
-    private NewbeExportRequest request() {
+    private OneEcosystemExportRequest request() {
         return request(ALL_RESOURCE_TYPES);
     }
 
-    private NewbeExportRequest request(List<String> resourceTypes) {
-        return new NewbeExportRequest(
+    private OneEcosystemExportRequest request(List<String> resourceTypes) {
+        return new OneEcosystemExportRequest(
             List.of("ABC0123ABCD"),
             Instant.now(),
             resourceTypes,

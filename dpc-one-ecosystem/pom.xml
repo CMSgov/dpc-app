@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>dpc-newbe</artifactId>
-    <name>DPC NEWBE Interaction Client</name>
+    <artifactId>dpc-one-ecosystem</artifactId>
+    <name>DPC client for shared backend (One Ecosystem initiative)</name>
 
     <dependencies>
         <dependency>

@@ -1,10 +1,10 @@
-package gov.cms.dpc.newbe.client;
+package gov.cms.dpc.oneecosystem.client;
 
-import gov.cms.dpc.newbe.models.NewbeExportRequest;
-import gov.cms.dpc.newbe.models.NewbeExportResponse;
-import gov.cms.dpc.newbe.models.NewbeJobStatus;
-import gov.cms.dpc.newbe.models.NewbeJobStatusOutput;
-import gov.cms.dpc.newbe.models.NewbeJobStatusResponse;
+import gov.cms.dpc.oneecosystem.models.OneEcosystemExportRequest;
+import gov.cms.dpc.oneecosystem.models.OneEcosystemExportResponse;
+import gov.cms.dpc.oneecosystem.models.OneEcosystemJobStatus;
+import gov.cms.dpc.oneecosystem.models.OneEcosystemJobStatusOutput;
+import gov.cms.dpc.oneecosystem.models.OneEcosystemJobStatusResponse;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
-public class MockNewbeClient implements NewbeClient {
+public class MockOneEcosystemClient implements OneEcosystemClient {
 
     private static final int POLL_RETRIES_BEFORE_FILE_DOWNLOAD = 2;
     private static final String[] ALL_RESOURCE_TYPES = {"Patient", "Coverage", "ExplanationOfBenefit"};
@@ -27,7 +27,7 @@ public class MockNewbeClient implements NewbeClient {
     private final Path exportPath;
     private final Map<UUID, MockJob> jobs = new HashMap<>();
 
-    public MockNewbeClient(Path exportPath) {
+    public MockOneEcosystemClient(Path exportPath) {
         this.exportPath = exportPath;
     }
 
@@ -43,24 +43,24 @@ public class MockNewbeClient implements NewbeClient {
      *   all requests will be POST to $shared-export
      */
     @Override
-    public synchronized NewbeExportResponse export(NewbeExportRequest request) {
+    public synchronized OneEcosystemExportResponse export(OneEcosystemExportRequest request) {
         final UUID jobId = UUID.randomUUID();
         final String jobUrl = "https://localhost:3002/api/v3/jobs/" + jobId;
         final List<String> resourceTypes = request.resourceTypes().isEmpty()
             ? List.of(ALL_RESOURCE_TYPES)
             : request.resourceTypes();
         jobs.put(jobId, new MockJob(jobId, resourceTypes));
-        return new NewbeExportResponse(202, jobUrl);
+        return new OneEcosystemExportResponse(202, jobUrl);
     }
 
     /**
      * arbitrarily 202's two times then returns response with where to get the file (200)
      */
     @Override
-    public synchronized NewbeJobStatus jobStatus(UUID jobId) {
+    public synchronized OneEcosystemJobStatus jobStatus(UUID jobId) {
         MockJob job = jobs.get(jobId);
         if (job == null) {
-            return new NewbeJobStatus(400, new NewbeJobStatusResponse(
+            return new OneEcosystemJobStatus(400, new OneEcosystemJobStatusResponse(
                 Instant.now(),
                 true,
                 List.of(),
@@ -69,13 +69,13 @@ public class MockNewbeClient implements NewbeClient {
             ));
         }
         if (++job.polls <= POLL_RETRIES_BEFORE_FILE_DOWNLOAD) {
-            return new NewbeJobStatus(202, null);
+            return new OneEcosystemJobStatus(202, null);
         }
         if (!job.complete) {
             writeNdjsonFiles(job);
             job.complete = true;
         }
-        return new NewbeJobStatus(200, new NewbeJobStatusResponse(
+        return new OneEcosystemJobStatus(200, new OneEcosystemJobStatusResponse(
             Instant.now(),
             true,
             output(job),
@@ -84,9 +84,9 @@ public class MockNewbeClient implements NewbeClient {
         ));
     }
 
-    private List<NewbeJobStatusOutput> output(MockJob job) {
+    private List<OneEcosystemJobStatusOutput> output(MockJob job) {
         return job.resourceTypes.stream()
-            .map(resourceType -> new NewbeJobStatusOutput(
+            .map(resourceType -> new OneEcosystemJobStatusOutput(
                 resourceType,
                 "/data/" + job.jobId + "/" + job.jobId + "-" + resourceType + ".ndjson"
             ))

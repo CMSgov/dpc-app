@@ -1,16 +1,16 @@
-package gov.cms.dpc.newbe.models;
+package gov.cms.dpc.oneecosystem.models;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
-public record NewbeExportRequest(
+public record OneEcosystemExportRequest(
     List<String> mbis,
     Instant since,
     List<String> resourceTypes,
     String typeFilter
 ) {
-    public NewbeExportRequest {
+    public OneEcosystemExportRequest {
         mbis = List.copyOf(mbis);
         Objects.requireNonNull(since, "since param is required");
         resourceTypes = List.copyOf(resourceTypes);

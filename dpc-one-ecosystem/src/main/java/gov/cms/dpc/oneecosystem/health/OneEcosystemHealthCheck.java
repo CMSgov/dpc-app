@@ -1,17 +1,17 @@
-package gov.cms.dpc.newbe.health;
+package gov.cms.dpc.oneecosystem.health;
 
-import gov.cms.dpc.newbe.client.NewbeClient;
+import gov.cms.dpc.oneecosystem.client.OneEcosystemClient;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import ru.vyarus.dropwizard.guice.module.installer.feature.health.NamedHealthCheck;
 
 @Singleton
-public class NewbeHealthCheck extends NamedHealthCheck {
+public class OneEcosystemHealthCheck extends NamedHealthCheck {
 
-    private final NewbeClient client;
+    private final OneEcosystemClient client;
 
     @Inject
-    public NewbeHealthCheck(NewbeClient client) {
+    public OneEcosystemHealthCheck(OneEcosystemClient client) {
         this.client = client;
     }
 
@@ -29,6 +29,6 @@ public class NewbeHealthCheck extends NamedHealthCheck {
 
     @Override
     public String getName() {
-        return "newbe-client";
+        return "one-ecosystem-client";
     }
 }
