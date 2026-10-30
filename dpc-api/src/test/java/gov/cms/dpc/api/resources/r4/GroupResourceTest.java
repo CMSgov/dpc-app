@@ -4,6 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
+import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.testing.APIAuthHelpers;
@@ -32,60 +36,60 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     void testCreateRoster() throws IOException, URISyntaxException {
         final IGenericClient client = buildV3Client();
 
-        assertThrows(NotImplementedOperationException.class, () -> client.create()
+        ICreateTyped rosterCreate = client.create()
                 .resource(new Group())
-                .encodedJson()
-                .execute(), "Should throw a 501");
+                .encodedJson();
+        assertThrows(NotImplementedOperationException.class, rosterCreate::execute, "Should throw a 501");
     }
 
     @Test
     void testGetRoster() throws IOException, URISyntaxException {
         final IGenericClient client = buildV3Client();
 
-        assertThrows(NotImplementedOperationException.class, () -> client.read()
+        IReadExecutable<Group> rosterAdd = client.read()
                 .resource(Group.class)
                 .withId(rosterId)
-                .encodedJson()
-                .execute(), "Should throw a 501");
+                .encodedJson();
+        assertThrows(NotImplementedOperationException.class, rosterAdd::execute, "Should throw a 501");
     }
 
     @Test
     void testUpdateRoster() throws IOException, URISyntaxException {
         final IGenericClient client = buildV3Client();
 
-        assertThrows(NotImplementedOperationException.class, () -> client.update()
+        IUpdateExecutable rosterUpdate = client.update()
                 .resource(new Group())
                 .withId(rosterId)
-                .encodedJson()
-                .execute(), "Should throw a 501");
+                .encodedJson();
+        assertThrows(NotImplementedOperationException.class, rosterUpdate::execute, "Should throw a 501");
     }
 
     @Test
     void testAddMemberToRoster() throws IOException, URISyntaxException {
         final IGenericClient client = buildV3Client();
 
-        assertThrows(NotImplementedOperationException.class, () -> client
+        IOperationUntypedWithInput<Group> memberAdd = client
                 .operation()
                 .onInstance(rosterId)
                 .named("$member-add")
                 .withParameters(memberParameters)
                 .returnResourceType(Group.class)
-                .encodedJson()
-                .execute(), "Should throw a 501");
+                .encodedJson();
+        assertThrows(NotImplementedOperationException.class, memberAdd::execute, "Should throw a 501");
     }
 
     @Test
     void testRemoveMemberFromRoster() throws IOException, URISyntaxException {
         final IGenericClient client = buildV3Client();
 
-        assertThrows(NotImplementedOperationException.class, () -> client
+        IOperationUntypedWithInput<Group> memberRemove = client
                 .operation()
                 .onInstance(rosterId)
                 .named("$member-remove")
                 .withParameters(memberParameters)
                 .returnResourceType(Group.class)
-                .encodedJson()
-                .execute(), "Should throw a 501");
+                .encodedJson();
+        assertThrows(NotImplementedOperationException.class, memberRemove::execute, "Should throw a 501");
     }
 
     private IGenericClient buildV3Client() throws IOException, URISyntaxException {
