@@ -16,6 +16,7 @@ import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.v1.*;
+import gov.cms.dpc.api.resources.r4.AttributionResource;
 import gov.cms.dpc.api.tasks.GenerateKeyPair;
 import gov.cms.dpc.api.tasks.keys.DeletePublicKey;
 import gov.cms.dpc.api.tasks.keys.ListPublicKeys;
@@ -67,6 +68,10 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(JobResource.class);
         binder.bind(PatientResource.class);
         binder.bind(PractitionerResource.class);
+
+        // V3 Resources
+        binder.bind(AttributionResource.class);
+        binder.bind(gov.cms.dpc.api.resources.r4.GroupResource.class);
 
         // DAO
         binder.bind(PublicKeyDAO.class);

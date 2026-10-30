@@ -74,6 +74,12 @@ public class APIAuthHelpers {
         return buildAuthenticatedClient(ctx, baseURL, macaroon, keyID, privateKey, disableSSLCheck, enableRequestLog, false);
     }
 
+    public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String authBaseURL, String macaroon, UUID keyID, PrivateKey privateKey) {
+        final IGenericClient client = createBaseFHIRClient(ctx, baseURL, false, false);
+        client.registerInterceptor(new HAPISmartInterceptor(authBaseURL, macaroon, keyID, privateKey));
+        return client;
+    }
+
     public static IGenericClient buildAuthenticatedClient(FhirContext ctx, String baseURL, String macaroon, UUID keyID, PrivateKey privateKey, boolean disableSSLCheck, boolean enableRequestLog, boolean addPreferAsync) {
         final IGenericClient client = createBaseFHIRClient(ctx, baseURL, disableSSLCheck, enableRequestLog);
         client.registerInterceptor(new HAPISmartInterceptor(baseURL, macaroon, keyID, privateKey));
