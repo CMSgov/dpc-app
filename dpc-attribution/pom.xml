@@ -77,10 +77,6 @@
             <groupId>com.smoketurner</groupId>
             <artifactId>dropwizard-swagger</artifactId>
         </dependency>
-        <dependency>
-            <groupId>${hapi.fhir.groupID}</groupId>
-            <artifactId>hapi-fhir-structures-r4</artifactId>
-        </dependency>
         <!--Testing dependencies-->
         <dependency>
             <groupId>org.testcontainers</groupId>

@@ -11,7 +11,6 @@ import gov.cms.dpc.attribution.jdbi.r4.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.r4.RosterDAO;
 import gov.cms.dpc.attribution.resources.r4.BaseResource;
 import gov.cms.dpc.attribution.resources.v1.*;
-import gov.cms.dpc.attribution.resources.v3.AttributionResource;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import org.hibernate.SessionFactory;
@@ -37,8 +36,6 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
 
         // R4 resources
         binder.bind(BaseResource.class);
-        binder.bind(AttributionResource.class);
-        binder.bind(gov.cms.dpc.attribution.resources.v3.GroupResource.class);
 
         // STU3 DAOs
         binder.bind(gov.cms.dpc.attribution.jdbi.stu3.OrganizationDAO.class);

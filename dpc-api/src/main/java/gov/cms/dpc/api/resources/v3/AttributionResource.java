@@ -1,4 +1,4 @@
-package gov.cms.dpc.attribution.resources.v3;
+package gov.cms.dpc.api.resources.v3;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Path;
