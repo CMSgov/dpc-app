@@ -1,6 +1,7 @@
 package gov.cms.dpc.fhir.validations;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.google.inject.name.Named;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -33,7 +34,7 @@ public class DPCProfileSupport implements IValidationSupport {
     private final Map<String, StructureDefinition> structureMap;
 
     @Inject
-    public DPCProfileSupport(FhirContext ctx) {
+    public DPCProfileSupport(@Named("stu3") FhirContext ctx) {
         this.ctx = ctx;
         this.structureMap = loadProfiles(ctx);
     }

@@ -4,7 +4,12 @@ import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import gov.cms.dpc.attribution.jdbi.*;
+import gov.cms.dpc.attribution.jdbi.r4.OrganizationDAO;
+import gov.cms.dpc.attribution.jdbi.r4.PatientDAO;
+import gov.cms.dpc.attribution.jdbi.r4.ProviderDAO;
+import gov.cms.dpc.attribution.jdbi.r4.RelationshipDAO;
+import gov.cms.dpc.attribution.jdbi.r4.RosterDAO;
+import gov.cms.dpc.attribution.resources.r4.BaseResource;
 import gov.cms.dpc.attribution.resources.v1.*;
 import gov.cms.dpc.attribution.resources.v3.AttributionResource;
 import gov.cms.dpc.attribution.tasks.TruncateDatabase;
@@ -22,17 +27,27 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     public void configure() {
         Binder binder = binder();
 
-        // Resources
+        // STU3 resources
         binder.bind(V1AttributionResource.class);
         binder.bind(PatientResource.class);
         binder.bind(PractitionerResource.class);
         binder.bind(GroupResource.class);
         binder.bind(OrganizationResource.class);
+        binder.bind(gov.cms.dpc.attribution.resources.v1.BaseResource.class);
+
+        // R4 resources
         binder.bind(BaseResource.class);
         binder.bind(AttributionResource.class);
         binder.bind(gov.cms.dpc.attribution.resources.v3.GroupResource.class);
 
-        // DAOs
+        // STU3 DAOs
+        binder.bind(gov.cms.dpc.attribution.jdbi.stu3.OrganizationDAO.class);
+        binder.bind(gov.cms.dpc.attribution.jdbi.stu3.PatientDAO.class);
+        binder.bind(gov.cms.dpc.attribution.jdbi.stu3.ProviderDAO.class);
+        binder.bind(gov.cms.dpc.attribution.jdbi.stu3.RosterDAO.class);
+        binder.bind(gov.cms.dpc.attribution.jdbi.stu3.RelationshipDAO.class);
+
+        // R4 DAOs
         binder.bind(OrganizationDAO.class);
         binder.bind(PatientDAO.class);
         binder.bind(ProviderDAO.class);
@@ -62,7 +77,7 @@ class AttributionAppModule extends DropwizardAwareModule<DPCAttributionConfigura
     @Provides
     // We can suppress this because the SessionFactory is managed
     @SuppressWarnings("CloseableProvides")
-    SessionFactory provideSessionFactory(DPCManagedSessionFactory factory) {
+    SessionFactory provideSessionFactory(@Named("stu3") DPCManagedSessionFactory factory) {
         return factory.getSessionFactory();
     }
 

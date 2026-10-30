@@ -1,8 +1,12 @@
 package gov.cms.dpc.attribution.resources.v1;
 
 import com.google.common.collect.Maps;
+import gov.cms.dpc.attribution.jdbi.PageResult;
+import gov.cms.dpc.attribution.jdbi.stu3.PatientDAO;
+import gov.cms.dpc.attribution.jdbi.stu3.ProviderDAO;
+import gov.cms.dpc.attribution.jdbi.stu3.RelationshipDAO;
+import gov.cms.dpc.attribution.jdbi.stu3.RosterDAO;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.jdbi.*;
 import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.common.entities.stu3.ProviderEntity;
 import gov.cms.dpc.common.entities.stu3.RosterEntity;
@@ -22,7 +26,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.*;
 
-import static gov.cms.dpc.attribution.AttributionTestHelpers.queryMatches;
+import static gov.cms.dpc.attribution.Stu3AttributionTestHelpers.queryMatches;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 

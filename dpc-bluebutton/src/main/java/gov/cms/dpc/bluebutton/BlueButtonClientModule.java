@@ -89,7 +89,7 @@ public class BlueButtonClientModule<T extends Configuration & BlueButtonBundleCo
 
     @Provides
     @Named("bbclient")
-    public IGenericClient provideFhirRestClient(FhirContext fhirContext, HttpClient httpClient) {
+    public IGenericClient provideFhirRestClient(@Named("stu3") FhirContext fhirContext, HttpClient httpClient) {
         ApacheHttp5RestfulClientFactory factory = new ApacheHttp5RestfulClientFactory(fhirContext);
         factory.setHttpClient(httpClient);
         fhirContext.setRestfulClientFactory(factory);

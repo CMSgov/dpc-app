@@ -3,13 +3,13 @@ package gov.cms.dpc.attribution.resources.v1;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.attribution.DPCAttributionConfiguration;
-import gov.cms.dpc.attribution.jdbi.OrganizationDAO;
-import gov.cms.dpc.attribution.resources.AbstractOrganizationResource;
+import gov.cms.dpc.attribution.jdbi.stu3.OrganizationDAO;
 import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import gov.cms.dpc.fhir.annotations.FHIRParameter;
+import gov.cms.dpc.fhir.annotations.stu3.FHIRParameter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
+import gov.cms.dpc.common.hibernate.attribution.DPCStu3HibernateBundle;
 import io.dropwizard.hibernate.UnitOfWork;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -46,7 +46,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @Override
     @GET
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     public List<Organization> searchOrganizations(
             @QueryParam("identifier") String identifier) {
 
@@ -75,7 +75,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
 
     @Override
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Timed
     @ExceptionMetered
     public Response submitOrganization(@FHIRParameter(name = "resource") Bundle transactionBundle) {
@@ -109,7 +109,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @GET
     @Path("/{organizationID}")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     public Organization getOrganization(
             @PathParam("organizationID") UUID organizationID) {
@@ -121,7 +121,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @PUT
     @Path("/{organizationID}")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     public Response updateOrganization(@PathParam("organizationID") UUID organizationID, Organization organization) {
         try {
@@ -137,7 +137,7 @@ public class OrganizationResource extends AbstractOrganizationResource {
     @DELETE
     @Path("/{organizationID}")
     @FHIR
-    @UnitOfWork
+    @UnitOfWork(DPCStu3HibernateBundle.BUNDLE_NAME)
     @Override
     public Response deleteOrganization(@PathParam("organizationID") UUID organizationID) {
         final OrganizationEntity organizationEntity = this.dao.fetchOrganization(organizationID)

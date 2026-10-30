@@ -25,14 +25,14 @@
       <div class="padding-y-3">
         <%
           csps = [
-            { id: :clear, logo_class: 'clear-login-button__logo', text: 'Verify with CLEAR', verify_path: login_organization_invitation_url(@invitation.provider_organization, @invitation, @invitation.token, provider: :clear) },
-            { id: :id_me, logo_class: 'idme-login-button__logo', text: 'Verify with ID.me', verify_path: login_organization_invitation_url(@invitation.provider_organization, @invitation, @invitation.token, provider: :id_me) },
-            { id: :login_dot_gov, logo_class: 'lg-login-button__logo', text: 'Verify with Login.gov', verify_path: login_organization_invitation_url(@invitation.provider_organization, @invitation, @invitation.token, provider: :login_dot_gov) },
+            { id: :clear, logo_src_light: asset_path('clear-logo-white.svg'), alt: 'CLEAR', verify_path: login_organization_invitation_url(@invitation.provider_organization, @invitation, @invitation.token, provider: :clear) },
+            { id: :id_me, logo_src_light: asset_path('idme-logo-white.svg'), alt: 'ID.me', verify_path: login_organization_invitation_url(@invitation.provider_organization, @invitation, @invitation.token, provider: :id_me) },
+            { id: :login_dot_gov, logo_src_light: asset_path('lg-logo-white.svg'), alt: 'Login.gov', verify_path: login_organization_invitation_url(@invitation.provider_organization, @invitation, @invitation.token, provider: :login_dot_gov) },
           ]
         %>
         <% csps.each do |csp| %>
-          <%= button_to csp[:verify_path], class: 'usa-button width-full margin-bottom-1', data: { turbo: false } do %>
-            <span class="<%= csp[:logo_class] %>"><%= csp[:text] %></span>
+          <%= button_to csp[:verify_path], class: 'usa-button padding-y-0 display-flex flex-align-center flex-justify-center height-5 width-full margin-bottom-1', data: { turbo: false } do %>
+            <img class="csp_logo" src="<%= csp[:logo_src_light] %>" alt="<%= csp[:alt] %>" />
           <% end %>
         <% end %>
       </div>
