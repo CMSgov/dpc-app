@@ -7,6 +7,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -126,6 +127,11 @@ class MockNewbeClientTest {
     }
 
     private NewbeExportRequest request(List<String> resourceTypes) {
-        return new NewbeExportRequest(UUID.randomUUID(), resourceTypes);
+        return new NewbeExportRequest(
+            List.of("ABC0123ABCD"),
+            Instant.now(),
+            resourceTypes,
+            "ExplanationOfBenefit?outcome=complete" // this means other resourceTypes are not _typeFilter'd
+        );
     }
 }

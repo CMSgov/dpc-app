@@ -45,12 +45,11 @@ public class MockNewbeClient implements NewbeClient {
     @Override
     public synchronized NewbeExportResponse export(NewbeExportRequest request) {
         final UUID jobId = UUID.randomUUID();
-        final String requestUrl = "/v3/Group/" + request.groupId() + "/$export";
         final String jobUrl = "https://localhost:3002/api/v3/jobs/" + jobId;
         final List<String> resourceTypes = request.resourceTypes().isEmpty()
             ? List.of(ALL_RESOURCE_TYPES)
             : request.resourceTypes();
-        jobs.put(jobId, new MockJob(jobId, requestUrl, resourceTypes));
+        jobs.put(jobId, new MockJob(jobId, resourceTypes));
         return new NewbeExportResponse(202, jobUrl);
     }
 
@@ -63,7 +62,6 @@ public class MockNewbeClient implements NewbeClient {
         if (job == null) {
             return new NewbeJobStatus(400, new NewbeJobStatusResponse(
                 Instant.now(),
-                null,
                 true,
                 List.of(),
                 List.of("error occurred on backend"),
@@ -79,7 +77,6 @@ public class MockNewbeClient implements NewbeClient {
         }
         return new NewbeJobStatus(200, new NewbeJobStatusResponse(
             Instant.now(),
-            job.requestUrl,
             true,
             output(job),
             List.of(),
@@ -124,14 +121,12 @@ public class MockNewbeClient implements NewbeClient {
 
     private static class MockJob {
         private final UUID jobId;
-        private final String requestUrl;
         private final List<String> resourceTypes;
         private int polls;
         private boolean complete;
 
-        private MockJob(UUID jobId, String requestUrl, List<String> resourceTypes) {
+        private MockJob(UUID jobId, List<String> resourceTypes) {
             this.jobId = jobId;
-            this.requestUrl = requestUrl;
             this.resourceTypes = List.copyOf(resourceTypes);
         }
     }
