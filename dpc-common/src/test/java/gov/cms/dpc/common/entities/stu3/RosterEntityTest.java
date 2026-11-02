@@ -9,6 +9,7 @@ import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.dstu3.model.Reference;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -53,16 +54,16 @@ class RosterEntityTest {
 		meta.addTag(coding);
 		attributionRoster.setMeta(meta);
 		attributionRoster.setId(UUID.randomUUID().toString());
+		attributionRoster.addMember().setEntity(new Reference("Patient/" + UUID.randomUUID()));
 
 		ProviderEntity provider = new ProviderEntity();
 
-		OffsetDateTime expirationDate = OffsetDateTime.now().plusDays(30);
-
-		RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, provider, expirationDate);
+		RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, provider);
 		assertNotNull(rosterEntity);
 		assertNotNull(rosterEntity.getManagingOrganization());
 		assertEquals(provider, rosterEntity.getAttributedProvider());
-		assertEquals(0, rosterEntity.getAttributions().size());
+		assertEquals(1, rosterEntity.getAttributions().size());
+		assertNull(rosterEntity.getAttributions().getFirst().getPeriodEnd());
 
 	}
 

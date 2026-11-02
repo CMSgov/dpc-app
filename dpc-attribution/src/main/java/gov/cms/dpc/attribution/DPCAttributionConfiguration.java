@@ -4,24 +4,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.cms.dpc.common.hibernate.attribution.IDPCDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
+import io.dropwizard.core.Configuration;
 import io.dropwizard.core.server.DefaultServerFactory;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.jetty.HttpConnectorFactory;
-import io.dropwizard.jobs.JobConfiguration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-public class DPCAttributionConfiguration extends JobConfiguration implements IDPCDatabase, IDPCFHIRConfiguration {
-
-    @Valid
-    private Duration expirationThreshold;
+public class DPCAttributionConfiguration extends Configuration implements IDPCDatabase, IDPCFHIRConfiguration {
 
     private Boolean migrationEnabled;
 
@@ -52,14 +48,6 @@ public class DPCAttributionConfiguration extends JobConfiguration implements IDP
     @Override
     public DataSourceFactory getDatabase() {
         return database;
-    }
-
-    public Duration getExpirationThreshold() {
-        return expirationThreshold;
-    }
-
-    public void setExpirationThreshold(int expirationThreshold) {
-        this.expirationThreshold = Duration.ofDays(expirationThreshold);
     }
 
     public String getPublicServerURL() {

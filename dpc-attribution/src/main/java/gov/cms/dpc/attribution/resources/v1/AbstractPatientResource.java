@@ -10,7 +10,6 @@ import org.hl7.fhir.dstu3.model.Patient;
 import java.util.List;
 import java.util.UUID;
 
-@Path("/Patient")
 @FHIR
 public abstract class AbstractPatientResource {
 

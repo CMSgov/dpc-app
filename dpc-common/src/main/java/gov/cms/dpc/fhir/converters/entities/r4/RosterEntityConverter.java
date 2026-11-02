@@ -72,7 +72,9 @@ public class RosterEntityConverter implements FHIRConverter<Group, RosterEntity>
         // Set the period begin, end
         final Period period = new Period();
         period.setStart(Date.from(relationship.getPeriodBegin().toInstant()));
-        period.setEnd(Date.from(relationship.getPeriodEnd().toInstant()));
+        if (relationship.getPeriodEnd() != null) {
+            period.setEnd(Date.from(relationship.getPeriodEnd().toInstant()));
+        }
         component.setPeriod(period);
         return component;
     }

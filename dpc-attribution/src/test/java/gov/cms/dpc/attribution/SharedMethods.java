@@ -5,7 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.DPCResourceType;
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import org.hl7.fhir.dstu3.model.*;
 
 import java.util.Calendar;
