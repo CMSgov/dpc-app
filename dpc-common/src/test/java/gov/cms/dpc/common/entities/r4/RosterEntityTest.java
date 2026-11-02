@@ -55,9 +55,7 @@ class RosterEntityTest {
 
 		ProviderEntity provider = new ProviderEntity();
 
-		OffsetDateTime expirationDate = OffsetDateTime.now().plusDays(30);
-
-		RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, provider, expirationDate);
+		RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, provider);
 		assertNotNull(rosterEntity);
 		assertNotNull(rosterEntity.getManagingOrganization());
 		assertEquals(provider, rosterEntity.getAttributedProvider());
@@ -95,9 +93,7 @@ class RosterEntityTest {
         group.addMember().setEntity(new Reference("Patient/" + patientId));
         group.addMember().setEntity(new Reference("Patient/" + UUID.randomUUID())).setInactive(true);
         ProviderEntity provider = new ProviderEntity();
-        OffsetDateTime expiration = OffsetDateTime.now().plusDays(30);
-
-        RosterEntity roster = RosterEntity.fromFHIR(group, provider, expiration);
+        RosterEntity roster = RosterEntity.fromFHIR(group, provider);
 
         assertEquals(rosterId, roster.getId());
         assertEquals(organizationId, roster.getManagingOrganization().getId());
@@ -106,6 +102,6 @@ class RosterEntityTest {
         AttributionRelationship attribution = roster.getAttributions().getFirst();
         assertEquals(patientId, attribution.getPatient().getID());
         assertSame(roster, attribution.getRoster());
-        assertEquals(expiration, attribution.getPeriodEnd());
+        assertNull(attribution.getPeriodEnd());
     }
 }

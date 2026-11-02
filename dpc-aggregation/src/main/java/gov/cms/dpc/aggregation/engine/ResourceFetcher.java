@@ -20,7 +20,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
-import static gov.cms.dpc.fhir.FHIRExtractors.getPatientMBI;
+import static gov.cms.dpc.fhir.stu3.FHIRExtractors.getPatientMBI;
 
 /**
  * A resource fetcher will fetch resources of particular type from passed {@link BlueButtonClient}

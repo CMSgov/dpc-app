@@ -2,7 +2,7 @@ package gov.cms.dpc.fhir.converters.entities.r4;
 
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.r4.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.FHIRConverter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import jakarta.ws.rs.WebApplicationException;

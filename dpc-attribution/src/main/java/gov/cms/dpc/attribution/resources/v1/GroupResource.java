@@ -7,13 +7,13 @@ import gov.cms.dpc.attribution.jdbi.stu3.PatientDAO;
 import gov.cms.dpc.attribution.jdbi.stu3.ProviderDAO;
 import gov.cms.dpc.attribution.jdbi.stu3.RelationshipDAO;
 import gov.cms.dpc.attribution.jdbi.stu3.RosterDAO;
-import gov.cms.dpc.attribution.utils.RESTUtils;
+import gov.cms.dpc.attribution.utils.stu3.RESTUtils;
 import gov.cms.dpc.common.entities.stu3.AttributionRelationship;
 import gov.cms.dpc.common.entities.stu3.PatientEntity;
 import gov.cms.dpc.common.entities.stu3.ProviderEntity;
 import gov.cms.dpc.common.entities.stu3.RosterEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.stu3.FHIRParameter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
@@ -91,7 +91,7 @@ public class GroupResource extends AbstractGroupResource {
         verifyAndGetMembers(attributionRoster);
 
         // Add the first provider and save the persisted Roster.
-        final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0), generateExpirationTime());
+        final RosterEntity rosterEntity = RosterEntity.fromFHIR(attributionRoster, providers.get(0));
         final RosterEntity persisted = this.rosterDAO.persistEntity(rosterEntity);
         final Group persistedGroup = this.converter.toFHIR(Group.class, persisted);
 
@@ -171,7 +171,6 @@ public class GroupResource extends AbstractGroupResource {
         patientEntities.stream()
             .map( pe -> {
                 AttributionRelationship attribution = new AttributionRelationship(rosterEntity, pe, OffsetDateTime.now(ZoneOffset.UTC));
-                attribution.setPeriodEnd(generateExpirationTime());
                 return attribution;
                 })
             .forEach(relationshipDAO::addAttributionRelationship);
@@ -206,15 +205,13 @@ public class GroupResource extends AbstractGroupResource {
 
         // Check which patients are already part of the roster and mark them active as of today
         OffsetDateTime periodBegin = OffsetDateTime.now(ZoneOffset.UTC);
-        OffsetDateTime periodEnd = generateExpirationTime();
-
         List<AttributionRelationship> existingAttributions = relationshipDAO.lookupAttributionRelationships(rosterID, patientIds);
         existingAttributions.forEach(attribution -> {
             if (attribution.isInactive()) {
                 attribution.setPeriodBegin(periodBegin);
             }
             attribution.setInactive(false);
-            attribution.setPeriodEnd(periodEnd);
+            attribution.setPeriodEnd(null);
         });
 
         // Build attributions for the new patients
@@ -226,9 +223,7 @@ public class GroupResource extends AbstractGroupResource {
         List<AttributionRelationship> newAttributions = patientEntities.stream()
             .filter( patient -> !existingPatientIds.contains(patient.getID()))
             .map( patient -> {
-                AttributionRelationship attribution = new AttributionRelationship(rosterEntity, patient, periodBegin);
-                attribution.setPeriodEnd(periodEnd);
-                return attribution;
+                return new AttributionRelationship(rosterEntity, patient, periodBegin);
             })
             .collect(Collectors.toList());
 
@@ -304,10 +299,6 @@ public class GroupResource extends AbstractGroupResource {
                 .orElseThrow(() -> NOT_FOUND_EXCEPTION);
 
         return converter.toFHIR(Group.class, rosterEntity);
-    }
-
-    private OffsetDateTime generateExpirationTime() {
-        return OffsetDateTime.now(ZoneOffset.UTC).plus(config.getExpirationThreshold());
     }
 
     private static Pair<IdType, IdType> parseCompositeID(String queryParam) {
