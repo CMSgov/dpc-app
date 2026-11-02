@@ -86,7 +86,10 @@ class CspVerificationService
       'fail' => :failed,
       'expired' => :expired,
       'manual_fail' => :failed,
-      'deferred' => :failed
+      'deferred' => :pending,
+      'awaiting_user_input' => :pending,
+      'processing_data' => :pending,
+      'awaiting_manual_review' => :pending
     }.freeze
 
     def self.session_url(access_token)
