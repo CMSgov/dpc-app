@@ -4,7 +4,6 @@ import com.google.inject.Provides;
 import gov.cms.dpc.oneecosystem.client.MockOneEcosystemClient;
 import gov.cms.dpc.oneecosystem.client.OneEcosystemClient;
 import gov.cms.dpc.oneecosystem.config.OneEcosystemBundleConfiguration;
-import gov.cms.dpc.oneecosystem.config.OneEcosystemClientConfiguration;
 import io.dropwizard.core.Configuration;
 import jakarta.inject.Singleton;
 import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
