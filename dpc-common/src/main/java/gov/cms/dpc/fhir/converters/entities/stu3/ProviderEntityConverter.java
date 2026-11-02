@@ -3,7 +3,7 @@ package gov.cms.dpc.fhir.converters.entities.stu3;
 import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.common.entities.stu3.ProviderEntity;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.fhir.converters.FHIRConverter;
 import gov.cms.dpc.fhir.converters.FHIREntityConverter;
 import gov.cms.dpc.fhir.validations.profiles.stu3.PractitionerProfile;

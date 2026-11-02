@@ -3,7 +3,6 @@ package gov.cms.dpc.attribution;
 import com.codahale.metrics.jersey3.InstrumentedResourceMethodApplicationListener;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import gov.cms.dpc.attribution.cli.SeedCommand;
-import gov.cms.dpc.attribution.jobs.ExpireAttributions;
 import gov.cms.dpc.common.hibernate.attribution.r4.DPCHibernateModule;
 import gov.cms.dpc.common.hibernate.attribution.DPCR4HibernateBundle;
 import gov.cms.dpc.common.hibernate.attribution.DPCStu3HibernateBundle;
@@ -19,8 +18,6 @@ import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import io.dropwizard.db.PooledDataSourceFactory;
 import io.dropwizard.health.check.http.HttpHealthCheck;
-import io.dropwizard.jobs.GuiceJobManager;
-import io.dropwizard.jobs.JobsBundle;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
@@ -28,16 +25,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
 
-import java.util.List;
-
 public class DPCAttributionService extends Application<DPCAttributionConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(DPCAttributionService.class);
 
     private final DPCStu3HibernateBundle<DPCAttributionConfiguration> stu3HibernateBundle = new DPCStu3HibernateBundle<>();
     private final DPCR4HibernateBundle<DPCAttributionConfiguration> r4HibernateBundle = new DPCR4HibernateBundle<>();
-
-    private GuiceBundle guiceBundle;
 
     public static void main(final String[] args) throws Exception {
         new DPCAttributionService().run(args);
@@ -67,9 +60,6 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
 
     @Override
     public void run(DPCAttributionConfiguration configuration, Environment environment) {
-        GuiceJobManager jobManager = new GuiceJobManager(configuration, guiceBundle.getInjector());
-        environment.lifecycle().manage(jobManager);
-
         EnvironmentParser.getEnvironment("Attribution");
         final var listener = new InstrumentedResourceMethodApplicationListener(environment.metrics());
         environment.jersey().getResourceConfig().register(listener);
@@ -83,7 +73,7 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
     }
 
     private void registerBundles(Bootstrap<DPCAttributionConfiguration> bootstrap) {
-        guiceBundle = GuiceBundle.builder()
+        final GuiceBundle guiceBundle = GuiceBundle.builder()
                 .enableAutoConfig("gov.cms.dpc.attribution")
                 .modules(
                         new gov.cms.dpc.common.hibernate.attribution.stu3.DPCHibernateModule<>(stu3HibernateBundle),
@@ -111,7 +101,5 @@ public class DPCAttributionService extends Application<DPCAttributionConfigurati
                 return configuration.getSwaggerBundleConfiguration();
             }
         });
-
-        bootstrap.addBundle(new JobsBundle(List.of(new ExpireAttributions())));
     }
 }

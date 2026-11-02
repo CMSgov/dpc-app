@@ -1,6 +1,6 @@
 package gov.cms.dpc.common.entities.r4;
 
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.r4.FHIRExtractors;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
@@ -119,7 +119,7 @@ public class RosterEntity implements Serializable {
         return Objects.hash(id, attributedProvider, managingOrganization, createdAt, updatedAt);
     }
 
-    public static RosterEntity fromFHIR(Group attributionRoster, ProviderEntity providerEntity, OffsetDateTime expiration) {
+    public static RosterEntity fromFHIR(Group attributionRoster, ProviderEntity providerEntity) {
         final RosterEntity rosterEntity = new RosterEntity();
 
         final UUID rosterID;
@@ -138,7 +138,7 @@ public class RosterEntity implements Serializable {
                 .setManagingOrganization(organizationEntity);
 
         // Add patients, but only those which are active
-        rosterEntity.setAttributions(getAttributedPatients(attributionRoster, rosterEntity, expiration));
+        rosterEntity.setAttributions(getAttributedPatients(attributionRoster, rosterEntity));
 
         // Add the provider
         rosterEntity.setAttributedProvider(providerEntity);
@@ -146,7 +146,7 @@ public class RosterEntity implements Serializable {
         return rosterEntity;
     }
 
-    private static List<AttributionRelationship> getAttributedPatients(Group attributionRoster, RosterEntity roster, OffsetDateTime expires) {
+    private static List<AttributionRelationship> getAttributedPatients(Group attributionRoster, RosterEntity roster) {
         final OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         return attributionRoster
                 .getMember()
@@ -158,9 +158,7 @@ public class RosterEntity implements Serializable {
                 .map(id -> {
                     final PatientEntity patientEntity = new PatientEntity();
                     patientEntity.setID(UUID.fromString(id.getIdPart()));
-                    final AttributionRelationship relationship = new AttributionRelationship(roster, patientEntity, now);
-                    relationship.setPeriodEnd(expires);
-                    return relationship;
+                    return new AttributionRelationship(roster, patientEntity, now);
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
     }

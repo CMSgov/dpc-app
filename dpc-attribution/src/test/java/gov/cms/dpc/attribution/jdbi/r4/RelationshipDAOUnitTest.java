@@ -1,7 +1,7 @@
 package gov.cms.dpc.attribution.jdbi.r4;
 
-import gov.cms.dpc.attribution.AbstractAttributionDAOTest;
-import gov.cms.dpc.attribution.AttributionTestHelpers;
+import gov.cms.dpc.attribution.utils.r4.AbstractAttributionDAOTest;
+import gov.cms.dpc.attribution.utils.r4.AttributionTestHelpers;
 import gov.cms.dpc.common.entities.r4.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import jakarta.persistence.SequenceGenerator;

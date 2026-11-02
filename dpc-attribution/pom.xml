@@ -41,18 +41,6 @@
             <artifactId>dropwizard-hibernate</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.dropwizard-jobs</groupId>
-            <artifactId>dropwizard-jobs-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.dropwizard-jobs</groupId>
-            <artifactId>dropwizard-jobs-guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz</artifactId>
-        </dependency>
-        <dependency>
             <groupId>ru.vyarus</groupId>
             <artifactId>dropwizard-guicey</artifactId>
         </dependency>
