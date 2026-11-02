@@ -4,12 +4,12 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.Path;
 
 @Path("/v3")
-public class AttributionResource {
+public class BaseResource {
 
     private final GroupResource groupResource;
 
     @Inject
-    public AttributionResource(GroupResource groupResource) {
+    public BaseResource(GroupResource groupResource) {
         this.groupResource = groupResource;
     }
 
