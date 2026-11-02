@@ -11,7 +11,6 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import java.util.List;
 import java.util.UUID;
 
-@Path("/Organization")
 public abstract class AbstractOrganizationResource {
 
     protected AbstractOrganizationResource() {

@@ -1,7 +1,7 @@
 package gov.cms.dpc.attribution.jdbi.stu3;
 
-import gov.cms.dpc.attribution.Stu3AbstractAttributionDAOTest;
-import gov.cms.dpc.attribution.Stu3AttributionTestHelpers;
+import gov.cms.dpc.attribution.utils.stu3.AbstractAttributionDAOTest;
+import gov.cms.dpc.attribution.utils.stu3.AttributionTestHelpers;
 import gov.cms.dpc.common.entities.stu3.*;
 import gov.cms.dpc.common.hibernate.attribution.DPCManagedSessionFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +13,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class OrganizationDAOUnitTest extends Stu3AbstractAttributionDAOTest {
+class OrganizationDAOUnitTest extends AbstractAttributionDAOTest {
 	private RelationshipDAO relationshipDAO;
 	private PatientDAO patientDAO;
 	private OrganizationDAO organizationDAO;
@@ -33,11 +33,11 @@ class OrganizationDAOUnitTest extends Stu3AbstractAttributionDAOTest {
 
 	@Test
 	void test_delete_cascades() {
-		OrganizationEntity org = Stu3AttributionTestHelpers.createOrganizationEntity();
-		PatientEntity pat = Stu3AttributionTestHelpers.createPatientEntity(org);
-		ProviderEntity provider = Stu3AttributionTestHelpers.createProviderEntity(org);
-		RosterEntity roster = Stu3AttributionTestHelpers.createRosterEntity(org, provider);
-		AttributionRelationship attribution = Stu3AttributionTestHelpers.createAttributionRelationship(roster, pat);
+		OrganizationEntity org = AttributionTestHelpers.createOrganizationEntity();
+		PatientEntity pat = AttributionTestHelpers.createPatientEntity(org);
+		ProviderEntity provider = AttributionTestHelpers.createProviderEntity(org);
+		RosterEntity roster = AttributionTestHelpers.createRosterEntity(org, provider);
+		AttributionRelationship attribution = AttributionTestHelpers.createAttributionRelationship(roster, pat);
 
 		// Insert org, provider, patient, attribution and roster
 		db.inTransaction(() -> {

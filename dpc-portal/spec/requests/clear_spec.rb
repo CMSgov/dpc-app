@@ -301,12 +301,38 @@ RSpec.describe 'Clear', type: :request do
       context 'verification is not finished' do
         let(:verification_session_body) { { status: 'awaiting_manual_review' } }
 
-        it 'is treated as unavailable' do
+        it 'redirects to the failure path with a pending message' do
           attempt_sign_in
-          expect(response.location).to eq csp_failure_url(message: 'unavailable', strategy: 'clear')
+          expect(response.location).to eq csp_failure_url(message: 'pending', strategy: 'clear')
+        end
+
+        it 'flashes the pending alert on the sign in page' do
+          attempt_sign_in
+          follow_redirect!
+          expect(response.location).to eq sign_in_url
+          expect(flash[:alert]).to eq CspErrorHandling::VERIFICATION_PENDING
+        end
+
+        it 'logs the status CLEAR gave' do
+          allow(Rails.logger).to receive(:info)
+          expect(Rails.logger).to receive(:info).with(
+            ['CSP verification session was not successful',
+             hash_including(actionType: LoggingConstants::ActionType::FailedLogin,
+                            verificationReason: 'awaiting_manual_review', csp: 'clear')]
+          )
+          attempt_sign_in
         end
 
         it_behaves_like 'does not sign in'
+      end
+
+      context 'verification is deferred' do
+        let(:verification_session_body) { { status: 'deferred' } }
+
+        it 'is pending, not a failure' do
+          attempt_sign_in
+          expect(response.location).to eq csp_failure_url(message: 'pending', strategy: 'clear')
+        end
       end
     end
 
@@ -450,6 +476,21 @@ RSpec.describe 'Clear', type: :request do
         it 'stores the session linked to the invitation, not a user' do
           attempt_sign_in
           expect(CspUserVerification.last).to have_attributes(invitation:, user: nil, status: 'success')
+        end
+      end
+
+      context 'a session that is still pending, for an existing user' do
+        let!(:user) { create(:user) }
+        let(:verification_session_body) { { status: 'awaiting_manual_review' } }
+
+        before do
+          create(:csp_user, user:, uuid:, csp:)
+          OmniAuth.config.add_mock(:clear, csp_auth_response)
+        end
+
+        it 'is stored with the status CLEAR gave, linked to the user' do
+          expect { attempt_sign_in }.to change { CspUserVerification.count }.by(1)
+          expect(CspUserVerification.last).to have_attributes(status: 'awaiting_manual_review', user:)
         end
       end
 
