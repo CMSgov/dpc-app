@@ -70,7 +70,7 @@ module LoginSupport
           given_name: user.given_name,
           family_name: user.family_name,
           all_emails:,
-          ial: 'http://idmanagement.gov/ns/assurance/ial/2'
+          ial: 'urn:acr.login.gov:verified-facial-match-required'
         }
       } }
   end

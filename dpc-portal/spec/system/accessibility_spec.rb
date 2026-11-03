@@ -18,7 +18,7 @@ RSpec.describe 'Accessibility', type: :system do
   let(:raw_info) do
     emails = %w[bob@example.com bob2@example.com]
     {
-      login_dot_gov: { all_emails: emails, ial: 'http://idmanagement.gov/ns/assurance/ial/2' },
+      login_dot_gov: { all_emails: emails, ial: 'urn:acr.login.gov:verified-facial-match-required' },
       id_me: { emails_confirmed: emails, identity_assurance_level: 2 },
       clear: {}
     }

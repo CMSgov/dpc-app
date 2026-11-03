@@ -65,7 +65,7 @@ LOGIN_DOT_GOV_CLIENT_CONFIG = {
   discovery: true,
   scope: LOGIN_DOT_GOV_CONFIG[:authorize_scope],
   response_type: :code,
-  acr_values: 'urn:acr.login.gov:verified-facial-match-required',
+  acr_values: LOGIN_DOT_GOV_CONFIG[:acr_values],
   client_auth_method: :jwt_bearer,
   client_options: {
     port:        443,

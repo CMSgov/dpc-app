@@ -22,7 +22,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                              family_name: 'Hoskins',
                              social_security_number: '1-2-3',
                              all_emails: %w[bob2@example.com bobby@example.com],
-                             ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } }
+                             ial: 'urn:acr.login.gov:verified-facial-match-required' } } }
     end
 
     login_dot_gov_config = {
@@ -52,7 +52,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                                  family_name: 'Hoskins',
                                  social_security_number: '1-2-3',
                                  all_emails: %w[email1@example.com email2@example.com],
-                                 ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } }
+                                 ial: 'urn:acr.login.gov:verified-facial-match-required' } } }
         )
         user = create(:user)
         create(:csp_user, user:, uuid:, csp:)
@@ -95,7 +95,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                                  family_name: 'Hoskins',
                                  social_security_number: '1-2-3',
                                  all_emails: nil,
-                                 ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } }
+                                 ial: 'urn:acr.login.gov:verified-facial-match-required' } } }
         )
         user = create(:user)
         csp_user = create(:csp_user, user:, uuid:, csp:)
@@ -136,7 +136,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                                  family_name: 'Hoskins',
                                  social_security_number: '1-2-3',
                                  all_emails: %w[email1@example.com],
-                                 ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } }
+                                 ial: 'urn:acr.login.gov:verified-facial-match-required' } } }
         )
         user = create(:user)
         csp_user = create(:csp_user, user:, uuid:, csp:)
