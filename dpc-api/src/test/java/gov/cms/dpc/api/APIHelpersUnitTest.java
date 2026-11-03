@@ -2,7 +2,7 @@ package gov.cms.dpc.api;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
-import gov.cms.dpc.testing.factories.BundleFactory;
+import gov.cms.dpc.testing.factories.stu3.BundleFactory;
 import jakarta.ws.rs.WebApplicationException;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;

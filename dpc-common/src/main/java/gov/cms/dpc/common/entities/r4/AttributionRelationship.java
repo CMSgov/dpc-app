@@ -37,7 +37,6 @@ public class AttributionRelationship implements Serializable {
     @Column(name = "period_begin", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime periodBegin;
 
-    @NotNull
     @Column(name = "period_end", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime periodEnd;
 

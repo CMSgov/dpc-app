@@ -78,6 +78,13 @@ public class RosterEntityConverterTest {
     }
 
     @Test
+    void toFHIRWithNoPeriodEnd() {
+        rosterEntity.getAttributions().getFirst().setPeriodEnd(null);
+        Group convertedResource = rosterEntityConverter.toFHIR(fhirEntityConverter, rosterEntity);
+        assertNull(convertedResource.getMember().getFirst().getPeriod().getEnd());
+    }
+
+    @Test
     void getFHIRResource() {
         assertEquals(Group.class, rosterEntityConverter.getFHIRResource());
     }

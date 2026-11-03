@@ -107,16 +107,26 @@ public class PatientDAO extends DPCAbstractDAO<PatientEntity> {
      * @return List of {@link PatientEntity}s
      */
     public List<PatientEntity> bulkPatientSearchById(UUID organizationId, List<UUID> resourceIDs) {
-        final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
-        final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
-        final Root<PatientEntity> root = query.from(PatientEntity.class);
+        List<PatientEntity> results = new ArrayList<>();
 
-        query.select(root)
-            .where(builder.and(
-                root.get(PersonEntity_.id).in(resourceIDs),
-                builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), organizationId))
-            );
-        return list(query);
+        // We removed the roster size cap, so they can be any size.  Chunk the list of IDs so we don't blow up if someone
+        // asks us to search for 500k patients at once.
+        List<List<UUID>> idChunks = ListUtils.partition(resourceIDs, queryChunkSize);
+        idChunks.forEach(idList -> {
+            final CriteriaBuilder builder = currentSession().getCriteriaBuilder();
+            final CriteriaQuery<PatientEntity> query = builder.createQuery(PatientEntity.class);
+            final Root<PatientEntity> root = query.from(PatientEntity.class);
+
+            query.select(root)
+                .where(builder.and(
+                    root.get(PersonEntity_.id).in(new ArrayList<>(idList)),
+                    builder.equal(root.get(PatientEntity_.organization).get(OrganizationEntity_.id), organizationId))
+                );
+
+            results.addAll(list(query));
+        });
+
+        return results;
     }
 
     /**

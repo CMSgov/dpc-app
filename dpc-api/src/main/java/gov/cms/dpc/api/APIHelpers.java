@@ -5,7 +5,7 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.FHIRExtractors;
+import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.lang3.StringUtils;
