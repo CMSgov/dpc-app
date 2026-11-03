@@ -10,6 +10,7 @@
         <module>dpc-queue</module>
         <module>dpc-aggregation</module>
         <module>dpc-attribution</module>
+        <module>dpc-attribution-client</module>
         <module>dpc-common</module>
         <module>dpc-bluebutton</module>
         <module>dpc-macaroons</module>

@@ -104,6 +104,16 @@ attributionClient:
     poolMaxPerRoute: ${POOL_MAX_PER_ROUTE:-20}
     poolMaxTotal: ${POOL_MAX_TOTAL:-20}
 
+attributionR4Client:
+  serverBaseUrl: ${ATTRIBUTION_R4_URL:-"http://localhost:3500/r4/"}
+  timeouts:
+    connectionTimeout: 20000 # ms
+    socketTimeout: 20000 # ms
+    requestTimeout: 20000 # ms
+  connectionPool:
+    poolMaxPerRoute: ${POOL_MAX_PER_ROUTE:-20}
+    poolMaxTotal: ${POOL_MAX_TOTAL:-20}
+
 attributionHealthCheckURL: ${ATTRIBUTION_HEALTHCHECK_URL:-"http://localhost:9902/healthcheck"}
 
 authenticationDisabled: ${AUTH_DISABLED:-false}

@@ -2,6 +2,7 @@ package gov.cms.dpc.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import gov.cms.dpc.attribution.client.config.AttributionBundleConfiguration;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.common.hibernate.auth.IDPCAuthDatabase;
@@ -25,7 +26,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DPCAPIConfiguration extends Configuration implements IDPCQueueDatabase, DPCQueueConfig, IDPCAuthDatabase, IDPCFHIRConfiguration, BlueButtonBundleConfiguration {
+public class DPCAPIConfiguration extends Configuration implements IDPCQueueDatabase, DPCQueueConfig, IDPCAuthDatabase, IDPCFHIRConfiguration, BlueButtonBundleConfiguration, AttributionBundleConfiguration {
 
     @NotEmpty
     private String exportPath;
@@ -53,6 +54,11 @@ public class DPCAPIConfiguration extends Configuration implements IDPCQueueDatab
     @NotNull
     @JsonProperty("attributionClient")
     private final FHIRClientConfiguration fhirClientConfiguration = new FHIRClientConfiguration();
+
+    @Valid
+    @NotNull
+    @JsonProperty("attributionR4Client")
+    private final FHIRClientConfiguration attributionClientConfiguration = new FHIRClientConfiguration();
 
     @NotEmpty
     @NotNull
@@ -163,6 +169,12 @@ public class DPCAPIConfiguration extends Configuration implements IDPCQueueDatab
 
     public FHIRClientConfiguration getFhirClientConfiguration() {
         return this.fhirClientConfiguration;
+    }
+
+    @Override
+    @JsonIgnore
+    public FHIRClientConfiguration getAttributionClientConfiguration() {
+        return this.attributionClientConfiguration;
     }
 
     public int getJobTimeoutInSeconds() {
