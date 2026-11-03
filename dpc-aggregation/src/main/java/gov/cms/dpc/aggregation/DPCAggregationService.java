@@ -66,11 +66,6 @@ public class DPCAggregationService extends Application<DPCAggregationConfigurati
             }
 
             @Override
-            public String getMigrationsFileName() {
-                return "migrations/queue.migrations.xml";
-            }
-
-            @Override
             public String name() {
                 return "queuedb";
             }

@@ -43,7 +43,6 @@ CONF_FILE="/app/resources/application.yml"
 
 if [ $DB_MIGRATION -eq 1 ]; then
   echo "Migrating the databases"
-  eval java "${JAVA_CLASSES}" queuedb migrate ${CONF_FILE} --migrations "/app/resources/migrations/queue.migrations.xml"
   eval java "${JAVA_CLASSES}" consentdb migrate ${CONF_FILE} --migrations "/app/resources/migrations/consent.migrations.xml"
 fi
 
