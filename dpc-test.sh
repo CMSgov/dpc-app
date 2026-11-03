@@ -63,7 +63,9 @@ fi
 
 docker compose -p start-v1-app down
 
-USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution aggregation --wait
+USE_BFD_MOCK=true docker compose -p start-v1-app up db attribution --wait
+USE_BFD_MOCK=true docker compose -p start-v1-app up db api --wait
+USE_BFD_MOCK=true docker compose -p start-v1-app up db aggregation --wait
 
 # Apply migrations for enabling insights in quicksights - these rely on migrations from attribution so they were
 # moved from entrypoint
@@ -85,10 +87,14 @@ USE_BFD_MOCK=true docker compose -p start-v1-app exec \
 
 echo "Quicksights migrations applied"
 
+# Stoping API after db migrations complete to avoid port binding
+docker compose -p start-v1-app stop api
+
 # Run the integration tests
 USE_BFD_MOCK=true docker compose -p start-v1-app up --exit-code-from tests tests
 
-echo "Starting api server for end-to-end tests"
+
+#echo "Starting api server for end-to-end tests"
 USE_BFD_MOCK=true docker compose -p start-v1-app up api --wait
 
 echo "Starting end-to-end tests"
