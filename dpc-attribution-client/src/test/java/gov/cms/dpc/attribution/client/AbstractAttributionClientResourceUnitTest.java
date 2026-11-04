@@ -3,6 +3,7 @@ package gov.cms.dpc.attribution.client;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IQuery;
@@ -39,6 +40,16 @@ abstract class AbstractAttributionClientResourceUnitTest {
         when(queryExec.encodedJson()).thenReturn(queryExec);
         when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
         when(mockQuery.whereMap(searchParams)).thenReturn(mockQuery);
+        return mockQuery;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected IQuery<Bundle> mockSearch(Class<? extends Resource> resourceClass) {
+        IQuery<IBaseBundle> queryExec = mock(IQuery.class, RETURNS_SELF);
+        IQuery<Bundle> mockQuery = mock(IQuery.class, RETURNS_SELF);
+        when(attributionClient.search().forResource(resourceClass).encodedJson()).thenReturn(queryExec);
+        when(queryExec.where(any(ICriterion.class))).thenReturn(queryExec);
+        when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
         return mockQuery;
     }
 

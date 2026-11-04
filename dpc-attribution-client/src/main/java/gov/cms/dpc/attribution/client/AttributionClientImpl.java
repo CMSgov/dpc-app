@@ -1,15 +1,21 @@
 package gov.cms.dpc.attribution.client;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import com.google.re2j.Pattern;
 import gov.cms.dpc.attribution.client.search.PatientSearch;
 import gov.cms.dpc.attribution.client.search.RosterSearch;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.r4.FHIRExtractors;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 
 import java.util.Collections;
@@ -24,6 +30,7 @@ import java.util.UUID;
  */
 public class AttributionClientImpl implements AttributionClient {
 
+    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9]+://.*$");
     private final IGenericClient client;
 
     public AttributionClientImpl(IGenericClient client) {
@@ -190,32 +197,108 @@ public class AttributionClientImpl implements AttributionClient {
 
     @Override
     public Bundle searchPatients(PatientSearch query) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        Objects.requireNonNull(query.organizationId(), "Organization ID is required");
+        if (query.count() != null && query.count() < 0) {
+            throw new IllegalArgumentException("Parameter _count must be >= 0");
+        }
+        if (query.offset() != null && query.offset() < 0) {
+            throw new IllegalArgumentException("Parameter _offset must be >= 0");
+        }
+
+        var request = this.client
+            .search()
+            .forResource(Patient.class)
+            .encodedJson()
+            .where(Patient.ORGANIZATION.hasId(query.organizationId().toString()))
+            .returnBundle(Bundle.class);
+
+        if (query.patientMbi() != null && !query.patientMbi().isEmpty()) {
+            final String expandedMBI;
+            if (IDENTIFIER_PATTERN.matcher(query.patientMbi()).matches()) {
+                expandedMBI = query.patientMbi();
+            } else {
+                expandedMBI = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), query.patientMbi());
+            }
+            final Identifier identifier = FHIRExtractors.parseIDFromQueryParam(expandedMBI);
+            request = request.where(Patient.IDENTIFIER.exactly()
+                .systemAndIdentifier(identifier.getSystem(), identifier.getValue()));
+        }
+        if (query.patientId() != null) {
+            request = request.where(new TokenClientParam("_id").exactly().code(query.patientId().toString()));
+        }
+        if (query.summary() != null) {
+            request.summaryMode(SummaryEnum.fromCode(query.summary()));
+        }
+        if (query.offset() != null) {
+            request.offset(query.offset());
+        }
+
+        // Count=0 forces summary
+        if (query.count() != null) {
+            request.count(query.count());
+            if (query.count() == 0) {
+                request.summaryMode(SummaryEnum.COUNT);
+            }
+        }
+        return request.execute();
     }
 
     @Override
     public Patient getPatient(UUID id) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        return this.client
+            .read()
+            .resource(Patient.class)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
     }
 
     @Override
     public MethodOutcome createPatient(Patient patient) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        return this.client
+            .create()
+            .resource(patient)
+            .encodedJson()
+            .execute();
     }
 
     @Override
     public Bundle submitPatients(Bundle bundle) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        final Parameters params = new Parameters();
+        params.addParameter().setResource(bundle);
+        return this.client
+            .operation()
+            .onType(Patient.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
     }
 
     @Override
     public Patient updatePatient(UUID id, Patient patient) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        final MethodOutcome outcome = this.client
+            .update()
+            .resource(patient)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
+
+        final Patient resource = (Patient) outcome.getResource();
+        if (resource == null) {
+            throw new IllegalStateException("Attribution service returned no Patient after update");
+        }
+        return resource;
     }
 
     @Override
     public void deletePatient(UUID id) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        this.client
+            .delete()
+            .resourceById(new IdType("Patient", id.toString()))
+            .encodedJson()
+            .execute();
     }
 
     @Override
