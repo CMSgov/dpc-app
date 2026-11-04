@@ -9,7 +9,7 @@ class PurgeInactiveUsersJob < ApplicationJob
 
   def perform
     cutoff = RETENTION_PERIOD.ago
-    inactive_user_ids(cutoff).find_each do |user_id|
+    inactive_user_ids(cutoff).each do |user_id|
       purge_user(user_id, cutoff)
     rescue StandardError => e
       log_failure(user, e)
