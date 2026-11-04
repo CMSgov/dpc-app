@@ -202,6 +202,7 @@ RSpec.describe 'LoginDotGov', type: :request do
 
       it 'does not set an authentication token' do
         post '/auth/login_dot_gov'
+        follow_redirect!
         csp_session = CspSession.new(request.session)
         expect(csp_session.current).to be_nil
         expect(csp_session.token).to be_nil
@@ -252,6 +253,7 @@ RSpec.describe 'LoginDotGov', type: :request do
       end
 
       it 'does not update the existing user record' do
+        existing_user.update!(given_name: 'Original')
         original_given_name = existing_user.given_name
         post '/auth/login_dot_gov'
         follow_redirect!
