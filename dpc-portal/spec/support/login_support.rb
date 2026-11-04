@@ -70,7 +70,7 @@ module LoginSupport
           given_name: user.given_name,
           family_name: user.family_name,
           all_emails:,
-          ial: 'urn:acr.login.gov:verified-facial-match-required'
+          ial: CspIdentityAssurance::FACIAL_MATCH_REQUIRED
         }
       } }
   end
