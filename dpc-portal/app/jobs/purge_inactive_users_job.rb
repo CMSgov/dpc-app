@@ -34,7 +34,7 @@ class PurgeInactiveUsersJob < ApplicationJob
       user.destroy!
       UserPurgeLog.create!(user_id: user_id, last_login_at:, purged_at: Time.now)
     end
-  rescue ActiveRecord::RecordNotFound  # record has already been deleted
+  rescue ActiveRecord::RecordNotFound # record has already been deleted
     nil
   end
 
