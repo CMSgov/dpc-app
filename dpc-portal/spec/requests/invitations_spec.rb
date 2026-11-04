@@ -1295,7 +1295,7 @@ def user_info_template(overrides = {})
     'birthdate' => '1938-10-06',
     'social_security_number' => '900888888',
     'verified_at' => 1_704_834_157,
-    'ial' => 'http://idmanagement.gov/ns/assurance/ial/2',
+    'ial' => CspIdentityAssurance::IAL2,
     'aal' => 'urn:gov:gsa:ac:classes:sp:PasswordProtectedTransport:duo'
   }.merge(overrides)
 end

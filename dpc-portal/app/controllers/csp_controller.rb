@@ -237,6 +237,6 @@ class CspController < ApplicationController
   def primary_email(auth) = auth.info.email
   def all_emails(auth) = auth.extra.raw_info.all_emails
 
-  def ial_1_user?(auth) = auth.extra.raw_info.ial == CspIdentityAssurance::LEGACY_IAL1
+  def ial_1_user?(auth) = auth.extra.raw_info.ial == CspIdentityAssurance::IAL1
   def store_id_token? = false
 end

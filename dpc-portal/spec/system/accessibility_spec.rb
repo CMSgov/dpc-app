@@ -62,7 +62,7 @@ RSpec.describe 'Accessibility', type: :system do
           ial1_raw_info = if provider == :id_me
                             { identity_assurance_level: 1 }
                           else
-                            { ial: 'http://idmanagement.gov/ns/assurance/ial/1' }
+                            { ial: CspIdentityAssurance::IAL1 }
                           end
 
           OmniAuth.config.add_mock(provider,

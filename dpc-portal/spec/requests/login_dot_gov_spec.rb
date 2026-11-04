@@ -10,7 +10,7 @@ RSpec.describe 'LoginDotGov', type: :request do
 
   it 'requests facial match verification from Login.gov' do
     expect(LOGIN_DOT_GOV_CLIENT_CONFIG[:acr_values])
-      .to eq('urn:acr.login.gov:verified-facial-match-required')
+      .to eq(CspIdentityAssurance::FACIAL_MATCH_REQUIRED)
   end
 
   describe 'POST /auth/login_dot_gov' do
@@ -27,7 +27,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                              family_name: 'Hoskins',
                              social_security_number: '1-2-3',
                              all_emails: %w[bob2@example.com bobby@example.com],
-                             ial: 'urn:acr.login.gov:verified-facial-match-required' } } }
+                             ial: CspIdentityAssurance::FACIAL_MATCH_REQUIRED } } }
     end
 
     login_dot_gov_config = {
@@ -39,7 +39,7 @@ RSpec.describe 'LoginDotGov', type: :request do
         uid: auth_uid,
         info: { email: 'bob@example.com' },
         extra: { raw_info: { all_emails: %w[bob@example.com bob2@example.com],
-                             ial: 'http://idmanagement.gov/ns/assurance/ial/1' } }
+                             ial: CspIdentityAssurance::IAL1 } }
       }
     }
     it_behaves_like 'a CSP client', login_dot_gov_config
@@ -57,7 +57,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                                  family_name: 'Hoskins',
                                  social_security_number: '1-2-3',
                                  all_emails: %w[email1@example.com email2@example.com],
-                                 ial: 'urn:acr.login.gov:verified-facial-match-required' } } }
+                                 ial: CspIdentityAssurance::FACIAL_MATCH_REQUIRED } } }
         )
         user = create(:user)
         create(:csp_user, user:, uuid:, csp:)
@@ -100,7 +100,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                                  family_name: 'Hoskins',
                                  social_security_number: '1-2-3',
                                  all_emails: nil,
-                                 ial: 'urn:acr.login.gov:verified-facial-match-required' } } }
+                                 ial: CspIdentityAssurance::FACIAL_MATCH_REQUIRED } } }
         )
         user = create(:user)
         csp_user = create(:csp_user, user:, uuid:, csp:)
@@ -141,7 +141,7 @@ RSpec.describe 'LoginDotGov', type: :request do
                                  family_name: 'Hoskins',
                                  social_security_number: '1-2-3',
                                  all_emails: %w[email1@example.com],
-                                 ial: 'urn:acr.login.gov:verified-facial-match-required' } } }
+                                 ial: CspIdentityAssurance::FACIAL_MATCH_REQUIRED } } }
         )
         user = create(:user)
         csp_user = create(:csp_user, user:, uuid:, csp:)
