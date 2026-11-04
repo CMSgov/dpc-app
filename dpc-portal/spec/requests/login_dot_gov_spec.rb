@@ -8,6 +8,11 @@ RSpec.describe 'LoginDotGov', type: :request do
   auth_uid = SecureRandom.uuid
   let(:uuid) { auth_uid }
 
+  it 'requests facial match verification from Login.gov' do
+    expect(LOGIN_DOT_GOV_CLIENT_CONFIG[:acr_values])
+      .to eq('urn:acr.login.gov:verified-facial-match-required')
+  end
+
   describe 'POST /auth/login_dot_gov' do
     let!(:csp) { Csp.find_by(name: 'login_dot_gov') || create(:csp, :login_dot_gov) }
     let(:token) { 'bearer-token' }
