@@ -170,5 +170,115 @@ RSpec.describe 'LoginDotGov', type: :request do
         follow_redirect!
       end
     end
+
+    context 'verified without facial match' do
+      let(:no_facial_match_uuid) { SecureRandom.uuid }
+
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.add_mock(
+          :login_dot_gov,
+          { uid: no_facial_match_uuid,
+            credentials: { expires_in: 899, token:, id_token: },
+            info: { email: 'nofacial@example.com' },
+            extra: { raw_info: { given_name: 'Bob',
+                                 family_name: 'Hoskins',
+                                 all_emails: %w[nofacial@example.com],
+                                 ial: CspIdentityAssurance::VERIFIED } } }
+        )
+      end
+
+      it 'returns 403 forbidden' do
+        post '/auth/login_dot_gov'
+        follow_redirect!
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      it 'renders the csp_signin_fail error component' do
+        post '/auth/login_dot_gov'
+        follow_redirect!
+        expect(response.body).to include('Login.gov sign-in failed')
+      end
+
+      it 'does not set an authentication token' do
+        post '/auth/login_dot_gov'
+        csp_session = CspSession.new(request.session)
+        expect(csp_session.current).to be_nil
+        expect(csp_session.token).to be_nil
+        expect(csp_session.user).to be_nil
+      end
+
+      it 'does not create a CspUser' do
+        expect do
+          post '/auth/login_dot_gov'
+          follow_redirect!
+        end.to change { CspUser.count }.by(0)
+      end
+    end
+
+    context 'user previously verified without facial match, has an existing account' do
+      let(:existing_user) { create(:user, given_name: 'Bob', family_name: 'Hoskins') }
+      let(:returning_uuid) { SecureRandom.uuid }
+
+      before do
+        returning_csp = Csp.find_by(name: 'login_dot_gov') || create(:csp, :login_dot_gov)
+        csp_user = create(:csp_user, user: existing_user, uuid: returning_uuid, csp: returning_csp)
+        create(:user_email, csp_user:, email: 'returning@example.com', primary: true, active: true)
+
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.add_mock(
+          :login_dot_gov,
+          { uid: returning_uuid,
+            credentials: { expires_in: 899, token:, id_token: },
+            info: { email: 'returning@example.com' },
+            extra: { raw_info: { given_name: 'Bob',
+                                 family_name: 'Hoskins',
+                                 all_emails: %w[returning@example.com],
+                                 ial: CspIdentityAssurance::VERIFIED } } }
+        )
+      end
+
+      it 'still blocks the login despite the existing account' do
+        post '/auth/login_dot_gov'
+        follow_redirect!
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      it 'does not sign the existing user in' do
+        post '/auth/login_dot_gov'
+        follow_redirect!
+        csp_session = CspSession.new(request.session)
+        expect(csp_session.user).to be_nil
+      end
+
+      it 'does not update the existing user record' do
+        original_given_name = existing_user.given_name
+        post '/auth/login_dot_gov'
+        follow_redirect!
+        expect(existing_user.reload.given_name).to eq original_given_name
+      end
+    end
+
+    context 'verified with facial match' do
+      before do
+        OmniAuth.config.test_mode = true
+        OmniAuth.config.add_mock(
+          :login_dot_gov,
+          { uid: SecureRandom.uuid,
+            credentials: { expires_in: 899, token:, id_token: },
+            info: { email: 'verified@example.com' },
+            extra: { raw_info: { given_name: 'Bob',
+                                 family_name: 'Hoskins',
+                                 all_emails: %w[verified@example.com],
+                                 ial: CspIdentityAssurance::FACIAL_MATCH_REQUIRED } } }
+        )
+      end
+
+      it 'is not blocked by the facial match guard' do
+        post '/auth/login_dot_gov'
+        follow_redirect!
+        expect(response).not_to have_http_status(:forbidden)
+      end
+    end
   end
 end
