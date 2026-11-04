@@ -24,18 +24,18 @@ class PurgeInactiveUsersJob < ApplicationJob
               .pluck(:user_id)
   end
 
-  def purge_user(user_id)
+  def purge_user(user_id, cutoff)
     user = User.find_by(id: user_id)
     return unless user
 
     user.with_lock do
-      next if user.user_sign_ins.exists?(['last_login_at >= ?', RETENTION_PERIOD.ago])
+      next if user.user_sign_ins.exists?(['last_login_at >= ?', cutoff])
 
       last_login_at = user.user_sign_ins.maximum(:last_login_at)
       delete_org_links(user)
       detach_references(user)
       user.destroy!
-      UserPurgeLog.create!(purged_user_id: user_id, last_login_at:, purged_at: Time.now)
+      UserPurgeLog.create!(user_id: user_id, last_login_at:, purged_at: Time.now)
     end
   end
 
