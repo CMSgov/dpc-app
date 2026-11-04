@@ -9,12 +9,18 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Placeholder implementation of {@link AttributionClient}.
+ * HAPI-backed implementation of {@link AttributionClient}.
  */
 public class AttributionClientImpl implements AttributionClient {
 
@@ -26,27 +32,67 @@ public class AttributionClientImpl implements AttributionClient {
 
     @Override
     public Bundle searchOrganizations(String identifier) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        Map<String, List<String>> searchParams = new HashMap<>();
+        if (identifier != null) {
+            searchParams.put("identifier", Collections.singletonList(identifier));
+        }
+        return this.client
+            .search()
+            .forResource(Organization.class)
+            .whereMap(searchParams)
+            .encodedJson()
+            .returnBundle(Bundle.class)
+            .execute();
     }
 
     @Override
     public Organization getOrganization(UUID id) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        return this.client
+            .read()
+            .resource(Organization.class)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
     }
 
     @Override
     public MethodOutcome submitOrganization(Bundle bundle) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setName("resource").setResource(bundle);
+
+        return this.client
+            .operation()
+            .onType(Organization.class)
+            .named("submit")
+            .withParameters(parameters)
+            .returnMethodOutcome()
+            .encodedJson()
+            .execute();
     }
 
     @Override
     public Organization updateOrganization(UUID id, Organization organization) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        MethodOutcome outcome = this.client
+            .update()
+            .resource(organization)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
+
+        final Organization resource = (Organization) outcome.getResource();
+        if (resource == null) {
+            throw new IllegalStateException("Attribution service returned no Organization after update");
+        }
+        return resource;
     }
 
     @Override
     public void deleteOrganization(UUID id) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        this.client
+            .delete()
+            .resourceById(new IdType("Organization", id.toString()))
+            .encodedJson()
+            .execute();
     }
 
     @Override
