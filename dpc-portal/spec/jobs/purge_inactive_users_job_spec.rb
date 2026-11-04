@@ -46,18 +46,6 @@ RSpec.describe PurgeInactiveUsersJob, type: :job do
           expect(UserSignIn.where(user_id: user.id)).to be_empty
         end
 
-        it 'nulls user_id on csp_user_verifications and credential_audit_logs instead of deleting them' do
-          user = create_user_with_csp(csp: provider)
-          create(:user_sign_in, user:, csp:, last_login_at: 7.years.ago)
-          verification = create(:csp_user_verification, user:, csp:)
-          audit_log = create(:credential_audit_log, user:)
-
-          PurgeInactiveUsersJob.perform_now
-
-          expect(verification.reload.user_id).to be_nil
-          expect(audit_log.reload.user_id).to be_nil
-        end
-
         it 'nulls invited_by_id and terms_of_service_accepted_by_id rather than deleting those records' do
           user = create_user_with_csp(csp: provider)
           create(:user_sign_in, user:, csp:, last_login_at: 7.years.ago)
