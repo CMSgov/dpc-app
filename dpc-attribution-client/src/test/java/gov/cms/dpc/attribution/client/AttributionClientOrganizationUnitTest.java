@@ -1,7 +1,6 @@
 package gov.cms.dpc.attribution.client;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IQuery;
@@ -9,9 +8,7 @@ import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
@@ -24,16 +21,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
  * Tests organization methods
  */
-class AttributionClientOrganizationTest {
-
-    private final IGenericClient attributionClient = mock(IGenericClient.class, RETURNS_DEEP_STUBS);
-    private final AttributionClient client = new AttributionClientImpl(attributionClient);
+class AttributionClientOrganizationUnitTest extends AbstractAttributionClientResourceUnitTest {
 
     @Test
     void testSearchOrganizationsByIds() {
@@ -50,7 +43,7 @@ class AttributionClientOrganizationTest {
         Map<String, List<String>> searchParams = new HashMap<>();
         searchParams.put("identifier", Collections.singletonList(ids));
 
-        IQuery<Bundle> query = mockSearch(searchParams);
+        IQuery<Bundle> query = mockSearch(Organization.class, searchParams);
         when(query.execute()).thenReturn(bundle);
 
         Bundle actualResponse = client.searchOrganizations(ids);
@@ -64,7 +57,7 @@ class AttributionClientOrganizationTest {
         String identifier = "1234567890";
         Bundle bundle = new Bundle();
         bundle.addEntry().setResource(new Organization());
-        IQuery<Bundle> query = mockSearch(Map.of("identifier", List.of(identifier)));
+        IQuery<Bundle> query = mockSearch(Organization.class, Map.of("identifier", List.of(identifier)));
         when(query.execute()).thenReturn(bundle);
 
         assertSame(bundle, client.searchOrganizations(identifier));
@@ -74,7 +67,7 @@ class AttributionClientOrganizationTest {
     @Test
     void testSearchOrganizationsWithoutIdentifier() {
         Bundle bundle = new Bundle();
-        IQuery<Bundle> query = mockSearch(Collections.emptyMap());
+        IQuery<Bundle> query = mockSearch(Organization.class, Collections.emptyMap());
         when(query.execute()).thenReturn(bundle);
 
         assertSame(bundle, client.searchOrganizations(null));
@@ -91,18 +84,8 @@ class AttributionClientOrganizationTest {
         outcome.setResource(organization);
         outcome.setCreated(true);
 
-        @SuppressWarnings("unchecked")
-        IOperationUntypedWithInput<MethodOutcome> submitExec = mock(IOperationUntypedWithInput.class);
-        when(attributionClient
-            .operation()
-            .onType(Organization.class)
-            .named("submit")
-            .withParameters(any(Parameters.class))
-            .returnMethodOutcome()
-            .encodedJson()
-        ).thenReturn(submitExec);
+        IOperationUntypedWithInput<MethodOutcome> submitExec = mockSubmitMethodOutcome(Organization.class);
         when(submitExec.execute()).thenReturn(outcome);
-        clearInvocations(attributionClient.operation().onType(Organization.class).named("submit"));
 
         assertSame(outcome, client.submitOrganization(bundle));
         ArgumentCaptor<Parameters> parameters = ArgumentCaptor.forClass(Parameters.class);
@@ -116,10 +99,7 @@ class AttributionClientOrganizationTest {
 
     @Test
     void testSubmitOrganizationHandlesFailure() {
-        @SuppressWarnings("unchecked")
-        IOperationUntypedWithInput<MethodOutcome> submitExec = mock(IOperationUntypedWithInput.class);
-        when(attributionClient.operation().onType(Organization.class).named("submit")
-                .withParameters(any(Parameters.class)).returnMethodOutcome().encodedJson()).thenReturn(submitExec);
+        IOperationUntypedWithInput<MethodOutcome> submitExec = mockSubmitMethodOutcome(Organization.class);
         UnprocessableEntityException failure = new UnprocessableEntityException("Must provide organization to register");
         when(submitExec.execute()).thenThrow(failure);
 
@@ -133,7 +113,7 @@ class AttributionClientOrganizationTest {
         UUID orgID = UUID.randomUUID();
         Organization organization = new Organization();
         organization.setId(orgID.toString());
-        IReadExecutable<Organization> readExec = mockRead(orgID);
+        IReadExecutable<Organization> readExec = mockRead(Organization.class, orgID);
         when(readExec.execute()).thenReturn(organization);
 
         assertSame(organization, client.getOrganization(orgID));
@@ -143,7 +123,7 @@ class AttributionClientOrganizationTest {
     @Test
     void testGetOrganizationHandlesNotFound() {
         UUID orgID = UUID.randomUUID();
-        IReadExecutable<Organization> readExec = mockRead(orgID);
+        IReadExecutable<Organization> readExec = mockRead(Organization.class, orgID);
         ResourceNotFoundException failure = new ResourceNotFoundException("Cannot find organization");
         when(readExec.execute()).thenThrow(failure);
 
@@ -153,7 +133,7 @@ class AttributionClientOrganizationTest {
     @Test
     void testDeleteOrganization() {
         UUID orgID = UUID.randomUUID();
-        IDeleteTyped deleteExec = mockDelete(orgID);
+        IDeleteTyped deleteExec = mockDelete(Organization.class, orgID);
 
         assertDoesNotThrow(() -> client.deleteOrganization(orgID));
         verify(deleteExec).execute();
@@ -162,7 +142,7 @@ class AttributionClientOrganizationTest {
     @Test
     void testDeleteOrganizationHandlesNotFound() {
         UUID orgID = UUID.randomUUID();
-        IDeleteTyped deleteExec = mockDelete(orgID);
+        IDeleteTyped deleteExec = mockDelete(Organization.class, orgID);
         ResourceNotFoundException failure = new ResourceNotFoundException("Cannot find organization");
         when(deleteExec.execute()).thenThrow(failure);
 
@@ -195,36 +175,4 @@ class AttributionClientOrganizationTest {
         assertEquals("Attribution service returned no Organization after update", failure.getMessage());
     }
 
-    @SuppressWarnings("unchecked")
-    private IQuery<Bundle> mockSearch(Map<String, List<String>> searchParams) {
-        IQuery<IBaseBundle> queryExec = mock(IQuery.class, RETURNS_DEEP_STUBS);
-        IQuery<Bundle> mockQuery = mock(IQuery.class);
-        when(attributionClient.search().forResource(Organization.class)).thenReturn(queryExec);
-        when(queryExec.whereMap(searchParams)).thenReturn(queryExec);
-        when(queryExec.encodedJson()).thenReturn(queryExec);
-        when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
-        return mockQuery;
-    }
-
-    @SuppressWarnings("unchecked")
-    private IReadExecutable<Organization> mockRead(UUID orgID) {
-        IReadExecutable<Organization> readExec = mock(IReadExecutable.class);
-        when(attributionClient.read().resource(Organization.class).withId(orgID.toString())
-                .encodedJson()).thenReturn(readExec);
-        return readExec;
-    }
-
-    private IDeleteTyped mockDelete(UUID orgID) {
-        IDeleteTyped deleteExec = mock(IDeleteTyped.class);
-        when(attributionClient.delete().resourceById(new IdType("Organization", orgID.toString()))
-                .encodedJson()).thenReturn(deleteExec);
-        return deleteExec;
-    }
-
-    private IUpdateExecutable mockUpdate(UUID orgID, Organization organization) {
-        IUpdateExecutable updateExec = mock(IUpdateExecutable.class);
-        when(attributionClient.update().resource(organization).withId(orgID.toString())
-                .encodedJson()).thenReturn(updateExec);
-        return updateExec;
-    }
 }

@@ -97,37 +97,95 @@ public class AttributionClientImpl implements AttributionClient {
 
     @Override
     public Bundle searchPractitioners(UUID organizationId, UUID practitionerId) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        Map<String, List<String>> searchParams = new HashMap<>();
+        searchParams.put("organization", Collections.singletonList(organizationId.toString()));
+        searchParams.put("_id", Collections.singletonList(practitionerId.toString()));
+
+        return this.client
+            .search()
+            .forResource(Practitioner.class)
+            .encodedJson()
+            .returnBundle(Bundle.class)
+            .whereMap(searchParams)
+            .execute();
     }
 
     @Override
     public Bundle searchPractitioners(UUID organizationId, String providerNpi) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        Map<String, List<String>> searchParams = new HashMap<>();
+        searchParams.put("organization", Collections.singletonList(organizationId.toString()));
+
+        final var request = this.client
+            .search()
+            .forResource(Practitioner.class)
+            .encodedJson()
+            .returnBundle(Bundle.class);
+
+        if (providerNpi != null && !providerNpi.isEmpty()) {
+            searchParams.put("identifier", Collections.singletonList(providerNpi));
+        }
+
+        return request
+            .whereMap(searchParams)
+            .execute();
     }
 
     @Override
     public Practitioner getPractitioner(UUID id) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        return this.client
+            .read()
+            .resource(Practitioner.class)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
     }
 
     @Override
     public MethodOutcome createPractitioner(Practitioner practitioner) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        return this.client
+            .create()
+            .resource(practitioner)
+            .encodedJson()
+            .execute();
     }
 
     @Override
     public Bundle submitPractitioners(Bundle bundle) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        final Parameters params = new Parameters();
+        params.addParameter().setResource(bundle);
+        return this.client
+            .operation()
+            .onType(Practitioner.class)
+            .named("submit")
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
     }
 
     @Override
     public Practitioner updatePractitioner(UUID id, Practitioner practitioner) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        MethodOutcome outcome = this.client
+            .update()
+            .resource(practitioner)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
+
+        final Practitioner resource = (Practitioner) outcome.getResource();
+        if (resource == null) {
+            throw new IllegalStateException("Attribution service returned no Practitioner after update");
+        }
+        return resource;
     }
 
     @Override
     public void deletePractitioner(UUID id) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        this.client
+            .delete()
+            .resourceById(new IdType("Practitioner", id.toString()))
+            .encodedJson()
+            .execute();
     }
 
     @Override

@@ -6,7 +6,6 @@ import gov.cms.dpc.attribution.client.search.RosterSearch;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
@@ -15,7 +14,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class AttributionClientImplTest {
+class AttributionClientImplUnitTest {
 
     private static final FhirContext FHIR_CONTEXT = FhirContext.forR4();
     private static final UUID ORGANIZATION_ID = UUID.randomUUID();
@@ -23,41 +22,6 @@ class AttributionClientImplTest {
 
     private final AttributionClient client = new AttributionClientImpl(
             FHIR_CONTEXT.newRestfulGenericClient("http://localhost:3500/r4/"));
-
-    @Test
-    void searchPractitionersByIdThrowsUnsupportedOperationException() {
-        assertNotImplemented(() -> client.searchPractitioners(ORGANIZATION_ID, RESOURCE_ID));
-    }
-
-    @Test
-    void searchPractitionersByNpiThrowsUnsupportedOperationException() {
-        assertNotImplemented(() -> client.searchPractitioners(ORGANIZATION_ID, "1234567890"));
-    }
-
-    @Test
-    void getPractitionerThrowsUnsupportedOperationException() {
-        assertNotImplemented(() -> client.getPractitioner(RESOURCE_ID));
-    }
-
-    @Test
-    void createPractitionerThrowsUnsupportedOperationException() {
-        assertNotImplemented(() -> client.createPractitioner(new Practitioner()));
-    }
-
-    @Test
-    void submitPractitionersThrowsUnsupportedOperationException() {
-        assertNotImplemented(() -> client.submitPractitioners(new Bundle()));
-    }
-
-    @Test
-    void updatePractitionerThrowsUnsupportedOperationException() {
-        assertNotImplemented(() -> client.updatePractitioner(RESOURCE_ID, new Practitioner()));
-    }
-
-    @Test
-    void deletePractitionerThrowsUnsupportedOperationException() {
-        assertNotImplemented(() -> client.deletePractitioner(RESOURCE_ID));
-    }
 
     @Test
     void searchPatientsThrowsUnsupportedOperationException() {

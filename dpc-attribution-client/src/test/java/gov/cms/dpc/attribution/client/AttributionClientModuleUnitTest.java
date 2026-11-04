@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class AttributionClientModuleTest {
+class AttributionClientModuleUnitTest {
 
     private static final Key<IGenericClient> CLIENT_KEY = Key.get(IGenericClient.class, Names.named("attributionR4"));
     private static final Key<FhirContext> CONTEXT_KEY = Key.get(FhirContext.class, Names.named("fhirContextAttributionR4"));
