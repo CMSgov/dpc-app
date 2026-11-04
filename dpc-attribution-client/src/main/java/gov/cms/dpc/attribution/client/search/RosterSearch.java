@@ -7,9 +7,9 @@ import java.util.UUID;
  *
  * @param groupId optional Group resource ID
  * @param organizationId required organization ID; the client supplies the organization tag
- * @param providerNPI optional FHIR characteristic-value composite token
+ * @param providerNpiCharacteristic optional FHIR characteristic-value composite token
  * @param patientReference optional patientId, may be in the form of "Patient/id" or just "id"
  */
-public record RosterSearch(UUID groupId, UUID organizationId, String providerNPI,
+public record RosterSearch(UUID groupId, UUID organizationId, String providerNpiCharacteristic,
 						   String patientReference) {
 }

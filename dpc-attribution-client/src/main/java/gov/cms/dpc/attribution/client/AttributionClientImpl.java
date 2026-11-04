@@ -10,6 +10,7 @@ import gov.cms.dpc.attribution.client.search.RosterSearch;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.r4.FHIRExtractors;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -29,6 +30,9 @@ import java.util.UUID;
  * HAPI-backed implementation of {@link AttributionClient}.
  */
 public class AttributionClientImpl implements AttributionClient {
+
+    private static final String GROUP_RESOURCE_TYPE = "Group";
+    private static final String SUBMIT_OPERATION = "submit";
 
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9]+://.*$");
     private final IGenericClient client;
@@ -70,7 +74,7 @@ public class AttributionClientImpl implements AttributionClient {
         return this.client
             .operation()
             .onType(Organization.class)
-            .named("submit")
+            .named(SUBMIT_OPERATION)
             .withParameters(parameters)
             .returnMethodOutcome()
             .encodedJson()
@@ -163,7 +167,7 @@ public class AttributionClientImpl implements AttributionClient {
         return this.client
             .operation()
             .onType(Practitioner.class)
-            .named("submit")
+            .named(SUBMIT_OPERATION)
             .withParameters(params)
             .returnResourceType(Bundle.class)
             .encodedJson()
@@ -269,7 +273,7 @@ public class AttributionClientImpl implements AttributionClient {
         return this.client
             .operation()
             .onType(Patient.class)
-            .named("submit")
+            .named(SUBMIT_OPERATION)
             .withParameters(params)
             .returnResourceType(Bundle.class)
             .encodedJson()
@@ -303,42 +307,108 @@ public class AttributionClientImpl implements AttributionClient {
 
     @Override
     public Bundle searchRosters(RosterSearch query) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        final Map<String, List<String>> queryParams = new HashMap<>();
+        if (query.groupId() != null) {
+            queryParams.put("_id", Collections.singletonList(query.groupId().toString()));
+        }
+        if (query.providerNpiCharacteristic() != null) {
+            queryParams.put(Group.SP_CHARACTERISTIC_VALUE, Collections.singletonList(query.providerNpiCharacteristic()));
+        }
+        if (query.patientReference() != null) {
+            queryParams.put("member", Collections.singletonList(query.patientReference()));
+        }
+
+        return this.client
+            .search()
+            .forResource(Group.class)
+            .whereMap(queryParams)
+            .withTag(DPCIdentifierSystem.DPC.getSystem(), query.organizationId().toString())
+            .returnBundle(Bundle.class)
+            .encodedJson()
+            .execute();
     }
 
     @Override
     public Group getRoster(UUID id) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        return this.client
+            .read()
+            .resource(Group.class)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
     }
 
     @Override
     public MethodOutcome createRoster(Group group) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        return this.client
+            .create()
+            .resource(group)
+            .encodedJson()
+            .execute();
     }
 
     @Override
     public Group replaceRoster(UUID id, Group group) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        final MethodOutcome outcome = this.client
+            .update()
+            .resource(group)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
+
+        final Group resource = (Group) outcome.getResource();
+        if (resource == null) {
+            throw new IllegalStateException("Attribution service returned no Group after update");
+        }
+        return resource;
     }
 
     @Override
     public void deleteRoster(UUID id) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        this.client
+            .delete()
+            .resourceById(new IdType(GROUP_RESOURCE_TYPE, id.toString()))
+            .encodedJson()
+            .execute();
     }
 
     @Override
     public Group addRosterMembers(UUID id, Group group) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        return executeGroupOperation(id, group, "add");
     }
 
     @Override
     public Group removeRosterMembers(UUID id, Group group) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        return executeGroupOperation(id, group, "remove");
     }
 
     @Override
     public Bundle getAttributedPatients(UUID id, boolean activeOnly) {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setValue(new BooleanType(activeOnly)).setName("active");
+
+        return this.client
+            .operation()
+            .onInstance(new IdType(GROUP_RESOURCE_TYPE, id.toString()))
+            .named("patients")
+            .withParameters(parameters)
+            .returnResourceType(Bundle.class)
+            .useHttpGet()
+            .encodedJson()
+            .execute();
+    }
+
+    private Group executeGroupOperation(UUID rosterID, Group groupUpdate, String operationName) {
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setResource(groupUpdate);
+        return this.client
+            .operation()
+            .onInstance(new IdType(GROUP_RESOURCE_TYPE, rosterID.toString()))
+            .named(operationName)
+            .withParameters(parameters)
+            .returnResourceType(Group.class)
+            .encodedJson()
+            .execute();
     }
 
     @Override
