@@ -9,12 +9,12 @@ class User < ApplicationRecord
   validates :verification_status, allow_nil: true,
                                   inclusion: { in: :verification_status }
 
-  has_many :csp_users
+  has_many :csp_users, dependent: :destroy
   has_many :csps, through: :csp_users
   has_many :user_emails, through: :csp_users
   has_many :ao_org_links
   has_many :cd_org_links
-  has_many :user_sign_ins
+  has_many :user_sign_ins, dependent: :delete_all
 
   # ao_med_sanction_waived used to be index 0, but we removed it so we start with 1 now
   enum :verification_reason, { ao_med_sanctions: 1 }

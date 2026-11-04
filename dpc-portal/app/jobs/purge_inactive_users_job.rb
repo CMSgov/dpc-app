@@ -8,8 +8,9 @@ class PurgeInactiveUsersJob < ApplicationJob
   RETENTION_PERIOD = 6.years
 
   def perform
-    inactive_users.find_each do |user|
-      purge_user(user)
+    cutoff = RETENTION_PERIOD.ago
+    inactive_user_ids(cutoff).find_each do |user_id|
+      purge_user(user_id, cutoff)
     rescue StandardError => e
       log_failure(user, e)
     end
@@ -17,45 +18,35 @@ class PurgeInactiveUsersJob < ApplicationJob
 
   private
 
-  def inactive_users
-    inactive_user_ids = UserSignIn.group(:user_id)
-                                  .having('MAX(last_login_at) < ?', RETENTION_PERIOD.ago)
-                                  .pluck(:user_id)
-    User.where(id: inactive_user_ids)
+  def inactive_user_ids(cutoff)
+    UserSignIn.group(:user_id)
+              .having('MAX(last_login_at) < ?', cutoff)
+              .pluck(:user_id)
   end
 
-  def purge_user(user)
-    last_login_at = user.user_sign_ins.maximum(:last_login_at)
-    user_id = user.id
+  def purge_user(user_id, cutoff)
+    User.new(id: user_id).with_lock do |user|
+      next if user.user_sign_ins.exists?(['last_login_at >= ?', cutoff])
 
-    ActiveRecord::Base.transaction do
+      last_login_at = user.user_sign_ins.maximum(:last_login_at)
+      delete_org_links(user)
       detach_references(user)
-      delete_csp_user_records(user)
-      delete_dependents(user)
       user.destroy!
       UserPurgeLog.create!(user_id: user_id, last_login_at:, purged_at: Time.now)
     end
+  rescue ActiveRecord::RecordNotFound  # record has already been deleted
+    nil
+  end
+
+  def delete_org_links(user)
+    AoOrgLink.where(user_id: user.id).delete_all
+    CdOrgLink.where(user_id: user.id).delete_all
   end
 
   def detach_references(user)
     Invitation.where(invited_by_id: user.id).update_all(invited_by_id: nil)
     ProviderOrganization.where(terms_of_service_accepted_by_id: user.id)
                         .update_all(terms_of_service_accepted_by_id: nil)
-
-    CspUserVerification.where(user_id: user.id).update_all(user_id: nil)
-    CredentialAuditLog.where(user_id: user.id).update_all(user_id: nil)
-  end
-
-  def delete_csp_user_records(user)
-    csp_user_ids = CspUser.where(user_id: user.id).select(:id)
-    UserEmail.where(csp_user_id: csp_user_ids).delete_all
-    CspUser.where(user_id: user.id).delete_all
-  end
-
-  def delete_dependents(user)
-    AoOrgLink.where(user_id: user.id).delete_all
-    CdOrgLink.where(user_id: user.id).delete_all
-    UserSignIn.where(user_id: user.id).delete_all
   end
 
   def log_failure(user, error)
