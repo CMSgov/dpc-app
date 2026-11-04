@@ -94,6 +94,9 @@ bbclient:
   maxResourcesCount: 1000 # Max number of resources that a request to BFD will return before using another request
   minResourcesCount: 100 # Minimum number of resources we'll try to download from BFD before giving up
 
+oneEcosystemClient:
+  useMock: ${USE_BFD_MOCK:-true}
+
 attributionClient:
   serverBaseUrl: ${ATTRIBUTION_URL:-"http://localhost:3500/v1/"}
   timeouts:

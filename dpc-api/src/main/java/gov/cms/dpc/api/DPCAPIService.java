@@ -25,6 +25,7 @@ import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.common.utils.UrlGenerator;
 import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.macaroons.BakeryModule;
+import gov.cms.dpc.oneecosystem.OneEcosystemClientModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
@@ -129,7 +130,8 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
                         new DPCAPIModule(hibernateAuthBundle),
                         new JobQueueModule<>(),
                         new FHIRModule<DPCAPIConfiguration>(),
-                        new BlueButtonClientModule<DPCAPIConfiguration>())
+                        new BlueButtonClientModule<DPCAPIConfiguration>(),
+                        new OneEcosystemClientModule<DPCAPIConfiguration>())
                 .build();
     }
 
