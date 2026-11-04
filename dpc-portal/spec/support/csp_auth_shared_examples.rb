@@ -557,7 +557,12 @@ RSpec.shared_examples 'a CSP client' do |config|
         follow_redirect!
         expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
         follow_redirect!
-        expect(response.body).to include('Your identity could not be verified')
+        if provider == :login_dot_gov
+          expect(response.body).to include("We couldn't verify your identity")
+          expect(response.body).to include('This may be due to incorrect information or a technical issue.')
+        else
+          expect(response.body).to include('Your identity could not be verified')
+        end
       end
     end
 
@@ -645,7 +650,12 @@ RSpec.shared_examples 'a CSP client' do |config|
         follow_redirect!
         expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
         follow_redirect!
-        expect(response.body).to include("Your identity could not be verified with #{display_name}")
+        if provider == :login_dot_gov
+          expect(response.body).to include("We couldn't verify your identity")
+          expect(response.body).to include('This may be due to incorrect information or a technical issue.')
+        else
+          expect(response.body).to include("Your identity could not be verified with #{display_name}")
+        end
       end
     end
   end

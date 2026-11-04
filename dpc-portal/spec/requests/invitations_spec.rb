@@ -417,7 +417,12 @@ RSpec.describe 'Invitations', type: :request do
               post invitation_url_for(org_id, invitation, 'login'), params: provider_params
               get '/auth/failure?message=verification_failure'
 
-              expect(response.body).to include('Your identity could not be verified')
+              if provider == :login_dot_gov
+                expect(response.body).to include("We couldn't verify your identity")
+                expect(response.body).to include('This may be due to incorrect information or a technical issue.')
+              else
+                expect(response.body).to include('Your identity could not be verified')
+              end
             end
           end
         end
@@ -449,7 +454,12 @@ RSpec.describe 'Invitations', type: :request do
               post invitation_url_for(org_id, invitation, 'login'), params: provider_params
               get '/auth/failure?message=verification_failure'
 
-              expect(response.body).to include('Your identity could not be verified')
+              if provider == :login_dot_gov
+                expect(response.body).to include("We couldn't verify your identity")
+                expect(response.body).to include('This may be due to incorrect information or a technical issue.')
+              else
+                expect(response.body).to include('Your identity could not be verified')
+              end
             end
           end
         end
