@@ -106,6 +106,11 @@ class CspController < ApplicationController
     sign_in(user:, csp:)
     session[:logged_in_at] = Time.now
     cookies.permanent[:last_used_csp] = csp
+    log_signin(user, csp)
+  end
+
+  def log_signin(user, csp)
+    user.record_login!(csp)
     log_event(:info, 'User logged in',
               action_context: LoggingConstants::ActionContext::Authentication,
               action_type: LoggingConstants::ActionType::UserLoggedIn,

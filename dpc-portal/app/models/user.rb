@@ -14,6 +14,7 @@ class User < ApplicationRecord
   has_many :user_emails, through: :csp_users
   has_many :ao_org_links
   has_many :cd_org_links
+  has_many :user_sign_ins
 
   # ao_med_sanction_waived used to be index 0, but we removed it so we start with 1 now
   enum :verification_reason, { ao_med_sanctions: 1 }
@@ -72,5 +73,10 @@ class User < ApplicationRecord
     joins(csp_users: :user_emails)
       .where(user_emails: { email: })
       .distinct
+  end
+
+  def record_login!(csp_name)
+    csp = Csp.find_by(name: csp_name)
+    UserSignIn.upsert({ user_id: id, csp_id: csp.id, last_login_at: Time.now }, unique_by: %i[user_id csp_id])
   end
 end

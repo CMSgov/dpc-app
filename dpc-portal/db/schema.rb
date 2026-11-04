@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_21_120100) do
+ActiveRecord::Schema[8.0].define(version: 2026_11_03_215041) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -291,6 +291,24 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_21_120100) do
     t.index ["csp_user_id"], name: "index_user_emails_on_csp_user_id"
   end
 
+  create_table "user_purge_logs", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.datetime "last_login_at", null: false
+    t.datetime "purged_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_user_purge_logs_on_user_id"
+  end
+
+  create_table "user_sign_ins", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "csp_id", null: false
+    t.datetime "last_login_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "csp_id"], name: "index_user_sign_ins_on_user_id_and_csp_id", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "remember_created_at"
     t.datetime "created_at", null: false
@@ -325,4 +343,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_21_120100) do
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "user_emails", "csp_users"
+  add_foreign_key "user_sign_ins", "csps"
+  add_foreign_key "user_sign_ins", "users"
 end
