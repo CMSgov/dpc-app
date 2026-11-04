@@ -10,6 +10,8 @@ import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 import gov.cms.dpc.fhir.configuration.IDPCFHIRConfiguration;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
+import gov.cms.dpc.oneecosystem.config.OneEcosystemBundleConfiguration;
+import gov.cms.dpc.oneecosystem.config.OneEcosystemClientConfiguration;
 import gov.cms.dpc.queue.config.DPCAwsQueueConfiguration;
 import gov.cms.dpc.queue.config.DPCQueueConfig;
 import io.dropwizard.client.JerseyClientConfiguration;
@@ -25,7 +27,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DPCAPIConfiguration extends Configuration implements IDPCQueueDatabase, DPCQueueConfig, IDPCAuthDatabase, IDPCFHIRConfiguration, BlueButtonBundleConfiguration {
+public class DPCAPIConfiguration extends Configuration implements IDPCQueueDatabase, DPCQueueConfig, IDPCAuthDatabase, IDPCFHIRConfiguration, BlueButtonBundleConfiguration, OneEcosystemBundleConfiguration {
 
     @NotEmpty
     private String exportPath;
@@ -48,6 +50,11 @@ public class DPCAPIConfiguration extends Configuration implements IDPCQueueDatab
     @NotNull
     @JsonProperty("bbclient")
     private BBClientConfiguration clientConfiguration = new BBClientConfiguration();
+
+    @Valid
+    @NotNull
+    @JsonProperty("oneEcosystemClient")
+    private OneEcosystemClientConfiguration oneEcosystemClientConfiguration = new OneEcosystemClientConfiguration();
 
     @Valid
     @NotNull
@@ -159,6 +166,11 @@ public class DPCAPIConfiguration extends Configuration implements IDPCQueueDatab
     @Override
     public BBClientConfiguration getBlueButtonConfiguration() {
         return this.clientConfiguration;
+    }
+
+    @Override
+    public OneEcosystemClientConfiguration getOneEcosystemClientConfiguration() {
+        return this.oneEcosystemClientConfiguration;
     }
 
     public FHIRClientConfiguration getFhirClientConfiguration() {
