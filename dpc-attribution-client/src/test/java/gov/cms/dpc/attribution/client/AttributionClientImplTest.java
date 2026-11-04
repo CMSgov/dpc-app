@@ -5,7 +5,6 @@ import gov.cms.dpc.attribution.client.search.PatientSearch;
 import gov.cms.dpc.attribution.client.search.RosterSearch;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.Test;
@@ -24,31 +23,6 @@ class AttributionClientImplTest {
 
     private final AttributionClient client = new AttributionClientImpl(
             FHIR_CONTEXT.newRestfulGenericClient("http://localhost:3500/r4/"));
-
-    @Test
-    void searchOrganizationsThrowsUnsupportedOperationException() {
-        assertNotImplemented(() -> client.searchOrganizations("|1234567890"));
-    }
-
-    @Test
-    void getOrganizationThrowsUnsupportedOperationException() {
-        assertNotImplemented(() -> client.getOrganization(RESOURCE_ID));
-    }
-
-    @Test
-    void submitOrganizationThrowsUnsupportedOperationException() {
-        assertNotImplemented(() -> client.submitOrganization(new Bundle()));
-    }
-
-    @Test
-    void updateOrganizationThrowsUnsupportedOperationException() {
-        assertNotImplemented(() -> client.updateOrganization(RESOURCE_ID, new Organization()));
-    }
-
-    @Test
-    void deleteOrganizationThrowsUnsupportedOperationException() {
-        assertNotImplemented(() -> client.deleteOrganization(RESOURCE_ID));
-    }
 
     @Test
     void searchPractitionersByIdThrowsUnsupportedOperationException() {
