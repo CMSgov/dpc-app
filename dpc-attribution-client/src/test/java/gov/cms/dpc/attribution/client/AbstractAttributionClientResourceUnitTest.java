@@ -47,6 +47,27 @@ abstract class AbstractAttributionClientResourceUnitTest {
         return mockQuery;
     }
 
+    protected IQuery<Bundle> mockSearch(Class<? extends Resource> resourceClass,
+                                      Map<String, List<String>> searchParams, String tagSystem, String tag) {
+        IQuery<Bundle> mockQuery = mockSearch(resourceClass, searchParams);
+        IQuery<IBaseBundle> queryExec = attributionClient.search().forResource(resourceClass);
+        when(queryExec.withTag(tagSystem, tag)).thenReturn(queryExec);
+        when(mockQuery.encodedJson()).thenReturn(mockQuery);
+        return mockQuery;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T extends Resource> IOperationUntypedWithInput<T> mockInstanceOperation(
+            Class<? extends Resource> resourceClass, UUID id, String operationName, Class<T> responseClass) {
+        IOperationUntypedWithInput<T> operationExec = mock(IOperationUntypedWithInput.class, RETURNS_SELF);
+        when(attributionClient.operation().onInstance(new IdType(resourceClass.getSimpleName(), id.toString()))
+                .named(operationName).withParameters(any(Parameters.class)).returnResourceType(responseClass))
+                .thenReturn(operationExec);
+        clearInvocations(attributionClient.operation()
+                .onInstance(new IdType(resourceClass.getSimpleName(), id.toString())).named(operationName));
+        return operationExec;
+    }
+
     @SuppressWarnings("unchecked")
     private void stubSearch(Class<? extends Resource> resourceClass, IQuery<Bundle> mockQuery) {
         IQuery<IBaseBundle> queryExec = mock(IQuery.class, RETURNS_SELF);
