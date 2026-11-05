@@ -117,7 +117,7 @@ bbclient:
 
 oneEcosystemClient:
   useMock: ${USE_BFD_MOCK:-false}
-  apiBaseUrl: ${ONE_ECOSYSTEM_API_BASE_URL:-"https://dev.bcda.cms.gov/api/"}
+  apiBaseUrl: ${ONE_ECOSYSTEM_API_BASE_URL:-"dev.bcda.cms.gov"}
   clientId: ${ONE_ECOSYSTEM_CLIENT_ID}
   clientSecret: ${ONE_ECOSYSTEM_CLIENT_SECRET}
 
