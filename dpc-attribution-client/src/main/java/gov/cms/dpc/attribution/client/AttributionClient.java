@@ -165,7 +165,10 @@ public interface AttributionClient {
     Bundle getAttributedPatients(UUID id, boolean activeOnly);
 
     /**
-     * Healthcheck
+     * Returns the attribution health endpoint's response.
+     * Any exceptions get thrown to the caller.
+     *
+     * @throws IllegalStateException if the response is not a boolean
      */
     boolean checkHealth();
 

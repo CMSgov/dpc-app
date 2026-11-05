@@ -19,11 +19,16 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -413,11 +418,28 @@ public class AttributionClientImpl implements AttributionClient {
 
     @Override
     public boolean checkHealth() {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        final String health = getTextResponse("_healthy").trim();
+        if (!Set.of("true", "false").contains(health)) {
+            throw new IllegalStateException("Attribution service returned an invalid health response");
+        }
+        return Boolean.parseBoolean(health);
     }
 
     @Override
     public String getVersion() {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        return getTextResponse("version");
+    }
+
+    private String getTextResponse(String path) {
+        final var response = this.client
+            .rawHttpRequest()
+            .get(path)
+            .accept("text/plain")
+            .execute();
+        try (InputStream input = response.getInputStream()) {
+            return new String(input.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Unable to read attribution response for " + path, e);
+        }
     }
 }
