@@ -19,6 +19,8 @@ import org.apache.hc.core5.http.HttpHeaders;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -42,7 +44,11 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
     private String accessToken;
     private Instant tokenExpiration;
 
+    private static final Logger logger = LoggerFactory.getLogger(OneEcosystemClientImpl.class);
+
     public OneEcosystemClientImpl(String apiHost, String clientId, String clientSecret) {
+        logger.info("Attempting to connect to host: {}", apiHost);
+
         this.apiBaseUrl = URI.create("https://" + apiHost); // need to figure out if I should pass in protocol // just make it work
         this.clientId = clientId;
         this.clientSecret = clientSecret;

@@ -237,6 +237,12 @@ unit-tests:
 .PHONY: load-tests
 load-tests: start-api-load-tests start-load-tests down-dpc-load-tests
 
+.PHONY: one-ecosystem-integration-tests
+one-ecosystem-integration-tests:
+	mvn verify -pl dpc-one-ecosystem -Pintegration-tests \
+  		-Dit.test=OneEcosystemClientDevTest \
+  		'-Djunit.jupiter.conditions.deactivate=org.junit.*DisabledCondition'
+
 .PHONY: ci-api-client-integration
 ci-api-client-integration: docker-base secure-envs
 	@bash ./dpc-api-client-integration-test.sh
