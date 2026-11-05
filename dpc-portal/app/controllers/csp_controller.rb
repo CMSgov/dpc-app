@@ -10,7 +10,8 @@ class CspController < ApplicationController
 
   def openid_connect
     return render_ial1_blocked if ial_1_user?(auth_details)
-    return render_facial_match_blocked if login_dot_gov_missing_facial_match?(auth_details)
+    return if additional_verification_blocked?
+
     return unless (active_csp = csp(auth_details.provider))
 
     failure_message = verification_failure_message(active_csp)
@@ -99,26 +100,6 @@ class CspController < ApplicationController
               user_identifier: @auth_details&.uid,
               csp: @auth_details&.provider)
     render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp: csp_code), status: :forbidden)
-  end
-
-  def render_facial_match_blocked
-    log_event(:error, "User verified with #{display_name || 'CSP'} but without required facial match",
-              action_context: LoggingConstants::ActionContext::Authentication,
-              action_type: LoggingConstants::ActionType::UserLoginWithoutAccount,
-              user_identifier: @auth_details&.uid,
-              csp: @auth_details&.provider)
-    render(Page::Utility::ErrorComponent.new(nil, 'csp_signin_fail', csp: csp_code), status: :forbidden)
-  end
-
-  def login_dot_gov_missing_facial_match?(auth)
-    return false unless auth.provider.to_s == 'login_dot_gov'
-
-    !login_dot_gov_facial_match_verified?(auth)
-  end
-
-  def login_dot_gov_facial_match_verified?(auth)
-    ial = auth.extra.raw_info.ial
-    ial.present? && ial.to_s == CspIdentityAssurance::FACIAL_MATCH_REQUIRED
   end
 
   def sign_in_and_log(user, csp)
@@ -239,4 +220,5 @@ class CspController < ApplicationController
 
   def ial_1_user?(auth) = auth.extra.raw_info.ial == CspIdentityAssurance::IAL1
   def store_id_token? = false
+  def additional_verification_blocked? = false
 end
