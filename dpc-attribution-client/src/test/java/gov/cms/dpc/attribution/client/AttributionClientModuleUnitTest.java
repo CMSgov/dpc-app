@@ -13,10 +13,13 @@ import com.google.inject.Key;
 import com.google.inject.name.Names;
 import gov.cms.dpc.attribution.client.config.AttributionBundleConfiguration;
 import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
+import org.hibernate.SessionFactory;
 import io.dropwizard.core.Configuration;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 class AttributionClientModuleUnitTest {
 
@@ -30,7 +33,7 @@ class AttributionClientModuleUnitTest {
         AttributionClientModule<TestConfiguration> module = new AttributionClientModule<>();
         module.setConfiguration(configuration);
 
-        Injector injector = Guice.createInjector(module);
+        Injector injector = Guice.createInjector(module, consentDatabaseModule());
 
         // Should return a Singleton.  I.E., always the same instance
         assertSame(injector.getInstance(AttributionClient.class), injector.getInstance(AttributionClient.class));
@@ -49,7 +52,7 @@ class AttributionClientModuleUnitTest {
         configuration.getConnectionPoolConfiguration().setPoolMaxPerRoute(7);
         configuration.getConnectionPoolConfiguration().setPoolMaxTotal(13);
 
-        Injector injector = Guice.createInjector(new AttributionClientModule<TestConfiguration>(configuration));
+        Injector injector = Guice.createInjector(new AttributionClientModule<TestConfiguration>(configuration), consentDatabaseModule());
         IGenericClient client = injector.getInstance(CLIENT_KEY);
         IRestfulClientFactory factory = client.getFhirContext().getRestfulClientFactory();
 
@@ -73,6 +76,7 @@ class AttributionClientModuleUnitTest {
         FhirContext sharedR4 = FhirContext.forR4();
         IGenericClient existingClient = stu3.newRestfulGenericClient("http://fakeurl/v1/");
         Injector injector = Guice.createInjector(
+                consentDatabaseModule(),
                 new AttributionClientModule<TestConfiguration>(createClientConfiguration()),
                 new AbstractModule() {
                     @Override
@@ -91,6 +95,16 @@ class AttributionClientModuleUnitTest {
         // Asking for a "fhirContextAttributionR4" context should be different from our stu3 and sharedR4 above
         assertNotSame(stu3, injector.getInstance(CONTEXT_KEY));
         assertNotSame(sharedR4, injector.getInstance(CONTEXT_KEY));
+    }
+
+    private static AbstractModule consentDatabaseModule() {
+        return new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(DPCConsentManagedSessionFactory.class).toInstance(
+                        new DPCConsentManagedSessionFactory(mock(SessionFactory.class)));
+            }
+        };
     }
 
     private static FHIRClientConfiguration createClientConfiguration() {

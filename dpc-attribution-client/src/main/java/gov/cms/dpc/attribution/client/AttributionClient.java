@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import com.google.re2j.Pattern;
 import gov.cms.dpc.attribution.client.search.PatientSearch;
 import gov.cms.dpc.attribution.client.search.RosterSearch;
+import gov.cms.dpc.attribution.client.service.ConsentService;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.r4.FHIRExtractors;
 import org.hl7.fhir.r4.model.Bundle;
@@ -47,9 +48,11 @@ public class AttributionClient {
 
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9]+://.*$");
     private final IGenericClient client;
+    private final ConsentService consentService;
 
-    public AttributionClient(IGenericClient client) {
+    public AttributionClient(IGenericClient client, ConsentService consentService) {
         this.client = Objects.requireNonNull(client);
+        this.consentService = Objects.requireNonNull(consentService);
     }
 
     /**
@@ -361,6 +364,29 @@ public class AttributionClient {
             .useHttpGet()
             .encodedJson()
             .execute();
+    }
+
+    /**
+     * Similar to getAttributedPatients(), but removes MBIs of beneficiaries that have opted out.
+     */
+    public Bundle getConsentingAttributedPatients(UUID id, boolean activeOnly) {
+        final Bundle attributedPatientsBundle = getAttributedPatients(id, activeOnly);
+        final List<Patient> attributedPatientsList = attributedPatientsBundle.getEntry().stream()
+            .map(Bundle.BundleEntryComponent::getResource)
+            .filter(Patient.class::isInstance)
+            .map(Patient.class::cast)
+            .toList();
+
+        // Converting this to a set makes the filter we're about to do more efficient
+        final Set<Patient> consentingPatients = Set.copyOf(consentService.filterConsent(attributedPatientsList));
+
+        attributedPatientsBundle.setEntry(attributedPatientsBundle.getEntry().stream()
+            .filter(entry -> entry.hasResource() && consentingPatients.contains(entry.getResource()))
+            .toList());
+        if (attributedPatientsBundle.hasTotal()) {
+            attributedPatientsBundle.setTotal(attributedPatientsBundle.getEntry().size());
+        }
+        return attributedPatientsBundle;
     }
 
     private Group executeGroupOperation(UUID rosterID, Group groupUpdate, String operationName) {

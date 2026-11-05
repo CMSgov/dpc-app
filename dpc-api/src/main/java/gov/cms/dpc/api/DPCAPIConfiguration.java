@@ -6,6 +6,7 @@ import gov.cms.dpc.attribution.client.config.AttributionBundleConfiguration;
 import gov.cms.dpc.bluebutton.config.BBClientConfiguration;
 import gov.cms.dpc.bluebutton.config.BlueButtonBundleConfiguration;
 import gov.cms.dpc.common.hibernate.auth.IDPCAuthDatabase;
+import gov.cms.dpc.common.hibernate.consent.IDPCConsentDatabase;
 import gov.cms.dpc.common.hibernate.queue.IDPCQueueDatabase;
 import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
 import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
@@ -26,7 +27,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DPCAPIConfiguration extends Configuration implements IDPCQueueDatabase, DPCQueueConfig, IDPCAuthDatabase, IDPCFHIRConfiguration, BlueButtonBundleConfiguration, AttributionBundleConfiguration {
+public class DPCAPIConfiguration extends Configuration implements IDPCQueueDatabase, DPCQueueConfig, IDPCAuthDatabase, IDPCConsentDatabase, IDPCFHIRConfiguration, BlueButtonBundleConfiguration, AttributionBundleConfiguration {
 
     @NotEmpty
     private String exportPath;
@@ -44,6 +45,16 @@ public class DPCAPIConfiguration extends Configuration implements IDPCQueueDatab
     @NotNull
     @JsonProperty("authdb")
     private DataSourceFactory authDatabase = new DataSourceFactory();
+
+    @Valid
+    @NotNull
+    @JsonProperty("consentdb")
+    private DataSourceFactory consentDatabase = new DataSourceFactory();
+
+    @Override
+    public DataSourceFactory getConsentDatabase() {
+        return consentDatabase;
+    }
 
     @Valid
     @NotNull

@@ -7,6 +7,9 @@ import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.google.inject.Provides;
 import gov.cms.dpc.attribution.client.config.AttributionBundleConfiguration;
+import gov.cms.dpc.attribution.client.service.ConsentService;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentManagedSessionFactory;
+import gov.cms.dpc.common.jdbi.ConsentDAO;
 import gov.cms.dpc.fhir.configuration.ConnectionPoolConfiguration;
 import gov.cms.dpc.fhir.configuration.FHIRClientConfiguration;
 import gov.cms.dpc.fhir.configuration.TimeoutConfiguration;
@@ -44,8 +47,14 @@ public class AttributionClientModule<T extends Configuration & AttributionBundle
 
     @Provides
     @Singleton
-    public AttributionClient provideAttributionClient(@Named("attributionR4") IGenericClient client) {
-        return new AttributionClient(client);
+    public AttributionClient provideAttributionClient(@Named("attributionR4") IGenericClient client, ConsentService consentService) {
+        return new AttributionClient(client, consentService);
+    }
+
+    @Provides
+    @Singleton
+    public ConsentService provideConsentService(DPCConsentManagedSessionFactory factory) {
+        return new ConsentService(new ConsentDAO(factory), clientConfiguration.getServerBaseUrl());
     }
 
     @Provides

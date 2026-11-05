@@ -1,6 +1,7 @@
 package gov.cms.dpc.attribution.client;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import gov.cms.dpc.attribution.client.service.ConsentService;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
@@ -27,7 +28,8 @@ import static org.mockito.Mockito.*;
 abstract class AbstractAttributionClientResourceUnitTest {
 
     protected final IGenericClient attributionClient = mock(IGenericClient.class, RETURNS_DEEP_STUBS);
-    protected final AttributionClient client = new AttributionClient(attributionClient);
+    protected final ConsentService consentService = mock(ConsentService.class);
+    protected final AttributionClient client = new AttributionClient(attributionClient, consentService);
 
     @SuppressWarnings("unchecked")
     protected IQuery<Bundle> mockSearch(Class<? extends Resource> resourceClass,

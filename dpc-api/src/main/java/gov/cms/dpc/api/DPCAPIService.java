@@ -16,6 +16,8 @@ import gov.cms.dpc.attribution.client.AttributionClientModule;
 import gov.cms.dpc.common.MDCConstants;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateModule;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateBundle;
+import gov.cms.dpc.common.hibernate.consent.DPCConsentHibernateModule;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateBundle;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueHibernateModule;
 import gov.cms.dpc.common.logging.filters.GenerateRequestIdFilter;
@@ -51,6 +53,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     private static final Logger logger = LoggerFactory.getLogger(DPCAPIService.class);
 
     private final DPCQueueHibernateBundle<DPCAPIConfiguration> hibernateQueueBundle = new DPCQueueHibernateBundle<>();
+    private final DPCConsentHibernateBundle<DPCAPIConfiguration> hibernateConsentBundle = new DPCConsentHibernateBundle<>();
     private final DPCAuthHibernateBundle<DPCAPIConfiguration> hibernateAuthBundle = new DPCAuthHibernateBundle<>(List.of(
             "gov.cms.dpc.macaroons.store.hibernate.entities"));
 
@@ -80,6 +83,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         // so Dropwizard needs to initialize the HibernateBundle first to create the SessionFactory.
         bootstrap.addBundle(hibernateQueueBundle);
         bootstrap.addBundle(hibernateAuthBundle);
+        bootstrap.addBundle(hibernateConsentBundle);
 
         bootstrap.addBundle(guiceBundle);
 
@@ -125,6 +129,7 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
                 .modules(
                         new DPCQueueHibernateModule<>(hibernateQueueBundle),
                         new DPCAuthHibernateModule<>(hibernateAuthBundle),
+                        new DPCConsentHibernateModule<>(hibernateConsentBundle),
                         new AuthModule(),
                         new BakeryModule(),
                         new DPCAPIModule(hibernateAuthBundle),

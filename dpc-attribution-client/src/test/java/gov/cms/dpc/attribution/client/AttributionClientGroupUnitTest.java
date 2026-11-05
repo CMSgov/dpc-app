@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -229,6 +230,125 @@ class AttributionClientGroupUnitTest extends AbstractAttributionClientResourceUn
 
         assertSame(failure, assertThrows(ResourceNotFoundException.class,
                 () -> client.getAttributedPatients(ROSTER_ID, true)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testGetConsentingAttributedPatientsFiltersEntries(boolean activeOnly) {
+        Patient permitted = createPatient("3aa0C00aA00");   // Consenting patient
+        Patient optedOut = createPatient("3aa0C00aA01");    // Opted out patient
+        Bundle attributed = new Bundle();
+        attributed.setType(Bundle.BundleType.SEARCHSET);
+        Bundle.BundleEntryComponent permittedEntry = attributed.addEntry()
+                .setResource(permitted).setFullUrl("Patient/permitted");
+        attributed.addEntry().setResource(optedOut);
+        attributed.addEntry().setResource(new Organization());  // Add org to the bundle
+        attributed.addEntry();                                  // Add an empty entry to the bundle
+        attributed.setTotal(4);
+        mockAttributedPatients(attributed);
+        when(consentService.filterConsent(List.of(permitted, optedOut))).thenReturn(List.of(permitted));
+
+        Bundle result = client.getConsentingAttributedPatients(ROSTER_ID, activeOnly);
+
+        assertSame(attributed, result);
+        assertEquals(List.of(permittedEntry), result.getEntry());
+        assertSame(permittedEntry, result.getEntryFirstRep());
+        assertSame(permitted, result.getEntryFirstRep().getResource());
+        assertEquals("Patient/permitted", result.getEntryFirstRep().getFullUrl());
+        assertEquals(1, result.getTotal());
+        assertEquals(Bundle.BundleType.SEARCHSET, result.getType());
+        verify(consentService).filterConsent(List.of(permitted, optedOut));
+        Parameters parameters = captureParameters("patients");
+        assertEquals(activeOnly, ((BooleanType) parameters.getParameterFirstRep().getValue()).booleanValue());
+    }
+
+    @Test
+    void testGetConsentingAttributedPatientsSavesOrderAndDuplicates() {
+        Patient first = createPatient("3aa0C00aA00");
+        Patient second = createPatient("3aa0C00aA01");
+        Bundle attributed = new Bundle();
+        Bundle.BundleEntryComponent firstEntry = attributed.addEntry().setResource(first);
+        Bundle.BundleEntryComponent secondEntry = attributed.addEntry().setResource(second);
+        Bundle.BundleEntryComponent duplicateEntry = attributed.addEntry().setResource(first);
+        mockAttributedPatients(attributed);
+        when(consentService.filterConsent(List.of(first, second, first))).thenReturn(List.of(second, first));
+
+        Bundle result = client.getConsentingAttributedPatients(ROSTER_ID, true);
+
+        assertEquals(List.of(firstEntry, secondEntry, duplicateEntry), result.getEntry());
+        assertFalse(result.hasTotal());
+    }
+
+    @Test
+    void testGetConsentingAttributedPatientsWithNoConsent() {
+        Patient patient = createPatient("3aa0C00aA00");
+        Bundle attributed = new Bundle();
+        attributed.addEntry().setResource(patient);
+        attributed.setTotal(1);
+        mockAttributedPatients(attributed);
+        when(consentService.filterConsent(List.of(patient))).thenReturn(List.of());
+
+        Bundle result = client.getConsentingAttributedPatients(ROSTER_ID, true);
+
+        assertTrue(result.getEntry().isEmpty());
+        assertEquals(0, result.getTotal());
+    }
+
+    @Test
+    void testGetConsentingAttributedPatientsWithEmptyGroup() {
+        Bundle attributed = new Bundle();
+        mockAttributedPatients(attributed);
+        when(consentService.filterConsent(List.of())).thenReturn(List.of());
+
+        Bundle result = client.getConsentingAttributedPatients(ROSTER_ID, false);
+
+        assertSame(attributed, result);
+        assertTrue(result.getEntry().isEmpty());
+        assertFalse(result.hasTotal());
+        verify(consentService).filterConsent(List.of());
+    }
+
+    @Test
+    void testGetConsentingAttributedPatientsHandlesExceptionOnConsent() {
+        Patient patient = createPatient("3aa0C00aA00");
+        Bundle attributed = new Bundle();
+        Bundle.BundleEntryComponent entry = attributed.addEntry().setResource(patient);
+        attributed.setTotal(1);
+        mockAttributedPatients(attributed);
+        IllegalStateException failure = new IllegalStateException("Consent lookup failed");
+        when(consentService.filterConsent(List.of(patient))).thenThrow(failure);
+
+        assertSame(failure, assertThrows(IllegalStateException.class,
+                () -> client.getConsentingAttributedPatients(ROSTER_ID, true)));
+
+        // Check that bundle hadn't been changed
+        assertEquals(List.of(entry), attributed.getEntry());
+        assertEquals(1, attributed.getTotal());
+    }
+
+    @Test
+    void testGetConsentingAttributedPatientsHandlesExceptionOnAttribution() {
+        IOperationUntypedWithInput<Bundle> operationExec =
+                mockInstanceOperation(Group.class, ROSTER_ID, "patients", Bundle.class);
+        ResourceNotFoundException failure = new ResourceNotFoundException("Cannot find Roster resource");
+        when(operationExec.execute()).thenThrow(failure);
+
+        assertSame(failure, assertThrows(ResourceNotFoundException.class,
+                () -> client.getConsentingAttributedPatients(ROSTER_ID, true)));
+        verifyNoInteractions(consentService);
+    }
+
+    private IOperationUntypedWithInput<Bundle> mockAttributedPatients(Bundle attributed) {
+        IOperationUntypedWithInput<Bundle> operationExec =
+                mockInstanceOperation(Group.class, ROSTER_ID, "patients", Bundle.class);
+        when(operationExec.execute()).thenReturn(attributed);
+        return operationExec;
+    }
+
+    private Patient createPatient(String mbi) {
+        Patient patient = new Patient();
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(mbi);
+        return patient;
     }
 
     private IQuery<Bundle> mockRosterSearch(Map<String, List<String>> filters) {
