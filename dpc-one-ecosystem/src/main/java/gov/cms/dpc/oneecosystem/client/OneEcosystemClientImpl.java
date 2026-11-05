@@ -42,8 +42,8 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
     private String accessToken;
     private Instant tokenExpiration;
 
-    public OneEcosystemClientImpl(URI apiBaseUrl, String clientId, String clientSecret) {
-        this.apiBaseUrl = apiBaseUrl;
+    public OneEcosystemClientImpl(String apiHost, String clientId, String clientSecret) {
+        this.apiBaseUrl = URI.create("https://" + apiHost); // need to figure out if I should pass in protocol // just make it work
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.httpClient = HttpClients.createDefault();
@@ -86,7 +86,8 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
      * The caller must close the response after reading it to release the connection.
      */
     public ClassicHttpResponse callLegacyEndpoint() {
-        HttpGet request = new HttpGet(apiBaseUrl.resolve("v3/jobs"));
+        URI endpoint = apiBaseUrl.resolve("api/v3/jobs");
+        HttpGet request = new HttpGet(endpoint);
         request.setHeader("Authorization", "Bearer " + currentToken());
         request.setHeader("Accept", "application/fhir+json");
         try {
@@ -107,7 +108,8 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
     }
 
     private String requestToken() {
-        HttpPost request = new HttpPost(apiBaseUrl.resolve("/auth/token"));
+        URI endpoint = apiBaseUrl.resolve("/auth/token");
+        HttpPost request = new HttpPost(endpoint);
         request.setConfig(RequestConfig.custom()
             .setResponseTimeout(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .build());

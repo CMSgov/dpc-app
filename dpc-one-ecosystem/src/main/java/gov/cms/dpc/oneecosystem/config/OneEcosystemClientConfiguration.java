@@ -2,14 +2,12 @@ package gov.cms.dpc.oneecosystem.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.net.URI;
-
 public class OneEcosystemClientConfiguration {
 
     @JsonProperty
     private boolean useMock = true;
     @JsonProperty
-    private URI apiBaseUrl;
+    private String apiBaseUrl;
     @JsonProperty
     private String clientId;
     @JsonProperty
@@ -19,7 +17,7 @@ public class OneEcosystemClientConfiguration {
         return useMock;
     }
 
-    public URI getApiBaseUrl() {
+    public String getApiBaseUrl() {
         return apiBaseUrl;
     }
 
