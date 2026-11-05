@@ -47,12 +47,17 @@ abstract class AbstractAttributionClientResourceUnitTest {
         return mockQuery;
     }
 
+    @SuppressWarnings("unchecked")
+    private void stubSearch(Class<? extends Resource> resourceClass, IQuery<Bundle> mockQuery) {
+        IQuery<IBaseBundle> queryExec = mock(IQuery.class, RETURNS_SELF);
+        when(attributionClient.search().forResource(resourceClass)).thenReturn(queryExec);
+        when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
+    }
+
     protected IQuery<Bundle> mockSearch(Class<? extends Resource> resourceClass,
                                       Map<String, List<String>> searchParams, String tagSystem, String tag) {
         IQuery<Bundle> mockQuery = mockSearch(resourceClass, searchParams);
-        IQuery<IBaseBundle> queryExec = attributionClient.search().forResource(resourceClass);
-        when(queryExec.withTag(tagSystem, tag)).thenReturn(queryExec);
-        when(mockQuery.encodedJson()).thenReturn(mockQuery);
+        when(mockQuery.withTag(tagSystem, tag)).thenReturn(mockQuery);
         return mockQuery;
     }
 
