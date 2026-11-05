@@ -1279,7 +1279,14 @@ def csp_response(provider, template)
                                     family_name: template['family_name'],
                                     identity_assurance_level: 2 } } }
   response[:extra][:raw_info][:sub] = template['sub'] if provider.to_sym == :clear
+  response[:extra][:raw_info][:ial] = ial_for(provider, template)
   response
+end
+
+def ial_for(provider, template)
+  return CspIdentityAssurance::FACIAL_MATCH_REQUIRED if provider.to_sym == :login_dot_gov
+
+  template['ial']
 end
 
 def bearer_token(provider)
@@ -1298,7 +1305,7 @@ def user_info_template(overrides = {})
     'birthdate' => '1938-10-06',
     'social_security_number' => '900888888',
     'verified_at' => 1_704_834_157,
-    'ial' => 'http://idmanagement.gov/ns/assurance/ial/2',
+    'ial' => CspIdentityAssurance::IAL2,
     'aal' => 'urn:gov:gsa:ac:classes:sp:PasswordProtectedTransport:duo'
   }.merge(overrides)
 end

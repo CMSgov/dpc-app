@@ -9,7 +9,7 @@ development: &development
     log_out_path: '/openid_connect/logout'
     token_expiration_interval: 300
     redirect_path: '/auth/login_dot_gov/callback'
-    acr_values: 'http://idmanagement.gov/ns/assurance/ial/2'
+    acr_values: 'urn:acr.login.gov:verified-facial-match-required'
     authorize_scope: 'openid email all_emails profile social_security_number'
     authorization_endpoint: <%= "https://#{ENV['IDP_LOGIN_DOT_GOV_HOST']}/openid_connect/authorize" %>
     token_endpoint: <%= "https://#{ENV['IDP_LOGIN_DOT_GOV_HOST']}/api/openid_connect/token" %>
