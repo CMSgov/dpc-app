@@ -28,7 +28,7 @@ import static org.mockito.Mockito.*;
 abstract class AbstractAttributionClientResourceUnitTest {
 
     protected final IGenericClient attributionClient = mock(IGenericClient.class, RETURNS_DEEP_STUBS);
-    protected final AttributionClient client = new AttributionClientImpl(attributionClient);
+    protected final AttributionClient client = new AttributionClient(attributionClient);
 
     @SuppressWarnings("unchecked")
     protected IQuery<Bundle> mockSearch(Class<? extends Resource> resourceClass,

@@ -1,24 +1,54 @@
 package gov.cms.dpc.attribution.client;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import com.google.re2j.Pattern;
 import gov.cms.dpc.attribution.client.search.PatientSearch;
 import gov.cms.dpc.attribution.client.search.RosterSearch;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.r4.FHIRExtractors;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Parameters;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 /**
- * Client contract for the attribution service's R4 endpoints.
+ * Client for the attribution service's R4 endpoints.
  *
  * <p>Searches and bulk operations return R4 {@link Bundle}s. Create operations return
  * {@link MethodOutcome}s.  Operation implementations wrap submitted resources in whatever FHIR
  * resource makes sense and deletes return nothing.  They either work or throw an exception.
  */
-public interface AttributionClient {
+public class AttributionClient {
+
+    private static final String GROUP_RESOURCE_TYPE = "Group";
+    private static final String SUBMIT_OPERATION = "submit";
+
+    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z0-9]+://.*$");
+    private final IGenericClient client;
+
+    public AttributionClient(IGenericClient client) {
+        this.client = Objects.requireNonNull(client);
+    }
 
     /**
      * Search for an {@link Organization}
@@ -26,27 +56,77 @@ public interface AttributionClient {
      * @param identifier optional FHIR identifier token.  Can be a comma separated list, or null.
      *                   Null lists all organizations.
      */
-    Bundle searchOrganizations(String identifier);
+    public Bundle searchOrganizations(String identifier) {
+        Map<String, List<String>> searchParams = new HashMap<>();
+        if (identifier != null) {
+            searchParams.put("identifier", Collections.singletonList(identifier));
+        }
+        return this.client
+            .search()
+            .forResource(Organization.class)
+            .whereMap(searchParams)
+            .encodedJson()
+            .returnBundle(Bundle.class)
+            .execute();
+    }
 
     /**
      * Read an {@link Organization}
      */
-    Organization getOrganization(UUID id);
+    public Organization getOrganization(UUID id) {
+        return this.client
+            .read()
+            .resource(Organization.class)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Submit an {@link Organization}
      */
-    MethodOutcome submitOrganization(Bundle bundle);
+    public MethodOutcome submitOrganization(Bundle bundle) {
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setName("resource").setResource(bundle);
+
+        return this.client
+            .operation()
+            .onType(Organization.class)
+            .named(SUBMIT_OPERATION)
+            .withParameters(parameters)
+            .returnMethodOutcome()
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Overwrite an {@link Organization}
      */
-    Organization updateOrganization(UUID id, Organization organization);
+    public Organization updateOrganization(UUID id, Organization organization) {
+        MethodOutcome outcome = this.client
+            .update()
+            .resource(organization)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
+
+        final Organization resource = (Organization) outcome.getResource();
+        if (resource == null) {
+            throw new IllegalStateException("Attribution service returned no Organization after update");
+        }
+        return resource;
+    }
 
     /**
      * Delete an {@link Organization}
      */
-    void deleteOrganization(UUID id);
+    public void deleteOrganization(UUID id) {
+        this.client
+            .delete()
+            .resourceById(new IdType("Organization", id.toString()))
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Search for a {@link Practitioner} by their ID
@@ -54,7 +134,19 @@ public interface AttributionClient {
      * @param organizationId required organization ID
      * @param practitionerId required practitioner resource ID
      */
-    Bundle searchPractitioners(UUID organizationId, UUID practitionerId);
+    public Bundle searchPractitioners(UUID organizationId, UUID practitionerId) {
+        Map<String, List<String>> searchParams = new HashMap<>();
+        searchParams.put("organization", Collections.singletonList(organizationId.toString()));
+        searchParams.put("_id", Collections.singletonList(practitionerId.toString()));
+
+        return this.client
+            .search()
+            .forResource(Practitioner.class)
+            .encodedJson()
+            .returnBundle(Bundle.class)
+            .whereMap(searchParams)
+            .execute();
+    }
 
     /**
      * Search for a {@link Practitioner} by their NPI
@@ -62,107 +154,337 @@ public interface AttributionClient {
      * @param organizationId required organization ID
      * @param providerNpi required provider NPI
      */
-    Bundle searchPractitioners(UUID organizationId, String providerNpi);
+    public Bundle searchPractitioners(UUID organizationId, String providerNpi) {
+        Map<String, List<String>> searchParams = new HashMap<>();
+        searchParams.put("organization", Collections.singletonList(organizationId.toString()));
+
+        final var request = this.client
+            .search()
+            .forResource(Practitioner.class)
+            .encodedJson()
+            .returnBundle(Bundle.class);
+
+        if (providerNpi != null && !providerNpi.isEmpty()) {
+            searchParams.put("identifier", Collections.singletonList(providerNpi));
+        }
+
+        return request
+            .whereMap(searchParams)
+            .execute();
+    }
 
     /**
      * Read a {@link Practitioner}
      */
-    Practitioner getPractitioner(UUID id);
+    public Practitioner getPractitioner(UUID id) {
+        return this.client
+            .read()
+            .resource(Practitioner.class)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Create a {@link Practitioner}
      */
-    MethodOutcome createPractitioner(Practitioner practitioner);
+    public MethodOutcome createPractitioner(Practitioner practitioner) {
+        return this.client
+            .create()
+            .resource(practitioner)
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Submit a {@link Bundle} of {@link Practitioner}s
      */
-    Bundle submitPractitioners(Bundle bundle);
+    public Bundle submitPractitioners(Bundle bundle) {
+        final Parameters params = new Parameters();
+        params.addParameter().setResource(bundle);
+        return this.client
+            .operation()
+            .onType(Practitioner.class)
+            .named(SUBMIT_OPERATION)
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Overwrite a {@link Practitioner}
      */
-    Practitioner updatePractitioner(UUID id, Practitioner practitioner);
+    public Practitioner updatePractitioner(UUID id, Practitioner practitioner) {
+        MethodOutcome outcome = this.client
+            .update()
+            .resource(practitioner)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
+
+        final Practitioner resource = (Practitioner) outcome.getResource();
+        if (resource == null) {
+            throw new IllegalStateException("Attribution service returned no Practitioner after update");
+        }
+        return resource;
+    }
 
     /**
      * Delete a {@link Practitioner}
      */
-    void deletePractitioner(UUID id);
+    public void deletePractitioner(UUID id) {
+        this.client
+            .delete()
+            .resourceById(new IdType("Practitioner", id.toString()))
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Search for a {@link Patient}
      */
-    Bundle searchPatients(PatientSearch query);
+    public Bundle searchPatients(PatientSearch query) {
+        Objects.requireNonNull(query.organizationId(), "Organization ID is required");
+        if (query.count() != null && query.count() < 0) {
+            throw new IllegalArgumentException("Parameter _count must be >= 0");
+        }
+        if (query.offset() != null && query.offset() < 0) {
+            throw new IllegalArgumentException("Parameter _offset must be >= 0");
+        }
+
+        var request = this.client
+            .search()
+            .forResource(Patient.class)
+            .encodedJson()
+            .where(Patient.ORGANIZATION.hasId(query.organizationId().toString()))
+            .returnBundle(Bundle.class);
+
+        if (query.patientMbi() != null && !query.patientMbi().isEmpty()) {
+            final String expandedMBI;
+            if (IDENTIFIER_PATTERN.matcher(query.patientMbi()).matches()) {
+                expandedMBI = query.patientMbi();
+            } else {
+                expandedMBI = String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), query.patientMbi());
+            }
+            final Identifier identifier = FHIRExtractors.parseIDFromQueryParam(expandedMBI);
+            request = request.where(Patient.IDENTIFIER.exactly()
+                .systemAndIdentifier(identifier.getSystem(), identifier.getValue()));
+        }
+        if (query.patientId() != null) {
+            request = request.where(new TokenClientParam("_id").exactly().code(query.patientId().toString()));
+        }
+        if (query.summary() != null) {
+            request.summaryMode(SummaryEnum.fromCode(query.summary()));
+        }
+        if (query.offset() != null) {
+            request.offset(query.offset());
+        }
+
+        // Count=0 forces summary
+        if (query.count() != null) {
+            request.count(query.count());
+            if (query.count() == 0) {
+                request.summaryMode(SummaryEnum.COUNT);
+            }
+        }
+        return request.execute();
+    }
 
     /**
      * Read a {@link Patient}
      */
-    Patient getPatient(UUID id);
+    public Patient getPatient(UUID id) {
+        return this.client
+            .read()
+            .resource(Patient.class)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Create a {@link Patient}
      */
-    MethodOutcome createPatient(Patient patient);
+    public MethodOutcome createPatient(Patient patient) {
+        return this.client
+            .create()
+            .resource(patient)
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Submit a {@link Bundle} of {@link Patient}s
      */
-    Bundle submitPatients(Bundle bundle);
+    public Bundle submitPatients(Bundle bundle) {
+        final Parameters params = new Parameters();
+        params.addParameter().setResource(bundle);
+        return this.client
+            .operation()
+            .onType(Patient.class)
+            .named(SUBMIT_OPERATION)
+            .withParameters(params)
+            .returnResourceType(Bundle.class)
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Overwrite a {@link Patient}
      */
-    Patient updatePatient(UUID id, Patient patient);
+    public Patient updatePatient(UUID id, Patient patient) {
+        final MethodOutcome outcome = this.client
+            .update()
+            .resource(patient)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
+
+        final Patient resource = (Patient) outcome.getResource();
+        if (resource == null) {
+            throw new IllegalStateException("Attribution service returned no Patient after update");
+        }
+        return resource;
+    }
 
     /**
      * Delete a {@link Patient}
      */
-    void deletePatient(UUID id);
+    public void deletePatient(UUID id) {
+        this.client
+            .delete()
+            .resourceById(new IdType("Patient", id.toString()))
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Search for a {@link Group}
      */
-    Bundle searchRosters(RosterSearch query);
+    public Bundle searchRosters(RosterSearch query) {
+        final Map<String, List<String>> queryParams = new HashMap<>();
+        if (query.groupId() != null) {
+            queryParams.put("_id", Collections.singletonList(query.groupId().toString()));
+        }
+        if (query.providerNpiCharacteristic() != null) {
+            queryParams.put(Group.SP_CHARACTERISTIC_VALUE, Collections.singletonList(query.providerNpiCharacteristic()));
+        }
+        if (query.patientReference() != null) {
+            queryParams.put("member", Collections.singletonList(query.patientReference()));
+        }
+
+        return this.client
+            .search()
+            .forResource(Group.class)
+            .whereMap(queryParams)
+            .withTag(DPCIdentifierSystem.DPC.getSystem(), query.organizationId().toString())
+            .returnBundle(Bundle.class)
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Read a {@link Group}
      */
-    Group getRoster(UUID id);
+    public Group getRoster(UUID id) {
+        return this.client
+            .read()
+            .resource(Group.class)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Create a {@link Group}
      */
-    MethodOutcome createRoster(Group group);
+    public MethodOutcome createRoster(Group group) {
+        return this.client
+            .create()
+            .resource(group)
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Overwrite a {@link Group}
      */
-    Group replaceRoster(UUID id, Group group);
+    public Group replaceRoster(UUID id, Group group) {
+        final MethodOutcome outcome = this.client
+            .update()
+            .resource(group)
+            .withId(id.toString())
+            .encodedJson()
+            .execute();
+
+        final Group resource = (Group) outcome.getResource();
+        if (resource == null) {
+            throw new IllegalStateException("Attribution service returned no Group after update");
+        }
+        return resource;
+    }
 
     /**
      * Delete a {@link Group}
      */
-    void deleteRoster(UUID id);
+    public void deleteRoster(UUID id) {
+        this.client
+            .delete()
+            .resourceById(new IdType(GROUP_RESOURCE_TYPE, id.toString()))
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Add {@link Patient}s to an existing {@link Group}.
      *
      * @param group {@link Group} containing the {@link Patient}s to be added
      */
-    Group addRosterMembers(UUID id, Group group);
+    public Group addRosterMembers(UUID id, Group group) {
+        return executeGroupOperation(id, group, "add");
+    }
 
     /**
      * Remove {@link Patient}s from an existing {@link Group}.
      *
      * @param group {@link Group} containing the {@link Patient}s to be removed
      */
-    Group removeRosterMembers(UUID id, Group group);
+    public Group removeRosterMembers(UUID id, Group group) {
+        return executeGroupOperation(id, group, "remove");
+    }
 
     /**
      * Return a {@link Bundle} of {@link Patient}s in the {@link Group}.  Only the MBIs will
      * be filled in.
      */
-    Bundle getAttributedPatients(UUID id, boolean activeOnly);
+    public Bundle getAttributedPatients(UUID id, boolean activeOnly) {
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setValue(new BooleanType(activeOnly)).setName("active");
+
+        return this.client
+            .operation()
+            .onInstance(new IdType(GROUP_RESOURCE_TYPE, id.toString()))
+            .named("patients")
+            .withParameters(parameters)
+            .returnResourceType(Bundle.class)
+            .useHttpGet()
+            .encodedJson()
+            .execute();
+    }
+
+    private Group executeGroupOperation(UUID rosterID, Group groupUpdate, String operationName) {
+        final Parameters parameters = new Parameters();
+        parameters.addParameter().setResource(groupUpdate);
+        return this.client
+            .operation()
+            .onInstance(new IdType(GROUP_RESOURCE_TYPE, rosterID.toString()))
+            .named(operationName)
+            .withParameters(parameters)
+            .returnResourceType(Group.class)
+            .encodedJson()
+            .execute();
+    }
 
     /**
      * Returns the attribution health endpoint's response.
@@ -170,10 +492,31 @@ public interface AttributionClient {
      *
      * @throws IllegalStateException if the response is not a boolean
      */
-    boolean checkHealth();
+    public boolean checkHealth() {
+        final String health = getTextResponse("_healthy").trim();
+        if (!Set.of("true", "false").contains(health)) {
+            throw new IllegalStateException("Attribution service returned an invalid health response");
+        }
+        return Boolean.parseBoolean(health);
+    }
 
     /**
      * Returns the version of dpc-attribution
      */
-    String getVersion();
+    public String getVersion() {
+        return getTextResponse("version");
+    }
+
+    private String getTextResponse(String path) {
+        final var response = this.client
+            .rawHttpRequest()
+            .get(path)
+            .accept("text/plain")
+            .execute();
+        try (InputStream input = response.getInputStream()) {
+            return new String(input.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Unable to read attribution response for " + path, e);
+        }
+    }
 }

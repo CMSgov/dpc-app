@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class AttributionClientImplUnitTest extends AbstractAttributionClientResourceUnitTest {
+class AttributionClientUnitTest extends AbstractAttributionClientResourceUnitTest {
 
     @ParameterizedTest
     // Check that we can trim whitespace, too

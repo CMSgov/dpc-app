@@ -45,7 +45,7 @@ public class AttributionClientModule<T extends Configuration & AttributionBundle
     @Provides
     @Singleton
     public AttributionClient provideAttributionClient(@Named("attributionR4") IGenericClient client) {
-        return new AttributionClientImpl(client);
+        return new AttributionClient(client);
     }
 
     @Provides
