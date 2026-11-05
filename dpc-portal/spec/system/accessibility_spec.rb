@@ -18,7 +18,7 @@ RSpec.describe 'Accessibility', type: :system do
   let(:raw_info) do
     emails = %w[bob@example.com bob2@example.com]
     {
-      login_dot_gov: { all_emails: emails, ial: 'http://idmanagement.gov/ns/assurance/ial/2' },
+      login_dot_gov: { all_emails: emails, ial: CspIdentityAssurance::FACIAL_MATCH_REQUIRED },
       id_me: { emails_confirmed: emails, identity_assurance_level: 2 },
       clear: {}
     }
@@ -62,7 +62,7 @@ RSpec.describe 'Accessibility', type: :system do
           ial1_raw_info = if provider == :id_me
                             { identity_assurance_level: 1 }
                           else
-                            { ial: 'http://idmanagement.gov/ns/assurance/ial/1' }
+                            { ial: CspIdentityAssurance::IAL1 }
                           end
 
           OmniAuth.config.add_mock(provider,

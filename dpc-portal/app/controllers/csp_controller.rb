@@ -10,6 +10,8 @@ class CspController < ApplicationController
 
   def openid_connect
     return render_ial1_blocked if ial_1_user?(auth_details)
+    return if additional_verification_blocked?
+
     return unless (active_csp = csp(auth_details.provider))
 
     failure_message = verification_failure_message(active_csp)
@@ -221,6 +223,7 @@ class CspController < ApplicationController
   def primary_email(auth) = auth.info.email
   def all_emails(auth) = auth.extra.raw_info.all_emails
 
-  def ial_1_user?(auth) = auth.extra.raw_info.ial == 'http://idmanagement.gov/ns/assurance/ial/1'
+  def ial_1_user?(auth) = auth.extra.raw_info.ial == CspIdentityAssurance::IAL1
   def store_id_token? = false
+  def additional_verification_blocked? = false
 end

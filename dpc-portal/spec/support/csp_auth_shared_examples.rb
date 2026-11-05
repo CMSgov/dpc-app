@@ -147,7 +147,13 @@ RSpec.shared_examples 'a CSP client' do |config|
       let(:orig_csp_name) { (CspUtils::CODES_TO_DISPLAY.keys - [provider]).sample.to_s }
       # A CLEAR login needs an access token carrying a verification_id, and a stubbed verification session
       let(:orig_token) { orig_csp_name == 'clear' ? clear_access_token : token }
-      let(:orig_csp_auth_response) { csp_auth_response.deep_merge(credentials: { token: orig_token }) }
+      let(:orig_csp_auth_response) do
+        response = csp_auth_response.deep_merge(credentials: { token: orig_token })
+        if orig_csp_name == 'login_dot_gov'
+          response = response.deep_merge(extra: { raw_info: { ial: CspIdentityAssurance::FACIAL_MATCH_REQUIRED } })
+        end
+        response
+      end
       context 'SSN matches' do
         before do
           user = create(:user, given_name: 'Bob', family_name: 'Hoskins')
@@ -557,7 +563,12 @@ RSpec.shared_examples 'a CSP client' do |config|
         follow_redirect!
         expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
         follow_redirect!
-        expect(response.body).to include('Your identity could not be verified')
+        if provider == :login_dot_gov
+          expect(response.body).to include("We couldn't verify your identity")
+          expect(response.body).to include('This may be due to incorrect information or a technical issue.')
+        else
+          expect(response.body).to include('Your identity could not be verified')
+        end
       end
     end
 
@@ -645,7 +656,12 @@ RSpec.shared_examples 'a CSP client' do |config|
         follow_redirect!
         expect(response.location).to eq("/auth/failure?message=#{error}&strategy=#{csp_name}")
         follow_redirect!
-        expect(response.body).to include("Your identity could not be verified with #{display_name}")
+        if provider == :login_dot_gov
+          expect(response.body).to include("We couldn't verify your identity")
+          expect(response.body).to include('This may be due to incorrect information or a technical issue.')
+        else
+          expect(response.body).to include("Your identity could not be verified with #{display_name}")
+        end
       end
     end
   end
