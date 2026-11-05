@@ -236,7 +236,7 @@ class AttributionClientGroupUnitTest extends AbstractAttributionClientResourceUn
     }
 
     private void verifyOrganizationTag(Map<String, List<String>> filters) {
-        verify(attributionClient.search().forResource(Group.class).whereMap(filters))
+        verify(attributionClient.search().forResource(Group.class).encodedJson().returnBundle(Bundle.class).whereMap(filters))
                 .withTag(DPCIdentifierSystem.DPC.getSystem(), ORGANIZATION_ID.toString());
     }
 

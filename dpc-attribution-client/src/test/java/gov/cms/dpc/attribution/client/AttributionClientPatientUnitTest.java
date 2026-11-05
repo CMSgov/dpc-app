@@ -57,7 +57,7 @@ class AttributionClientPatientUnitTest extends AbstractAttributionClientResource
 
         assertSame(bundle, client.searchPatients(search));
         verifyOrganizationFilter();
-        verify(query, never()).where(any(ICriterion.class));
+        verify(query).where(any(ICriterion.class));
     }
 
     @Test
@@ -271,7 +271,7 @@ class AttributionClientPatientUnitTest extends AbstractAttributionClientResource
     }
 
     private void verifyOrganizationFilter() {
-        verify(attributionClient.search().forResource(Patient.class).encodedJson()).where(
+        verify(attributionClient.search().forResource(Patient.class).encodedJson().returnBundle(Bundle.class)).where(
             argThat((ICriterion<?> criterion) ->
                 matchesCriterion(criterion, "organization", ORGANIZATION_ID.toString())));
     }

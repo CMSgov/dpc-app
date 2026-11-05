@@ -3,7 +3,6 @@ package gov.cms.dpc.attribution.client;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
-import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IQuery;
@@ -33,32 +32,30 @@ abstract class AbstractAttributionClientResourceUnitTest {
     @SuppressWarnings("unchecked")
     protected IQuery<Bundle> mockSearch(Class<? extends Resource> resourceClass,
                                       Map<String, List<String>> searchParams) {
-        IQuery<IBaseBundle> queryExec = mock(IQuery.class);
         IQuery<Bundle> mockQuery = mock(IQuery.class);
-        when(attributionClient.search().forResource(resourceClass)).thenReturn(queryExec);
-        when(queryExec.whereMap(searchParams)).thenReturn(queryExec);
-        when(queryExec.encodedJson()).thenReturn(queryExec);
-        when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
+        stubSearch(resourceClass, mockQuery);
         when(mockQuery.whereMap(searchParams)).thenReturn(mockQuery);
         return mockQuery;
     }
 
     @SuppressWarnings("unchecked")
     protected IQuery<Bundle> mockSearch(Class<? extends Resource> resourceClass) {
-        IQuery<IBaseBundle> queryExec = mock(IQuery.class, RETURNS_SELF);
         IQuery<Bundle> mockQuery = mock(IQuery.class, RETURNS_SELF);
-        when(attributionClient.search().forResource(resourceClass).encodedJson()).thenReturn(queryExec);
-        when(queryExec.where(any(ICriterion.class))).thenReturn(queryExec);
-        when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
+        stubSearch(resourceClass, mockQuery);
         return mockQuery;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void stubSearch(Class<? extends Resource> resourceClass, IQuery<Bundle> mockQuery) {
+        IQuery<IBaseBundle> queryExec = mock(IQuery.class, RETURNS_SELF);
+        when(attributionClient.search().forResource(resourceClass)).thenReturn(queryExec);
+        when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
     }
 
     protected IQuery<Bundle> mockSearch(Class<? extends Resource> resourceClass,
                                       Map<String, List<String>> searchParams, String tagSystem, String tag) {
         IQuery<Bundle> mockQuery = mockSearch(resourceClass, searchParams);
-        IQuery<IBaseBundle> queryExec = attributionClient.search().forResource(resourceClass);
-        when(queryExec.withTag(tagSystem, tag)).thenReturn(queryExec);
-        when(mockQuery.encodedJson()).thenReturn(mockQuery);
+        when(mockQuery.withTag(tagSystem, tag)).thenReturn(mockQuery);
         return mockQuery;
     }
 
