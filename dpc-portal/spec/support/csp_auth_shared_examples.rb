@@ -147,7 +147,6 @@ RSpec.shared_examples 'a CSP client' do |config|
       let(:orig_csp_name) { (CspUtils::CODES_TO_DISPLAY.keys - [provider]).sample.to_s }
       # A CLEAR login needs an access token carrying a verification_id, and a stubbed verification session
       let(:orig_token) { orig_csp_name == 'clear' ? clear_access_token : token }
-      # let(:orig_csp_auth_response) { csp_auth_response.deep_merge(credentials: { token: orig_token }) }
       let(:orig_csp_auth_response) do
         response = csp_auth_response.deep_merge(credentials: { token: orig_token })
         if orig_csp_name == 'login_dot_gov'
