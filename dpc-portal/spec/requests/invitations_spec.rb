@@ -417,7 +417,12 @@ RSpec.describe 'Invitations', type: :request do
               post invitation_url_for(org_id, invitation, 'login'), params: provider_params
               get '/auth/failure?message=verification_failure'
 
-              expect(response.body).to include('Your identity could not be verified')
+              if provider == :login_dot_gov
+                expect(response.body).to include("We couldn't verify your identity")
+                expect(response.body).to include('This may be due to incorrect information or a technical issue.')
+              else
+                expect(response.body).to include('Your identity could not be verified')
+              end
             end
           end
         end
@@ -449,7 +454,12 @@ RSpec.describe 'Invitations', type: :request do
               post invitation_url_for(org_id, invitation, 'login'), params: provider_params
               get '/auth/failure?message=verification_failure'
 
-              expect(response.body).to include('Your identity could not be verified')
+              if provider == :login_dot_gov
+                expect(response.body).to include("We couldn't verify your identity")
+                expect(response.body).to include('This may be due to incorrect information or a technical issue.')
+              else
+                expect(response.body).to include('Your identity could not be verified')
+              end
             end
           end
         end
@@ -1269,7 +1279,14 @@ def csp_response(provider, template)
                                     family_name: template['family_name'],
                                     identity_assurance_level: 2 } } }
   response[:extra][:raw_info][:sub] = template['sub'] if provider.to_sym == :clear
+  response[:extra][:raw_info][:ial] = ial_for(provider, template)
   response
+end
+
+def ial_for(provider, template)
+  return CspIdentityAssurance::FACIAL_MATCH_REQUIRED if provider.to_sym == :login_dot_gov
+
+  template['ial']
 end
 
 def bearer_token(provider)
@@ -1288,7 +1305,7 @@ def user_info_template(overrides = {})
     'birthdate' => '1938-10-06',
     'social_security_number' => '900888888',
     'verified_at' => 1_704_834_157,
-    'ial' => 'http://idmanagement.gov/ns/assurance/ial/2',
+    'ial' => CspIdentityAssurance::IAL2,
     'aal' => 'urn:gov:gsa:ac:classes:sp:PasswordProtectedTransport:duo'
   }.merge(overrides)
 end
