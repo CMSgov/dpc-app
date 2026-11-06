@@ -106,7 +106,7 @@ then
 
   if [ -z "$TARGET_GROUP_ARN" ]
   then
-    echo "ERROR: Target Group ${TARGET_GROUP//-tg/} not found or naming mismatch. Skipping ELB health check and exiting as a failure."
+    echo "ERROR: Target Group ${TARGET_GROUP//-v9-tg/} not found or naming mismatch. Skipping ELB health check and exiting as a failure."
     exit 1
   else
     echo "Found Target Group ARN: $TARGET_GROUP_ARN"
