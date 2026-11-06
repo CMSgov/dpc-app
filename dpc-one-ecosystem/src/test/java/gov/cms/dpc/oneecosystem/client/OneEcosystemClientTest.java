@@ -28,7 +28,8 @@ class OneEcosystemClientTest {
         );
 
         int statusCode = client.callLegacyEndpoint();
-        assertNotEquals(403, statusCode, "should not get a 403");
+        // note: testing with an invalid bearer token as of 11/6/26 does not return a 401
+        assertNotEquals(401, statusCode, "should not get a 401");
 
         // update this when we can move to other api calls and check for a valid response
         assertEquals(400, statusCode,
