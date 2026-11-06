@@ -51,7 +51,7 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
     public OneEcosystemClientImpl(String apiHost, String clientId, String clientSecret) {
         logger.info("Attempting to connect to host: {}", apiHost);
 
-        this.apiBaseUrl = URI.create("https://" + apiHost); // need to figure out if I should pass in protocol // just make it work
+        this.apiBaseUrl = URI.create("https://" + apiHost);
         this.clientId = clientId;
         this.clientSecret = clientSecret;
 
