@@ -20,7 +20,7 @@ jobs:
       matrix:
         include:
           - service: api
-            script_params: api-https api frontend v9
+            script_params: api-v9-tg-https api frontend v9
             skip: false
           - service: attribution
             script_params: none attribution backend v9
@@ -29,13 +29,13 @@ jobs:
             script_params: none aggregation backend v9
             skip: false
           - service: web
-            script_params: web-v2-1-https web frontend v9
+            script_params: web-v2-1-v9-tg-https web frontend v9
             skip: ${{ inputs.env == 'prod' }}
           - service: admin
-            script_params: web-admin-https web-admin frontend v9
+            script_params: web-admin-v9-tg-https web-admin frontend v9
             skip: ${{ inputs.env == 'prod' }}
           - service: web-portal
-            script_params: web-portal-https web-portal frontend v9
+            script_params: web-portal-v9-tg-https web-portal frontend v9
             skip: ${{ inputs.env == 'sandbox' }}
           - service: async-portal
             script_params: none async-portal frontend v9
