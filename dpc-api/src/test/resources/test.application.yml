@@ -96,6 +96,9 @@ bbclient:
 
 oneEcosystemClient:
   useMock: ${USE_BFD_MOCK:-true}
+  apiBaseUrl: ${ONE_ECOSYSTEM_API_BASE_URL:-"dev.bcda.cms.gov"}
+  clientId: ${ONE_ECOSYSTEM_CLIENT_ID}
+  clientSecret: ${ONE_ECOSYSTEM_CLIENT_SECRET}
 
 attributionClient:
   serverBaseUrl: ${ATTRIBUTION_URL:-"http://localhost:3500/v1/"}
