@@ -14,8 +14,8 @@ import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpResponse;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -89,21 +89,20 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
 
     /**
      * For testing oauth against BCDA's "dev" env
-     * The caller must close the response after reading it to release the connection.
+     *   Should return a non-403 status code to indicate request has been authenticated
      */
-    public ClassicHttpResponse callLegacyEndpoint() {
+    public int callLegacyEndpoint() {
         URI endpoint = apiBaseUrl.resolve("api/v3/jobs");
         HttpGet request = new HttpGet(endpoint);
         request.setHeader("Authorization", "Bearer " + currentToken());
         request.setHeader("Accept", "application/fhir+json");
         try {
-            return httpClient.executeOpen(null, request, null);
+            return httpClient.execute(request, HttpResponse::getCode);
         } catch (IOException e) {
             throw new UncheckedIOException("NEWBE legacy request failed", e);
         }
     }
 
-    // Serialize token acquisition so concurrent callers share a single replacement token.
     private synchronized String currentToken() {
         if (accessToken != null && Instant.now().isBefore(tokenExpiration)) {
             return accessToken;
@@ -137,8 +136,10 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
         }
     }
 
-    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication
-    // "basic" auth for BCDA to provide creds
+    /**
+     * Get "basic" auth header to pass in credentials for token request
+     * https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication
+     */
     private String clientCredentialsBasicAuth() {
         String credentials = clientId + ":" + clientSecret;
         return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));

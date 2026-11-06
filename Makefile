@@ -237,10 +237,11 @@ unit-tests:
 .PHONY: load-tests
 load-tests: start-api-load-tests start-load-tests down-dpc-load-tests
 
+# For manually invoking @Disabled test, mvn should pick it up automatically after @Disabled is removed
 .PHONY: one-ecosystem-integration-tests
 one-ecosystem-integration-tests:
 	mvn verify -pl dpc-one-ecosystem -Pintegration-tests \
-  		-Dit.test=OneEcosystemClientDevTest \
+  		-Dit.test=OneEcosystemClientTest \
   		'-Djunit.jupiter.conditions.deactivate=org.junit.*DisabledCondition'
 
 .PHONY: ci-api-client-integration
