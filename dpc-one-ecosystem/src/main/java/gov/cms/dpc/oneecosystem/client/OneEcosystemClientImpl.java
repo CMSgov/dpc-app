@@ -12,7 +12,6 @@ import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpResponse;
@@ -121,16 +120,18 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
         request.setHeader(HttpHeaders.ACCEPT, "application/json");
         request.setHeader(HttpHeaders.AUTHORIZATION, clientCredentialsBasicAuth());
 
-        try (CloseableHttpResponse response = httpClient.execute(request)) {
-            if (!HttpStatus.isSuccess(response.getCode())) {
-                throw new IllegalStateException("Error requesting token: " + response.getReasonPhrase());
-            }
-            var token = objectMapper.readTree(response.getEntity().getContent());
-            tokenExpiration = Instant.now().plusSeconds(
-                token.path("expires_in").asLong() - REQUEST_TIMEOUT_SECONDS
-            );
-            accessToken = token.path("access_token").asText();
-            return accessToken;
+        try {
+            return httpClient.execute(request, response -> {
+                if (!HttpStatus.isSuccess(response.getCode())) {
+                    throw new IllegalStateException("Error requesting token: " + response.getReasonPhrase());
+                }
+                var token = objectMapper.readTree(response.getEntity().getContent());
+                tokenExpiration = Instant.now().plusSeconds(
+                        token.path("expires_in").asLong() - REQUEST_TIMEOUT_SECONDS
+                );
+                accessToken = token.path("access_token").asText();
+                return accessToken;
+            });
         } catch (IOException e) {
             throw new UncheckedIOException("token request failed", e);
         }
@@ -138,7 +139,7 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
 
     /**
      * Get "basic" auth header to pass in credentials for token request
-     * https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication">...</a>
      */
     private String clientCredentialsBasicAuth() {
         String credentials = clientId + ":" + clientSecret;
