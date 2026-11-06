@@ -8,13 +8,16 @@ import gov.cms.dpc.oneecosystem.models.OneEcosystemExportRequest;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemExportResponse;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemJobStatus;
 import io.dropwizard.jackson.Jackson;
-import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.util.Timeout;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -32,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 public class OneEcosystemClientImpl implements OneEcosystemClient {
 
-    private static final int REQUEST_TIMEOUT_SECONDS = 60;
+    private static final int REQUEST_TIMEOUT = 5000; // ms
     private final URI apiBaseUrl;
     private final String clientId;
     private final String clientSecret;
@@ -51,7 +54,21 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
         this.apiBaseUrl = URI.create("https://" + apiHost); // need to figure out if I should pass in protocol // just make it work
         this.clientId = clientId;
         this.clientSecret = clientSecret;
-        this.httpClient = HttpClients.createDefault();
+
+        Timeout requestTimeout = Timeout.ofMilliseconds(REQUEST_TIMEOUT);
+        var connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                .setDefaultConnectionConfig(ConnectionConfig.custom()
+                        .setConnectTimeout(requestTimeout)
+                        .build())
+                .build();
+        RequestConfig defaultConfig = RequestConfig.custom()
+                .setResponseTimeout(requestTimeout)
+                .setConnectionRequestTimeout(requestTimeout)
+                .build();
+        this.httpClient = HttpClients.custom()
+                .setConnectionManager(connectionManager)
+                .setDefaultRequestConfig(defaultConfig)
+                .build();
         this.objectMapper = Jackson.newObjectMapper();
 
         FhirContext context = FhirContext.forR4();
@@ -107,16 +124,12 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
             return accessToken;
         }
 
-        accessToken = requestToken();
-        return accessToken;
+        return requestToken();
     }
 
     private String requestToken() {
         URI endpoint = apiBaseUrl.resolve("/auth/token");
         HttpPost request = new HttpPost(endpoint);
-        request.setConfig(RequestConfig.custom()
-            .setResponseTimeout(REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-            .build());
         request.setHeader(HttpHeaders.ACCEPT, "application/json");
         request.setHeader(HttpHeaders.AUTHORIZATION, clientCredentialsBasicAuth());
 
@@ -126,9 +139,10 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
                     throw new IllegalStateException("Error requesting token: " + response.getReasonPhrase());
                 }
                 var token = objectMapper.readTree(response.getEntity().getContent());
-                tokenExpiration = Instant.now().plusSeconds(
-                        token.path("expires_in").asLong() - REQUEST_TIMEOUT_SECONDS
-                );
+
+                long safeTokenLifetime = Math.max(
+                        token.path("expires_in").asLong() - TimeUnit.MILLISECONDS.toSeconds(REQUEST_TIMEOUT), 0L);
+                tokenExpiration = Instant.now().plusSeconds(safeTokenLifetime);
                 accessToken = token.path("access_token").asText();
                 return accessToken;
             });
