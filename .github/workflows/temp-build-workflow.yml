@@ -7,7 +7,10 @@ name: 'DPC - Dev Multi-Branch Test Builds'
 
 on:
   workflow_dispatch:
-  push:
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   build_dev:
