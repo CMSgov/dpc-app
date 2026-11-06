@@ -55,20 +55,7 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
 
-        Timeout requestTimeout = Timeout.ofMilliseconds(REQUEST_TIMEOUT);
-        var connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-                .setDefaultConnectionConfig(ConnectionConfig.custom()
-                        .setConnectTimeout(requestTimeout)
-                        .build())
-                .build();
-        RequestConfig defaultConfig = RequestConfig.custom()
-                .setResponseTimeout(requestTimeout)
-                .setConnectionRequestTimeout(requestTimeout)
-                .build();
-        this.httpClient = HttpClients.custom()
-                .setConnectionManager(connectionManager)
-                .setDefaultRequestConfig(defaultConfig)
-                .build();
+        this.httpClient = createHttpClient();
         this.objectMapper = Jackson.newObjectMapper();
 
         FhirContext context = FhirContext.forR4();
@@ -117,6 +104,23 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
         } catch (IOException e) {
             throw new UncheckedIOException("NEWBE legacy request failed", e);
         }
+    }
+
+    private static CloseableHttpClient createHttpClient() {
+        Timeout requestTimeout = Timeout.ofMilliseconds(REQUEST_TIMEOUT);
+        var connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                .setDefaultConnectionConfig(ConnectionConfig.custom()
+                        .setConnectTimeout(requestTimeout)
+                        .build())
+                .build();
+        RequestConfig defaultConfig = RequestConfig.custom()
+                .setResponseTimeout(requestTimeout)
+                .setConnectionRequestTimeout(requestTimeout)
+                .build();
+        return HttpClients.custom()
+                .setConnectionManager(connectionManager)
+                .setDefaultRequestConfig(defaultConfig)
+                .build();
     }
 
     private synchronized String currentToken() {
