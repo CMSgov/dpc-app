@@ -40,7 +40,7 @@ RSpec.describe 'Clear', type: :request do
                              given_name: 'Bob',
                              family_name: 'Hoskins',
                              SSN: '123456789',
-                             ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } }
+                             ial: CspIdentityAssurance::IAL2 } } }
     end
 
     clear_config = {
@@ -65,7 +65,7 @@ RSpec.describe 'Clear', type: :request do
                                                         given_name: 'Bob',
                                                         family_name: 'Hoskins',
                                                         SSN: '123456789',
-                                                        ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
+                                                        ial: CspIdentityAssurance::IAL2 } } })
 
         user = create(:user)
         create(:csp_user, user:, uuid:, csp:)
@@ -108,7 +108,7 @@ RSpec.describe 'Clear', type: :request do
                                                         given_name: 'Bob',
                                                         family_name: 'Hoskins',
                                                         SSN: '123456789',
-                                                        ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
+                                                        ial: CspIdentityAssurance::IAL2 } } })
 
         user = create(:user)
         csp_user = create(:csp_user, user:, uuid:, csp:)
@@ -151,7 +151,7 @@ RSpec.describe 'Clear', type: :request do
                                                         given_name: 'Bob',
                                                         family_name: 'Hoskins',
                                                         SSN: '123456789',
-                                                        ial: 'http://idmanagement.gov/ns/assurance/ial/2' } } })
+                                                        ial: CspIdentityAssurance::IAL2 } } })
 
         user = create(:user)
         csp_user = create(:csp_user, user:, uuid:, csp:)

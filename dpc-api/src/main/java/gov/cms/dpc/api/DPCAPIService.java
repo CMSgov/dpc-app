@@ -28,6 +28,7 @@ import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.common.utils.UrlGenerator;
 import gov.cms.dpc.fhir.FHIRModule;
 import gov.cms.dpc.macaroons.BakeryModule;
+import gov.cms.dpc.oneecosystem.OneEcosystemClientModule;
 import gov.cms.dpc.queue.JobQueueModule;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
@@ -137,6 +138,8 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
                         new FHIRModule<DPCAPIConfiguration>(),
                         new AttributionClientModule<DPCAPIConfiguration>(),
                         new BlueButtonClientModule<DPCAPIConfiguration>())
+                        new BlueButtonClientModule<DPCAPIConfiguration>(),
+                        new OneEcosystemClientModule<DPCAPIConfiguration>())
                 .build();
     }
 
@@ -147,6 +150,24 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
     }
 
     private void setupCustomBundles(final Bootstrap<DPCAPIConfiguration> bootstrap) {
+
+        bootstrap.addBundle(new MigrationsBundle<>() {
+            @Override
+            public DataSourceFactory getDataSourceFactory(DPCAPIConfiguration configuration) {
+                return configuration.getQueueDatabase();
+            }
+
+            @Override
+            public String getMigrationsFileName() {
+                return "migrations/queue.migrations.xml";
+            }
+
+            @Override
+            public String name() {
+                return "queuedb";
+            }
+        });
+
         bootstrap.addBundle(new MigrationsBundle<>() {
             @Override
             public DataSourceFactory getDataSourceFactory(DPCAPIConfiguration configuration) {

@@ -68,6 +68,10 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(PatientResource.class);
         binder.bind(PractitionerResource.class);
 
+        // V3 Resources
+        binder.bind(gov.cms.dpc.api.resources.r4.BaseResource.class);
+        binder.bind(gov.cms.dpc.api.resources.r4.GroupResource.class);
+
         // DAO
         binder.bind(PublicKeyDAO.class);
         binder.bind(TokenDAO.class);

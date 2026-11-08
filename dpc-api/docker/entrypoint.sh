@@ -43,6 +43,7 @@ CONF_FILE="/app/resources/application.yml"
 
 if [ $DB_MIGRATION -eq 1 ]; then
   echo "Migrating the database"
+  eval java "${JAVA_CLASSES}" queuedb migrate ${CONF_FILE} --migrations "/app/resources/migrations/queue.migrations.xml"
   eval "java ${CONF_FLAGS} ${JAVA_CLASSES} db migrate ${CONF_FILE}"
 fi
 

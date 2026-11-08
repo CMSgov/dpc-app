@@ -1,23 +1,37 @@
-<h1>Your identity could not be verified with <%= @csp_display_name %></h1>
-<div class="usa-prose">
-  <p>You've been returned to the DPC Portal because your identity verification with <%= @csp_display_name %> wasn't completed.</p>
-
-  <% if @current_csp == :login_dot_gov %>
-    <p><%= link_to 'Get help from Login.gov', 'https://www.login.gov/help/verify-your-identity/overview/' %></p>
-    <p><%= link_to 'Contact Login.gov ', 'https://www.login.gov/contact/' %></p>
-  <% elsif @current_csp == :id_me %>
-    <p><%= link_to 'ID.me Help Center', 'https://help.id.me/hc/en-us' %></p>
-  <% elsif @current_csp == :clear %>
-    <p><%= link_to 'CLEAR Support', 'https://www.clearme.com/support' %></p>
-  <% end %>
-</div>
+<% if @current_csp == :login_dot_gov %>
+  <h1>We couldn't verify your identity</h1>
+  <div class="usa-prose">
+    <p>We were unable to verify your identity with Login.gov. This may be due to incorrect information or a technical issue.</p>
+      <p><span class="text-bold">Here's what you can try:</span></p>
+      <ol>
+        <li>If you are having issues creating or logging into a Login.gov account, please review
+            <%= link_to "Login.gov's Help Section", 'https://www.login.gov/help/verify-your-identity/overview/' %>
+            or <%= link_to 'contact them', 'https://www.login.gov/contact/' %> directly.</li>
+        <li>Try another identity service provider &mdash; CLEAR or ID.me are also accepted.</li>
+        <li>If you still can't verify your identity after checking Login.gov's help section or contacting them directly, contact us at
+            <%= mail_to 'dpcinfo@cms.hhs.gov' %>.</li>
+      </ol>
+  </div>
+<% else %>
+  <h1>Your identity could not be verified with <%= @csp_display_name %></h1>
+  <div class="usa-prose">
+    <p>You've been returned to the DPC Portal because your identity verification with <%= @csp_display_name %> wasn't completed.</p>
+    <% if @current_csp == :id_me %>
+      <p><%= link_to 'ID.me Help Center', 'https://help.id.me/hc/en-us' %></p>
+    <% elsif @current_csp == :clear %>
+      <p><%= link_to 'CLEAR Support', 'https://www.clearme.com/support' %></p>
+    <% end %>
+  </div>
+<% end %>
 
 <div class="margin-y-3">
-  <%= render Core::Button::ButtonComponent.new(label: "Sign out of #{@csp_display_name}",
-      destination: csp_logout_path(invitation_token: @invitation&.token, current_csp: @current_csp),
-      method: :delete) %>
-</div>
+  <%= render Core::Button::ButtonComponent.new(
+          label: "Sign out of #{@csp_display_name}",
+          destination: csp_logout_path(invitation_token: @invitation&.token, current_csp: @current_csp),
+          method: :delete) %></div>
 
-<div class="usa-prose">
-  <p><span class="text-bold">Still need help?</span> Contact us at <%= mail_to 'dpcinfo@cms.hhs.gov' %></p>
-</div>
+<% unless @current_csp == :login_dot_gov %>
+  <div class="usa-prose">
+    <p><span class="text-bold">Still need help?</span> Contact us at <%= mail_to 'dpcinfo@cms.hhs.gov' %></p>
+  </div>
+<% end %>
