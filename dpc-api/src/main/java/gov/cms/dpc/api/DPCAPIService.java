@@ -128,18 +128,17 @@ public class DPCAPIService extends Application<DPCAPIConfiguration> {
         JerseyGuiceUtils.reset();
         return GuiceBundle.builder()
                 .modules(
-                        new DPCQueueHibernateModule<>(hibernateQueueBundle),
-                        new DPCAuthHibernateModule<>(hibernateAuthBundle),
-                        new DPCConsentHibernateModule<>(hibernateConsentBundle),
-                        new AuthModule(),
-                        new BakeryModule(),
-                        new DPCAPIModule(hibernateAuthBundle),
-                        new JobQueueModule<>(),
-                        new FHIRModule<DPCAPIConfiguration>(),
-                        new AttributionClientModule<DPCAPIConfiguration>(),
-                        new BlueButtonClientModule<DPCAPIConfiguration>())
-                        new BlueButtonClientModule<DPCAPIConfiguration>(),
-                        new OneEcosystemClientModule<DPCAPIConfiguration>())
+                    new DPCQueueHibernateModule<>(hibernateQueueBundle),
+                    new DPCAuthHibernateModule<>(hibernateAuthBundle),
+                    new DPCConsentHibernateModule<>(hibernateConsentBundle),
+                    new AuthModule(),
+                    new BakeryModule(),
+                    new DPCAPIModule(hibernateAuthBundle),
+                    new JobQueueModule<>(),
+                    new FHIRModule<DPCAPIConfiguration>(),
+                    new AttributionClientModule<DPCAPIConfiguration>(),
+                    new BlueButtonClientModule<DPCAPIConfiguration>(),
+                    new OneEcosystemClientModule<DPCAPIConfiguration>())
                 .build();
     }
 
