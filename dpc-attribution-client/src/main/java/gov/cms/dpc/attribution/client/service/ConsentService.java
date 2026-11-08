@@ -2,7 +2,6 @@ package gov.cms.dpc.attribution.client.service;
 
 import gov.cms.dpc.common.jdbi.ConsentDAO;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
-import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.converters.entities.r4.ConsentEntityConverter;
 import jakarta.inject.Named;
 import org.hl7.fhir.r4.model.Consent;
@@ -42,7 +41,7 @@ public class ConsentService {
         // MBI -> ConsentResult(s)
         final Map<String, List<ConsentResult>> consentsByMbi = doConsentSearch(mbis).stream()
             .collect(Collectors.groupingBy(
-                entity -> FHIRExtractors.parseTag(entity.getMbi()).getRight(),
+                ConsentEntity::getMbi,
                 Collectors.mapping(this::toConsentResult, Collectors.toList())));
 
         // Filter for patients that haven't opted out and return list
@@ -65,24 +64,23 @@ public class ConsentService {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private boolean isOptedOut(Optional<List<ConsentResult>> consentResultsOptional) {
         if (consentResultsOptional.isPresent()) {
-            final List<ConsentResult> consentResults = consentResultsOptional.get();
+            // Filter out future opt outs and find the latest current one.
+            final Instant now = Instant.now();
+            final List<ConsentResult> consentResults = consentResultsOptional.get().stream()
+                .filter(consent -> !consent.getConsentDate().isAfter(now))
+                .toList();
             if (consentResults.isEmpty()) {
                 return false;
             }
             final ConsentResult latestConsent = Collections.max(consentResults, Comparator.comparing(ConsentResult::getConsentDate));
             final boolean isActive = latestConsent.isActive();
             final boolean isOptOut = ConsentResult.PolicyType.OPT_OUT.equals(latestConsent.getPolicyType());
-            final boolean isFutureConsent = latestConsent.getConsentDate().isAfter(Instant.now());
-            return isActive && isOptOut && !isFutureConsent;
+            return isActive && isOptOut;
         }
         return true;
     }
 
     private List<ConsentEntity> doConsentSearch(List<String> mbis) {
-        List<String> fullMbis = mbis.stream()
-                .map( mbi -> String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), mbi) )
-                .toList();
-
-        return this.consentDAO.findByMbis(fullMbis);
+        return this.consentDAO.findByMbis(mbis);
     }
 }
