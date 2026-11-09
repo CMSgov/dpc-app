@@ -1,8 +1,7 @@
 package gov.cms.dpc.aggregation.service;
 
-import gov.cms.dpc.common.jdbi.ConsentDAO;
 import gov.cms.dpc.common.consent.entities.ConsentEntity;
-import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.common.jdbi.ConsentDAO;
 import gov.cms.dpc.fhir.converters.entities.stu3.ConsentEntityConverter;
 import jakarta.inject.Named;
 import org.hl7.fhir.dstu3.model.Consent;
@@ -42,10 +41,6 @@ public class ConsentServiceImpl implements ConsentService {
     }
 
     private List<ConsentEntity> doConsentSearch(List<String> mbis) {
-        List<String> fullMbis = mbis.stream()
-                .map( mbi -> String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), mbi) )
-                .toList();
-
-        return this.consentDAO.findByMbis(fullMbis);
+        return this.consentDAO.findByMbis(mbis);
     }
 }
