@@ -5,6 +5,7 @@ import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
+import gov.cms.dpc.queue.models.JobQueueBatchFilterClaim;
 import gov.cms.dpc.testing.AbstractMultipleDAOTest;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 	DistributedBatchQueueUnitTest() {
-		super(JobQueueBatch.class, JobQueueBatchFile.class);
+		super(JobQueueBatch.class, JobQueueBatchFile.class, JobQueueBatchFilterClaim.class);
 	}
 
 	private DistributedBatchQueue queue;

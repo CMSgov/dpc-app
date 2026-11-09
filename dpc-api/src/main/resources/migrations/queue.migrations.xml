@@ -247,5 +247,17 @@
                                 constraintName="fk_job_batch_id_filter_claims"
                                 referencedTableName="JOB_QUEUE_BATCH" referencedColumnNames="batch_id"/>
     </changeSet>
+    <changeSet id="add-one-eco-job-id" author="ashley-weaver">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="JOB_QUEUE_BATCH" columnName="one_eco_job_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="JOB_QUEUE_BATCH">
+            <column name="one_eco_job_id" type="UUID">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

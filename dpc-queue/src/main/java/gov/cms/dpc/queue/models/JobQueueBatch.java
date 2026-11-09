@@ -27,7 +27,7 @@ public class JobQueueBatch implements Serializable {
     private static final long serialVersionUID = -578824686165779398L;
 
     /**
-     * The list of resource type supported by DCP
+     * The list of resource type supported by DPC
      */
     public static final List<DPCResourceType> validResourceTypes = List.of(
             DPCResourceType.Patient,
@@ -173,11 +173,43 @@ public class JobQueueBatch implements Serializable {
     @JoinColumn(name = "batch_id", insertable = false, updatable = false, nullable = false)
     private List<JobQueueBatchFile> jobQueueBatchFiles;
 
+    /**
+     * The filter claims applied to this batch. Populated for v3 group export jobs.
+     */
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "batch_id", insertable = false, updatable = false, nullable = false)
+    private List<JobQueueBatchFilterClaim> jobQueueBatchFilterClaims;
+
     @Column(name = "requesting_ip")
     private String requestingIP;
 
     @Column(name = "is_bulk")
     private boolean isBulk;
+
+    /**
+     * The id of the group this job is exporting, for group export requests.
+     */
+    @Column(name = "group_id")
+    private UUID groupID;
+
+    /**
+     * Where this export request originated.
+     */
+    @Column(name = "export_source")
+    private String exportSource;
+
+    /**
+     * The version of the API under which this job was created.
+     */
+    @Column(name = "export_version")
+    private String exportVersion;
+
+    /**
+     * The id of the corresponding job in the shared backend, once this job has been sent there.
+     */
+    @Column(name = "one_eco_job_id")
+    private UUID oneEcoJobID;
+
 
     public JobQueueBatch() {
     }
@@ -193,6 +225,24 @@ public class JobQueueBatch implements Serializable {
                          String requestingIP,
                          String requestUrl,
                          boolean isBulk) {
+        this(jobID, orgID, orgNPI, providerNPI, patients, resourceTypes, since, transactionTime,
+                requestingIP, requestUrl, isBulk, null, "internal-dpc", "v1");
+    }
+
+    public JobQueueBatch(UUID jobID,
+                         UUID orgID,
+                         String orgNPI,
+                         String providerNPI,
+                         List<String> patients,
+                         List<DPCResourceType> resourceTypes,
+                         OffsetDateTime since,
+                         OffsetDateTime transactionTime,
+                         String requestingIP,
+                         String requestUrl,
+                         boolean isBulk,
+                         UUID groupID,
+                         String exportSource,
+                         String exportVersion) {
         this.batchID = UUID.randomUUID();
         this.jobID = jobID;
         this.orgID = orgID;
@@ -205,9 +255,13 @@ public class JobQueueBatch implements Serializable {
         this.status = JobStatus.QUEUED;
         this.submitTime = OffsetDateTime.now(ZoneOffset.UTC);
         this.jobQueueBatchFiles = new ArrayList<>();
+        this.jobQueueBatchFilterClaims = new ArrayList<>();
         this.requestingIP = requestingIP;
         this.requestUrl = requestUrl;
         this.isBulk = isBulk;
+        this.groupID = groupID;
+        this.exportSource = exportSource;
+        this.exportVersion = exportVersion;
     }
 
     /**
@@ -236,6 +290,13 @@ public class JobQueueBatch implements Serializable {
             return false;
         }
         return requestUrl.toLowerCase().contains("/v2/");
+    }
+
+    /**
+     * Is the job a v3 job, based on {@code export_version}.
+     */
+    public Boolean isV3() {
+        return exportVersion != null && exportVersion.equalsIgnoreCase("v3");
     }
 
     public UUID getBatchID() {
@@ -330,6 +391,26 @@ public class JobQueueBatch implements Serializable {
         return isBulk;
     }
 
+    public Optional<UUID> getGroupID() {
+        return Optional.ofNullable(groupID);
+    }
+
+    public String getExportSource() {
+        return exportSource;
+    }
+
+    public String getExportVersion() {
+        return exportVersion;
+    }
+
+    public Optional<UUID> getOneEcoJobID() {
+        return Optional.ofNullable(oneEcoJobID);
+    }
+
+    public void setOneEcoJobID(UUID oneEcoJobID) {
+        this.oneEcoJobID = oneEcoJobID;
+    }
+
     public List<JobQueueBatchFile> getJobQueueBatchFiles() {
         return jobQueueBatchFiles;
     }
@@ -359,6 +440,19 @@ public class JobQueueBatch implements Serializable {
             this.jobQueueBatchFiles.add(file);
             return file;
         }
+    }
+
+    public List<JobQueueBatchFilterClaim> getJobQueueBatchFilterClaims() {
+        return jobQueueBatchFilterClaims;
+    }
+
+    public synchronized JobQueueBatchFilterClaim addJobQueueBatchFilterClaim(DPCResourceType resourceType,
+                                                                             String filterKey,
+                                                                             String operator,
+                                                                             String filterValue) {
+        JobQueueBatchFilterClaim claim = new JobQueueBatchFilterClaim(batchID, jobID, resourceType, filterKey, operator, filterValue);
+        this.jobQueueBatchFilterClaims.add(claim);
+        return claim;
     }
 
     /**
@@ -534,7 +628,12 @@ public class JobQueueBatch implements Serializable {
                 .append(completeTime, that.completeTime)
                 .append(requestingIP, that.requestingIP)
                 .append(requestUrl, that.requestUrl)
+                .append(groupID, that.groupID)
+                .append(exportSource, that.exportSource)
+                .append(exportVersion, that.exportVersion)
+                .append(oneEcoJobID, that.oneEcoJobID)
                 .append(jobQueueBatchFiles, that.jobQueueBatchFiles)
+                .append(jobQueueBatchFilterClaims, that.jobQueueBatchFilterClaims)
                 .isEquals();
     }
 
@@ -561,6 +660,10 @@ public class JobQueueBatch implements Serializable {
                 .append(completeTime)
                 .append(requestingIP)
                 .append(requestUrl)
+                .append(groupID)
+                .append(exportSource)
+                .append(exportVersion)
+                .append(oneEcoJobID)
                 .toHashCode();
     }
 
@@ -588,6 +691,10 @@ public class JobQueueBatch implements Serializable {
                 ", requestUrl='" + requestUrl + '\'' +
                 ", requestingIP='" + requestingIP + '\'' +
                 ", isBulk=" + isBulk +
+                ", groupID=" + groupID +
+                ", exportSource='" + exportSource + '\'' +
+                ", exportVersion='" + exportVersion + '\'' +
+                ", oneEcoJobID=" + oneEcoJobID +
                 '}';
     }
 }

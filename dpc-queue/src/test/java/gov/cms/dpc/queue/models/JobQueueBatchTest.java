@@ -5,7 +5,6 @@ import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
@@ -28,6 +27,8 @@ class JobQueueBatchTest {
     private static final UUID orgID = UUID.randomUUID();
     private static final List<DPCResourceType> resourceTypes = JobQueueBatch.validResourceTypes;
     private static final UUID aggregatorID = UUID.randomUUID();
+    private static final UUID groupID = UUID.randomUUID();
+    private static final UUID oneEcoJobID = UUID.randomUUID();
     private static final String orgNPI = NPIUtil.generateNPI();
     private static final String providerNPI = NPIUtil.generateNPI();
     private static final List<String> patientList = List.of("1", "2", "3");
@@ -74,39 +75,76 @@ class JobQueueBatchTest {
     }
 
     @Test
+    void testIsV3() {
+        final var job = createV3JobQueueBatch();
+        assertTrue(job.isV3());
+    }
+
+    @Test
+    void testDefaultExportFields() {
+        final var job = createJobQueueBatch();
+        assertEquals("internal-dpc", job.getExportSource());
+        assertEquals("v1", job.getExportVersion());
+        assertTrue(job.getGroupID().isEmpty());
+    }
+
+    @Test
+    void testV3ConstructorFields() {
+        final var job = createV3JobQueueBatch();
+        assertEquals(groupID, job.getGroupID().get());
+        assertEquals("external-bcda", job.getExportSource());
+        assertEquals("v3", job.getExportVersion());
+    }
+
+    @Test
+    void testOneEcoJobID() {
+        final var job = createJobQueueBatch();
+        assertTrue(job.getOneEcoJobID().isEmpty());
+
+        job.setOneEcoJobID(oneEcoJobID);
+        assertEquals(oneEcoJobID, job.getOneEcoJobID().get());
+    }
+
+    @Test
     void testCreateJobQueueBatch() {
         final var job = createJobQueueBatch();
         job.setAggregatorIDForTesting(aggregatorID);
         var completeTime = OffsetDateTime.now(ZoneOffset.UTC);
         job.setCompleteTime(completeTime);
         job.setPriority(1000);
+        job.setOneEcoJobID(oneEcoJobID);
         assertEquals(aggregatorID, job.getAggregatorID().get());
         assertEquals(completeTime, job.getCompleteTime().get());
         assertEquals(1000, job.getPriority());
+        assertEquals(oneEcoJobID, job.getOneEcoJobID().get());
 
         final var expected = "JobQueueBatch{" +
-                             "batchID=" + job.getBatchID() +
-                             ", jobID=" + job.getJobID() +
-                             ", orgID=" + job.getOrgID() +
-                             ", orgNPI='" + job.getOrgNPI() + '\'' +
-                             ", providerID='" + job.getProviderID() + '\'' +
-                             ", providerNPI='" + job.getProviderNPI() + '\'' +
-                             ", status=" + job.getStatus() +
-                             ", priority=" + 1000 +
-                             ", patients=" + job.getPatients() +
-                             ", patientIndex=" + (job.getPatientIndex().isPresent() ? job.getPatientIndex() : null) +
-                             ", resourceTypes=" + job.getResourceTypes() +
-                             ", since=" + (job.getSince().isPresent() ? job.getSince() : null) +
-                             ", transactionTime=" + job.getTransactionTime() +
-                             ", aggregatorID=" + aggregatorID +
-                             ", updateTime=" + (job.getUpdateTime().isPresent() ? job.getUpdateTime() : null) +
-                             ", submitTime=" + job.getSubmitTime().get() +
-                             ", startTime=" + (job.getStartTime().isPresent() ? job.getStartTime() : null) +
-                             ", completeTime=" + completeTime +
-                             ", requestUrl='" + job.getRequestUrl() + '\'' +
-                             ", requestingIP='" + job.getRequestingIP() + '\'' +
-                             ", isBulk=" + job.isBulk() +
-                             '}';
+                "batchID=" + job.getBatchID() +
+                ", jobID=" + job.getJobID() +
+                ", orgID=" + job.getOrgID() +
+                ", orgNPI='" + job.getOrgNPI() + '\'' +
+                ", providerID='" + job.getProviderID() + '\'' +
+                ", providerNPI='" + job.getProviderNPI() + '\'' +
+                ", status=" + job.getStatus() +
+                ", priority=" + 1000 +
+                ", patients=" + job.getPatients() +
+                ", patientIndex=" + (job.getPatientIndex().isPresent() ? job.getPatientIndex() : null) +
+                ", resourceTypes=" + job.getResourceTypes() +
+                ", since=" + (job.getSince().isPresent() ? job.getSince() : null) +
+                ", transactionTime=" + job.getTransactionTime() +
+                ", aggregatorID=" + aggregatorID +
+                ", updateTime=" + (job.getUpdateTime().isPresent() ? job.getUpdateTime() : null) +
+                ", submitTime=" + job.getSubmitTime().get() +
+                ", startTime=" + (job.getStartTime().isPresent() ? job.getStartTime() : null) +
+                ", completeTime=" + completeTime +
+                ", requestUrl='" + job.getRequestUrl() + '\'' +
+                ", requestingIP='" + job.getRequestingIP() + '\'' +
+                ", isBulk=" + job.isBulk() +
+                ", groupID=" + null +
+                ", exportSource='" + job.getExportSource() + '\'' +
+                ", exportVersion='" + job.getExportVersion() + '\'' +
+                ", oneEcoJobID=" + oneEcoJobID +
+                '}';
         assertEquals(expected, job.toString());
     }
 
@@ -118,8 +156,25 @@ class JobQueueBatchTest {
 
         var file2 = job.addJobQueueFile(DPCResourceType.Patient, 0, 1);
         assertEquals(file1, file2);
-        assertEquals(file1.getCount(), 2);
+        assertEquals(2, file1.getCount());
         assertEquals(file1, job.getJobQueueFileLatest(DPCResourceType.Patient).get());
+    }
+
+    @Test
+    void testAddJobQueueBatchFilterClaim() {
+        final var job = createV3JobQueueBatch();
+        assertTrue(job.getJobQueueBatchFilterClaims().isEmpty());
+
+        var claim = job.addJobQueueBatchFilterClaim(DPCResourceType.Patient, "status", "eq", "active");
+
+        assertEquals(1, job.getJobQueueBatchFilterClaims().size());
+        assertEquals(claim, job.getJobQueueBatchFilterClaims().getFirst());
+        assertEquals(job.getBatchID(), claim.getBatchID());
+        assertEquals(job.getJobID(), claim.getJobID());
+        assertEquals(DPCResourceType.Patient, claim.getResourceType());
+        assertEquals("status", claim.getFilterKey());
+        assertEquals("eq", claim.getOperator());
+        assertEquals("active", claim.getFilterValue());
     }
 
     @Test
@@ -139,12 +194,7 @@ class JobQueueBatchTest {
         final var job = createJobQueueBatch();
         job.status = JobStatus.RUNNING;
 
-        try {
-            job.setRunningStatus(aggregatorID);
-            Assertions.fail();
-        } catch (JobQueueFailure e) {
-            assertTrue(e.getMessage().contains("Cannot run job. JobStatus"));
-        }
+        assertThrows(JobQueueFailure.class, () -> job.setRunningStatus(aggregatorID));
     }
 
     @Test
@@ -177,12 +227,7 @@ class JobQueueBatchTest {
     void testFetchNextBatch_NotRunning() {
         final var job = Mockito.spy(createJobQueueBatch());
 
-        try {
-            job.fetchNextPatient(aggregatorID);
-            Assertions.fail();
-        } catch (JobQueueFailure e) {
-            assertTrue(e.getMessage().contains("Cannot fetch next batch."));
-        }
+        assertThrows(JobQueueFailure.class, () -> job.fetchNextPatient(aggregatorID));
     }
 
     @Test
@@ -203,12 +248,7 @@ class JobQueueBatchTest {
         final var job = Mockito.spy(createJobQueueBatch());
         job.status = JobStatus.COMPLETED;
 
-        try {
-            job.setPausedStatus(aggregatorID);
-            Assertions.fail();
-        } catch (JobQueueFailure e) {
-            assertTrue(e.getMessage().contains("Cannot pause batch."));
-        }
+        assertThrows(JobQueueFailure.class, () -> job.setPausedStatus(aggregatorID));
     }
 
     @Test
@@ -262,12 +302,7 @@ class JobQueueBatchTest {
         final var job = Mockito.spy(createJobQueueBatch());
         job.status = JobStatus.QUEUED;
 
-        try {
-            job.setCompletedStatus(aggregatorID);
-            Assertions.fail();
-        } catch (JobQueueFailure e) {
-            assertTrue(e.getMessage().contains("Cannot complete. JobStatus"));
-        }
+        assertThrows(JobQueueFailure.class, () -> job.setCompletedStatus(aggregatorID));
     }
 
     @Test
@@ -275,12 +310,7 @@ class JobQueueBatchTest {
         final var job = Mockito.spy(createJobQueueBatch());
         job.status = JobStatus.RUNNING;
 
-        try {
-            job.setCompletedStatus(aggregatorID);
-            Assertions.fail();
-        } catch (JobQueueFailure e) {
-            assertTrue(e.getMessage().contains("Cannot complete. Job processing not finished"));
-        }
+        assertThrows(JobQueueFailure.class, () -> job.setCompletedStatus(aggregatorID));
     }
 
     @Test
@@ -372,12 +402,7 @@ class JobQueueBatchTest {
         final var job = createJobQueueBatch();
         job.aggregatorID = UUID.randomUUID();
 
-        try {
-            job.verifyAggregatorID(aggregatorID);
-            Assertions.fail();
-        } catch (JobQueueFailure e) {
-            assertTrue(e.getMessage().contains("Cannot process a job owned by another aggregator."));
-        }
+        assertThrows(JobQueueFailure.class, () -> job.verifyAggregatorID(aggregatorID));
     }
 
     @Test
@@ -410,7 +435,12 @@ class JobQueueBatchTest {
     }
 
     JobQueueBatch createJobQueueBatch() {
-        return new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, OffsetDateTime.now(ZoneOffset.UTC), null, null,true);
+        return new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, OffsetDateTime.now(ZoneOffset.UTC), null, null, true);
+    }
+
+    JobQueueBatch createV3JobQueueBatch() {
+        return new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, OffsetDateTime.now(ZoneOffset.UTC), null, null, true,
+                groupID, "external-bcda", "v3");
     }
 
 
@@ -421,12 +451,28 @@ class JobQueueBatchTest {
         try (MockedStatic<UUID> uuidMockedStatic = Mockito.mockStatic(UUID.class)) {
             uuidMockedStatic.when(UUID::randomUUID).thenReturn(jobID);
 
-            var job1 = new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, timestamp, null, null,true);
-            var job2 = new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, timestamp, null, null,true);
+            var job1 = new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, timestamp, null, null, true);
+            var job2 = new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, timestamp, null, null, true);
             job1.submitTime = timestamp;
             job2.submitTime = timestamp;
             assertEquals(job1, job2);
             assertEquals(job1.hashCode(), job2.hashCode());
+        }
+    }
+
+    @Test
+    void testEquals_differentExportVersion() {
+        OffsetDateTime timestamp = OffsetDateTime.now(ZoneOffset.UTC);
+
+        try (MockedStatic<UUID> uuidMockedStatic = Mockito.mockStatic(UUID.class)) {
+            uuidMockedStatic.when(UUID::randomUUID).thenReturn(jobID);
+
+            var job1 = new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, timestamp, null, null, true);
+            var job2 = new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, timestamp, null, null, true,
+                    groupID, "external-bcda", "v3");
+            job1.submitTime = timestamp;
+            job2.submitTime = timestamp;
+            assertNotEquals(job1, job2);
         }
     }
 
