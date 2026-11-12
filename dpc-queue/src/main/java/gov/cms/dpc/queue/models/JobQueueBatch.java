@@ -226,7 +226,7 @@ public class JobQueueBatch implements Serializable {
                          String requestUrl,
                          boolean isBulk) {
         this(jobID, orgID, orgNPI, providerNPI, patients, resourceTypes, since, transactionTime,
-                requestingIP, requestUrl, isBulk, null, "internal-dpc", "v1");
+                requestingIP, requestUrl, isBulk, null, "internal-dpc", "V1");
     }
 
     public JobQueueBatch(UUID jobID,

@@ -84,7 +84,7 @@ class JobQueueBatchTest {
     void testDefaultExportFields() {
         final var job = createJobQueueBatch();
         assertEquals("internal-dpc", job.getExportSource());
-        assertEquals("v1", job.getExportVersion());
+        assertEquals("V1", job.getExportVersion());
         assertTrue(job.getGroupID().isEmpty());
     }
 
@@ -93,7 +93,7 @@ class JobQueueBatchTest {
         final var job = createV3JobQueueBatch();
         assertEquals(groupID, job.getGroupID().get());
         assertEquals("external-bcda", job.getExportSource());
-        assertEquals("v3", job.getExportVersion());
+        assertEquals("V3", job.getExportVersion());
     }
 
     @Test
@@ -440,7 +440,7 @@ class JobQueueBatchTest {
 
     JobQueueBatch createV3JobQueueBatch() {
         return new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, OffsetDateTime.now(ZoneOffset.UTC), null, null, true,
-                groupID, "external-bcda", "v3");
+                groupID, "external-bcda", "V3");
     }
 
 
@@ -469,7 +469,7 @@ class JobQueueBatchTest {
 
             var job1 = new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, timestamp, null, null, true);
             var job2 = new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, timestamp, null, null, true,
-                    groupID, "external-bcda", "v3");
+                    groupID, "external-bcda", "V3");
             job1.submitTime = timestamp;
             job2.submitTime = timestamp;
             assertNotEquals(job1, job2);
