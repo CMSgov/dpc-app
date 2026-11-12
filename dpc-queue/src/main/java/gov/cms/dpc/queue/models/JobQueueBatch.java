@@ -53,7 +53,7 @@ public class JobQueueBatch implements Serializable {
     private UUID batchID;
 
     /**
-     * The unique job identifier
+     * The unique job identifier, generated for v1 and from the shared backend for v3
      */
     @Column(name = "job_id")
     private UUID jobID;
@@ -204,64 +204,129 @@ public class JobQueueBatch implements Serializable {
     @Column(name = "export_version")
     private String exportVersion;
 
-    /**
-     * The id of the corresponding job in the shared backend, once this job has been sent there.
-     */
-    @Column(name = "one_eco_job_id")
-    private UUID oneEcoJobID;
-
 
     public JobQueueBatch() {
     }
 
-    public JobQueueBatch(UUID jobID,
-                         UUID orgID,
-                         String orgNPI,
-                         String providerNPI,
-                         List<String> patients,
-                         List<DPCResourceType> resourceTypes,
-                         OffsetDateTime since,
-                         OffsetDateTime transactionTime,
-                         String requestingIP,
-                         String requestUrl,
-                         boolean isBulk) {
-        this(jobID, orgID, orgNPI, providerNPI, patients, resourceTypes, since, transactionTime,
-                requestingIP, requestUrl, isBulk, null, "internal-dpc", "V1");
-    }
-
-    public JobQueueBatch(UUID jobID,
-                         UUID orgID,
-                         String orgNPI,
-                         String providerNPI,
-                         List<String> patients,
-                         List<DPCResourceType> resourceTypes,
-                         OffsetDateTime since,
-                         OffsetDateTime transactionTime,
-                         String requestingIP,
-                         String requestUrl,
-                         boolean isBulk,
-                         UUID groupID,
-                         String exportSource,
-                         String exportVersion) {
+    /**
+     * Use {@link Builder} to construct instances.
+     *
+     * @param b - the populated builder
+     */
+    private JobQueueBatch(Builder b) {
         this.batchID = UUID.randomUUID();
-        this.jobID = jobID;
-        this.orgID = orgID;
-        this.orgNPI = orgNPI;
-        this.providerNPI = providerNPI;
-        this.patients = patients;
-        this.resourceTypes = resourceTypes;
-        this.since = since;
-        this.transactionTime = transactionTime;
+        this.jobID = b.jobID;
+        this.orgID = b.orgID;
+        this.orgNPI = b.orgNPI;
+        this.providerNPI = b.providerNPI;
+        this.patients = b.patients;
+        this.resourceTypes = b.resourceTypes;
+        this.since = b.since;
+        this.transactionTime = b.transactionTime;
         this.status = JobStatus.QUEUED;
         this.submitTime = OffsetDateTime.now(ZoneOffset.UTC);
         this.jobQueueBatchFiles = new ArrayList<>();
         this.jobQueueBatchFilterClaims = new ArrayList<>();
-        this.requestingIP = requestingIP;
-        this.requestUrl = requestUrl;
-        this.isBulk = isBulk;
-        this.groupID = groupID;
-        this.exportSource = exportSource;
-        this.exportVersion = exportVersion;
+        this.requestingIP = b.requestingIP;
+        this.requestUrl = b.requestUrl;
+        this.isBulk = b.isBulk;
+        this.groupID = b.groupID;
+        this.exportSource = b.exportSource;
+        this.exportVersion = b.exportVersion;
+    }
+
+    /**
+     * Builder for {@link JobQueueBatch}. Defaults to v1 values for exportSource and exportVersion.
+     */
+    public static class Builder {
+        private UUID jobID;
+        private UUID orgID;
+        private String orgNPI;
+        private String providerNPI;
+        private List<String> patients;
+        private List<DPCResourceType> resourceTypes;
+        private OffsetDateTime since;
+        private OffsetDateTime transactionTime;
+        private String requestingIP;
+        private String requestUrl;
+        private boolean isBulk;
+        private UUID groupID;
+        private String exportSource = "internal-dpc";
+        private String exportVersion = "V1";
+
+        public Builder jobID(UUID jobID) {
+            this.jobID = jobID;
+            return this;
+        }
+
+        public Builder orgID(UUID orgID) {
+            this.orgID = orgID;
+            return this;
+        }
+
+        public Builder orgNPI(String orgNPI) {
+            this.orgNPI = orgNPI;
+            return this;
+        }
+
+        public Builder providerNPI(String providerNPI) {
+            this.providerNPI = providerNPI;
+            return this;
+        }
+
+        public Builder patients(List<String> patients) {
+            this.patients = patients;
+            return this;
+        }
+
+        public Builder resourceTypes(List<DPCResourceType> resourceTypes) {
+            this.resourceTypes = resourceTypes;
+            return this;
+        }
+
+        public Builder since(OffsetDateTime since) {
+            this.since = since;
+            return this;
+        }
+
+        public Builder transactionTime(OffsetDateTime transactionTime) {
+            this.transactionTime = transactionTime;
+            return this;
+        }
+
+        public Builder requestingIP(String requestingIP) {
+            this.requestingIP = requestingIP;
+            return this;
+        }
+
+        public Builder requestUrl(String requestUrl) {
+            this.requestUrl = requestUrl;
+            return this;
+        }
+
+        public Builder isBulk(boolean isBulk) {
+            this.isBulk = isBulk;
+            return this;
+        }
+
+        public Builder groupID(UUID groupID) {
+            this.groupID = groupID;
+            return this;
+        }
+
+        public Builder exportSource(String exportSource) {
+            this.exportSource = exportSource;
+            return this;
+        }
+
+        public Builder exportVersion(String exportVersion) {
+            this.exportVersion = exportVersion;
+            return this;
+        }
+
+        public JobQueueBatch build() {
+            return new JobQueueBatch(this);
+        }
     }
 
     /**
@@ -401,14 +466,6 @@ public class JobQueueBatch implements Serializable {
 
     public String getExportVersion() {
         return exportVersion;
-    }
-
-    public Optional<UUID> getOneEcoJobID() {
-        return Optional.ofNullable(oneEcoJobID);
-    }
-
-    public void setOneEcoJobID(UUID oneEcoJobID) {
-        this.oneEcoJobID = oneEcoJobID;
     }
 
     public List<JobQueueBatchFile> getJobQueueBatchFiles() {
@@ -631,7 +688,6 @@ public class JobQueueBatch implements Serializable {
                 .append(groupID, that.groupID)
                 .append(exportSource, that.exportSource)
                 .append(exportVersion, that.exportVersion)
-                .append(oneEcoJobID, that.oneEcoJobID)
                 .append(jobQueueBatchFiles, that.jobQueueBatchFiles)
                 .append(jobQueueBatchFilterClaims, that.jobQueueBatchFilterClaims)
                 .isEquals();
@@ -663,7 +719,6 @@ public class JobQueueBatch implements Serializable {
                 .append(groupID)
                 .append(exportSource)
                 .append(exportVersion)
-                .append(oneEcoJobID)
                 .toHashCode();
     }
 
@@ -694,7 +749,6 @@ public class JobQueueBatch implements Serializable {
                 ", groupID=" + groupID +
                 ", exportSource='" + exportSource + '\'' +
                 ", exportVersion='" + exportVersion + '\'' +
-                ", oneEcoJobID=" + oneEcoJobID +
                 '}';
     }
 }

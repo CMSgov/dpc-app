@@ -28,7 +28,6 @@ class JobQueueBatchTest {
     private static final List<DPCResourceType> resourceTypes = JobQueueBatch.validResourceTypes;
     private static final UUID aggregatorID = UUID.randomUUID();
     private static final UUID groupID = UUID.randomUUID();
-    private static final UUID oneEcoJobID = UUID.randomUUID();
     private static final String orgNPI = NPIUtil.generateNPI();
     private static final String providerNPI = NPIUtil.generateNPI();
     private static final List<String> patientList = List.of("1", "2", "3");
@@ -97,26 +96,15 @@ class JobQueueBatchTest {
     }
 
     @Test
-    void testOneEcoJobID() {
-        final var job = createJobQueueBatch();
-        assertTrue(job.getOneEcoJobID().isEmpty());
-
-        job.setOneEcoJobID(oneEcoJobID);
-        assertEquals(oneEcoJobID, job.getOneEcoJobID().get());
-    }
-
-    @Test
     void testCreateJobQueueBatch() {
         final var job = createJobQueueBatch();
         job.setAggregatorIDForTesting(aggregatorID);
         var completeTime = OffsetDateTime.now(ZoneOffset.UTC);
         job.setCompleteTime(completeTime);
         job.setPriority(1000);
-        job.setOneEcoJobID(oneEcoJobID);
         assertEquals(aggregatorID, job.getAggregatorID().get());
         assertEquals(completeTime, job.getCompleteTime().get());
         assertEquals(1000, job.getPriority());
-        assertEquals(oneEcoJobID, job.getOneEcoJobID().get());
 
         final var expected = "JobQueueBatch{" +
                 "batchID=" + job.getBatchID() +
@@ -143,7 +131,6 @@ class JobQueueBatchTest {
                 ", groupID=" + null +
                 ", exportSource='" + job.getExportSource() + '\'' +
                 ", exportVersion='" + job.getExportVersion() + '\'' +
-                ", oneEcoJobID=" + oneEcoJobID +
                 '}';
         assertEquals(expected, job.toString());
     }
@@ -435,12 +422,32 @@ class JobQueueBatchTest {
     }
 
     JobQueueBatch createJobQueueBatch() {
-        return new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, OffsetDateTime.now(ZoneOffset.UTC), null, null, true);
+        return new JobQueueBatch.Builder()
+                .jobID(jobID)
+                .orgID(orgID)
+                .orgNPI(orgNPI)
+                .providerNPI(providerNPI)
+                .patients(patientList)
+                .resourceTypes(resourceTypes)
+                .transactionTime(OffsetDateTime.now(ZoneOffset.UTC))
+                .isBulk(true)
+                .build();
     }
 
     JobQueueBatch createV3JobQueueBatch() {
-        return new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, OffsetDateTime.now(ZoneOffset.UTC), null, null, true,
-                groupID, "external-bcda", "V3");
+        return new JobQueueBatch.Builder()
+                .jobID(jobID)
+                .orgID(orgID)
+                .orgNPI(orgNPI)
+                .providerNPI(providerNPI)
+                .patients(patientList)
+                .resourceTypes(resourceTypes)
+                .transactionTime(OffsetDateTime.now(ZoneOffset.UTC))
+                .isBulk(true)
+                .groupID(groupID)
+                .exportSource("external-bcda")
+                .exportVersion("V3")
+                .build();
     }
 
 
@@ -451,8 +458,18 @@ class JobQueueBatchTest {
         try (MockedStatic<UUID> uuidMockedStatic = Mockito.mockStatic(UUID.class)) {
             uuidMockedStatic.when(UUID::randomUUID).thenReturn(jobID);
 
-            var job1 = new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, timestamp, null, null, true);
-            var job2 = new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, timestamp, null, null, true);
+            var builder = new JobQueueBatch.Builder()
+                    .jobID(jobID)
+                    .orgID(orgID)
+                    .orgNPI(orgNPI)
+                    .providerNPI(providerNPI)
+                    .patients(patientList)
+                    .resourceTypes(resourceTypes)
+                    .transactionTime(timestamp)
+                    .isBulk(true);
+
+            var job1 = builder.build();
+            var job2 = builder.build();
             job1.submitTime = timestamp;
             job2.submitTime = timestamp;
             assertEquals(job1, job2);
@@ -467,9 +484,22 @@ class JobQueueBatchTest {
         try (MockedStatic<UUID> uuidMockedStatic = Mockito.mockStatic(UUID.class)) {
             uuidMockedStatic.when(UUID::randomUUID).thenReturn(jobID);
 
-            var job1 = new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, timestamp, null, null, true);
-            var job2 = new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patientList, resourceTypes, null, timestamp, null, null, true,
-                    groupID, "external-bcda", "V3");
+            var builder = new JobQueueBatch.Builder()
+                    .jobID(jobID)
+                    .orgID(orgID)
+                    .orgNPI(orgNPI)
+                    .providerNPI(providerNPI)
+                    .patients(patientList)
+                    .resourceTypes(resourceTypes)
+                    .transactionTime(timestamp)
+                    .isBulk(true);
+
+            var job1 = builder.build();
+            var job2 = builder
+                    .groupID(groupID)
+                    .exportSource("external-bcda")
+                    .exportVersion("V3")
+                    .build();
             job1.submitTime = timestamp;
             job2.submitTime = timestamp;
             assertNotEquals(job1, job2);

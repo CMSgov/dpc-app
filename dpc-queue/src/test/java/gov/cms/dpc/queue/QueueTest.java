@@ -255,18 +255,16 @@ class QueueTest {
     void testInvalidJobBatch(JobQueueCommon queue) {
         final UUID jobID = UUID.randomUUID();
 
-        final var jobBatch = new JobQueueBatch(
-                jobID,
-                orgID,
-                orgNPI,
-                providerNPI,
-                patientMBIs,
-                Collections.singletonList(DPCResourceType.ExplanationOfBenefit),
-                null,
-                OffsetDateTime.now(ZoneOffset.UTC),
-                null,
-                null,
-                true);
+        final var jobBatch = new JobQueueBatch.Builder()
+                .jobID(jobID)
+                .orgID(orgID)
+                .orgNPI(orgNPI)
+                .providerNPI(providerNPI)
+                .patients(patientMBIs)
+                .resourceTypes(Collections.singletonList(DPCResourceType.ExplanationOfBenefit))
+                .transactionTime(OffsetDateTime.now(ZoneOffset.UTC))
+                .isBulk(true)
+                .build();
 
         // Set the aggregatorID to something random so it gets claimed incorrectly
         jobBatch.setAggregatorIDForTesting(UUID.randomUUID());
