@@ -996,7 +996,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         ConsentEntity consentEntity = new ConsentEntity();
         consentEntity.setLoincCode("64292-6");
-        consentEntity.setMbi( String.format("%s|%s", DPCIdentifierSystem.MBI.getSystem(), mbi));
+        consentEntity.setMbi(mbi);
         consentEntity.setEffectiveDate(date);
         consentEntity.setPolicyCode(policyUrl);
 

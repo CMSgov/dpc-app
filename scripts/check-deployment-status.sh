@@ -17,9 +17,9 @@ fi
 
 echo "Waiting for ECS service ${SVC_NAME}-${SVC_VERSION} deployment to succeed..."
 
-MAX_ATTEMPTS=60   # 60 attempts
+MAX_ATTEMPTS=90   # 90 attempts
 SLEEP_SECONDS=10  # 10 seconds between attempts
-TOTAL_TIMEOUT=$((MAX_ATTEMPTS * SLEEP_SECONDS)) # Total time: 600 seconds (10 minutes)
+TOTAL_TIMEOUT=$((MAX_ATTEMPTS * SLEEP_SECONDS)) # Total time: 900 seconds (15 minutes)
 DEPLOYMENT_STATUS="TIMEOUT" # Initialize status flag for post-loop check
 
 # Use a for loop to iterate a fixed number of times
@@ -95,10 +95,22 @@ set -e
 
 if [ -z "$TARGET_GROUP_ARN" ]
 then
-  echo "ERROR: Target Group ${TARGET_GROUP} not found or naming mismatch. Skipping ELB health check and exiting as a failure."
-  exit 1
-else
-  echo "Found Target Group ARN: $TARGET_GROUP_ARN"
+  echo "ERROR: Target Group ${TARGET_GROUP} not found. Trying again with legacy naming convention."
+
+  set +e
+  TARGET_GROUP_ARN=$(aws elbv2 describe-target-groups \
+    --names "${TARGET_GROUP//-v9-tg/}" \
+    --query "TargetGroups[0].{arn: TargetGroupArn}" \
+    --output text)
+  set -e
+
+  if [ -z "$TARGET_GROUP_ARN" ]
+  then
+    echo "ERROR: Target Group ${TARGET_GROUP//-v9-tg/} not found or naming mismatch. Skipping ELB health check and exiting as a failure."
+    exit 1
+  else
+    echo "Found Target Group ARN: $TARGET_GROUP_ARN"
+  fi
 fi
 
 echo "Waiting for ELB target group ${TARGET_GROUP} to become stable..."
