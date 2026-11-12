@@ -83,6 +83,7 @@ public class JobBatchProcessor {
         final Optional<Patient> optPatient = fetchPatient(job, mbi);
         if(optPatient.isEmpty()) {
             // Failed to load patient
+            logger.info("optPatient.isEmpty() == true");
             failReason = Optional.of(OutcomeReason.INTERNAL_ERROR);
             flowable = Optional.of(Flowable.just(AggregationUtils.toOperationOutcome(failReason.get(), mbi)));
         }
@@ -92,6 +93,7 @@ public class JobBatchProcessor {
 
         // Check if the patient has opted out
         if(flowable.isEmpty()) {
+            logger.info("FLOWABLE 1");
             Optional<Pair<Flowable<Resource>, OutcomeReason>> consentResult = checkForOptOut(optPatient.get());
             if(consentResult.isPresent()) {
                 flowable = Optional.of(consentResult.get().getLeft());
@@ -101,6 +103,7 @@ public class JobBatchProcessor {
 
         // Check if the patient passes look back
         if(flowable.isEmpty()) {
+            logger.info("FLOWABLE 2");
             Pair<Flowable<Resource>, OutcomeReason> lookBackResult = checkLookBack(optPatient.get(), job);
                 flowable = Optional.of(lookBackResult.getLeft());  // if passing, list of EOBs
                 failReason = lookBackResult.getRight() == null ?
@@ -109,6 +112,7 @@ public class JobBatchProcessor {
 
         // All checks passed, load resources
         if(failReason.isEmpty()) {
+            logger.info("FLOWABLE 3");
             Flowable<Resource> coverageFlow = Flowable.empty();
             if (job.getResourceTypes().contains(DPCResourceType.Coverage)) {
                 coverageFlow = fetchResource(job, optPatient.get(), DPCResourceType.Coverage, job.getSince().orElse(null));
@@ -164,6 +168,7 @@ public class JobBatchProcessor {
 
         if (consentResult.getRight().isPresent()) {
             // Consent check returned an error
+            logger.info("consentResult.getRight().isPresent() == true");
             return Optional.of(
                     Pair.of(
                         Flowable.just(consentResult.getRight().get()),
@@ -172,6 +177,7 @@ public class JobBatchProcessor {
             );
         } else if (isOptedOut(consentResult.getLeft())) {
             // Enrollee is opted out
+            logger.info("isOptedOut(consentResult.getLeft() == true");
             return Optional.of(
                     Pair.of(
                             Flowable.just(AggregationUtils.toOperationOutcome(OutcomeReason.CONSENT_OPTED_OUT, FHIRExtractors.getPatientMBI(patient))),
@@ -181,6 +187,7 @@ public class JobBatchProcessor {
         }
 
         // Passes consent check
+        logger.info("consentResult.getRight().isPresent() == false && isOptedOut(consentResult.getLeft() == false");
         return Optional.empty();
     }
 
