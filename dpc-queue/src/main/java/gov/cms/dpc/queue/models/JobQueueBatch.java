@@ -36,10 +36,10 @@ public class JobQueueBatch implements Serializable {
     );
 
     /**
-     * Test if the resource type is in the list of resources supported by the DCP
+     * Test if the resource type is in the list of resources supported by DPC
      *
      * @param type - {@code true} resource is supported by DPC. {@code false} resource is not supported by DPC.
-     * @return True iff the passed in type is valid f
+     * @return True iff the passed in type is valid
      */
     public static Boolean isValidResourceType(DPCResourceType type) {
         return validResourceTypes.contains(type);
