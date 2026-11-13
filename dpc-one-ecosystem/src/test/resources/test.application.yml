@@ -1,0 +1,8 @@
+serverBaseUrl: example.test
+clientId: client-id
+clientSecret: client-secret
+tokenRefreshBuffer: 5000 # ms
+timeouts:
+  connectionTimeout: 5000 # ms
+  socketTimeout: 5000 # ms
+  requestTimeout: 5000 # ms
