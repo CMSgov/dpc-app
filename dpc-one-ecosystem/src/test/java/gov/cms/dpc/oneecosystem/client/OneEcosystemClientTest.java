@@ -1,8 +1,13 @@
 package gov.cms.dpc.oneecosystem.client;
 
+import ca.uhn.fhir.context.FhirContext;
 import gov.cms.dpc.testing.IntegrationTest;
+import io.dropwizard.configuration.ConfigurationException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,21 +17,22 @@ import static org.junit.jupiter.api.Assertions.*;
  * manually test against dev w/ these commands:
  *   make secure-envs
  *   source ops/config/decrypted/local.env
- *   export ONE_ECOSYSTEM_API_BASE_URL ONE_ECOSYSTEM_CLIENT_ID ONE_ECOSYSTEM_CLIENT_SECRET
+ *   export ONE_ECOSYSTEM_CLIENT_ID ONE_ECOSYSTEM_CLIENT_SECRET
  *   make one-ecosystem-integration-tests
  */
 @Disabled
 @IntegrationTest
 class OneEcosystemClientTest {
 
+    private static OneEcosystemClientImpl client;
+
+    @BeforeAll
+    static void setupOneEcosystemClient() throws IOException, ConfigurationException {
+        client = new OneEcosystemClientImpl(OneEcosystemTestHelpers.loadConfig("dev.application.yml"), FhirContext.forR4());
+    }
+
     @Test
     void testLegacyEndpointAuthenticated() {
-        OneEcosystemClientImpl client = new OneEcosystemClientImpl(
-            System.getenv("ONE_ECOSYSTEM_API_BASE_URL"),
-            System.getenv("ONE_ECOSYSTEM_CLIENT_ID"),
-            System.getenv("ONE_ECOSYSTEM_CLIENT_SECRET")
-        );
-
         int statusCode = client.callLegacyEndpoint();
         assertNotEquals(401, statusCode, "should not get a 401");
 

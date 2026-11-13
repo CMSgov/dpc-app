@@ -1,0 +1,8 @@
+serverBaseUrl: "${ONE_ECOSYSTEM_API_BASE_URL:-dev.bcda.cms.gov}"
+clientId: "${ONE_ECOSYSTEM_CLIENT_ID}"
+clientSecret: "${ONE_ECOSYSTEM_CLIENT_SECRET}"
+tokenRefreshBuffer: 5000 # ms
+timeouts:
+  connectionTimeout: 5000 # ms
+  socketTimeout: 5000 # ms
+  requestTimeout: 5000 # ms

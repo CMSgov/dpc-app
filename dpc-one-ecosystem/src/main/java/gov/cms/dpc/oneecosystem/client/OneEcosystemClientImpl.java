@@ -4,6 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.apache.ApacheHttp5RestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.dpc.fhir.configuration.ConnectionPoolConfiguration;
+import gov.cms.dpc.fhir.configuration.TimeoutConfiguration;
+import gov.cms.dpc.oneecosystem.config.OneEcosystemClientConfiguration;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemExportRequest;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemExportResponse;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemJobStatus;
@@ -35,10 +38,10 @@ import java.util.concurrent.TimeUnit;
 
 public class OneEcosystemClientImpl implements OneEcosystemClient {
 
-    private static final int REQUEST_TIMEOUT = 5000; // ms
-    private final URI apiBaseUrl;
+    private final URI apiBaseUri;
     private final String clientId;
     private final String clientSecret;
+    private final long tokenRefreshBuffer;
     private final ObjectMapper objectMapper;
     private final CloseableHttpClient httpClient;
     private final IGenericClient fhirClient;
@@ -48,21 +51,20 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
 
     private static final Logger logger = LoggerFactory.getLogger(OneEcosystemClientImpl.class);
 
-    public OneEcosystemClientImpl(String apiHost, String clientId, String clientSecret) {
-        logger.info("Attempting to connect to host: {}", apiHost);
+    public OneEcosystemClientImpl(OneEcosystemClientConfiguration config, FhirContext fhirContext) {
+        this.apiBaseUri = config.apiBaseUri();
+        logger.info("Attempting to connect to host: {}", apiBaseUri.getHost());
 
-        this.apiBaseUrl = URI.create("https://" + apiHost);
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
+        this.clientId = config.getClientId();
+        this.clientSecret = config.getClientSecret();
+        this.tokenRefreshBuffer = config.getTokenRefreshBuffer();
 
-        this.httpClient = createHttpClient();
+        this.httpClient = createHttpClient(config.getTimeouts(), config.getConnectionPoolConfiguration());
         this.objectMapper = Jackson.newObjectMapper();
 
-        FhirContext context = FhirContext.forR4();
-        ApacheHttp5RestfulClientFactory factory = new ApacheHttp5RestfulClientFactory(context);
+        ApacheHttp5RestfulClientFactory factory = new ApacheHttp5RestfulClientFactory(fhirContext);
         factory.setHttpClient(httpClient);
-        context.setRestfulClientFactory(factory);
-        this.fhirClient = context.newRestfulGenericClient(this.apiBaseUrl.toString());
+        this.fhirClient = factory.newGenericClient(this.apiBaseUri.toString());
 
         requestToken();
     }
@@ -95,7 +97,7 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
      *   Should return a non-403 status code to indicate request has been authenticated
      */
     public int callLegacyEndpoint() {
-        URI endpoint = apiBaseUrl.resolve("api/v3/jobs");
+        URI endpoint = apiBaseUri.resolve("api/v3/jobs");
         HttpGet request = new HttpGet(endpoint);
         request.setHeader("Authorization", "Bearer " + currentToken());
         request.setHeader("Accept", "application/fhir+json");
@@ -106,16 +108,17 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
         }
     }
 
-    private static CloseableHttpClient createHttpClient() {
-        Timeout requestTimeout = Timeout.ofMilliseconds(REQUEST_TIMEOUT);
+    private static CloseableHttpClient createHttpClient(TimeoutConfiguration timeouts, ConnectionPoolConfiguration pool) {
         var connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
                 .setDefaultConnectionConfig(ConnectionConfig.custom()
-                        .setConnectTimeout(requestTimeout)
+                        .setConnectTimeout(Timeout.ofMilliseconds(timeouts.getConnectionTimeout()))
                         .build())
+                .setMaxConnTotal(pool.getPoolMaxTotal())
+                .setMaxConnPerRoute(pool.getPoolMaxPerRoute())
                 .build();
         RequestConfig defaultConfig = RequestConfig.custom()
-                .setResponseTimeout(requestTimeout)
-                .setConnectionRequestTimeout(requestTimeout)
+                .setResponseTimeout(Timeout.ofMilliseconds(timeouts.getSocketTimeout()))
+                .setConnectionRequestTimeout(Timeout.ofMilliseconds(timeouts.getRequestTimeout()))
                 .build();
         return HttpClients.custom()
                 .setConnectionManager(connectionManager)
@@ -132,7 +135,7 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
     }
 
     private String requestToken() {
-        URI endpoint = apiBaseUrl.resolve("/auth/token");
+        URI endpoint = apiBaseUri.resolve("/auth/token");
         HttpPost request = new HttpPost(endpoint);
         request.setHeader(HttpHeaders.ACCEPT, "application/json");
         request.setHeader(HttpHeaders.AUTHORIZATION, clientCredentialsBasicAuth());
@@ -144,9 +147,9 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
                 }
                 var token = objectMapper.readTree(response.getEntity().getContent());
 
-                long safeTokenLifetime = Math.max(
-                        token.path("expires_in").asLong() - TimeUnit.MILLISECONDS.toSeconds(REQUEST_TIMEOUT), 0L);
-                tokenExpiration = Instant.now().plusSeconds(safeTokenLifetime);
+                long tokenLifetimeMs = TimeUnit.SECONDS.toMillis(token.path("expires_in").asLong());
+                long safeTokenLifetimeMs = Math.max(tokenLifetimeMs - tokenRefreshBuffer, 0L);
+                tokenExpiration = Instant.now().plusMillis(safeTokenLifetimeMs);
                 accessToken = token.path("access_token").asText();
                 return accessToken;
             });

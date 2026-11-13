@@ -1,5 +1,8 @@
 package gov.cms.dpc.oneecosystem.client;
 
+import ca.uhn.fhir.context.FhirContext;
+import gov.cms.dpc.oneecosystem.config.OneEcosystemClientConfiguration;
+import io.dropwizard.configuration.ConfigurationException;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -11,6 +14,7 @@ import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -27,9 +31,16 @@ import static org.mockito.Mockito.*;
 class OneEcosystemClientUnitTest {
 
     private static final int TOKEN_LIFETIME_SECONDS = 3600;
+    private static final FhirContext FHIR_CONTEXT = FhirContext.forR4();
+    private static OneEcosystemClientConfiguration config;
 
     private CloseableHttpClient httpClient;
     private MockedStatic<HttpClients> httpClients;
+
+    @BeforeAll
+    static void loadConfig() throws IOException, ConfigurationException {
+        config = OneEcosystemTestHelpers.loadConfig("test.application.yml");
+    }
 
     @BeforeEach
     void setup() throws IOException {
@@ -100,7 +111,7 @@ class OneEcosystemClientUnitTest {
     }
 
     private OneEcosystemClientImpl newClient() {
-        return new OneEcosystemClientImpl("example.test", "client-id", "client-secret");
+        return new OneEcosystemClientImpl(config, FHIR_CONTEXT);
     }
 
     private Answer<String> tokenResponse(String token, int expiresIn) {

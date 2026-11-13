@@ -1,6 +1,8 @@
 package gov.cms.dpc.oneecosystem;
 
+import ca.uhn.fhir.context.FhirContext;
 import com.google.inject.Provides;
+import com.google.inject.name.Named;
 import gov.cms.dpc.oneecosystem.client.MockOneEcosystemClient;
 import gov.cms.dpc.oneecosystem.client.OneEcosystemClient;
 import gov.cms.dpc.oneecosystem.client.OneEcosystemClientImpl;
@@ -19,15 +21,11 @@ public class OneEcosystemClientModule<T extends Configuration & OneEcosystemBund
 
     @Provides
     @Singleton
-    public OneEcosystemClient provideOneEcosystemClient() {
+    public OneEcosystemClient provideOneEcosystemClient(@Named("r4") FhirContext fhirContext) {
         OneEcosystemClientConfiguration clientConfiguration = configuration().getOneEcosystemClientConfiguration();
         Path exportPath = Path.of(configuration().getExportPath());
         return clientConfiguration.isUseMock()
             ? new MockOneEcosystemClient(exportPath)
-            : new OneEcosystemClientImpl(
-                clientConfiguration.getApiBaseUrl(),
-                clientConfiguration.getClientId(),
-                clientConfiguration.getClientSecret()
-            );
+            : new OneEcosystemClientImpl(clientConfiguration, fhirContext);
     }
 }
