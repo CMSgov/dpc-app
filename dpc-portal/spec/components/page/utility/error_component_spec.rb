@@ -101,6 +101,14 @@ RSpec.describe Page::Utility::ErrorComponent, type: :component do
       end
     end
 
+    context 'when email_mismatch with IdMe' do
+      let(:component) { described_class.new(nil, 'email_mismatch', csp: 'id_me') }
+
+      it 'should link to help article' do
+        is_expected.to include('https://help.id.me/hc/en-us/articles/360011500573-Change-your-IDMe-email-address')
+      end
+    end
+
     CspUtils::CODES_TO_DISPLAY.each do |csp, display_name|
       context "using #{display_name}" do
         context 'AO already accepted' do
