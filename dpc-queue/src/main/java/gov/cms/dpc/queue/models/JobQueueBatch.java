@@ -27,7 +27,7 @@ public class JobQueueBatch implements Serializable {
     private static final long serialVersionUID = -578824686165779398L;
 
     /**
-     * The list of resource type supported by DCP
+     * The list of resource type supported by DPC
      */
     public static final List<DPCResourceType> validResourceTypes = List.of(
             DPCResourceType.Patient,
@@ -36,10 +36,10 @@ public class JobQueueBatch implements Serializable {
     );
 
     /**
-     * Test if the resource type is in the list of resources supported by the DCP
+     * Test if the resource type is in the list of resources supported by DPC
      *
      * @param type - {@code true} resource is supported by DPC. {@code false} resource is not supported by DPC.
-     * @return True iff the passed in type is valid f
+     * @return True iff the passed in type is valid
      */
     public static Boolean isValidResourceType(DPCResourceType type) {
         return validResourceTypes.contains(type);
@@ -53,7 +53,7 @@ public class JobQueueBatch implements Serializable {
     private UUID batchID;
 
     /**
-     * The unique job identifier
+     * The unique job identifier, generated for v1 and from the shared backend for v3
      */
     @Column(name = "job_id")
     private UUID jobID;
@@ -173,41 +173,160 @@ public class JobQueueBatch implements Serializable {
     @JoinColumn(name = "batch_id", insertable = false, updatable = false, nullable = false)
     private List<JobQueueBatchFile> jobQueueBatchFiles;
 
+    /**
+     * The filter claims applied to this batch. Populated for v3 group export jobs.
+     */
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "batch_id", insertable = false, updatable = false, nullable = false)
+    private List<JobQueueBatchFilterClaim> jobQueueBatchFilterClaims;
+
     @Column(name = "requesting_ip")
     private String requestingIP;
 
     @Column(name = "is_bulk")
     private boolean isBulk;
 
+    /**
+     * The id of the group this job is exporting, for group export requests.
+     */
+    @Column(name = "group_id")
+    private UUID groupID;
+
+    /**
+     * Where this export request originated.
+     */
+    @Column(name = "export_source")
+    private String exportSource;
+
+    /**
+     * The version of the API under which this job was created.
+     */
+    @Column(name = "export_version")
+    private String exportVersion;
+
+
     public JobQueueBatch() {
     }
 
-    public JobQueueBatch(UUID jobID,
-                         UUID orgID,
-                         String orgNPI,
-                         String providerNPI,
-                         List<String> patients,
-                         List<DPCResourceType> resourceTypes,
-                         OffsetDateTime since,
-                         OffsetDateTime transactionTime,
-                         String requestingIP,
-                         String requestUrl,
-                         boolean isBulk) {
+    /**
+     * Use {@link Builder} to construct instances.
+     *
+     * @param b - the populated builder
+     */
+    private JobQueueBatch(Builder b) {
         this.batchID = UUID.randomUUID();
-        this.jobID = jobID;
-        this.orgID = orgID;
-        this.orgNPI = orgNPI;
-        this.providerNPI = providerNPI;
-        this.patients = patients;
-        this.resourceTypes = resourceTypes;
-        this.since = since;
-        this.transactionTime = transactionTime;
+        this.jobID = b.jobID;
+        this.orgID = b.orgID;
+        this.orgNPI = b.orgNPI;
+        this.providerNPI = b.providerNPI;
+        this.patients = b.patients;
+        this.resourceTypes = b.resourceTypes;
+        this.since = b.since;
+        this.transactionTime = b.transactionTime;
         this.status = JobStatus.QUEUED;
         this.submitTime = OffsetDateTime.now(ZoneOffset.UTC);
         this.jobQueueBatchFiles = new ArrayList<>();
-        this.requestingIP = requestingIP;
-        this.requestUrl = requestUrl;
-        this.isBulk = isBulk;
+        this.jobQueueBatchFilterClaims = new ArrayList<>();
+        this.requestingIP = b.requestingIP;
+        this.requestUrl = b.requestUrl;
+        this.isBulk = b.isBulk;
+        this.groupID = b.groupID;
+        this.exportSource = b.exportSource;
+        this.exportVersion = b.exportVersion;
+    }
+
+    /**
+     * Builder for {@link JobQueueBatch}. Defaults to v1 values for exportSource and exportVersion.
+     */
+    public static class Builder {
+        private UUID jobID;
+        private UUID orgID;
+        private String orgNPI;
+        private String providerNPI;
+        private List<String> patients;
+        private List<DPCResourceType> resourceTypes;
+        private OffsetDateTime since;
+        private OffsetDateTime transactionTime;
+        private String requestingIP;
+        private String requestUrl;
+        private boolean isBulk;
+        private UUID groupID;
+        private String exportSource = "internal-dpc";
+        private String exportVersion = "V1";
+
+        public Builder jobID(UUID jobID) {
+            this.jobID = jobID;
+            return this;
+        }
+
+        public Builder orgID(UUID orgID) {
+            this.orgID = orgID;
+            return this;
+        }
+
+        public Builder orgNPI(String orgNPI) {
+            this.orgNPI = orgNPI;
+            return this;
+        }
+
+        public Builder providerNPI(String providerNPI) {
+            this.providerNPI = providerNPI;
+            return this;
+        }
+
+        public Builder patients(List<String> patients) {
+            this.patients = patients;
+            return this;
+        }
+
+        public Builder resourceTypes(List<DPCResourceType> resourceTypes) {
+            this.resourceTypes = resourceTypes;
+            return this;
+        }
+
+        public Builder since(OffsetDateTime since) {
+            this.since = since;
+            return this;
+        }
+
+        public Builder transactionTime(OffsetDateTime transactionTime) {
+            this.transactionTime = transactionTime;
+            return this;
+        }
+
+        public Builder requestingIP(String requestingIP) {
+            this.requestingIP = requestingIP;
+            return this;
+        }
+
+        public Builder requestUrl(String requestUrl) {
+            this.requestUrl = requestUrl;
+            return this;
+        }
+
+        public Builder isBulk(boolean isBulk) {
+            this.isBulk = isBulk;
+            return this;
+        }
+
+        public Builder groupID(UUID groupID) {
+            this.groupID = groupID;
+            return this;
+        }
+
+        public Builder exportSource(String exportSource) {
+            this.exportSource = exportSource;
+            return this;
+        }
+
+        public Builder exportVersion(String exportVersion) {
+            this.exportVersion = exportVersion;
+            return this;
+        }
+
+        public JobQueueBatch build() {
+            return new JobQueueBatch(this);
+        }
     }
 
     /**
@@ -236,6 +355,13 @@ public class JobQueueBatch implements Serializable {
             return false;
         }
         return requestUrl.toLowerCase().contains("/v2/");
+    }
+
+    /**
+     * Is the job a v3 job, based on {@code export_version}.
+     */
+    public Boolean isV3() {
+        return exportVersion != null && exportVersion.equalsIgnoreCase("v3");
     }
 
     public UUID getBatchID() {
@@ -330,6 +456,18 @@ public class JobQueueBatch implements Serializable {
         return isBulk;
     }
 
+    public Optional<UUID> getGroupID() {
+        return Optional.ofNullable(groupID);
+    }
+
+    public String getExportSource() {
+        return exportSource;
+    }
+
+    public String getExportVersion() {
+        return exportVersion;
+    }
+
     public List<JobQueueBatchFile> getJobQueueBatchFiles() {
         return jobQueueBatchFiles;
     }
@@ -359,6 +497,19 @@ public class JobQueueBatch implements Serializable {
             this.jobQueueBatchFiles.add(file);
             return file;
         }
+    }
+
+    public List<JobQueueBatchFilterClaim> getJobQueueBatchFilterClaims() {
+        return jobQueueBatchFilterClaims;
+    }
+
+    public synchronized JobQueueBatchFilterClaim addJobQueueBatchFilterClaim(DPCResourceType resourceType,
+                                                                             String filterKey,
+                                                                             String operator,
+                                                                             String filterValue) {
+        JobQueueBatchFilterClaim claim = new JobQueueBatchFilterClaim(batchID, jobID, resourceType, filterKey, operator, filterValue);
+        this.jobQueueBatchFilterClaims.add(claim);
+        return claim;
     }
 
     /**
@@ -534,7 +685,11 @@ public class JobQueueBatch implements Serializable {
                 .append(completeTime, that.completeTime)
                 .append(requestingIP, that.requestingIP)
                 .append(requestUrl, that.requestUrl)
+                .append(groupID, that.groupID)
+                .append(exportSource, that.exportSource)
+                .append(exportVersion, that.exportVersion)
                 .append(jobQueueBatchFiles, that.jobQueueBatchFiles)
+                .append(jobQueueBatchFilterClaims, that.jobQueueBatchFilterClaims)
                 .isEquals();
     }
 
@@ -561,6 +716,9 @@ public class JobQueueBatch implements Serializable {
                 .append(completeTime)
                 .append(requestingIP)
                 .append(requestUrl)
+                .append(groupID)
+                .append(exportSource)
+                .append(exportVersion)
                 .toHashCode();
     }
 
@@ -588,6 +746,9 @@ public class JobQueueBatch implements Serializable {
                 ", requestUrl='" + requestUrl + '\'' +
                 ", requestingIP='" + requestingIP + '\'' +
                 ", isBulk=" + isBulk +
+                ", groupID=" + groupID +
+                ", exportSource='" + exportSource + '\'' +
+                ", exportVersion='" + exportVersion + '\'' +
                 '}';
     }
 }

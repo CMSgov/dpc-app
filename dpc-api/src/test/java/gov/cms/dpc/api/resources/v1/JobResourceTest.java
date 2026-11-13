@@ -57,7 +57,7 @@ public class JobResourceTest {
      * Test that a non-existent job is handled correctly
      */
     @Test
-    public void testNonExistentJob() {
+    void testNonExistentJob() {
         final var jobID = UUID.randomUUID();
         final var queue = new MemoryBatchQueue(100);
         final var resource = new JobResource(queue, client, TEST_BASEURL);
@@ -72,7 +72,7 @@ public class JobResourceTest {
      * Test with a queued job
      */
     @Test
-    public void testQueuedJob() {
+    void testQueuedJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(100);
@@ -97,7 +97,7 @@ public class JobResourceTest {
      * Test with a running job
      */
     @Test
-    public void testRunningJob() {
+    void testRunningJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(1);
@@ -126,7 +126,7 @@ public class JobResourceTest {
      * Test with a successful job
      */
     @Test
-    public void testSuccessfulJob() {
+    void testSuccessfulJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(100);
@@ -175,7 +175,7 @@ public class JobResourceTest {
      * Test with a successful job with one patient error
      */
     @Test
-    public void testJobWithError() {
+    void testJobWithError() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(100);
@@ -216,7 +216,7 @@ public class JobResourceTest {
      * Test with a failed job
      */
     @Test
-    public void testFailedJob() {
+    void testFailedJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(100);
@@ -241,7 +241,7 @@ public class JobResourceTest {
     }
 
     @Test
-    public void testExpiredJob() {
+    void testExpiredJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(1);
@@ -281,7 +281,7 @@ public class JobResourceTest {
      * Test accessing a job with the wrong organization
      */
     @Test
-    public void testWrongOrgJobAccess() {
+    void testWrongOrgJobAccess() {
         final var organizationPrincipalCorrect = APITestHelpers.makeOrganizationPrincipal();
         final var orgIDCorrect = FHIRExtractors.getEntityUUID(organizationPrincipalCorrect.getOrganization().getId());
         final var organizationPrincipalWrong = APITestHelpers.makeOrganizationPrincipal(OTHER_ORGANIZATION);
@@ -328,7 +328,7 @@ public class JobResourceTest {
      * Test building extension for a file.
      */
     @Test
-    public void testBuildOutputEntryExtension() {
+    void testBuildOutputEntryExtension() {
         final var resource = new JobResource(null, client, "");
         final var file = new JobQueueBatchFile(UUID.randomUUID(), UUID.fromString("f1e518f5-4977-47c6-971b-7eeaf1b433e8"), DPCResourceType.Patient, 0, 11);
         file.setChecksum(Hex.decode("9d251cea787379c603af13f90c26a9b2a4fbb1e029793ae0f688c5631cdb6a1b"));
@@ -341,17 +341,18 @@ public class JobResourceTest {
     }
 
     @Test
-    public void testBuildJobExtension() {
+    void testBuildJobExtension() {
         final var resource = new JobResource(null, client, "");
-        final var batch = new JobQueueBatch(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                TEST_ORG_NPI,
-                TEST_PROVIDER_NPI,
-                Collections.emptyList(),
-                Collections.emptyList(),
-                null,
-                OffsetDateTime.now(), null, null, true);
+        final var batch = new JobQueueBatch.Builder()
+                .jobID(UUID.randomUUID())
+                .orgID(UUID.randomUUID())
+                .orgNPI(TEST_ORG_NPI)
+                .providerNPI(TEST_PROVIDER_NPI)
+                .patients(Collections.emptyList())
+                .resourceTypes(Collections.emptyList())
+                .transactionTime(OffsetDateTime.now())
+                .isBulk(true)
+                .build();
         final var aggregatorId = UUID.randomUUID();
         batch.setRunningStatus(aggregatorId);
         batch.setCompletedStatus(aggregatorId);
