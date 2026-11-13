@@ -100,11 +100,18 @@ RSpec.describe PurgeInactiveUsersJob, type: :job do
             original.call(**args)
           end
 
-          expect(Rails.logger).to receive(:error).with(
-            ['User purge failed', hash_including(actionType: LoggingConstants::ActionType::UserPurgeFailed)]
-          )
+          allow(Rails.logger).to receive(:error)
 
           PurgeInactiveUsersJob.perform_now
+
+          expect(Rails.logger).to have_received(:error).with(
+            ['User purge failed', hash_including(
+              actionContext: LoggingConstants::ActionContext::UserManagement,
+              actionType: LoggingConstants::ActionType::UserPurgeFailed,
+              user_identifier: failing_user.id,
+              error: ActiveRecord::RecordInvalid.new.message
+            )]
+          )
 
           expect(User.exists?(failing_user.id)).to be true
           expect(User.exists?(healthy_user.id)).to be false

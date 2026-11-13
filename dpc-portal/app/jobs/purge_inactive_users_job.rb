@@ -3,14 +3,10 @@
 # Remove users after period of inactivity
 class PurgeInactiveUsersJob < ApplicationJob
   queue_as :portal
-  include StructuredLogging
-
-  RETENTION_PERIOD = 6.years
 
   def perform
-    cutoff = RETENTION_PERIOD.ago
-    inactive_user_ids(cutoff).each do |user_id|
-      purge_user(user_id, cutoff)
+    inactive_user_ids.each do |user_id|
+      purge_user(user_id)
     rescue StandardError => e
       log_failure(user_id, e)
     end
@@ -18,18 +14,22 @@ class PurgeInactiveUsersJob < ApplicationJob
 
   private
 
-  def inactive_user_ids(cutoff)
+  def retention_cutoff
+    6.years.ago
+  end
+
+  def inactive_user_ids
     UserSignIn.group(:user_id)
-              .having('MAX(last_login_at) < ?', cutoff)
+              .having('MAX(last_login_at) < ?', retention_cutoff)
               .pluck(:user_id)
   end
 
-  def purge_user(user_id, cutoff)
+  def purge_user(user_id)
     user = User.find_by(id: user_id)
     return unless user
 
     user.with_lock do
-      next if user.user_sign_ins.exists?(['last_login_at >= ?', cutoff])
+      next if user.user_sign_ins.exists?(['last_login_at >= ?', retention_cutoff])
 
       last_login_at = user.user_sign_ins.maximum(:last_login_at)
       delete_org_links(user)
@@ -51,14 +51,10 @@ class PurgeInactiveUsersJob < ApplicationJob
   end
 
   def log_failure(user_id, error)
-    log_event(:error, 'User purge failed',
-              action_context: LoggingConstants::ActionContext::UserManagement,
-              action_type: LoggingConstants::ActionType::UserPurgeFailed,
-              user_identifier: user_id,
-              error: error.class.name)
-  end
-
-  def csp_log_context
-    {}
+    Rails.logger.error(['User purge failed',
+                        { actionContext: LoggingConstants::ActionContext::UserManagement,
+                          actionType: LoggingConstants::ActionType::UserPurgeFailed,
+                          user_identifier: user_id,
+                          error: error.message }])
   end
 end
