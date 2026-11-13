@@ -105,6 +105,7 @@ jobs:
           sudo cp ./dpc-api/target/site/jacoco/jacoco.xml jacoco-reports/dpc-api-jacoco.xml
           sudo cp ./dpc-attribution/target/site/jacoco-it/jacoco.xml jacoco-reports/dpc-attribution-it-jacoco.xml
           sudo cp ./dpc-attribution/target/site/jacoco/jacoco.xml jacoco-reports/dpc-attribution-jacoco.xml
+          sudo cp ./dpc-attribution-client/target/site/jacoco/jacoco.xml jacoco-reports/dpc-attribution-client-jacoco.xml
           sudo cp ./dpc-bluebutton/target/site/jacoco/jacoco.xml jacoco-reports/dpc-bluebutton-jacoco.xml
           sudo cp ./dpc-common/target/site/jacoco/jacoco.xml jacoco-reports/dpc-common-jacoco.xml
           sudo cp ./dpc-macaroons/target/site/jacoco/jacoco.xml jacoco-reports/dpc-macaroons-jacoco.xml

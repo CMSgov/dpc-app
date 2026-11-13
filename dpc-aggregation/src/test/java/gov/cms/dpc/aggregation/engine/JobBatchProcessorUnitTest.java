@@ -22,6 +22,8 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -37,6 +39,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -447,6 +450,86 @@ class JobBatchProcessorUnitTest {
         JobQueueBatchFile completedJob = results.get(0);
 
         assertError(completedJob.getBatchID(), DPCResourceType.Patient);
+    }
+
+    @ParameterizedTest
+    @EnumSource(ConsentResult.PolicyType.class)
+    void testFutureConsentDoesNotOverrideCurrentOptOut(ConsentResult.PolicyType futurePolicyType) {
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
+        ConsentResult futureConsent = new ConsentResult();
+        futureConsent.setActive(true);
+        futureConsent.setPolicyType(futurePolicyType);
+        futureConsent.setConsentDate(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
+
+        OperationsConfig operationsConfig = getOperationsConfig();
+        JobBatchProcessor jobBatchProcessor = getJobBatchProcessor(bbClient, operationsConfig, new EveryoneGetsDataLookBackServiceImpl(), consentService);
+
+        IJobQueue queue = new MemoryBatchQueue();
+        final var jobID = queue.createJob(
+                UUID.randomUUID(),
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
+                Collections.singletonList(mbi),
+                Collections.singletonList(DPCResourceType.Patient),
+                null,
+                MockBlueButtonClient.getBfdTransactionTime(),
+                null, null, true, false
+        );
+        List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
+
+        Mockito.when(consentService.getConsent(List.of(mbi))).thenReturn(Optional.of(List.of(optOut, futureConsent)));
+
+        List<JobQueueBatchFile> results = jobBatchProcessor.processJobBatchPartial(
+                UUID.randomUUID(),
+                queue,
+                jobs.get(0),
+                mbi
+        );
+
+        assertEquals(1, results.size());
+        JobQueueBatchFile completedJob = results.get(0);
+        assertEquals(DPCResourceType.OperationOutcome, completedJob.getResourceType());
+        assertError(completedJob.getBatchID(), DPCResourceType.Patient);
+    }
+
+    @ParameterizedTest
+    @EnumSource(ConsentResult.PolicyType.class)
+    void testOnlyFutureConsentDoesNotOverrideCurrentOptIn(ConsentResult.PolicyType futurePolicyType) {
+        String mbi = MockBlueButtonClient.TEST_PATIENT_MBIS.get(0);
+        ConsentResult futureConsent = new ConsentResult();
+        futureConsent.setActive(true);
+        futureConsent.setPolicyType(futurePolicyType);
+        futureConsent.setConsentDate(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
+
+        OperationsConfig operationsConfig = getOperationsConfig();
+        JobBatchProcessor jobBatchProcessor = getJobBatchProcessor(bbClient, operationsConfig, new EveryoneGetsDataLookBackServiceImpl(), consentService);
+
+        IJobQueue queue = new MemoryBatchQueue();
+        final var jobID = queue.createJob(
+                UUID.randomUUID(),
+                TEST_ORG_NPI,
+                TEST_PROVIDER_NPI,
+                Collections.singletonList(mbi),
+                Collections.singletonList(DPCResourceType.Patient),
+                null,
+                MockBlueButtonClient.getBfdTransactionTime(),
+                null, null, true, false
+        );
+        List<JobQueueBatch> jobs = queue.getJobBatches(jobID);
+
+        Mockito.when(consentService.getConsent(List.of(mbi))).thenReturn(Optional.of(List.of(futureConsent)));
+
+        List<JobQueueBatchFile> results = jobBatchProcessor.processJobBatchPartial(
+                UUID.randomUUID(),
+                queue,
+                jobs.get(0),
+                mbi
+        );
+
+        assertEquals(1, results.size());
+        JobQueueBatchFile completedJob = results.get(0);
+        assertEquals(DPCResourceType.Patient, completedJob.getResourceType());
+        assertNoError(completedJob.getBatchID(), DPCResourceType.Patient);
     }
 
     @Test
