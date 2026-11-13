@@ -4,7 +4,7 @@
 class CspUser < ApplicationRecord
   belongs_to :user
   belongs_to :csp
-  has_many :user_emails
+  has_many :user_emails, dependent: :delete_all
 
   def add_or_activate_new_email(new_emails)
     existing_emails = user_emails
