@@ -7,6 +7,8 @@ on:
       - .github/workflows/api-waf-sync-deploy.yml
       - .github/workflows/deploy_go_lambda.yml
       - lambda/api-waf-sync/**
+      - go.mod
+      - go.sum
   workflow_dispatch:
 
 # Ensure we have only one integration test running at a time
