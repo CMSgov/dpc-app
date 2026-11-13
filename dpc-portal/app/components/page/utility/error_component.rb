@@ -13,9 +13,6 @@ module Page
       def initialize(invitation, reason, csp: nil)
         super()
         @invitation = invitation
-        @org_name = invitation&.provider_organization&.name
-        @ao_full_name = invitation&.invited_by_full_name
-        @ao_email = invitation&.invited_by&.email
         @csp_display_name = DISPLAY_NAMES.fetch(csp&.to_sym, 'CSP')
         @current_csp = csp&.to_sym
         @reason = AoVerificationService::SERVER_ERRORS.include?(reason) ? :server_error : reason.to_sym
