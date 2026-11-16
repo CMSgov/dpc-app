@@ -122,6 +122,7 @@ public class GroupResourceUnitTest {
 
         Provenance provenance = new Provenance();
         Provenance.ProvenanceAgentComponent provenanceAgent = new Provenance.ProvenanceAgentComponent();
+        provenanceAgent.addRole().addCoding().setCode("AGNT");
         provenanceAgent.setWho(new Reference("Organization/" + UUID.randomUUID()));
         provenanceAgent.setOnBehalfOf(new Reference("Practitioner/" + practitionerId));
         provenance.addAgent(provenanceAgent);
@@ -174,6 +175,7 @@ public class GroupResourceUnitTest {
 
         Provenance provenance = new Provenance();
         Provenance.ProvenanceAgentComponent provenanceAgent = new Provenance.ProvenanceAgentComponent();
+        provenanceAgent.addRole().addCoding().setCode("AGNT");
         provenanceAgent.setWho(new Reference("Organization/" + UUID.randomUUID()));
         provenanceAgent.setOnBehalfOf(new Reference("Practitioner/" + practitionerId));
         provenance.addAgent(provenanceAgent);
@@ -206,6 +208,7 @@ public class GroupResourceUnitTest {
 
         Provenance provenance = new Provenance();
         Provenance.ProvenanceAgentComponent provenanceAgent = new Provenance.ProvenanceAgentComponent();
+        provenanceAgent.addRole().addCoding().setCode("AGNT");
         provenanceAgent.setWho(new Reference("Organization/" + UUID.randomUUID()));
         provenanceAgent.setOnBehalfOf(new Reference("Practitioner/" + practitionerId));
         provenance.addAgent(provenanceAgent);
@@ -366,8 +369,9 @@ public class GroupResourceUnitTest {
         organization.setId(UUID.randomUUID().toString());
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
 
+        String groupId = UUID.randomUUID().toString();
         Group fakeGroup = new Group();
-        fakeGroup.setId(UUID.randomUUID().toString());
+        fakeGroup.setId(groupId);
         fakeGroup.addMember().setEntity(new Reference("Patient/" + UUID.randomUUID()));
 
         IReadExecutable<Group> readExec = mock(IReadExecutable.class);
@@ -402,22 +406,22 @@ public class GroupResourceUnitTest {
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v3/Group/1234567890/$export"));
 
         assertDoesNotThrow(() ->
-                resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.APPLICATION_NDJSON, "2017-01-01T00:00:00Z", null, "respond-async", request));
+                resource.export(organizationPrincipal, groupId, "Coverage", FHIRMediaTypes.APPLICATION_NDJSON, "2017-01-01T00:00:00Z", null, "respond-async", request));
 
         assertDoesNotThrow(() ->
-                resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", null, "respond-async", request));
+                resource.export(organizationPrincipal, groupId, "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", null, "respond-async", request));
 
         assertDoesNotThrow(() ->
-                resource.export(organizationPrincipal, "roster-id", "Coverage", FHIRMediaTypes.NDJSON, "2017-01-01T00:00:00Z", null, "respond-async", request));
+                resource.export(organizationPrincipal, groupId, "Coverage", FHIRMediaTypes.NDJSON, "2017-01-01T00:00:00Z", null, "respond-async", request));
 
         assertThrows(BadRequestException.class, () ->
-                resource.export(organizationPrincipal, "roster-id", "Coverage", FHIR_JSON, "2017-01-01T00:00:00Z", null, "respond-async", request));
+                resource.export(organizationPrincipal, groupId, "Coverage", FHIR_JSON, "2017-01-01T00:00:00Z", null, "respond-async", request));
 
         assertThrows(BadRequestException.class, () ->
-                resource.export(organizationPrincipal, "roster-id", "Coverage", null, "2017-01-01T00:00:00Z", null, "respond-async", request));
+                resource.export(organizationPrincipal, groupId, "Coverage", null, "2017-01-01T00:00:00Z", null, "respond-async", request));
 
         assertThrows(BadRequestException.class, () ->
-                resource.export(organizationPrincipal, "roster-id", "Coverage", "", "2017-01-01T00:00:00Z", null, "respond-async", request));
+                resource.export(organizationPrincipal, groupId, "Coverage", "", "2017-01-01T00:00:00Z", null, "respond-async", request));
 
         // 3 non-bad requests
         verify(request, times(3)).getHeader(HttpHeaders.X_FORWARDED_FOR);
