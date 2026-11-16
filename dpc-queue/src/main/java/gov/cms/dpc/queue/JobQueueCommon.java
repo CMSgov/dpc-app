@@ -71,7 +71,19 @@ public abstract class JobQueueCommon implements IJobQueue {
                                            String requestingIP,
                                            String requestUrl,
                                            boolean isBulk) {
-        return new JobQueueBatch(jobID, orgID, orgNPI, providerNPI, patients, resourceTypes, since, transactionTime, requestingIP, requestUrl, isBulk);
+        return new JobQueueBatch.Builder()
+                .jobID(jobID)
+                .orgID(orgID)
+                .orgNPI(orgNPI)
+                .providerNPI(providerNPI)
+                .patients(patients)
+                .resourceTypes(resourceTypes)
+                .since(since)
+                .transactionTime(transactionTime)
+                .requestingIP(requestingIP)
+                .requestUrl(requestUrl)
+                .isBulk(isBulk)
+                .build();
     }
 
     protected List<JobQueueBatch> createEmptyBatch(UUID jobID,
