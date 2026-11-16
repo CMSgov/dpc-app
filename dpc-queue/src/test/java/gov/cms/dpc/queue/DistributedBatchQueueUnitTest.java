@@ -5,6 +5,7 @@ import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
+import gov.cms.dpc.queue.models.JobQueueBatchFilterClaim;
 import gov.cms.dpc.testing.AbstractMultipleDAOTest;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,17 +22,31 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 	DistributedBatchQueueUnitTest() {
-		super(JobQueueBatch.class, JobQueueBatchFile.class);
+		super(JobQueueBatch.class, JobQueueBatchFile.class, JobQueueBatchFilterClaim.class);
 	}
 
 	private DistributedBatchQueue queue;
 	private Session session;
+    private JobQueueBatch jobQueueBatch;
 
 	@BeforeEach
 	void setup() {
 		DPCQueueManagedSessionFactory sessionFactory = new DPCQueueManagedSessionFactory(db.getSessionFactory());
 		queue = new DistributedBatchQueue(sessionFactory, 100, new MetricRegistry());
 		session = sessionFactory.getSessionFactory().openSession();
+        jobQueueBatch = new JobQueueBatch.Builder()
+                .jobID(UUID.randomUUID())
+                .orgID(UUID.randomUUID())
+                .orgNPI("orgNpi")
+                .providerNPI("providerNpi")
+                .patients(List.of())
+                .resourceTypes(List.of())
+                .since(OffsetDateTime.now())
+                .transactionTime(OffsetDateTime.now(ZoneOffset.UTC))
+                .requestingIP("reqIp")
+                .requestUrl("reqUrl")
+                .isBulk(true)
+                .build();
 	}
 
 	@Test
@@ -45,20 +61,6 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 	@Test
 	void test_queueAge_works() {
 		Transaction transaction = session.beginTransaction();
-
-		JobQueueBatch jobQueueBatch = new JobQueueBatch(
-			UUID.randomUUID(),
-			UUID.randomUUID(),
-			"orgNpi",
-			"providerNpi",
-			List.of(),
-			List.of(),
-			OffsetDateTime.now(),
-			OffsetDateTime.now(),
-			"reqIp",
-			"reqUrl",
-			true
-		);
 
 		session.persist(jobQueueBatch);
 		transaction.commit();
@@ -81,19 +83,6 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 		 assertEquals(0, queue.queueSize());
 
 		Transaction transaction = session.beginTransaction();
-		JobQueueBatch jobQueueBatch = new JobQueueBatch(
-				UUID.randomUUID(),
-				UUID.randomUUID(),
-				"orgNpi",
-				"providerNpi",
-				List.of(),
-				List.of(),
-				OffsetDateTime.now(),
-				OffsetDateTime.now(),
-				"reqIp",
-				"reqUrl",
-				true
-		);
 		session.persist(jobQueueBatch);
 		transaction.commit();
 
@@ -105,20 +94,6 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 		Transaction transaction = session.beginTransaction();
 
 		UUID aggregatorId = UUID.randomUUID();
-		JobQueueBatch jobQueueBatch = new JobQueueBatch(
-			UUID.randomUUID(),
-			UUID.randomUUID(),
-			"orgNpi",
-			"providerNpi",
-			List.of(),
-			List.of(),
-			OffsetDateTime.now(),
-			OffsetDateTime.now(),
-			"reqIp",
-			"reqUrl",
-			true
-		);
-
 		jobQueueBatch.setAggregatorIDForTesting(aggregatorId);
 		jobQueueBatch.setRunningStatus(aggregatorId);
 		jobQueueBatch.setUpdateTime();
@@ -144,22 +119,9 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
 	void test_getJobBatchFile_works() {
 		Transaction transaction = session.beginTransaction();
 
-		UUID orgId = UUID.randomUUID();
-		UUID jobId = UUID.randomUUID();
-		JobQueueBatch jobQueueBatch = new JobQueueBatch(
-			jobId,
-			orgId,
-			"orgNpi",
-			"providerNpi",
-			List.of(),
-			List.of(),
-			OffsetDateTime.now(),
-			OffsetDateTime.now(),
-			"reqIp",
-			"reqUrl",
-			true
-		);
 		UUID batchId = jobQueueBatch.getBatchID();
+        UUID orgId = jobQueueBatch.getOrgID();
+        UUID jobId = jobQueueBatch.getJobID();
 
 		int sequence = 0;
 		DPCResourceType resource = DPCResourceType.ExplanationOfBenefit;
