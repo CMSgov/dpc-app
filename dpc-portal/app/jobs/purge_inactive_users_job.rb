@@ -48,6 +48,7 @@ class PurgeInactiveUsersJob < ApplicationJob
     Invitation.where(invited_by_id: user.id).update_all(invited_by_id: nil)
     ProviderOrganization.where(terms_of_service_accepted_by_id: user.id)
                         .update_all(terms_of_service_accepted_by_id: nil)
+    CspUserVerification.where(user_id: user.id).update_all(user_id: nil)
   end
 
   def log_failure(user_id, error)
