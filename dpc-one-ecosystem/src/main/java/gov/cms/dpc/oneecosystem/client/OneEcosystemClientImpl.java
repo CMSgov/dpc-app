@@ -46,8 +46,8 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
     private final CloseableHttpClient httpClient;
     private final IGenericClient fhirClient;
 
-    private String accessToken;
-    private Instant tokenExpiration;
+    private volatile String accessToken;
+    private volatile Instant tokenExpiration;
 
     private static final Logger logger = LoggerFactory.getLogger(OneEcosystemClientImpl.class);
 
@@ -126,19 +126,19 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
                 .build();
     }
 
-private String currentToken() {
-    String token = accessToken;
-    if (token != null && Instant.now().isBefore(tokenExpiration)) {
-        return token; // fast path, no lock
-    }
-    synchronized (this) {
-        // re-check: another thread may have refreshed while we waited for the lock
-        if (accessToken != null && Instant.now().isBefore(tokenExpiration)) {
-            return accessToken;
+    private String currentToken() {
+        Instant expiration = tokenExpiration;
+        String token = accessToken;
+        if (token !=null && expiration != null && Instant.now().isBefore(expiration)) {
+            return token; // fast path, no lock
         }
-        return requestToken();
-    }
-}
+        synchronized (this) {
+            // re-check: another thread may have refreshed while we waited for the lock
+            if (accessToken != null && Instant.now().isBefore(tokenExpiration)) {
+                return accessToken;
+            }
+            return requestToken();
+        }
     }
 
     private String requestToken() {
@@ -156,8 +156,8 @@ private String currentToken() {
 
                 long tokenLifetimeMs = TimeUnit.SECONDS.toMillis(token.path("expires_in").asLong());
                 long safeTokenLifetimeMs = Math.max(tokenLifetimeMs - tokenRefreshBuffer, 0L);
-                tokenExpiration = Instant.now().plusMillis(safeTokenLifetimeMs);
                 accessToken = token.path("access_token").asText();
+                tokenExpiration = Instant.now().plusMillis(safeTokenLifetimeMs);
                 return accessToken;
             });
         } catch (IOException e) {
