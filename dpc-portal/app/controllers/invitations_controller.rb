@@ -104,13 +104,18 @@ class InvitationsController < ApplicationController
   def complete_registration
     session.delete(invitation_status_key)
     sign_in(user: @user, csp: csp_session.current)
+    cookies.permanent[:last_used_csp] = csp_session.current
+    log_registration
+    render(Page::Invitations::SuccessComponent.new(@organization, @invitation, @given_name, @family_name))
+  end
+
+  def log_registration
+    @user.record_login!(csp_session.current)
     log_event(:info, 'User logged in',
               action_context: LoggingConstants::ActionContext::Registration,
               action_type: LoggingConstants::ActionType::UserLoggedIn,
               user_identifier: current_csp_user_identifier,
               invitation: @invitation.id)
-    cookies.permanent[:last_used_csp] = csp_session.current
-    render(Page::Invitations::SuccessComponent.new(@organization, @invitation, @given_name, @family_name))
   end
 
   def csp_login_actions(csp)
