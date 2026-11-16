@@ -43,6 +43,31 @@ public interface IJobQueue {
                    boolean isBulk,
                    boolean isSmoke);
 
+
+    /**
+     * Create and submit an external job into the queue.
+     *
+     * @param jobID           - The job ID assigned by the external backend
+     * @param orgID           - The organization submitting the job
+     * @param mbis            - The list of MBIs of patients to fetch data for
+     * @param resourceTypes   - The resource types to fetch patient data for
+     * @param since           - The since parameter to use for the requests. May be null.
+     * @param requestingIP    - The IP address where the request came from
+     * @param requestUrl      - The URL of the original request
+     * @param groupID         - The Group (roster) ID this export is for
+     * @param isBulk          - Flag to indicate bulk request
+     * @return The jobID, echoed back for convenience
+     */
+    UUID createExternalJob(UUID jobID,
+                           UUID orgID,
+                           List<String> mbis,
+                           List<DPCResourceType> resourceTypes,
+                           OffsetDateTime since,
+                           String requestingIP,
+                           String requestUrl,
+                           UUID groupID,
+                           boolean isBulk);
+
     /**
      * Find a batch in the queue, regardless of job status. Does not alter the batch.
      *

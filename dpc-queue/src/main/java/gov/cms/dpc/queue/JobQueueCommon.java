@@ -50,6 +50,37 @@ public abstract class JobQueueCommon implements IJobQueue {
         return jobBatches.stream().map(JobQueueBatch::getJobID).findFirst().orElseThrow(() -> new JobQueueFailure("Unable to create job. No batches to submit."));
     }
 
+    @Override
+    public UUID createExternalJob(UUID jobID,
+                                  UUID orgID,
+                                  List<String> mbis,
+                                  List<DPCResourceType> resourceTypes,
+                                  OffsetDateTime since,
+                                  String requestingIP,
+                                  String requestUrl,
+                                  UUID groupID,
+                                  boolean isBulk) {
+        final int priority = determinePriority(mbis.size(), false);
+
+        final JobQueueBatch batch = new JobQueueBatch.Builder()
+                .jobID(jobID)
+                .orgID(orgID)
+                .patients(mbis)
+                .resourceTypes(resourceTypes)
+                .since(since)
+                .requestingIP(requestingIP)
+                .requestUrl(requestUrl)
+                .isBulk(isBulk)
+                .groupID(groupID)
+                .exportSource("external-bcda")
+                .exportVersion("V3")
+                .build();
+        batch.setPriority(priority);
+
+        this.submitJobBatches(Collections.singletonList(batch));
+        return jobID;
+    }
+
     private int determinePriority(int patientCount, boolean isSmoke){
         if (isSmoke){
             return 1500;
