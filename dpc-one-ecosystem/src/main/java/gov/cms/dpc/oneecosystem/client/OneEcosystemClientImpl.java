@@ -126,12 +126,19 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
                 .build();
     }
 
-    private synchronized String currentToken() {
+private String currentToken() {
+    String token = accessToken;
+    if (token != null && Instant.now().isBefore(tokenExpiration)) {
+        return token; // fast path, no lock
+    }
+    synchronized (this) {
+        // re-check: another thread may have refreshed while we waited for the lock
         if (accessToken != null && Instant.now().isBefore(tokenExpiration)) {
             return accessToken;
         }
-
         return requestToken();
+    }
+}
     }
 
     private String requestToken() {
