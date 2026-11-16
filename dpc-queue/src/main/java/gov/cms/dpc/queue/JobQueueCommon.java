@@ -53,21 +53,28 @@ public abstract class JobQueueCommon implements IJobQueue {
     @Override
     public UUID createExternalJob(UUID jobID,
                                   UUID orgID,
+                                  String orgNPI,
+                                  String providerNPI,
                                   List<String> mbis,
                                   List<DPCResourceType> resourceTypes,
                                   OffsetDateTime since,
+                                  OffsetDateTime transactionTime,
                                   String requestingIP,
                                   String requestUrl,
                                   UUID groupID,
-                                  boolean isBulk) {
-        final int priority = determinePriority(mbis.size(), false);
+                                  boolean isBulk,
+                                  boolean isSmoke) {
+        final int priority = determinePriority(mbis.size(), isSmoke);
 
         final JobQueueBatch batch = new JobQueueBatch.Builder()
                 .jobID(jobID)
                 .orgID(orgID)
+                .orgNPI(orgNPI)
+                .providerNPI(providerNPI)
                 .patients(mbis)
                 .resourceTypes(resourceTypes)
                 .since(since)
+                .transactionTime(transactionTime)
                 .requestingIP(requestingIP)
                 .requestUrl(requestUrl)
                 .isBulk(isBulk)

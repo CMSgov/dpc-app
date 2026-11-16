@@ -39,11 +39,11 @@ public abstract class AbstractGroupResource extends AbstractResourceWithExport {
 
     @POST
     @Path("/{rosterID}/$member-add")
-    public abstract Group memberAdd(OrganizationPrincipal organizationPrincipal, UUID rosterID, @Valid @Profiled Provenance rosterAttestation, Group groupUpdate);
+    public abstract Group addRosterMembers(OrganizationPrincipal organizationPrincipal, UUID rosterID, @Valid @Profiled Provenance rosterAttestation, Group groupUpdate);
 
     @POST
     @Path("/{rosterID}/$member-remove")
-    public abstract Group memberRemove(UUID rosterID, Group groupUpdate);
+    public abstract Group removeRosterMembers(UUID rosterID, Group groupUpdate);
 
     @GET
     @Path("/{rosterID}/$export")

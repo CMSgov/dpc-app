@@ -8,6 +8,8 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.net.HttpHeaders;
+import gov.cms.dpc.api.DPCAPIConfiguration;
+import gov.cms.dpc.api.V3APITestHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -15,7 +17,7 @@ import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.oneecosystem.client.OneEcosystemClient;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemExportRequest;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemExportResponse;
-import gov.cms.dpc.queue.IJobQueue;
+import gov.cms.dpc.queue.service.DataService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
@@ -24,6 +26,9 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -52,17 +57,35 @@ public class GroupResourceUnitTest {
     OneEcosystemClient oneEcosystemClient;
 
     @Mock
-    IJobQueue mockQueue;
+    DataService mockDataService;
 
     @Mock
     HttpServletRequest request;
+
+    DPCAPIConfiguration config = new DPCAPIConfiguration();
 
     GroupResource resource;
 
     @BeforeEach
     void setUp() {
         openMocks(this);
-        resource = new GroupResource(attributionClient, BASE_URL, oneEcosystemClient, mockQueue);
+        resource = new GroupResource(attributionClient, BASE_URL, oneEcosystemClient, mockDataService, config);
+    }
+
+    private void stubOrgAndProviderNpi(Organization organization, Group group) {
+        // update when Organization is updated to r4
+        org.hl7.fhir.dstu3.model.Identifier orgNpiIdentifier = new org.hl7.fhir.dstu3.model.Identifier();
+        orgNpiIdentifier.setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(NPIUtil.generateNPI());
+        organization.setIdentifier(List.of(orgNpiIdentifier));
+
+        group.addCharacteristic().getCode().addCoding().setCode("attributed-to");
+        CodeableConcept providerNpiConcept = new CodeableConcept();
+        providerNpiConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(NPIUtil.generateNPI());
+        group.getCharacteristicFirstRep().setValue(providerNpiConcept);
+
+        IReadExecutable<Organization> orgReadExec = mock(IReadExecutable.class);
+        when(attributionClient.read().resource(Organization.class).withId(organization.getId()).encodedJson()).thenReturn(orgReadExec);
+        when(orgReadExec.execute()).thenReturn(organization);
     }
 
     @Test
@@ -127,8 +150,6 @@ public class GroupResourceUnitTest {
         provenanceAgent.setOnBehalfOf(new Reference("Practitioner/" + practitionerId));
         provenance.addAgent(provenanceAgent);
 
-        // Pre-populate a tag for a different org, to verify createRoster overwrites it
-        // rather than appending.
         Group groupWithBadTag = new Group();
         groupWithBadTag.getMeta().addTag(DPCIdentifierSystem.DPC.getSystem(), UUID.randomUUID().toString(), "Organization ID");
         groupWithBadTag.addCharacteristic().getCode().addCoding().setCode("attributed-to");
@@ -238,6 +259,8 @@ public class GroupResourceUnitTest {
         group.setId(groupId);
         group.addMember().setEntity(new Reference("Patient/" + UUID.randomUUID()));
 
+        stubOrgAndProviderNpi(organization, group);
+
         IReadExecutable<Group> readExec = mock(IReadExecutable.class);
         when(attributionClient.read().resource(Group.class).withId(new IdType("Group", groupId)).encodedJson()).thenReturn(readExec);
         when(readExec.execute()).thenReturn(group);
@@ -253,10 +276,7 @@ public class GroupResourceUnitTest {
                 .encodedJson()).thenReturn(bundleOperation);
 
         Bundle patients = new Bundle();
-        patients.addEntry(new Bundle.BundleEntryComponent()
-                .setResource(new Patient()
-                        .setIdentifier(List.of(new Identifier()
-                                .setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("9S79A00AA00")))));
+        patients.addEntry(new Bundle.BundleEntryComponent().setResource(V3APITestHelpers.createPatientWithMbi("9S79A00AA00")));
         when(bundleOperation.execute()).thenReturn(patients);
 
         when(oneEcosystemClient.export(any())).thenReturn(
@@ -292,6 +312,8 @@ public class GroupResourceUnitTest {
         group.setId(groupId);
         group.addMember().setEntity(new Reference("Patient/" + UUID.randomUUID()));
 
+        stubOrgAndProviderNpi(organization, group);
+
         IReadExecutable<Group> readExec = mock(IReadExecutable.class);
         when(attributionClient.read().resource(Group.class).withId(new IdType("Group", groupId)).encodedJson()).thenReturn(readExec);
         when(readExec.execute()).thenReturn(group);
@@ -309,10 +331,7 @@ public class GroupResourceUnitTest {
                 .encodedJson()).thenReturn(bundleOperation);
 
         Bundle patients = new Bundle();
-        patients.addEntry(new Bundle.BundleEntryComponent()
-                .setResource(new Patient()
-                        .setIdentifier(List.of(new Identifier()
-                                .setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("9S79A00AA00")))));
+        patients.addEntry(new Bundle.BundleEntryComponent().setResource(V3APITestHelpers.createPatientWithMbi("9S79A00AA00")));
         when(bundleOperation.execute()).thenReturn(patients);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
@@ -336,31 +355,15 @@ public class GroupResourceUnitTest {
         verifyNoInteractions(request);
     }
 
-    @Test
-    void testExportWithNullPreferHeader() {
+    @ParameterizedTest(name = "testExportWithInvalidPreferHeader[prefer={0}]")
+    @NullSource
+    @ValueSource(strings = {"", "badPrefer"})
+    void testExportWithInvalidPreferHeader(String prefer) {
         Organization organization = new Organization();
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
 
         assertThrows(BadRequestException.class, () ->
-                resource.export(organizationPrincipal, "fakeId", null, FHIRMediaTypes.NDJSON, "fakeSince", null, null, request));
-    }
-
-    @Test
-    void testExportWithEmptyPreferHeader() {
-        Organization organization = new Organization();
-        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
-
-        assertThrows(BadRequestException.class, () ->
-                resource.export(organizationPrincipal, "fakeId", null, FHIRMediaTypes.NDJSON, "fakeSince", null, "", request));
-    }
-
-    @Test
-    void testExportWithBadPreferHeader() {
-        Organization organization = new Organization();
-        OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
-
-        assertThrows(BadRequestException.class, () ->
-                resource.export(organizationPrincipal, "fakeId", null, FHIRMediaTypes.NDJSON, "fakeSince", null, "badPrefer", request));
+                resource.export(organizationPrincipal, "fakeId", null, FHIRMediaTypes.NDJSON, "fakeSince", null, prefer, request));
     }
 
     @Test
@@ -374,6 +377,8 @@ public class GroupResourceUnitTest {
         fakeGroup.setId(groupId);
         fakeGroup.addMember().setEntity(new Reference("Patient/" + UUID.randomUUID()));
 
+        stubOrgAndProviderNpi(organization, fakeGroup);
+
         IReadExecutable<Group> readExec = mock(IReadExecutable.class);
         when(attributionClient
                 .read()
@@ -384,8 +389,7 @@ public class GroupResourceUnitTest {
         when(readExec.execute()).thenReturn(fakeGroup);
 
         IOperationUntypedWithInput<Bundle> operationInput = mock(IOperationUntypedWithInput.class);
-        Patient fakePatient = new Patient();
-        fakePatient.getIdentifier().add(new Identifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("2S51C00AA00"));
+        Patient fakePatient = V3APITestHelpers.createPatientWithMbi("2S51C00AA00");
         Bundle fakeBundle = new Bundle();
         fakeBundle.getEntry().add(new Bundle.BundleEntryComponent().setResource(fakePatient));
         when(attributionClient
@@ -403,7 +407,7 @@ public class GroupResourceUnitTest {
         when(oneEcosystemClient.export(any())).thenReturn(
                 new OneEcosystemExportResponse(202, "https://localhost:3002/api/v3/jobs/" + UUID.randomUUID()));
 
-        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v3/Group/1234567890/$export"));
+        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v3/Group/" + groupId + "/$export"));
 
         assertDoesNotThrow(() ->
                 resource.export(organizationPrincipal, groupId, "Coverage", FHIRMediaTypes.APPLICATION_NDJSON, "2017-01-01T00:00:00Z", null, "respond-async", request));

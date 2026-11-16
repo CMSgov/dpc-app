@@ -151,6 +151,38 @@ public class DataService {
         );
     }
 
+    /**
+     * Creates an external job on the queue.
+     */
+    public UUID createExternalJob(UUID jobID,
+                                  UUID organizationID,
+                                  String orgNPI,
+                                  String providerNPI,
+                                  List<String> patientMBIs,
+                                  List<DPCResourceType> resourceTypes,
+                                  OffsetDateTime since,
+                                  OffsetDateTime transactionTime,
+                                  String requestingIP,
+                                  String requestUrl,
+                                  UUID groupID,
+                                  boolean isBulk,
+                                  boolean isSmoke) {
+        return this.queue.createExternalJob(
+                jobID,
+                organizationID,
+                orgNPI,
+                providerNPI,
+                patientMBIs,
+                resourceTypes,
+                since,
+                transactionTime,
+                requestingIP,
+                requestUrl,
+                groupID,
+                isBulk,
+                isSmoke);
+    }
+
     private Optional<List<JobQueueBatch>> waitForJobToComplete(UUID jobID, UUID organizationID, IJobQueue queue) {
         CompletableFuture<Optional<List<JobQueueBatch>>> dataFuture = new CompletableFuture<>();
         final ScheduledExecutorService poller = Executors.newSingleThreadScheduledExecutor();
