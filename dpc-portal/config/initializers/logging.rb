@@ -10,6 +10,7 @@ module LoggingConstants
     HealthCheck = 'HealthCheck'
     Rendering = 'Rendering'
     CredentialManagement = 'CredentialManagement'
+    UserManagement = 'UserManagement'
   end
 
   module ActionType
@@ -70,5 +71,7 @@ module LoggingConstants
     InvalidCsp = 'InvalidCsp'
     CspUnavailable = 'CspUnavailable'
     CspVerificationNotRecorded = 'CspVerificationNotRecorded'
+
+    UserPurgeFailed = 'UserPurgeFailed'
   end
 end
