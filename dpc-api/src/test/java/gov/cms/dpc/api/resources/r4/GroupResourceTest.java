@@ -4,6 +4,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICreateTyped;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -147,11 +149,11 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         group.getCharacteristicFirstRep().getCode().getCodingFirstRep().setCode("<script>nope</script>");
 
         // Submit the group
-        assertThrows(InvalidRequestException.class, () -> v3Client
+        ICreateTyped invalidCreate = v3Client
                 .create()
                 .resource(group)
-                .encodedJson()
-                .execute());
+                .encodedJson();
+        assertThrows(InvalidRequestException.class, invalidCreate::execute);
 
         // Reset back to good safe value
         group.getCharacteristicFirstRep().getCode().getCodingFirstRep().setCode(safeCodeValue);
@@ -163,12 +165,12 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         provenance.getReasonFirstRep().getCodingFirstRep().setCode("<script>nope</script>");
 
         // Provenance parser can't parse
-        assertThrows(UnprocessableEntityException.class, () -> v3Client
+        final ICreateTyped unprocessableCreate = v3Client
                 .create()
                 .resource(group)
                 .encodedJson()
-                .withAdditionalHeader("X-Provenance", r4Ctx.newJsonParser().encodeResourceToString(provenance))
-                .execute());
+                .withAdditionalHeader("X-Provenance", r4Ctx.newJsonParser().encodeResourceToString(provenance));
+        assertThrows(UnprocessableEntityException.class, unprocessableCreate::execute);
     }
 
     @Test
@@ -341,12 +343,11 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         assertNotNull(foundGroup, "Org B should have been able to retrieve their own group");
         assertEquals(orgBGroup.getId(), foundGroup.getId(), "Returned group ID should have been the same as requested ID");
 
-        assertThrows(ResourceNotFoundException.class, () ->
-                        orgBClient.read()
-                                .resource(Group.class)
-                                .withId(orgAGroup.getId())
-                                .encodedJson()
-                                .execute(),
+        IReadExecutable<Group> notFoundRead = orgBClient.read()
+                .resource(Group.class)
+                .withId(orgAGroup.getId())
+                .encodedJson();
+        assertThrows(ResourceNotFoundException.class, notFoundRead::execute,
                 "Organization B should not be able to retrieve group from another organization (Org A)");
     }
 
@@ -369,12 +370,13 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
                 orgBContext.getOrgId(), "Practitioner/" + orgBPractitioner.getIdElement().getIdPart(), List.of());
         final String provenanceStr = r4Ctx.newJsonParser().encodeResourceToString(provenance);
 
-        assertThrows(ResourceNotFoundException.class, () ->
-                        orgBClient.update().resource(orgAGroup)
-                                .withId(orgAGroup.getId())
-                                .encodedJson()
-                                .withAdditionalHeader("X-Provenance", provenanceStr)
-                                .execute(),
+        IUpdateExecutable notFoundUpdate = orgBClient
+                .update()
+                .resource(orgAGroup)
+                .withId(orgAGroup.getId())
+                .encodedJson()
+                .withAdditionalHeader("X-Provenance", provenanceStr);
+        assertThrows(ResourceNotFoundException.class, notFoundUpdate::execute,
                 "Org should receive auth error when updating another org's group.");
 
         final MethodOutcome response = orgBClient.update().resource(orgBGroup)

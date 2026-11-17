@@ -337,21 +337,21 @@ public class GroupResourceUnitTest {
         patients.addEntry(new Bundle.BundleEntryComponent().setResource(V3APITestHelpers.createPatientWithMbi("9S79A00AA00")));
         when(bundleOperation.execute()).thenReturn(patients);
 
+        final String timezoneFutureSince = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusSeconds(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            String since = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusSeconds(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, null, "respond-async", request);
+            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, timezoneFutureSince, null, "respond-async", request);
         });
         assertEquals("'_since' query parameter cannot be a future date", exception.getMessage());
 
+        final String futureSince = OffsetDateTime.now().plusDays(2).toString();
         exception = assertThrows(BadRequestException.class, () -> {
-            final String since = OffsetDateTime.now().plusDays(2).toString();
-            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, null, "respond-async", request);
+            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, futureSince, null, "respond-async", request);
         });
         assertEquals("'_since' query parameter cannot be a future date", exception.getMessage());
 
+        final String badFormatSince = "2020-05-2X616:43:01.780+10:00";
         WebApplicationException badFormat = assertThrows(WebApplicationException.class, () -> {
-            final String since = "2020-05-2X616:43:01.780+10:00";
-            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, null, "respond-async", request);
+            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, badFormatSince, null, "respond-async", request);
         });
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), badFormat.getResponse().getStatus());
 

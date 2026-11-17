@@ -12,6 +12,7 @@ import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.DataRetrievalException;
 import gov.cms.dpc.queue.exceptions.DataRetrievalRetryException;
+import gov.cms.dpc.queue.models.ExternalJobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import jakarta.inject.Inject;
@@ -154,33 +155,8 @@ public class DataService {
     /**
      * Creates an external job on the queue.
      */
-    public UUID createExternalJob(UUID jobID,
-                                  UUID organizationID,
-                                  String orgNPI,
-                                  String providerNPI,
-                                  List<String> patientMBIs,
-                                  List<DPCResourceType> resourceTypes,
-                                  OffsetDateTime since,
-                                  OffsetDateTime transactionTime,
-                                  String requestingIP,
-                                  String requestUrl,
-                                  UUID groupID,
-                                  boolean isBulk,
-                                  boolean isSmoke) {
-        return this.queue.createExternalJob(
-                jobID,
-                organizationID,
-                orgNPI,
-                providerNPI,
-                patientMBIs,
-                resourceTypes,
-                since,
-                transactionTime,
-                requestingIP,
-                requestUrl,
-                groupID,
-                isBulk,
-                isSmoke);
+    public UUID createExternalJob(ExternalJobQueueBatch externalBatch) {
+        return this.queue.createExternalJob(externalBatch);
     }
 
     private Optional<List<JobQueueBatch>> waitForJobToComplete(UUID jobID, UUID organizationID, IJobQueue queue) {

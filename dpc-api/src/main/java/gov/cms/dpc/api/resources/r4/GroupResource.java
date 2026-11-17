@@ -24,6 +24,7 @@ import gov.cms.dpc.fhir.r4.FHIRExtractors;
 import gov.cms.dpc.oneecosystem.client.OneEcosystemClient;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemExportRequest;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemExportResponse;
+import gov.cms.dpc.queue.models.ExternalJobQueueBatch;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
@@ -46,6 +47,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static gov.cms.dpc.common.logging.LogSanitizer.sanitize;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
 import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
@@ -117,6 +119,7 @@ public class GroupResource extends AbstractGroupResource {
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
     @Override
     public Group getRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID) {
+        requireRosterId(rosterID);
         return fetchGroup(new IdType(RESOURCE_TYPE, rosterID.toString()));
     }
 
@@ -142,6 +145,7 @@ public class GroupResource extends AbstractGroupResource {
         logAndVerifyAttestation(rosterAttestation, rosterID, rosterUpdate);
         APIHelpers.addOrganizationTag(rosterUpdate, organizationPrincipal.getOrganization().getId());
 
+        requireRosterId(rosterID);
         final MethodOutcome outcome = this.client
                 .update()
                 .resource(rosterUpdate)
@@ -223,6 +227,8 @@ public class GroupResource extends AbstractGroupResource {
                            @QueryParam("_typeFilter") @NoHtml String typeFilterParam,
                            @ApiParam(hidden = true) @HeaderParam(FHIRHeaders.PREFER_HEADER) @Valid String prefer,
                            @Context HttpServletRequest request) {
+        rosterID = sanitize(rosterID);
+        sinceParam = sanitize(sinceParam);
         logger.info("Exporting data for roster: {} _since: {}", rosterID, sinceParam);
         final String eventTime = SplunkTimestamp.getSplunkTimestamp();
 
@@ -262,8 +268,21 @@ public class GroupResource extends AbstractGroupResource {
         final UUID backendJobID = extractJobId(exportResponse.contentLocation());
 
         final boolean isSmoke = config.getLookBackExemptOrgs().contains(orgID.toString());
-        this.dataService.createExternalJob(backendJobID, orgID, orgNPI, providerNPI, attributedMbis,
-                resources, since, null, requestingIP, requestUrl, groupID, true, isSmoke);
+        final ExternalJobQueueBatch externalBatch = new ExternalJobQueueBatch.Builder()
+                .jobID(backendJobID)
+                .orgID(orgID)
+                .orgNPI(orgNPI)
+                .providerNPI(providerNPI)
+                .mbis(attributedMbis)
+                .resourceTypes(resources)
+                .since(since)
+                .requestingIP(requestingIP)
+                .requestUrl(requestUrl)
+                .groupID(groupID)
+                .isBulk(true)
+                .isSmoke(isSmoke)
+                .build();
+        this.dataService.createExternalJob(externalBatch);
 
         final int totalPatients = attributedMbis.size();
         final String resourcesRequested = String.join(";", resourceNames);
@@ -275,6 +294,7 @@ public class GroupResource extends AbstractGroupResource {
     }
 
     private Group executeGroupOperation(UUID rosterID, Group groupUpdate, String operationName) {
+        requireRosterId(rosterID);
         final Parameters parameters = new Parameters();
         parameters.addParameter().setResource(groupUpdate);
         return this.client
@@ -379,6 +399,12 @@ public class GroupResource extends AbstractGroupResource {
             }
         } catch (ResourceNotFoundException e) {
             throw new WebApplicationException("Could not find provider defined in provenance header", HttpStatus.SC_UNPROCESSABLE_CONTENT);
+        }
+    }
+
+    private void requireRosterId(UUID rosterID) {
+        if (rosterID == null) {
+            throw new BadRequestException("rosterID is required");
         }
     }
 }

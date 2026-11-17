@@ -10,6 +10,7 @@ import gov.cms.dpc.oneecosystem.models.OneEcosystemJobStatusOutput;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemJobStatusResponse;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
+import gov.cms.dpc.queue.models.ExternalJobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import jakarta.ws.rs.core.Response;
@@ -47,6 +48,20 @@ public class JobResourceTest {
         MockitoAnnotations.openMocks(this);
     }
 
+    private ExternalJobQueueBatch buildExternalJobQueueBatch(UUID orgID, UUID groupID, String requestUrl) {
+        return new ExternalJobQueueBatch.Builder()
+                .jobID(UUID.randomUUID())
+                .orgID(orgID)
+                .orgNPI(TEST_ORG_NPI)
+                .providerNPI(TEST_PROVIDER_NPI)
+                .mbis(List.of(TEST_PATIENT_MBI))
+                .resourceTypes(JobQueueBatch.validResourceTypes)
+                .requestUrl(requestUrl)
+                .groupID(groupID)
+                .isBulk(true)
+                .build();
+    }
+
     @Test
     void testNonExistentJob() {
         final var jobID = UUID.randomUUID();
@@ -66,9 +81,8 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
         final var groupID = UUID.randomUUID();
 
-        final var jobID = queue.createExternalJob(UUID.randomUUID(), orgID, TEST_ORG_NPI, TEST_PROVIDER_NPI,
-                List.of(TEST_PATIENT_MBI), JobQueueBatch.validResourceTypes,
-                null, null, null, String.format(TEST_JOB_URL, groupID), groupID, true, false);
+        final var jobID = queue.createExternalJob(
+                buildExternalJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)));
 
         when(client.jobStatus(jobID)).thenReturn(new OneEcosystemJobStatus(202, null));
 
@@ -87,9 +101,7 @@ public class JobResourceTest {
         final var groupID = UUID.randomUUID();
         final var requestUrl = String.format(TEST_JOB_URL, groupID);
 
-        final var jobID = queue.createExternalJob(UUID.randomUUID(), orgID, TEST_ORG_NPI, TEST_PROVIDER_NPI,
-                List.of(TEST_PATIENT_MBI), JobQueueBatch.validResourceTypes,
-                null, null, null, requestUrl, groupID, true, false);
+        final var jobID = queue.createExternalJob(buildExternalJobQueueBatch(orgID, groupID, requestUrl));
 
         final Instant transactionTime = Instant.now();
         final List<OneEcosystemJobStatusOutput> outputs = JobQueueBatch.validResourceTypes.stream()
@@ -129,9 +141,8 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
         final var groupID = UUID.randomUUID();
 
-        final var jobID = queue.createExternalJob(UUID.randomUUID(), orgID, TEST_ORG_NPI, TEST_PROVIDER_NPI,
-                List.of(TEST_PATIENT_MBI), JobQueueBatch.validResourceTypes,
-                null, null, null, String.format(TEST_JOB_URL, groupID), groupID, true, false);
+        final var jobID = queue.createExternalJob(
+                buildExternalJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)));
 
         final List<String> partialErrors = List.of(
                 "Failed to retrieve ExplanationOfBenefit data for 3 of 150 patients: BFD returned 504 Gateway Timeout");
@@ -159,10 +170,9 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
         final var groupID = UUID.randomUUID();
 
-        final var jobID = queue.createExternalJob(UUID.randomUUID(), orgID, TEST_ORG_NPI, TEST_PROVIDER_NPI,
-                List.of(TEST_PATIENT_MBI), JobQueueBatch.validResourceTypes,
-                null, null, null, String.format(TEST_JOB_URL, groupID), groupID, true, false);
-        final var batch = queue.getJobBatches(jobID).get(0);
+        final var jobID = queue.createExternalJob(
+                buildExternalJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)));
+        final var batch = queue.getJobBatches(jobID).getFirst();
 
         final List<String> fatalErrors = List.of(
                 "BCDA job aborted: downstream BFD service was unreachable after 3 retries");
@@ -171,8 +181,9 @@ public class JobResourceTest {
                 new OneEcosystemJobStatusResponse(Instant.now(), true, List.of(), fatalErrors, jobID)));
 
         final var resource = new JobResource(queue, client, TEST_BASEURL);
+        String jobString = jobID.toString();
         JobQueueFailure exception = assertThrows(JobQueueFailure.class,
-                () -> resource.checkJobStatus(organizationPrincipal, jobID.toString()));
+                () -> resource.checkJobStatus(organizationPrincipal, jobString));
         assertEquals(String.format("Operation on Job(%s) Batch(%s) failed for reason: Batch failed", jobID, batch.getBatchID()), exception.getMessage());
     }
 
@@ -188,9 +199,8 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
         final var groupID = UUID.randomUUID();
 
-        final var jobID = queue.createExternalJob(UUID.randomUUID(), orgID, TEST_ORG_NPI, TEST_PROVIDER_NPI,
-                List.of(TEST_PATIENT_MBI), JobQueueBatch.validResourceTypes,
-                null, null, null, String.format(TEST_JOB_URL, groupID), groupID, true, false);
+        final var jobID = queue.createExternalJob(
+                buildExternalJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)));
 
         when(client.jobStatus(jobID)).thenReturn(new OneEcosystemJobStatus(400,
                 new OneEcosystemJobStatusResponse(Instant.now(), true, List.of(),
@@ -212,10 +222,9 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
         final var groupID = UUID.randomUUID();
 
-        final var jobID = queue.createExternalJob(UUID.randomUUID(), orgID, TEST_ORG_NPI, TEST_PROVIDER_NPI,
-                List.of(TEST_PATIENT_MBI), JobQueueBatch.validResourceTypes,
-                null, null, null, String.format(TEST_JOB_URL, groupID), groupID, true, false);
-        final var batch = queue.getJobBatches(jobID).get(0);
+        final var jobID = queue.createExternalJob(
+                buildExternalJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)));
+        final var batch = queue.getJobBatches(jobID).getFirst();
 
         OneEcosystemJobStatus status = new OneEcosystemJobStatus(503,
                 new OneEcosystemJobStatusResponse(Instant.now(), true, List.of(), List.of(), jobID));
@@ -223,8 +232,9 @@ public class JobResourceTest {
 
         final var resource = new JobResource(queue, client, TEST_BASEURL);
 
+        String jobString = jobID.toString();
         JobQueueFailure exception = assertThrows(JobQueueFailure.class,
-                () -> resource.checkJobStatus(organizationPrincipal, jobID.toString()));
+                () -> resource.checkJobStatus(organizationPrincipal, jobString));
         assertEquals(String.format("Operation on Job(%s) Batch(%s) failed for reason: Export job returned unrecognized status code: %s", jobID, batch.getBatchID(), status.statusCode()), exception.getMessage());
     }
 
@@ -237,9 +247,7 @@ public class JobResourceTest {
         final var groupID = UUID.randomUUID();
         final var requestUrl = String.format(TEST_JOB_URL, groupID);
 
-        final var jobID = queue.createExternalJob(UUID.randomUUID(), orgIDCorrect, TEST_ORG_NPI, TEST_PROVIDER_NPI,
-                List.of(TEST_PATIENT_MBI), JobQueueBatch.validResourceTypes,
-                null, null, null, requestUrl, groupID, true, false);
+        final var jobID = queue.createExternalJob(buildExternalJobQueueBatch(orgIDCorrect, groupID, requestUrl));
 
         when(client.jobStatus(jobID)).thenReturn(new OneEcosystemJobStatus(200,
                 new OneEcosystemJobStatusResponse(Instant.now(), true, List.of(), List.of(), jobID)));

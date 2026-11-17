@@ -1,6 +1,7 @@
 package gov.cms.dpc.queue;
 
 import gov.cms.dpc.fhir.DPCResourceType;
+import gov.cms.dpc.queue.models.ExternalJobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 
@@ -47,34 +48,10 @@ public interface IJobQueue {
     /**
      * Create and submit an external job into the queue.
      *
-     * @param jobID           - The job ID assigned by the external backend
-     * @param orgID           - The organization submitting the job
-     * @param orgNPI          - The NPI of the organization submitting the job
-     * @param providerNPI     - The NPI of the provider submitting the job
-     * @param mbis            - The list of MBIs of patients to fetch data for
-     * @param resourceTypes   - The resource types to fetch patient data for
-     * @param since           - The since parameter to use for the requests. May be null.
-     * @param transactionTime - The transactionTime of the job
-     * @param requestingIP    - The IP address where the request came from
-     * @param requestUrl      - The URL of the original request
-     * @param groupID         - The Group (roster) ID this export is for
-     * @param isBulk          - Flag to indicate bulk request
-     * @param isSmoke         - Flag to indicate smoke test request
+     * @param batch The external job queue batch
      * @return The jobID, echoed back for convenience
      */
-    UUID createExternalJob(UUID jobID,
-                           UUID orgID,
-                           String orgNPI,
-                           String providerNPI,
-                           List<String> mbis,
-                           List<DPCResourceType> resourceTypes,
-                           OffsetDateTime since,
-                           OffsetDateTime transactionTime,
-                           String requestingIP,
-                           String requestUrl,
-                           UUID groupID,
-                           boolean isBulk,
-                           boolean isSmoke);
+    UUID createExternalJob(ExternalJobQueueBatch batch);
 
     /**
      * Find a batch in the queue, regardless of job status. Does not alter the batch.
@@ -128,7 +105,7 @@ public interface IJobQueue {
     /**
      * Completes the current batch.
      *
-     * @param job          - the job batch to compelte
+     * @param job          - the job batch to complete
      * @param aggregatorID - the current aggregator working the job
      */
     void completeBatch(JobQueueBatch job, UUID aggregatorID);
