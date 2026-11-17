@@ -46,6 +46,7 @@ public class AbstractSecureApplicationTest {
     private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION =
             new DropwizardTestSupport<>(DPCAPIService.class, configPath);
     protected static FhirContext ctx;
+    protected static FhirContext r4Ctx;
     protected static String ORGANIZATION_TOKEN;
     // Macaroon to use for doing admin things (like creating tokens and keys)
     protected static String GOLDEN_MACAROON;
@@ -65,8 +66,30 @@ public class AbstractSecureApplicationTest {
         return new TestOrganizationContext(clientToken,npi,orgId,newKeyPair.getLeft().toString(),newKeyPair.getRight());
     }
 
+    protected IGenericClient buildSetupClient() {
+        return APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+    }
+
+    protected IGenericClient buildSetupClient(TestOrganizationContext orgContext) {
+        return APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgContext.getClientToken(),
+                UUID.fromString(orgContext.getPublicKeyId()), orgContext.getPrivateKey());
+    }
+
+    protected IGenericClient buildV3Client() {
+        return APIAuthHelpers.buildAuthenticatedClient(r4Ctx, getV3BaseURL(), getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+    }
+
+    protected IGenericClient buildV3Client(TestOrganizationContext orgContext) {
+        return APIAuthHelpers.buildAuthenticatedClient(r4Ctx, getV3BaseURL(), getBaseURL(), orgContext.getClientToken(),
+                UUID.fromString(orgContext.getPublicKeyId()), orgContext.getPrivateKey());
+    }
+
     protected String getBaseURL() {
         return String.format("http://localhost:%d/v1", APPLICATION.getLocalPort());
+    }
+
+    protected String getV3BaseURL() {
+        return String.format("http://localhost:%d/v3", APPLICATION.getLocalPort());
     }
 
     protected String getAdminURL() {
@@ -83,6 +106,7 @@ public class AbstractSecureApplicationTest {
     public static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
         ctx = FhirContext.forDstu3();
+        r4Ctx = FhirContext.forR4();
         // Register a test organization for us
         // First, create a Golden macaroon for admin uses
         GOLDEN_MACAROON = APIAuthHelpers.createGoldenMacaroon();

@@ -53,6 +53,9 @@ public class GroupResourceUnitTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     IGenericClient attributionClient;
 
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    IGenericClient attributionSTU3Client;
+
     @Mock
     OneEcosystemClient oneEcosystemClient;
 
@@ -69,7 +72,7 @@ public class GroupResourceUnitTest {
     @BeforeEach
     void setUp() {
         openMocks(this);
-        resource = new GroupResource(attributionClient, BASE_URL, oneEcosystemClient, mockDataService, config);
+        resource = new GroupResource(attributionClient, attributionSTU3Client, BASE_URL, oneEcosystemClient, mockDataService, config);
     }
 
     private void stubOrgAndProviderNpi(Organization organization, Group group) {
@@ -117,13 +120,13 @@ public class GroupResourceUnitTest {
         outcome.setResource(group);
         when(createExec.execute()).thenReturn(outcome);
 
-        Identifier identifier = new Identifier();
+        org.hl7.fhir.dstu3.model.Identifier identifier = new org.hl7.fhir.dstu3.model.Identifier();
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
         identifier.setValue(practitionerNPI);
-        Practitioner practitioner = new Practitioner();
+        org.hl7.fhir.dstu3.model.Practitioner practitioner = new org.hl7.fhir.dstu3.model.Practitioner();
         practitioner.setIdentifier(List.of(identifier));
-        IReadExecutable<Practitioner> readExec = mock(IReadExecutable.class);
-        when(attributionClient.read().resource(Practitioner.class).withId(practitionerId.toString()).encodedJson()).thenReturn(readExec);
+        IReadExecutable<org.hl7.fhir.dstu3.model.Practitioner> readExec = mock(IReadExecutable.class);
+        when(attributionSTU3Client.read().resource(org.hl7.fhir.dstu3.model.Practitioner.class).withId(practitionerId.toString()).encodedJson()).thenReturn(readExec);
         when(readExec.execute()).thenReturn(practitioner);
 
         Response response = resource.createRoster(organizationPrincipal, provenance, group);
@@ -157,13 +160,13 @@ public class GroupResourceUnitTest {
         codeableConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(practitionerNPI);
         groupWithBadTag.getCharacteristicFirstRep().setValue(codeableConcept);
 
-        Identifier identifier = new Identifier();
+        org.hl7.fhir.dstu3.model.Identifier identifier = new org.hl7.fhir.dstu3.model.Identifier();
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
         identifier.setValue(practitionerNPI);
-        Practitioner practitioner = new Practitioner();
+        org.hl7.fhir.dstu3.model.Practitioner practitioner = new org.hl7.fhir.dstu3.model.Practitioner();
         practitioner.setIdentifier(List.of(identifier));
-        IReadExecutable<Practitioner> readExec = mock(IReadExecutable.class);
-        when(attributionClient.read().resource(Practitioner.class).withId(practitionerId.toString()).encodedJson()).thenReturn(readExec);
+        IReadExecutable<org.hl7.fhir.dstu3.model.Practitioner> readExec = mock(IReadExecutable.class);
+        when(attributionSTU3Client.read().resource(org.hl7.fhir.dstu3.model.Practitioner.class).withId(practitionerId.toString()).encodedJson()).thenReturn(readExec);
         when(readExec.execute()).thenReturn(practitioner);
 
         ICreate iCreate = mock(ICreate.class);
@@ -207,13 +210,13 @@ public class GroupResourceUnitTest {
         codeableConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(NPIUtil.generateNPI());
         group.getCharacteristicFirstRep().setValue(codeableConcept);
 
-        Identifier identifier = new Identifier();
+        org.hl7.fhir.dstu3.model.Identifier identifier = new org.hl7.fhir.dstu3.model.Identifier();
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
         identifier.setValue(NPIUtil.generateNPI());
-        Practitioner practitioner = new Practitioner();
+        org.hl7.fhir.dstu3.model.Practitioner practitioner = new org.hl7.fhir.dstu3.model.Practitioner();
         practitioner.setIdentifier(List.of(identifier));
-        IReadExecutable<Practitioner> readExec = mock(IReadExecutable.class);
-        when(attributionClient.read().resource(Practitioner.class).withId(practitionerId.toString()).encodedJson()).thenReturn(readExec);
+        IReadExecutable<org.hl7.fhir.dstu3.model.Practitioner> readExec = mock(IReadExecutable.class);
+        when(attributionSTU3Client.read().resource(org.hl7.fhir.dstu3.model.Practitioner.class).withId(practitionerId.toString()).encodedJson()).thenReturn(readExec);
         when(readExec.execute()).thenReturn(practitioner);
 
         assertThrows(WebApplicationException.class, () -> resource.createRoster(organizationPrincipal, provenance, group));
@@ -240,8 +243,8 @@ public class GroupResourceUnitTest {
         codeableConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(NPIUtil.generateNPI());
         group.getCharacteristicFirstRep().setValue(codeableConcept);
 
-        IReadExecutable<Practitioner> readExec = mock(IReadExecutable.class);
-        when(attributionClient.read().resource(Practitioner.class).withId(practitionerId.toString()).encodedJson()).thenReturn(readExec);
+        IReadExecutable<org.hl7.fhir.dstu3.model.Practitioner> readExec = mock(IReadExecutable.class);
+        when(attributionSTU3Client.read().resource(org.hl7.fhir.dstu3.model.Practitioner.class).withId(practitionerId.toString()).encodedJson()).thenReturn(readExec);
         when(readExec.execute()).thenThrow(new ResourceNotFoundException("practitioner not found"));
 
         assertThrows(WebApplicationException.class, () -> resource.createRoster(organizationPrincipal, provenance, group));

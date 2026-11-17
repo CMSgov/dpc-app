@@ -56,18 +56,21 @@ public class GroupResource extends AbstractGroupResource {
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
     private static final String RESOURCE_TYPE = "Group";
 
+    private final IGenericClient stu3Client;
     private final String baseURL;
     private final OneEcosystemClient oneEcosystemClient;
     private final DataService dataService;
     private final DPCAPIConfiguration config;
 
     @Inject
-    public GroupResource(@Named("attribution") IGenericClient client,
+    public GroupResource(@Named("attribution-r4") IGenericClient client,
+                         @Named("attribution") IGenericClient stu3Client, // Can be removed when Practitioner is on R4
                          @APIV3 String baseURL,
                          OneEcosystemClient oneEcosystemClient,
                          DataService dataService,
                          DPCAPIConfiguration config) {
         super(client);
+        this.stu3Client = stu3Client;
         this.baseURL = baseURL;
         this.oneEcosystemClient = oneEcosystemClient;
         this.dataService = dataService;
@@ -362,13 +365,13 @@ public class GroupResource extends AbstractGroupResource {
 
     private void verifyHeader(String practitionerUUID, Group attributionRoster) {
         try {
-            Practitioner practitioner = client.read()
-                    .resource(Practitioner.class)
+            org.hl7.fhir.dstu3.model.Practitioner practitioner = stu3Client.read()
+                    .resource(org.hl7.fhir.dstu3.model.Practitioner.class)
                     .withId(gov.cms.dpc.fhir.stu3.FHIRExtractors.getEntityUUID(practitionerUUID).toString())
                     .encodedJson()
                     .execute();
 
-            Identifier provenancePractitionerNPI = FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES);
+            org.hl7.fhir.dstu3.model.Identifier provenancePractitionerNPI = gov.cms.dpc.fhir.stu3.FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES);
             String groupPractitionerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
 
             if (!provenancePractitionerNPI.getValue().equals(groupPractitionerNPI)) {
