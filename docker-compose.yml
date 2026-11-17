@@ -108,6 +108,7 @@ services:
       DEBUG_MODE: ${DEBUG_MODE:-false}
       USE_BFD_MOCK: ${USE_BFD_MOCK:-true}
       DD_SERVICE: dpc-api
+      ONE_ECOSYSTEM_API_BASE_URL: dev.bcda.cms.gov
     depends_on:
       attribution:
         condition: service_healthy
