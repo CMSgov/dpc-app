@@ -11,10 +11,12 @@ import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.auth.jwt.JwtKeyLocator;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
 import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
-import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
+import gov.cms.dpc.api.resources.r4.BaseResource;
+import gov.cms.dpc.api.resources.r4.DataResource;
+import gov.cms.dpc.api.resources.r4.GroupResource;
 import gov.cms.dpc.api.resources.v1.*;
 import gov.cms.dpc.api.tasks.GenerateKeyPair;
 import gov.cms.dpc.api.tasks.keys.DeletePublicKey;
@@ -37,6 +39,7 @@ import gov.cms.dpc.macaroons.annotations.PublicURL;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
+import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import jakarta.inject.Named;
@@ -60,17 +63,18 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     public void configure() {
         Binder binder = binder();
         // V1 Resources
-        binder.bind(BaseResource.class);
-        binder.bind(DataResource.class);
+        binder.bind(gov.cms.dpc.api.resources.v1.BaseResource.class);
+        binder.bind(gov.cms.dpc.api.resources.v1.DataResource.class);
         binder.bind(DefinitionResource.class);
-        binder.bind(GroupResource.class);
+        binder.bind(gov.cms.dpc.api.resources.v1.GroupResource.class);
         binder.bind(JobResource.class);
         binder.bind(PatientResource.class);
         binder.bind(PractitionerResource.class);
 
         // V3 Resources
-        binder.bind(gov.cms.dpc.api.resources.r4.BaseResource.class);
-        binder.bind(gov.cms.dpc.api.resources.r4.GroupResource.class);
+        binder.bind(BaseResource.class);
+        binder.bind(DataResource.class);
+        binder.bind(GroupResource.class);
 
         // DAO
         binder.bind(PublicKeyDAO.class);

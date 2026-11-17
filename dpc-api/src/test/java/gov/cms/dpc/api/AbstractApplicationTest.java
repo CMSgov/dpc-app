@@ -5,7 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
-import gov.cms.dpc.fhir.helpers.FHIRHelpers;
+import gov.cms.dpc.fhir.helpers.v1.FHIRHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.testing.ConfigOverride;

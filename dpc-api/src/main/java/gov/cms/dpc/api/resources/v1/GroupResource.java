@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 import static gov.cms.dpc.api.APIHelpers.addOrganizationTag;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
-import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
+import static gov.cms.dpc.fhir.helpers.v1.FHIRHelpers.handleMethodOutcome;
 
 
 @Api(value = "Group", authorizations = @Authorization(value = "access_token"))
