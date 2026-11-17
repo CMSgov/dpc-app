@@ -3,6 +3,7 @@ package gov.cms.dpc.api.resources.r4;
 import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.common.utils.NPIUtil;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.oneecosystem.client.OneEcosystemClient;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemJobStatus;
@@ -15,6 +16,7 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -125,15 +127,10 @@ public class JobResourceTest {
                 () -> assertEquals(OffsetDateTime.ofInstant(transactionTime, ZoneOffset.UTC), completion.getTransactionTime()));
 
         for (JobCompletionModel.OutputEntry entry : completion.getOutput()) {
-            assertEquals(TEST_BASEURL + "/data/" + jobID + "/" + jobID + "-" + entry.getType().name() + ".ndjson", entry.getUrl());
+            assertEquals(TEST_BASEURL + "/Data/" + jobID + "/" + jobID + "-" + entry.getType().name() + ".ndjson", entry.getUrl());
         }
     }
 
-    /**
-     * Job completed overall (200) but the backend reports partial, per-patient errors.
-     * Realistic example: a subset of patients timed out against BFD, but enough of the
-     * job succeeded that NEWBE still reports completion.
-     */
     @Test
     void testJobWithError() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
@@ -155,14 +152,13 @@ public class JobResourceTest {
 
         assertEquals(HttpStatus.OK_200, response.getStatus());
         final var completion = (JobCompletionModel) response.getEntity();
-        assertTrue(completion.getOutput().isEmpty());
+        assertAll(() -> assertTrue(completion.getOutput().isEmpty()),
+                () -> assertEquals(1, completion.getError().size()),
+                () -> assertEquals(DPCResourceType.OperationOutcome, completion.getError().getFirst().getType()),
+                () -> assertEquals(partialErrors.size(), completion.getError().getFirst().getCount()),
+                () -> assertEquals(TEST_BASEURL + "/Jobs/" + jobID + "/OperationOutcome", completion.getError().getFirst().getUrl()));
     }
 
-    /**
-     * Backend explicitly reports the job failed (500) - mirrors v1's local
-     * JobStatus.FAILED handling: same exception type and message, "Batch failed", even
-     * though here the failure was detected by the backend rather than an aggregator.
-     */
     @Test
     void testFailedJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
@@ -187,11 +183,6 @@ public class JobResourceTest {
         assertEquals(String.format("Operation on Job(%s) Batch(%s) failed for reason: Batch failed", jobID, batch.getBatchID()), exception.getMessage());
     }
 
-    /**
-     * Backend does not recognize the job ID at all - e.g. it expired or was purged on
-     * NEWBE's side. Distinct from testFailedJob: the job isn't known to have failed,
-     * it simply isn't known.
-     */
     @Test
     void testUnknownJob() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
@@ -212,9 +203,6 @@ public class JobResourceTest {
         assertEquals(HttpStatus.NOT_FOUND_404, response.getStatus());
     }
 
-    /**
-     * A backend status code this resource doesn't recognize at all
-     */
     @Test
     void testUnrecognizedBackendStatus() {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
@@ -260,5 +248,57 @@ public class JobResourceTest {
 
         final Response responseRight = resource.checkJobStatus(organizationPrincipalCorrect, jobID.toString());
         assertEquals(HttpStatus.OK_200, responseRight.getStatus());
+    }
+
+    @Test
+    void testGetJobErrorsReturnsOperationOutcome() {
+        final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+        final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
+        final var queue = new MemoryBatchQueue(100);
+        final var groupID = UUID.randomUUID();
+
+        final var jobID = queue.createExternalJob(
+                buildExternalJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)));
+
+        final List<String> errors = List.of("BFD returned 504 Gateway Timeout for 3 of 150 patients");
+        when(client.jobStatus(jobID)).thenReturn(new OneEcosystemJobStatus(200,
+                new OneEcosystemJobStatusResponse(Instant.now(), true, List.of(), errors, jobID)));
+
+        final var resource = new JobResource(queue, client, TEST_BASEURL);
+        final Response response = resource.getJobErrors(organizationPrincipal, jobID.toString());
+
+        assertEquals(HttpStatus.OK_200, response.getStatus());
+        final OperationOutcome outcome = (OperationOutcome) response.getEntity();
+        assertAll(() -> assertEquals(1, outcome.getIssue().size()),
+                () -> assertEquals(errors.getFirst(), outcome.getIssueFirstRep().getDiagnostics()),
+                () -> assertEquals(OperationOutcome.IssueSeverity.ERROR, outcome.getIssueFirstRep().getSeverity()));
+    }
+
+    @Test
+    void testGetJobErrorsWrongOrganization() {
+        final var organizationPrincipalCorrect = APITestHelpers.makeOrganizationPrincipal();
+        final var orgIDCorrect = FHIRExtractors.getEntityUUID(organizationPrincipalCorrect.getOrganization().getId());
+        final var organizationPrincipalWrong = APITestHelpers.makeOrganizationPrincipal(OTHER_ORGANIZATION);
+        final var queue = new MemoryBatchQueue(100);
+        final var groupID = UUID.randomUUID();
+
+        final var jobID = queue.createExternalJob(
+                buildExternalJobQueueBatch(orgIDCorrect, groupID, String.format(TEST_JOB_URL, groupID)));
+
+        final var resource = new JobResource(queue, client, TEST_BASEURL);
+        final Response response = resource.getJobErrors(organizationPrincipalWrong, jobID.toString());
+
+        assertEquals(HttpStatus.UNAUTHORIZED_401, response.getStatus());
+    }
+
+    @Test
+    void testGetJobErrorsNonExistentJob() {
+        final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
+        final var queue = new MemoryBatchQueue(100);
+        final var resource = new JobResource(queue, client, TEST_BASEURL);
+
+        final Response response = resource.getJobErrors(organizationPrincipal, UUID.randomUUID().toString());
+
+        assertEquals(HttpStatus.NOT_FOUND_404, response.getStatus());
     }
 }

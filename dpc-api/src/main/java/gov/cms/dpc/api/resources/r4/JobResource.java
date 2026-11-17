@@ -9,6 +9,7 @@ import gov.cms.dpc.common.annotations.APIV3;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.fhir.DPCResourceType;
+import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.stu3.FHIRExtractors;
 import gov.cms.dpc.oneecosystem.client.OneEcosystemClient;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemJobStatus;
@@ -25,6 +26,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +88,7 @@ public class JobResource extends AbstractJobResource {
         }
 
         // Get JobStatus from the external client
-        final JobQueueBatch batch = batches.get(0);
+        final JobQueueBatch batch = batches.getFirst();
         final OneEcosystemJobStatus status = this.client.jobStatus(jobUUID);
 
         Response.ResponseBuilder builder = Response.noContent();
@@ -99,7 +101,7 @@ public class JobResource extends AbstractJobResource {
             builder = buildJobStatusInProgress(builder);
         } else if (status.statusCode() == HttpStatus.OK_200) {
             // All batches in the job have finished
-            builder = buildJobStatusCompleted(builder, status.body(), batch.getRequestUrl());
+            builder = buildJobStatusCompleted(builder, status.body(), batch.getRequestUrl(), jobUUID);
         } else if (status.statusCode() == HttpStatus.BAD_REQUEST_400) {
             // Backend doesn't recognize the job ID
             builder = builder.status(HttpStatus.NOT_FOUND_404).entity("Could not find job");
@@ -110,6 +112,45 @@ public class JobResource extends AbstractJobResource {
         }
 
         return builder.build();
+    }
+
+    @GET
+    @Path("/{jobID}/OperationOutcome")
+    @FHIR
+    @Timed
+    @ExceptionMetered
+    @Authorizer
+    @ApiOperation(value = "Fetch OperationOutcome detailing export job errors", response = OperationOutcome.class)
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "OperationOutcome describing errors reported by the export backend"),
+            @ApiResponse(code = 401, message = "Invalid organization for job"),
+            @ApiResponse(code = 404, message = "Export job cannot be found")
+    })
+    public Response getJobErrors(@Auth OrganizationPrincipal organizationPrincipal, @PathParam("jobID") @NoHtml String jobID) {
+        final UUID jobUUID = UUID.fromString(jobID);
+        final UUID orgUUID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
+        final List<JobQueueBatch> batches = this.queue.getJobBatches(jobUUID);
+        if (batches.isEmpty()) {
+            return Response.status(HttpStatus.NOT_FOUND_404).entity("Could not find job").build();
+        }
+        final JobQueueBatch batch = batches.getFirst();
+        if (!batch.getOrgID().equals(orgUUID)) {
+            return Response.status(HttpStatus.UNAUTHORIZED_401).entity("Invalid organization for job").build();
+        }
+
+        final OneEcosystemJobStatus status = this.client.jobStatus(jobUUID);
+        final List<String> errors = status.body() != null ? status.body().error() : List.of();
+
+        return Response.ok(buildOperationOutcome(errors)).build();
+    }
+
+    private OperationOutcome buildOperationOutcome(List<String> errors) {
+        final OperationOutcome outcome = new OperationOutcome();
+        errors.forEach(error -> outcome.addIssue()
+                .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                .setCode(OperationOutcome.IssueType.PROCESSING)
+                .setDiagnostics(error));
+        return outcome;
     }
 
     private Response.ResponseBuilder buildJobStatusInProgress(Response.ResponseBuilder builder) {
@@ -128,13 +169,14 @@ public class JobResource extends AbstractJobResource {
      * @param requestUrl - the original export request URL, as persisted on the batch
      * @return the response builder
      */
-    private Response.ResponseBuilder buildJobStatusCompleted(Response.ResponseBuilder builder, OneEcosystemJobStatusResponse response, String requestUrl) {
+    private Response.ResponseBuilder buildJobStatusCompleted(Response.ResponseBuilder builder, OneEcosystemJobStatusResponse response, String requestUrl, UUID jobID) {
         OffsetDateTime transactionTime = OffsetDateTime.ofInstant(response.transactionTime(), ZoneOffset.UTC);
         final List<JobCompletionModel.OutputEntry> outputEntries = response.output().stream()
                 .map(this::toOutputEntry)
                 .toList();
 
-        if (!response.error().isEmpty()) {
+        final List<JobCompletionModel.OutputEntry> errorEntries = buildErrorEntries(response.error(), jobID);
+        if (!errorEntries.isEmpty()) {
             logger.warn("Export job {} reported errors: {}", response.JobID(), response.error());
         }
 
@@ -142,15 +184,24 @@ public class JobResource extends AbstractJobResource {
                 transactionTime,
                 requestUrl,
                 outputEntries,
-                List.of(),
+                errorEntries,
                 List.of());
 
         return builder.status(HttpStatus.OK_200).entity(completionModel);
     }
 
+    private List<JobCompletionModel.OutputEntry> buildErrorEntries(List<String> errors, UUID jobID) {
+        if (errors.isEmpty()) {
+            return List.of();
+        }
+
+        final String errorUrl = this.baseURL + "/Jobs/" + jobID + "/OperationOutcome";
+        return List.of(new JobCompletionModel.OutputEntry(DPCResourceType.OperationOutcome, errorUrl, errors.size(), List.of()));
+    }
+
     private JobCompletionModel.OutputEntry toOutputEntry(OneEcosystemJobStatusOutput output) {
         final DPCResourceType type = resolveResourceType(output.type());
-        return new JobCompletionModel.OutputEntry(type, this.baseURL + output.url(), 0, List.of());
+        return new JobCompletionModel.OutputEntry(type, buildDownloadUrl(output.url()), 0, List.of());
     }
 
     private DPCResourceType resolveResourceType(String resourceTypeName) {
@@ -158,5 +209,17 @@ public class JobResource extends AbstractJobResource {
                 .filter(type -> type.getPath().equalsIgnoreCase(resourceTypeName))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Unknown resource type returned by export backend: " + resourceTypeName));
+    }
+
+    /**
+     * Rewrites the backend's raw /data/{jobID}/{filename} path into this API's own download route
+     * @param backendPath path from backend
+     * @return DPC-structured path
+     */
+    private String buildDownloadUrl(String backendPath) {
+        final String[] segments = backendPath.split("/");
+        final String filename = segments[segments.length - 1];
+        final String jobIdSegment = segments.length >= 2 ? segments[segments.length - 2] : "";
+        return this.baseURL + "/Data/" + jobIdSegment + "/" + filename;
     }
 }

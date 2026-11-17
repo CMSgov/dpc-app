@@ -116,8 +116,12 @@ public class GroupResourceUnitTest {
         ICreateTyped createExec = mock(ICreateTyped.class);
         when(attributionClient.create().resource(group).encodedJson()).thenReturn(createExec);
 
+        UUID createdGroupId = UUID.randomUUID();
+        group.setId("https://attribution.internal:9902/v1/Group/" + createdGroupId);
+
         MethodOutcome outcome = new MethodOutcome();
         outcome.setResource(group);
+        outcome.setCreated(true);
         when(createExec.execute()).thenReturn(outcome);
 
         org.hl7.fhir.dstu3.model.Identifier identifier = new org.hl7.fhir.dstu3.model.Identifier();
@@ -134,6 +138,8 @@ public class GroupResourceUnitTest {
 
         assertEquals("Organization ID", result.getMeta().getTag(DPCIdentifierSystem.DPC.getSystem(), orgId.toString()).getDisplay());
         assertEquals(group, result);
+        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
+        assertEquals(BASE_URL + "/Group/" + createdGroupId, response.getHeaderString("Location"));
     }
 
     @Test

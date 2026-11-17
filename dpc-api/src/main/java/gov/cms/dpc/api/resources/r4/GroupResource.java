@@ -37,6 +37,8 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.hc.core5.http.HttpStatus;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +51,6 @@ import java.util.UUID;
 
 import static gov.cms.dpc.common.logging.LogSanitizer.sanitize;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
-import static gov.cms.dpc.fhir.helpers.FHIRHelpers.handleMethodOutcome;
 
 @Api(value = "Group", authorizations = @Authorization(value = "access_token"))
 @Path("/v3/Group")
@@ -106,7 +107,7 @@ public class GroupResource extends AbstractGroupResource {
                 .encodedJson()
                 .execute();
 
-        return handleMethodOutcome(outcome);
+        return buildCreateResponse(outcome);
     }
 
     @GET
@@ -406,5 +407,29 @@ public class GroupResource extends AbstractGroupResource {
         if (rosterID == null) {
             throw new BadRequestException("rosterID is required");
         }
+    }
+
+    /**
+     * Handle {@link MethodOutcome} for a v3 Group.
+     *
+     * @param outcome - the result of the create call against attribution
+     * @return the Create response, with a v3-correct Location header
+     */
+    private Response buildCreateResponse(MethodOutcome outcome) {
+        final IBaseResource resource = outcome.getResource();
+        if (resource == null) {
+            throw new WebApplicationException("Unable to get resource.", Response.Status.INTERNAL_SERVER_ERROR);
+        }
+
+        final Response.Status status = outcome.getCreated() != null ? Response.Status.CREATED : Response.Status.OK;
+        final Response.ResponseBuilder builder = Response.status(status).entity(resource);
+
+        if (outcome.getCreated() != null) {
+            final IIdType createdId = outcome.getId() != null ? outcome.getId() : resource.getIdElement();
+            builder.location(URI.create(this.baseURL + "/Group/" + createdId.getIdPart()));
+            builder.lastModified(resource.getMeta().getLastUpdated());
+        }
+
+        return builder.build();
     }
 }

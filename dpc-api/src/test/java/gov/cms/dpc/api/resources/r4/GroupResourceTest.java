@@ -259,7 +259,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
                 .withAdditionalHeader("X-Provenance", r4Ctx.newJsonParser().encodeResourceToString(provenance))
                 .execute();
 
-        final String location = methodOutcome.getResponseHeaders().get("location").get(0);
+        final String location = methodOutcome.getResponseHeaders().get("location").getFirst();
         assertNotNull(location);
 
         final Group foundGroup = v3Client.read()
