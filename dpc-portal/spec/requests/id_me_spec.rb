@@ -28,7 +28,7 @@ RSpec.describe 'IdMe', type: :request do
     id_me_config = {
       provider: :id_me,
       auth_endpoint: '/auth/id_me',
-      display_name: 'ID.me',
+      display_name: 'IDMe',
       logout_host: ENV.fetch('IDP_ID_ME_HOST'),
       ial1_auth_response: {
         uid: auth_uid,
