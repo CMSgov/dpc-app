@@ -367,10 +367,11 @@ public class AttributionClient {
     }
 
     /**
-     * Similar to getAttributedPatients(), but removes MBIs of beneficiaries that have opted out.
+     * Similar to getAttributedPatients(), but removes MBIs of beneficiaries that have opted out.  Only
+     * returns active patients.
      */
-    public Bundle getConsentingAttributedPatients(UUID id, boolean activeOnly) {
-        final Bundle attributedPatientsBundle = getAttributedPatients(id, activeOnly);
+    public Bundle getConsentingAttributedPatients(UUID id) {
+        final Bundle attributedPatientsBundle = getAttributedPatients(id, true);
         final List<Patient> attributedPatientsList = attributedPatientsBundle.getEntry().stream()
             .map(Bundle.BundleEntryComponent::getResource)
             .filter(Patient.class::isInstance)

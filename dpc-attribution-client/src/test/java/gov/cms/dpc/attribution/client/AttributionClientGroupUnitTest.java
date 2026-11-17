@@ -232,9 +232,8 @@ class AttributionClientGroupUnitTest extends AbstractAttributionClientResourceUn
                 () -> client.getAttributedPatients(ROSTER_ID, true)));
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void testGetConsentingAttributedPatientsFiltersEntries(boolean activeOnly) {
+    @Test
+    void testGetConsentingAttributedPatientsFiltersEntries() {
         Patient permitted = createPatient("3aa0C00aA00");   // Consenting patient
         Patient optedOut = createPatient("3aa0C00aA01");    // Opted out patient
         Bundle attributed = new Bundle();
@@ -248,7 +247,7 @@ class AttributionClientGroupUnitTest extends AbstractAttributionClientResourceUn
         mockAttributedPatients(attributed);
         when(consentService.filterConsent(List.of(permitted, optedOut))).thenReturn(List.of(permitted));
 
-        Bundle result = client.getConsentingAttributedPatients(ROSTER_ID, activeOnly);
+        Bundle result = client.getConsentingAttributedPatients(ROSTER_ID);
 
         assertSame(attributed, result);
         assertEquals(List.of(permittedEntry), result.getEntry());
@@ -259,7 +258,6 @@ class AttributionClientGroupUnitTest extends AbstractAttributionClientResourceUn
         assertEquals(Bundle.BundleType.SEARCHSET, result.getType());
         verify(consentService).filterConsent(List.of(permitted, optedOut));
         Parameters parameters = captureParameters("patients");
-        assertEquals(activeOnly, ((BooleanType) parameters.getParameterFirstRep().getValue()).booleanValue());
     }
 
     @Test
@@ -273,7 +271,7 @@ class AttributionClientGroupUnitTest extends AbstractAttributionClientResourceUn
         mockAttributedPatients(attributed);
         when(consentService.filterConsent(List.of(first, second, first))).thenReturn(List.of(second, first));
 
-        Bundle result = client.getConsentingAttributedPatients(ROSTER_ID, true);
+        Bundle result = client.getConsentingAttributedPatients(ROSTER_ID);
 
         assertEquals(List.of(firstEntry, secondEntry, duplicateEntry), result.getEntry());
         assertFalse(result.hasTotal());
@@ -288,7 +286,7 @@ class AttributionClientGroupUnitTest extends AbstractAttributionClientResourceUn
         mockAttributedPatients(attributed);
         when(consentService.filterConsent(List.of(patient))).thenReturn(List.of());
 
-        Bundle result = client.getConsentingAttributedPatients(ROSTER_ID, true);
+        Bundle result = client.getConsentingAttributedPatients(ROSTER_ID);
 
         assertTrue(result.getEntry().isEmpty());
         assertEquals(0, result.getTotal());
@@ -300,7 +298,7 @@ class AttributionClientGroupUnitTest extends AbstractAttributionClientResourceUn
         mockAttributedPatients(attributed);
         when(consentService.filterConsent(List.of())).thenReturn(List.of());
 
-        Bundle result = client.getConsentingAttributedPatients(ROSTER_ID, false);
+        Bundle result = client.getConsentingAttributedPatients(ROSTER_ID);
 
         assertSame(attributed, result);
         assertTrue(result.getEntry().isEmpty());
@@ -319,7 +317,7 @@ class AttributionClientGroupUnitTest extends AbstractAttributionClientResourceUn
         when(consentService.filterConsent(List.of(patient))).thenThrow(failure);
 
         assertSame(failure, assertThrows(IllegalStateException.class,
-                () -> client.getConsentingAttributedPatients(ROSTER_ID, true)));
+                () -> client.getConsentingAttributedPatients(ROSTER_ID)));
 
         // Check that bundle hadn't been changed
         assertEquals(List.of(entry), attributed.getEntry());
@@ -334,7 +332,7 @@ class AttributionClientGroupUnitTest extends AbstractAttributionClientResourceUn
         when(operationExec.execute()).thenThrow(failure);
 
         assertSame(failure, assertThrows(ResourceNotFoundException.class,
-                () -> client.getConsentingAttributedPatients(ROSTER_ID, true)));
+                () -> client.getConsentingAttributedPatients(ROSTER_ID)));
         verifyNoInteractions(consentService);
     }
 
