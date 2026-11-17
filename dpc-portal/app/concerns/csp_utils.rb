@@ -12,7 +12,7 @@ module CspUtils
 
   CODES_TO_DISPLAY = {
     login_dot_gov: 'Login.gov',
-    id_me: 'ID.me',
+    id_me: 'IDMe',
     clear: 'CLEAR'
   }.freeze
 
