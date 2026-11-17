@@ -257,7 +257,6 @@ class AttributionClientGroupUnitTest extends AbstractAttributionClientResourceUn
         assertEquals(1, result.getTotal());
         assertEquals(Bundle.BundleType.SEARCHSET, result.getType());
         verify(consentService).filterConsent(List.of(permitted, optedOut));
-        Parameters parameters = captureParameters("patients");
     }
 
     @Test
