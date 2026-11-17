@@ -1,11 +1,15 @@
-package gov.cms.dpc.api;
+package gov.cms.dpc.api.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.DPCAPIConfiguration;
+import gov.cms.dpc.api.DPCAPIService;
+import gov.cms.dpc.api.TestOrganizationContext;
 import gov.cms.dpc.common.utils.NPIUtil;
-import gov.cms.dpc.fhir.helpers.FHIRHelpers;
+import gov.cms.dpc.fhir.helpers.r4.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.IntegrationTest;
@@ -65,6 +69,7 @@ public class AbstractSecureApplicationTest {
         return new TestOrganizationContext(clientToken,npi,orgId,newKeyPair.getLeft().toString(),newKeyPair.getRight());
     }
 
+    // TODO: update to v3 once /v3/token is ready
     protected String getBaseURL() {
         return String.format("http://localhost:%d/v1", APPLICATION.getLocalPort());
     }
@@ -73,6 +78,7 @@ public class AbstractSecureApplicationTest {
         return String.format("http://localhost:%d/tasks", APPLICATION.getAdminPort());
     }
 
+    // TODO: Update to v3/admin once that endpoint is created
     protected String getAdminResourceURL() {
         return String.format("http://localhost:%d/v1/Admin", APPLICATION.getLocalPort());
     }
@@ -82,7 +88,7 @@ public class AbstractSecureApplicationTest {
     @BeforeAll
     public static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
-        ctx = FhirContext.forDstu3();
+        ctx = FhirContext.forR4();
         // Register a test organization for us
         // First, create a Golden macaroon for admin uses
         GOLDEN_MACAROON = APIAuthHelpers.createGoldenMacaroon();
@@ -90,6 +96,7 @@ public class AbstractSecureApplicationTest {
         ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, ORGANIZATION_NPI, TASK_URL);
 
         // Register Public key
+        // TODO: Switch v1->v3 when it's available
         final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", ORGANIZATION_ID, GOLDEN_MACAROON, "http://localhost:3002/v1");
         PRIVATE_KEY = uuidPrivateKeyPair.getRight();
         PUBLIC_KEY_ID = uuidPrivateKeyPair.getLeft();

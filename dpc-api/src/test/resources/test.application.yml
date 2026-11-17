@@ -39,11 +39,12 @@ server:
             application: ${APPLICATION:-"dpc-api"}
         filterFactories:
           - type: token-filter-factory
-  # Turn off gzip for the /Data endpoint only
+  # Data endpoints handle gzip and byte ranges themselves.
   gzip:
     enabled: true
     excludedPaths:
       - "/v1/Data/*"
+      - "/v3/Data/*"
 
 logging:
   level: INFO
