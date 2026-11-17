@@ -16,6 +16,6 @@ RSpec.describe Core::Navigation::CspHelpLinksComponent, type: :component do
 
   it 'renders ID.me help link' do
     render_inline(component)
-    expect(page).to have_link('ID.me Help Center', href: 'https://help.id.me/hc/en-us')
+    expect(page).to have_link('IDMe Help Center', href: 'https://help.id.me/hc/en-us')
   end
 end

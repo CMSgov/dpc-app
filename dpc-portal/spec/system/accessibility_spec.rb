@@ -611,8 +611,8 @@ RSpec.describe 'Accessibility', type: :system do
     it_behaves_like 'accessibility tests', :clear, 'CLEAR'
   end
 
-  describe 'with ID.me' do
-    it_behaves_like 'accessibility tests', :id_me, 'ID.me'
+  describe 'with IDMe' do
+    it_behaves_like 'accessibility tests', :id_me, 'IDMe'
   end
 
   describe 'with Login.gov' do

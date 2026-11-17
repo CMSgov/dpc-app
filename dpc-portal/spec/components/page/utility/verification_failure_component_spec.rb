@@ -42,7 +42,7 @@ RSpec.describe Page::Utility::VerificationFailureComponent, type: :component do
     before { render_inline(component) }
 
     it 'should specify IdMe on page' do
-      expect(page).to have_text('Your identity could not be verified with ID.me')
+      expect(page).to have_text('Your identity could not be verified with IDMe')
     end
   end
 
