@@ -7,7 +7,7 @@
         <li>If you are having issues creating or logging into a Login.gov account, please review
             <%= link_to "Login.gov's Help Section", 'https://www.login.gov/help/verify-your-identity/overview/' %>
             or <%= link_to 'contact them', 'https://www.login.gov/contact/' %> directly.</li>
-        <li>Try another identity service provider &mdash; CLEAR or ID.me are also accepted.</li>
+        <li>Try another identity service provider &mdash; CLEAR or IDMe are also accepted.</li>
         <li>If you still can't verify your identity after checking Login.gov's help section or contacting them directly, contact us at
             <%= mail_to 'dpcinfo@cms.hhs.gov' %>.</li>
       </ol>
@@ -17,7 +17,7 @@
   <div class="usa-prose">
     <p>You've been returned to the DPC Portal because your identity verification with <%= @csp_display_name %> wasn't completed.</p>
     <% if @current_csp == :id_me %>
-      <p><%= link_to 'ID.me Help Center', 'https://help.id.me/hc/en-us' %></p>
+      <p><%= link_to 'IDMe Help Center', 'https://help.id.me/hc/en-us' %></p>
     <% elsif @current_csp == :clear %>
       <p><%= link_to 'CLEAR Support', 'https://www.clearme.com/support' %></p>
     <% end %>
