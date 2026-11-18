@@ -9,7 +9,7 @@ import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.net.HttpHeaders;
-import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.v1.APITestHelpers;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;

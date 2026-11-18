@@ -8,11 +8,13 @@ public class BaseResource {
 
     private final GroupResource groupResource;
     private final DataResource dataResource;
+    private final OrganizationResource organizationResource;
 
     @Inject
-    public BaseResource(GroupResource groupResource, DataResource dataResource) {
+    public BaseResource(GroupResource groupResource, DataResource dataResource, OrganizationResource organizationResource) {
         this.groupResource = groupResource;
         this.dataResource = dataResource;
+        this.organizationResource = organizationResource;
     }
 
     @Path("/Group")
@@ -23,5 +25,10 @@ public class BaseResource {
     @Path("/Data")
     public DataResource dataOperations() {
         return dataResource;
+    }
+
+    @Path("/Organization")
+    public OrganizationResource organizationOperations() {
+        return organizationResource;
     }
 }

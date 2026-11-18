@@ -2,7 +2,7 @@ package gov.cms.dpc.api.resources.r4;
 
 import com.codahale.metrics.MetricRegistry;
 import gov.cms.dpc.aggregation.util.AggregationUtils;
-import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.r4.APITestHelpers;
 import gov.cms.dpc.api.r4.AbstractSecureApplicationTest;
 import gov.cms.dpc.common.hibernate.queue.DPCQueueManagedSessionFactory;
 import gov.cms.dpc.common.utils.GzipUtil;
@@ -248,9 +248,7 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 
 	private String getAccessToken() {
 		try {
-			// TODO: Remove this once /v3/token and key are available
-			String v1BaseUrl = getBaseURL().replaceFirst("/v3$", "/v1");
-			APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(v1BaseUrl, ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+			APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 			return auth.accessToken;
 		} catch (IOException | URISyntaxException e) {
 			fail("Failed to generate access token");

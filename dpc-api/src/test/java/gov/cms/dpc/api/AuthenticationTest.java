@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import gov.cms.dpc.api.v1.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.v1.APITestHelpers;
 import gov.cms.dpc.fhir.helpers.v1.FHIRHelpers;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import org.apache.hc.core5.http.ParseException;
@@ -15,8 +16,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
-import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
+import static gov.cms.dpc.api.v1.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.v1.APITestHelpers.ORGANIZATION_NPI;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

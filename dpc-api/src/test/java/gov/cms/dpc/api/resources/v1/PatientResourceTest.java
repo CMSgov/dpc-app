@@ -12,7 +12,7 @@ import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import com.codahale.metrics.MetricRegistry;
-import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.v1.APITestHelpers;
 import gov.cms.dpc.api.v1.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.TestOrganizationContext;
 import gov.cms.dpc.bluebutton.client.MockBlueButtonClient;
@@ -67,8 +67,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
-import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
+import static gov.cms.dpc.api.v1.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.v1.APITestHelpers.ORGANIZATION_NPI;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.Random.class)

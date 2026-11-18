@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.validations;
+package gov.cms.dpc.fhir.validations.v1;
 
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
