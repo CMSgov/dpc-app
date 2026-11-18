@@ -245,7 +245,7 @@ public class GroupResource extends AbstractGroupResource {
 
         final UUID orgID = gov.cms.dpc.fhir.stu3.FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final UUID groupID = UUID.fromString(rosterID);
-        final String orgNPI = this.getOrganizationNPI(organizationPrincipal);
+        final String orgNPI = APIHelpers.fetchOrganizationNPI(this.stu3Client, orgID);
         final String providerNPI = FHIRExtractors.getAttributedNPI(group);
 
         // Handle the _type and since query parameters

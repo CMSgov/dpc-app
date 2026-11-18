@@ -75,8 +75,11 @@ public class GroupResourceUnitTest {
         resource = new GroupResource(attributionClient, attributionSTU3Client, BASE_URL, oneEcosystemClient, mockDataService, config);
     }
 
-    private void stubOrgAndProviderNpi(Organization organization, Group group) {
+    private void stubOrgAndProviderNpi(OrganizationPrincipal organizationPrincipal, Group group) {
         // update when Organization is updated to r4
+        org.hl7.fhir.dstu3.model.Organization organization = organizationPrincipal.getOrganization();
+        UUID orgId = gov.cms.dpc.fhir.stu3.FHIRExtractors.getEntityUUID(organization.getId());
+
         org.hl7.fhir.dstu3.model.Identifier orgNpiIdentifier = new org.hl7.fhir.dstu3.model.Identifier();
         orgNpiIdentifier.setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(NPIUtil.generateNPI());
         organization.setIdentifier(List.of(orgNpiIdentifier));
@@ -86,8 +89,8 @@ public class GroupResourceUnitTest {
         providerNpiConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(NPIUtil.generateNPI());
         group.getCharacteristicFirstRep().setValue(providerNpiConcept);
 
-        IReadExecutable<Organization> orgReadExec = mock(IReadExecutable.class);
-        when(attributionSTU3Client.read().resource(Organization.class).withId(organization.getId()).encodedJson()).thenReturn(orgReadExec);
+        IReadExecutable<org.hl7.fhir.dstu3.model.Organization> orgReadExec = mock(IReadExecutable.class);
+        when(attributionSTU3Client.read().resource(org.hl7.fhir.dstu3.model.Organization.class).withId(orgId.toString()).encodedJson()).thenReturn(orgReadExec);
         when(orgReadExec.execute()).thenReturn(organization);
     }
 
@@ -268,7 +271,7 @@ public class GroupResourceUnitTest {
         group.setId(groupId);
         group.addMember().setEntity(new Reference("Patient/" + UUID.randomUUID()));
 
-        stubOrgAndProviderNpi(organization, group);
+        stubOrgAndProviderNpi(organizationPrincipal, group);
 
         IReadExecutable<Group> readExec = mock(IReadExecutable.class);
         when(attributionClient.read().resource(Group.class).withId(new IdType("Group", groupId)).encodedJson()).thenReturn(readExec);
@@ -321,7 +324,7 @@ public class GroupResourceUnitTest {
         group.setId(groupId);
         group.addMember().setEntity(new Reference("Patient/" + UUID.randomUUID()));
 
-        stubOrgAndProviderNpi(organization, group);
+        stubOrgAndProviderNpi(organizationPrincipal, group);
 
         IReadExecutable<Group> readExec = mock(IReadExecutable.class);
         when(attributionClient.read().resource(Group.class).withId(new IdType("Group", groupId)).encodedJson()).thenReturn(readExec);
@@ -386,7 +389,7 @@ public class GroupResourceUnitTest {
         fakeGroup.setId(groupId);
         fakeGroup.addMember().setEntity(new Reference("Patient/" + UUID.randomUUID()));
 
-        stubOrgAndProviderNpi(organization, fakeGroup);
+        stubOrgAndProviderNpi(organizationPrincipal, fakeGroup);
 
         IReadExecutable<Group> readExec = mock(IReadExecutable.class);
         when(attributionClient
