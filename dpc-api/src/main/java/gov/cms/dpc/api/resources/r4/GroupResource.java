@@ -18,7 +18,6 @@ import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRHeaders;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
-import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
 import gov.cms.dpc.fhir.r4.FHIRExtractors;
 import gov.cms.dpc.oneecosystem.client.OneEcosystemClient;
@@ -95,7 +94,7 @@ public class GroupResource extends AbstractGroupResource {
     })
     @Override
     public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-                                 @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation,
+                                 @ApiParam(hidden = true) @Valid @ProvenanceHeader Provenance rosterAttestation, // readd @Profiled when supported for V3
                                  Group attributionRoster) {
         // Log attestation
         logAndVerifyAttestation(rosterAttestation, null, attributionRoster);
@@ -141,7 +140,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     public Group updateRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                               @ApiParam(value = "Attribution Group ID") @PathParam("rosterID") UUID rosterID,
-                              @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation,
+                              @ApiParam(hidden = true) @Valid @ProvenanceHeader Provenance rosterAttestation, // readd @Profiled when supported for V3
                               Group rosterUpdate) {
         logAndVerifyAttestation(rosterAttestation, rosterID, rosterUpdate);
         APIHelpers.addOrganizationTag(rosterUpdate, organizationPrincipal.getOrganization().getId());
@@ -170,7 +169,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     public Group addRosterMembers(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                   @ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
-                                  @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation,
+                                  @ApiParam(hidden = true) @Valid @ProvenanceHeader Provenance rosterAttestation, // readd @Profiled when supported for V3
                                   Group groupUpdate) {
         logAndVerifyAttestation(rosterAttestation, rosterID, groupUpdate);
         APIHelpers.addOrganizationTag(groupUpdate, organizationPrincipal.getOrganization().getId());
