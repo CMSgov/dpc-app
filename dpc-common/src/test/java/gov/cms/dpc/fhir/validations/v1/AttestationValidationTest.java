@@ -1,6 +1,4 @@
-package gov.cms.dpc.fhir.validations;
-
-import gov.cms.dpc.fhir.validations.v1.DPCProfileSupport;
+package gov.cms.dpc.fhir.validations.v1;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -124,7 +122,6 @@ class AttestationValidationTest {
         final Meta meta = new Meta();
         meta.addProfile(AttestationProfile.PROFILE_URI);
         provenance.setMeta(meta);
-//        provenance.addTarget(new Reference("Patient/test"));
         provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
 
         // Add an agent
@@ -154,7 +151,6 @@ class AttestationValidationTest {
         final Meta meta = new Meta();
         meta.addProfile(AttestationProfile.PROFILE_URI);
         provenance.setMeta(meta);
-//        provenance.addTarget(new Reference("Patient/test"));
         provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
         final Provenance.ProvenanceAgentComponent agent = new Provenance.ProvenanceAgentComponent();
         agent.setWho(new Reference("Organization/test"));
@@ -183,7 +179,6 @@ class AttestationValidationTest {
         final Meta meta = new Meta();
         meta.addProfile(AttestationProfile.PROFILE_URI);
         provenance.setMeta(meta);
-//        provenance.addTarget(new Reference("Patient/test"));
         provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
 
         // Add an agent
@@ -213,7 +208,6 @@ class AttestationValidationTest {
         final Meta meta = new Meta();
         meta.addProfile(AttestationProfile.PROFILE_URI);
         provenance.setMeta(meta);
-//        provenance.addTarget(new Reference("Patient/test"));
         provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
 
         // Add an agent
@@ -257,7 +251,6 @@ class AttestationValidationTest {
         final Meta meta = new Meta();
         meta.addProfile(AttestationProfile.PROFILE_URI);
         provenance.setMeta(meta);
-//        provenance.addTarget(new Reference("Patient/test"));
         provenance.addReason().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
 
         // Add an agent

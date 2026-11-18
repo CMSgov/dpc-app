@@ -1,17 +1,15 @@
-package gov.cms.dpc.fhir.validations;
-
-import gov.cms.dpc.fhir.validations.v1.DPCProfileSupport;
+package gov.cms.dpc.fhir.validations.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
-import gov.cms.dpc.fhir.validations.profiles.stu3.AttributionRosterProfile;
+import gov.cms.dpc.fhir.validations.profiles.r4.AttributionRosterProfile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,22 +17,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(BufferedLoggerHandler.class)
-public class RosterValidationTest {
+class RosterValidationTest {
 
     private static FhirValidator fhirValidator;
-    private static DPCProfileSupport dpcModule;
-    private static FhirContext ctx;
 
     @BeforeAll
     static void setup() {
-        ctx = FhirContext.forDstu3();
+        FhirContext ctx = FhirContext.forR4();
         final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 
         fhirValidator = ctx.newValidator();
         fhirValidator.registerValidatorModule(instanceValidator);
 
-
-        dpcModule = new DPCProfileSupport(ctx);
+        DPCProfileSupport dpcModule = new DPCProfileSupport(ctx);
         final ValidationSupportChain chain = new ValidationSupportChain(
                 dpcModule,
                 new DefaultProfileValidationSupport(ctx),
@@ -49,21 +44,15 @@ public class RosterValidationTest {
         final CodeableConcept concept = new CodeableConcept();
         concept.addCoding().setCode("attributed-to");
         group.addCharacteristic().setCode(concept).setExclude(false).setValue(new BooleanType(false));
-
-        // Add a single member
         group.addMember().setEntity(new Reference("Patient/yup"));
 
         final ValidationResult result = fhirValidator.validateWithResult(group);
-        assertTrue(result.isSuccessful());
+        assertTrue(result.isSuccessful(), () -> result.getMessages().toString());
     }
-
 
     private Group generateFakeGroup() {
         final Group group = new Group();
-        final Meta meta = new Meta();
-        meta.addProfile(AttributionRosterProfile.PROFILE_URI);
-        group.setMeta(meta);
-
+        group.setMeta(new Meta().addProfile(AttributionRosterProfile.PROFILE_URI));
         group.setActual(true);
         group.setActive(true);
         group.setType(Group.GroupType.PERSON);
