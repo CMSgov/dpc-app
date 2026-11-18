@@ -4,7 +4,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.v1.APITestHelpers;
 import gov.cms.dpc.api.v1.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.entities.TokenEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
@@ -38,7 +38,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.v1.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TokenResourceTest extends AbstractSecureApplicationTest {

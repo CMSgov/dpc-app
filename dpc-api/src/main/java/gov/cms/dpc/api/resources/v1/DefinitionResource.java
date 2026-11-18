@@ -8,7 +8,7 @@ import gov.cms.dpc.api.resources.AbstractDefinitionResource;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.fhir.annotations.FHIR;
-import gov.cms.dpc.fhir.validations.DPCProfileSupport;
+import gov.cms.dpc.fhir.validations.v1.DPCProfileSupport;
 import io.swagger.annotations.*;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;

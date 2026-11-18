@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.DPCAPIService;
 import gov.cms.dpc.api.TestOrganizationContext;
@@ -32,8 +31,8 @@ import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.util.UUID;
 
-import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
-import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_NPI;
+import static gov.cms.dpc.api.r4.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.r4.APITestHelpers.ORGANIZATION_NPI;
 import static gov.cms.dpc.testing.APIAuthHelpers.TASK_URL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -69,8 +68,12 @@ public class AbstractSecureApplicationTest {
         return new TestOrganizationContext(clientToken,npi,orgId,newKeyPair.getLeft().toString(),newKeyPair.getRight());
     }
 
-    // TODO: update to v3 once /v3/token is ready
     protected String getBaseURL() {
+        return String.format("http://localhost:%d/v3", APPLICATION.getLocalPort());
+    }
+
+    // TODO: Update to v3 when the token endpoint is ready
+    protected String getAuthBaseURL() {
         return String.format("http://localhost:%d/v1", APPLICATION.getLocalPort());
     }
 
