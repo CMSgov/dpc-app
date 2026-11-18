@@ -6,10 +6,12 @@ import gov.cms.dpc.api.resources.AbstractResourceWithExport;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
-import gov.cms.dpc.fhir.annotations.Profiled;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Provenance;
@@ -27,7 +29,7 @@ public abstract class AbstractGroupResource extends AbstractResourceWithExport {
     }
 
     @POST
-    public abstract Response createRoster(OrganizationPrincipal organizationPrincipal, @Valid @Profiled Provenance rosterAttestation, Group attributionRoster);
+    public abstract Response createRoster(OrganizationPrincipal organizationPrincipal, @Valid Provenance rosterAttestation, Group attributionRoster);
 
     @GET
     @Path("/{rosterID}")
@@ -35,11 +37,11 @@ public abstract class AbstractGroupResource extends AbstractResourceWithExport {
 
     @PUT
     @Path("/{rosterID}")
-    public abstract Group updateRoster(OrganizationPrincipal organizationPrincipal, UUID rosterID, @Valid @Profiled Provenance rosterAttestation, Group rosterUpdate);
+    public abstract Group updateRoster(OrganizationPrincipal organizationPrincipal, UUID rosterID, @Valid Provenance rosterAttestation, Group rosterUpdate);
 
     @POST
     @Path("/{rosterID}/$member-add")
-    public abstract Group addRosterMembers(OrganizationPrincipal organizationPrincipal, UUID rosterID, @Valid @Profiled Provenance rosterAttestation, Group groupUpdate);
+    public abstract Group addRosterMembers(OrganizationPrincipal organizationPrincipal, UUID rosterID, @Valid Provenance rosterAttestation, Group groupUpdate);
 
     @POST
     @Path("/{rosterID}/$member-remove")
