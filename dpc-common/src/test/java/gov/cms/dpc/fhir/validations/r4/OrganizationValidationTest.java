@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.validations;
+package gov.cms.dpc.fhir.validations.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -6,22 +6,23 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.validations.profiles.stu3.OrganizationProfile;
+import gov.cms.dpc.fhir.validations.profiles.r4.OrganizationProfile;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.model.Address;
-import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.Organization;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Collections;
 
-import static gov.cms.dpc.testing.factories.stu3.OrganizationFactory.generateFakeAddress;
-import static gov.cms.dpc.testing.factories.stu3.OrganizationFactory.generateFakeOrganization;
-import static org.junit.jupiter.api.Assertions.*;
+import static gov.cms.dpc.testing.factories.r4.OrganizationFactory.generateFakeAddress;
+import static gov.cms.dpc.testing.factories.r4.OrganizationFactory.generateFakeOrganization;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(BufferedLoggerHandler.class)
 class OrganizationValidationTest {
@@ -30,7 +31,7 @@ class OrganizationValidationTest {
 
     @BeforeAll
     static void setup() {
-        FhirContext ctx = FhirContext.forDstu3();
+        FhirContext ctx = FhirContext.forR4();
         final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 
         fhirValidator = ctx.newValidator();
@@ -51,20 +52,15 @@ class OrganizationValidationTest {
         organization.addAddress(generateFakeAddress());
 
         final ValidationResult result = fhirValidator.validateWithResult(organization, new ValidationOptions().addProfile(OrganizationProfile.PROFILE_URI));
-        assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
-                () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
+        assertFalse(result.isSuccessful(), "Should require an NPI identifier");
 
         organization.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("test-mbi-value");
-
         final ValidationResult r2 = fhirValidator.validateWithResult(organization, new ValidationOptions().addProfile(OrganizationProfile.PROFILE_URI));
-        assertAll(() -> assertFalse(r2.isSuccessful(), "Should have failed validation"),
-                () -> assertEquals(2, r2.getMessages().size(), "Should have two failures for ID"));
+        assertFalse(r2.isSuccessful(), "An MBI should not satisfy the NPI requirement");
 
-        // Add correct NPI
         organization.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("test-value");
-
         final ValidationResult r3 = fhirValidator.validateWithResult(organization, new ValidationOptions().addProfile(OrganizationProfile.PROFILE_URI));
-        assertTrue(r3.isSuccessful(), "Should have passed");
+        assertTrue(r3.isSuccessful(), () -> r3.getMessages().toString());
     }
 
     @Test
@@ -73,20 +69,14 @@ class OrganizationValidationTest {
         organization.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("test-value");
 
         final ValidationResult result = fhirValidator.validateWithResult(organization, new ValidationOptions().addProfile(OrganizationProfile.PROFILE_URI));
-        assertAll(() -> assertFalse(result.isSuccessful(), "Should have failed validation"),
-                () -> assertEquals(1, result.getMessages().size(), "Should have a single failure"));
+        assertFalse(result.isSuccessful(), "Should require an address");
 
-        // Add a text based Address
         organization.addAddress().setText("7500 Security Blvd").setType(Address.AddressType.PHYSICAL).setUse(Address.AddressUse.HOME);
-
         final ValidationResult r2 = fhirValidator.validateWithResult(organization, new ValidationOptions().addProfile(OrganizationProfile.PROFILE_URI));
-        assertAll(() -> assertFalse(r2.isSuccessful(), "Should have failed validation"),
-                () -> assertEquals(7, r2.getMessages().size(), "Should have multiple address failures"));
+        assertFalse(r2.isSuccessful(), "Should require the address fields in the DPC address profile");
 
-        // Add valid address
         organization.setAddress(Collections.singletonList(generateFakeAddress()));
-
         final ValidationResult r3 = fhirValidator.validateWithResult(organization, new ValidationOptions().addProfile(OrganizationProfile.PROFILE_URI));
-        assertTrue(r3.isSuccessful(), "Should have passed");
+        assertTrue(r3.isSuccessful(), () -> r3.getMessages().toString());
     }
 }

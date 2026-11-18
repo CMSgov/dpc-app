@@ -1,6 +1,4 @@
-package gov.cms.dpc.fhir.validations;
-
-import gov.cms.dpc.fhir.validations.v1.DPCProfileSupport;
+package gov.cms.dpc.fhir.validations.v1;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;

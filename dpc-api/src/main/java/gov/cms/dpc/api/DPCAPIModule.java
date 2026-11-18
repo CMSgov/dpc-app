@@ -17,6 +17,7 @@ import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.api.resources.r4.BaseResource;
 import gov.cms.dpc.api.resources.r4.DataResource;
 import gov.cms.dpc.api.resources.r4.GroupResource;
+import gov.cms.dpc.api.resources.r4.OrganizationResource;
 import gov.cms.dpc.api.resources.v1.*;
 import gov.cms.dpc.api.tasks.GenerateKeyPair;
 import gov.cms.dpc.api.tasks.keys.DeletePublicKey;
@@ -25,6 +26,7 @@ import gov.cms.dpc.api.tasks.keys.UploadPublicKey;
 import gov.cms.dpc.api.tasks.tokens.DeleteToken;
 import gov.cms.dpc.api.tasks.tokens.GenerateClientTokens;
 import gov.cms.dpc.api.tasks.tokens.ListClientTokens;
+import gov.cms.dpc.attribution.client.AttributionClient;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
@@ -135,13 +137,24 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
             .create(IpAddressResource.class, new Class<?>[]{IpAddressDAO.class}, new Object[]{dao});
     }
 
+    // TODO: Delete once we remove v1
     @Provides
-    public OrganizationResource provideOrganizationResource(@Named("attribution") IGenericClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
+    public gov.cms.dpc.api.resources.v1.OrganizationResource provideV1OrganizationResource(@Named("attribution") IGenericClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
-                .create(OrganizationResource.class,
+                .create(gov.cms.dpc.api.resources.v1.OrganizationResource.class,
                         new Class<?>[]{IGenericClient.class,
                         TokenDAO.class,
                         PublicKeyDAO.class},
+                        new Object[]{client, tokenDAO, keyDAO});
+    }
+
+    @Provides
+    public OrganizationResource provideR4OrganizationResource(AttributionClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
+        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+                .create(OrganizationResource.class,
+                        new Class<?>[]{AttributionClient.class,
+                                TokenDAO.class,
+                                PublicKeyDAO.class},
                         new Object[]{client, tokenDAO, keyDAO});
     }
 
