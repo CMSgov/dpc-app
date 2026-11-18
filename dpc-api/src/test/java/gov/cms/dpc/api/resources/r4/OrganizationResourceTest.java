@@ -147,8 +147,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         // Generate a golden macaroon
         final String goldenMacaroon = APIAuthHelpers.createGoldenMacaroon();
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), goldenMacaroon, false);
-        final Patient patient = new Patient();
-        patient.setId(UUID.randomUUID().toString());
+        final Patient patient = APITestHelpers.createPatientResource("1111111111", UUID.randomUUID().toString());
 
         final Bundle bundle = new Bundle();
         bundle.addEntry().setResource(patient);

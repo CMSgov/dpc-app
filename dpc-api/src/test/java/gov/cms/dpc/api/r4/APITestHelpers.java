@@ -20,6 +20,9 @@ import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFacto
 import gov.cms.dpc.fhir.validations.r4.DPCProfileSupport;
 import gov.cms.dpc.fhir.validations.r4.ProfileValidator;
 import gov.cms.dpc.testing.APIAuthHelpers;
+import gov.cms.dpc.testing.factories.r4.FHIRPatientBuilder;
+import gov.cms.dpc.testing.factories.r4.FHIRPractitionerBuilder;
+import gov.cms.dpc.testing.utils.MBIUtil;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
@@ -36,11 +39,25 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.Reference;
 import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.IOException;
+import java.sql.Date;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -57,9 +74,13 @@ public class APITestHelpers {
     }
 
     public static OrganizationPrincipal makeOrganizationPrincipal() {
+        return makeOrganizationPrincipal(ORGANIZATION_ID);
+    }
+
+    public static OrganizationPrincipal makeOrganizationPrincipal(String id) {
         // Authentication principals remain STU3 even when the API resource is R4.
         Organization organization = new Organization();
-        organization.setId(ORGANIZATION_ID);
+        organization.setId(id);
         organization.addIdentifier(new Identifier()
                 .setSystem(DPCIdentifierSystem.NPPES.getSystem())
                 .setValue(ORGANIZATION_NPI));
@@ -141,5 +162,66 @@ public class APITestHelpers {
                 assertEquals(HttpStatus.OK_200, response.getCode(), "Should be healthy");
             }
         }
+    }
+
+    public static Practitioner createPractitionerResource(String npi, String orgID) {
+        return FHIRPractitionerBuilder.newBuilder()
+                .withNpi(npi)
+                .withOrgTag(orgID)
+                .withName("Test", "Practitioner")
+                .withId(UUID.randomUUID())
+                .build();
+    }
+
+    public static Patient createPatientResource(String organizationID) {
+        return createPatientResource(MBIUtil.generateMBI(), organizationID);
+    }
+
+    public static Patient createPatientResource(String mbi, String organizationID) {
+        return FHIRPatientBuilder.newBuild()
+                .withMbi(mbi)
+                .withBirthDate("1990-01-01")
+                .withName("Test", "Patient")
+                .withGender(Enumerations.AdministrativeGender.OTHER)
+                .managedBy(organizationID)
+                .withId(UUID.randomUUID())
+                .build();
+    }
+
+    public static List<Patient> createPatientResources(String organizationID, int numPatients) {
+        List<Patient> patients = new ArrayList<>(numPatients);
+
+        for (int i = 0; i < numPatients; i++) {
+            patients.add(createPatientResource(MBIUtil.generateMBI(), organizationID));
+        }
+        return patients;
+    }
+
+    public static Provenance createProvenance(String orgId, String practitionerId, List<String> patientIds) {
+        if (patientIds.isEmpty()) {
+            throw new IllegalArgumentException("R4 Provenance requires at least one patient target");
+        }
+
+        final Coding reasonCoding = new Coding().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
+
+        final Coding roleCode = new Coding()
+                .setSystem("http://hl7.org/fhir/v3/RoleClass")
+                .setCode("AGNT");
+
+        final CodeableConcept roleConcept = new CodeableConcept().addCoding(roleCode);
+        final Provenance.ProvenanceAgentComponent component = new Provenance.ProvenanceAgentComponent()
+                .setRole(Collections.singletonList(roleConcept))
+                .setWho(new Reference(new IdType("Organization", new IdType(orgId).getIdPart())))
+                .setOnBehalfOf(new Reference(new IdType("Practitioner", new IdType(practitionerId).getIdPart())));
+
+        final Provenance provenance = new Provenance()
+                .setRecorded(Date.valueOf(Instant.now().atZone(ZoneOffset.UTC).toLocalDate()))
+                .setReason(Collections.singletonList(new CodeableConcept().addCoding(reasonCoding)))
+                .addAgent(component);
+
+        for (String patientId : patientIds) {
+            provenance.addTarget(new Reference(new IdType("Patient", new IdType(patientId).getIdPart())));
+        }
+        return provenance;
     }
 }
