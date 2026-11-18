@@ -1,0 +1,348 @@
+package gov.cms.dpc.api.resources.r4;
+
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.DPCAPIConfiguration;
+import gov.cms.dpc.api.DPCAPIService;
+import gov.cms.dpc.api.entities.TokenEntity;
+import gov.cms.dpc.api.models.CollectionResponse;
+import gov.cms.dpc.fhir.FHIRFormatters;
+import gov.cms.dpc.fhir.helpers.FHIRHelpers;
+import gov.cms.dpc.testing.APIAuthHelpers;
+import io.dropwizard.testing.DropwizardTestSupport;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.eclipse.jetty.http.HttpStatus;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
+import static org.junit.jupiter.api.Assertions.*;
+
+class TokenResourceTest extends AbstractSecureApplicationTest {
+
+    private final ObjectMapper mapper;
+    private final String fullyAuthedToken;
+    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION =
+            new DropwizardTestSupport<>(DPCAPIService.class, configPath);
+
+    private TokenResourceTest() {
+        this.mapper = new ObjectMapper();
+
+        try {
+            this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getV3BaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
+        } catch (IOException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @BeforeEach
+    void beforeEachTest() throws IOException {
+        String decodedToken = new String(Base64.getDecoder().decode(ORGANIZATION_TOKEN));
+        String orgTokenId = decodedToken.substring(decodedToken.indexOf("\"i\":\"")+5,decodedToken.indexOf("\",\"c\":"));
+
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(this.fullyAuthedToken);
+
+        List<TokenEntity> tokensToBeDeleted = tokens.getEntities().stream()
+                .filter(token -> !token.getId().equals(orgTokenId))
+                .toList();
+
+        tokensToBeDeleted.forEach(token -> deleteToken(token.getId()));
+    }
+
+    @Test
+    void testTokenList() throws IOException {
+
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(this.fullyAuthedToken);
+        assertFalse(tokens.getEntities().isEmpty(), "Should have at least one token");
+        assertEquals(LocalDate.now(ZoneOffset.UTC), tokens.getCreatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDate(), "Should have created date");
+        final TokenEntity token = ((List<TokenEntity>) tokens.getEntities()).get(0);
+
+        assertAll(() -> assertEquals(String.format("Token for organization %s.", ORGANIZATION_ID), token.getLabel(), "Should have auto-generated label"),
+                () -> assertEquals(LocalDate.now().plusYears(1), token.getExpiresAt().toLocalDate(), "Should expire in 1 year"),
+                () -> assertEquals(LocalDate.now(), token.getCreatedAt().toLocalDate(), "Should be created today"),
+                () -> assertNull(token.getToken(), "Should not have token field"));
+
+        // Check to see if a direct fetch works as well
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpGet httpGet = new HttpGet(getV3BaseURL() + String.format("/Token/%s", token.getId()));
+            httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
+
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                assertEquals(HttpStatus.OK_200, response.getCode(), "Should have succeeded");
+                final TokenEntity singleEntity = this.mapper.readValue(response.getEntity().getContent(), TokenEntity.class);
+                assertEquals(token, singleEntity, "Should be the same");
+            }
+        }
+    }
+
+    @Test
+    void testTokenCustomLabel() throws IOException {
+        // List the tokens
+
+        final String customLabel = "custom token label";
+        // Create a new token with a custom label
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost httpPost = new HttpPost(getV3BaseURL() + String.format("/Token?label=%s", URLEncoder.encode(customLabel, StandardCharsets.UTF_8)));
+            httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertEquals(HttpStatus.OK_200, response.getCode(), "Should have found organization");
+                final TokenEntity tokenEntity = this.mapper.readValue(response.getEntity().getContent(), TokenEntity.class);
+                assertAll(() -> assertEquals(customLabel, tokenEntity.getLabel(), "Should have correct label"),
+                        () -> assertNotNull(tokenEntity.getToken(), "Should have generated token"));
+            }
+        }
+
+        // List the tokens
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(this.fullyAuthedToken);
+        assertEquals(1, tokens
+                .getEntities()
+                .stream()
+                .filter(token -> token.getLabel().equals(customLabel))
+                .count(), "Should have token with custom label");
+    }
+
+    @Test
+    void testTokenCreationWithExceedingExpirationTime() throws IOException {
+        // Create a new token with an expiration greater than 1 year
+        final OffsetDateTime expires = OffsetDateTime.now(ZoneOffset.UTC).plusYears(5);
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost httpPost = new HttpPost(getV3BaseURL() + String.format("/Token?expiration=%s", expires.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+            httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertEquals(HttpStatus.BAD_REQUEST_400, response.getCode(), "Should fail with exceeding expiration time");
+            }
+        }
+    }
+
+    @Test
+    void testTokenCreationWithPastExpirationTime() throws IOException {
+        final OffsetDateTime expires = OffsetDateTime.now(ZoneOffset.UTC).minusDays(10);
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost httpPost = new HttpPost(getV3BaseURL() + String.format("/Token?expiration=%s", expires.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+            httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertEquals(HttpStatus.BAD_REQUEST_400, response.getCode(), "Should fail with past expiration time");
+            }
+        }
+    }
+
+
+
+    @Test
+    void testTokenCreationWithValidCustomExpiration() throws IOException {
+        final OffsetDateTime expiresFinal = OffsetDateTime.now(ZoneOffset.UTC).plusDays(10);
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost httpPost = new HttpPost(getV3BaseURL() + String.format("/Token?expiration=%s", expiresFinal.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+            httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertEquals(HttpStatus.OK_200, response.getCode(), "Should have been created.");
+            }
+        }
+
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(this.fullyAuthedToken);
+        assertEquals(1, tokens.getEntities().stream().filter(token -> token.getExpiresAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDate().equals(expiresFinal.toLocalDate())).count(), "Should have 1 token with matching expiration");
+    }
+
+    @Test
+    void testTokenCreationWithDefaults() throws IOException {
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost httpPost = new HttpPost(getV3BaseURL() + "/Token");
+            httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
+
+            String newTokenId;
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertEquals(HttpStatus.OK_200, response.getCode(), "Should have been created.");
+                final TokenEntity tokenReturned = mapper.readValue(response.getEntity().getContent(), TokenEntity.class);
+                assertNotNull(tokenReturned, "Should have contained a response body");
+                assertEquals(tokenReturned.getLabel(), String.format("Token for organization %s.", ORGANIZATION_ID), "Returned token should have default label");
+                assertNotNull(tokenReturned.getCreatedAt(), "Returned token should have a non-empty createdAt value");
+                assertNotNull(tokenReturned.getExpiresAt(), "Returned token should have a non-empty expiredAt value");
+                assertFalse(StringUtils.isBlank(tokenReturned.getToken()), "Returned token should not have a blank token value.");
+                assertFalse(StringUtils.isBlank(tokenReturned.getId()), "Returned token should not have a blank ID value");
+                newTokenId = tokenReturned.getId();
+            }
+
+            final HttpGet httpGet = new HttpGet(getV3BaseURL() + String.format("/Token/%s", newTokenId));
+            httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
+
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                assertEquals(HttpStatus.OK_200, response.getCode(), "Should have succeeded");
+                final TokenEntity tokenReturned = this.mapper.readValue(response.getEntity().getContent(), TokenEntity.class);
+                assertNotNull(tokenReturned, "Should have contained a response body");
+                assertEquals(tokenReturned.getLabel(), String.format("Token for organization %s.", ORGANIZATION_ID), "Returned token should have default label");
+                assertNotNull(tokenReturned.getCreatedAt(), "Returned token should have a non-empty createdAt value");
+                assertNotNull(tokenReturned.getExpiresAt(), "Returned token should have a non-empty expiredAt value");
+                assertTrue(StringUtils.isBlank(tokenReturned.getToken()), "Returned token should not have a token value (Value is returned only during creation).");
+                assertFalse(StringUtils.isBlank(tokenReturned.getId()), "Returned token should not have a blank ID value");
+            }
+        }
+    }
+
+    @Test
+    void testTokenCreationUsingBodyParams() throws IOException {
+        final OffsetDateTime expiresFinal = OffsetDateTime.now(ZoneOffset.UTC).plusDays(10);
+        final String expiresFormatted =  FHIRFormatters.INSTANT_FORMATTER.format(expiresFinal);
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost httpPost = new HttpPost(getV3BaseURL() + "/Token");
+            httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
+            httpPost.setEntity(new StringEntity("{\"expiresAt\":\""+expiresFormatted+"\",\"label\":\"custom-label\"}"));
+            httpPost.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertEquals(HttpStatus.OK_200, response.getCode(), "Should have been created.");
+            }
+        }
+
+        final CollectionResponse<TokenEntity> tokens = fetchTokens(this.fullyAuthedToken);
+        assertEquals(1, tokens.getEntities().stream()
+                .filter(token -> token.getExpiresAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDate().equals(expiresFinal.toLocalDate()))
+                .filter(token -> token.getLabel().equals("custom-label")).count(), "Should have 1 token with matching expiration and custom label");
+    }
+
+    @Test
+    void testNoHtmlInBodyLabel() throws IOException {
+        final OffsetDateTime expiresFinal = OffsetDateTime.now(ZoneOffset.UTC).plusDays(10);
+        final String expiresFormatted =  FHIRFormatters.INSTANT_FORMATTER.format(expiresFinal);
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost httpPost = new HttpPost(getV3BaseURL() + "/Token");
+            httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
+            httpPost.setEntity(new StringEntity("{\"expiresAt\":\""+expiresFormatted+"\",\"label\":\"Ok Text<script>alert('Bad script')</script>\"}"));
+            httpPost.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertEquals(HttpStatus.UNPROCESSABLE_ENTITY_422, response.getCode(), "422 Should have been returned due to html/script tags");
+            }
+        }
+    }
+
+    @Test
+    void testTokenCreationWithInvalidExpirationBodyParam() throws IOException {
+        final String expiresFormatted =  "invalid-date-time-format-ZZZ";
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost httpPost = new HttpPost(getV3BaseURL() + "/Token");
+            httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
+            httpPost.setEntity(new StringEntity("{\"expiresAt\":\""+expiresFormatted+"\",\"label\":\"custom-label\"}"));
+            httpPost.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                assertEquals(HttpStatus.BAD_REQUEST_400, response.getCode(), "Should have been created.");
+            }
+        }
+    }
+
+
+
+    @Test
+    void testTokenDeletion() throws IOException {
+        //Create a token
+        TokenEntity token = createToken();
+
+        //Ensure it was crated and persisted
+        CollectionResponse<TokenEntity> tokens = fetchTokens(this.fullyAuthedToken);
+        assertFalse(tokens.getEntities().isEmpty(), "Should have a token");
+        List<TokenEntity> tokenList = tokens.getEntities().stream().filter(t -> t.getId().equals(token.getId())).collect(Collectors.toList());
+        assertEquals(1, tokenList.size(), "There should exist exactly 1 token with matching token ID");
+
+        //Delete it
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpDelete httpDelete = new HttpDelete(getV3BaseURL() + String.format("/Token/%s", token.getId()));
+            httpDelete.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
+            try (CloseableHttpResponse response = client.execute(httpDelete)) {
+                assertEquals(HttpStatus.NO_CONTENT_204, response.getCode(), "Should have succeeded with a 204 (No Content)");
+                assertNull(response.getEntity(), "Response should not have an entity (empty body)");
+            }
+        }
+
+        //Ensure it is no longer returned when listing tokens
+        tokens = fetchTokens(this.fullyAuthedToken);
+        tokenList = tokens.getEntities().stream().filter(t -> t.getId().equals(token.getId())).toList();
+        assertEquals(0, tokenList.size(), "There should exist exactly 0 tokens with matching token ID");
+
+        //Ensure it is no longer returned when fetched by id
+        final HttpGet httpGet = new HttpGet(getV3BaseURL() + "/Token/"+token.getId());
+        httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
+        try (final CloseableHttpClient client = HttpClients.createDefault();CloseableHttpResponse response = client.execute(httpGet)) {
+            assertEquals(HttpStatus.NOT_FOUND_404, response.getCode(), "Should not have been found (Expected 404)");
+        }
+    }
+
+    private TokenEntity createToken() throws IOException {
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpPost httpPost = new HttpPost(getV3BaseURL() + "/Token");
+            httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                return this.mapper.readValue(response.getEntity().getContent(), TokenEntity.class);
+            }
+        }
+    }
+
+    private boolean deleteToken(String tokenId){
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpDelete httpDelete = new HttpDelete(getV3BaseURL() + String.format("/Token/%s", tokenId));
+            httpDelete.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
+            try (CloseableHttpResponse response = client.execute(httpDelete)) {
+                return response.getCode() == 204;
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Test
+    void testTokenSigning() throws IOException, URISyntaxException, ParseException {
+        final IParser parser = ctx.newJsonParser();
+        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
+        // Create a new org and make sure it has no providers
+        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
+
+        // Create a new JWT
+        final APIAuthHelpers.AuthResponse authResponse = APIAuthHelpers.jwtAuthFlow(this.getV3BaseURL(), fullyAuthedToken, PUBLIC_KEY_ID, PRIVATE_KEY);
+        assertAll(() -> assertNotEquals("", authResponse.accessToken, "Should have token"),
+                () -> assertEquals(300, authResponse.expiresIn, "Should be valid for 300 seconds"),
+                () -> assertEquals("system/*.*", authResponse.scope, "Should have correct scope"),
+                () -> assertEquals("bearer", authResponse.tokenType, "Should be a macaroon"));
+
+        // Try to authenticate using the private key for org 1 and the token for org 2, should throw an exception, but in the auth handler
+        final AssertionFailedError error = assertThrows(AssertionFailedError.class, () -> APIAuthHelpers.jwtAuthFlow(this.getV3BaseURL(), m2, PUBLIC_KEY_ID, PRIVATE_KEY));
+        error.getMessage();
+    }
+
+    protected String getV3BaseURL() {
+        return getBaseURL().replaceFirst("/v1$", "/v3");
+    }
+
+    CollectionResponse<TokenEntity> fetchTokens(String token) throws IOException {
+        try (final CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpGet httpGet = new HttpGet(getV3BaseURL() + "/Token");
+            httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
+
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                return this.mapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
+            }
+        }
+    }
+}
