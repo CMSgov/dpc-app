@@ -185,15 +185,7 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 			"reqUrl",
 			true
 		);
-		submittedJobQueueBatch.addJobQueueFile(DPCResourceType.Patient, sequence, 100);
-
-		// Add the new batch to the queue
-		queue.submitJobBatches(List.of(submittedJobQueueBatch));
-
-		// We created one job with one batch,
-		List<JobQueueBatch> batches = queue.getJobBatches(jobID);
-		JobQueueBatch batch = batches.get(0);
-		JobQueueBatchFile batchFile = batch.getJobQueueBatchFiles().get(0);
+		JobQueueBatchFile batchFile = submittedJobQueueBatch.addJobQueueFile(DPCResourceType.Patient, sequence, 100);
 
 		// Create the file in the file system and get its metadata
 		String fileName = batchFile.getFileName() + ".ndjson";
@@ -218,7 +210,11 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 			fail("Could not create test file: " + path);
 		}
 
-		// Complete the batch and save metadata changes
+		// Persist the complete file metadata before marking the batch complete
+		queue.submitJobBatches(List.of(submittedJobQueueBatch));
+		List<JobQueueBatch> batches = queue.getJobBatches(jobID);
+		JobQueueBatch batch = batches.get(0);
+
 		UUID aggregatorID = UUID.randomUUID();
 		batch.setRunningStatus(aggregatorID);
 		queue.completeBatch(batch, aggregatorID);
