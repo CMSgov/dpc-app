@@ -87,7 +87,7 @@ public class GroupResourceUnitTest {
         group.getCharacteristicFirstRep().setValue(providerNpiConcept);
 
         IReadExecutable<Organization> orgReadExec = mock(IReadExecutable.class);
-        when(attributionClient.read().resource(Organization.class).withId(organization.getId()).encodedJson()).thenReturn(orgReadExec);
+        when(attributionSTU3Client.read().resource(Organization.class).withId(organization.getId()).encodedJson()).thenReturn(orgReadExec);
         when(orgReadExec.execute()).thenReturn(organization);
     }
 
