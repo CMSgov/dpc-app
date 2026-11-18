@@ -108,6 +108,12 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
+    public gov.cms.dpc.api.resources.r4.KeyResource provideR4KeyResource(PublicKeyDAO dao) {
+        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+                .create(gov.cms.dpc.api.resources.r4.KeyResource.class, new Class<?>[]{PublicKeyDAO.class}, new Object[]{dao});
+    }
+
+    @Provides
     public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, JwtKeyLocator locator, IJTICache cache, @APIV1 String publicURL) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(TokenResource.class,

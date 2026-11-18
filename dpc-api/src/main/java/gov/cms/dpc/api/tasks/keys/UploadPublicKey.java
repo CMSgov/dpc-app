@@ -3,6 +3,7 @@ package gov.cms.dpc.api.tasks.keys;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
+import gov.cms.dpc.api.models.KeySignature;
 import gov.cms.dpc.api.resources.v1.KeyResource;
 import gov.cms.dpc.api.tasks.TasksCommon;
 import io.dropwizard.servlets.tasks.PostBodyTask;
@@ -46,7 +47,7 @@ public class UploadPublicKey extends PostBodyTask {
             label = Optional.ofNullable(labelParams.get(0));
         }
 
-        KeyResource.KeySignature keySignature = new ObjectMapper().readValue(body, KeyResource.KeySignature.class);
+        KeySignature keySignature = new ObjectMapper().readValue(body, KeySignature.class);
 
         final PublicKeyEntity publicKeyEntity = this.resource.submitKey(new OrganizationPrincipal(organization), keySignature, label);
         this.mapper.writeValue(output, publicKeyEntity);

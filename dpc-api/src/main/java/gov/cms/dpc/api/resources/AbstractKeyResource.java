@@ -3,7 +3,7 @@ package gov.cms.dpc.api.resources;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
-import gov.cms.dpc.api.resources.v1.KeyResource;
+import gov.cms.dpc.api.models.KeySignature;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -30,5 +30,5 @@ public abstract class AbstractKeyResource {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @POST
-    public abstract PublicKeyEntity submitKey(OrganizationPrincipal organizationPrincipal, KeyResource.KeySignature keySignature, Optional<String> keyLabelOptional);
+    public abstract PublicKeyEntity submitKey(OrganizationPrincipal organizationPrincipal, KeySignature keySignature, Optional<String> keyLabelOptional);
 }
