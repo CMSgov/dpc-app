@@ -41,6 +41,7 @@ import java.util.UUID;
 public class JobResource extends AbstractJobResource {
 
     private static final Logger logger = LoggerFactory.getLogger(JobResource.class);
+    private static final String JOB_NOT_FOUND = "Could not find job";
 
     private final IJobQueue queue;
     private final OneEcosystemClient client;
@@ -73,7 +74,7 @@ public class JobResource extends AbstractJobResource {
         final List<JobQueueBatch> batches = this.queue.getJobBatches(jobUUID);
 
         if (batches.isEmpty()) {
-            return Response.status(HttpStatus.NOT_FOUND_404).entity("Could not find job").build();
+            return Response.status(HttpStatus.NOT_FOUND_404).entity(JOB_NOT_FOUND).build();
         }
 
         // Validate the batches
@@ -104,7 +105,7 @@ public class JobResource extends AbstractJobResource {
             builder = buildJobStatusCompleted(builder, status.body(), batch.getRequestUrl(), jobUUID);
         } else if (status.statusCode() == HttpStatus.BAD_REQUEST_400) {
             // Backend doesn't recognize the job ID
-            builder = builder.status(HttpStatus.NOT_FOUND_404).entity("Could not find job");
+            builder = builder.status(HttpStatus.NOT_FOUND_404).entity(JOB_NOT_FOUND);
         } else {
             // Unrecognized status
             logger.error("Export job {} returned unrecognized backend status code {}", jobUUID, status.statusCode());
@@ -131,7 +132,7 @@ public class JobResource extends AbstractJobResource {
         final UUID orgUUID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final List<JobQueueBatch> batches = this.queue.getJobBatches(jobUUID);
         if (batches.isEmpty()) {
-            return Response.status(HttpStatus.NOT_FOUND_404).entity("Could not find job").build();
+            return Response.status(HttpStatus.NOT_FOUND_404).entity(JOB_NOT_FOUND).build();
         }
         final JobQueueBatch batch = batches.getFirst();
         if (!batch.getOrgID().equals(orgUUID)) {
