@@ -1,6 +1,6 @@
-package gov.cms.dpc.testing.factories;
+package gov.cms.dpc.testing.factories.r4;
 
-import org.hl7.fhir.dstu3.model.Practitioner;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
