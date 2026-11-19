@@ -104,8 +104,8 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
                 respBuilder.append(respLine.trim());
             }
             String resp = respBuilder.toString();
-            assertTrue(resp.contains("\"resourceType\":\"OperationOutcome\""));
-            assertTrue(resp.contains("Resource type must be `Parameters`"));
+            assertTrue(resp.contains("\"resourceType\":\"OperationOutcome\""), resp);
+            assertTrue(resp.contains("Resource type must be `Parameters`"), resp);
         }
 
         conn.disconnect();
