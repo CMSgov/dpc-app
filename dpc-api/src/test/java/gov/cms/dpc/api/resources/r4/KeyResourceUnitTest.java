@@ -125,10 +125,10 @@ public class KeyResourceUnitTest {
     public void testSubmitKeyTooLong() throws GeneralSecurityException {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         KeySignature keySignature = KeyResourceTest.generateKeyAndSignature();
-        String label = "A really, really, really long, test key label";
+        Optional<String> label = Optional.of("A really, really, really long, test key label");
 
         WebApplicationException exception = assertThrows(WebApplicationException.class,
-                () -> resource.submitKey(organizationPrincipal, keySignature, Optional.of(label)));
+                () -> resource.submitKey(organizationPrincipal, keySignature, label));
         assertEquals(HttpStatus.SC_BAD_REQUEST, exception.getResponse().getStatus());
         assertEquals("Key label cannot be more than 25 characters", exception.getMessage());
     }
@@ -137,11 +137,12 @@ public class KeyResourceUnitTest {
     public void testSubmitKeyBadPEMString() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         KeySignature keySignature = new KeySignature("badPEMString", "badSignature");
+        Optional<String> label = Optional.of("label");
 
-        WebApplicationException exception =  assertThrows(WebApplicationException.class,
-                () -> resource.submitKey(organizationPrincipal, keySignature, Optional.of("label")));
+        WebApplicationException exception = assertThrows(WebApplicationException.class,
+                () -> resource.submitKey(organizationPrincipal, keySignature, label));
+
         assertEquals(HttpStatus.SC_BAD_REQUEST, exception.getResponse().getStatus());
         assertEquals("Public key could not be parsed", exception.getMessage());
-
     }
 }

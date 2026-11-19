@@ -102,9 +102,11 @@ class IpAddressResourceUnitTest {
     @Test
     public void testDelete_notFound() {
         IpAddressEntity existingIp = new IpAddressEntity().setId(UUID.randomUUID());
-
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of(existingIp));
 
-        assertThrows(WebApplicationException.class, () -> ipAddressResource.deleteIpAddress(organizationPrincipal, UUID.randomUUID()));
+        UUID nonExistentId = UUID.randomUUID();
+
+        assertThrows(WebApplicationException.class,
+                () -> ipAddressResource.deleteIpAddress(organizationPrincipal, nonExistentId));
     }
 }

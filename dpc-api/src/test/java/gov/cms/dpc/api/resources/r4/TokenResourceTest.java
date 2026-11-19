@@ -48,8 +48,6 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
 
     private final ObjectMapper mapper;
     private final String fullyAuthedToken;
-    private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION =
-            new DropwizardTestSupport<>(DPCAPIService.class, configPath);
 
     private TokenResourceTest() {
         this.mapper = new ObjectMapper();
@@ -259,13 +257,13 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
     void testTokenDeletion() throws IOException {
         //Create a token
         TokenEntity token = createToken();
-
         //Ensure it was crated and persisted
         CollectionResponse<TokenEntity> tokens = fetchTokens(this.fullyAuthedToken);
         assertFalse(tokens.getEntities().isEmpty(), "Should have a token");
-        List<TokenEntity> tokenList = tokens.getEntities().stream().filter(t -> t.getId().equals(token.getId())).collect(Collectors.toList());
+        List<TokenEntity> tokenList = tokens.getEntities().stream()
+                .filter(t -> t.getId().equals(token.getId()))
+                .toList();
         assertEquals(1, tokenList.size(), "There should exist exactly 1 token with matching token ID");
-
         //Delete it
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpDelete httpDelete = new HttpDelete(getV3BaseURL() + String.format("/Token/%s", token.getId()));
@@ -275,16 +273,14 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
                 assertNull(response.getEntity(), "Response should not have an entity (empty body)");
             }
         }
-
         //Ensure it is no longer returned when listing tokens
         tokens = fetchTokens(this.fullyAuthedToken);
         tokenList = tokens.getEntities().stream().filter(t -> t.getId().equals(token.getId())).toList();
         assertEquals(0, tokenList.size(), "There should exist exactly 0 tokens with matching token ID");
-
         //Ensure it is no longer returned when fetched by id
         final HttpGet httpGet = new HttpGet(getV3BaseURL() + "/Token/"+token.getId());
         httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
-        try (final CloseableHttpClient client = HttpClients.createDefault();CloseableHttpResponse response = client.execute(httpGet)) {
+        try (final CloseableHttpClient client = HttpClients.createDefault(); CloseableHttpResponse response = client.execute(httpGet)) {
             assertEquals(HttpStatus.NOT_FOUND_404, response.getCode(), "Should not have been found (Expected 404)");
         }
     }
@@ -320,14 +316,16 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
 
         // Create a new JWT
-        final APIAuthHelpers.AuthResponse authResponse = APIAuthHelpers.jwtAuthFlow(this.getV3BaseURL(), fullyAuthedToken, PUBLIC_KEY_ID, PRIVATE_KEY);
+        final String baseURL = this.getV3BaseURL();
+        final APIAuthHelpers.AuthResponse authResponse = APIAuthHelpers.jwtAuthFlow(baseURL, fullyAuthedToken, PUBLIC_KEY_ID, PRIVATE_KEY);
         assertAll(() -> assertNotEquals("", authResponse.accessToken, "Should have token"),
                 () -> assertEquals(300, authResponse.expiresIn, "Should be valid for 300 seconds"),
                 () -> assertEquals("system/*.*", authResponse.scope, "Should have correct scope"),
                 () -> assertEquals("bearer", authResponse.tokenType, "Should be a macaroon"));
 
         // Try to authenticate using the private key for org 1 and the token for org 2, should throw an exception, but in the auth handler
-        final AssertionFailedError error = assertThrows(AssertionFailedError.class, () -> APIAuthHelpers.jwtAuthFlow(this.getV3BaseURL(), m2, PUBLIC_KEY_ID, PRIVATE_KEY));
+        final AssertionFailedError error = assertThrows(AssertionFailedError.class,
+                () -> APIAuthHelpers.jwtAuthFlow(baseURL, m2, PUBLIC_KEY_ID, PRIVATE_KEY));
         error.getMessage();
     }
 
