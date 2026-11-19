@@ -74,32 +74,6 @@ abstract class AbstractAttributionClientResourceUnitTest {
     }
 
     @SuppressWarnings("unchecked")
-    private void stubSearch(Class<? extends Resource> resourceClass, IQuery<Bundle> mockQuery) {
-        IQuery<IBaseBundle> queryExec = mock(IQuery.class, RETURNS_SELF);
-        when(attributionClient.search().forResource(resourceClass)).thenReturn(queryExec);
-        when(queryExec.returnBundle(Bundle.class)).thenReturn(mockQuery);
-    }
-
-    protected IQuery<Bundle> mockSearch(Class<? extends Resource> resourceClass,
-                                      Map<String, List<String>> searchParams, String tagSystem, String tag) {
-        IQuery<Bundle> mockQuery = mockSearch(resourceClass, searchParams);
-        when(mockQuery.withTag(tagSystem, tag)).thenReturn(mockQuery);
-        return mockQuery;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected <T extends Resource> IOperationUntypedWithInput<T> mockInstanceOperation(
-            Class<? extends Resource> resourceClass, UUID id, String operationName, Class<T> responseClass) {
-        IOperationUntypedWithInput<T> operationExec = mock(IOperationUntypedWithInput.class, RETURNS_SELF);
-        when(attributionClient.operation().onInstance(new IdType(resourceClass.getSimpleName(), id.toString()))
-                .named(operationName).withParameters(any(Parameters.class)).returnResourceType(responseClass))
-                .thenReturn(operationExec);
-        clearInvocations(attributionClient.operation()
-                .onInstance(new IdType(resourceClass.getSimpleName(), id.toString())).named(operationName));
-        return operationExec;
-    }
-
-    @SuppressWarnings("unchecked")
     protected <T extends Resource> IReadExecutable<T> mockRead(Class<T> resourceClass, UUID id) {
         IReadExecutable<T> readExec = mock(IReadExecutable.class);
         when(attributionClient.read().resource(resourceClass).withId(id.toString())

@@ -43,7 +43,7 @@ class FHIRHandlerRoutingTest {
             .build();
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1", "r4"})
+    @ValueSource(strings = {"v1", "r4", "v3"})
     void readsAndWritesTheRequestedVersion(String version) {
         String json = "{\"resourceType\":\"Patient\",\"id\":\"test-patient\",\"name\":[{\"family\":\"García\"}]}";
         try (Response response = RESOURCE.target(version + "/Patient")
@@ -60,7 +60,7 @@ class FHIRHandlerRoutingTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1", "r4"})
+    @ValueSource(strings = {"v1", "r4", "v3"})
     void serializesErrorsInTheRequestedVersion(String version) {
         try (Response response = RESOURCE.target(version + "/error").request(FHIRMediaTypes.FHIR_JSON).get()) {
             assertOutcome(response, version, 500);
@@ -68,7 +68,7 @@ class FHIRHandlerRoutingTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1", "r4"})
+    @ValueSource(strings = {"v1", "r4", "v3"})
     void returnsBadRequestForMalformedJson(String version) {
         try (Response response = RESOURCE.target(version + "/Patient")
                 .request(FHIRMediaTypes.FHIR_JSON).post(Entity.entity("not json", FHIRMediaTypes.FHIR_JSON))) {
@@ -77,14 +77,14 @@ class FHIRHandlerRoutingTest {
     }
 
     private FhirContext context(String version) {
-        return version.equals("r4") ? R4 : STU3;
+        return version.equals("v1") ? STU3 : R4;
     }
 
     private void assertOutcome(Response response, String version, int status) {
         assertEquals(status, response.getStatus());
         assertEquals(FHIRMediaTypes.FHIR_JSON, response.getMediaType().toString());
         IBaseResource outcome = context(version).newJsonParser().parseResource(response.readEntity(String.class));
-        if (version.equals("r4")) {
+        if (!version.equals("v1")) {
             assertInstanceOf(org.hl7.fhir.r4.model.OperationOutcome.class, outcome);
         } else {
             assertInstanceOf(org.hl7.fhir.dstu3.model.OperationOutcome.class, outcome);
@@ -108,6 +108,12 @@ class FHIRHandlerRoutingTest {
             return patient;
         }
 
+        @POST
+        @Path("/v3/Patient")
+        public org.hl7.fhir.r4.model.Patient echoV3(org.hl7.fhir.r4.model.Patient patient) {
+            return patient;
+        }
+
         @GET
         @Path("/v1/error")
         public Response stu3Error() {
@@ -117,6 +123,12 @@ class FHIRHandlerRoutingTest {
         @GET
         @Path("/r4/error")
         public Response r4Error() {
+            throw new IllegalStateException("test error");
+        }
+
+        @GET
+        @Path("/v3/error")
+        public Response v3Error() {
             throw new IllegalStateException("test error");
         }
     }

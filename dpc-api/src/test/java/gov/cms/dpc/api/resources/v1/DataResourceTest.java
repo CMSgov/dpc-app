@@ -172,19 +172,19 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 		UUID jobID = UUID.randomUUID();
 
 		// Create batch
-		final var submittedJobQueueBatch = new JobQueueBatch(
-			jobID,
-			UUID.fromString(APITestHelpers.ORGANIZATION_ID),
-			APITestHelpers.ORGANIZATION_ID,
-			"providerNpi",
-			List.of(),
-			List.of(resourceType),
-			OffsetDateTime.now(),
-			OffsetDateTime.now(),
-			"reqIp",
-			"reqUrl",
-			true
-		);
+		final var submittedJobQueueBatch = new JobQueueBatch.Builder()
+			.jobID(jobID)
+			.orgID(UUID.fromString(APITestHelpers.ORGANIZATION_ID))
+			.orgNPI(APITestHelpers.ORGANIZATION_ID)
+			.providerNPI("providerNpi")
+			.patients(List.of())
+			.resourceTypes(List.of(resourceType))
+			.since(OffsetDateTime.now())
+			.transactionTime(OffsetDateTime.now())
+			.requestingIP("reqIp")
+			.requestUrl("reqUrl")
+			.isBulk(true)
+			.build();
 		JobQueueBatchFile batchFile = submittedJobQueueBatch.addJobQueueFile(DPCResourceType.Patient, sequence, 100);
 
 		// Create the file in the file system and get its metadata
