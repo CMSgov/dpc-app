@@ -18,8 +18,6 @@ import org.hl7.fhir.r4.model.Provenance;
 
 import java.util.UUID;
 
-// Can be removed when v1 is deprecated
-
 @FHIR
 @Path("/Group")
 public abstract class AbstractGroupResource extends AbstractResourceWithExport {
