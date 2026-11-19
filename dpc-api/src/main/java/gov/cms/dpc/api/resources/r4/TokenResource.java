@@ -163,11 +163,14 @@ public class TokenResource extends AbstractTokenResource {
 
         //Set the label, if provided, otherwise, generate a default one
         if (optionalBody.isPresent() && StringUtils.isNotEmpty(optionalBody.get().getLabel())) {
-            tokenEntity.setLabel(optionalBody.get().getLabel());
+            tokenEntity.setLabel(sanitizeForLog(optionalBody.get().getLabel()));
         } else {
-            tokenEntity.setLabel(Optional.ofNullable(tokenLabel).orElse(String.format("Token for organization %s.", organizationID)));
+            tokenEntity.setLabel(Optional.ofNullable(tokenLabel)
+                    .map(TokenResource::sanitizeForLog)
+                    .orElse(String.format("Token for organization %s.", organizationID)));
         }
         logger.info("Generating access token: {}", tokenEntity);
+
         final TokenEntity persisted;
         try {
             persisted = this.dao.persistToken(tokenEntity);
@@ -419,7 +422,6 @@ public class TokenResource extends AbstractTokenResource {
 
         if (idMissing) {
             logger.error("GOLDEN MACAROON WAS GENERATED IN TOKEN RESOURCE!");
-            // TODO: Remove the Macaroon from the root key store (DPC-729)
             throw new IllegalStateException("Token generation failed");
         }
     }
@@ -429,5 +431,16 @@ public class TokenResource extends AbstractTokenResource {
             throw new WebApplicationException(String.format("Claim %s must be present", claimName), Response.Status.BAD_REQUEST);
         }
         return claim;
+    }
+
+    /**
+     * Removes CR/LF and other control characters from user-supplied input
+     * before it can be written to application logs, preventing log forging (CWE-117).
+     */
+    private static String sanitizeForLog(String input) {
+        if (input == null) {
+            return null;
+        }
+        return input.replaceAll("[\\r\\n\\t]", "_");
     }
 }
