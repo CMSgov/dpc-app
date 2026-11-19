@@ -25,15 +25,14 @@ TASK_DEF=${TASK_DEF_ARN#*/}
 echo "Getting network config." # Gets security groups and subnets
 NETWORK_CONFIG=$(aws ecs describe-services --cluster "$CLUSTER_NAME" --services "$SERVICE_NAME" --query "services[0].networkConfiguration")
 
-# We're relying on the fact that the container we want is named similar to the service.  For example, when the service is
-# "dpc-dev-async-portal-v9", the container we want is "dpc-dev-async-portal".  If this is ever not the case we'll have to
-# revisit, but for now this is the easiest way to filter out the datadog-agent, guard duty, service connect and whatever
-# other containers we add to our services in the future.
 echo "Getting container name"
+
+# Get container name with either legacy naming convention (i.e. `dpc-test-async-portal`) or CDAP service module convention (i.e. `async-portal-v9`)
 CONTAINER=$(aws ecs describe-task-definition \
   --task-definition "$TASK_DEF" \
-  --query "taskDefinition.containerDefinitions[?starts_with('${SERVICE_NAME}', name)] | [0]" \
+  --query "taskDefinition.containerDefinitions[?contains('${SERVICE_NAME}', name)] | [0]" \
   --output json)
+
 CONTAINER_NAME=$(jq -r '.name' <<< "$CONTAINER")
 
 # Skip running the entry point script on our tmp task and just drop to a shell for our command
