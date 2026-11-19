@@ -45,13 +45,13 @@ public class TokenResourceUnitTest {
     private static Macaroon macaroon;
     private static final JwtKeyLocator locator = Mockito.mock(JwtKeyLocator.class);
     private static final IJTICache cache = Mockito.mock(IJTICache.class);
-    private static final String auth_url = "auth_url";
+    private static final String AUTH_URL = "auth_url";
     private TokenResource tokenResource;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        this.tokenResource = new TokenResource(mockTokenDao, bakery, policy, locator, cache, auth_url);
+        this.tokenResource = new TokenResource(mockTokenDao, bakery, policy, locator, cache, AUTH_URL);
     }
 
     @Test
@@ -135,7 +135,7 @@ public class TokenResourceUnitTest {
                 Mockito.when(mockTokenDao.persistToken(Mockito.any())).thenReturn(persistedToken);
                 Mockito.when(bakery.serializeMacaroon(macaroon, true)).thenReturn(token_result.getBytes());
 
-                TokenEntity actualResponse = tokenResource.createOrganizationToken(organizationPrincipal, null, auth_url, optExpires);
+                TokenEntity actualResponse = tokenResource.createOrganizationToken(organizationPrincipal, null, AUTH_URL, optExpires);
 
                 assertEquals(persistedToken, actualResponse);
             }
