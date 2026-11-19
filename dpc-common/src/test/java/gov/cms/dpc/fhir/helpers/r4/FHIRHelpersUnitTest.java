@@ -1,4 +1,4 @@
-package gov.cms.dpc.fhir.helpers;
+package gov.cms.dpc.fhir.helpers.r4;
 
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
-import gov.cms.dpc.fhir.helpers.v1.FHIRHelpers;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -15,16 +14,18 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Organization;
-import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.testcontainers.shaded.org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,26 +59,27 @@ class FHIRHelpersUnitTest {
         when(submitOp.encodedJson()).thenReturn(submitOp);
 
         CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
-        MockedStatic<HttpClients> mockedHttpClients = mockStatic(HttpClients.class);
-        mockedHttpClients.when(HttpClients::createDefault).thenReturn(httpClient);
-        CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class, RETURNS_DEEP_STUBS);
-        when(httpResponse.getCode()).thenReturn(HttpStatus.SC_OK);
-        when(httpClient.execute(any(HttpPost.class))).thenReturn(httpResponse);
-        HttpEntity httpEntity = mock(HttpEntity.class);
-        InputStream inputStream = IOUtils.toInputStream(MACAROON, "UTF-8");
-        when(httpEntity.getContent()).thenReturn(inputStream);
-        when(httpResponse.getEntity()).thenReturn(httpEntity);
+        try (MockedStatic<HttpClients> mockedHttpClients = mockStatic(HttpClients.class)) {
+            mockedHttpClients.when(HttpClients::createDefault).thenReturn(httpClient);
+            CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class, RETURNS_DEEP_STUBS);
+            when(httpResponse.getCode()).thenReturn(HttpStatus.SC_OK);
+            when(httpClient.execute(any(HttpPost.class))).thenReturn(httpResponse);
+            HttpEntity httpEntity = mock(HttpEntity.class);
+            InputStream inputStream = IOUtils.toInputStream(MACAROON, "UTF-8");
+            when(httpEntity.getContent()).thenReturn(inputStream);
+            when(httpResponse.getEntity()).thenReturn(httpEntity);
 
-        String response = assertDoesNotThrow(() ->
-                FHIRHelpers.registerOrganization(client, parser, orgID.toString(), orgNPI, ADMIN_URL));
-        assertEquals(MACAROON, response);
+            String response = assertDoesNotThrow(() ->
+                    FHIRHelpers.registerOrganization(client, parser, orgID.toString(), orgNPI, ADMIN_URL));
+            assertEquals(MACAROON, response);
 
-        // Token generation error
-        when(httpResponse.getCode()).thenReturn(HttpStatus.SC_BAD_REQUEST);
-        when(httpResponse.getReasonPhrase()).thenReturn("Bad request");
-        IllegalStateException stateException = assertThrows(IllegalStateException.class, () ->
-                FHIRHelpers.registerOrganization(client, parser, orgID.toString(), orgNPI, ADMIN_URL));
-        assertEquals("Unable to generate token: " + httpResponse.getReasonPhrase(), stateException.getMessage());
+            // Token generation error
+            when(httpResponse.getCode()).thenReturn(HttpStatus.SC_BAD_REQUEST);
+            when(httpResponse.getReasonPhrase()).thenReturn("Bad request");
+            IllegalStateException stateException = assertThrows(IllegalStateException.class, () ->
+                    FHIRHelpers.registerOrganization(client, parser, orgID.toString(), orgNPI, ADMIN_URL));
+            assertEquals("Unable to generate token: " + httpResponse.getReasonPhrase(), stateException.getMessage());
+        }
     }
 
     @Test
@@ -109,6 +111,35 @@ class FHIRHelpersUnitTest {
         Response response = FHIRHelpers.handleMethodOutcome(outcome);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         assertEquals(organization, response.getEntity());
+    }
+
+    @Test
+    void createdPractitionerHasV3Location() {
+        Practitioner practitioner = new Practitioner();
+        String id = UUID.randomUUID().toString();
+        practitioner.setId(id);
+        practitioner.getMeta().setLastUpdated(new Date());
+        MethodOutcome outcome = new MethodOutcome();
+        outcome.setResource(practitioner);
+        outcome.setCreated(true);
+
+        Response response = FHIRHelpers.handleMethodOutcome(outcome);
+
+        assertEquals(201, response.getStatus());
+        assertSame(practitioner, response.getEntity());
+        assertEquals("v3/Practitioner/" + id, response.getLocation().toString());
+        assertNotNull(response.getLastModified());
+    }
+
+    @Test
+    void missingIdOnCreatedResourceIsAnError() {
+        MethodOutcome outcome = new MethodOutcome();
+        outcome.setResource(new Practitioner());
+        outcome.setCreated(true);
+
+        WebApplicationException exception = assertThrows(WebApplicationException.class,
+                () -> FHIRHelpers.handleMethodOutcome(outcome));
+        assertEquals(500, exception.getResponse().getStatus());
     }
 
     private Organization buildOrganization() {

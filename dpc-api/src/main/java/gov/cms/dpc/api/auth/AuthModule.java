@@ -7,7 +7,7 @@ import gov.cms.dpc.api.auth.filters.PathAuthorizationFilter;
 import gov.cms.dpc.api.auth.jwt.CaffeineJTICache;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.auth.jwt.JwtKeyLocator;
-import gov.cms.dpc.api.auth.macaroonauth.MacaroonsAuthenticator;
+import gov.cms.dpc.api.auth.macaroonauth.r4.MacaroonsAuthenticator;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthFactory;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
@@ -46,7 +46,8 @@ public class AuthModule extends DropwizardAwareModule<DPCAPIConfiguration> {
             binder.bind(DPCUnauthorizedHandler.class);
             binder.bind(UnauthorizedHandler.class).to(DPCUnauthorizedHandler.class);
             binder.bind(AuthFactory.class).to(DPCAuthFactory.class);
-            binder.bind(authenticatorTypeLiteral).to(MacaroonsAuthenticator.class);
+            binder.bind(authenticatorTypeLiteral).to(gov.cms.dpc.api.auth.macaroonauth.stu3.MacaroonsAuthenticator.class);
+            binder.bind(MacaroonsAuthenticator.class);
         }
         binder.bind(DPCAuthDynamicFeature.class);
         binder.bind(LocatorAdapter.class).to(JwtKeyLocator.class);

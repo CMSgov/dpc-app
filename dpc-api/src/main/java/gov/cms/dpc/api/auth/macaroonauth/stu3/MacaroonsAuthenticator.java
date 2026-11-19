@@ -1,4 +1,4 @@
-package gov.cms.dpc.api.auth.macaroonauth;
+package gov.cms.dpc.api.auth.macaroonauth.stu3;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;

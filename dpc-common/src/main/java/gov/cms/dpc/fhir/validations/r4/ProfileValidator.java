@@ -4,12 +4,14 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationOptions;
 import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.validations.profiles.r4.OrganizationProfile;
+import gov.cms.dpc.fhir.validations.profiles.r4.PractitionerProfile;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Practitioner;
 
 public class ProfileValidator implements ConstraintValidator<Profiled, BaseResource> {
 
@@ -28,11 +30,16 @@ public class ProfileValidator implements ConstraintValidator<Profiled, BaseResou
             context.buildConstraintViolationWithTemplate("No resource provided").addConstraintViolation();
             return false;
         }
-        if (!(value instanceof Organization)) {
+        final String profile;
+        if (value instanceof Organization) {
+            profile = OrganizationProfile.PROFILE_URI;
+        } else if (value instanceof Practitioner) {
+            profile = PractitionerProfile.PROFILE_URI;
+        } else {
             throw new IllegalArgumentException("No R4 profile configured for " + value.getClass().getName());
         }
 
-        final ValidationOptions options = new ValidationOptions().addProfile(OrganizationProfile.PROFILE_URI);
+        final ValidationOptions options = new ValidationOptions().addProfile(profile);
         final var result = validator.validateWithResult(value, options);
         if (result.isSuccessful()) {
             return true;

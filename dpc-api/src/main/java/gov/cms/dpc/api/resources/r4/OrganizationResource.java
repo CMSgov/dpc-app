@@ -33,7 +33,6 @@ import org.slf4j.MDC;
 import java.util.UUID;
 
 @Api(value = "Organization", authorizations = @Authorization(value = "access_token"))
-@Path("/v3/Organization")
 public class OrganizationResource {
 
     private static final Logger logger = LoggerFactory.getLogger(OrganizationResource.class);

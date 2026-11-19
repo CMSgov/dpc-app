@@ -8,7 +8,7 @@ import gov.cms.dpc.api.auth.DPCAuthDynamicFeature;
 import gov.cms.dpc.api.auth.DPCAuthFactory;
 import gov.cms.dpc.api.auth.DPCUnauthorizedHandler;
 import gov.cms.dpc.api.auth.MacaroonHelpers;
-import gov.cms.dpc.api.auth.macaroonauth.MacaroonsAuthenticator;
+import gov.cms.dpc.api.auth.macaroonauth.stu3.MacaroonsAuthenticator;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
@@ -734,7 +734,9 @@ class JWTUnitTests {
 
         final TokenPolicy tokenPolicy = new TokenPolicy();
 
-        final DPCAuthFactory factory = new DPCAuthFactory(bakery, new MacaroonsAuthenticator(client), tokenDAO, dpc401handler);
+        // TODO: Rewrite when we get rid of the stu3 MacaroonsAuthenticator
+        final DPCAuthFactory factory = new DPCAuthFactory(bakery, new MacaroonsAuthenticator(client),
+                mock(gov.cms.dpc.api.auth.macaroonauth.r4.MacaroonsAuthenticator.class), tokenDAO, dpc401handler);
         final DPCAuthDynamicFeature dynamicFeature = new DPCAuthDynamicFeature(factory);
 
         final TokenResource tokenResource = new TokenResource(tokenDAO, bakery, tokenPolicy, locator, jtiCache, "localhost:3002/v1");
