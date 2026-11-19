@@ -371,7 +371,8 @@ class DataResourceUnitTest {
         final FhirContext ctx = FhirContext.forR4();
         final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
 
-        return APITestHelpers.buildResourceExtension(ctx, Collections.singletonList(dataResource),
+        return APITestHelpers.buildResourceExtension(ctx,
+                Collections.singletonList(new BaseResource(null, dataResource, null, null)),
                 List.of(staticFilter,
                         new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class),
                         new HttpRangeHeaderParamConverterProvider(),

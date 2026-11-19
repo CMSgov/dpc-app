@@ -52,7 +52,6 @@ import static gov.cms.dpc.fhir.dropwizard.filters.StreamingContentSizeFilter.X_C
  * https://github.com/aruld/jersey-streaming
  */
 @Api(tags = { "Bulk Data", "Data" }, authorizations = @Authorization(value = "access_token"))
-@Path("/v3/Data")
 @Produces("application/ndjson")
 public class DataResource {
 

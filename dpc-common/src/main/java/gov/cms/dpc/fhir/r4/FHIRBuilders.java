@@ -53,7 +53,8 @@ public class FHIRBuilders {
             meta = new Meta();
         }
 
-        // Add the Organization ID
+        // Remove any existing org tags and add our own
+        meta.getTag().removeIf(tag -> DPCIdentifierSystem.DPC.getSystem().equalsIgnoreCase(tag.getSystem()));
         meta.addTag(DPCIdentifierSystem.DPC.getSystem(), organizationID.toString(), "Organization ID");
         resource.setMeta(meta);
     }

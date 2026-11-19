@@ -1,14 +1,18 @@
 package gov.cms.dpc.api.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.validation.FhirValidator;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DataFormatExceptionMapper;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionMapper;
 import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionMapper;
@@ -47,15 +51,20 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -171,6 +180,43 @@ public class APITestHelpers {
                 .withName("Test", "Practitioner")
                 .withId(UUID.randomUUID())
                 .build();
+    }
+
+    public static void setupPractitionerTest(IGenericClient client, IParser parser) throws IOException {
+        try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("r4/provider_bundle.json")) {
+            if (inputStream == null) {
+                throw new IOException("Missing r4/provider_bundle.json test fixture");
+            }
+            final Parameters providerParameters = (Parameters) parser.parseResource(inputStream);
+            client.operation()
+                    .onType(Practitioner.class)
+                    .named("submit")
+                    .withParameters(providerParameters)
+                    .encodedJson()
+                    .execute();
+        }
+    }
+
+    public static MethodOutcome createResource(IGenericClient client, IBaseResource resource) {
+        return client.create().resource(resource).encodedJson().execute();
+    }
+
+    public static <T extends IBaseResource> T getResourceById(IGenericClient client, Class<T> clazz, String resourceId) {
+        return client.read().resource(clazz).withId(resourceId).encodedJson().execute();
+    }
+
+    public static Bundle resourceSearch(IGenericClient client, DPCResourceType resourceType) {
+        return client.search().forResource(resourceType.name())
+                .whereMap(Map.of()).returnBundle(Bundle.class).encodedJson().execute();
+    }
+
+    public static void deleteResourceById(IGenericClient client, DPCResourceType resourceType, String resourceId) {
+        client.delete().resourceById(resourceType.name(), resourceId).execute();
+    }
+
+    public static void updateResource(IGenericClient client, String id, IBaseResource resource) {
+        IUpdateExecutable executable = client.update().resource(resource).withId(id).encodedJson();
+        executable.execute();
     }
 
     public static Patient createPatientResource(String organizationID) {

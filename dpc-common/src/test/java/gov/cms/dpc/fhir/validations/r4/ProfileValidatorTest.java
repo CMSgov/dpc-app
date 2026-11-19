@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.validations.profiles.r4.OrganizationProfile;
+import gov.cms.dpc.fhir.validations.profiles.r4.PractitionerProfile;
 import jakarta.validation.ConstraintValidatorContext;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -13,6 +14,7 @@ import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -65,7 +67,12 @@ class ProfileValidatorTest {
         address.setType(Address.AddressType.BOTH);
         organization.addAddress(address);
 
-        return List.of(organization);
+        Practitioner practitioner = new Practitioner();
+        practitioner.setMeta(new Meta().addProfile(PractitionerProfile.PROFILE_URI));
+        practitioner.addName().setFamily("Practitioner").addGiven("Test");
+        practitioner.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("1232131239");
+
+        return List.of(organization, practitioner);
     }
 
     @Test
@@ -77,5 +84,13 @@ class ProfileValidatorTest {
                 .addLine("123 Main St").setCity("Baltimore").setState("MD").setPostalCode("21201").setCountry("US");
 
         assertFalse(validator.isValid(organization, VALIDATION_CONTEXT));
+    }
+
+    @Test
+    void rejectsPractitionerWithoutRequiredIdentifier() {
+        Practitioner practitioner = new Practitioner();
+        practitioner.addName().setFamily("Practitioner").addGiven("Test");
+
+        assertFalse(validator.isValid(practitioner, VALIDATION_CONTEXT));
     }
 }

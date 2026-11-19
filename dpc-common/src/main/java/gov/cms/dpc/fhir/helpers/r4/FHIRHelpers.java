@@ -17,8 +17,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,8 +25,6 @@ import java.net.URISyntaxException;
 
 
 public class FHIRHelpers {
-
-    private static final Logger log = LoggerFactory.getLogger(FHIRHelpers.class);
 
     /**
      * Register an organization with the Attribution Service
@@ -105,11 +101,10 @@ public class FHIRHelpers {
         final Response.Status status = outcome.getCreated() != null ? Response.Status.CREATED : Response.Status.OK;
         Response.ResponseBuilder builder = Response.status(status).entity(resource);
         if (outcome.getCreated() != null) {
-            try {
-                builder.location(new URI("v1/" + outcome.getResource().getIdElement().toString()));
-            } catch (URISyntaxException e) {
-                log.warn("Failed to add location header to resource {}", outcome.getResource().fhirType());
+            if (resource.getIdElement().getIdPart() == null) {
+                throw new WebApplicationException("Created resource has no ID.", Response.Status.INTERNAL_SERVER_ERROR);
             }
+            builder.location(URI.create("v3/" + resource.fhirType() + "/" + resource.getIdElement().getIdPart()));
             builder.lastModified(resource.getMeta().getLastUpdated());
         }
         return builder.build();

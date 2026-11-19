@@ -18,6 +18,7 @@ import gov.cms.dpc.api.resources.r4.BaseResource;
 import gov.cms.dpc.api.resources.r4.DataResource;
 import gov.cms.dpc.api.resources.r4.GroupResource;
 import gov.cms.dpc.api.resources.r4.OrganizationResource;
+import gov.cms.dpc.api.resources.r4.PractitionerResource;
 import gov.cms.dpc.api.resources.v1.*;
 import gov.cms.dpc.api.tasks.GenerateKeyPair;
 import gov.cms.dpc.api.tasks.keys.DeletePublicKey;
@@ -77,6 +78,7 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         binder.bind(BaseResource.class);
         binder.bind(DataResource.class);
         binder.bind(GroupResource.class);
+        binder.bind(PractitionerResource.class);
 
         // DAO
         binder.bind(PublicKeyDAO.class);
