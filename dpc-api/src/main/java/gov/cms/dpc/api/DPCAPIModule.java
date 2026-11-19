@@ -156,6 +156,12 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
+    public gov.cms.dpc.api.resources.r4.IpAddressResource provideR4IpAddressResource(IpAddressDAO dao) {
+        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+                .create(gov.cms.dpc.api.resources.r4.IpAddressResource.class, new Class<?>[]{IpAddressDAO.class}, new Object[]{dao});
+    }
+
+    @Provides
     public OrganizationResource provideOrganizationResource(@Named("attribution") IGenericClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(OrganizationResource.class,
