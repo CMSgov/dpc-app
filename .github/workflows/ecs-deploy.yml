@@ -72,8 +72,18 @@ env:
   TENV_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
+  update-sops:
+    name: 'Update sops parameters'
+    uses: ./.github/workflows/tofu-apply.yml
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      environment: ${{ inputs.env }}
+    secrets: inherit
   deploy:
     name: Deploy
+    needs: 'Update sops parameters'
     permissions:
       contents: read
       id-token: write
