@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.net.HttpHeaders;
+import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.attribution.client.AttributionClient;
@@ -122,14 +123,12 @@ public class GroupResourceUnitTest {
         outcome.setCreated(true);
         when(attributionClient.createRoster(group)).thenReturn(outcome);
 
-        org.hl7.fhir.dstu3.model.Identifier identifier = new org.hl7.fhir.dstu3.model.Identifier();
+        Identifier identifier = new Identifier();
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
         identifier.setValue(practitionerNPI);
-        org.hl7.fhir.dstu3.model.Practitioner practitioner = new org.hl7.fhir.dstu3.model.Practitioner();
+        Practitioner practitioner = new Practitioner();
         practitioner.setIdentifier(List.of(identifier));
-        IReadExecutable<org.hl7.fhir.dstu3.model.Practitioner> readExec = mock(IReadExecutable.class);
-        when(attributionSTU3Client.read().resource(org.hl7.fhir.dstu3.model.Practitioner.class).withId(practitionerId.toString()).encodedJson()).thenReturn(readExec);
-        when(readExec.execute()).thenReturn(practitioner);
+        when(attributionClient.getPractitioner(practitionerId)).thenReturn(practitioner);
 
         Response response = resource.createRoster(organizationPrincipal, provenance, group);
         Group result = (Group) response.getEntity();
@@ -164,14 +163,12 @@ public class GroupResourceUnitTest {
         codeableConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(practitionerNPI);
         groupWithBadTag.getCharacteristicFirstRep().setValue(codeableConcept);
 
-        org.hl7.fhir.dstu3.model.Identifier identifier = new org.hl7.fhir.dstu3.model.Identifier();
+        Identifier identifier = new Identifier();
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
         identifier.setValue(practitionerNPI);
-        org.hl7.fhir.dstu3.model.Practitioner practitioner = new org.hl7.fhir.dstu3.model.Practitioner();
+        Practitioner practitioner = new Practitioner();
         practitioner.setIdentifier(List.of(identifier));
-        IReadExecutable<org.hl7.fhir.dstu3.model.Practitioner> readExec = mock(IReadExecutable.class);
-        when(attributionSTU3Client.read().resource(org.hl7.fhir.dstu3.model.Practitioner.class).withId(practitionerId.toString()).encodedJson()).thenReturn(readExec);
-        when(readExec.execute()).thenReturn(practitioner);
+        when(attributionClient.getPractitioner(practitionerId)).thenReturn(practitioner);
 
         MethodOutcome outcome = new MethodOutcome();
         outcome.setResource(new Group());
@@ -207,14 +204,12 @@ public class GroupResourceUnitTest {
         codeableConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(NPIUtil.generateNPI());
         group.getCharacteristicFirstRep().setValue(codeableConcept);
 
-        org.hl7.fhir.dstu3.model.Identifier identifier = new org.hl7.fhir.dstu3.model.Identifier();
+        Identifier identifier = new Identifier();
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
         identifier.setValue(NPIUtil.generateNPI());
-        org.hl7.fhir.dstu3.model.Practitioner practitioner = new org.hl7.fhir.dstu3.model.Practitioner();
+        Practitioner practitioner = new Practitioner();
         practitioner.setIdentifier(List.of(identifier));
-        IReadExecutable<org.hl7.fhir.dstu3.model.Practitioner> readExec = mock(IReadExecutable.class);
-        when(attributionSTU3Client.read().resource(org.hl7.fhir.dstu3.model.Practitioner.class).withId(practitionerId.toString()).encodedJson()).thenReturn(readExec);
-        when(readExec.execute()).thenReturn(practitioner);
+        when(attributionClient.getPractitioner(practitionerId)).thenReturn(practitioner);
 
         assertThrows(WebApplicationException.class, () -> resource.createRoster(organizationPrincipal, provenance, group));
     }
@@ -240,9 +235,7 @@ public class GroupResourceUnitTest {
         codeableConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(NPIUtil.generateNPI());
         group.getCharacteristicFirstRep().setValue(codeableConcept);
 
-        IReadExecutable<org.hl7.fhir.dstu3.model.Practitioner> readExec = mock(IReadExecutable.class);
-        when(attributionSTU3Client.read().resource(org.hl7.fhir.dstu3.model.Practitioner.class).withId(practitionerId.toString()).encodedJson()).thenReturn(readExec);
-        when(readExec.execute()).thenThrow(new ResourceNotFoundException("practitioner not found"));
+        when(attributionClient.getPractitioner(practitionerId)).thenThrow(new ResourceNotFoundException("practitioner not found"));
 
         assertThrows(WebApplicationException.class, () -> resource.createRoster(organizationPrincipal, provenance, group));
     }
@@ -264,7 +257,7 @@ public class GroupResourceUnitTest {
         when(attributionClient.getRoster(UUID.fromString(groupId))).thenReturn(group);
 
         Bundle patients = new Bundle();
-        patients.addEntry(new Bundle.BundleEntryComponent().setResource(V3APITestHelpers.createPatientWithMbi("9S79A00AA00")));
+        patients.addEntry(new Bundle.BundleEntryComponent().setResource(APITestHelpers.V3.createPatientWithMbi("9S79A00AA00")));
         when(attributionClient.getAttributedPatients(UUID.fromString(groupId), true)).thenReturn(patients);
 
         when(oneEcosystemClient.export(any())).thenReturn(
@@ -307,7 +300,7 @@ public class GroupResourceUnitTest {
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v3/Group/" + groupId + "/$export"));
 
         Bundle patients = new Bundle();
-        patients.addEntry(new Bundle.BundleEntryComponent().setResource(V3APITestHelpers.createPatientWithMbi("9S79A00AA00")));
+        patients.addEntry(new Bundle.BundleEntryComponent().setResource(APITestHelpers.V3.createPatientWithMbi("9S79A00AA00")));
         when(attributionClient.getAttributedPatients(UUID.fromString(groupId), true)).thenReturn(patients);
 
         final String timezoneFutureSince = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusSeconds(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
@@ -357,7 +350,7 @@ public class GroupResourceUnitTest {
 
         when(attributionClient.getRoster(any(UUID.class))).thenReturn(fakeGroup);
 
-        Patient fakePatient = V3APITestHelpers.createPatientWithMbi("2S51C00AA00");
+        Patient fakePatient = APITestHelpers.V3.createPatientWithMbi("2S51C00AA00");
         Bundle fakeBundle = new Bundle();
         fakeBundle.getEntry().add(new Bundle.BundleEntryComponent().setResource(fakePatient));
         when(attributionClient.getAttributedPatients(any(UUID.class), eq(true))).thenReturn(fakeBundle);
