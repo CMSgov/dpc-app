@@ -35,14 +35,15 @@ public abstract class AbstractFHIRExceptionHandler<E extends Throwable> extends 
             }
             Class<?> parent = method.getDeclaringClass().getSuperclass();
             if (parent == null) {
-                break;
+                return false;
             }
             try {
                 method = parent.getMethod(method.getName(), method.getParameterTypes());
             } catch (NoSuchMethodException e) {
-                break;
+                return false;
             }
         }
+        // We shouldn't get here, but we need to be exhaustive
         return false;
     }
 
