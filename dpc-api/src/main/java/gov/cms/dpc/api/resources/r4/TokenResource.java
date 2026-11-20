@@ -196,7 +196,9 @@ public class TokenResource extends AbstractTokenResource {
             @ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
             @ApiParam(value = "Token ID", required = true) @NotNull @PathParam("tokenID") UUID tokenID) {
         final List<TokenEntity> matchedToken = this.dao.findTokenByOrgAndID(organizationPrincipal.getID(), tokenID);
-        assert matchedToken.size() == 1 : "Should only have a single matching token";
+        if (matchedToken.isEmpty()) {
+            throw new WebApplicationException("Cannot find token with matching ID", Response.Status.NOT_FOUND);
+        }
 
         this.dao.deleteToken(matchedToken.get(0));
 

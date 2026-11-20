@@ -166,7 +166,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
             }
         }
     }
-    
+
     @Test
     @SuppressWarnings("unchecked")
     public void testRejectEccKey() throws NoSuchAlgorithmException, IOException {
@@ -186,6 +186,11 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
                 assertEquals("ECC keys are not currently supported", respBody.get("message"), "Should return helpful error message");
             }
         }
+    }
+
+    @Override
+    protected String getBaseURL() {
+        return super.getBaseURL().replaceFirst("/v1$", "/v3");
     }
 
     protected static KeySignature generateKeyAndSignature() throws GeneralSecurityException {

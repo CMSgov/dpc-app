@@ -53,7 +53,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         this.mapper = new ObjectMapper();
 
         try {
-            this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getV3BaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
+            this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
         }
@@ -88,7 +88,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
 
         // Check to see if a direct fetch works as well
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getV3BaseURL() + String.format("/Token/%s", token.getId()));
+            final HttpGet httpGet = new HttpGet(getBaseURL() + String.format("/Token/%s", token.getId()));
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
@@ -106,7 +106,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         final String customLabel = "custom token label";
         // Create a new token with a custom label
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(getV3BaseURL() + String.format("/Token?label=%s", URLEncoder.encode(customLabel, StandardCharsets.UTF_8)));
+            final HttpPost httpPost = new HttpPost(getBaseURL() + String.format("/Token?label=%s", URLEncoder.encode(customLabel, StandardCharsets.UTF_8)));
             httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             try (CloseableHttpResponse response = client.execute(httpPost)) {
                 assertEquals(HttpStatus.OK_200, response.getCode(), "Should have found organization");
@@ -130,7 +130,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         // Create a new token with an expiration greater than 1 year
         final OffsetDateTime expires = OffsetDateTime.now(ZoneOffset.UTC).plusYears(5);
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(getV3BaseURL() + String.format("/Token?expiration=%s", expires.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+            final HttpPost httpPost = new HttpPost(getBaseURL() + String.format("/Token?expiration=%s", expires.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
             httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             try (CloseableHttpResponse response = client.execute(httpPost)) {
                 assertEquals(HttpStatus.BAD_REQUEST_400, response.getCode(), "Should fail with exceeding expiration time");
@@ -142,7 +142,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
     void testTokenCreationWithPastExpirationTime() throws IOException {
         final OffsetDateTime expires = OffsetDateTime.now(ZoneOffset.UTC).minusDays(10);
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(getV3BaseURL() + String.format("/Token?expiration=%s", expires.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+            final HttpPost httpPost = new HttpPost(getBaseURL() + String.format("/Token?expiration=%s", expires.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
             httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             try (CloseableHttpResponse response = client.execute(httpPost)) {
                 assertEquals(HttpStatus.BAD_REQUEST_400, response.getCode(), "Should fail with past expiration time");
@@ -156,7 +156,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
     void testTokenCreationWithValidCustomExpiration() throws IOException {
         final OffsetDateTime expiresFinal = OffsetDateTime.now(ZoneOffset.UTC).plusDays(10);
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(getV3BaseURL() + String.format("/Token?expiration=%s", expiresFinal.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
+            final HttpPost httpPost = new HttpPost(getBaseURL() + String.format("/Token?expiration=%s", expiresFinal.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
             httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             try (CloseableHttpResponse response = client.execute(httpPost)) {
                 assertEquals(HttpStatus.OK_200, response.getCode(), "Should have been created.");
@@ -170,7 +170,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
     @Test
     void testTokenCreationWithDefaults() throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(getV3BaseURL() + "/Token");
+            final HttpPost httpPost = new HttpPost(getBaseURL() + "/Token");
             httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
 
             String newTokenId;
@@ -186,7 +186,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
                 newTokenId = tokenReturned.getId();
             }
 
-            final HttpGet httpGet = new HttpGet(getV3BaseURL() + String.format("/Token/%s", newTokenId));
+            final HttpGet httpGet = new HttpGet(getBaseURL() + String.format("/Token/%s", newTokenId));
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
@@ -207,7 +207,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         final OffsetDateTime expiresFinal = OffsetDateTime.now(ZoneOffset.UTC).plusDays(10);
         final String expiresFormatted =  FHIRFormatters.INSTANT_FORMATTER.format(expiresFinal);
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(getV3BaseURL() + "/Token");
+            final HttpPost httpPost = new HttpPost(getBaseURL() + "/Token");
             httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             httpPost.setEntity(new StringEntity("{\"expiresAt\":\""+expiresFormatted+"\",\"label\":\"custom-label\"}"));
             httpPost.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
@@ -227,7 +227,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         final OffsetDateTime expiresFinal = OffsetDateTime.now(ZoneOffset.UTC).plusDays(10);
         final String expiresFormatted =  FHIRFormatters.INSTANT_FORMATTER.format(expiresFinal);
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(getV3BaseURL() + "/Token");
+            final HttpPost httpPost = new HttpPost(getBaseURL() + "/Token");
             httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             httpPost.setEntity(new StringEntity("{\"expiresAt\":\""+expiresFormatted+"\",\"label\":\"Ok Text<script>alert('Bad script')</script>\"}"));
             httpPost.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
@@ -241,7 +241,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
     void testTokenCreationWithInvalidExpirationBodyParam() throws IOException {
         final String expiresFormatted =  "invalid-date-time-format-ZZZ";
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(getV3BaseURL() + "/Token");
+            final HttpPost httpPost = new HttpPost(getBaseURL() + "/Token");
             httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             httpPost.setEntity(new StringEntity("{\"expiresAt\":\""+expiresFormatted+"\",\"label\":\"custom-label\"}"));
             httpPost.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
@@ -266,7 +266,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         assertEquals(1, tokenList.size(), "There should exist exactly 1 token with matching token ID");
         //Delete it
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpDelete httpDelete = new HttpDelete(getV3BaseURL() + String.format("/Token/%s", token.getId()));
+            final HttpDelete httpDelete = new HttpDelete(getBaseURL() + String.format("/Token/%s", token.getId()));
             httpDelete.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             try (CloseableHttpResponse response = client.execute(httpDelete)) {
                 assertEquals(HttpStatus.NO_CONTENT_204, response.getCode(), "Should have succeeded with a 204 (No Content)");
@@ -278,7 +278,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         tokenList = tokens.getEntities().stream().filter(t -> t.getId().equals(token.getId())).toList();
         assertEquals(0, tokenList.size(), "There should exist exactly 0 tokens with matching token ID");
         //Ensure it is no longer returned when fetched by id
-        final HttpGet httpGet = new HttpGet(getV3BaseURL() + "/Token/"+token.getId());
+        final HttpGet httpGet = new HttpGet(getBaseURL() + "/Token/"+token.getId());
         httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
         try (final CloseableHttpClient client = HttpClients.createDefault(); CloseableHttpResponse response = client.execute(httpGet)) {
             assertEquals(HttpStatus.NOT_FOUND_404, response.getCode(), "Should not have been found (Expected 404)");
@@ -287,7 +287,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
 
     private TokenEntity createToken() throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpPost httpPost = new HttpPost(getV3BaseURL() + "/Token");
+            final HttpPost httpPost = new HttpPost(getBaseURL() + "/Token");
             httpPost.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             try (CloseableHttpResponse response = client.execute(httpPost)) {
                 return this.mapper.readValue(response.getEntity().getContent(), TokenEntity.class);
@@ -297,7 +297,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
 
     private boolean deleteToken(String tokenId){
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpDelete httpDelete = new HttpDelete(getV3BaseURL() + String.format("/Token/%s", tokenId));
+            final HttpDelete httpDelete = new HttpDelete(getBaseURL() + String.format("/Token/%s", tokenId));
             httpDelete.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", this.fullyAuthedToken));
             try (CloseableHttpResponse response = client.execute(httpDelete)) {
                 return response.getCode() == 204;
@@ -316,7 +316,7 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
 
         // Create a new JWT
-        final String baseURL = this.getV3BaseURL();
+        final String baseURL = this.getBaseURL();
         final APIAuthHelpers.AuthResponse authResponse = APIAuthHelpers.jwtAuthFlow(baseURL, fullyAuthedToken, PUBLIC_KEY_ID, PRIVATE_KEY);
         assertAll(() -> assertNotEquals("", authResponse.accessToken, "Should have token"),
                 () -> assertEquals(300, authResponse.expiresIn, "Should be valid for 300 seconds"),
@@ -329,13 +329,14 @@ class TokenResourceTest extends AbstractSecureApplicationTest {
         error.getMessage();
     }
 
-    protected String getV3BaseURL() {
-        return getBaseURL().replaceFirst("/v1$", "/v3");
+    @Override
+    protected String getBaseURL() {
+        return super.getBaseURL().replaceFirst("/v1$", "/v3");
     }
 
     CollectionResponse<TokenEntity> fetchTokens(String token) throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getV3BaseURL() + "/Token");
+            final HttpGet httpGet = new HttpGet(getBaseURL() + "/Token");
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", token));
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
