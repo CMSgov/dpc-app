@@ -1,9 +1,16 @@
 package gov.cms.dpc.api;
 
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.testing.factories.r4.FHIRPatientBuilder;
+import gov.cms.dpc.testing.factories.r4.FHIRPractitionerBuilder;
 import org.hl7.fhir.r4.model.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 
 // R4 versions of test helpers, can be removed when V1 is removed
 
@@ -34,5 +41,53 @@ public class V3APITestHelpers {
         Patient patient = new Patient();
         patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue(mbi);
         return patient;
+    }
+
+    public static Practitioner createPractitionerResource(String npi, String orgId) {
+        return FHIRPractitionerBuilder.newBuilder()
+                .withNpi(npi)
+                .withOrgTag(orgId)
+                .withName("Test", "Practitioner")
+                .withId(UUID.randomUUID())
+                .build();
+    }
+
+    public static Patient createPatientResource(String mbi, String orgId) {
+        return FHIRPatientBuilder.newBuild()
+                .withMbi(mbi)
+                .withBirthDate("1990-01-01")
+                .withName("Test", "Patient")
+                .withGender(Enumerations.AdministrativeGender.OTHER)
+                .managedBy(orgId)
+                .withId(UUID.randomUUID())
+                .build();
+    }
+
+    public static void setupPractitionerTest(IGenericClient client, IParser parser) throws IOException {
+        try (InputStream inputStream = V3APITestHelpers.class.getClassLoader().getResourceAsStream("provider_bundle.json")) {
+            final Parameters providerParameters = (Parameters) parser.parseResource(inputStream);
+
+            client
+                    .operation()
+                    .onType(Practitioner.class)
+                    .named("submit")
+                    .withParameters(providerParameters)
+                    .encodedJson()
+                    .execute();
+        }
+    }
+
+    public static void setupPatientTest(IGenericClient client, IParser parser) throws IOException {
+        try (InputStream inputStream = V3APITestHelpers.class.getClassLoader().getResourceAsStream("patient_bundle.json")) {
+            final Parameters patientParameters = (Parameters) parser.parseResource(inputStream);
+
+            client
+                    .operation()
+                    .onType(Patient.class)
+                    .named("submit")
+                    .withParameters(patientParameters)
+                    .encodedJson()
+                    .execute();
+        }
     }
 }

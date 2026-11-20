@@ -2,15 +2,13 @@ package gov.cms.dpc.api.resources.r4;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.gclient.ICreate;
-import ca.uhn.fhir.rest.gclient.ICreateTyped;
-import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
 import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.V3APITestHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.attribution.client.AttributionClient;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.FHIRMediaTypes;
@@ -42,6 +40,7 @@ import java.util.UUID;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
 
@@ -50,8 +49,8 @@ public class GroupResourceUnitTest {
 
     private static final String BASE_URL = "http://localhost:3002/v3";
 
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    IGenericClient attributionClient;
+    @Mock
+    AttributionClient attributionClient;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     IGenericClient attributionSTU3Client;
@@ -116,16 +115,13 @@ public class GroupResourceUnitTest {
         codeableConcept.addCoding().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setCode(practitionerNPI);
         group.getCharacteristicFirstRep().setValue(codeableConcept);
 
-        ICreateTyped createExec = mock(ICreateTyped.class);
-        when(attributionClient.create().resource(group).encodedJson()).thenReturn(createExec);
-
         UUID createdGroupId = UUID.randomUUID();
         group.setId("https://attribution.internal:9902/v1/Group/" + createdGroupId);
 
         MethodOutcome outcome = new MethodOutcome();
         outcome.setResource(group);
         outcome.setCreated(true);
-        when(createExec.execute()).thenReturn(outcome);
+        when(attributionClient.createRoster(group)).thenReturn(outcome);
 
         org.hl7.fhir.dstu3.model.Identifier identifier = new org.hl7.fhir.dstu3.model.Identifier();
         identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem());
@@ -178,21 +174,14 @@ public class GroupResourceUnitTest {
         when(attributionSTU3Client.read().resource(org.hl7.fhir.dstu3.model.Practitioner.class).withId(practitionerId.toString()).encodedJson()).thenReturn(readExec);
         when(readExec.execute()).thenReturn(practitioner);
 
-        ICreate iCreate = mock(ICreate.class);
-        doReturn(iCreate).when(attributionClient).create();
-
-        ICreateTyped iCreateTyped = mock(ICreateTyped.class);
-        doReturn(iCreateTyped).when(iCreate).resource(groupWithBadTag);
-        doReturn(iCreateTyped).when(iCreateTyped).encodedJson();
-
         MethodOutcome outcome = new MethodOutcome();
         outcome.setResource(new Group());
-        doReturn(outcome).when(iCreateTyped).execute();
+        when(attributionClient.createRoster(any(Group.class))).thenReturn(outcome);
 
         resource.createRoster(organizationPrincipal, provenance, groupWithBadTag);
 
         ArgumentCaptor<Group> groupArg = ArgumentCaptor.forClass(Group.class);
-        verify(iCreate, times(1)).resource(groupArg.capture());
+        verify(attributionClient, times(1)).createRoster(groupArg.capture());
 
         Group capturedGroup = groupArg.getValue();
         assertEquals(organization.getId(), capturedGroup.getMeta().getTagFirstRep().getCode());
@@ -273,23 +262,11 @@ public class GroupResourceUnitTest {
 
         stubOrgAndProviderNpi(organizationPrincipal, group);
 
-        IReadExecutable<Group> readExec = mock(IReadExecutable.class);
-        when(attributionClient.read().resource(Group.class).withId(new IdType("Group", groupId)).encodedJson()).thenReturn(readExec);
-        when(readExec.execute()).thenReturn(group);
-
-        IOperationUntypedWithInput<Bundle> bundleOperation = mock(IOperationUntypedWithInput.class);
-        when(attributionClient
-                .operation()
-                .onInstance(new IdType(group.getId()))
-                .named("patients")
-                .withParameters(any(Parameters.class))
-                .returnResourceType(Bundle.class)
-                .useHttpGet()
-                .encodedJson()).thenReturn(bundleOperation);
+        when(attributionClient.getRoster(UUID.fromString(groupId))).thenReturn(group);
 
         Bundle patients = new Bundle();
         patients.addEntry(new Bundle.BundleEntryComponent().setResource(V3APITestHelpers.createPatientWithMbi("9S79A00AA00")));
-        when(bundleOperation.execute()).thenReturn(patients);
+        when(attributionClient.getAttributedPatients(UUID.fromString(groupId), true)).thenReturn(patients);
 
         when(oneEcosystemClient.export(any())).thenReturn(
                 new OneEcosystemExportResponse(202, "https://localhost:3002/api/v3/jobs/" + UUID.randomUUID()));
@@ -326,25 +303,13 @@ public class GroupResourceUnitTest {
 
         stubOrgAndProviderNpi(organizationPrincipal, group);
 
-        IReadExecutable<Group> readExec = mock(IReadExecutable.class);
-        when(attributionClient.read().resource(Group.class).withId(new IdType("Group", groupId)).encodedJson()).thenReturn(readExec);
-        when(readExec.execute()).thenReturn(group);
+        when(attributionClient.getRoster(UUID.fromString(groupId))).thenReturn(group);
 
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v3/Group/" + groupId + "/$export"));
 
-        IOperationUntypedWithInput<Bundle> bundleOperation = mock(IOperationUntypedWithInput.class);
-        when(attributionClient
-                .operation()
-                .onInstance(new IdType(group.getId()))
-                .named("patients")
-                .withParameters(any(Parameters.class))
-                .returnResourceType(Bundle.class)
-                .useHttpGet()
-                .encodedJson()).thenReturn(bundleOperation);
-
         Bundle patients = new Bundle();
         patients.addEntry(new Bundle.BundleEntryComponent().setResource(V3APITestHelpers.createPatientWithMbi("9S79A00AA00")));
-        when(bundleOperation.execute()).thenReturn(patients);
+        when(attributionClient.getAttributedPatients(UUID.fromString(groupId), true)).thenReturn(patients);
 
         final String timezoneFutureSince = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusSeconds(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
@@ -391,30 +356,12 @@ public class GroupResourceUnitTest {
 
         stubOrgAndProviderNpi(organizationPrincipal, fakeGroup);
 
-        IReadExecutable<Group> readExec = mock(IReadExecutable.class);
-        when(attributionClient
-                .read()
-                .resource(Group.class)
-                .withId(any(IdType.class))
-                .encodedJson())
-                .thenReturn(readExec);
-        when(readExec.execute()).thenReturn(fakeGroup);
+        when(attributionClient.getRoster(any(UUID.class))).thenReturn(fakeGroup);
 
-        IOperationUntypedWithInput<Bundle> operationInput = mock(IOperationUntypedWithInput.class);
         Patient fakePatient = V3APITestHelpers.createPatientWithMbi("2S51C00AA00");
         Bundle fakeBundle = new Bundle();
         fakeBundle.getEntry().add(new Bundle.BundleEntryComponent().setResource(fakePatient));
-        when(attributionClient
-                .operation()
-                .onInstance(any(IdType.class))
-                .named("patients")
-                .withParameters(any(Parameters.class))
-                .returnResourceType(Bundle.class)
-                .useHttpGet()
-                .encodedJson())
-                .thenReturn(operationInput);
-        when(operationInput.execute())
-                .thenReturn(fakeBundle);
+        when(attributionClient.getAttributedPatients(any(UUID.class), eq(true))).thenReturn(fakeBundle);
 
         when(oneEcosystemClient.export(any())).thenReturn(
                 new OneEcosystemExportResponse(202, "https://localhost:3002/api/v3/jobs/" + UUID.randomUUID()));
@@ -461,21 +408,8 @@ public class GroupResourceUnitTest {
         group.setId(groupId);
         group.addMember().setEntity(new Reference("Patient/" + UUID.randomUUID()));
 
-        IReadExecutable<Group> readExec = mock(IReadExecutable.class);
-        when(attributionClient.read().resource(Group.class).withId(new IdType("Group", groupId)).encodedJson()).thenReturn(readExec);
-        when(readExec.execute()).thenReturn(group);
-
-        IOperationUntypedWithInput<Bundle> bundleOperation = mock(IOperationUntypedWithInput.class);
-        when(attributionClient
-                .operation()
-                .onInstance(new IdType(group.getId()))
-                .named("patients")
-                .withParameters(any(Parameters.class))
-                .returnResourceType(Bundle.class)
-                .useHttpGet()
-                .encodedJson()).thenReturn(bundleOperation);
-
-        when(bundleOperation.execute()).thenReturn(new Bundle());
+        when(attributionClient.getRoster(UUID.fromString(groupId))).thenReturn(group);
+        when(attributionClient.getAttributedPatients(UUID.fromString(groupId), true)).thenReturn(new Bundle());
 
         String since = "2020-05-26T16:43:01.780Z";
         assertThrows(WebApplicationException.class, () ->

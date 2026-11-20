@@ -202,41 +202,8 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
 
     @Provides
     @Singleton
-    @Named("fhirContextAttributionR4")
-    public FhirContext provideAttributionR4Context() {
-        return FhirContext.forR4();
-    }
-
-    @Provides
-    @Singleton
     @Named("attribution")
     public IGenericClient provideFHIRClient(@Named("fhirContextAttributionSTU3") FhirContext ctx) {
-        FHIRClientConfiguration fhirClientConfiguration = configuration().getFhirClientConfiguration();
-
-        String attributionUrl = fhirClientConfiguration.getServerBaseUrl();
-        logger.info("Connecting to attribution server at {}.", attributionUrl);
-
-        IRestfulClientFactory iRestfulClientFactory = ctx.getRestfulClientFactory();
-        iRestfulClientFactory.setServerValidationMode(ServerValidationModeEnum.NEVER);
-
-        TimeoutConfiguration timeoutConfiguration = fhirClientConfiguration.getTimeouts();
-        iRestfulClientFactory.setSocketTimeout(timeoutConfiguration.getSocketTimeout());
-        iRestfulClientFactory.setConnectTimeout(timeoutConfiguration.getConnectionTimeout());
-        iRestfulClientFactory.setConnectionRequestTimeout(timeoutConfiguration.getRequestTimeout());
-
-        ConnectionPoolConfiguration connectionPoolConfiguration = fhirClientConfiguration.getConnectionPoolConfiguration();
-        iRestfulClientFactory.setPoolMaxPerRoute(connectionPoolConfiguration.getPoolMaxPerRoute());
-        iRestfulClientFactory.setPoolMaxTotal(connectionPoolConfiguration.getPoolMaxTotal());
-
-        IGenericClient client = ctx.newRestfulGenericClient(attributionUrl);
-        client.registerInterceptor(new RequestIdHeaderInterceptor());
-        return client;
-    }
-
-    @Provides
-    @Singleton
-    @Named("attribution-r4")
-    public IGenericClient provideR4FHIRClient(@Named("fhirContextAttributionR4") FhirContext ctx) {
         FHIRClientConfiguration fhirClientConfiguration = configuration().getFhirClientConfiguration();
 
         String attributionUrl = fhirClientConfiguration.getServerBaseUrl();

@@ -10,6 +10,7 @@ import gov.cms.dpc.api.DPCAPIConfiguration;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
+import gov.cms.dpc.attribution.client.AttributionClient;
 import gov.cms.dpc.common.annotations.APIV3;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.logging.SplunkTimestamp;
@@ -58,8 +59,7 @@ public class GroupResource extends AbstractGroupResource {
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
     private static final String RESOURCE_TYPE = "Group";
 
-//    private final AttributionClient attributionClient;
-    private final IGenericClient attributionClient;       // R4-context, @Named("attribution-r4")
+    private final AttributionClient attributionClient;
     private final IGenericClient stu3Client; // Can be removed when Practitioner and Organization are on R4
     private final String baseURL;
     private final OneEcosystemClient oneEcosystemClient;
@@ -67,14 +67,13 @@ public class GroupResource extends AbstractGroupResource {
     private final DPCAPIConfiguration config;
 
     @Inject
-    public GroupResource(/* AttributionClient attributionClient, */
-                        @Named("attribution-r4") IGenericClient attributionClient,
+    public GroupResource(AttributionClient attributionClient,
                         @Named("attribution") IGenericClient stu3Client,
                         @APIV3 String baseURL,
                         OneEcosystemClient oneEcosystemClient,
                         DataService dataService,
                         DPCAPIConfiguration config) {
-        super(attributionClient);
+        super(stu3Client);
         this.attributionClient = attributionClient;
         this.stu3Client = stu3Client;
         this.baseURL = baseURL;
@@ -104,12 +103,7 @@ public class GroupResource extends AbstractGroupResource {
         logAndVerifyAttestation(rosterAttestation, null, attributionRoster);
         APIHelpers.addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
 
-//        final MethodOutcome outcome = this.attributionClient.createRoster(attributionRoster);
-        final MethodOutcome outcome = this.attributionClient
-                .create()
-                .resource(attributionRoster)
-                .encodedJson()
-                .execute();
+        final MethodOutcome outcome = this.attributionClient.createRoster(attributionRoster);
 
         return buildCreateResponse(outcome);
     }
@@ -125,8 +119,7 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     public Group getRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID) {
         requireRosterId(rosterID);
-//        return this.attributionClient.getRoster(rosterID);
-        return fetchGroup(new IdType(RESOURCE_TYPE, rosterID.toString()));
+        return this.attributionClient.getRoster(rosterID);
     }
 
     @PUT
@@ -152,15 +145,7 @@ public class GroupResource extends AbstractGroupResource {
         APIHelpers.addOrganizationTag(rosterUpdate, organizationPrincipal.getOrganization().getId());
 
         requireRosterId(rosterID);
-//        return this.attributionClient.updateRoster(rosterID, rosterUpdate);
-        final MethodOutcome outcome = this.attributionClient
-                .update()
-                .resource(rosterUpdate)
-                .withId(new IdType(RESOURCE_TYPE, rosterID.toString()))
-                .encodedJson()
-                .execute();
-
-        return (Group) outcome.getResource();
+        return this.attributionClient.replaceRoster(rosterID, rosterUpdate);
     }
 
     @POST
@@ -181,8 +166,7 @@ public class GroupResource extends AbstractGroupResource {
         logAndVerifyAttestation(rosterAttestation, rosterID, groupUpdate);
         APIHelpers.addOrganizationTag(groupUpdate, organizationPrincipal.getOrganization().getId());
         requireRosterId(rosterID);
-//        return this.attributionClient.addRosterMembers(rosterID, groupUpdate);
-        return executeGroupOperation(rosterID, groupUpdate, "add");
+        return this.attributionClient.addRosterMembers(rosterID, groupUpdate);
     }
 
     @POST
@@ -197,8 +181,7 @@ public class GroupResource extends AbstractGroupResource {
     public Group removeRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
                                      @ApiParam Group groupUpdate) {
         requireRosterId(rosterID);
-//        return this.attributionClient.removeRosterMembers(rosterID, groupUpdate);
-        return executeGroupOperation(rosterID, groupUpdate, "remove");
+        return this.attributionClient.removeRosterMembers(rosterID, groupUpdate);
     }
 
     /**
@@ -246,9 +229,8 @@ public class GroupResource extends AbstractGroupResource {
         // Check the parameters
         checkExportRequest(outputFormat, prefer);
 
-//        final UUID groupID = UUID.fromString(rosterID);
-//        final Group group = this.attributionClient.getRoster(groupID);
-        final Group group = fetchGroup(new IdType(RESOURCE_TYPE, rosterID));
+        final UUID groupID = UUID.fromString(rosterID);
+        final Group group = this.attributionClient.getRoster(groupID);
 
         // Get the attributed patients
         final List<String> attributedMbis = fetchPatientMBIs(group);
@@ -256,11 +238,8 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException("No active attributed patients found for the group", Response.Status.NOT_ACCEPTABLE);
         }
 
-        // final UUID orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
-        // final String orgNPI = this.getOrganizationNPI(organizationPrincipal);
-        final UUID orgID = gov.cms.dpc.fhir.stu3.FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
-        final UUID groupID = UUID.fromString(rosterID);
-        final String orgNPI = APIHelpers.fetchOrganizationNPI(this.stu3Client, orgID);
+        final UUID orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
+        final String orgNPI = this.getOrganizationNPI(organizationPrincipal);
         final String providerNPI = FHIRExtractors.getAttributedNPI(group);
 
         // Handle the _type and since query parameters
@@ -308,20 +287,6 @@ public class GroupResource extends AbstractGroupResource {
                 .contentLocation(URI.create(this.baseURL + "/Jobs/" + backendJobID)).build();
     }
 
-    private Group executeGroupOperation(UUID rosterID, Group groupUpdate, String operationName) {
-        requireRosterId(rosterID);
-        final Parameters parameters = new Parameters();
-        parameters.addParameter().setResource(groupUpdate);
-        return this.attributionClient
-                .operation()
-                .onInstance(new IdType(RESOURCE_TYPE, rosterID.toString()))
-                .named(operationName)
-                .withParameters(parameters)
-                .returnResourceType(Group.class)
-                .encodedJson()
-                .execute();
-    }
-
     private Response buildCreateResponse(MethodOutcome outcome) {
         final IBaseResource resource = outcome.getResource();
         if (resource == null) {
@@ -345,20 +310,8 @@ public class GroupResource extends AbstractGroupResource {
             throw new WebApplicationException("Cannot perform export with no beneficiaries", Response.Status.NOT_ACCEPTABLE);
         }
 
-//        final UUID groupID = UUID.fromString(group.getIdElement().getIdPart());
-//        final Bundle patients = this.attributionClient.getAttributedPatients(groupID, true);
-        final Parameters parameters = new Parameters();
-        parameters.addParameter().setValue(new BooleanType(true)).setName("active");
-
-        final Bundle patients = this.attributionClient
-                .operation()
-                .onInstance(new IdType(group.getId()))
-                .named("patients")
-                .withParameters(parameters)
-                .returnResourceType(Bundle.class)
-                .useHttpGet()
-                .encodedJson()
-                .execute();
+        final UUID groupID = UUID.fromString(group.getIdElement().getIdPart());
+        final Bundle patients = this.attributionClient.getAttributedPatients(groupID, true);
 
         return patients
                 .getEntry()
@@ -366,15 +319,6 @@ public class GroupResource extends AbstractGroupResource {
                 .map(entry -> (Patient) entry.getResource())
                 .map(FHIRExtractors::getPatientMBI)
                 .toList();
-    }
-
-    private Group fetchGroup(IdType groupID) {
-        return this.attributionClient
-                .read()
-                .resource(Group.class)
-                .withId(groupID)
-                .encodedJson()
-                .execute();
     }
 
     private UUID extractJobId(String contentLocation) {
@@ -440,7 +384,7 @@ public class GroupResource extends AbstractGroupResource {
             if (!provenancePractitionerNPI.getValue().equals(groupPractitionerNPI)) {
                 throw new WebApplicationException("Provenance header's provider does not match group provider", HttpStatus.SC_UNPROCESSABLE_CONTENT);
             }
-        } catch (ResourceNotFoundException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             throw new WebApplicationException("Could not find provider defined in provenance header", HttpStatus.SC_UNPROCESSABLE_CONTENT);
         }
     }

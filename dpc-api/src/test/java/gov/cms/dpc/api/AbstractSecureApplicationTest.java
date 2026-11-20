@@ -66,15 +66,6 @@ public class AbstractSecureApplicationTest {
         return new TestOrganizationContext(clientToken,npi,orgId,newKeyPair.getLeft().toString(),newKeyPair.getRight());
     }
 
-    protected IGenericClient buildSetupClient() {
-        return APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
-    }
-
-    protected IGenericClient buildSetupClient(TestOrganizationContext orgContext) {
-        return APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgContext.getClientToken(),
-                UUID.fromString(orgContext.getPublicKeyId()), orgContext.getPrivateKey());
-    }
-
     protected IGenericClient buildV3Client() {
         return APIAuthHelpers.buildAuthenticatedClient(r4Ctx, getV3BaseURL(), getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
     }

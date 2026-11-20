@@ -9,15 +9,15 @@ import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.TestOrganizationContext;
-import gov.cms.dpc.api.V3APITestHelpers;
 import gov.cms.dpc.common.utils.NPIUtil;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.r4.FHIRExtractors;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import gov.cms.dpc.testing.factories.r4.FHIRGroupBuilder;
+import gov.cms.dpc.testing.utils.MBIUtil;
 import jakarta.ws.rs.HttpMethod;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.ParseException;
@@ -42,53 +42,55 @@ import java.util.List;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.V3APITestHelpers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-// Uses R4 for Group and STU3 for Patient/Practitioner, can be updated when those classes are
-@Disabled(value = "blocked on R4 attribution client")
+@Disabled("until all resources are using R4")
 @ExtendWith(BufferedLoggerHandler.class)
 public class GroupResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testMissingProvenance() throws IOException {
-        final IGenericClient setupClient = buildSetupClient();
-        final IGenericClient v3Client = buildV3Client();
-        final IParser stu3Parser = ctx.newJsonParser();
-
-        APITestHelpers.setupPatientTest(setupClient, stu3Parser);
-        APITestHelpers.setupPractitionerTest(setupClient, stu3Parser);
+        final IParser parser = r4Ctx.newJsonParser();
+        IGenericClient client = buildV3Client();
+        setupPatientTest(client, parser);
+        setupPractitionerTest(client, parser);
 
         // Create a patient
-        final org.hl7.fhir.dstu3.model.Bundle patientSearch = setupClient
+        final Bundle patientSearch = client
                 .search()
-                .forResource(org.hl7.fhir.dstu3.model.Patient.class)
-                .where(org.hl7.fhir.dstu3.model.Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), "4S41C00AA00"))
-                .returnBundle(org.hl7.fhir.dstu3.model.Bundle.class)
+                .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), "4S41C00AA00"))
+                .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
+
         assertEquals(1, patientSearch.getTotal(), "Should have a single patient");
-        final org.hl7.fhir.dstu3.model.Patient patient = (org.hl7.fhir.dstu3.model.Patient) patientSearch.getEntryFirstRep().getResource();
+
+        final Patient patient = (Patient) patientSearch.getEntryFirstRep().getResource();
 
         // Create the practitioner
-        final org.hl7.fhir.dstu3.model.Bundle practSearch = setupClient
+        final Bundle practSearch = client
                 .search()
-                .forResource(org.hl7.fhir.dstu3.model.Practitioner.class)
-                .where(org.hl7.fhir.dstu3.model.Practitioner.IDENTIFIER.exactly().code("1232131239"))
-                .returnBundle(org.hl7.fhir.dstu3.model.Bundle.class)
+                .forResource(Practitioner.class)
+                .where(Practitioner.IDENTIFIER.exactly().code("1232131239"))
+                .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
+
         assertEquals(1, practSearch.getTotal(), "Should have a specific provider");
-        final org.hl7.fhir.dstu3.model.Practitioner foundProvider = (org.hl7.fhir.dstu3.model.Practitioner) practSearch.getEntryFirstRep().getResource();
 
         // Fetch the provider directly
-        final String providerNPI = foundProvider.getIdentifierFirstRep().getValue();
+        final Practitioner foundProvider = (Practitioner) practSearch.getEntryFirstRep().getResource();
+
         final Group group = FHIRGroupBuilder.newBuild()
-                .attributedTo(providerNPI)
-                .withPatients(patient.getIdElement().getValue())
+                .attributedTo(FHIRExtractors.getProviderNPI(foundProvider))
+                .withOrgTag(UUID.fromString(ORGANIZATION_ID))
+                .withPatients(patient.getIdElement().getIdPart())
                 .build();
 
         // Submit the group
-        final ICreateTyped creation = v3Client
+        final ICreateTyped creation = client
                 .create()
                 .resource(group)
                 .encodedJson();
@@ -99,8 +101,9 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
                 () -> assertEquals("Must have X-Provenance header", operationOutcome.getIssueFirstRep().getDetails().getText(), "Should have correct message"));
 
         // Try again with provenance
-        final Provenance provenance = V3APITestHelpers.createProvenance(
-                ORGANIZATION_ID, "Practitioner/" + foundProvider.getIdElement().getIdPart(),
+        final Provenance provenance = createProvenance(
+                ORGANIZATION_ID,
+                "Practitioner/" + foundProvider.getIdElement().getIdPart(),
                 List.of(patient.getIdElement().getValue()));
 
         creation.withAdditionalHeader("X-Provenance", r4Ctx.newJsonParser().encodeResourceToString(provenance));
@@ -109,39 +112,41 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testInvalidInputsWhenCreatingGroup() throws IOException {
-        final IGenericClient setupClient = buildSetupClient();
-        final IGenericClient v3Client = buildV3Client();
-        final IParser stu3Parser = ctx.newJsonParser();
-
-        APITestHelpers.setupPatientTest(setupClient, stu3Parser);
-        APITestHelpers.setupPractitionerTest(setupClient, stu3Parser);
+        final IParser parser = r4Ctx.newJsonParser();
+        IGenericClient client = buildV3Client();
+        setupPatientTest(client, parser);
+        setupPractitionerTest(client, parser);
 
         // Grab the created patient
-        final org.hl7.fhir.dstu3.model.Bundle patientSearch = setupClient
+        final Bundle patientSearch = client
                 .search()
-                .forResource(org.hl7.fhir.dstu3.model.Patient.class)
-                .where(org.hl7.fhir.dstu3.model.Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), "4S41C00AA00"))
-                .returnBundle(org.hl7.fhir.dstu3.model.Bundle.class)
+                .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), "4S41C00AA00"))
+                .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
+
         assertEquals(1, patientSearch.getTotal(), "Should have a single patient");
-        final org.hl7.fhir.dstu3.model.Patient patient = (org.hl7.fhir.dstu3.model.Patient) patientSearch.getEntryFirstRep().getResource();
+
+        final Patient patient = (Patient) patientSearch.getEntryFirstRep().getResource();
 
         // Grab the created practitioner
-        final org.hl7.fhir.dstu3.model.Bundle practSearch = setupClient
+        final Bundle practSearch = client
                 .search()
-                .forResource(org.hl7.fhir.dstu3.model.Practitioner.class)
-                .where(org.hl7.fhir.dstu3.model.Practitioner.IDENTIFIER.exactly().code("1234329724"))
-                .returnBundle(org.hl7.fhir.dstu3.model.Bundle.class)
+                .forResource(Practitioner.class)
+                .where(Practitioner.IDENTIFIER.exactly().code("1234329724"))
+                .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
+
         assertEquals(1, practSearch.getTotal(), "Should have a specific provider");
 
         // Fetch the provider directly
-        final org.hl7.fhir.dstu3.model.Practitioner foundProvider = (org.hl7.fhir.dstu3.model.Practitioner) practSearch.getEntryFirstRep().getResource();
-        final String providerNPI = foundProvider.getIdentifierFirstRep().getValue();
+        final Practitioner foundProvider = (Practitioner) practSearch.getEntryFirstRep().getResource();
+
         final Group group = FHIRGroupBuilder.newBuild()
-                .attributedTo(providerNPI)
+                .attributedTo(FHIRExtractors.getProviderNPI(foundProvider))
+                .withOrgTag(UUID.fromString(ORGANIZATION_ID))
                 .withPatients(patient.getIdElement().getValue())
                 .build();
 
@@ -149,7 +154,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         group.getCharacteristicFirstRep().getCode().getCodingFirstRep().setCode("<script>nope</script>");
 
         // Submit the group
-        ICreateTyped invalidCreate = v3Client
+        ICreateTyped invalidCreate = client
                 .create()
                 .resource(group)
                 .encodedJson();
@@ -159,13 +164,14 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
         group.getCharacteristicFirstRep().getCode().getCodingFirstRep().setCode(safeCodeValue);
 
         // Test scripts in provenance
-        final Provenance provenance = V3APITestHelpers.createProvenance(
-                ORGANIZATION_ID, "Practitioner/" + foundProvider.getIdElement().getIdPart(),
+        final Provenance provenance = createProvenance(
+                ORGANIZATION_ID,
+                "Practitioner/" + foundProvider.getIdElement().getIdPart(),
                 List.of(patient.getIdElement().getValue()));
         provenance.getReasonFirstRep().getCodingFirstRep().setCode("<script>nope</script>");
 
         // Provenance parser can't parse
-        final ICreateTyped unprocessableCreate = v3Client
+        final ICreateTyped unprocessableCreate = client
                 .create()
                 .resource(group)
                 .encodedJson()
@@ -175,18 +181,18 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testCreateInvalidGroup() throws IOException, URISyntaxException {
-        final Provenance provenance = new Provenance();
+        Provenance provenance = new Provenance();
         provenance.setRecorded(java.sql.Date.valueOf(LocalDate.now()));
         provenance.addReason().addCoding(new Coding("http://hl7.org/fhir/v3/ActReason", "TREAT", null));
-        final String provString = r4Ctx.newJsonParser().encodeResourceToString(provenance);
+        String provString = r4Ctx.newJsonParser().encodeResourceToString(provenance);
 
-        final URL url = new URI(getV3BaseURL() + "/Group").toURL();
-        final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        URL url = new URI(getV3BaseURL() + "/Group").toURL();
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(HttpMethod.POST);
         conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
         conn.setRequestProperty("X-Provenance", provString);
 
-        final APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         conn.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + auth.accessToken);
 
         conn.setDoOutput(true);
@@ -201,7 +207,7 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
             while ((respLine = reader.readLine()) != null) {
                 respBuilder.append(respLine.trim());
             }
-            final String resp = respBuilder.toString();
+            String resp = respBuilder.toString();
             assertAll(() -> assertTrue(resp.contains("\"resourceType\":\"OperationOutcome\"")),
                     () -> assertTrue(resp.contains("Invalid JSON content")));
         }
@@ -211,141 +217,160 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testCreateGroupReturnsAppropriateHeaders() throws IOException {
-        final IGenericClient setupClient = buildSetupClient();
-        final IGenericClient v3Client = buildV3Client();
-        final IParser stu3Parser = ctx.newJsonParser();
-
-        APITestHelpers.setupPatientTest(setupClient, stu3Parser);
-        APITestHelpers.setupPractitionerTest(setupClient, stu3Parser);
+        final IParser parser = ctx.newJsonParser();
+        IGenericClient client = buildV3Client();
+        setupPatientTest(client, parser);
+        setupPractitionerTest(client, parser);
 
         // Grab the created patient
-        final org.hl7.fhir.dstu3.model.Bundle patientSearch = setupClient
+        final Bundle specificSearch = client
                 .search()
-                .forResource(org.hl7.fhir.dstu3.model.Patient.class)
-                .where(org.hl7.fhir.dstu3.model.Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), "4S41C00AA00"))
-                .returnBundle(org.hl7.fhir.dstu3.model.Bundle.class)
+                .forResource(Patient.class)
+                .where(Patient.IDENTIFIER.exactly().systemAndCode(DPCIdentifierSystem.MBI.getSystem(), "4S41C00AA00"))
+                .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
-        assertEquals(1, patientSearch.getTotal(), "Should have a single patient");
-        final org.hl7.fhir.dstu3.model.Patient patient = (org.hl7.fhir.dstu3.model.Patient) patientSearch.getEntryFirstRep().getResource();
+
+        assertEquals(1, specificSearch.getTotal(), "Should have a single patient");
+
+        final Patient patient = (Patient) specificSearch.getEntryFirstRep().getResource();
 
         // Grab the created practitioner
-        final org.hl7.fhir.dstu3.model.Bundle practSearch = setupClient
+        final Bundle practSearch = client
                 .search()
-                .forResource(org.hl7.fhir.dstu3.model.Practitioner.class)
-                .where(org.hl7.fhir.dstu3.model.Practitioner.IDENTIFIER.exactly().code("1234329724"))
-                .returnBundle(org.hl7.fhir.dstu3.model.Bundle.class)
+                .forResource(Practitioner.class)
+                .where(Practitioner.IDENTIFIER.exactly().code("1234329724"))
+                .returnBundle(Bundle.class)
                 .encodedJson()
                 .execute();
+
         assertEquals(1, practSearch.getTotal(), "Should have a specific provider");
 
         // Fetch the provider directly
-        final org.hl7.fhir.dstu3.model.Practitioner foundProvider = (org.hl7.fhir.dstu3.model.Practitioner) practSearch.getEntryFirstRep().getResource();
-        final String providerNPI = foundProvider.getIdentifierFirstRep().getValue();
+        final Practitioner foundProvider = (Practitioner) practSearch.getEntryFirstRep().getResource();
+
         final Group group = FHIRGroupBuilder.newBuild()
-                .attributedTo(providerNPI)
+                .attributedTo(FHIRExtractors.getProviderNPI(foundProvider))
                 .withPatients(patient.getIdElement().getValue())
                 .build();
 
         // Test scripts in provenance
-        final Provenance provenance = V3APITestHelpers.createProvenance(
-                ORGANIZATION_ID, "Practitioner/" + foundProvider.getIdElement().getIdPart(),
+        final Provenance provenance = createProvenance(
+                ORGANIZATION_ID,
+                "Practitioner/" + foundProvider.getIdElement().getIdPart(),
                 List.of(patient.getIdElement().getValue()));
 
-        final MethodOutcome methodOutcome = v3Client
+        MethodOutcome methodOutcome = client
                 .create()
                 .resource(group)
                 .encodedJson()
                 .withAdditionalHeader("X-Provenance", r4Ctx.newJsonParser().encodeResourceToString(provenance))
                 .execute();
 
-        final String location = methodOutcome.getResponseHeaders().get("location").getFirst();
+        String location = methodOutcome.getResponseHeaders().get("location").getFirst();
         assertNotNull(location);
 
-        final Group foundGroup = v3Client.read()
+        Group foundGroup = client.read()
                 .resource(Group.class)
                 .withUrl(location)
                 .encodedJson()
                 .execute();
 
         assertEquals(group.getIdentifierFirstRep().getValue(), foundGroup.getIdentifierFirstRep().getValue());
+
+        client.delete()
+                .resource(foundGroup)
+                .encodedJson()
+                .execute();
     }
 
     @Test
     void testProvenanceHeaderAndGroupProviderMatch() {
-        final IGenericClient setupClient = buildSetupClient();
-        final IGenericClient v3Client = buildV3Client();
+        IGenericClient client = buildV3Client();
+        Practitioner practitioner = createPractitionerResource(NPIUtil.generateNPI(), ORGANIZATION_ID);
 
-        final org.hl7.fhir.dstu3.model.Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), ORGANIZATION_ID);
-        final MethodOutcome outcome = setupClient.create()
+        MethodOutcome outcome = client.create()
                 .resource(practitioner)
                 .encodedJson()
                 .execute();
-        final org.hl7.fhir.dstu3.model.Practitioner createdPractitioner = (org.hl7.fhir.dstu3.model.Practitioner) outcome.getResource();
+
+        Practitioner createdPractitioner = (Practitioner) outcome.getResource();
 
         // Group will have non-matching practitioner NPI
-        Group group = FHIRGroupBuilder.newBuild().attributedTo(NPIUtil.generateNPI()).build();
+        Group group = FHIRGroupBuilder.newBuild()
+                .attributedTo(NPIUtil.generateNPI())
+                .withOrgTag(UUID.fromString(ORGANIZATION_ID))
+                .build();
 
-        Provenance provenance = V3APITestHelpers.createProvenance(
-                ORGANIZATION_ID, "Practitioner/" + createdPractitioner.getIdElement().getIdPart(), List.of());
+        final Provenance provenance = createProvenance(
+                ORGANIZATION_ID,
+                "Practitioner/" + createdPractitioner.getIdElement().getIdPart(),
+                List.of());
 
-        ICreateTyped createGroup = v3Client
+        ICreateTyped createGroup = client
                 .create()
                 .resource(group)
                 .encodedJson()
                 .withAdditionalHeader("X-Provenance", r4Ctx.newJsonParser().encodeResourceToString(provenance));
-        Assertions.assertThrows(UnprocessableEntityException.class, createGroup::execute);
+        assertThrows(UnprocessableEntityException.class, createGroup::execute);
 
-        // Set provenance practitioner to unknown practitioner
+        // Create provenance with unknown practitioner
         group = FHIRGroupBuilder.newBuild()
-                .attributedTo(createdPractitioner.getIdentifierFirstRep().getValue())
+                .attributedTo(FHIRExtractors.getProviderNPI(createdPractitioner))
                 .build();
-        provenance = V3APITestHelpers.createProvenance(
-                ORGANIZATION_ID, "Practitioner/" + UUID.randomUUID(), List.of());
+        Provenance unknownProvenance = createProvenance(
+                ORGANIZATION_ID,
+                "Practitioner/" + UUID.randomUUID(),
+                List.of());
 
-        final Group finalGroup = group;
-        createGroup = v3Client
+        createGroup = client
                 .create()
-                .resource(finalGroup)
+                .resource(group)
                 .encodedJson()
-                .withAdditionalHeader("X-Provenance", r4Ctx.newJsonParser().encodeResourceToString(provenance));
+                .withAdditionalHeader("X-Provenance", r4Ctx.newJsonParser().encodeResourceToString(unknownProvenance));
         Assertions.assertThrows(UnprocessableEntityException.class, createGroup::execute);
+
+        client.delete()
+                .resource(createdPractitioner)
+                .encodedJson()
+                .execute();
     }
 
     @Test
     void testGroupCanOnlyBeRetrievedByOwner() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
-        final IGenericClient orgASetupClient = buildSetupClient(orgAContext);
-        final IGenericClient orgBSetupClient = buildSetupClient(orgBContext);
         final IGenericClient orgAClient = buildV3Client(orgAContext);
         final IGenericClient orgBClient = buildV3Client(orgBContext);
 
-        org.hl7.fhir.dstu3.model.Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(), orgASetupClient);
+        Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(), orgAClient);
         Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Collections.emptyList());
 
-        org.hl7.fhir.dstu3.model.Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBSetupClient);
+        Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
         Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
+
+        final String orgAGroupId = orgAGroup.getId();
+        final String orgBGroupId = orgBGroup.getId();
 
         Group foundGroup = orgAClient.read()
                 .resource(Group.class)
-                .withId(orgAGroup.getId())
+                .withId(orgAGroupId)
                 .encodedJson()
                 .execute();
         assertNotNull(foundGroup, "Org A should have been able to retrieve their own group");
-        assertEquals(orgAGroup.getId(), foundGroup.getId(), "Returned group ID should have been the same as requested ID");
+        assertEquals(orgAGroupId, foundGroup.getIdElement().getIdPart(), "Returned group ID should have been the same as requested ID");
 
         foundGroup = orgBClient.read()
                 .resource(Group.class)
-                .withId(orgBGroup.getId())
+                .withId(orgBGroupId)
                 .encodedJson()
                 .execute();
         assertNotNull(foundGroup, "Org B should have been able to retrieve their own group");
-        assertEquals(orgBGroup.getId(), foundGroup.getId(), "Returned group ID should have been the same as requested ID");
+        assertEquals(orgBGroupId, foundGroup.getIdElement().getIdPart(), "Returned group ID should have been the same as requested ID");
 
         IReadExecutable<Group> notFoundRead = orgBClient.read()
                 .resource(Group.class)
-                .withId(orgAGroup.getId())
+                .withId(orgAGroupId)
                 .encodedJson();
         assertThrows(ResourceNotFoundException.class, notFoundRead::execute,
                 "Organization B should not be able to retrieve group from another organization (Org A)");
@@ -355,35 +380,33 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     void testOrgCanOnlyUpdateTheirOwnGroup() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
-        final IGenericClient orgASetupClient = buildSetupClient(orgAContext);
-        final IGenericClient orgBSetupClient = buildSetupClient(orgBContext);
         final IGenericClient orgAClient = buildV3Client(orgAContext);
         final IGenericClient orgBClient = buildV3Client(orgBContext);
 
-        org.hl7.fhir.dstu3.model.Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(), orgASetupClient);
+        Practitioner orgAPractitioner = createAndSubmitPractitioner(orgAContext.getOrgId(), orgAClient);
         Group orgAGroup = createAndSubmitGroup(orgAContext.getOrgId(), orgAPractitioner, orgAClient, Collections.emptyList());
 
-        org.hl7.fhir.dstu3.model.Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBSetupClient);
+        Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
         Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
-        final Provenance provenance = V3APITestHelpers.createProvenance(
-                orgBContext.getOrgId(), "Practitioner/" + orgBPractitioner.getIdElement().getIdPart(), List.of());
-        final String provenanceStr = r4Ctx.newJsonParser().encodeResourceToString(provenance);
-
+        Provenance provenance = createProvenance(
+                orgBContext.getOrgId(),
+                "Practitioner/" + orgBPractitioner.getIdElement().getIdPart(),
+                List.of());
         IUpdateExecutable notFoundUpdate = orgBClient
                 .update()
                 .resource(orgAGroup)
                 .withId(orgAGroup.getId())
                 .encodedJson()
-                .withAdditionalHeader("X-Provenance", provenanceStr);
+                .withAdditionalHeader("X-Provenance", r4Ctx.newJsonParser().encodeResourceToString(provenance));
         assertThrows(ResourceNotFoundException.class, notFoundUpdate::execute,
                 "Org should receive auth error when updating another org's group.");
 
-        final MethodOutcome response = orgBClient.update().resource(orgBGroup)
-                .withId(orgBGroup.getId())
+        MethodOutcome response = orgBClient.update().resource(orgBGroup)
                 .encodedJson()
-                .withAdditionalHeader("X-Provenance", provenanceStr)
+                .withAdditionalHeader("X-Provenance", r4Ctx.newJsonParser().encodeResourceToString(provenance))
                 .execute();
+
         assertNotNull(response.getResource(), "Org B should have been able to update their group");
     }
 
@@ -391,54 +414,63 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
     void testOrgCanOnlyAddPatientsTheyManageToGroup() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
-        final IGenericClient orgASetupClient = buildSetupClient(orgAContext);
-        final IGenericClient orgBSetupClient = buildSetupClient(orgBContext);
+        final IGenericClient orgAClient = buildV3Client(orgAContext);
         final IGenericClient orgBClient = buildV3Client(orgBContext);
 
         // Setup org A with a patient
-        final org.hl7.fhir.dstu3.model.Patient orgAPatient = (org.hl7.fhir.dstu3.model.Patient)
-                APITestHelpers.createResource(orgASetupClient, APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId())).getResource();
+        final Patient orgAPatient = createAndSubmitPatient(orgAContext.getOrgId(), orgAClient);
 
         // Setup org B with a practitioner and empty group
-        org.hl7.fhir.dstu3.model.Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBSetupClient);
-        Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
+        final Practitioner orgBPractitioner = createAndSubmitPractitioner(orgBContext.getOrgId(), orgBClient);
+        final Group orgBGroup = createAndSubmitGroup(orgBContext.getOrgId(), orgBPractitioner, orgBClient, Collections.emptyList());
 
-        // Ensure Org B can not add Org A's patient to group using add operation:  /Group/{id}/$add
+        // Ensure Org B can not add Org A's patient to group using add operation:  /Group/{id}/$member-add
         orgBGroup.addMember(new Group.GroupMemberComponent().setEntity(new Reference(orgAPatient.getId())));
 
-        final URL url = new URI(getV3BaseURL() + "/Group/" + orgBGroup.getId() + "/$member-add").toURL();
-        final HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        URL url = new URI(getV3BaseURL() + "/Group/" + orgBGroup.getId() + "/$member-add").toURL();
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod(HttpMethod.POST);
         conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
         conn.setDoOutput(true);
 
-        final APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
+        APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
         conn.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + auth.accessToken);
 
-        final Provenance provenance = V3APITestHelpers.createProvenance(
-                orgBContext.getOrgId(), "Practitioner/" + orgBPractitioner.getIdElement().getIdPart(), List.of());
+        Provenance provenance = createProvenance(
+                orgBContext.getOrgId(),
+                "Practitioner/" + orgBPractitioner.getIdElement().getIdPart(),
+                List.of());
         conn.setRequestProperty("X-Provenance", r4Ctx.newJsonParser().encodeResourceToString(provenance));
 
-        final String reqBody = r4Ctx.newJsonParser().encodeResourceToString(orgBGroup);
+        String reqBody = r4Ctx.newJsonParser().encodeResourceToString(orgBGroup);
         conn.getOutputStream().write(reqBody.getBytes());
 
         assertEquals(HttpStatus.BAD_REQUEST_400, conn.getResponseCode());
-        final String body = new String(conn.getErrorStream().readAllBytes());
+        String body = new String(conn.getErrorStream().readAllBytes());
         assertTrue(body.contains("All patients in group must exist"));
 
         conn.disconnect();
     }
 
-    private org.hl7.fhir.dstu3.model.Practitioner createAndSubmitPractitioner(String orgId, IGenericClient setupClient) {
-        final org.hl7.fhir.dstu3.model.Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), orgId);
-        final MethodOutcome methodOutcome = setupClient.create()
+    private Patient createAndSubmitPatient(String orgId, IGenericClient client) {
+        final Patient patient = createPatientResource(MBIUtil.generateMBI(), orgId);
+        final MethodOutcome methodOutcome = client.create()
+                .resource(patient)
+                .encodedJson()
+                .execute();
+        return (Patient) methodOutcome.getResource();
+    }
+
+    private Practitioner createAndSubmitPractitioner(String orgId, IGenericClient client) {
+        final Practitioner practitioner = createPractitionerResource(NPIUtil.generateNPI(), orgId);
+        final MethodOutcome methodOutcome = client.create()
                 .resource(practitioner)
                 .encodedJson()
                 .execute();
-        return (org.hl7.fhir.dstu3.model.Practitioner) methodOutcome.getResource();
+        return (Practitioner) methodOutcome.getResource();
     }
 
-    private Group createAndSubmitGroup(String orgId, org.hl7.fhir.dstu3.model.Practitioner practitioner, IGenericClient v3Client, List<String> patientIds) {
+    private Group createAndSubmitGroup(String orgId, Practitioner practitioner, IGenericClient client, List<String> patientIds) {
         final String practitionerId = practitioner.getId();
         final String practitionerNPI = practitioner.getIdentifierFirstRep().getValue();
 
@@ -448,12 +480,14 @@ public class GroupResourceTest extends AbstractSecureApplicationTest {
                 .withPatients(patientIds.toArray(String[]::new))
                 .build();
 
-        final Provenance provenance = V3APITestHelpers.createProvenance(orgId, practitionerId, Collections.emptyList());
-        final MethodOutcome outcome = v3Client.create()
+        final Provenance provenance = createProvenance(orgId, practitionerId, patientIds);
+
+        final MethodOutcome outcome = client.create()
                 .resource(group)
                 .encodedJson()
-                .withAdditionalHeader("X-Provenance", r4Ctx.newJsonParser().encodeResourceToString(provenance))
+                .withAdditionalHeader("X-Provenance", ctx.newJsonParser().encodeResourceToString(provenance))
                 .execute();
+
         return (Group) outcome.getResource();
     }
 }
