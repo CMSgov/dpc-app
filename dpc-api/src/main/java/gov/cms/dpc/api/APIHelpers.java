@@ -133,4 +133,19 @@ public class APIHelpers {
                 .execute();
         return FHIRExtractors.findMatchingIdentifier(org.getIdentifier(), DPCIdentifierSystem.NPPES).getValue();
     }
+
+    public static class V3 {
+         public static void addOrganizationTag(org.hl7.fhir.r4.model.Resource resource, String organizationID) {
+            final org.hl7.fhir.r4.model.Coding orgTag = new org.hl7.fhir.r4.model.Coding(DPCIdentifierSystem.DPC.getSystem(), organizationID, "Organization ID");
+            final org.hl7.fhir.r4.model.Meta meta = resource.getMeta();
+            if (meta == null) {
+                final org.hl7.fhir.r4.model.Meta newMeta = new org.hl7.fhir.r4.model.Meta();
+                newMeta.addTag(orgTag);
+                resource.setMeta(newMeta);
+            } else {
+                meta.getTag().removeIf(coding -> DPCIdentifierSystem.DPC.getSystem().equalsIgnoreCase(coding.getSystem().trim()));
+                meta.addTag(orgTag);
+            }
+        }
+    }
 }
