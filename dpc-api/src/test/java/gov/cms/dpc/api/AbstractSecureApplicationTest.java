@@ -67,11 +67,11 @@ public class AbstractSecureApplicationTest {
     }
 
     protected IGenericClient buildV3Client() {
-        return APIAuthHelpers.buildAuthenticatedClient(r4Ctx, getV3BaseURL(), getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        return APIAuthHelpers.buildAuthenticatedClient(r4Ctx, getV3BaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
     }
 
     protected IGenericClient buildV3Client(TestOrganizationContext orgContext) {
-        return APIAuthHelpers.buildAuthenticatedClient(r4Ctx, getV3BaseURL(), getBaseURL(), orgContext.getClientToken(),
+        return APIAuthHelpers.buildAuthenticatedClient(r4Ctx, getV3BaseURL(), orgContext.getClientToken(),
                 UUID.fromString(orgContext.getPublicKeyId()), orgContext.getPrivateKey());
     }
 

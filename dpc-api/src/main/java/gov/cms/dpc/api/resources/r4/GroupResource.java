@@ -49,7 +49,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static gov.cms.dpc.common.logging.LogSanitizer.sanitize;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
 
 @Api(value = "Group", authorizations = @Authorization(value = "access_token"))
@@ -285,6 +284,10 @@ public class GroupResource extends AbstractGroupResource {
                 jobId, orgID, orgNPI, totalPatients, resourcesRequested, eventTime);
 
         return Response.status(Response.Status.ACCEPTED).contentLocation(URI.create(this.baseURL + "/Jobs/" + jobId)).build();
+    }
+
+    private static String sanitize(String input) {
+        return input == null ? null : input.replaceAll("[\r\n]", "_");
     }
 
     private Response buildCreateResponse(MethodOutcome outcome) {
