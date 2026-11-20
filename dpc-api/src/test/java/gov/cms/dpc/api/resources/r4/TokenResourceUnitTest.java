@@ -122,8 +122,8 @@ public class TokenResourceUnitTest {
         String expires = timeNow.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         Optional<OffsetDateTimeParam> optExpires = Optional.of(new OffsetDateTimeParam(expires));
         TokenEntity persistedToken = new TokenEntity(UUID.randomUUID().toString(), orgId, TokenEntity.TokenType.MACAROON);
-        String token_result = "final_token";
-        persistedToken.setToken(token_result);
+        String tokenResult = "final_token";
+        persistedToken.setToken(tokenResult);
 
         Mockito.when(policy.getExpirationPolicy()).thenReturn(expirationPolicy);
         Mockito.when(policy.getVersionPolicy()).thenReturn(versionPolicy);
@@ -133,7 +133,7 @@ public class TokenResourceUnitTest {
             try (MockedStatic<OffsetDateTime> mockedStatic = Mockito.mockStatic(OffsetDateTime.class)) {
                 mockedStatic.when(() -> OffsetDateTime.now(ZoneOffset.UTC)).thenReturn(timeNow);
                 Mockito.when(mockTokenDao.persistToken(Mockito.any())).thenReturn(persistedToken);
-                Mockito.when(bakery.serializeMacaroon(macaroon, true)).thenReturn(token_result.getBytes());
+                Mockito.when(bakery.serializeMacaroon(macaroon, true)).thenReturn(tokenResult.getBytes());
 
                 TokenEntity actualResponse = tokenResource.createOrganizationToken(organizationPrincipal, null, AUTH_URL, optExpires);
 

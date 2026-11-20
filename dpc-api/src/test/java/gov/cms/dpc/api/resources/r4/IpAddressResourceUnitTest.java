@@ -32,12 +32,12 @@ class IpAddressResourceUnitTest {
     IpAddressDAO ipAddressDAO;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         ipAddressResource = new IpAddressResource(ipAddressDAO);
     }
 
     @Test
-    public void testGet() {
+    void testGet() {
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of(ipAddressEntity));
@@ -48,7 +48,7 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
-    public void testGet_nothingReturned() {
+    void testGet_nothingReturned() {
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of());
 
         CollectionResponse<IpAddressEntity> response = ipAddressResource.getOrganizationIpAddresses(organizationPrincipal);
@@ -56,7 +56,7 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
-    public void testPost_happyPath() {
+    void testPost_happyPath() {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("192.168.1.1");
         IpAddressEntity ipAddressEntity = new IpAddressEntity();
 
@@ -68,14 +68,14 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
-    public void testPost_badIp() {
+    void testPost_badIp() {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("1.bad.ip.addr");
 
         assertThrows(WebApplicationException.class, () -> ipAddressResource.submitIpAddress(organizationPrincipal, createIpAddressRequest));
     }
 
     @Test
-    public void testPost_tooManyIps() {
+    void testPost_tooManyIps() {
         CreateIpAddressRequest createIpAddressRequest = new CreateIpAddressRequest("192.168.1.1");
 
         List<IpAddressEntity> existingIps = new ArrayList<>();
@@ -89,7 +89,7 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
-    public void testDelete_happyPath() {
+    void testDelete_happyPath() {
         UUID ipId = UUID.randomUUID();
         IpAddressEntity existingIp = new IpAddressEntity().setId(ipId);
 
@@ -100,7 +100,7 @@ class IpAddressResourceUnitTest {
     }
 
     @Test
-    public void testDelete_notFound() {
+    void testDelete_notFound() {
         IpAddressEntity existingIp = new IpAddressEntity().setId(UUID.randomUUID());
         when(ipAddressDAO.fetchIpAddresses(organizationPrincipal.getID())).thenReturn(List.of(existingIp));
 

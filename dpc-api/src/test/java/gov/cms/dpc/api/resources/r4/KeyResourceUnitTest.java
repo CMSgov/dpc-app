@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
@@ -29,13 +28,13 @@ public class KeyResourceUnitTest {
     KeyResource resource;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         resource = new KeyResource(publicKeyDao);
     }
 
     @Test
-    public void testGetPublicKeys() {
+    void testGetPublicKeys() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
 
         PublicKeyEntity publicKeyEntity = mock(PublicKeyEntity.class);
@@ -49,7 +48,7 @@ public class KeyResourceUnitTest {
     }
 
     @Test
-    public void testGetPublicKey() {
+    void testGetPublicKey() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
 
@@ -62,7 +61,7 @@ public class KeyResourceUnitTest {
     }
 
     @Test
-    public void testGetPublicKeyNotFound() {
+    void testGetPublicKeyNotFound() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
 
@@ -74,7 +73,7 @@ public class KeyResourceUnitTest {
     }
 
     @Test
-    public void testDeletePublicKey() {
+    void testDeletePublicKey() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
 
@@ -88,7 +87,7 @@ public class KeyResourceUnitTest {
     }
 
     @Test
-    public void testDeletePublicKeyNotFound() {
+    void testDeletePublicKeyNotFound() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         UUID publicKeyUUID = UUID.randomUUID();
 
@@ -101,7 +100,7 @@ public class KeyResourceUnitTest {
     }
 
     @Test
-    public void testSubmitKey() throws GeneralSecurityException, IOException {
+    void testSubmitKey() throws GeneralSecurityException, IOException {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         KeySignature keySignature = KeyResourceTest.generateKeyAndSignature();
 
@@ -110,7 +109,7 @@ public class KeyResourceUnitTest {
         resource.submitKey(organizationPrincipal, keySignature, Optional.of(label));
 
         ArgumentCaptor<PublicKeyEntity> keyEntityArgumentCaptor = ArgumentCaptor.forClass(PublicKeyEntity.class);
-        Mockito.verify(publicKeyDao).persistPublicKey(keyEntityArgumentCaptor.capture());
+        verify(publicKeyDao).persistPublicKey(keyEntityArgumentCaptor.capture());
 
         PublicKeyEntity keyEntity = keyEntityArgumentCaptor.getValue();
         assertEquals(organizationPrincipal.getID(), keyEntity.getOrganization_id());
@@ -122,7 +121,7 @@ public class KeyResourceUnitTest {
     }
 
     @Test
-    public void testSubmitKeyTooLong() throws GeneralSecurityException {
+    void testSubmitKeyTooLong() throws GeneralSecurityException {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         KeySignature keySignature = KeyResourceTest.generateKeyAndSignature();
         Optional<String> label = Optional.of("A really, really, really long, test key label");
@@ -134,7 +133,7 @@ public class KeyResourceUnitTest {
     }
 
     @Test
-    public void testSubmitKeyBadPEMString() {
+    void testSubmitKeyBadPEMString() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         KeySignature keySignature = new KeySignature("badPEMString", "badSignature");
         Optional<String> label = Optional.of("label");
