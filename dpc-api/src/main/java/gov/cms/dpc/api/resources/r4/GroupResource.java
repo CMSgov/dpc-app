@@ -19,6 +19,7 @@ import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.fhir.FHIRHeaders;
 import gov.cms.dpc.fhir.annotations.FHIR;
 import gov.cms.dpc.fhir.annotations.FHIRAsync;
+import gov.cms.dpc.fhir.annotations.Profiled;
 import gov.cms.dpc.fhir.annotations.ProvenanceHeader;
 import gov.cms.dpc.fhir.r4.FHIRExtractors;
 import gov.cms.dpc.oneecosystem.client.OneEcosystemClient;
@@ -49,6 +50,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static gov.cms.dpc.api.APIHelpers.V3.addOrganizationTag;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
 
 @Api(value = "Group", authorizations = @Authorization(value = "access_token"))
@@ -58,26 +60,24 @@ public class GroupResource extends AbstractGroupResource {
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
     private static final String RESOURCE_TYPE = "Group";
 
-    private final AttributionClient attributionClient;
-    private final IGenericClient stu3Client; // Can be removed when Practitioner and Organization are on R4
     private final String baseURL;
+    private final AttributionClient attributionClient;
     private final OneEcosystemClient oneEcosystemClient;
     private final DataService dataService;
     private final DPCAPIConfiguration config;
 
     @Inject
-    public GroupResource(AttributionClient attributionClient,
-                        @Named("attribution") IGenericClient stu3Client,
-                        @APIV3 String baseURL,
-                        OneEcosystemClient oneEcosystemClient,
-                        DataService dataService,
-                        DPCAPIConfiguration config) {
+    public GroupResource(DataService dataService,
+                         @Named("attribution") IGenericClient stu3Client,
+                         @APIV3 String baseURL,
+                         AttributionClient attributionClient,
+                         OneEcosystemClient oneEcosystemClient,
+                         DPCAPIConfiguration config) {
         super(stu3Client);
-        this.attributionClient = attributionClient;
-        this.stu3Client = stu3Client;
-        this.baseURL = baseURL;
-        this.oneEcosystemClient = oneEcosystemClient;
         this.dataService = dataService;
+        this.baseURL = baseURL;
+        this.attributionClient = attributionClient;
+        this.oneEcosystemClient = oneEcosystemClient;
         this.config = config;
     }
 
@@ -96,11 +96,11 @@ public class GroupResource extends AbstractGroupResource {
     })
     @Override
     public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-                                 @ApiParam(hidden = true) @Valid @ProvenanceHeader Provenance rosterAttestation, // readd @Profiled when supported for V3
+                                 @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation, // readd @Profiled when supported for V3
                                  Group attributionRoster) {
         // Log attestation
         logAndVerifyAttestation(rosterAttestation, null, attributionRoster);
-        APIHelpers.V3.addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
+        addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
 
         final MethodOutcome outcome = this.attributionClient.createRoster(attributionRoster);
 
@@ -138,10 +138,10 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     public Group updateRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                               @ApiParam(value = "Attribution Group ID") @PathParam("rosterID") UUID rosterID,
-                              @ApiParam(hidden = true) @Valid @ProvenanceHeader Provenance rosterAttestation, // readd @Profiled when supported for V3
+                              @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation, // readd @Profiled when supported for V3
                               Group rosterUpdate) {
         logAndVerifyAttestation(rosterAttestation, rosterID, rosterUpdate);
-        APIHelpers.V3.addOrganizationTag(rosterUpdate, organizationPrincipal.getOrganization().getId());
+        addOrganizationTag(rosterUpdate, organizationPrincipal.getOrganization().getId());
 
         requireRosterId(rosterID);
         return this.attributionClient.replaceRoster(rosterID, rosterUpdate);
@@ -160,10 +160,10 @@ public class GroupResource extends AbstractGroupResource {
     @Override
     public Group addRosterMembers(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                   @ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
-                                  @ApiParam(hidden = true) @Valid @ProvenanceHeader Provenance rosterAttestation, // readd @Profiled when supported for V3
+                                  @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation, // readd @Profiled when supported for V3
                                   Group groupUpdate) {
         logAndVerifyAttestation(rosterAttestation, rosterID, groupUpdate);
-        APIHelpers.V3.addOrganizationTag(groupUpdate, organizationPrincipal.getOrganization().getId());
+        addOrganizationTag(groupUpdate, organizationPrincipal.getOrganization().getId());
         requireRosterId(rosterID);
         return this.attributionClient.addRosterMembers(rosterID, groupUpdate);
     }
