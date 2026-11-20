@@ -61,7 +61,7 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 
 	@ParameterizedTest
 	@MethodSource("downloadArgs")
-	void canDownloadFiles(boolean compressFile, Map<String, String> requestHeaders) throws IOException {
+	void canDownloadFiles(boolean compressFile, Map<String, String> requestHeaders) throws IOException, ProtocolException {
 		String testData = "test data".repeat(50);
 		String fileName = createTestExport(testData, compressFile);
 
@@ -101,14 +101,12 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 			}
 
 			assertEquals(testData, responseString);
-		} catch (IOException | ProtocolException e) {
-			fail("Failed to read response");
 		}
 	}
 
 	@ParameterizedTest
 	@MethodSource("downloadArgs")
-	void canDownloadFileRanges(boolean compressFile, Map<String, String> requestHeadersIn) throws IOException {
+	void canDownloadFileRanges(boolean compressFile, Map<String, String> requestHeadersIn) throws IOException, ProtocolException {
 		String testData = "uncompressed_data";
 		String fileName = createTestExport("12345_" + testData + "_54321", compressFile);
 
@@ -138,8 +136,6 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 			byte[] responseData = entity.getContent().readAllBytes();
 			String responseString = new String(responseData);
 			assertEquals(testData, responseString);
-		} catch (IOException | ProtocolException e) {
-			fail("Failed to read response");
 		}
 	}
 

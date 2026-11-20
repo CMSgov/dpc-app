@@ -129,8 +129,10 @@ class PractitionerResourceUnitTest {
 
     @Test
     void testUpdateProvider() {
+        UUID providerId = UUID.randomUUID();
+        Practitioner practitioner = new Practitioner();
         WebApplicationException exception = assertThrows(WebApplicationException.class,
-                () -> practitionerResource.updateProvider(UUID.randomUUID(), new Practitioner()));
+                () -> practitionerResource.updateProvider(providerId, practitioner));
         assertEquals(501, exception.getResponse().getStatus());
         verifyNoInteractions(attributionClient);
     }

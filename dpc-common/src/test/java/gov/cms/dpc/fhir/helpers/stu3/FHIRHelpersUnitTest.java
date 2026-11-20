@@ -34,13 +34,14 @@ import static org.mockito.Mockito.*;
 
 class FHIRHelpersUnitTest {
 
-    static final UUID orgID = UUID.randomUUID();
-    static final String orgNPI = NPIUtil.generateNPI();
+    static final UUID ORG_ID = UUID.randomUUID();
+    static final String ORG_NPI = NPIUtil.generateNPI();
     static final String MACAROON = "macaroon";
     static final String ADMIN_URL = "admin.url";
 
     @Test
     void testRegisterOrganization() throws IOException {
+        String organizationId = ORG_ID.toString();
         IParser parser = mock(IParser.class);
         Bundle bundle = new Bundle();
         bundle.addEntry().setResource(new Organization());
@@ -69,22 +70,23 @@ class FHIRHelpersUnitTest {
             when(httpResponse.getEntity()).thenReturn(httpEntity);
 
             String response = assertDoesNotThrow(() ->
-                    FHIRHelpers.registerOrganization(client, parser, orgID.toString(), orgNPI, ADMIN_URL));
+                    FHIRHelpers.registerOrganization(client, parser, organizationId, ORG_NPI, ADMIN_URL));
             assertEquals(MACAROON, response);
 
             // Token generation error
             when(httpResponse.getCode()).thenReturn(HttpStatus.SC_BAD_REQUEST);
             when(httpResponse.getReasonPhrase()).thenReturn("Bad request");
             IllegalStateException stateException = assertThrows(IllegalStateException.class, () ->
-                    FHIRHelpers.registerOrganization(client, parser, orgID.toString(), orgNPI, ADMIN_URL));
+                    FHIRHelpers.registerOrganization(client, parser, organizationId, ORG_NPI, ADMIN_URL));
             assertEquals("Unable to generate token: " + httpResponse.getReasonPhrase(), stateException.getMessage());
         }
     }
 
     @Test
     void testHandleMethodOutcome_nullResource() {
+        MethodOutcome outcome = new MethodOutcome();
         WebApplicationException exception = assertThrows(WebApplicationException.class, () ->
-                FHIRHelpers.handleMethodOutcome(new MethodOutcome()));
+                FHIRHelpers.handleMethodOutcome(outcome));
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), exception.getResponse().getStatus());
         assertEquals("Unable to get resource.", exception.getMessage());
     }
@@ -114,9 +116,9 @@ class FHIRHelpersUnitTest {
 
     private Organization buildOrganization() {
         Organization organization = new Organization();
-        organization.setId(orgID.toString());
+        organization.setId(ORG_ID.toString());
         Identifier identifier = new Identifier();
-        identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(orgNPI);
+        identifier.setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue(ORG_NPI);
         organization.setIdentifier(List.of(identifier));
         return organization;
     }

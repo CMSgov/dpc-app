@@ -98,8 +98,9 @@ class PatientResourceUnitTest {
 
     @Test
     void testCountInvalid() {
+        OrganizationPrincipal principal = APITestHelpers.makeOrganizationPrincipal();
         WebApplicationException exception = assertThrows(WebApplicationException.class,
-                () -> patientResource.patientSearch(APITestHelpers.makeOrganizationPrincipal(), null, -4, null));
+                () -> patientResource.patientSearch(principal, null, -4, null));
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), exception.getResponse().getStatus());
         verifyNoInteractions(attributionClient);
@@ -107,8 +108,9 @@ class PatientResourceUnitTest {
 
     @Test
     void testPageInvalid() {
+        OrganizationPrincipal principal = APITestHelpers.makeOrganizationPrincipal();
         WebApplicationException exception = assertThrows(WebApplicationException.class,
-                () -> patientResource.patientSearch(APITestHelpers.makeOrganizationPrincipal(), null, null, -5));
+                () -> patientResource.patientSearch(principal, null, null, -5));
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), exception.getResponse().getStatus());
         verifyNoInteractions(attributionClient);
@@ -200,11 +202,12 @@ class PatientResourceUnitTest {
 
     @Test
     void testSubmitPatientNoResource() {
+        OrganizationPrincipal principal = APITestHelpers.makeOrganizationPrincipal();
         Patient patient = new Patient();
         when(attributionClient.createPatient(patient)).thenReturn(new MethodOutcome());
 
         WebApplicationException exception = assertThrows(WebApplicationException.class,
-                () -> patientResource.submitPatient(APITestHelpers.makeOrganizationPrincipal(), patient));
+                () -> patientResource.submitPatient(principal, patient));
 
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), exception.getResponse().getStatus());
     }
@@ -263,8 +266,9 @@ class PatientResourceUnitTest {
         when(validation.getMessages()).thenReturn(List.of(message));
         when(fhirValidator.validateWithResult(eq(patient), any(ValidationOptions.class))).thenReturn(validation);
 
+        Parameters params = parametersWithBundle(bundle);
         WebApplicationException exception = assertThrows(WebApplicationException.class,
-                () -> patientResource.bulkSubmitPatients(principal, parametersWithBundle(bundle)));
+                () -> patientResource.bulkSubmitPatients(principal, params));
 
         assertEquals(422, exception.getResponse().getStatus());
         assertEquals("Invalid Patient", exception.getMessage());
@@ -301,10 +305,11 @@ class PatientResourceUnitTest {
 
     @Test
     void testBulkSubmitRejectsMissingBundle() {
+        OrganizationPrincipal principal = APITestHelpers.makeOrganizationPrincipal();
         Parameters params = new Parameters();
 
         WebApplicationException exception = assertThrows(WebApplicationException.class,
-                () -> patientResource.bulkSubmitPatients(APITestHelpers.makeOrganizationPrincipal(), params));
+                () -> patientResource.bulkSubmitPatients(principal, params));
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), exception.getResponse().getStatus());
         verifyNoInteractions(attributionClient, fhirValidator);
@@ -312,11 +317,12 @@ class PatientResourceUnitTest {
 
     @Test
     void testBulkSubmitRejectsNonBundleResource() {
+        OrganizationPrincipal principal = APITestHelpers.makeOrganizationPrincipal();
         Parameters params = new Parameters();
         params.addParameter().setResource(new Patient());
 
         WebApplicationException exception = assertThrows(WebApplicationException.class,
-                () -> patientResource.bulkSubmitPatients(APITestHelpers.makeOrganizationPrincipal(), params));
+                () -> patientResource.bulkSubmitPatients(principal, params));
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), exception.getResponse().getStatus());
         verifyNoInteractions(attributionClient, fhirValidator);
@@ -324,8 +330,9 @@ class PatientResourceUnitTest {
 
     @Test
     void testBulkSubmitRejectsNullParameters() {
+        OrganizationPrincipal principal = APITestHelpers.makeOrganizationPrincipal();
         WebApplicationException exception = assertThrows(WebApplicationException.class,
-                () -> patientResource.bulkSubmitPatients(APITestHelpers.makeOrganizationPrincipal(), null));
+                () -> patientResource.bulkSubmitPatients(principal, null));
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), exception.getResponse().getStatus());
         verifyNoInteractions(attributionClient, fhirValidator);
@@ -394,8 +401,10 @@ class PatientResourceUnitTest {
 
     @Test
     void testValidatePatientWithoutResource() {
+        OrganizationPrincipal principal = APITestHelpers.makeOrganizationPrincipal();
+        Parameters params = new Parameters();
         WebApplicationException exception = assertThrows(WebApplicationException.class,
-                () -> patientResource.validatePatient(APITestHelpers.makeOrganizationPrincipal(), new Parameters()));
+                () -> patientResource.validatePatient(principal, params));
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), exception.getResponse().getStatus());
         verifyNoInteractions(fhirValidator, attributionClient);

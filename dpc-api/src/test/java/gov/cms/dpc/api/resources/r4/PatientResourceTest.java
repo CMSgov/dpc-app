@@ -239,7 +239,8 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         assertNotNull(APITestHelpers.getResourceById(orgAClient, Patient.class, orgAPatient.getId()), "Org should be able to retrieve their own patient.");
         assertNotNull(APITestHelpers.getResourceById(orgBClient, Patient.class, orgBPatient.getId()), "Org should be able to retrieve their own patient.");
-        assertThrows(ResourceNotFoundException.class, () -> APITestHelpers.getResourceById(orgAClient, Patient.class, orgBPatient.getId()), "Expected auth error when retrieving another org's patient.");
+        final String orgBPatientId = orgBPatient.getId();
+        assertThrows(ResourceNotFoundException.class, () -> APITestHelpers.getResourceById(orgAClient, Patient.class, orgBPatientId), "Expected auth error when retrieving another org's patient.");
     }
 
     @Test
@@ -346,9 +347,10 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
         final Patient orgBPatient = (Patient) APITestHelpers.createResource(orgBClient, APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId())).getResource();
+        final String orgBPatientId = orgBPatient.getIdElement().getIdPart();
 
-        assertThrows(ResourceNotFoundException.class, () -> APITestHelpers.deleteResourceById(orgAClient, DPCResourceType.Patient, orgBPatient.getIdElement().getIdPart()), "Expected auth error when deleting another org's patient.");
-        APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Patient, orgBPatient.getIdElement().getIdPart());
+        assertThrows(ResourceNotFoundException.class, () -> APITestHelpers.deleteResourceById(orgAClient, DPCResourceType.Patient, orgBPatientId), "Expected auth error when deleting another org's patient.");
+        APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Patient, orgBPatientId);
     }
 
     @Test
@@ -360,18 +362,20 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
         final Patient orgAPatient = (Patient) APITestHelpers.createResource(orgAClient, APITestHelpers.createPatientResource(MockBlueButtonClient.TEST_PATIENT_MBIS.get(2), orgAContext.getOrgId())).getResource();
         final Patient orgBPatient = (Patient) APITestHelpers.createResource(orgBClient, APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId())).getResource();
+        final String orgAPatientId = orgAPatient.getIdElement().getIdPart();
+        final String orgBPatientId = orgBPatient.getIdElement().getIdPart();
 
-        APITestHelpers.getResourceById(orgAClient, Patient.class, orgAPatient.getIdElement().getIdPart());
-        APITestHelpers.getResourceById(orgBClient, Patient.class, orgBPatient.getIdElement().getIdPart());
-        assertThrows(ResourceNotFoundException.class, () -> APITestHelpers.getResourceById(orgBClient, Patient.class, orgAPatient.getIdElement().getIdPart()), "Expected auth error when accessing another org's patient");
+        APITestHelpers.getResourceById(orgAClient, Patient.class, orgAPatientId);
+        APITestHelpers.getResourceById(orgBClient, Patient.class, orgBPatientId);
+        assertThrows(ResourceNotFoundException.class, () -> APITestHelpers.getResourceById(orgBClient, Patient.class, orgAPatientId), "Expected auth error when accessing another org's patient");
 
-        APITestHelpers.updateResource(orgAClient, orgAPatient.getIdElement().getIdPart(), orgAPatient);
-        APITestHelpers.updateResource(orgBClient, orgBPatient.getIdElement().getIdPart(), orgBPatient);
-        assertThrows(ResourceNotFoundException.class, () -> APITestHelpers.updateResource(orgBClient, orgAPatient.getIdElement().getIdPart(), orgAPatient), "Expected auth error when updating another org's patient");
+        APITestHelpers.updateResource(orgAClient, orgAPatientId, orgAPatient);
+        APITestHelpers.updateResource(orgBClient, orgBPatientId, orgBPatient);
+        assertThrows(ResourceNotFoundException.class, () -> APITestHelpers.updateResource(orgBClient, orgAPatientId, orgAPatient), "Expected auth error when updating another org's patient");
 
-        APITestHelpers.updateResource(orgAClient, orgAPatient.getIdElement().getIdPart(), orgAPatient);
-        APITestHelpers.updateResource(orgBClient, orgBPatient.getIdElement().getIdPart(), orgBPatient);
-        assertThrows(ResourceNotFoundException.class, () -> APITestHelpers.updateResource(orgBClient, orgAPatient.getIdElement().getIdPart(), orgAPatient), "Expected auth error when updating another org's patient");
+        APITestHelpers.updateResource(orgAClient, orgAPatientId, orgAPatient);
+        APITestHelpers.updateResource(orgBClient, orgBPatientId, orgBPatient);
+        assertThrows(ResourceNotFoundException.class, () -> APITestHelpers.updateResource(orgBClient, orgAPatientId, orgAPatient), "Expected auth error when updating another org's patient");
     }
 
     @Test

@@ -43,11 +43,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(BufferedLoggerHandler.class)
 public class AbstractSecureApplicationTest {
     protected static final String OTHER_ORG_ID = "065fbe84-3551-4ec3-98a3-0d1198c3cb55";
-    protected static final String configPath = "src/test/resources/test.application.yml";
-    private static final ObjectMapper mapper = new ObjectMapper();
+    protected static final String CONFIG_PATH = "src/test/resources/test.application.yml";
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static final DropwizardTestSupport<DPCAPIConfiguration> APPLICATION =
-            new DropwizardTestSupport<>(DPCAPIService.class, configPath);
+            new DropwizardTestSupport<>(DPCAPIService.class, CONFIG_PATH);
     protected static FhirContext ctx;
     protected static String ORGANIZATION_TOKEN;
     // Macaroon to use for doing admin things (like creating tokens and keys)
@@ -83,7 +83,7 @@ public class AbstractSecureApplicationTest {
     protected String getExportPath() { return APPLICATION.getConfiguration().getExportPath(); }
 
     @BeforeAll
-    public static void setup() throws Exception {
+    protected static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
         ctx = FhirContext.forDstu3();
         // Register a test organization for us
@@ -99,19 +99,19 @@ public class AbstractSecureApplicationTest {
     }
 
     @BeforeEach
-    public void eachSetup() throws IOException {
+    protected void eachSetup() throws IOException {
 
         // Check health
         APITestHelpers.checkHealth(APPLICATION);
     }
 
     @AfterEach
-    public void eachShutdown() throws IOException {
+    protected void eachShutdown() throws IOException {
         APITestHelpers.checkHealth(APPLICATION);
     }
 
     @AfterAll
-    public static void shutdown() throws IOException {
+    protected static void shutdown() throws IOException {
         checkAllConnectionsClosed(String.format("http://localhost:%s", APPLICATION.getAdminPort()));
         APPLICATION.after();
     }
@@ -121,7 +121,7 @@ public class AbstractSecureApplicationTest {
             final HttpGet metricsGet = new HttpGet(String.format("%s/metrics", adminURL));
 
             try (CloseableHttpResponse response = client.execute(metricsGet)) {
-                final JsonNode metricsNode = mapper.reader().readTree(response.getEntity().getContent());
+                final JsonNode metricsNode = MAPPER.reader().readTree(response.getEntity().getContent());
                 metricsNode.get("gauges")
                         .properties()
                         .forEach(gauge -> {

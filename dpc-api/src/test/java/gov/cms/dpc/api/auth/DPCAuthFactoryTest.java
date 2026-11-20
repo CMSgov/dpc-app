@@ -4,6 +4,7 @@ import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.api.auth.macaroonauth.stu3.MacaroonsAuthenticator;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.macaroons.MacaroonBakery;
+import io.dropwizard.auth.Authenticator;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +44,8 @@ class DPCAuthFactoryTest {
         verify(v3).authenticate(v3Credentials);
 
         DPCAuthCredentials unsupported = new DPCAuthCredentials("token", org, annotation, "id", "v2");
-        assertThrows(IllegalStateException.class, () -> factory.pathAuthenticator().authenticate(unsupported));
+        Authenticator<DPCAuthCredentials, OrganizationPrincipal> authenticator = factory.pathAuthenticator();
+        assertThrows(IllegalStateException.class, () -> authenticator.authenticate(unsupported));
         verifyNoMoreInteractions(v1, v3);
     }
 }

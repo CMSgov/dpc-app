@@ -30,6 +30,9 @@ public class FHIRHelpers {
 
     private static final Logger log = LoggerFactory.getLogger(FHIRHelpers.class);
 
+    private FHIRHelpers() {
+    }
+
     /**
      * Register an organization with the Attribution Service
      * Organizations are pulled from the `organization_bundle.json` file and filtered based on the provided resource ID
