@@ -30,7 +30,7 @@ import gov.cms.dpc.queue.DistributedBatchQueue;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.factories.stu3.BundleFactory;
-import gov.cms.dpc.testing.factories.FHIRPractitionerBuilder;
+import gov.cms.dpc.testing.factories.stu3.FHIRPractitionerBuilder;
 import jakarta.ws.rs.HttpMethod;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Pair;
