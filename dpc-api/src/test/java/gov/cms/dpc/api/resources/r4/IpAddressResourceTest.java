@@ -41,14 +41,14 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     private final CreateIpAddressRequest ipRequest = new CreateIpAddressRequest("192.168.1.1");
 
     private IpAddressResourceTest() throws IOException, URISyntaxException {
-        this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getV3BaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
+        this.fullyAuthedToken = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY).accessToken;
     }
 
     @Test
     @Order(1)
     public void testBadAuth() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
-        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getV3BaseURL()));
+        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
         HttpGet get = new HttpGet(uriBuilder.build());
         get.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
@@ -62,7 +62,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     @Order(2)
     public void testNoAuth() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
-        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getV3BaseURL()));
+        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
         HttpGet get = new HttpGet(uriBuilder.build());
         get.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
@@ -76,7 +76,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     public void testPost_happyPath() throws IOException, URISyntaxException {
         CloseableHttpClient client = HttpClients.createDefault();
         String ipAddressJson = mapper.writeValueAsString(ipRequest);
-        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getV3BaseURL()));
+        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
         HttpPost post = new HttpPost(uriBuilder.build());
         post.setEntity(new StringEntity(ipAddressJson));
@@ -102,7 +102,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     // Force this to run after the POST test
     public void testGet() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
-        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getV3BaseURL()));
+        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
         HttpGet get = new HttpGet(uriBuilder.build());
         get.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
@@ -126,7 +126,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     @Order(5)
     public void testDelete_happyPath() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
-        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress/%s", getV3BaseURL(), ipAddressEntityResponse.getId()));
+        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress/%s", getBaseURL(), ipAddressEntityResponse.getId()));
 
         HttpDelete delete = new HttpDelete(uriBuilder.build());
         delete.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
@@ -140,7 +140,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
     @Order(6)
     public void testDelete_notFound() throws URISyntaxException, IOException {
         CloseableHttpClient client = HttpClients.createDefault();
-        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress/%s", getV3BaseURL(), UUID.randomUUID()));
+        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress/%s", getBaseURL(), UUID.randomUUID()));
 
         HttpDelete delete = new HttpDelete(uriBuilder.build());
         delete.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
@@ -163,7 +163,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
 
         CloseableHttpClient client = HttpClients.createDefault();
         String ipAddressJson = mapper.writeValueAsString(ipAddressRequest);
-        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getV3BaseURL()));
+        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
         HttpPost post = new HttpPost(uriBuilder.build());
         post.setEntity(new StringEntity(ipAddressJson));
@@ -182,7 +182,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
 
         CloseableHttpClient client = HttpClients.createDefault();
         String ipAddressJson = mapper.writeValueAsString(emptyIpRequest);
-        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getV3BaseURL()));
+        URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
         HttpPost post = new HttpPost(uriBuilder.build());
         post.setEntity(new StringEntity(ipAddressJson));
@@ -199,7 +199,7 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             String ipAddressJson = mapper.writeValueAsString(ipAddressRequest);
-            URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getV3BaseURL()));
+            URIBuilder uriBuilder = new URIBuilder(String.format("%s/IpAddress", getBaseURL()));
 
             HttpPost post = new HttpPost(uriBuilder.build());
             post.setEntity(new StringEntity(ipAddressJson));
@@ -213,7 +213,8 @@ class IpAddressResourceTest extends AbstractSecureApplicationTest {
         }
     }
 
-    protected String getV3BaseURL() {
-        return getBaseURL().replaceFirst("/v1$", "/v3");
+    @Override
+    protected String getBaseURL() {
+        return super.getBaseURL().replaceFirst("/v1$", "/v3");
     }
 }
