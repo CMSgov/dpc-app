@@ -1,7 +1,6 @@
 package gov.cms.dpc.queue;
 
 import gov.cms.dpc.fhir.DPCResourceType;
-import gov.cms.dpc.queue.models.ExternalJobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 
@@ -48,10 +47,11 @@ public interface IJobQueue {
     /**
      * Create and submit an external job into the queue.
      *
-     * @param batch The external job queue batch
+     * @param batch     The populated job queue batch
+     * @param isSmoke   Flag to indicate smoke test request
      * @return The jobID, echoed back for convenience
      */
-    UUID createExternalJob(ExternalJobQueueBatch batch);
+    UUID createExternalJob(JobQueueBatch batch, boolean isSmoke);
 
     /**
      * Find a batch in the queue, regardless of job status. Does not alter the batch.

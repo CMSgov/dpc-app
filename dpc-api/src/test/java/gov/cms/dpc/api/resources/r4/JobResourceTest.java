@@ -9,9 +9,9 @@ import gov.cms.dpc.oneecosystem.client.OneEcosystemClient;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemJobStatus;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemJobStatusOutput;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemJobStatusResponse;
+import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.MemoryBatchQueue;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
-import gov.cms.dpc.queue.models.ExternalJobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.testing.BufferedLoggerHandler;
 import jakarta.ws.rs.core.Response;
@@ -45,23 +45,29 @@ public class JobResourceTest {
     @Mock
     OneEcosystemClient client;
 
-    @BeforeEach
-    void setup() {
-        MockitoAnnotations.openMocks(this);
-    }
-
-    private ExternalJobQueueBatch buildExternalJobQueueBatch(UUID orgID, UUID groupID, String requestUrl) {
-        return new ExternalJobQueueBatch.Builder()
+    private JobQueueBatch buildJobQueueBatch(UUID orgID, UUID groupID, String requestUrl) {
+        return new JobQueueBatch.Builder()
                 .jobID(UUID.randomUUID())
                 .orgID(orgID)
                 .orgNPI(TEST_ORG_NPI)
                 .providerNPI(TEST_PROVIDER_NPI)
-                .mbis(List.of(TEST_PATIENT_MBI))
+                .patients(List.of(TEST_PATIENT_MBI))
                 .resourceTypes(JobQueueBatch.validResourceTypes)
                 .requestUrl(requestUrl)
                 .groupID(groupID)
                 .isBulk(true)
                 .build();
+    }
+
+    private UUID createAndSubmitExternalJob(IJobQueue queue, UUID orgID) {
+        final UUID groupID = UUID.randomUUID();
+        final JobQueueBatch batch = buildJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID));
+        return queue.createExternalJob(batch, false);
+    }
+
+    @BeforeEach
+    void setup() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -81,10 +87,8 @@ public class JobResourceTest {
         final var organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
         final var orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
         final var queue = new MemoryBatchQueue(100);
-        final var groupID = UUID.randomUUID();
 
-        final var jobID = queue.createExternalJob(
-                buildExternalJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)));
+        final var jobID = createAndSubmitExternalJob(queue, orgID);
 
         when(client.jobStatus(jobID)).thenReturn(new OneEcosystemJobStatus(202, null));
 
@@ -103,7 +107,7 @@ public class JobResourceTest {
         final var groupID = UUID.randomUUID();
         final var requestUrl = String.format(TEST_JOB_URL, groupID);
 
-        final var jobID = queue.createExternalJob(buildExternalJobQueueBatch(orgID, groupID, requestUrl));
+        final var jobID = queue.createExternalJob(buildJobQueueBatch(orgID, groupID, requestUrl), false);
 
         final Instant transactionTime = Instant.now();
         final List<OneEcosystemJobStatusOutput> outputs = JobQueueBatch.validResourceTypes.stream()
@@ -138,8 +142,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
         final var groupID = UUID.randomUUID();
 
-        final var jobID = queue.createExternalJob(
-                buildExternalJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)));
+        final var jobID = queue.createExternalJob(buildJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)),  false);
 
         final List<String> partialErrors = List.of(
                 "Failed to retrieve ExplanationOfBenefit data for 3 of 150 patients: BFD returned 504 Gateway Timeout");
@@ -166,8 +169,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
         final var groupID = UUID.randomUUID();
 
-        final var jobID = queue.createExternalJob(
-                buildExternalJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)));
+        final var jobID = queue.createExternalJob(buildJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)), false);
         final var batch = queue.getJobBatches(jobID).getFirst();
 
         final List<String> fatalErrors = List.of(
@@ -190,8 +192,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
         final var groupID = UUID.randomUUID();
 
-        final var jobID = queue.createExternalJob(
-                buildExternalJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)));
+        final var jobID = queue.createExternalJob(buildJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)), false);
 
         when(client.jobStatus(jobID)).thenReturn(new OneEcosystemJobStatus(400,
                 new OneEcosystemJobStatusResponse(Instant.now(), true, List.of(),
@@ -210,8 +211,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
         final var groupID = UUID.randomUUID();
 
-        final var jobID = queue.createExternalJob(
-                buildExternalJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)));
+        final var jobID = queue.createExternalJob(buildJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)),  false);
         final var batch = queue.getJobBatches(jobID).getFirst();
 
         OneEcosystemJobStatus status = new OneEcosystemJobStatus(503,
@@ -232,10 +232,8 @@ public class JobResourceTest {
         final var orgIDCorrect = FHIRExtractors.getEntityUUID(organizationPrincipalCorrect.getOrganization().getId());
         final var organizationPrincipalWrong = APITestHelpers.makeOrganizationPrincipal(OTHER_ORGANIZATION);
         final var queue = new MemoryBatchQueue(100);
-        final var groupID = UUID.randomUUID();
-        final var requestUrl = String.format(TEST_JOB_URL, groupID);
 
-        final var jobID = queue.createExternalJob(buildExternalJobQueueBatch(orgIDCorrect, groupID, requestUrl));
+        final var jobID = createAndSubmitExternalJob(queue, orgIDCorrect);
 
         when(client.jobStatus(jobID)).thenReturn(new OneEcosystemJobStatus(200,
                 new OneEcosystemJobStatusResponse(Instant.now(), true, List.of(), List.of(), jobID)));
@@ -257,8 +255,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
         final var groupID = UUID.randomUUID();
 
-        final var jobID = queue.createExternalJob(
-                buildExternalJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)));
+        final var jobID = queue.createExternalJob(buildJobQueueBatch(orgID, groupID, String.format(TEST_JOB_URL, groupID)), false);
 
         final List<String> errors = List.of("BFD returned 504 Gateway Timeout for 3 of 150 patients");
         when(client.jobStatus(jobID)).thenReturn(new OneEcosystemJobStatus(200,
@@ -282,8 +279,7 @@ public class JobResourceTest {
         final var queue = new MemoryBatchQueue(100);
         final var groupID = UUID.randomUUID();
 
-        final var jobID = queue.createExternalJob(
-                buildExternalJobQueueBatch(orgIDCorrect, groupID, String.format(TEST_JOB_URL, groupID)));
+        final var jobID = queue.createExternalJob(buildJobQueueBatch(orgIDCorrect, groupID, String.format(TEST_JOB_URL, groupID)), false);
 
         final var resource = new JobResource(queue, client, TEST_BASEURL);
         final Response response = resource.getJobErrors(organizationPrincipalWrong, jobID.toString());

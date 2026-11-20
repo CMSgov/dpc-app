@@ -12,7 +12,6 @@ import gov.cms.dpc.queue.IJobQueue;
 import gov.cms.dpc.queue.JobStatus;
 import gov.cms.dpc.queue.exceptions.DataRetrievalException;
 import gov.cms.dpc.queue.exceptions.DataRetrievalRetryException;
-import gov.cms.dpc.queue.models.ExternalJobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatchFile;
 import jakarta.inject.Inject;
@@ -155,8 +154,8 @@ public class DataService {
     /**
      * Creates an external job on the queue.
      */
-    public UUID createExternalJob(ExternalJobQueueBatch externalBatch) {
-        return this.queue.createExternalJob(externalBatch);
+    public UUID createExternalJob(JobQueueBatch batch, boolean isSmoke) {
+        return this.queue.createExternalJob(batch, isSmoke);
     }
 
     private Optional<List<JobQueueBatch>> waitForJobToComplete(UUID jobID, UUID organizationID, IJobQueue queue) {

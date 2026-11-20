@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
-import static gov.cms.dpc.api.V3APITestHelpers.*;
+import static gov.cms.dpc.api.APITestHelpers.V3.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Disabled("until all resources are using R4")

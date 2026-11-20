@@ -24,7 +24,7 @@ import gov.cms.dpc.fhir.r4.FHIRExtractors;
 import gov.cms.dpc.oneecosystem.client.OneEcosystemClient;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemExportRequest;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemExportResponse;
-import gov.cms.dpc.queue.models.ExternalJobQueueBatch;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
@@ -101,7 +101,7 @@ public class GroupResource extends AbstractGroupResource {
                                  Group attributionRoster) {
         // Log attestation
         logAndVerifyAttestation(rosterAttestation, null, attributionRoster);
-        APIHelpers.addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
+        APIHelpers.V3.addOrganizationTag(attributionRoster, organizationPrincipal.getOrganization().getId());
 
         final MethodOutcome outcome = this.attributionClient.createRoster(attributionRoster);
 
@@ -142,7 +142,7 @@ public class GroupResource extends AbstractGroupResource {
                               @ApiParam(hidden = true) @Valid @ProvenanceHeader Provenance rosterAttestation, // readd @Profiled when supported for V3
                               Group rosterUpdate) {
         logAndVerifyAttestation(rosterAttestation, rosterID, rosterUpdate);
-        APIHelpers.addOrganizationTag(rosterUpdate, organizationPrincipal.getOrganization().getId());
+        APIHelpers.V3.addOrganizationTag(rosterUpdate, organizationPrincipal.getOrganization().getId());
 
         requireRosterId(rosterID);
         return this.attributionClient.replaceRoster(rosterID, rosterUpdate);
@@ -164,7 +164,7 @@ public class GroupResource extends AbstractGroupResource {
                                   @ApiParam(hidden = true) @Valid @ProvenanceHeader Provenance rosterAttestation, // readd @Profiled when supported for V3
                                   Group groupUpdate) {
         logAndVerifyAttestation(rosterAttestation, rosterID, groupUpdate);
-        APIHelpers.addOrganizationTag(groupUpdate, organizationPrincipal.getOrganization().getId());
+        APIHelpers.V3.addOrganizationTag(groupUpdate, organizationPrincipal.getOrganization().getId());
         requireRosterId(rosterID);
         return this.attributionClient.addRosterMembers(rosterID, groupUpdate);
     }
@@ -259,32 +259,32 @@ public class GroupResource extends AbstractGroupResource {
         if (exportResponse.statusCode() != 202) {
             throw new WebApplicationException("Unable to start export job", HttpStatus.SC_BAD_GATEWAY);
         }
-        final UUID backendJobID = extractJobId(exportResponse.contentLocation());
+        final UUID jobId = extractJobId(exportResponse.contentLocation());
 
         final boolean isSmoke = config.getLookBackExemptOrgs().contains(orgID.toString());
-        final ExternalJobQueueBatch externalBatch = new ExternalJobQueueBatch.Builder()
-                .jobID(backendJobID)
+        final JobQueueBatch batch = new JobQueueBatch.Builder()
+                .jobID(jobId)
                 .orgID(orgID)
                 .orgNPI(orgNPI)
                 .providerNPI(providerNPI)
-                .mbis(attributedMbis)
+                .patients(attributedMbis)
                 .resourceTypes(resources)
                 .since(since)
                 .requestingIP(requestingIP)
                 .requestUrl(requestUrl)
+                .exportSource("external-bcda")
+                .exportVersion("V3")
                 .groupID(groupID)
                 .isBulk(true)
-                .isSmoke(isSmoke)
                 .build();
-        this.dataService.createExternalJob(externalBatch);
+        this.dataService.createExternalJob(batch, isSmoke);
 
         final int totalPatients = attributedMbis.size();
         final String resourcesRequested = String.join(";", resourceNames);
         logger.info("dpcMetric=queueSubmitted,operation=/v3/Group/$export,jobID={},orgId={},orgNpi={},totalPatients={},resourcesRequested={},queueSubmitTime={}",
-                backendJobID, orgID, orgNPI, totalPatients, resourcesRequested, eventTime);
+                jobId, orgID, orgNPI, totalPatients, resourcesRequested, eventTime);
 
-        return Response.status(Response.Status.ACCEPTED)
-                .contentLocation(URI.create(this.baseURL + "/Jobs/" + backendJobID)).build();
+        return Response.status(Response.Status.ACCEPTED).contentLocation(URI.create(this.baseURL + "/Jobs/" + jobId)).build();
     }
 
     private Response buildCreateResponse(MethodOutcome outcome) {
@@ -365,20 +365,8 @@ public class GroupResource extends AbstractGroupResource {
 
     private void verifyHeader(String practitionerUUID, Group attributionRoster) {
         try {
-            // Practitioner practitioner = this.attributionClient.getPractitioner(FHIRExtractors.getEntityUUID(practitionerUUID));
-            // Identifier provenancePractitionerNPI = FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES);
-            // String groupPractitionerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
-            //
-            // if (!provenancePractitionerNPI.getValue().equals(groupPractitionerNPI)) {
-            //     throw new WebApplicationException("Provenance header's provider does not match group provider", HttpStatus.SC_UNPROCESSABLE_CONTENT);
-            // }
-            org.hl7.fhir.dstu3.model.Practitioner practitioner = stu3Client.read()
-                    .resource(org.hl7.fhir.dstu3.model.Practitioner.class)
-                    .withId(gov.cms.dpc.fhir.stu3.FHIRExtractors.getEntityUUID(practitionerUUID).toString())
-                    .encodedJson()
-                    .execute();
-
-            org.hl7.fhir.dstu3.model.Identifier provenancePractitionerNPI = gov.cms.dpc.fhir.stu3.FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES);
+            Practitioner practitioner = this.attributionClient.getPractitioner(FHIRExtractors.getEntityUUID(practitionerUUID));
+            Identifier provenancePractitionerNPI = FHIRExtractors.findMatchingIdentifier(practitioner.getIdentifier(), DPCIdentifierSystem.NPPES);
             String groupPractitionerNPI = FHIRExtractors.getAttributedNPI(attributionRoster);
 
             if (!provenancePractitionerNPI.getValue().equals(groupPractitionerNPI)) {

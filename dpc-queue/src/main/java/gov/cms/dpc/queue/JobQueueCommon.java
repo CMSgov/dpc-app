@@ -2,7 +2,6 @@ package gov.cms.dpc.queue;
 
 import gov.cms.dpc.fhir.DPCResourceType;
 import gov.cms.dpc.queue.exceptions.JobQueueFailure;
-import gov.cms.dpc.queue.models.ExternalJobQueueBatch;
 import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.reactivex.Observable;
 
@@ -52,29 +51,12 @@ public abstract class JobQueueCommon implements IJobQueue {
     }
 
     @Override
-    public UUID createExternalJob(ExternalJobQueueBatch externalBatch) {
-        final int priority = determinePriority(externalBatch.mbis().size(), externalBatch.isSmoke());
-
-        final JobQueueBatch batch = new JobQueueBatch.Builder()
-                .jobID(externalBatch.jobID())
-                .orgID(externalBatch.orgID())
-                .orgNPI(externalBatch.orgNPI())
-                .providerNPI(externalBatch.providerNPI())
-                .patients(externalBatch.mbis())
-                .resourceTypes(externalBatch.resourceTypes())
-                .since(externalBatch.since())
-                .transactionTime(externalBatch.transactionTime())
-                .requestingIP(externalBatch.requestingIP())
-                .requestUrl(externalBatch.requestUrl())
-                .isBulk(externalBatch.isBulk())
-                .groupID(externalBatch.groupID())
-                .exportSource("external-bcda")
-                .exportVersion("V3")
-                .build();
+    public UUID createExternalJob(JobQueueBatch batch, boolean isSmoke) {
+        final int priority = determinePriority(batch.getPatients().size(), isSmoke);
         batch.setPriority(priority);
 
         this.submitJobBatches(Collections.singletonList(batch));
-        return externalBatch.jobID();
+        return batch.getJobID();
     }
 
     private int determinePriority(int patientCount, boolean isSmoke){

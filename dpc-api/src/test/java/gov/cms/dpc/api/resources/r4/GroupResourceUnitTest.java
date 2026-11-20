@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.net.HttpHeaders;
 import gov.cms.dpc.api.DPCAPIConfiguration;
-import gov.cms.dpc.api.V3APITestHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.attribution.client.AttributionClient;
 import gov.cms.dpc.common.utils.NPIUtil;
