@@ -3,10 +3,12 @@ package gov.cms.dpc.api.auth.macaroonauth.r4;
 import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.attribution.client.AttributionClient;
+import gov.cms.dpc.attribution.client.search.PatientSearch;
 import gov.cms.dpc.fhir.DPCResourceType;
 import jakarta.ws.rs.NotFoundException;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,8 +76,34 @@ class MacaroonsAuthenticatorUnitTest {
     }
 
     @Test
-    void testUnsupportedPathTypeFailsClosed() {
+    void testPatientPath() {
         when(pathAuthorizer.type()).thenReturn(DPCResourceType.Patient);
+        UUID patientId = UUID.randomUUID();
+        Bundle bundle = new Bundle();
+        bundle.addEntry().setResource(new Patient());
+        PatientSearch search = new PatientSearch(patientId, null, organizationId, null, null, null);
+        when(client.searchPatients(search)).thenReturn(bundle);
+        DPCAuthCredentials credentials = new DPCAuthCredentials("macaroon", organization, pathAuthorizer, patientId.toString());
+
+        assertTrue(authenticator.authenticate(credentials).isPresent());
+        verify(client).searchPatients(search);
+    }
+
+    @Test
+    void testPatientPathNotFound() {
+        when(pathAuthorizer.type()).thenReturn(DPCResourceType.Patient);
+        UUID patientId = UUID.randomUUID();
+        PatientSearch search = new PatientSearch(patientId, null, organizationId, null, null, null);
+        when(client.searchPatients(search)).thenReturn(new Bundle());
+        DPCAuthCredentials credentials = new DPCAuthCredentials("macaroon", organization, pathAuthorizer, patientId.toString());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> authenticator.authenticate(credentials));
+        assertEquals("Patient not found", exception.getMessage());
+    }
+
+    @Test
+    void testUnsupportedPathTypeFailsClosed() {
+        when(pathAuthorizer.type()).thenReturn(DPCResourceType.Group);
         DPCAuthCredentials credentials = new DPCAuthCredentials("macaroon", organization, pathAuthorizer, UUID.randomUUID().toString());
 
         assertThrows(IllegalStateException.class, () -> authenticator.authenticate(credentials));

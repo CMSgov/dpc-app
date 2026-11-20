@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
 import gov.cms.dpc.fhir.validations.profiles.r4.OrganizationProfile;
+import gov.cms.dpc.fhir.validations.profiles.r4.PatientProfile;
 import gov.cms.dpc.fhir.validations.profiles.r4.PractitionerProfile;
 import jakarta.validation.ConstraintValidatorContext;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
@@ -14,12 +15,15 @@ import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.sql.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -72,7 +76,16 @@ class ProfileValidatorTest {
         practitioner.addName().setFamily("Practitioner").addGiven("Test");
         practitioner.addIdentifier().setSystem(DPCIdentifierSystem.NPPES.getSystem()).setValue("1232131239");
 
-        return List.of(organization, practitioner);
+        Patient patient = new Patient();
+        patient.setMeta(new Meta().addProfile(PatientProfile.PROFILE_URI));
+        patient.setId("test-patient");
+        patient.setGender(org.hl7.fhir.r4.model.Enumerations.AdministrativeGender.OTHER);
+        patient.setManagingOrganization(new Reference("Organization/test-organization"));
+        patient.addIdentifier().setSystem(DPCIdentifierSystem.MBI.getSystem()).setValue("4S41C00AA00");
+        patient.addName().setFamily("Patient").addGiven("Test");
+        patient.setBirthDate(Date.valueOf("1990-01-01"));
+
+        return List.of(organization, practitioner, patient);
     }
 
     @Test
@@ -92,5 +105,15 @@ class ProfileValidatorTest {
         practitioner.addName().setFamily("Practitioner").addGiven("Test");
 
         assertFalse(validator.isValid(practitioner, VALIDATION_CONTEXT));
+    }
+
+    @Test
+    void rejectsPatientWithoutRequiredIdentifier() {
+        Patient patient = new Patient();
+        patient.setManagingOrganization(new Reference("Organization/test-organization"));
+        patient.addName().setFamily("Patient").addGiven("Test");
+        patient.setBirthDate(Date.valueOf("1990-01-01"));
+
+        assertFalse(validator.isValid(patient, VALIDATION_CONTEXT));
     }
 }

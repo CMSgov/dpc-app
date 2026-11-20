@@ -10,14 +10,16 @@ public class BaseResource {
     private final DataResource dataResource;
     private final OrganizationResource organizationResource;
     private final PractitionerResource practitionerResource;
+    private final PatientResource patientResource;
 
     @Inject
     public BaseResource(GroupResource groupResource, DataResource dataResource, OrganizationResource organizationResource,
-                        PractitionerResource practitionerResource) {
+                        PractitionerResource practitionerResource, PatientResource patientResource) {
         this.groupResource = groupResource;
         this.dataResource = dataResource;
         this.organizationResource = organizationResource;
         this.practitionerResource = practitionerResource;
+        this.patientResource = patientResource;
     }
 
     @Path("/Group")
@@ -38,5 +40,10 @@ public class BaseResource {
     @Path("/Practitioner")
     public PractitionerResource practitionerOperations() {
         return practitionerResource;
+    }
+
+    @Path("/Patient")
+    public PatientResource patientOperations() {
+        return patientResource;
     }
 }

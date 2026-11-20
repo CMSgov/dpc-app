@@ -376,7 +376,7 @@ class DataResourceUnitTest {
         final AuthFilter<DPCAuthCredentials, OrganizationPrincipal> staticFilter = new StaticAuthFilter(new StaticAuthenticator());
 
         return APITestHelpers.buildResourceExtension(ctx,
-                Collections.singletonList(new BaseResource(null, dataResource, null, null)),
+                Collections.singletonList(new BaseResource(null, dataResource, null, null, null)),
                 List.of(staticFilter,
                         new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class),
                         new HttpRangeHeaderParamConverterProvider(),

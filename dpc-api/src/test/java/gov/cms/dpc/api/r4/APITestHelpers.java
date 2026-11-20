@@ -197,6 +197,21 @@ public class APITestHelpers {
         }
     }
 
+    public static void setupPatientTest(IGenericClient client, IParser parser) throws IOException {
+        try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("r4/patient_bundle.json")) {
+            if (inputStream == null) {
+                throw new IOException("Missing r4/patient_bundle.json test fixture");
+            }
+            final Parameters patientParameters = (Parameters) parser.parseResource(inputStream);
+            client.operation()
+                    .onType(Patient.class)
+                    .named("submit")
+                    .withParameters(patientParameters)
+                    .encodedJson()
+                    .execute();
+        }
+    }
+
     public static MethodOutcome createResource(IGenericClient client, IBaseResource resource) {
         return client.create().resource(resource).encodedJson().execute();
     }
@@ -206,8 +221,13 @@ public class APITestHelpers {
     }
 
     public static Bundle resourceSearch(IGenericClient client, DPCResourceType resourceType) {
+        return resourceSearch(client, resourceType, Map.of());
+    }
+
+    public static Bundle resourceSearch(IGenericClient client, DPCResourceType resourceType,
+                                        Map<String, List<String>> searchParams) {
         return client.search().forResource(resourceType.name())
-                .whereMap(Map.of()).returnBundle(Bundle.class).encodedJson().execute();
+                .whereMap(searchParams).returnBundle(Bundle.class).encodedJson().execute();
     }
 
     public static void deleteResourceById(IGenericClient client, DPCResourceType resourceType, String resourceId) {

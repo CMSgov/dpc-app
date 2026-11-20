@@ -4,6 +4,7 @@ import gov.cms.dpc.api.auth.DPCAuthCredentials;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.attribution.client.AttributionClient;
+import gov.cms.dpc.attribution.client.search.PatientSearch;
 import gov.cms.dpc.fhir.DPCResourceType;
 import io.dropwizard.auth.Authenticator;
 import jakarta.inject.Inject;
@@ -38,6 +39,15 @@ public class MacaroonsAuthenticator implements Authenticator<DPCAuthCredentials,
             final UUID practitionerId = UUID.fromString(credentials.getPathValue());
             if (client.searchPractitioners(principal.getID(), practitionerId).getEntry().isEmpty()) {
                 throw new NotFoundException("Practitioner not found");
+            }
+            return Optional.of(principal);
+        }
+
+        if (pathAuthorizer.type() == DPCResourceType.Patient) {
+            final UUID patientId = UUID.fromString(credentials.getPathValue());
+            if (client.searchPatients(new PatientSearch(patientId, null, principal.getID(), null, null, null))
+                    .getEntry().isEmpty()) {
+                throw new NotFoundException("Patient not found");
             }
             return Optional.of(principal);
         }
