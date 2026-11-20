@@ -4,6 +4,7 @@ import gov.cms.dpc.api.APITestHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
+import gov.cms.dpc.api.models.KeySignature;
 import jakarta.ws.rs.WebApplicationException;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,7 +103,7 @@ public class KeyResourceUnitTest {
     @Test
     public void testSubmitKey() throws GeneralSecurityException, IOException {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
-        KeyResource.KeySignature keySignature = KeyResourceTest.generateKeyAndSignature();
+        KeySignature keySignature = KeyResourceTest.generateKeyAndSignature();
 
         String label = "A test key label";
 
@@ -123,7 +124,7 @@ public class KeyResourceUnitTest {
     @Test
     public void testSubmitKeyTooLong() throws GeneralSecurityException {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
-        KeyResource.KeySignature keySignature = KeyResourceTest.generateKeyAndSignature();
+        KeySignature keySignature = KeyResourceTest.generateKeyAndSignature();
         String label = "A really, really, really long, test key label";
 
         WebApplicationException exception = assertThrows(WebApplicationException.class,
@@ -135,7 +136,7 @@ public class KeyResourceUnitTest {
     @Test
     public void testSubmitKeyBadPEMString() {
         OrganizationPrincipal organizationPrincipal = APITestHelpers.makeOrganizationPrincipal();
-        KeyResource.KeySignature keySignature = new KeyResource.KeySignature("badPEMString", "badSignature");
+        KeySignature keySignature = new KeySignature("badPEMString", "badSignature");
 
         WebApplicationException exception =  assertThrows(WebApplicationException.class,
                 () -> resource.submitKey(organizationPrincipal, keySignature, Optional.of("label")));

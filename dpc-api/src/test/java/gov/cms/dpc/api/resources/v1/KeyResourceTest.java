@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.models.CollectionResponse;
+import gov.cms.dpc.api.models.KeySignature;
 import gov.cms.dpc.testing.APIAuthHelpers;
 import gov.cms.dpc.testing.KeyType;
 import gov.cms.dpc.testing.models.KeyView;
@@ -48,7 +49,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testInvalidKeySubmission() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
-        KeyResource.KeySignature keySig = generateKeyAndSignature();
+        KeySignature keySig = generateKeyAndSignature();
 
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/Key", getBaseURL()));
@@ -69,7 +70,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
                         () -> assertTrue(EntityUtils.toString(response.getEntity()).contains("duplicate key value violates unique constraint"), "Should have nice error message"));
             }
 
-            KeyResource.KeySignature keySig2 = generateKeyAndSignature();
+            KeySignature keySig2 = generateKeyAndSignature();
             // Try again with same label
             String json2 = new ObjectMapper().writeValueAsString(keySig2);
             post.setEntity(new StringEntity(json2));
@@ -95,9 +96,9 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testMismatchedKeyAndSignature() throws GeneralSecurityException, IOException, URISyntaxException {
-        KeyResource.KeySignature keySig1 = generateKeyAndSignature();
-        KeyResource.KeySignature keySig2 = generateKeyAndSignature();
-        KeyResource.KeySignature mismatched = new KeyResource.KeySignature(keySig1.getKey(), keySig2.getSignature());
+        KeySignature keySig1 = generateKeyAndSignature();
+        KeySignature keySig2 = generateKeyAndSignature();
+        KeySignature mismatched = new KeySignature(keySig1.getKey(), keySig2.getSignature());
         String json3 = new ObjectMapper().writeValueAsString(mismatched);
         URIBuilder builder = new URIBuilder(String.format("%s/Key", getBaseURL()));
         builder.addParameter("label", "Key/sig mismatch");
@@ -115,7 +116,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testRoundTrip() throws GeneralSecurityException, IOException {
-        KeyResource.KeySignature keySig = generateKeyAndSignature();
+        KeySignature keySig = generateKeyAndSignature();
 
         KeyView entity;
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
@@ -172,7 +173,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
     public void testRejectEccKey() throws NoSuchAlgorithmException, IOException {
         KeyPair eccKeyPair = APIAuthHelpers.generateKeyPair(KeyType.ECC);
         String publicKeyStr = APIAuthHelpers.generatePublicKey(eccKeyPair.getPublic());
-        KeyResource.KeySignature keySig = new KeyResource.KeySignature(publicKeyStr, "");
+        KeySignature keySig = new KeySignature(publicKeyStr, "");
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
             final HttpPost post = new HttpPost(String.format("%s/Key", getBaseURL()));
             String json = new ObjectMapper().writeValueAsString(keySig);
@@ -188,10 +189,10 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
         }
     }
 
-    protected static KeyResource.KeySignature generateKeyAndSignature() throws GeneralSecurityException {
+    protected static KeySignature generateKeyAndSignature() throws GeneralSecurityException {
         final KeyPair keyPair = APIAuthHelpers.generateKeyPair(KeyType.RSA);
         final String publicKey = APIAuthHelpers.generatePublicKey(keyPair.getPublic());
         final String signature = APIAuthHelpers.signString(keyPair.getPrivate(), KeyResource.SNIPPET);
-        return new KeyResource.KeySignature(publicKey, signature);
+        return new KeySignature(publicKey, signature);
     }
 }

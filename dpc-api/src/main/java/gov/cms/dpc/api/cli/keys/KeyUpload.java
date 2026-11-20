@@ -3,7 +3,7 @@ package gov.cms.dpc.api.cli.keys;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.cli.AbstractAdminCommand;
 import gov.cms.dpc.api.exceptions.AdminCommandException;
-import gov.cms.dpc.api.resources.v1.KeyResource;
+import gov.cms.dpc.api.models.KeySignature;
 import io.dropwizard.core.setup.Bootstrap;
 import jakarta.ws.rs.core.MediaType;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -78,14 +78,14 @@ public class KeyUpload extends AbstractAdminCommand {
         final Path signaturePath = FileSystems.getDefault().getPath(namespace.getString(SIGNATURE_FILE));
         final String signature = Files.readString(signaturePath);
 
-        KeyResource.KeySignature keySignature = new KeyResource.KeySignature(publicKey, signature);
+        KeySignature keySignature = new KeySignature(publicKey, signature);
 
         final Optional<String> label = Optional.ofNullable(namespace.getString("key-label"));
         uploadKey(apiService, orgID.getIdPart(), label, keySignature);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private void uploadKey(String apiService, String orgID, Optional<String> label, KeyResource.KeySignature keySig) throws IOException, URISyntaxException, ParseException {
+    private void uploadKey(String apiService, String orgID, Optional<String> label, KeySignature keySig) throws IOException, URISyntaxException, ParseException {
         try (final CloseableHttpClient httpClient = HttpClients.createDefault()) {
             final URIBuilder builder = new URIBuilder(String.format("%s/upload-key", apiService));
 
