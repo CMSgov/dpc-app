@@ -1,0 +1,362 @@
+package gov.cms.dpc.api.resources.r4;
+
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
+import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.dpc.api.r4.APITestHelpers;
+import gov.cms.dpc.api.r4.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.TestOrganizationContext;
+import gov.cms.dpc.common.utils.NPIUtil;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
+import gov.cms.dpc.fhir.helpers.r4.FHIRHelpers;
+import gov.cms.dpc.testing.APIAuthHelpers;
+import gov.cms.dpc.testing.factories.r4.FHIRPractitionerBuilder;
+import jakarta.ws.rs.HttpMethod;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.ParseException;
+import org.eclipse.jetty.http.HttpStatus;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.junit.jupiter.api.Test;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
+import java.sql.Date;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class PractitionerResourceTest extends AbstractSecureApplicationTest {
+
+    @Test
+    void ensurePractitionersExist() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
+        final IParser parser = ctx.newJsonParser();
+        final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        APITestHelpers.setupPractitionerTest(client, parser);
+
+        // Find everything attributed
+        final Bundle practitioners = client
+                .search()
+                .forResource(Practitioner.class)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(4, practitioners.getTotal(), "Should have all the providers");
+
+        final Bundle specificSearch = client
+                .search()
+                .forResource(Practitioner.class)
+                .where(Practitioner.IDENTIFIER.exactly().code("1232131239"))
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(1, specificSearch.getTotal(), "Should have a specific provider");
+
+        // Fetch the provider directly
+        final Practitioner foundProvider = (Practitioner) specificSearch.getEntryFirstRep().getResource();
+
+        final IReadExecutable<Practitioner> clientQuery = client
+                .read()
+                .resource(Practitioner.class)
+                .withId(foundProvider.getIdElement())
+                .encodedJson();
+
+        final Practitioner queriedProvider = clientQuery.execute();
+
+        assertTrue(foundProvider.equalsDeep(queriedProvider), "Search and GET should be identical");
+
+        // Try to delete the practitioner
+        client
+                .delete()
+                .resourceById(queriedProvider.getIdElement())
+                .encodedJson()
+                .execute();
+
+        // Try again, should be not found
+        assertThrows(ResourceNotFoundException.class, clientQuery::execute, "Should not have practitioner");
+
+        // Create a new org and make sure it has no providers
+        final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
+        // Submit a new public key to use for JWT flow
+        final String keyLabel = "new-key";
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey(keyLabel, OTHER_ORG_ID, GOLDEN_MACAROON, getAuthBaseURL());
+
+        // Update the authenticated client to use the new organization
+        client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), m2, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
+
+        final Bundle otherPractitioners = client
+                .search()
+                .forResource(Practitioner.class)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(0, otherPractitioners.getTotal(), "Should not have any practitioners");
+
+        // Try to look for one of the other practitioners
+        final Bundle otherSpecificSearch = client
+                .search()
+                .forResource(Practitioner.class)
+                .where(Practitioner.IDENTIFIER.exactly().identifier(foundProvider.getIdentifierFirstRep().getValue()))
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+
+        assertEquals(0, otherSpecificSearch.getTotal(), "Should not have a specific provider");
+    }
+
+    @Test
+    void testCreateInvalidPractitioner() throws IOException, URISyntaxException {
+        URL url = new URL(getBaseURL() + "/Practitioner");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(HttpMethod.POST);
+        conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
+
+        APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        conn.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + auth.accessToken);
+
+        conn.setDoOutput(true);
+        String reqBody = "{\"test\": \"test\"}";
+        conn.getOutputStream().write(reqBody.getBytes());
+
+        assertEquals(HttpStatus.BAD_REQUEST_400, conn.getResponseCode());
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
+            StringBuilder respBuilder = new StringBuilder();
+            String respLine;
+            while ((respLine = reader.readLine()) != null) {
+                respBuilder.append(respLine.trim());
+            }
+            String resp = respBuilder.toString();
+            assertTrue(resp.contains("\"resourceType\":\"OperationOutcome\""));
+            assertTrue(resp.contains("Invalid JSON content"));
+        }
+
+        conn.disconnect();
+    }
+
+    @Test
+    void testCreatePractitionerReturnsAppropriateHeaders() {
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        Practitioner practitioner = APITestHelpers.createPractitionerResource(NPIUtil.generateNPI(), APITestHelpers.ORGANIZATION_ID);
+
+        MethodOutcome methodOutcome = client.create()
+                .resource(practitioner)
+                .encodedJson()
+                .execute();
+
+        String location = methodOutcome.getResponseHeaders().get("location").get(0);
+        String date = methodOutcome.getResponseHeaders().get("last-modified").get(0);
+        assertNotNull(location);
+        assertNotNull(date);
+        assertTrue(location.contains("/v3/Practitioner/"));
+
+        Practitioner foundPractitioner = client.read()
+                .resource(Practitioner.class)
+                .withUrl(location)
+                .encodedJson()
+                .execute();
+
+        assertEquals(practitioner.getIdentifierFirstRep().getValue(), foundPractitioner.getIdentifierFirstRep().getValue());
+
+        client.delete()
+                .resource(foundPractitioner)
+                .encodedJson()
+                .execute();
+    }
+
+    @Test
+    void testUpdatePractitionerNotImplemented() throws IOException {
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        final IParser parser = ctx.newJsonParser();
+        APITestHelpers.setupPractitionerTest(client, parser);
+
+        // Grab a practitioner to update
+        final Bundle practitioners = client
+                .search()
+                .forResource(Practitioner.class)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+        final Practitioner practitioner = (Practitioner) practitioners.getEntryFirstRep().getResource();
+
+        practitioner.setBirthDate(Date.valueOf("1989-01-01"));
+        IUpdateExecutable update = client
+                .update()
+                .resource(practitioner)
+                .withId(practitioner.getId());
+
+        assertThrows(NotImplementedOperationException.class, update::execute);
+    }
+
+    @Test
+    void testPractitionerPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
+        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
+        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
+        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
+        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
+
+        Practitioner practitioner1 = FHIRPractitionerBuilder.newBuilder()
+                .withOrgTag(orgAContext.getOrgId())
+                .withNpi(NPIUtil.generateNPI())
+                .withName("Org A Practitioner", "Last name")
+                .build();
+
+        Practitioner practitioner2 = FHIRPractitionerBuilder.newBuilder()
+                .withOrgTag(orgBContext.getOrgId())
+                .withNpi(NPIUtil.generateNPI())
+                .withName("Org B Practitioner", "Last name")
+                .build();
+
+        final Practitioner orgAPractitioner = (Practitioner) APITestHelpers.createResource(orgAClient, practitioner1).getResource();
+        final Practitioner orgBPractitioner = (Practitioner) APITestHelpers.createResource(orgBClient, practitioner2).getResource();
+        final String orgAPractitionerId = orgAPractitioner.getIdElement().getIdPart();
+        final String orgBPractitionerId = orgBPractitioner.getIdElement().getIdPart();
+
+        //Test GET /Practitioner/{id}
+        assertNotNull(APITestHelpers.getResourceById(orgAClient, Practitioner.class, orgAPractitionerId));
+        assertNotNull(APITestHelpers.getResourceById(orgBClient, Practitioner.class, orgBPractitionerId));
+        assertThrows(ResourceNotFoundException.class,
+                () -> APITestHelpers.getResourceById(orgBClient, Practitioner.class, orgAPractitionerId)
+                , "Expected auth exception when accessing another org's practitioner.");
+
+        //Test PUT /Practitioner/{id}
+        assertThrows(ResourceNotFoundException.class,
+                () -> APITestHelpers.updateResource(orgBClient, orgAPractitionerId, orgAPractitioner)
+                , "Expected auth exception when updating another org's practitioner.");
+        assertThrows(NotImplementedOperationException.class,
+                () -> APITestHelpers.updateResource(orgAClient, orgAPractitionerId, orgAPractitioner)
+                , "Expected Not Implemented exception when updating a practitioner.");
+        assertThrows(NotImplementedOperationException.class,
+                () -> APITestHelpers.updateResource(orgBClient, orgBPractitionerId, orgBPractitioner)
+                , "Expected Not Implemented exception when updating a practitioner.");
+
+        //Test DELETE /Practitioner/{id}
+        assertThrows(ResourceNotFoundException.class,
+                () -> APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Practitioner, orgAPractitionerId)
+                , "Expected auth exception when deleting another org's practitioner.");
+
+        APITestHelpers.deleteResourceById(orgAClient, DPCResourceType.Practitioner, orgAPractitionerId);
+        APITestHelpers.deleteResourceById(orgBClient, DPCResourceType.Practitioner, orgBPractitionerId);
+    }
+
+    @Test
+    void testRequestBodyForgery() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
+        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
+        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
+        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
+        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
+
+        Practitioner practitioner = FHIRPractitionerBuilder.newBuilder()
+                .withOrgTag(orgBContext.getOrgId())
+                .withNpi(NPIUtil.generateNPI())
+                .withName("Org B Practitioner", "Last name")
+                .build();
+
+        //Test forgery during practitioner creation (Specify another org's id in the metadata tag)
+        practitioner.getMeta().addTag(DPCIdentifierSystem.DPC.getSystem(), orgBContext.getOrgId(), "Organization ID");
+        APITestHelpers.createResource(orgAClient, practitioner).getResource();
+
+        Bundle bundle = APITestHelpers.resourceSearch(orgBClient, DPCResourceType.Practitioner);
+        assertEquals(0, bundle.getTotal(), "Expected Org B to have 0 practitioners.");
+
+        bundle = APITestHelpers.resourceSearch(orgAClient, DPCResourceType.Practitioner);
+        assertEquals(1, bundle.getTotal(), "Expected Org A to have 1 practitioner.");
+    }
+
+    @Test
+    void testRequestBodyForgeryOnMultipleSubmit() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
+        final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
+        final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
+        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
+        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
+
+        Practitioner practitioner1 = FHIRPractitionerBuilder.newBuilder()
+                .withOrgTag(orgBContext.getOrgId())
+                .withNpi(NPIUtil.generateNPI())
+                .withName("Org B Practitioner", "Last name")
+                .build();
+
+        Practitioner practitioner2 = FHIRPractitionerBuilder.newBuilder()
+                .withOrgTag(orgBContext.getOrgId())
+                .withNpi(NPIUtil.generateNPI())
+                .withName("Org B Practitioner", "Last name")
+                .build();
+
+        Practitioner practitioner3 = FHIRPractitionerBuilder.newBuilder()
+                .withOrgTag(orgBContext.getOrgId())
+                .withNpi(NPIUtil.generateNPI())
+                .withName("Org B Practitioner", "Last name")
+                .build();
+
+        Practitioner practitioner4 = FHIRPractitionerBuilder.newBuilder()
+                .withOrgTag(orgBContext.getOrgId())
+                .withNpi(NPIUtil.generateNPI())
+                .withName("Org B Practitioner", "Last name")
+                .build();
+
+        practitioner4.getMeta().addTag(DPCIdentifierSystem.DPC.getSystem(), orgBContext.getOrgId(), "Organization ID");
+
+        Bundle bundle = new Bundle();
+        bundle.addEntry(new Bundle.BundleEntryComponent().setResource(practitioner1));
+        bundle.addEntry(new Bundle.BundleEntryComponent().setResource(practitioner2));
+        bundle.addEntry(new Bundle.BundleEntryComponent().setResource(practitioner3));
+        bundle.addEntry(new Bundle.BundleEntryComponent().setResource(practitioner4));
+
+        orgAClient.operation()
+                .onType(Practitioner.class)
+                .named("submit")
+                .withParameter(Parameters.class, "name", bundle)
+                .execute();
+
+        //Test forgery during practitioner creation (Specify another org's id in the metadata tag)
+        Bundle result = APITestHelpers.resourceSearch(orgBClient, DPCResourceType.Practitioner);
+        assertEquals(0, result.getTotal(), "Expected Org B to have 0 practitioners.");
+
+        result = APITestHelpers.resourceSearch(orgAClient, DPCResourceType.Practitioner);
+        assertEquals(4, result.getTotal(), "Expected Org A to have 4 practitioners.");
+    }
+
+    @Test
+    void testBadPractitionerIdReturns404() throws IOException {
+        final IParser parser = ctx.newJsonParser();
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        APITestHelpers.setupPractitionerTest(client, parser);
+
+        final IReadExecutable<Practitioner> clientQuery = client
+                .read()
+                .resource(Practitioner.class)
+                .withId(UUID.randomUUID().toString())
+                .encodedJson();
+
+        ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class, clientQuery::execute, "Should be not found");
+        assertEquals(HttpStatus.NOT_FOUND_404, e.getStatusCode());
+
+        // Make sure we get 1 fatal issue back with the correct message and status
+        OperationOutcome operationOutcome = (OperationOutcome) e.getOperationOutcome();
+        List<OperationOutcome.OperationOutcomeIssueComponent> issues = operationOutcome.getIssue();
+        assertEquals(1, issues.size());
+
+        OperationOutcome.OperationOutcomeIssueComponent issue = issues.get(0);
+        assertEquals(OperationOutcome.IssueSeverity.FATAL, issue.getSeverity());
+        assertEquals("Practitioner not found", issue.getDetails().getText());
+    }
+}

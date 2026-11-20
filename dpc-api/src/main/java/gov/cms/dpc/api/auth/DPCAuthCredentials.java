@@ -12,12 +12,18 @@ public class DPCAuthCredentials {
     private final Organization organization;
     private final PathAuthorizer pa;
     private final String pathValue;
+    private final String apiVersion;
 
     public DPCAuthCredentials(String macaroon, Organization organization, PathAuthorizer pa, String pathValue) {
+        this(macaroon, organization, pa, pathValue, null);
+    }
+
+    public DPCAuthCredentials(String macaroon, Organization organization, PathAuthorizer pa, String pathValue, String apiVersion) {
         this.macaroon = macaroon;
         this.organization = organization;
         this.pa = pa;
         this.pathValue = pathValue;
+        this.apiVersion = apiVersion;
     }
 
     public String getMacaroon() {
@@ -34,5 +40,9 @@ public class DPCAuthCredentials {
 
     public String getPathValue() {
         return pathValue;
+    }
+
+    public String getApiVersion() {
+        return apiVersion;
     }
 }

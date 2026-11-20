@@ -1,0 +1,374 @@
+package gov.cms.dpc.api.v1;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.gclient.*;
+import com.google.common.collect.Maps;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
+import gov.cms.dpc.api.exceptions.JsonParseExceptionMapper;
+import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
+import gov.cms.dpc.fhir.configuration.DPCFHIRConfiguration;
+import gov.cms.dpc.fhir.dropwizard.handlers.stu3.BundleHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.stu3.FHIRHandler;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DataFormatExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DefaultFHIRExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.HAPIExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionMapper;
+import gov.cms.dpc.fhir.dropwizard.handlers.exceptions.PersistenceExceptionMapper;
+import gov.cms.dpc.fhir.validations.v1.DPCProfileSupport;
+import gov.cms.dpc.fhir.validations.v1.ProfileValidator;
+import gov.cms.dpc.fhir.validations.dropwizard.FHIRValidationModule;
+import gov.cms.dpc.fhir.validations.dropwizard.InjectingConstraintValidatorFactory;
+import gov.cms.dpc.testing.APIAuthHelpers;
+import gov.cms.dpc.testing.factories.stu3.FHIRPatientBuilder;
+import gov.cms.dpc.testing.factories.stu3.FHIRPractitionerBuilder;
+import gov.cms.dpc.testing.utils.MBIUtil;
+import io.dropwizard.auth.AuthValueFactoryProvider;
+import io.dropwizard.testing.DropwizardTestSupport;
+import io.dropwizard.testing.junit5.ResourceExtension;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.eclipse.jetty.http.HttpStatus;
+import org.glassfish.jersey.test.grizzly.GrizzlyWebTestContainerFactory;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.codesystems.V3RoleClass;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.mockito.Mockito;
+import ru.vyarus.dropwizard.guice.module.context.SharedConfigurationState;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Date;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+public class APITestHelpers {
+    private static final String ATTRIBUTION_URL = "http://localhost:3500/v1";
+    public static final String ORGANIZATION_ID = "46ac7ad6-7487-4dd0-baa0-6e2c8cae76a0";
+    private static final String ATTRIBUTION_TRUNCATE_TASK = "http://localhost:9902/tasks/truncate";
+    private static final String CONSENT_TRUNCATE_TASK = "http://localhost:9901/tasks/truncate";
+    public static String ORGANIZATION_NPI = "1111111112";
+    private static final String CONFIG_PATH = "src/test/resources/test.application.yml";
+
+    private APITestHelpers() {
+        // Not used
+    }
+
+    public static OrganizationPrincipal makeOrganizationPrincipal() {
+        return makeOrganizationPrincipal(ORGANIZATION_ID);
+    }
+
+    public static OrganizationPrincipal makeOrganizationPrincipal(String id) {
+        Organization org = new Organization();
+        org.setId(id);
+        org.addIdentifier(
+            new Identifier()
+                .setSystem(DPCIdentifierSystem.NPPES.getSystem())
+                .setValue(ORGANIZATION_NPI)
+        );
+        return new OrganizationPrincipal(org);
+    }
+
+    public static void mockOrganizationRead(IGenericClient client, Organization organization) {
+        final IRead readMock = mock(IRead.class);
+        final IReadTyped<Organization> readTypedMock = mock(IReadTyped.class);
+        final IReadExecutable<Organization> readExecutableMock = mock(IReadExecutable.class);
+
+        when(client.read()).thenReturn(readMock);
+        when(readMock.resource(Organization.class)).thenReturn(readTypedMock);
+        when(readTypedMock.withId(Mockito.anyString())).thenReturn(readExecutableMock);
+        when(readExecutableMock.encodedJson()).thenReturn(readExecutableMock);
+        when(readExecutableMock.execute()).thenReturn(organization);
+    }
+
+    public static IGenericClient buildAttributionClient(FhirContext ctx) {
+        ctx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+        IGenericClient client = ctx.newRestfulGenericClient(ATTRIBUTION_URL);
+
+        // Disable logging for tests
+        LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+        loggingInterceptor.setLogRequestSummary(false);
+        loggingInterceptor.setLogResponseSummary(false);
+        client.registerInterceptor(loggingInterceptor);
+
+        // Make responses repeatable
+        client.registerInterceptor(new APIAuthHelpers.RepeatableResponseInterceptor());
+
+        return client;
+    }
+
+    public static void setupPractitionerTest(IGenericClient client, IParser parser) throws IOException {
+        try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("provider_bundle.json")) {
+            final Parameters providerParameters = (Parameters) parser.parseResource(inputStream);
+
+            client
+                    .operation()
+                    .onType(Practitioner.class)
+                    .named("submit")
+                    .withParameters(providerParameters)
+                    .encodedJson()
+                    .execute();
+        }
+    }
+
+    public static void setupPatientTest(IGenericClient client, IParser parser) throws IOException {
+        try (InputStream inputStream = APITestHelpers.class.getClassLoader().getResourceAsStream("patient_bundle.json")) {
+            final Parameters patientParameters = (Parameters) parser.parseResource(inputStream);
+
+            client
+                    .operation()
+                    .onType(Patient.class)
+                    .named("submit")
+                    .withParameters(patientParameters)
+                    .encodedJson()
+                    .execute();
+        }
+    }
+
+    /**
+     * Build Dropwizard test instance with a specific subset of Resources and Providers
+     *
+     * @param ctx        - {@link FhirContext} context to use
+     * @param resources  - {@link List} of resources to add to test instance
+     * @param providers  - {@link List} of providers to add to test instance
+     * @param validation - {@code true} enable custom validation. {@code false} Disable custom validation
+     * @return - {@link ResourceExtension}
+     */
+    public static ResourceExtension buildResourceExtension(FhirContext
+                                                                   ctx, List<Object> resources, List<Object> providers, boolean validation) {
+
+        final FHIRHandler fhirHandler = new FHIRHandler(ctx);
+        final var builder = ResourceExtension
+                .builder()
+                .setRegisterDefaultExceptionMappers(false)
+                .setTestContainerFactory(new GrizzlyWebTestContainerFactory())
+                .addProvider(fhirHandler)
+                .addProvider(new BundleHandler(fhirHandler))
+                .addProvider(JerseyExceptionMapper.class)
+                .addProvider(PersistenceExceptionMapper.class)
+                .addProvider(HAPIExceptionMapper.class)
+                .addProvider(DefaultFHIRExceptionMapper.class)
+                .addProvider(DataFormatExceptionMapper.class)
+                .addProvider(JsonParseExceptionMapper.class)
+                .addProvider(new AuthValueFactoryProvider.Binder<>(OrganizationPrincipal.class));
+
+        // Optionally enable validation
+        if (validation) {
+            // Validation config
+            final DPCFHIRConfiguration.FHIRValidationConfiguration config = new DPCFHIRConfiguration.FHIRValidationConfiguration();
+            config.setEnabled(true);
+
+            final ValidationSupportChain support = new ValidationSupportChain(
+                    new DPCProfileSupport(ctx),
+                    new DefaultProfileValidationSupport(ctx),
+                    new InMemoryTerminologyServerValidationSupport(ctx));
+            final InjectingConstraintValidatorFactory constraintFactory = new InjectingConstraintValidatorFactory(
+                Set.of(new ProfileValidator(new FHIRValidationModule(config).provideFhirValidator(ctx, support))));
+
+            builder.setValidator(provideValidator(constraintFactory));
+        }
+
+        resources.forEach(builder::addResource);
+        providers.forEach(builder::addProvider);
+
+        return builder.build();
+    }
+
+    public static <C extends io.dropwizard.core.Configuration> void setupApplication(DropwizardTestSupport<C> application) throws
+            Exception {
+        // Truncate attribution database
+        truncateDatabase();
+        application.before();
+        // Truncate the Auth DB
+        // dropwizard-guicey will raise a SharedStateError unless we clear the configuration state before each run
+        SharedConfigurationState.clear();
+        application.getApplication().run("db", "drop-all", "--confirm-delete-everything", CONFIG_PATH);
+        SharedConfigurationState.clear();
+        application.getApplication().run("db", "migrate", CONFIG_PATH);
+
+    }
+
+    private static void truncateDatabase() throws IOException {
+        List<String> taskUrls = List.of(ATTRIBUTION_TRUNCATE_TASK, CONSENT_TRUNCATE_TASK);
+
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            for(String url : taskUrls) {
+                try (CloseableHttpResponse execute = client.execute(new HttpPost(url))) {
+                    assertEquals(HttpStatus.OK_200, execute.getCode(), "Should have truncated DB at " + url);
+                }
+            }
+        }
+    }
+
+    public static <C extends io.dropwizard.core.Configuration> void checkHealth(DropwizardTestSupport<C> application) throws
+            IOException {
+        // URI of the API Service Healthcheck
+        final String healthURI = String.format("http://localhost:%s/healthcheck", application.getAdminPort());
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            final HttpGet healthCheck = new HttpGet(healthURI);
+
+            try (CloseableHttpResponse execute = client.execute(healthCheck)) {
+                assertEquals(HttpStatus.OK_200, execute.getCode(), "Should be healthy");
+            }
+        }
+    }
+
+    private static Validator provideValidator(InjectingConstraintValidatorFactory factory) {
+        return Validation.byDefaultProvider()
+                .configure().constraintValidatorFactory(factory)
+                .buildValidatorFactory().getValidator();
+    }
+
+    public static Practitioner createPractitionerResource(String npi, String orgID) {
+        return FHIRPractitionerBuilder.newBuilder()
+                .withNpi(npi)
+                .withOrgTag(orgID)
+                .withName("Test", "Practitioner")
+                .withId(UUID.randomUUID())
+                .build();
+    }
+
+    public static Patient createPatientResource(String organizationID) {
+        return createPatientResource(MBIUtil.generateMBI(), organizationID);
+    }
+
+    public static Patient createPatientResource(String mbi, String organizationID) {
+        return FHIRPatientBuilder.newBuild()
+                .withMbi(mbi)
+                .withBirthDate("1990-01-01")
+                .withName("Test", "Patient")
+                .withGender(Enumerations.AdministrativeGender.OTHER)
+                .managedBy(organizationID)
+                .withId(UUID.randomUUID())
+                .build();
+    }
+
+    public static List<Patient> createPatientResources(String organizationID, int numPatients) {
+        List<Patient> patients = new ArrayList<>(numPatients);
+
+        for(int i=0; i<numPatients; i++) {
+            patients.add(createPatientResource(MBIUtil.generateMBI(), organizationID));
+        }
+        return patients;
+    }
+
+    public static Provenance createProvenance(String orgId, String practitionerId, List<String> patientIds){
+        final Coding reasonCoding = new Coding().setSystem("http://hl7.org/fhir/v3/ActReason").setCode("TREAT");
+
+        final Coding roleCode = new Coding()
+                .setSystem(V3RoleClass.AGNT.getSystem())
+                .setCode(V3RoleClass.AGNT.toCode());
+
+        final CodeableConcept roleConcept = new CodeableConcept().addCoding(roleCode);
+        final Provenance.ProvenanceAgentComponent component = new Provenance.ProvenanceAgentComponent()
+                .setRole(Collections.singletonList(roleConcept))
+                .setWho(new Reference(new IdType("Organization", orgId)))
+                .setOnBehalfOf(new Reference(practitionerId));
+
+        final Provenance provenance = new Provenance()
+                .setRecorded(Date.valueOf(Instant.now().atZone(ZoneOffset.UTC).toLocalDate()))
+                .setReason(Collections.singletonList(reasonCoding))
+                .addAgent(component);
+
+        for(String patientId:patientIds){
+            provenance.addTarget(new Reference(patientId));
+        }
+        return provenance;
+    }
+
+    public static MethodOutcome createResource(IGenericClient client, IBaseResource resource, Map<String,String> extraHeaders){
+        ICreateTyped iCreateTyped = client.create()
+                .resource(resource)
+                .encodedJson();
+
+        extraHeaders.forEach(iCreateTyped::withAdditionalHeader);
+        return iCreateTyped.execute();
+    }
+
+    public static MethodOutcome createResource(IGenericClient client, IBaseResource resource){
+        return createResource(client,resource, Maps.newHashMap());
+    }
+
+    public  static <T extends IBaseResource> T getResourceById(IGenericClient client, Class<T> clazz, String resourceId){
+       return client.read()
+                .resource(clazz)
+                .withId(resourceId).encodedJson().execute();
+    }
+
+    public  static Bundle resourceSearch(IGenericClient client, DPCResourceType resourceType, Map<String,List<String>> searchParams){
+        return client
+                .search()
+                .forResource(resourceType.name())
+                .whereMap(searchParams)
+                .returnBundle(Bundle.class)
+                .encodedJson()
+                .execute();
+    }
+
+    public  static Bundle resourceSearch(IGenericClient client, DPCResourceType resourceType){
+        return resourceSearch(client,resourceType, Maps.newHashMap());
+    }
+
+    public static void deleteResourceById(IGenericClient client, DPCResourceType resourceType, String resourceId){
+        client.delete()
+                .resourceById(resourceType.name(), resourceId)
+                .execute();
+    }
+
+    public static void updateResource(IGenericClient client, String id, IBaseResource resource, Map<String,String> extraHeaders){
+        IUpdateExecutable executable = client
+                .update()
+                .resource(resource)
+                .withId(id)
+                .encodedJson();
+
+        extraHeaders.forEach(executable::withAdditionalHeader);
+        executable.execute();
+    }
+
+    public static void updateResource(IGenericClient client, String id, IBaseResource resource){
+        updateResource(client, id, resource, Maps.newHashMap());
+    }
+
+    public static Bundle getPatientEverything(IGenericClient client, String patientId, String provenance){
+        return client
+                .operation()
+                .onInstance(new IdType("Patient", patientId))
+                .named("$everything")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", provenance)
+                .execute();
+    }
+
+    public static Bundle doGroupExport(IGenericClient client,String groupId, String provenance){
+        return client
+                .operation()
+                .onInstance(new IdType("Group", groupId))
+                .named("$export")
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .useHttpGet()
+                .withAdditionalHeader("X-Provenance", provenance)
+                .execute();
+    }
+}

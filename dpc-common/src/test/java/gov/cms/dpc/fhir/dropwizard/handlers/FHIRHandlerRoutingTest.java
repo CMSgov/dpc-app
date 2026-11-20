@@ -16,6 +16,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.Response;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -41,9 +42,18 @@ class FHIRHandlerRoutingTest {
             .addProvider(new FHIRHandler(R4))
             .addProvider(DefaultFHIRExceptionMapper.class)
             .build();
+    private static final ResourceExtension V3_RESOURCE = ResourceExtension.builder()
+            .setRegisterDefaultExceptionMappers(false)
+            .addResource(new V3BaseResource())
+            .addProvider(new FHIRHandler(R4))
+            .addProvider(new gov.cms.dpc.fhir.parameters.r4.FHIRParamValueFactory(R4))
+            .addProvider(gov.cms.dpc.fhir.dropwizard.handlers.exceptions.DataFormatExceptionMapper.class)
+            .addProvider(gov.cms.dpc.fhir.dropwizard.handlers.exceptions.JerseyExceptionMapper.class)
+            .addProvider(DefaultFHIRExceptionMapper.class)
+            .build();
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1", "r4"})
+    @ValueSource(strings = {"v1", "r4", "v3"})
     void readsAndWritesTheRequestedVersion(String version) {
         String json = "{\"resourceType\":\"Patient\",\"id\":\"test-patient\",\"name\":[{\"family\":\"García\"}]}";
         try (Response response = RESOURCE.target(version + "/Patient")
@@ -60,7 +70,7 @@ class FHIRHandlerRoutingTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1", "r4"})
+    @ValueSource(strings = {"v1", "r4", "v3"})
     void serializesErrorsInTheRequestedVersion(String version) {
         try (Response response = RESOURCE.target(version + "/error").request(FHIRMediaTypes.FHIR_JSON).get()) {
             assertOutcome(response, version, 500);
@@ -68,7 +78,7 @@ class FHIRHandlerRoutingTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1", "r4"})
+    @ValueSource(strings = {"v1", "r4", "v3"})
     void returnsBadRequestForMalformedJson(String version) {
         try (Response response = RESOURCE.target(version + "/Patient")
                 .request(FHIRMediaTypes.FHIR_JSON).post(Entity.entity("not json", FHIRMediaTypes.FHIR_JSON))) {
@@ -76,15 +86,24 @@ class FHIRHandlerRoutingTest {
         }
     }
 
+    @Test
+    void returnsR4OutcomeForInvalidV3OrganizationSubmit() {
+        try (Response response = V3_RESOURCE.target("v3/Organization/$submit")
+                .request("*/*")
+                .post(Entity.entity("{\"test\":\"test\"}", FHIRMediaTypes.FHIR_JSON))) {
+            assertOutcome(response, "v3", 400);
+        }
+    }
+
     private FhirContext context(String version) {
-        return version.equals("r4") ? R4 : STU3;
+        return version.equals("v1") ? STU3 : R4;
     }
 
     private void assertOutcome(Response response, String version, int status) {
         assertEquals(status, response.getStatus());
         assertEquals(FHIRMediaTypes.FHIR_JSON, response.getMediaType().toString());
         IBaseResource outcome = context(version).newJsonParser().parseResource(response.readEntity(String.class));
-        if (version.equals("r4")) {
+        if (!version.equals("v1")) {
             assertInstanceOf(org.hl7.fhir.r4.model.OperationOutcome.class, outcome);
         } else {
             assertInstanceOf(org.hl7.fhir.dstu3.model.OperationOutcome.class, outcome);
@@ -108,6 +127,12 @@ class FHIRHandlerRoutingTest {
             return patient;
         }
 
+        @POST
+        @Path("/v3/Patient")
+        public org.hl7.fhir.r4.model.Patient echoV3(org.hl7.fhir.r4.model.Patient patient) {
+            return patient;
+        }
+
         @GET
         @Path("/v1/error")
         public Response stu3Error() {
@@ -118,6 +143,37 @@ class FHIRHandlerRoutingTest {
         @Path("/r4/error")
         public Response r4Error() {
             throw new IllegalStateException("test error");
+        }
+
+        @GET
+        @Path("/v3/error")
+        public Response v3Error() {
+            throw new IllegalStateException("test error");
+        }
+    }
+
+    @Path("/v3")
+    public static class V3BaseResource {
+        @Path("/Organization")
+        public V3OrganizationResource organizationOperations() {
+            return new V3OrganizationProxyResource();
+        }
+    }
+
+    public static class V3OrganizationResource {
+        @POST
+        @Path("/$submit")
+        @FHIR
+        public org.hl7.fhir.r4.model.Bundle submit(
+                @gov.cms.dpc.fhir.annotations.r4.FHIRParameter(name = "resource") org.hl7.fhir.r4.model.Bundle bundle) {
+            return bundle;
+        }
+    }
+
+    public static class V3OrganizationProxyResource extends V3OrganizationResource {
+        @Override
+        public org.hl7.fhir.r4.model.Bundle submit(org.hl7.fhir.r4.model.Bundle bundle) {
+            return super.submit(bundle);
         }
     }
 }

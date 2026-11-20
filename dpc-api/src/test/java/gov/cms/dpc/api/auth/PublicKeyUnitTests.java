@@ -2,7 +2,7 @@ package gov.cms.dpc.api.auth;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.v1.APITestHelpers;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthFactory;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
 import gov.cms.dpc.api.entities.PublicKeyEntity;

@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 class VersionedExceptionMapperTest {
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1/Patient", "r4/Patient"})
+    @ValueSource(strings = {"v1/Patient", "r4/Patient", "v3/Organization/$submit"})
     void routesUnexpectedExceptions(String path) {
         Response response = new DefaultFHIRExceptionMapper(fhirResourceInfo(), uriInfo(path))
                 .toResponse(new IllegalStateException("error"));
@@ -30,7 +30,7 @@ class VersionedExceptionMapperTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1/Patient", "r4/Patient"})
+    @ValueSource(strings = {"v1/Patient", "r4/Patient", "v3/Organization/$submit"})
     void routesHapiExceptions(String path) {
         BaseServerResponseException exception = hapiException();
         Response response = new HAPIExceptionMapper(fhirResourceInfo(), uriInfo(path)).toResponse(exception);
@@ -38,7 +38,7 @@ class VersionedExceptionMapperTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1/Patient", "r4/Patient"})
+    @ValueSource(strings = {"v1/Patient", "r4/Patient", "v3/Organization/$submit"})
     void routesValidationExceptions(String path) {
         JerseyViolationException exception = new JerseyViolationException(Set.of(), mock(Invocable.class));
         Response response = new JerseyExceptionMapper(fhirResourceInfo(), uriInfo(path)).toResponse(exception);
@@ -46,7 +46,7 @@ class VersionedExceptionMapperTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1/Patient", "r4/Patient"})
+    @ValueSource(strings = {"v1/Patient", "r4/Patient", "v3/Organization/$submit"})
     void routesPersistenceExceptions(String path) {
         Response response = new PersistenceExceptionMapper(fhirResourceInfo(), uriInfo(path))
                 .toResponse(new PersistenceException("database details"));
@@ -61,7 +61,7 @@ class VersionedExceptionMapperTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1/Patient", "r4/Patient"})
+    @ValueSource(strings = {"v1/Patient", "r4/Patient", "v3/Organization/$submit"})
     void routesParserExceptions(String path) {
         Response response = new DataFormatExceptionMapper(fhirResourceInfo(), uriInfo(path))
                 .toResponse(new DataFormatException("invalid JSON"));
@@ -69,7 +69,8 @@ class VersionedExceptionMapperTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"r4/Patient", "/r4/Patient", "r4", "v1/Patient", "v1"})
+    @ValueSource(strings = {"r4/Patient", "/r4/Patient", "r4", "v3/Organization/$submit",
+            "/v3/Organization/$submit", "v3", "v1/Patient", "v1"})
     void handlesErrorsBeforeResourceMatching(String path) {
         ResourceInfo unmatched = mock(ResourceInfo.class);
         Response response = new DefaultFHIRExceptionMapper(unmatched, uriInfo(path))
@@ -78,7 +79,8 @@ class VersionedExceptionMapperTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"r4ish/Patient", "prefix/r4/Patient", "v1/Patient"})
+    @ValueSource(strings = {"r4ish/Patient", "prefix/r4/Patient", "v3ish/Patient",
+            "prefix/v3/Patient", "v1/Patient"})
     void matchesOnlyTheFirstCompletePathSegment(String path) {
         Response response = new DefaultFHIRExceptionMapper(fhirResourceInfo(), uriInfo(path))
                 .toResponse(new IllegalStateException("error"));
@@ -86,7 +88,7 @@ class VersionedExceptionMapperTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1/version", "r4/version", "admin/version"})
+    @ValueSource(strings = {"v1/version", "r4/version", "v3/version", "admin/version"})
     void preservesNonFhirErrorResponses(String path) {
         ResourceInfo info = mock(ResourceInfo.class);
         when(info.getResourceClass()).thenAnswer(invocation -> NonFHIRResource.class);
@@ -97,7 +99,7 @@ class VersionedExceptionMapperTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"v1/Patient", "r4/Patient"})
+    @ValueSource(strings = {"v1/Patient", "r4/Patient", "v3/Organization/$submit"})
     void preservesRedirects(String path) {
         Response redirect = Response.status(302).header("Location", "/elsewhere").build();
         Response response = new DefaultFHIRExceptionMapper(fhirResourceInfo(), uriInfo(path))
@@ -147,7 +149,8 @@ class VersionedExceptionMapperTest {
 
     private void assertOutcome(Response response, String path, int status) {
         assertEquals(status, response.getStatus());
-        if (path.equals("r4") || path.startsWith("r4/")) {
+        if (path.equals("r4") || path.startsWith("r4/")
+                || path.equals("v3") || path.startsWith("v3/")) {
             assertInstanceOf(org.hl7.fhir.r4.model.OperationOutcome.class, response.getEntity());
         } else {
             assertInstanceOf(org.hl7.fhir.dstu3.model.OperationOutcome.class, response.getEntity());

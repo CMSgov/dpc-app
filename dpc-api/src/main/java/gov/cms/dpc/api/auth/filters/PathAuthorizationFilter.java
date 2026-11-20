@@ -39,6 +39,9 @@ public class PathAuthorizationFilter extends DPCAuthFilter {
 
     @Override
     protected DPCAuthCredentials buildCredentials(String macaroon, UUID organizationID, UriInfo uriInfo) {
+        if (uriInfo.getPathSegments().isEmpty()) {
+            throw new WebApplicationException("Unable to determine API version from request path", Response.Status.INTERNAL_SERVER_ERROR);
+        }
         final String pathParam = this.pa.pathParam();
         final String pathValue = uriInfo.getPathParameters().getFirst(pathParam);
         if (pathValue == null) {
@@ -50,6 +53,6 @@ public class PathAuthorizationFilter extends DPCAuthFilter {
         organization.setId(new IdType("Organization", organizationID.toString()));
         return new DPCAuthCredentials(macaroon,
                 organization,
-                this.pa, pathValue);
+                this.pa, pathValue, uriInfo.getPathSegments().getFirst().getPath());
     }
 }

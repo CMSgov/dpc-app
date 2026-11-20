@@ -2,7 +2,7 @@ package gov.cms.dpc.api.resources.v1;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.v1.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.entities.IpAddressEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.CreateIpAddressRequest;
@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
-import static gov.cms.dpc.api.APITestHelpers.ORGANIZATION_ID;
+import static gov.cms.dpc.api.v1.APITestHelpers.ORGANIZATION_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
