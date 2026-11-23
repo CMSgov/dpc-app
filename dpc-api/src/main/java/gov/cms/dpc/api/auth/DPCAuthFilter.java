@@ -3,7 +3,6 @@ package gov.cms.dpc.api.auth;
 import com.github.nitram509.jmacaroons.Macaroon;
 import gov.cms.dpc.api.jdbi.TokenDAO;
 import gov.cms.dpc.common.MDCConstants;
-import gov.cms.dpc.common.utils.EnvironmentParser;
 import gov.cms.dpc.common.utils.XSSSanitizerUtil;
 import gov.cms.dpc.macaroons.MacaroonBakery;
 import gov.cms.dpc.macaroons.exceptions.BakeryException;
@@ -11,7 +10,6 @@ import io.dropwizard.auth.AuthFilter;
 import io.dropwizard.auth.Authenticator;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.slf4j.Logger;
@@ -61,12 +59,6 @@ public abstract class DPCAuthFilter extends AuthFilter<DPCAuthCredentials, Organ
         final String orgId = dpcAuthCredentials.getOrganization().getId();
         final String resourceRequested = XSSSanitizerUtil.sanitize(uriInfo.getPath());
         final String method = requestContext.getMethod();
-
-        // TODO Remove this when we want to turn on the IpAddress end point on Prod
-        final String environment = EnvironmentParser.getEnvironment("API", false);
-        if(resourceRequested.equals("v1/IpAddress") && environment.equals("prod")) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
-        }
 
         final boolean authenticated = this.authenticate(requestContext, dpcAuthCredentials, null);
         if (!authenticated) {

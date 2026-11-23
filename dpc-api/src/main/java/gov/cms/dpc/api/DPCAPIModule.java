@@ -106,6 +106,12 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
+    public gov.cms.dpc.api.resources.r4.KeyResource provideR4KeyResource(PublicKeyDAO dao) {
+        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+                .create(gov.cms.dpc.api.resources.r4.KeyResource.class, new Class<?>[]{PublicKeyDAO.class}, new Object[]{dao});
+    }
+
+    @Provides
     public TokenResource provideTokenResource(TokenDAO dao, MacaroonBakery bakery, JwtKeyLocator locator, IJTICache cache, @APIV1 String publicURL) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
                 .create(TokenResource.class,
@@ -124,9 +130,33 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
+    public gov.cms.dpc.api.resources.r4.TokenResource provideR4TokenResource(TokenDAO dao, MacaroonBakery bakery, JwtKeyLocator locator, IJTICache cache, @Named("v3URL") String publicURL) {
+        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+                .create(gov.cms.dpc.api.resources.r4.TokenResource.class,
+                        new Class<?>[]{TokenDAO.class,
+                                MacaroonBakery.class,
+                                TokenPolicy.class,
+                                JwtKeyLocator.class,
+                                IJTICache.class,
+                                String.class},
+                        new Object[]{dao,
+                                bakery,
+                                this.configuration().getTokenPolicy(),
+                                locator,
+                                cache,
+                                publicURL});
+    }
+
+    @Provides
     public IpAddressResource provideIpAddressResource(IpAddressDAO dao) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
             .create(IpAddressResource.class, new Class<?>[]{IpAddressDAO.class}, new Object[]{dao});
+    }
+
+    @Provides
+    public gov.cms.dpc.api.resources.r4.IpAddressResource provideR4IpAddressResource(IpAddressDAO dao) {
+        return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
+                .create(gov.cms.dpc.api.resources.r4.IpAddressResource.class, new Class<?>[]{IpAddressDAO.class}, new Object[]{dao});
     }
 
     @Provides
@@ -156,6 +186,13 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     public String provideBaseURL() {
         return configuration().getPublicURL();
     }
+
+    @Provides
+    @Named("v3URL")
+    public String providesV3URL() {
+        return configuration().getPublicURL() + "/v3";
+    }
+
 
     @Provides
     @APIV1

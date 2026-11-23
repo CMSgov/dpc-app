@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.models.CollectionResponse;
+import gov.cms.dpc.api.models.KeySignature;
 import gov.cms.dpc.api.resources.v1.KeyResource;
 import gov.cms.dpc.api.tasks.keys.DeletePublicKey;
 import gov.cms.dpc.api.tasks.keys.ListPublicKeys;
@@ -59,7 +60,7 @@ public class PublicKeyTaskTests {
         final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             upk.execute(map, "{\"key\":\"this is a key\",\"signature\":\"this is a signature\"}", new PrintWriter(new OutputStreamWriter(bos)));
-            ArgumentCaptor<KeyResource.KeySignature> keySigArg = ArgumentCaptor.forClass(KeyResource.KeySignature.class);
+            ArgumentCaptor<KeySignature> keySigArg = ArgumentCaptor.forClass(KeySignature.class);
             Mockito.verify(this.keyResource, Mockito.times(1)).submitKey(principalCaptor.capture(),
                     keySigArg.capture(), Mockito.eq(Optional.empty()));
             assertEquals(id, principalCaptor.getValue().getID(), "Should have correct ID");
@@ -74,7 +75,7 @@ public class PublicKeyTaskTests {
         final Map<String, List<String>> map = Map.of("organization", List.of(id.toString()), "label", List.of("this is a label"));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             upk.execute(map, "{\"key\":\"this is a key\",\"signature\":\"this is a signature\"}", new PrintWriter(new OutputStreamWriter(bos)));
-            ArgumentCaptor<KeyResource.KeySignature> keySigArg = ArgumentCaptor.forClass(KeyResource.KeySignature.class);
+            ArgumentCaptor<KeySignature> keySigArg = ArgumentCaptor.forClass(KeySignature.class);
             Mockito.verify(this.keyResource, Mockito.times(1)).submitKey(principalCaptor.capture(),
                     keySigArg.capture(),
                     Mockito.eq(Optional.of("this is a label")));
