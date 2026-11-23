@@ -131,7 +131,8 @@ class MockOneEcosystemClientTest {
             List.of("ABC0123ABCD"),
             Instant.now(),
             resourceTypes,
-            "ExplanationOfBenefit?outcome=complete" // this means other resourceTypes are not _typeFilter'd
+            "ExplanationOfBenefit?outcome=complete", // this means other resourceTypes are not _typeFilter'd
+            "https://example.com/api/v3/Group/1234/$export"
         );
     }
 }

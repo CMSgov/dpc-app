@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import gov.cms.dpc.fhir.configuration.ConnectionPoolConfiguration;
 import gov.cms.dpc.fhir.configuration.TimeoutConfiguration;
 import gov.cms.dpc.oneecosystem.config.OneEcosystemClientConfiguration;
@@ -201,11 +202,10 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
 
     private String buildExportBody(OneEcosystemExportRequest request) throws IOException {
         ObjectNode root = objectMapper.createObjectNode();
-        // TODO: pull source_query URL from request
-        root.put("source_query", "https://dpc.cms.gov/api/v3/Group/{groupID}/$export");
-        root.put("system", "DPC");
-        root.put("tracking_id", UUID.randomUUID().toString());
-        root.put("version", "v3");
+        root.set("source_query", TextNode.valueOf(request.sourceQuery()));
+        root.set("system", TextNode.valueOf("DPC"));
+        root.set("tracking_id", TextNode.valueOf(UUID.randomUUID().toString()));
+        root.set("version", TextNode.valueOf("v3"));
 
         ObjectNode query = root.putArray("queries").addObject();
         request.mbis().forEach(query.putArray("mbis")::add);
@@ -215,8 +215,8 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
         ArrayNode filters = query.putArray("filters");
 
         ObjectNode sinceFilter = filters.addObject();
-        sinceFilter.put("name", "_since");
-        sinceFilter.put("value", request.since().toString());
+        sinceFilter.set("name", TextNode.valueOf("_since"));
+        sinceFilter.set("value", TextNode.valueOf(request.since().toString()));
 
         // TODO: clarify what filtering logic is in scope for MVP
         // filters.addObject()

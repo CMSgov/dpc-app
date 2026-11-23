@@ -8,13 +8,14 @@ public record OneEcosystemExportRequest(
     List<String> mbis,
     Instant since,
     List<String> resourceTypes,
-    String typeFilter
+    String typeFilter,
+    String sourceQuery
 ) {
     public OneEcosystemExportRequest {
         mbis = List.copyOf(mbis);
         Objects.requireNonNull(since, "since param is required");
         resourceTypes = List.copyOf(resourceTypes);
         Objects.requireNonNull(typeFilter, "typeFilter param is required");
-        // TODO: add request URL for NewBE to track via source_query
+        Objects.requireNonNull(sourceQuery, "sourceQuery param is required");
     }
 }
