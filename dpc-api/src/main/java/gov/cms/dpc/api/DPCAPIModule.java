@@ -11,7 +11,6 @@ import gov.cms.dpc.api.auth.jwt.IJTICache;
 import gov.cms.dpc.api.auth.jwt.JwtKeyLocator;
 import gov.cms.dpc.api.converters.ChecksumConverterProvider;
 import gov.cms.dpc.api.converters.HttpRangeHeaderParamConverterProvider;
-import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.api.jdbi.IpAddressDAO;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.jdbi.TokenDAO;
@@ -23,6 +22,7 @@ import gov.cms.dpc.api.tasks.keys.UploadPublicKey;
 import gov.cms.dpc.api.tasks.tokens.DeleteToken;
 import gov.cms.dpc.api.tasks.tokens.GenerateClientTokens;
 import gov.cms.dpc.api.tasks.tokens.ListClientTokens;
+import gov.cms.dpc.attribution.client.AttributionClient;
 import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.ExportPath;
 import gov.cms.dpc.common.annotations.JobTimeout;
@@ -37,6 +37,7 @@ import gov.cms.dpc.macaroons.annotations.PublicURL;
 import gov.cms.dpc.macaroons.config.TokenPolicy;
 import gov.cms.dpc.macaroons.thirdparty.IThirdPartyKeyStore;
 import gov.cms.dpc.macaroons.thirdparty.MemoryThirdPartyKeyStore;
+import gov.cms.dpc.queue.FileManager;
 import gov.cms.dpc.queue.service.DataService;
 import io.dropwizard.hibernate.UnitOfWorkAwareProxyFactory;
 import jakarta.inject.Named;
@@ -173,9 +174,9 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     }
 
     @Provides
-    public OrganizationResource provideR4OrganizationResource(AttributionClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
+    public gov.cms.dpc.api.resources.r4.OrganizationResource provideR4OrganizationResource(AttributionClient client, TokenDAO tokenDAO, PublicKeyDAO keyDAO) {
         return new UnitOfWorkAwareProxyFactory(authHibernateBundle)
-                .create(OrganizationResource.class,
+                .create(gov.cms.dpc.api.resources.r4.OrganizationResource.class,
                         new Class<?>[]{AttributionClient.class,
                                 TokenDAO.class,
                                 PublicKeyDAO.class},

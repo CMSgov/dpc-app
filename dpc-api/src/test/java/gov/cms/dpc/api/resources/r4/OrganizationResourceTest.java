@@ -79,7 +79,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         assertThrows(InvalidRequestException.class, () -> OrganizationHelpers.createOrganization(ctx, client, newOrgID, true));
 
         // Now, try to create one again, but using an actual org token
-        final IGenericClient orgClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        final IGenericClient orgClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         assertThrows(AuthenticationException.class, () -> OrganizationHelpers.createOrganization(ctx, orgClient, "1111111112", true));
     }
 
@@ -113,7 +113,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testOrganizationFetch() {
-        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         final Bundle organizations = client
                 .search()
@@ -130,7 +130,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
     @Test
     void testOrganizationFetchById() {
 
-        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         final Organization organization = client
                 .read()
@@ -172,8 +172,8 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         final IParser parser = ctx.newJsonParser();
         final IGenericClient attrClient = APITestHelpers.buildAttributionClient(ctx);
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, orgID, "1111121111", getAdminURL());
-        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("org-update-key", orgID, GOLDEN_MACAROON, getAuthBaseURL());
-        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("org-update-key", orgID, GOLDEN_MACAROON, getBaseURL());
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
 
         Organization organization = client
                 .read()
@@ -201,8 +201,8 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         // Try to update when authenticated as different organization
         final String org2ID = UUID.randomUUID().toString();
         final String org2Macaroon = FHIRHelpers.registerOrganization(attrClient, parser, org2ID, "4321234211", getAdminURL());
-        final Pair<UUID, PrivateKey> org2UUIDPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("org2-update-key", org2ID, GOLDEN_MACAROON, getAuthBaseURL());
-        final IGenericClient org2Client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), org2Macaroon, org2UUIDPrivateKeyPair.getLeft(), org2UUIDPrivateKeyPair.getRight());
+        final Pair<UUID, PrivateKey> org2UUIDPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("org2-update-key", org2ID, GOLDEN_MACAROON, getBaseURL());
+        final IGenericClient org2Client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), org2Macaroon, org2UUIDPrivateKeyPair.getLeft(), org2UUIDPrivateKeyPair.getRight());
 
         IUpdateTyped update = org2Client.update().resource(organization);
         assertThrows(AuthenticationException.class, update::execute);
@@ -216,7 +216,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
         FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), orgDeletionID.toString(), "1111121111", TASK_URL);
 
         // Register Public key
-        APIAuthHelpers.generateAndUploadKey("org-deletion-key", orgDeletionID.toString(), GOLDEN_MACAROON, getAuthBaseURL());
+        APIAuthHelpers.generateAndUploadKey("org-deletion-key", orgDeletionID.toString(), GOLDEN_MACAROON, getBaseURL());
         final IGenericClient client = APIAuthHelpers.buildAdminClient(ctx, getBaseURL(), GOLDEN_MACAROON, false);
 
         // Delegate the Macaroon
@@ -261,7 +261,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
 
     CollectionResponse<TokenEntity> fetchTokens(String token) throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getAuthBaseURL() + "/Token");
+            final HttpGet httpGet = new HttpGet(getBaseURL() + "/Token");
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
@@ -272,7 +272,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
 
     CollectionResponse<PublicKeyEntity> fetchKeys(String token) throws IOException {
         try (final CloseableHttpClient client = HttpClients.createDefault()) {
-            final HttpGet httpGet = new HttpGet(getAuthBaseURL() + "/Key");
+            final HttpGet httpGet = new HttpGet(getBaseURL() + "/Key");
             httpGet.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
 
             try (CloseableHttpResponse response = client.execute(httpGet)) {
@@ -283,7 +283,7 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testUpdateInvalidOrganization() {
-        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         final Organization organization = client.read()
             .resource(Organization.class)
             .withId(ORGANIZATION_ID)
@@ -303,10 +303,11 @@ class OrganizationResourceTest extends AbstractSecureApplicationTest {
     void testSharedOrganizationAcrossVersions() throws Exception {
         final TestOrganizationContext otherOrg = registerAndSetupNewOrg();
         final UUID keyId = UUID.fromString(otherOrg.getPublicKeyId());
-        final IGenericClient r4Client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(),
+        final IGenericClient r4Client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(),
                 otherOrg.getClientToken(), keyId, otherOrg.getPrivateKey());
+        final String v1BaseURL = getBaseURL().replaceFirst("/v3$", "/v1");
         final IGenericClient v1Client = APIAuthHelpers.buildAuthenticatedClient(FhirContext.forDstu3(),
-                getAuthBaseURL(), otherOrg.getClientToken(), keyId, otherOrg.getPrivateKey());
+                v1BaseURL, otherOrg.getClientToken(), keyId, otherOrg.getPrivateKey());
 
         Organization r4Organization = r4Client.read().resource(Organization.class)
                 .withId(otherOrg.getOrgId()).encodedJson().execute();

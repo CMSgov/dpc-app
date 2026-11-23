@@ -70,7 +70,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testCreatePatientReturnsAppropriateHeaders() {
-        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         Patient patient = APITestHelpers.createPatientResource("4S41C00AA00", ORGANIZATION_ID);
 
         MethodOutcome methodOutcome = client.create()
@@ -95,7 +95,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void ensurePatientsExist() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
-        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
 
         final Bundle patients = fetchPatients(client);
@@ -114,8 +114,8 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         assertTrue(foundPatient.equalsDeep(queriedPatient), "Search and GET should be identical");
 
         final String m2 = FHIRHelpers.registerOrganization(attrClient, parser, OTHER_ORG_ID, "1112111111", getAdminURL());
-        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("new-key", OTHER_ORG_ID, GOLDEN_MACAROON, getAuthBaseURL());
-        client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), m2, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("new-key", OTHER_ORG_ID, GOLDEN_MACAROON, getBaseURL());
+        client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), m2, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
 
         final Bundle otherPatients = fetchPatients(client);
         assertEquals(0, otherPatients.getTotal(), "Should not have any patients");
@@ -140,8 +140,8 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     @Test
     void testPatientRemoval() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
-        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("patient-deletion-key", ORGANIZATION_ID, GOLDEN_MACAROON, getAuthBaseURL());
-        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("patient-deletion-key", ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
         APITestHelpers.setupPatientTest(client, parser);
 
         final Bundle patients = fetchPatients(client);
@@ -167,8 +167,8 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     @Test
     void testPatientUpdating() throws IOException, URISyntaxException, GeneralSecurityException, ParseException {
         final String macaroon = FHIRHelpers.registerOrganization(attrClient, parser, ORGANIZATION_ID, ORGANIZATION_NPI, getAdminURL());
-        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("patient-update-key", ORGANIZATION_ID, GOLDEN_MACAROON, getAuthBaseURL());
-        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("patient-update-key", ORGANIZATION_ID, GOLDEN_MACAROON, getBaseURL());
+        final IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), macaroon, uuidPrivateKeyPair.getLeft(), uuidPrivateKeyPair.getRight());
         APITestHelpers.setupPatientTest(client, parser);
 
         final Bundle patients = fetchPatients(client);
@@ -204,7 +204,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
         conn.setRequestMethod(HttpMethod.POST);
         conn.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/fhir+json");
 
-        APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         conn.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + auth.accessToken);
 
         conn.setDoOutput(true);
@@ -231,8 +231,8 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     void testGetPatientByUUID() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
-        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
-        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
+        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
+        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
         final Patient orgAPatient = (Patient) APITestHelpers.createResource(orgAClient, APITestHelpers.createPatientResource("4S41C00AA00", orgAContext.getOrgId())).getResource();
         final Patient orgBPatient = (Patient) APITestHelpers.createResource(orgBClient, APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId())).getResource();
@@ -245,7 +245,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testFetchPatientRandomPage() throws IOException {
-        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
         Map<String, List<String>> params = new HashMap<>();
         params.put("_count", List.of("10"));
@@ -257,7 +257,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testFetchPatientSummaryBundle() throws IOException {
-        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
         Map<String, List<String>> params = new HashMap<>();
         params.put("_count", List.of("0"));
@@ -268,7 +268,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testFetchPatientFollowLinksHappyPath() throws IOException {
-        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
         Map<String, List<String>> params = new HashMap<>();
         params.put("_count", List.of("50"));
@@ -289,7 +289,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testFetchPatientInvalidParams() throws IOException {
-        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
         Map<String, List<String>> invalidCountParams = new HashMap<>();
         invalidCountParams.put("_count", List.of("-1"));
@@ -302,7 +302,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
 
     @Test
     void testFetchPatientHighCountNumber() throws IOException {
-        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         APITestHelpers.setupPatientTest(client, parser);
         Map<String, List<String>> params = new HashMap<>();
         params.put("_count", List.of("101"));
@@ -319,7 +319,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     void testUpdatePatientDataDuringPagination() {
         final int FIRST_PATIENT_COUNT = 95;
         final int ADDITIONAL_PATIENT_COUNT = 10;
-        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 
         submitPatients(client, ORGANIZATION_ID, FIRST_PATIENT_COUNT);
 
@@ -343,8 +343,8 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     void testDeletePatient() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
-        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
-        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
+        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
+        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
         final Patient orgBPatient = (Patient) APITestHelpers.createResource(orgBClient, APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId())).getResource();
         final String orgBPatientId = orgBPatient.getIdElement().getIdPart();
@@ -357,8 +357,8 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     void testPatientPathAuthorization() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final TestOrganizationContext orgAContext = registerAndSetupNewOrg();
         final TestOrganizationContext orgBContext = registerAndSetupNewOrg();
-        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
-        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
+        final IGenericClient orgAClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgAContext.getClientToken(), UUID.fromString(orgAContext.getPublicKeyId()), orgAContext.getPrivateKey());
+        final IGenericClient orgBClient = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), orgBContext.getClientToken(), UUID.fromString(orgBContext.getPublicKeyId()), orgBContext.getPrivateKey());
 
         final Patient orgAPatient = (Patient) APITestHelpers.createResource(orgAClient, APITestHelpers.createPatientResource(MockBlueButtonClient.TEST_PATIENT_MBIS.get(2), orgAContext.getOrgId())).getResource();
         final Patient orgBPatient = (Patient) APITestHelpers.createResource(orgBClient, APITestHelpers.createPatientResource("4S41C00AA00", orgBContext.getOrgId())).getResource();
@@ -382,7 +382,7 @@ class PatientResourceTest extends AbstractSecureApplicationTest {
     void testBatchSubmit() throws GeneralSecurityException, IOException, URISyntaxException, ParseException {
         final int COUNT_TEST_PATIENTS = 500;
 
-        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+        IGenericClient client = APIAuthHelpers.buildAuthenticatedClient(ctx, getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
         final TestOrganizationContext orgContext = registerAndSetupNewOrg();
         List<Patient> patients = APITestHelpers.createPatientResources(orgContext.getOrgId(), COUNT_TEST_PATIENTS);
 

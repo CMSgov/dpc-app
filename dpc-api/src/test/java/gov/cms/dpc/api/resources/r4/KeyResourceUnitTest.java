@@ -1,6 +1,6 @@
 package gov.cms.dpc.api.resources.r4;
 
-import gov.cms.dpc.api.APITestHelpers;
+import gov.cms.dpc.api.r4.APITestHelpers;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;

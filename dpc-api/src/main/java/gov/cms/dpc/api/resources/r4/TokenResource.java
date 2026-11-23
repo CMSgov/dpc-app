@@ -20,7 +20,6 @@ import gov.cms.dpc.api.models.CreateTokenRequest;
 import gov.cms.dpc.api.models.JWTAuthResponse;
 import gov.cms.dpc.api.resources.AbstractTokenResource;
 import gov.cms.dpc.common.MDCConstants;
-import gov.cms.dpc.common.annotations.APIV1;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.annotations.Public;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
@@ -39,6 +38,7 @@ import io.jsonwebtoken.Jwts;
 import io.swagger.annotations.*;
 import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.persistence.NoResultException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -87,7 +87,7 @@ public class TokenResource extends AbstractTokenResource {
                          TokenPolicy policy,
                          JwtKeyLocator locator,
                          IJTICache cache,
-                         @APIV1 String publicURL) {
+                         @Named("v3URL") String publicURL) {
         this.dao = dao;
         this.bakery = bakery;
         this.policy = policy;

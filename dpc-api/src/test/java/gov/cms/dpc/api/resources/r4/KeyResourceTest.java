@@ -2,7 +2,7 @@ package gov.cms.dpc.api.resources.r4;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.dpc.api.AbstractSecureApplicationTest;
+import gov.cms.dpc.api.r4.AbstractSecureApplicationTest;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.KeySignature;
 import gov.cms.dpc.testing.APIAuthHelpers;
@@ -37,7 +37,7 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
     private final ObjectMapper mapper;
     private final String fullyAuthedToken;
 
-    private KeyResourceTest() {
+    KeyResourceTest() {
         this.mapper = new ObjectMapper();
         // Do the JWT flow in order to get a correct ORGANIZATION_TOKEN, this is normally handled by the HAPI client
         try {
@@ -186,11 +186,6 @@ class KeyResourceTest extends AbstractSecureApplicationTest {
                 assertEquals("ECC keys are not currently supported", respBody.get("message"), "Should return helpful error message");
             }
         }
-    }
-
-    @Override
-    protected String getBaseURL() {
-        return super.getBaseURL().replaceFirst("/v1$", "/v3");
     }
 
     protected static KeySignature generateKeyAndSignature() throws GeneralSecurityException {

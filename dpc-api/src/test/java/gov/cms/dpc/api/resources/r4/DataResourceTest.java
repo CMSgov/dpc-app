@@ -244,7 +244,7 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 
 	private String getAccessToken() {
 		try {
-			APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getAuthBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
+			APIAuthHelpers.AuthResponse auth = APIAuthHelpers.jwtAuthFlow(getBaseURL(), ORGANIZATION_TOKEN, PUBLIC_KEY_ID, PRIVATE_KEY);
 			return auth.accessToken;
 		} catch (IOException | URISyntaxException e) {
 			fail("Failed to generate access token");

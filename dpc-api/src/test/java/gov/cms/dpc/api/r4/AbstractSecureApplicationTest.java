@@ -64,17 +64,12 @@ public class AbstractSecureApplicationTest {
         final String orgId = UUID.randomUUID().toString();
         final String npi = NPIUtil.generateNPI();
         final String clientToken = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), orgId,  npi, TASK_URL);
-        final Pair<UUID, PrivateKey> newKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", orgId, GOLDEN_MACAROON, "http://localhost:3002/v1");
+        final Pair<UUID, PrivateKey> newKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", orgId, GOLDEN_MACAROON, getBaseURL());
         return new TestOrganizationContext(clientToken,npi,orgId,newKeyPair.getLeft().toString(),newKeyPair.getRight());
     }
 
     protected String getBaseURL() {
         return String.format("http://localhost:%d/v3", APPLICATION.getLocalPort());
-    }
-
-    // TODO: Update to v3 when the token endpoint is ready
-    protected String getAuthBaseURL() {
-        return String.format("http://localhost:%d/v1", APPLICATION.getLocalPort());
     }
 
     protected String getAdminURL() {
@@ -99,8 +94,8 @@ public class AbstractSecureApplicationTest {
         ORGANIZATION_TOKEN = FHIRHelpers.registerOrganization(attrClient, ctx.newJsonParser(), ORGANIZATION_ID, ORGANIZATION_NPI, TASK_URL);
 
         // Register Public key
-        // TODO: Switch v1->v3 when it's available
-        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", ORGANIZATION_ID, GOLDEN_MACAROON, "http://localhost:3002/v1");
+        final String baseURL = String.format("http://localhost:%d/v3", APPLICATION.getLocalPort());
+        final Pair<UUID, PrivateKey> uuidPrivateKeyPair = APIAuthHelpers.generateAndUploadKey("integration-test-key", ORGANIZATION_ID, GOLDEN_MACAROON, baseURL);
         PRIVATE_KEY = uuidPrivateKeyPair.getRight();
         PUBLIC_KEY_ID = uuidPrivateKeyPair.getLeft();
     }
