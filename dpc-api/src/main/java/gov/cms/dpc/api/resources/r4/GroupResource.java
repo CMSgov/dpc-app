@@ -245,7 +245,7 @@ public class GroupResource extends AbstractGroupResource {
         final List<String> resourceNames = resources.stream().map(DPCResourceType::name).toList();
         final OffsetDateTime since = this.handleSinceQueryParam(sinceParam);
         final Instant sinceInstant = since == null ? Instant.EPOCH : since.toInstant();
-        final String typeFilter = typeFilterParam == null ? "" : typeFilterParam;
+        final String typeFilter = typeFilterParam == null ? resourceTypes : typeFilterParam;
 
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
         final String requestUrl = APIHelpers.fetchRequestUrl(request);
