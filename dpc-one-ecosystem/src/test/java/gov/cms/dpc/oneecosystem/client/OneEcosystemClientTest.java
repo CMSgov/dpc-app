@@ -1,6 +1,8 @@
 package gov.cms.dpc.oneecosystem.client;
 
 import ca.uhn.fhir.context.FhirContext;
+import gov.cms.dpc.oneecosystem.models.OneEcosystemExportRequest;
+import gov.cms.dpc.oneecosystem.models.OneEcosystemExportResponse;
 import gov.cms.dpc.testing.IntegrationTest;
 import io.dropwizard.configuration.ConfigurationException;
 import org.junit.jupiter.api.BeforeAll;
@@ -8,6 +10,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,5 +43,28 @@ class OneEcosystemClientTest {
         // update this when we can move to other api calls and check for a valid response
         assertEquals(400, statusCode,
                 "Should show client has authenticated but received an error");
+    }
+
+    @Test
+    void testExport() {
+        OneEcosystemExportRequest request = new OneEcosystemExportRequest(
+                List.of("1S00EU7JJ00", "1S00EU7JJ11", "1S00EU7JJ18", "1S00EU8EX75", "1S00EU8EY44"),
+                Instant.parse("2026-08-01T13:00:00Z"), // 2026-08-01T08:00:00-05:00
+                List.of("Patient", "ExplanationOfBenefit", "Coverage"),
+                "ExplanationOfBenefit?_tag=https://bluebutton.cms.gov/fhir/CodeSystem/System-Type%7CNationalClaimsHistory&outcome=partial&service-date=gt2026-02-10"
+        );
+
+        OneEcosystemExportResponse response = client.export(request);
+
+        assertNotEquals(401, response.statusCode(), "should not get a 401");
+
+        // update this once we confirm the actual accepted status / payload shape for $shared-export
+        assertEquals(202, response.statusCode(),
+                "Export request should be accepted for async processing");
+        assertNotNull(response.contentLocation(),
+                "Should receive a location (full URL or job ID) for the export job");
+        assertTrue(response.contentLocation().matches("https?://.+/api/v3/jobs/\\d+"),
+                "contentLocation should job URL"
+                        + response.contentLocation());
     }
 }

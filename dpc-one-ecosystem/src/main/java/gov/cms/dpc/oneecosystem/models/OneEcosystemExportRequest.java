@@ -15,5 +15,6 @@ public record OneEcosystemExportRequest(
         Objects.requireNonNull(since, "since param is required");
         resourceTypes = List.copyOf(resourceTypes);
         Objects.requireNonNull(typeFilter, "typeFilter param is required");
+        // TODO: add request URL for NewBE to track via source_query
     }
 }

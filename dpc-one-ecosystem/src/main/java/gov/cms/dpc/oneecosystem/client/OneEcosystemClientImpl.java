@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.apache.ApacheHttp5RestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.cms.dpc.fhir.configuration.ConnectionPoolConfiguration;
 import gov.cms.dpc.fhir.configuration.TimeoutConfiguration;
 import gov.cms.dpc.oneecosystem.config.OneEcosystemClientConfiguration;
@@ -18,8 +20,10 @@ import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.util.Timeout;
 import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -84,7 +88,28 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
 
     @Override
     public OneEcosystemExportResponse export(OneEcosystemExportRequest request) {
-        throw new UnsupportedOperationException("not implemented");
+        URI endpoint = apiBaseUri.resolve("api/v3/$shared-export");
+        HttpPost post = new HttpPost(endpoint);
+        post.setHeader(HttpHeaders.ACCEPT, "application/fhir+json");
+        post.setHeader("Prefer", "respond-async");
+        post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + currentToken());
+
+        try {
+            post.setEntity(new StringEntity(buildExportBody(request), ContentType.APPLICATION_JSON));
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to serialize export request", e);
+        }
+
+        try {
+            return httpClient.execute(post, response -> {
+                int statusCode = response.getCode();
+                var locationHeader = response.getFirstHeader(HttpHeaders.CONTENT_LOCATION);
+                String contentLocation = locationHeader != null ? locationHeader.getValue() : null;
+                return new OneEcosystemExportResponse(statusCode, contentLocation);
+            });
+        } catch (IOException e) {
+            throw new UncheckedIOException("Export request failed", e);
+        }
     }
 
     @Override
@@ -172,5 +197,31 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
     private String clientCredentialsBasicAuth() {
         String credentials = clientId + ":" + clientSecret;
         return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String buildExportBody(OneEcosystemExportRequest request) throws IOException {
+        ObjectNode root = objectMapper.createObjectNode();
+        // TODO: pull source_query URL from request
+        root.put("source_query", "https://dpc.cms.gov/api/v3/Group/{groupID}/$export");
+        root.put("system", "DPC");
+        root.put("tracking_id", UUID.randomUUID().toString());
+        root.put("version", "v3");
+
+        ObjectNode query = root.putArray("queries").addObject();
+        request.mbis().forEach(query.putArray("mbis")::add);
+        request.resourceTypes().forEach(query.putArray("resource_types")::add);
+        query.putObject("headers");
+
+        ArrayNode filters = query.putArray("filters");
+
+        ObjectNode sinceFilter = filters.addObject();
+        sinceFilter.put("name", "_since");
+        sinceFilter.put("value", request.since().toString());
+
+        // TODO: clarify what filtering logic is in scope for MVP
+        // filters.addObject()
+        // typeFilter.put("name", "_typeFilter")
+
+        return objectMapper.writeValueAsString(root);
     }
 }
