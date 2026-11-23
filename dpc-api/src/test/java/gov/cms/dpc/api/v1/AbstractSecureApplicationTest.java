@@ -83,7 +83,7 @@ public class AbstractSecureApplicationTest {
     protected String getExportPath() { return APPLICATION.getConfiguration().getExportPath(); }
 
     @BeforeAll
-    static void setup() throws Exception {
+    protected static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
         ctx = FhirContext.forDstu3();
         // Register a test organization for us
@@ -99,19 +99,19 @@ public class AbstractSecureApplicationTest {
     }
 
     @BeforeEach
-    void eachSetup() throws IOException {
+    protected void eachSetup() throws IOException {
 
         // Check health
         APITestHelpers.checkHealth(APPLICATION);
     }
 
     @AfterEach
-    void eachShutdown() throws IOException {
+    protected void eachShutdown() throws IOException {
         APITestHelpers.checkHealth(APPLICATION);
     }
 
     @AfterAll
-    static void shutdown() throws IOException {
+    protected static void shutdown() throws IOException {
         checkAllConnectionsClosed(String.format("http://localhost:%s", APPLICATION.getAdminPort()));
         APPLICATION.after();
     }
