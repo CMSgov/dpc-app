@@ -193,17 +193,10 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
         return configuration().getPublicURL() + "/v3";
     }
 
-
     @Provides
     @APIV1
     public String provideV1URL() {
         return configuration().getPublicURL() + "/v1";
-    }
-
-    @Provides
-    @APIV3
-    public String provideV3URL() {
-        return configuration().getPublicURL() + "/v3";
     }
 
     @Provides

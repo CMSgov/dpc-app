@@ -5,7 +5,6 @@ import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.resources.AbstractJobResource;
-import gov.cms.dpc.common.annotations.APIV3;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.models.JobCompletionModel;
 import gov.cms.dpc.fhir.DPCResourceType;
@@ -21,6 +20,7 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -48,7 +48,7 @@ public class JobResource extends AbstractJobResource {
     private final String baseURL;
 
     @Inject
-    public JobResource(IJobQueue queue, OneEcosystemClient client, @APIV3 String baseURL) {
+    public JobResource(IJobQueue queue, OneEcosystemClient client, @Named("v3URL") String baseURL) {
         this.queue = queue;
         this.client = client;
         this.baseURL = baseURL;

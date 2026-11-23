@@ -11,7 +11,6 @@ import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.api.auth.annotations.Authorizer;
 import gov.cms.dpc.api.auth.annotations.PathAuthorizer;
 import gov.cms.dpc.attribution.client.AttributionClient;
-import gov.cms.dpc.common.annotations.APIV3;
 import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.logging.SplunkTimestamp;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
@@ -69,7 +68,7 @@ public class GroupResource extends AbstractGroupResource {
     @Inject
     public GroupResource(DataService dataService,
                          @Named("attribution") IGenericClient stu3Client,
-                         @APIV3 String baseURL,
+                         @Named ("v3URL") String baseURL,
                          AttributionClient attributionClient,
                          OneEcosystemClient oneEcosystemClient,
                          DPCAPIConfiguration config) {
