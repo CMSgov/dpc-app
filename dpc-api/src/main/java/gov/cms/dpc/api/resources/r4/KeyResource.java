@@ -11,7 +11,6 @@ import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
 import gov.cms.dpc.api.models.KeySignature;
-import gov.cms.dpc.api.resources.AbstractKeyResource;
 import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import io.dropwizard.auth.Auth;
@@ -33,8 +32,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Api(tags = {"Auth", "Key"}, authorizations = @Authorization(value = "access_token"))
-@Path("/v3/Key")
-public class KeyResource extends AbstractKeyResource {
+public class KeyResource {
 
     public static final String SNIPPET = "This is the snippet used to verify a key pair in DPC.";
     private static final Logger logger = LoggerFactory.getLogger(KeyResource.class);
@@ -58,7 +56,6 @@ public class KeyResource extends AbstractKeyResource {
             notes = "This endpoint returns all the public keys currently associated with the organization." +
                     "<p>The returned keys are serialized using PEM encoding.",
             authorizations = @Authorization(value = "access_token"))
-    @Override
     public CollectionResponse<PublicKeyEntity> getPublicKeys(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal) {
         return new CollectionResponse<>(this.dao.fetchPublicKeys(organizationPrincipal.getID()));
     }
@@ -74,7 +71,6 @@ public class KeyResource extends AbstractKeyResource {
             notes = "This endpoint returns the specified public key associated with the organization." +
                     "<p>The returned keys are serialized using PEM encoding.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find public key for organization"))
-    @Override
     public PublicKeyEntity getPublicKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotNull @PathParam(value = "keyID") UUID keyID) {
         final List<PublicKeyEntity> publicKeys = this.dao.publicKeySearch(keyID, organizationPrincipal.getID());
         if (publicKeys.isEmpty()) {
@@ -96,7 +92,6 @@ public class KeyResource extends AbstractKeyResource {
             @ApiResponse(code = 404, message = "Cannot find public key for organization"),
             @ApiResponse(code = 200, message = "Key successfully removed")
     })
-    @Override
     public Response deletePublicKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal, @NotNull @PathParam(value = "keyID") UUID keyID) {
         final List<PublicKeyEntity> keys = this.dao.publicKeySearch(keyID, organizationPrincipal.getID());
 
@@ -122,7 +117,6 @@ public class KeyResource extends AbstractKeyResource {
                     "- secp384r1")
     @ApiResponses(@ApiResponse(code = 400, message = "Public key is not valid."))
     @UnitOfWork(value = DPCAuthHibernateBundle.BUNDLE_NAME)
-    @Override
     public PublicKeyEntity submitKey(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                      @ApiParam KeySignature keySignature,
                                      @ApiParam(name = "label", value = "Public Key Label (cannot be more than 25 characters in length)", defaultValue = "key:{random integer}", allowableValues = "range[-infinity, 25]")
