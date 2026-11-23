@@ -7,6 +7,7 @@ import gov.cms.dpc.api.auth.staticauth.StaticAuthFactory;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
 import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
+import gov.cms.dpc.api.models.KeySignature;
 import gov.cms.dpc.api.resources.v1.KeyResource;
 import gov.cms.dpc.common.converters.jackson.StringToOffsetDateTimeConverter;
 import gov.cms.dpc.testing.APIAuthHelpers;
@@ -90,7 +91,7 @@ class PublicKeyUnitTests {
             final Response response = RESOURCE
                     .target("/v1/Key")
                     .request()
-                    .post(Entity.entity(new KeyResource.KeySignature(APIAuthHelpers.generatePublicKey(key.getPublic()), sigStr), MediaType.APPLICATION_JSON));
+                    .post(Entity.entity(new KeySignature(APIAuthHelpers.generatePublicKey(key.getPublic()), sigStr), MediaType.APPLICATION_JSON));
 
             assertAll(() -> assertEquals(200, response.getStatus(), "Should have succeeded"),
                     () -> assertTrue(response.readEntity(KeyView.class).label.startsWith("key:"), "Should have default label"));
@@ -112,7 +113,7 @@ class PublicKeyUnitTests {
                     .target("/v1/Key")
                     .queryParam("label", label)
                     .request()
-                    .post(Entity.entity(new KeyResource.KeySignature(keyStr, sigStr), MediaType.APPLICATION_JSON));
+                    .post(Entity.entity(new KeySignature(keyStr, sigStr), MediaType.APPLICATION_JSON));
 
             assertAll(() -> assertEquals(200, response.getStatus(), "Should have succeeded"),
                     () -> assertEquals(label, response.readEntity(KeyView.class).label, "Should have default label"));
