@@ -73,7 +73,7 @@ public class AbstractSecureApplicationTest {
     }
 
     // TODO: Update to v3 when the token endpoint is ready
-    protected String getAuthBaseURL() {
+    String getAuthBaseURL() {
         return String.format("http://localhost:%d/v1", APPLICATION.getLocalPort());
     }
 
@@ -82,14 +82,14 @@ public class AbstractSecureApplicationTest {
     }
 
     // TODO: Update to v3/admin once that endpoint is created
-    protected String getAdminResourceURL() {
+    String getAdminResourceURL() {
         return String.format("http://localhost:%d/v1/Admin", APPLICATION.getLocalPort());
     }
 
     protected String getExportPath() { return APPLICATION.getConfiguration().getExportPath(); }
 
     @BeforeAll
-    protected static void setup() throws Exception {
+    static void setup() throws Exception {
         APITestHelpers.setupApplication(APPLICATION);
         ctx = FhirContext.forR4();
         // Register a test organization for us
@@ -106,19 +106,19 @@ public class AbstractSecureApplicationTest {
     }
 
     @BeforeEach
-    protected void eachSetup() throws IOException {
+    void eachSetup() throws IOException {
 
         // Check health
         APITestHelpers.checkHealth(APPLICATION);
     }
 
     @AfterEach
-    protected void eachShutdown() throws IOException {
+    void eachShutdown() throws IOException {
         APITestHelpers.checkHealth(APPLICATION);
     }
 
     @AfterAll
-    protected static void shutdown() throws IOException {
+    static void shutdown() throws IOException {
         checkAllConnectionsClosed(String.format("http://localhost:%s", APPLICATION.getAdminPort()));
         APPLICATION.after();
     }
