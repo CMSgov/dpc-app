@@ -394,11 +394,11 @@ GEM
     pry-nav (1.0.0)
       pry (>= 0.9.10, < 0.15)
     public_suffix (7.0.5)
-    puma (8.0.3)
+    puma (8.1.2)
       nio4r (~> 2.0)
     raabro (1.5.0)
     racc (1.8.1)
-    rack (3.2.8)
+    rack (3.2.9)
     rack-oauth2 (2.3.0)
       activesupport
       attr_required
@@ -406,7 +406,7 @@ GEM
       faraday-follow_redirects
       json-jwt (>= 1.11.0)
       rack (>= 2.1.0)
-    rack-protection (4.2.1)
+    rack-protection (4.2.2)
       base64 (>= 0.1.0)
       logger (>= 1.6.0)
       rack (>= 3.0.0, < 4)
@@ -527,11 +527,11 @@ GEM
       simplecov-html (~> 0.10.0)
     simplecov-html (0.10.2)
     simpleidn (0.2.3)
-    sinatra (4.2.1)
+    sinatra (4.2.2)
       logger (>= 1.6.0)
       mustermann (~> 3.0)
       rack (>= 3.0.0, < 4)
-      rack-protection (= 4.2.1)
+      rack-protection (= 4.2.2)
       rack-session (>= 2.0.0, < 3)
       tilt (~> 2.0)
     snaky_hash (2.0.9)
@@ -658,6 +658,7 @@ DEPENDENCIES
   pry-nav
   puma (>= 8.0.2)
   rack (>= 3.2.3)
+  rack-protection (>= 4.2.2)
   rack-session (>= 2.1.2)
   rails-controller-testing
   railties (~> 8.1.4)
