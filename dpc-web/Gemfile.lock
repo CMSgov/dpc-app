@@ -1,3 +1,12 @@
+PATH
+  remote: vendor/api_client
+  specs:
+    api_client (0.2.3)
+      active_model_serializers
+      activemodel (~> 8.1.4)
+      macaroons
+      oauth2
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -76,7 +85,11 @@ GEM
       uri (>= 0.13.1)
     addressable (2.9.2)
       public_suffix (>= 2.0.2, < 8.0)
+    anonymous_loader (0.1.5)
+      version_gem (~> 1.1, >= 1.1.17)
     ast (2.4.3)
+    auth-sanitizer (0.2.5)
+      version_gem (~> 1.1, >= 1.1.16)
     aws-eventstream (1.4.0)
     aws-partitions (1.1148.0)
     aws-sdk-core (3.229.0)
@@ -208,6 +221,8 @@ GEM
     globalid (1.4.0)
       activesupport (>= 6.1)
     hashdiff (1.2.1)
+    hashie (5.2.0)
+      logger
     health_check (3.1.0)
       railties (>= 5.0)
     i18n (1.15.2)
@@ -286,6 +301,8 @@ GEM
       prism (~> 1.5)
     msgpack (1.8.7)
     multi_json (1.17.0)
+    multi_xml (0.9.1)
+      bigdecimal (>= 3.1, < 5)
     net-http (0.9.1)
       uri (>= 0.11.1)
     net-imap (0.6.4.1)
@@ -302,6 +319,16 @@ GEM
     nokogiri (1.19.6)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
+    oauth2 (2.1.0)
+      anonymous_loader (~> 0.1, >= 0.1.5)
+      auth-sanitizer (~> 0.2, >= 0.2.5)
+      faraday (>= 0.17.3, < 4.0)
+      jwt (>= 1.0, < 4.0)
+      logger (~> 1.2)
+      multi_xml (~> 0.5)
+      rack (>= 1.2, < 4)
+      snaky_hash (~> 2.0, >= 2.0.9)
+      version_gem (~> 1.1, >= 1.1.17)
     orm_adapter (0.5.0)
     ostruct (0.6.2)
     parallel (2.3.0)
@@ -439,6 +466,9 @@ GEM
     simplecov-html (0.10.2)
     simpleidn (0.2.2)
       unf (~> 0.1.4)
+    snaky_hash (2.0.9)
+      hashie (>= 0.1.0, < 6)
+      version_gem (~> 1.1, >= 1.1.16)
     solid_queue (1.2.1)
       activejob (>= 7.1)
       activerecord (>= 7.1)
@@ -473,6 +503,7 @@ GEM
     uri (1.1.1)
     useragent (0.16.11)
     vcr (6.2.0)
+    version_gem (1.1.17)
     virtus (2.0.0)
       axiom-types (~> 0.1)
       coercible (~> 1.0)
@@ -508,6 +539,7 @@ DEPENDENCIES
   activerecord (~> 8.1.4)
   activestorage (~> 8.1.4)
   activesupport (~> 8.1.4)
+  api_client!
   axe-core-capybara
   axe-core-rspec
   bootsnap (>= 1.1.0)
