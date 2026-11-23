@@ -135,7 +135,10 @@ public class APIHelpers {
     }
 
     public static class V3 {
-         public static void addOrganizationTag(org.hl7.fhir.r4.model.Resource resource, String organizationID) {
+        private V3() {
+            // not used
+        }
+        public static void addOrganizationTag(org.hl7.fhir.r4.model.Resource resource, String organizationID) {
             final org.hl7.fhir.r4.model.Coding orgTag = new org.hl7.fhir.r4.model.Coding(DPCIdentifierSystem.DPC.getSystem(), organizationID, "Organization ID");
             final org.hl7.fhir.r4.model.Meta meta = resource.getMeta();
             if (meta == null) {
