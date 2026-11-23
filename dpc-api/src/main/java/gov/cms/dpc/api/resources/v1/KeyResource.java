@@ -10,15 +10,14 @@ import gov.cms.dpc.api.entities.PublicKeyEntity;
 import gov.cms.dpc.api.exceptions.PublicKeyException;
 import gov.cms.dpc.api.jdbi.PublicKeyDAO;
 import gov.cms.dpc.api.models.CollectionResponse;
+import gov.cms.dpc.api.models.KeySignature;
 import gov.cms.dpc.api.resources.AbstractKeyResource;
-import gov.cms.dpc.common.annotations.NoHtml;
 import gov.cms.dpc.common.entities.stu3.OrganizationEntity;
 import gov.cms.dpc.common.hibernate.auth.DPCAuthHibernateBundle;
 import io.dropwizard.auth.Auth;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -192,29 +191,5 @@ public class KeyResource extends AbstractKeyResource {
     private String buildDefaultKeyID() {
         final int newKeyID = this.random.nextInt();
         return String.format("key:%d", newKeyID);
-    }
-
-    public static class KeySignature {
-        @NoHtml
-        @NotEmpty
-        private String key;
-        @NoHtml
-        @NotEmpty
-        private String signature;
-
-        public KeySignature() {}
-
-        public KeySignature(String key, String signature) {
-            this.key = key;
-            this.signature = signature;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public String getSignature() {
-            return signature;
-        }
     }
 }
