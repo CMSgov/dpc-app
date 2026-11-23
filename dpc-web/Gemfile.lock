@@ -349,7 +349,7 @@ GEM
     pry-nav (1.0.0)
       pry (>= 0.9.10, < 0.15)
     public_suffix (7.0.5)
-    puma (8.0.3)
+    puma (8.1.2)
       nio4r (~> 2.0)
     raabro (1.4.0)
     racc (1.8.1)
