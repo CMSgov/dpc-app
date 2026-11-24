@@ -218,7 +218,10 @@ public class DistributedBatchQueue extends JobQueueCommon {
      */
     private Optional<JobQueueBatch> claimBatchFromDatabase(Session session, UUID aggregatorID) {
         // Claim a new batch
-        Optional<String> batchID = session.createNativeQuery("SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch WHERE status = 0 ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED",
+        Optional<String> batchID = session.createNativeQuery(
+                "SELECT Cast(batch_id as varchar) batch_id FROM job_queue_batch " +
+                        "WHERE status = 0 AND export_source = '" + JobQueueBatch.INTERNAL_EXPORT_SOURCE + "' " +
+                        "ORDER BY priority ASC, submit_time ASC LIMIT 1 FOR UPDATE SKIP LOCKED",
                         String.class)
                 .uniqueResultOptional();
 
@@ -328,7 +331,10 @@ public class DistributedBatchQueue extends JobQueueCommon {
 
                 query.select(builder.count(root));
                 query.where(
-                        builder.equal(root.get("status"), JobStatus.QUEUED)
+                        builder.and(
+                                builder.equal(root.get("status"), JobStatus.QUEUED),
+                                builder.equal(root.get("exportSource"), JobQueueBatch.INTERNAL_EXPORT_SOURCE)
+                        )
                 );
 
                 return session.createQuery(query).getSingleResult();
@@ -348,7 +354,9 @@ public class DistributedBatchQueue extends JobQueueCommon {
         try (final Session session = this.factory.openSession()) {
             try {
                 Optional<Timestamp> submitTime =
-                    session.createNativeQuery("SELECT MIN( submit_time ) FROM job_queue_batch WHERE status = " + JobStatus.QUEUED.ordinal(),
+                    session.createNativeQuery(
+                            "SELECT MIN( submit_time ) FROM job_queue_batch WHERE status = " + JobStatus.QUEUED.ordinal() +
+                                    " AND export_source = '" + JobQueueBatch.INTERNAL_EXPORT_SOURCE + "'",
                                     Timestamp.class)
                     .uniqueResultOptional();
 

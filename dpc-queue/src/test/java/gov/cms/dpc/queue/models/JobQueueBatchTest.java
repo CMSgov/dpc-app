@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static gov.cms.dpc.queue.models.JobQueueBatch.INTERNAL_EXPORT_SOURCE;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -82,7 +83,7 @@ class JobQueueBatchTest {
     @Test
     void testDefaultExportFields() {
         final var job = createJobQueueBatch();
-        assertEquals("internal-dpc", job.getExportSource());
+        assertEquals(INTERNAL_EXPORT_SOURCE, job.getExportSource());
         assertEquals("V1", job.getExportVersion());
         assertTrue(job.getGroupID().isEmpty());
     }

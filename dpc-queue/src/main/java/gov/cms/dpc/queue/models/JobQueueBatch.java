@@ -26,6 +26,9 @@ public class JobQueueBatch implements Serializable {
 
     private static final long serialVersionUID = -578824686165779398L;
 
+    public static final String INTERNAL_EXPORT_SOURCE = "internal-dpc";
+    public static final String EXTERNAL_EXPORT_SOURCE = "external-bcda";
+
     /**
      * The list of resource type supported by DPC
      */
@@ -251,7 +254,7 @@ public class JobQueueBatch implements Serializable {
         private String requestUrl;
         private boolean isBulk;
         private UUID groupID;
-        private String exportSource = "internal-dpc";
+        private String exportSource = INTERNAL_EXPORT_SOURCE;
         private String exportVersion = "V1";
 
         public Builder jobID(UUID jobID) {
@@ -362,6 +365,10 @@ public class JobQueueBatch implements Serializable {
      */
     public Boolean isV3() {
         return exportVersion != null && exportVersion.equalsIgnoreCase("v3");
+    }
+
+    public Boolean isExternal() {
+        return EXTERNAL_EXPORT_SOURCE.equalsIgnoreCase(this.exportSource);
     }
 
     public UUID getBatchID() {
