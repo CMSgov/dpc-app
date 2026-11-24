@@ -22,8 +22,12 @@ import org.mockito.MockedStatic;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
@@ -110,6 +114,66 @@ class OneEcosystemClientUnitTest {
         assertEquals("Bearer new-token", authorization);
     }
 
+    @Test
+    void shouldReadCompletedJobOutputUrls() throws IOException {
+        String jobId = "42";
+        when(httpClient.execute(
+                argThat(request -> request instanceof HttpPost post && "/auth/token".equals(post.getPath())),
+                any(HttpClientResponseHandler.class)))
+                .thenAnswer(tokenResponse("access-token", TOKEN_LIFETIME_SECONDS));
+
+        when(httpClient.execute(any(HttpGet.class), any(HttpClientResponseHandler.class)))
+                .thenAnswer(response(200, """
+                    {
+                      "transactionTime": "2026-08-01T13:00:00Z",
+                      "request": "https://dpc.cms.gov/api/v3/Group/test-group/$export",
+                      "requiresAccessToken": true,
+                      "output": [
+                        {"type": "Patient", "url": "https://example.test/data/42/patient.ndjson"},
+                        {"type": "Coverage", "url": "https://example.test/data/42/coverage.ndjson"},
+                        {"type": "ExplanationOfBenefit", "url": "https://example.test/data/42/eob.ndjson"}
+                      ],
+                      "error": [],
+                      "JobID": %s
+                    }
+                    """.formatted(jobId)));
+
+        var status = newClient().jobStatus(jobId);
+
+        assertEquals(200, status.statusCode());
+        assertEquals(jobId, status.body().JobID());
+        assertEquals(Instant.parse("2026-08-01T13:00:00Z"), status.body().transactionTime());
+        assertEquals(List.of("Patient", "Coverage", "ExplanationOfBenefit"), status.body().output().stream()
+                .map(output -> output.type()).toList());
+        assertEquals(List.of(
+                "https://example.test/data/42/patient.ndjson",
+                "https://example.test/data/42/coverage.ndjson",
+                "https://example.test/data/42/eob.ndjson"), status.body().output().stream()
+                .map(output -> output.url()).toList());
+
+        ArgumentCaptor<HttpGet> apiRequest = ArgumentCaptor.forClass(HttpGet.class);
+        verify(httpClient).execute(apiRequest.capture(), any(HttpClientResponseHandler.class));
+        assertEquals("/api/v3/jobs/" + jobId, apiRequest.getValue().getPath());
+        assertEquals("Bearer access-token", apiRequest.getValue().getFirstHeader(HttpHeaders.AUTHORIZATION).getValue());
+        assertEquals("application/fhir+json", apiRequest.getValue().getFirstHeader(HttpHeaders.ACCEPT).getValue());
+    }
+
+    @Test
+    void shouldReturnPendingJobWithoutBody() throws IOException {
+        when(httpClient.execute(
+                argThat(request -> request instanceof HttpPost post && "/auth/token".equals(post.getPath())),
+                any(HttpClientResponseHandler.class)))
+                .thenAnswer(tokenResponse("access-token", TOKEN_LIFETIME_SECONDS));
+
+        when(httpClient.execute(any(HttpGet.class), any(HttpClientResponseHandler.class)))
+                .thenAnswer(response(202, null));
+
+        var status = newClient().jobStatus(UUID.randomUUID().toString());
+
+        assertEquals(202, status.statusCode());
+        assertNull(status.body());
+    }
+
     private OneEcosystemClientImpl newClient() {
         return new OneEcosystemClientImpl(config, FHIR_CONTEXT);
     }
@@ -121,7 +185,9 @@ class OneEcosystemClientUnitTest {
     private <T> Answer<T> response(int status, String body) {
         return invocation -> {
             try (var response = new BasicClassicHttpResponse(status)) {
-                response.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
+                if (body != null) {
+                    response.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
+                }
                 return invocation.<HttpClientResponseHandler<T>>getArgument(1).handleResponse(response);
             }
         };

@@ -115,9 +115,8 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
     }
 
     @Override
-    public OneEcosystemJobStatus jobStatus(UUID jobId) {
-        // TODO: Confirm job ID format with BCDA; may need to convert int/long/number to UUID
-        URI endpoint = apiBaseUri.resolve("api/v3/jobs/" + jobId.toString());
+    public OneEcosystemJobStatus jobStatus(String jobId) {
+        URI endpoint = apiBaseUri.resolve("api/v3/jobs/" + jobId);
         HttpGet request = new HttpGet(endpoint);
         request.setHeader(HttpHeaders.ACCEPT, "application/fhir+json");
         request.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + currentToken());

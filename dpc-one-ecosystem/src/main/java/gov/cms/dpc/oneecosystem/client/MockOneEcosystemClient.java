@@ -25,7 +25,7 @@ public class MockOneEcosystemClient implements OneEcosystemClient {
     private static final String[] ALL_RESOURCE_TYPES = {"Patient", "Coverage", "ExplanationOfBenefit"};
 
     private final Path exportPath;
-    private final Map<UUID, MockJob> jobs = new HashMap<>();
+    private final Map<String, MockJob> jobs = new HashMap<>();
 
     public MockOneEcosystemClient(Path exportPath) {
         this.exportPath = exportPath;
@@ -44,7 +44,7 @@ public class MockOneEcosystemClient implements OneEcosystemClient {
      */
     @Override
     public synchronized OneEcosystemExportResponse export(OneEcosystemExportRequest request) {
-        final UUID jobId = UUID.randomUUID();
+        final String jobId = UUID.randomUUID().toString();
         final String jobUrl = "https://localhost:3002/api/v3/jobs/" + jobId;
         final List<String> resourceTypes = request.resourceTypes().isEmpty()
             ? List.of(ALL_RESOURCE_TYPES)
@@ -57,7 +57,7 @@ public class MockOneEcosystemClient implements OneEcosystemClient {
      * arbitrarily 202's two times then returns response with where to get the file (200)
      */
     @Override
-    public synchronized OneEcosystemJobStatus jobStatus(UUID jobId) {
+    public synchronized OneEcosystemJobStatus jobStatus(String jobId) {
         MockJob job = jobs.get(jobId);
         if (job == null) {
             return new OneEcosystemJobStatus(400, new OneEcosystemJobStatusResponse(
@@ -120,12 +120,12 @@ public class MockOneEcosystemClient implements OneEcosystemClient {
     }
 
     private static class MockJob {
-        private final UUID jobId;
+        private final String jobId;
         private final List<String> resourceTypes;
         private int polls;
         private boolean complete;
 
-        private MockJob(UUID jobId, List<String> resourceTypes) {
+        private MockJob(String jobId, List<String> resourceTypes) {
             this.jobId = jobId;
             this.resourceTypes = List.copyOf(resourceTypes);
         }

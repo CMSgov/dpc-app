@@ -4,8 +4,6 @@ import gov.cms.dpc.oneecosystem.models.OneEcosystemExportRequest;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemExportResponse;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemJobStatus;
 
-import java.util.UUID;
-
 public interface OneEcosystemClient {
 
     /**
@@ -16,5 +14,5 @@ public interface OneEcosystemClient {
 
     OneEcosystemExportResponse export(OneEcosystemExportRequest request);
 
-    OneEcosystemJobStatus jobStatus(UUID jobId);
+    OneEcosystemJobStatus jobStatus(String jobId);
 }

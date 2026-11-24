@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -69,8 +68,7 @@ class OneEcosystemClientTest {
                 "Expected a job URL ending in a job ID: " + jobUrl);
 
 
-        // String jobId = jobUrl.substring(jobUrl.lastIndexOf('/') + 1);
-        UUID jobId = UUID.fromString(jobUrl.substring(jobUrl.lastIndexOf('/') + 1));
+        String jobId = jobUrl.substring(jobUrl.lastIndexOf('/') + 1);
 
         int maxPollAttempts = 10;
         for (int attempt = 0; attempt < maxPollAttempts; attempt++) {
