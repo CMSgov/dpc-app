@@ -206,7 +206,6 @@ public class GroupResource {
                            @DefaultValue(FHIR_NDJSON) @QueryParam("_outputFormat") @NoHtml String outputFormat,
                            @ApiParam(value = "Resources will be included in the response if their state has changed after the supplied time.")
                            @QueryParam("_since") @NoHtml String sinceParam,
-                           @QueryParam("_typeFilter") @NoHtml String typeFilterParam,
                            @ApiParam(hidden = true) @HeaderParam(FHIRHeaders.PREFER_HEADER) @Valid String prefer,
                            @Context HttpServletRequest request) {
         rosterID = sanitize(rosterID);
@@ -235,14 +234,12 @@ public class GroupResource {
         final List<String> resourceNames = resources.stream().map(DPCResourceType::name).toList();
         final OffsetDateTime since = handleSinceQueryParam(sinceParam);
         final Instant sinceInstant = since == null ? Instant.EPOCH : since.toInstant();
-        final String typeFilter = typeFilterParam == null ? resourceTypes : typeFilterParam;
 
         final String requestingIP = APIHelpers.fetchRequestingIP(request);
         final String requestUrl = APIHelpers.fetchRequestUrl(request);
 
         // Send export request to shared backend
-        final OneEcosystemExportRequest exportRequest =
-                new OneEcosystemExportRequest(attributedMbis, sinceInstant, resourceNames, typeFilter);
+        final OneEcosystemExportRequest exportRequest = new OneEcosystemExportRequest(attributedMbis, sinceInstant, resourceNames, null);
         final OneEcosystemExportResponse exportResponse = this.oneEcosystemClient.export(exportRequest);
         if (exportResponse.statusCode() != 202) {
             throw new WebApplicationException("Unable to start export job", HttpStatus.SC_BAD_GATEWAY);
@@ -260,7 +257,7 @@ public class GroupResource {
                 .since(since)
                 .requestingIP(requestingIP)
                 .requestUrl(requestUrl)
-                .exportSource("external-bcda")
+                .exportSource(JobQueueBatch.EXTERNAL_EXPORT_SOURCE)
                 .exportVersion("V3")
                 .groupID(groupID)
                 .isBulk(true)

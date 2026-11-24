@@ -14,6 +14,5 @@ public record OneEcosystemExportRequest(
         mbis = List.copyOf(mbis);
         Objects.requireNonNull(since, "since param is required");
         resourceTypes = List.copyOf(resourceTypes);
-        Objects.requireNonNull(typeFilter, "typeFilter param is required");
     }
 }

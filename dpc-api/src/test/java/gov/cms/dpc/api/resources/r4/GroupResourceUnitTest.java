@@ -271,15 +271,15 @@ public class GroupResourceUnitTest {
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v3/Group/" + groupId + "/$export"));
 
         String since = "2020-05-26T16:43:01.780Z";
-        Response response = resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, since, null, "respond-async", request);
+        Response response = resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, since, "respond-async", request);
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus(), "Expected ACCEPTED response code");
 
         since = "2020-05-26T16:43:01.780+10:00";
-        response = resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, since, null, "respond-async", request);
+        response = resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, since, "respond-async", request);
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus(), "Expected ACCEPTED response code");
 
         since = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).minusSeconds(5).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        response = resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, since, null, "respond-async", request);
+        response = resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, since, "respond-async", request);
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus(), "Expected ACCEPTED response code");
 
         verify(request, times(3)).getHeader(HttpHeaders.X_FORWARDED_FOR);
@@ -310,19 +310,19 @@ public class GroupResourceUnitTest {
 
         final String timezoneFutureSince = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusSeconds(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, timezoneFutureSince, null, "respond-async", request);
+            resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, timezoneFutureSince, "respond-async", request);
         });
         assertEquals("'_since' query parameter cannot be a future date", exception.getMessage());
 
         final String futureSince = OffsetDateTime.now().plusDays(2).toString();
         exception = assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, futureSince, null, "respond-async", request);
+            resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, futureSince, "respond-async", request);
         });
         assertEquals("'_since' query parameter cannot be a future date", exception.getMessage());
 
         final String badFormatSince = "2020-05-2X616:43:01.780+10:00";
         WebApplicationException badFormat = assertThrows(WebApplicationException.class, () -> {
-            resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, badFormatSince, null, "respond-async", request);
+            resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, badFormatSince, "respond-async", request);
         });
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), badFormat.getResponse().getStatus());
 
@@ -337,7 +337,7 @@ public class GroupResourceUnitTest {
         OrganizationPrincipal organizationPrincipal = new OrganizationPrincipal(organization);
 
         assertThrows(BadRequestException.class, () ->
-                resource.export(organizationPrincipal, "fakeId", null, FHIRMediaTypes.NDJSON, "fakeSince", null, prefer, request));
+                resource.export(organizationPrincipal, "fakeId", null, FHIRMediaTypes.NDJSON, "fakeSince", prefer, request));
     }
 
     @Test
@@ -366,22 +366,22 @@ public class GroupResourceUnitTest {
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v3/Group/" + groupId + "/$export"));
 
         assertDoesNotThrow(() ->
-                resource.export(organizationPrincipal, groupId, "Coverage", FHIRMediaTypes.APPLICATION_NDJSON, "2017-01-01T00:00:00Z", null, "respond-async", request));
+                resource.export(organizationPrincipal, groupId, "Coverage", FHIRMediaTypes.APPLICATION_NDJSON, "2017-01-01T00:00:00Z", "respond-async", request));
 
         assertDoesNotThrow(() ->
-                resource.export(organizationPrincipal, groupId, "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", null, "respond-async", request));
+                resource.export(organizationPrincipal, groupId, "Coverage", FHIRMediaTypes.FHIR_NDJSON, "2017-01-01T00:00:00Z", "respond-async", request));
 
         assertDoesNotThrow(() ->
-                resource.export(organizationPrincipal, groupId, "Coverage", FHIRMediaTypes.NDJSON, "2017-01-01T00:00:00Z", null, "respond-async", request));
+                resource.export(organizationPrincipal, groupId, "Coverage", FHIRMediaTypes.NDJSON, "2017-01-01T00:00:00Z", "respond-async", request));
 
         assertThrows(BadRequestException.class, () ->
-                resource.export(organizationPrincipal, groupId, "Coverage", FHIR_JSON, "2017-01-01T00:00:00Z", null, "respond-async", request));
+                resource.export(organizationPrincipal, groupId, "Coverage", FHIR_JSON, "2017-01-01T00:00:00Z", "respond-async", request));
 
         assertThrows(BadRequestException.class, () ->
-                resource.export(organizationPrincipal, groupId, "Coverage", null, "2017-01-01T00:00:00Z", null, "respond-async", request));
+                resource.export(organizationPrincipal, groupId, "Coverage", null, "2017-01-01T00:00:00Z",  "respond-async", request));
 
         assertThrows(BadRequestException.class, () ->
-                resource.export(organizationPrincipal, groupId, "Coverage", "", "2017-01-01T00:00:00Z", null, "respond-async", request));
+                resource.export(organizationPrincipal, groupId, "Coverage", "", "2017-01-01T00:00:00Z", "respond-async", request));
 
         // 3 non-bad requests
         verify(request, times(3)).getHeader(HttpHeaders.X_FORWARDED_FOR);
@@ -410,6 +410,6 @@ public class GroupResourceUnitTest {
 
         String since = "2020-05-26T16:43:01.780Z";
         assertThrows(WebApplicationException.class, () ->
-                resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, null, "respond-async", request));
+                resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, "respond-async", request));
     }
 }
