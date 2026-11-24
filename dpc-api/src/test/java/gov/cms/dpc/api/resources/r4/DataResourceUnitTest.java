@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.resources.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import gov.cms.dpc.api.r4.APITestHelpers;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthFilter;
 import gov.cms.dpc.api.auth.staticauth.StaticAuthenticator;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -41,12 +43,17 @@ import java.io.StringWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static org.apache.hc.core5.http.HttpHeaders.CONTENT_RANGE;
+import static org.apache.hc.core5.http.HttpHeaders.RANGE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -76,29 +83,24 @@ class DataResourceUnitTest {
 
     static Stream<Arguments> downloadArgs() {
         return Stream.of(
-            Arguments.of(false, Collections.EMPTY_MAP),	// uncompressed file, uncompressed download
-            Arguments.of(false, Map.of(HttpHeaders.ACCEPT_ENCODING, GzipUtil.GZIP)),	// uncompressed file, compressed download
-            Arguments.of(true, Collections.EMPTY_MAP), 	// compressed file, uncompressed download
-            Arguments.of(true, Map.of(HttpHeaders.ACCEPT_ENCODING, GzipUtil.GZIP))	// compressed file, compressed download
+            Arguments.of(false, Collections.EMPTY_MAP), // gzip in .ndjson, uncompressed download
+            Arguments.of(false, Map.of(HttpHeaders.ACCEPT_ENCODING, GzipUtil.GZIP)), // gzip in .ndjson, compressed download
+            Arguments.of(true, Collections.EMPTY_MAP), // legacy .ndjson.gz, uncompressed download
+            Arguments.of(true, Map.of(HttpHeaders.ACCEPT_ENCODING, GzipUtil.GZIP)) // legacy .ndjson.gz, compressed download
         );
     }
 
     @ParameterizedTest
     @MethodSource("downloadArgs")
-    void canDownloadFiles(boolean compressFile, Map<String, String> requestHeaders) throws IOException {
+    // All files are compressed, but legacy files are .ndjson.gz and new files are just .ndjson
+    void canDownloadFiles(boolean legacyExtension, Map<String, String> requestHeaders) throws IOException {
         final String testData = "This is a test";
 
-        when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
+        when(manager.getV3File(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
             final File tempPath = FileUtils.getTempDirectory();
-            File file;
-            if (compressFile) {
-                file = File.createTempFile("test", ".ndjson.gz", tempPath);
-                FileUtils.writeByteArrayToFile(file, GzipUtil.compress(testData));
-            } else {
-                file = File.createTempFile("test", ".ndjson", tempPath);
-                FileUtils.write(file, testData, StandardCharsets.UTF_8);
-            }
-            return new FileManager.FilePointer("", file.length(), UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, compressFile);
+            File file = File.createTempFile("test", legacyExtension ? ".ndjson.gz" : ".ndjson", tempPath);
+            FileUtils.writeByteArrayToFile(file, GzipUtil.compress(testData));
+            return new FileManager.FilePointer("", file.length(), UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, true);
         });
 
         boolean expectGzipCompressed =
@@ -124,11 +126,11 @@ class DataResourceUnitTest {
     void testFileFromExpiredJob() {
         UUID jobId = UUID.randomUUID();
 
-        when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
+        when(manager.getV3File(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
             final File tempPath = FileUtils.getTempDirectory();
             final File file = File.createTempFile("test", ".ndjson", tempPath);
-            FileUtils.write(file, "This is a test", StandardCharsets.UTF_8);
-            return new FileManager.FilePointer("", file.length(), jobId, OffsetDateTime.now(ZoneOffset.UTC), file, false);
+            FileUtils.writeByteArrayToFile(file, GzipUtil.compress("This is a test"));
+            return new FileManager.FilePointer("", file.length(), jobId, OffsetDateTime.now(ZoneOffset.UTC), file, true);
         });
 
         UUID aggregatorId = UUID.randomUUID();
@@ -151,25 +153,22 @@ class DataResourceUnitTest {
 
     @ParameterizedTest
     @MethodSource("downloadArgs")
-    void canDownloadFileRanges(boolean compressFile, Map<String, String> requestHeaders) throws IOException {
+    void canDownloadFileRanges(boolean legacyExtension, Map<String, String> requestHeaders) throws IOException {
         final File tempPath = FileUtils.getTempDirectory();
         final int length = 4 * 1024 * 1024;
         final String randomString = buildRandomString();
 
-        File file;
-        if (compressFile) {
-            file = File.createTempFile("test", ".ndjson.gz", tempPath);
-            FileUtils.writeByteArrayToFile(file, GzipUtil.compress(randomString));
-        } else {
-            file = File.createTempFile("test", ".ndjson", tempPath);
-            FileUtils.write(file, randomString, StandardCharsets.UTF_8);
-        }
+        File file = File.createTempFile("test", legacyExtension ? ".ndjson.gz" : ".ndjson", tempPath);
+        FileUtils.writeByteArrayToFile(file, GzipUtil.compress(randomString));
 
-        when(manager.getFile(Mockito.any(), Mockito.anyString())).thenReturn(
-            new FileManager.FilePointer("", 0, UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, compressFile)
+        when(manager.getV3File(Mockito.any(), Mockito.anyString())).thenReturn(
+            new FileManager.FilePointer("", file.length(), UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, true)
         );
 
-        // Try to request one byte
+        Response head = RESOURCE.target("/v3/Data/test.ndjson").request().head();
+        assertEquals(String.valueOf(length), head.getHeaderString(HttpHeaders.CONTENT_LENGTH));
+
+        // HTTP range ends are inclusive
         Invocation.Builder requestBuilder = RESOURCE.target("/v3/Data/test.ndjson")
             .request()
             .header(org.apache.hc.core5.http.HttpHeaders.RANGE, "bytes=0-1")
@@ -182,7 +181,16 @@ class DataResourceUnitTest {
         String responseBody = readResponse(response, false);
 
         assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus(), "Should have partial content status");
-        assertEquals(String.valueOf(randomString.charAt(0)), responseBody, "Should only have a single byte");
+        assertEquals(randomString.substring(0, 2), responseBody, "Should return both requested bytes");
+        assertEquals("bytes 0-1/" + length, response.getHeaderString(CONTENT_RANGE));
+        assertEquals("2", response.getHeaderString(HttpHeaders.CONTENT_LENGTH));
+
+        response = RESOURCE.target("/v3/Data/test.ndjson").request()
+            .header(RANGE, "bytes=0-0").get();
+        assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus());
+        assertEquals(String.valueOf(randomString.charAt(0)), readResponse(response, false));
+        assertEquals("bytes 0-0/" + length, response.getHeaderString(CONTENT_RANGE));
+        assertEquals("1", response.getHeaderString(HttpHeaders.CONTENT_LENGTH));
 
         // Request 500 kb, with an offset
         int start = 30;
@@ -199,7 +207,9 @@ class DataResourceUnitTest {
         responseBody = readResponse(response, false);
 
         assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus(), "Should have partial content status");
-        assertEquals(randomString.substring(start, end), responseBody, "Response should match");
+        assertEquals(randomString.substring(start, end + 1), responseBody, "Response should match");
+        assertEquals(String.format("bytes %d-%d/%d", start, end, length), response.getHeaderString(CONTENT_RANGE));
+        assertEquals(String.valueOf(end - start + 1), response.getHeaderString(HttpHeaders.CONTENT_LENGTH));
 
         // Request the entire file
         requestBuilder = RESOURCE.target("/v3/Data/test.ndjson")
@@ -215,6 +225,8 @@ class DataResourceUnitTest {
 
         assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus(), "Should have partial content status");
         assertEquals(randomString, responseBody, "Response should match");
+        assertEquals(String.format("bytes 0-%d/%d", length - 1, length), response.getHeaderString(CONTENT_RANGE));
+        assertEquals(String.valueOf(length), response.getHeaderString(HttpHeaders.CONTENT_LENGTH));
 
         // Request the entire file, without the ending value, which returns one chunk
         requestBuilder = RESOURCE.target("/v3/Data/test.ndjson")
@@ -228,14 +240,23 @@ class DataResourceUnitTest {
         response = requestBuilder.get();
         responseBody = readResponse(response, false);
 
-        // Result might be chunked, so only check what the serve says it responded with
-        String contentRange = response.getHeaderString(org.apache.hc.core5.http.HttpHeaders.CONTENT_RANGE);
-        String[] splitContentRange = contentRange.split("[\\s-/]");
-        int responseStart = Integer.parseInt(splitContentRange[1]);
-        int responseEnd = Integer.parseInt(splitContentRange[2]);
-
         assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus(), "Should have partial content status");
-        assertEquals(randomString.substring(responseStart, responseEnd), responseBody, "Response should match");
+        assertEquals(randomString.substring(0, 1024 * 1024), responseBody, "Response should match");
+        assertEquals("bytes 0-1048575/" + length, response.getHeaderString(CONTENT_RANGE));
+        assertEquals("1048576", response.getHeaderString(HttpHeaders.CONTENT_LENGTH));
+
+        response = RESOURCE.target("/v3/Data/test.ndjson").request()
+            .header(RANGE, "bytes=" + (length - 1) + "-").get();
+        assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus());
+        assertEquals(String.valueOf(randomString.charAt(length - 1)), readResponse(response, false));
+        assertEquals(String.format("bytes %d-%d/%d", length - 1, length - 1, length),
+            response.getHeaderString(CONTENT_RANGE));
+        assertEquals("1", response.getHeaderString(HttpHeaders.CONTENT_LENGTH));
+
+        response = RESOURCE.target("/v3/Data/test.ndjson").request()
+            .header(RANGE, "bytes=" + length + "-").get();
+        assertEquals(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE.getStatusCode(), response.getStatus());
+        assertEquals("bytes */" + length, response.getHeaderString(CONTENT_RANGE));
 
         // Request file with an invalid range
         requestBuilder = RESOURCE.target("/v3/Data/test.ndjson")
@@ -250,13 +271,69 @@ class DataResourceUnitTest {
         assertEquals(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE.getStatusCode(), response.getStatus());
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void emptyFileHasNoSatisfiableRange(boolean legacyExtension, @TempDir Path directory) throws IOException {
+        final Path path = directory.resolve(legacyExtension ? "empty.ndjson.gz" : "empty.ndjson");
+        Files.write(path, GzipUtil.compress(""));
+        when(manager.getV3File(Mockito.any(), Mockito.anyString())).thenReturn(
+            new FileManager.FilePointer("", Files.size(path), UUID.randomUUID(),
+                OffsetDateTime.now(ZoneOffset.UTC), path.toFile(), true)
+        );
+
+        final Response response = RESOURCE.target("/v3/Data/test.ndjson").request()
+            .header(RANGE, "bytes=0-0").get();
+        assertEquals(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE.getStatusCode(), response.getStatus());
+        assertEquals("bytes */0", response.getHeaderString(CONTENT_RANGE));
+    }
+
+    @Test
+    void rangeSpansConcatenatedGzipMembers(@TempDir Path directory) throws IOException {
+        final Path path = directory.resolve("multiple.ndjson");
+        Files.write(path, GzipUtil.compress("first"));
+        Files.write(path, GzipUtil.compress("second"), StandardOpenOption.APPEND);
+        when(manager.getV3File(Mockito.any(), Mockito.anyString())).thenReturn(
+            new FileManager.FilePointer("", Files.size(path), UUID.randomUUID(),
+                OffsetDateTime.now(ZoneOffset.UTC), path.toFile(), true)
+        );
+
+        final Response response = RESOURCE.target("/v3/Data/test.ndjson").request()
+            .header(RANGE, "bytes=3-8").get();
+        assertEquals(HttpStatus.PARTIAL_CONTENT_206, response.getStatus());
+        assertEquals("stseco", readResponse(response, false));
+        assertEquals("bytes 3-8/11", response.getHeaderString(CONTENT_RANGE));
+        assertEquals("6", response.getHeaderString(HttpHeaders.CONTENT_LENGTH));
+    }
+
+    @Test
+    void cachesUncompressedSizeAcrossRequestsAndInvalidatesOnChecksumChange(@TempDir Path directory) throws IOException {
+        final Path path = directory.resolve("cached.ndjson");
+        Files.write(path, GzipUtil.compress("test data"));
+        FileManager.FilePointer pointer = spy(new FileManager.FilePointer("original", Files.size(path),
+            UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), path.toFile(), true));
+        when(manager.getV3File(Mockito.any(), Mockito.anyString())).thenReturn(pointer);
+
+        assertEquals("9", RESOURCE.target("/v3/Data/test.ndjson").request().head()
+            .getHeaderString(HttpHeaders.CONTENT_LENGTH));
+        assertEquals("9", RESOURCE.target("/v3/Data/test.ndjson").request().head()
+            .getHeaderString(HttpHeaders.CONTENT_LENGTH));
+        verify(pointer, times(1)).getUncompressedInputStream();
+
+        FileManager.FilePointer updated = spy(new FileManager.FilePointer("updated", Files.size(path),
+            UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), path.toFile(), true));
+        when(manager.getV3File(Mockito.any(), Mockito.anyString())).thenReturn(updated);
+        assertEquals("9", RESOURCE.target("/v3/Data/test.ndjson").request().head()
+            .getHeaderString(HttpHeaders.CONTENT_LENGTH));
+        verify(updated, times(1)).getUncompressedInputStream();
+    }
+
     @Test
     void testNonByteRange() {
-        when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
+        when(manager.getV3File(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
             final File tempPath = FileUtils.getTempDirectory();
             final File file = File.createTempFile("test", ".ndjson", tempPath);
-            FileUtils.write(file, "This is a test", StandardCharsets.UTF_8);
-            return new FileManager.FilePointer("", file.length(), UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, false);
+            FileUtils.writeByteArrayToFile(file, GzipUtil.compress("This is a test"));
+            return new FileManager.FilePointer("", file.length(), UUID.randomUUID(), OffsetDateTime.now(ZoneOffset.UTC), file, true);
         });
 
         final Response response = RESOURCE.target("/v3/Data/test.ndjson")
@@ -278,11 +355,11 @@ class DataResourceUnitTest {
         @BeforeEach
         void setupETagTests() {
 
-            when(manager.getFile(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
+            when(manager.getV3File(Mockito.any(), Mockito.anyString())).thenAnswer(answer -> {
                 final File tempPath = FileUtils.getTempDirectory();
                 final File file = File.createTempFile("test", ".ndjson", tempPath);
-                FileUtils.write(file, "This is a test", StandardCharsets.UTF_8);
-                return new FileManager.FilePointer("This should match", file.length(), UUID.randomUUID(), modifiedDate, file, false);
+                FileUtils.writeByteArrayToFile(file, GzipUtil.compress("This is a test"));
+                return new FileManager.FilePointer("This should match", file.length(), UUID.randomUUID(), modifiedDate, file, true);
             });
         }
 
@@ -367,7 +444,8 @@ class DataResourceUnitTest {
 
     private static ResourceExtension buildDataResource() {
 
-        final DataResource dataResource = new DataResource(manager, client, queue);
+        final DataResource dataResource = new DataResource(manager, client, queue,
+            Caffeine.newBuilder().maximumSize(10).build());
         final FhirContext ctx = FhirContext.forR4();
         final StaticAuthFilter staticFilter = new StaticAuthFilter(new StaticAuthenticator());
 

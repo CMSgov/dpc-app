@@ -106,6 +106,7 @@ logging:
       discardingThreshold: 0
 
 jobTimeoutInSeconds: ${JOB_TIMEOUT_IN_SECONDS:-60}
+dataFileSizeCacheMaxEntries: ${DATA_FILE_SIZE_CACHE_MAX_ENTRIES:-10000}
 
 # The root URL at which the application is accessible, if necessary, include the port, do not include the application version
 publicURL: ${PUBLIC_URL:-"http://localhost:3002"}

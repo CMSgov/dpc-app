@@ -24,10 +24,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,18 +50,18 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 
 	static Stream<Arguments> downloadArgs() {
 		return Stream.of(
-			Arguments.of(false, Collections.EMPTY_MAP),	// uncompressed file, uncompressed download
-			Arguments.of(false, Map.of(HttpHeaders.ACCEPT_ENCODING, GzipUtil.GZIP)),	// uncompressed file, compressed download
-			Arguments.of(true, Collections.EMPTY_MAP), 	// compressed file, uncompressed download
-			Arguments.of(true, Map.of(HttpHeaders.ACCEPT_ENCODING, GzipUtil.GZIP))	// compressed file, compressed download
+			Arguments.of(false, Collections.EMPTY_MAP), // gzip in .ndjson, uncompressed download
+			Arguments.of(false, Map.of(HttpHeaders.ACCEPT_ENCODING, GzipUtil.GZIP)), // gzip in .ndjson, compressed download
+			Arguments.of(true, Collections.EMPTY_MAP), // legacy .ndjson.gz, uncompressed download
+			Arguments.of(true, Map.of(HttpHeaders.ACCEPT_ENCODING, GzipUtil.GZIP)) // legacy .ndjson.gz, compressed download
 		);
 	}
 
 	@ParameterizedTest
 	@MethodSource("downloadArgs")
-	void canDownloadFiles(boolean compressFile, Map<String, String> requestHeaders) throws IOException, ProtocolException {
+	void canDownloadFiles(boolean legacyExtension, Map<String, String> requestHeaders) throws IOException, ProtocolException {
 		String testData = "test data".repeat(50);
-		String fileName = createTestExport(testData, compressFile);
+		String fileName = createTestExport(testData, legacyExtension);
 
 		String token = getAccessToken();
 		waitForFileReady(fileName, token);
@@ -106,16 +104,17 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 
 	@ParameterizedTest
 	@MethodSource("downloadArgs")
-	void canDownloadFileRanges(boolean compressFile, Map<String, String> requestHeadersIn) throws IOException, ProtocolException {
+	void canDownloadFileRanges(boolean legacyExtension, Map<String, String> requestHeadersIn) throws IOException, ProtocolException {
 		String testData = "uncompressed_data";
-		String fileName = createTestExport("12345_" + testData + "_54321", compressFile);
+		String fullContent = "12345_" + testData + "_54321";
+		String fileName = createTestExport(fullContent, legacyExtension);
 
 		String token = getAccessToken();
 		waitForFileReady(fileName, token);
 
 		// Add range header
 		Map<String, String> requestHeaders = new HashMap<>(requestHeadersIn);
-		requestHeaders.put(HttpHeaders.RANGE, String.format("bytes=%d-%d", 6, 6 + testData.length()));
+		requestHeaders.put(HttpHeaders.RANGE, String.format("bytes=%d-%d", 6, 6 + testData.length() - 1));
 
 		try (ClassicHttpResponse response = downloadExport(fileName, token, requestHeaders))
 		{
@@ -136,6 +135,9 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 			byte[] responseData = entity.getContent().readAllBytes();
 			String responseString = new String(responseData);
 			assertEquals(testData, responseString);
+			assertEquals(String.format("bytes 6-%d/%d", 6 + testData.length() - 1, fullContent.length()),
+				response.getHeader(HttpHeaders.CONTENT_RANGE).getValue());
+			assertEquals(testData.length(), responseData.length);
 		}
 	}
 
@@ -162,7 +164,7 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 	}
 
 	// Creates a fake export file we can use the DataResource to download
-	private String createTestExport(String content, boolean compress) throws IOException {
+	private String createTestExport(String content, boolean legacyExtension) throws IOException {
 		DPCResourceType resourceType = DPCResourceType.Patient;
 		int sequence = 0;
 		UUID jobID = UUID.randomUUID();
@@ -186,22 +188,13 @@ class DataResourceTest extends AbstractSecureApplicationTest {
 		// Create the file in the file system and get its metadata
 		String fileName = batchFile.getFileName() + ".ndjson";
 
-		Path path;
-		byte[] fileData;
-		if  (compress) {
-			path = Paths.get(exportPath + "/" + fileName + ".gz");
-			fileData = GzipUtil.compress(content);
-		} else {
-			path = Paths.get(exportPath + "/" + fileName);
-			fileData = content.getBytes(StandardCharsets.UTF_8);
-		}
+		Path path = Paths.get(exportPath + "/" + fileName + (legacyExtension ? ".gz" : ""));
+		byte[] fileData = GzipUtil.compress(content);
 
 		try {
 			Files.write(path, fileData);
-			batchFile.setFileLength(content.length());
-			try (FileInputStream fis = new FileInputStream(path.toFile())) {
-				batchFile.setChecksum(AggregationUtils.generateChecksum(fis));
-			}
+			batchFile.setFileLength(fileData.length);
+			batchFile.setChecksum(AggregationUtils.generateChecksum(path.toFile()));
 		} catch (IOException e) {
 			fail("Could not create test file: " + path);
 		}

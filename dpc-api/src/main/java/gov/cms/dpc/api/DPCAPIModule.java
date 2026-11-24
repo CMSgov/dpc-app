@@ -5,6 +5,8 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import com.codahale.metrics.MetricRegistry;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import gov.cms.dpc.api.auth.jwt.IJTICache;
@@ -187,6 +189,15 @@ public class DPCAPIModule extends DropwizardAwareModule<DPCAPIConfiguration> {
     @Singleton
     public MetricRegistry provideMetricRegistry() {
         return environment().metrics();
+    }
+
+    @Provides
+    @Singleton
+    @Named("dataFileSizeCache")
+    public Cache<String, Long> provideDataFileSizeCache() {
+        return Caffeine.newBuilder()
+                .maximumSize(configuration().getDataFileSizeCacheMaxEntries())
+                .build();
     }
 
     @Provides

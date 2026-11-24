@@ -1,6 +1,7 @@
 package gov.cms.dpc.api.resources.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import com.github.benmanes.caffeine.cache.Cache;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
 import gov.cms.dpc.api.auth.r4.OrganizationPrincipal;
@@ -20,6 +21,7 @@ import gov.cms.dpc.queue.models.JobQueueBatch;
 import io.dropwizard.auth.Auth;
 import io.swagger.annotations.*;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.Response;
@@ -34,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -64,11 +67,16 @@ public class DataResource {
     private final AttributionClient client;
     private final IJobQueue queue;
 
+    // We only want to calculate uncompressed file sizes once
+    private final Cache<String, Long> uncompressedFileSizes;
+
     @Inject
-    public DataResource(FileManager manager, AttributionClient client, IJobQueue queue) {
+    public DataResource(FileManager manager, AttributionClient client, IJobQueue queue,
+                        @Named("dataFileSizeCache") Cache<String, Long> uncompressedFileSizes) {
         this.manager = manager;
         this.client = client;
         this.queue = queue;
+        this.uncompressedFileSizes = uncompressedFileSizes;
     }
 
     @Path("/{fileID}.ndjson")
@@ -80,7 +88,7 @@ public class DataResource {
     @ApiResponses({
             @ApiResponse(code = HttpStatus.OK_200, message = "File of newline-delimited JSON FHIR objects", responseHeaders = {
                     @ResponseHeader(name = HttpHeaders.ETAG, description = "SHA256 checksum of file"),
-                    @ResponseHeader(name = HttpHeaders.CONTENT_LENGTH, description = "size of file (in bytes)"),
+                    @ResponseHeader(name = HttpHeaders.CONTENT_LENGTH, description = "size of uncompressed file (in bytes)"),
                     @ResponseHeader(name = HttpHeaders.LAST_MODIFIED, description = "creation timestamp of file (in milliseconds since Unix epoch)"),
                     @ResponseHeader(name = HttpHeaders.ACCEPT_RANGES, description = "Accepted HTTP range request (bytes only)")
             }),
@@ -93,7 +101,7 @@ public class DataResource {
             @HeaderParam(HttpHeaders.IF_NONE_MATCH) @ApiParam(value = "Download file only if provided SHA256 checksum doesn't match") Optional<String> fileChecksum,
             @HeaderParam(HttpHeaders.IF_MODIFIED_SINCE) @ApiParam(value = "Download file only if provided timestamp (milliseconds since Unix Epoch) is older than file creation timestamp", example = "1575394136") Optional<String> modifiedHeader,
             @PathParam("fileID") @ApiParam(required = true, value = "NDJSON file name", example = "728b270d-d7de-4143-82fe-d3ccd92cebe4-1-coverage.ndjson") @NoHtml String fileID) {
-        final FileManager.FilePointer filePointer = this.manager.getFile(organizationPrincipal.getID(), fileID);
+        final FileManager.FilePointer filePointer = this.manager.getV3File(organizationPrincipal.getID(), fileID);
 
         if (returnCachedValue(filePointer, fileChecksum, modifiedHeader)) {
             return Response.status(Response.Status.NOT_MODIFIED).build();
@@ -101,7 +109,7 @@ public class DataResource {
 
         return Response.ok()
                 .header(HttpHeaders.ETAG, filePointer.getChecksum())
-                .header(HttpHeaders.CONTENT_LENGTH, filePointer.getFileSize())
+                .header(HttpHeaders.CONTENT_LENGTH, getUncompressedFileSize(fileID, filePointer))
                 .header(HttpHeaders.LAST_MODIFIED, filePointer.getCreationTime().toInstant().toEpochMilli())
                 .header(HttpHeaders.ACCEPT_RANGES, ACCEPTED_RANGE_VALUE)
                 .build();
@@ -126,7 +134,7 @@ public class DataResource {
             }),
             @ApiResponse(code = HttpStatus.PARTIAL_CONTENT_206, message = "Returning a partial byte range of file", responseHeaders = {
                     @ResponseHeader(name = HttpHeaders.ACCEPT_RANGES, description = "Accepted HTTP range request (bytes only)"),
-                    @ResponseHeader(name = HttpHeaders.CONTENT_RANGE, description = "HTTP range response (e.g. bytes=1-1234/{total file size}"),
+                    @ResponseHeader(name = HttpHeaders.CONTENT_RANGE, description = "HTTP range response (e.g. bytes 1-1234/{uncompressed file size}"),
             }),
             @ApiResponse(code = HttpStatus.NOT_MODIFIED_304, message = "No newer files available"),
             @ApiResponse(code = HttpStatus.UNAUTHORIZED_401, message = "Not authorized to download file"),
@@ -141,7 +149,7 @@ public class DataResource {
             @PathParam("fileID") @ApiParam(required = true, value = "NDJSON file name", example = "728b270d-d7de-4143-82fe-d3ccd92cebe4-1-coverage.ndjson") @NoHtml String fileID) {
 
         final UUID orgUUID = organizationPrincipal.getID();
-        final FileManager.FilePointer filePointer = this.manager.getFile(orgUUID, fileID);
+        final FileManager.FilePointer filePointer = this.manager.getV3File(orgUUID, fileID);
         String orgNPI;
         try {
             orgNPI = FHIRExtractors.findMatchingIdentifier(
@@ -224,14 +232,20 @@ public class DataResource {
                     Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
         }
         final long rangeStart = range.getStart() < 0 ? 0 : range.getStart();
-        final long rangeEnd = range.getEnd().orElse(rangeStart + CHUNK_SIZE);
-        final long len = rangeEnd - rangeStart;
-
-        // If we have a negative range, throw an exception
-        if (len < 0) {
+        if (range.getEnd().isPresent() && range.getEnd().get() < rangeStart) {
             throw new WebApplicationException("Range end cannot be before begin",
                     Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE);
         }
+        final long fileSize = getUncompressedFileSize(fileID, filePointer);
+        if (rangeStart >= fileSize) {
+            return Response.status(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE)
+                    .header(HttpHeaders.CONTENT_RANGE, String.format("bytes */%d", fileSize))
+                    .build();
+        }
+        final long rangeEnd = range.getEnd()
+                .map(end -> Math.min(end, fileSize - 1))
+                .orElseGet(() -> rangeStart + Math.min(CHUNK_SIZE, fileSize - rangeStart) - 1);
+        final long len = rangeEnd - rangeStart + 1;
 
         // We need to get an uncompressed input stream, then move our cursor to the offset we want. We can't use a
         // RandomAccessFile because our file is more than likely compressed.
@@ -250,7 +264,7 @@ public class DataResource {
             // duplicating that here and we only create non-zipped responses.
             StreamingOutput streamingOutput = new CompressibleStreamingOutput(boundedInputStream, false, false);
 
-            final String responseRange = String.format("bytes %d-%d/%d", rangeStart, rangeEnd, len);
+            final String responseRange = String.format("bytes %d-%d/%d", rangeStart, rangeEnd, fileSize);
             return Response
                 .status(Response.Status.PARTIAL_CONTENT)
                 .entity(streamingOutput)
@@ -261,6 +275,27 @@ public class DataResource {
                 .build();
         } catch (IOException e) {
             throw new WebApplicationException(String.format("Unable to open file `%s`.`.", fileID), e,
+                    Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // We need to get the uncompressed file size every time a user streams an individual chunk of a file.  That's a
+    // costly check since we have to uncompress the file to do it, so we're going to cache the values.
+    private long getUncompressedFileSize(String fileID, FileManager.FilePointer filePointer) {
+        try {
+            // Batch metadata stores the gzip size, but ranges address the decompressed bytes.
+            final String cacheKey = filePointer.getFile().getAbsolutePath() + ":" + filePointer.getChecksum();
+            final Long cachedSize = uncompressedFileSizes.getIfPresent(cacheKey);
+            if (cachedSize != null) {
+                return cachedSize;
+            }
+            try (InputStream inputStream = filePointer.getUncompressedInputStream()) {
+                final long fileSize = inputStream.transferTo(OutputStream.nullOutputStream());
+                uncompressedFileSizes.put(cacheKey, fileSize);
+                return fileSize;
+            }
+        } catch (IOException e) {
+            throw new WebApplicationException(String.format("Unable to open file `%s`.", fileID), e,
                     Response.Status.INTERNAL_SERVER_ERROR);
         }
     }

@@ -103,6 +103,9 @@ public class DPCAPIConfiguration extends Configuration implements IDPCQueueDatab
     @Min(0)
     private int jobTimeoutInSeconds;
 
+    @Min(1)
+    private long dataFileSizeCacheMaxEntries = 10_000;
+
     public TokenPolicy getTokenPolicy() {
         return tokenPolicy;
     }
@@ -202,6 +205,14 @@ public class DPCAPIConfiguration extends Configuration implements IDPCQueueDatab
 
     public int getJobTimeoutInSeconds() {
         return jobTimeoutInSeconds;
+    }
+
+    public long getDataFileSizeCacheMaxEntries() {
+        return dataFileSizeCacheMaxEntries;
+    }
+
+    public void setDataFileSizeCacheMaxEntries(long dataFileSizeCacheMaxEntries) {
+        this.dataFileSizeCacheMaxEntries = dataFileSizeCacheMaxEntries;
     }
 
     public List<String> getLookBackExemptOrgs() {
