@@ -658,7 +658,6 @@ DEPENDENCIES
   pry-nav
   puma (>= 8.0.2)
   rack (>= 3.2.3)
-  rack-protection (>= 4.2.2)
   rack-session (>= 2.1.2)
   rails-controller-testing
   railties (~> 8.1.4)
@@ -672,7 +671,7 @@ DEPENDENCIES
   sassc-rails (>= 2.1.2)
   selenium-webdriver
   simplecov (<= 0.17.1)
-  sinatra (>= 4.2.0)
+  sinatra (>= 4.2.2)
   solid_queue (~> 1.2, >= 1.2.2)
   spring
   spring-watcher-listen (~> 2.1.0)
