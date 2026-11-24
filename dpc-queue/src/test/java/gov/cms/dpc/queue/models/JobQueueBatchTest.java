@@ -92,7 +92,7 @@ class JobQueueBatchTest {
     void testV3ConstructorFields() {
         final var job = createV3JobQueueBatch();
         assertEquals(groupID, job.getGroupID().get());
-        assertEquals("external-bcda", job.getExportSource());
+        assertEquals(JobQueueBatch.EXTERNAL_EXPORT_SOURCE, job.getExportSource());
         assertEquals("V3", job.getExportVersion());
     }
 
@@ -446,7 +446,7 @@ class JobQueueBatchTest {
                 .transactionTime(OffsetDateTime.now(ZoneOffset.UTC))
                 .isBulk(true)
                 .groupID(groupID)
-                .exportSource("external-bcda")
+                .exportSource(JobQueueBatch.EXTERNAL_EXPORT_SOURCE)
                 .exportVersion("V3")
                 .build();
     }
@@ -498,7 +498,7 @@ class JobQueueBatchTest {
             var job1 = builder.build();
             var job2 = builder
                     .groupID(groupID)
-                    .exportSource("external-bcda")
+                    .exportSource(JobQueueBatch.EXTERNAL_EXPORT_SOURCE)
                     .exportVersion("V3")
                     .build();
             job1.submitTime = timestamp;

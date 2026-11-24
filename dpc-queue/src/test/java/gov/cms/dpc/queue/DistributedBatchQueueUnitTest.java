@@ -84,7 +84,7 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
                 .resourceTypes(List.of())
                 .requestUrl("reqUrl")
                 .isBulk(true)
-                .exportSource("external-bcda")
+                .exportSource(JobQueueBatch.EXTERNAL_EXPORT_SOURCE)
                 .exportVersion("V3")
                 .build();
 
@@ -123,7 +123,7 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
                 .resourceTypes(List.of())
                 .requestUrl("reqUrl")
                 .isBulk(true)
-                .exportSource("external-bcda")
+                .exportSource(JobQueueBatch.EXTERNAL_EXPORT_SOURCE)
                 .exportVersion("V3")
                 .build();
 
@@ -204,7 +204,7 @@ class DistributedBatchQueueUnitTest extends AbstractMultipleDAOTest {
                 .resourceTypes(List.of())
                 .requestUrl("reqUrl")
                 .isBulk(true)
-                .exportSource("external-bcda")
+                .exportSource(JobQueueBatch.EXTERNAL_EXPORT_SOURCE)
                 .exportVersion("V3")
                 .build();
 
