@@ -15,6 +15,7 @@ import gov.cms.dpc.fhir.FHIRMediaTypes;
 import gov.cms.dpc.oneecosystem.client.OneEcosystemClient;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemExportRequest;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemExportResponse;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import gov.cms.dpc.queue.service.DataService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.BadRequestException;
@@ -36,6 +37,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static gov.cms.dpc.fhir.FHIRMediaTypes.FHIR_JSON;
 import static org.junit.jupiter.api.Assertions.*;
@@ -48,6 +50,9 @@ import static org.mockito.MockitoAnnotations.openMocks;
 public class GroupResourceUnitTest {
 
     private static final String BASE_URL = "http://localhost:3002/v3";
+    private static final String RESOURCE_TYPES = JobQueueBatch.validResourceTypes.stream()
+            .map(Enum::toString)
+            .collect(Collectors.joining(","));
 
     @Mock
     AttributionClient attributionClient;
@@ -266,15 +271,15 @@ public class GroupResourceUnitTest {
         when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:3002/v3/Group/" + groupId + "/$export"));
 
         String since = "2020-05-26T16:43:01.780Z";
-        Response response = resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, null, "respond-async", request);
+        Response response = resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, since, null, "respond-async", request);
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus(), "Expected ACCEPTED response code");
 
         since = "2020-05-26T16:43:01.780+10:00";
-        response = resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, null, "respond-async", request);
+        response = resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, since, null, "respond-async", request);
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus(), "Expected ACCEPTED response code");
 
         since = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).minusSeconds(5).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        response = resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, since, null, "respond-async", request);
+        response = resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, since, null, "respond-async", request);
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus(), "Expected ACCEPTED response code");
 
         verify(request, times(3)).getHeader(HttpHeaders.X_FORWARDED_FOR);
@@ -305,19 +310,19 @@ public class GroupResourceUnitTest {
 
         final String timezoneFutureSince = OffsetDateTime.now(ZoneId.of("America/Puerto_Rico")).plusSeconds(10).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, timezoneFutureSince, null, "respond-async", request);
+            resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, timezoneFutureSince, null, "respond-async", request);
         });
         assertEquals("'_since' query parameter cannot be a future date", exception.getMessage());
 
         final String futureSince = OffsetDateTime.now().plusDays(2).toString();
         exception = assertThrows(BadRequestException.class, () -> {
-            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, futureSince, null, "respond-async", request);
+            resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, futureSince, null, "respond-async", request);
         });
         assertEquals("'_since' query parameter cannot be a future date", exception.getMessage());
 
         final String badFormatSince = "2020-05-2X616:43:01.780+10:00";
         WebApplicationException badFormat = assertThrows(WebApplicationException.class, () -> {
-            resource.export(organizationPrincipal, groupId, null, FHIRMediaTypes.NDJSON, badFormatSince, null, "respond-async", request);
+            resource.export(organizationPrincipal, groupId, RESOURCE_TYPES, FHIRMediaTypes.NDJSON, badFormatSince, null, "respond-async", request);
         });
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), badFormat.getResponse().getStatus());
 
