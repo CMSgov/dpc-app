@@ -22,9 +22,11 @@ import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.util.Timeout;
 import org.eclipse.jetty.http.HttpStatus;
@@ -43,6 +45,18 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class OneEcosystemClientImpl implements OneEcosystemClient {
+
+    private static final String DEFAULT_TYPE_FILTER_JSON = """
+            {
+              "name": "_typeFilter",
+              "value": {
+                "resource_type": "ExplanationOfBenefit",
+                "query_parameters": [
+                  {"name": "_tag", "value": "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type|NationalClaimsHistory,https://bluebutton.cms.gov/fhir/CodeSystem/System-Type|DDPS"}
+                ]
+              }
+            }
+            """;
 
     private final URI apiBaseUri;
     private final String clientId;
@@ -92,9 +106,7 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
     public OneEcosystemExportResponse export(OneEcosystemExportRequest request) {
         URI endpoint = apiBaseUri.resolve("api/v3/$shared-export");
         HttpPost post = new HttpPost(endpoint);
-        post.setHeader(HttpHeaders.ACCEPT, "application/fhir+json");
         post.setHeader("Prefer", "respond-async");
-        post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + currentToken());
 
         try {
             post.setEntity(new StringEntity(buildExportBody(request), ContentType.APPLICATION_JSON));
@@ -103,7 +115,7 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
         }
 
         try {
-            return httpClient.execute(post, response -> {
+            return executeAuthenticatedRequest(post, response -> {
                 int statusCode = response.getCode();
                 var locationHeader = response.getFirstHeader(HttpHeaders.CONTENT_LOCATION);
                 String contentLocation = locationHeader != null ? locationHeader.getValue() : null;
@@ -118,11 +130,9 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
     public OneEcosystemJobStatus jobStatus(String jobId) {
         URI endpoint = apiBaseUri.resolve("api/v3/jobs/" + jobId);
         HttpGet request = new HttpGet(endpoint);
-        request.setHeader(HttpHeaders.ACCEPT, "application/fhir+json");
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + currentToken());
 
         try {
-            return httpClient.execute(request, response -> {
+            return executeAuthenticatedRequest(request, response -> {
                 int statusCode = response.getCode();
 
                 OneEcosystemJobStatusResponse body = null;
@@ -144,13 +154,18 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
     public int callLegacyEndpoint() {
         URI endpoint = apiBaseUri.resolve("api/v3/jobs");
         HttpGet request = new HttpGet(endpoint);
-        request.setHeader("Authorization", "Bearer " + currentToken());
-        request.setHeader("Accept", "application/fhir+json");
         try {
-            return httpClient.execute(request, HttpResponse::getCode);
+            return executeAuthenticatedRequest(request, HttpResponse::getCode);
         } catch (IOException e) {
             throw new UncheckedIOException("NEWBE legacy request failed", e);
         }
+    }
+
+    private <T> T executeAuthenticatedRequest(
+            ClassicHttpRequest request, HttpClientResponseHandler<T> handler) throws IOException {
+        request.setHeader(HttpHeaders.ACCEPT, "application/fhir+json");
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + currentToken());
+        return httpClient.execute(request, handler);
     }
 
     private static CloseableHttpClient createHttpClient(TimeoutConfiguration timeouts, ConnectionPoolConfiguration pool) {
@@ -229,7 +244,6 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
         ObjectNode query = root.putArray("queries").addObject();
         request.mbis().forEach(query.putArray("mbis")::add);
         request.resourceTypes().forEach(query.putArray("resource_types")::add);
-        query.putObject("headers");
 
         ArrayNode filters = query.putArray("filters");
 
@@ -237,9 +251,7 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
         sinceFilter.set("name", TextNode.valueOf("_since"));
         sinceFilter.set("value", TextNode.valueOf(request.since().toString()));
 
-        // TODO: clarify what filtering logic is in scope for MVP
-        // filters.addObject()
-        // typeFilter.put("name", "_typeFilter")
+        filters.add(objectMapper.readTree(DEFAULT_TYPE_FILTER_JSON));
 
         return objectMapper.writeValueAsString(root);
     }

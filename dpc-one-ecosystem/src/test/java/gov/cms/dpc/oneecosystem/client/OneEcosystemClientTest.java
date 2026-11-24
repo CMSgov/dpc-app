@@ -51,14 +51,12 @@ class OneEcosystemClientTest {
                 List.of("1S00EU7JJ00", "1S00EU7JJ11", "1S00EU7JJ18", "1S00EU8EX75", "1S00EU8EY44"),
                 Instant.parse("2026-08-01T13:00:00Z"), // 2026-08-01T08:00:00-05:00
                 List.of("Patient", "ExplanationOfBenefit", "Coverage"),
-                "ExplanationOfBenefit?_tag=https://bluebutton.cms.gov/fhir/CodeSystem/System-Type%7CNationalClaimsHistory&outcome=partial&service-date=gt2026-02-10",
                 "https://example.com/api/v3/Group/1234/$export"
         );
 
         OneEcosystemExportResponse response = client.export(request);
 
         assertNotEquals(401, response.statusCode(), "should not get a 401");
-
         assertEquals(202, response.statusCode(),
                 "Export request should be accepted for async processing");
         assertNotNull(response.contentLocation(),
