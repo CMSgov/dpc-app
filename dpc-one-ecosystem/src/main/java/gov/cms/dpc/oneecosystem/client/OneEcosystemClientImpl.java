@@ -13,6 +13,7 @@ import gov.cms.dpc.oneecosystem.config.OneEcosystemClientConfiguration;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemExportRequest;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemExportResponse;
 import gov.cms.dpc.oneecosystem.models.OneEcosystemJobStatus;
+import gov.cms.dpc.oneecosystem.models.OneEcosystemJobStatusResponse;
 import io.dropwizard.jackson.Jackson;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -115,7 +116,26 @@ public class OneEcosystemClientImpl implements OneEcosystemClient {
 
     @Override
     public OneEcosystemJobStatus jobStatus(UUID jobId) {
-        throw new UnsupportedOperationException("not implemented");
+        // TODO: Confirm job ID format with BCDA; may need to convert int/long/number to UUID
+        URI endpoint = apiBaseUri.resolve("api/v3/jobs/" + jobId.toString());
+        HttpGet request = new HttpGet(endpoint);
+        request.setHeader(HttpHeaders.ACCEPT, "application/fhir+json");
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + currentToken());
+
+        try {
+            return httpClient.execute(request, response -> {
+                int statusCode = response.getCode();
+
+                OneEcosystemJobStatusResponse body = null;
+                if (statusCode == HttpStatus.OK_200) {
+                    body = objectMapper.readValue(response.getEntity().getContent(), OneEcosystemJobStatusResponse.class);
+                }
+
+                return new OneEcosystemJobStatus(statusCode, body);
+            });
+        } catch (IOException e) {
+            throw new UncheckedIOException("Job status request failed", e);
+        }
     }
 
     /**

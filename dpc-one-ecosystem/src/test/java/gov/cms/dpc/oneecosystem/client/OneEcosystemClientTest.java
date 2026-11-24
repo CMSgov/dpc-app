@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -46,7 +47,7 @@ class OneEcosystemClientTest {
     }
 
     @Test
-    void testExport() {
+    void testExport() throws InterruptedException {
         OneEcosystemExportRequest request = new OneEcosystemExportRequest(
                 List.of("1S00EU7JJ00", "1S00EU7JJ11", "1S00EU7JJ18", "1S00EU8EX75", "1S00EU8EY44"),
                 Instant.parse("2026-08-01T13:00:00Z"), // 2026-08-01T08:00:00-05:00
@@ -59,13 +60,29 @@ class OneEcosystemClientTest {
 
         assertNotEquals(401, response.statusCode(), "should not get a 401");
 
-        // update this once we confirm the actual accepted status / payload shape for $shared-export
         assertEquals(202, response.statusCode(),
                 "Export request should be accepted for async processing");
         assertNotNull(response.contentLocation(),
                 "Should receive a location (full URL or job ID) for the export job");
-        assertTrue(response.contentLocation().matches("https?://.+/api/v3/jobs/\\d+"),
-                "contentLocation should job URL"
-                        + response.contentLocation());
+        String jobUrl = response.contentLocation();
+        assertTrue(jobUrl.matches("https?://.+/api/v3/jobs/[^/]+"),
+                "Expected a job URL ending in a job ID: " + jobUrl);
+
+
+        // String jobId = jobUrl.substring(jobUrl.lastIndexOf('/') + 1);
+        UUID jobId = UUID.fromString(jobUrl.substring(jobUrl.lastIndexOf('/') + 1));
+
+        int maxPollAttempts = 10;
+        for (int attempt = 0; attempt < maxPollAttempts; attempt++) {
+            var jobStatus = client.jobStatus(jobId);
+            if (jobStatus.statusCode() == 200) {
+                return;
+            }
+            assertEquals(202, jobStatus.statusCode(),
+                    "should return 202 when waiting for job to complete");
+
+            Thread.sleep(5000);
+        }
+        fail("Export job did not complete after " + maxPollAttempts + " polls: " + jobUrl);
     }
 }
