@@ -76,7 +76,7 @@ public class GroupResourceUnitTest {
     @BeforeEach
     void setUp() {
         openMocks(this);
-        resource = new GroupResource(mockDataService, attributionSTU3Client, BASE_URL, attributionClient, oneEcosystemClient, config);
+        resource = new GroupResource(mockDataService, BASE_URL, attributionClient, oneEcosystemClient, config);
     }
 
     private void stubOrgAndProviderNpi(OrganizationPrincipal organizationPrincipal, Group group) {

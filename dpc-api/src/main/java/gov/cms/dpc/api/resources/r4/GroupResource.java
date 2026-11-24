@@ -1,7 +1,6 @@
 package gov.cms.dpc.api.resources.r4;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.annotation.ExceptionMetered;
 import com.codahale.metrics.annotation.Timed;
@@ -49,12 +48,11 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static gov.cms.dpc.api.APIHelpers.V3.addOrganizationTag;
+import static gov.cms.dpc.api.APIHelpers.V3.*;
 import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
 
 @Api(value = "Group", authorizations = @Authorization(value = "access_token"))
-@Path("/v3/Group")
-public class GroupResource extends AbstractGroupResource {
+public class GroupResource {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
     private static final String RESOURCE_TYPE = "Group";
@@ -67,12 +65,10 @@ public class GroupResource extends AbstractGroupResource {
 
     @Inject
     public GroupResource(DataService dataService,
-                         @Named("attribution") IGenericClient stu3Client,
                          @Named ("v3URL") String baseURL,
                          AttributionClient attributionClient,
                          OneEcosystemClient oneEcosystemClient,
                          DPCAPIConfiguration config) {
-        super(stu3Client);
         this.dataService = dataService;
         this.baseURL = baseURL;
         this.attributionClient = attributionClient;
@@ -93,9 +89,8 @@ public class GroupResource extends AbstractGroupResource {
             @ApiResponse(code = 200, message = "Roster already exists"),
             @ApiResponse(code = 422, message = "Provider in Provenance header does not match Provider in Roster")
     })
-    @Override
     public Response createRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
-                                 @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation, // readd @Profiled when supported for V3
+                                 @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation,
                                  Group attributionRoster) {
         // Log attestation
         logAndVerifyAttestation(rosterAttestation, null, attributionRoster);
@@ -114,7 +109,6 @@ public class GroupResource extends AbstractGroupResource {
     @ExceptionMetered
     @ApiOperation(value = "Fetch Attribution Roster", notes = "Fetch specific Attribution roster.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
-    @Override
     public Group getRoster(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID) {
         requireRosterId(rosterID);
         return this.attributionClient.getRoster(rosterID);
@@ -134,7 +128,6 @@ public class GroupResource extends AbstractGroupResource {
             @ApiResponse(code = 404, message = "Cannot find Roster with given ID"),
             @ApiResponse(code = 422, message = "Provider in Provenance header does not match Provider in Roster")
     })
-    @Override
     public Group updateRoster(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                               @ApiParam(value = "Attribution Group ID") @PathParam("rosterID") UUID rosterID,
                               @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation, // readd @Profiled when supported for V3
@@ -156,7 +149,6 @@ public class GroupResource extends AbstractGroupResource {
     @ApiImplicitParams(
             @ApiImplicitParam(name = "X-Provenance", required = true, paramType = "header", type = "string", dataTypeClass = Provenance.class))
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
-    @Override
     public Group addRosterMembers(@ApiParam(hidden = true) @Auth OrganizationPrincipal organizationPrincipal,
                                   @ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
                                   @ApiParam(hidden = true) @Valid @Profiled @ProvenanceHeader Provenance rosterAttestation, // readd @Profiled when supported for V3
@@ -175,7 +167,6 @@ public class GroupResource extends AbstractGroupResource {
     @ExceptionMetered
     @ApiOperation(value = "Remove Group members (Patients)", notes = "Update specific Attribution Group by removing members (Patients) given in the provided resource.")
     @ApiResponses(@ApiResponse(code = 404, message = "Cannot find Roster with given ID"))
-    @Override
     public Group removeRosterMembers(@ApiParam(value = "Attribution roster ID") @PathParam("rosterID") UUID rosterID,
                                      @ApiParam Group groupUpdate) {
         requireRosterId(rosterID);
@@ -193,7 +184,6 @@ public class GroupResource extends AbstractGroupResource {
      * @param sinceParam    - Optional since parameter
      * @return - {@link Response} specifying whether the request was successful.
      */
-    @Override
     @GET
     @Path("/{rosterID}/$export")
     @PathAuthorizer(type = DPCResourceType.Group, pathParam = "rosterID")
@@ -237,13 +227,13 @@ public class GroupResource extends AbstractGroupResource {
         }
 
         final UUID orgID = FHIRExtractors.getEntityUUID(organizationPrincipal.getOrganization().getId());
-        final String orgNPI = this.getOrganizationNPI(organizationPrincipal);
+        final String orgNPI = getOrganizationNPI(organizationPrincipal).get();
         final String providerNPI = FHIRExtractors.getAttributedNPI(group);
 
         // Handle the _type and since query parameters
-        final List<DPCResourceType> resources = this.handleTypeQueryParam(resourceTypes);
+        final List<DPCResourceType> resources = handleTypeQueryParam(resourceTypes);
         final List<String> resourceNames = resources.stream().map(DPCResourceType::name).toList();
-        final OffsetDateTime since = this.handleSinceQueryParam(sinceParam);
+        final OffsetDateTime since = handleSinceQueryParam(sinceParam);
         final Instant sinceInstant = since == null ? Instant.EPOCH : since.toInstant();
         final String typeFilter = typeFilterParam == null ? resourceTypes : typeFilterParam;
 

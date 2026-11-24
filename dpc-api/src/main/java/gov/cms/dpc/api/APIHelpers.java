@@ -3,22 +3,35 @@ package gov.cms.dpc.api;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import com.google.common.net.HttpHeaders;
+import gov.cms.dpc.api.auth.OrganizationPrincipal;
 import gov.cms.dpc.bluebutton.client.BlueButtonClient;
 import gov.cms.dpc.fhir.DPCIdentifierSystem;
+import gov.cms.dpc.fhir.DPCResourceType;
+import gov.cms.dpc.fhir.FHIRHeaders;
 import gov.cms.dpc.fhir.stu3.FHIRExtractors;
+import gov.cms.dpc.queue.models.JobQueueBatch;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.hl7.fhir.dstu3.model.*;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static gov.cms.dpc.fhir.FHIRMediaTypes.*;
 
 public class APIHelpers {
 
@@ -149,6 +162,93 @@ public class APIHelpers {
                 meta.getTag().removeIf(coding -> DPCIdentifierSystem.DPC.getSystem().equalsIgnoreCase(coding.getSystem().trim()));
                 meta.addTag(orgTag);
             }
+        }
+
+        public static Optional<String> getOrganizationNPI(OrganizationPrincipal organizationPrincipal) {
+            if (organizationPrincipal == null) {
+                return Optional.empty();
+            }
+
+            Organization organization = organizationPrincipal.getOrganization();
+            if (organization == null || !organization.hasIdentifier()) {
+                return Optional.empty();
+            }
+
+            return organization.getIdentifier().stream()
+                    .filter(id -> DPCIdentifierSystem.NPPES.getSystem().equalsIgnoreCase(id.getSystem()))
+                    .map(Identifier::getValue)
+                    .findFirst();
+        }
+
+        public static OffsetDateTime handleSinceQueryParam(String sinceParam) {
+            if (!StringUtils.isBlank(sinceParam)) {
+                try{
+                    OffsetDateTime sinceDate = OffsetDateTime.parse(sinceParam, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                    if (sinceDate.isAfter(OffsetDateTime.now(ZoneId.systemDefault()))) {
+                        throw new BadRequestException("'_since' query parameter cannot be a future date");
+                    }
+                    return sinceDate;
+                } catch (DateTimeParseException e) {
+                    throw new BadRequestException("_since parameter `"+e.getParsedString()+"` could not be parsed at index "+e.getErrorIndex());
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Convert the '_types' {@link QueryParam} to a list of resources to add to the job. Handle the empty case,
+         * by returning all valid resource types.
+         *
+         * @param resourcesListParam - {@link String} of comma separated values corresponding to FHIR {@link DPCResourceType}s
+         * @return - A list of {@link DPCResourceType} to return for this request.
+         */
+        public static List<DPCResourceType> handleTypeQueryParam(String resourcesListParam) {
+            // If the query param is omitted, the FHIR spec states that all resources should be returned
+            if (resourcesListParam == null || resourcesListParam.isEmpty()) {
+                return JobQueueBatch.validResourceTypes;
+            }
+
+            final var resources = new ArrayList<DPCResourceType>();
+            for (String queryResource : resourcesListParam.split(",", -1)) {
+                final var foundResourceType = matchResourceType(queryResource);
+                if (foundResourceType.isEmpty()) {
+                    throw new BadRequestException(String.format("Unsupported resource name in the '_type' query parameter: %s", queryResource));
+                }
+                resources.add(foundResourceType.get());
+            }
+            return resources;
+        }
+
+        /**
+         * Check the query parameters of the request. If not valid, throw a {@link BadRequestException}.
+         *
+         * @param outputFormat param to check
+         */
+        public static void checkExportRequest(String outputFormat, String headerPrefer) {
+            // _outputFormat only supports FHIR_NDJSON, APPLICATION_NDJSON, NDJSON
+            if (!Strings.CI.equalsAny(outputFormat, FHIR_NDJSON, APPLICATION_NDJSON, NDJSON)) {
+                throw new BadRequestException("'_outputFormat' query parameter must be '" + FHIR_NDJSON + "', '" + APPLICATION_NDJSON + "', or '" + NDJSON +"' ");
+            }
+            if (headerPrefer == null || StringUtils.isEmpty(headerPrefer)) {
+                throw new BadRequestException("The 'Prefer' header must be '" + FHIRHeaders.PREFER_RESPOND_ASYNC + "'");
+            }
+            if (!headerPrefer.equals(FHIRHeaders.PREFER_RESPOND_ASYNC)) {
+                throw new BadRequestException("The 'Prefer' header must be '" + FHIRHeaders.PREFER_RESPOND_ASYNC + "'");
+            }
+        }
+
+        /**
+         * Convert a single resource type in a query param into a {@link DPCResourceType}.
+         *
+         * @param queryResourceType - The text from the query param
+         * @return If match is found a {@link DPCResourceType}
+         */
+        private static Optional<DPCResourceType> matchResourceType(String queryResourceType) {
+            final var canonical = queryResourceType.trim().toUpperCase();
+            // Implementation Note: resourceTypeMap is a small list <3 so hashing isn't faster
+            return JobQueueBatch.validResourceTypes.stream()
+                    .filter(validResource -> validResource.toString().equalsIgnoreCase(canonical))
+                    .findFirst();
         }
     }
 }

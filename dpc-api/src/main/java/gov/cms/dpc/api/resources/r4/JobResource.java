@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Api(tags = {"Bulk Data", "Job"}, authorizations = @Authorization(value = "access_token"))
-@Path("/v3/Jobs")
 public class JobResource extends AbstractJobResource {
 
     private static final Logger logger = LoggerFactory.getLogger(JobResource.class);
@@ -77,19 +76,17 @@ public class JobResource extends AbstractJobResource {
             return Response.status(HttpStatus.NOT_FOUND_404).entity(JOB_NOT_FOUND).build();
         }
 
-        // Validate the batches
-        for (JobQueueBatch batch : batches) {
-            logger.debug("Fetched Batch: {}", batch);
-            if (!batch.getOrgID().equals(orgUUID)) {
-                return Response.status(HttpStatus.UNAUTHORIZED_401).entity("Invalid organization for job").build();
-            }
-            if (!batch.isValid()) {
-                throw new JobQueueFailure(jobUUID, batch.getBatchID(), "Fetched an invalid job model");
-            }
+        // Validate the batch
+        final JobQueueBatch batch = batches.getFirst();
+        logger.debug("Fetched Batch: {}", batch);
+        if (!batch.getOrgID().equals(orgUUID)) {
+            return Response.status(HttpStatus.UNAUTHORIZED_401).entity("Invalid organization for job").build();
+        }
+        if (!batch.isValid()) {
+            throw new JobQueueFailure(jobUUID, batch.getBatchID(), "Fetched an invalid job model");
         }
 
         // Get JobStatus from the external client
-        final JobQueueBatch batch = batches.getFirst();
         final OneEcosystemJobStatus status = this.client.jobStatus(jobUUID);
 
         Response.ResponseBuilder builder = Response.noContent();
